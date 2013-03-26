@@ -1,9 +1,10 @@
 <?php
 $nologo = true;
+$dbsetup = true; //prevents connection to database
+	include("../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
 
-	$dbsetup = true; //prevents connection to database
-	include("../config.php");
+	
 	require("../header.php");
 	$pagetitle = "Documentation";
 	require("../infoheader.php");

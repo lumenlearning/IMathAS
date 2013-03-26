@@ -1,6 +1,10 @@
 <?php
 //IMathAS Math Config File.  Adjust settings here!
 
+//path settings
+//web path to install
+$imasroot = "";
+
 //database access settings
 $curdir = rtrim(dirname(__FILE__), '/\\');
 require("$curdir/configsecrets.php");
@@ -24,9 +28,7 @@ $accountapproval = "admin@myopenmath.com";
 //color shift icons as deadline approaches?
 $colorshift = true;
 
-//path settings
-//web path to install
-$imasroot = "";
+
 
 //mimetex path
 $mathimgurl = "http://www.imathas.com/cgi-bin/mimetex.cgi";
