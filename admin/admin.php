@@ -301,6 +301,7 @@ $placeinhead .= "}</script>";
 		echo "<a href=\"forms.php?action=importmacros\">Install Macro File</a><br/>\n";
 		echo "<a href=\"forms.php?action=importqimages\">Install Question Images</a><br/>\n";
 		echo "<a href=\"forms.php?action=importcoursefiles\">Install Course Files</a><br/>\n";
+		echo "<a href=\"admin.php?debug=true\">Enable Debug Mode</a><br/>\n";
 		echo '</span>';
 	}
 	echo '<span class="column">';
