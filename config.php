@@ -8,6 +8,7 @@ $imasroot = "";
 //database access settings
 $curdir = rtrim(dirname(__FILE__), '/\\');
 require("$curdir/configsecrets.php");
+$CFG['GEN']['AWSforcoursefiles'] = true;
 
 //install name
 $installname = "MyOpenMath";
@@ -59,6 +60,9 @@ $templateuser = 2;
  $CFG['GEN']['homelayout'] = '|0,1,2|10,11|0,1';
  $CFG['GEN']['headerinclude'] = "headercontent.php";
  $CFG['GEN']['headerscriptinclude'] = "momga.js";
+ 
+ //do safe course delete
+ $CFG['GEN']['doSafeCourseDelete'] = true;
 	 
  //can set almost any assessment setting this way
  $CFG['AMS']['defpoints'] = 1;
@@ -111,7 +115,7 @@ $templateuser = 2;
 //session path 
 //$sessionpath = "";
 
-
+ error_reporting(0);
 
 
 //Uncomment to change the default course theme, also used on the home & admin page:
