@@ -31,6 +31,7 @@
 				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();
+				
 				$query = "INSERT INTO imas_students (userid,courseid) VALUES ('$newuserid',1),('$newuserid',11)";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
@@ -44,6 +45,11 @@
 				$message .= "Phone: {$_POST['phone']} <br/>\n";
 				$message .= "Username: {$_POST['username']} <br/>\n";
 				mail($accountapproval,$subject,$message,$headers);
+				
+				$now = time();
+				$query = "INSERT INTO imas_log (time, log) VALUES ($now, 'New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>')";
+				mysql_query($query) or die("Query failed : " . mysql_error());
+				
 				
 				$message = "<p>Your new account request has been sent.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
