@@ -1,10 +1,13 @@
 <?php
 //MOM account secrets
-$AWSkey = $_ENV['AWS_ACCESS_KEY_ID'];
-$AWSsecret = $_ENV['AWS_SECRET_KEY'];
-$AWSbucket = $_ENV['PARAM1'];
-$dbserver = $_ENV['PARAM2'];
-$dbname = $_ENV['PARAM3'];
-$dbusername = $_ENV['PARAM4'];
-$dbpassword = $_ENV['PARAM5'];
+$AWSkey = getenv('AWS_ACCESS_KEY_ID');
+$AWSsecret = getenv('AWS_SECRET_KEY');
+$AWSbucket = getenv('PARAM1');
+$dbserver = getenv('PARAM2');
+$dbname = getenv('PARAM3');
+$dbusername = getenv('PARAM4');
+$dbpassword = getenv('PARAM5');
+if (getenv('imasroot')!==false) {
+	$imasroot = getenv('imasroot');
+}
 ?>
