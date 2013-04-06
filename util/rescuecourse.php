@@ -3,8 +3,9 @@ require("../validate.php");
 if ($myrights<100) {
 	exit;
 }
-if (isset($_GET['cid'])) {
-	$query = "SELECT itemorder,blockcnt FROM imas_courses WHERE id='{$_GET['cid']}'";
+if (isset($_REQUEST['cid'])) {
+	$cid = intval($_REQUEST['cid']);
+	$query = "SELECT itemorder,blockcnt FROM imas_courses WHERE id='{$cid}'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$items = unserialize(mysql_result($result,0,0));
 	$blockcnt = mysql_result($result,0,1);
@@ -39,7 +40,7 @@ fixsub($items);
 
 $recovereditems = array();
 
-$query = "SELECT id FROM imas_items WHERE courseid='{$_GET['cid']}'";
+$query = "SELECT id FROM imas_items WHERE courseid='{$cid}'";
 $result = mysql_query($query) or die("Query failed : " . mysql_error());
 while ($row = mysql_fetch_row($result)) {
 	if (!in_array($row[0],$itemsfnd)) {
@@ -63,11 +64,11 @@ if (count($recovereditems)>0) {
 	echo "recovered ". count($recovereditems) . "items";
 	print_r($items);
 	$itemorder = addslashes(serialize($items));
-	$query = "UPDATE imas_courses SET itemorder='$itemorder',blockcnt=blockcnt+1 WHERE id='{$_GET['cid']}'";
+	$query = "UPDATE imas_courses SET itemorder='$itemorder',blockcnt=blockcnt+1 WHERE id='{$cid}'";
 	mysql_query($query) or die("Query failed : $query" . mysql_error());
 } else {
 	$itemorder = addslashes(serialize($items));
-	$query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='{$_GET['cid']}'";
+	$query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='{$cid}'";
 	mysql_query($query) or die("Query failed : $query" . mysql_error());
 }
 
