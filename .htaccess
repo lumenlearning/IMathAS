@@ -28,4 +28,4 @@ RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteCond %{REQUEST_URI} !^/status\.php$
 RewriteCond %{REQUEST_URI} !^/version$
 RewriteCond %{REQUEST_URI} !^/_hostmanager/
-RewriteRule . https://%{SERVER_NAME}%{REQUEST_URI} [L,R]
+RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
