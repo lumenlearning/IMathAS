@@ -19,3 +19,13 @@ AddType application/vnd.ms-excel.template.macroEnabled.12 xltm
 AddType application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx
 Options -Indexes
 php_value upload_max_filesize 10M
+
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^myopenmath\.com
+RewriteRule ^(.*)$ https://www.myopenmath.com/$1 [R=permanent,L]
+
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{REQUEST_URI} !^/status\.php$
+RewriteCond %{REQUEST_URI} !^/version$
+RewriteCond %{REQUEST_URI} !^/_hostmanager/
+RewriteRule . https://%{SERVER_NAME}%{REQUEST_URI} [L,R]
