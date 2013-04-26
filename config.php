@@ -40,7 +40,7 @@ $colorshift = true;
 
 
 //mimetex path
-$mathimgurl = "http://www.imathas.com/cgi-bin/mimetex.cgi";
+$mathimgurl = "/cgi-bin/mimetex.cgi";
 
 //enable lti?
 $enablebasiclti = true;
@@ -114,6 +114,9 @@ $templateuser = 2;
  $CFG['GEN']['badgebase'] = 'badgebasemom.png';
 
  $CFG['GEN']['guesttempaccts'] = array(518);
+ 
+ $CFG['GEN']['forcecanvashttps'] = true;
+ $CFG['GEN']['addwww'] = true;
 
  $studentTOS = "studentTOS.php";
  

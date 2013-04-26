@@ -22,7 +22,7 @@ php_value upload_max_filesize 10M
 
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^myopenmath\.com
-RewriteCond %{REQUEST_URI} !^/bltilaunch\.php$
+RewriteCond %{REQUEST_URI} !^(/bltilaunch\.php|/canvas\.php)$
 RewriteRule ^(.*)$ https://www.myopenmath.com/$1 [R=permanent,L]
 
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
