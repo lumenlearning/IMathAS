@@ -71,6 +71,9 @@ if (mysql_num_rows($result)==0) {
 	echo '<p>Username: '.$row[1].'<br/>Name: '.$row[2].', '.$row[3].' ('.$row[4].')</p>';
 	if ($details != '') {
 		echo "<p>$details</p>";
+		if (preg_match('/School:(.*?)<br/',$details,$matches)) {
+			echo '<p><a target="checkver" href="https://www.google.com/search?q='.urlencode($row[3].' '.$row[2].' '.$matches[1]).'">Search</a></p>';
+		}
 	}
 	echo '<p>Group: <select name="group"><option value="-1">New Group</option>';
 	$query = "SELECT id,name FROM imas_groups ORDER BY name";
