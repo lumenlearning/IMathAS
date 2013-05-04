@@ -31,10 +31,16 @@ div.breadcrumb { display:none;}
 #headerlogo { display:none;}
 </style>
 <script type="text/javascript">
-var imasroot = '<?php echo $imasroot; ?>';
+var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?ver=011312"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?ver=043013"></script>
 <?php
+if (isset($CFG['locale'])) {
+	$lang = substr($CFG['locale'],0,2);
+	if (file_exists(rtrim(dirname(__FILE__), '/\\').'/i18n/locale/'.$lang.'/messages.js')) {
+		echo '<script type="text/javascript" src="'.$imasroot.'/i18n/locale/'.$lang.'/messages.js"></script>';
+	}
+}
 if (isset($coursetheme) && strpos($coursetheme,'_dark')!==false) {$mathdarkbg = true;} else {$mathdarkbg = false;}
 if (isset($ispublic) && $ispublic) {
 	echo "<script src=\"$imasroot/javascript/ASCIIMathMLwFallback.js?ver=082911\" type=\"text/javascript\"></script>\n";

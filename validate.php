@@ -8,6 +8,7 @@
 	 header('Location: http://' . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/install.php");
  }
  require_once("$curdir/config.php");
+ require("i18n/i18n.php");
  if (isset($sessionpath) && $sessionpath!='') { session_save_path($sessionpath);}
  ini_set('session.gc_maxlifetime',86400);
  ini_set('auto_detect_line_endings',true);
@@ -190,13 +191,17 @@ END;
 	 	mysql_query($query) or die("Query failed : " . mysql_error());
 	 	$userid = mysql_insert_id();
 	 	
-	 	if (is_array($CFG['GEN']['guesttempaccts']) && count($CFG['GEN']['guesttempaccts'])>0) {
-	 		$query = "INSERT INTO imas_students (userid,courseid) VALUES ";
-			foreach ($CFG['GEN']['guesttempaccts'] as $i=>$encid) {
+		$query = "SELECT id FROM imas_courses WHERE (istemplate&8)=8 AND available<4";
+		$result = mysql_query($query) or die("Query failed : " . mysql_error());
+		if (mysql_num_rows($result)>0) {
+			$query = "INSERT INTO imas_students (userid,courseid) VALUES ";
+			$i = 0;
+			while ($row = mysql_fetch_row($result)) {
 				if ($i>0) { $query .= ',';}
-				$query .= "($userid,$encid)";
-				mysql_query($query) or die("Query failed : " . mysql_error());
+				$query .= "($userid,{$row[0]})";
+				$i++;
 			}
+			mysql_query($query) or die("Query failed : " . mysql_error());
 		}
 	 	
 	 	$line['id'] = $userid;

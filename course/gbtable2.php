@@ -60,6 +60,7 @@ row[0][1][0][7] = assessmentid, gbitems.id, forumid
 row[0][1][0][8] = tutoredit: 0 no, 1 yes
 row[0][1][0][9] = 5 number summary, if not limuser-ed
 row[0][1][0][10] = 0 regular, 1 group
+row[0][1][0][11] = due date (if $includeduedate is set)
 
 row[0][2] category totals
 row[0][2][0][0] = "Category Name"
@@ -71,6 +72,7 @@ row[0][2][0][4] = total possible for past/current
 row[0][2][0][5] = total possible for all
 row[0][2][0][6-9] = 5 number summary
 row[0][2][0][10] = gbcat id
+row[0][2][0][11] = category weight (if weighted grades)
 
 row[0][3][0] = total possible past
 row[0][3][1] = total possible past&current
@@ -128,7 +130,7 @@ cats[i]:  0: name, 1: scale, 2: scaletype, 3: chop, 4: dropn, 5: weight, 6: hidd
 ****/
 
 function gbtable() {
-	global $cid,$isteacher,$istutor,$tutorid,$userid,$catfilter,$secfilter,$timefilter,$lnfilter,$isdiag,$sel1name,$sel2name,$canviewall,$lastlogin,$hidelocked;
+	global $cid,$isteacher,$istutor,$tutorid,$userid,$catfilter,$secfilter,$timefilter,$lnfilter,$isdiag,$sel1name,$sel2name,$canviewall,$lastlogin,$logincnt,$hidelocked;
 	if ($canviewall && func_num_args()>0) {
 		$limuser = func_get_arg(0);
 	} else if (!$canviewall) {
@@ -138,6 +140,9 @@ function gbtable() {
 	}
 	if (!isset($lastlogin)) {
 		$lastlogin = 0;
+	}
+	if (!isset($logincnt)) {
+		$logincnt = 0;
 	}
 	
 	$category = array();
@@ -151,6 +156,9 @@ function gbtable() {
 	list($useweights,$orderby,$defaultcat,$usersort) = mysql_fetch_row($result);
 	if ($useweights==2) {$useweights = 0;} //use 0 mode for calculation of totals
 	
+	if (isset($GLOBALS['setorderby'])) {
+		$orderby = $GLOBALS['setorderby'];
+	}
 	
 	//Build user ID headers 
 	$gb[0][0][0] = "Name";
@@ -184,6 +192,9 @@ function gbtable() {
 	}
 	if ($lastlogin) {
 		$gb[0][0][] = "Last Login";
+	}
+	if ($logincnt) {
+		$gb[0][0][] = "Login Count";
 	}
 	
 	//orderby 10: course order (11 cat first), 12: course order rev (13 cat first)
@@ -535,6 +546,9 @@ function gbtable() {
 					$gb[0][1][$pos][7] = $discuss[$k];
 					$discusscol[$discuss[$k]] = $pos;
 				}
+				if (isset($GLOBALS['includeduedate'])) {
+					$gb[0][1][$pos][11] = $enddate[$k];
+				}
 					
 				
 				$pos++;
@@ -581,7 +595,9 @@ function gbtable() {
 				$gb[0][1][$pos][7] = $discuss[$k];
 				$discusscol[$discuss[$k]] = $pos;
 			}
-			
+			if (isset($GLOBALS['includeduedate'])) {
+				$gb[0][1][$pos][11] = $enddate[$k];
+			}
 			$pos++;
 		}
 	} 
@@ -664,6 +680,9 @@ function gbtable() {
 			$gb[0][2][$pos][4] = $catposscur[$cat];
 			$gb[0][2][$pos][5] = $catpossfuture[$cat];
 		}
+		if ($useweights==1) {
+			$gb[0][2][$pos][11] = $cats[$cat][5];
+		}
 			
 		
 		$overallptspast += $gb[0][2][$pos][3];
@@ -745,9 +764,19 @@ function gbtable() {
 		if ($lastlogin) {
 			$gb[$ln][0][] = date("n/j/y",$line['lastaccess']);
 		}
+		
 		$sturow[$line['id']] = $ln;
 		$timelimitmult[$line['id']] = $line['timelimitmult'];
 		$ln++;
+	}
+	
+	//pull logincnt if needed
+	if ($logincnt==1) {
+		$query = "SELECT userid,count(*) FROM imas_login_log WHERE courseid='$cid' GROUP BY userid";
+		$result2 = mysql_query($query) or die("Query failed : " . mysql_error());
+		while ($r = mysql_fetch_row($result2)) {
+			$gb[$sturow[$r[0]]][0][] = $r[1];
+		}
 	}
 	
 	//pull exceptions

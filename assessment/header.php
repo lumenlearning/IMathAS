@@ -34,12 +34,18 @@ function getlastanswer(qn, part) {
 //add require_once style script loader
 initstack = new Array();
 window.onload = init;
-var imasroot = '<?php echo $imasroot; ?>';
+var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
 <link rel="stylesheet" href="<?php echo $imasroot . "/assessment/mathtest.css?ver=092812";?>" type="text/css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js" type="text/javascript"></script>
 <?php
-echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/general.js?ver=011312\"></script>\n";
+if (isset($CFG['locale'])) {
+	$lang = substr($CFG['locale'],0,2);
+	if (file_exists(rtrim(dirname(__FILE__), '/\\').'/../i18n/locale/'.$lang.'/messages.js')) {
+		echo '<script type="text/javascript" src="'.$imasroot.'/i18n/locale/'.$lang.'/messages.js"></script>';
+	}
+}
+echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/general.js?ver=043013\"></script>\n";
 if (isset($sessiondata['coursetheme'])) {
 	if (isset($flexwidth)) {
 		$coursetheme = str_replace('_fw','',$sessiondata['coursetheme']);
@@ -93,7 +99,7 @@ div { zoom: 1; }
 }
 </style> 
 <![endif]--> 
-<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=021613";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=042713";?>" type="text/javascript"></script>
 <?php 
 if (isset($sessiondata['useflash'])) {
 	echo '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>';

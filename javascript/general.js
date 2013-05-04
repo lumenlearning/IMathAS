@@ -195,7 +195,7 @@ function submitlimiter(e) {
 function setupFormLimiters() {
 	var el = document.getElementsByTagName("form");
 	for (var i=0;i<el.length;i++) {
-		if (typeof el[i].onsubmit != 'function') {
+		if (typeof el[i].onsubmit != 'function' && el[i].className!="nolimit") {
 			el[i].onsubmit = submitlimiter;
 		}
 	}
@@ -372,3 +372,38 @@ function setselectbycookie() {
 	}
 }
 addLoadEvent(setselectbycookie);
+
+function recclick(type,typeid,info) {
+	if (cid>0) {
+		$.ajax({
+			type: "POST",
+			url: imasroot+'/course/rectrack.php?cid='+cid,
+			data: "type="+encodeURIComponent(type)+"&typeid="+encodeURIComponent(typeid)+"&info="+encodeURIComponent(info)
+		});
+	}			
+}
+function setuptracklinks(i,el) {
+	if ($(el).attr("data-base")) {
+		$(el).click(function() {
+			var inf = $(this).attr('data-base').split('-');
+			recclick(inf[0], inf[1], $(this).attr("href"));
+		});
+	}
+}
+$(function() {
+		$('a').each(setuptracklinks);
+});
+
+function _(txt) {
+	if (typeof i18njs != "undefined" && i18njs[txt]) {
+		var outtxt = i18njs[txt];
+	} else {
+		var outtxt = txt;
+	}
+	if (arguments.length>1) {
+		for (var i=1;i<arguments.length;i++) {
+			outtxt = outtxt.replace('$'+i,arguments[i]);
+		}
+	}
+	return outtxt;
+}

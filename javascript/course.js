@@ -22,6 +22,8 @@ function ahahDone(url, target) {
       if (usingASCIISvg) {
 	      setTimeout("drawPics()",100);
       }
+      $('#'+target+' a').each(setuptracklinks);
+      
       var x = document.getElementById(target).getElementsByTagName("script"); 
       for(var i=0;i<x.length;i++) {
 	      if (x[i].src) {
@@ -127,7 +129,9 @@ function showcalcontentsid(elid) {
 				if (caleventsarr[elid].data[i].id!=null) { 
 					html += '<a href="../assessment/showtest.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'"';
 					if (caleventsarr[elid].data[i].timelimit!=null) {
-						html += 'onclick="return confirm(\'This assessment has a time limit. Click OK to start or continue working on the assessment.\')" ';
+						html += 'onclick="recclick(\'assessviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].id+'\');return confirm(\'This assessment has a time limit. Click OK to start or continue working on the assessment.\')" ';
+					} else {
+						html += 'onclick="recclick(\'assessviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].id+'\');" ';	
 					}
 					html += '>';
 					html += caleventsarr[elid].data[i].name + '</a>';
@@ -138,6 +142,9 @@ function showcalcontentsid(elid) {
 				if (caleventsarr[elid].data[i].allowlate==1) {
 					html += ' <a href="redeemlatepass.php?cid='+cid+'&aid='+caleventsarr[elid].data[i].id+'">Use LatePass</a>';
 				}
+				if (caleventsarr[elid].data[i].undolate==1) {
+					html += ' <a href="redeemlatepass.php?cid='+cid+'&aid='+caleventsarr[elid].data[i].id+'&undo=true">Un-use LatePass</a>';
+				}
 				if (caleventsarr[elid].data[i].editlink!=null) {
 					html += ' <a href="addassessment.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">Settings</a>';
 					html += ' <a href="addquestions.php?cid='+cid+'&aid='+caleventsarr[elid].data[i].id+'">Questions</a>';
@@ -147,7 +154,8 @@ function showcalcontentsid(elid) {
 			} else if (caleventsarr[elid].data[i].type=='AR') {
 				html += '<li><span class="calitem" style="background-color: '+caleventsarr[elid].data[i].color+';padding: 0px 5px 0px 5px;">'+caleventsarr[elid].data[i].tag+'</span> ';
 				if (caleventsarr[elid].data[i].id!=null) { 
-					html += '<a href="../assessment/showtest.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">';
+					html += '<a onclick="recclick(\'assessviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].id+'\');" ';	
+					html += 'href="../assessment/showtest.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">';
 					html += caleventsarr[elid].data[i].name + '</a>';
 				} else {
 					html += caleventsarr[elid].data[i].name;
@@ -168,10 +176,13 @@ function showcalcontentsid(elid) {
 			} else if (caleventsarr[elid].data[i].type=='L') {
 				html += '<li><span class="calitem" style="background-color: '+caleventsarr[elid].data[i].color+'; padding: 0px 5px 0px 5px;">'+ caleventsarr[elid].data[i].tag+'</span> ';
 				if (caleventsarr[elid].data[i].id!=null) { 
+					
 					if (caleventsarr[elid].data[i].link=='') {
-						html += '<a href="../course/showlinkedtext.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">';
+						html += '<a onclick="recclick(\'linkedviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].id+'\');" ';
+						html += 'href="../course/showlinkedtext.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">';
 					} else {
-						html += '<a href="'+caleventsarr[elid].data[i].link+'">';
+						html += '<a onclick="recclick(\'linkedviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].link+'\');" ';
+						html += 'href="'+caleventsarr[elid].data[i].link+'">';
 					}
 					html += caleventsarr[elid].data[i].name + '</a>';
 				} else {
