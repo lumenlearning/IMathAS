@@ -1,8 +1,8 @@
 <?php
-	
 	require("config.php");
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
+	$placeinhead .= '<style type="text/css">div { margin: 0px; padding: 0px;}</style>';
 	$nologo = true;
 	require("header.php");
 	$pagetitle = "Instructor Account Request";
