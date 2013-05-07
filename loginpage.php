@@ -137,7 +137,8 @@ Then read more about <a href="<?php echo $imasroot;?>/info/classroom.php">using 
 </p>
 
 <br class=clear>
-<p class="textright"><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2011 David Lippman</p>
+<p class="textright"><a href="<?php echo $imasroot;?>/info/privacy.php">Privacy Policy</a></p>
+<p class="textright"><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2013 David Lippman</p>
 </div>
 <?php 
 	require("footer.php");

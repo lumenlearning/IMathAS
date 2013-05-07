@@ -84,10 +84,13 @@
 	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=formright><input type=text name=username value=\"$username\" size=40></span><br class=form />\n";
 	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
 	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";
-	echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+	if (isset($CFG['GEN']['TOSpage'])) {
+		echo "<span class=form><label for=\"agree\">I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></label></span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+	}
 	echo "<div class=submit><input type=submit value=\"Request Account\"></div>\n";
 	echo "</form>\n";
-	echo "<h4>Terms of Use</h4>\n";
+	/*echo "<h4>Terms of Use</h4>\n";
 	echo "<p><em>The IMathAS software and this webserver hosting are offered free of charge for use by instructors and their students using ";
 	echo "open textbooks. ";  
 	echo "There is <strong>no warranty</strong> and <strong>no guarantees</strong> attached with this offer.  The ";
@@ -102,5 +105,6 @@
 	echo "granting explicit rights for others to use, copy, and redistribute modifications of your items without compensation or attribution.</em></p>";
 	echo '<p><em>You have permission to export any open content on MyOpenMath to use on your own non-commercial installation of the IMathAS software.  ';
 	echo 'If you wish to use the content for commercial use, please contact the site administrator.</em></p>';
+	*/
 	require("footer.php");
 ?>

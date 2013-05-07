@@ -10,27 +10,52 @@ require("../infoheader.php");
 <img class="floatleft" src="<?php echo $imasroot;?>/img/hands.jpg"/>
 
 <div class="content">
+<h2>What is MyOpenMath?</h2>
 
 <p>MyOpenMath runs on the free, open source, <a href="http://www.imathas.com">IMathAS</a> platform, providing
-free hosted use of this platform in support of free, open textbooks.  The intent is to provide classroom use of
-the platform, without any added cost to students, for schools unable to host their own install of
-the IMathAS platform, and to provide students self-study opportunities.</p
+free hosted use of this platform in support of free, open textbooks like the
+ones listed on <a href="http://www.opentextbookstore.com/">OpenTextBookStore.com</a>.  
+The intent is to provide classroom use of
+the platform, without any required cost to students, for schools wanting a managed install of
+the IMathAS platform, and to provide students self-study opportunities.</p>
 
-<p>Be aware that this site is 
-community managed and provides no direct technical support to faculty or students.</p>
+<h2>How/Why is it Free?  Our Story</h2>
 
-<p>MyOpenMath began with wild dream back in 2005 that it would be great
-to provide free online math homework for anyone who wanted to use it in place
-of expensive publisher products.  The development
-of open textbooks took that vision one step further - totally free online
-math courses combining free online math homework with the best open textbooks, like the
-ones listed on <a href="http://www.opentextbookstore.com/">OpenTextBookStore.com</a>.</p>
+<p>It is always concerning when you visit a website that offers a free service.  
+What's the catch?  Are you going to be advertised to?  Get forced to pay for service in a year?  
+To address those concerns, here is a bit of info about MyOpenMath's history and business model.</p>
 
-<p>Most of the homework content on MyOpenMath was originally developed for WAMAP.org, a Washington-state
-installation of the IMathAS platform, serving thousands of students every quarter.  The 
-content was largely created by faculty who developed it for use in their own courses.</p>
+<p>MyOpenMath was born out of free, open source software developed by David Lippman, 
+a community college math professor in Washington State, starting in 2005.  With a little grant support 
+and a lot of his free time, David ran a state-wide installation of that software at wamap.org.  
+Faculty from around the state got involved, and collaboratively contributed much of the question 
+content now found on MyOpenMath.  Out of Open Course Library project in Washington, 
+several complete courses based on open textbooks were created.  Other folks got involved, 
+including James Sousa from Phoenix College who contributed a huge collection of questions 
+tied to his video examples.</p>  
 
-<p>The development of IMathAS and the content has been supported by several grant projects
+<p>In 2011 David started MyOpenMath as a way to share with the world this software 
+system and all the great content that had been built around open textbooks.  
+He self-funded the site for the first year, then joined forces with Lumen Learning, 
+who had been using MyOpenMath with the Kaleidoscope Project.  Lumen now hosts the 
+MyOpenMath site, and leads continued content development, with plans to provide the 
+full arithmetic-through-calculus sequence in MyOpenMath using open textbooks.</p>
+
+<p>David and Lumen both feel very strongly that a free and open version of MyOpenMath 
+should always exist, without advertisements.  They are also committed that all the 
+content remain open as well, so it could be moved to a local install of the IMathAS 
+software if desired or needed.  To accomplish this, they are adopting a "freemium" model, 
+where the basic service will remain free with community-based support for faculty, 
+but additional services are available to institutions for a fee.  
+Those services include instructor support, content support, branding, and administrative services.  
+Additionally, students may be given the option to contribute for use of the system 
+on a pay-what-you-can basis.  However, a no-charge option will always be available 
+to students, as ensuring student access to high quality materials is our number one priority.</p>
+
+<h2>Credits</h2>
+
+<p>While Lumen Learning now funds MyOpenMath, the development of IMathAS and the 
+content has been supported by several grant projects
 as well as the time, effort, feedback, suggestions, and dedication of its users.
 Grants from the <a href="http://www.sbctc.edu/college/e_elearning.aspx">Washington State eLearning Council</a>
 and the <a href="http://www.transitionmathproject.org/">Transition Math Project</a> helped
@@ -42,12 +67,6 @@ are a basis for many of the open courses found on MyOpenMath.  Others were contr
 by faculty, including <a href="http://mathispower4u.yolasite.com/">James Sousa</a> from 
 Phoenix Community College.</p>
 
-<p>In case you're curious, we receive a small referral fee from some of our print partners 
-when you order books through links on our sister site <a href="http://www.opentextbookstore.com/">OpenTextBookStore.com</a>. 
-We use that money to run this site and OpenTextBookStore.com, so if you decide to adopt
-an open textbook, we'd love it if you ordered your printed copies through that site.  If a miracle
-happens and we actually make more money than our hosting costs, our intent is use that revenue
-to help promote the site and keep the content updated. </p>
 
 </div>
 
