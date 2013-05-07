@@ -1,5 +1,8 @@
-<html>
-<body>
+<?php
+require("config.php");
+$flexwidth = true;
+require("header.php");
+?>
 <h1>Terms of Use</h1>
 <p><strong>Intro</strong></p>
 <p>MyOpenMath provides algorithmically generated online math homework. &nbsp;By using the MyOpenMath site, you are agreeing to these terms of use. &nbsp;MyOpenMath may update the Terms of Service at any time and without prior notice by posting a new version at <a href="http://www.myopenmath.com/">http://www.myopenmath.com</a>.</p>
@@ -56,5 +59,6 @@
 <p>You expressly understand and agree that MyOpenMath and its subsidiaries, affiliates, officers, employees, agents, partners and licensors shall not be liable to you for any direct, indirect, incidental, special, consequential or exemplary damages, including, but not limited to, damages for loss of profits, goodwill, use, data or other intangible losses (even if osi has been advised of the possibility of such damages), resulting from the use or the inability to use the MyOpenMath service.</p>
 <p><strong>Attribution</strong></p>
 <p>Portions of this Terms of Service were remixed from <a href="http://opensource.org/ToS">http://opensource.org/ToS</a>, Creative Commons Attribution License.</p>
-</body>
-</html>
+<?php
+require("footer.php");
+?>
