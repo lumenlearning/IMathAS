@@ -77,12 +77,30 @@ $courseid = intval($_POST['custom_canvas_course_id']);
 $consumerkey = $_POST['oauth_consumer_key'];
   
 
+$licenses = array('cc-by'=>'Attribution',
+		'cc-by-sa'=>'Attribution Share-Alike',
+		'cc-by-sa-nc'=>'Attribution Non-Commercial Share-Alike',
+		'cc-by-nc'=>'Attribution Non-Commercial',
+		'cc0'=>'CC0 / Public Domain');
+
+$licensesvid = array(
+		'c'=>'Non-open Copyrighted',
+		'cc-by'=>'Attribution',
+		'cc-by-sa'=>'Attribution Share-Alike',
+		'cc-by-nd'=>'Attribution No-Derivatives',
+		'cc-by-sa-nc'=>'Attribution Non-Commercial Share-Alike',
+		'cc-by-nc'=>'Attribution Non-Commercial',
+		'cc-by-nc-nd'=>'Attribution Non-Commercial No-Derivatives',
+		'cc0'=>'CC0 / Public Domain');
+
 if (isset($_POST['license'])) {
 	$_POST  = array_map('htmlentities', $_POST);
 	
 	$licenselinks = array('cc-by'=>'http://creativecommons.org/licenses/by/3.0',
 		'cc-by-sa'=>'http://creativecommons.org/licenses/by-sa/3.0',
+		'cc-by-nd'=>'http://creativecommons.org/licenses/by-nd/3.0',
 		'cc-by-sa-nc'=>'http://creativecommons.org/licenses/by-nc-sa/3.0',
+		'cc-by-nc-nd'=>'http://creativecommons.org/licenses/by-nc-nd/3.0',
 		'cc-by-nc'=>'http://creativecommons.org/licenses/by-nc/3.0',
 		'cc0'=>'http://creativecommons.org/publicdomain/zero/1.0/');
 	$licenseimgs = array('cc-by'=>'https://i.creativecommons.org/l/by/3.0/80x15.png',
@@ -90,11 +108,7 @@ if (isset($_POST['license'])) {
 		'cc-by-sa-nc'=>'https://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png',
 		'cc-by-nc'=>'https://i.creativecommons.org/l/by-nc/3.0/80x15.png',
 		'cc0'=>'https://i.creativecommons.org/p/zero/1.0/80x15.png');	
-	$licenses = array('cc-by'=>'Attribution',
-		'cc-by-sa'=>'Attribution Share-Alike',
-		'cc-by-sa-nc'=>'Attribution Non-Commercial Share-Alike',
-		'cc-by-nc'=>'Attribution Non-Commercial',
-		'cc0'=>'CC0 / Public Domain');
+	
 	
 	$licused = array();
 	
@@ -169,7 +183,7 @@ if (isset($_POST['license'])) {
 			} else if ($type=='vid' && $_POST['creator'.$i]!='[Creator]' && $_POST['item'.$i]!='[Content Item]' && $_POST['terms'.$i]!='[Terms]') {
 				$thishtml .= 'The video of ';
 				if ($_POST['url'.$i]!='[URL]') {
-					$thishtml .= '<a href="'.$_POST['url'.$i].'">'.$_POST['item'.$i].'</a>';
+					$thishtml .= '<a class="inline_disabled" href="'.$_POST['url'.$i].'">'.$_POST['item'.$i].'</a>';
 				} else {
 					$thishtml .= $_POST['item'.$i];
 				}
@@ -181,8 +195,15 @@ if (isset($_POST['license'])) {
 				if ($_POST['project'.$i]!='[Project]') {
 					$thishtml .= ' for '.$_POST['project'.$i];
 				}
-			
-				$thishtml .= '. Embedded as permitted by '.$_POST['terms'.$i].'.';
+				if ($_POST['license'.$i]=='c') {
+					$thishtml .= '.  This video is copyrighted and is not licensed under an open license';
+				} else {
+					$thishtml .= ' under a <a rel="license" href="'.$licenselinks[$_POST['license'.$i]].'">';
+					$thishtml .= 'Creative Commons '.$licensesvid[$_POST['license'.$i]].' License</a>';
+				}
+				if ($_POST['terms'.$i]!='[Terms]') {
+					$thishtml .= '. Embedded as permitted by '.$_POST['terms'.$i].'.';
+				}
 			} else if ($type=='pd' && $_POST['creator'.$i]!='[Creator]') {
 				if ($_POST['url'.$i]!='[URL]') {
 					$thishtml .= '<a href="'.$_POST['url'.$i].'">Public domain content</a> ';
@@ -296,17 +317,15 @@ if (isset($_POST['license'])) {
 }
 //http://screencast.com/t/wBGcQsAd
 
-$licenses = array('cc-by'=>'Attribution',
-		'cc-by-sa'=>'Attribution Share-Alike',
-		'cc-by-sa-nc'=>'Attribution Share-Alike Non-Commercial',
-		'cc-by-nc'=>'Attribution Non-Commercial',
-		'cc0'=>'CC0 / Public Domain');
-
 $licenseopts = '';
 foreach ($licenses as $k=>$lic) {
 	$licenseopts .= '<option value="'.$k.'">'.$lic.'</option>';
 }
 
+$licensevidopts = '';
+foreach ($licensesvid as $k=>$lic) {
+	$licensevidopts .= '<option value="'.$k.'">'.$lic.'</option>';
+}
 
 
 ?>
@@ -371,7 +390,7 @@ $(function() {
 				var html = gethtml(toload,toload["itemtype"+i],itemcnt,i);
 				$('#contentholder').append('<li id="li'+itemcnt+'">'+html+'</li>');
 				
-				if (toload["itemtype"+i]=="cc" || toload["itemtype"+i]=="ccspec") {
+				if (toload["itemtype"+i]=="cc" || toload["itemtype"+i]=="ccspec"  || toload["itemtype"+i]=="vid") {
 					$('#license'+itemcnt).val(toload["license"+i]);
 				}	
 				if (toload["itemtype"+i]=="pd" || toload["itemtype"+i]=="pdspec") {
@@ -436,6 +455,7 @@ function clearall() {
 }
 
 var licenseopts = '<?php echo $licenseopts;?>';
+var licensevidopts = '<?php echo $licensevidopts;?>';
 
 function ifd(val,alt) {
 	if (typeof val !='undefined' && val != null) {
@@ -482,7 +502,8 @@ function gethtml(data,type,i,ir) {
 		html += '<input name="creator'+i+'" class="in req" type="text" value="'+ifd(data["creator"+ir],"[Creator]")+'"/> ';
 		html += 'of <input name="org'+i+'" class="in" type="text" value="'+ifd(data["org"+ir],"[Org]")+'"/> ';
 		html += 'to <input name="project'+i+'" class="in" type="text" value="'+ifd(data["project"+ir],"[Project]")+'"/>  ';
-		html += 'and published at <input id="url'+i+'" name="url'+i+'" class="in url req" type="text" value="'+ifd(data["url"+ir],"[URL]")+'"/>.  ';
+		html += 'and published at <input id="url'+i+'" name="url'+i+'" class="in url req" type="text" value="'+ifd(data["url"+ir],"[URL]")+'"/>  ';
+		html += 'under a <select class="req" id="license'+i+'" name="license'+i+'">'+licensevidopts+'</select> license. ';
 		html += 'Embedded as permitted by <input id="terms'+i+'" name="terms'+i+'" class="in req" type="text" value="'+ifd(data["terms"+ir],"[Terms]")+'"/>. ';
 	} else if (type=='pd') {
 		html += 'Public domain content ';
@@ -609,6 +630,10 @@ function additem(el) {
 				} else if (target.val().match(/vimeo/)) {
 					$('#terms'+id).val("Vimeo's Terms of Use");
 					changed=true;
+				} else if (target.val().match(/ted\.com/)) {
+					$('#terms'+id).val("Ted's Terms of Use");
+					$('#license'+id).val("cc-by-nc-nd");
+					changed=true;
 				}
 				if (changed) {
 					$('#terms'+id).css({"color":"black"});
@@ -639,7 +664,7 @@ Page License: <select class="req" id="license" name="license">
 <option value="origspec">Original Content, specific item</option>
 <option value="cc">CC Licensed Content</option>
 <option value="ccspec">CC Licensed Content, specific item</option>
-<option value="vid">Copyrighted Video (embedded)</option>
+<option value="vid">Embedded Video</option>
 <option value="pd">Public Domain</option>
 <option value="pdspec">Public Domain, specific item</option>
 </select></p>
