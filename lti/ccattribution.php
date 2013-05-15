@@ -120,7 +120,7 @@ if (isset($_POST['license'])) {
 	$licused[] = $_POST['license'];
 	
 	$cnt = 0;
-	for ($i=0;$i<50;$i++) {
+	for ($i=0;$i<55;$i++) {
 		if (isset($_POST['itemtype'.$i])) {
 
 			$type = $_POST['itemtype'.$i];
@@ -197,13 +197,14 @@ if (isset($_POST['license'])) {
 				}
 				if ($_POST['license'.$i]=='c') {
 					$thishtml .= '.  This video is copyrighted and is not licensed under an open license';
+					if ($_POST['terms'.$i]!='[Terms]') {
+						$thishtml .= '. Embedded as permitted by '.$_POST['terms'.$i].'.';
+					}
 				} else {
 					$thishtml .= ' under a <a rel="license" href="'.$licenselinks[$_POST['license'.$i]].'">';
 					$thishtml .= 'Creative Commons '.$licensesvid[$_POST['license'.$i]].' License</a>';
 				}
-				if ($_POST['terms'.$i]!='[Terms]') {
-					$thishtml .= '. Embedded as permitted by '.$_POST['terms'.$i].'.';
-				}
+				
 			} else if ($type=='pd' && $_POST['creator'.$i]!='[Creator]') {
 				if ($_POST['url'.$i]!='[URL]') {
 					$thishtml .= '<a href="'.$_POST['url'.$i].'">Public domain content</a> ';
@@ -228,9 +229,16 @@ if (isset($_POST['license'])) {
 		}
 	}
 	$html .= '</ul>';
-	$html .= '<a rel="license" href="'.$licenselinks[$_POST['license']].'">';
-	$html .= '<img alt="Creative Commons License" style="border-width:0" ';
-	$html .= 'src="'.$licenseimgs[$_POST['license']].'"/></a></div>';
+	if (!isset($_POST['noccimage'])) {
+		$html .= '<a rel="license" href="'.$licenselinks[$_POST['license']].'">';
+		$html .= '<img alt="Creative Commons License" style="border-width:0" ';
+		$html .= 'src="'.$licenseimgs[$_POST['license']].'"/></a>';
+	}
+	if ($consumerkey=='lumen') {
+		$html .= '<p>If you believe that a portion of this Open Course Framework infringes ';
+		$html .= 'another\'s copyright, <a href="http://lumenlearning.com/copyright">contact us</a>.</p>';	
+	}
+	$html .= '</div>';
 	
 	$key = md5($html);
 	/*$handle = fopen("$key.txt",'w');
@@ -300,11 +308,16 @@ if (isset($_POST['license'])) {
 	$storekey = $db->real_escape_string("$consumerkey-$courseid-$userid");
 	$query = "SELECT data FROM ltidata WHERE tool='$tool' AND datakey='$storekey'";
 	$result = $db->query($query) or die("Query failed : $query " . $db->error);
+	if ($consumerkey=='lumen') {
+		$default = array('itemtype50'=>'orig','creator50'=>'Lumen Learning');
+	} else {
+		$default = array();
+	}
 	if ($result->num_rows>0) {
 		$row = $result->fetch_row();
 		$d = unserialize($row[0]);
 	} else {
-		$d = array();
+		$d = $default;
 	}
 	/*
 	if (file_exists("cc-$courseid-$userid.txt")) {
@@ -314,6 +327,7 @@ if (isset($_POST['license'])) {
 	}
 	*/
 	$toload = json_encode($d);
+	$defaultload = json_encode($default);
 }
 //http://screencast.com/t/wBGcQsAd
 
@@ -373,6 +387,7 @@ foreach ($licensesvid as $k=>$lic) {
 </style>
 <script type="text/javascript">
 var toload = <?php echo str_replace("'","\\'",$toload); ?>;
+var deftoload = <?php echo str_replace("'","\\'",$defaultload); ?>;
 function getwidth(v) {
 	$('#test').text(v);
 	return $('#test').width()+7;
@@ -397,6 +412,21 @@ $(function() {
 					$('#typesel'+itemcnt).val(toload["typesel"+i]);
 				}	
 				itemcnt++;
+			}
+		}
+		var eitemcnt = 50;
+		for (var i=50;i<55;i++) {
+			if (typeof toload["itemtype"+i]!="undefined") {
+				var html = gethtml(toload,toload["itemtype"+i],eitemcnt,i);
+				$('#contentholder').append('<li id="li'+eitemcnt+'">'+html+'</li>');
+				
+				if (toload["itemtype"+i]=="cc" || toload["itemtype"+i]=="ccspec"  || toload["itemtype"+i]=="vid") {
+					$('#license'+eitemcnt).val(toload["license"+i]);
+				}	
+				if (toload["itemtype"+i]=="pd" || toload["itemtype"+i]=="pdspec") {
+					$('#typesel'+eitemcnt).val(toload["typesel"+i]);
+				}	
+				eitemcnt++;
 			}
 		}
 		if (typeof toload["license"]!="undefined") {
@@ -451,6 +481,63 @@ function clearall() {
 		$('#contentholder').empty();
 		itemcnt = 0;
 		$('#license').val('cc-by');
+		
+		var eitemcnt = 50;
+		for (var i=50;i<55;i++) {
+			if (typeof deftoload["itemtype"+i]!="undefined") {
+				var html = gethtml(deftoload,deftoload["itemtype"+i],eitemcnt,i);
+				$('#contentholder').append('<li id="li'+eitemcnt+'">'+html+'</li>');
+				
+				if (deftoload["itemtype"+i]=="cc" || deftoload["itemtype"+i]=="ccspec"  || deftoload["itemtype"+i]=="vid") {
+					$('#license'+eitemcnt).val(deftoload["license"+i]);
+				}	
+				if (deftoload["itemtype"+i]=="pd" || deftoload["itemtype"+i]=="pdspec") {
+					$('#typesel'+eitemcnt).val(deftoload["typesel"+i]);
+				}	
+				eitemcnt++;
+			}
+		}
+		if (typeof deftoload["license"]!="undefined") {
+			$('#license').val(deftoload["license"]);	
+		}
+		$(".in").each(function() {
+			$(this).css({"width":getwidth($(this).val())});
+			if ($(this).val().match(/^\[[\w\s]+\]$/)) {
+				$(this).css({"color":"gray"});
+			}
+		});
+		$(".in").on("focus", function(event) {
+				var target = $(event.target);
+				if (target.val().match(/^\[[\w\s]+\]$/)) {
+					target.data("origval",target.val());
+					target.css({"color":"black"});
+					target.val("");
+				}
+		}).on("focus keydown", function(event) {
+				if (event.type=='keydown') {
+					var keycode = event.which;
+					var valid = 
+						(keycode == 8 || keycode ==46)   || // delete/backspace
+						(keycode > 47 && keycode < 58)   || // number keys
+						keycode == 32 || keycode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
+						(keycode > 64 && keycode < 91)   || // letter keys
+						(keycode > 95 && keycode < 112)  || // numpad keys
+						(keycode > 185 && keycode < 193) || // ;=,-./` (in order)
+						(keycode > 218 && keycode < 223);   // [\]' (in order)
+					if (!valid) {return;}
+				}
+				var target = $(event.target);
+				target.stop().animate({ width:checkwidth(target.val(),target.width())},100);
+		}).on("blur", function(event) {
+				var target = $(event.target);
+				if (target.val()=='') {
+					target.val(target.data("origval"));	
+					target.css({"color":"gray"});
+				}
+				target.stop().animate({ width:getwidth(target.val())},100);
+		});
+		
+		
 	}
 }
 
@@ -673,6 +760,9 @@ Page License: <select class="req" id="license" name="license">
 <input type="hidden" name="custom_canvas_course_id" value="<?php echo $courseid;?>"/>
 <input type="hidden" name="custom_canvas_user_id" value="<?php echo $userid;?>"/>
 <input type="hidden" name="oauth_consumer_key" value="<?php echo $consumerkey;?>"/>
+<?php if (isset($_POST['custom_no_image'])) {
+	echo '<input type="hidden" name="noccimage" value="1"/>';
+}?>
 <p><input type="button" value="Insert" onclick="checkissues()"/> <input type="button" value="Clear All" onclick="clearall()"/></p>
 <p style="font-size:80%"><i>Not all fields are required, but provide as much detail as you have.  <br/>
 If an item requires special attribution requirements, add that detail after inserting the attribution statement
