@@ -387,7 +387,11 @@ if ($overwriteBody==1) {
 		<?php if (isset($guestid)) {
 			echo '<span class="red">', _('Instructor Preview'), '</span> ';
 		}?>
-		<?php echo $userfullname ?>
+		<?php 
+		if ($coursetheme!='otbs_fw.css' && $coursetheme!='otbs.css') {
+			echo $userfullname;
+		} else { echo '&nbsp;';}
+		?>
 		</span>
 		<?php echo $curBreadcrumb ?>
 		<div class=clear></div>
@@ -400,7 +404,7 @@ if ($overwriteBody==1) {
 	<?php
 		if (isset($CFG['CPS']['additemtype']) && $CFG['CPS']['additemtype'][0]=='links') {
 		} else {
-			echo '<p>'.generateadditem($_GET['folder'],'LB').'</p>';
+			//echo '<p>'.generateadditem($_GET['folder'],'LB').'</p>';
 		}
 	?>
 		<p>

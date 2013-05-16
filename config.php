@@ -99,7 +99,7 @@ $templateuser = 2;
  $defaultcoursetheme = "otbs_fw.css";
  $CFG['CPS']['theme'] = array("otbs_fw.css",1);
  $CFG['CPS']['themelist'] ="otbs_fw.css,otbs.css,modern.css,angelish.css,facebookish.css";
- $CFG['CPS']['themenames'] = "OpenTextBookStore Fixed Width,OpenTextBookStore Fluid,Modern,Clean,Social";
+ $CFG['CPS']['themenames'] = "Lumen Fixed Width,Lumen Fluid,Modern,Clean,Social";
 	 
  $CFG['TE']['navicons'] = array(
 	 'untried'=>'te_blue_arrow.png',
@@ -119,6 +119,7 @@ $templateuser = 2;
  $CFG['GEN']['addwww'] = true;
  $CFG['GEN']['TOSpage'] = $imasroot.'/termsofuse.php';
 
+ $smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
  //$studentTOS = "studentTOS.php";
  
 //Math chat disabled 
