@@ -274,6 +274,7 @@ div#headerbarlogo img {
 	vertical-align: -60%;
 }
 div#headerrightlinks {
+	text-align: right;
 	float: right;
 	margin-top: 15px;
 	margin-right: 20px;

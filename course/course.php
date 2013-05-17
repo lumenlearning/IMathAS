@@ -383,12 +383,16 @@ if ($overwriteBody==1) {
 	}
 ?>
 	<div class=breadcrumb>
-		<span class="padright">
-		<?php if (isset($guestid)) {
-			echo '<span class="red">', _('Instructor Preview'), '</span> ';
-		}?>
 		<?php 
-		if ($coursetheme!='otbs_fw.css' && $coursetheme!='otbs.css') {
+		if (isset($guestid) || !isset($usernameinheader)) {
+			echo '<span class="padright">';
+		} else {
+			echo '<span class="padright" style="padding-right:20px">';
+		}
+		if (isset($guestid)) {
+			echo '<span class="red">', _('Instructor Preview'), '</span> ';
+		}
+		if (!isset($usernameinheader)) {
 			echo $userfullname;
 		} else { echo '&nbsp;';}
 		?>
