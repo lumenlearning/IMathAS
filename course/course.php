@@ -385,7 +385,7 @@ if ($overwriteBody==1) {
 	<div class=breadcrumb>
 		<?php 
 		if (isset($CFG['GEN']['logopad'])) {
-			echo '<span class="padright" style="padding-right:20px">';
+			echo '<span class="padright" style="padding-right:'.$CFG['GEN']['logopad'].'">';
 		} else {
 			echo '<span class="padright">';
 		}
