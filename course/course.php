@@ -384,10 +384,10 @@ if ($overwriteBody==1) {
 ?>
 	<div class=breadcrumb>
 		<?php 
-		if (isset($guestid) || !isset($usernameinheader)) {
-			echo '<span class="padright">';
-		} else {
+		if (isset($CFG['GEN']['logopad'])) {
 			echo '<span class="padright" style="padding-right:20px">';
+		} else {
+			echo '<span class="padright">';
 		}
 		if (isset($guestid)) {
 			echo '<span class="red">', _('Instructor Preview'), '</span> ';

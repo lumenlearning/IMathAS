@@ -120,6 +120,7 @@ $templateuser = 2;
  $CFG['GEN']['TOSpage'] = $imasroot.'/termsofuse.php';
 
  $smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
+ $CFG['GEN']['logopad'] = '20px';
  //$studentTOS = "studentTOS.php";
  
 //Math chat disabled 
