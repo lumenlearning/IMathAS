@@ -118,7 +118,7 @@ $templateuser = 2;
  $CFG['GEN']['forcecanvashttps'] = true;
  $CFG['GEN']['addwww'] = true;
  $CFG['GEN']['TOSpage'] = $imasroot.'/termsofuse.php';
-
+ $CFG['GEN']['enrollonnewinstructor'] = array(1,11);
  //$studentTOS = "studentTOS.php";
  
 //Math chat disabled 

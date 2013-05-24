@@ -15,6 +15,12 @@ if (isset($_GET['go'])) {
 	} else 	if (isset($_POST['deny'])) {
 		$query = "UPDATE imas_users SET rights=10 WHERE id='{$_POST['id']}'";
 		mysql_query($query) or die("Query failed : " . mysql_error());
+		if (isset($CFG['GEN']['enrollonnewinstructor'])) {
+			require("../includes/unenroll.php");
+			foreach ($CFG['GEN']['enrollonnewinstructor'] as $rcid) {
+				unenrollstu($rcid, array(intval($_POST['id'])));
+			}
+		}
 	} else 	if (isset($_POST['approve'])) {
 		if ($_POST['group']>-1) {
 			$group = intval($_POST['group']);
