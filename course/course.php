@@ -408,7 +408,7 @@ if ($overwriteBody==1) {
 	<?php
 		if (isset($CFG['CPS']['additemtype']) && $CFG['CPS']['additemtype'][0]=='links') {
 		} else {
-			echo '<p>'.generateadditem($_GET['folder'],'LB').'</p>';
+			//echo '<p>'.generateadditem($_GET['folder'],'LB').'</p>';
 		}
 	?>
 		<p>
