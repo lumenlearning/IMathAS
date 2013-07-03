@@ -388,16 +388,33 @@ function recclick(type,typeid,info) {
 	}			
 }
 function setuptracklinks(i,el) {
-	if ($(el).attr("data-base")) {
-		$(el).click(function() {
-			var inf = $(this).attr('data-base').split('-');
-			recclick(inf[0], inf[1], $(this).attr("href"));
+	if (jQuery(el).attr("data-base")) {
+		jQuery(el).click(function() {
+			var inf = jQuery(this).attr('data-base').split('-');
+			recclick(inf[0], inf[1], jQuery(this).attr("href"));
 		});
 	}
 }
-$(function() {
-		$('a').each(setuptracklinks);
-});
+
+function addmultiselect(el,n) {
+	var p = $(el).parent();
+	var val = $('#'+n).val();
+	var txt = $('#'+n+' option[value='+val+']').prop('disabled',true).html();
+	if (val != 'null') {
+		p.append('<div class="multiselitem"><span class="right"><a href="#" onclick="removemultiselect(this);return false;">Remove</a></span><input type="hidden" name="'+n+'[]" value="'+val+'"/>'+txt+'</div>');
+	}
+	$('#'+n).val('null');
+}
+function removemultiselect(el) {
+	var p = $(el).parent().parent();
+	var val = p.find('input').val();
+	p.parent().find('option[value='+val+']').prop('disabled',false);
+	p.remove();
+}
+
+(function($){
+	$('a').each(setuptracklinks);		
+})(jQuery);
 
 function _(txt) {
 	if (typeof i18njs != "undefined" && i18njs[txt]) {
