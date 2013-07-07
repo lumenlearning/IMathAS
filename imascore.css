@@ -568,3 +568,7 @@ div.multiselitem {
 	background-color: #eee;
 	margin-bottom: 2px;
 }
+.videoembedbtn {
+	color: #999;
+	cursor: pointer;
+}
