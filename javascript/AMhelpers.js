@@ -84,7 +84,7 @@ function calculate(inputId,outputId,format) {
 				  }
 				  trg = str.match(/(sin|cos|tan|sec|csc|cot)\^/);
 				  reg = new RegExp("(sqrt|ln|log|sin|cos|tan|sec|csc|cot|abs)([^\(])");
-				  errstuff = str.match(reg)
+				  errstuff = str.match(reg);
 				  if (trg!=null) {
 					  trg = trg[1];
 					  //str += "["+_("use")+" ("+trg+"(x))^2 "+_("instead of ")+trg+_("^2(x)]");
@@ -1394,7 +1394,11 @@ function isBlank(str) {
 function editdebit(el) {
 	var descr = $('#qn'+(el.id.substr(2)*1 - 1));
 	if (!isBlank(el.value) && descr.hasClass("iscredit")) {
-		descr.width(descr.width()+20);
+		if (descr.is('select')) {
+			descr.css('margin-right',20);
+		} else {
+			descr.width(descr.width()+20);
+		}
 		descr.css('padding-left',0);
 		descr.removeClass("iscredit");
 	}
@@ -1402,7 +1406,11 @@ function editdebit(el) {
 function editcredit(el) {
 	var descr = $('#qn'+(el.id.substr(2)*1 - 2));
 	if (!isBlank(el.value) && !descr.hasClass("iscredit")) {
-		descr.width(descr.width()-20);
+		if (descr.is('select')) {
+			descr.css('margin-right',0);
+		} else {
+			descr.width(descr.width()-20);
+		}
 		descr.css('padding-left',20);
 		descr.addClass("iscredit");
 	}
@@ -1411,7 +1419,11 @@ function initcreditboxes() {
 	$('.creditbox').each(function(i, el) {
 		if (!isBlank(el.value) && $(el).css('padding-left')!=20) {
 			var descr = $('#qn'+(el.id.substr(2)*1 - 2));
-			descr.width(descr.width()-20);
+			if (descr.is('select')) {
+				descr.css('margin-right',0);
+			} else {
+				descr.width(descr.width()-20);
+			}
 			descr.css('padding-left',20);
 			descr.addClass("iscredit");
 		}
