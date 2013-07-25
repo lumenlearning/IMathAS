@@ -112,10 +112,10 @@ if (isset($_POST['license'])) {
 	
 	$licused = array();
 	
-	$html = '<hr/><div style="font-size:x-small">This page is licensed under a ';
+	$html = '<hr/><div style="font-size:x-small">The content of this page is licensed under a ';
 	$html .= '<a rel="license" href="'.$licenselinks[$_POST['license']].'">';
 	$html .= 'Creative Commons '.$licenses[$_POST['license']].' License</a> ';
-	$html .= 'and contains content from a variety of sources published under a variety of open licenses, including:<ul>';
+	$html .= 'except for any elements that may be licensed differently.  The content of this page includes:<ul>';
 	
 	$licused[] = $_POST['license'];
 	
