@@ -143,24 +143,45 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$questions = explode(',',$line['questions']);
 					$qloc = array_search($clearid,$questions);
 					if ($qloc!==false) {
-						$scores = explode(',',$line['scores']);
 						$attempts = explode(',',$line['attempts']);
 						$lastanswers = explode('~',$line['lastanswers']);
-						$bestscores = explode(',',$line['bestscores']);
 						$bestattempts = explode(',',$line['bestattempts']);
 						$bestlastanswers = explode('~',$line['bestlastanswers']);
 						
-						$scores[$qloc] = -1;
+						if (strpos($line['scores'],';')===false) {
+							//old format	
+							$scores = explode(',',$line['scores']);
+							$bestscores = explode(',',$line['bestscores']);
+							$scores[$qloc] = -1;
+							$bestscores[$qloc] = -1;
+							$scorelist = implode(',',$scores);
+							$bestscorelist = implode(',',$scores);
+						} else {
+							//has raw
+							list($scorelist,$rawscorelist) = explode(';',$line['scores']);
+							$scores = explode(',', $scorelist);
+							$rawscores = explode(',', $rawscorelist);
+							$scores[$qloc] = -1;
+							$rawscores[$qloc] = -1;
+							$scorelist = implode(',',$scores).';'.implode(',',$rawscores);
+							list($bestscorelist,$bestrawscorelist,$firstscorelist) = explode(';',$line['bestscores']);
+							$bestscores = explode(',', $bestscorelist);
+							$bestrawscores = explode(',', $bestrawscorelist);
+							$firstscores = explode(',', $firstscorelist);
+							$bestscores[$qloc] = -1;
+							$bestrawscores[$qloc] = -1;
+							$firstscores[$qloc] = -1;
+							$bestscorelist = implode(',',$bestscores).';'.implode(',',$bestrawscores).';'.implode(',',$firstscores);
+						}
+						
+						
+						
 						$attempts[$qloc] = 0;
 						$lastanswers[$qloc] = '';
-						$bestscores[$qloc] = -1;
 						$bestattempts[$qloc] = 0;
 						$bestlastanswers[$qloc] = '';
-						
-						$scorelist = implode(',',$scores);
 						$attemptslist = implode(',',$attempts);
 						$lalist = addslashes(implode('~',$lastanswers));
-						$bestscorelist = implode(',',$scores);
 						$bestattemptslist = implode(',',$attempts);
 						$bestlalist = addslashes(implode('~',$lastanswers));
 						
@@ -244,17 +265,30 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			while ($row = mysql_fetch_row($result)) {
 				$qarr = explode(',',$row[1]);
-				$sarr = explode(',',$row[2]);
+				if (strpos($row[2],';')===false) {
+					$bestscores = explode(',',$row[2]);
+					$doraw = false;
+				} else {
+					list($bestscorelist,$bestrawscorelist,$firstscorelist) = explode(';',$row[2]);
+					$bestscores = explode(',', $bestscorelist);
+					$bestrawscores = explode(',', $bestrawscorelist);
+					$firstscores = explode(',', $firstscorelist);
+					$doraw = true;
+				}
 				for ($i=0; $i<count($qarr); $i++) {
 					if (in_array($qarr[$i],$qids)) {
 						if ($_POST['withdrawtype']=='zero' || $_POST['withdrawtype']=='groupzero') {
 							$sarr[$i] = 0;
 						} else if ($_POST['withdrawtype']=='full' || $_POST['withdrawtype']=='groupfull') {
-							$sarr[$i] = $poss[$qarr[$i]];
+							$bestscores[$i] = $poss[$qarr[$i]];
 						}
 					}
 				}
-				$slist = implode(',',$sarr);
+				if ($doraw) {
+					$slist = implode(',',$bestscores).';'.implode(',',$bestrawscores).';'.implode(',',$firstscores);
+				} else {
+					$slist = implode(',',$bestscores );
+				}
 				$query = "UPDATE imas_assessment_sessions SET bestscores='$slist' WHERE id='{$row[0]}'";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 			}
@@ -1152,7 +1186,7 @@ if ($overwriteBody==1) {
 				if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
 ?>
 
-				<td><input type=checkbox name='achecked[]' value='<?php echo $page_assessmentList[$i]['id'] ?>' checked=1></td>
+				<td><input type=checkbox name='achecked[]' value='<?php echo $page_assessmentList[$i]['id'] ?>'></td>
 				<td><?php echo $page_assessmentList[$i]['name'] ?></td>
 				<td><?php echo $page_assessmentList[$i]['summary'] ?></td>
 			</tr>

@@ -73,7 +73,8 @@
 		$cnt = 0;
 		while($line=mysql_fetch_array($result, MYSQL_ASSOC)) {
 			if ((!$onepergroup && isset($allscores[$line['id']])) || ($onepergroup && isset($grpscores[$line['agroupid']]))) {//if (isset($locs[$line['id']])) {
-				$scores = explode(",",$line['bestscores']);
+				$sp = explode(';',$line['bestscores']);
+				$scores = explode(",",$sp[0]);
 				if ($onepergroup) {
 					if ($line['agroupid']==0) { continue;}
 					foreach ($grpscores[$line['agroupid']] as $loc=>$sv) {
@@ -95,6 +96,9 @@
 					$feedback = $_POST['feedback-'.$line['id']];
 				}
 				$scorelist = implode(",",$scores);
+				if (count($sp)>1) {
+					$scorelist .= ';'.$sp[1].';'.$sp[2];
+				}
 				
 				$query = "UPDATE imas_assessment_sessions SET bestscores='$scorelist',feedback='$feedback' WHERE id='{$line['id']}'";
 				mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -368,7 +372,8 @@
 			$s3asid = $asid;
 		}
 		$questions = explode(',',$line['questions']);
-		$scores = explode(",",$line['bestscores']);
+		$sp = explode(';', $line['bestscores']);
+		$scores = explode(",",$sp[0]);
 		$attempts = explode(",",$line['bestattempts']);
 		if ($ver=='graded') {
 			$seeds = explode(",",$line['bestseeds']);
@@ -605,6 +610,9 @@
 	}
 function getansweights($qi,$code) {
 	global $seeds,$questions;	
+	if (preg_match('/scoremethod\s*=\s*"(singlescore|acct|allornothing)"/', $code)) {
+		return array(1);
+	}
 	$i = array_search($qi,$questions);
 	return sandboxgetweights($code,$seeds[$i]);
 }
@@ -612,10 +620,23 @@ function getansweights($qi,$code) {
 function sandboxgetweights($code,$seed) {
 	srand($seed);
 	$code = interpret('control','multipart',$code);
-	if (strpos($code,'answeights')!==false) {
-		$code = str_replace("\n",';if(isset($answeights)){return;};'."\n",$code);
+	if (($p=strrpos($code,'answeights'))!==false) {
+		$np = strpos($code,"\n",$p);
+		if ($np !== false) {
+			$code = substr($code,0,$np).';if(isset($answeights)){return;};'.substr($code,$np);
+		} else {
+			$code .= ';if(isset($answeights)){return;};';
+		}
+		//$code = str_replace("\n",';if(isset($answeights)){return;};'."\n",$code);
 	} else {
-		$code = str_replace("\n",';if(isset($anstypes)){return;};'."\n",$code);
+		$p=strrpos($code,'answeights');
+		$np = strpos($code,"\n",$p);
+		if ($np !== false) {
+			$code = substr($code,0,$np).';if(isset($anstypes)){return;};'.substr($code,$np);
+		} else {
+			$code .= ';if(isset($answeights)){return;};';
+		}
+		//$code = str_replace("\n",';if(isset($anstypes)){return;};'."\n",$code);
 	}
 	eval($code);
 	if (!isset($answeights)) {

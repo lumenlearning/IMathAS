@@ -570,7 +570,7 @@ function enditem($canedit) {
 				   $startdate = formatdate($line['startdate']);
 			   }
 			   if ($line['enddate']==2000000000) {
-				   $enddate = _('Never');
+				   $enddate =  _('Always');
 			   } else {
 				   $enddate =formatdate($line['enddate']);
 			   }
@@ -586,8 +586,8 @@ function enditem($canedit) {
 				   if (mysql_num_rows($result)==0) {
 					   $nothidden = false;
 				   } else {
-					   $scores = mysql_result($result,0,0);
-					   if (round(getpts($scores),1)+.02<$line['reqscore']) {
+					   $scores = explode(';',mysql_result($result,0,0));
+					   if (round(getpts($scores[0]),1)+.02<$line['reqscore']) {
 					   	   $nothidden = false;
 					   }
 				   }
@@ -678,7 +678,12 @@ function enditem($canedit) {
 						  echo "<div class=icon style=\"background-color: #99f;\">?</div>";
 					   }
 				   }
-				   echo "<div class=title><b><a href=\"../assessment/showtest.php?id=$typeid&cid=$cid\">{$line['name']}</a></b><BR> ", _('Past Due Date.  Showing as Review');
+				   echo "<div class=title><b><a href=\"../assessment/showtest.php?id=$typeid&cid=$cid\"";
+				   if (isset($studentid)) {
+				   	   echo " data-base=\"assess-$typeid\"";
+				   }
+				   
+				   echo ">{$line['name']}</a></b><BR> ", _('Past Due Date.  Showing as Review');
 				   if ($line['reviewdate']!=2000000000) { 
 					   echo " ", _('until'), " $reviewdate \n";
 				   }

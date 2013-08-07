@@ -87,6 +87,9 @@ function getquestioninfo($qns,$testsettings) {
 //which might be randomizer determined, hence the seed
 function getansweights($qi,$code) {
 	global $seeds,$questions;	
+	if (preg_match('/scoremethod\s*=\s*"(singlescore|acct|allornothing)"/', $code)) {
+		return array(1);
+	}
 	$i = array_search($qi,$questions);
 	return sandboxgetweights($code,$seeds[$i]);
 }
@@ -94,10 +97,23 @@ function getansweights($qi,$code) {
 function sandboxgetweights($code,$seed) {
 	srand($seed);
 	$code = interpret('control','multipart',$code);
-	if (strpos($code,'answeights')!==false) {
-		$code = str_replace("\n",';if(isset($answeights)){return;};'."\n",$code);
+	if (($p=strrpos($code,'answeights'))!==false) {
+		$np = strpos($code,"\n",$p);
+		if ($np !== false) {
+			$code = substr($code,0,$np).';if(isset($answeights)){return;};'.substr($code,$np);
+		} else {
+			$code .= ';if(isset($answeights)){return;};';
+		}
+		//$code = str_replace("\n",';if(isset($answeights)){return;};'."\n",$code);
 	} else {
-		$code = str_replace("\n",';if(isset($anstypes)){return;};'."\n",$code);
+		$p=strrpos($code,'answeights');
+		$np = strpos($code,"\n",$p);
+		if ($np !== false) {
+			$code = substr($code,0,$np).';if(isset($anstypes)){return;};'.substr($code,$np);
+		} else {
+			$code .= ';if(isset($answeights)){return;};';
+		}
+		//$code = str_replace("\n",';if(isset($anstypes)){return;};'."\n",$code);
 	}
 	eval($code);
 	if (!isset($answeights)) {
@@ -274,7 +290,10 @@ function amreattempting($n) {
 	return in_array($n,$reattempting);
 }
 
-function scorestocolors($sc,$pts,$answ) {
+function scorestocolors($sc,$pts,$answ,$noraw) {
+	if (!$noraw) {
+		$pts = 1;
+	}
 	if (trim($sc)=='') {return '';}
 	if (strpos($sc,'~')===false) {
 		if ($pts==0) {
@@ -290,14 +309,18 @@ function scorestocolors($sc,$pts,$answ) {
 		}
 		return array($color);
 	} else {
-		for ($i=0; $i<count($answ)-1; $i++) {
-			$answ[$i] = round($answ[$i]*$pts,2);
-		}
-		//adjust for rounding
-		$diff = $pts - array_sum($answ);
-		$answ[count($answ)-1] += $diff;
-		
 		$scarr = explode('~',$sc);
+		if ($noraw) {
+			for ($i=0; $i<count($answ)-1; $i++) {
+				$answ[$i] = round($answ[$i]*$pts,2);
+			}
+			//adjust for rounding
+			$diff = $pts - array_sum($answ);
+			$answ[count($answ)-1] += $diff;
+		} else {
+			$answ = array_fill(0,count($scarr),1);
+		}
+		
 		$out = array();
 		foreach ($scarr as $k=>$v) {
 			if ($answ[$k]==0) {
@@ -413,10 +436,10 @@ function printscore2($sc) {
 //qn: question index in questions array
 //qi: getquestioninfo[qid]
 function scorequestion($qn) { 
-	global $questions,$scores,$seeds,$testsettings,$qi,$attempts,$lastanswers,$isreview,$bestseeds,$bestscores,$bestattempts,$bestlastanswers, $reattempting;
+	global $questions,$scores,$seeds,$testsettings,$qi,$attempts,$lastanswers,$isreview,$bestseeds,$bestscores,$bestattempts,$bestlastanswers, $reattempting, $rawscores, $bestrawscores, $firstrawscores;
 	global $regenonreattempt;
 	//list($qsetid,$cat) = getqsetid($questions[$qn]);
-	$rawscore = scoreq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],$_POST["qn$qn"],$qi[$questions[$qn]]['points']);
+	list($rawscore,$rawscores[$qn]) = scoreq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],$_POST["qn$qn"],$qi[$questions[$qn]]['points']);
 	
 	$afterpenalty = calcpointsafterpenalty($rawscore,$qi[$questions[$qn]],$testsettings,$attempts[$qn]);
 	
@@ -440,6 +463,9 @@ function scorequestion($qn) {
 	} else {
 		$scores[$qn] = $afterpenalty;
 	}
+	if (!$isreview && $attempts[$qn]==0 && strpos($lastanswers[$qn],'##')===false) {
+		$firstrawscores[$qn] = $rawscores[$qn];
+	}
 	
 	//$scores[$qn] = $afterpenalty;
 	$attempts[$qn]++;
@@ -448,29 +474,39 @@ function scorequestion($qn) {
 	if ($loc!==false) {
 		array_splice($reattempting,$loc,1);
 	}
-	
 	if (getpts($scores[$qn])>=getpts($bestscores[$qn]) && !$isreview) {
 		$bestseeds[$qn] = $seeds[$qn];
 		$bestscores[$qn] = $scores[$qn];
+		$bestrawscores[$qn] = $rawscores[$qn];
 		$bestattempts[$qn] = $attempts[$qn];
 		deletefilesifnotused($bestlastanswers[$qn],$lastanswers[$qn]);
 		$bestlastanswers[$qn] = $lastanswers[$qn];
 	}
+	
 	return $rawscore;
 }
 
 //records everything but questions array
 //if limit=true, only records lastanswers
 function recordtestdata($limit=false) { 
-	global $isreview,$bestscores,$bestattempts,$bestseeds,$bestlastanswers,$scores,$attempts,$seeds,$lastanswers,$testid,$testsettings,$sessiondata,$reattempting,$timesontask,$lti_sourcedid,$qi;
-	$bestscorelist = implode(',',$bestscores);
+	global $isreview,$bestscores,$bestattempts,$bestseeds,$bestlastanswers,$scores,$attempts,$seeds,$lastanswers,$testid,$testsettings,$sessiondata,$reattempting,$timesontask,$lti_sourcedid,$qi,$noraw,$rawscores,$bestrawscores,$firstrawscores;
+	
+	if ($noraw) {
+		$bestscorelist = implode(',',$bestscores);
+	} else {
+		$bestscorelist = implode(',',$bestscores).';'.implode(',',$bestrawscores).';'.implode(',',$firstrawscores);
+	}
 	$bestattemptslist = implode(',',$bestattempts);
 	$bestseedslist = implode(',',$bestseeds);
 	$bestlastanswers = str_replace('~','',$bestlastanswers);
 	$bestlalist = implode('~',$bestlastanswers);
 	$bestlalist = addslashes(stripslashes($bestlalist));
 	
-	$scorelist = implode(',',$scores);
+	if ($noraw) {
+		$scorelist = implode(',',$scores);
+	} else {
+		$scorelist = implode(',',$scores).';'.implode(',',$rawscores);
+	}
 	$attemptslist = implode(',',$attempts);
 	$seedslist = implode(',',$seeds);
 	$lastanswers = str_replace('~','',$lastanswers);
@@ -486,7 +522,7 @@ function recordtestdata($limit=false) {
 			$query = "UPDATE imas_assessment_sessions SET reviewlastanswers='$lalist' ";
 		} else {
 			$query = "UPDATE imas_assessment_sessions SET reviewscores='$scorelist',reviewattempts='$attemptslist',reviewseeds='$seedslist',reviewlastanswers='$lalist',";
-			$query .= "endtime=$now,reviewreattempting='$reattemptinglist' ";
+			$query .= "reviewreattempting='$reattemptinglist' ";
 		}
 	} else {
 		if ($limit) {
@@ -612,7 +648,7 @@ function canimproveany() {
 
 //basic show question, for
 function basicshowq($qn,$seqinactive=false,$colors=array()) {
-	global $showansduring,$questions,$testsettings,$qi,$seeds,$showhints,$attempts,$regenonreattempt,$showansafterlast,$showeachscore;
+	global $showansduring,$questions,$testsettings,$qi,$seeds,$showhints,$attempts,$regenonreattempt,$showansafterlast,$showeachscore,$noraw, $rawscores;
 	$qshowansduring = ($showansduring && $qi[$questions[$qn]]['showans']=='0');
 	$qshowansafterlast = (($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J');
 	
@@ -624,6 +660,9 @@ function basicshowq($qn,$seqinactive=false,$colors=array()) {
 	
 	$regen = ((($regenonreattempt && $qi[$questions[$qn]]['regen']==0) || $qi[$questions[$qn]]['regen']==1)&&amreattempting($qn));
 	$thisshowhints = ($qi[$questions[$qn]]['showhints']==2 || ($qi[$questions[$qn]]['showhints']==0 && $showhints));
+	if (!$noraw && $showeachscore && $GLOBALS['questionmanualgrade'] != true) {
+		$colors = scorestocolors($rawscores[$qn], '', '', $noraw);
+	}
 	if (!$seqinactive) {
 		displayq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],$showa,$thisshowhints,$attempts[$qn],false,$regen,$seqinactive,$colors);
 	} else {
