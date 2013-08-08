@@ -15,11 +15,7 @@ html {
 }
 
 /*Link styles*/
-a:link {
-	text-decoration: none;
-	color: #009;
-}
-a:visited {
+a, a:link, a:visited {
 	text-decoration: none;
 	color: #009;
 }
@@ -428,7 +424,7 @@ div#viewbuttoncont a.buttoninactive {
 div#viewbuttoncont a.buttoninactive:hover {
 	background-color: #036;
 }
-a:link.newnote {
+a.newnote, a.newnote:link, a.newnote:visited {
 	color: #f00;
 }
 

@@ -18,14 +18,11 @@ html {
 }
 
 /*Link styles*/
-a:link {
+a, a:link, a:visited {
 	text-decoration: none;
 	color: #009;
 }
-a:visited {
-	text-decoration: none;
-	color: #009;
-}
+
 a:hover {
 	text-decoration: underline;
 }
@@ -433,7 +430,7 @@ div#viewbuttoncont a.buttoninactive:hover {
 div#headerhome, div#homelinkbox {
 	padding-top: 8px;
 }
-a:link.newnote {
+a.newnote, a.newnote:link, a.newnote:visited {
 	color: #f00;
 }
 
