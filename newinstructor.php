@@ -24,7 +24,7 @@
 			$query = "SELECT id FROM imas_users WHERE SID='{$_POST['username']}'";
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			if (mysql_num_rows($result)>0) {
-				echo "<p>Username <b>{$_POST['username']}</b> is already in use.  Please try another</p>\n";
+				echo "<p>Username <b>{$_POST['username']}</b> is already in use.  If you already have an account, use the Forgot Username link on the login page.  Otherwise, please try another username.  </p>\n";
 			} else {
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email) ";
 				$md5pw = md5($_POST['password']);
