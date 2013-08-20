@@ -389,8 +389,9 @@ END;
 		$breadcrumbbase = "<a href=\"$imasroot/index.php\">Home</a> &gt; ";
 	}
 	if (isset($_GET['cid']) && $_GET['cid']!="admin" && $_GET['cid']>0) {
+		$dopayprompt = false;
 		$cid = $_GET['cid'];
-		$query = "SELECT id,locked,timelimitmult,section FROM imas_students WHERE userid='$userid' AND courseid='{$_GET['cid']}'";
+		$query = "SELECT id,locked,timelimitmult,section,lastaccess,stutype,custominfo FROM imas_students WHERE userid='$userid' AND courseid='{$_GET['cid']}'";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$line = mysql_fetch_array($result, MYSQL_ASSOC);
 		if ($line != null) {
@@ -406,7 +407,19 @@ END;
 			} else {
 				$now = time();
 				if (!isset($sessiondata['lastaccess'.$cid])) {
-					$query = "UPDATE imas_students SET lastaccess='$now' WHERE id=$studentid";
+					if ($line['lastaccess']==0 || $line['custominfo']=='') {//first access to course
+						$firstcourseaccess = true;
+						$payprompt = $now+14.5*24*60*60;
+						$custominfo = addslashes(serialize(array('payprompttime'=>$payprompt)));
+						$query = "UPDATE imas_students SET lastaccess='$now',custominfo='$custominfo' WHERE id=$studentid";
+					} else {
+						$custominfo = unserialize($line['custominfo']);
+						if ($line['stutype']==0 && $custominfo['payprompttime']<$now) {
+							$dopayprompt = true;
+							$sessiondata['paypromptcourse'] = $cid;
+						}
+						$query = "UPDATE imas_students SET lastaccess='$now' WHERE id=$studentid";
+					}
 					mysql_query($query) or die("Query failed : " . mysql_error());
 					$sessiondata['lastaccess'.$cid] = $now;
 					$query = "INSERT INTO imas_login_log (userid,courseid,logintime) VALUES ($userid,'$cid',$now)";

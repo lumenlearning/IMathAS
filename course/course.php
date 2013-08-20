@@ -325,6 +325,14 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 }
   
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=081013\"></script>";
+if (isset($dopayprompt) && $dopayprompt ==true) {
+	if ($userid%2==0) {
+		$evenodd = '0';
+	} else {
+		$evenodd = '1';
+	}
+	$placeinhead .= '<script type="text/javascript"> $(function() { GB_show("Contribute","../info/contribute.php?t='.$evenodd.'",600,500);});</script>';
+}	
 
 /******* begin html output ********/
 require("../header.php");
