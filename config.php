@@ -121,6 +121,10 @@ $templateuser = 2;
  $CFG['GEN']['enrollonnewinstructor'] = array(1,11);
  $smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
  $CFG['GEN']['logopad'] = '20px';
+ 
+ $CFG['GEN']['skipbrowsercheck'] = true;
+ 
+ 
  //$studentTOS = "studentTOS.php";
  
 //Math chat disabled 

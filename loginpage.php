@@ -60,7 +60,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 <div class="textright"><a href="<?php echo $imasroot; ?>/forms.php?action=newuser">Register as a new student</a></div>
 <div class="textright"><a href="<?php echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a><br/>
 <a href="<?php echo $imasroot; ?>/forms.php?action=lookupusername">Forgot Username</a></div>
-<div class="textright"><a href="<?php echo $imasroot; ?>/checkbrowser.php">Browser check</a></div>
 <input type="hidden" id="tzoffset" name="tzoffset" value=""> 
 <input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
 <input type="hidden" id="password" name="password" value="" />
