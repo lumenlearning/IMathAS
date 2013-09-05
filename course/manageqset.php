@@ -631,6 +631,8 @@ if ($myrights<20) {
 				$searchlikes = "imas_questionset.description REGEXP '$safesearch' AND ";
 			} else if ($safesearch=='isbroken') {
 				$searchlikes = "imas_questionset.broken=1 AND ";	
+			} else if (substr($safesearch,0,7)=='childof') { 
+				$searchlikes = "imas_questionset.ancestors REGEXP '[[:<:]]".substr($safesearch,8)."[[:>:]]' AND ";	
 			} else {$searchterms = explode(" ",$safesearch);
 				$searchlikes = "((imas_questionset.description LIKE '%".implode("%' AND imas_questionset.description LIKE '%",$searchterms)."%') ";
 				if (substr($safesearch,0,3)=='id=') {
@@ -1082,7 +1084,7 @@ function getnextprev(formn,loc) {
 		echo "<input type=button value=\"Add New Question\" onclick=\"window.location='moddataset.php?cid=$cid'\">\n";
 		echo "</form>";
 		
-		echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
+		echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js?v=082913\"></script>\n";
 		echo "<form id=\"selform\" method=post action=\"manageqset.php?cid=$cid\">\n";
 		//echo "Check/Uncheck All: <input type=\"checkbox\" name=\"ca2\" value=\"1\" onClick=\"chkAll(this.form, 'nchecked[]', this.checked)\">\n";
 		echo 'Check: <a href="#" onclick="return chkAllNone(\'selform\',\'nchecked[]\',true)">All</a> <a href="#" onclick="return chkAllNone(\'selform\',\'nchecked[]\',false)">None</a> ';
@@ -1144,8 +1146,8 @@ function getnextprev(formn,loc) {
 
 		echo "</tbody></table>\n";
 		echo "<script type=\"text/javascript\">\n";
-		echo "initSortTable('myTable',Array(false,'S',false,false,'S','N','D'";
-		echo ",'S'";
+		echo "initSortTable('myTable',Array(false,'S',false,false,false,'S','N','D'";
+		echo ",'S',false";
 		echo "),true);\n";
 		echo "</script>\n";
 		echo "</form>\n";
