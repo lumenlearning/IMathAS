@@ -169,6 +169,26 @@ switch($_GET['action']) {
 			}
 		}      
 		
+		if (isset($CFG['CPS']['deftime']) && $CFG['CPS']['deftime'][1]==0) {
+			$deftime = $CFG['CPS']['deftime'][0];
+		} else {
+			preg_match('/(\d+)\s*:(\d+)\s*(\w+)/',$_POST['deftime'],$tmatches);
+			if (count($tmatches)==0) {
+				preg_match('/(\d+)\s*([a-zA-Z]+)/',$_POST['deftime'],$tmatches);
+				$tmatches[3] = $tmatches[2];
+				$tmatches[2] = 0;
+			}
+			$tmatches[1] = $tmatches[1]%12;
+			if($tmatches[3]=="pm") {$tmatches[1]+=12; }
+			$deftime = $tmatches[1]*60 + $tmatches[2];
+		}
+		
+		if (isset($CFG['CPS']['deflatepass']) && $CFG['CPS']['deflatepass'][1]==0) {
+			$deflatepass = $CFG['CPS']['deflatepass'][0];
+		} else {
+			$deflatepass = intval($_POST['deflatepass']);
+		}
+		
 		if (isset($CFG['CPS']['showlatepass']) && $CFG['CPS']['showlatepass'][1]==0) {
 			$showlatepass = intval($CFG['CPS']['showlatepass'][0]);
 		} else {
@@ -231,14 +251,14 @@ switch($_GET['action']) {
 		
 		if ($_GET['action']=='modify') {
 			$query = "UPDATE imas_courses SET name='{$_POST['coursename']}',enrollkey='{$_POST['ekey']}',hideicons='$hideicons',available='$avail',lockaid='{$_POST['lockaid']}',picicons='$picicons',chatset=$chatset,showlatepass=$showlatepass,";
-			$query .= "allowunenroll='$unenroll',copyrights='$copyrights',msgset='$msgset',toolset='$toolset',topbar='$topbar',cploc='$cploc',theme='$theme',ltisecret='{$_POST['ltisecret']}',istemplate=$istemplate WHERE id='{$_GET['id']}'";
+			$query .= "allowunenroll='$unenroll',copyrights='$copyrights',msgset='$msgset',toolset='$toolset',topbar='$topbar',cploc='$cploc',theme='$theme',ltisecret='{$_POST['ltisecret']}',istemplate=$istemplate,deftime='$deftime',deflatepass='$deflatepass' WHERE id='{$_GET['id']}'";
 			if ($myrights<75) { $query .= " AND ownerid='$userid'";}
 			mysql_query($query) or die("Query failed : " . mysql_error());
 		} else {
 			$blockcnt = 1;
 			$itemorder = addslashes(serialize(array()));
-			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,chatset,showlatepass,itemorder,topbar,cploc,available,istemplate,theme,ltisecret,blockcnt) VALUES ";
-			$query .= "('{$_POST['coursename']}','$userid','{$_POST['ekey']}','$hideicons','$picicons','$unenroll','$copyrights','$msgset',$toolset,$chatset,$showlatepass,'$itemorder','$topbar','$cploc','$avail',$istemplate,'$theme','{$_POST['ltisecret']}','$blockcnt');";
+			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,chatset,showlatepass,itemorder,topbar,cploc,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt) VALUES ";
+			$query .= "('{$_POST['coursename']}','$userid','{$_POST['ekey']}','$hideicons','$picicons','$unenroll','$copyrights','$msgset',$toolset,$chatset,$showlatepass,'$itemorder','$topbar','$cploc','$avail',$istemplate,'$deftime','$deflatepass','$theme','{$_POST['ltisecret']}','$blockcnt');";
 			mysql_query($query) or die("Query failed : " . mysql_error());
 			$cid = mysql_insert_id();
 			//if ($myrights==40) {
@@ -287,6 +307,16 @@ switch($_GET['action']) {
 				}
 				$ancestors = addslashes($ancestors);
 				$outcomes = array();
+				
+				$query = 'SELECT imas_questionset.id,imas_questionset.replaceby FROM imas_questionset JOIN ';
+				$query .= 'imas_questions ON imas_questionset.id=imas_questions.questionsetid JOIN ';
+				$query .= 'imas_assessments ON imas_assessments.id=imas_questions.assessmentid WHERE ';
+				$query .= "imas_assessments.courseid='{$_POST['usetemplate']}' AND imas_questionset.replaceby>0";
+				$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
+				while ($row = mysql_fetch_row($result)) {
+					$replacebyarr[$row[0]] = $row[1];  
+				}
+				
 				if ($outcomesarr!='') {
 					$query = "SELECT id,name,ancestors FROM imas_outcomes WHERE courseid='{$_POST['usetemplate']}'";
 					$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
@@ -318,7 +348,8 @@ switch($_GET['action']) {
 				} else {
 					$newoutcomearr = '';
 				}
-				
+				$removewithdrawn = true;
+				$usereplaceby = "all";
 				$newitems = array();
 				require("../includes/copyiteminc.php");
 				copyallsub($items,'0',$newitems,$gbcats);

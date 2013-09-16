@@ -1065,7 +1065,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$out .= '</ul></div><div class="match"><ul class=nomark>';
 				}
 			}
-			$out .= '<li>';
+			if (strpos($questions[$randqkeys[$i]],' ')===false || strlen($questions[$randqkeys[$i]])<12) {
+				$out .= '<li class="nowrap">';
+			} else {
+				$out .= '<li>';
+			}
 			$out .= "<select name=\"qn$qn-$i\">";
 			$out .= '<option value="-" ';
 			if ($las[$i]=='-' || $las[$i]=='') {
@@ -1089,7 +1093,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$out .= ">$v</option>";
 				}
 			}
-			$out .= "</select> {$questions[$randqkeys[$i]]}</li>\n";
+			$out .= "</select>&nbsp;{$questions[$randqkeys[$i]]}</li>\n";
 		}
 		$out .= "</ul>\n";
 		$out .= "</div>";
@@ -1610,7 +1614,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "<select name=\"qn$qn\" id=\"qn$qn\" style=\"margin-right:20px\" class=\"$colorbox\"><option value=\"\"> </option>";
 			foreach ($questions as $i=>$v) {
 				$out .= '<option value="'.htmlentities($v).'"';
-				if ($v==$la) {
+				//This is a hack.  Need to figure a better way to deal with & in answers
+				if (str_replace('&','',$v)==$la) {
 					$out .= ' selected="selected"';
 				}
 				$out .= '>'.htmlentities($v).'</option>';
@@ -2409,7 +2414,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 										$v = -1*floor(-log10(abs($anans))-1e-12) - $reqsigfigs;
 									}
 									//this line will reject 0.25 if the answer is 0.250 with 3 sigfigs
-									if ($anans != 0 && $v < 0 && strlen($givenans) - strpos($givenans,'.')-1 + $v < 0) { continue; } //not enough decimal places
+									$gadploc = strpos($givenans,'.');
+									if ($gadploc===false) {$gadploc = strlen($givenans);}
+									if ($anans != 0 && $v < 0 && strlen($givenans) - $gadploc-1 + $v < 0) { continue; } //not enough decimal places
 									
 									if (abs($anans-$givenans)< pow(10,$v)/2+1E-12) {$correct += 1; $foundloc = $j; break 2;}
 								} else {
