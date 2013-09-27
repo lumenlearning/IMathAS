@@ -75,6 +75,7 @@ $templateuser = 2;
  //can set almost any assessment setting this way
  $CFG['AMS']['defpoints'] = 1;
  $CFG['AMS']['showtips'] = 2;
+ $CFG['AMS']['eqnhelper'] = 4;
 
  $CFG['AMS']['guesslib'] = true;
 	 

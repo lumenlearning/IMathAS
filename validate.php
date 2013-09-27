@@ -414,11 +414,11 @@ END;
 						$custominfo = addslashes(serialize(array('payprompttime'=>$payprompt)));
 						$query = "UPDATE imas_students SET lastaccess='$now',custominfo='$custominfo' WHERE id=$studentid";
 					} else {
-						$custominfo = unserialize($line['custominfo']);
+						/*$custominfo = unserialize($line['custominfo']);
 						if ($line['stutype']==0 && $custominfo['payprompttime']<$now) {
 							$dopayprompt = true;
 							$sessiondata['paypromptcourse'] = $cid;
-						}
+						}*/
 						$query = "UPDATE imas_students SET lastaccess='$now' WHERE id=$studentid";
 					}
 					mysql_query($query) or die("Query failed : " . mysql_error());
