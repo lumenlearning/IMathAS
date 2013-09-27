@@ -324,7 +324,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	}
 }
   
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=081013\"></script>";
+$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=092413\"></script>";
 if (isset($dopayprompt) && $dopayprompt ==true) {
 	if ($userid%2==0) {
 		$evenodd = '0';
