@@ -78,13 +78,16 @@
 	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
 	
 	echo "<h3>New Instructor Account Request</h3>\n";
+	echo '<p>Note: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges. ';
+	echo 'MyOpenMath does not currently provide instructor accounts to parents, home-schools, or tutors. MyOpenMath is only intended for use with children and adults over ';
+	echo 'the age of 13.</p>';
 	echo "<form method=post action=\"newinstructor.php\" onsubmit=\"return passwordchk();\">\n";
 	echo "<span class=form>First Name</span><span class=formright><input type=text name=firstname value=\"$firstname\" size=40></span><br class=form />\n";
 	echo "<span class=form>Last Name</span><span class=formright><input type=text name=lastname value=\"$lastname\" size=40></span><br class=form />\n";
 	echo "<span class=form>Email Address</span><span class=formright><input type=text name=email value=\"$email\" size=40></span><br class=form />\n";
 	echo "<span class=form>Phone Number</span><span class=formright><input type=text name=phone value=\"$phone\" size=40></span><br class=form />\n";
 	echo "<span class=form>School &amp; District / College</span><span class=formright><input type=text name=school value=\"$school\" size=40></span><br class=form />\n";
-	echo "<span class=form>Web address at which your instructor status can be verified</span><span class=formright><input type=text name=verurl value=\"$verurl\" size=40></span><br class=form />\n";
+	echo "<span class=form>Web page where your instructor status can be verified (e.g., a school directory)</span><span class=formright><input type=text name=verurl value=\"$verurl\" size=40></span><br class=form />\n";
 	
 	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=formright><input type=text name=username value=\"$username\" size=40></span><br class=form />\n";
 	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";

@@ -263,6 +263,7 @@ div#headerbarlogo {
 	/*background: transparent url(../img/otbslogo.gif) no-repeat scroll left bottom;*/
 	padding-top: 10px;
 	height: 60px;
+	overflow: hidden;
 }
 div#headerbarlogo img {
 	vertical-align: -60%;
