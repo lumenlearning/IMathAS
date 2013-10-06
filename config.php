@@ -3,60 +3,119 @@
 
 //path settings
 //web path to install
-$imasroot = "";
 
-//database access settings
-$AWSkey = getenv('AWS_ACCESS_KEY_ID');
-$AWSsecret = getenv('AWS_SECRET_KEY');
-$AWSbucket = getenv('PARAM1');
-$dbserver = getenv('PARAM2');
-$dbname = getenv('PARAM3');
-$dbusername = getenv('PARAM4');
-$dbpassword = getenv('PARAM5');
-if (getenv('imasroot')!==false) {
-	$imasroot = getenv('imasroot');
-}
-$CFG['GEN']['AWSforcoursefiles'] = true;
-
-//install name
-$installname = "MyOpenMath";
-
-//login prompts
-$loginprompt = "Username";
-$longloginprompt = "Enter a username.  Use only numbers, letters, or the _ character.";
-$loginformat = '/^\w+$/';
-
-//require email confirmation of new users?
-$emailconfirmation = false;
-
-//email to send notices from
-$sendfrom = "do-not-reply@myopenmath.com";
-$accountapproval = "admin@myopenmath.com";
-
-
-//color shift icons as deadline approaches?
-$colorshift = true;
-
-
-
-//mimetex path
+/*** common config ***/
 $mathimgurl = "/cgi-bin/mimetex.cgi";
+$imasroot = "";
+$allowmacroinstall = false;
+$CFG['GEN']['AWSforcoursefiles'] = true;
+//do safe course delete
+$CFG['GEN']['doSafeCourseDelete'] = true;
+  
+if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
+ /*** WAMAP.org config ***/	
 
-//enable lti?
-$enablebasiclti = true;
+  $AWSkey = getenv('AWS_ACCESS_KEY_ID');
+  $AWSsecret = getenv('AWS_SECRET_KEY');  
+  $AWSbucket = getenv('PARAM1');  //SWITCH to 'wamapdata'
+  $dbserver = getenv('PARAM2');
+  $dbname = getenv('PARAM3');  //SWITCH to 'wamap'
+  $dbusername = getenv('PARAM4');
+  $dbpassword = getenv('PARAM5');
+  if (getenv('imasroot')!==false) {
+	$imasroot = getenv('imasroot');
+  }
 
-//allow nongroup libs?
-$allownongrouplibs = false;
+ 
+  $CFG['GEN']['directaccessincludepath'] = 'wamap/';
+  $CFG['GEN']['diagincludepath'] = '../wamap/';
+  $loginpage = '"wamap/loginpage.php';
+ 
+ 	
+  $installname = "WAMAP";
+  $longloginprompt = "Enter a username.  Use only numbers, letters, or the _ character.";
+  $loginprompt = "Username";
+  $loginformat = '/^\w+$/';  //A-Z, a-z, 0-9, _ are the only allowed characters
+  $emailconfirmation = false;
+  $sendfrom = "do-not-reply@wamap.org";
+  $newacctemail = "imathas@wamap.org";
+  $colorshift = true;
+  $smallheaderlogo = '<img src="/wamap/img/wamaplogosmall.gif"/>';
+  $allownongrouplibs = false;
+  $allowcourseimport = false;
+  $enablebasiclti = true;
+  $mathchaturl = "http://www.imathas.com/cur/mathchat/index.php";
+  
+  //user for course templates
+  $templateuser = 890;
+  
+  //special configs
+  $CFG['GEN']['allowInstrImportStuByName'] = false;
+  $CFG['CPS']['cploc'] = array(3,1);
+  $CFG['CPS']['picicons'] =  array(1,1);
+  $CFG['GBS']['orderby'] = 1;
+  $CFG['AMS']['showtips'] = 2;
+  $CFG['AMS']['eqnhelper'] = 4;
+  $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
+  $CFG['GEN']['allowteacherexport'] = 1;
+  $CFG['GEN']['LTIorgid'] = 'www.wamap.org';
+  
+  $CFG['CPS']['chatset'] = array(0,0);
+  
+   //and most of the gradebook settings
+  $CFG['GBS']['defgbmode'] = 1011;
+  $CFG['GBS']['orderby'] = 1;
+ 
+  $CFG['GEN']['skipbrowsercheck'] = true;
+  
+/*** end WAMAP.org config ***/	
+} else {
+	
+/*** MyOpenMath config ***/
 
-//allow course import of questions?
-$allowcourseimport = false;
+  //database access settings
+  $AWSkey = getenv('AWS_ACCESS_KEY_ID');
+  $AWSsecret = getenv('AWS_SECRET_KEY');
+  $AWSbucket = getenv('PARAM1');
+  $dbserver = getenv('PARAM2');
+  $dbname = getenv('PARAM3');
+  $dbusername = getenv('PARAM4');
+  $dbpassword = getenv('PARAM5');
+  if (getenv('imasroot')!==false) {
+	$imasroot = getenv('imasroot');
+  }
 
-//allow macro install?
-$allowmacroinstall = true;
 
-$templateuser = 2;
+  //install name
+  $installname = "MyOpenMath";
 
-//userid for instructor on student self-enroll courses
+  //login prompts
+  $loginprompt = "Username";
+  $longloginprompt = "Enter a username.  Use only numbers, letters, or the _ character.";
+  $loginformat = '/^\w+$/';
+
+  //require email confirmation of new users?
+  $emailconfirmation = false;
+
+  //email to send notices from
+  $sendfrom = "do-not-reply@myopenmath.com";
+  $accountapproval = "admin@myopenmath.com";
+
+  //color shift icons as deadline approaches?
+  $colorshift = true;
+
+  //enable lti?
+  $enablebasiclti = true;
+
+  //allow nongroup libs?
+  $allownongrouplibs = false;
+
+  //allow course import of questions?
+  $allowcourseimport = false;
+
+  $templateuser = 2;
+
+  //userid for instructor on student self-enroll courses
  $CFG['GEN']['selfenrolluser'] = 13;
 
  //allow instructors to create student accounts?
@@ -68,9 +127,6 @@ $templateuser = 2;
  $CFG['GEN']['homelayout'] = '|0,1,2|10,11|0,1';
  $CFG['GEN']['headerinclude'] = "headercontent.php";
  $CFG['GEN']['headerscriptinclude'] = "momga.js";
- 
- //do safe course delete
- $CFG['GEN']['doSafeCourseDelete'] = true;
 	 
  //can set almost any assessment setting this way
  $CFG['AMS']['defpoints'] = 1;
@@ -125,15 +181,14 @@ $templateuser = 2;
  
  $CFG['GEN']['skipbrowsercheck'] = true;
  
- 
- //$studentTOS = "studentTOS.php";
- 
-//Math chat disabled 
-//$mathchaturl = "$imasroot/mathchat/index.php";
+ /*** end MyOpenMath config ***/
+}
 
 //session path 
 //$sessionpath = "";
 
+ ini_set("upload_max_filesize", "10485760");
+ ini_set("post_max_size", "10485760");
  error_reporting(0);
 
 

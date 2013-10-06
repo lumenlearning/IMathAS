@@ -7,7 +7,7 @@ $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\
 	
 	require("../header.php");
 	$pagetitle = "Documentation";
-	require("../infoheader.php");
+	require((isset($CFG['GEN']['diagincludepath'])?$CFG['GEN']['diagincludepath']:'../')."infoheader.php");
 ?>
 
 <h2>Guides</h2>
