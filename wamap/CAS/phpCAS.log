@@ -1,0 +1,295 @@
+0155 .START ****************** [CAS.php:414]
+0155 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '', false) [tcclaunch.php:259]
+0155 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '', false) [CAS.php:315]
+0155 .|    <= ''
+0155 .<= ''
+0155 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+0155 .<= ''
+0155 .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+0155 .|    => CASClient::checkAuthentication() [CAS.php:884]
+0155 .|    |    => CASClient::isAuthenticated() [client.php:732]
+0155 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+0155 .|    |    |    |    no user found [client.php:895]
+0155 .|    |    |    <= false
+0155 .|    |    |    no ticket found [client.php:825]
+0155 .|    |    <= false
+0155 .|    |    user is not authenticated (cache reset) [client.php:767]
+0155 .|    |    => CASClient::redirectToCas(true) [client.php:768]
+0155 .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+0155 .|    |    |    |    => CASClient::getURL() [client.php:331]
+0155 .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php'
+0155 .|    |    |    <= 'https://my.tacomacc.edu:443/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true'
+0155 .|    |    |    Redirect to : https://my.tacomacc.edu:443/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true
+0155 .|    |    |    exit()
+0155 .|    |    |    -
+0155 .|    |    -
+0155 .|    -
+7800 .START ****************** [CAS.php:414]
+7800 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, 'cas', false) [tcclaunch.php:259]
+7800 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, 'cas', false) [CAS.php:315]
+7800 .|    <= ''
+7800 .<= ''
+7800 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+7800 .<= ''
+7800 .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+7800 .|    => CASClient::checkAuthentication() [CAS.php:884]
+7800 .|    |    => CASClient::isAuthenticated() [client.php:732]
+7800 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+7800 .|    |    |    |    no user found [client.php:895]
+7800 .|    |    |    <= false
+7800 .|    |    |    no ticket found [client.php:825]
+7800 .|    |    <= false
+7800 .|    <= false
+7800 .<= false
+7800 .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+7800 .exit()
+44FF .START ****************** [CAS.php:414]
+44FF .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+44FF .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+44FF .|    <= ''
+44FF .<= ''
+44FF .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+44FF .<= ''
+44FF .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+44FF .|    => CASClient::checkAuthentication() [CAS.php:884]
+44FF .|    |    => CASClient::isAuthenticated() [client.php:732]
+44FF .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+44FF .|    |    |    |    no user found [client.php:895]
+44FF .|    |    |    <= false
+44FF .|    |    |    no ticket found [client.php:825]
+44FF .|    |    <= false
+44FF .|    |    user is not authenticated (cache reset) [client.php:767]
+44FF .|    |    => CASClient::redirectToCas(true) [client.php:768]
+44FF .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+44FF .|    |    |    |    => CASClient::getURL() [client.php:331]
+44FF .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php'
+44FF .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true'
+44FF .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true
+44FF .|    |    |    exit()
+44FF .|    |    |    -
+44FF .|    |    -
+44FF .|    -
+172A .START ****************** [CAS.php:414]
+172A .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+172A .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+172A .|    <= ''
+172A .<= ''
+172A .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+172A .<= ''
+172A .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+172A .|    => CASClient::checkAuthentication() [CAS.php:884]
+172A .|    |    => CASClient::isAuthenticated() [client.php:732]
+172A .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+172A .|    |    |    |    no user found [client.php:895]
+172A .|    |    |    <= false
+172A .|    |    |    no ticket found [client.php:825]
+172A .|    |    <= false
+172A .|    <= false
+172A .<= false
+172A .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+172A .exit()
+ED23 .START ****************** [CAS.php:414]
+ED23 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+ED23 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+ED23 .|    <= ''
+ED23 .<= ''
+ED23 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+ED23 .<= ''
+ED23 .=> phpCAS::forceAuthentication() [tcclaunch.php:268]
+ED23 .|    => CASClient::forceAuthentication() [CAS.php:911]
+ED23 .|    |    => CASClient::isAuthenticated() [client.php:686]
+ED23 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+ED23 .|    |    |    |    no user found [client.php:895]
+ED23 .|    |    |    <= false
+ED23 .|    |    |    no ticket found [client.php:825]
+ED23 .|    |    <= false
+ED23 .|    |    => CASClient::redirectToCas(false) [client.php:695]
+ED23 .|    |    |    => CASClient::getServerLoginURL(false, false) [client.php:912]
+ED23 .|    |    |    |    => CASClient::getURL() [client.php:331]
+ED23 .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php?login=true'
+ED23 .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php%3Flogin%3Dtrue'
+ED23 .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php%3Flogin%3Dtrue
+ED23 .|    |    |    exit()
+ED23 .|    |    |    -
+ED23 .|    |    -
+ED23 .|    -
+B96C .START ****************** [CAS.php:414]
+B96C .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+B96C .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+B96C .|    <= ''
+B96C .<= ''
+B96C .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+B96C .<= ''
+B96C .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+B96C .|    => CASClient::checkAuthentication() [CAS.php:884]
+B96C .|    |    => CASClient::isAuthenticated() [client.php:732]
+B96C .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+B96C .|    |    |    |    no user found [client.php:895]
+B96C .|    |    |    <= false
+B96C .|    |    |    no ticket found [client.php:825]
+B96C .|    |    <= false
+B96C .|    |    user is not authenticated (cache reset) [client.php:767]
+B96C .|    |    => CASClient::redirectToCas(true) [client.php:768]
+B96C .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+B96C .|    |    |    |    => CASClient::getURL() [client.php:331]
+B96C .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php'
+B96C .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true'
+B96C .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true
+B96C .|    |    |    exit()
+B96C .|    |    |    -
+B96C .|    |    -
+B96C .|    -
+AC93 .START ****************** [CAS.php:414]
+AC93 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+AC93 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+AC93 .|    <= ''
+AC93 .<= ''
+AC93 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+AC93 .<= ''
+AC93 .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+AC93 .|    => CASClient::checkAuthentication() [CAS.php:884]
+AC93 .|    |    => CASClient::isAuthenticated() [client.php:732]
+AC93 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+AC93 .|    |    |    |    no user found [client.php:895]
+AC93 .|    |    |    <= false
+AC93 .|    |    |    no ticket found [client.php:825]
+AC93 .|    |    <= false
+AC93 .|    <= false
+AC93 .<= false
+AC93 .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+AC93 .exit()
+D8E9 .START ****************** [CAS.php:414]
+D8E9 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+D8E9 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+D8E9 .|    <= ''
+D8E9 .<= ''
+D8E9 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+D8E9 .<= ''
+D8E9 .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+D8E9 .|    => CASClient::checkAuthentication() [CAS.php:884]
+D8E9 .|    |    => CASClient::isAuthenticated() [client.php:732]
+D8E9 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+D8E9 .|    |    |    |    no user found [client.php:895]
+D8E9 .|    |    |    <= false
+D8E9 .|    |    |    no ticket found [client.php:825]
+D8E9 .|    |    <= false
+D8E9 .|    |    user is not authenticated (cache reset) [client.php:767]
+D8E9 .|    |    => CASClient::redirectToCas(true) [client.php:768]
+D8E9 .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+D8E9 .|    |    |    |    => CASClient::getURL() [client.php:331]
+D8E9 .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php'
+D8E9 .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true'
+D8E9 .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true
+D8E9 .|    |    |    exit()
+D8E9 .|    |    |    -
+D8E9 .|    |    -
+D8E9 .|    -
+ABC2 .START ****************** [CAS.php:414]
+ABC2 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:259]
+ABC2 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+ABC2 .|    <= ''
+ABC2 .<= ''
+ABC2 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:262]
+ABC2 .<= ''
+ABC2 .=> phpCAS::checkAuthentication() [tcclaunch.php:272]
+ABC2 .|    => CASClient::checkAuthentication() [CAS.php:884]
+ABC2 .|    |    => CASClient::isAuthenticated() [client.php:732]
+ABC2 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+ABC2 .|    |    |    |    no user found [client.php:895]
+ABC2 .|    |    |    <= false
+ABC2 .|    |    |    no ticket found [client.php:825]
+ABC2 .|    |    <= false
+ABC2 .|    <= false
+ABC2 .<= false
+ABC2 .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+ABC2 .exit()
+8FAB .START ****************** [CAS.php:414]
+8FAB .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:261]
+8FAB .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+8FAB .|    <= ''
+8FAB .<= ''
+8FAB .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:264]
+8FAB .<= ''
+8FAB .=> phpCAS::checkAuthentication() [tcclaunch.php:274]
+8FAB .|    => CASClient::checkAuthentication() [CAS.php:884]
+8FAB .|    |    => CASClient::isAuthenticated() [client.php:732]
+8FAB .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+8FAB .|    |    |    |    no user found [client.php:895]
+8FAB .|    |    |    <= false
+8FAB .|    |    |    no ticket found [client.php:825]
+8FAB .|    |    <= false
+8FAB .|    |    user is not authenticated (cache reset) [client.php:767]
+8FAB .|    |    => CASClient::redirectToCas(true) [client.php:768]
+8FAB .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+8FAB .|    |    |    |    => CASClient::getURL() [client.php:331]
+8FAB .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php'
+8FAB .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true'
+8FAB .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true
+8FAB .|    |    |    exit()
+8FAB .|    |    |    -
+8FAB .|    |    -
+8FAB .|    -
+3962 .START ****************** [CAS.php:414]
+3962 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:261]
+3962 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+3962 .|    <= ''
+3962 .<= ''
+3962 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:264]
+3962 .<= ''
+3962 .=> phpCAS::checkAuthentication() [tcclaunch.php:274]
+3962 .|    => CASClient::checkAuthentication() [CAS.php:884]
+3962 .|    |    => CASClient::isAuthenticated() [client.php:732]
+3962 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+3962 .|    |    |    |    no user found [client.php:895]
+3962 .|    |    |    <= false
+3962 .|    |    |    no ticket found [client.php:825]
+3962 .|    |    <= false
+3962 .|    <= false
+3962 .<= false
+3962 .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+3962 .exit()
+1579 .START ****************** [CAS.php:414]
+1579 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:261]
+1579 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+1579 .|    <= ''
+1579 .<= ''
+1579 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:264]
+1579 .<= ''
+1579 .=> phpCAS::checkAuthentication() [tcclaunch.php:274]
+1579 .|    => CASClient::checkAuthentication() [CAS.php:884]
+1579 .|    |    => CASClient::isAuthenticated() [client.php:732]
+1579 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+1579 .|    |    |    |    no user found [client.php:895]
+1579 .|    |    |    <= false
+1579 .|    |    |    no ticket found [client.php:825]
+1579 .|    |    <= false
+1579 .|    |    user is not authenticated (cache reset) [client.php:767]
+1579 .|    |    => CASClient::redirectToCas(true) [client.php:768]
+1579 .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+1579 .|    |    |    |    => CASClient::getURL() [client.php:331]
+1579 .|    |    |    |    <= 'http://localhost/imathas/CAS/tcclaunch.php'
+1579 .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true'
+1579 .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fimathas%2FCAS%2Ftcclaunch.php&gateway=true
+1579 .|    |    |    exit()
+1579 .|    |    |    -
+1579 .|    |    -
+1579 .|    -
+EBA1 .START ****************** [CAS.php:414]
+EBA1 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:261]
+EBA1 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+EBA1 .|    <= ''
+EBA1 .<= ''
+EBA1 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:264]
+EBA1 .<= ''
+EBA1 .=> phpCAS::checkAuthentication() [tcclaunch.php:274]
+EBA1 .|    => CASClient::checkAuthentication() [CAS.php:884]
+EBA1 .|    |    => CASClient::isAuthenticated() [client.php:732]
+EBA1 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+EBA1 .|    |    |    |    no user found [client.php:895]
+EBA1 .|    |    |    <= false
+EBA1 .|    |    |    no ticket found [client.php:825]
+EBA1 .|    |    <= false
+EBA1 .|    <= false
+EBA1 .<= false
+EBA1 .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+EBA1 .exit()
