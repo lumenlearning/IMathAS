@@ -31,5 +31,5 @@ RewriteCond %{REQUEST_URI} ^(/|/index\.php)$
 RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 
 RewriteCond %{HTTP_HOST} wamap\.org
-RewriteCond %{REQUEST_URI} ^(/CAS/|/cmpt/|/projects/|/PCA.html|/evergreen.php|/renton.php|/flashcards.php|/verifyuser.php|/testit.php)
+RewriteCond %{REQUEST_URI} ^(/CAS/|/cmpt/|/projects/|/PCA.html|/evergreen.php|/renton.php|/flashcards.php|/verifyuser.php|/favicon.ico)
 RewriteRule ^(.*)$ /wamap/$1
