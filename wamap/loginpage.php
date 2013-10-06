@@ -20,7 +20,10 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		 $_SESSION['challenge'] = $challenge;
 	 }
 	 $pagetitle = "About Us";
-	 include("infoheader.php");
+	 
+	 $wamapdir = rtrim(dirname(__FILE__), '/\\');
+	 
+	 include("$wamapdir/infoheader.php");
 	 
 	 $pref = 0;
 	 if (isset($_COOKIE['mathgraphprefs'])) {

@@ -1,10 +1,10 @@
 <?php
 	
-	require("config.php");
+	require("../config.php");
 	$pagetitle = "New instructor account request";
-	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
+	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 	$nologo = true;
-	require("header.php");
+	require("../header.php");
 	$pagetitle = "Instructor Account Request";
 	require("infoheader.php");
 
@@ -99,5 +99,5 @@
 	echo "<p><em>If you create questions, assignments, or courses and set them to be available for use by other instructors, through that action you are ";
 	echo "granting explicit rights for other instructors to use, copy, and redistribute modifications of your items to other instructors without compensation or attribution. ";
 	echo "This includes redistribution to other non-commercial installations of the IMathAS software.</em></p>";
-	require("footer.php");
+	require("../footer.php");
 ?>

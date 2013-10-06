@@ -41,34 +41,13 @@ continues to grow with contributions from our users.  Thanks to all of you!</p>
   and <a href="http://www.pierce.ctc.edu">Pierce College</a></p>
 <p class="ind">Special thanks to all the users who have contributed suggestions for improvement!</p>
 <p class="ind">IMathAS is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GNU Public License</a></p>
-<p class="ind">IMathAS makes use of:
-<ul>
-<li>ASCIIMathML and ASCIIsvg, (c) <a href="http://www.chapman.edu/~jipsen">Peter Jipsen</a></li>
-<li>TinyMCE,  (c) 2003-2008 <a href="http://tinymce.moxiecode.com/">Moxiecode Systems AB</a></li>
-<li>AsciiMath and AsciiSvg Plugins for TinyMCE, (c) 2008 David Lippman</li>
-<li>CalendarPopup, (c) 2005 <a href="http://www.nsftools.com">Julian Robichaux</a></li>
-<li>Color Picker, (c) <a href="http://www.webreference.com/programming/javascript/mk/column3/index.html">Mark Kahn</a></li>
-<li>Form Validator, (c) Martin Honnen</li>
-<li>Table Sorter, (c) <a href="http://www.dhtmlgoodies.com">www.dhtmlgoodies.com</a>, November 2005</li>
-<li>Crystal Icons, <a href="http://www.everaldo.com/crystal/">Crystal Project</a></li>
-<li>htmLawed, (c) <a href="http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/">Santosh Patnaik</a></li>
-<li>S3 library, (c) 2007-2008, Donovan Schonknecht</li>
-<li>MD5 JS, (c) Paul Johnston 1999 - 2002.</li>
-<li>Nested tree (c) 2007 <a href="http://www.clanccc.co.uk/moo/nested.html">CrazyDave</a></li>
-<li>Mootools, (c) 2006 Valerio Proietti</li>
-<li>excanvas, (c) 2006 Google inc</li>
-<li>TinyMCE file manager, (c) TadejK</li>
-<li>Viewer.class used by plot3d library (c) David Lippman, based on code by Evgeny Demidov</li>
-</ul>
-</p>
-
 
 <h4>Web Design</h4>
 <p class="ind">Info pages web design by Doug Thayer</p>
 <p class="ind">Photos used on this website from <a href="http://www.sxc.hu">stock.xchng</a></p>
 
 <h4>Web Hosting</h4>
-<p class="ind">Hosting provided by <a href="http://www.adhost.com">AdHost</a></p>
+<p class="ind">Hosting provided by <a href="http://lumenlearning.com">Lumen Learning</a></p>
 
 
 </div>

@@ -29,7 +29,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  
   $CFG['GEN']['directaccessincludepath'] = 'wamap/';
   $CFG['GEN']['diagincludepath'] = '../wamap/';
-  $loginpage = '"wamap/loginpage.php';
+  $loginpage = 'wamap/loginpage.php';
  
  	
   $installname = "WAMAP";
@@ -172,6 +172,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 
  $CFG['GEN']['guesttempaccts'] = array(518);
  
+ $CFG['GEN']['hidedefindexmenu'] = true;
  $CFG['GEN']['forcecanvashttps'] = true;
  $CFG['GEN']['addwww'] = true;
  $CFG['GEN']['TOSpage'] = $imasroot.'/termsofuse.php';
