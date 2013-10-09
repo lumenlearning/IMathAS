@@ -167,6 +167,16 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 	 'wrong'=>'te_red_ex.png',
 	 'partial'=>'te_yellow_check.png');
 
+ $CFG['CPS']['miniicons'] = array( 
+ 	 'assess'=>'assess_tiny.png',
+ 	 'drill'=>'assess_tiny.png',
+ 	 'inline'=>'inline_tiny.png',
+ 	 'linked'=>'html_tiny.png',
+ 	 'forum'=>'forum_tiny.png',
+ 	 'wiki'=>'wiki_tiny.png',
+ 	 'folder'=>'folder_tiny.png',
+ 	 'calendar'=>'1day.png');
+ 	 
  $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
  $CFG['GEN']['badgebase'] = 'badgebasemom.png';
 
