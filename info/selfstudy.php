@@ -35,12 +35,7 @@ logging in.</p>
   <li>Trigonometry, using the <a href="http://gan.doubleclick.net/gan_click?lid=41000613802022394&pubid=21000000000357812">CK12/Sousa</a> textbook</li>
 </ul>
 </p>
-
-<p>Coming soon we will have self-study courses for:
-<ul>
-  <li>Arithmetic (Dev Math 1), using the NROC textbook</li>
-</ul>
-</p>  
+ 
 </div>
 
 </body>

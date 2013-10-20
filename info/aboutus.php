@@ -12,12 +12,22 @@ require("../infoheader.php");
 <div class="content">
 <h2>What is MyOpenMath?</h2>
 
-<p>MyOpenMath runs on the free, open source, <a href="http://www.imathas.com">IMathAS</a> platform, providing
+<p>MyOpenMath runs on the open source, <a href="http://www.imathas.com">IMathAS</a> platform, providing
 free hosted use of this platform in support of free, open textbooks like the
 ones listed on <a href="http://www.opentextbookstore.com/">OpenTextBookStore.com</a>.  
 The intent is to provide classroom use of
 the platform, without any required cost to students, for schools wanting a managed install of
 the IMathAS platform, and to provide students self-study opportunities.</p>
+
+<h2>Support</h2>
+<p>Community-based support is available through open support forums and training videos.</p>
+ 
+<p>More comprehensive support services are available for MyOpenMath through the <a href="http://www.lumenlearning.com/math">Candela Math</a>
+ subscription service offered by Lumen Learning.  These services include faculty training, online and phone support for faculty, 
+ content and learning analytics, data-driven recommendations for improving content, 
+ learning content improvements, service level agreements and backups, and long-term
+ access to course data.  The Candela support packages typically cost less than 3% 
+ of what students currently pay for commercial products (yes, we mean 97% less).</p>
 
 <h2>How/Why is it Free?  Our Story</h2>
 
@@ -46,8 +56,8 @@ should always exist, without advertisements.  They are also committed that all t
 content remain open as well, so it could be moved to a local install of the IMathAS 
 software if desired or needed.  To accomplish this, they are adopting a "freemium" model, 
 where the basic service will remain free with community-based support for faculty, 
-but additional services are available to institutions for a fee.  
-Those services include instructor support, content support, branding, and administrative services.  
+but <a href="http://www.lumenlearning.com/math">additional services</a> are available to institutions for a fee.  
+Those services include instructor support, content support, and administrative services.  
 Additionally, students may be given the option to contribute for use of the system 
 on a pay-what-you-can basis.  However, a no-charge option will always be available 
 to students, as ensuring student access to high quality materials is our number one priority.</p>
@@ -65,7 +75,8 @@ develop the platform and create a large set of content.</p>
 the Washington State <a href="http://www.opencourselibrary.org/">Open Course Library</a> project 
 are a basis for many of the open courses found on MyOpenMath.  Others were contributed
 by faculty, including <a href="http://mathispower4u.yolasite.com/">James Sousa</a> from 
-Phoenix Community College.</p>
+Phoenix Community College.  Many of these courses were improved by contributions
+and feedback from faculty involved in the Kaleidoscope Project.</p>
 
 
 </div>

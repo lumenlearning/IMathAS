@@ -2,6 +2,7 @@
 $nologo = true;
 require("../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
+$placeinhead .= '<style type="text/css">ul.spaced li {padding-bottom: .5em;}</style>';
 require("../header.php");
 $pagetitle ="Classroom";
 require("../infoheader.php");
@@ -28,17 +29,22 @@ course only include online homework, while others include videos, handouts, and 
 The books for these courses can be read online, or printed copies can be ordered through our partner
 site, <a href="http://www.opentextbookstore.com">OpenTextBookStore.com</a>.</p>
 <p>We currently have pre-built courses aligned with:
-<ul>
+<ul class="spaced">
+  <li>Arithmetic for College Students, David Lippman's remix of the MITE/NROC textbook</li>
   <li>Prealgebra, by College of the Redwoods</li>
   <li>Beginning and Intermediate Algebra, by Tyler Wallace</li>
-  <li>Precalculus: an Investigation of Functions, by David Lippman and Melonie Rasmussen (covers College Algebra and Trig) <a href="http://www.youtube.com/watch?v=1IpDmCaJ6rI" target="_blank">video tour</a></li>
+  <li>Beginning and Intermediate Algebra, a CK12 flexbook remixed by James Sousa</li>
+  <li>Precalculus: an Investigation of Functions, by David Lippman and Melonie Rasmussen<br/>(covers College Algebra and Trig) <a href="http://www.youtube.com/watch?v=1IpDmCaJ6rI" target="_blank">video tour</a></li>
+  <li>College Algebra, by Carl Stitz and Jeff Zeager</li>
   <li>Trigonometry, a CK12 flexbook remixed by James Sousa</li>
+  <li>Math in Society, by David Lippman (A quantitative reasoning / math for liberal arts course)</li>
+  <li>Business Calculus, by Shana Calaway, Dale Hoffman, and David Lippman</li>
 </ul>
 </p>
 
-<p>Coming very soon we will have pre-built courses for:
+<p>Coming very soon we will have a pre-built course for:
 <ul>
-  <li>Arithmetic (Dev Math 1), by NROC</li>
+  <li>Contemporary Calculus, by Dale Hoffman (covers single-variable calculus)</li>
 </ul>
 </p>  
 </div>
