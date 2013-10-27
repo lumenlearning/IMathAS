@@ -287,7 +287,19 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	} else {
 		$newpostscnt = '';	
 	}
-   
+	
+	//get items with content views, for enabling stats link
+	if (isset($teacherid) || isset($tutorid)) { 
+		$hasstats = array();
+		$query = "SELECT DISTINCT(CONCAT(SUBSTRING(type,1,1),typeid)) FROM imas_content_track WHERE courseid='$cid' AND type IN ('inlinetext','linkedsum','linkedlink','linkedintext','linkedviacal','assessintro','assess','assesssum','wiki','wikiintext') ";
+		//not sure this is useful information, since this is in the list posts by name page, and we don't track forum views in content tracking
+		//$query .= "UNION SELECT DISTINCT(CONCAT(SUBSTRING(type,1,1),info)) FROM imas_content_track WHERE courseid='$cid' AND type in ('forumpost','forumreply')";
+		$result = mysql_query($query) or die("Query failed : " . mysql_error());
+		while ($row = mysql_fetch_row($result)) {
+			$hasstats[$row[0]] = true;	
+		}
+	}
+	
 	//get active chatters
 	if (isset($mathchaturl) &&  $chatset==1) {
 		if (substr($mathchaturl,0,4)=='http') {
@@ -470,8 +482,10 @@ if ($overwriteBody==1) {
 ?>
 		<p><b><?php echo _('Course Items'); ?></b><br/>
 			<a href="copyitems.php?cid=<?php echo $cid ?>"><?php echo _('Copy'); ?></a><br/>
-			<a href="../admin/exportitems.php?cid=<?php echo $cid ?>"><?php echo _('Export'); ?></a><br/>
-			<a href="../admin/importitems.php?cid=<?php echo $cid ?>"><?php echo _('Import'); ?></a>
+			<a href="../admin/ccexport.php?cid=<?php echo $cid ?>"><?php echo _('Export'); ?></a>
+		<?php if (!isset($CFG['GEN']['noimathasimportfornonadmins']) || $myrights>=75) { ?>
+			<br/><a href="../admin/importitems.php?cid=<?php echo $cid ?>"><?php echo _('Import'); ?></a>
+		<?php } ?>
 		</p>
 		
 		<p><b><?php echo _('Mass Change'); ?></b><br/>
