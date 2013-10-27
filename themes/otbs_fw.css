@@ -242,7 +242,7 @@ span.padright {
 	margin: 0;
 	margin: 0px;
 	margin-bottom: 0px;
-	height: 94px;
+	/*height: 94px;*/
 	border-bottom: 2px solid #440044;
 }
 .headerwrapper h1 {
@@ -252,7 +252,7 @@ span.padright {
 	font-weight: normal;
 }
 div#headercontent, div#navlistcont {
-	width: 1000px;
+	max-width: 1000px;
 	margin: auto;
 	
 }
@@ -260,12 +260,13 @@ div#headercontent {
 	height: 70px;
 }
 div#navlistcont {
-	height: 24px;
+	/*height: 24px;*/
 }
 div#headerbarlogo {
 	/*background: transparent url(../img/otbslogo.gif) no-repeat scroll left bottom;*/
 	padding-top: 10px;
-	height: 60px;
+	height: 50px;
+	overflow: hidden;
 }
 div#headerbarlogo img {
 	vertical-align: -60%;
@@ -286,7 +287,7 @@ div#headerrightlinks a:hover {
 .footerwrapper {
 	height: 20px;
 	margin:auto;
-	width:1000px;
+	max-width:1000px;
 }
 
 div.breadcrumb {
@@ -298,7 +299,7 @@ div.breadcrumb {
 	margin-right: -15px;
 	padding: .25em;
 	padding-left: 10px;
-	height: 1.5em;
+	min-height: 1.5em;
 }
 div#centercontent div.breadcrumb {
 	margin-left: -10px;
@@ -313,7 +314,7 @@ div.breadcrumb a {
 	padding-right: 15px;
 	position: relative;
 	margin:auto;
-	width:970px;
+	max-width:970px;
 }
 
 div.ddmenu {
@@ -399,7 +400,7 @@ ul#navlist li a:hover {
 }
 div#navlistwrapper {
 	margin:auto;
-	width:1000px;
+	max-width:1000px;
 }
 div.additembox span {
 	background-color: #ddd;
