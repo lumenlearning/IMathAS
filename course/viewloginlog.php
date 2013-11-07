@@ -4,7 +4,7 @@
 
 require("../validate.php");
 $cid = intval($_GET['cid']);
-if (!isset($teacherid) && !isse($tutorid)) {
+if (!isset($teacherid) && !isset($tutorid)) {
 	$uid = $userid;
 } else {
 	$uid = intval($_GET['uid']);
@@ -23,8 +23,11 @@ $curBreadcrumb .= "&gt; View Login Log\n";
 $pagetitle = "View Login Log";
 require("../header.php");
 echo "<div class=\"breadcrumb\">$curBreadcrumb</div>";
+
+echo '<div class="cpmid"><a href="viewactionlog.php?cid='.$cid.'&uid='.$uid.'">View Activity Log</a></div>';
+
 echo '<div id="headerloginlog" class="pagetitle"><h2>'.$pagetitle. '</h2></div>';
-echo '<p><a href="viewactionlog.php?cid='.$cid.'&uid='.$uid.'">View Activity Log</a></p>';
+
 $query = "SELECT LastName,FirstName FROM imas_users WHERE id='$uid'";
 $result = mysql_query($query) or die("Query failed : " . mysql_error());
 $row = mysql_fetch_row($result);
