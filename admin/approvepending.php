@@ -42,8 +42,8 @@ if (isset($_GET['go'])) {
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 		$headers .= "From: $accountapproval\r\n";
 		$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.$row[0].'</p>';
-		$message .= 'Welcome to MyOpenMath.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.$row[1].'</b> and the password you provided.</p>';
-		$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.myopenmath.com/docs/docs.php">Getting Started Guide</a> helpful</p>';
+		$message .= '<p>Welcome to MyOpenMath.  Your account has been activated, and you\'re all set to log in at <a href="https://www.myopenmath.com">MyOpenMath.com</a> as an instructor using the username <b>'.$row[1].'</b> and the password you provided.</p>';
+		//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.myopenmath.com/docs/docs.php">Getting Started Guide</a> helpful</p>';
 		$message .= '<p>I\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
 		$message .= '<p>I\'ve also signed you up for the MyOpenMath Training Course.  This course has video tutorials and assignments that will walk you through learning how to use MyOpenMath in your classes.</p>';
 		$message .= '<p>David Lippman<br/>admin@myopenmath.com<br/>MyOpenMath administrator</p>';
