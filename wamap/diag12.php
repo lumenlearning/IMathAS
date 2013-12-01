@@ -1,9 +1,9 @@
 <?php
 $nologo = true;
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
-require("../../header.php");
+require("../header.php");
 $pagetitle =$line['name'];
-require("../infoheader.php");
+require("infoheader.php");
 ?>
 <div style="margin-left: 10px">
 <p>
@@ -30,7 +30,7 @@ representing the general areas of content that appear on the MPT-G.  While the g
 expect to questions on the actual MPT-G to necessarily be similar to the questions you see in this practice.</p>
 
 <p><b>To begin your practice:</b></p>
-<form method=post action="index.php?id=<?php echo $diagid; ?>">
+<form method=post action="../diag/index.php?id=<?php echo $diagid; ?>">
 <span class=form><?php echo $line['idprompt']; ?></span> <input class=form type=text size=12 name=SID><BR class=form>
 <span class=form>Enter First Name:</span> <input class=form type=text size=20 name=firstname><BR class=form>
 <span class=form>Enter Last Name:</span> <input class=form type=text size=20 name=lastname><BR class=form>

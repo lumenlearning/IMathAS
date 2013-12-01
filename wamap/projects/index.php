@@ -1,13 +1,15 @@
 <?php
+error_reporting(E_ALL);
 @set_time_limit(0);
 ini_set("max_input_time", "600");
 ini_set("max_execution_time", "600");
 ini_set("memory_limit", "104857600");
 ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
-date_default_timezone_set('America/Los_Angeles'); 
-require("../validate.php");
-require("../includes/filehandler.php");
+date_default_timezone_set('America/Los_Angeles');
+require("../../validate.php");
+require("../../includes/filehandler.php");
+
 $placeinhead = "<script type=\"text/javascript\">
 
   var _gaq = _gaq || [];
@@ -389,7 +391,7 @@ if (isset($_GET['modify'])) {
 		}
 		$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
 		$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
-		require("../header.php");
+		require("../../header.php");
 		echo '<div class="breadcrumb"><a href="index.php">Task List</a> &gt; Add/Modify Task</div>';
 		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"index.php?modify={$_GET['modify']}\" onsubmit=\"return validateForm(this);\">\n";
 		foreach ($questions as $key=>$arr) {
@@ -536,7 +538,7 @@ if (isset($_GET['modify'])) {
 		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/index.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
-	require("../header.php");
+	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="index.php">Task List</a> &gt; View Task</div>';
 	echo '<div id="ratingholder">';
 	echo getratingsfor($_GET['id']);
@@ -631,7 +633,7 @@ if (isset($_GET['modify'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/tablesorter.js"></script>';
 	
-	require("../header.php");
+	require("../../header.php");
 	echo '<div class="cp">';
 	foreach ($questions as $key=>$arr) {
 		//generate search pulldowns

@@ -17,9 +17,9 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 
   $AWSkey = getenv('AWS_ACCESS_KEY_ID');
   $AWSsecret = getenv('AWS_SECRET_KEY');  
-  $AWSbucket = getenv('PARAM1');  //SWITCH to 'wamapdata'
+  $AWSbucket = 'wamapdata';  //SWITCH to 'wamapdata'
   $dbserver = getenv('PARAM2');
-  $dbname = getenv('PARAM3');  //SWITCH to 'wamap'
+  $dbname = 'wamap';  //SWITCH to 'wamap'
   $dbusername = getenv('PARAM4');
   $dbpassword = getenv('PARAM5');
   if (getenv('imasroot')!==false) {

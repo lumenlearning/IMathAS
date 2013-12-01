@@ -7,13 +7,13 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 date_default_timezone_set('America/Los_Angeles'); 
 if (isset($_GET['public'])) {
-	require("../config.php");
+	require("../../config.php");
 	$ispublic = true;
 } else {
-	require("../validate.php");
+	require("../../validate.php");
 	$ispublic = false;
 }
-require("../includes/filehandler.php");
+require("../../includes/filehandler.php");
 /*$placeinhead = "<script type=\"text/javascript\">
 
   var _gaq = _gaq || [];
@@ -394,7 +394,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		}
 		$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
 		$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
-		require("../header.php");
+		require("../../header.php");
 		echo '<div class="breadcrumb"><a href="arithmetic.php">Task List</a> &gt; Add/Modify Task</div>';
 		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"arithmetic.php?modify={$_GET['modify']}\" onsubmit=\"return validateForm(this);\">\n";
 		foreach ($questions as $key=>$arr) {
@@ -532,7 +532,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 	}
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
-	require("../header.php");
+	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="arithmetic.php'.($ispublic?'?public=true':'').'">Task List</a> &gt; Topic coverage summary</div>';
 	echo '<p>Topic Coverage Summary</p>';
 	
@@ -605,7 +605,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/arithmetic.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
-	require("../header.php");
+	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="arithmetic.php'.($ispublic?'?public=true':'').'">Task List</a> &gt; View Task</div>';
 	echo '<div id="ratingholder">';
 	echo getratingsfor($_GET['id']);
@@ -700,7 +700,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/tablesorter.js"></script>';
 	
-	require("../header.php");
+	require("../../header.php");
 	echo '<div class="cp">';
 	foreach ($questions as $key=>$arr) {
 		//generate search pulldowns
