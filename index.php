@@ -270,9 +270,7 @@ echo '<a href="msgs/msglist.php?cid=0">', _('Messages'), '</a>';
 if ($msgtotal>0) {
 	echo ' <a href="msgs/newmsglist.php?cid=0" class="newnote">', sprintf(_('New (%d)'), $msgtotal), '</a>';
 }
-if ($myrights > 10) {
-	echo " | <a href=\"docs/docs.php\">", _('Documentation'), "</a>\n";
-} else if ($myrights > 9) {
+if ($myrights > 9) {
 	echo " | <a href=\"help.php?section=usingimas\">", _('Help'), "</a>\n";
 }
 		
