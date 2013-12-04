@@ -149,9 +149,9 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['CPS']['unenroll'] = array(0,0);
  $CFG['CPS']['chatset'] = array(0,0);
  $CFG['CPS']['showlatepass'] = array(1,0);
- $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,7,9",1),0);
+ $CFG['CPS']['topbar'] = array(array("0,1,2,3","0,2,3,4,6",1),0);
  
-// $CFG['CPS']['leftnavtools'] = false;
+ $CFG['CPS']['leftnavtools'] = 'limited';
  $CFG['CPS']['templateoncreate'] = true;
  
  $defaultcoursetheme = "otbs_fw.css";
