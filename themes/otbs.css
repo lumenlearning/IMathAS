@@ -275,12 +275,7 @@ div#headerrightlinks {
 	margin-right: 20px;
 	color: #666;
 }
-div#headerrightlinks a {
-	color: #969;
-}
-div#headerrightlinks a:hover {
-	color: #636;
-}
+
 .footerwrapper {
 	height: 20px;
 	/*margin:auto;
