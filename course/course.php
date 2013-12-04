@@ -444,7 +444,14 @@ if ($overwriteBody==1) {
 ?>
 		</p>
 	<?php
-	if (!isset($CFG['CPS']['leftnavtools']) || $CFG['CPS']['leftnavtools']!==false) {
+	if (isset($CFG['CPS']['leftnavtools']) || $CFG['CPS']['leftnavtools']=='limited') {
+	?>
+		<p><b><?php echo _('Tools'); ?></b><br/>
+			<a href="managestugrps.php?cid=<?php echo $cid ?>"><?php echo _('Groups'); ?></a><br/>
+			<a href="addoutcomes.php?cid=<?php echo $cid ?>"><?php echo _('Outcomes'); ?></a><br/>
+		</p>
+	<?php
+	} else if (!isset($CFG['CPS']['leftnavtools']) || $CFG['CPS']['leftnavtools']!==false) {
 	?>
 		<p><b><?php echo _('Tools'); ?></b><br/>
 			<a href="listusers.php?cid=<?php echo $cid ?>" class="essen"><?php echo _('Roster'); ?></a><br/>
@@ -454,7 +461,7 @@ if ($overwriteBody==1) {
 			<a href="showcalendar.php?cid=<?php echo $cid ?>"><?php echo _('Calendar'); ?></a>
 		</p>
 	<?php
-	}
+	} 
 	if (!$useviewbuttons) {
 	?>
 		<p><b><?php echo _('Views'); ?></b><br/>
@@ -738,7 +745,7 @@ function makeTopMenu() {
 		} else {
 			echo 'class="buttoninactive buttoncurveright"';
 		}
-		echo '>', _('Quick'), '</a>';
+		echo '>', _('Quick Rearrange'), '</a>';
 		echo '</div>';
 		//echo '<br class="clear"/>';
 			
