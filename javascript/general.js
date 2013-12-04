@@ -9,13 +9,20 @@ function mopen(id,cid) {
 		homemenuloaded = 1;
 	}
 	mcancelclosetime();
-	if(ddmenuitem) ddmenuitem.style.visibility = 'hidden';
-	ddmenuitem = document.getElementById(id);
-	ddmenuitem.style.visibility = 'visible';
+	if(ddmenuitem) { 
+		ddmenuitem.style.visibility = 'hidden';
+		ddmenuitem = null;
+	}else {
+		ddmenuitem = document.getElementById(id);
+		ddmenuitem.style.visibility = 'visible';
+	}
 }
 // close showed layer
 function mclose() {
-	if(ddmenuitem) ddmenuitem.style.visibility = 'hidden';
+	if(ddmenuitem) {
+		ddmenuitem.style.visibility = 'hidden';
+		ddmenuitem = null;
+	}
 }
 // go close timer
 function mclosetime() {
@@ -506,6 +513,11 @@ jQuery(document).ready(function($) {
 	$('a[href*="youtu"]').each(setupvideoembeds);
 	$('a[href*="vimeo"]').each(setupvideoembeds);	
 	$('body').fitVids();
+	$('a[target="_blank"]').each(function() {
+		if (!this.href.match(/youtu/) && !this.href.match(/vimeo/)) {
+		   $(this).append(' <img src="'+imasroot+'/img/extlink.png"/>')
+		}
+	});
 });
 
 function _(txt) {
