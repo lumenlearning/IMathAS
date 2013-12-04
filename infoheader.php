@@ -4,8 +4,8 @@
 
 <ul id="navlist">
 <li><a href="<?php echo $imasroot; ?>/index.php">Welcome</a></li>
-<li><a href="<?php echo $imasroot; ?>/info/selfstudy.php">Self Study</a></li>
-<li><a href="<?php echo $imasroot; ?>/info/classroom.php">Classroom</a></li>
+<li><a href="<?php echo $imasroot; ?>/info/selfstudy.php">Student Self Study</a></li>
+<li><a href="<?php echo $imasroot; ?>/info/classroom.php">For Instructors</a></li>
 <li><a href="<?php echo $imasroot; ?>/info/aboutus.php">About Us</a></li>
 
 
