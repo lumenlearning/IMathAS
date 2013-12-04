@@ -55,6 +55,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 <table>
 <tr><td><?php echo $loginprompt;?>:</td><td><input type="text" size="15" id="username" name="username" /></td></tr>
 <tr><td>Password:</td><td><input type="password" size="15" id="passwordentry" /></td></tr>
+<tr><td></td><td><input type="submit" value="Login"></td></tr>
 </table>
 <div id="settings">JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</div>
 <div class="textright"><a href="<?php echo $imasroot; ?>/forms.php?action=newuser">Register as a new student</a></div>
@@ -75,11 +76,10 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		var html = ""; 
 		html += 'Accessibility: ';
 		html += "<a href='#' onClick=\"window.open('<?php echo $imasroot;?>/help.php?section=loggingin','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))\">Help</a>";
-		html += '<br/><input type="radio" name="access" value="0" <?php if ($pref==0) {echo "checked=1";} ?> />Use visual display<br/>';
-		html += '<input type="radio" name="access" value="2" <?php if ($pref==2) {echo "checked=1";} ?> />Force image-based graphs<br/>';
-		html += '<input type="radio" name="access" value="4" <?php if ($pref==4) {echo "checked=1";} ?> />Force image-based math<br/>';
-		html += '<input type="radio" name="access" value="3" <?php if ($pref==3) {echo "checked=1";} ?> />Force image based display<br/>';
-		html += '<input type="radio" name="access" value="1">Use text-based display';
+		html += '<div style="margin-top: 0px;margin-right:0px;text-align:right;padding:0px"><select name="access"><option value="0" <?php if ($pref==0) {echo 'selected="selected"';} ?> />Use defaults</option>';
+		html += '<option value="3" <?php if ($pref==3) {echo 'selected="selected"';} ?> />Force image-based display</option>';
+		html += '<option value="1">Use text-based display</option></select></div>';
+		
 		
 		if (AMnoMathML) {
 			html += '<input type=hidden name="mathdisp" value="0">';
@@ -94,7 +94,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		if (!AMnoMathML && !ASnoSVG) {
 			html += '<input type=hidden name="isok" value=1>';
 		} 
-		html += '<div class=textright><input type="submit" value="Login"></div>';
+		
 		setnode.innerHTML = html; 
 		document.getElementById("username").focus();
 	}
