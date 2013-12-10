@@ -54,5 +54,6 @@ echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouse
 </div>
 <?php
 $nologo = true;
+$haslogout = true;
 }
 ?>
