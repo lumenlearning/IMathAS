@@ -254,7 +254,7 @@ div#headercontent, div#navlistcont {
 }
 div#headercontent {
 	height: 70px;
-	padding-left: 20px;
+	padding: 0px 20px;
 }
 div#navlistcont {
 	/*height: 24px;*/
