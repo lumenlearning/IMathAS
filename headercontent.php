@@ -6,6 +6,9 @@ if (!isset($flexwidth) && ($coursetheme=='otbs_fw.css' || $coursetheme=='otbs.cs
 <?php
 $usernameinheader = true;
 if ($selfhasuserimg==1) {
+	if ($myrights > 5) {
+		echo "<a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">";
+	}
 	if(isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
 		echo "<img src=\"{$urlmode}s3.amazonaws.com/{$GLOBALS['AWSbucket']}/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
 	} else {
@@ -13,23 +16,19 @@ if ($selfhasuserimg==1) {
 		$galleryPath = "$curdir/course/files/";
 		echo "<img src=\"$imasroot/course/files/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
 	}
+	if ($myrights > 5) {
+		echo '</a>';
+	}
 }
 ?>
 <div id="headerrightlinks">
 <?php 
-echo '<span id="myname">'.$userfullname.'</span><br/>';
-//echo "<a href=\"$imasroot/index.php\">Home</a> | ";
 if ($myrights > 5) {
-	echo "<a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,500)\">Account Settings</a>";
-}
-/*
-if (isset($teacherid)) {
-	echo "<a href=\"$imasroot/help.php?section=coursemanagement\">Help</a> ";
+	echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img src=\"$imasroot/img/gears.png\"/></a><br/>";
 } else {
-	echo "<a href=\"$imasroot/help.php?section=usingimas\">Help</a> ";
+	echo '&nbsp;<br/><span id="myname">'.$userfullname.'</span><br/>';
 }
-echo "| <a href=\"$imasroot/actions.php?action=logout\">Log Out</a>";
-*/
+
 ?>
 </div>
 <div id="headerbarlogo"><a href="<?php echo $imasroot;?>/index.php"><img src="<?php echo $imasroot;?>/img/mom.png" /></a>
@@ -37,16 +36,14 @@ echo "| <a href=\"$imasroot/actions.php?action=logout\">Log Out</a>";
 <span style="padding-left: 30px;">
 <?php
 echo "<a href=\"$imasroot/index.php\">Home</a> | ";
-
 echo '<a href="#" onclick="$(\'#homemenu\').css(\'left\',$(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> | ';
-
 if (isset($teacherid)) {
 	echo "<a href=\"$imasroot/help.php?section=coursemanagement\">Help</a> ";
 } else {
 	echo "<a href=\"$imasroot/help.php?section=usingimas\">Help</a> ";
 }
 echo "| <a href=\"$imasroot/actions.php?action=logout\">Log Out</a>";
-echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()" style="right:auto;"></div>';
+echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()" style="right:auto;text-align:left"></div>';
 ?>
 
 </div>
