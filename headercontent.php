@@ -47,7 +47,7 @@ if (isset($userid)) {
 		echo "<a href=\"$imasroot/help.php?section=usingimas\">Help</a> ";
 	}
 	echo "| <a href=\"$imasroot/actions.php?action=logout\">Log Out</a>";
-	echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()" style="right:auto;text-align:left"></div>';
+	echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()"></div>';
 }
 ?>
 

@@ -311,7 +311,24 @@ div.breadcrumb a {
 
 div.ddmenu {
 	padding: 5px;
-	background: #eeeeff;
+	background: #F2F2F2;
+	border:1px solid #C3CAC2;
+	position: absolute;
+	right:auto;
+	text-align:left;
+	visibility:hidden;
+	margin: 0px;
+	z-index: 100;
+}
+div.ddmenu li {
+	padding-bottom: 2px;
+}
+div.ddmenu ul.nomark li {
+	margin-top: 0px;
+}
+div.ddmenu ul.nomark {
+	padding-left: 0px;
+	margin-left: 15px;
 }
 /*colors and borders for assessments*/
 /*seq question css*/
