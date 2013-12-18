@@ -39,7 +39,7 @@ if (isset($userid)) {
 <?php
 if (isset($userid)) {
 	echo "<a href=\"$imasroot/index.php\">Home</a> | ";
-	echo '<a href="#" onclick="$(\'#homemenu\').css(\'left\',$(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> | ';
+	echo '<a href="#" onclick="jQuery(\'#homemenu\').css(\'left\',jQuery(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> | ';
 	
 	if (isset($teacherid)) {
 		echo "<a href=\"$imasroot/help.php?section=coursemanagement\">Help</a> ";
