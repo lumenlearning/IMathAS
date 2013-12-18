@@ -128,14 +128,8 @@ Then read more about <a href="<?php echo $imasroot;?>/info/classroom.php">using 
 <p class="ind">If you are an instructor, you can <a href="<?php echo $imasroot;?>/newinstructor.php">request an instructor account</a></p>
 
 
-<p class="ind">Also available:
-<ul>
-<li><a href="<?php echo $imasroot;?>/info/enteringanswers.php">Help for students: Entering answers</a></li>
-<li><a href="<?php echo $imasroot;?>/docs/docs.php">Instructor Documentation</a></li>
-</ul>
-</p>
-
 <br class=clear>
+<p>&nbsp;</p>
 <p class="textright"><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2013 David Lippman<br/>
 <a href="<?php echo $imasroot;?>/info/privacy.php">Privacy Policy</a></p>
 </div>

@@ -1,7 +1,7 @@
 /*General settings - fonts, overall page background, etc*/
 body {
-	background-color:#FAF2FF;
-	background-image:url(../img/otbsbkg2.png);
+	background-color:#F7F7FF;
+	background-image:url(../img/simplebg.png);
 	background-position:center top;
 	background-repeat:repeat-y;
 	/*font-family: Verdana,Tahoma,Arial,Helvetica,sans-serif;*/
