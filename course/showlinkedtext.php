@@ -53,15 +53,80 @@
 	
 	require("../header.php");
 	if ($shownav) {
-		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid={$_GET['cid']}\">$coursename</a> ";
-		echo "&gt; $titlesimp</div>";
-		echo '<div id="headershowlinkedtext" class="pagetitle"><h2>'.$titlesimp.'</h2></div>';
+		if (isset($_SESSION['backtrack'])) {
+			echo '<div class="breadcrumb">'.$_SESSION['backtrack'][0];
+			echo " &gt; $titlesimp</div>";
+		} else {
+			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid={$_GET['cid']}\">$coursename</a> ";
+			echo "&gt; $titlesimp</div>";
+			echo '<div id="headershowlinkedtext" class="pagetitle"><h2>'.$titlesimp.'</h2></div>';
+		}
 	}
-	echo '<div style="padding-left:10px; padding-right: 10px;">';
+	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;">';
 	echo filter($text);
+	if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
+		$now = time();
+		$query = "SELECT il.id,il.title,il.avail,il.startdate,il.enddate,ii.id AS itemid 
+			  FROM imas_linkedtext as il JOIN imas_items AS ii ON il.id=ii.typeid AND ii.itemtype='LinkedText'
+			  WHERE ii.courseid='$cid' ";
+		if (!$isteacher && !$istutor) {	 
+			  $query .= "AND (il.avail=2 OR (il.avail=1 AND $now>il.startdate AND $now<il.enddate))";
+		}
+		$result = mysql_query($query) or die("Query failed : " . mysql_error());
+		$itemdata = array();
+		while ($row = mysql_fetch_assoc($result)) {
+			$itemdata[$row['itemid']] = $row;
+			if ($row['id']==$_GET['id']) {
+				$thisitemid = $row['itemid'];
+			}
+		}
+		
+		$flatlist = array();
+		$thisitemloc = -1;
+		function getflatlinkeditemlist($items) {
+			global $flatlist, $itemdata, $now, $isteacher, $istutor, $thisitemloc,$thisitemid;
+			foreach ($items as $it) {
+				if (is_array($it)) {
+					if ($isteacher || $istutor || $it['avail']==2 || ($it['avail']==1 && $now>$it['startdate'] && $now<$it['enddate'])) {
+						getflatlinkeditemlist($it['items']);
+					}
+				} else {
+					if (isset($itemdata[$it])) {
+						$flatlist[] = $it;
+						if ($it==$thisitemid) {
+							$thisitemloc = count($flatlist)-1;
+						}
+					}
+				}
+			}
+		}
+		$query = "SELECT itemorder FROM imas_courses WHERE id='$cid'";
+		$result = mysql_query($query) or die("Query failed : " . mysql_error());
+		$row = mysql_fetch_row($result);
+		getflatlinkeditemlist(unserialize($row[0]));
+		
+		echo '<p>&nbsp;</p>';
+		if ($thisitemloc>0) {
+			$p = $itemdata[$flatlist[$thisitemloc-1]];
+			echo '<div class="floatleft" style="max-width:45%;height:auto;text-align:center"><button type="button" onclick="window.location.href=\'showlinkedtext.php?cid='.$cid.'&id='.$p['id'].'\'">&lt; '._('Previous');
+			echo '<br/>'.$p['title'];
+			echo '</button></div>';
+		}
+		if ($thisitemloc<count($flatlist)-2) {
+			$p = $itemdata[$flatlist[$thisitemloc+1]];
+			echo '<div class="floatright" style="max-width:45%;height:auto;text-align:center"><button type="button" onclick="window.location.href=\'showlinkedtext.php?cid='.$cid.'&id='.$p['id'].'\'">'._('Next');
+			echo ' &gt;<br/>'.$p['title'];
+			echo '</button></div>';
+		}
+		echo '<div class="clear"></div>';
+	}
 	echo '</div>';
 	if ($shownav) {
-		echo "<div class=right><a href=\"course.php?cid={$_GET['cid']}\">Return to Course Page</a></div>\n";
+		if (isset($_SESSION['backtrack'])) {
+			echo "<div class=right><a href=\"course.php?cid={$_GET['cid']}&folder=".$_SESSION['backtrack'][1]."\">Back</a></div>\n";
+		} else {
+			echo "<div class=right><a href=\"course.php?cid={$_GET['cid']}\">Return to Course Page</a></div>\n";
+		}
 	}
 	require("../footer.php");	
 
