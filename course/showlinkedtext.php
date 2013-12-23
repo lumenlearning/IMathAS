@@ -49,8 +49,21 @@
 	if (isset($studentid)) {
 		$rec = "data-base=\"linkedintext-{$_GET['id']}\" ";
 		$text = str_replace('<a ','<a '.$rec, $text);
+		$placeinhead = '<script type="text/javascript">
+			function recunload() {
+				if (!recordedunload) {
+					$.ajax({
+						type: "POST",
+						url: "'.$imasroot.'/course/rectrack.php?cid='.$cid.'",
+						data: "unloadinglinked='.$_GET['id'].'",
+						async: false
+					   });
+					recordedunload = true;
+				}
+			}
+			window.onunload = window.onbeforeunload = recunload;
+		 </script>';
 	}
-	
 	require("../header.php");
 	if ($shownav) {
 		if (isset($_SESSION['backtrack'])) {
@@ -64,7 +77,7 @@
 	}
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;">';
 	echo filter($text);
-	if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
+	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || isset($sessiondata['readernavon'])) {
 		$now = time();
 		$query = "SELECT il.id,il.title,il.avail,il.startdate,il.enddate,ii.id AS itemid 
 			  FROM imas_linkedtext as il JOIN imas_items AS ii ON il.id=ii.typeid AND ii.itemtype='LinkedText'
@@ -108,15 +121,25 @@
 		echo '<p>&nbsp;</p>';
 		if ($thisitemloc>0) {
 			$p = $itemdata[$flatlist[$thisitemloc-1]];
-			echo '<div class="floatleft" style="max-width:45%;height:auto;text-align:center"><button type="button" onclick="window.location.href=\'showlinkedtext.php?cid='.$cid.'&id='.$p['id'].'\'">&lt; '._('Previous');
+			if (isset($studentid) && !isset($sessiondata['stuview'])) {
+				$rec = "data-base=\"linkedlink-{$p['id']}\" ";
+			} else {
+				$rec = '';
+			}
+			echo '<div class="floatleft" style="max-width:45%"><a '.$rec.' class="abutton" style="height:auto;text-align:center" href="showlinkedtext.php?cid='.$cid.'&id='.$p['id'].'">&lt; '._('Previous');
 			echo '<br/>'.$p['title'];
-			echo '</button></div>';
+			echo '</a></div>';
 		}
 		if ($thisitemloc<count($flatlist)-2) {
 			$p = $itemdata[$flatlist[$thisitemloc+1]];
-			echo '<div class="floatright" style="max-width:45%;height:auto;text-align:center"><button type="button" onclick="window.location.href=\'showlinkedtext.php?cid='.$cid.'&id='.$p['id'].'\'">'._('Next');
+			if (isset($studentid) && !isset($sessiondata['stuview'])) {
+				$rec = "data-base=\"linkedlink-{$p['id']}\" ";
+			} else {
+				$rec = '';
+			}
+			echo '<div class="floatright" style="max-width:45%"><a '.$rec.' class="abutton" style="height:auto;text-align:center" href="showlinkedtext.php?cid='.$cid.'&id='.$p['id'].'"> '._('Next');
 			echo ' &gt;<br/>'.$p['title'];
-			echo '</button></div>';
+			echo '</a></div>';
 		}
 		echo '<div class="clear"></div>';
 	}

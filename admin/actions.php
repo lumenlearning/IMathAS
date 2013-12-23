@@ -225,7 +225,7 @@ switch($_GET['action']) {
 		if (isset($CFG['CPS']['toolset']) && $CFG['CPS']['toolset'][1]==0) {
 			$toolset = $CFG['CPS']['toolset'][0];
 		} else {
-			$toolset = 1*!isset($_POST['toolset-cal']) + 2*!isset($_POST['toolset-forum'])+ 4*!isset($_POST['toolset-reord']);
+			$toolset = 1*!isset($_POST['toolset-cal']) + 2*!isset($_POST['toolset-forum']) + 4*!isset($_POST['toolset-reord']);
 		}
 		
 		if (isset($CFG['CPS']['cploc']) && $CFG['CPS']['cploc'][1]==0) {
@@ -853,13 +853,13 @@ switch($_GET['action']) {
 	case "modltidomaincred":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
 		if ($_GET['id']=='new') {
-			$query = "INSERT INTO imas_users (email,SID,password,rights) VALUES ";
+			$query = "INSERT INTO imas_users (email,SID,password,rights,groupid) VALUES ";
 			$query .= "('{$_POST['ltidomain']}','{$_POST['ltikey']}',";
-			$query .= "'{$_POST['ltisecret']}','{$_POST['createinstr']}')";
+			$query .= "'{$_POST['ltisecret']}','{$_POST['createinstr']}','{$_POST['groupid']}')";
 		} else {
 			$query = "UPDATE imas_users SET email='{$_POST['ltidomain']}',";
 			$query .= "SID='{$_POST['ltikey']}',password='{$_POST['ltisecret']}',";
-			$query .= "rights='{$_POST['createinstr']}' WHERE id='{$_GET['id']}'";
+			$query .= "rights='{$_POST['createinstr']}',groupid='{$_POST['groupid']}' WHERE id='{$_GET['id']}'";
 		}
 		mysql_query($query) or die("Query failed : " . mysql_error());
 		break;

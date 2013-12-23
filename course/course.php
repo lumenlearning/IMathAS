@@ -368,15 +368,10 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 }
   
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=092413\"></script>";
-if (isset($dopayprompt) && $dopayprompt ==true) {
-	if ($userid%2==0) {
-		$evenodd = '0';
-	} else {
-		$evenodd = '1';
-	}
-	$placeinhead .= '<script type="text/javascript"> $(function() { GB_show("Contribute","../info/contribute.php?t='.$evenodd.'",600,500);});</script>';
-}	
-
+if (isset($tutorid) && isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
+	$placeinhead .= '<script type="text/javascript">$(function(){$(".instrdates").hide();});</script>';
+}
+	
 /******* begin html output ********/
 require("../header.php");
 
@@ -617,11 +612,12 @@ if ($overwriteBody==1) {
 	   }
 
    } else {
-	   if (isset($teacherid)) {
+	   if (isset($teacherid) && $quickview!='on') {
+	   	   if ($_GET['folder']=='0') {
 	   	echo '<p><b>Welcome to your course!</b></p>';
 	   	echo '<p>To start by copying from another course, use the <a href="copyitems.php?cid='.$cid.'">Course Items: Copy</a> ';
 	   	echo 'link along the left side of the screen.</p><p>If you want to build from scratch, use the "Add An Item" pulldown below to get started.</p><p>&nbsp;</p>';
-	   	
+	   	   }
 	   	echo generateadditem($_GET['folder'],'t');
 	   }
    }
