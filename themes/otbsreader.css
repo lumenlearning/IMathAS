@@ -29,7 +29,7 @@ div.mainbody {
 .linkedtextholder {
  font-size: 110%;
  line-height: 1.7em;
-  max-width: 40em;
+  max-width: 35em;
   margin: auto;
 }
     
@@ -58,11 +58,25 @@ div.mainbody {
     margin-top: 20px;
     margin-bottom: 20px; 
   }
-  
+
+ .mceContentBody .im_glossdef {	
+	color: #ccc;
+}
+.mceContentBody .im_glossdef:before {
+ 	content: " (hidden def: ";
+	color: #ccc;
+}
+.mceContentBody .im_glossdef:after {
+ 	content: ")";
+	color: #ccc;
+}
 .linkedtextholder .im_glossdef {
     display: none; 
   }
-.linkedtextholder .im_figure {
+  .im_glossterm.hoverdef {
+  	  border-bottom: 1px #aaa dashed;
+  }
+.linkedtextholder .im_figure, .linkedtextholder p.s32 {
     max-width: 500px;
     margin: auto; 
     font-size: 80%;
@@ -77,6 +91,14 @@ div.mainbody {
  }
  .linkedtextholder .im_figure.im_medium img, .linkedtextholder .im_figure.im_small img {
 	max-width: 150px;
+ }
+ .linkedtextholder p.s26, .linkedtextholder p.s17, .linkedtextholder p.s41, .linkedtextholder p.s72 {
+ 	font-size: 130%;
+ 	font-weight: bold;
+ }
+ .linkedtextholder p.s96 {
+ 	font-size: 110%;
+ 	font-weight: bold;
  }
 /*Container for course items*/
 div.item {

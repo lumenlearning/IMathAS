@@ -45,7 +45,7 @@
 			exit;
 		}
 	}
-	
+	$placeinhead = '';
 	if (isset($studentid)) {
 		$rec = "data-base=\"linkedintext-{$_GET['id']}\" ";
 		$text = str_replace('<a ','<a '.$rec, $text);
@@ -64,18 +64,30 @@
 			window.onunload = window.onbeforeunload = recunload;
 		 </script>';
 	}
+	$placeinhead .= '<script type="text/javascript"> $(function() {
+	$(".im_glossterm").addClass("hoverdef").each(function(i,el) { 
+		$(el).attr("title",$(el).next(".im_glossdef").text());
+	   });
+	});
+	</script>';
 	require("../header.php");
+	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3)) {
+		$fixbc = 'style="position:fixed;top:0;width:100%"';
+		$pad = 'padding-top: 25px;';
+	} else {
+		$fixbc = '';  $pad = '';
+	}
 	if ($shownav) {
 		if (isset($_SESSION['backtrack'])) {
-			echo '<div class="breadcrumb">'.$_SESSION['backtrack'][0];
+			echo '<div class="breadcrumb" '.$fixbc.'>'.$_SESSION['backtrack'][0];
 			echo " &gt; $titlesimp</div>";
 		} else {
-			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid={$_GET['cid']}\">$coursename</a> ";
+			echo "<div class=breadcrumb $fixbc>$breadcrumbbase <a href=\"course.php?cid={$_GET['cid']}\">$coursename</a> ";
 			echo "&gt; $titlesimp</div>";
 			echo '<div id="headershowlinkedtext" class="pagetitle"><h2>'.$titlesimp.'</h2></div>';
 		}
 	}
-	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;">';
+	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;'.$pad.'">';
 	echo filter($text);
 	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || isset($sessiondata['readernavon'])) {
 		$now = time();
