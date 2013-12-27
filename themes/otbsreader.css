@@ -80,6 +80,7 @@ div.mainbody {
     max-width: 500px;
     margin: auto; 
     font-size: 80%;
+    line-height: 1.5em;
  } 
 .linkedtextholder .smallattr {
     line-height: normal;
