@@ -19,12 +19,14 @@ if (isset($teacherid)) {
 			if (is_array($it)) {
 				if ($curdepth<$depth) {
 					$url = 'https://www.myopenmath.com/bltilaunch.php?custom_view_folder='.$cid.'-'.$it['id'];
-					echo $ind.$it['name'].'  <a href="'.$url.'">'.$url.'</a><br/>';
+					echo '<tr><td>'.$it['name'].'</td><td><a href="'.$url.'">'.$url.'</a></td></tr>';
 					rec($it['items'],$curdepth+1,'-&nbsp;');
 				}
 			}
 		}
 	}
+	echo '<table><tbody>';
 	rec($items,0,'');
+	echo '</tbody></table>';
 }
 ?>
