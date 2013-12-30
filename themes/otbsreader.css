@@ -449,6 +449,7 @@ span.link {
 	right: 0px;
 	top: 0px;
 	width: 30px;
+	display: none;
 }
 
 span.padright {
