@@ -132,6 +132,9 @@ div.mainbody {
 	
 }
 
+b.readitem {
+	font-weight: normal;
+}
 a.abutton {
 	padding: 3px 8px;
 	display: inline-block;
@@ -156,6 +159,7 @@ input[type=submit],input[type=button], button, a.abutton {
   background-image: none;
   border: 1px solid transparent;
   border-radius: 0;
+  height: auto;
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
