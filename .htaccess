@@ -25,8 +25,11 @@ RewriteCond %{HTTP_HOST} ^myopenmath\.com
 RewriteCond %{REQUEST_URI} !^(/bltilaunch\.php|/canvas\.php)$
 RewriteRule ^(.*)$ https://www.myopenmath.com/$1 [R=permanent,L]
 
+RewriteCond %{HTTP_HOST} ^wamap\.org
+RewriteCond %{REQUEST_URI} !^(/bltilaunch\.php|/canvas\.php)$
+RewriteRule ^(.*)$ https://www.wamap.org/$1 [R=permanent,L]
+
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
-RewriteCond %{HTTP_HOST} myopenmath\.com
 RewriteCond %{REQUEST_URI} ^(/|/index\.php)$
 RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 
