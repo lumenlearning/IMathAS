@@ -27,7 +27,7 @@
 			} else {
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email) ";
 				$md5pw = md5($_POST['password']);
-				$query .= "VALUES ('{$_POST['username']}','$md5pw',0,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
+				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();
 				$query = "INSERT INTO imas_students (userid,courseid) VALUES ('$newuserid',1),('$newuserid',438)";
