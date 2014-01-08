@@ -230,7 +230,7 @@ input[type=submit]:focus, button:focus,input[type=button]:focus, a.abutton:focus
   	  cursor: help;
   	  border-bottom: 1px dotted #999999;
   }
-.linkedtextholder .im_figure, .linkedtextholder p.s32 {
+.linkedtextholder .im_figure, .linkedtextholder .os_figure, .linkedtextholder p.s32 {
     max-width: 500px;
     margin: auto; 
     font-size: 80%;
