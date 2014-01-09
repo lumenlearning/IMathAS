@@ -9,9 +9,11 @@ if (isset($_GET['callength'])) {
 	$_COOKIE["callength".$_GET['cid']] = $_GET['callength'];
 }
 
+require_once("filehandler.php");
+
 function showcalendar($refpage) {
 
-global $imasroot,$cid,$userid,$teacherid,$previewshift,$latepasses,$urlmode, $latepasshrs, $myrights, $tzoffset;
+global $imasroot,$cid,$userid,$teacherid,$previewshift,$latepasses,$urlmode, $latepasshrs, $myrights, $tzoffset, $tzname;
 
 $now= time();
 if ($previewshift!=-1) {
@@ -40,7 +42,11 @@ $dayofweek = tzdate('w',$today);
 $curmonum = tzdate('n',$today);
 $dayofmo = tzdate('j',$today);
 $curyr = tzdate('Y',$today);
-$serveroffset = date('Z') + $tzoffset*60;
+if ($tzname=='') {
+	$serveroffset = date('Z') + $tzoffset*60;
+} else {
+	$serveroffset = 0; //don't need this if user's timezone has been set
+}
 $midtoday = mktime(12,0,0,$curmonum,$dayofmo,$curyr)+$serveroffset;
 
 
@@ -243,8 +249,8 @@ while ($row = mysql_fetch_row($result)) {
 	 if ((substr($row[3],0,4)=="http") && (strpos($row[3]," ")===false)) { //is a web link
 		   $alink = trim($row[3]);
 	   } else if (substr($row[3],0,5)=="file:") {
-		   $filename = substr($row[3],5);
-		   $alink = $imasroot . "/course/files/".$filename;
+		   $filename = substr(strip_tags($row[3]),5);
+		   $alink = getcoursefileurl($filename);//$alink = $imasroot . "/course/files/".$filename;
 	   } else {
 		   $alink = '';
 	   }
@@ -403,7 +409,7 @@ for ($i=0;$i<count($hdrs);$i++) {
 			echo '<td id="'.$ids[$i][$j].'" onclick="showcalcontents(this)" class="today"><div class="td"><span class=day>'.$hdrs[$i][$j]."</span><div class=center>";
 		} else {
 			$addr = $refpage.".php?cid=$cid&calstart=". ($midtoday + $i*7*24*60*60 + ($j - $dayofweek)*24*60*60);
-			echo '<td id="'.$ids[$i][$j].'" onclick="showcalcontents(this)" ><div class="td"><span class=day><a href="'.$addr.'">'.$hdrs[$i][$j]."</a></span><div class=center>";
+			echo '<td id="'.$ids[$i][$j].'" onclick="showcalcontents(this)" ><div class="td"><span class=day><a href="'.$addr.'" class="caldl">'.$hdrs[$i][$j]."</a></span><div class=center>";
 		}
 		if (isset($assess[$ids[$i][$j]])) {
 			foreach ($assess[$ids[$i][$j]] as $k=>$info) {

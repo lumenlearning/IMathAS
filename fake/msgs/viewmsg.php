@@ -79,8 +79,11 @@
 			
 	
 	$msgid = $_GET['msgid'];
-	$query = "SELECT imas_msgs.*,imas_fakeusers.LastName,imas_fakeusers.FirstName,imas_fakeusers.email,imas_fakeusers.hasuserimg ";
-	$query .= "FROM imas_msgs,imas_fakeusers WHERE imas_msgs.msgfrom=imas_fakeusers.id AND imas_msgs.id='$msgid' ";
+	
+	$query = "SELECT imas_msgs.*,imas_fakeusers.LastName,imas_fakeusers.FirstName,imas_fakeusers.email,imas_fakeusers.hasuserimg,imas_students.section ";
+	$query .= "FROM imas_msgs JOIN imas_fakeusers ON imas_msgs.msgfrom=imas_fakeusers.id LEFT JOIN imas_students ON imas_students.userid=imas_fakeusers.id AND imas_students.courseid='$cid' ";
+	$query .= "WHERE imas_msgs.id='$msgid' ";
+	
 	if ($type!='allstu' || !$isteacher) {
 		$query .= "AND (imas_msgs.msgto='$userid' OR imas_msgs.msgfrom='$userid')";
 	}
@@ -102,6 +105,9 @@
 	}
 	echo "<table class=gb ><tbody>";
 	echo "<tr><td><b>From:</b></td><td>{$line['LastName']}, {$line['FirstName']}";
+	if ($line['section']!='') {
+		echo ' <span class="small">(Section: '.$line['section'].')</span>';
+	}
 	if (isset($teacherof[$line['courseid']])) {
 		echo " <a href=\"mailto:{$line['email']}\">email</a> | ";
 		echo " <a href=\"$imasroot/course/gradebook.php?cid={$line['courseid']}&stu={$line['msgfrom']}\" target=\"_popoutgradebook\">gradebook</a>";
@@ -158,14 +164,16 @@
 			$cansendmsgs = true;
 		}
 		if ($cansendmsgs) {
-			echo "<a href=\"msglist.php?cid=$cid&filtercid=$filtercid&page=$page&type=$type&add=new&to={$line['msgfrom']}&toquote=$msgid\">Reply</a> | ";
+			echo "<button type=\"button\" onclick=\"window.location.href='msglist.php?cid=$cid&filtercid=$filtercid&page=$page&type=$type&add=new&to={$line['msgfrom']}&toquote=$msgid'\">"._('Reply')."</button> | ";
 		}
-		echo "<a href=\"msghistory.php?cid=$cid&filtercid=$filtercid&page=$page&msgid=$msgid&type=$type\">View Conversation</a> | ";
-		echo "<a href=\"msglist.php?cid=$cid&filtercid=$filtercid&page=$page&removeid=$msgid&type=$type\">Delete</a>";
+		echo "<button type=\"button\" onclick=\"if(confirm('"._('Are you SURE you want to delete this message?')."')){window.location.href='msglist.php?cid=$cid&filtercid=$filtercid&page=$page&removeid=$msgid&type=$type'}\">"._('Delete')."</button>";
+		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?markunread=true&cid=$cid&filtercid=$filtercid&page=$page&msgid=$msgid&type=$type'\">"._('Mark Unread')."</button>";
+		
+		echo " | <a href=\"msghistory.php?cid=$cid&filtercid=$filtercid&page=$page&msgid=$msgid&type=$type\">View Conversation</a> ";
 		if ($isteacher && $line['courseid']==$cid) {
 			echo " | <a href=\"$imasroot/course/gradebook.php?cid={$line['courseid']}&stu={$line['msgfrom']}\">Gradebook</a>";
 		}
-		echo " | <a href=\"viewmsg.php?markunread=true&cid=$cid&filtercid=$filtercid&page=$page&msgid=$msgid&type=$type\">Mark Unread</a>";
+		
 	} else if ($type=='sent' && $type!='allstu') {
 		echo "<a href=\"msghistory.php?cid=$cid&filtercid=$filtercid&page=$page&msgid=$msgid&type=$type\">View Conversation</a>";
 		

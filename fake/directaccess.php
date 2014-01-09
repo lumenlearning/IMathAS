@@ -157,8 +157,14 @@
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$coursename = mysql_result($result,0,0);
 		
-		$placeinhead = "<style type=\"text/css\">div#header {clear: both;height: 75px;background-color: #9C6;margin: 0px;padding: 0px;border-left: 10px solid #036;border-bottom: 5px solid #036;} \n.vcenter {font-family: sans-serif;font-size: 28px;margin: 0px;margin-left: 30px;padding-top: 25px;color: #fff;}</style>";
+		if (isset($CFG['GEN']['directaccessincludepath'])) {
+			$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/".$CFG['GEN']['directaccessincludepath']."infopages.css\" type=\"text/css\">\n";
+		} else {
+			$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
+		}
+		//$placeinhead = "<style type=\"text/css\">div#header {clear: both;height: 75px;background-color: #9C6;margin: 0px;padding: 0px;border-left: 10px solid #036;border-bottom: 5px solid #036;} \n.vcenter {font-family: sans-serif;font-size: 28px;margin: 0px;margin-left: 30px;padding-top: 25px;color: #fff;}</style>";
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/md5.js\" ></script>";
+		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 		$pagetitle = $coursename;
 		 if (isset($_SESSION['challenge'])) {
 			 $challenge = $_SESSION['challenge'];
@@ -167,7 +173,7 @@
 			 $_SESSION['challenge'] = $challenge;
 		 }
 		require("header.php");
-		echo "<div class=\"breadcrumb\">$breadcrumbbase $coursename Access</div>";
+		//echo "<div class=\"breadcrumb\">$breadcrumbbase $coursename Access</div>";
 		echo "<div id=\"header\"><div class=\"vcenter\">$coursename</div></div>";
 		//echo '<span style="float:right;margin-top:10px;">'.$smallheaderlogo.'</span>';
 		
@@ -201,10 +207,13 @@ if (strlen($enrollkey)>0) {
 <div id="settings">JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</div>
 
 <input type="hidden" id="tzoffset" name="tzoffset" value=""> 
+<input type="hidden" id="tzname" name="tzname" value=""> 
 <input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
 <script type="text/javascript">        
         var thedate = new Date();  
         document.getElementById("tzoffset").value = thedate.getTimezoneOffset();  
+        var tz = jstz.determine(); 
+        document.getElementById("tzname").value = tz.name();
 </script> 
 
 

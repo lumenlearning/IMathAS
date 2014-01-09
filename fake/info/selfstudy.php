@@ -12,7 +12,8 @@ require("../infoheader.php");
 <div class="content">
 
 <h2>Self Study</h2>
-<p>MyOpenMath can be used by students as a self-study resource.  MyOpenMath provides 
+<p>While most students use MyOpenMath in connection with an instructor-led course, 
+MyOpenMath can be used by students as a self-study resource.  MyOpenMath provides 
 interactive assessment to supplement several
 free and open math textbooks that can be read online, or printed copies can be ordered through our partner
 site, <a href="http://www.opentextbookstore.com">OpenTextBookStore.com</a>.  All our self-study

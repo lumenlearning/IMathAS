@@ -289,103 +289,117 @@ function mathjs(st,varlist) {
     	
     	return out;
     }
+    
+    function catchkeypress(e) {
+        e = e || window.event; 
+    	var k = e.which || e.keyCode;
+    	if (k==13 || k==61) {
+    		document.calculator.ans.value=getval(document.calculator.ans.value);
+    		e.preventDefault();
+    		return false;
+    	}
+    	
+    }
+    function refocus() {
+    	document.getElementById('ans').focus();
+    }
     </script>
     </head>
-    <body>
-    <form name="calculator">
+    <body onload="document.getElementById('ans').focus()">
+    <form name="calculator" onsubmit="return false;">
     <!-- from http://www.daniweb.com/web-development/web-design-html-and-css/code/216407/a-four-function-calculator-html# -->
    
     <table>
     <tr>
     <td colspan="5">
-    <input type="text" value="" name="ans" style="width:200px;text-align:right;margin:5px;">
+    <input type="text" id="ans" value="" name="ans" style="width:200px;text-align:right;margin:5px;" onkeypress="catchkeypress()" autosuggest="off" autocomplete="off" autocorrect="off"/>
     </td>
      <td align="center">
-    <input type="button" value=" C " name="clear" onClick="document.calculator.ans.value=''">
+    <input type="button" value=" C " name="clear" onClick="document.calculator.ans.value='';refocus();">
     </td>
     </tr>
     <tr>
      <td align="center">
-    <input type="button" value=" ^ " name="power" onClick="document.calculator.ans.value+='^'">
+    <input type="button" value=" ^ " name="power" onClick="document.calculator.ans.value+='^';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" &radic; " name="sqrt" onClick="document.calculator.ans.value+='sqrt('">
+    <input type="button" value=" &radic; " name="sqrt" onClick="document.calculator.ans.value+='sqrt(';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 7 " name="seven" onClick="document.calculator.ans.value+='7'">
+    <input type="button" value=" 7 " name="seven" onClick="document.calculator.ans.value+='7';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 8 " name="eight" onClick="document.calculator.ans.value+='8'">
+    <input type="button" value=" 8 " name="eight" onClick="document.calculator.ans.value+='8';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 9 " name="nine" onClick="document.calculator.ans.value+='9'">
+    <input type="button" value=" 9 " name="nine" onClick="document.calculator.ans.value+='9';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" / " name="divide" onClick="document.calculator.ans.value+='/'">
+    <input type="button" value=" / " name="divide" onClick="document.calculator.ans.value+='/';refocus();">
     </td>
    
     </tr>
     <tr>
     <td align="center">
-    <input type="button" value=" ( " name="divide" onClick="document.calculator.ans.value+='('">
+    <input type="button" value=" ( " name="divide" onClick="document.calculator.ans.value+='(';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" ) " name="divide" onClick="document.calculator.ans.value+=')'">
+    <input type="button" value=" ) " name="divide" onClick="document.calculator.ans.value+=')';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 4 " name="four" onClick="document.calculator.ans.value+='4'">
+    <input type="button" value=" 4 " name="four" onClick="document.calculator.ans.value+='4';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 5 " name="five" onClick="document.calculator.ans.value+='5'">
+    <input type="button" value=" 5 " name="five" onClick="document.calculator.ans.value+='5';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 6 " name="six" onClick="document.calculator.ans.value+='6'">
+    <input type="button" value=" 6 " name="six" onClick="document.calculator.ans.value+='6';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" * " name="multiply" onClick="document.calculator.ans.value+='*'">
+    <input type="button" value=" * " name="multiply" onClick="document.calculator.ans.value+='*';refocus();">
     </td>
     
     </tr>
     <tr>
     <td align="center">
-    <input type="button" value=" log " name="divide" onClick="document.calculator.ans.value+='log('">
+    <input type="button" value=" log " name="divide" onClick="document.calculator.ans.value+='log(';refocus();">
     </td>
      <td align="center">
-    <input type="button" value=" ln " name="divide" onClick="document.calculator.ans.value+='ln('">
+    <input type="button" value=" ln " name="divide" onClick="document.calculator.ans.value+='ln(';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 1 " name="one" onClick="document.calculator.ans.value+='1'">
+    <input type="button" value=" 1 " name="one" onClick="document.calculator.ans.value+='1';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 2 " name="two" onClick="document.calculator.ans.value+='2'">
+    <input type="button" value=" 2 " name="two" onClick="document.calculator.ans.value+='2';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 3 " name="three" onClick="document.calculator.ans.value+='3'">
+    <input type="button" value=" 3 " name="three" onClick="document.calculator.ans.value+='3';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" - " name="subtract" onClick="document.calculator.ans.value+='-'">
+    <input type="button" value=" - " name="subtract" onClick="document.calculator.ans.value+='-';refocus();">
     </td>
      
     </tr>
     <tr>
     <td align="center">
-    <input type="button" value=" e^ " name="divide" onClick="document.calculator.ans.value+='e^'">
+    <input type="button" value=" e^ " name="divide" onClick="document.calculator.ans.value+='e^';refocus();">
     </td>
      <td align="center">
-    <input type="button" value=" &pi; " name="divide" onClick="document.calculator.ans.value+='pi'">
+    <input type="button" value=" &pi; " name="divide" onClick="document.calculator.ans.value+='pi';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" . " name="dec" onClick="document.calculator.ans.value+='.'">
+    <input type="button" value=" . " name="dec" onClick="document.calculator.ans.value+='.';refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" 0 " name="zero" onClick="document.calculator.ans.value+='0'">
+    <input type="button" value=" 0 " name="zero" onClick="document.calculator.ans.value+='0';refocus();">
     </td>
     <td align="center">
     <input type="button" value=" = " name="equal"
-    onClick="document.calculator.ans.value=getval(document.calculator.ans.value)">
+    onClick="document.calculator.ans.value=getval(document.calculator.ans.value);refocus();">
     </td>
     <td align="center">
-    <input type="button" value=" + " name="add" onClick="document.calculator.ans.value+='+'">
+    <input type="button" value=" + " name="add" onClick="document.calculator.ans.value+='+';refocus();">
     </td>
 
     </tr>

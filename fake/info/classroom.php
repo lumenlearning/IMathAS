@@ -4,7 +4,7 @@ require("../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
 $placeinhead .= '<style type="text/css">ul.spaced li {padding-bottom: .5em;}</style>';
 require("../header.php");
-$pagetitle ="Classroom";
+$pagetitle ="For Instructors";
 require("../infoheader.php");
 ?>
 
@@ -34,19 +34,14 @@ site, <a href="http://www.opentextbookstore.com">OpenTextBookStore.com</a>.</p>
   <li>Prealgebra, by College of the Redwoods</li>
   <li>Beginning and Intermediate Algebra, by Tyler Wallace</li>
   <li>Beginning and Intermediate Algebra, a CK12 flexbook remixed by James Sousa</li>
+  <li>Math in Society, by David Lippman (A quantitative reasoning / math for liberal arts course)</li>
   <li>Precalculus: an Investigation of Functions, by David Lippman and Melonie Rasmussen<br/>(covers College Algebra and Trig) <a href="http://www.youtube.com/watch?v=1IpDmCaJ6rI" target="_blank">video tour</a></li>
   <li>College Algebra, by Carl Stitz and Jeff Zeager</li>
-  <li>Trigonometry, a CK12 flexbook remixed by James Sousa</li>
-  <li>Math in Society, by David Lippman (A quantitative reasoning / math for liberal arts course)</li>
   <li>Business Calculus, by Shana Calaway, Dale Hoffman, and David Lippman</li>
+  <li>Contemporary Calculus (single variable), by Dale Hoffman</li>
 </ul>
 </p>
-
-<p>Coming very soon we will have a pre-built course for:
-<ul>
-  <li>Contemporary Calculus, by Dale Hoffman (covers single-variable calculus)</li>
-</ul>
-</p>  
+<p>To preview these courses, <a href="index.php">return to the login page</a> and login with username <b>guest</b> (no password needed).</p>
 </div>
 
 </body>

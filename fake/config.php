@@ -17,9 +17,9 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 
   $AWSkey = getenv('AWS_ACCESS_KEY_ID');
   $AWSsecret = getenv('AWS_SECRET_KEY');  
-  $AWSbucket = getenv('PARAM1');  //SWITCH to 'wamapdata'
+  $AWSbucket = 'wamapdata';  //SWITCH to 'wamapdata'
   $dbserver = getenv('PARAM2');
-  $dbname = getenv('PARAM3');  //SWITCH to 'wamap'
+  $dbname = 'wamap';  //SWITCH to 'wamap'
   $dbusername = getenv('PARAM4');
   $dbpassword = getenv('PARAM5');
   if (getenv('imasroot')!==false) {
@@ -149,15 +149,15 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['CPS']['unenroll'] = array(0,0);
  $CFG['CPS']['chatset'] = array(0,0);
  $CFG['CPS']['showlatepass'] = array(1,0);
- $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,7,9",1),0);
+ $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,9",1),0);
  
-// $CFG['CPS']['leftnavtools'] = false;
+ //$CFG['CPS']['leftnavtools'] = 'limited';
  $CFG['CPS']['templateoncreate'] = true;
  
  $defaultcoursetheme = "otbs_fw.css";
  $CFG['CPS']['theme'] = array("otbs_fw.css",1);
- $CFG['CPS']['themelist'] ="otbs_fw.css,otbs.css,modern.css,angelish.css,facebookish.css";
- $CFG['CPS']['themenames'] = "Lumen Fixed Width,Lumen Fluid,Modern,Clean,Social";
+ $CFG['CPS']['themelist'] ="otbs_fw.css,otbs.css,modern.css,angelish.css,facebookish.css,otbsreader.css";
+ $CFG['CPS']['themenames'] = "Lumen Fixed Width,Lumen Fluid,Modern,Clean,Social,Reader";
 	 
  $CFG['TE']['navicons'] = array(
 	 'untried'=>'te_blue_arrow.png',
@@ -196,7 +196,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** end MyOpenMath config ***/
 }
 
-$imasroot .= "/fake";
+$imasroot = "/fake";
 
 //session path 
 //$sessionpath = "";

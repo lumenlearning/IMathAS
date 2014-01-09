@@ -13,7 +13,7 @@ function beginitem($canedit,$aname=0) {
 	 }
 }
 function enditem($canedit) {
-	//echo '<div class="clear"></div>';
+	echo '<div class="clear"></div>';
 	echo "</div>\n";
 	if ($canedit) {
 		echo '</div>'; //itemwrapper
@@ -23,7 +23,7 @@ function enditem($canedit) {
 
   function showitems($items,$parent,$inpublic=false) {
 	   global $teacherid,$tutorid,$studentid,$cid,$imasroot,$userid,$openblocks,$firstload,$sessiondata,$previewshift,$myrights;
-	   global $hideicons,$exceptions,$latepasses,$graphicalicons,$ispublic,$studentinfo,$newpostcnts,$CFG,$latepasshrs,$hasstats;
+	   global $hideicons,$exceptions,$latepasses,$graphicalicons,$ispublic,$studentinfo,$newpostcnts,$CFG,$latepasshrs,$hasstats,$toolset,$readlinkeditems;
 	   require_once("../includes/filehandler.php");
 	   
 	   if (!isset($CFG['CPS']['itemicons'])) {
@@ -75,7 +75,7 @@ function enditem($canedit) {
 					continue;
 				}
 			}  
-			$items[$i]['name'] = stripslashes($items[$i]['name']);
+			$items[$i]['name'] = stripslashes($items[$i]['name']);;
 			if ($canedit) {
 				echo generatemoveselect($i,count($items),$parent,$blocklist);
 			}
@@ -168,7 +168,7 @@ function enditem($canedit) {
 					if (($hideicons&16)==0) {
 						echo "</div>";
 					}
-					echo '<br class="clear" />';
+					echo '<div class="clear"></div>';
 					echo "</div>";
 					if ($canedit) {
 						echo '</div>'; //itemwrapper
@@ -221,7 +221,7 @@ function enditem($canedit) {
 					if (($hideicons&16)==0) {
 						echo "</div>";
 					}
-					echo '<br class="clear" />';
+					echo '<div class="clear"></div>';
 					echo "</div>";
 					if ($canedit) {
 						echo '</div>'; //itemwrapper
@@ -368,7 +368,7 @@ function enditem($canedit) {
 					if (($hideicons&16)==0) {
 						echo "</div>";
 					}
-					echo '<br class="clear" />';
+					echo '<div class="clear"></div>';
 					echo "</div>";
 					if ($canedit) {
 						echo '</div>'; //itemwrapper
@@ -415,7 +415,7 @@ function enditem($canedit) {
 					if (($hideicons&16)==0) {
 						echo "</div>";
 					}
-					echo '<br class="clear" />';
+					echo '<div class="clear"></div>';
 					echo "</div>";
 					if ($canedit) {
 						echo '</div>'; //itemwrapper
@@ -548,6 +548,9 @@ function enditem($canedit) {
 	    		   }
 	    		   if (strpos($line['summary'],'<p>')!==0 && strpos($line['summary'],'<ul>')!==0 && strpos($line['summary'],'<ol>')!==0) {
 				   $line['summary'] = '<p>'.$line['summary'].'</p>';
+				   if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['summary'])) {
+				   	   $line['summary'] = '';
+				   }
 			   }
 			   if (isset($studentid) && !isset($sessiondata['stuview'])) {
 			   	   $rec = "data-base=\"assesssum-$typeid\" ";
@@ -752,12 +755,52 @@ function enditem($canedit) {
 		   } else if ($line['itemtype']=="InlineText") {
 		
 			   $typeid = $line['typeid'];
-			   $query = "SELECT title,text,startdate,enddate,fileorder,avail FROM imas_inlinetext WHERE id='$typeid'";
+			   $query = "SELECT title,text,startdate,enddate,fileorder,avail,isplaylist FROM imas_inlinetext WHERE id='$typeid'";
 			   $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 			   $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			
-			   if (strpos($line['text'],'<p>')!==0 && strpos($line['text'],'<ul>')!==0 && strpos($line['text'],'<ol>')!==0) {
+			   $isvideo = (preg_match_all('/youtu/',$line['text'])>1) && ($line['isplaylist']>0);
+			   if ($isvideo) {
+			   	   $json = array();
+			   	   preg_match_all('/<a[^>]*(youtube\.com|youtu\.be)(.*?)"[^>]*?>(.*?)<\/a>/',$line['text'],$matches, PREG_SET_ORDER);
+			   	   foreach ($matches as $k=>$m) {
+			   	   	if ($m[1]=='youtube.com') {
+			   	   		$p = explode('v=',$m[2]);
+			   	   		$p2 = preg_split('/[#&]/',$p[1]);
+			   	   	} else if ($m[1]=='youtu.be') {
+			   	   		$p2 = preg_split('/[#&?]/',substr($m[2],1));
+			   	   	}
+			   	   	$vidid = $p2[0];
+			   	   	if (preg_match('/.*[^r]t=((\d+)m)?((\d+)s)?.*/',$m[2],$tm)) {
+			   	   		$start = ($tm[2]?$tm[2]*60:0) + ($tm[4]?$tm[4]*1:0);
+			   	   	} else if (preg_match('/start=(\d+)/',$m[2],$tm)) {
+			   	   		$start = $tm[1];
+			   	   	} else {
+			   	   		$start = 0;
+			   	   	}
+			   	   	if (preg_match('/end=(\d+)/',$m[2],$tm)) {
+			   	   		$end = $tm[1];
+			   	   	} else {
+			   	   		$end = 0;
+			   	   	}
+			   	   	$json[] = '{"name":"'.str_replace('"','\\"',$m[3]).'", "vidid":"'.str_replace('"','\\"',$vidid).'", "start":'.$start.', "end":'.$end.'}';
+			   	   	$line['text'] = str_replace($m[0],'<a href="#" onclick="playliststart('.$typeid.','.$k.');return false;">'.$m[3].'</a>',$line['text']);
+			   	   }
+			   	   
+			   	   $playlist = '<div class="playlistbar" id="playlistbar'.$typeid.'"><div class="vidtracksA"></div> <span> Playlist</span> ';
+			   	   $playlist .= '<div class="vidplay" style="margin-left:1em;cursor:pointer" onclick="playliststart('.$typeid.',0)"></div>';
+			   	   $playlist .= '<div class="vidrewI" style="display:none;"></div><div class="vidff" style="display:none;margin-right:1em;"></div> ';
+			   	   $playlist .= '<span class="playlisttitle"></span></div>';
+			   	   $playlist .= '<div class="playlistwrap" id="playlistwrap'.$typeid.'">';
+			   	   $playlist .= '<div class="playlisttext">'.$line['text'].'</div><div class="playlistvid"></div></div>';
+			   	   $playlist .= '<script type="text/javascript">playlist['.$typeid.'] = ['.implode(',',$json).'];</script>'; 
+			   	   $line['text'] = $playlist;
+			   	   
+			   } else if (strpos($line['text'],'<p>')!==0 && strpos($line['text'],'<ul>')!==0 && strpos($line['text'],'<ol>')!==0) {
 				   $line['text'] = '<p>'.$line['text'].'</p>';
+				   if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['text'])) {
+				   	   $line['text'] = '';
+				   }
 			   }
 			   if (isset($studentid) && !isset($sessiondata['stuview'])) {
 			   	   $rec = "data-base=\"inlinetext-$typeid\" ";
@@ -903,6 +946,9 @@ function enditem($canedit) {
 			  
 			   if (strpos($line['summary'],'<p>')!==0) {
 				   $line['summary'] = '<p>'.$line['summary'].'</p>';
+				   if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['summary'])) {
+				   	   $line['summary'] = '';
+				   }
 			   }
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -989,6 +1035,9 @@ function enditem($canedit) {
 			  
 			   if (strpos($line['summary'],'<p>')!==0 && strpos($line['summary'],'<ul>')!==0 && strpos($line['summary'],'<ol>')!==0) {
 				   $line['summary'] = '<p>'.$line['summary'].'</p>';
+				   if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['summary'])) {
+				   	   $line['summary'] = '';
+				   } 
 			   }
 			   if (isset($studentid) && !isset($sessiondata['stuview'])) {
 			   	   $rec = "data-base=\"linkedsum-$typeid\" ";
@@ -1072,7 +1121,12 @@ function enditem($canedit) {
 					   }
 				   }
 				   echo "<div class=title>";
-				   echo "<b><a href=\"$alink\" $rec $target>{$line['title']}</a></b>\n";
+				   if (isset($readlinkeditems[$typeid])) {
+				   	   echo '<b class="readitem">';
+				   } else {
+				   	   echo '<b>';
+				   }
+				   echo "<a href=\"$alink\" $rec $target>{$line['title']}</a></b>\n";
 				   if ($viewall) { 
 					   echo '<span class="instrdates">';
 					   echo "<br/>$show ";
@@ -1189,6 +1243,9 @@ function enditem($canedit) {
 			  
 			   if (strpos($line['description'],'<p>')!==0) {
 				   $line['description'] = '<p>'.$line['description'].'</p>';
+				   if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['description'])) {
+				   	   $line['description'] = '';
+				   }
 			   }
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -1288,6 +1345,9 @@ function enditem($canedit) {
 			   if ($ispublic && $line['groupsetid']>0) { continue;}
 			   if (strpos($line['description'],'<p>')!==0) {
 				   $line['description'] = '<p>'.$line['description'].'</p>';
+				   if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['description'])) {
+				   	   $line['description'] = '';
+				   }
 			   }
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -1507,6 +1567,8 @@ function enditem($canedit) {
    }
     
    function generatemoveselect($num,$count,$blk,$blocklist) {
+   	   global $toolset;
+   	   if (($toolset&4)==4) {return '';}
 	$num = $num+1;  //adjust indexing
 	$html = "<select class=\"mvsel\" id=\"$blk-$num\" onchange=\"moveitem($num,'$blk')\">\n";
 	for ($i = 1; $i <= $count; $i++) {

@@ -146,6 +146,7 @@ function printoutcome($arr) {
 			echo '<li class="blockli" id="grp'.$cnt.'"><span class=icon style="background-color:#66f">G</span> ';
 			echo '<input class="outcome" type="text" size="60" id="g'.$cnt.'" value="'.htmlentities($item['name']).'" onkeyup="txtchg()"> ';
 			echo '<a href="#" onclick="removeoutcomegrp(this);return false">'._("Delete").'</a>';
+			$cnt++;
 			if (count($item['outcomes'])>0) {
 				echo '<ul class="qview">';
 				printoutcome($item['outcomes']);
@@ -244,7 +245,7 @@ echo "<div id=\"headercourse\" class=\"pagetitle\"><h2>"._("Course Outcomes")."<
 
 echo '<div class="cpmid"><a href="outcomemap.php?cid='.$cid.'">'._('View Outcomes Map').'</a> | <a href="outcomereport.php?cid='.$cid.'">'._('View Outcomes Report').'</a></div>';
 
-echo '<div class="breadcrumb">'._('Use colored boxes to drag-and-drop order.').' <input type="button" id="recchg" disabled="disabled" value="', _('Record Changes'), '" onclick="submitChanges()"/><span id="submitnotice" style="color:red;"></span></div>';
+echo '<div class="breadcrumb">'._('Use colored boxes to drag-and-drop order and move outcomes inside groups.').' <input type="button" id="recchg" disabled="disabled" value="', _('Save Changes'), '" onclick="submitChanges()"/><span id="submitnotice" style="color:red;"></span></div>';
 
 echo '<ul id="qviewtree" class="qview">';
 printoutcome($outcomes);

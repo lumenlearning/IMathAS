@@ -40,7 +40,17 @@
 	 $defaultcoursetheme = "default.css";
  }
  $coursetheme = $defaultcoursetheme; //will be overwritten later if set
- 
+ if (!isset($CFG['CPS']['miniicons'])) {
+	$CFG['CPS']['miniicons'] = array( 
+		 'assess'=>'assess_tiny.png',
+		 'drill'=>'assess_tiny.png',
+		 'inline'=>'inline_tiny.png',
+		 'linked'=>'html_tiny.png',
+		 'forum'=>'forum_tiny.png',
+		 'wiki'=>'wiki_tiny.png',
+		 'folder'=>'folder_tiny.png',
+		 'calendar'=>'1day.png');
+ }
  
  //check for bad sessionids.  
  if (strlen($sessionid)<10) { 
@@ -49,16 +59,23 @@
 	exit;	 
  }
  $sessiondata = array();
- $query = "SELECT userid,tzoffset,sessiondata,time FROM imas_sessions WHERE sessionid='$sessionid'";
+ $query = "SELECT * FROM imas_sessions WHERE sessionid='$sessionid'";
  $result = mysql_query($query) or die("Query failed : " . mysql_error());
  if (mysql_num_rows($result)>0) {
-	 $userid = mysql_result($result,0,0);
-	 $tzoffset = mysql_result($result,0,1);
-	 $enc = mysql_result($result,0,2);
+ 	 $line = mysql_fetch_assoc($result);
+ 	 $userid = $line['userid'];
+ 	 $tzoffset = $line['tzoffset'];
+ 	 $tzname = '';
+ 	 if (isset($line['tzname']) && $line['tzname']!='') {
+ 	 	if (date_default_timezone_set($line['tzname'])) {
+ 	 		$tzname = $line['tzname'];
+ 	 	}
+ 	 }
+ 	 $enc = $line['sessiondata'];
 	 if ($enc!='0') {
 		 $sessiondata = unserialize(base64_decode($enc));
 		 //delete own session if old and not posting
-		 if ((time()-mysql_result($result,0,3))>24*60*60 && (!isset($_POST) || count($_POST)==0)) {
+		 if ((time()-$line['time'])>24*60*60 && (!isset($_POST) || count($_POST)==0)) {
 			$query = "DELETE FROM imas_sessions WHERE userid='$userid'";
 			mysql_query($query) or die("Query failed : " . mysql_error());
 			unset($userid);
@@ -281,7 +298,11 @@ END;
 			 $enc = 0; //give warning
 		 }
 		 
-		 $query = "INSERT INTO imas_sessions (sessionid,userid,time,tzoffset,sessiondata) VALUES ('$sessionid','$userid',$now,'{$_POST['tzoffset']}','$enc')";
+		 if (isset($_POST['tzname']) && strpos(basename($_SERVER['PHP_SELF']),'upgrade.php')===false) {
+		 	 $query = "INSERT INTO imas_sessions (sessionid,userid,time,tzoffset,tzname,sessiondata) VALUES ('$sessionid','$userid',$now,'{$_POST['tzoffset']}','{$_POST['tzname']}','$enc')";
+		 } else {
+		 	 $query = "INSERT INTO imas_sessions (sessionid,userid,time,tzoffset,sessiondata) VALUES ('$sessionid','$userid',$now,'{$_POST['tzoffset']}','$enc')";
+		 }
 		 $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		 
 		 $query = "UPDATE imas_fakeusers SET lastaccess=$now WHERE id=$userid";
@@ -333,7 +354,7 @@ END;
 	//$username = $_COOKIE['username'];
 	$query = "SELECT SID,rights,groupid,LastName,FirstName,deflib";
 	if (strpos(basename($_SERVER['PHP_SELF']),'upgrade.php')===false) {
-		$query .= ',listperpage';
+		$query .= ',listperpage,hasuserimg';
 	}
 	$query .= " FROM imas_fakeusers WHERE id='$userid'"; 
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -343,6 +364,7 @@ END;
 	$groupid = $line['groupid'];
 	$userdeflib = $line['deflib'];
 	$listperpage = $line['listperpage'];
+	$selfhasuserimg = $line['hasuserimg'];
 	$userfullname = $line['FirstName'] . ' ' . $line['LastName'];
 	$previewshift = -1;
 	$basephysicaldir = rtrim(dirname(__FILE__), '/\\');
@@ -354,8 +376,20 @@ END;
 			writesessiondata();
 		}
 	}
+	if (isset($_GET['fullwidth'])) {
+		$sessiondata['usefullwidth'] = true;
+		$usefullwidth = true;
+		writesessiondata();
+	} else if (isset($sessiondata['usefullwidth'])) {
+		$usefullwidth = true;
+	}
+	
 	if (isset($_GET['mathjax'])) {
 		$sessiondata['mathdisp'] = 3;
+		writesessiondata();
+	}
+	if (isset($_GET['readernavon'])) {
+		$sessiondata['readernavon'] = true;
 		writesessiondata();
 	}
 	if (isset($_GET['useflash'])) {
@@ -471,7 +505,7 @@ END;
 		
 			}
 		}
-		$query = "SELECT imas_courses.name,imas_courses.available,imas_courses.lockaid,imas_courses.copyrights,imas_fakeusers.groupid,imas_courses.theme,imas_courses.newflag,imas_courses.msgset,imas_courses.topbar,imas_courses.toolset,imas_courses.deftime ";
+		$query = "SELECT imas_courses.name,imas_courses.available,imas_courses.lockaid,imas_courses.copyrights,imas_fakeusers.groupid,imas_courses.theme,imas_courses.newflag,imas_courses.msgset,imas_courses.topbar,imas_courses.toolset,imas_courses.deftime,imas_courses.picicons ";
 		$query .= "FROM imas_courses,imas_fakeusers WHERE imas_courses.id='{$_GET['cid']}' AND imas_fakeusers.id=imas_courses.ownerid";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		if (mysql_num_rows($result)>0) {
@@ -485,6 +519,7 @@ END;
 			$coursetopbar[1] = explode(',',$coursetopbar[1]);
 			$coursetoolset = $crow[9];
 			$coursedeftime = $crow[10];
+			$picicons = $crow[11];
 			if (!isset($coursetopbar[2])) { $coursetopbar[2] = 0;}
 			if ($coursetopbar[0][0] == null) {unset($coursetopbar[0][0]);}
 			if ($coursetopbar[1][0] == null) {unset($coursetopbar[1][0]);}
@@ -532,11 +567,15 @@ END;
  }
  
  function tzdate($string,$time) {
-	  global $tzoffset;
+	  global $tzoffset, $tzname;
 	  //$dstoffset = date('I',time()) - date('I',$time);
-	  //return gmdate($string, $time-60*($tzoffset+60*$dstoffset));	
-	  $serveroffset = date('Z') + $tzoffset*60;
-	  return date($string, $time-$serveroffset);
+	  //return gmdate($string, $time-60*($tzoffset+60*$dstoffset));
+	  if ($tzname != '') {
+	  	  return date($string, $time);
+	  } else {
+		  $serveroffset = date('Z') + $tzoffset*60;
+		  return date($string, $time-$serveroffset);
+	  }
 	  //return gmdate($string, $time-60*$tzoffset);
   }
   
