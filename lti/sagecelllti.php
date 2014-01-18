@@ -1,0 +1,106 @@
+<?php
+$dbusername = getenv('PARAM4');
+$dbpassword = getenv('PARAM5');
+$dbserver = getenv('PARAM2');
+$dbname = "sagecell";
+$link = mysql_connect($dbserver,$dbusername, $dbpassword) 
+  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
+mysql_select_db($dbname);
+
+function addslashes_deep($value) {
+	return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));
+  }
+if (!get_magic_quotes_gpc()) {
+   $_GET    = array_map('addslashes_deep', $_GET);
+   $_POST  = array_map('addslashes_deep', $_POST);
+   $_COOKIE = array_map('addslashes_deep', $_COOKIE);
+} 
+
+if (empty($_POST['oauth_consumer_key'])) {
+	echo 'Error: provide a key (any key - your domain name is suggested)';
+	exit;
+} 
+if (empty($_POST['resource_link_id'])) {
+	echo 'Resource link id is required';
+	exit;
+}
+$ltirole = strtolower($_REQUEST['roles']);          
+if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false) {
+	$ltirole = 'instructor';
+} else {
+	$ltirole = 'learner';
+}
+
+$domain = $_POST['oauth_consumer_key'];
+$linkid = $_POST['resource_link_id'];
+
+if (isset($_GET['save'])) {
+	$code = $_POST['code'];
+	if ($_GET['id']!='new') {
+		$id = intval($_GET['id']);
+		$query = "UPDATE celldata SET code='$code' WHERE id=$id";
+		mysql_query($query) or die("Query failed : " . mysql_error());
+	} else {
+		$query = "INSERT INTO celldata (domain,linkid,code) VALUES ";
+		$query .= "('$domain','$linkid','$code')";
+		mysql_query($query) or die("Query failed : " . mysql_error());
+		$id = mysql_insert_id();
+	}
+} 
+$query = "SELECT code,id FROM celldata WHERE domain='$domain' AND linkid='$linkid'";
+$result = mysql_query($query) or die("Query failed : " . mysql_error());
+if (mysql_num_rows($result)>0) {
+	$code = mysql_result($result,0,0);
+	$id = mysql_result($result,0,1);
+} else {
+	$code = "a = solve(x^2+3*x-2==0,x); print a\nplot(x^2+3*x-2,(-4,4))";
+	$id = 'new';
+}
+?>
+<html>
+<head>
+<title>Sage Cell</title>
+<script type="text/javascript" src="http://aleph.sagemath.org/static/jquery.min.js"></script>
+<script type="text/javascript" src="http://aleph.sagemath.org/embedded_sagecell.js"></script>
+
+<!-- Initialize each cell -->
+<script>
+$(sagecell.init(
+    function() {
+        singlecell.makeSagecell({
+            inputLocation: '#sagecell1', 
+            replaceOutput: true,
+            hide: ['messages', 'computationID', 'files', 'sageMode', 
+                   'editorToggle', 'sessionTitle', 'done'],
+            evalButtonText: 'Evaluate'})
+    }
+ ))
+</script>
+</head>
+
+<body>
+<div id="sagecell1"><script type="text/code"><?php echo $code;?>
+</script></div>
+<p>This web page provides a gateway to the <a href="http://www.sagemath.org/">Sage</a> computer algebra system.
+See <a href="http://www.sagemath.org/eval.html#Calculus/Basics/Differential">some examples</a> of what it can do, or
+see the <a href="http://www.sagemath.org/doc/reference/index.html">reference manual</a> for help with syntax.</p>
+<?php
+if ($ltirole == 'instructor') {
+	echo '<p>Instructors can set default code which will show when students view this placement of this tool.  Students will be able to modify the code, but not save their changes.</p>';
+	echo '<form method="post" action="sagecelllti.php?save=true&amp;id='.$id.'" onsubmit="getcode()">';
+	echo '<input type="submit" value="Save Default Code"/>';
+	echo '<input type="hidden" name="oauth_consumer_key" value="'.$domain.'"/>';
+	echo '<input type="hidden" name="resource_link_id" value="'.$linkid.'"/>';
+	echo '<input type="hidden" name="roles" value="'.$ltirole.'"/>';
+	echo '<textarea style="visibility:hidden;position:absolute;" name="code" id="savecode"></textarea>';
+	echo '</form>';
+	echo '<script type="text/javascript">
+	      function getcode() {
+		var c = document.getElementById("sagecell1").getElementsByTagName("textarea")[0].value;
+		document.getElementById("savecode").value = c;
+	      }</script>';
+}
+?>
+</body>
+</html>
+
