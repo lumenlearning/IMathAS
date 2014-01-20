@@ -60,8 +60,8 @@ if (mysql_num_rows($result)>0) {
 <html>
 <head>
 <title>Sage Cell</title>
-<script type="text/javascript" src="http://aleph.sagemath.org/static/jquery.min.js"></script>
-<script type="text/javascript" src="http://aleph.sagemath.org/embedded_sagecell.js"></script>
+<script type="text/javascript" src="https://sagecell.sagemath.org/static/jquery.min.js"></script>
+<script type="text/javascript" src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
 
 <!-- Initialize each cell -->
 <script>
