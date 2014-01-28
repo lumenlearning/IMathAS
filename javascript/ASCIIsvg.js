@@ -1008,6 +1008,18 @@ function nthlogten(n,v) {
 function matchtolower(match) {
 	return match.toLowerCase();
 }
+function functoindex(match) {
+	var func = "sinh|cosh|tanh|sech|csch|coth|sqrt|ln|log|sin|cos|tan|sec|csc|cot|abs|root".split("|");
+	for (var i=0;i<func.length;i++) {
+		if (func[i]==match) {
+			return '@'+i+'@';
+		}
+	}
+}
+function indextofunc(match, contents) {
+	var func = "sinh|cosh|tanh|sech|csch|coth|sqrt|ln|log|sin|cos|tan|sec|csc|cot|abs|root".split("|");
+	return func[contents];
+}
 
 function mathjs(st,varlist) {
   //translate a math formula to js function notation
@@ -1021,9 +1033,11 @@ function mathjs(st,varlist) {
   //parenthesizes the function variables
   st = st.replace("[","(");
   st = st.replace("]",")");
-  st = st.replace(/arc(sin|cos|tan)/g,"a#r#c $1");
+   st = st.replace(/arc(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth)/gi,"$1^-1");
+  st = st.replace(/(Sin|Cos|Tan|Sec|Csc|Cot|Arc|Abs|Log|Ln|Sqrt)/gi, matchtolower);
   if (varlist != null) {
-	  var reg = new RegExp("(sqrt|ln|log|sin|cos|tan|sec|csc|cot|abs|root)[\(]","g");
+	  st = st.replace(/(sinh|cosh|tanh|sech|csch|coth|sqrt|ln|log|sin|cos|tan|sec|csc|cot|abs|root)/g, functoindex);
+  	  var reg = new RegExp("(sqrt|ln|log|sin|cos|tan|sec|csc|cot|abs|root)[\(]","g");
 	  st = st.replace(reg,"$1#(");
 	  var reg = new RegExp("("+varlist+")("+varlist+")$","g");
 	  st = st.replace(reg,"($1)($2)");
@@ -1031,7 +1045,7 @@ function mathjs(st,varlist) {
 	  st = st.replace(reg,"($1)$2");
 	  var reg = new RegExp("("+varlist+")("+varlist+")([^a-df-zA-Z#])","g"); // 10/25/10 re-removed \( for x(1+x); moved f() handling to AMhelpers;  6/1/09 readded \( for f(350/x)
 	  st = st.replace(reg,"($1)($2)$3"); //get xy3
-	  //var reg = new RegExp("("+varlist+")("+varlist+")(\w*[^\(#])","g");
+	 // var reg = new RegExp("("+varlist+")("+varlist+")(\w*[^\(#])","g");
 	  //st = st.replace(reg,"($1)($2)$3"); //get xysin
 	  var reg = new RegExp("([^a-df-zA-Z#])("+varlist+")([^a-df-zA-Z#])","g");
 	  st = st.replace(reg,"$1($2)$3");	  
@@ -1039,11 +1053,10 @@ function mathjs(st,varlist) {
 	  st = st.replace(reg,"($1)$2");
 	  var reg = new RegExp("([^a-df-zA-Z])("+varlist+")$","g");
 	  st = st.replace(reg,"$1($2)");
+	  st = st.replace(/@(\d+)@/g, indextofunc);
   }
   st = st.replace(/#/g,"");
-  st = st.replace(/a#r#c\s+(sin|cos|tan)/g,"arc$1");
   st = st.replace(/\s/g,"");
-  st = st.replace(/(Sin|Cos|Tan|Sec|Csc|Cot|Arc|Abs|Log|Ln|Sqrt)/g, matchtolower);
   st = st.replace(/log_([\d\.]+)\(/g,"nthlog($1,");
   st = st.replace(/log_\(([\d\.]+)\)\(/g,"nthlog($1,");
   st = st.replace(/log/g,"logten");
