@@ -1,6 +1,6 @@
 <?php
-require("config.php");
-$addr = "http://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/course/quickdrill.php";
+require("../config.php");
+$addr = "https://www.wamap.org/course/quickdrill.php";
 
 $query = "SELECT i_qs.description,i_qs.id FROM imas_questionset as i_qs JOIN imas_library_items as ili ON ili.qsetid=i_qs.id ";
 $query .= "WHERE ili.libid=1270 ORDER BY i_qs.description";
