@@ -780,7 +780,17 @@ if (!isset($_POST['embedpostback'])) {
 	      	   link.innerHTML = link.innerHTML.replace("Show","Hide");
 		   content.style.display = "block";
 	      }
-	     }</script>';
+	     }
+	     function togglemainintroshow(el) {
+	     	if ($("#intro").hasClass("hidden")) {
+	     		$(el).html("'._("Hide Intro/Instructions").'");
+	     		$("#intro").removeClass("hidden").addClass("intro");
+	     	} else {
+	     		$("#intro").addClass("hidden");
+	     		$(el).html("'._("Show Intro/Instructions").'");
+	     	}
+	     }
+	     </script>';
 
 	$cid = $testsettings['courseid'];
 	if ($testsettings['displaymethod'] == "VideoCue") {
@@ -1180,7 +1190,8 @@ if (!isset($_POST['embedpostback'])) {
 	}
 	if (isset($_GET['action'])) {
 		if ($_GET['action']=="skip" || $_GET['action']=="seq") {
-			echo "<div class=right><span onclick=\"document.getElementById('intro').className='intro';\"><a href=\"#\">", _('Show Instructions'), "</a></span></div>\n";
+			echo '<div class="right"><a href="#" onclick="togglemainintroshow(this);return false;">'._("Show Intro/Instructions").'</a></div>';
+			//echo "<div class=right><span onclick=\"document.getElementById('intro').className='intro';\"><a href=\"#\">", _('Show Instructions'), "</a></span></div>\n";
 		}
 		if ($_GET['action']=="scoreall") {
 			//score test
@@ -1397,7 +1408,12 @@ if (!isset($_POST['embedpostback'])) {
 					
 					echo ', is displayed below</p>';
 					if (!$noraw && $showeachscore && $GLOBALS['questionmanualgrade'] != true) {
-						$colors = scorestocolors($rawscores[$qn], '', '', $noraw);
+						//$colors = scorestocolors($rawscores[$qn], '', $qi[$questions[$qn]]['answeights'], $noraw);
+						if (strpos($rawscores[$qn],'~')!==false) {
+							$colors = explode('~',$rawscores[$qn]);
+						} else {
+							$colors = array($rawscores[$qn]);
+						}
 					} else {
 						$colors = array();
 					}
@@ -1438,7 +1454,7 @@ if (!isset($_POST['embedpostback'])) {
 					
 				}
 				
-				echo "<br/><p>When you're done, <a href=\"showtest.php?action=skip&amp;done=true\">click here to see a summary of your score</a>.</p>\n";
+				echo "<br/><p>When you are done, <a href=\"showtest.php?action=skip&amp;done=true\">click here to see a summary of your scores</a>.</p>\n";
 				
 				echo "</div>\n";
 			    }
@@ -1500,13 +1516,18 @@ if (!isset($_POST['embedpostback'])) {
 						echo "<p><a href=\"showtest.php?action=skip&amp;to=$next&amp;regen=$next\">", _('Try another similar question'), "</a></p>\n";
 					}
 					if ($lefttodo == 0) {
-						echo "<a href=\"showtest.php?action=skip&amp;done=true\">", _('Click here to finalize assessment and summarize score'), "</a>\n";
+						echo "<a href=\"showtest.php?action=skip&amp;done=true\">", _('When you are done, click here to see a summary of your score'), "</a>\n";
 					}
 					if (!$reattemptsremain && $testsettings['showans']!='N') {// && $showeachscore) {
 						echo "<p>", _('Question with last attempt is displayed for your review only'), "</p>";
 						
 						if (!$noraw && $showeachscore) {
-							$colors = scorestocolors($rawscores[$next], '', '', $noraw);
+							//$colors = scorestocolors($rawscores[$next], '', $qi[$questions[$next]]['answeights'], $noraw);
+							if (strpos($rawscores[$next],'~')!==false) {
+								$colors = explode('~',$rawscores[$next]);
+							} else {
+								$colors = array($rawscores[$next]);
+							}
 						} else {
 							$colors = array();
 						}
@@ -1596,7 +1617,7 @@ if (!isset($_POST['embedpostback'])) {
 					$done = true;
 				} 
 				if (!$done) {
-					echo "<p>", _('Question scored. <a href="#curq">Continue with assessment</a>, or click <a href="showtest.php?action=seq&amp;done=true">here</a> to finalize and summarize score.'), "</p>\n";
+					echo "<p>", _('Question scored. <a href="#curq">Continue with assessment</a>, or when you are done click <a href="showtest.php?action=seq&amp;done=true">here</a> to see a summary of your score.'), "</p>\n";
 					echo "</div>\n";
 					echo "<hr/>";
 				} else {
@@ -2201,7 +2222,7 @@ if (!isset($_POST['embedpostback'])) {
 				echo "<p>" . _('Total Points Possible: ') . totalpointspossible($qi) . "</p>";
 			}
 			if (!$sessiondata['istutorial']) {
-				echo "<p><a href=\"showtest.php?action=embeddone\">", _('Click here to finalize assessment and summarize score'), "</a></p>\n";
+				echo "<p><a href=\"showtest.php?action=embeddone\">", _('When you are done, click here to see a summary of your score'), "</a></p>\n";
 			}
 			
 			echo '</div>'; //ends either inset or formcontents div
@@ -2310,7 +2331,7 @@ if (!isset($_POST['embedpostback'])) {
 		global $imasroot,$scores,$bestscores,$showeachscore,$qi,$questions,$testsettings;
 		echo "<a href=\"#beginquestions\"><img class=skipnav src=\"$imasroot/img/blank.gif\" alt=\"", _('Skip Navigation'), "\" /></a>\n";
 		
-		echo '<div class="navbar" style="width:125px">';
+		echo '<div class="navbar fixedonscroll" style="width:125px">';
 		echo "<h4>", _('Pages'), "</h4>\n";
 		echo '<ul class="qlist" style="margin-left:-10px">';
 		$jsonbits = array();

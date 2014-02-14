@@ -301,7 +301,7 @@ function scorestocolors($sc,$pts,$answ,$noraw) {
 	if (trim($sc)=='') {return '';}
 	if (strpos($sc,'~')===false) {
 		if ($pts==0) {
-			$color = 'ansgrn';
+			$color = '';
 		} else if ($sc<0) {
 			$color = '';
 		} else if ($sc==0) {
@@ -322,13 +322,14 @@ function scorestocolors($sc,$pts,$answ,$noraw) {
 			$diff = $pts - array_sum($answ);
 			$answ[count($answ)-1] += $diff;
 		} else {
+			$origansw = $answ;
 			$answ = array_fill(0,count($scarr),1);
 		}
 		
 		$out = array();
 		foreach ($scarr as $k=>$v) {
-			if ($answ[$k]==0) {
-				$color = 'ansgrn';
+			if ($answ[$k]==0 || (!$noraw && $origansw[$k]==0)) {
+				$color = '';
 			} else if ($v < 0) {
 				$color = '';
 			} else if ($v==0) { 
@@ -701,7 +702,7 @@ function basicshowq($qn,$seqinactive=false,$colors=array()) {
 	$regen = ((($regenonreattempt && $qi[$questions[$qn]]['regen']==0) || $qi[$questions[$qn]]['regen']==1)&&amreattempting($qn));
 	$thisshowhints = ($qi[$questions[$qn]]['showhints']==2 || ($qi[$questions[$qn]]['showhints']==0 && $showhints));
 	if (!$noraw && $showeachscore) { //&& $GLOBALS['questionmanualgrade'] != true) {
-		$colors = scorestocolors($rawscores[$qn], '', '', $noraw);
+		$colors = scorestocolors($rawscores[$qn], '', $qi[$questions[$qn]]['answeights'], $noraw);
 	}
 	if (!$seqinactive) {
 		displayq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],$showa,$thisshowhints,$attempts[$qn],false,$regen,$seqinactive,$colors);
@@ -748,7 +749,7 @@ function showqinfobar($qn,$inreview,$single,$isembed=false) {
 		}
 		if ($attempts[$qn]>0 && $showeachscore) {
 			if (strpos($scores[$qn],'~')===false) {
-				echo "<br/>", _('Score on last attempt:'), " {$scores[$qn]}.  ", _('Score in gradebook:'), " {$bestscores[$qn]}";
+				echo "<br/>", _('Score on last attempt:'). " ".($scores[$qn]<0?'N/A':$scores[$qn]).". ". _('Score in gradebook:'), " ".($bestscores[$qn]<0?'N/A':$bestscores[$qn]);
 			} else {
 				echo "<br/>", _('Score on last attempt:'), " (" . str_replace('~', ', ',$scores[$qn]) . '), ';
 				echo _('Score in gradebook:'), " (" . str_replace('~', ', ',$bestscores[$qn]) . '), ';

@@ -131,8 +131,7 @@ div.spacer {
 }
 
 div.navbar {
-	position: absolute;
-	left: 10px;
+	float: left;
 	width:120px;
 	padding:10px;
 	margin-top:0px;
@@ -520,6 +519,7 @@ input[type=submit]:hover, button:hover,input[type=button]:hover {
   width: 400px;
   height: 400px;
   z-index: 150;
+  -webkit-overflow-scrolling: touch;
 }
 
 #GB_frame {
@@ -535,6 +535,12 @@ input[type=submit]:hover, button:hover,input[type=button]:hover {
   padding: 2px 0 2px 5px;
   margin: 0;
   text-align: left;
+}
+.floatright {
+	float:right;
+}
+.pointer {
+	cursor:pointer;
 }
 svg {
 	overflow: hidden;
