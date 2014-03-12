@@ -5033,7 +5033,7 @@ function checkreqtimes($tocheck,$rtimes) {
 	if ($tocheck=='DNE' || $tocheck=='oo' || $tocheck=='+oo' || $tocheck=='-oo') {
 		return 1;
 	}
-	$cleanans = preg_replace('/[^\w\*\/\+\-\(\)\[\],\.\^]+/','',$tocheck);
+	$cleanans = preg_replace('/[^\w\*\/\+\-\(\)\[\],\.\^=]+/','',$tocheck);
 	//if entry used pow or exp, we want to replace them with their asciimath symbols for requiretimes purposes
 	$cleanans = str_replace("pow","^",$cleanans);
 	$cleanans = str_replace("exp","e",$cleanans);
@@ -5177,7 +5177,7 @@ function parsecomplex($v) {
 function checkanswerformat($tocheck,$ansformats) {
 	$tocheck = trim($tocheck);
 	$tocheck = str_replace(',','',$tocheck);
-	if ($tocheck=='DNE' || $tocheck=='oo' || $tocheck=='+oo' || $tocheck=='-oo') {
+	if (strtoupper($tocheck)=='DNE' || $tocheck=='oo' || $tocheck=='+oo' || $tocheck=='-oo') {
 		return true;
 	}
 	if (in_array("fraction",$ansformats) || in_array("reducedfraction",$ansformats) || in_array("fracordec",$ansformats)) {
