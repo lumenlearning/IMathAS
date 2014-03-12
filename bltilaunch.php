@@ -68,7 +68,7 @@ if (isset($_GET['launch'])) {
 	$query = "SELECT sessiondata,userid FROM imas_sessions WHERE sessionid='$sessionid'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	if (mysql_num_rows($result)==0) {
-		reporterror("No authorized session exists");
+		reporterror("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again.");
 	}
 	list($enc,$userid) = mysql_fetch_row($result);
 	$sessiondata = unserialize(base64_decode($enc));
@@ -133,7 +133,7 @@ if (isset($_GET['launch'])) {
 	$query = "SELECT sessiondata,userid FROM imas_sessions WHERE sessionid='$sessionid'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	if (mysql_num_rows($result)==0) {
-		reporterror("No authorized session exists");
+		reporterror("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again.");
 	}
 	list($enc,$userid) = mysql_fetch_row($result);
 	$sessiondata = unserialize(base64_decode($enc));
@@ -1035,7 +1035,7 @@ if ($_SESSION['lti_keytype']=='cc-vf' || (!$promptforsettings && !$createnewsess
 	} else if ($keyparts[0]=='sso') {
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/index.php");
 	} else if ($keyparts[0]=='folder') {
-		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/course/course.php?cid=$cid&folder=".$keyparts[3]);
+		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/course/course.php?checksess=true&cid=$cid&folder=".$keyparts[3]);
 	} else { //will only be instructors hitting this option
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/ltihome.php");
 	}

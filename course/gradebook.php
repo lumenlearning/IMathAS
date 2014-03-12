@@ -316,10 +316,7 @@ if ($canviewall) {
 				if (poss[i]==0) {poss[i]=.0000001;}
 			} else {
 				poss[i] = 100;
-				if(ths[i].innerHTML.match(/Section/)) {
-					startat++;
-				}
-				if(ths[i].innerHTML.match(/Code/)) {
+				if(ths[i].className.match(/nocolorize/)) {
 					startat++;
 				}
 			}
@@ -495,18 +492,18 @@ if (isset($studentid) || $stu!=0) { //show student view
 	
 } else { //show instructor view
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js?v=012811\"></script>\n";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablescroller2.js?v=013112\"></script>\n";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablescroller2.js?v=012514\"></script>\n";
 	$placeinhead .= "<script type=\"text/javascript\">\n";
 	$placeinhead .= 'var ts = new tablescroller("myTable",';
 	if (isset($_COOKIE["gblhdr-$cid"]) && $_COOKIE["gblhdr-$cid"]==1) {
-		$placeinhead .= 'true);';
+		$placeinhead .= 'true,'.$showpics.');';
 		$headerslocked = true;
 	} else {
 		if (!isset($_COOKIE["gblhdr-$cid"]) && isset($CFG['GBS']['lockheader']) && $CFG['GBS']['lockheader']==true) {
-			$placeinhead .= 'true);';
+			$placeinhead .= 'true,'.$showpics.');';
 			$headerslocked = true;
 		} else {
-			$placeinhead .= 'false);';
+			$placeinhead .= 'false,'.$showpics.');';
 			$headerslocked = false;
 			$usefullwidth = true;
 		}
@@ -707,8 +704,11 @@ function gbstudisp($stu) {
 		echo '</h3>';
 		if ($isteacher) {
 			echo '<div style="clear:both;display:inline-block" class="cpmid secondary">';
-			echo '<a href="mailto:'.$stuemail.'">', _('Email'), '</a> | ';
-			echo "<a href=\"$imasroot/msgs/msglist.php?cid={$_GET['cid']}&add=new&to=$stu\">", _('Message'), "</a> | ";
+			//echo '<a href="mailto:'.$stuemail.'">', _('Email'), '</a> | ';
+			echo "<a href=\"#\" onclick=\"GB_show('Send Email','$imasroot/course/sendmsgmodal.php?to=$stu&sendtype=email&cid=$cid',800,'auto')\" title=\"Send Email\">", _('Email'), "</a> | ";
+			
+			//echo "<a href=\"$imasroot/msgs/msglist.php?cid={$_GET['cid']}&add=new&to=$stu\">", _('Message'), "</a> | ";
+			echo "<a href=\"#\" onclick=\"GB_show('Send Message','$imasroot/course/sendmsgmodal.php?to=$stu&sendtype=msg&cid=$cid',800,'auto')\" title=\"Send Message\">", _('Message'), "</a> | ";
 			echo "<a href=\"gradebook.php?cid={$_GET['cid']}&uid=$stu&massexception=1\">", _('Make Exception'), "</a> | ";
 			echo "<a href=\"listusers.php?cid={$_GET['cid']}&chgstuinfo=true&uid=$stu\">", _('Change Info'), "</a> | ";
 			echo "<a href=\"viewloginlog.php?cid={$_GET['cid']}&uid=$stu&from=gb\">", _('Login Log'), "</a> | ";
@@ -793,7 +793,7 @@ function gbstudisp($stu) {
 			echo '<td>';
 			
 			if ($gbt[0][1][$i][4]==0 || $gbt[0][1][$i][4]==3) {
-				echo $gbt[0][1][$i][2], ' ', _('(Not Counted)');
+				echo $gbt[0][1][$i][2].'&nbsp;', _('pts'), ' ', _('(Not Counted)');
 			} else {
 				echo $gbt[0][1][$i][2].'&nbsp;', _('pts');
 				if ($gbt[0][1][$i][4]==2) {
@@ -1142,7 +1142,12 @@ function gbinstrdisp() {
 	for ($i=0;$i<count($gbt[0][0]);$i++) { //biographical headers
 		if ($i==1) {echo '<th><div>&nbsp;</div></th>';} //for pics
 		if ($i==1 && $gbt[0][0][1]!='ID') { continue;}
-		echo '<th><div>'.$gbt[0][0][$i];
+		if ($gbt[0][0][$i]=='Section' || $gbt[0][0][$i]=='Code') {
+			echo '<th class="nocolorize"><div>';
+		} else {
+			echo '<th><div>';
+		}
+		echo $gbt[0][0][$i];
 		if (($gbt[0][0][$i]=='Section' || ($isdiag && $i==4)) && (!$istutor || $tutorsection=='')) {
 			echo "<br/><select id=\"secfiltersel\" onchange=\"chgsecfilter()\"><option value=\"-1\" ";
 			if ($secfilter==-1) {echo  'selected=1';}
@@ -1248,7 +1253,7 @@ function gbinstrdisp() {
 			//name and points
 			echo '<th class="cat'.$gbt[0][1][$i][1].'"><div>'.$gbt[0][1][$i][0].'<br/>';
 			if ($gbt[0][1][$i][4]==0 || $gbt[0][1][$i][4]==3) {
-				echo $gbt[0][1][$i][2], ' ', _('(Not Counted)');
+				echo $gbt[0][1][$i][2].'&nbsp;', _('pts'), ' ', _('(Not Counted)');
 			} else {
 				echo $gbt[0][1][$i][2].'&nbsp;', _('pts');
 				if ($gbt[0][1][$i][4]==2) {

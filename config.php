@@ -38,7 +38,8 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $loginformat = '/^\w+$/';  //A-Z, a-z, 0-9, _ are the only allowed characters
   $emailconfirmation = false;
   $sendfrom = "do-not-reply@wamap.org";
-  $newacctemail = "imathas@wamap.org";
+  $newacctemail = "dlippman@pierce.ctc.edu";
+  $accountapproval = "dlippman@pierce.ctc.edu";
   $colorshift = true;
   $smallheaderlogo = '<img src="/wamap/img/wamaplogosmall.gif"/>';
   $allownongrouplibs = false;

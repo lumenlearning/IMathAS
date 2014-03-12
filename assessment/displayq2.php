@@ -171,14 +171,36 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		if (!is_array($anstypes)) {
 			$anstypes = explode(",",$anstypes);
 		}
-
+		if ($qdata['qtype']=="multipart") {
+			if (isset($answeights)) {
+				if (!is_array($answeights)) {
+					$answeights = explode(",",$answeights);
+				}
+				$localsum = array_sum($answeights);
+				if ($localsum==0) {$localsum = 1;}
+				foreach ($answeights as $kidx=>$vval) {
+					$answeights[$kidx] = $vval/$localsum;
+				}
+			} else {
+				if (count($anstypes)>1) {
+					if ($qnpointval==0) {$qnpointval=1;}
+					$answeights = array_fill(0,count($anstypes)-1,round($qnpointval/count($anstypes),2));
+					$answeights[] = $qnpointval-array_sum($answeights);
+					foreach ($answeights as $kidx=>$vval) {
+						$answeights[$kidx] = $vval/$qnpointval;
+					}
+				} else {
+					$answeights = array(1);
+				}
+			}
+		}
 		$laparts = explode("&",$la);
 		foreach ($anstypes as $kidx=>$anstype) {
-			$qcol = isset($qcolors[$kidx])?$qcolors[$kidx]:'';
+			$qcol = isset($qcolors[$kidx])?(is_numeric($qcolors[$kidx])?rawscoretocolor($qcolors[$kidx],$answeights[$kidx]):$qcolors[$kidx]):'';
 			list($answerbox[$kidx],$tips[$kidx],$shanspt[$kidx],$previewloc[$kidx]) = makeanswerbox($anstype,$kidx,$laparts[$kidx],$options,$qnidx+1,$qcol);
 		}
 	} else {
-		$qcol = isset($qcolors[0])?$qcolors[0]:'';
+		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor($qcolors[0],1):$qcolors[0]):'';
 		list($answerbox,$tips[0],$shanspt[0],$previewloc) = makeanswerbox($qdata['qtype'],$qnidx,$la,$options,0,$qcol);
 	}
 	if ($qdata['qtype']=='conditional') {
@@ -573,9 +595,9 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$qnpointval=1) {
 	if (isset($reqdecimals) && !is_array($reqdecimals) && !isset($abstolerance) && !isset($reltolerance)) {
 		$abstolerance = 0.5/(pow(10,$reqdecimals));
 	} else if (isset($reqdecimals) && is_array($reqdecimals)) {
-		foreach ($reqdecimals as $k=>$v) {
-			if (!isset($abstolerance[$k]) && !isset($reltolerance[$k])) {
-				$abstolerance[$k] = 0.5/(pow(10,$v));
+		foreach ($reqdecimals as $kidx=>$vval) {
+			if (!isset($abstolerance[$kidx]) && !isset($reltolerance[$kidx])) {
+				$abstolerance[$kidx] = 0.5/(pow(10,$vval));
 			}
 		}
 	}
@@ -590,7 +612,8 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$qnpointval=1) {
 	if (isset($answersize)) {$options['answersize'] = $answersize;}
 	if (isset($variables)) {$options['variables'] = $variables;}
 	if (isset($domain)) {$options['domain'] = $domain;}
-	if (isset($requiretimes)) {$options['requiretimes'] = $requiretimes;}	
+	if (isset($requiretimes)) {$options['requiretimes'] = $requiretimes;}
+	if (isset($requiretimeslistpart)) {$options['requiretimeslistpart'] = $requiretimeslistpart;}	
 	if (isset($scoremethod)) {$options['scoremethod'] = $scoremethod;}	
 	if (isset($strflags)) {$options['strflags'] = $strflags;}
 	if (isset($matchlist)) {$options['matchlist'] = $matchlist;}
@@ -614,18 +637,18 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$qnpointval=1) {
 			if (!is_array($answeights)) {
 				$answeights = explode(",",$answeights);
 			}
-			$sum = array_sum($answeights);
-			if ($sum==0) {$sum = 1;}
-			foreach ($answeights as $k=>$v) {
-				$answeights[$k] = $v/$sum;
+			$localsum = array_sum($answeights);
+			if ($localsum==0) {$localsum = 1;}
+			foreach ($answeights as $kidx=>$vval) {
+				$answeights[$kidx] = $vval/$localsum;
 			}
 		} else {
 			if (count($anstypes)>1) {
 				if ($qnpointval==0) {$qnpointval=1;}
 				$answeights = array_fill(0,count($anstypes)-1,round($qnpointval/count($anstypes),2));
 				$answeights[] = $qnpointval-array_sum($answeights);
-				foreach ($answeights as $k=>$v) {
-					$answeights[$k] = $v/$qnpointval;
+				foreach ($answeights as $kidx=>$vval) {
+					$answeights[$kidx] = $vval/$qnpointval;
 				}
 			} else {
 				$answeights = array(1);
@@ -2316,7 +2339,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['reqsigfigs'])) {if (is_array($options['reqsigfigs'])) {$reqsigfigs = $options['reqsigfigs'][$qn];} else {$reqsigfigs = $options['reqsigfigs'];}}
 		if (is_array($options['partialcredit'][$qn]) || ($multi>0 && is_array($options['partialcredit']))) {$partialcredit = $options['partialcredit'][$qn];} else {$partialcredit = $options['partialcredit'];}
-		
+		$givenans = str_replace('∞', 'oo', $givenans);
 		if (isset($partialcredit)) {
 			if (!is_array($partialcredit)) {
 				$partialcredit = explode(',',$partialcredit);
@@ -2383,16 +2406,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 		
 		
-		/*  should students get an answer right by leaving it blank?
-		if ($answerformat=='exactlist' || $answerformat=='orderedlist' || $answerformat=='list') {
-			if (trim($answer)=='') {
-				if (trim($givenans)=='') {
-					return 1;
-				} else {
-					return 0;
-				}
-			}
-		}*/
 		$extrapennum = count($gaarr)+count($anarr);
 		
 		if ($answerformat=='orderedlist') {
@@ -2805,6 +2818,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		if (!isset($answerformat)) { $answerformat = '';}
+		$givenans = str_replace('∞', 'oo', $givenans);
 		$ansformats = explode(',',$answerformat);
 		$answer = str_replace(' ','',$answer);
 		
@@ -2921,6 +2935,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['abstolerance'])) {if (is_array($options['abstolerance'])) {$abstolerance = $options['abstolerance'][$qn];} else {$abstolerance = $options['abstolerance'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
+		if (isset($options['requiretimeslistpart'])) {if (is_array($options['requiretimeslistpart'])) {$requiretimeslistpart = $options['requiretimeslistpart'][$qn];} else {$requiretimeslistpart = $options['requiretimeslistpart'];}}
 		
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
@@ -2952,6 +2967,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					}
 					//echo $cpts[0].','.$cpts[1].'<br/>';
 					if ($answer!='DNE' && (!checkanswerformat($cpts[0],$ansformats) || !checkanswerformat($cpts[1],$ansformats))) {
+						return 0;
+					}
+					if ($answer!='DNE' && isset($requiretimeslistpart) && checkreqtimes($tchk,$requiretimeslistpart)==0) {
 						return 0;
 					}
 				}
@@ -3031,11 +3049,16 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['abstolerance'])) {if (is_array($options['abstolerance'])) {$abstolerance = $options['abstolerance'][$qn];} else {$abstolerance = $options['abstolerance'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
+		if (isset($options['requiretimeslistpart'])) {if (is_array($options['requiretimeslistpart'])) {$requiretimeslistpart = $options['requiretimeslistpart'][$qn];} else {$requiretimeslistpart = $options['requiretimeslistpart'];}}
 		
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
-		
+		$givenans = str_replace('∞', 'oo', $givenans);
 		$GLOBALS['partlastanswer'] = $_POST["tc$qn"].'$#$'.$givenans;
+		
+		if ($answer==='') {
+			if (trim($_POST["tc$qn"])==='') { return 1;} else { return 0;}
+		}
 		
 		if ($givenans == null) {return 0;}
 		
@@ -3146,6 +3169,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				if (!checkanswerformat($orarr[$j],$ansformats)) {
 					continue;
 				} 
+				if (isset($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart)==0) {
+					continue;
+				}
 				//removed - done above already
 				//$anss = explode(' or ',$answer);  
 				foreach ($anss as $anans) {
@@ -3551,6 +3577,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		$ansformats = explode(',',$answerformat);
+		$givenans = str_replace('∞', 'oo', $givenans);
 		
 		if ($anstype == 'interval') {
 			$GLOBALS['partlastanswer'] = $givenans;
@@ -4792,7 +4819,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					else if ($n<36) { $randstr .= chr(65 + $n-10);}
 					else { $randstr .= chr(97 + $n-36);}
 				}
-				$s3asid = $GLOBALS['testsettings']['id']."/$randstr";
+				//in case "same random seed" is selected, students can overwrite their own
+				//files. Avoid this.
+				if (($GLOBALS['testsettings']['shuffle']&4)==4 || ($GLOBALS['testsettings']['shuffle']&2)==2) {
+					//if same random seed is set, need to check for duplicates
+					$n = 0;
+					do {
+						$n++;
+						$s3asid = $GLOBALS['testsettings']['id']."/$n";
+					} while (doesfileexist('assess',"adata/$s3asid/$filename"));
+				} else {
+					$s3asid = $GLOBALS['testsettings']['id']."/$randstr";
+				}
 			} else {
 				$GLOBALS['partlastanswer'] = _('Error - no asid');
 				$GLOBALS['scoremessages'] .= _('Error - no asid');
@@ -4803,11 +4841,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$GLOBALS['scoremessages'] .= _('Error - File not uploaded in preview');
 				return 0;
 			}
-			/*
-			not needed if each file is randomly coded
-			if (isset($GLOBALS['isreview']) && $GLOBALS['isreview']==true) {
-				$filename = 'rev-'.$filename;
-			}*/
+		
 			if (is_uploaded_file($_FILES["qn$qn"]['tmp_name'])) {
 				if ($answerformat=='excel') {
 					$zip = new ZipArchive;
@@ -4996,6 +5030,9 @@ function isNaN( $var ) {
 }
 
 function checkreqtimes($tocheck,$rtimes) {
+	if ($tocheck=='DNE' || $tocheck=='oo' || $tocheck=='+oo' || $tocheck=='-oo') {
+		return 1;
+	}
 	$cleanans = preg_replace('/[^\w\*\/\+\-\(\)\[\],\.\^]+/','',$tocheck);
 	//if entry used pow or exp, we want to replace them with their asciimath symbols for requiretimes purposes
 	$cleanans = str_replace("pow","^",$cleanans);
@@ -5279,6 +5316,20 @@ function getcolormark($c) {
 	} else {
 		return '';
 	}
+}
+
+function rawscoretocolor($sc,$aw) {
+	if ($aw==0) {
+		return '';
+	} else if ($sc<0) {
+		return '';
+	} else if ($sc==0) {
+		return 'ansred';
+	} else if ($sc>.98) {
+		return 'ansgrn';
+	} else {
+		return 'ansyel';
+	}	
 }
 
 if (!function_exists('stripslashes_deep')) {

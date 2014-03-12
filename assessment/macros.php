@@ -3,7 +3,7 @@
 //(c) 2006 David Lippman
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric");
 array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder");
 function mergearrays($a,$b) {
 	if (!is_array($a)) {
@@ -296,7 +296,7 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 				$y = round($evalyfunc($t),3);//round(eval("return ($yfunc);"),3);
 				$alt .= "<tr><td>$x</td><td>$y</td></tr>";
 			} else {
-				$x = $xmin + $dx*$i + 1E-10 - ($domainlimited?0:5*($xmax-$xmin)/$settings[6]);
+				$x = $xmin + $dx*$i + (($i<$stopat/2)?1E-10:-1E-10) - ($domainlimited?0:5*($xmax-$xmin)/$settings[6]);
 				if (in_array($x,$avoid)) { continue;}
 				//echo $func.'<br/>';
 				$y = round($evalfunc($x),3);//round(eval("return ($func);"),3);
@@ -1273,7 +1273,7 @@ function lcm($n, $m) //least common multiple
 } 
 
 function dispreducedfraction($n,$d,$dblslash=false,$varinnum=false) {
-	return '`'.makereducedfraction($n,$d,$dblslash).'`';
+	return '`'.makereducedfraction($n,$d,$dblslash,$varinnum).'`';
 }
 
 function makereducedfraction($n,$d,$dblslash=false,$varinnum=false) {
@@ -2155,10 +2155,12 @@ function intervaltoineq($str,$var) {
 }
 
 function cleanbytoken($str,$funcs = array()) {
-	$parts = explode('=',$str); 
+	$parts = preg_split('/([=\,])/',$str,-1,PREG_SPLIT_DELIM_CAPTURE);
 	$finalout = array();
-	foreach ($parts as $substr) {
-		if (trim($substr)=='') {$finalout[] = ''; continue;}
+	for ($k=0;$k<count($parts);$k+=2) {
+		$finalout = array();
+		$substr = $parts[$k];
+		if (trim($substr)=='') {$parts[$k] = ''; continue;}
 		$tokens = cleantokenize(trim($substr),$funcs);
 		//print_r($tokens);
 		$out = array();
@@ -2205,15 +2207,15 @@ function cleanbytoken($str,$funcs = array()) {
 			} else if ($token[1]==3 && $token[0]==='1') {
 				$dontuse = false;
 				if ($lastout>-1) { //if not first character
-					if ($out[$lastout] != '^' && $out[$lastout]!='+' && $out[$lastout]!='-') {
+					if ($out[$lastout] != '^' && $out[$lastout] != '/' && $out[$lastout]!='+' && $out[$lastout]!='-') {
 						//( )1, x1,*1
 						if ($out[$lastout]=='*') { //elim *
 							array_pop($out);
 						}
 						$dontuse = true;
-					} else if ($out[$lastout] == '^') {
+					} else if ($out[$lastout] == '^' || $out[$lastout] == '/' ) {
 						if ($lastout>=1) {
-							//4+x^1 -> 4+x, 4x^1 -> 4x
+							//4+x^1 -> 4+x, 4x^1 -> 4x,   x/1 -> x
 							array_pop($out);
 							$dontuse = true;
 						}
@@ -2248,8 +2250,9 @@ function cleanbytoken($str,$funcs = array()) {
 		} else {
 			$finalout[] = implode('',$out);
 		}
+		$parts[$k] = implode('',$finalout);
 	}
-	return implode('=',$finalout);
+	return implode('',$parts);
 }
 
 

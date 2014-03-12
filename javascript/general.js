@@ -277,7 +277,8 @@ function chkAllNone(frmid, arr, mark, skip) {
   return false;
 }
 
-function initeditor(edmode,edids) {
+function initeditor(edmode,edids,css) {
+	var cssmode = css || 0;
 	var edsetup = {
 	    mode : edmode,
 	    theme : "advanced",
@@ -292,7 +293,7 @@ function initeditor(edmode,edids) {
 	    plugins : 'asciimath,asciisvg,dataimage,table,inlinepopups,paste,media,advlist'+((fileBrowserCallBackFunc != null)?",attach":""),
 	    gecko_spellcheck : true,
 	    extended_valid_elements : 'iframe[src|width|height|name|align],param[name|value],@[sscr]',
-	    content_css : imasroot+'/imascore.css,'+imasroot+'/themes/'+coursetheme,
+	    content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme,
 	    popup_css_add : imasroot+'/themes/'+coursetheme,
 	    theme_advanced_resizing : true,
 	    table_styles: "Gridded=gridded;Gridded Centered=gridded centered",
@@ -543,6 +544,30 @@ jQuery.fn.isolatedScroll = function() {
     });
     return this;
 };
+
+jQuery(document).ready(function($) {
+	var fixedonscrollel = $('.fixedonscroll');
+	var initialtop = [];
+	for (var i=0;i<fixedonscrollel.length;i++) {
+		initialtop[i] = $(fixedonscrollel[i]).offset().top;
+		if ($(fixedonscrollel[i]).height()>$(window).height()) { //skip if element is taller than window
+			initialtop[i] = -1;
+		}
+	}
+	if (fixedonscrollel.length>0) {
+		$(window).scroll(function() {
+			var winscrolltop = $(window).scrollTop();
+			for (var i=0;i<fixedonscrollel.length;i++) {
+				if (winscrolltop > initialtop[i] && initialtop[i]>0) {
+					$(fixedonscrollel[i]).css('position','fixed').css('top','5px');
+				} else {
+					$(fixedonscrollel[i]).css('position','static');
+				}
+			}
+		});
+	}
+});
+
 
 function _(txt) {
 	if (typeof i18njs != "undefined" && i18njs[txt]) {

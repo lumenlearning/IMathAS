@@ -89,7 +89,7 @@
 	}
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;'.$pad.'">';
 	$navbuttons = '';
-	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || isset($sessiondata['readernavon'])) {
+	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || $coursetheme='otbsreader.css') {
 		$now = time();
 		$query = "SELECT il.id,il.title,il.avail,il.startdate,il.enddate,ii.id AS itemid 
 			  FROM imas_linkedtext as il JOIN imas_items AS ii ON il.id=ii.typeid AND ii.itemtype='LinkedText'
