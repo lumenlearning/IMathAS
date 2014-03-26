@@ -236,6 +236,17 @@ input[type=submit]:focus, button:focus,input[type=button]:focus, a.abutton:focus
     font-size: 80%;
     line-height: 1.5em;
  } 
+.linkedtextholder .wc_picl, .linkedtextholder .wc_picr {
+	float: right;
+	margin-left: 15px;
+	font-size: 80%;
+	line-height: 1.5em;
+}
+.linkedtextholder .wc_picc {
+	margin: auto;
+	font-size: 80%;
+	line-height: 1.5em;
+}
 .linkedtextholder .smallattr {
     line-height: normal;
  }
