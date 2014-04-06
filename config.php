@@ -9,6 +9,7 @@ $mathimgurl = "/cgi-bin/mimetex.cgi";
 $imasroot = "";
 $allowmacroinstall = false;
 $CFG['GEN']['AWSforcoursefiles'] = true;
+$CFG['pandocpath'] = '/bin/pandoc';
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
   
