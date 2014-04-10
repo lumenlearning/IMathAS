@@ -9,9 +9,10 @@ $mathimgurl = "/cgi-bin/mimetex.cgi";
 $imasroot = "";
 $allowmacroinstall = false;
 $CFG['GEN']['AWSforcoursefiles'] = true;
-$CFG['pandocpath'] = '/bin/pandoc';
+
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
+$CFG['GEN']['pandocserver'] = '54.212.251.50';
   
 if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** WAMAP.org config ***/	
