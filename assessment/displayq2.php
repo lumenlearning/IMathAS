@@ -3,7 +3,7 @@
 //IMathAS:  Core of the testing engine.  Displays and grades questions
 //(c) 2006 David Lippman
 //quadratic inequalities contributed by Cam Joyce
-
+$GLOBALS['noformatfeedback'] = true;
 $mathfuncs = array("sin","cos","tan","sinh","cosh","tanh","arcsin","arccos","arctan","arcsinh","arccosh","sqrt","ceil","floor","round","log","ln","abs","max","min","count");
 $allowedmacros = $mathfuncs;
 //require_once("mathphp.php");
@@ -13,6 +13,7 @@ require("macros.php");
 function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt=false,$clearla=false,$seqinactive=false,$qcolors=array()) {
 	//$starttime = microtime(true);
 	global $imasroot, $myrights, $showtips, $urlmode;
+	
 	if (!isset($_SESSION['choicemap'])) { $_SESSION['choicemap'] = array(); }
 	$GLOBALS['inquestiondisplay'] = true;
 	
@@ -154,6 +155,10 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		$variables =& $variable;
 	}
 	
+	if (isset($formatfeedbackon)) {
+		unset($GLOBALS['noformatfeedback']);
+	}
+	
 	//pack options
 	
 	if (isset($ansprompt)) {$options['ansprompt'] = $ansprompt;}
@@ -177,7 +182,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	if (isset($snaptogrid)) {$options['snaptogrid'] = $snaptogrid;}
 	if (isset($background)) {$options['background'] = $background;}
 	
-	if ($qdata['qtype']=='conditional') {
+	if ($qdata['qtype']=='conditional' || isset($GLOBALS['nocolormark'])) {
 		$qcolors = array(); //no colors for conditional type
 	}
 	if ($qdata['qtype']=="multipart" || $qdata['qtype']=='conditional') {
@@ -300,6 +305,41 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		}
 	}
 	
+	if ($doshowans && isset($showanswer) && !is_array($showanswer)) {  //single showanswer defined
+		$showanswerloc = (isset($showanswerstyle) && $showanswerstyle=='inline')?'<span>':'<div>';
+		if ($nosabutton) {
+			$showanswerloc .= filter(_('Answer:') . " $showanswer\n");	
+		} else {
+			$showanswerloc .= "<input class=\"sabtn\" type=button value=\""._('Show Answer')."\" onClick='javascript:document.getElementById(\"ans$qnidx\").className=\"shown\"; rendermathnode(document.getElementById(\"ans$qnidx\"));' />";
+			$showanswerloc .= filter(" <span id=\"ans$qnidx\" class=\"hidden\">$showanswer </span>\n");
+		}
+		$showanswerloc .= (isset($showanswerstyle) && $showanswerstyle=='inline')?'</span>':'</div>';
+	} else {
+		$showanswerloc = array();
+		foreach($tips as $iidx=>$tip) {
+			$showanswerloc[$iidx] = (isset($showanswerstyle) && $showanswerstyle=='inline')?'<span>':'<div>';
+			if ($doshowans && (!isset($showanswer) || (is_array($showanswer) && !isset($showanswer[$iidx]))) && $shanspt[$iidx]!=='') {
+				if ($nosabutton) {
+					$showanswerloc[$iidx] .= "<span id=\"showansbtn$qnidx-$iidx\">".filter(_('Answer:') . " {$shanspt[$iidx]}</span>\n");
+				} else {
+					$showanswerloc[$iidx] .= "<input id=\"showansbtn$qnidx-$iidx\" class=\"sabtn\" type=button value=\"". _('Show Answer'). "\" onClick='javascript:document.getElementById(\"ans$qnidx-$iidx\").className=\"shown\";' />"; //AMprocessNode(document.getElementById(\"ans$qnidx-$iidx\"));'>";
+					$showanswerloc[$iidx] .= filter(" <span id=\"ans$qnidx-$iidx\" class=\"hidden\">{$shanspt[$iidx]}</span>\n");
+				}
+			} else if ($doshowans && isset($showanswer) && is_array($showanswer)) { //use part specific showanswer
+				if (isset($showanswer[$iidx])) {
+					if ($nosabutton) {
+						$showanswerloc[$iidx] .= "<span id=\"showansbtn$qnidx-$iidx\">".filter(_('Answer:') . " {$showanswer[$iidx]}</span>\n");
+					} else {
+						$showanswerloc[$iidx] .= "<input id=\"showansbtn$qnidx-$iidx\" class=\"sabtn\" type=button value=\""._('Show Answer')."\" onClick='javascript:document.getElementById(\"ans$qnidx-$iidx\").className=\"shown\";' />";// AMprocessNode(document.getElementById(\"ans$qnidx-$iidx\"));'>";
+						$showanswerloc[$iidx] .= filter(" <span id=\"ans$qnidx-$iidx\" class=\"hidden\">{$showanswer[$iidx]}</span>\n");
+					}
+				}
+			}
+			$showanswerloc[$iidx] .= (isset($showanswerstyle) && $showanswerstyle=='inline')?'</span>':'</div>';
+			
+		}
+	}
+	
 	//echo $toevalqtext;
 	eval("\$evaledqtext = \"$toevalqtxt\";");
 	eval("\$evaledsoln = \"$toevalsoln\";");
@@ -407,7 +447,10 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			if ($showtips!=1) { echo 'style="display:none;" ';}
 			echo ">", _('Box'), " ".($iidx+1).": <span id=\"tips$qnidx-$iidx\">".filter($tip)."</span></p>";
 		}
-		if ($doshowans && (!isset($showanswer) || (is_array($showanswer) && !isset($showanswer[$iidx]))) && $shanspt[$iidx]!=='') {
+		if ($doshowans && strpos($toevalqtxt,'$showanswerloc')===false && is_array($showanswerloc) && isset($showanswerloc[$iidx])) {
+			echo '<div>'.$showanswerloc[$iidx].'</div>';
+		}
+		/*if ($doshowans && (!isset($showanswer) || (is_array($showanswer) && !isset($showanswer[$iidx]))) && $shanspt[$iidx]!=='') {
 			if ($nosabutton) {
 				echo filter("<div>" . _('Answer:') . " {$shanspt[$iidx]} </div>\n");
 			} else {
@@ -423,17 +466,19 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 					echo filter(" <span id=\"ans$qnidx-$iidx\" class=\"hidden\">{$showanswer[$iidx]}</span></div>\n");
 				}
 			}
-		}
+		}*/
 	}
 	echo "</div>\n";
 	
-	if ($doshowans && isset($showanswer) && !is_array($showanswer)) {  //single showanswer defined
-		if ($nosabutton) {
+	if ($doshowans && isset($showanswer) && !is_array($showanswer) && strpos($toevalqtxt,'$showanswerloc')===false) {  //single showanswer defined
+		/*if ($nosabutton) {
 			echo filter("<div>" . _('Answer:') . " $showanswer </div>\n");	
 		} else {
 			echo "<div><input class=\"sabtn\" type=button value=\""._('Show Answer')."\" onClick='javascript:document.getElementById(\"ans$qnidx\").className=\"shown\"; rendermathnode(document.getElementById(\"ans$qnidx\"));' />";
 			echo filter(" <span id=\"ans$qnidx\" class=\"hidden\">$showanswer </span></div>\n");
-		}
+		}*/
+		echo '<div>'.$showanswerloc.'</div>';
+		
 	}
 	if ($doshowans && ($qdata['solutionopts']&4)==4 && $qdata['solution']!='') {
 		if ($nosabutton) {
@@ -902,9 +947,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($colorbox != '') {$style .= ' class="'.$colorbox.'" ';} else {$style='';}
 		
 		if ($displayformat == 'inline') {
-			$out .= "<span $style>";
+			$out .= "<span $style id=\"qnwrap$qn\">";
 		} else if ($displayformat != 'select') {
-			$out .= "<div $style style=\"display:block\" class=\"clearfix\">";
+			$out .= "<div $style id=\"qnwrap$qn\" style=\"display:block\" class=\"clearfix\">";
 		}
 		if ($displayformat == "select") { 
 			$msg = '?';
@@ -914,7 +959,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					break;
 				}
 			}
-			$out = "<select name=\"qn$qn\" $style><option value=\"NA\">$msg</option>\n";
+			$out = "<select name=\"qn$qn\" id=\"qn$qn\" $style><option value=\"NA\">$msg</option>\n";
 		} else if ($displayformat == "horiz") {
 			
 		} else if ($displayformat == "inline") {
@@ -928,7 +973,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		
 		for ($i=0; $i < count($randkeys); $i++) {
 			if ($displayformat == "horiz") {
-				$out .= "<div class=choice >{$questions[$randkeys[$i]]}<br/><input type=radio name=qn$qn value=$i ";
+				$out .= "<div class=choice ><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label><br/><input type=radio id=\"qn$qn-$i\" name=qn$qn value=$i ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
 				$out .= " /></div>\n";
 			} else if ($displayformat == "select") {
@@ -936,9 +981,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				if (($la!='') && ($la!='NA') && ($la == $i)) { $out .= "selected=1";}
 				$out .= ">{$questions[$randkeys[$i]]}</option>\n";
 			} else if ($displayformat == "inline") {
-				$out .= "<input type=radio name=qn$qn value=$i ";
+				$out .= "<input type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
-				$out .= " />{$questions[$randkeys[$i]]}";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label>";
 			} else if ($displayformat == 'column') {
 				if ($i%$itempercol==0) {
 					if ($i>0) {
@@ -946,13 +991,13 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					}
 					$out .= '<div class="match"><ul class=nomark>';
 				}
-				$out .= "<li><input type=radio name=qn$qn value=$i ";
+				$out .= "<li><input type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
-				$out .= " />{$questions[$randkeys[$i]]}</li> \n";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}<label></li> \n";
 			} else {
-				$out .= "<li><input class=\"unind\" type=radio name=qn$qn value=$i ";
+				$out .= "<li><input class=\"unind\" type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
-				$out .= " />{$questions[$randkeys[$i]]}</li> \n";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}<label></li> \n";
 			}
 		}
 		if ($displayformat == "horiz") {
@@ -1022,9 +1067,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($colorbox != '') {$style .= ' class="'.$colorbox.'" ';} else {$style='';}
 		
 		if ($displayformat == 'inline') {
-			$out .= "<span $style>";
+			$out .= "<span $style id=\"qnwrap$qn\">";
 		} else  {
-			$out .= "<div $style style=\"display:block\" class=\"clearfix\">";
+			$out .= "<div $style id=\"qnwrap$qn\" style=\"display:block\" class=\"clearfix\">";
 		}
 		if ($displayformat == "horiz") {
 			
@@ -1038,14 +1083,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		
 		for ($i=0; $i < count($randkeys); $i++) {
 			if ($displayformat == "horiz") {
-				$out .= "<div class=choice>{$questions[$randkeys[$i]]}<br/>";
-				$out .= "<input type=checkbox name=\"qn$qn"."[$i]\" value=$i ";
+				$out .= "<div class=choice><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label><br/>";
+				$out .= "<input type=checkbox name=\"qn$qn"."[$i]\" value=$i id=\"qn$qn-$i\" ";
 				if (isset($labits[$i]) && ($labits[$i]!='') && ($labits[$i] == $i)) { $out .= "CHECKED";}
 				$out .= " /></div> \n";
 			} else if ($displayformat == "inline") {
-				$out .= "<input type=checkbox name=\"qn$qn"."[$i]\" value=$i ";
+				$out .= "<input type=checkbox name=\"qn$qn"."[$i]\" value=$i id=\"qn$qn-$i\" ";
 				if (isset($labits[$i]) && ($labits[$i]!='') && ($labits[$i] == $i)) { $out .= "CHECKED";}
-				$out .= " />{$questions[$randkeys[$i]]} ";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label> ";
 			} else if ($displayformat == 'column') {
 				if ($i%$itempercol==0) {
 					if ($i>0) {
@@ -1053,13 +1098,13 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					}
 					$out .= '<div class="match"><ul class=nomark>';
 				}
-				$out .= "<li><input type=checkbox name=\"qn$qn"."[$i]\" value=$i ";
+				$out .= "<li><input type=checkbox name=\"qn$qn"."[$i]\" value=$i id=\"qn$qn-$i\" ";
 				if (isset($labits[$i]) && ($labits[$i]!='') && ($labits[$i] == $i)) { $out .= "CHECKED";}
-				$out .= " />{$questions[$randkeys[$i]]}</li> \n";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label></li> \n";
 			} else {
-				$out .= "<li><input class=\"unind\" type=checkbox name=\"qn$qn"."[$i]\" value=$i ";
+				$out .= "<li><input class=\"unind\" type=checkbox name=\"qn$qn"."[$i]\" value=$i id=\"qn$qn-$i\" ";
 				if (isset($labits[$i]) && ($labits[$i]!='') && ($labits[$i] == $i)) { $out .= "CHECKED";}
-				$out .= " />{$questions[$randkeys[$i]]}</li> \n";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label></li> \n";
 			}
 		}
 		if ($displayformat == "horiz") {
@@ -1127,7 +1172,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else {
 			$divstyle = '';
 		}
-		if ($colorbox != '') {$out .= '<div class="'.$colorbox.'" style="display:block">';}
+		if ($colorbox != '') {$out .= '<div class="'.$colorbox.'" id="qnwrap'.$qn.'" style="display:block">';}
 		$out .= "<div class=\"match\" $divstyle>\n";
 		$out .= "<p class=\"centered\">$questiontitle</p>\n";
 		$out .= "<ul class=\"nomark\">\n";
@@ -1219,6 +1264,15 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (!isset($sz)) { $sz = 20;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		
+		$lap = explode('$f$',$la);
+		if (isset($lap[1]) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
+			$rightanswrongformat = true;
+			if ($colorbox=='ansred') {
+				$colorbox = 'ansorg';
+			}
+		}
+		$la = $lap[0];
+		
 		$la = explode('$#$',$la);
 		$la = $la[0];
 		
@@ -1263,6 +1317,13 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= "/>$rightb";
 		$out .= getcolormark($colorbox);
+		if (!isset($GLOBALS['nocolormark']) && isset($rightanswrongformat) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
+			if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
+				$out .= ' '.formhoverover('<span style="color:#f60;font-size:80%">(Format)</span>','One or more of your answers is equivalent to the correct answer, but is not simplified or is in the wrong format');
+			} else {
+				$out .= ' '.formhoverover('<span style="color:#f60;font-size:80%">(Format)</span>','Your answer is equivalent to the correct answer, but is not simplified or is in the wrong format');
+			}
+		}
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />\n";
 		if (!isset($hidepreview)) {
 			$preview .= "<input type=button class=btn value=Preview onclick=\"calculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
@@ -1293,9 +1354,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($ansprompt)) {$out .= $ansprompt;}
 		if (isset($answersize)) {
 			if ($colorbox=='') {
-				$out .= '<table>';
+				$out .= '<table id="qnwrap'.$qn.'">';
 			} else {
-				$out .= '<table class="'.$colorbox.'">';
+				$out .= '<table class="'.$colorbox.'" id="qnwrap'.$qn.'">';
 			}
 			$out .= '<tr><td class="matrixleft">&nbsp;</td><td>';
 			$answersize = explode(",",$answersize);
@@ -1345,9 +1406,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($answersize)) {
 			$answersize = explode(",",$answersize);
 			if ($colorbox=='') {
-				$out .= '<table>';
+				$out .= '<table id="qnwrap'.$qn.'">';
 			} else {
-				$out .= '<table class="'.$colorbox.'">';
+				$out .= '<table class="'.$colorbox.'" id="qnwrap'.$qn.'">';
 			}
 			$out .= '<tr><td class="matrixleft">&nbsp;</td><td>';
 			$out .= "<table>";
@@ -1396,8 +1457,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		
 		$lap = explode('$f$',$la);
-		if (isset($lap[1])) {
+		if (isset($lap[1]) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
 			$rightanswrongformat = true;
+			if ($colorbox=='ansred') {
+				$colorbox = 'ansorg';
+			}
 		}
 		$la = $lap[0];
 		
@@ -1428,9 +1492,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />";
 		$out .= "<input type=\"hidden\" id=\"qn$qn-vals\" name=\"qn$qn-vals\" />";
 		$out .= getcolormark($colorbox);
-		//if (!isset($GLOBALS['nocolormark']) && isset($rightanswrongformat) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
-		//	$out .= ' '.formhoverover('<span style="color:red;font-size:80%">(Format)</span>','Your answer is equivalent to the correct answer, but is not simplified or is in the wrong format');
-		//}
+		if (!isset($GLOBALS['nocolormark']) && isset($rightanswrongformat) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
+			$out .= ' '.formhoverover('<span style="color:#f60;font-size:80%">(Format)</span>','Your answer is equivalent to the correct answer, but is not simplified or is in the wrong format');
+		}
 		if (!isset($hidepreview)) {$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"AMpreview('tc$qn','p$qn')\" /> &nbsp;\n";}
 		$preview .= "<span id=p$qn></span>\n";
 		
@@ -1781,9 +1845,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$la = preg_replace('/\n/','<br/>',$la);
 			} 
 			if ($colorbox=='') {
-				$out .= '<div class="intro">';
+				$out .= '<div class="intro" id="qnwrap'.$qn.'">';
 			} else {
-				$out .= '<div class="intro '.$colorbox.'">';
+				$out .= '<div class="intro '.$colorbox.'" id="qnwrap'.$qn.'">';
 			}
 			if (isset($GLOBALS['questionscoreref'])) {
 				if ($multi==0) {
@@ -2091,7 +2155,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$bg = getgraphfilename($plot);
 		$dotline = 0;
-		if ($colorbox!='') { $out .= '<div class="'.$colorbox.'">';}
+		if ($colorbox!='') { $out .= '<div class="'.$colorbox.'" id="qnwrap'.$qn.'">';}
 		$out .= "<canvas class=\"drawcanvas\" id=\"canvas$qn\" width=\"{$settings[6]}\" height=\"{$settings[7]}\"></canvas>";
 		
 		$out .= "<div><span id=\"drawtools$qn\" class=\"drawtools\">";
@@ -3131,8 +3195,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		
 		if ($givenans == null) {return 0;}
 		
+		$formatok = "all";
 		if (checkreqtimes($_POST["tc$qn"],$requiretimes)==0) {
-			return 0;
+			//return 0;
+			$formatok = "nowhole";
 		}
 		
 		$ansformats = explode(',',$answerformat);
@@ -3148,7 +3214,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				foreach ($aarr as $j=>$anans) {
 					if ($anans=='') {
 						if (isset($GLOBALS['teacherid'])) {
-							echo '<p>', _('Debug info: empty, missingor invalid $answer'), ' </p>';
+							echo '<p>', _('Debug info: empty, missing or invalid $answer'), ' </p>';
 						}
 						return 0;
 					}
@@ -3235,11 +3301,14 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$gaarr = array($gamasterarr[$i]);
 			}
 			foreach($gaarr as $j=>$givenans) {
+				$partformatok = true;
 				if (!checkanswerformat($orarr[$j],$ansformats)) {
-					continue;
+					$formatok = "nopart";  $partformatok = false;
+					//continue;
 				} 
 				if (isset($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart)==0) {
-					continue;
+					$formatok = "nopart";  $partformatok = false;
+					//continue;
 				}
 				//removed - done above already
 				//$anss = explode(' or ',$answer);  
@@ -3257,15 +3326,15 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						if (is_array($anans)) {
 							if (($anans[1]=="(" && $givenans>$anans[2]) || ($anans[1]=="[" && $givenans>=$anans[2])) {
 								if (($anans[4]==")" && $givenans<$anans[3]) || ($anans[4]=="]" && $givenans<=$anans[3])) {
-									$correct += 1; $foundloc = $j; break 2; 
+									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2; 
 								} 
 							} 
 						} else if ($anans=="DNE" && strtoupper($givenans)=="DNE") {
-							$correct += 1; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
 						} else if (($anans=="+oo" || $anans=="oo") && ($givenans=="+oo" || $givenans=="oo")) {
-							$correct += 1; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
 						} else if ($anans=="-oo" && $givenans=="-oo") {
-							$correct += 1; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
 						}/* moved to preprocessing
 						else if (is_numeric($givenans)) {
 							//try evaling answer
@@ -3278,9 +3347,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						}*/
 					} else if (is_numeric($givenans)) {
 						if (isset($abstolerance)) {
-							if (abs($anans-$givenans) < $abstolerance+1E-12) {$correct += 1; $foundloc = $j; break 2;} 	
+							if (abs($anans-$givenans) < $abstolerance+1E-12) {if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;} 	
 						} else {
-							if (abs($anans - $givenans)/(abs($anans)+.0001) < $reltolerance+1E-12) {$correct += 1; $foundloc = $j; break 2;} 
+							if (abs($anans - $givenans)/(abs($anans)+.0001) < $reltolerance+1E-12) {if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;} 
 						}
 					}
 				}
@@ -3304,6 +3373,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 		}
 		if ($score<0) { $score = 0; }
+		if ($formatok != "all") {
+			$GLOBALS['partlastanswer'] .= '$f$1';
+			if ($formatok == 'nowhole') {
+				$score = 0;
+			}
+		}
 		return ($score);
 	} else if ($anstype == "numfunc") {
 		if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}
@@ -4248,11 +4323,16 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 
 			$scores = array();
+			if ((count($dots)+count($odots))==0) {
+				$extradots = 0;
+			} else {
+				$extradots = max((count($dots) + count($odots) - count($ansdots) - count($ansodots))/(count($dots)+count($odots)),0);
+			}
 			foreach ($ansdots as $key=>$ansdot) {
 				$scores[$key] = 0;
 				for ($i=0; $i<count($dots); $i++) {
 					if (($dots[$i][0]-$ansdot[0])*($dots[$i][0]-$ansdot[0]) + ($dots[$i][1]-$ansdot[1])*($dots[$i][1]-$ansdot[1]) <= 25*max(1,$reltolerance)) {
-						$scores[$key] = 1;
+						$scores[$key] = 1-$extradots;
 						break;
 					}
 				}
@@ -4261,7 +4341,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$scores[$key] = 0;
 				for ($i=0; $i<count($odots); $i++) {
 					if (($odots[$i][0]-$ansodot[0])*($odots[$i][0]-$ansodot[0]) + ($odots[$i][1]-$ansodot[1])*($odots[$i][1]-$ansodot[1]) <= 25*max(1,$reltolerance)) {
-						$scores[$key] = 1;
+						$scores[$key] = 1-$extradots;
 						break;
 					}
 				}
@@ -5455,7 +5535,7 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 	}
 }
 
-function getcolormark($c) {
+function getcolormark($c,$wrongformat=false) {
 	global $imasroot;
 	
 	if (isset($GLOBALS['nocolormark'])) { return '';}
@@ -5464,6 +5544,8 @@ function getcolormark($c) {
 		return '<img class="scoreboxicon" src="'.$imasroot.'/img/redx.gif" width="6" height="6"/>';
 	} else if ($c=='ansgrn') {
 		return '<img class="scoreboxicon" src="'.$imasroot.'/img/gchk.gif" width="8" height="6"/>';
+	} else if ($c=='ansorg') {
+		return '<img class="scoreboxicon" src="'.$imasroot.'/img/orgx.gif" width="6" height="6"/>';	
 	} else if ($c=='ansyel') {
 		return '<img class="scoreboxicon" src="'.$imasroot.'/img/ychk.gif" width="8" height="6"/>';
 	} else {
