@@ -331,6 +331,8 @@ END;
 	 } else {
 		 if (empty($_SESSION['challenge'])) {
 			 $badsession = true;
+		 } else {
+		 	 $badsession = false;
 		 }
 		 if (($line != null) && strlen($line['password'])==32) {
 		 	 $err = '<p>It looks like you have not reset your password yet.  Please do that by clicking the Forgot Password link below</p>';
@@ -581,6 +583,7 @@ END;
 		if (!isset($loginpage)) {
 			 $loginpage = "loginpage.php";
 		}
+		$err = '';
 		require($loginpage);
 		exit;
 	} 
