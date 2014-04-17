@@ -878,14 +878,16 @@ if (!isset($_POST['embedpostback'])) {
 			$rowgrptest = addslashes_deep($rowgrptest);
 			$insrow = "'".implode("','",$rowgrptest)."'";
 			$loginfo = "$userfullname creating group. ";
+			require_once("../includes/password.php");
 			for ($i=1;$i<$testsettings['groupmax'];$i++) {
 				if (isset($_POST['user'.$i]) && $_POST['user'.$i]!=0) {
 					$query = "SELECT password,LastName,FirstName FROM imas_users WHERE id='{$_POST['user'.$i]}'";
 					$result = mysql_query($query) or die("Query failed : $query:" . mysql_error());
 					$thisusername = mysql_result($result,0,2) . ' ' . mysql_result($result,0,1);	
 					if ($testsettings['isgroup']==1) {
-						$md5pw = md5($_POST['pw'.$i]);
-						if (mysql_result($result,0,0)!=$md5pw) {
+						//$md5pw = md5($_POST['pw'.$i]);
+						$actualpw = mysql_result($result,0,0);
+						if (password_verify($_POST['pw'.$i],$actualpw)) {
 							echo "<p>$thisusername: ", _('password incorrect'), "</p>";
 							$errcnt++;
 							continue;

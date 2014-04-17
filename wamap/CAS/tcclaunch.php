@@ -7,6 +7,7 @@
 error_reporting(0);
 
 include("../../config.php");
+require_once("../../includes/password.php");		
 $ltiorg = 'tacomacc.edu';
 $ltiorgname = 'Tacoma CC';
 
@@ -157,10 +158,10 @@ if (isset($_GET['launch'])) {
 		} else if (!isset($_REQUEST['onlyekey'])) {
 			if (!empty($_POST['curSID']) && !empty($_POST['curPW'])) {
 				//provided current SID/PW pair
-				$md5pw = md5($_POST['curPW']);
 				$query = "SELECT password,id FROM imas_users WHERE SID='{$_POST['curSID']}'";
 				$result = mysql_query($query) or die("Query failed : " . mysql_error());
-				if (mysql_result($result,0,0)==$md5pw) {
+				$actualpw = mysql_result($result,0,0);
+				if (password_verify($_POST['curPW'],$actualpw)) {
 					$userid=mysql_result($result,0,1);
 				} else {
 					$infoerr = 'Existing username/password provided are not valid.';
@@ -187,7 +188,8 @@ if (isset($_GET['launch'])) {
 				} else {
 					$msgnot = 0;
 				}
-				$md5pw = md5($_POST['pw1']);
+				$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				
 			}
 		}
 		if (isset($_POST['ekey']) && $_POST['ekey']!='') {

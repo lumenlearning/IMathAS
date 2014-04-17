@@ -26,7 +26,9 @@
 				echo "<p style=\"color:red\">Username <b>{$_POST['username']}</b> is already in use.  Please try another</p>\n";
 			} else {
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email) ";
-				$md5pw = md5($_POST['password']);
+				require_once("../includes/password.php");
+				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+				
 				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();

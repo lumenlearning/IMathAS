@@ -61,7 +61,9 @@
 		}	
 		
 		if ($page_newaccounterror=='') {//no error
-			$md5pw = md5($_POST['pw1']);
+			require_once("../includes/password.php");
+			$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+
 			if ($emailconfirmation) {$initialrights = 0;} else {$initialrights = 10;}
 			if (isset($_POST['msgnot'])) {
 				$msgnot = 1;
@@ -163,7 +165,7 @@
 			$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
 		}
 		//$placeinhead = "<style type=\"text/css\">div#header {clear: both;height: 75px;background-color: #9C6;margin: 0px;padding: 0px;border-left: 10px solid #036;border-bottom: 5px solid #036;} \n.vcenter {font-family: sans-serif;font-size: 28px;margin: 0px;margin-left: 30px;padding-top: 25px;color: #fff;}</style>";
-		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/md5.js\" ></script>";
+		//$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/md5.js\" ></script>";
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 		$pagetitle = $coursename;
 		 if (isset($_SESSION['challenge'])) {

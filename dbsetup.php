@@ -1011,7 +1011,9 @@ $sql = 'INSERT INTO imas_dbschema (id,ver) VALUES (2,0)';  //initialize guest ac
 mysql_query($sql) or die("Query failed : $sql " . mysql_error());
 echo 'imas_dbschema created<br/>';
 
-$md5pw = md5($password);
+
+require_once("includes/password.php");
+$md5pw = password_hash($password, PASSWORD_DEFAULT);
 $now = time();
 $sql = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email) VALUES ('$username','$md5pw',100,'$firstname','$lastname','$email')";
 mysql_query($sql) or die("Query failed : $sql " . mysql_error());

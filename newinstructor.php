@@ -8,6 +8,7 @@
 	$pagetitle = "Instructor Account Request";
 	require("infoheader.php");
 
+	
 	if (isset($_POST['firstname'])) {
 		if (!isset($_POST['agree'])) {
 			echo "<p>You must agree to the Terms and Conditions to set up an account</p>";
@@ -27,7 +28,8 @@
 				echo "<p>Username <b>{$_POST['username']}</b> is already in use.  If you already have an account, use the Forgot Username link on the login page.  Otherwise, please try another username.  </p>\n";
 			} else {
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email) ";
-				$md5pw = md5($_POST['password']);
+				require_once("includes/password.php");
+				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
 				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();

@@ -5,7 +5,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 }
 //any extra CSS, javascript, etc needed for login page
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\" />\n";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/md5.js?v=2\" ></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 	$nologo = true;
 	require("../header.php");
@@ -53,11 +52,14 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 			echo "<p>Login Error.  Try Again</p>\n";
 		}
 	}
+	if ($err!='') {
+		echo $err;
+	}
 ?>
 <b>Login</b>
 <table>
 <tr><td><?php echo $loginprompt;?>:</td><td><input type="text" size="15" id="username" name="username" /></td></tr>
-<tr><td>Password:</td><td><input type="password" size="15" id="passwordentry" /></td></tr>
+<tr><td>Password:</td><td><input type="password" size="15" name="password" /></td></tr>
 </table>
 <div id="settings">JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</div>
 <div class="textright"><a href="<?php echo $imasroot; ?>/forms.php?action=newuser">Register as a new student</a></div>
@@ -67,7 +69,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 <input type="hidden" id="tzoffset" name="tzoffset" value="" />
 <input type="hidden" id="tzname" name="tzname" value=""> 
 <input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
-<input type="hidden" id="password" name="password" value="" />
 <script type="text/javascript">        
         var thedate = new Date();  
         document.getElementById("tzoffset").value = thedate.getTimezoneOffset(); 
@@ -120,6 +121,14 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 </form>
 </div>
 <div class="text">
+<p style="background-color:#ffc">
+On April 17, around 11am PDT, we were forced to take MyOpenMath offline due to a potential security
+breach.  For more details, <a href="securitynotice.php">read the incident notice</a>.<br/><br/>
+
+To insure the security of MyOpenMath, we are requiring all users to reset their passwords.  Please
+use the link below the login box for "Forgot Password", or <a href="forms.php?action=resetpw">click here</a>.
+You will receive an email with a link to reset your password.</p>
+
 <p>WAMAP is a web based mathematics assessment and course management platform.  Its use is provided free to Washington State public 
 educational institution students and instructors.
  </p>

@@ -2,6 +2,7 @@
 //IMathAS:  Admin actions
 //(c) 2006 David Lippman
 require("../validate.php");
+require_once("../includes/password.php");
 
 switch($_GET['action']) {
 	case "emulateuser":
@@ -29,9 +30,9 @@ switch($_GET['action']) {
 	case "resetpwd":
 		if ($myrights < 75) { echo "You don't have the authority for this action"; break;}
 		if (isset($_POST['newpw'])) {
-			$md5pw = md5($_POST['newpw']);
+			$md5pw = password_hash($_POST['newpw'], PASSWORD_DEFAULT);; //md5($_POST['newpw']);
 		} else {
-			$md5pw =md5("password");
+			$md5pw = password_hash("password", PASSWORD_DEFAULT);;  //$md5pw =md5("password");
 		}
 		$query = "UPDATE imas_users SET password='$md5pw' WHERE id='{$_GET['id']}'";
 		if ($myrights < 100) { $query .= " AND groupid='$groupid' AND rights<100"; }
@@ -71,8 +72,9 @@ switch($_GET['action']) {
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$line = mysql_fetch_array($result, MYSQL_ASSOC);
 	
-		if ((md5($_POST['oldpw'])==$line['password']) && ($_POST['newpw1'] == $_POST['newpw2'])) {
-			$md5pw =md5($_POST['newpw1']);
+		if (password_verify($_POST['oldpw'], $line['password']) && ($_POST['newpw1'] == $_POST['newpw2'])) {
+			$md5pw = password_hash($_POST['newpw1'], PASSWORD_DEFAULT);
+			//$md5pw =md5($_POST['newpw1']);
 			$query = "UPDATE imas_users SET password='$md5pw' WHERE id='$userid'";
 			mysql_query($query) or die("Query failed : " . mysql_error()); 
 		} else {
@@ -94,7 +96,8 @@ switch($_GET['action']) {
 			exit;
 		}
 		
-		$md5pw =md5($_POST['password']);
+		$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+		//$md5pw =md5($_POST['password']);
 		if ($myrights < 100) {
 			$newgroup = $groupid;
 		} else if ($myrights == 100) {

@@ -234,7 +234,8 @@ END;
 	 	$line['rights'] = 5;
 	 	$line['groupid'] = 0;
 	 	$_POST['password'] = 'temp';
-	 	$line['password'] = md5('temp');
+	 	require_once("includes/password.php");		
+	 	$line['password'] =  password_hash($_POST['temp'], PASSWORD_DEFAULT);
 	 	$_POST['usedetected'] = true;
 	 } else {
 		 $query = "SELECT id,password,rights,groupid FROM imas_users WHERE SID = '{$_POST['username']}'";
@@ -242,7 +243,9 @@ END;
 		 $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	 }
 	// if (($line != null) && ($line['password'] == md5($_POST['password']))) {
-	 if (($line != null) && ((md5($line['password'].$_SESSION['challenge']) == $_POST['password']) ||($line['password'] == md5($_POST['password'])) )) {
+	// if (($line != null) && ((md5($line['password'].$_SESSION['challenge']) == $_POST['password']) ||($line['password'] == md5($_POST['password'])) )) {
+	require_once("includes/password.php");
+	if (($line != null) && password_verify($_POST['password'],$line['password'])) { 
 		 unset($_SESSION['challenge']); //challenge is used up - forget it.
 		 $userid = $line['id'];
 		 $groupid = $line['groupid'];
@@ -328,6 +331,11 @@ END;
 	 } else {
 		 if (empty($_SESSION['challenge'])) {
 			 $badsession = true;
+		 }
+		 if (($line != null) && strlen($line['password'])==32) {
+		 	 $err = '<p>It looks like you have not reset your password yet.  Please do that by clicking the Forgot Password link below</p>';
+		 } else {
+		 	 $err = '';
 		 }
 		 /*  For login error tracking - requires add'l table
 		 if ($line==null) {
@@ -631,4 +639,5 @@ END;
 	}	
 	return $pass;
   }
+  
 ?>
