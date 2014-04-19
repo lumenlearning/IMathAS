@@ -193,10 +193,10 @@
 		require_once("config.php");
 		
 		if (isset($_POST['username'])) {
-			$query = "SELECT password,id,email FROM imas_users WHERE SID='{$_POST['username']}'";
+			$query = "SELECT id,email,rights FROM imas_users WHERE SID='{$_POST['username']}'";
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			if (mysql_num_rows($result)>0) {
-				$id = mysql_result($result,0,1);
+				list($id,$email,$rights) = mysql_fetch_row($result);
 				
 				$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 				$code = '';
@@ -215,10 +215,27 @@
 				$message .= "password will then be reset to: password.</p>";
 				$message .= "<a href=\"" .$urlmode. $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/actions.php?action=resetpw&id=$id&code=$code\">";
 				$message .= $urlmode . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/actions.php?action=resetpw&id=$id&code=$code</a>\r\n";
-				mail(mysql_result($result,0,2),'Password Reset Request',$message,$headers);
-				echo '<p>An email with a password reset link has been sent your email address on record.  ';
-				echo 'If you do not see it in a few minutes, check your spam or junk box to see if the email ended up there. ';
-				echo 'It may help to add '.$sendfrom.' to your contacts list.</p>';
+				//mail($email,'Password Reset Request',$message,$headers);
+				
+				require("includes/mailses.php");
+				$ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
+
+				$m = new SimpleEmailServiceMessage();
+				$m->addTo($email);
+				$m->setFrom($sendfrom);
+				$m->setSubject('Password Reset Request');
+				$m->setMessageFromString(null,$message);
+				$ses->sendEmail($m);
+				
+				require("header.php");
+				echo '<p>An email with a password reset link has been sent your email address on record: <b>'.$email.'.</b><br/> ';
+				echo 'If you do not see it in a few minutes, check your spam or junk box to see if the email ended up there.<br/>';
+				echo 'It may help to add <b>'.$sendfrom.'</b> to your contacts list.</p>';
+				echo '<p>If you still have trouble and are a student, contact your instructor - they can reset your password for you.</p>';
+				if ($rights>10) {
+					echo '<p>If you still have trouble and are an instructor, please contact dlippman@lumenlearning.com for a manual reset.</p>';
+				}
+				require("footer.php");
 				exit;
 			} else {
 				echo "Invalid Username.  <a href=\"index.php$gb\">Try again</a>";
@@ -258,6 +275,10 @@
 				echo '<p><input type="submit" value="Submit"/></p>';
 				echo '</form>';
 				echo '</body></html>';
+				exit;
+			} else {
+				echo '<html><body>Invalid reset code.  If you have requested a password reset multiple times, you need the link from ';
+				echo 'the most recent email.</body></html>';
 				exit;
 			}
 				
