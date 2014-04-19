@@ -25,15 +25,21 @@
 			if (mysql_num_rows($result)>0) {
 				echo "<p style=\"color:red\">Username <b>{$_POST['username']}</b> is already in use.  Please try another</p>\n";
 			} else {
-				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email) ";
+				if (isset($CFG['GEN']['homelayout'])) {
+					$homelayout = $CFG['GEN']['homelayout'];
+				} else {
+					$homelayout = '|0,1,2||0,1';
+				}
+				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
 				require_once("../includes/password.php");
 				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
 				
-				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
+				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}', '$homelayout');";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();
 				$query = "INSERT INTO imas_students (userid,courseid) VALUES ('$newuserid',1),('$newuserid',438)";
 				mysql_query($query) or die("Query failed : " . mysql_error());
+				
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 				$headers .= "From: $installname <$sendfrom>\r\n";

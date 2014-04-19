@@ -27,10 +27,16 @@
 			if (mysql_num_rows($result)>0) {
 				echo "<p>Username <b>{$_POST['username']}</b> is already in use.  If you already have an account, use the Forgot Username link on the login page.  Otherwise, please try another username.  </p>\n";
 			} else {
-				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email) ";
-				require_once("includes/password.php");
+				if (isset($CFG['GEN']['homelayout'])) {
+					$homelayout = $CFG['GEN']['homelayout'];
+				} else {
+					$homelayout = '|0,1,2||0,1';
+				}
+				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
+				require_once("../includes/password.php");
 				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
-				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}');";
+				
+				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}', '$homelayout');";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();
 				if (isset($CFG['GEN']['enrollonnewinstructor'])) {
