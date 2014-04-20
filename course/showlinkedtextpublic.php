@@ -6,7 +6,7 @@
 		exit;
 	}
 	$cid = intval($_GET['cid']);
-
+	
 	if (isset($_GET['from'])) {
 		$pubcid = $cid;  //swap out cid's before calling validate
 		$cid = intval($_GET['from']);
@@ -58,7 +58,7 @@
 	$itemid = mysql_result($result,0,0);
 	
 	$query = "SELECT itemorder,name,theme FROM imas_courses WHERE id='$cid'";
-	$result = mysql_query($query) or die("Query failed : " . mysql_error());
+	$result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 	$items = unserialize(mysql_result($result,0,0));
 	if ($fcid==0) {
 		$coursename = mysql_result($result,0,1);
@@ -98,7 +98,7 @@
 	
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;">';
 	$navbuttons = '';
-	if ($coursetheme='otbsreader.css') {
+	if ($coursetheme=='otbsreader.css') {
 		$now = time();
 		$query = "SELECT il.id,il.title,il.avail,il.startdate,il.enddate,ii.id AS itemid 
 			  FROM imas_linkedtext as il JOIN imas_items AS ii ON il.id=ii.typeid AND ii.itemtype='LinkedText'
