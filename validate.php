@@ -190,7 +190,7 @@ END;
  	echo '</body></html>';
  	exit;
  }
- $verified = false; 
+ $verified = false;  $err = '';
  //Just put in username and password, trying to log in
  if ($haslogin && !$hasusername) {
 	  //clean up old sessions
@@ -234,8 +234,12 @@ END;
 	 	$line['rights'] = 5;
 	 	$line['groupid'] = 0;
 	 	$_POST['password'] = 'temp';
-	 	require_once("includes/password.php");		
-	 	$line['password'] =  password_hash($_POST['temp'], PASSWORD_DEFAULT);
+	 	if (isset($CFG['GEN']['newpasswords'])) {
+	 		require_once("includes/password.php");		
+	 		$line['password'] =  password_hash($_POST['temp'], PASSWORD_DEFAULT);
+	 	} else {
+	 		$line['password'] = md5('temp');
+	 	}
 	 	$_POST['usedetected'] = true;
 	 } else {
 		 $query = "SELECT id,password,rights,groupid FROM imas_users WHERE SID = '{$_POST['username']}'";
@@ -243,9 +247,12 @@ END;
 		 $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	 }
 	// if (($line != null) && ($line['password'] == md5($_POST['password']))) {
-	// if (($line != null) && ((md5($line['password'].$_SESSION['challenge']) == $_POST['password']) ||($line['password'] == md5($_POST['password'])) )) {
-	require_once("includes/password.php");
-	if (($line != null) && password_verify($_POST['password'],$line['password'])) { 
+	if (isset($CFG['GEN']['newpasswords'])) {
+	 	require_once("includes/password.php");		
+	}
+	if (($line != null) && (
+	  ((!isset($CFG['GEN']['newpasswords']) || $CFG['GEN']['newpasswords']!='only') && ((md5($line['password'].$_SESSION['challenge']) == $_POST['password']) ||($line['password'] == md5($_POST['password']))))
+	  || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['password'],$line['password']))	)) {
 		 unset($_SESSION['challenge']); //challenge is used up - forget it.
 		 $userid = $line['id'];
 		 $groupid = $line['groupid'];
@@ -315,7 +322,12 @@ END;
 		 }
 		 $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		 
-		 $query = "UPDATE imas_users SET lastaccess=$now WHERE id=$userid";
+		 if (isset($CFG['GEN']['newpasswords']) && strlen($line['password'])==32) { //old password - rehash it
+		 	 $hashpw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+		 	 $query = "UPDATE imas_users SET lastaccess=$now,password='$hashpw' WHERE id=$userid";
+		 } else {
+		 	 $query = "UPDATE imas_users SET lastaccess=$now WHERE id=$userid";
+		 }
 		 $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		 
 		 if (isset($_SERVER['QUERY_STRING'])) {
@@ -444,8 +456,8 @@ END;
 
 	if ((isset($_GET['cid']) && $_GET['cid']!="admin" && $_GET['cid']>0) || (isset($sessiondata['courseid']) && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')!==false)) {
 		if (isset($_GET['cid'])) {
-		$dopayprompt = false;
-		$cid = $_GET['cid'];
+			$dopayprompt = false;
+			$cid = $_GET['cid'];
 		} else {
 			$cid = $sessiondata['courseid'];
 		}
@@ -583,7 +595,6 @@ END;
 		if (!isset($loginpage)) {
 			 $loginpage = "loginpage.php";
 		}
-		$err = '';
 		require($loginpage);
 		exit;
 	} 

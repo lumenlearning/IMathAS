@@ -5,9 +5,8 @@
 		echo "Need course id";
 		exit;
 	}
-	
 	$cid = intval($_GET['cid']);
-	
+
 	if (isset($_GET['from'])) {
 		$pubcid = $cid;  //swap out cid's before calling validate
 		$cid = intval($_GET['from']);

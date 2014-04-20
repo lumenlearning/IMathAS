@@ -54,8 +54,11 @@
 			exit;
 		}
 		
-		$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
-		//$md5pw = md5($_POST['pw1']);
+		if (isset($CFG['GEN']['newpasswords'])) {
+			$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+		} else {
+			$md5pw = md5($_POST['pw1']);
+		}
 		if ($emailconfirmation) {$initialrights = 0;} else {$initialrights = 10;}
 		if (isset($_POST['msgnot'])) {
 			$msgnot = 1;
@@ -251,8 +254,11 @@
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$realcode = mysql_result($result,0,0);
 			if (mysql_num_rows($result)>0 && $_POST['code']===$realcode && $realcode!='') {
-				//$newpw = md5("password");
-				$newpw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				if (isset($CFG['GEN']['newpasswords'])) {
+					$newpw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				} else {
+					$newpw = md5("password");
+				}
 				$query = "UPDATE imas_users SET password='$newpw',remoteaccess='' WHERE id='{$_POST['id']}' LIMIT 1";
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				echo "Password Reset.  ";
@@ -283,7 +289,7 @@
 			}
 				
 		}
-	} else if ($_GET['action']=="lookupusername") {
+	} else if ($_GET['action']=="lookupusername") {    
 		require_once("config.php");
 		$query = "SELECT SID,lastaccess FROM imas_users WHERE email='{$_POST['email']}'";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -326,10 +332,13 @@
 	} else if ($_GET['action']=="chgpwd") {
 		$query = "SELECT password FROM imas_users WHERE id = '$userid'";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
-		$line = mysql_fetch_array($result, MYSQL_ASSOC);
-		if (password_verify($_POST['oldpw'],$line['password']) && ($_POST['newpw1'] == $_POST['newpw2']) && $myrights>5) {
-			//$md5pw =md5($_POST['newpw1']);
-			$md5pw = password_hash($_POST['newpw1'], PASSWORD_DEFAULT);
+		$line = mysql_fetch_array($result, MYSQL_ASSOC);  
+		if ((md5($_POST['oldpw'])==$line['password'] || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['oldpw'],$line['password']))) && ($_POST['newpw1'] == $_POST['newpw2']) && $myrights>5) {
+			if (isset($CFG['GEN']['newpasswords'])) {
+				$md5pw = password_hash($_POST['newpw1'], PASSWORD_DEFAULT);
+			} else {
+				$md5pw =md5($_POST['newpw1']);
+			}
 			$query = "UPDATE imas_users SET password='$md5pw' WHERE id='$userid'";
 			mysql_query($query) or die("Query failed : " . mysql_error()); 
 		} else {
@@ -558,10 +567,12 @@
 			$query = "SELECT password FROM imas_users WHERE id = '$userid'";
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$line = mysql_fetch_array($result, MYSQL_ASSOC);
-			if (password_verify($_POST['oldpw'],$line['password']) && ($_POST['newpw1'] == $_POST['newpw2']) && $myrights>5) {
-				$md5pw = password_hash($_POST['newpw1'], PASSWORD_DEFAULT);
-				//$md5pw =md5($_POST['newpw1']);
-				
+			if ((md5($_POST['oldpw'])==$line['password'] || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['oldpw'],$line['password']))) && ($_POST['newpw1'] == $_POST['newpw2']) && $myrights>5) {
+				if (isset($CFG['GEN']['newpasswords'])) {
+					$md5pw = password_hash($_POST['newpw1'], PASSWORD_DEFAULT);
+				} else {
+					$md5pw =md5($_POST['newpw1']);
+				}
 				$query = "UPDATE imas_users SET password='$md5pw' WHERE id='$userid'";
 				mysql_query($query) or die("Query failed : " . mysql_error()); 
 			} else {

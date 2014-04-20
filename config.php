@@ -12,7 +12,11 @@ $CFG['GEN']['AWSforcoursefiles'] = true;
 
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
+
 $CFG['GEN']['pandocserver'] = '54.212.251.50';
+
+//force use of better hashed pw
+$CFG['GEN']['newpasswords'] = "only";
   
 if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** WAMAP.org config ***/	

@@ -225,7 +225,9 @@ if (isset($_GET['launch'])) {
 		$allow_acctcreation = false;
 	}
 	if ($_GET['userinfo']=='set') {	
-		require_once("includes/password.php");
+		if (isset($CFG['GEN']['newpasswords'])) {
+			require_once("includes/password.php");
+		}
 		//check input
 		$infoerr = '';
 		unset($userid);
@@ -238,7 +240,11 @@ if (isset($_GET['launch'])) {
 		} else {
 			if (!empty($_POST['curSID']) && !empty($_POST['curPW'])) {
 				//provided current SID/PW pair
-				$md5pw = password_hash($_POST['curPW'], PASSWORD_DEFAULT);
+				if (isset($CFG['GEN']['newpasswords'])) {
+					$md5pw = password_hash($_POST['curPW'], PASSWORD_DEFAULT);
+				} else {
+					$md5pw = md5($_POST['curPW']);
+				}
 				$query = "SELECT password,id FROM imas_users WHERE SID='{$_POST['curSID']}'";
 				$result = mysql_query($query) or die("Query failed : " . mysql_error());
 				if (mysql_num_rows($result)==0) {
@@ -275,7 +281,11 @@ if (isset($_GET['launch'])) {
 				} else {
 					$msgnot = 0;
 				}
-				$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				if (isset($CFG['GEN']['newpasswords'])) {
+					$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				} else {
+					$md5pw = md5($_POST['pw1']);
+				}
 			}
 		}
 		if ($infoerr=='') { // no error, so create!

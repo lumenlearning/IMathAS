@@ -138,8 +138,12 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				$overwriteBody = 1;
 				$body = "$loginprompt '{$_POST['SID']}' is used.  <a href=\"listusers.php?cid=$cid&newstu=new\">Try Again</a>\n";
 			} else {
-				require_once("../includes/password.php");
-				$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				if (isset($CFG['GEN']['newpasswords'])) {
+					require_once("../includes/password.php");
+					$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
+				} else {
+					$md5pw = md5($_POST['pw1']);
+				}
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify) ";
 				$query .= "VALUES ('{$_POST['SID']}','$md5pw',10,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',0);";
 				mysql_query($query) or die("Query failed : " . mysql_error());
@@ -194,8 +198,12 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				$query .= ",SID='$un'";
 			}
 			if (isset($_POST['doresetpw'])) {
-				require_once("../includes/password.php");
-				$newpw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+				if (isset($CFG['GEN']['newpasswords'])) {
+					require_once("../includes/password.php");
+					$newpw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+				} else {
+					$newpw = md5($_POST['password']);
+				}
 				$query .= ",password='$newpw'";
 			}
 			
