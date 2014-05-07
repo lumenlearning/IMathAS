@@ -25,7 +25,8 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	 
 	 include("$wamapdir/infoheader.php");
 	 
-	 $pref = 0;
+	 $pref = 5;
+	 /*
 	 if (isset($_COOKIE['mathgraphprefs'])) {
 		 $prefparts = explode('-',$_COOKIE['mathgraphprefs']);
 		 if ($prefparts[0]==2 && $prefparts[1]==2) { //img all
@@ -36,7 +37,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 			 $pref = 2;
 		 }
 			 
-	 }
+	 }*/
 ?>
 	
 
@@ -83,11 +84,10 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		var html = ""; 
 		html += 'Accessibility: ';
 		html += "<a href='#' onClick=\"window.open('<?php echo $imasroot;?>/help.php?section=loggingin','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))\">Help<\/a>";
-		html += '<br/><input type="radio" name="access" value="0" <?php if ($pref==0) {echo "checked=1";} ?> />Use visual display<br/>';
-		html += '<input type="radio" name="access" value="2" <?php if ($pref==2) {echo "checked=1";} ?> />Force image-based graphs<br/>';
-		html += '<input type="radio" name="access" value="4" <?php if ($pref==4) {echo "checked=1";} ?> />Force image-based math<br/>';
-		html += '<input type="radio" name="access" value="3" <?php if ($pref==3) {echo "checked=1";} ?> />Force image based display<br/>';
-		html += '<input type="radio" name="access" value="1">Use text-based display';
+		html += '<div style="margin-top: 0px;margin-right:0px;text-align:right;padding:0px"><select name="access"><option value="0" <?php if ($pref==0) {echo 'selected="selected"';} ?> />Use defaults</option>';
+		html += '<option value="3" <?php if ($pref==3) {echo 'selected="selected"';} ?> />Force image-based display</option>';
+		html += '<option value="5" <?php if ($pref==5) {echo 'selected="selected"';} ?> />MathJax display</option>';
+		html += '<option value="1">Use text-based display</option></select></div>';
 		
 		if (AMnoMathML) {
 			html += '<input type="hidden" name="mathdisp" value="0" />';
@@ -125,7 +125,8 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 On April 17, around 11am PDT, we were forced to take WAMAP offline due to a potential security
 breach.  For more details, <a href="securitynotice.php">read the incident notice</a>.<br/><br/>
 
-To insure the security of WAMAP, we are requiring all users to reset their passwords.  Please
+To insure the security of WAMAP, we are requiring all users to reset their passwords.  If you have
+not already reset your password since April 17, please
 use the link below the login box for "Forgot Password", or <a href="forms.php?action=resetpw">click here</a>.
 You will receive an email with a link to reset your password.</p>
 
