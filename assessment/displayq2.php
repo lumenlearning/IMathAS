@@ -912,6 +912,12 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			shuffle($randkeys);
 		}
 		$_SESSION['choicemap'][$qn] = $randkeys;
+		if (isset($GLOBALS['capturechoices'])) {
+			if (!isset($GLOBALS['choicesdata'])) {
+				$GLOBALS['choicesdata'] = array();
+			}
+			$GLOBALS['choicesdata'][$qn] = array($anstype, $questions);
+		}
 		
 		//trim out unshuffled showans
 		$la = explode('$!$',$la);
@@ -1057,6 +1063,12 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			shuffle($randkeys);
 		}
 		$_SESSION['choicemap'][$qn] = $randkeys;
+		if (isset($GLOBALS['capturechoices'])) {
+			if (!isset($GLOBALS['choicesdata'])) {
+				$GLOBALS['choicesdata'] = array();
+			}
+			$GLOBALS['choicesdata'][$qn] = array($anstype, $questions);
+		}
 		
 		$labits = explode('|',$la);
 		if ($displayformat == 'column') { $displayformat = '2column';}
@@ -1164,6 +1176,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$randakeys = array_rand($answers,count($answers));
 			shuffle($randakeys);
 		}
+		
+		if (isset($GLOBALS['capturechoices'])) {
+			if (!isset($GLOBALS['choicesdata'])) {
+				$GLOBALS['choicesdata'] = array();
+			}
+			$GLOBALS['choicesdata'][$qn] = array($anstype, $randakeys);
+		}
+		
 		$ncol = 1;
 		if (substr($displayformat,1)=='columnselect') {
 			$ncol = $displayformat{0};
@@ -2390,7 +2410,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				if ($dotline==2) {
 					$cmd = 'fill="transblue";path([['.implode('],[',$answers).']]);fill="blue";';
 				} else {
-					$cmd = 'path([['.implode('],[',$answers).']]);';
+					$cmd = 'stroke="blue";path([['.implode('],[',$answers).']]);';
 				}
 				for($i=0;$i<count($answers)-1;$i++) {
 					$cmd .= 'dot(['.$answers[$i].']);';
@@ -2499,6 +2519,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		$GLOBALS['partlastanswer'] = $givenans;
+		
 		if ($answer==='') {
 			if (trim($givenans)==='') { return 1;} else { return 0;}
 		}
@@ -3590,8 +3611,13 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 		$strflags = str_replace(' ','',$strflags);
 		$strflags = explode(",",$strflags);
+		$torem = array();
 		foreach($strflags as $flag) {
 			$pc = explode('=',$flag);
+			if ($pc[0]=='ignore_symbol') {
+				$torem[] = $pc[1];
+				continue;
+			}
 			if ($pc[1]==='true' || $pc[1]==='1' || $pc[1]===1) {
 				$pc[1] = true;
 			}
@@ -3612,6 +3638,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			foreach($gaarr as $j=>$givenans) {
 				$givenans = trim($givenans);
 		
+				if (count($torem)>0) {
+					$givenans = str_replace($torem,'',$givenans);
+				}
 				if ($flags['ignore_commas']===true) {
 					$givenans = str_replace(',','',$givenans);
 					$answer = str_replace(',','',$answer);
@@ -3740,6 +3769,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 					
 			if (in_array('inequality',$ansformats)) {
+				$_POST["tc$qn"] = str_replace('or', ' or ', $_POST["tc$qn"]);
 				preg_match_all('/[a-zA-Z]+/',$_POST["tc$qn"],$matches);
 				foreach ($matches[0] as $var) {
 					if (in_array($var,$mathfuncs)) { continue;}
@@ -5498,8 +5528,13 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4) or as a whole number (like 4 or -2)'), $eword);
 		$shorttip = $islist?_('Enter a list of fractions or whole numbers'):_('Enter a fraction or whole number');
 	} else if (in_array('reducedfraction',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6) or as a whole number (like 4 or -2)'), $eword);
-		$shorttip = $islist?_('Enter a list of reduced fractions or whole numbers'):_('Enter a reduced fraction or whole number');
+		if (in_array('fracordec',$ansformats)) {
+			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6), as a whole number (like 4 or -2), or as an exact decimal (like 0.5 or 1.25)'), $eword);
+			$shorttip = $islist?_('Enter a list of reduced fractions, whole numbers, or exact decimals'):_('Enter a reduced fraction, whole number, or exact decimal');
+		} else {
+			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6) or as a whole number (like 4 or -2)'), $eword);
+			$shorttip = $islist?_('Enter a list of reduced fractions or whole numbers'):_('Enter a reduced fraction or whole number');
+		}
 	} else if (in_array('mixednumber',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a reduced mixed number or as a whole number.  Example: 2 1/2 = 2 &frac12;'), $eword);
 		$shorttip = $islist?_('Enter a list of mixed numbers or whole numbers'):_('Enter a mixed number or whole number');
