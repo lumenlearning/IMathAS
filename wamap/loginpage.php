@@ -25,7 +25,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	 
 	 include("$wamapdir/infoheader.php");
 	 
-	 $pref = 5;
+	 $pref = 0;
 	 /*
 	 if (isset($_COOKIE['mathgraphprefs'])) {
 		 $prefparts = explode('-',$_COOKIE['mathgraphprefs']);

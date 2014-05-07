@@ -89,19 +89,18 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		
 		
 		if (AMnoMathML) {
-			html += '<input type=hidden name="mathdisp" value="0">';
+			html += '<input type="hidden" name="mathdisp" value="0" />';
 		} else {
-			html += '<input type=hidden name="mathdisp" value="1">';
+			html += '<input type="hidden" name="mathdisp" value="1" />';
 		}
 		if (ASnoSVG) {
-			html += '<input type=hidden name="graphdisp" value="2">';
+			html += '<input type="hidden" name="graphdisp" value="2" />';
 		} else {
-			html += '<input type=hidden name="graphdisp" value="1">';
+			html += '<input type="hidden" name="graphdisp" value="1" />';
 		}
 		if (!AMnoMathML && !ASnoSVG) {
-			html += '<input type=hidden name="isok" value=1>';
+			html += '<input type="hidden" name="isok" value="1" />';
 		} 
-		
 		setnode.innerHTML = html; 
 		document.getElementById("username").focus();
 	}
