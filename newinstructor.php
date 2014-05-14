@@ -33,7 +33,7 @@
 					$homelayout = '|0,1,2||0,1';
 				}
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
-				require_once("../includes/password.php");
+				require_once("includes/password.php");
 				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
 				
 				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}', '$homelayout');";
