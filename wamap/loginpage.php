@@ -121,14 +121,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 </form>
 </div>
 <div class="text">
-<p style="background-color:#ffc">
-On April 17, around 11am PDT, we were forced to take WAMAP offline due to a potential security
-breach.  For more details, <a href="securitynotice.php">read the incident notice</a>.<br/><br/>
-
-To insure the security of WAMAP, we are requiring all users to reset their passwords.  If you have
-not already reset your password since April 17, please
-use the link below the login box for "Forgot Password", or <a href="forms.php?action=resetpw">click here</a>.
-You will receive an email with a link to reset your password.</p>
 
 <p>WAMAP is a web based mathematics assessment and course management platform.  Its use is provided free to Washington State public 
 educational institution students and instructors.

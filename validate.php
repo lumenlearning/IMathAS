@@ -347,7 +347,7 @@ END;
 		 	 $badsession = false;
 		 }
 		 if (($line != null) && strlen($line['password'])==32) {
-		 	 $err = '<p>It looks like you have not reset your password yet.  Please do that by clicking the Forgot Password link below</p>';
+		 	 $err = '<p>Your password has expired.  Please reset it by clicking the Forgot Password link below.</p>';
 		 } else {
 		 	 $err = '';
 		 }
