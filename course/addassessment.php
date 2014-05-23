@@ -391,7 +391,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$line['ltisecret'] = '';
 			$line['caltag'] = isset($CFG['AMS']['caltag'])?$CFG['AMS']['caltag']:'?';
 			$line['calrtag'] = isset($CFG['AMS']['calrtag'])?$CFG['AMS']['calrtag']:'R';
-			$line['showtips'] = isset($CFG['AMS']['showtips'])?$CFG['AMS']['showtips']:1;
+			$line['showtips'] = isset($CFG['AMS']['showtips'])?$CFG['AMS']['showtips']:2;
 			$usedeffb = false;
 			$deffb = "This assessment contains items that are not automatically graded.  Your grade may be inaccurate until your instructor grades these items.";
 			$gbcat = 0;
@@ -739,7 +739,7 @@ if ($overwriteBody==1) {
 		<div id="customoptions" class="show">
 			<fieldset><legend>Core Options</legend>
 			<span class=form>Require Password (blank for none):</span>
-			<span class=formright><input type="password" name="assmpassword" id="assmpassword" value="<?php echo $line['password'];?>"> <a href="#" onclick="apwshowhide(this);return false;">Show</a></span><br class=form />
+			<span class=formright><input type="password" name="assmpassword" id="assmpassword" value="<?php echo $line['password'];?>" autocomplete="off"> <a href="#" onclick="apwshowhide(this);return false;">Show</a></span><br class=form />
 			<span class=form>Time Limit (minutes, 0 for no time limit): </span>
 			<span class=formright><input type=text size=4 name=timelimit value="<?php echo abs($timelimit);?>">
 				<input type="checkbox" name="timelimitkickout" <?php if ($timelimit<0) echo 'checked="checked"';?> /> Kick student out at timelimit</span><BR class=form>

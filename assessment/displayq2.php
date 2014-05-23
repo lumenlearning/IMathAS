@@ -2318,7 +2318,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		
 		$la = str_replace(array('(',')'),array('[',']'),$la);
 		$la = explode(';;',$la);
-		$la[0] = '['.str_replace(';','],[',$la[0]).']';
+		if ($la[0]!='') {
+			$la[0] = '['.str_replace(';','],[',$la[0]).']';
+		}
 		$la = '[['.implode('],[',$la).']]';
 		
 		$out .= "drawla[$qn] = $la;</script>";
@@ -3767,11 +3769,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			if (checkreqtimes($_POST["tc$qn"],$requiretimes)==0) {
 				return 0;
 			}
-					
 			if (in_array('inequality',$ansformats)) {
 				$_POST["tc$qn"] = str_replace('or', ' or ', $_POST["tc$qn"]);
-				preg_match_all('/[a-zA-Z]+/',$_POST["tc$qn"],$matches);
+			
+				preg_match_all('/([a-zA-Z]\(\s*[a-zA-Z]\s*\)|[a-zA-Z]+)/',$_POST["tc$qn"],$matches);
 				foreach ($matches[0] as $var) {
+					$var = str_replace(' ','',$var);
 					if (in_array($var,$mathfuncs)) { continue;}
 					if ($var!= 'or' && $var!='and' && $var != $variables && $_POST["qn$qn"]!="(-oo,oo)") {
 						return 0;
@@ -3925,6 +3928,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$reltolerance = 1; 
 			}
 		}
+
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		$GLOBALS['partlastanswer'] = $givenans;
 		
@@ -4002,7 +4006,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					array_pop($line);
 				}
 			}
-			
 			
 			$matchstu = array();
 			for ($i=0; $i<count($ansdots); $i++) {
