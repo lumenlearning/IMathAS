@@ -447,9 +447,11 @@ END;
 				header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}");
 				exit;
 			}
-		} else {
+		} else if ($sessiondata['ltirole']=='instructor') {
 			$breadcrumbbase = "<a href=\"$imasroot/ltihome.php?showhome=true\">LTI Home</a> &gt; ";
-		} 
+		} else {
+			$breadcrumbbase = '';
+		}
 	} else {
 		$breadcrumbbase = "<a href=\"$imasroot/index.php\">Home</a> &gt; ";
 	}
