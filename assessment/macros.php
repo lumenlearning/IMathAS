@@ -3,7 +3,7 @@
 //(c) 2006 David Lippman
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs");
 array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates");
 function mergearrays($a,$b) {
 	if (!is_array($a)) {
@@ -896,6 +896,10 @@ function makeprettydisparray($a) {
 	for ($i=0;$i<count($a);$i++) {
 		$a = "`".makepretty($a)."`";
 	}
+}
+
+function prettynegs($a) {
+	return str_replace('-','&#x2212;',$a);
 }
 
 
@@ -2676,18 +2680,18 @@ function getfeedbacktxt($stu,$fbtxt,$ans) {
 	if ($stu===null) {
 		return " ";
 	} else if ($stu==='NA') {
-		return '<span class="feedbackwrap"><img src="'.$imasroot.'/img/redx.gif"/> No answer selected. Try again.</span>';
+		return '<div class="feedbackwrap"><img src="'.$imasroot.'/img/redx.gif"/> No answer selected. Try again.</div>';
 	} else if (isset($fbtxt[$stu])) {
 		if ($stu==$ans) {
-			return '<span class="feedbackwrap correct"><img src="'.$imasroot.'/img/gchk.gif"/> '.$fbtxt[$stu].'</span>';
+			return '<div class="feedbackwrap correct"><img src="'.$imasroot.'/img/gchk.gif"/> '.$fbtxt[$stu].'</div>';
 		} else {
-			return '<span class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> '.$fbtxt[$stu].'</span>';
+			return '<div class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> '.$fbtxt[$stu].'</div>';
 		}
 	} else {
 		if ($stu==$ans) {
-			return '<span class="feedbackwrap correct"><img src="'.$imasroot.'/img/gchk.gif"/></span>';
+			return '<div class="feedbackwrap correct"><img src="'.$imasroot.'/img/gchk.gif"/></div>';
 		} else {
-			return '<span class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/></span>';
+			return '<div class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/></div>';
 		}
 	}
 }
@@ -2696,7 +2700,7 @@ function getfeedbacktxtessay($stu,$fbtxt) {
 	if ($stu==null || trim($stu)=='') {
 		return '';
 	} else {
-		return '<span class="feedbackwrap correct">'.$fbtxt.'</span>';
+		return '<div class="feedbackwrap correct">'.$fbtxt.'</div>';
 	}
 }
 
@@ -2705,7 +2709,7 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb, $tol=.001) {
 	if ($stu===null) {
 		return " ";
 	} else if (!is_numeric($stu)) {
-		return '<span class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> This answer does not appear to be a valid number.</span>';
+		return '<div class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> This answer does not appear to be a valid number.</div>';
 	} else {
 		if ($tol{0}=='|') {
 			$abstol = true;
@@ -2724,12 +2728,12 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb, $tol=.001) {
 		}
 		if ($match>-1) {
 			if ($partial[$i+1]<1) {
-				return '<span class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> '.$fbtxt[$i/2].'</span>';
+				return '<div class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> '.$fbtxt[$i/2].'</div>';
 			} else {
-				return '<span class="feedbackwrap correct"><img src="'.$imasroot.'/img/gchk.gif"/> '.$fbtxt[$i/2].'</span>';
+				return '<div class="feedbackwrap correct"><img src="'.$imasroot.'/img/gchk.gif"/> '.$fbtxt[$i/2].'</div>';
 			}
 		} else {
-			return '<span class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> '.$deffb.'</span>';
+			return '<div class="feedbackwrap incorrect"><img src="'.$imasroot.'/img/redx.gif"/> '.$deffb.'</div>';
 		}
 	}
 }

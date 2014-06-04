@@ -33,7 +33,7 @@
 		//Gbmode : Links NC Dates
 		$totonleft = floor($gbmode/1000)%10 ; //0 right, 1 left
 		$links = ((floor($gbmode/100)%10)&1); //0: view/edit, 1 q breakdown
-		$hidenc = (floor($gbmode/10)%10)%3; //0: show all, 1 stu visisble (cntingb not 0), 2 hide all (cntingb 1 or 2)
+		$hidenc = (floor($gbmode/10)%10)%4; //0: show all, 1 stu visisble (cntingb not 0), 2 hide all (cntingb 1 or 2)
 		$availshow = $gbmode%10; //0: past, 1 past&cur, 2 all
 	} else {
 		$links = 0;
@@ -520,11 +520,11 @@
 		if ($isteacher) {
 			if (isset($exped) && $exped!=$line['enddate']) {
 				echo "<p>Has exception, with due date: ".tzdate("F j, Y, g:i a",$exped);
-				echo "  <button type=\"button\" onclick=\"window.location.href='exception.php?cid=$cid&aid={$line['assessmentid']}&uid={$_GET['uid']}&asid={$_GET['asid']}'\">Edit Exception</button>";
+				echo "  <button type=\"button\" onclick=\"window.location.href='exception.php?cid=$cid&aid={$line['assessmentid']}&uid={$_GET['uid']}&asid={$_GET['asid']}&from=$from&stu=$stu'\">Edit Exception</button>";
 				echo "<br/>Original Due Date: ". tzdate("F j, Y, g:i a",$line['enddate']);
 			} else {
 				echo "<p>Due Date: ". tzdate("F j, Y, g:i a",$line['enddate']);
-				echo "  <button type=\"button\" onclick=\"window.location.href='exception.php?cid=$cid&aid={$line['assessmentid']}&uid={$_GET['uid']}&asid={$_GET['asid']}'\">Make Exception</button>";
+				echo "  <button type=\"button\" onclick=\"window.location.href='exception.php?cid=$cid&aid={$line['assessmentid']}&uid={$_GET['uid']}&asid={$_GET['asid']}&from=$from&stu=$stu'\">Make Exception</button>";
 			}
 			echo "</p>";
 		}
