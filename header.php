@@ -39,7 +39,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?ver=121713"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?ver=060414"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -251,7 +251,7 @@ require_once("$curdir/filter/filter.php");
 //CUSTOMIZE:  put a small (max 120px wide) logo on upper right of course pages
 
 if (!isset($nologo)) {
-	echo '<div id="headerlogo" ';
+	echo '<div id="headerlogo" class="hideinmobile" ';
 	if ($myrights>10 && !$ispublic && !isset($sessiondata['ltiitemtype'])) {
 		echo 'onclick="mopen(\'homemenu\',';
 		if (isset($cid) && is_numeric($cid)) {
