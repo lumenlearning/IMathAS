@@ -41,7 +41,7 @@ site, <a href="http://www.opentextbookstore.com">OpenTextBookStore.com</a>.</p>
   <li>Contemporary Calculus (single variable), by Dale Hoffman</li>
 </ul>
 </p>
-<p>To preview these courses, <a href="index.php">return to the login page</a> and login with username <b>guest</b> (no password needed).</p>
+<p>To preview these courses, <a href="../index.php">return to the login page</a> and login with username <b>guest</b> (no password needed).</p>
 </div>
 
 </body>

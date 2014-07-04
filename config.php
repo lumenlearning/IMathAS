@@ -13,7 +13,7 @@ $CFG['GEN']['AWSforcoursefiles'] = true;
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
 
-$CFG['GEN']['pandocserver'] = '54.212.251.50';
+$CFG['GEN']['pandocserver'] = '54.191.55.159';//'54.212.251.50';
 
 //force use of better hashed pw
 $CFG['GEN']['newpasswords'] = "only";
@@ -74,6 +74,8 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['GBS']['orderby'] = 1;
  
   $CFG['GEN']['skipbrowsercheck'] = true;
+  
+  $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on wamap.org';
   
 /*** end WAMAP.org config ***/	
 } else {
@@ -200,6 +202,8 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  
  $CFG['GEN']['skipbrowsercheck'] = true;
  
+ $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
+  
  /*** end MyOpenMath config ***/
 }
 

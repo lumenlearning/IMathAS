@@ -307,7 +307,7 @@ END;
 			 $sessiondata['useed'] = checkeditorok(); 
 			 $enc = base64_encode(serialize($sessiondata));
 		 } else if ($_POST['usedetected']==true || isset($CFG['GEN']['skipbrowsercheck'])) {
-		 	 $sessiondata['mathdisp'] = 2-$_POST['mathdisp'];
+		 	 $sessiondata['mathdisp'] = $line['rights']>10?3:(2-$_POST['mathdisp']);
 		 	 $sessiondata['graphdisp'] = $_POST['graphdisp'];
 		 	 $sessiondata['useed'] = checkeditorok(); 
 			 $enc = base64_encode(serialize($sessiondata));
