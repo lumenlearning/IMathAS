@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+function go() {
+	var params = $("#theform").serialize();
+	$("#txtout").html("");
+	$("#spinner").show();
+	$.ajax({
+		url: "rehostimg.php",
+		data: params,
+		type: "POST"
+	}).done(function(data) {
+		if ($('input:radio[name=outformat]:checked').val()=="raw") {
+			$("#rawout").val(data);
+			$("#rawout").show();
+			$("#txtout").hide();
+		} else {
+			$("#txtout").html(data);
+			$("#rawout").hide();
+			$("#txtout").show();
+		}
+		$("#spinner").hide();
+	});
+}
+function selectText(containerid) {
+        if (document.selection) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(document.getElementById(containerid));
+            range.select();
+        } else if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNode(document.getElementById(containerid));
+            window.getSelection().addRange(range);
+        }
+}
+</script>
+</head>
+<body>
+<form id="theform">
+<p>URL: <input size="80" name="url"/></p>
+<p>Grab:<br/>
+<input type="radio" name="toget" value="wikipedia"> Wikipedia / Wikibooks page<br/>
+<input type="radio" name="toget" value="selector"> Grab contents of selector: <input type="text" name="selector" value="#book-content"/></br>
+<input type="radio" name="toget" value="selparent"> Grab contents of parent of selector: <input type="text" name="selparent" value=".sectiontitle"/></br>
+<input type="radio" name="toget" value="dohtml"> Process html pasted below:<br/>
+<textarea name="html" cols="80" rows="10"></textarea>
+<p>Output format: <input type="radio" name="outformat" value="html"> rendered HTML <input type="radio" name="outformat" value="raw" checked> raw HTML</p>
+<p><button type="button" onclick="go()">Process</button> <img style="display:none;" id="spinner" src="../img/updating.gif"/></p>
+</form>
+Output: 
+<div id="txtout" style="width:90%;height:100px;border:1px solid black;overflow-y:scroll" onclick="selectText('txtout')"></div>
+<textarea id="rawout" cols="80" rows="10" style="display:none;"></textarea>
+
+<p>Some known selectors:</p>
+<ul>
+ <li>Lardbucket:  #book-content</li>
+ <li>OpenGeography:  #content  </li>
+ <li>Cancer.gov:  #cgvBody or .contentzone</li>
+ <li>OnlineStatBook:  parent of .sectiontitle</li>
+ <li>CNX.org:  .media-body </li>
+</ul>
+ 
+</body>
+</html>
