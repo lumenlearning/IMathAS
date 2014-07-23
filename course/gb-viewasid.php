@@ -7,7 +7,7 @@
 	$isteacher = isset($teacherid);
 	$istutor = isset($tutorid);
 	$cid = $_GET['cid'];
-	$asid = $_GET['asid'];
+	$asid = intval($_GET['asid']);
 	if (!isset($_GET['uid']) && !$isteacher && !$istutor) {
 		$_GET['uid'] = $userid;
 	}
@@ -39,6 +39,7 @@
 		$links = 0;
 		$stu = 0;
 		$from = 'gb';
+		$now = time();
 	}
 	
 	
@@ -409,6 +410,12 @@
 			exit;
 		}
 		$line=mysql_fetch_array($result, MYSQL_ASSOC);
+		
+		if (!$isteacher && !$istutor) {
+			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
+			$query .= "($userid,'$cid','gbviewasid','{$line['assessmentid']}',$now)";
+			mysql_query($query) or die("Query failed : " . mysql_error());
+		}
 		
 		echo "<div class=breadcrumb>$breadcrumbbase ";
 		if (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltiitemtype']!=0) {
@@ -1004,6 +1011,12 @@
 		$query .= "WHERE imas_assessments.id=imas_assessment_sessions.assessmentid AND imas_assessment_sessions.id='{$_GET['asid']}'";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$line=mysql_fetch_array($result, MYSQL_ASSOC);
+		
+		if (!$isteacher && !$istutor) {
+			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
+			$query .= "($userid,'$cid','gbviewasid','{$line['assessmentid']}',$now)";
+			mysql_query($query) or die("Query failed : " . mysql_error());
+		}
 		
 		echo "<h4>{$line['name']}</h4>\n";
 		echo "<p>Started: " . tzdate("F j, Y, g:i a",$line['starttime']) ."<BR>\n";

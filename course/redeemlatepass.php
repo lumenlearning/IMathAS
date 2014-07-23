@@ -9,7 +9,15 @@
 	$query = "SELECT latepasshrs FROM imas_courses WHERE id='$cid'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$hours = mysql_result($result,0,0);
-		
+	$now = time();
+	
+	$viewedassess = array();
+	$query = "SELECT typeid FROM imas_content_track WHERE courseid='$cid' AND userid='$userid' AND type='gbviewasid'";
+	$result = mysql_query($query) or die("Query failed : " . mysql_error());
+	while ($row = mysql_fetch_row($result)) {
+		$viewedassess[] = $row[0];
+	}
+	
 	if (isset($_GET['undo'])) {
 		require("../header.php");
 		echo "<div class=breadcrumb>$breadcrumbbase ";
@@ -75,13 +83,15 @@
 		$hasexception = false;
 		if (mysql_num_rows($result)==0) {
 			$usedlatepasses = 0;
+			$thised = $enddate;
 		} else {
 			$r = mysql_fetch_row($result);
 			$usedlatepasses = round(($r[0] - $enddate)/($hours*3600));
 			$hasexception = true;
+			$thised = $r[0];
 		}
 		
-		if ($allowlate==1 || $allowlate-1>$usedlatepasses) {
+		if (($allowlate%10==1 || $allowlate%10-1>$usedlatepasses) && ($now<$thised || ($allowlate>10 && ($now-$thised)<$hours*3600 && !in_array($aid,$viewedassess)))) {
 			$query = "UPDATE imas_students SET latepass=latepass-1 WHERE userid='$userid' AND courseid='$cid' AND latepass>0";
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			if (mysql_affected_rows()>0) {
@@ -124,19 +134,21 @@
 		$hasexception = false;
 		if (mysql_num_rows($result)==0) {
 			$usedlatepasses = 0;
+			$thised = $enddate;
 		} else {
 			$r = mysql_fetch_row($result);
 			$usedlatepasses = round(($r[0] - $enddate)/($hours*3600));
 			$hasexception = true;
+			$thised = $r[0];
 		}
 		
 		if ($numlatepass==0) { //shouldn't get here if 0
 			echo "<p>You have no late passes remaining.</p>";
-		} else if ($allowlate==1 || $usedlatepasses<$allowlate-1) {
+		} else if (($allowlate%10==1 || $allowlate%10-1>$usedlatepasses) && ($now<$thised || ($allowlate>10 && ($now-$thised)<$hours*3600 && !in_array($aid,$viewedassess)))) {
 			echo '<div id="headerredeemlatepass" class="pagetitle"><h2>Redeem LatePass</h2></div>';
 			echo "<form method=post action=\"redeemlatepass.php?cid=$cid&aid=$aid&confirm=true\">";
-			if ($allowlate>1) {
-				echo '<p>You may use up to '.($allowlate-1-$usedlatepasses).' more LatePass(es) on this assessment.</p>';
+			if ($allowlate%10>1) {
+				echo '<p>You may use up to '.($allowlate%10-1-$usedlatepasses).' more LatePass(es) on this assessment.</p>';
 			}
 			echo "<p>You have $numlatepass LatePass(es) remaining.  You can redeem one LatePass for a $hours hour ";
 			echo "extension on this assessment.  Are you sure you want to redeem a LatePass?</p>";

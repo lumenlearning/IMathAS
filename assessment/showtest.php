@@ -854,13 +854,13 @@ if (!isset($_POST['embedpostback'])) {
 			echo '</a> ';
 		}
 		$latepasscnt = 0;
-		if ($testsettings['allowlate']>1 && isset($exceptionduedate) && $exceptionduedate>0) {
+		if ($testsettings['allowlate']%10>1 && isset($exceptionduedate) && $exceptionduedate>0) {
 			$query = "SELECT latepasshrs FROM imas_courses WHERE id='".$testsettings['courseid']."'";
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$latepasshrs = mysql_result($result,0,0);
 			$latepasscnt = round(($exceptionduedate - $testsettings['enddate'])/(3600*$latepasshrs));
 		}
-		if (($testsettings['allowlate']==1 || $testsettings['allowlate']-1>$latepasscnt) && $sessiondata['latepasses']>0 && !$isreview) {
+		if (($testsettings['allowlate']%10==1 || $testsettings['allowlate']%10-1>$latepasscnt) && $sessiondata['latepasses']>0 && !$isreview) {
 			echo "<a href=\"$imasroot/course/redeemlatepass.php?cid=$cid&aid={$testsettings['id']}\" onclick=\"return confirm('", _('This will discard any unsaved work.'), "');\">", _('Redeem LatePass'), "</a> ";
 		}
 		
@@ -1482,7 +1482,7 @@ if (!isset($_POST['embedpostback'])) {
 					echo "<a name=\"beginquestions\"></a>\n";
 					basicshowq($next);
 					showqinfobar($next,true,true);
-					echo '<input type="submit" class="btn" value="Submit" />';
+					echo '<input type="submit" class="btn" value="'. _('Submit'). '" />';
 					if (($testsettings['showans']=='J' && $qi[$questions[$next]]['showans']=='0') || $qi[$questions[$next]]['showans']=='J') {
 						echo ' <input type="button" class="btn" value="', _('Jump to Answer'), '" onclick="if (confirm(\'', _('If you jump to the answer, you must generate a new version to earn credit'), '\')) {window.location = \'showtest.php?action=skip&amp;jumptoans='.$next.'&amp;to='.$next.'\'}"/>';
 					}
@@ -1522,7 +1522,7 @@ if (!isset($_POST['embedpostback'])) {
 					echo "<a name=\"beginquestions\"></a>\n";
 					basicshowq($next);
 					showqinfobar($next,true,true);
-					echo '<input type="submit" class="btn" value="Submit" />';
+					echo '<input type="submit" class="btn" value="'. _('Submit'). '" />';
 					if (($testsettings['showans']=='J' && $qi[$questions[$next]]['showans']=='0') || $qi[$questions[$next]]['showans']=='J') {
 						echo ' <input type="button" class="btn" value="', _('Jump to Answer'), '" onclick="if (confirm(\'', _('If you jump to the answer, you must generate a new version to earn credit'), '\')) {window.location = \'showtest.php?action=skip&amp;jumptoans='.$next.'&amp;to='.$next.'\'}"/>';
 					}
@@ -2205,7 +2205,7 @@ if (!isset($_POST['embedpostback'])) {
 					
 					basicshowq($i,false);
 					$quesout .= ob_get_clean();
-					$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="Submit" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
+					$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
 					
 				} else {
 					if (!$sessiondata['istutorial']) {

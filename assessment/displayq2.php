@@ -70,16 +70,16 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 					if ($arvp==='') {
 						$stuanswers[$i+1][$k] = null;
 					} else {
-						if (strpos($arvp,'$f$')) {
+						if (strpos($arvp,'$f$')!==false) {
 							$tmp = explode('$f$',$arvp);
 							$arvp = $tmp[0];
 						}
-						if (strpos($arvp,'$!$')) {
+						if (strpos($arvp,'$!$')!==false) {
 							$arvp = explode('$!$',$arvp);
 							$arvp = $arvp[1];
 							if (is_numeric($arvp)) { $arvp = intval($arvp);}
 						}
-						if (strpos($arvp,'$#$')) {
+						if (strpos($arvp,'$#$')!==false) {
 							$tmp = explode('$#$',$arvp);
 							$arvp = $tmp[0];
 							$stuanswersval[$i+1][$k] = $tmp[1];
@@ -95,16 +95,16 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 				if ($arv==='' || $arv==='ReGen') {
 					$stuanswers[$i+1] = null;
 				} else {
-					if (strpos($arvp,'$f$')) {
+					if (strpos($arvp,'$f$')!==false) {
 						$tmp = explode('$f$',$arv);
 						$arv = $tmp[0];
 					}
-					if (strpos($arv,'$!$')) {
+					if (strpos($arv,'$!$')!==false) {
 						$arv = explode('$!$',$arv);
 						$arv = $arv[1];
 						if (is_numeric($arv)) { $arv = intval($arv);}
 					}
-					if (strpos($arv,'$#$')) {
+					if (strpos($arv,'$#$')!==false) {
 						$tmp = explode('$#$',$arv);
 						$arv = $tmp[0];
 						$stuanswersval[$i+1] = $tmp[1];
@@ -527,12 +527,12 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$qnpointval=1) {
 					if ($arvp==='') {
 						$stuanswers[$i+1][$k] = null;
 					} else {
-						if (strpos($arvp,'$!$')) {
+						if (strpos($arvp,'$!$')!==false) {
 							$arvp = explode('$!$',$arvp);
 							$arvp = $arvp[1];
 							if (is_numeric($arvp)) { $arvp = intval($arvp);}
 						}
-						if (strpos($arvp,'$#$')) {
+						if (strpos($arvp,'$#$')!==false) {
 							$tmp = explode('$#$',$arvp);
 							$arvp = $tmp[0];
 							$stuanswersval[$i+1][$k] = $tmp[1];
@@ -548,12 +548,12 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$qnpointval=1) {
 				if ($arv==='' || $arv==='ReGen') {
 					$stuanswers[$i+1] = null;
 				} else {
-					if (strpos($arv,'$!$')) {
+					if (strpos($arv,'$!$')!==false) {
 						$arv = explode('$!$',$arv);
 						$arv = $arv[1];
 						if (is_numeric($arv)) { $arv = intval($arv);}
 					}
-					if (strpos($arv,'$#$')) {
+					if (strpos($arv,'$#$')!==false) {
 						$tmp = explode('$#$',$arv);
 						$arv = $tmp[0];
 						$stuanswersval[$i+1] = $tmp[1];
@@ -1369,7 +1369,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />\n";
 		if (!isset($hidepreview)) {
-			$preview .= "<input type=button class=btn value=Preview onclick=\"calculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
+			$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"calculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 		}
 		$preview .= "$leftb<span id=p$qn></span>$rightb ";
 		$out .= "<script type=\"text/javascript\">calctoproc[$qn] = 1; calcformat[$qn] = '$answerformat';</script>\n";
@@ -1476,7 +1476,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else {
 			$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\" />\n";
 			$out .= getcolormark($colorbox);
-			$out .= "<input type=button value=Preview onclick=\"matrixcalc('tc$qn','p$qn')\" /> &nbsp;\n";
+			$out .= "<input type=button value=\"" . _('Preview') . "\" onclick=\"matrixcalc('tc$qn','p$qn')\" /> &nbsp;\n";
 			$out .= "<span id=p$qn></span> \n";
 			$out .= "<script type=\"text/javascript\">matcalctoproc[$qn] = 1;</script>\n";
 			$tip = _('Enter your answer as a matrix, like ((2,3,4),(1,4,5))');

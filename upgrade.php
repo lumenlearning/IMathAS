@@ -1,7 +1,7 @@
 <?php  
 //change counter; increase by 1 each time a change is made
 //TODO:  change linked text tex to mediumtext
-$latest = 86;
+$latest = 88;
 
 
 @set_time_limit(0);
@@ -1464,6 +1464,19 @@ if (!empty($dbsetup)) {  //initial setup - just write upgradecounter.txt
 				mysql_query($query);
 			}
 			
+		}
+		if ($last<87) {
+			$query = 'ALTER TABLE imas_gbcats ADD `calctype` TINYINT(1) NOT NULL DEFAULT \'0\'';
+			$res = mysql_query($query);
+			if ($res===false) {
+			 	 echo "<p>Query failed: ($query) : ".mysql_error()."</p>";
+			}
+			$query = 'UPDATE imas_gbcats SET calctype=1 WHERE dropn<>0';
+			$res = mysql_query($query);
+		}
+		if ($last<88) {
+			$query = "ALTER TABLE `imas_forums` ADD `tutoredit` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '0';";
+			mysql_query($query) or die("Query failed : " . mysql_error());
 		}
 		/*$handle = fopen("upgradecounter.txt",'w');
 		if ($handle===false) {
