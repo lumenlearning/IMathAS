@@ -33,7 +33,7 @@ logging in.</p>
   <li>Beginning and Intermediate Algebra, using the <a href="http://www.opentextbookstore.com/details.php?id=6">Tyler Wallace</a> textbook</li>
   <li>Precalculus 1 (College Algebra), using the <a href="http://www.opentextbookstore.com/details.php?id=2">Lippman/Rasmussen</a> textbook</li>
   <li>Precalculus 2 (Trigonometry), using the <a href="http://www.opentextbookstore.com/details.php?id=2">Lippman/Rasmussen</a> textbook</li>
-  <li>Trigonometry, using the <a href="http://gan.doubleclick.net/gan_click?lid=41000613802022394&pubid=21000000000357812">CK12/Sousa</a> textbook</li>
+  <li>Trigonometry, using the <a href="https://dl.dropboxusercontent.com/u/28928849/TrigCh1/CK-12-TrigSecond-Edition.pdf">CK12/Sousa</a> textbook</li>
 </ul>
 </p>
  
