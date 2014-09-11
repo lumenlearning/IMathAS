@@ -2,7 +2,7 @@
 if ($coursetheme=='otbsreader.css') {
 	$nologo = true;
 }
-if (!isset($flexwidth) && ($coursetheme=='otbs_fw.css' || $coursetheme=='otbs.css')) {
+if (!isset($flexwidth) && ($coursetheme=='wamap_fw.css' || $coursetheme=='wamap.css')) {
 	$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 ?>
 <div id="headercontent">
@@ -36,9 +36,9 @@ if (isset($userid)) {
 
 ?>
 </div>
-<div id="headerbarlogo"><a href="<?php echo $imasroot;?>/index.php"><img src="<?php echo $imasroot;?>/img/mom.png" /></a>
+<div id="headerbarlogo"><a href="<?php echo $imasroot;?>/index.php"><img src="<?php echo $imasroot;?>/wamap/img/wamaplogo.png" /></a>
 
-<span style="padding-left: 30px;">
+<span style="padding-left: 50px;">
 <?php
 if (isset($userid)) {
 	echo "<a href=\"$imasroot/index.php\">Home</a> | ";
