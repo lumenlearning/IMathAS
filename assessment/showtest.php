@@ -3,6 +3,17 @@
 //(c) 2006 David Lippman
 
 	require("../validate.php");
+	if (!isset($CFG['TE']['navicons'])) {
+		 $CFG['TE']['navicons'] = array(
+			 'untried'=>'te_blue_arrow.png',
+			 'canretrywrong'=>'te_red_redo.png',
+			 'canretrypartial'=>'te_yellow_redo.png',
+			 'noretry'=>'te_blank.gif',
+			 'correct'=>'te_green_check.png',
+			 'wrong'=>'te_red_ex.png',
+			 'partial'=>'te_yellow_check.png');
+			
+	}
 	if (isset($guestid)) {
 		$teacherid=$guestid;
 	}
@@ -118,7 +129,7 @@
 				echo '<h2>'.$adata['name'].'</h2>';
 				echo '<p>', _('Password required for access.'), '</p>';
 				echo "<form method=\"post\" enctype=\"multipart/form-data\" action=\"showtest.php?cid={$_GET['cid']}&amp;id={$_GET['id']}\">";
-				echo "<p>Password: <input type=\"password\" name=\"password\" /></p>";
+				echo "<p>Password: <input type=\"password\" name=\"password\" autocomplete=\"off\" /></p>";
 				echo '<input type=submit value="', _('Submit'), '" />';
 				echo "</form>";
 				require("../footer.php");
@@ -1009,7 +1020,7 @@ if (!isset($_POST['embedpostback'])) {
 			for ($i=1;$i<$testsettings['groupmax']-count($curgrp)+1;$i++) {
 				echo '<br />', _('Username'), ': <select name="user'.$i.'">'.$selops.'</select> ';
 				if ($testsettings['isgroup']==1) {
-					echo _('Password'), ': <input type="password" name="pw'.$i.'" />'."\n";
+					echo _('Password'), ': <input type="password" name="pw'.$i.'" autocomplete="off"/>'."\n";
 				}
 			}
 			echo '<p><input type=submit name="grpsubmit" value="', _('Record Group and Continue'), '"/></p>';
@@ -1457,6 +1468,10 @@ if (!isset($_POST['embedpostback'])) {
 						displayq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],2,false,$attempts[$qn],false,false,false,$colors);
 					} else {
 						displayq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],false,false,$attempts[$qn],false,false,false,$colors);
+					}
+					$contactlinks = showquestioncontactlinks($qn);
+					if ($contactlinks!='' && !$sessiondata['istutorial']) {
+						echo '<div class="review">'.$contactlinks.'</div>';
 					}
 					
 				} else if ($immediatereattempt) {
@@ -2810,20 +2825,20 @@ if (!isset($_POST['embedpostback'])) {
 			}
 		}
 		if ($reviewatend) {
-			global $testtype, $scores, $saenddate, $isteacher, $istutor, $seeds, $attempts;
+			global $testtype, $scores, $saenddate, $isteacher, $istutor, $seeds, $attempts, $rawscores, $noraw;
 			
 			$showa=false;
 			
 			for ($i=0; $i<count($questions); $i++) {
 				echo '<div>';
 				if (!$noraw) {
-					if (strpos($rawscores[$qn],'~')!==false) {
-						$col = explode('~',$rawscores[$qn]);
+					if (strpos($rawscores[$i],'~')!==false) {
+						$col = explode('~',$rawscores[$i]);
 					} else {
-						$col = array($rawscores[$qn]);
+						$col = array($rawscores[$i]);
 					}
 				} else {
-					$col = scorestocolors($noraw?$scores[$qn]:$rawscores[$qn], $qi[$questions[$i]]['points'], $qi[$questions[$i]]['answeights'],$noraw);
+					$col = scorestocolors($noraw?$scores[$i]:$rawscores[$i], $qi[$questions[$i]]['points'], $qi[$questions[$i]]['answeights'],$noraw);
 				}
 				displayq($i, $qi[$questions[$i]]['questionsetid'],$seeds[$i],$showa,false,$attempts[$i],false,false,false,$col);
 				echo "<div class=review>", _('Question')." ".($i+1).". ", _('Last Attempt:');

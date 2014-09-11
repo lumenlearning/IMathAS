@@ -61,6 +61,7 @@ row[0][1][0][8] = tutoredit: 0 no, 1 yes
 row[0][1][0][9] = 5 number summary, if not limuser-ed
 row[0][1][0][10] = 0 regular, 1 group
 row[0][1][0][11] = due date (if $includeduedate is set)
+row[0][1][0][12] = allowlate (in general)
 
 row[0][2] category totals
 row[0][2][0][0] = "Category Name"
@@ -417,15 +418,18 @@ function gbtable() {
 				if ($line['postby'] > 0 && $line['postby'] < 2000000000) {
 					if ($now>$line['replyby'] && $now>$line['postby']) {
 						$avail[$kcnt] = 0;
+						$enddate[$kcnt] = max($line['replyby'], $line['postby']);
 					}
 				} else {
 					if ($now>$line['replyby']) {
 						$avail[$kcnt] = 0;
+						$enddate[$kcnt] = $line['replyby'];
 					}
 				}
 			} else if ($line['postby'] > 0 && $line['postby'] < 2000000000) {
 				if ($now>$line['postby']) {
 					$avail[$kcnt] = 0;
+					$enddate[$kcnt] = $line['postby'];
 				}
 			}
 		} else {
@@ -998,7 +1002,7 @@ function gbtable() {
 				$allowlatethis = true;
 			} else if ($allowlate[$i]>10 && ($now - $thised)<$latepasshrs*3600) {
 				$allowlatethis = true;
-			}
+			} 
 		}
 		$gb[$row][1][$col][10] = $allowlatethis;
 		

@@ -301,6 +301,7 @@ function initeditor(edmode,edids,css) {
 	    theme_advanced_resizing : true,
 	    table_styles: "Gridded=gridded;Gridded Centered=gridded centered",
 	    cleanup_callback : "imascleanup",
+	    convert_urls: false,
 	    AScgiloc : imasroot+'/filter/graph/svgimg.php',
 	    ASdloc : imasroot+'/javascript/d.svg',
 	    file_browser_callback : fileBrowserCallBackFunc
@@ -625,3 +626,30 @@ function _(txt) {
   };
 // Works with either jQuery or Zepto
 })( window.jQuery || window.Zepto );
+
+//code for alt selectors
+function setAltSelectors(group,val) {
+	console.log("looking for "+group);
+	$(".alts."+group).parents(".altWrap").find(".altContentOn").removeClass("altContentOn").addClass("altContentOff");
+	$(".alts."+group).parents(".altWrap").find("."+val).addClass("altContentOn").removeClass("altContentOff");	
+	$("select.alts."+group).val(group+":"+val);
+	
+	var exdate=new Date();
+	exdate.setDate(exdate.getDate() + 365);
+	document.cookie = 'alt_store_'+group+"="+escape(val) + ";expires="+exdate.toGMTString()+ ";path=/";
+}
+jQuery(document).ready(function($) {
+	$(".alts").on('change', function() {
+		var groupValue = this.value.split(':');
+		if (groupValue.length > 1) {
+			setAltSelectors(groupValue[0],groupValue[1]);
+		}
+	}).each(function (i,el) {
+		var groupValue = el.value.split(':');
+		if ((co = readCookie('alt_store_'+groupValue[0]))!=null) { //has cookie
+			setAltSelectors(groupValue[0], co);	
+		} else if ($(el).hasClass("setDefault")) {
+			setAltSelectors(groupValue[0], groupValue[1]);
+		}
+	});
+});

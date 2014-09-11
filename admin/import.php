@@ -233,7 +233,7 @@ if (!(isset($teacherid)) && $myrights<75) {
 							//not efficient, but sufficient :)
 							$query = "DELETE FROM imas_qimages WHERE qsetid='$qsetid'";
 							mysql_query($query) or die("Import failed on $query: " . mysql_error());
-							$qimgs = explode("\n",$qdata[$qn]['qimgs']);
+							$qimgs = explode("\n",trim($qdata[$qn]['qimgs']));
 							foreach($qimgs as $qimg) {
 								$p = explode(',',$qimg);
 								$query = "INSERT INTO imas_qimages (qsetid,var,filename) VALUES ($qsetid,'{$p[0]}','{$p[1]}')";
@@ -254,7 +254,7 @@ if (!(isset($teacherid)) && $myrights<75) {
 					$importuidval = ','.$qdata[$qn]['uqid'];
 					$qdata[$qn]['uqid'] = substr($mt,11).substr($mt,2,2).$qn;
 				}
-				$query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,ownerid,userights,description,author,solution,solutionopts,qtype,control,qcontrol,qtext,answer,extref,license,ancestorauthors,otherattribution,hasimg$importuidstr) VALUES ";
+				$query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,ownerid,userights,description,author,qtype,control,qcontrol,qtext,answer,solution,solutionopts,extref,license,ancestorauthors,otherattribution,hasimg$importuidstr) VALUES ";
 				$query .= "('{$qdata[$qn]['uqid']}',$now,$now,'$userid','$rights','{$qdata[$qn]['description']}','{$qdata[$qn]['author']}','{$qdata[$qn]['qtype']}','{$qdata[$qn]['control']}','{$qdata[$qn]['qcontrol']}',";
 				$query .= "'{$qdata[$qn]['qtext']}','{$qdata[$qn]['answer']}','{$qdata[$qn]['solution']}','{$qdata[$qn]['solutionopts']}','{$qdata[$qn]['extref']}','{$qdata[$qn]['license']}','{$qdata[$qn]['ancestorauthors']}','{$qdata[$qn]['otherattribution']}',$hasimg$importuidval)";
 				mysql_query($query) or die("Import failed on {$qdata[$qn]['description']}: $query:" . mysql_error());

@@ -650,3 +650,11 @@ div.multiselitem {
 .clearfix {
     *zoom: 1;
 }
+
+.greystrike {
+	text-decoration: line-through;
+	color:#999;	
+}
+.altContentOff {
+	display:none;
+}

@@ -871,16 +871,17 @@ function gbstudisp($stu) {
 			
 			echo '<td class="cat'.$gbt[0][1][$i][1].'">'.$gbt[0][1][$i][0];
 			$afterduelatepass = false;
-			if (!$isteacher && !$istutor && $latepasses>0 &&	(
+			if (!$isteacher && !$istutor && $latepasses>0  &&	(
 				(isset($gbt[1][1][$i][10]) && $gbt[1][1][$i][10]>0 && !in_array($gbt[0][1][$i][7],$viewedassess)) ||  //started, and already figured it's ok
 				(!isset($gbt[1][1][$i][10]) && $now<$gbt[0][1][$i][11]) || //not started, before due date
-				(!isset($gbt[1][1][$i][10]) && $now-$gbt[0][1][$i][11]<$latepasshrs*3600 && !in_array($gbt[0][1][$i][7],$viewedassess)) //not started, within one latepass
+				(!isset($gbt[1][1][$i][10]) && $gbt[0][1][$i][12]>10 && $now-$gbt[0][1][$i][11]<$latepasshrs*3600 && !in_array($gbt[0][1][$i][7],$viewedassess)) //not started, within one latepass
 			    )) {
-				echo ' <span class="small"><a href="redeemlatepass?cid='.$cid.'&aid='.$gbt[0][1][$i][7].'">[';
+				echo ' <span class="small"><a href="redeemlatepass.php?cid='.$cid.'&aid='.$gbt[0][1][$i][7].'">[';
 				echo _('Use LatePass').']</a></span>';
 				if ($now>$gbt[0][1][$i][11]) {
 					$afterduelatepass = true;
 				}
+				
 			}
 			
 			echo '</td>';
@@ -1512,7 +1513,7 @@ function gbinstrdisp() {
 		}
 		echo "<a href=\"gradebook.php?cid=$cid&amp;stu={$gbt[$i][4][0]}\">";
 		if ($gbt[$i][4][1]>0) {
-			echo '<span style="text-decoration: line-through;">'.$gbt[$i][0][0].'</span>';
+			echo '<span class="greystrike">'.$gbt[$i][0][0].'</span>';
 		} else {
 			echo $gbt[$i][0][0];
 		}

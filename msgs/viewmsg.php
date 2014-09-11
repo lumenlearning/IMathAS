@@ -94,6 +94,9 @@
 		exit;
 	}
 	$line = mysql_fetch_array($result, MYSQL_ASSOC);
+	
+	$isteacher = isset($teacherof[$line['courseid']]);
+	
 	$senddate = tzdate("F j, Y, g:i a",$line['senddate']);
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	if ($line['hasuserimg']==1) {

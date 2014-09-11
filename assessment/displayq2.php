@@ -1887,7 +1887,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($displayformat=='editor') {
 			$rows += 5;
 		}
-		if ($GLOBALS['useeditor']=='review') {
+		if ($GLOBALS['useeditor']=='review' || ($GLOBALS['useeditor']=='reviewifneeded' && trim($la)=='')) {
 			$la = str_replace('&quot;','"',$la);
 			$la = preg_replace('/%(\w+;)/',"&$1",$la);
 			//$la = str_replace('nbsp;','&nbsp;',$la);
@@ -2605,7 +2605,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				}
 			}
 		} else {
-			$gaarr = array(str_replace(array('$',',',' '),'',$givenans));
+			$gaarr = array(str_replace(array('$',',',' ','/','^'),'',$givenans));
 			if (strpos($answer,'[')===false && strpos($answer,'(')===false) {
 				$anarr = array(str_replace(',','',$answer));
 			} else {
@@ -3693,13 +3693,13 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		foreach($anarr as $i=>$answer) {
 			$foundloc = -1;
 			if (count($torem)>0) {
-				$answer = str_replace($torem,'',$answer);
+				$answer = str_replace($torem,' ',$answer);
 			}
 			foreach($gaarr as $j=>$givenans) {
 				$givenans = trim($givenans);
 		
 				if (count($torem)>0) {
-					$givenans = str_replace($torem,'',$givenans);
+					$givenans = str_replace($torem,' ',$givenans);
 				}
 				if ($flags['ignore_commas']===true) {
 					$givenans = str_replace(',','',$givenans);
@@ -3720,7 +3720,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				if ($flags['special_or']===true) {
 					$specialor = true;
 				}
-				
 				if ($flags['ignore_case']===true) {
 					$givenans = strtoupper($givenans);
 					$answer = strtoupper($answer);
