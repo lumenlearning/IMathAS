@@ -59,7 +59,6 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   //special configs
   $CFG['GEN']['allowInstrImportStuByName'] = false;
   $CFG['CPS']['cploc'] = array(7,0);
-  $CFG['CPS']['picicons'] =  array(1,1);
   $CFG['GBS']['orderby'] = 1;
   $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
   $CFG['GEN']['allowteacherexport'] = 1;

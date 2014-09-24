@@ -7,6 +7,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\" />\n";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 	$nologo = true;
+	$flexwidth = true;
 	require("../header.php");
 	if (isset($_SERVER['QUERY_STRING'])) {
 		 $querys = '?'.$_SERVER['QUERY_STRING'];
