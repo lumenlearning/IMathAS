@@ -346,13 +346,21 @@
 			}
 			$s3asid = $asid;
 		}
-		$questions = explode(',',$line['questions']);
+		if (strpos($line['questions'],';')===false) {
+			$questions = explode(",",$line['questions']);
+			$bestquestions = $questions;
+		} else {
+			list($questions,$bestquestions) = explode(";",$line['questions']);
+			$questions = explode(",",$questions);
+			$bestquestions = explode(",",$bestquestions);
+		}
 		$sp = explode(';', $line['bestscores']);
 		$scores = explode(",",$sp[0]);
 		$attempts = explode(",",$line['bestattempts']);
 		if ($ver=='graded') {
 			$seeds = explode(",",$line['bestseeds']);
 			$la = explode("~",$line['bestlastanswers']);
+			$questions = $bestquestions;
 		} else if ($ver=='last') {
 			$seeds = explode(",",$line['seeds']);
 			$la = explode("~",$line['lastanswers']);

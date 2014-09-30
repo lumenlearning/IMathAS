@@ -571,7 +571,14 @@
 		
 		
 		
-		$questions = explode(",",$line['questions']);
+		if (strpos($line['questions'],';')===false) {
+			$questions = explode(",",$line['questions']);
+			$bestquestions = $questions;
+		} else {
+			list($questions,$bestquestions) = explode(";",$line['questions']);
+			$questions = explode(",",$questions);
+			$bestquestions = explode(",",$bestquestions);
+		}
 		if ($line['timeontask']=='') {
 			$timesontask = array_fill(0,count($questions),'');
 		} else {
@@ -608,6 +615,7 @@
 			if (isset($sp[1])) {$rawscores = explode(",",$sp[1]);}
 			$attempts = explode(",",$line['bestattempts']);
 			$lastanswers = explode("~",$line['bestlastanswers']);
+			$questions = $bestquestions;
 			echo "<p><b>Showing Scored Attempts</b> | ";
 			echo "<a href=\"gb-viewasid.php?stu=$stu&asid={$_GET['asid']}&cid=$cid&from=$from&uid={$_GET['uid']}&lastver=1\">Show Last Attempts</a> | ";
 			echo "<a href=\"gb-viewasid.php?stu=$stu&asid={$_GET['asid']}&cid=$cid&from=$from&uid={$_GET['uid']}&reviewver=1\">Show Review Attempts</a>";

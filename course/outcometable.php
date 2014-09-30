@@ -502,7 +502,12 @@ function outcometable() {
 		
 		$gb[$row][1][$col][3] = $l['id'];; //assessment session id
 		
-		$questions = explode(",",$l['questions']);
+		if (strpos($l['questions'],';')===false) {
+			$questions = explode(",",$l['questions']);
+		} else {
+			list($questions,$bestquestions) = explode(";",$l['questions']);
+			$questions = explode(",",$bestquestions);
+		}
 		$sp = explode(';',$l['bestscores']);
 		$scores = explode(",",$sp[0]);
 		$pts = array();
