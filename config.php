@@ -5,7 +5,11 @@
 //web path to install
 
 /*** common config ***/
-$mathimgurl = "/cgi-bin/mimetex.cgi";
+if (PHP_INT_SIZE==8) {
+	$mathimgurl = "/cgi-bin/mimetex64.cgi";
+} else {
+	$mathimgurl = "/cgi-bin/mimetex.cgi";
+}
 $imasroot = "";
 $allowmacroinstall = false;
 $CFG['GEN']['AWSforcoursefiles'] = true;
