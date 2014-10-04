@@ -90,7 +90,12 @@ if ($type=='notstart') {
 	$sturegens = array();
 	$stuatt = array();
 	while ($line=mysql_fetch_array($result, MYSQL_ASSOC)) {
-		$questions = explode(',',$line['questions']);
+		if (strpos($line['questions'],';')===false) {
+			$questions = explode(",",$line['questions']);
+		} else {
+			list($questions,$bestquestions) = explode(";",$line['questions']);
+			$questions = explode(",",$bestquestions);
+		}
 		$sp = explode(';', $line['bestscores']);
 		$scores = explode(',', $sp[0]);
 		$attp = explode(',',$line['bestattempts']);

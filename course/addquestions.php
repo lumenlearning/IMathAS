@@ -132,6 +132,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$body .= "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addquestions.php?cid=$cid&aid=$aid';\"></p>\n";
 		}
 	}
+	/*  
+	9/25/14: Doesn't appear to get referenced anywhere
 	if (isset($_GET['clearqattempts'])) {
 		if (isset($_GET['confirmed'])) {
 			$clearid = $_GET['clearqattempts'];
@@ -140,7 +142,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$query .= "FROM imas_assessment_sessions WHERE assessmentid='$aid'";
 				$result = mysql_query($query) or die("Query failed : " . mysql_error());
 				while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
-					$questions = explode(',',$line['questions']);
+					if (strpos($line['questions'],';')===false) {
+						$questions = explode(",",$line['questions']);
+						$bestquestions = $questions;
+					} else {
+						list($questions,$bestquestions) = explode(";",$line['questions']);
+						$questions = explode(",",$questions);
+						$bestquestions = explode(",",$bestquestions);
+					}
 					$qloc = array_search($clearid,$questions);
 					if ($qloc!==false) {
 						$attempts = explode(',',$line['attempts']);
@@ -207,6 +216,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$body .= "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addquestions.php?cid=$cid&aid=$aid'\"></p>\n";
 		}
 	}
+	*/
 	if (isset($_GET['withdraw'])) {
 		if (isset($_GET['confirmed'])) {
 			if (strpos($_GET['withdraw'],'-')!==false) {
@@ -264,7 +274,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query = "SELECT id,questions,bestscores FROM imas_assessment_sessions WHERE assessmentid='$aid'";
 			$result = mysql_query($query) or die("Query failed : " . mysql_error());
 			while ($row = mysql_fetch_row($result)) {
-				$qarr = explode(',',$row[1]);
+				//$qarr = explode(',',$row[1]);
+				if (strpos($row[1],';')===false) {
+					$qarr = explode(",",$row[1]);
+				} else {
+					list($questions,$bestquestions) = explode(";",$row[1]);
+					$qarr = explode(",",$bestquestions);
+				}
 				if (strpos($row[2],';')===false) {
 					$bestscores = explode(',',$row[2]);
 					$doraw = false;
@@ -683,7 +699,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 							$extref = explode('~~',$line['extref']);
 							$hasvid = false;  $hasother = false;
 							foreach ($extref as $v) {
-								if (substr($v,0,5)=="Video" || strpos($v,'youtube.com')!==false) {
+								if (substr($v,0,5)=="Video" || strpos($v,'youtube.com')!==false || strpos($v,'youtu.be')!==false) {
 									$hasvid = true;
 								} else {
 									$hasother = true;
@@ -923,6 +939,7 @@ if ($overwriteBody==1) {
 		<img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=addingquestionstoanassessment','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/>
 	</h2></div>
 <?php	
+	echo '<div class="cp"><a href="addassessment.php?id='.$_GET['aid'].'&amp;cid='.$cid.'">'._('Assessment Settings').'</a></div>';	
 	if ($beentaken) {
 ?>	
 	<h3>Warning</h3>
