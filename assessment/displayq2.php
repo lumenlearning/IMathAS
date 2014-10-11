@@ -2662,7 +2662,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						}
 					} else {//{if (is_numeric($givenans)) {
 						//$givenans = preg_replace('/[^\-\d\.eE]/','',$givenans); //strip out units, dollar signs, whatever
-						$givenans = preg_replace('/^(-?\d*\.?\d*E?\d*).*$/','$1',trim($givenans)); //strip out units
+						$givenans = preg_replace('/^(-?\d*\.?\d*E?\-?\d*).*$/','$1',trim($givenans)); //strip out units
 						if (is_numeric($givenans)) {
 							if (isset($reqsigfigs)) {
 								if ($givenans*$anans < 0) { continue;} //move on if opposite signs
@@ -3587,6 +3587,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					}
 				}
 			}
+			
 			if ($cntnan==20 && isset($GLOBALS['teacherid'])) {
 				echo "<p>", _('Debug info: function evaled to Not-a-number at all test points.  Check $domain'), "</p>";
 			}
@@ -3596,7 +3597,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			if ($answerformat=="equation") {
 				if ($cntbothzero>18) {
 					$correct = true;
-				} else if (count($ratios)>0) {
+				} else if (count($ratios)>1) {
 					if (count($ratios)==$cntzero) {
 						$correct = false; return 0;
 					} else {
