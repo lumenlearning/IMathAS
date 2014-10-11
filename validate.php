@@ -415,7 +415,7 @@ END;
 	
 	if (!isset($sessiondata['graphdisp'])) {
 		$now = time();
-		$query = "INSERT INTO imas_log (time,log) VALUES ($now,'missing graphdisp for $userid on page ".addslashes($_SERVER['REQUEST_URI']). " from ".addslashes($_SERVER['HTTP_REFERER'])." using ".addslashes($_SERVER['HTTP_USER_AGENT'])."')";
+		$query = "INSERT INTO imas_log (time,log) VALUES ($now,'missing graphdisp for $userid on page ".addslashes($_SERVER['REQUEST_URI']). " from ".addslashes($_SERVER['HTTP_REFERER'])." using ".addslashes($_SERVER['HTTP_USER_AGENT'])." with sessiondata ".addslashes($enc)."')";
 		mysql_query($query) or die("Query failed : " . mysql_error());
 		$sessiondata['graphdisp'] = 2;
 		writesessiondata();
