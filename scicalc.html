@@ -300,12 +300,19 @@ function mathjs(st,varlist) {
     	}
     	
     }
+    function inIframe() {
+    	try {
+    		return window.self !== window.top;
+    	} catch (e) {
+    		return true;
+    	}
+    }
     function refocus() {
     	document.getElementById('ans').focus();
     }
     </script>
     </head>
-    <body onload="document.getElementById('ans').focus()">
+    <body onload="if (!inIframe()) {document.getElementById('ans').focus();}">
     <form name="calculator" onsubmit="return false;">
     <!-- from http://www.daniweb.com/web-development/web-design-html-and-css/code/216407/a-four-function-calculator-html# -->
    
