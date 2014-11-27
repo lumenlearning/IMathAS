@@ -185,14 +185,28 @@ function chem_decomposecompound($c) {
 }
 
 
-//chem_getcompoundmolmass(compound)
+//chem_getcompoundmolmass(compound, [round])
 //gets the molecular mass of the given compound
-function chem_getcompoundmolmass($c) {
+// round: decimals to round the individual atoms' molecular mass to during calculuations
+//        default: no additional rounding (4 decimal place accuracy)
+//        special value: .5.  Rounds all values to whole numbers, except Cl and Cu to nearest .5 
+function chem_getcompoundmolmass($c,$round=4) {
 	global $chem_periodic_table, $chem_numberbyatom;
 	list($els,$cnt) = chem_decomposecompound($c);
 	$molmass = 0;
 	foreach ($els as $k=>$el) {
-		$molmass += $chem_periodic_table[$chem_numberbyatom[$el]][3]*$cnt[$k];
+		if ($round==.5) {
+			echo abs(round(2*$chem_periodic_table[$chem_numberbyatom[$el]][3])/2 - $chem_periodic_table[$chem_numberbyatom[$el]][3]).'<br/>';
+			if (abs(round(2*$chem_periodic_table[$chem_numberbyatom[$el]][3])/2 - $chem_periodic_table[$chem_numberbyatom[$el]][3]) < .05) {
+				$molmass += round(2*$chem_periodic_table[$chem_numberbyatom[$el]][3])/2*$cnt[$k];
+			} else {
+				$molmass += round($chem_periodic_table[$chem_numberbyatom[$el]][3])*$cnt[$k];
+			}
+		} else if ($round<4) {
+			$molmass += round($chem_periodic_table[$chem_numberbyatom[$el]][3],$round)*$cnt[$k];	
+		} else {
+			$molmass += $chem_periodic_table[$chem_numberbyatom[$el]][3]*$cnt[$k];
+		}
 	}
 	return $molmass;
 }
@@ -291,13 +305,34 @@ function chem_makeioniccompound($cation,$anion) {
 	if ($catsub==1) {
 		$formula = $cation[0];
 	} else {
-		$formula = '('.$cation[0].')_'.$catsub;
+		if (strpos($cation[0],' ')!==false) {
+			$formula = '('.$cation[0].')';
+			$formula .= '_'.$catsub;
+		} else if (strpos($cation[0],'_')!==false) {
+			//this is Hg_2 only
+			$pts = explode('_',$cation[0]);
+			$formula = $pts[0].'_'.($pts[1]*$catsub);
+		} else {
+			$formula = $cation[0];
+			$formula .= '_'.$catsub;
+		}
+		
 	}
 	$ansub = $lcm/$anion[1];
 	if ($ansub==1) {
 		$formula .= ' '.$anion[0];
 	} else {
-		$formula .= ' ('.$anion[0].')_'.$ansub;
+		if (strpos($anion[0],' ')!==false) {
+			$formula .= ' ('.$anion[0].')';
+			$formula .= '_'.$ansub;
+		} else if (strpos($anion[0],'_')!==false) {
+			$pts = explode('_',$anion[0]);	
+			$formula .= ' '.$pts[0].'_'.($ansub*$pts[1]);
+		} else {
+			$formula .= ' '.$anion[0];
+			$formula .= '_'.$ansub;
+		}
+		
 	}
 	$name = $cation[2].' '.$anion[2];
 	return array($formula,$name);
@@ -469,11 +504,11 @@ $GLOBALS['chem_cations'] = array(
 	array('Au',1,'gold (I)','aurous','pv'), //common
 	array('Au',3,'gold (III)','auric','pv'), //common
 	array('Sn',2,'tin (II)','stannous','pv'), //common
-	array('Sn',4,'tin (I V)','stannic','pv'), //common
+	array('Sn',4,'tin (IV)','stannic','pv'), //common
 	array('Pb',2,'lead (II)','plumbous','pv'), //common
-	array('Pb',4,'lead (I V)','plumbic','pv'), //common 34
+	array('Pb',4,'lead (IV)','plumbic','pv'), //common 34
 	array('Hg',2,'mercury (II)','mercuric','pv'),
-	array('Hg_2',2,'mercury (I)','mercuric','pv')  //36
+	array('Hg_2',2,'mercury (I)','mercurous','pa')  //36
 );
 $GLOBALS['chem_anions'] = array(
 	array('F',1,'fluoride','','s'), //common 0
@@ -482,7 +517,7 @@ $GLOBALS['chem_anions'] = array(
 	array('I',1,'iodide','','s'), //common
 	array('O',2,'oxide','','s'), //common
 	array('S',2,'sulfide','','s'), //common
-	array('N',3,'nitrite','','s'), //common
+	array('N',3,'nitride','','s'), //common
 	array('P',3,'phosphide','','s'), //common
 	array('C',4,'carbide','','s'), //common 8
 	array('Se',2,'selenide','','s'),
