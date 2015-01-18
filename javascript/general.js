@@ -85,8 +85,8 @@ function tipshow(el,tip) {
 	tipobj.style.left = "5px";
 	tipobj.style.display = "block";
 	
-	if (typeof AMnoMathML!='undefined' && typeof noMathRender != 'undefined') {
-		if (!AMnoMathML && !noMathRender) {
+	if (typeof usingASCIIMath!='undefined' && typeof noMathRender != 'undefined') {
+		if (usingASCIIMath && !noMathRender) {
 			rendermathnode(tipobj);
 		}
 	}
@@ -662,4 +662,12 @@ jQuery(document).ready(function($) {
 			setAltSelectors(groupValue[0], groupValue[1]);
 		}
 	});
+	$(document).on("keydown", function (e) {
+	    if (e.which === 8 && !$(e.target).is("input[type='text']:not([readonly]),input[type='password']:not([readonly]), textarea")) {
+		e.preventDefault();
+	    }
+	});
+	
 });
+
+

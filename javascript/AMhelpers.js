@@ -4,7 +4,9 @@
 //handles preview button for calculated type
 function calculate(inputId,outputId,format) {
   var fullstr = document.getElementById(inputId).value;
+  fullstr = fullstr.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
   fullstr = fullstr.replace(/=/,'');
+  fullstr = fullstr.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
   if (format.indexOf('list')!=-1) {
 	  var strarr = fullstr.split(/,/);
   } else {
@@ -13,7 +15,7 @@ function calculate(inputId,outputId,format) {
   }
   for (var sc=0;sc<strarr.length;sc++) {
 	  str = strarr[sc];
-	  str = str.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
+	  //str = str.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
 	  var err = "";
 	  if (str.match(/DNE/i)) {
 		  str = str.toUpperCase();
@@ -21,9 +23,14 @@ function calculate(inputId,outputId,format) {
 		  str = "`"+str+"`";
 	  } else {
 		  err += singlevalsyntaxcheck(str,format);
+		  if (str.match(/,/)) {
+		  	  err += _("Invalid use of a comma - it will be ignored and this expression may not evaluate as intended.");
+		  	  str = str.replace(/,/g,'');
+		  }
 		  if (format.indexOf('mixednumber')!=-1) {
 		  	  str = str.replace(/_/,' ');
 		  } else {
+		  	  str = str.replace(/([0-9])\s+([0-9])/g,"$1*$2");
 		  	  str = str.replace(/\s/g,'');
 		  }
 		  err += syntaxcheckexpr(str,format);
@@ -100,7 +107,7 @@ function ineqtointerval(strw) {
 //preview for calcinterval type 
 function intcalculate(inputId,outputId,format) {
   var fullstr = document.getElementById(inputId).value;
-  
+  fullstr = fullstr.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
   if (fullstr.match(/DNE/i)) {
 	  fullstr = fullstr.toUpperCase();
   } else if (fullstr.replace(/\s+/g,'')=='') {
@@ -247,6 +254,7 @@ function intcalculate(inputId,outputId,format) {
 //preview for calcntuple
 function ntuplecalc(inputId,outputId,format) {
 	var fullstr = document.getElementById(inputId).value;
+	fullstr = fullstr.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
 	fullstr = fullstr.replace(/\s+/g,'');
 	if (fullstr.match(/DNE/i)) {
 		fullstr = fullstr.toUpperCase();
@@ -577,6 +585,7 @@ function AMpreview(inputId,outputId) {
   
   var str = document.getElementById(inputId).value;
   str = str.replace(/,/g,"");
+  str = str.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
    var dispstr = str;
    
   for (var i=0; i<vars.length; i++) {
@@ -639,10 +648,9 @@ function AMpreview(inputId,outputId) {
   if (fl!='') {
 	  reg = new RegExp("("+fl+")\\(","g");
 	  str = str.replace(reg,"$1*sin($1+");
-	  vl = vl+'|'+fl;
   }
   vars = vl.split('|');
-  var totesteqn = mathjs(str,vl); 
+  var totesteqn = mathjs(str,vl);
   	  
   while (tstpt<ptlist.length && (isNaN(res) || res=="Infinity")) {
 	  var totest = '';
@@ -709,7 +717,7 @@ function singlevalsyntaxcheck(str,format) {
 		  }
 	} else if (format.indexOf('fracordec')!=-1) {
 		  str = str.replace(/\s/g,'');
-		  if (!str.match(/^\-?\(?\d+\s*\/\s*\-?\d+\)?$/) && !str.match(/^?\-?\d+$/) && !str.match(/^\-?(\d+|\d+\.\d*|\d*\.\d+)$/)) {
+		  if (!str.match(/^\-?\(?\d+\s*\/\s*\-?\d+\)?$/) && !str.match(/^\-?\d+$/) && !str.match(/^\-?(\d+|\d+\.\d*|\d*\.\d+)$/)) {
 			return (_(" invalid entry format")+". ");  
 		  }
 	} else if (format.indexOf('mixednumber')!=-1) {
@@ -750,9 +758,9 @@ function syntaxcheckexpr(str,format,vl) {
 		  err += " ("+_("unmatched parens")+"). ";
 	  }
 	  if (vl) {
-	  	  reg = new RegExp("(sqrt|ln|log|sinh|cosh|tanh|sech|csch|coth|sin|cos|tan|sec|csc|cot|abs)("+vl+"|\\d+)");
+	  	  reg = new RegExp("(sqrt|ln|log|sinh|cosh|tanh|sech|csch|coth|sin|cos|tan|sec|csc|cot|abs)\s*("+vl+"|\\d+)");
 	  } else {
-	  	  reg = new RegExp("(sqrt|ln|log|sinh|cosh|tanh|sech|csch|coth|sin|cos|tan|sec|csc|cot|abs)(\\d+)");
+	  	  reg = new RegExp("(sqrt|ln|log|sinh|cosh|tanh|sech|csch|coth|sin|cos|tan|sec|csc|cot|abs)\s*(\\d+)");
 	  }
 	  errstuff = str.match(reg);
 	  if (errstuff!=null) {  
@@ -811,7 +819,7 @@ function doonsubmit(form,type2,skipconfirm) {
 		
 		fullstr = document.getElementById("tc"+qn).value;
 		fullstr = fullstr.replace(/\s+/g,'');
-		
+		fullstr = fullstr.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
 		if (fullstr.match(/DNE/i)) {
 			  fullstr = fullstr.toUpperCase();
 		  } else {
@@ -869,6 +877,7 @@ function doonsubmit(form,type2,skipconfirm) {
 		qn = parseInt(qn);
 		
 		str = document.getElementById("tc"+qn).value;
+		str = str.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
 		if (calcformat[qn].indexOf('list')!=-1) {
 			strarr = str.split(/,/);
 		} else {
@@ -927,6 +936,7 @@ function doonsubmit(form,type2,skipconfirm) {
 		qn = parseInt(qn);
 		str = document.getElementById("tc"+qn).value;
 		str = str.replace(/,/g,"");
+		str = str.replace(/\u2013|\u2014|\u2015/g, "-").replace(/\u2044/g, "/");
 		if (iseqn[qn]==1) {
 			str = str.replace(/(.*)=(.*)/,"$1-($2)");
 		}
@@ -952,12 +962,11 @@ function doonsubmit(form,type2,skipconfirm) {
 		if (fl!='') {
 			reg = new RegExp("("+fl+")\\(","g");
 			str = str.replace(reg,"$1*sin($1+");
-			varlist = varlist+'|'+fl;
 		}
 		vars = varlist.split("|");
 		var nh = document.getElementById("qn" + qn);
 		nh.value = mathjs(str,varlist);
-
+		
 		ptlist = pts[qn].split(",");
 		vals= new Array();
 		for (var fj=0; fj<ptlist.length;fj++) { //for each set of inputs

@@ -138,6 +138,7 @@
 	$ntime = 0;
 	$tot = 0;
 	$tottime = 0;
+	$tottimeontask = 0;
 	while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		if ($lc%2!=0) {
 			echo "<tr class=even onMouseOver=\"this.className='highlight'\" onMouseOut=\"this.className='even'\">"; 
@@ -178,7 +179,8 @@
 			} else {
 				echo $total;
 			}
-			if ($total<$minscore) {
+			//if ($total<$minscore) {
+			if (($minscore<10000 && $total<$minscore) || ($minscore>10000 && $total<($minscore-10000)/100*$totalpossible)) {
 				echo "&nbsp;(NC)";
 			} else 	if ($IP==1 && $thisenddate>$now) {
 				echo "&nbsp;(IP)";
@@ -222,6 +224,7 @@
 				echo '<td>'.round($timeused/60).' min';
 				if ($timeontask>0) {
 					echo ' ('.$timeontask.' min)';
+					$tottimeontask += $timeontask;
 				}
 				echo '</td>';
 				$tottime += $timeused;
@@ -248,6 +251,9 @@
 	}
 	if ($ntime>0) {
 		$timeavg = round(($tottime/$ntime)/60) . ' min';
+		if ($tottimeontask >0 ) {
+			$timeavg .= ' ('.round($tottimeontask/$ntime) . ' min)';	
+		}
 	} else {
 		$timeavg = '-';
 	}

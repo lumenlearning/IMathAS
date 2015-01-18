@@ -156,8 +156,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				mysql_query($query) or die("Query failed : " . mysql_error());
 				$newuserid = mysql_insert_id();
 				//$query = "INSERT INTO imas_students (userid,courseid) VALUES ($newuserid,'$cid')";
-				$vals = "$newuserid,'$cid'";
-				$query = "INSERT INTO imas_students (userid,courseid";
+				$query = "SELECT deflatepass FROM imas_courses WHERE id='$cid'";
+				$result = mysql_query($query) or die("Query failed : " . mysql_error());
+				$row = mysql_fetch_row($result);
+				$deflatepass = $row[0];
+				
+				$vals = "$newuserid,'$cid','$deflatepass'";
+				$query = "INSERT INTO imas_students (userid,courseid,latepass";
 				if (trim($_POST['section'])!='') {
 					$query .= ",section";
 					$vals .= ",'".$_POST['section']."'";
@@ -375,12 +380,20 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			$hascode = false;
 		}	
 		
+		if ($hassection) {
+			$query = "SELECT usersort FROM imas_gbscheme WHERE courseid='$cid'";
+			$result = mysql_query($query) or die("Query failed : " . mysql_error());
+			$row = mysql_fetch_row($result);
+			$sectionsort = ($row[0]==0);
+		} else {
+			$sectionsort = false;
+		}
 		$query = "SELECT imas_students.id,imas_students.userid,imas_users.FirstName,imas_users.LastName,imas_users.email,imas_users.SID,imas_students.lastaccess,imas_students.section,imas_students.code,imas_students.locked,imas_users.hasuserimg,imas_students.timelimitmult ";
 		$query .= "FROM imas_students,imas_users WHERE imas_students.courseid='$cid' AND imas_students.userid=imas_users.id ";
 		if ($secfilter>-1) {
 			$query .= "AND imas_students.section='$secfilter' ";			
 		}
-		if ($hassection) {
+		if ($sectionsort) {
 			$query .= "ORDER BY imas_students.section,imas_users.LastName,imas_users.FirstName";
 		} else {
 			$query .= "ORDER BY imas_users.LastName,imas_users.FirstName";

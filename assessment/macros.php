@@ -1090,6 +1090,7 @@ function diffrrands($min,$max,$p,$n, $nonzero=false) {
 	if (($q = strpos((string) $min,'.'))!==false) { $rn = max($rn, strlen((string) $min) - $q - 1); }
 	
 	$maxi = ($max-$min)/$p;
+
 	if ($n<.1*$maxi) {
 		$out = array();
 		
@@ -1106,7 +1107,7 @@ function diffrrands($min,$max,$p,$n, $nonzero=false) {
 			$r = array_merge($r,$r);
 		}
 		if ($nonzero) {
-			if ($min < 0 && $max > 0) {
+			if ($min <= 0 && $max >= 0) {
 				array_splice($r,-1*$min/$p,1);
 			}
 		}
@@ -1139,7 +1140,7 @@ function nonzerodiffrands($min,$max,$n) {
 		return $out;
 	} else {
 		$r = range($min,$max);
-		if ($min < 0 && $max > 0) {
+		if ($min <= 0 && $max >= 0) {
 			array_splice($r,-1*$min,1);
 		}
 		shuffle($r);
@@ -1575,25 +1576,44 @@ function subarray($a) {
 	return $out;
 }
 
-function showdataarray($a,$n=1) {
+function showdataarray($a,$n=1,$format='table') {
 	if (!is_array($a)) {
 		return '';
 	}
-	$out = '<table class=stats><tbody>';
-	$cnt = 0;
-	while ($cnt<count($a)) {
-		$out .= '<tr>';
-		for ($i=0;$i<$n;$i++) {
-			if (isset($a[$cnt])) {
-				$out .= '<td>'.$a[$cnt].'</td>';
-			} else {
-				$out .= '<td></td>';
+	
+	if ($format == 'pre') {
+		$maxwidth = 1; $cnt = 0;
+		foreach ($a as $v) {
+			if (strlen($v)>$maxwidth) {
+				$maxwidth = strlen($v);
 			}
-			$cnt++;
 		}
-		$out .= '</tr>';
+		$out = '<pre>';
+		while ($cnt<count($a)) {
+			for ($i=0;$i<$n;$i++) {
+				$out .= sprintf("%{$maxwidth}s ",$a[$cnt]);
+				$cnt++;
+			}
+			$out .= "\n";
+		}
+		$out .= '</pre>';
+	} else {
+		$out = '<table class=stats><tbody>';
+		$cnt = 0;
+		while ($cnt<count($a)) {
+			$out .= '<tr>';
+			for ($i=0;$i<$n;$i++) {
+				if (isset($a[$cnt])) {
+					$out .= '<td>'.$a[$cnt].'</td>';
+				} else {
+					$out .= '<td></td>';
+				}
+				$cnt++;
+			}
+			$out .= '</tr>';
+		}
+		$out .= '</tbody></table>';
 	}
-	$out .= '</tbody></table>';
 	return $out;
 }
 

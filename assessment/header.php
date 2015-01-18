@@ -96,10 +96,10 @@ if (!isset($sessiondata['mathdisp'])) {
 }
 
 if ($sessiondata['graphdisp']==1) {
-	echo "<script src=\"$imasroot/javascript/ASCIIsvg_min.js?v=072314\" type=\"text/javascript\"></script>\n";
+	echo "<script src=\"$imasroot/javascript/ASCIIsvg_min.js?v=121514\" type=\"text/javascript\"></script>\n";
 	echo "<script type=\"text/javascript\">var usingASCIISvg = true;</script>";
 } else {
-	echo "<script src=\"$imasroot/javascript/mathjs.js?v=012314\" type=\"text/javascript\"></script>\n";
+	echo "<script src=\"$imasroot/javascript/mathjs.js?v=101314\" type=\"text/javascript\"></script>\n";
 	echo "<script type=\"text/javascript\">var usingASCIISvg = false;</script>";
 }
 ?>
@@ -115,7 +115,7 @@ div { zoom: 1; }
 }
 </style> 
 <![endif]--> 
-<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=060514";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=121514";?>" type="text/javascript"></script>
 <script src="<?php echo $imasroot . "/javascript/confirmsubmit.js";?>" type="text/javascript"></script>
 <!--[if lt IE 9]>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
@@ -150,6 +150,9 @@ if (isset($placeinhead)) {
 }
 if (isset($CFG['GEN']['headerscriptinclude'])) {
 	require("$curdir/../{$CFG['GEN']['headerscriptinclude']}");
+}
+if (isset($CFG['GEN']['translatewidgetID'])) {
+	echo '<meta name="google-translate-customization" content="'.$CFG['GEN']['translatewidgetID'].'"></meta>';
 }
 echo '</head><body>';
 

@@ -79,7 +79,11 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 			$msgid = mysql_insert_id();
 			
 			if ($_GET['replyto']>0) {
-				$query = "UPDATE imas_msgs SET replied=1 WHERE id='{$_GET['replyto']}'";
+				$query = "UPDATE imas_msgs SET replied=1";
+				if (isset($_POST['sendunread'])) {
+					$query .= ',isread=(isread&~1)';
+				}
+				$query .= " WHERE id='{$_GET['replyto']}'";
 				mysql_query($query) or die("Query failed : $query " . mysql_error());
 				$query = "SELECT baseid FROM imas_msgs WHERE id='{$_GET['replyto']}'";
 				$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -303,8 +307,12 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 			echo "<span class=left><div class=editor><textarea id=message name=message style=\"width: 100%;\" rows=20 cols=70>";
 			echo htmlentities($message);
 			echo "</textarea></div></span><br class=form>\n";
-			
-			echo "<div class=submit><input type=submit value='Send Message'></div>\n";
+			if ($replyto>0) {
+				echo '<span class="form"></span><span class="formright"><input type="checkbox" name="sendunread" value="1"/> '._('Mark original message unread').'</span><br class="form"/>';
+			}
+			echo '<div class="submit"><button type="submit" name="submit" value="send">'._('Send Message').'</button></div>';
+
+			echo "</span></p>\n";
 			
 			if ($msgmonitor==1) {
 				echo "<p><span class=red>Note</span>: Student-to-student messages may be monitored by your instructor</p>";

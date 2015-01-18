@@ -4,7 +4,7 @@
 //Version 0.2 April 16, 2014
 
 global $allowedmacros;
-array_push($allowedmacros,"chem_disp","chem_mathdisp","chem_getsymbol","chem_getnumber","chem_getname","chem_getweight","chem_getmeltingpoint","chem_getboilingpoint","chem_getfamily","chem_randelementbyfamily"," chem_diffrandelementsbyfamily", "chem_getrandcompound", "chem_getdiffrandcompounds","chem_decomposecompound","chem_getcompoundmolmass");
+array_push($allowedmacros,"chem_disp","chem_mathdisp","chem_getsymbol","chem_getnumber","chem_getname","chem_getweight","chem_getmeltingpoint","chem_getboilingpoint","chem_getfamily","chem_randelementbyfamily"," chem_diffrandelementsbyfamily", "chem_getrandcompound", "chem_getdiffrandcompounds","chem_decomposecompound","chem_getcompoundmolmass","chem_randanion","chem_randcation","chem_makeioniccompound");
 
 //chem_disp(compound) 
 //formats a compound for display in as HTML
@@ -185,16 +185,156 @@ function chem_decomposecompound($c) {
 }
 
 
-//chem_getcompoundmolmass(compound)
+//chem_getcompoundmolmass(compound, [round])
 //gets the molecular mass of the given compound
-function chem_getcompoundmolmass($c) {
+// round: decimals to round the individual atoms' molecular mass to during calculuations
+//        default: no additional rounding (4 decimal place accuracy)
+//        special value: .5.  Rounds all values to whole numbers, except Cl and Cu to nearest .5 
+function chem_getcompoundmolmass($c,$round=4) {
 	global $chem_periodic_table, $chem_numberbyatom;
 	list($els,$cnt) = chem_decomposecompound($c);
 	$molmass = 0;
 	foreach ($els as $k=>$el) {
-		$molmass += $chem_periodic_table[$chem_numberbyatom[$el]][3]*$cnt[$k];
+		if ($round==.5) {
+			if (abs(round(2*$chem_periodic_table[$chem_numberbyatom[$el]][3])/2 - $chem_periodic_table[$chem_numberbyatom[$el]][3]) < .05) {
+				$molmass += round(2*$chem_periodic_table[$chem_numberbyatom[$el]][3])/2*$cnt[$k];
+			} else {
+				$molmass += round($chem_periodic_table[$chem_numberbyatom[$el]][3])*$cnt[$k];
+			}
+		} else if ($round<4) {
+			$molmass += round($chem_periodic_table[$chem_numberbyatom[$el]][3],$round)*$cnt[$k];	
+		} else {
+			$molmass += $chem_periodic_table[$chem_numberbyatom[$el]][3]*$cnt[$k];
+		}
 	}
 	return $molmass;
+}
+
+//chem_randcation([group,name type,include uncommon])
+//group name:  simple, basic (simple + NH_4), polyvalent, or all. Default = all
+//name type: "common" (iron (II)) or "alternate" (ferrous)  default = common
+//include uncommon: set true to include francium, radium, cadmium, etc.
+//returns array(symbol, charge, name)
+function chem_randcation($group="all", $type="common", $uncommon = false) {
+	global $chem_cations;
+	if ($group=="polyvalent") {
+		$pickfrom = range(17,34);
+	} else {
+		$pickfrom = range(0,12);
+	}
+	if ($group=="basic" || $group=="all") {
+		$pickfrom[] = 13;
+	}
+	if ($uncommon && $group != 'polyvalent') {
+		$pickfrom = array_merge($pickfrom, range(14,16));
+	}
+	if ($group=="all") {
+		$pickfrom = array_merge($pickfrom, range(17,34));
+	}
+	if ($uncommon && ($group=="all" || $group=="polyvalent")) {
+		$pickfrom = array_merge($pickfrom, range(35,36));
+	}
+	$r = randfrom($pickfrom);
+	$name = ($type=="alternate" && $chem_cations[$r][3]!='')?$chem_cations[$r][3]:$chem_cations[$r][2];
+	return array($chem_cations[$r][0],$chem_cations[$r][1],$name);
+}
+
+//chem_randanion([group,name type,include uncommon])
+//group name:  simple, polyatomic, or all. Default = all
+//name type: "common" (bicarbonate) or "alternate" (hydrogen carbonate)  default = common
+//include uncommon: set true to include selenide, peroxide
+//returns array(symbol, charge, name)
+function chem_randanion($group="all", $type="common", $uncommon = false) {
+	global $chem_anions;
+	if ($group=="polyatomic") {
+		$pickfrom = range(10,36);
+	} else {
+		$pickfrom = range(0,8);
+	}
+	if ($uncommon && $group != 'polyatomic') {
+		$pickfrom[] = 9;
+	}
+	if ($group=="all") {
+		$pickfrom = array_merge($pickfrom, range(10,36));
+	}
+	if ($uncommon && ($group=="all" || $group=="polyatomic")) {
+		$pickfrom[] = 35;
+	}
+	$r = randfrom($pickfrom);
+	$name = ($type=="alternate" && $chem_anions[$r][3]!='')?$chem_anions[$r][3]:$chem_anions[$r][2];
+	return array($chem_anions[$r][0],$chem_anions[$r][1],$name);
+}
+
+//chem_makeioniccompound(cation, anion)
+//takes a cation and anion
+//  these are the array returned by chem_randcation and chem_randanion
+//returns array(formula, name)
+function chem_makeioniccompound($cation,$anion) {
+	if (!is_array($cation)) {
+		global $chem_cations;
+		$found = false;
+		foreach($chem_cations as $c) {
+			if ($c[0]==$cation) {
+				$cation = $c;
+				$found = true;
+				break;
+			}
+		}
+		if (!$found) {
+			echo "Cation not found.";
+		}
+	}
+	if (!is_array($anion)) {
+		global $chem_anions;
+		$found = false;
+		foreach($chem_anions as $c) {
+			if ($c[0]==$anion) {
+				$anion = $c;
+				$found = true;
+				break;
+			}
+		}
+		if (!$found) {
+			echo "Anion not found.";
+		}
+	}
+		
+	$lcm = lcm($cation[1],$anion[1]);
+	$catsub = $lcm/$cation[1];
+	if ($catsub==1) {
+		$formula = $cation[0];
+	} else {
+		if (strpos($cation[0],' ')!==false) {
+			$formula = '('.$cation[0].')';
+			$formula .= '_'.$catsub;
+		} else if (strpos($cation[0],'_')!==false) {
+			//this is Hg_2 only
+			$pts = explode('_',$cation[0]);
+			$formula = $pts[0].'_'.($pts[1]*$catsub);
+		} else {
+			$formula = $cation[0];
+			$formula .= '_'.$catsub;
+		}
+		
+	}
+	$ansub = $lcm/$anion[1];
+	if ($ansub==1) {
+		$formula .= ' '.$anion[0];
+	} else {
+		if (strpos($anion[0],' ')!==false) {
+			$formula .= ' ('.$anion[0].')';
+			$formula .= '_'.$ansub;
+		} else if (strpos($anion[0],'_')!==false) {
+			$pts = explode('_',$anion[0]);	
+			$formula .= ' '.$pts[0].'_'.($ansub*$pts[1]);
+		} else {
+			$formula .= ' '.$anion[0];
+			$formula .= '_'.$ansub;
+		}
+		
+	}
+	$name = $cation[2].' '.$anion[2];
+	return array($formula,$name);
 }
 	
 	
@@ -330,13 +470,92 @@ $GLOBALS['chem_numberbyatom'] = array(
 	'Bi'=>83,'Po'=>84,'At'=>85,'Rn'=>86,'Fr'=>87,'Ra'=>88,'Ac'=>89,'Th'=>90,'Pa'=>91,'U'=>92,'Np'=>93,'Pu'=>94,'Am'=>95,
 	'Cm'=>96,'Bk'=>97,'Cf'=>98,'Es'=>99,'Fm'=>100,'Md'=>101,'No'=>102,'Lr'=>103);
 
+$GLOBALS['chem_cations'] = array(
+	array('Li',1,'lithium','','s'), //common  0
+	array('Na',1,'sodium','','s'), //common
+	array('K',1,'potassium','','s'), //common
+	array('Rb',1,'rubidium','','s'), //common
+	array('Cs',1,'cesium','','s'), //common
+	array('Be',2,'beryllium','','s'), //common
+	array('Mg',2,'magnesium','','s'), //common
+	array('Ca',2,'calcium','','s'), //common
+	array('Sr',2,'strontium','','s'), //common
+	array('Ba',2,'barium','','s'), //common
+	array('Zn',2,'zinc','','s'), //common
+	array('Ag',1,'silver','','s'), //common
+	array('Al',3,'aluminum','','s'), //common
+	array('N H_4',1,'ammonium','','pa'), //common  13
+	array('Cd',2,'cadmium','','s'),
+	array('Fr',1,'francium','','s'),
+	array('Ra',2,'radium','','s'),  //16
+	array('Cr',2,'chromium (II)','chromous','pv'), //common 17
+	array('Cr',3,'chromium (III)','chromic','pv'), //common
+	array('Mn',2,'manganese (II)','manganous','pv'), //common
+	array('Mn',3,'manganese (III)','manganic','pv'), //common
+	array('Fe',2,'iron (II)','ferrous','pv'), //common
+	array('Fe',3,'iron (III)','ferric','pv'), //common
+	array('Co',2,'cobalt (II)','cobaltous','pv'), //common
+	array('Co',3,'cobalt (III)','cobaltic','pv'), //common
+	array('Ni',2,'nickel (II)','nickelous','pv'), //common
+	array('Ni',3,'nickel (III)','nickelic','pv'), //common
+	array('Cu',1,'copper (I)','cuprous','pv'), //common
+	array('Cu',2,'copper (II)','cupric','pv'), //common
+	array('Au',1,'gold (I)','aurous','pv'), //common
+	array('Au',3,'gold (III)','auric','pv'), //common
+	array('Sn',2,'tin (II)','stannous','pv'), //common
+	array('Sn',4,'tin (IV)','stannic','pv'), //common
+	array('Pb',2,'lead (II)','plumbous','pv'), //common
+	array('Pb',4,'lead (IV)','plumbic','pv'), //common 34
+	array('Hg',2,'mercury (II)','mercuric','pv'),
+	array('Hg_2',2,'mercury (I)','mercurous','pa')  //36
+);
+$GLOBALS['chem_anions'] = array(
+	array('F',1,'fluoride','','s'), //common 0
+	array('Cl',1,'chloride','','s'), //common
+	array('Br',1,'bromide','','s'), //common
+	array('I',1,'iodide','','s'), //common
+	array('O',2,'oxide','','s'), //common
+	array('S',2,'sulfide','','s'), //common
+	array('N',3,'nitride','','s'), //common
+	array('P',3,'phosphide','','s'), //common
+	array('C',4,'carbide','','s'), //common 8
+	array('Se',2,'selenide','','s'),
+	array('C_2 H_3 O_2',1,'acetate','','pa'), //common  10
+	array('Cl O',1,'hypochlorite','','pa'), //common
+	array('Cl O_2',1,'chlorite','','pa'), //common
+	array('Cl O_3',1,'chlorate','','pa'), //common
+	array('Cl O_4',1,'perchlorate','','pa'), //common
+	array('C N',1,'cyanide','','pa'), //common
+	array('H C O_3',1,'bicarbonate','hydrogen carbonate','pa'), //common
+	array('H_2 P O_4',1,'dihydrogen  phosphate','','pa'), //common
+	array('H S O_3',1,'bisulfite','hydrogen sulfite','pa'), //common
+	array('H S O_4',1,'bisulfate','hydrogen sulfate','pa'), //common
+	array('I O_3',1,'iodate','','pa'), //common
+	array('Mn O_4',1,'permanganate','','pa'), //common
+	array('N O_2',1,'nitrite','','pa'), //common
+	array('N O_3',1,'nitrate','','pa'), //common
+	array('O H',1,'hydroxide','','pa'), //common
+	array('S C N',1,'thiocyanate','','pa'), //common
+	array('C O_3',2,'carbonate','','pa'), //common
+	array('C_2 O_4',2,'oxalate','','pa'), //common
+	array('Cr O_4',2,'chromate','','pa'), //common
+	array('Cr_2 O_7',2,'dichromate','','pa'), //common
+	array('H P O_4',2,'hydrogen phosphate','','pa'), //common
+	array('S O_3',2,'sulfite','','pa'), //common
+	array('S O_4',2,'sulfate','','pa'), //common
+	array('Si O_3',2,'silicate','','pa'), //common
+	array('As O_4',3,'arsenate','','pa'), //common
+	array('P O_3',3,'phosphite','','pa'), //common
+	array('P O_4',3,'phosphate','','pa'), //common 36
+	array('O_2',2,'peroxide','','pa')
+);
 $GLOBALS['chem_compounds'] = array(
 	'twobasic' => array(
 		array('Silver bromide','Ag Br'),
 		array('Silver chloride','Ag Cl'),
 		array('Silver iodide','Ag I'),
-		array('Aluminium nitride','Al N'),
-		array('Aluminium phosphide','Al P'),
+		array('Aluminum nitride','Al N'),
+		array('Aluminum phosphide','Al P'),
 		array('Boron nitride','B N'),
 		array('Barium oxide','Ba O'),
 		array('Beryllium oxide','Be O'),
@@ -384,8 +603,8 @@ $GLOBALS['chem_compounds'] = array(
 		array('Silver oxide','Ag_2 O'),
 		array('Silver sulfide','Ag_2 S'),
 		array('Silver nitride','Ag_3 N'),
-		array('Aluminium chloride','Al Cl_3'),
-		array('Aluminium fluoride','Al F_3'),
+		array('Aluminum chloride','Al Cl_3'),
+		array('Aluminum fluoride','Al F_3'),
 		array('Arsine','As H_3'),
 		array('Boron trichloride','B Cl_3'),
 		array('Boron trifluoride','B F_3'),
@@ -446,7 +665,7 @@ $GLOBALS['chem_compounds'] = array(
 		array('Uranium pentafluoride','U F_5'),
 		array('Zinc bromide','Zn Br_2'),
 		array('Zinc chloride','Zn Cl_2'),
-		array('Aluminium oxide','Al_2 O_3'),
+		array('Aluminum oxide','Al_2 O_3'),
 		array('Diborane','B_2 H_6'),
 		array('Boron oxide','B_2 O_3'),
 		array('Pentaborane','B_5 H_9'),
@@ -515,7 +734,7 @@ $GLOBALS['chem_compounds'] = array(
 		array('Potassium perchlorate','K Cl O_4'),
 		array('Potassium carbonate','K_2 C O_3'),
 		array('Potassium sulfate','K_2 S O_4'),
-		array('Lithium aluminium hydride','Li Al H_4'),
+		array('Lithium Aluminum hydride','Li Al H_4'),
 		array('Lithium borohydride','Li B H_4'),
 		array('Lithium hypochlorite','Li Cl O'),
 		array('Lithium chlorate','Li Cl O_3'),
@@ -571,8 +790,8 @@ $GLOBALS['chem_compounds'] = array(
 		array('Zinc sulfate','Zn S O_4')
 	),
 	'parens'=> array(
-		array('Aluminium hydroxide','Al (O H)_3'),
-		array('Aluminium nitrate','Al (N O_3)_3'),
+		array('Aluminum hydroxide','Al (O H)_3'),
+		array('Aluminum nitrate','Al (N O_3)_3'),
 		array('Ammonium chromate','(N H_4)_2 Cr O_4'),
 		array('Ammonium dichromate','(N H_4)_2 Cr_2 O_7'),
 		array('Ammonium persulfate','(N H_4)_2 S_2 O_8'),

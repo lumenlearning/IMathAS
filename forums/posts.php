@@ -60,9 +60,16 @@
 		}
 		exit;
 	}
-	$query = "SELECT settings,replyby,defdisplay,name,points,groupsetid,postby,rubric,tutoredit FROM imas_forums WHERE id='$forumid'";
+	$query = "SELECT settings,replyby,defdisplay,name,points,groupsetid,postby,rubric,tutoredit,enddate,avail FROM imas_forums WHERE id='$forumid'";
 	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	list($forumsettings, $replyby, $defdisplay, $forumname, $pointsposs, $groupset, $postby, $rubric, $tutoredit) = mysql_fetch_row($result);
+	list($forumsettings, $replyby, $defdisplay, $forumname, $pointsposs, $groupset, $postby, $rubric, $tutoredit, $enddate, $avail) = mysql_fetch_row($result);
+	
+	if (isset($studentid) && ($avail==0 || ($avail==1 && time()>$enddate))) {
+		require("../header.php");
+		echo '<p>This forum is closed.  <a href="course.php?cid='.$cid.'">Return to the course page</a></p>';
+		require("../footer.php");
+		exit;
+	}
 	
 	$allowreply = ($isteacher || (time()<$replyby));
 	$allowanon = (($forumsettings&1)==1);
@@ -321,10 +328,13 @@
 		}
 		//echo "<br/><b style=\"font-size: 120%\">Post: {$subject[$threadid]}</b><br/>\n";
 		//echo "<b style=\"font-size: 100%\">Forum: $forumname</b></p>";
-		echo " | <input type=button value=\"Expand All\" onclick=\"expandall()\"/>";
-		echo "<input type=button value=\"Collapse All\" onclick=\"collapseall()\"/> | ";
-		echo " <input type=button value=\"Show All\" onclick=\"showall()\"/>";
-		echo "<input type=button value=\"Hide All\" onclick=\"hideall()\"/> ";
+		
+		echo '| <button onclick="expandall()">'._('Expand All').'</button>';
+		echo '<button onclick="collapseall()">'._('Collapse All').'</button> | ';
+		echo '<button onclick="showall()">'._('Show All').'</button>';
+		echo '<button onclick="hideall()">'._('Hide All').'</button>';
+		
+		
 		/*if ($view==2) {
 			echo "<a href=\"posts.php?view=$view&cid=$cid&forum=$forumid&page=$page&thread=$threadid&view=0\">View Expanded</a>";
 		} else {

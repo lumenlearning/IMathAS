@@ -679,11 +679,24 @@
 				if (!butn.hasClass("hchidden")) {
 					butn.html("'._('Show Correct Questions').'");
 					butn.addClass("hchidden");
+					$(".iscorrect").hide();
 				} else {
 					butn.html("'._('Hide Correct Questions').'");
 					butn.removeClass("hchidden");
+					$(".iscorrect").show();
 				}
-				$(".iscorrect").toggle();
+			}
+			function hideperfect() {
+				var butn = $("#hptoggle");
+				if (!butn.hasClass("hphidden")) {
+					butn.html("'._('Show Perfect Questions').'");
+					butn.addClass("hphidden");
+					$(".isperfect").hide();
+				} else {
+					butn.html("'._('Hide Perfect Questions').'");
+					butn.removeClass("hphidden");
+					$(".isperfect").show();
+				}
 			}
 			function hideNA() {
 				var butn = $("#hnatoggle");
@@ -707,15 +720,15 @@
 					var idparts = partname.split("-");
 					var qn = (idparts[0]*1+1)*1000+idparts[1]*1;
 					$(el).on("mouseover", function () {
-						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","yellow")};
+						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","yellow")};
 					}).on("mouseout", function () {
-						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","")};
+						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","")};
 					}).on("focus", function () {
 						focuscolorlock = true;
-						$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","yellow");
+						$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","yellow");
 					}).on("blur", function () {
 						focuscolorlock = false;
-						$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","");
+						$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","");
 					});
 				});
 				$("input[id^=\'showansbtn\']").each(function(i, el) {
@@ -723,9 +736,9 @@
 					var idparts = partname.split("-");
 					var qn = (idparts[0]*1+1)*1000+idparts[1]*1;
 					$(el).on("mouseover", function () {
-						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","yellow")};
+						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","yellow")};
 					}).on("mouseout", function () {
-						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","")};
+						if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","")};
 					});
 				});
 				$("input[id^=\'qn\'], input[id^=\'tc\'], select[id^=\'qn\'], div[id^=\'qnwrap\'], span[id^=\'qnwrap\']").each(function(i,el) {
@@ -738,15 +751,15 @@
 					if (qn>999) {
 						var partname = (Math.floor(qn/1000)-1)+"-"+(qn%1000);
 						$(el).on("mouseover", function () {
-							if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","yellow")};
+							if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","yellow")};
 						}).on("mouseout", function () {
-							if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","")};
+							if (!focuscolorlock) {$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","")};
 						}).on("focus", function () {
 							focuscolorlock = true;
-							$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","yellow");
+							$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","yellow");
 						}).on("blur", function () {
 							focuscolorlock = false;
-							$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname).css("background-color","");
+							$("#qn"+qn+", #tc"+qn+", #qnwrap"+qn+", #showansbtn"+partname+", #scorebox"+partname+", #ptpos"+partname).css("background-color","");
 						});
 					}
 				});
@@ -754,13 +767,16 @@
 			</script>';
 		
 		echo '<p><button type="button" id="hctoggle" onclick="hidecorrect()">'._('Hide Correct Questions').'</button>';
+		echo ' <button type="button" id="hptoggle" onclick="hideperfect()">'._('Hide Perfect Questions').'</button>';
 		echo ' <button type="button" id="hnatoggle" onclick="hideNA()">'._('Hide Unanswered Questions').'</button>';
 		echo ' <button type="button" id="showanstoggle" onclick="showallans()">'._('Show All Answers').'</button></p>';
 		$total = 0;
 		
 		for ($i=0; $i<count($questions);$i++) {
 			echo "<div ";
-			if ($canedit && ((isset($rawscores) && isperfect($rawscores[$i])) || getpts($scores[$i])==$pts[$questions[$i]])) {
+			if ($canedit && getpts($scores[$i])==$pts[$questions[$i]]) {
+				echo 'class="iscorrect isperfect"';
+			} else if ($canedit && ((isset($rawscores) && isperfect($rawscores[$i])) || getpts($scores[$i])==$pts[$questions[$i]])) {
 				echo 'class="iscorrect"';	
 			} else if ($scores[$i]==-1) {
 				echo 'class="notanswered"';	
@@ -826,11 +842,18 @@
 			}
 			echo " out of {$pts[$questions[$i]]} ";
 			if ($parts!='') {
-				echo '(parts: '.implode(', ',$answeights[$questions[$i]]).')';
+				echo '(parts: ';
+				for ($j=0;$j<count($answeights[$questions[$i]]);$j++) {
+					if ($j>0) { echo ', ';}
+					echo "<span id=\"ptpos$i-$j\">".$answeights[$questions[$i]][$j].'</span>';
+				}
+				echo ')';
 			}
 			echo "in {$attempts[$i]} attempt(s)\n";
 			if ($isteacher || $istutor) {
-				if ($canedit && ((isset($rawscores) && isperfect($rawscores[$i])) || getpts($scores[$i])==$pts[$questions[$i]])) {
+				if ($canedit && getpts($scores[$i])==$pts[$questions[$i]]) {
+					echo '<div class="iscorrect isperfect">';
+				} else if ($canedit && ((isset($rawscores) && isperfect($rawscores[$i])) || getpts($scores[$i])==$pts[$questions[$i]])) {
 					echo '<div class="iscorrect">';
 				} else if ($scores[$i]==='N/A') {
 					echo '<div class="notanswered">';	
@@ -923,7 +946,7 @@
 									}
 								}
 								
-								echo str_replace(array('&','%nbsp;','%%'),array('; ','&nbsp;','&'), $laarr[$k]);
+								echo str_replace(array('&','%nbsp;','%%','<','>'),array('; ','&nbsp;','&','&lt;','&gt;'), $laarr[$k]);
 							}
 							$cnt++;
 						}

@@ -4,6 +4,7 @@
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 	$nologo = true;
+	$flexwidth = true;
 	require("../header.php");
 	$pagetitle = "Instructor Account Request";
 	require("infoheader.php");

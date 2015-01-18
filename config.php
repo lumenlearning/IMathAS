@@ -100,6 +100,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['GEN']['hidedefindexmenu'] = true;
   
   $CFG['GEN']['mathjaxonly'] = true;
+  $CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
   
 /*** end WAMAP.org config ***/	
 } else {
