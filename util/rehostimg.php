@@ -144,7 +144,8 @@ foreach ($imgs as $img) {
 	} else {
 		$path = $basedir . $src;
 	}
-	$localname = preg_replace('/[^\w-\._]/','',urldecode(basename($path)));
+	$pathparts = explode('?',$path);
+	$localname = preg_replace('/[^\w-\._]/','',urldecode(basename($pathparts[0])));
 	copy($path, $galleryPath.'/'.$localname);
 	$newname = processImage($localname, 500,400);
 	pq($img)->attr("src", storefiletos3($newname));
