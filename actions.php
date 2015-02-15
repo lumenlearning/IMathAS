@@ -218,17 +218,11 @@
 				$message .= "will then be prompted to choose a new password.</p>";
 				$message .= "<a href=\"" .$urlmode. $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/actions.php?action=resetpw&id=$id&code=$code\">";
 				$message .= $urlmode . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/actions.php?action=resetpw&id=$id&code=$code</a>\r\n";
-				//mail($email,'Password Reset Request',$message,$headers);
-				
-				require("includes/mailses.php");
-				$ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
-
-				$m = new SimpleEmailServiceMessage();
-				$m->addTo($email);
-				$m->setFrom($sendfrom);
-				$m->setSubject('Password Reset Request');
-				$m->setMessageFromString(null,$message);
-				$ses->sendEmail($m);
+				if (isset($CFG['GEN']['useSESmail'])) {
+					SESmail($email, $sendfrom, 'Password Reset Request',$message);
+				} else {
+					mail($email,'Password Reset Request',$message,$headers);
+				}
 				
 				require("header.php");
 				echo '<p>An email with a password reset link has been sent your email address on record: <b>'.$email.'.</b><br/> ';

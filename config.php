@@ -100,7 +100,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['GEN']['hidedefindexmenu'] = true;
   
   $CFG['GEN']['mathjaxonly'] = true;
-  $CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
+  //$CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
   
 /*** end WAMAP.org config ***/	
 } else {
@@ -239,6 +239,19 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  ini_set("post_max_size", "10485760");
  error_reporting(0);
 
+ $CFG['GEN']['useSESmail'] = true;
+ function SESmail($email,$from,$subject,$message) {
+ 	require_once("includes/mailses.php");
+ 	$ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
+
+	$m = new SimpleEmailServiceMessage();
+	$m->addTo($email);
+	$m->setFrom($from);
+	$m->setSubject($subject);
+	$m->setMessageFromString(null,$message);
+	$ses->sendEmail($m);
+ }
+ 
 
 //Uncomment to change the default course theme, also used on the home & admin page:
 //$defaultcoursetheme = "default.css"
