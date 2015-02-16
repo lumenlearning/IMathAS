@@ -232,6 +232,18 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** end MyOpenMath config ***/
 }
 
+$CFG['GEN']['useSESmail'] = true;
+function SESmail($email, $from, $subject, $message) {
+	require_once("includes/mailses.php");
+	$ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
+	
+	$m = new SimpleEmailServiceMessage();
+	$m->addTo($email);
+	$m->setFrom($from);
+	$m->setSubject($subject);
+	$m->setMessageFromString(null,$message);
+	$ses->sendEmail($m);
+}
 //session path 
 //$sessionpath = "";
 
