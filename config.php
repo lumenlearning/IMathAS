@@ -233,7 +233,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 }
 
 //session path 
-//$sessionpath = "";
+$sessionpath = "/tmp";
 
  ini_set("upload_max_filesize", "10485760");
  ini_set("post_max_size", "10485760");
