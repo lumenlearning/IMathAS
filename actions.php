@@ -305,7 +305,12 @@
 				$message .= "Username: <b>{$row[0]}</b>.  Last logged in: $lastlogin<br/>";
 			}
 			$message .= "</p><p>If you forgot your password, use the Lost Password link at the login page.</p>";
-			mail($_POST['email'],"$installname Username Request",$message,$headers);
+			if (isset($CFG['GEN']['useSESmail'])) {
+				SESmail($_POST['email'], $sendfrom, "$installname Username Request",$message);
+			} else {
+				mail($_POST['email'],"$installname Username Request",$message,$headers);
+			}
+			
 			exit;
 		} else {
 			$query = "SELECT SID,lastaccess FROM imas_users WHERE email='{$_POST['email']}'";

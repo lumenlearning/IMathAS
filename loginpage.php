@@ -82,24 +82,22 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		var html = ""; 
 		html += 'Accessibility: ';
 		html += "<a href='#' onClick=\"window.open('<?php echo $imasroot;?>/help.php?section=loggingin','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))\">Help</a>";
-		html += '<div style="margin-top: 0px;margin-right:0px;text-align:right;padding:0px"><select name="access"><option value="0" <?php if ($pref==0) {echo 'selected="selected"';} ?> />Use defaults</option>';
-		html += '<option value="3" <?php if ($pref==3) {echo 'selected="selected"';} ?> />Force image-based display</option>';
-		html += '<option value="5" <?php if ($pref==5) {echo 'selected="selected"';} ?> />MathJax display</option>';
+		html += '<div style="margin-top: 0px;margin-right:0px;text-align:right;padding:0px"><select name="access"><option value="0">Use defaults</option>';
+		html += '<option value="3">Force image-based display</option>';
 		html += '<option value="1">Use text-based display</option></select></div>';
 		
-		
-		if (AMnoMathML) {
-			html += '<input type="hidden" name="mathdisp" value="0" />';
+		if (!MathJaxCompatible) {
+			html += '<input type=hidden name="mathdisp" value="0">';
 		} else {
-			html += '<input type="hidden" name="mathdisp" value="1" />';
+			html += '<input type=hidden name="mathdisp" value="1">';
 		}
 		if (ASnoSVG) {
-			html += '<input type="hidden" name="graphdisp" value="2" />';
+			html += '<input type=hidden name="graphdisp" value="2">';
 		} else {
-			html += '<input type="hidden" name="graphdisp" value="1" />';
+			html += '<input type=hidden name="graphdisp" value="1">';
 		}
-		if (!AMnoMathML && !ASnoSVG) {
-			html += '<input type="hidden" name="isok" value="1" />';
+		if (MathJaxCompatible && !ASnoSVG) {
+			html += '<input type=hidden name="isok" value=1>';
 		} 
 		setnode.innerHTML = html; 
 		document.getElementById("username").focus();
