@@ -232,8 +232,10 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** end MyOpenMath config ***/
 }
 
-//session path 
-$sessionpath = "/tmp";
+//session path
+if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
+	$sessionpath = "/tmp";
+}
 
  ini_set("upload_max_filesize", "10485760");
  ini_set("post_max_size", "10485760");
