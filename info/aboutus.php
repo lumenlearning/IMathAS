@@ -22,8 +22,8 @@ the IMathAS platform, and to provide students self-study opportunities.</p>
 <h2>Support</h2>
 <p>Community-based support is available through open support forums and training videos.</p>
  
-<p>More comprehensive support services are available for MyOpenMath through the <a href="http://www.lumenlearning.com/math">Candela Math</a>
- subscription service offered by Lumen Learning.  These services include faculty training, online and phone support for faculty, 
+<p>More comprehensive support services are available for MyOpenMath through <a href="http://lumenlearning.com/open-courses-overview/">Lumen Learning</a>.  
+ These services include faculty training, online and phone support for faculty, 
  content and learning analytics, data-driven recommendations for improving content, 
  learning content improvements, service level agreements and backups, and long-term
  access to course data.  The Candela support packages typically cost less than 3% 
@@ -39,7 +39,7 @@ To address those concerns, here is a bit of info about MyOpenMath's history and 
 a community college math professor in Washington State, starting in 2005.  With a little grant support 
 and a lot of his free time, David ran a state-wide installation of that software at wamap.org.  
 Faculty from around the state got involved, and collaboratively contributed much of the question 
-content now found on MyOpenMath.  Out of Open Course Library project in Washington, 
+content now found on MyOpenMath.  Out of the Open Course Library project in Washington, 
 several complete courses based on open textbooks were created.  Other folks got involved, 
 including James Sousa from Phoenix College who contributed a huge collection of questions 
 tied to his video examples.</p>  
@@ -56,11 +56,10 @@ should always exist, without advertisements.  They are also committed that all t
 content remain open as well, so it could be moved to a local install of the IMathAS 
 software if desired or needed.  To accomplish this, they are adopting a "freemium" model, 
 where the basic service will remain free with community-based support for faculty, 
-but <a href="http://www.lumenlearning.com/math">additional services</a> are available to institutions for a fee.  
+but <a href="http://lumenlearning.com/open-courses-overview/">additional services</a> are available to institutions for a fee.  
 Those services include instructor support, content support, and administrative services.  
-Additionally, students may be given the option to contribute for use of the system 
-on a pay-what-you-can basis.  However, a no-charge option will always be available 
-to students, as ensuring student access to high quality materials is our number one priority.</p>
+Students will never be directly charged, as ensuring student access to high quality 
+materials is our number one priority.</p>
 
 <h2>Credits</h2>
 
