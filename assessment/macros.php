@@ -169,6 +169,7 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			array_shift($function);
 			$evalxfunc = create_function('$t','return('.$xfunc.');');
 			$evalyfunc = create_function('$t','return('.$yfunc.');');
+			if ($evalxfunc===false || $evalyfunc===false) {continue;}
 		} else if ($function[0]{0}=='<' || $function[0]{0}=='>') {
 			$isineq = true;
 			if ($function[0]{1}=='=') {
@@ -181,6 +182,7 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			$func = mathphp($func,"x");
 			$func = str_replace("(x)",'($x)',$func);
 			$evalfunc = create_function('$x','return('.$func.');');	
+			if ($evalfunc===false) {continue;}
 		} else if (strlen($function[0])>1 && $function[0]{0}=='x' && ($function[0]{1}=='<' || $function[0]{1}=='>' || $function[0]{1}=='=')) {
 			$isxequals = true;
 			if ($function[0]{1}=='=') {
@@ -200,6 +202,7 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			$func = mathphp($func,"x");
 			$func = str_replace("(x)",'($x)',$func);
 			$evalfunc = create_function('$x','return('.$func.');');
+			if ($evalfunc===false) {continue;}
 		}
 		
 		//even though ASCIIsvg has a plot function, we'll calculate it here to hide the function
@@ -271,9 +274,14 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 		} else {$xmax = $settings[1];}
 		
 		if ($GLOBALS['sessiondata']['graphdisp']==0) {
-			$dx = 1;
+			if ($xmax-$xmin>2) { 
+				$dx = 1;
+				$stopat = ($xmax-$xmin)+1;
+			} else {
+				$dx = ($xmax-$xmin)/10;
+				$stopat = ($domainlimited?10:11);
+			}
 			$alt .= "<table class=stats><thead><tr><th>x</th><th>y</th></thead></tr><tbody>";
-			$stopat = ($xmax-$xmin)+1;
 		} else {
 			$dx = ($xmax - $xmin + ($domainlimited?0:10*($xmax-$xmin)/$settings[6]) )/100;
 			$stopat = ($domainlimited?101:102);
@@ -281,6 +289,14 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 				$stopat = 1;
 			}
 		}
+		if ($xmax==$xmin) {
+			$xrnd = 6;
+			$yrnd = 6;
+		} else {
+			$xrnd = floor(-log10($xmax-$xmin)-1e-12)+4;
+			$yrnd = floor(-log10($ymax-$ymin)-1e-12)+4;
+		}
+	
 		$lasty = 0;
 		$lastl = 0;
 		$px = null;
@@ -292,16 +308,18 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			if ($isparametric) {
 				$t = $xmin + $dx*$i + 1E-10;
 				if (in_array($t,$avoid)) { continue;}
-				$x = round($evalxfunc($t),3);//round(eval("return ($xfunc);"),3);
-				$y = round($evalyfunc($t),3);//round(eval("return ($yfunc);"),3);
+				$x = round($evalxfunc($t),$xrnd);//round(eval("return ($xfunc);"),3);
+				$y = round($evalyfunc($t),$yrnd);//round(eval("return ($yfunc);"),3);
 				$alt .= "<tr><td>$x</td><td>$y</td></tr>";
 			} else {
 				$x = $xmin + $dx*$i + (($i<$stopat/2)?1E-10:-1E-10) - ($domainlimited?0:5*($xmax-$xmin)/$settings[6]);
 				if (in_array($x,$avoid)) { continue;}
 				//echo $func.'<br/>';
-				$y = round($evalfunc($x),3);//round(eval("return ($func);"),3);
+				$y = round($evalfunc($x),$xrnd);//round(eval("return ($func);"),3);
+				$x = round($x,$xrnd);
 				$alt .= "<tr><td>".($xmin + $dx*$i)."</td><td>$y</td></tr>";
 			}
+
 			if ($i<2 || $i==$stopat-2) {
 				$fx[$i] = $x;
 				$fy[$i] = $y;
@@ -315,11 +333,11 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			} else if ($y>$ymax || $y<$ymin) { //going or still out of bounds
 				if ($py <= $ymax && $py >= $ymin) { //going out
 					if ($y>$ymax) { //going up
-						$iy = $ymax + 5*($ymax-$ymin)/$settings[7];
+						$iy = round($ymax + 5*($ymax-$ymin)/$settings[7],$yrnd);
 					} else { //going down
-						$iy = $ymin - 5*($ymax-$ymin)/$settings[7];
+						$iy = round($ymin - 5*($ymax-$ymin)/$settings[7],$yrnd);
 					}
-					$ix = ($x-$px)*($iy - $py)/($y-$py) + $px;
+					$ix = round(($x-$px)*($iy - $py)/($y-$py) + $px,$xrnd);
 					if ($lastl == 0) {$pathstr .= "path([";} else { $pathstr .= ",";}
 					$pathstr .= "[$px,$py],[$ix,$iy]]);";
 					$lastl = 0;
@@ -329,11 +347,11 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			} else if ($py>$ymax || $py<$ymin) { //coming or staying in bounds?
 				if ($y <= $ymax && $y >= $ymin) { //coming in
 					if ($py>$ymax) { //going up
-						$iy = $ymax + 5*($ymax-$ymin)/$settings[7];
+						$iy = round($ymax + 5*($ymax-$ymin)/$settings[7],$yrnd);
 					} else { //going down
-						$iy = $ymin - 5*($ymax-$ymin)/$settings[7];
+						$iy = round($ymin - 5*($ymax-$ymin)/$settings[7],$yrnd);
 					}
-					$ix = ($x-$px)*($iy - $py)/($y-$py) + $px;
+					$ix = round(($x-$px)*($iy - $py)/($y-$py) + $px,$xrnd);
 					if ($lastl == 0) {$pathstr .= "path([";} else { $pathstr .= ",";}
 					$pathstr .= "[$ix,$iy]";
 					$lastl++;
@@ -2876,17 +2894,11 @@ function getsnapwidthheight($xmin,$xmax,$ymin,$ymax,$width,$height,$snaptogrid) 
 	}
 	if ($xmax - $xmin>0) {
 		$newwidth = ($xmax - $xmin)*(round($snapparts[0]*($width-2*$imgborder)/($xmax - $xmin))/$snapparts[0]) + 2*$imgborder;
-		if (($newwidth - $width)/$width<.1) {
-			$width = $newwidth;
-		}
 	}
 	if ($ymax - $ymin>0) {
 		$newheight = ($ymax - $ymin)*(round($snapparts[1]*($height-2*$imgborder)/($ymax - $ymin))/$snapparts[1]) + 2*$imgborder;
-		if (($newheight- $height)/$height<.1) {
-			$height = $newheight;
-		}
 	}
-	return array($width,$height);
+	return array($newwidth,$newheight);
 }
 
 function getscorenonzero() {
