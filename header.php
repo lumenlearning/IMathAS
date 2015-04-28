@@ -39,7 +39,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?ver=012115"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?ver=042515"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -132,6 +132,11 @@ if (isset($CFG['GEN']['headerscriptinclude'])) {
 }
 if (isset($CFG['GEN']['translatewidgetID'])) {
 	echo '<meta name="google-translate-customization" content="'.$CFG['GEN']['translatewidgetID'].'"></meta>';
+}
+if (isset($sessiondata['ltiitemtype'])) {
+	echo '<script type="text/javascript">
+	$(function(){parent.postMessage(JSON.stringify({subject:\'lti.frameResize\', height: $(document).height()+"px"}), \'*\');});
+	</script>';
 }
 echo "</head>\n";
 echo "<body>\n";
