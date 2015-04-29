@@ -63,5 +63,7 @@ if (isset($userid)) {
 <?php
 $nologo = true;
 $haslogout = true;
+} else if (isset($CFG['GEN']['hidedefindexmenu'])) {
+	unset($CFG['GEN']['hidedefindexmenu']);
 }
 ?>
