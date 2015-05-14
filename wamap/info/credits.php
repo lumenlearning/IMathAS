@@ -18,8 +18,10 @@ require("../infoheader.php");
 <p class="ind">WAMAP.org is powered by <a href="http://www.imathas.com">IMathAS</a> web assessment software</a></p>
 
 
-<h4>Site Funding</h4>
-<p class="ind">Web hosting funded by the <a href="http://sbctc.edu">Washington State Board for Community and Technical Colleges</a>.</p>
+<h4>Site Funding and Hosting</h4>
+<p class="ind">Web hosting funded by the Washington State Board for Community and Technical Colleges.</p>
+
+<p class="ind">Hosting provided by <a href="http://lumenlearning.com">Lumen Learning</a></p>
 
 <h4>Question Content</h4>
 <p class="ind">The core question library and templated courses were developed with grant support from the Washington State Distance Learning Council.  The content 
@@ -46,8 +48,7 @@ continues to grow with contributions from our users.  Thanks to all of you!</p>
 <p class="ind">Info pages web design by Doug Thayer</p>
 <p class="ind">Photos used on this website from <a href="http://www.sxc.hu">stock.xchng</a></p>
 
-<h4>Web Hosting</h4>
-<p class="ind">Hosting provided by <a href="http://lumenlearning.com">Lumen Learning</a></p>
+
 
 
 </div>

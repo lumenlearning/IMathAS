@@ -57,7 +57,11 @@ if (isset($_GET['go'])) {
 	
 			$message .= '<p>David Lippman<br/>dlippman@pierce.ctc.edu<br/>Instructor, Math @ Pierce College and WAMAP administrator</p>';
 		}
-		mail($row[2],$installname . ' Account Approval',$message,$headers);
+		if (isset($CFG['GEN']['useSESmail'])) {
+			SESmail($row[2], $accountapproval, $installname . ' Account Approval', $message);
+		} else {
+			mail($row[2],$installname . ' Account Approval',$message,$headers);
+		}
 	}
 	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/admin/approvepending.php?skipn=$offset");
 	exit;

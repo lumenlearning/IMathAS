@@ -60,8 +60,6 @@
 				
 				$message = "<p>Your new account request has been sent.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.</p>";
-				$message .= "<p>While it is being processed, you may ";
-				$message .= "wish to read some of the new user documentation available at <a href=\"http://www.wamap.org/docs/docs.html\">http://www.wamap.org/docs/docs.html</a></p>\n";
 				mail($_POST['email'],$subject,$message,$headers);
 				
 				echo $message;

@@ -67,8 +67,6 @@
 				$message = "<p>Your new account request has been sent.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
 				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
-				$message .= "<p>While it is being processed, you also may ";
-				$message .= "wish to read some of the new user documentation available at <a href=\"http://www.myopenmath.com/docs/docs.php\">http://www.myopenmath.com/docs/docs.php</a></p>\n";
 				mail($_POST['email'],$subject,$message,$headers);
 				
 				echo $message;
