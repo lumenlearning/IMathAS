@@ -52,7 +52,7 @@ ul {
 	}
 	$skipcids = implode(',',$skipcid);
 	*/
-	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname, COUNT(DISTINCT s.id) FROM imas_students AS s JOIN imas_teachers AS t ";
+	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email FROM imas_students AS s JOIN imas_teachers AS t ";
 	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
 	if ($end != $now) {
 		$query .= "AND s.lastaccess<$end ";
@@ -62,7 +62,8 @@ ul {
 	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
 	
 	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	$lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = '';
+	$lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = ''; $grpinstrcnt = 0;
+	$lastemail = '';
 	$seencid = array();
 	while ($row = mysql_fetch_row($result)) {
 		if ($row[1].', '.$row[2]!=$lastuser) {
@@ -73,13 +74,15 @@ ul {
 			}
 			$userdata = '';
 			$lastuser = $row[1].', '.$row[2];
+			$lastemail = $row[6];
+			$grpinstrcnt++;
 		}
 		if ($row[0] != $lastgroup) {
 			if ($lastgroup != '') {
-				echo "<p><b>$lastgroup</b>: $grpcnt";
+				echo "<p><b>$lastgroup</b>: $grpcnt students, $grpinstrcnt instructors";
 				echo '<ul>'.$grpdata.'</ul></p>';
 			}
-			$grpcnt = 0;  $grpdata = '';
+			$grpcnt = 0;  $grpdata = ''; $grpinstrcnt = 0;
 			$lastgroup = $row[0];
 		}
 		$userdata .= "<li>".$row[4].' ('.$row[3].'): <b>'.$row[5].'</b>';
@@ -94,9 +97,8 @@ ul {
 	$grpdata .= '<li><b>'.$lastuser.'</b><ul>';
 	$grpdata .= $userdata;
 	$grpdata .= '</ul></li>';
-	$userdata = '';
-	$lastuser = $row[1].', '.$row[2];
-	echo "<p><b>$lastgroup</b>: $grpcnt";
+	$grpinstrcnt++;
+	echo "<p><b>$lastgroup</b>: $grpcnt students, $grpinstrcnt instructors";
 	echo '<ul>'.$grpdata.'</ul></p>';
 	
 ?>
