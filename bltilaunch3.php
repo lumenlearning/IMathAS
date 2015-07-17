@@ -554,10 +554,20 @@ if (isset($_GET['launch'])) {
 		$_SESSION['selection_return'] = $_REQUEST['launch_presentation_return_url'];
 	}
 	
-	//look if we know this student
-	$orgparts = explode(':',$ltiorg);  //THIS was added to avoid issues when GUID change, while still storing it
-	$shortorg = $orgparts[0];
-	$query = "SELECT userid FROM imas_ltiusers WHERE org LIKE '$shortorg:%' AND ltiuserid='$ltiuserid' ORDER BY id";
+	//look if we know this user
+	$orgparts = explode(':',$ltiorg);  //THIS was added to avoid issues when LMS GUID change, while still storing it
+	$shortorg = $orgparts[0];	   //we'll only use the part from the lti key
+	$query = "SELECT lti.userid FROM imas_ltiusers AS lti LEFT JOIN imas_users as iu ON lti.userid=iu.id ";
+	$query .= "WHERE lti.org LIKE '$shortorg:%' AND lti.ltiuserid='$ltiuserid' ";
+	if ($ltirole!='learner') {
+		//if they're a teacher, make sure their imathas account is too. If not, we'll act like we don't know them
+		//and require a new connection
+		$query .= "AND iu.rights>12 ";
+	}
+	//if multiple accounts, use student one first (if not $ltirole of teacher) then higher rights.
+	//if there was a mixup and multiple records were created, use the first one
+	$query .= "ORDER BY iu.rights, lti.id";
+
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	if (mysql_num_rows($result) > 0) { //yup, we know them
 		$userid = mysql_result($result,0,0);
