@@ -266,3 +266,11 @@ padding-left: 1%;
     padding-top: 15px;
     padding-bottom: 15px;
 }
+.fc-day-grid-event,.fc-h-event, .fc-event, .fc-start, .fc-end{
+    /*width: 90%;*/
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.fc-event{
+    cursor: pointer;
+}

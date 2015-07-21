@@ -58,6 +58,7 @@ function calendar() {
     $('.calendar').fullCalendar({
         height: "auto",
         fixedWeekCount: false,
+        cursor: 'pointer',
         header: {
             left: 'prev,  title, next ',
             right: 'month,agendaWeek'
@@ -76,7 +77,7 @@ function calendar() {
                     var assessmentData = calendarResponse.data;
                     var events = [];
                     $.each(assessmentData.assessmentArray, function (index, assessmentDetail) {
-                        var eventColor = 'blue';
+                        var eventColor = '#008E71';
 
                         if(assessmentDetail.endDateString < assessmentDetail.now && assessmentDetail.reviewDateString != 0 && assessmentDetail.reviewDateString > assessmentDetail.now)
                         {

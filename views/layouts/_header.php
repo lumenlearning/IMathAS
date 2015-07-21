@@ -13,8 +13,11 @@ NavBar::begin([
 ]);
 echo '<div class="dropdown dropdown-class">
         <img src="../../img/class.png">
-        <button class="btn btn-primary dropdown-toggle" type="submit" data-toggle="dropdown">My Classes
-        <span class="caret"></span></button>
+        <select>
+            <option value="" disabled="disabled" selected="selected">My Classes</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+        </select>
       </div>';
 echo Nav::widget([
     'options' => ['class' => 'navbar-nav navbar-right'],
