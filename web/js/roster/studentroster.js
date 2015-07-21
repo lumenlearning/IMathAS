@@ -24,9 +24,8 @@ function showStudentInformation(students,isCode,isSection,isImageColumnPresent)
     var courseId =  $( "#course-id" ).val();
     var html = "";
     $.each(students, function (index, student) {
-
-        html += "<tr> <td><input type='checkbox' name='student-information-check' value='" + student.id + "'></td>";
-        if (isImageColumnPresent == 1) {
+        html += "<tr> <td><div class='checkbox'><label><input type='checkbox' name='student-information-check' value='" + student.id + "'><span class='cr'><i class='cr-icon fa fa-check'></i></span></label></div></td>";
+                if (isImageColumnPresent == 1) {
             imageURL = 'dummy_profile.jpg';
             if (student.hasuserimg != 0) {
                 imageURL = student.id + ".jpg";
@@ -37,21 +36,15 @@ function showStudentInformation(students,isCode,isSection,isImageColumnPresent)
         if (student.locked != 0) {
             html += " locked-student";
         }
-
         html += " '>"+ capitalizeFirstLetter(student.lastname) + "</td>";
-
         if (student.locked == 0) {
             html += "<td class = 'FirstName'>";
         } else {
             html += "<td  class='FirstName locked-student '>";
         }
         html += capitalizeFirstLetter(student.firstname) + "</td>";
-
-
-
-        html += "<td><a>" + student.email + "</a></td>";
+        html += "<td>" + student.email + "</td>";
         html += "<td class = 'Username'>" + student.username + "</td>";
-
         displayText ="never";
         if (student.locked == 0) {
             if (student.lastaccess != 0) {
@@ -65,11 +58,15 @@ function showStudentInformation(students,isCode,isSection,isImageColumnPresent)
         html += "<td><ul class='nav nav-tabs roster-settings'>" +
         "<li class='dropdown'> <a class='dropdown-toggle' data-toggle='dropdown' href='#'><i class='fa fa-cog icon-nav'></i>Settings<span class='caret caret-settings'></span></a>" +
         "<ul class='dropdown-menu settings-menu'><li>" +
-        "<a href='#'>Grades</a>" +
-        "<a href='#'>Exception</a>" +
-        "<a href='#'>Change Information</a>" +
-        "</li></ul></li>" +
-        "</ul></td>";
+        "<a href='#'><img class='small-icon' src='../../img/gradebook.png'>&nbsp;Grades</a>" +
+        "<a class ='roster-make-exception' href='make-exception?cid="+courseId+"&student-data="+ student.id +"&section-data="+ student.section +"'><i class='fa fa-plus-square fa-fw'></i>&nbsp;Exception</a>" +
+        "<a href='change-student-information?cid=" + courseId + "&uid=" + student.id + "'><i class='fa fa-cogs'></i>&nbsp;Change Information</a>";
+        if (student.locked == 0) {
+            html += "<a  href='#' onclick='lockUnlockStudent(false," + student.id + ")'><i class='fa fa-lock fa-fw'></i>&nbsp;Lock</a>";
+        } else {
+            html += "<a href='#' onclick='lockUnlockStudent(true," + student.id + ")'><i class='fa fa-unlock'></i>&nbsp;Unlock</a>";
+        }
+        html += "</li></ul></li></ul></td>";
     });
     $('#student-information-table').append(html);
     createDataTable('student-data-table');
@@ -77,19 +74,30 @@ function showStudentInformation(students,isCode,isSection,isImageColumnPresent)
     $(".images").hide();
 }
 function selectCheckBox() {
-    $('.check-all').click(function () {
-        $('#student-information-table input:checkbox').each(function () {
-            $(this).prop('checked', true);
-        })
-    });
-    $('.uncheck-all').click(function () {
-        $('#student-information-table input:checkbox').each(function () {
-            $(this).prop('checked', false);
-        })
+    $('.student-data-table input[name = "header-checked"]').click(function(){
+        if($(this).prop("checked") == true){
+            $('#student-information-table input:checkbox').each(function () {
+                $(this).prop('checked', true);
+            })
+        }
+        else if($(this).prop("checked") == false){
+            $('#student-information-table input:checkbox').each(function () {
+                $(this).prop('checked', false);
+            })
+        }
     });
     $('.non-locked').click(function () {
         $('#student-information-table input:checkbox').each(function () {
-            if (($(this).parent().siblings('.lock-class').text()) == "Lock") {
+            var selectedEntry = $(this).val();
+            var lockedStudent = 0;
+            $.each(studentData, function (index, student) {
+                if(selectedEntry == student.id){
+                    if(student.locked != 0){
+                        lockedStudent = 1;
+                    }
+                }
+            });
+            if (lockedStudent == 0) {
                 $(this).prop('checked', true);
             } else {
                 $(this).prop('checked', false);
@@ -126,9 +134,14 @@ function studentLock() {
         var dataArray = [];
         $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
             markArray.push($(this).val());
-            dataArray.push($(this).parent().siblings('.LastName').text() + ' ' + $(this).parent().siblings('.FirstName').text() + ' (' + $(this).parent().siblings('.Username').text() + ')');
+            var selectedEntry = $(this).val();
+            $.each(studentData, function (index, student) {
+                if(selectedEntry == student.id){
+                    dataArray.push((capitalizeFirstLetter(student.lastname) + ', ' + capitalizeFirstLetter(student.firstname) + ' (' +student.username + ')').trim());
+                }
+            });
         });
-
+        dataArray.sort();
         if (markArray.length != 0) {
             var html = '<div><p>Are you SURE you want to lock the selected students out of the course?</p></div><p>';
             $.each(dataArray, function (index, studentData) {
@@ -142,7 +155,7 @@ function studentLock() {
                 closeText: "hide",
                 buttons: {
                     "Yes, Lock Out Student": function () {
-                        $('#student-information-table input[name="student-information-check"]:checked').each(function () {
+                        $('#student-information-table input[name="student-information-check"]:checked, input[name = "header-checked"]:checked').each(function () {
                             $(this).prop('checked', false);
                         });
                         $(this).dialog("close");
@@ -153,7 +166,7 @@ function studentLock() {
                     "Cancel": function () {
 
                         $(this).dialog('destroy').remove();
-                        $('#student-information-table input[name="student-information-check"]:checked').each(function () {
+                        $('#student-information-table input[name="student-information-check"]:checked, input[name = "header-checked"]:checked').each(function () {
                             $(this).prop('checked', false);
                         });
                         return false;
@@ -180,9 +193,14 @@ function studentUnenroll() {
         var dataArray = [];
         $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
             markArray.push($(this).val());
-            dataArray.push($(this).parent().siblings('.LastName').text() + ' ' + $(this).parent().siblings('.FirstName').text() +
-                ' (' + $(this).parent().siblings('.Username').text() + ')');
+            var selectedEntry = $(this).val();
+            $.each(studentData, function (index, student) {
+                if(selectedEntry == student.id){
+                    dataArray.push((capitalizeFirstLetter(student.lastname) + ', ' + capitalizeFirstLetter(student.firstname) + ' (' +student.username + ')').trim());
+                }
+            });
         });
+        dataArray.sort();
         if (markArray.length != 0) {
             var html = '<div><p><b style = "color: red">Warning!</b>:&nbsp;This will delete ALL course data about these students. This action cannot be undone. ' +
                 'If you have a student who isn\'t attending but may return, use the Lock Out of course option instead of unenrolling them.</p><p>Are you SURE' +
@@ -198,7 +216,7 @@ function studentUnenroll() {
                 closeText: "hide",
                 buttons: {
                     "Unenroll": function () {
-                        $('#student-information-table input[name="student-information-check"]:checked').each(function () {
+                        $('#student-information-table input[name="student-information-check"]:checked, input[name = "header-checked"]:checked').each(function () {
                             $(this).prop('checked', false);
                         });
                         $(this).dialog("close");
@@ -207,7 +225,7 @@ function studentUnenroll() {
                         return true;
                     },
                     "Lock Students Out Instead": function () {
-                        $('#student-information-table input[name="student-information-check"]:checked').each(function () {
+                        $('#student-information-table input[name="student-information-check"]:checked, input[name = "header-checked"]:checked').each(function () {
                             $(this).prop('checked', false);
                         });
                         $(this).dialog("close");
@@ -218,7 +236,7 @@ function studentUnenroll() {
                     "Cancel": function () {
 
                         $(this).dialog('destroy').remove();
-                        $('#student-information-table input[name="student-information-check"]:checked').each(function () {
+                        $('#student-information-table input[name="student-information-check"]:checked, input[name = "header-checked"]:checked').each(function () {
                             $(this).prop('checked', false);
                         });
                         return false;

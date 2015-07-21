@@ -27,9 +27,12 @@
     clear: both;
     font-weight: normal;
     line-height: 1.42857143;
-    color: #428bca;
+    color: #808080;
     white-space: nowrap;
     border-bottom: 1px solid #ccc;
+}
+.nav-tabs.nav-justified > .dropdown .enroll-options > li > a:hover{
+    color: #428bca;
 }
 .nav-tabs.nav-justified > .dropdown .enroll-options{
     background: #f8f8f8;
@@ -142,6 +145,7 @@ div.dataTables_info {
 .nav-tabs .settings-menu > li > a{
     border-bottom: 1px solid #ddd;
     padding: 8px;
+    color: #6d6d6d;
 }
 .nav-tabs .settings-menu > li > a:hover{
     color: #3441AC;

@@ -38,36 +38,36 @@ $this->params['breadcrumbs'][] = $this->title;
             <li class="dropdown">
                 <a class="dropdown-toggle grey-color-link" data-toggle="dropdown" href="#"><?php AppUtility::t('With selected');?><span class="caret right-aligned"></span></a>
                 <ul class="dropdown-menu selected-options">
-                    <li><a class="non-locked" href="#"><?php AppUtility::t('Select non-locked');?></a></li>
+                    <li><a class="non-locked" href="#"><i class="fa fa-unlock-alt fa-fw"></i>&nbsp;<?php AppUtility::t('Select non-locked');?></a></li>
                     <li>
                         <form action="roster-email?cid=<?php echo $course->id ?>" method="post" id="roster-email-form">
                             <input type="hidden" id="student-id" name="student-data" value=""/>
                             <input type="hidden" id="course-id" name="course-id" value="<?php echo $course->id; ?>"/>
-                            <a class="with-selected-list" href="javascript: studentEmail()"><?php AppUtility::t('Email');?></a></li>
+                            <a class="with-selected-list" href="javascript: studentEmail()"><img class="fa-fw" src="<?php echo AppUtility::getAssetURL()?>img/email.png">&nbsp;<?php AppUtility::t('Email');?></a></li>
                         </form>
                     <li>
                         <form action="roster-message?cid=<?php echo $course->id ?>" method="post" id="roster-message-form">
                             <input type="hidden" id="message-id" name="student-data" value=""/>
                             <input type="hidden" id="course-id" name="course-id" value="<?php echo $course->id; ?>"/>
-                            <a class="with-selected-list" href="javascript: studentMessage()"><?php AppUtility::t('Message');?></a></li>
+                            <a class="with-selected-list" href="javascript: studentMessage()"><i class="fa fa-envelope-o fa-fw"></i>&nbsp;<?php AppUtility::t('Message');?></a></li>
                         </form>
-                    <li><a id="un-enroll-link" href="#"><?php AppUtility::t('Unenroll');?></a></li>
-                    <li><a id="lock-btn" href="#"><?php AppUtility::t('Lock');?></a></li>
+                    <li><a id="un-enroll-link" href="#"><i class="fa fa-trash fa-fw"></i>&nbsp;<?php AppUtility::t('Unenroll');?></a></li>
+                    <li><a id="lock-btn" href="#"><i class='fa fa-lock fa-fw'></i>&nbsp;<?php AppUtility::t('Lock');?></a></li>
                     <li>
                         <form action="make-exception?cid=<?php echo $course->id ?>" id="make-exception-form" method="post">
                             <input type="hidden" id="exception-id" name="student-data" value=""/>
                             <input type="hidden" id="section-name" name="section-data" value=""/>
-                            <a class="with-selected-list" href="javascript: teacherMakeException()"><?php AppUtility::t('Make Exception');?></a>
+                            <a class="with-selected-list" href="javascript: teacherMakeException()"><i class='fa fa-plus-square fa-fw'></i>&nbsp;<?php AppUtility::t('Make Exception');?></a>
                         </form>
                     </li>
                     <li>
                         <form action="copy-student-email?cid=<?php echo $course->id ?>" method="post" id="copy-emails-form">
                             <input type="hidden" id="email-id" name="student-data" value=""/>
                             <input type="hidden" id="course-id" name="course-id" value="<?php echo $course->id; ?>"/>
-                            <a class="with-selected-list" href="javascript: copyStudentsEmail()"><?php AppUtility::t('Copy Emails');?></a>
+                            <a class="with-selected-list" href="javascript: copyStudentsEmail()"><i class="fa fa-clipboard fa-fw"></i>&nbsp;<?php AppUtility::t('Copy Emails');?></a>
                         </form>
                     </li>
-                    <li><a href="#"><?php AppUtility::t('Pictures');?></a></li>
+                    <li><a href="#"><i class="fa fa-user fa-fw"></i>&nbsp;<?php AppUtility::t('Pictures');?></a></li>
                 </ul>
             </li>
 
@@ -75,10 +75,17 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
 <div class="roster-table">
-    <table class="student-data-table table table-bordered table-striped table-hover data-table" id="student-information" bPaginate="false" >
+    <table class="student-data-table table table-striped table-hover data-table" id="student-information" bPaginate="false" >
         <thead>
         <tr>
-            <th></th>
+            <th class="studentId">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="header-checked" value="">
+                        <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                    </label>
+                </div>
+            </th>
             <?php if ($isImageColumnPresent == 1) {
                 ?><th></th>
             <?php }
