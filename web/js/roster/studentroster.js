@@ -3,10 +3,6 @@ $(document).ready(function () {
     selectCheckBox();
     studentLock();
     studentUnenroll();
-    studentEmail();
-    studentMessage();
-    teacherMakeException();
-    copyStudentEmail();
     jQuerySubmit('student-roster-ajax', { course_id: course_id }, 'studentRosterSuccess');
 });
 
@@ -37,21 +33,6 @@ function showStudentInformation(students,isCode,isSection,isImageColumnPresent)
             }
             html += "<td><img  class='images circular-image' src='../../Uploads/" + imageURL + "' ></td>";
         }
-
-        if (isSection == true) {
-            html += "<td class='section-class'>";
-            if (student.section != null) {
-                html += student.section;
-            }
-            html += "</td>";
-        }
-        if (isCode == true) {
-            html += "<td>";
-            if (student.code != null) {
-                html += student.code;
-            }
-            html += "</td>";
-        }
         html += "<td class = 'LastName ";
         if (student.locked != 0) {
             html += " locked-student";
@@ -81,16 +62,14 @@ function showStudentInformation(students,isCode,isSection,isImageColumnPresent)
         else {
             html += "<td><a>Is locked out</a></a></td>"
         }
-
-        html += "<td><a>Grades</a></td>";
-        html += "<td><a class ='roster-make-exception' href='make-exception?cid="+courseId+"&student-data="+ student.id +"&section-data="+ student.section +"'>Exception</a></td>";
-        html += "<td><a href='change-student-information?cid=" + courseId + "&uid=" + student.id + "'>Change</a></td>";
-        if (student.locked == 0) {
-            html += "<td class = 'lock-class'><a  href='#' onclick='lockUnlockStudent(false," + student.id + ")'>Lock</a></td>";
-        }
-        else {
-            html += "<td class = 'lock-class'><img src='../../img/lock.png'>&nbsp;<a href='#' onclick='lockUnlockStudent(true," + student.id + ")'>Unlock</a></td>";
-         }
+        html += "<td><ul class='nav nav-tabs roster-settings'>" +
+        "<li class='dropdown'> <a class='dropdown-toggle' data-toggle='dropdown' href='#'><i class='fa fa-cog icon-nav'></i>Settings<span class='caret caret-settings'></span></a>" +
+        "<ul class='dropdown-menu settings-menu'><li>" +
+        "<a href='#'>Grades</a>" +
+        "<a href='#'>Exception</a>" +
+        "<a href='#'>Change Information</a>" +
+        "</li></ul></li>" +
+        "</ul></td>";
     });
     $('#student-information-table').append(html);
     createDataTable('student-data-table');
@@ -186,7 +165,7 @@ function studentLock() {
             });
         }
         else {
-            var msg = "Select atleast one student.";
+            var msg = "Select at least one student to assign lock.";
             CommonPopUp(msg);
         }
     });
@@ -195,7 +174,7 @@ function markLockSuccess(response) {
     location.reload();
 }
 function studentUnenroll() {
-    $('#unenroll-btn').click(function (e) {
+    $('#un-enroll-link').click(function (e) {
         var course_id = $("#course-id").val();
         var markArray = [];
         var dataArray = [];
@@ -252,7 +231,7 @@ function studentUnenroll() {
         }
         else {
             e.preventDefault();
-            var msg = "Select atleast one student.";
+            var msg = "Select at least one student to unenroll.";
             CommonPopUp(msg);
         }
     });
@@ -261,67 +240,55 @@ function markUnenrollSuccess(response) {
     location.reload();
 }
 function studentEmail() {
-    $('#roster-email').click(function (e) {
-        var markArray = [];
-        $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
-            markArray.push($(this).val());
-        });
-        if (markArray.length != 0) {
-            document.getElementById("student-id").value = markArray;
-        } else {
-            e.preventDefault();
-            var msg = "Select atleast one student.";
-            CommonPopUp(msg);
-        }
-    });
+    var markArray = createStudentList();
+    if (markArray.length != 0) {
+        document.getElementById("student-id").value = markArray;
+        document.forms["roster-email-form"].submit();
+    } else {
+        var msg = "Select at least one student to send Email.";
+        CommonPopUp(msg);
+    }
 }
 function studentMessage() {
-    $('#roster-message').click(function (e) {
-        var markArray = [];
-        $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
-            markArray.push($(this).val());
-        });
-        if (markArray.length != 0) {
-            document.getElementById("message-id").value = markArray;
-        } else {
-            var msg = "Select atleast one student.";
-            CommonPopUp(msg);
-            e.preventDefault();
-        }
-    });
+    var markArray = createStudentList();
+    if (markArray.length != 0) {
+        document.getElementById("message-id").value = markArray;
+        document.forms["roster-message-form"].submit();
+    } else {
+        var msg = "Select at least one student to send Message.";
+        CommonPopUp(msg);
+    }
 }
-function copyStudentEmail() {
-    $('#roster-copy-emails').click(function (e) {
-        var markArray = [];
-        $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
-            markArray.push($(this).val());
-        });
+function copyStudentsEmail() {
+        var markArray = createStudentList();
         if (markArray.length != 0) {
             document.getElementById("email-id").value = markArray;
+            document.forms["copy-emails-form"].submit();
         } else {
-            var msg = "Select atleast one student.";
+            var msg = "Select at least one student.";
             CommonPopUp(msg);
-            e.preventDefault();
         }
-    });
 }
 function teacherMakeException() {
-    $('#roster-makeExc').click(function (e) {
         var markArray = [];
         var sectionName;
         $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
             markArray.push($(this).val());
-            sectionName = ($(this).parent().siblings('.section-class').text());
+            var selectedId = $(this).val();
+            $.each(studentData, function (index, student) {
+                if(selectedId == student.id){
+                    sectionName = student.section;
+                }
+            });
         });
         if (markArray.length != 0) {
             document.getElementById("exception-id").value = markArray;
             document.getElementById("section-name").value = sectionName;
+            document.forms["make-exception-form"].submit();
         } else {
-            var msg = "Select atleast one student.";
+            var msg = "Select at least one student to make an exception.";
             CommonPopUp(msg);
-            e.preventDefault();
         }
-    });
 }
 var picsize = 0;
 function rotatepics() {
@@ -386,7 +353,6 @@ function lockUnlockStudent(lockOrUnlock, studentId) {
 
 function lockUnlockSuccess(response)
 {
-
     location.reload();
 }
 
@@ -401,4 +367,12 @@ $('.roster-make-exception').click(function(e) {
     f.action = cancelUrl;
     f.submit();
     });
+}
+
+function createStudentList(){
+    var markArray = [];
+    $('.student-data-table input[name = "student-information-check"]:checked').each(function () {
+        markArray.push($(this).val());
+    });
+    return markArray;
 }
