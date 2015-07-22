@@ -20,7 +20,16 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
     <a href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/show-assessment?id=' . $assessment->id . '&cid=' . $course->id) ?>" class="confirmation-require assessment-link"
        id="<?php echo $assessment->id ?>"><?php echo $assessment->name ?></a>
 </b>
-<img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSetting.png"/>
+<div class="floatright">
+    <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+    <ul class=" select1 dropdown-menu selected-options">
+        <li><a class="question" href="#"><?php AppUtility::t('Questions');?></a></li>
+        <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>"><?php AppUtility::t('Setting');?></a></li>
+        <li><a id="delete" href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+        <li><a id="copy" href="#" ><?php AppUtility::t('Copy');?></a></li>
+    </ul>
+</div>
+
 <input type="hidden" class="confirmation-require" id="time-limit<?php echo $assessment->id ?>"
        name="urlTimeLimit" value="<?php echo $assessment->timelimit; ?>">
 
@@ -40,10 +49,6 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
         <span title="Late Passes Allowed">LP</span>
     <?php
     } ?>
-
-<a> Questions </a>| <a
-    href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>">
-<!--    Settings </a>|<a href="#" onclick="deleteItem('--><?php //echo $assessment->id ;?><!--','--><?php //echo AppConstant::ASSESSMENT ?><!--','--><?php //echo $parent ;?><!--','--><?php //echo $course->id ;?><!--')"> Delete </a> |<a> Copy </a>| <a>Grades</a>-->
 <?php  } else if ($assessment->enddate <= $currentTime && $assessment->startdate <= $currentTime && $assessment->startdate != 0) {
 ?>
 <div class="item">
@@ -55,7 +60,16 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
        class="confirmation-require assessment-link"
        id="<?php echo $assessment->id ?>"><?php echo $assessment->name ?></a>
 </b>
-<img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSetting.png"/>
+<div class="floatright">
+    <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+    <ul class=" select1 dropdown-menu selected-options">
+        <li><a class="question" href="#"><?php AppUtility::t('Questions');?></a></li>
+        <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>"><?php AppUtility::t('Setting');?></a></li>
+        <li><a id="delete" href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+        <li><a id="copy" href="#" ><?php AppUtility::t('Copy');?></a></li>
+    </ul>
+</div>
+
 <input type="hidden" class="confirmation-require" id="time-limit<?php echo $assessment->id ?>"
        name="urlTimeLimit" value="<?php echo $assessment->timelimit; ?>">
 <?php if ($assessment['avail'] == AppConstant::NUMERIC_ZERO) { ?>
@@ -73,9 +87,7 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
         <span title="Late Passes Allowed">LP</span>
     <?php
     } ?>
-<a> Questions </a>| <a
-    href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id=' . $assessment->id . '&cid=' . $course->id . '&block=0') ?>">
-<!--    Settings </a>|<a href="#" onclick="deleteItem('--><?php //echo $assessment->id ;?><!--','--><?php //echo AppConstant::ASSESSEMENT ?><!--','--><?php //echo $parent ;?><!--','--><?php //echo $course->id ;?><!--')"> Delete </a> |<a> Copy </a>| <a>Grades</a>-->
+
 <?php if ($assessment->reviewdate > AppConstant::NUMERIC_ZERO) { ?>
     <br>This assessment is in review mode - no scores will be saved
 <?php }
@@ -91,7 +103,16 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                class="confirmation-require assessment-link"
                id="<?php echo $assessment->id ?>"><?php echo $assessment->name ?></a>
         </b>
-        <img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSetting.png"/>
+        <div class="floatright">
+            <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+            <ul class=" select1 dropdown-menu selected-options">
+                <li><a class="question" href="#"><?php AppUtility::t('Questions');?></a></li>
+                <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>"><?php AppUtility::t('Setting');?></a></li>
+                <li><a id="delete" href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+                <li><a id="copy" href="#" ><?php AppUtility::t('Copy');?></a></li>
+            </ul>
+        </div>
+
         <input type="hidden" class="confirmation-require"
                id="time-limit<?php echo $assessment->id ?>" name="urlTimeLimit"
                value="<?php echo $assessment->timelimit; ?>">
@@ -123,9 +144,6 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                     <?php } ?>
                 <?php } else { ?>
                     <br> Past Due Date of <?php echo AppUtility::formatDate($assessment->enddate); ?>,  Showing as Review.untill <?php echo AppUtility::formatDate($assessment->reviewdate); ?>
-
-
-
                 <?php }
             }   } ?>
 
@@ -134,9 +152,7 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
              <span title="Late Passes Allowed">LP</span>
             <?php
         } ?>
-        <a> Questions </a>| <a
-            href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id=' . $assessment->id . '&cid=' . $course->id . '&block=0') ?>">
-<!--            Settings </a>|<a href="#" onclick="deleteItem('--><?php //echo $assessment->id ;?><!--','--><?php //echo AppConstant::ASSESSMENT ?><!--','--><?php //echo $parent ;?><!--','--><?php //echo $course->id ;?><!--')"> Delete </a> |<a> Copy </a>| <a>Grades</a>-->
+
         <?php if ($assessment->startdate >= 0 && $assessment->enddate < $currentTime && $assessment['avail'] != AppConstant::NUMERIC_ZERO && $assessment->reviewdate != AppConstant::NUMERIC_ZERO) { ?>
 
             <br> This assessment is in review mode - no scores will be saved
@@ -560,7 +576,7 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                 $endDate = AppUtility::formatDate($inline->enddate);?>
             <img alt="text item" class="floatleft" src="<?php echo AppUtility::getHomeURL() ?>img/inline.png"/>
                 <div class="title">
-                    <b><?php echo ucfirst($inline->title) ?></b>
+                    <b><?php echo ucfirst($inline->title)?></b>
 
                     <div class="floatright">
                         <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
@@ -617,13 +633,15 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                         ?>
                     <p><?php echo $inline->text ?></p>
                 </div>
-                <?php foreach ($inline->instrFiles as $key => $instrFile) { ?>
+                <?php if($inline->instrFiles!= 0){
+                foreach ($inline->instrFiles as $key => $instrFile) { ?>
                     <ul class="fileattachlist">
                         <li>
                             <a href="/openmath/files/<?php echo $instrFile->filename ?>"><?php echo $instrFile->filename ?></a>
                         </li>
                     </ul>
-                <?php } ?>
+                <?php }
+                } ?>
             </div>
             <div class="clear"></div>
         <?php } else{ ?>

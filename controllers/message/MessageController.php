@@ -26,6 +26,7 @@ class MessageController extends AppController
      */
     public function actionIndex()
     {
+        $this->layout = "master";
         $this->guestUserHandler();
         $courseId = $this->getParamVal('cid');
         $isNewMessage = $this->getParamVal('newmsg');
