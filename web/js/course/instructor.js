@@ -6,6 +6,7 @@ function moveitem(from,blk) {
     var to = document.getElementById(blk+'-'+from).value;
 
     if (to != from) {
+
         var toopen = homePath+'&block=' + blk + '&from=' + from + '&to=' + to;
         window.location = toopen;
     }

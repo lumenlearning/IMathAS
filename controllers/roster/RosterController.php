@@ -43,6 +43,7 @@ class RosterController extends AppController
     public function actionStudentRoster()
     {
         $this->guestUserHandler();
+        $this->layout = "master";
         $courseId = $this->getParamVal('cid');
         $course = Course::getById($courseId);
         $students = Student::findByCid($courseId);
@@ -63,7 +64,7 @@ class RosterController extends AppController
                 }
             }
         }
-        $this->includeCSS(['dataTables.bootstrap.css']);
+        $this->includeCSS(['dataTables.bootstrap.css', 'roster/roster.css']);
         $this->includeJS(['jquery.dataTables.min.js', 'dataTables.bootstrap.js', 'roster/studentroster.js', 'general.js']);
         $responseData = array('course' => $course, 'isSection' => $isSectionPresent, 'isCode' => $isCodePresent, 'isImageColumnPresent' => $isImageColumnPresent);
         return $this->render('studentRoster', $responseData);
@@ -730,7 +731,7 @@ class RosterController extends AppController
 
 //Controller method to assign lock on student.
     public function actionMarkLockAjax()
-    {AppUtility::dump("hiii");
+    {
         $this->layout = false;
         $params = $this->getRequestParams();
         foreach ($params['checkedstudents'] as $students) {

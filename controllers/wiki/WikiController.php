@@ -6,7 +6,6 @@ use app\components\WikiUtility;
 use app\controllers\AppController;
 use app\models\Course;
 use app\models\Items;
-use app\models\StuGroupSet;
 use app\models\Wiki;
 use app\models\WikiRevision;
 

@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: tudip
- * Date: 9/7/15
- * Time: 12:14 PM
- */
+
 namespace app\components;
 use \yii\base\Component;
 use app\components\AppUtility;
@@ -23,10 +18,20 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
 <img alt="assess" class="floatleft" src="<?php echo AppUtility::getAssetURL() ?>img/assess.png"/>
 <div class="title">
 <b>
-    <a href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/show-assessment?id=' . $assessment->id . '&cid=' . $course->id) ?>"
-       class="confirmation-require assessment-link"
+    <a href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/show-assessment?id=' . $assessment->id . '&cid=' . $course->id) ?>" class="confirmation-require assessment-link"
        id="<?php echo $assessment->id ?>"><?php echo $assessment->name ?></a>
 </b>
+<div class="floatright">
+    <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+    <ul class=" select1 dropdown-menu selected-options">
+        <li><a class="question" href="#"><?php AppUtility::t('Questions');?></a></li>
+        <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>"><?php AppUtility::t('Setting');?></a></li>
+        <li><a id="delete" href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+        <li><a id="copy" href="#" ><?php AppUtility::t('Copy');?></a></li>
+    </ul>
+</div>
+
+
 <input type="hidden" class="confirmation-require" id="time-limit<?php echo $assessment->id ?>"
        name="urlTimeLimit" value="<?php echo $assessment->timelimit; ?>">
 
@@ -47,9 +52,6 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
     <?php
     } ?>
 
-<a> Questions </a>| <a
-    href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>">
-    Settings </a>|<a href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['assessment']['id']; ?>','<?php echo AppConstant::ASSESSMENT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>| <a>Grades</a>
 <?php  } else if ($assessment->enddate <= $currentTime && $assessment->startdate <= $currentTime && $assessment->startdate != 0) {
 ?>
 <div class="item">
@@ -61,6 +63,18 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
        class="confirmation-require assessment-link"
        id="<?php echo $assessment->id ?>"><?php echo $assessment->name ?></a>
 </b>
+
+<div class="floatright">
+    <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+    <ul class=" select1 dropdown-menu selected-options">
+        <li><a class="question" href="#"><?php AppUtility::t('Questions');?></a></li>
+        <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>"><?php AppUtility::t('Setting');?></a></li>
+        <li><a id="delete" href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+        <li><a id="copy" href="#" ><?php AppUtility::t('Copy');?></a></li>
+    </ul>
+</div>
+
+
 <input type="hidden" class="confirmation-require" id="time-limit<?php echo $assessment->id ?>"
        name="urlTimeLimit" value="<?php echo $assessment->timelimit; ?>">
 <?php if ($assessment['avail'] == AppConstant::NUMERIC_ZERO) { ?>
@@ -78,9 +92,7 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
         <span title="Late Passes Allowed">LP</span>
     <?php
     } ?>
-<a> Questions </a>| <a
-    href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id=' . $assessment->id . '&cid=' . $course->id . '&block=0') ?>">
-    Settings </a>|<a href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['assessment']['id']; ?>','<?php echo AppConstant::ASSESSMENT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>| <a>Grades</a>
+
 <?php if ($assessment->reviewdate > AppConstant::NUMERIC_ZERO) { ?>
     <br>This assessment is in review mode - no scores will be saved
 <?php }
@@ -96,6 +108,17 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                class="confirmation-require assessment-link"
                id="<?php echo $assessment->id ?>"><?php echo $assessment->name ?></a>
         </b>
+
+        <div class="floatright">
+            <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+            <ul class=" select1 dropdown-menu selected-options">
+                <li><a class="question" href="#"><?php AppUtility::t('Questions');?></a></li>
+                <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id='.$assessment->id . '&cid=' . $course->id . '&block=0') ?>"><?php AppUtility::t('Setting');?></a></li>
+                <li><a id="delete" href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+                <li><a id="copy" href="#" ><?php AppUtility::t('Copy');?></a></li>
+            </ul>
+        </div>
+
         <input type="hidden" class="confirmation-require"
                id="time-limit<?php echo $assessment->id ?>" name="urlTimeLimit"
                value="<?php echo $assessment->timelimit; ?>">
@@ -128,8 +151,6 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                 <?php } else { ?>
                     <br> Past Due Date of <?php echo AppUtility::formatDate($assessment->enddate); ?>,  Showing as Review.untill <?php echo AppUtility::formatDate($assessment->reviewdate); ?>
 
-
-
                 <?php }
             }   } ?>
 
@@ -138,9 +159,6 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
              <span title="Late Passes Allowed">LP</span>
             <?php
         } ?>
-        <a> Questions </a>| <a
-            href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/add-assessment?id=' . $assessment->id . '&cid=' . $course->id . '&block=0') ?>">
-            Settings </a>|<a href="#" onclick="deleteItem('<?php echo $assessment->id ;?>','<?php echo AppConstant::ASSESSMENT ?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['assessment']['id']; ?>','<?php echo AppConstant::ASSESSMENT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>| <a>Grades</a>
         <?php if ($assessment->startdate >= 0 && $assessment->enddate < $currentTime && $assessment['avail'] != AppConstant::NUMERIC_ZERO && $assessment->reviewdate != AppConstant::NUMERIC_ZERO) { ?>
 
             <br> This assessment is in review mode - no scores will be saved
@@ -364,7 +382,9 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                     <?php } else if ($link->startdate >= $currentTime && $link->enddate <= $currentTime) { ?>
                         <br>Showing <?php echo $startDateOfLink; ?> until <?php echo $endDateOfLink; ?>
                     <?php } ?>
+
                     <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
+
 
                 </div>
                 <div class="itemsum">
@@ -426,8 +446,8 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                     <?php } else if ($link->startdate >= $currentTime && $link->enddate <= $currentTime) { ?>
                         <br>Showing <?php echo $startDateOfLink; ?> until <?php echo $endDateOfLink; ?>
                     <?php } ?>
-                    <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
 
+                    <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
 
                 </div>
                 <div class="itemsum">
@@ -484,8 +504,8 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                     <?php } else if ($link->startdate >= $currentTime && $link->enddate <= $currentTime) { ?>
                         <br>Showing <?php echo $startDateOfLink; ?> until <?php echo $endDateOfLink; ?>
                     <?php } ?>
-                    <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
 
+                    <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
 
                 </div>
                 <div class="itemsum"><p>
@@ -537,8 +557,8 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                     <?php } else if ($link->startdate >= $currentTime && $link->enddate <= $currentTime) { ?>
                         <br>Showing <?php echo $startDateOfLink; ?> until <?php echo $endDateOfLink; ?>
                     <?php } ?>
-                    <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
 
+                    <a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/add-link?id=' . $link->id . '&cid=' . $course->id) ?>"> Modify </a>|<a href="#" onclick="deleteItem('<?php echo $link->id; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> |<a href="#" onclick="copyItem('<?php echo $item['link']['id']; ?>','<?php echo AppConstant::LINK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
 
                 </div>
                 <div class="itemsum"><p>
@@ -564,32 +584,51 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                 $endDate = AppUtility::formatDate($inline->enddate);?>
             <img alt="text item" class="floatleft" src="<?php echo AppUtility::getHomeURL() ?>img/inline.png"/>
                 <div class="title">
-                    <b><?php echo $inline->title ?></b> <br>
+
+                    <b><?php echo ucfirst($inline->title)?></b>
+
+                    <div class="floatright">
+                        <a class="dropdown-toggle grey-color-link select_button1 floatright" data-toggle="dropdown" href="javascript:void(0);"><img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/></a>
+                        <ul class=" select1 dropdown-menu selected-options">
+                            <li><a class="modify" href="<?php echo AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inline->id.'&courseId=' .$course->id)?>"><?php AppUtility::t('Modify');?></a></li>
+                            <li><a id="delete" href="#" onclick="deleteItem('<?php echo $inline->id; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Delete');?></a></li>
+                            <li><a id="copy" href="#" onclick="copyItem('<?php echo $item['inline']['id']; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"><?php AppUtility::t('Copy');?></a></li>
+                        </ul>
+                    </div>
+
                 </div>
                 <div class="itemsum">
                     <?php } ?>
                     <?php if($inline->avail == 2) { ?>
-                        <?php echo "Showing Always"; echo '<a href="' .AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inline->id.'&courseId=' .$course->id).'"> Modify  </a>'; ?> | <a href="#" onclick="deleteItem('<?php echo $inline->id; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">  Delete </a> | <a href="#" onclick="copyItem('<?php echo $item['inline']['id']; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
-                    <?php }
+
+                        <?php echo "Showing Always";
+                    }
                     else {
                         if($inline->startdate == 0 && $inline->enddate == 2000000000 || $inline->startdate != 0 && $inline->enddate == 2000000000)
                         {
-                            echo "Showing until: Always"; echo '<a href="' .AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inline->id.'&courseId=' .$course->id).'"> Modify  </a>'; ?> | <a href="#" onclick="deleteItem('<?php echo $inline->id; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">  Delete </a> | <a href="#" onclick="copyItem('<?php echo $item['inline']['id']; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
-                        <?php }
+                            echo "Showing until: Always";
+                         }
                         else{
-                            echo "Showing until: " .$endDate; echo '<a href="' .AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inline->id.'&courseId=' .$course->id).'"> Modify  </a>'; ?> | <a href="#" onclick="deleteItem('<?php echo $inline->id; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">  Delete </a> | <a href="#" onclick="copyItem('<?php echo $item['inline']['id']; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
-                        <?php }
+                            echo "Showing until: " .$endDate;
+                         }
+
                     }
                     ?>
                     <p><?php echo $inline->text ?></p>
                 </div>
-                <?php foreach ($inline->instrFiles as $key => $instrFile) { ?>
+
+                <?php if($inline->instrFiles!= 0){
+                foreach ($inline->instrFiles as $key => $instrFile) { ?>
+
                     <ul class="fileattachlist">
                         <li>
                             <a href="/openmath/files/<?php echo $instrFile->filename ?>"><?php echo $instrFile->filename ?></a>
                         </li>
                     </ul>
-                <?php } ?>
+
+                <?php  }
+                } ?>
+
             </div>
         <?php } elseif($inline->avail == 0) { ?>
             <div class="item">
@@ -598,21 +637,27 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                 $endDate = AppUtility::formatDate($inline->enddate);?>
             <img alt="text item" class="floatleft faded" src="<?php echo AppUtility::getHomeURL() ?>img/inline.png"/>
                 <div class="title">
-                    <b><?php echo $inline->title ?></b> <br>
+
+                    <b><?php echo ucfirst($inline->title) ?></b>
+                    <img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/><br>
                 </div>
                 <div class="itemsum"><p>
                         <?php  }
-                        echo 'Hidden'; echo '<a href="' .AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inline->id.'&courseId=' .$course->id).'"> Modify  </a>'; ?> | <a href="#" onclick="deleteItem('<?php echo $inline->id; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">  Delete </a> | <a href="#" onclick="copyItem('<?php echo $item['inline']['id']; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>
-
+                        echo 'Hidden';
+                        ?>
                     <p><?php echo $inline->text ?></p>
                 </div>
-                <?php foreach ($inline->instrFiles as $key => $instrFile) { ?>
+                <?php if($inline->instrFiles!= 0){
+                foreach ($inline->instrFiles as $key => $instrFile) { ?>
                     <ul class="fileattachlist">
                         <li>
                             <a href="/openmath/files/<?php echo $instrFile->filename ?>"><?php echo $instrFile->filename ?></a>
                         </li>
                     </ul>
-                <?php } ?>
+
+                <?php }
+                } ?>
+
             </div>
             <div class="clear"></div>
         <?php } else{ ?>
@@ -621,13 +666,18 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                 $endDate = AppUtility::formatDate($inline->enddate);?>
                 <img alt="text item" class="floatleft faded" src="<?php echo AppUtility::getHomeURL() ?>img/inline.png"/>
                 <div class="title">
-                    <b><?php echo $inline->title ?></b> <br>
+
+                    <b><?php echo ucfirst($inline->title) ?></b>
+                    <img alt="setting" class="floatright course-setting-button" src="<?php echo AppUtility::getAssetURL()?>img/courseSettingItem.png"/><br>
+
                 </div>
                 <div class="itemsum"><p>
                         <?php }
                         $startDate = AppUtility::formatDate($inline->startdate);
                         $endDate = AppUtility::formatDate($inline->enddate);
-                        echo "Showing " .$startDate. " until " .$endDate; echo '<a href="' .AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inline->id.'&courseId=' .$course->id).'"> Modify  </a> ';?>| <a href="#" onclick="deleteItem('<?php echo $inline->id; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Delete </a> | <a href="#" onclick="copyItem('<?php echo $item['inline']['id']; ?>','<?php echo AppConstant::INLINE_TEXT?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')"> Copy </a>';?>
+
+                        echo "Showing " .$startDate. " until " .$endDate; ?>
+
                 </div>
             </div>
         <?php }?>
@@ -691,7 +741,11 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                                     <br><?php echo $title?>   <?php echo $StartDate?> until <?php echo $endDate?></span>
                                  <span class="instronly">
                                      <?php if($block['SH'] == 'HT' ||$block['SH'] == 'ST'){?>
+<<<<<<< HEAD
                                  <a href="<?php echo AppUtility::getURLFromHome('block','block/edit-content?cid='.$course->id.'&Folder='.$parent.'-'.$cnt)?>">Edit Content</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
+=======
+                                 <a href="#">Edit Content</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
+>>>>>>> ui-dev
                                     <?php }else{?>
                                     <a href="#">Isolate</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
                                 <?php }?>
@@ -780,12 +834,17 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                     elseif($block['SH'] == 'SO'){$title = 'Showing Expanded';}elseif($block['SH'] == 'SC'){$title = 'Showing Collapsed';}
                     elseif($block['SH'] == 'SF'){$title = 'Showing as Folder';}elseif($block['SH'] == 'ST'){$title = 'Showing as TreeReader';}?>
                     <br><?php echo $title?> Always</span>
+<<<<<<< HEAD
                     <span class="instronly">
                                      <?php if($block['SH'] == 'HT' ||$block['SH'] == 'ST'){?>
                                          <a href="<?php echo AppUtility::getURLFromHome('block','block/edit-content?cid='.$course->id.'&Folder='.$parent.'-'.$cnt)?>">Edit Content</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
                                      <?php }else{?>
                                          <a href="#">Isolate</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
                                      <?php }?>
+=======
+                                 <span class="instronly">
+                                <a href="#">Isolate</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
+>>>>>>> ui-dev
                                 </span>
                 </div>
             </div>
@@ -862,6 +921,7 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                                     </b>
                                     </span>
                                     <span class="instrdates">
+<<<<<<< HEAD
                                     <br>Hidden</span>
                                    <span class="instronly">
                                      <?php if($block['SH'] == 'HT' ||$block['SH'] == 'ST'){?>
@@ -870,6 +930,11 @@ if ($assessment->enddate >= $currentTime && $assessment->startdate >= $currentTi
                                          <a href="#">Isolate</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
                                      <?php }?>
                                 </span>
+=======
+                                    <br>Hidden</span><span class="instronly">
+                                    <a href="#">Isolate</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/add-block?courseId='.$course->id.'&id='.$parent.'-'.$cnt.'&modify=1')?>">Modify</a> | <a href="#" onclick="deleteItem('<?php echo $parent.'-'.$cnt ?>','<?php echo AppConstant::BLOCK?>','<?php echo $parent ;?>','<?php echo $course->id ;?>')">Delete</a> | <a href="#">Copy</a> | <a href="<?php echo AppUtility::getURLFromHome('block','block/new-flag?cid='.$course->id.'&newflag='.$parent.'-'.$cnt)?>">NewFlag</a>
+                                    </span>
+>>>>>>> ui-dev
                                 </div>
                             </div>
                         <div class=blockitems id="block5<?php echo $block['id']?>">

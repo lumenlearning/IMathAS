@@ -141,6 +141,10 @@ class AppUtility extends Component
         return date($format, $dateStr);
     }
 
+    public static function getFormattedTime($dateStr, $format = 'h:i A'){
+        return date($format, $dateStr);
+    }
+
     public static function getFullName($first, $last){
         return trim(ucfirst($first).' '.ucfirst($last));
     }
@@ -2511,10 +2515,12 @@ class AppUtility extends Component
     }
 
     public static function get_meta_keys(){
+
         $keys = array();
         $keys[] = 'settings';
 
         // key value json
+
     }
 
     public static function t($key, $echo = true){

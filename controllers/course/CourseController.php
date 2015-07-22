@@ -552,6 +552,7 @@ class CourseController extends AppController
         $this->guestUserHandler();
         $params = $this->getRequestParams();
         $cid = $params['cid'];
+        $currentDate = AppUtility::parsedatetime(date('m/d/Y'), date('h:i a'));
         $assessments = Assessments::getByCourseId($cid);
         $calendarItems = CalItem::getByCourseId($cid);
         $CalendarLinkItems = Links::getByCourseId($cid);
@@ -562,8 +563,9 @@ class CourseController extends AppController
             $assessmentArray[] = array(
                 'startDate' => AppUtility::getFormattedDate($assessment['startdate']),
                 'endDate' => AppUtility::getFormattedDate($assessment['enddate']),
+                'dueTime' => AppUtility::getFormattedTime($assessment['enddate']),
                 'reviewDate' => AppUtility::getFormattedDate($assessment['reviewdate']),
-                'name' => $assessment['name'],
+                'name' => ucfirst($assessment['name']),
                 'startDateString' => $assessment['startdate'],
                 'endDateString' => $assessment['enddate'],
                 'reviewDateString' => $assessment['reviewdate'],
@@ -578,8 +580,9 @@ class CourseController extends AppController
             $calendarArray[] = array(
                 'courseId' => $calendarItem['courseid'],
                 'date' => AppUtility::getFormattedDate($calendarItem['date']),
-                'title' => $calendarItem['title'],
-                'tag' => $calendarItem['tag']
+                'dueTime' => AppUtility::getFormattedTime($calendarItem['date']),
+                'title' => ucfirst($calendarItem['title']),
+                'tag' => ucfirst($calendarItem['tag'])
             );
         }
         $calendarLinkArray = array();
@@ -587,14 +590,15 @@ class CourseController extends AppController
         {
             $calendarLinkArray[] = array(
                 'courseId' => $CalendarLinkItem['courseid'],
-                'title' => $CalendarLinkItem['title'],
+                'title' => ucfirst($CalendarLinkItem['title']),
                 'startDate' => AppUtility::getFormattedDate($CalendarLinkItem['startdate']),
                 'endDate' => AppUtility::getFormattedDate($CalendarLinkItem['enddate']),
+                'dueTime' => AppUtility::getFormattedTime($CalendarLinkItem['enddate']),
                 'now' => AppUtility::parsedatetime(date('m/d/Y'), date('h:i a')),
                 'startDateString' => $CalendarLinkItem['startdate'],
                 'endDateString' => $CalendarLinkItem['enddate'],
                 'linkedId' => $CalendarLinkItem['id'],
-                'calTag' => $CalendarLinkItem['caltag']
+                'calTag' => ucfirst($CalendarLinkItem['caltag'])
             );
         }
         $calendarInlineTextArray = array();
@@ -603,13 +607,14 @@ class CourseController extends AppController
             $calendarInlineTextArray[] = array(
                 'courseId' => $calendarInlineTextItem['courseid'],
                 'endDate' => AppUtility::getFormattedDate($calendarInlineTextItem['enddate']),
+                'dueTime' => AppUtility::getFormattedTime($calendarInlineTextItem['enddate']),
                 'now' => AppUtility::parsedatetime(date('m/d/Y'), date('h:i a')),
                 'startDateString' => $calendarInlineTextItem['startdate'],
                 'endDateString' => $calendarInlineTextItem['enddate'],
-                'calTag' => $calendarInlineTextItem['caltag']
+                'calTag' => ucfirst($calendarInlineTextItem['caltag'])
             );
         }
-        $responseData = array('assessmentArray' => $assessmentArray,'calendarArray' => $calendarArray, 'calendarLinkArray' => $calendarLinkArray, 'calendarInlineTextArray' => $calendarInlineTextArray);
+        $responseData = array('assessmentArray' => $assessmentArray,'calendarArray' => $calendarArray, 'calendarLinkArray' => $calendarLinkArray, 'calendarInlineTextArray' => $calendarInlineTextArray, 'currentDate' => $currentDate);
         return $this->successResponse($responseData);
     }
 
@@ -687,10 +692,14 @@ class CourseController extends AppController
 //    Display calendar on click of menuBars
     public function actionCalendar()
     {
+        $this->layout = "master";
         $this->guestUserHandler();
+        $courseId = $this->getParamVal('cid');
+        $course = Course::getById($courseId);
         $this->includeCSS(['fullcalendar.min.css', 'calendar.css', 'jquery-ui.css']);
         $this->includeJS(['moment.min.js', 'fullcalendar.min.js', 'student.js']);
-        return $this->render('calendar');
+        $responseData = array('course' => $course );
+        return $this->render('calendar', $responseData);
     }
     /**
      * Modify inline text: Teacher
@@ -711,6 +720,7 @@ class CourseController extends AppController
             $hideTitle = false;
             $pageTitle = AppConstant::INLINE_TEXT_MODIFY_TITLE;
             if($this->isPostMethod()){
+
                 $page_formActionTag = AppUtility::getURLFromHome('course', 'course/modify-inline-text?id=' . $inlineText->id.'&courseId=' .$course->id);
                 $saveChanges = new InlineText();
                 $saveChanges->updateChanges($params, $inlineTextId);
@@ -719,10 +729,12 @@ class CourseController extends AppController
             $saveTitle = AppConstant::SAVE_BUTTON;
         }
         else {
+
             $pageTitle = AppConstant::INLINE_TEXT_ADD_TITLE;
             if($this->isPostMethod()){
                 $startDate = AppUtility::parsedatetime($params['StartDate'],$params['start_end_time']);
                 $endDate = AppUtility::parsedatetime($params['EndDate'],$params['end_end_time']);
+
                 $page_formActionTag = AppUtility::getURLFromHome('course', 'course/modify-inline-text?courseId=' .$course->id);
                 $saveChanges = new InlineText();
                 $lastInlineId = $saveChanges->saveChanges($params, $courseId);
@@ -953,6 +965,7 @@ class CourseController extends AppController
 
                         if ($_FILES['userfile']['error']==1 || $_FILES['userfile']['error']==2) {
 
+
                             $errormsg = "File size too large";
                             $params['text'] = "File upload error - $errormsg";
                             $uploaderror = true;
@@ -1031,6 +1044,7 @@ class CourseController extends AppController
         $responseData = array('course' => $course,'groupNames' => $groupNames,'rubricsData' => $rubricsData,'pageOutcomesList' => $pageOutcomesList,'modifyLinkId' => $modifyLinkId,
             'pageOutcomes' => $pageOutcomes,'toolvals' => $toolvals,'gbcatsLabel' => $gbcatsLabel,'gbcatsId' => $gbcatsId,'toollabels' => $toollabels,'checkboxesValues' => $checkboxesValues);
         return $this->renderWithData('addLink',$responseData);
+
     }
 
     function storeuploadedcoursefile($id,$key,$sec="public-read") {
