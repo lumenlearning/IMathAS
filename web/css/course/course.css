@@ -10,7 +10,9 @@
 .add-item{
     background-color: #f0f0f0;
     display: block;
-    padding: 12px 22px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 12px;
     border-bottom: 1px #dadada solid;
     border-top: 1px #dadada solid;
 }
@@ -24,6 +26,7 @@
     padding-left: 0;
 }
 .ui-dialog-titlebar, .ui-widget-header, .ui-corner-all, .ui-helper-clearfix, .ui-draggable-handle{
+    background-color: #ffffff;
     display: none;
 }
 
@@ -39,7 +42,7 @@
 .icon-center{
     position: relative;
     top: 5px;
-    margin-left: 30px;
+    margin-left: 40px;
     margin-right: 20px;
 }
 .item-name{
@@ -93,4 +96,30 @@
 }
 div.dialog-items{
     min-height: 220px !important;
+}
+.item-name-small{
+    margin-top:10px;
+    text-align: center;
+    margin-right: 0;
+}
+
+.mvsel{
+    width: 5%!important;
+    float: left!important;
+    background-color: #9a9a9a;
+}
+.course-setting-button{
+    width: 30px;
+    height: 30px;
+}
+.select1{
+    display:none; /* Hide it first of all */
+    background:#F8F8F8;
+    border:1px solid #CCC;
+    box-shadow:0 1px 3px rgba(0,0,0,0.15);
+    position:relative;
+    left:0px;
+    border-radius:3px;
+    margin-right: -60px;
+    margin-top: 30px;
 }
