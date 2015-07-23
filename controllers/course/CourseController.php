@@ -721,7 +721,7 @@ class CourseController extends AppController
     }
 
     /**
-     * Modify inline text: Teacher
+     * Modify inline text: coyTeacher
      */
     public function actionModifyInlineText()
     {

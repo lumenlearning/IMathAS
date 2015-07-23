@@ -122,7 +122,7 @@ class AppConstant
     const MODIFY_ASSESSMENT ="Modify Assessment";
     const ADD_ASSESSMENT ="Add Assessment";
 
-    const FORUMTYPE = '1';
+    const FORUM = 'Forum';
     const WIKI = 'WIKI';
     const LINK ='LINK';
     const ASSESSMENT ='ASSESSMENT';

@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="item-detail-content">
     <?php echo $this->render("../../instructor/instructor/_toolbarTeacher", ['course' => $course, 'section' => 'roster']);?>
 </div>
-<div class="tab-content shadowBox"">
+<div class="tab-content shadowBox">
 <div class="roster-nav-tab">
     <ul class="nav nav-tabs nav-justified roster-menu-bar-nav">
         <li><a href="<?php echo AppUtility::getURLFromHome('roster/roster', 'login-grid-view?cid='.$course->id); ?>"><?php AppUtility::t('View Login Grid');?></a></li>

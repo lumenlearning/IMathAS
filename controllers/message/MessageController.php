@@ -38,7 +38,7 @@ class MessageController extends AppController
             $rights = $this->getAuthenticatedUser();
             $users = User::findAllUser($sortBy, $order);
             $teacher = Teacher::getTeachersById($courseId);
-            $this->includeCSS(['dataTables.bootstrap.css']);
+            $this->includeCSS(['dataTables.bootstrap.css', 'message.css']);
             $this->includeJS(['jquery.dataTables.min.js', 'dataTables.bootstrap.js','message/message.js', 'general.js' ]);
             $responseData = array('model' => $model, 'course' => $course, 'users' => $users, 'teachers' => $teacher, 'userRights' => $rights, 'isNewMessage' => $isNewMessage);
             return $this->renderWithData('messages', $responseData);
