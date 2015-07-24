@@ -14,7 +14,7 @@
 
                 </span>
             </div>
-            <div class="item-name left-float" style="padding-top: 15px; padding-left: 5px">
+            <div class="item-name left-float" style="padding-left: 5px">
                 <?php echo isset($item_name) ?  $item_name : ""; ?>
             </div>
             <div class="clear-both"></div>

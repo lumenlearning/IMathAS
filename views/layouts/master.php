@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use app\assets\AppAsset;
 use app\components\AppUtility;
+use app\controllers\AppController;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
@@ -33,7 +34,6 @@ AppAsset::register($this);
 </div>
 <div class="clear-both"></div>
 <div class="master-wrap">
-
     <div class="master-container">
         <div class="container-upper-blue">
             <div class="graphic-math-img">

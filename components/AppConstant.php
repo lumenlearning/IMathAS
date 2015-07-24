@@ -129,4 +129,5 @@ class AppConstant
     const INLINE_TEXT = 'INLINE';
     const CALENDAR = 'CALENDAR';
     const BLOCK = 'BLOCK';
+    const FORUM = 'FORUM';
 }

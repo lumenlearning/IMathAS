@@ -22,9 +22,9 @@ div.pagetitle h2 {
 }
 div.item {
 	margin-bottom: 10px;
-	padding-right: 5%;
-	padding-top: 5px;
-    padding-left: 5px;
+	/*padding-right: 5%;*/
+	padding-top: 15px;
+    padding-left: 15px;
 	overflow: auto;
 	/*border-radius: 5px;*/
     /*width: 95%;*/
@@ -46,7 +46,7 @@ span.iteminfo {
 }
 div.title {
 	/*display: inline;*/
-	margin-left: 30px;
+	margin-left: 35px;
 }
 div.block, div.blockitems div.blockitems div.block {
 	padding: 5px;

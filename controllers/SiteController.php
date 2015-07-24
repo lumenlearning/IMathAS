@@ -77,7 +77,6 @@ class SiteController extends AppController
     public function actionLogin()
     {
         $this->unauthorizedAccessHandler();
-
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post())) {
             if ($model->login()) {

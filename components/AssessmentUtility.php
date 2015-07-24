@@ -120,7 +120,8 @@ class AssessmentUtility extends Component
             return '';
         }
         $key = $key+1;
-        $html = "<select class=\"mvsel\" id=\"$parent-$key\" onchange=\"moveitem($key,$parent)\">\n";
+        $html = '';
+        $html = "<select class=\"mvsel\" id=\"$parent-$key\" onchange=\"moveitem($key,$parent)\" style='height: 30px'>\n";
         for ($i = 1; $i <= $countCourseDetails; $i++) {
             $html .= "<option value=\"$i\" ";
             if ($i==$key) { $html .= "SELECTED";}

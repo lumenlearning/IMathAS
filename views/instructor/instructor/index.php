@@ -15,7 +15,7 @@ $now = $currentTime;
 <input type="hidden" class="calender-course-id" id="courseIdentity" value="<?php echo $course->id ?>">
 <input type="hidden" class="courseId" value="<?php echo $course->id?>">
 <div class="item-detail-header">
-    <?php echo $this->render("../../itemHeader/_indexWithButton",['item_name'=>'Course Setting', 'link_title'=>'Home', 'link_url' => AppUtility::getHomeURL().'site/index', 'page_title' => $this->title]); ?>
+    <?php echo $this->render("../../itemHeader/_indexWithButton",['item_name'=>'Course Settings', 'link_title'=>'Home', 'link_url' => AppUtility::getHomeURL().'site/index', 'page_title' => $this->title]); ?>
 </div>
 
 <div class="item-detail-content">
@@ -34,61 +34,63 @@ $now = $currentTime;
     <div class="clear-both"></div>
     <div class=" row add-item">
         <div class="col-md-1 plus-icon">
-        <i class="fa fa-plus fa-2x"></i>
-    </div>
+            <i class="fa fa-plus fa-2x"></i>
+        </div>
         <div class=" col-md-2 add-item-text">
             <p>Add An Item...</p>
         </div>
+
     </div>
     <input type="hidden" class="home-path" value="<?php echo AppUtility::getURLFromHome('instructor', 'instructor/index?cid=' . $course->id) ?>">
-
-    <?php
-    $parent = \app\components\AppConstant::NUMERIC_ZERO;
-    $countCourseDetails = count($courseDetail);
-    if ($countCourseDetails){
-
-        $assessment = $blockList = array();
-        foreach ($courseDetail as $key => $item){
-            echo AssessmentUtility::createItemOrder($key, $countCourseDetails, $parent, $blockList);
-            switch (key($item)):
-                case 'Assessment': ?>
-                    <?php CourseItemsUtility::AddAssessment($assessment,$item,$course,$currentTime,$parent);?>
-                    <input type="hidden" class="assessment-link" value="<?php echo $assessment->id?>">
-                    <?php break; ?>
-                    <!-- ///////////////////////////// Forum here /////////////////////// -->,
-                <?php case 'Forum': ?>
-                <?php CourseItemsUtility::AddForum($item,$course,$currentTime,$parent); ?>
-                <?php break; ?>
-                <!-- ////////////////// Wiki here //////////////////-->
-            <?php case 'Wiki': ?>
-                <?php CourseItemsUtility::AddWiki($item,$course,$parent); ?>
-                <?php break; ?>
-                <!-- ////////////////// Linked text here //////////////////-->
+    <input type="hidden" class="block-check" value="<?php echo $tb = 't'; ?>">
+    <div class="display-item-details">
             <?php
-                case 'LinkedText': ?>
-                    <?php CourseItemsUtility::AddLink($item,$currentTime,$parent,$course);?>
-                    <?php break; ?>
-                    <!-- ////////////////// Inline text here //////////////////-->
-                <?php case 'InlineText': ?>
-                <?php CourseItemsUtility::AddInlineText($item,$currentTime,$course,$parent);?>
-                <?php break; ?>
-                <!-- Calender Here-->
-            <?php case 'Calendar': ?>
-                <?php CourseItemsUtility::AddCalendar($item,$parent,$course);?>
-                <?php break; ?>
-                <!--  Block here-->
-            <?php case  'Block': ?>
-                <?php  $cnt++; ?>
-                <?php $displayBlock = new CourseItemsUtility();
-                $displayBlock->DisplayWholeBlock($item,$currentTime,$assessment,$course,$parent,$cnt);
-                ?>
-                <?php break; ?>
-            <?php endswitch;
-            ?>
+            $parent = \app\components\AppConstant::NUMERIC_ZERO;
 
-        <?php }?>
+            $countCourseDetails = count($courseDetail);
+            if ($countCourseDetails){
 
-    <?php } ?>
-</div>
+                $assessment = $blockList = array();
+                foreach ($courseDetail as $key => $item){
+                    echo AssessmentUtility::createItemOrder($key, $countCourseDetails, $parent, $blockList);
+                    switch (key($item)):
+                        case 'Assessment': ?>
+                            <?php CourseItemsUtility::AddAssessment($assessment,$item,$course,$currentTime,$parent);?>
+                            <input type="hidden" class="assessment-link" value="<?php echo $assessment->id?>">
+                            <?php break; ?>
+                            <!-- ///////////////////////////// Forum here /////////////////////// -->,
+                        <?php case 'Forum': ?>
+                        <?php CourseItemsUtility::AddForum($item,$course,$currentTime,$parent); ?>
+                        <?php break; ?>
+                        <!-- ////////////////// Wiki here //////////////////-->
+                    <?php case 'Wiki': ?>
+                        <?php CourseItemsUtility::AddWiki($item,$course,$parent); ?>
+                        <?php break; ?>
+                        <!-- ////////////////// Linked text here //////////////////-->
+                    <?php
+                        case 'LinkedText': ?>
+                            <?php CourseItemsUtility::AddLink($item,$currentTime,$parent,$course);?>
+                            <?php break; ?>
+                            <!-- ////////////////// Inline text here //////////////////-->
+                        <?php case 'InlineText': ?>
+                        <?php CourseItemsUtility::AddInlineText($item,$currentTime,$course,$parent);?>
+                        <?php break; ?>
+                        <!-- Calender Here-->
+                    <?php case 'Calendar': ?>
+                        <?php CourseItemsUtility::AddCalendar($item,$parent,$course);?>
+                        <?php break; ?>
+                        <!--  Block here-->
+                    <?php case  'Block': ?>
+                        <?php  $cnt++; ?>
+                        <?php $displayBlock = new CourseItemsUtility();
+                        $displayBlock->DisplayWholeBlock($item,$currentTime,$assessment,$course,$parent,$cnt);
+                        ?>
+                        <?php break; ?>
+                    <?php endswitch;
+                    ?>
 
-</div>
+                <?php }?>
+
+            <?php } ?>
+       </div>
+    </div>
