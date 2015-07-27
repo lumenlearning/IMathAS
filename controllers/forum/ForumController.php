@@ -93,17 +93,44 @@ class ForumController extends AppController
         $orderBy = 'id';
         $forums = Forums::getByCourseIdOrdered($cid,$sort,$orderBy);
         $user = $this->getAuthenticatedUser();
-//        $NewPostCount = Thread::findNewPostCnt($cid,$user);
+        $NewPostCounts = Thread::findNewPostCnt($cid,$user);
         if ($forums)
         {
-            $forumArray = array();
-            foreach ($forums as $key => $forum) {
-                $threadCount = ForumThread::findThreadCount($forum->id);
+           $forumArray = array();
+            foreach ($forums as $key => $forum)
+            {
+
+                   $threadCount = ForumThread::findThreadCount($forum->id);
                 $postCount = count($forum->imasForumPosts);
                 $lastObject = '';
                 if ($postCount > AppConstant::NUMERIC_ZERO) {
                     $lastObject = $forum->imasForumPosts[$postCount - AppConstant::NUMERIC_ONE];
                 }
+                $flag = 0;
+                foreach($NewPostCounts as $count)
+                {
+                    if($count['forumid'] == $forum->id ){
+                        $tempArray = array
+                        (
+                            'forumId' => $forum->id,
+                            'forumName' => $forum->name,
+                            'threads' => count($threadCount),
+                            'posts' => $postCount,
+                            'currentTime' => $currentTime,
+                            'endDate' => $forum->enddate,
+                            'rights' => $user->rights,
+                            'countId' => $count['forumid'],
+                            'count' =>$count['COUNT(imas_forum_threads.id)'],
+                            'lastPostDate' => ($lastObject != '') ? date('F d, o g:i a', $lastObject->postdate) : '',
+
+                        );
+                        $flag = 1;
+                        array_push($forumArray, $tempArray);
+                    }
+
+             }
+             if($flag == 0){
+
                 $tempArray = array
                 (
                     'forumId' => $forum->id,
@@ -113,14 +140,20 @@ class ForumController extends AppController
                     'currentTime' => $currentTime,
                     'endDate' => $forum->enddate,
                     'rights' => $user->rights,
-                    'lastPostDate' => ($lastObject != '') ? date('F d, o g:i a', $lastObject->postdate) : ''
+                    'countId' => AppConstant::NUMERIC_ZERO,
+                    'lastPostDate' => ($lastObject != '') ? date('F d, o g:i a', $lastObject->postdate) : '',
                 );
-                array_push($forumArray, $tempArray);
+                 array_push($forumArray, $tempArray);
             }
+
+
+
+        }
             $this->includeCSS(['forums.css']);
             $this->includeJS(['forum/forum.js']);
 
             return $this->successResponse($forumArray);
+
         }
         else
         {
