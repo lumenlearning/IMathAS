@@ -16,16 +16,18 @@ function calculate(inputId,outputId,format) {
   var fullstr = document.getElementById(inputId).value;
   fullstr = normalizemathunicode(fullstr);
   fullstr = fullstr.replace(/=/,'');
-  fullstr = fullstr.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
+  
   if (format.indexOf('list')!=-1) {
 	  var strarr = fullstr.split(/,/);
+  } else if (format.indexOf('set')!=-1) {
+  	  var strarr = fullstr.replace(/[\{\}]/g,'').split(/,/);
   } else {
 	  var strarr = new Array();
 	  strarr[0] = fullstr;
   }
   for (var sc=0;sc<strarr.length;sc++) {
 	  str = strarr[sc];
-	  //str = str.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
+	  str = str.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
 	  var err = "";
 	  if (str.match(/DNE/i)) {
 		  str = str.toUpperCase();
@@ -34,8 +36,7 @@ function calculate(inputId,outputId,format) {
 	  } else {
 		  err += singlevalsyntaxcheck(str,format);
 		  if (str.match(/,/)) {
-		  	  err += _("Invalid use of a comma - it will be ignored and this expression may not evaluate as intended.");
-		  	  str = str.replace(/,/g,'');
+		  	  err += _("Invalid use of a comma.");
 		  }
 		  if (format.indexOf('mixednumber')!=-1) {
 		  	  str = str.replace(/_/,' ');
@@ -48,6 +49,7 @@ function calculate(inputId,outputId,format) {
 		  err += syntaxcheckexpr(str,format);
 		  try {
 			  var evalstr = str;
+			  evalstr = evalstr.replace(',','*NaN*'); //force eval error on lingering commas
 			  if (format.indexOf('allowmixed')!=-1 || format.indexOf('mixednumber')!=-1) {
 				  evalstr = evalstr.replace(/(\d+)\s+(\d+\s*\/\s*\d+)/,"($1+$2)");
 			  }
@@ -72,6 +74,13 @@ function calculate(inputId,outputId,format) {
 	  strarr[sc] = str+" ";
   }
   fullstr = strarr.join(', ');
+  if (format.indexOf('set')!=-1) {
+  	  if (!document.getElementById(inputId).value.match(/^\s*{.*?}\s*$/)) {
+  	  	  fullstr += ("syntax error: this answer must be in set notation, a list wrapped in braces like {1,2,3}");
+  	  } else {
+  	  	  fullstr = '{'+fullstr+'}';
+  	  }
+  }
   var outnode = document.getElementById(outputId);
   var n = outnode.childNodes.length;
   for (var i=0; i<n; i++)
@@ -856,7 +865,7 @@ function doonsubmit(form,type2,skipconfirm) {
 				}
 				strarr.push(fullstr.substring(lastpos));
 			  } else {
-				  var strarr = fullstr.split(/U/);
+				  var strarr = fullstr.split(/U/i);
 			  }
 			  for (k=0; k<strarr.length; k++) {
 				  str = strarr[k];
@@ -896,17 +905,24 @@ function doonsubmit(form,type2,skipconfirm) {
 		str = document.getElementById("tc"+qn).value;
 		str = normalizemathunicode(str);
 		str = str.replace(/=/,'');
-		str = str.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
+		
 		if (calcformat[qn].indexOf('list')!=-1) {
 			strarr = str.split(/,/);
+		} else if (calcformat[qn].indexOf('set')!=-1) {
+			if (!str.match(/^\s*{.*?}\s*$/)) {
+				continue;
+			} else {
+				strarr = str.replace(/^\s*{(.*?)}\s*$/,'$1').split(/,/);
+			}
 		} else {
 			var strarr = new Array();
 			strarr[0] = str;
 		}
 		for (var sc=0;sc<strarr.length;sc++) {
 			str = strarr[sc];
-			
-			str = str.replace(/,/g,"");
+			str = str.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
+			str = str.replace(',','*NaN*'); //force eval error
+			//str = str.replace(/,/g,"");
 			if (calcformat[qn].indexOf('scinot')!=-1) {
 				str = str.replace(/(x|X|\u00D7)/,"*");
 			}

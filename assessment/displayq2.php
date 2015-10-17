@@ -159,7 +159,12 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	if (isset($formatfeedbackon)) {
 		unset($GLOBALS['noformatfeedback']);
 	}
-	
+	if (isset($anstypes)) {
+		if (!is_array($anstypes)) {
+			$anstypes = explode(",",$anstypes);
+		}
+		$anstypes = array_map('trim', $anstypes);
+	}
 	//pack options
 	
 	if (isset($ansprompt)) {$options['ansprompt'] = $ansprompt;}
@@ -188,9 +193,6 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		$qcolors = array();
 	}
 	if ($qdata['qtype']=="multipart" || $qdata['qtype']=='conditional') {
-		if (!is_array($anstypes)) {
-			$anstypes = explode(",",$anstypes);
-		}
 		if ($qdata['qtype']=="multipart") {
 			if (isset($answeights)) {
 				if (!is_array($answeights)) {
@@ -685,15 +687,32 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	if (isset($variable) && !isset($variables)) {
 		$variables =& $variable;
 	}
-	if (isset($reqdecimals) && !is_array($reqdecimals) && !isset($abstolerance) && !isset($reltolerance)) {
-		$abstolerance = 0.5/(pow(10,$reqdecimals));
-	} else if (isset($reqdecimals) && is_array($reqdecimals)) {
-		foreach ($reqdecimals as $kidx=>$vval) {
-			if (!isset($abstolerance[$kidx]) && !isset($reltolerance[$kidx])) {
-				$abstolerance[$kidx] = 0.5/(pow(10,$vval));
+	if (isset($anstypes)) {
+		if (!is_array($anstypes)) {
+			$anstypes = explode(",",$anstypes);
+		}
+		$anstypes = array_map('trim', $anstypes);
+	}
+	if (isset($reqdecimals)) {
+		if (is_array($reqdecimals)) {  
+			foreach ($reqdecimals as $kidx=>$vval) {
+				if (!isset($abstolerance[$kidx]) && !isset($reltolerance[$kidx])) {
+					$abstolerance[$kidx] = 0.5/(pow(10,$vval));
+				}
 			}
+		} else {
+			if (!isset($abstolerance) && !isset($reltolerance)) { //set global abstol
+				$abstolerance = 0.5/(pow(10,$reqdecimals));
+			} else if (isset($anstypes)) {
+				foreach ($anstypes as $kidx=>$vval) {
+					if (!isset($abstolerance[$kidx]) && !isset($reltolerance[$kidx])) {
+						$abstolerance[$kidx] = 0.5/(pow(10,$reqdecimals));
+					}
+				}
+			}			
 		}
 	}
+
 	srand($seed+2);
 	//pack options from eval
 	if (isset($answer)) {$options['answer'] = $answer;}
@@ -720,9 +739,6 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	
 	$score = 0;
 	if ($qdata['qtype']=="multipart") {
-		if (!is_array($anstypes)) {
-			$anstypes = explode(",",$anstypes);
-		}
 		if (in_array('essay',$anstypes) || in_array('file',$anstypes)) {
 			$GLOBALS['questionmanualgrade'] = true;
 		}
@@ -847,6 +863,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($answerformat=='list' || $answerformat=='exactlist' ||  $answerformat=='orderedlist') {
 			$tip = _('Enter your answer as a list of whole or decimal numbers separated with commas: Examples: -4, 3, 2.5') . "<br/>";
 			$shorttip = _('Enter a list of whole or decimal numbers');
+		} else if ($answerformat=='set' || $answerformat=='exactset') {
+			$tip = _('Enter your answer as a set of whole or decimal numbers separated with commas: Example: {-4, 3, 2.5}') . "<br/>";
+			$shorttip = _('Enter a set of whole or decimal numbers');
 		} else {
 			$tip = _('Enter your answer as a whole or decimal number.  Examples: 3, -4, 5.5') . "<br/>";
 			$shorttip = _('Enter a whole or decimal number');
@@ -1348,11 +1367,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
 			$tip = _('Enter your answer as a list of values separated by commas: Example: -4, 3, 2') . "<br/>";
 			$eword = _('each value');
+		} else if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
+			$tip = _('Enter your answer as a set of values separated with commas: Example: {-4, 3, 2}') . "<br/>";
+			$eword = _('each value');
 		} else {
 			$tip = '';
 			$eword = _('your answer');
 		}
-		list($longtip,$shorttip) = formathint($eword,$ansformats,'calculated',(in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)), 1);
+		list($longtip,$shorttip) = formathint($eword,$ansformats,'calculated',(in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats) || in_array('set',$ansformats) || in_array('exactset',$ansformats)), 1);
 		$tip .= $longtip;
 		
 		if ($showtips==2) { //eqntips: work in progress
@@ -2202,7 +2224,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$settings[3] = 0;
 			if (strpos($settings[4],':')!==false) {
 				$settings[4] = explode(':',$settings[4]);
-				$sclinglbl = $settings[4][0];
+				if ($settings[4][0]{0}=='h') {
+					$sclinglbl = substr($settings[4][0],1).':0:1';
+				} else {
+					$sclinglbl = $settings[4][0];
+				}
 				$sclinggrid = $settings[4][1];
 			} else {
 				$sclinglbl = $settings[4];
@@ -2623,6 +2649,13 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			if (trim($givenans)==='' || trim($givenans)==='0') { return 1;} else { return 0;}
 		}
 		if ($givenans == null) {return 0;}
+		if ($answerformat=='set' || $answerformat=='exactset') {
+			$givenans = trim($givenans);
+			if ($givenans{0}!='{' || substr($givenans,-1)!='}') { return 0; }
+			$answer = str_replace(array('{','}'),'', $answer);
+			$givenans = str_replace(array('{','}'),'', $givenans);
+			$answerformat = str_replace('set','list',$answerformat);
+		}
 		if ($answerformat=='exactlist') {
 			$gaarr = explode(',',$givenans);
 			$gaarrcnt = count($gaarr);
@@ -2650,7 +2683,11 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				}
 			}
 		} else {
+			$givenans = preg_replace('/(\d)\s*,\s*(?=\d{3}\b)/','$1',$givenans);
+			$givenans = str_replace(',','99999999',$givenans); //force wrong ans on lingering commas
+
 			$gaarr = array(str_replace(array('$',',',' ','/','^','*'),'',$givenans));
+			
 			if (strpos($answer,'[')===false && strpos($answer,'(')===false) {
 				$anarr = array(str_replace(',','',$answer));
 			} else {
@@ -3342,10 +3379,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
-		$givenans = str_replace(array('∞','⁄ '), array('oo','/'), $givenans);
+		$givenans = normalizemathunicode($givenans);
 
 		$GLOBALS['partlastanswer'] = $_POST["tc$qn"].'$#$'.$givenans;
-		$_POST["tc$qn"] = str_replace(array('∞','⁄ '), array('oo','/'),$_POST["tc$qn"]);
+		$_POST["tc$qn"] = normalizemathunicode($_POST["tc$qn"]);
 		if ($answer==='') {
 			if (trim($_POST["tc$qn"])==='') { return 1;} else { return 0;}
 		}
@@ -3362,6 +3399,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		
 		if (in_array("scinot",$ansformats)) {
 			$answer = str_replace('xx','*',$answer);
+		}
+		if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
+			$answer = str_replace(array('{','}'),'', $answer);
+			$givenans = str_replace(array('{','}'),'', $givenans);
+			$_POST["tc$qn"] = str_replace(array('{','}'),'', $_POST["tc$qn"]);
+			$ansformats = explode(',', str_replace('set','list',$answerformat));
 		}
 		//pre-evaluate all instructor expressions - preg match all intervals.  Return array of or options
 		if (in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats) || in_array('list',$ansformats)) {
@@ -3910,9 +3953,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		$ansformats = explode(',',$answerformat);
+		
 		$givenans = normalizemathunicode($givenans);
 		$_POST["tc$qn"] = normalizemathunicode($_POST["tc$qn"]);
-
+				
 		if ($anstype == 'interval') {
 			$GLOBALS['partlastanswer'] = $givenans;
 			$givenans = str_replace('u', 'U', $givenans);
@@ -3973,7 +4017,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$correct = 0;
 		$ansar = explode(' or ',$answer);
 		$givenans = str_replace(' ','',$givenans);
-		
+					
 		foreach($ansar as $anans) {
 			$answer = str_replace(' ','',$anans);
 			
@@ -5716,32 +5760,37 @@ function checkanswerformat($tocheck,$ansformats) {
 function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false) {
 	$tip = '';
 	$shorttip = '';
+	if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
+		$listtype = "set";
+	} else {
+		$listtype = "list";
+	}
 	if (in_array('fraction',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4) or as a whole number (like 4 or -2)'), $eword);
-		$shorttip = $islist?_('Enter a list of fractions or whole numbers'):_('Enter a fraction or whole number');
+		$shorttip = $islist?sprintf(_('Enter a %s of fractions or whole numbers'), $listtype):_('Enter a fraction or whole number');
 	} else if (in_array('reducedfraction',$ansformats)) {
 		if (in_array('fracordec',$ansformats)) {
 			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6), as a whole number (like 4 or -2), or as an exact decimal (like 0.5 or 1.25)'), $eword);
-			$shorttip = $islist?_('Enter a list of reduced fractions, whole numbers, or exact decimals'):_('Enter a reduced fraction, whole number, or exact decimal');
+			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions, whole numbers, or exact decimals'), $listtype):_('Enter a reduced fraction, whole number, or exact decimal');
 		} else {
 			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6) or as a whole number (like 4 or -2)'), $eword);
-			$shorttip = $islist?_('Enter a list of reduced fractions or whole numbers'):_('Enter a reduced fraction or whole number');
+			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions or whole numbers'), $listtype):_('Enter a reduced fraction or whole number');
 		}
 	} else if (in_array('mixednumber',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a reduced mixed number or as a whole number.  Example: 2 1/2 = 2 &frac12;'), $eword);
-		$shorttip = $islist?_('Enter a list of mixed numbers or whole numbers'):_('Enter a mixed number or whole number');
+		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or whole numbers'), $listtype):_('Enter a mixed number or whole number');
 	} else if (in_array('mixednumberorimproper',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a reduced mixed number, reduced proper or improper fraction, or as a whole number.  Example: 2 1/2 = 2 &frac12;'), $eword);
-		$shorttip = $islist?_('Enter a list of mixed numbers or whole numbers'):_('Enter a reduced mixed number, proper or improper fraction, or whole number');
+		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or whole numbers'), $listtype):_('Enter a reduced mixed number, proper or improper fraction, or whole number');
 	} else if (in_array('fracordec',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4), a whole number (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
-		$shorttip = $islist?_('Enter a list of fractions or exact decimals'):_('Enter a fraction or exact decimal');
+		$shorttip = $islist?sprintf(_('Enter a %s of fractions or exact decimals'), $listtype):_('Enter a fraction or exact decimal');
 	} else if (in_array('scinot',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
-		$shorttip = $islist?_('Enter a list of numbers using scientific notation'):_('Enter a number using scientific notation');
+		$shorttip = $islist?sprintf(_('Enter a %s of numbers using scientific notation'), $listtype):_('Enter a number using scientific notation');
 	} else {
 		$tip .= sprintf(_('Enter %s as a number (like 5, -3, 2.2) or as a calculation (like 5/3, 2^3, 5+4)'), $eword);
-		$shorttip = $islist?_('Enter a list of mathematical expressions'):_('Enter a mathematical expression');
+		$shorttip = $islist?sprintf(_('Enter a %s of mathematical expressions'), $listtype):_('Enter a mathematical expression');
 	}
 	if ($calledfrom != 'calcmatrix') {
 		$tip .= "<br/>" . _('Enter DNE for Does Not Exist, oo for Infinity');

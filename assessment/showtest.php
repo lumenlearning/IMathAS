@@ -512,7 +512,7 @@
 		exit;
 	}
 	if (!isset($sessiondata['actas'])) { 
-		$query = "SELECT startdate,enddate FROM imas_exceptions WHERE userid='$userid' AND assessmentid='{$line['assessmentid']}'";
+		$query = "SELECT startdate,enddate,islatepass,exceptionpenalty FROM imas_exceptions WHERE userid='$userid' AND assessmentid='{$line['assessmentid']}'";
 		$result2 = mysql_query($query) or die("Query failed : " . mysql_error());
 		$row = mysql_fetch_row($result2);
 		if ($row!=null) {
@@ -529,6 +529,10 @@
 			} else { //in exception
 				if ($testsettings['enddate']<$now) { //exception is for past-due-date
 					$inexception = true;	
+					$exceptiontype = $row[2];
+					if ($row[3]!==null) {
+						$testsettings['exceptionpenalty'] = $row[3];
+					}
 				}
 			}
 			$exceptionduedate = $row[1];
@@ -625,6 +629,7 @@
 	$reviewatend = ($testsettings['testtype']=="EndReview");
 	$showhints = ($testsettings['showhints']==1);
 	$showtips = $testsettings['showtips'];
+	$useeqnhelper = $testsettings['eqnhelper'];
 	$regenonreattempt = (($testsettings['shuffle']&8)==8 && !$allowregen);
 	if ($regenonreattempt) {
 		$nocolormark = true;
@@ -881,8 +886,6 @@ if (!isset($_POST['embedpostback'])) {
 		$placeinhead .= '<style type="text/css"> div.question input.btn { margin-left: 10px; } </style>';
 		
 	} 
-
-	$useeqnhelper = $testsettings['eqnhelper'];
 	
 	//IP: eqntips 
 	if ($testsettings['showtips']==2) {
@@ -1169,18 +1172,32 @@ if (!isset($_POST['embedpostback'])) {
 		echo "<div class=right><span style=\"color:#f00\">Practice Assessment.</span>  <a href=\"showtest.php?regenall=fromscratch\">", _('Create new version.'), "</a></div>";
 	}
 	if (!$isreview && !$superdone) {
+		$duetimenote = '';
 		if ($exceptionduedate > 0) {
 			$timebeforedue = $exceptionduedate - time();
+			if ($timebeforedue>0 && ($testsettings['enddate'] - time()) < 0) { //past original due date
+				$duetimenote .= _('This assignment is past the original due date of ').tzdate('D m/d/Y g:i a',$testsettings['enddate']).'. ';
+				if ($exceptiontype==1) {
+					$duetimenote .= _('You have used a LatePass');
+				} else {
+					$duetimenote .= _('You were granted an extension');
+				}
+				$duetimenote .= '.<br/>';
+				if ($testsettings['exceptionpenalty']>0) {
+					$duetimenote .= sprintf(_('Problems answered correctly after the original due date are subject to a %d%% penalty'), $testsettings['exceptionpenalty']);
+					$duetimenote .= '.<br/>';
+				} 
+			}
 		} else {
 			$timebeforedue = $testsettings['enddate'] - time();
 		}
 		if ($timebeforedue < 0) {
-			$duetimenote = _('Past due');
+			$duetimenote .= _('Past due');
 		} else if ($timebeforedue < 24*3600) { //due within 24 hours
 			if ($timebeforedue < 300) {
-				$duetimenote = '<span style="color:#f00;">' . _('Due in under ');
+				$duetimenote .= '<span style="color:#f00;">' . _('Due in under ');
 			} else {
-				$duetimenote = '<span>' . _('Due in ');
+				$duetimenote .= '<span>' . _('Due in ');
 			}
 			if ($timebeforedue>3599) {
 				$duetimenote .= floor($timebeforedue/3600). " " . _('hours') . ", ";
@@ -1194,11 +1211,11 @@ if (!isset($_POST['embedpostback'])) {
 			}
 		} else {
 			if ($testsettings['enddate']==2000000000) {
-				$duetimenote = '';
+				$duetimenote .= '';
 			} else if ($exceptionduedate > 0) {
-				$duetimenote = _('Due') . " " . tzdate('D m/d/Y g:i a',$exceptionduedate);
+				$duetimenote .= _('Due') . " " . tzdate('D m/d/Y g:i a',$exceptionduedate);
 			} else {
-				$duetimenote = _('Due') . " " . tzdate('D m/d/Y g:i a',$testsettings['enddate']);
+				$duetimenote .= _('Due') . " " . tzdate('D m/d/Y g:i a',$testsettings['enddate']);
 			}
 		}
 	}
@@ -2342,6 +2359,13 @@ if (!isset($_POST['embedpostback'])) {
 					$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
 					
 				} else {
+					if (($showansafterlast && $qi[$questions[$i]]['showans']=='0') || $qi[$questions[$i]]['showans']=='F' || $qi[$questions[$i]]['showans']=='J') {
+						$showcorrectnow = true;
+					} else if ($showansduring && $qi[$questions[$i]]['showans']=='0' && $qi[$questions[$i]]['showans']=='0' && $testsettings['showans']==$attempts[$i]) {
+						$showcorrectnow = true;
+					} else {
+						$showcorrectnow = false;
+					}
 					if (!$sessiondata['istutorial']) {
 						echo '<div class="prequestion">';
 						echo "<p>", _('No attempts remain on this problem.'), "</p>";
@@ -2351,30 +2375,26 @@ if (!isset($_POST['embedpostback'])) {
 						if ($showeachscore) {
 							//TODO i18n
 							$msg =  "<p>This question, with your last answer";
-							if (($showansafterlast && $qi[$questions[$i]]['showans']=='0') || $qi[$questions[$i]]['showans']=='F' || $qi[$questions[$i]]['showans']=='J') {
+							if ($showcorrectnow) {
 								$msg .= " and correct answer";
-								$showcorrectnow = true;
-							} else if ($showansduring && $qi[$questions[$i]]['showans']=='0' && $qi[$questions[$i]]['showans']=='0' && $testsettings['showans']==$attempts[$i]) {
-								$msg .= " and correct answer";
-								$showcorrectnow = true;
-							} else {
-								$showcorrectnow = false;
 							}
 							if ($showcorrectnow) {
-								echo $msg . ', is displayed below</p>';
-								echo '</div>';
-								displayq($i,$qi[$questions[$i]]['questionsetid'],$seeds[$i],2,false,$attempts[$i],false,false,true);
+								echo $msg . ', is displayed below</p>';	
 							} else {
 								echo $msg . ', is displayed below</p>';
-								echo '</div>';
-								displayq($i,$qi[$questions[$i]]['questionsetid'],$seeds[$i],0,false,$attempts[$i],false,false,true);
 							}
-							
+						} 
+						echo '</div>';
+					}
+					if ($showeachscore) {
+						if ($showcorrectnow) {
+							displayq($i,$qi[$questions[$i]]['questionsetid'],$seeds[$i],2,false,$attempts[$i],false,false,true);
 						} else {
-							echo '</div>';
-							if ($testsettings['showans']!='N') {
-								displayq($i,$qi[$questions[$i]]['questionsetid'],$seeds[$i],0,false,$attempts[$i],false,false,true);
-							}
+							displayq($i,$qi[$questions[$i]]['questionsetid'],$seeds[$i],0,false,$attempts[$i],false,false,true);
+						}
+					} else {
+						if ($testsettings['showans']!='N') {
+							displayq($i,$qi[$questions[$i]]['questionsetid'],$seeds[$i],0,false,$attempts[$i],false,false,true);
 						}
 					}
 					
@@ -2637,6 +2657,11 @@ if (!isset($_POST['embedpostback'])) {
 				} catch (e) {}
 			}
 		}</script>';
+		
+		if (!$isdiag && $testsettings['noprint']==0) {
+			echo "<p style=\"margin-top:2.5em\"><a href=\"#\" onclick=\"window.open('$imasroot/assessment/printtest.php','printver','width=400,height=300,toolbar=1,menubar=1,scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width-420));return false;\">", _('Print Version'), "</a></p> ";
+		}
+		
 		echo '</div>';	
 	}
 	

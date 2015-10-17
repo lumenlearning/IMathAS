@@ -1913,7 +1913,7 @@ function definefunc($func,$varlist) {
 	return array($func,$varlist);
 }
 
-function getstuans($v,$q,$i) {
+function getstuans($v,$q,$i=0) {
 	if (is_array($v[$q])) {
 		return $v[$q][$i];
 	} else {
@@ -2136,6 +2136,7 @@ function makenumberrequiretimes($arr) {
 function evalbasic($str) {
 	$str = str_replace(',','',$str);
 	$str = str_replace('pi','3.141592653',$str);
+	$str = clean($str);
 	if (is_numeric($str)) {
 		return $str;
 	} else if (preg_match('/[^\d+\-\/\*\.]/',$str)) {
