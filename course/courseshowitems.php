@@ -585,16 +585,19 @@ function enditem($canedit) {
 			   } else {
 				   $reviewdate = formatdate($line['reviewdate']);
 			   }
-			   $nothidden = true;
-			   if ($line['reqscore']>0 && $line['reqscoreaid']>0 && !$viewall && $line['enddate']>$now
+			   $nothidden = true;  $showgreyedout = false;
+			   if (abs($line['reqscore'])>0 && $line['reqscoreaid']>0 && !$viewall && $line['enddate']>$now
 			   	   && (!isset($exceptions[$items[$i]]) || $exceptions[$items[$i]][3]==0)) {
+			   	   if ($line['reqscore']<0) {
+			   	   	   $showgreyedout = true;
+			   	   }
 				   $query = "SELECT bestscores FROM imas_assessment_sessions WHERE assessmentid='{$line['reqscoreaid']}' AND userid='$userid'";
 				   $result = mysql_query($query) or die("Query failed : " . mysql_error());
 				   if (mysql_num_rows($result)==0) {
 					   $nothidden = false;
 				   } else {
 					   $scores = explode(';',mysql_result($result,0,0));
-					   if (round(getpts($scores[0]),1)+.02<$line['reqscore']) {
+					   if (round(getpts($scores[0]),1)+.02<abs($line['reqscore'])) {
 					   	   $nothidden = false;
 					   }
 				   }
@@ -730,6 +733,30 @@ function enditem($canedit) {
 				   }
 				   echo filter("<br/><i>" . _('This assessment is in review mode - no scores will be saved') . "</i></div><div class=itemsum>{$line['summary']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
+			   } else if ($line['avail']==1 && $line['startdate']<$now && $line['enddate']>$now && $showgreyedout) {  //greyedout view for conditional items
+			   	   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
+				   if (($hideicons&1)==0) {
+					   if ($graphicalicons) {
+						   echo "<img alt=\"assessment\" class=\"floatleft faded\" src=\"$imasroot/img/{$itemicons['assess']}\" />";
+					   } else {
+						   echo "<div class=icon style=\"background-color: #ccc;\">?</div>";
+					   }
+				   }
+				   if (substr($line['deffeedback'],0,8)=='Practice') {
+					   $endname = _('Available until');
+				   } else {
+					   $endname = _('Due');
+				   }
+				   
+				   echo "<div class=\"title grey\"><b><i>{$line['name']}</i></b>";
+				   echo '<br/><span class="small">'._('The requirements for beginning this item have not been met yet').'</span>';
+
+				   if ($line['enddate']!=2000000000) {
+					   echo "<br/> $endname $enddate \n";
+				   }
+				   echo filter("</div><div class=\"itemsum grey\">{$line['summary']}</div>\n");
+				   enditem($canedit); //echo "</div>\n";
+			   	   
 			   } else if ($viewall) { //not avail to stu
 				   if ($line['avail']==0) {
 					   $show = _('Hidden');
@@ -778,7 +805,7 @@ function enditem($canedit) {
 			   $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 			   $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			
-			   $isvideo = (preg_match_all('/youtu/',$line['text'],$matches)>1) && ($line['isplaylist']>0);
+			   $isvideo = ($line['isplaylist']>0) && (preg_match_all('/youtu/',$line['text'],$matches)>1 || preg_match_all('/google\.com\/file/',$line['text'],$matches)>1);
 			   if ($isvideo) {
 			   	   $json = array();
 			   	   preg_match_all('/<a[^>]*(youtube\.com|youtu\.be)(.*?)"[^>]*?>(.*?)<\/a>/',$line['text'],$matches, PREG_SET_ORDER);
@@ -804,6 +831,13 @@ function enditem($canedit) {
 			   	   	}
 			   	   	$json[] = '{"name":"'.str_replace('"','\\"',$m[3]).'", "vidid":"'.str_replace('"','\\"',$vidid).'", "start":'.$start.', "end":'.$end.'}';
 			   	   	$line['text'] = str_replace($m[0],'<a href="#" onclick="playliststart('.$typeid.','.$k.');return false;">'.$m[3].'</a>',$line['text']);
+			   	   }
+			   	   preg_match_all('/<a[^>]*google\.com\/file\/d\/(.*?)\/view[^"]*?"[^>]*?>(.*?)<\/a>/',$line['text'],$matches, PREG_SET_ORDER);
+			   	   foreach ($matches as $k=>$m) {
+			   	   	$vidid = $m[1];
+			   	   	
+			   	   	$json[] = '{"name":"'.str_replace('"','\\"',$m[2]).'", "vidid":"'.str_replace('"','\\"',$vidid).'", "start":0, "end":0, "isGdrive":true}';
+			   	   	$line['text'] = str_replace($m[0],'<a href="#" onclick="playliststart('.$typeid.','.$k.');return false;">'.$m[2].'</a>',$line['text']);
 			   	   }
 			   	   
 			   	   $playlist = '<div class="playlistbar" id="playlistbar'.$typeid.'"><div class="vidtracksA"></div> <span> Playlist</span> ';

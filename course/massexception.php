@@ -17,17 +17,18 @@
 		$startdate = parsedatetime($_POST['sdate'],$_POST['stime']);
 		$enddate = parsedatetime($_POST['edate'],$_POST['etime']);
 		$waivereqscore = (isset($_POST['waivereqscore']))?1:0;
+		$epenalty = (isset($_POST['overridepenalty']))?intval($_POST['newpenalty']):'NULL';
 		
 		foreach(explode(',',$_POST['tolist']) as $stu) {
 			foreach($_POST['addexc'] as $aid) {
 				$query = "SELECT id FROM imas_exceptions WHERE userid='$stu' AND assessmentid='$aid'";
 				$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
 				if (mysql_num_rows($result)==0) {
-					$query = "INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,waivereqscore) VALUES ";
-					$query .= "('$stu','$aid',$startdate,$enddate,$waivereqscore)";
+					$query = "INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,waivereqscore,exceptionpenalty) VALUES ";
+					$query .= "('$stu','$aid',$startdate,$enddate,$waivereqscore,$epenalty)";
 				} else {
 					$eid = mysql_result($result,0,0);
-					$query = "UPDATE imas_exceptions SET startdate=$startdate,enddate=$enddate,islatepass=0,waivereqscore=$waivereqscore WHERE id=$eid";
+					$query = "UPDATE imas_exceptions SET startdate=$startdate,enddate=$enddate,islatepass=0,waivereqscore=$waivereqscore,exceptionpenalty=$epenalty WHERE id=$eid";
 				}
 				mysql_query($query) or die("Query failed :$query " . mysql_error());	
 				if (isset($_POST['forceregen'])) {
@@ -118,13 +119,13 @@
 	
 	echo '<div id="headermassexception" class="pagetitle"><h2>Manage Exceptions</h2></div>';
 	if ($calledfrom=='lu') {
-		echo "<form method=post action=\"listusers.php?cid=$cid&massexception=1\">\n";
+		echo "<form method=post action=\"listusers.php?cid=$cid&massexception=1\" id=\"qform\">\n";
 	} else if ($calledfrom=='gb') {
 		echo "<form method=post action=\"gradebook.php?cid=$cid&massexception=1";
 		if (isset($_GET['uid'])) {
 			echo "&uid={$_GET['uid']}";
 		}
-		echo "\">\n";
+		echo "\" id=\"qform\">\n";
 	}
 	
 	if (isset($_POST['tolist'])) {
@@ -177,7 +178,9 @@
 	$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
 	if (mysql_num_rows($result)>0) {
 		echo "<h4>Existing Exceptions</h4>";
-		echo "Select exceptions to clear";
+		echo "Select exceptions to clear. ";
+		echo 'Check: <a href="#" onclick="return chkAllNone(\'qform\',\'clears[]\',true)">All</a> <a href="#" onclick="return chkAllNone(\'qform\',\'clears[]\',false)">None</a>. ';
+	
 		echo '<ul>';
 		if ($isall) {
 			$lasta = 0;
@@ -271,8 +274,10 @@
 	echo "<a href=\"#\" onClick=\"displayDatePicker('edate', this); return false\"><img src=\"../img/cal.gif\" alt=\"Calendar\"/></A>\n";
 	echo "at <input type=text size=10 name=etime value=\"$etime\"></span><BR class=form>\n";
 	
-	echo "Set Exception for assessments:";
-	echo "<ul>";
+	echo "Set Exception for assessments: ";
+	echo 'Check: <a href="#" onclick="return chkAllNone(\'qform\',\'addexc[]\',true)">All</a> <a href="#" onclick="return chkAllNone(\'qform\',\'addexc[]\',false)">None</a>. ';
+	
+	echo '<ul class="nomark">';
 	$query = "SELECT id,name FROM imas_assessments WHERE courseid='$cid'";
 	$query .= ' ORDER BY name';
 	$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
@@ -296,7 +301,7 @@
 	echo '<p><input type="checkbox" name="eatlatepass"/> Deduct <input type="input" name="latepassn" size="1" value="1"/> LatePass(es) from each student. '.$lpmsg.'</p>';
 	
 	echo '<p><input type="checkbox" name="waivereqscore"/> Waive "show based on an another assessment" requirements, if applicable.</p>';
-	
+	echo '<p><input type="checkbox" name="overridepenalty"/> Override default exception/LatePass penalty.  Deduct <input type="input" name="newpenalty" size="2" value="0"/>% for questions done while in exception.</p>';
 	echo '<p><input type="checkbox" name="sendmsg"/> Send message to these students?</p>';
 	
 	if (!isset($_GET['uid']) && count($_POST['checked'])>1) {

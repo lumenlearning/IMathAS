@@ -17,9 +17,12 @@
 	if (strpos($_SERVER['HTTP_REFERER'],'treereader')!==false) {
 		$shownav = false;
 		$flexwidth = true;
+		$nologo = true;
 	} else {
 		$shownav = true;
 	}
+	$isteacher = isset($teacherid);
+	$istutor = isset($tutorid);
 	$query = "SELECT text,title,target FROM imas_linkedtext WHERE id='{$_GET['id']}'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$text = mysql_result($result, 0,0);
@@ -97,7 +100,7 @@
 	}
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;'.$pad.'">';
 	$navbuttons = '';
-	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || $coursetheme='otbsreader.css') {
+	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || $coursetheme=='otbsreader.css') {
 		$now = time();
 		$query = "SELECT il.id,il.title,il.avail,il.startdate,il.enddate,ii.id AS itemid 
 			  FROM imas_linkedtext as il JOIN imas_items AS ii ON il.id=ii.typeid AND ii.itemtype='LinkedText'
@@ -164,7 +167,11 @@
 		$navbuttons .= '<div class="clear"></div>';
 	}
 	if ($navbuttons != '') {
-		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1', $text);
+		if (strpos($text, 'smallattr')!==false) {
+			$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1', $text);
+		} else {
+			$text .= '<hr/>'.$navbuttons;
+		}
 	}
 	echo filter($text);
 	echo '</div>';

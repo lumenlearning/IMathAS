@@ -20,7 +20,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 } else { // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 	$cid = $_GET['cid'];
 	
-	if (isset($teacherid) && isset($sessiondata['sessiontestid']) && !isset($sessiondata['actas'])) {
+	if (isset($teacherid) && isset($sessiondata['sessiontestid']) && !isset($sessiondata['actas']) && $sessiondata['courseid']==$cid) {
 		//clean up coming out of an assessment
 		require_once("../includes/filehandler.php");
 		//deleteasidfilesbyquery(array('id'=>$sessiondata['sessiontestid']),1);
@@ -379,7 +379,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	}
 }
   
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=011914\"></script>";
+$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=092815\"></script>";
 if (isset($tutorid) && isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
 	$placeinhead .= '<script type="text/javascript">$(function(){$(".instrdates").hide();});</script>';
 }

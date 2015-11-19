@@ -3,7 +3,7 @@
 //(c) 2006 David Lippman
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec");
 array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates");
 function mergearrays($a,$b) {
 	if (!is_array($a)) {
@@ -319,7 +319,7 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 				$x = $xmin + $dx*$i + (($i<$stopat/2)?1E-10:-1E-10) - ($domainlimited?0:5*abs($xmax-$xmin)/$settings[6]);
 				if (in_array($x,$avoid)) { continue;}
 				//echo $func.'<br/>';
-				$y = round($evalfunc($x),$xrnd);//round(eval("return ($func);"),3);
+				$y = round($evalfunc($x),$yrnd);//round(eval("return ($func);"),3);
 				$x = round($x,$xrnd);
 				$alt .= "<tr><td>".($xmin + $dx*$i)."</td><td>$y</td></tr>";
 			}
@@ -1530,7 +1530,11 @@ function makescinot($n,$d=8,$f="x") {
 	$isneg = "";
 	if ($n<0) { $isneg = "-"; $n = abs($n);}
 	$exp = floor(log10($n));
-	$mant = number_format($n/pow(10,$exp),$d);
+	if ($d==-1) {
+		$mant = round($n/pow(10,$exp),8);
+	} else {
+		$mant = number_format($n/pow(10,$exp),$d);
+	}
 	if ($f=="*") {
 		return "$isneg $mant * 10^($exp)";
 	} else if ($f=="E") {
@@ -1909,7 +1913,7 @@ function definefunc($func,$varlist) {
 	return array($func,$varlist);
 }
 
-function getstuans($v,$q,$i) {
+function getstuans($v,$q,$i=0) {
 	if (is_array($v[$q])) {
 		return $v[$q][$i];
 	} else {
@@ -2008,7 +2012,7 @@ function textonimage() {
 	$args = func_get_args();
 	$img = array_shift($args);
 	$img = preg_replace('/^.*src="(.*?)".*$/',"$1",$img);
-	$out = '<div style="position: relative;">';
+	$out = '<div style="position: relative;" class="txtimgwrap">';
 	$out .= '<img src="'.$img.'" style="position: relative; top: 0px; left: 0px;" />';
 	while (count($args)>2) {
 		$text = array_shift($args);
@@ -2132,6 +2136,7 @@ function makenumberrequiretimes($arr) {
 function evalbasic($str) {
 	$str = str_replace(',','',$str);
 	$str = str_replace('pi','3.141592653',$str);
+	$str = clean($str);
 	if (is_numeric($str)) {
 		return $str;
 	} else if (preg_match('/[^\d+\-\/\*\.]/',$str)) {
@@ -2925,6 +2930,24 @@ function getscorenonzero() {
 	}
 	return $out;
 }
+
+function getiscorrect() {
+	global $rawscores;
+	$out = array();
+	for ($i=0;$i<count($rawscores);$i++) {
+		if (strpos($rawscores[$i],'~')===false) {
+			$out[$i+1] = ($rawscores[$i]<0)?-1:(($rawscores[$i]==1)?1:0);
+		} else {
+			$sp = explode('~',$rawscores[$i]);
+			$out[$i+1] = array();
+			for ($j=0;$j<count($sp);$j++) {
+				$out[$i+1][$j] = ($sp[$j]==1)?1:0;
+			}
+		}
+	}
+	return $out;
+}
+
 function ABarray($s,$n) {
 	$out = array();
 	for ($i=$s;$i<$s+$n;$i++) {

@@ -4,10 +4,10 @@
 function normalizemathunicode(str) {
 	str = str.replace(/\u2013|\u2014|\u2015|\u2212/g, "-");
 	str = str.replace(/\u2044|\u2215/g, "/");
-	str = str.replace("∞","oo").replace("≤","<=").replace("≥",">=");
-	str = str.replace("±","+-").replace("÷","/");
-	str = str.replace("√","sqrt").replace("∛","root(3)");
-	str = str.replace("²","^2").replace("³","^3");
+	str = str.replace(/∞/g,"oo").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/∪/g,"U");
+	str = str.replace(/±/g,"+-").replace(/÷/g,"/").replace(/·|✕|×|⋅/g,"*");
+	str = str.replace(/√/g,"sqrt").replace(/∛/g,"root(3)");
+	str = str.replace(/²/g,"^2").replace(/³/g,"^3");
 	return str;
 }
 
@@ -16,16 +16,18 @@ function calculate(inputId,outputId,format) {
   var fullstr = document.getElementById(inputId).value;
   fullstr = normalizemathunicode(fullstr);
   fullstr = fullstr.replace(/=/,'');
-  fullstr = fullstr.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
+  
   if (format.indexOf('list')!=-1) {
 	  var strarr = fullstr.split(/,/);
+  } else if (format.indexOf('set')!=-1) {
+  	  var strarr = fullstr.replace(/[\{\}]/g,'').split(/,/);
   } else {
 	  var strarr = new Array();
 	  strarr[0] = fullstr;
   }
   for (var sc=0;sc<strarr.length;sc++) {
 	  str = strarr[sc];
-	  //str = str.replace(/(\d)\s*,(?=\s*\d{3}\b)/g,"$1");
+	  str = str.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
 	  var err = "";
 	  if (str.match(/DNE/i)) {
 		  str = str.toUpperCase();
@@ -34,11 +36,12 @@ function calculate(inputId,outputId,format) {
 	  } else {
 		  err += singlevalsyntaxcheck(str,format);
 		  if (str.match(/,/)) {
-		  	  err += _("Invalid use of a comma - it will be ignored and this expression may not evaluate as intended.");
-		  	  str = str.replace(/,/g,'');
+		  	  err += _("Invalid use of a comma.");
 		  }
 		  if (format.indexOf('mixednumber')!=-1) {
 		  	  str = str.replace(/_/,' ');
+		  } else if (format.indexOf('scinot')!=-1) {
+			  str = str.replace(/(x|X|\u00D7)/,"xx");
 		  } else {
 		  	  str = str.replace(/([0-9])\s+([0-9])/g,"$1*$2");
 		  	  str = str.replace(/\s/g,'');
@@ -46,11 +49,12 @@ function calculate(inputId,outputId,format) {
 		  err += syntaxcheckexpr(str,format);
 		  try {
 			  var evalstr = str;
+			  evalstr = evalstr.replace(',','*NaN*'); //force eval error on lingering commas
 			  if (format.indexOf('allowmixed')!=-1 || format.indexOf('mixednumber')!=-1) {
 				  evalstr = evalstr.replace(/(\d+)\s+(\d+\s*\/\s*\d+)/,"($1+$2)");
 			  }
 			  if (format.indexOf('scinot')!=-1) {
-				   evalstr = evalstr.replace("xx","*");
+			  	  evalstr = evalstr.replace("xx","*");
 			  }
 			  with (Math) var res = eval(mathjs(evalstr));
 		  } catch(e) {
@@ -70,6 +74,13 @@ function calculate(inputId,outputId,format) {
 	  strarr[sc] = str+" ";
   }
   fullstr = strarr.join(', ');
+  if (format.indexOf('set')!=-1) {
+  	  if (!document.getElementById(inputId).value.match(/^\s*{.*?}\s*$/)) {
+  	  	  fullstr += ("syntax error: this answer must be in set notation, a list wrapped in braces like {1,2,3}");
+  	  } else {
+  	  	  fullstr = '{'+fullstr+'}';
+  	  }
+  }
   var outnode = document.getElementById(outputId);
   var n = outnode.childNodes.length;
   for (var i=0; i<n; i++)
@@ -148,7 +159,7 @@ function intcalculate(inputId,outputId,format) {
 		}
 		strarr.push(fullstr.substring(lastpos));
 	  } else {
-	  	  var strarr = fullstr.split(/U/);
+	  	  var strarr = fullstr.split(/U/i);
 	  }
 	  var isok = true; var fullerr="";
 	  for (i=0; i<strarr.length; i++) {
@@ -599,7 +610,9 @@ function AMpreview(inputId,outputId) {
    var dispstr = str;
    
   for (var i=0; i<vars.length; i++) {
-  	  if (vars[i].charCodeAt(0)>96) { //lowercase
+  	  if (vars[i] == "varE") {
+		  str = str.replace("E","varE");	
+	  } else if (vars[i].charCodeAt(0)>96) { //lowercase
 		  if (arraysearch(vars[i].toUpperCase(),vars)==-1) {
 			//vars[i] = vars[i].toLowerCase();
 			str = str.replace(new RegExp(vars[i],"gi"),vars[i]);	  
@@ -624,7 +637,7 @@ function AMpreview(inputId,outputId) {
 				break;
 			  }
 		  }
-		  if (!isgreek && !vars[i].match(/^(\w)_\d+$/)) {
+		  if (!isgreek && !vars[i].match(/^(\w)_\d+$/) && vars[i]!="varE") {
 			  varstoquote.push(vars[i]);
 		  }
 	  }
@@ -634,6 +647,7 @@ function AMpreview(inputId,outputId) {
 	  var reg = new RegExp("("+vltq+")","g");
 	  dispstr = str.replace(reg,"\"$1\"");
   }
+  dispstr = dispstr.replace("varE","E");
   
   var outnode = document.getElementById(outputId);
   var n = outnode.childNodes.length;
@@ -649,11 +663,14 @@ function AMpreview(inputId,outputId) {
   
   
   ptlist = pts[qn].split(",");
+  var err = '';
   var tstpt = 0; var res = NaN; var isnoteqn = false;
   if (iseqn[qn]==1) {
   	if (!str.match(/=/)) {isnoteqn = true;}
   	else if (str.match(/=/g).length>1) {isnoteqn = true;}
 	str = str.replace(/(.*)=(.*)/,"$1-($2)");
+  } else {
+  	if (!str.match(/=/)) {isnoteqn = true;}  
   }
   if (fl!='') {
 	  reg = new RegExp("("+fl+")\\(","g");
@@ -668,7 +685,7 @@ function AMpreview(inputId,outputId) {
 		totest += "var " + vars[j] + "="+testvals[j]+";"; 
 	  }
 	  totest += totesteqn;
-	  var err=_("syntax ok");
+	  err =_("syntax ok");
 	  try {
 	    with (Math) var res = scopedeval(totest);
 	  } catch(e) {
@@ -690,8 +707,8 @@ function AMpreview(inputId,outputId) {
   	  	  err += ". "+formaterr;
   	  }
   }
-
   if (iseqn[qn]==1 && isnoteqn) { err = _("syntax error: this is not an equation");}
+  else if ((typeof iseqn[qn] === 'undefined') && !isnoteqn) { err = _("syntax error: you gave an equation, not an expression");}
   outnode.appendChild(document.createTextNode(" " + err));
 
 }
@@ -825,7 +842,7 @@ function doonsubmit(form,type2,skipconfirm) {
 	
 	for (var qn in intcalctoproc) { //i=0; i<intcalctoproc.length; i++) {
 		qn = parseInt(qn);
-		
+		if (document.getElementById("tc"+qn)==null) {continue;}
 		fullstr = document.getElementById("tc"+qn).value;
 		fullstr = fullstr.replace(/\s+/g,'');
 		fullstr = normalizemathunicode(fullstr);
@@ -848,7 +865,7 @@ function doonsubmit(form,type2,skipconfirm) {
 				}
 				strarr.push(fullstr.substring(lastpos));
 			  } else {
-				  var strarr = fullstr.split(/U/);
+				  var strarr = fullstr.split(/U/i);
 			  }
 			  for (k=0; k<strarr.length; k++) {
 				  str = strarr[k];
@@ -884,19 +901,28 @@ function doonsubmit(form,type2,skipconfirm) {
 	}
 	for (var qn in calctoproc) { //i=0; i<calctoproc.length; i++) {
 		qn = parseInt(qn);
-		
+		if (document.getElementById("tc"+qn)==null) {continue;}
 		str = document.getElementById("tc"+qn).value;
 		str = normalizemathunicode(str);
+		str = str.replace(/=/,'');
+		
 		if (calcformat[qn].indexOf('list')!=-1) {
 			strarr = str.split(/,/);
+		} else if (calcformat[qn].indexOf('set')!=-1) {
+			if (!str.match(/^\s*{.*?}\s*$/)) {
+				continue;
+			} else {
+				strarr = str.replace(/^\s*{(.*?)}\s*$/,'$1').split(/,/);
+			}
 		} else {
 			var strarr = new Array();
 			strarr[0] = str;
 		}
 		for (var sc=0;sc<strarr.length;sc++) {
 			str = strarr[sc];
-			
-			str = str.replace(/,/g,"");
+			str = str.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
+			str = str.replace(',','*NaN*'); //force eval error
+			//str = str.replace(/,/g,"");
 			if (calcformat[qn].indexOf('scinot')!=-1) {
 				str = str.replace(/(x|X|\u00D7)/,"*");
 			}
@@ -924,37 +950,46 @@ function doonsubmit(form,type2,skipconfirm) {
 	for (var qn in matcalctoproc) {//i=0; i<matcalctoproc.length; i++) {
 		qn = parseInt(qn);
 		if (matsize[qn]!= null) {
+			if (document.getElementById("qn"+qn+"-0")==null) {continue;}
 			msize = matsize[qn].split(",");
 			str = matrixcalc("qn"+qn,null,msize[0],msize[1]);
 		} else {
+			if (document.getElementById("tc"+qn)==null) {continue;}
 			str = matrixcalc("tc"+qn,null);
 		}
 		document.getElementById("qn" +  qn).value = str;
 	}
 	for (var qn in ntupletoproc) {//i=0; i<ntupletoproc.length; i++) {
 		qn = parseInt(qn);
+		if (document.getElementById("tc"+qn)==null) {continue;}
 		str = ntuplecalc("tc"+qn,null,'');
 		document.getElementById("qn" + qn).value = str;
 	}
 	for (var qn in complextoproc) { //i=0; i<complextoproc.length; i++) {
 		qn = parseInt(qn);
+		if (document.getElementById("tc"+qn)==null) {continue;}
 		str = complexcalc("tc"+qn,null,'');
 		document.getElementById("qn" + qn).value = str;
 	}
 	for (var qn in functoproc) { //fcnt=0; fcnt<functoproc.length; fcnt++) {
 		qn = parseInt(qn);
+		if (document.getElementById("tc"+qn)==null) {continue;}
 		str = document.getElementById("tc"+qn).value;
 		str = str.replace(/,/g,"");
 		str = normalizemathunicode(str);
 		if (iseqn[qn]==1) {
 			str = str.replace(/(.*)=(.*)/,"$1-($2)");
+		} else {
+			if (str.match("=")) {continue;}	
 		}
 		fl = flist[qn];
 		varlist = vlist[qn];
 		
 		vars = varlist.split("|");
 		for (var j=0; j<vars.length; j++) {
-			  if (vars[j].charCodeAt(0)>96) { //lowercase
+			  if (vars[j] == "varE") {
+			  	  str = str.replace("E","varE");	
+			  } else if (vars[j].charCodeAt(0)>96) { //lowercase
 				  if (arraysearch(vars[j].toUpperCase(),vars)==-1) {
 					 // vars[j] = vars[j].toLowerCase();
 					  str = str.replace(new RegExp(vars[j],"gi"),vars[j]);	  
@@ -975,7 +1010,6 @@ function doonsubmit(form,type2,skipconfirm) {
 		vars = varlist.split("|");
 		var nh = document.getElementById("qn" + qn);
 		nh.value = mathjs(str,varlist);
-
 		ptlist = pts[qn].split(",");
 		vals= new Array();
 		for (var fj=0; fj<ptlist.length;fj++) { //for each set of inputs

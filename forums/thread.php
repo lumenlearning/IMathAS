@@ -78,9 +78,9 @@
 		}
 			exit;	
 	}
-	$query = "SELECT name,postby,settings,groupsetid,sortby,taglist,enddate,avail FROM imas_forums WHERE id='$forumid'";
+	$query = "SELECT name,postby,settings,groupsetid,sortby,taglist,enddate,avail,postinstr,replyinstr FROM imas_forums WHERE id='$forumid'";
 	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	list($forumname, $postby, $forumsettings, $groupsetid, $sortby, $taglist, $enddate, $avail) = mysql_fetch_row($result);
+	list($forumname, $postby, $forumsettings, $groupsetid, $sortby, $taglist, $enddate, $avail, $postinstr,$replyinstr) = mysql_fetch_row($result);
 	
 	if (isset($studentid) && ($avail==0 || ($avail==1 && time()>$enddate))) {
 		require("../header.php");
@@ -91,6 +91,8 @@
 
 	$allowmod = (($forumsettings&2)==2);
 	$allowdel = ((($forumsettings&4)==4) || $isteacher);
+	$postbeforeview = (($forumsettings&16)==16);
+	$canviewall = (isset($teacherid) || isset($tutorid));
 	$dofilter = false;
 	$now = time();
 	$grpqs = '';
@@ -173,6 +175,17 @@
 	
 		echo "<h2>Forum Search Results</h2>";
 		
+		if (!isset($_GET['allforums'])) {
+			$query = "SELECT id FROM imas_forum_posts WHERE forumid='$forumid' AND parent=0 AND userid='$userid' LIMIT 1";
+			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			$oktoshow = (mysql_num_rows($result)>0);
+			if (!$oktoshow) {
+				echo '<p>'._('This search is blocked. In this forum, you must post your own thread before you can read those posted by others.').'</p>';
+				require("../footer.php");
+				exit;
+			}
+		}
+		
 		$safesearch = $_GET['search'];
 		$safesearch = str_replace(' and ', ' ',$safesearch);
 		$searchterms = explode(" ",$safesearch);
@@ -183,7 +196,7 @@
 			$query = "SELECT imas_forums.id,imas_forum_posts.threadid,imas_forum_posts.subject,imas_forum_posts.message,imas_users.FirstName,imas_users.LastName,imas_forum_posts.postdate,imas_forums.name,imas_forum_posts.isanon FROM imas_forum_posts,imas_forums,imas_users ";
 			$query .= "WHERE imas_forum_posts.forumid=imas_forums.id ";
 			if (!$isteacher) {
-				$query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now AND imas_forums.enddate>$now)) ";
+				$query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now AND imas_forums.enddate>$now)) AND (imas_forums.settings&16)=0 ";
 			}
 			$query .= "AND imas_users.id=imas_forum_posts.userid AND imas_forums.courseid='$cid' AND ($searchlikes OR $searchlikes2 OR $searchlikes3)";
 		} else {
@@ -255,7 +268,29 @@
 	
 	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=$cid\">$coursename</a> &gt; Forum Topics</div>\n";
 	echo '<div id="headerthread" class="pagetitle"><h2>Forum: '.$forumname.'</h2></div>';
-
+	
+	if ($postinstr != '' || $replyinstr != '') {
+		echo '<a href="#" onclick="$(\'#postreplyinstr\').show();$(this).remove();return false;">';
+		 if ($postinstr != '' && $replyinstr != '') {
+		 	 echo _('View Post and Reply Instructions');
+		 } else if ($postinstr != '') {
+		 	 echo _('View Post Instructions');
+		 } else if ($replyinstr != '') {
+		 	 echo _('View Reply Instructions');
+		 } 
+		echo '</a>';
+		echo '<div id="postreplyinstr" style="display:none;">';
+		if ($postinstr != '') {
+			echo '<h4>'._('Posting Instructions').'</h4>';
+			echo $postinstr;
+		}
+		if ($replyinstr != '') {
+			echo '<h4>'._('Reply Instructions').'</h4>';
+			echo $replyinstr;
+		}
+		echo '</div><br/>';
+	}
+	
 	$query = "SELECT threadid,COUNT(id) AS postcount,MAX(postdate) AS maxdate FROM imas_forum_posts ";
 	$query .= "WHERE forumid='$forumid' ";
 	if ($dofilter) {

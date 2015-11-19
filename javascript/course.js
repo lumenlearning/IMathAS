@@ -187,12 +187,17 @@ function showcalcontentsid(elid) {
 					
 					if (caleventsarr[elid].data[i].link=='') {
 						html += '<a onclick="recclick(\'linkedviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].id+'\');" ';
+						if (caleventsarr[elid].data[i].target==1) { html += 'target="_blank" ';}
 						html += 'href="../course/showlinkedtext.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">';
 					} else {
 						html += '<a onclick="recclick(\'linkedviacal\','+caleventsarr[elid].data[i].id+',\''+caleventsarr[elid].data[i].link+'\');" ';
+						if (caleventsarr[elid].data[i].target==1) { html += 'target="_blank" ';}
 						html += 'href="'+caleventsarr[elid].data[i].link+'">';
 					}
-					html += caleventsarr[elid].data[i].name + '</a>';
+					html += caleventsarr[elid].data[i].name;
+					if (caleventsarr[elid].data[i].target==1) {html += ' <img src="'+imasroot+'/img/extlink.png"/>';}
+					html += '</a>';
+					
 				} else {
 					html += caleventsarr[elid].data[i].name;
 				}
@@ -290,7 +295,11 @@ function playliststart(id,vidk,el) {
 	var wrap = $('#playlistwrap'+id);
 	var bar = $('#playlistbar'+id);
 	var iframe = wrap.find('iframe');
-	var url = location.protocol+'//www.youtube.com/embed/'+playlist[id][vidk].vidid;
+	if (playlist[id][vidk].isGdrive) {
+		var url = "https://drive.google.com/file/d/"+playlist[id][vidk].vidid+"/preview";
+	} else {
+		var url = location.protocol+'//www.youtube.com/embed/'+playlist[id][vidk].vidid;
+	}
 	if (playlist[id][vidk].start>0) {
 		url += '?start='+playlist[id][vidk].start+'&';
 		if (playlist[id][vidk].end>0) {
@@ -333,8 +342,11 @@ function playliststart(id,vidk,el) {
 	} else {
 		wrap.find('iframe').attr('src',url);	
 	}
-	
-	bar.find('.playlisttitle').html(playlist[id][vidk].name+' <a target="_blank" href="http://www.youtube.com/watch?v='+playlist[id][vidk].vidid+'"><img src="'+imasroot+'/img/extlink.png"/></a>');
+	if (playlist[id][vidk].isGdrive) {
+		bar.find('.playlisttitle').html(playlist[id][vidk].name+' <a target="_blank" href="https://drive.google.com/file/d/'+playlist[id][vidk].vidid+'/view"><img src="'+imasroot+'/img/extlink.png"/></a>');
+	} else {
+		bar.find('.playlisttitle').html(playlist[id][vidk].name+' <a target="_blank" href="http://www.youtube.com/watch?v='+playlist[id][vidk].vidid+'"><img src="'+imasroot+'/img/extlink.png"/></a>');
+	}
 	if (vidk==0) {
 		bar.find('.vidrew,.vidrewI').removeClass("vidrew").addClass("vidrewI");
 	} else {
