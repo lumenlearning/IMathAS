@@ -135,7 +135,7 @@ numerical or algebraic expression answers.
 <p>If you already have an account, you can log on using the box to the right.</p>
 <p>If you are new to WAMAP, use the links above to find information about using WAMAP in the classroom, or to access diagnostic assessments.</p>
 <br class="clear" />
-<p class="textright">WAMAP is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2015 David Lippman<br/>
+<p class="textright">WAMAP is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2016 David Lippman<br/>
 <a href="/wamap/info/credits.php">Credits</a></p>
 </div>
 <?php 
