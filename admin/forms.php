@@ -781,9 +781,9 @@ switch($_GET['action']) {
 		break;
 	case "modgroup":
 		echo '<div id="headerforms" class="pagetitle"><h2>Rename Instructor Group</h2></div>';
-		$query = "SELECT name,parent FROM imas_groups WHERE id='{$_GET['id']}'";
+		$query = "SELECT name,parent,grouptype FROM imas_groups WHERE id='{$_GET['id']}'";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
-		list($gpname,$parent) = mysql_fetch_row($result);
+		list($gpname,$parent,$grptype) = mysql_fetch_row($result);
 		
 		echo "<form method=post action=\"actions.php?action=modgroup&id={$_GET['id']}\">\n";
 		echo "Group name: <input type=text size=50 name=gpname id=gpname value=\"$gpname\"><br/>\n";
@@ -798,6 +798,9 @@ switch($_GET['action']) {
 			echo '>'.$r[1].'</option>';
 		}
 		echo '</select><br/>';
+		echo '<input type="checkbox" id="iscust" name="iscust" ';
+		if ($grptype==1) { echo 'checked';}
+		echo '> <label for="istcust">'._('Lumen Customer').'</label><br/>';
 		echo "<input type=submit value=\"Update Group\">\n";
 		echo "</form>\n";
 		break;

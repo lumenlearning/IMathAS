@@ -37,11 +37,11 @@ if (isset($_GET['form'])) {
 		
 		if (!empty($_POST['FirstName']) || !empty($_POST['LastName']) || !empty($_POST['SID']) || !empty($_POST['email'])) {
 			if (!empty($_POST['SID'])) {
-				$query = "SELECT imas_users.*,imas_groups.name FROM imas_users LEFT JOIN imas_groups ON imas_users.groupid=imas_groups.id WHERE imas_users.SID='{$_POST['SID']}'";
+				$query = "SELECT imas_users.*,imas_groups.name,imas_groups.grouptype FROM imas_users LEFT JOIN imas_groups ON imas_users.groupid=imas_groups.id WHERE imas_users.SID='{$_POST['SID']}'";
 			} else if (!empty($_POST['email'])) {
-				$query = "SELECT imas_users.*,imas_groups.name FROM imas_users LEFT JOIN imas_groups ON imas_users.groupid=imas_groups.id WHERE imas_users.email='{$_POST['email']}'";
+				$query = "SELECT imas_users.*,imas_groups.name,imas_groups.grouptype FROM imas_users LEFT JOIN imas_groups ON imas_users.groupid=imas_groups.id WHERE imas_users.email='{$_POST['email']}'";
 			} else  {
-				$query = "SELECT imas_users.*,imas_groups.name FROM imas_users LEFT JOIN imas_groups ON imas_users.groupid=imas_groups.id WHERE ";
+				$query = "SELECT imas_users.*,imas_groups.name,imas_groups.grouptype FROM imas_users LEFT JOIN imas_groups ON imas_users.groupid=imas_groups.id WHERE ";
 				if (!empty($_POST['LastName'])) {
 					$query .= "imas_users.LastName='{$_POST['LastName']}' ";
 					if (!empty($_POST['FirstName'])) {
@@ -63,7 +63,11 @@ if (isset($_GET['form'])) {
 					echo '<ul><li>Username: <a href="../admin/admin.php?showcourses='.$row['id'].'">'.$row['SID'].'</a></li>';
 					echo '<li>ID: '.$row['id'].'</li>';
 					if ($row['name']!=null) {
-						echo '<li>Group: '.$row['name'].'</li>';
+						echo '<li>Group: '.$row['name'];
+						if ($row['grouptype']==1) {
+							echo ' (Lumen Customer)';
+						}
+						echo '</li>';
 					}
 					echo '<li>Email: '.$row['email'].'</li>';
 					echo '<li>Last Login: '.tzdate("n/j/y g:ia", $row['lastaccess']).'</li>';

@@ -60,7 +60,9 @@
 		'Total Active Students for Instructor',
 		'Institution',
 		'Total Active Students at Institution',
-		'Total Active Instructors at Institution'
+		'Total Active Instructors at Institution',
+		'Lumen Customer',
+		'Supergroup'
 		));
 		
 		
@@ -78,7 +80,14 @@
 	}
 	$skipcids = implode(',',$skipcid);
 	
-	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email FROM imas_students AS s JOIN imas_teachers AS t ";
+	$grpnames = array();
+	$query = 'SELECT id,name FROM imas_groups WHERE 1';
+	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	while ($row = mysql_fetch_row($result)) {
+		$grpnames[$row[0]] = $row[1];
+	}
+	
+	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email,g.parent,g.grouptype FROM imas_students AS s JOIN imas_teachers AS t ";
 	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
 	if ($end != $now) {
 		$query .= "AND s.lastaccess<$end ";
@@ -88,7 +97,7 @@
 	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
 	
 	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	$lastgroup = '';  $grpcnt = 0; $grpdata = array();  $lastuser = ''; $userdata = array(); $grpinstrcnt = 0;
+	$lastgroup = '';  $lastparent = ''; $grpcnt = 0; $grpdata = array();  $lastuser = ''; $userdata = array(); $grpinstrcnt = 0;
 	$lastemail; $instrstucnt = 0;
 	$seencid = array();
 	while ($row = mysql_fetch_row($result)) {
@@ -113,11 +122,15 @@
 					$d[] = $lastgroup;
 					$d[] = $grpcnt;
 					$d[] = $grpinstrcnt;
+					$d[] = $lastiscust;
+					$d[] = $lastparent;
 					exportascsv($d);
 				}
 			}
 			$grpcnt = 0;  $grpdata = array(); $grpinstrcnt = 0;
 			$lastgroup = $row[0];
+			$lastparent = (($row[7]>0)?$grpnames[$row[7]]:"");
+			$lastiscust = (($row[8]==1)?'Y':'N');
 		}
 		if (!in_array($row[3],$seencid)) {
 			$grpcnt += $row[5];
@@ -141,6 +154,8 @@
 		$d[] = $lastgroup;
 		$d[] = $grpcnt;
 		$d[] = $grpinstrcnt;
+		$d[] = $lastiscust;
+		$d[] = $lastparent;
 		exportascsv($d);
 	}
 
