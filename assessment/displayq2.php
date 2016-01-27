@@ -1461,11 +1461,12 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answerboxsize'])) {if (is_array($options['answerboxsize'])) {$sz = $options['answerboxsize'][$qn];} else {$sz = $options['answerboxsize'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		
-		if (!isset($sz)) { $sz = 20;}
+		
 		
 		if ($multi>0) { $qn = $multi*1000+$qn;} 
 		if (isset($ansprompt)) {$out .= $ansprompt;}
 		if (isset($answersize)) {
+			if (!isset($sz)) { $sz = 3;}
 			if ($colorbox=='') {
 				$out .= '<table id="qnwrap'.$qn.'">';
 			} else {
@@ -1479,7 +1480,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			for ($row=0; $row<$answersize[0]; $row++) {
 				$out .= "<tr>";
 				for ($col=0; $col<$answersize[1]; $col++) {
-					$out .= "<td><input class=\"text\" type=\"text\"  size=3 name=\"qn$qn-$count\" value=\"{$las[$count]}\"  autocomplete=\"off\" /></td>\n";
+					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" value=\"{$las[$count]}\"  autocomplete=\"off\" /></td>\n";
 					$count++;
 				}
 				$out .= "</tr>";
@@ -1489,7 +1490,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= '</td><td class="matrixright">&nbsp;</td></tr></table>';
 			$tip = _('Enter each element of the matrix as  number (like 5, -3, 2.2)');
 		} else {
-			$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\" />\n";
+			if (!isset($sz)) { $sz = 20;}
+			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\" />\n";
 			$out .= getcolormark($colorbox);
 			$out .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"AMmathpreview('qn$qn','p$qn')\" /> &nbsp;\n";
 			$out .= "<span id=p$qn></span> ";
@@ -1509,14 +1511,13 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = explode(',',$answerformat);
 		
-		if (!isset($sz)) { $sz = 20;}
-		
 		$la = explode('$#$',$la);
 		$la = $la[0];
 		
 		if ($multi>0) { $qn = $multi*1000+$qn;} 
 		if (isset($ansprompt)) {$out .= $ansprompt;}
 		if (isset($answersize)) {
+			if (!isset($sz)) { $sz = 3;}
 			$answersize = explode(",",$answersize);
 			if ($colorbox=='') {
 				$out .= '<table id="qnwrap'.$qn.'">';
@@ -1530,7 +1531,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			for ($row=0; $row<$answersize[0]; $row++) {
 				$out .= "<tr>";
 				for ($col=0; $col<$answersize[1]; $col++) {
-					$out .= "<td><input class=\"text\" type=\"text\"  size=3 name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"{$las[$count]}\" autocomplete=\"off\" /></td>\n";
+					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"{$las[$count]}\" autocomplete=\"off\" /></td>\n";
 					$count++;
 				}
 				$out .= "</tr>";
@@ -1544,7 +1545,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$tip .= formathint(_('each element of the matrix'),$ansformats,'calcmatrix');
 			//$tip = "Enter each element of the matrix as  number (like 5, -3, 2.2) or as a calculation (like 5/3, 2^3, 5+4)";
 		} else {
-			$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\" />\n";
+			if (!isset($sz)) { $sz = 20;}
+			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"$la\" autocomplete=\"off\" />\n";
 			$out .= getcolormark($colorbox);
 			$out .= "<input type=button value=\"" . _('Preview') . "\" onclick=\"matrixcalc('tc$qn','p$qn')\" /> &nbsp;\n";
 			$out .= "<span id=p$qn></span> \n";
@@ -1888,6 +1890,38 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			}
 			$out .= '</select>';
 			$out .= getcolormark($colorbox);
+		} else if ($answerformat=='MQexperimental') {
+			$out .= "<input type=\"text\" style=\"position:absolute;visibility:hidden\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" />";
+			$out .= "<span class=\"$colorbox mathquill-embedded-latex MQE$qn\">";
+			if ($displayformat != '') {
+				$laprts = explode(';',$la);
+				$laptcnt = 0;
+				while (($p=strpos($displayformat, '[AB]'))!==false) {
+					if (isset($laprts[$laptcnt])) {
+						$lav = $laprts[$laptcnt];
+						$laptcnt++;
+					} else {
+						$lav = '';
+					}			
+					$displayformat = substr($displayformat,0,$p).'\editable{'.$lav.'}'.substr($displayformat,$p+4);
+					//$out .= str_replace('[AB]', '\editable{'.$lav.'}', $displayformat, 1);
+				}
+				$out .= $displayformat;
+			} else {
+				$out .= '\editable{'.$la.'}';
+			}
+			$out .= "</span>";
+			$out .= getcolormark($colorbox);
+			$out .= '<script type="text/javascript">$(function() {
+				 $(".MQE'.$qn.'").on("keypress keyup", function() {
+				     var latexvals = [];
+				     var latex = $(".MQE'.$qn.'").find(".mathquill-editable").each(function(i,el) {
+				            latexvals.push($(el).mathquill("latex"));
+				         });
+				     $("#qn'.$qn.'").val(MQtoAM(latexvals.join(";")));
+				   });
+				   setTimeout(function(){$(".MQE'.$qn.'").find("textarea").blur();}, 25);
+				});</script>';
 		} else {
 			$out .= "<input type=\"text\"  size=\"$sz\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" autocomplete=\"off\"  ";
 			
@@ -2022,7 +2056,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$la = htmlentities($la);
 			}
 			if ($rows<2) {
-				$out .= "<input type=\"text $colorbox\" size=\"$cols\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" /> ";
+				$out .= "<input type=\"text\" class=\"text $colorbox\" size=\"$cols\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" /> ";
 				$out .= getcolormark($colorbox);
 			} else {
 				if ($colorbox!='') { $out .= '<div class="'.$colorbox.'">';}
@@ -2399,6 +2433,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					if (count($answerformat)>1 && $answerformat[1]=='abs') { $out .= 'class="sel" '; $def = 8;}
 					$out .= '/>';
 				}
+				if (count($answerformat)==1 || in_array('rational',$answerformat)) {
+					$out .= "<img src=\"$imasroot/img/tprat.png\" onclick=\"settool(this,$qn,8.2)\" ";
+					if (count($answerformat)>1 && $answerformat[1]=='rational') { $out .= 'class="sel" '; $def = 8.2;}
+					$out .= '/>';
+				}
 				if (in_array('exp',$answerformat)) {
 					$out .= "<img src=\"$imasroot/img/tpexp.png\" onclick=\"settool(this,$qn,8.3)\" ";
 					if (count($answerformat)>1 && $answerformat[1]=='exp') { $out .= 'class="sel" '; $def = 8.3;}
@@ -2633,7 +2672,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$out .= "<input type=\"hidden\" name=\"lf$qn\" value=\"$file\"/>";
 					if (in_array(strtolower($extension),array('jpg','gif','png','bmp','jpe'))) {
 						$out .= " <span class=\"clickable\" id=\"filetog$qn\" onclick=\"toggleinlinebtn('img$qn','filetog$qn');\">[+]</span>";
-						$out .= " <br/><img id=\"img$qn\" style=\"display:none;max-width:80%;\" src=\"$url\" />";
+						$out .= " <br/><div><img id=\"img$qn\" style=\"display:none;max-width:80%;\" onclick=\"rotateimg(this)\" src=\"$url\" /></div>";
 					} else if (in_array(strtolower($extension),array('doc','docx','pdf','xls','xlsx','ppt','pptx'))) {
 						$out .= " <span class=\"clickable\" id=\"filetog$qn\" onclick=\"toggleinlinebtn('fileprev$qn','filetog$qn');\">[+]</span>";
 						$out .= " <br/><iframe id=\"fileprev$qn\" style=\"display:none;\" src=\"https://docs.google.com/viewer?url=".urlencode($url)."&embedded=true\" width=\"80%\" height=\"600px\"></iframe>";
@@ -4260,8 +4299,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if ($answerformat[0]=="polygon" || $answerformat[0]=='closedpolygon') {
 			foreach ($answers as $key=>$function) {
 				$function = explode(',',$function);
-				$pixx = ($function[0] - $settings[0])*$pixelsperx + $imgborder;
-				$pixy = $settings[7] - ($function[1]-$settings[2])*$pixelspery - $imgborder;	
+				$pixx = (evalbasic($function[0]) - $settings[0])*$pixelsperx + $imgborder;
+				$pixy = $settings[7] - (evalbasic($function[1])-$settings[2])*$pixelspery - $imgborder;	
 				$ansdots[$key] = array($pixx,$pixy);
 			}
 			$isclosed = false;
@@ -4349,6 +4388,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$ansexps = array();
 			$anscoss = array();
 			$ansvecs = array();
+			$ansrats = array();
 			$x0 = $settings[0];
 			$x1 = 1/4*$settings[1] + 3/4*$settings[0];
 			$x2 = 1/2*$settings[1] + 1/2*$settings[0];
@@ -4370,8 +4410,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				//	x,y,"closed" or "open"
 				//form: function, color, xmin, xmax, startmaker, endmarker
 				if (count($function)==2 || (count($function)==3 && ($function[2]=='open' || $function[2]=='closed'))) { //is dot
-					$pixx = ($function[0] - $settings[0])*$pixelsperx + $imgborder;
-					$pixy = $settings[7] - ($function[1]-$settings[2])*$pixelspery - $imgborder;	
+					$pixx = (evalbasic($function[0]) - $settings[0])*$pixelsperx + $imgborder;
+					$pixy = $settings[7] - (evalbasic($function[1])-$settings[2])*$pixelspery - $imgborder;	
 					if (count($function)==2 || $function[2]=='closed') {
 						$ansdots[$key] = array($pixx,$pixy);
 					} else {
@@ -4412,9 +4452,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$func = str_replace("(x)",'($x)',$func);
 					$func = create_function('$x', 'return ('.$func.');');
 					
-					$y1 = $func($x1);
-					$y2 = $func($x2);
-					$y3 = $func($x3);
+					$y1 = @$func($x1);
+					$y2 = @$func($x2);
+					$y3 = @$func($x3);
 					$y1p = $settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
 					$y2p = $settings[7] - ($y2-$settings[2])*$pixelspery - $imgborder;
 					$y3p = $settings[7] - ($y3-$settings[2])*$pixelspery - $imgborder;
@@ -4503,6 +4543,30 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						$str = ($yop-$y3p)/safepow($base,$x3p-$xop);
 						$ansexps[$key] = array($str,$base);
 						
+					} else if (strpos($function[0],'/x')!==false || preg_match('|/\([^\)]*x|', $function[0])) {
+						if ($y1===false) {
+							$x1 = $x1+.2*($x2-$x1);
+							$y1 = @$func($x1);
+							$y1p = $settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
+						} else if ($y2===false) {
+							$x2 = $x2+.2*($x2-$x1);
+							$y2 = @$func($x2);
+							$y2p = $settings[7] - ($y2-$settings[2])*$pixelspery - $imgborder;
+						} else if ($y3===false) {
+							$x3 = $x3-.2*($x2-$x1);
+							$y3 = @$func($x3);
+							$y3p = $settings[7] - ($y3-$settings[2])*$pixelspery - $imgborder;
+						} 
+						$h = ($x1*$x2*$y1-$x1*$x2*$y2-$x1*$x3*$y1+$x1*$x3*$y3+$x2*$x3*$y2-$x2*$x3*$y3)/(-$x1*$y2+$x1*$y3+$x2*$y1-$x2*$y3-$x3*$y1+$x3*$y2);
+						$k = (($x1*$y1-$x2*$y2)-$h*($y1-$y2))/($x1-$x2);
+						$c = ($y1-$k)*($x1-$h);
+						
+						$hp = ($h - $settings[0])*$pixelsperx + $imgborder;
+						$kp = $settings[7] - ($k-$settings[2])*$pixelspery - $imgborder;
+						//eval at point on graph closest to (h,k), at h+sqrt(c)
+						$np = $settings[7] - (@$func($h+sqrt(abs($c)))-$settings[2])*$pixelspery - $imgborder;
+						$ansrats[$key] = array($hp,$kp,$np);
+						
 					} else if (abs(($y3-$y2)-($y2-$y1))<1e-9) {
 						//colinear
 						$slope = ($y2p-$y1p)/($x2p-$x1p);
@@ -4545,6 +4609,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$coss = array();
 			$exps = array();
 			$vecs = array();
+			$rats = array();
 			if ($tplines=='') {
 				$tplines = array();
 			} else {
@@ -4622,6 +4687,13 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							//$exps[] = array($str,$base);
 							$exps[] = array($pts[1]-$xop, $adjy1, $pts[3]-$xop, $adjy2, $base);
 						}
+					} else if ($pts[0]==8.2) { //rational
+						if ($pts[1]!=$pts[3] && $pts[2]!=$pts[4]) {
+							$stretch = ($pts[3]-$pts[1])*($pts[4]-$pts[2]);
+							$yp = $pts[2]+(($stretch>0)?1:-1)*sqrt(abs($stretch));
+						
+							$rats[] = array($pts[1],$pts[2],$yp);
+						}
 					} else if ($pts[0]==9 || $pts[0]==9.1) {
 						if ($pts[0]==9.1) {
 							$pts[1] -= ($pts[3] - $pts[1]);
@@ -4658,6 +4730,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			} else {
 				$extradots = max((count($dots) + count($odots) - count($ansdots) - count($ansodots))/(count($dots)+count($odots)),0);
 			}
+			
 			foreach ($ansdots as $key=>$ansdot) {
 				$scores[$key] = 0;
 				for ($i=0; $i<count($dots); $i++) {
@@ -4859,6 +4932,22 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						continue;
 					}
 					if (abs($anssqrt[2]-$sqrts[$i][2])>$defpttol*$reltolerance) {
+						continue;
+					}
+					$scores[$key] = 1;
+					break;
+				}
+			}
+			foreach ($ansrats as $key=>$ansrat) {
+				$scores[$key] = 0;
+				for ($i=0; $i<count($rats); $i++) {
+					if (abs($ansrat[0]-$rats[$i][0])>$defpttol*$reltolerance) {
+						continue;
+					}
+					if (abs($ansrat[1]-$rats[$i][1])>$defpttol*$reltolerance) {
+						continue;
+					}
+					if (sqrt(2)*abs($ansrat[2]-$rats[$i][2])>$defpttol*$reltolerance) {
 						continue;
 					}
 					$scores[$key] = 1;
@@ -5100,6 +5189,97 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 			$extrastuffpenalty = max((count($ineqlines)-count($answers))/(max(count($answers),count($ineqlines))),0);
 			
+		} else if ($answerformat[0]=='numberline') {
+			foreach ($answers as $key=>$function) {
+				if ($function=='') { continue; }
+				$function = explode(',',$function);
+				if (count($function)==2 || (count($function)==3 && ($function[2]=='open' || $function[2]=='closed'))) { //is dot
+					$pixx = ($function[0] - $settings[0])*$pixelsperx + $imgborder;
+					$pixy = $settings[7] - ($function[1]-$settings[2])*$pixelspery - $imgborder;	
+					if (count($function)==2 || $function[2]=='closed') {
+						$ansdots[$key] = array($pixx,$pixy);
+					} else {
+						$ansodots[$key] = array($pixx,$pixy);
+					}
+				} else {
+					$xminpix = round(max(1,($function[1] - $settings[0])*$pixelsperx + $imgborder));
+					$xmaxpix = round(min($settings[6]-1,($function[2] - $settings[0])*$pixelsperx + $imgborder));
+					$anslines[$key] = array($xminpix,$xmaxpix);
+				}
+			}
+			
+			list($lines,$dots,$odots,$tplines,$ineqlines) = explode(';;',$givenans);
+			
+			if ($lines=='') {
+				$lines = array();
+			} else {
+				$lines = explode(';',$lines);
+				foreach ($lines as $k=>$line) {
+					$lines[$k] = explode('),(',substr($line,1,strlen($line)-2));
+					$minp = explode(',', $lines[$k][0]);
+					$maxp = explode(',', $lines[$k][count($lines[$k])-1]);
+					$lines[$k] = array(min($minp[0], $maxp[0]), max($minp[0], $maxp[0]));
+				}
+			}
+			
+			if ($dots=='') {
+				$dots = array();
+			} else {
+				$dots = explode('),(', substr($dots,1,strlen($dots)-2));
+				foreach ($dots as $k=>$pt) {
+					$dots[$k] = explode(',',$pt);
+				}
+			}
+			if ($odots=='') {
+				$odots = array();
+			} else {
+				$odots = explode('),(', substr($odots,1,strlen($odots)-2));
+				foreach ($odots as $k=>$pt) {
+					$odots[$k] = explode(',',$pt);
+				}
+			}
+
+			$scores = array();
+			if ((count($dots)+count($odots))==0) {
+				$extradots = 0;
+			} else {
+				$extradots = max((count($dots) + count($odots) - count($ansdots) - count($ansodots))/(count($dots)+count($odots)),0);
+			}
+			$defpttol = 5;
+			foreach ($ansdots as $key=>$ansdot) {
+				$scores[$key] = 0;
+				for ($i=0; $i<count($dots); $i++) {
+					if (($dots[$i][0]-$ansdot[0])*($dots[$i][0]-$ansdot[0]) + ($dots[$i][1]-$ansdot[1])*($dots[$i][1]-$ansdot[1]) <= $defpttol*$defpttol*max(1,$reltolerance)) {
+						$scores[$key] = 1-$extradots;
+						break;
+					}
+				}
+			}
+			foreach ($ansodots as $key=>$ansodot) {
+				$scores[$key] = 0;
+				for ($i=0; $i<count($odots); $i++) {
+					if (($odots[$i][0]-$ansodot[0])*($odots[$i][0]-$ansodot[0]) + ($odots[$i][1]-$ansodot[1])*($odots[$i][1]-$ansodot[1]) <= $defpttol*$defpttol*max(1,$reltolerance)) {
+						$scores[$key] = 1-$extradots;
+						break;
+					}
+				}
+			}
+			
+			foreach ($anslines as $key=>$ansline) {
+				$scores[$key] = 0;
+				for ($i=0; $i<count($lines); $i++) {
+					if (abs($ansline[0]-$lines[$i][0])>$defpttol*$reltolerance) {
+						continue;
+					}
+					if (abs($ansline[1]-$lines[$i][1])>$defpttol*$reltolerance) {
+						continue;
+					}
+					$scores[$key] = 1;
+					break;
+				}
+			}
+			$extrastuffpenalty = max((count($lines)-count($anslines))/(max(count($answers),count($anslines))),0);
+			
 		} else {
 			//not polygon or twopoint, continue with regular grading
 			//evaluate all the functions in $answers
@@ -5112,8 +5292,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				//	x,y,"closed" or "open"
 				//form: function, color, xmin, xmax, startmaker, endmarker
 				if (count($function)==2 || (count($function)==3 && ($function[2]=='open' || $function[2]=='closed'))) { //is dot
-					$pixx = ($function[0] - $settings[0])*$pixelsperx + $imgborder;
-					$pixy = $settings[7] - ($function[1]-$settings[2])*$pixelspery - $imgborder;	
+					$pixx = (evalbasic($function[0]) - $settings[0])*$pixelsperx + $imgborder;
+					$pixy = $settings[7] - (evalbasic($function[1])-$settings[2])*$pixelspery - $imgborder;	
 					if (count($function)==2 || $function[2]=='closed') {
 						$ansdots[$key] = array($pixx,$pixy);
 					} else {
@@ -5132,8 +5312,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				if (!isset($function[2])) {
 					$function[2] = $settings[1];
 				}
-				$xminpix = max(2*$imgborder,($function[1] - $settings[0])*$pixelsperx + $imgborder);
-				$xmaxpix = min($settings[6]-2*$imgborder,($function[2] - $settings[0])*$pixelsperx + $imgborder);
+				$xminpix = round(max(2*$imgborder,($function[1] - $settings[0])*$pixelsperx + $imgborder));
+				$xmaxpix = round(min($settings[6]-2*$imgborder,($function[2] - $settings[0])*$pixelsperx + $imgborder));
 				for ($k=ceil($xminpix/$step); $k*$step <= $xmaxpix; $k++) {
 					$x = $k*$step;
 					$coordx = ($x - $imgborder)/$pixelsperx + $settings[0]+1E-10;
@@ -5186,14 +5366,14 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$totinterp = 0;
 			foreach ($lines as $k=>$line) {
 				for ($i=1;$i<count($line);$i++) {
-					$leftx = min($line[$i][0],$line[$i-1][0]);
-					$rightx = max($line[$i][0],$line[$i-1][0]);
+					$leftx = round(max(min($line[$i][0],$line[$i-1][0]), 2*$imgborder));
+					$rightx = round(min(max($line[$i][0],$line[$i-1][0]), $settings[6]-2*$imgborder));
 					if ($line[$i][0]==$line[$i-1][0]) {
 						$m = 9999;
 					} else {
 						$m = ($line[$i][1] - $line[$i-1][1])/($line[$i][0]-$line[$i-1][0]);
 					}
-					for ($k = ceil($leftx/$step); $k*$step<$rightx; $k++) {
+					for ($k = ceil($leftx/$step); $k*$step<=$rightx; $k++) {
 						$x = $k*$step;
 						$y = $line[$i-1][1] + $m*($x-$line[$i-1][0]);
 						if ($y>$imgborder && $y<($settings[7]-$imgborder)) {
@@ -5259,6 +5439,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 			//divide up over all the lines
 			$percentunmatcheddrawn = $percentunmatcheddrawn;
+			//if ($GLOBALS['myrights']==100) {
+			//	print_r($anslines);
+			//	print_r($linedata);
+			//}
 			foreach ($anslines as $key=>$answerline) {
 				if ($stcnts[$key]<2) {
 					$stdevs[$key] = 0;
@@ -5275,7 +5459,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$percentunmatchedans = 0;
 				}
 				$scores[$key] = 1-($stdevpen + $percentunmatcheddrawn + $percentunmatchedans)/$reltolerance;
-				//echo "Line: $key, stdev: {$stdevs[$key]}, unmatchedrawn: $percentunmatcheddrawn, unmatchedans: $percentunmatchedans <br/>";
+				//if ($GLOBALS['myrights']==100) {
+				 //echo "Line: $key, stdev: {$stdevs[$key]}, unmatchedrawn: $percentunmatcheddrawn, unmatchedans: $percentunmatchedans <br/>";
+				//}
 				if ($scores[$key]<0) { 
 					$scores[$key] = 0;
 				} else if ($scores[$key]>1) {
@@ -5289,6 +5475,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			} else {
 				$extradots = max((count($dots) + count($odots) - count($ansdots) - count($ansodots))/(count($dots)+count($odots)),0);
 			}
+
 			foreach ($ansdots as $key=>$ansdot) {
 				$scores[$key] = 0;
 				for ($i=0; $i<count($dots); $i++) {

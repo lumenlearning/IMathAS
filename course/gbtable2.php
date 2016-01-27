@@ -365,7 +365,7 @@ function gbtable() {
 	if ($catfilter>-1) {
 		$query .= "AND gbcategory='$catfilter' ";
 	}
-	$query .= "ORDER BY showdate";
+	$query .= "ORDER BY showdate,name";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	while ($line=mysql_fetch_array($result, MYSQL_ASSOC)) {
 		$grades[$kcnt] = $line['id'];
@@ -547,14 +547,28 @@ function gbtable() {
 	$discusscol = array();
 	$exttoolcol = array();
 	if ($orderby==1) { //order $category by enddate
-		asort($enddate,SORT_NUMERIC);
+		//asort($enddate,SORT_NUMERIC);
+		uksort($enddate, function($a,$b) use ($enddate,$name) {
+			if ($enddate[$a]==$enddate[$b]) {
+				return ($name[$a]>$name[$b]?1:-1);
+			} else {
+				return ($enddate[$a]>$enddate[$b]?1:-1);
+			}		
+		  });
 		$newcategory = array();
 		foreach ($enddate as $k=>$v) {
 			$newcategory[$k] = $category[$k];
 		}
 		$category = $newcategory;
 	} else if ($orderby==5) { //order $category by enddate reverse
-		arsort($enddate,SORT_NUMERIC);
+		//arsort($enddate,SORT_NUMERIC);
+		uksort($enddate, function($a,$b) use ($enddate,$name) {
+			if ($enddate[$a]==$enddate[$b]) {
+				return ($name[$a]>$name[$b]?1:-1);
+			} else {
+				return ($enddate[$a]>$enddate[$b]?-1:1);
+			}		
+		  });
 		$newcategory = array();
 		foreach ($enddate as $k=>$v) {
 			$newcategory[$k] = $category[$k];
@@ -673,13 +687,27 @@ function gbtable() {
 	}
 	if (($orderby&1)==0) {//if not grouped by category
 		if ($orderby==0) {   //enddate
-			asort($enddate,SORT_NUMERIC);
+			uksort($enddate, function($a,$b) use ($enddate,$name) {
+				if ($enddate[$a]==$enddate[$b]) {
+					return ($name[$a]>$name[$b]?1:-1);
+				} else {
+					return ($enddate[$a]>$enddate[$b]?1:-1);
+				}		
+			  });
+			//asort($enddate,SORT_NUMERIC);
 			$itemorder = array_keys($enddate);
 		} else if ($orderby==2) {  //alpha
 			natcasesort($name);//asort($name);
 			$itemorder = array_keys($name);
 		} else if ($orderby==4) { //enddate reverse
-			arsort($enddate,SORT_NUMERIC);
+			//arsort($enddate,SORT_NUMERIC);
+			uksort($enddate, function($a,$b) use ($enddate,$name) {
+				if ($enddate[$a]==$enddate[$b]) {
+					return ($name[$a]>$name[$b]?1:-1);
+				} else {
+					return ($enddate[$a]>$enddate[$b]?-1:1);
+				}		
+			  });
 			$itemorder = array_keys($enddate);
 		} else if ($orderby==6) { //startdate
 			asort($startdate,SORT_NUMERIC);
@@ -697,7 +725,7 @@ function gbtable() {
 		
 		foreach ($itemorder as $k) {
 			$gb[0][1][$pos][0] = $name[$k]; //item name
-			$gb[0][1][$pos][1] = $cats[$category[$k]][7]; //item category name
+			$gb[0][1][$pos][1] = $cats[$category[$k]][8]; //item category name
 			$gb[0][1][$pos][2] = $possible[$k]; //points possible
 			$gb[0][1][$pos][3] = $avail[$k]; //0 past, 1 current, 2 future
 			$gb[0][1][$pos][4] = $cntingb[$k]; //0 no count and hide, 1 count, 2 EC, 3 no count
@@ -1363,7 +1391,7 @@ function gbtable() {
 		
 		foreach($catorder as $cat) {//foreach category
 			if (isset($cattotpast[$ln][$cat])) {  //past items
-				//cats: name,scale,scaletype,chop,drop,weight,calctype
+				//cats: name,scale,scaletype,chop,drop,weight,hidden,calctype
 				//if ($cats[$cat][4]!=0 && abs($cats[$cat][4])<count($cattotpast[$ln][$cat])) { //if drop is set and have enough items
 				if ($cats[$cat][7]==1) {
 					foreach($cattotpast[$ln][$cat] as $col=>$v) {
