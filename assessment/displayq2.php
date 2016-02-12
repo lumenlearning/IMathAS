@@ -180,6 +180,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	if (isset($answertitle)) {$options['answertitle'] = $answertitle;}
 	if (isset($answersize)) {$options['answersize'] = $answersize;}
 	if (isset($variables)) {$options['variables'] = $variables;}
+	if (isset($strflags)) {$options['strflags'] = $strflags;}
 	if (isset($domain)) {$options['domain'] = $domain;}	
 	if (isset($answerboxsize)) {$options['answerboxsize'] = $answerboxsize;}
 	if (isset($hidepreview)) {$options['hidepreview'] = $hidepreview;}
@@ -382,7 +383,9 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		}
 	}
 	if (strpos($evaledqtext,'[SAB')!==false) {
-		if (is_array($showanswerloc)) {
+		if (!isset($showanswerloc)) {
+			$evaledqtext = preg_replace('/\[SAB\d*\]/','',$evaledqtext);
+		} else if (is_array($showanswerloc)) {
 			foreach($showanswerloc as $iidx=>$saloc) {
 				if (strpos($evaledqtext,'[SAB'.$iidx.']')!==false) {
 					$evaledqtext = str_replace('[SAB'.$iidx.']', $saloc, $evaledqtext);
@@ -1862,6 +1865,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		if (isset($options['answerboxsize'])) {if (is_array($options['answerboxsize'])) {$sz = $options['answerboxsize'][$qn];} else {$sz = $options['answerboxsize'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
+		if (isset($options['strflags'])) {if (is_array($options['strflags'])) {$strflags = $options['strflags'][$qn];} else {$strflags = $options['strflags'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (is_array($options['questions'][$qn])) {$questions = $options['questions'][$qn];} else {$questions = $options['questions'];}
@@ -1975,7 +1979,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				}
 			}
 		}
-		$sa .= $answer;
+		if (strpos($strflags,'regex')!==false) {
+			$sa .= _('The answer must match a specified pattern');
+		} else {
+			$sa .= $answer;
+		}
 	} else if ($anstype == "essay") {
 		if (isset($options['answerboxsize'])) {if (is_array($options['answerboxsize'])) {$sz = $options['answerboxsize'][$qn];} else {$sz = $options['answerboxsize'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
@@ -2534,7 +2542,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($answers)) {
 			$saarr = array();
 			$ineqcolors = array("blue","red","green");
-			foreach($answers as $k=>$ans) {
+			$k = 0;
+			foreach($answers as $ans) {
 				if (is_array($ans)) { continue;} //shouldn't happen, unless user forgot to set question to multipart
 				if ($ans=='') { continue;}
 				$function = explode(',',$ans);
@@ -2583,13 +2592,48 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 							$saarr[$k] .= ','.$function[1].','.$function[2];
 							if ($locky==1) {
 								$saarr[$k] .=',,,3';
+							}
+						} else if ($locky==1) {
+							$saarr[$k] .=',,,,,3';
+						}
+						//add asymptotes for rational function graphs
+						if (strpos($function[0],'/x')!==false || preg_match('|/\([^\)]*x|', $function[0])) {
+							$func = makepretty($function[0]);
+							$func = mathphp($func,'x');
+							$func = str_replace("(x)",'($x)',$func);
+							$func = create_function('$x', 'return ('.$func.');');
+							$x1 = 1/4*$settings[1] + 3/4*$settings[0];
+							$x2 = 1/2*$settings[1] + 1/2*$settings[0];
+							$x3 = 3/4*$settings[1] + 1/4*$settings[0];
+			
+							$y1 = @$func($x1);
+							$y2 = @$func($x2);
+							$y3 = @$func($x3);
+					
+							if ($y1===false) {
+								$x1 = $x1+.2*($x2-$x1);
+								$y1 = @$func($x1);
+								$y1p = $settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
+							} else if ($y2===false) {
+								$x2 = $x2+.2*($x2-$x1);
+								$y2 = @$func($x2);
+								$y2p = $settings[7] - ($y2-$settings[2])*$pixelspery - $imgborder;
+							} else if ($y3===false) {
+								$x3 = $x3-.2*($x2-$x1);
+								$y3 = @$func($x3);
+								$y3p = $settings[7] - ($y3-$settings[2])*$pixelspery - $imgborder;
+							} 
+							$va = ($x1*$x2*$y1-$x1*$x2*$y2-$x1*$x3*$y1+$x1*$x3*$y3+$x2*$x3*$y2-$x2*$x3*$y3)/(-$x1*$y2+$x1*$y3+$x2*$y1-$x2*$y3-$x3*$y1+$x3*$y2);
+							$ha = (($x1*$y1-$x2*$y2)-$va*($y1-$y2))/($x1-$x2);
+							
+							$k++;
+							$saarr[$k] = "$ha,green,,,,,,dash";
+							$k++;
+							$saarr[$k] = "[$va,t],green,,,,,,dash";
 						}
 					}
-						if ($locky==1) {
-							$saarr[$k] .=',,,,,3';
 				}
-			}
-				}
+				$k++;
 			}
 			
 			if ($backg!='') {
@@ -3388,6 +3432,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$tchk = str_replace(array('s$n','p$'),array('sin','pi'),$tchk);
 				} else {
 					$cpts = parsecomplex($tchk);
+					
 					if (!is_array($cpts)) {
 						return 0;
 					}
@@ -3884,7 +3929,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		
 	} else if ($anstype == "string") {
 		if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}
-		if (is_array($options['strflags'])) {$strflags = $options['strflags'][$qn];} else {$strflags = $options['strflags'];}
+		if (isset($options['strflags'])) {if (is_array($options['strflags'])) {$strflags = $options['strflags'][$qn];} else {$strflags = $options['strflags'];}}
 		if (isset($options['scoremethod']))if (is_array($options['scoremethod'])) {$scoremethod = $options['scoremethod'][$qn];} else {$scoremethod = $options['scoremethod'];}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		
@@ -3958,7 +4003,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				if ($flags['special_or']===true) {
 					$specialor = true;
 				}
-				if ($flags['ignore_case']===true) {
+				if ($flags['ignore_case']===true && !isset($flags['regex'])) {
 					$givenans = strtoupper($givenans);
 					$answer = strtoupper($answer);
 					if ($specialor) {
@@ -4005,6 +4050,13 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						}
 					} else if (isset($flags['in_answer'])) {
 						if (strpos($givenans,$anans)!==false) {
+							$correct += 1;
+							$foundloc = $j;
+							break 2;
+						}
+					} else if (isset($flags['regex'])) {
+						$regexstr = '/'.str_replace('/','\/',$anans).'/'.($flags['ignore_case']?'i':'');
+						if (preg_match($regexstr,$givenans)) {
 							$correct += 1;
 							$foundloc = $j;
 							break 2;
@@ -5909,8 +5961,21 @@ function parsecomplex($v) {
 				}
 			}
 			//which is bigger?
-			if ($p-$L>1 && $R-$p>1) {
-				return _('error - invalid form');
+			if ($p-$L>0 && $R-$p>0 && ($R==$len || $L==0)) {
+				//return _('error - invalid form');
+				if ($R==$len) {// real + AiB
+					$real = substr($v,0,$L);
+					$imag = substr($v,$L,$p-$L);
+					$imag .= '*'.substr($v,$p+1+($v{$p+1}=='*'?1:0),$R-$p-1);
+				} else if ($L==0) { //AiB + real
+					$real = substr($v,$R);
+					$imag = substr($v,0,$p);
+					$imag .= '*'.substr($v,$p+1+($v{$p+1}=='*'?1:0),$R-$p-1);
+				} else {
+					return _('error - invalid form');
+				}
+				$imag = str_replace('-*','-',$imag);
+				$imag = str_replace('+*','+',$imag);
 			} else if ($p-$L>1) {
 				$imag = substr($v,$L,$p-$L);
 				$real = substr($v,0,$L) . substr($v,$p+1);
