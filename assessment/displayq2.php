@@ -210,7 +210,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			} else {
 				if (count($anstypes)>1) {
 					if ($qnpointval==0) {$qnpointval=1;}
-					$answeights = array_fill(0,count($anstypes)-1,round($qnpointval/count($anstypes),2));
+					$answeights = array_fill(0,count($anstypes)-1,round($qnpointval/count($anstypes),3));
 					$answeights[] = $qnpointval-array_sum($answeights);
 					foreach ($answeights as $kidx=>$vval) {
 						$answeights[$kidx] = $vval/$qnpointval;
@@ -221,6 +221,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			}
 		}
 		$laparts = explode("&",$la);
+		
 		foreach ($anstypes as $kidx=>$anstype) {
 			$qcol = ($qdata['qtype']=="multipart" && isset($qcolors[$kidx]))?(is_numeric($qcolors[$kidx])?rawscoretocolor($qcolors[$kidx],$answeights[$kidx]):$qcolors[$kidx]):'';
 			list($answerbox[$kidx],$entryTips[$kidx],$shanspt[$kidx],$previewloc[$kidx]) = makeanswerbox($anstype,$kidx,$laparts[$kidx],$options,$qnidx+1,$qcol);
@@ -718,7 +719,7 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	eval(interpret('control',$qdata['qtype'],$qdata['control']));
 	srand($seed+1);
 	eval(interpret('answer',$qdata['qtype'],$qdata['answer']));
-
+	
 	if (isset($choices) && !isset($questions)) {
 		$questions =& $choices;
 	}
@@ -731,6 +732,7 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 		}
 		$anstypes = array_map('trim', $anstypes);
 	}
+	
 	if (isset($reqdecimals)) {
 		if (is_array($reqdecimals)) {  
 			foreach ($reqdecimals as $kidx=>$vval) {
@@ -1073,7 +1075,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else if ($displayformat == "select") {
 				$out .= "<option value=$i ";
 				if (($la!='') && ($la!='NA') && ($la == $i)) { $out .= "selected=1";}
-				$out .= ">{$questions[$randkeys[$i]]}</option>\n";
+				$out .= ">".str_replace('`','',$questions[$randkeys[$i]])."</option>\n";
 			} else if ($displayformat == "inline") {
 				$out .= "<input type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
@@ -1314,7 +1316,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					if ($las[$i]==$letters[$j]) {
 						$out .= 'selected="1"';
 					}
-					$out .= ">{$answers[$randakeys[$j]]}</option>\n";
+					$out .= ">".str_replace('`','',$answers[$randakeys[$j]])."</option>\n";
 				}
 			} else {
 				foreach ($letters as $v) {
@@ -2037,7 +2039,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					if (strpos($m[0],'target=')===false) {
 						$ret = '<a target="_blank" '.substr($m[0], 2);
 					} else {
-						$ret = $m[0];
+						//force links to open in a new window to prevent manual scores and feedback from being lost
+						$ret = preg_replace('/target=".*?"/','target="_blank"',$m[0]);
 					}
 					$url = $m[1];
 					$extension = substr($url,strrpos($url,'.')+1,3);
@@ -2441,7 +2444,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					if (count($answerformat)>1 && $answerformat[1]=='abs') { $out .= 'class="sel" '; $def = 8;}
 					$out .= '/>';
 				}
-				if (count($answerformat)==1 || in_array('rational',$answerformat)) {
+				if (in_array('rational',$answerformat)) {
 					$out .= "<img src=\"$imasroot/img/tprat.png\" onclick=\"settool(this,$qn,8.2)\" ";
 					if (count($answerformat)>1 && $answerformat[1]=='rational') { $out .= 'class="sel" '; $def = 8.2;}
 					$out .= '/>';

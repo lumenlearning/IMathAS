@@ -2301,7 +2301,9 @@ if (!isset($_POST['embedpostback'])) {
 				$intropages = preg_split('/\[PAGE\s*([^\]]*)\]/',$intro,-1,PREG_SPLIT_DELIM_CAPTURE); //main pagetitle cont 1 pagetitle
 				if (!isset($_GET['page'])) { $_GET['page'] = 0;}
 				if ($_GET['page']==0) {
-					echo $intropages[0];	
+					if (!preg_match('/^<div\s*class="intro">(\s|&nbsp;|<p>(\s*|&nbsp;)*<\/p>)*<\/div>$/', $intropages[0])) {
+						echo $intropages[0];
+					}
 				} 
 				$intro =  $intropages[2*$_GET['page']+2];
 				preg_match_all('/\[QUESTION\s+(\d+)\s*\]/',$intro,$matches,PREG_PATTERN_ORDER);
@@ -2418,8 +2420,8 @@ if (!isset($_POST['embedpostback'])) {
 				$quesout .= '</div>';
 				$intro = str_replace('[QUESTION '.($i+1).']',$quesout,$intro);
 			}
-			$intro = preg_replace('/<div class="intro">\s*(&nbsp;|<p>\s*<\/p>|<\/p>|\s*)\s*<\/div>/','',$intro);
-			echo $intro;
+			$intro = preg_replace('/<div class="intro">\s*(&nbsp;|<p>(\s|&nbsp;)*<\/p>|<\/p>|\s*)\s*<\/div>/','',$intro);
+			echo $intro;		
 			
 			if ($dopage==true) {
 				echo '<p>';
@@ -2596,11 +2598,13 @@ if (!isset($_POST['embedpostback'])) {
 				//if (false && $showeachscore) {
 				///	echo "<br/><span id=\"embednavcanimp$i\" style=\"margin-left:8px\">$cntcanimp</span> can be improved";
 				//}
+				echo '<span style="margin-left:8px">';
 				if ($showeachscore) {
-					echo " <span id=\"embednavscore$i\" style=\"margin-left:8px\">".round($pgpts,1)." point".(($pgpts==1)?"":"s")."</span> out of $pgposs";
+					echo " <span id=\"embednavscore$i\">".round($pgpts,1)." point".(($pgpts==1)?"":"s")."</span> out of $pgposs";
 				} else {
-					echo " <span id=\"embednavunans$i\" style=\"margin-left:8px\">$cntunans</span> unattempted";
+					echo " <span id=\"embednavunans$i\">$cntunans</span> unattempted";
 				}
+				echo '</span>';
 				$totposs += $pgposs;
 			}
 			echo "</li>\n";
