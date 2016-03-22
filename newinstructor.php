@@ -67,6 +67,8 @@
 				$message = "<p>Your new account request has been sent.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
 				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
+				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
+				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
 				mail($_POST['email'],$subject,$message,$headers);
 				
 				echo $message;
