@@ -9,7 +9,10 @@ function normalizemathunicode(str) {
 	str = str.replace(/√/g,"sqrt").replace(/∛/g,"root(3)");
 	str = str.replace(/²/g,"^2").replace(/³/g,"^3");
 	str = str.replace(/\bOO\b/i,"oo");
-	str = str.replace(/θ/,"theta").replace(/φ/,"phi").replace(/π/,"pi").replace(/σ/,"sigma").replace(/μ/,"mu");
+	str = str.replace(/θ/,"theta").replace(/φ/,"phi").replace(/π/,"pi").replace(/σ/,"sigma").replace(/μ/,"mu")
+	str = str.replace(/α/,"alpha").replace(/β/,"beta").replace(/γ/,"gamma").replace(/δ/,"delta").replace(/ε/,"epsilon").replace(/κ/,"kappa");
+	str = str.replace(/λ/,"lambda").replace(/ρ/,"rho").replace(/τ/,"tau").replace(/χ/,"chi").replace(/ω/,"omega");
+	str = str.replace(/Ω/,"Omega").replace(/Γ/,"Gamma").replace(/Φ/,"Phi").replace(/Δ/,"Delta").replace(/Σ/,"Sigma");
 	return str;
 }
 
@@ -39,6 +42,9 @@ function calculate(inputId,outputId,format) {
 		  err += singlevalsyntaxcheck(str,format);
 		  if (str.match(/,/)) {
 		  	  err += _("Invalid use of a comma.");
+		  }
+		  if (format.indexOf('allowxtimes')!=-1) {
+		  	  str = str.replace(/(x|X|\u00D7)/,"*");  
 		  }
 		  if (format.indexOf('mixed')!=-1) {
 		  	  str = str.replace(/_/,' ');
@@ -612,12 +618,24 @@ function AMpreview(inputId,outputId) {
   var str = document.getElementById(inputId).value;
   str = str.replace(/,/g,"");
   str = normalizemathunicode(str);
-   var dispstr = str;
-   
+  var foundaltcap = []; 
   for (var i=0; i<vars.length; i++) {
   	  if (vars[i] == "varE") {
 		  str = str.replace("E","varE");	
-	  } else if (vars[i].charCodeAt(0)>96) { //lowercase
+	  } else {
+	  	foundaltcap[i] = false;
+	  	for (var j=0; j<vars.length; j++) {
+	  		if (i!=j && vars[j].toLowerCase()==vars[i].toLowerCase() && vars[j]!=vars[i]) {
+	  			foundaltcap[i] = true;
+	  			break;
+	  		}
+	  	}
+	  	if (!foundaltcap[i]) {
+			str = str.replace(new RegExp(vars[i],"gi"),vars[i]);
+		}
+	  }
+	  
+	  /*else if (vars[i].charCodeAt(0)>96) { //lowercase
 		  if (arraysearch(vars[i].toUpperCase(),vars)==-1) {
 			//vars[i] = vars[i].toLowerCase();
 			str = str.replace(new RegExp(vars[i],"gi"),vars[i]);	  
@@ -628,11 +646,12 @@ function AMpreview(inputId,outputId) {
 		   	str = str.replace(new RegExp(vars[i],"gi"),vars[i]);	  
 		  }
 	  }
+	  */
   }
-  vl = vars.join("|");
- 
+
+  var dispstr = str; 
   //quote out multiletter variables
-  var varstoquote = new Array();
+  var varstoquote = new Array(); var regmod;
   for (var i=0; i<vars.length; i++) {
 	  if (vars[i].length>1) {
 		  var isgreek = false;
@@ -642,15 +661,53 @@ function AMpreview(inputId,outputId) {
 				break;
 			  }
 		  }
+		  if (vars[i].match(/^\w+_\w+$/)) {
+		  	if (!foundaltcap[i]) {
+		  		regmod = "gi";
+		  	} else {
+		  		regmod = "g";
+		  	}
+		  	//var varpts = vars[i].match(new RegExp(/^(\w+)_(\d*[a-zA-Z]+\w+)$/,regmod));
+		  	var varpts = new RegExp(/^(\w+)_(\w+)$/,regmod).exec(vars[i]);
+		  	if (varpts[1].length>1) {
+		  		varpts[1] = '"'+varpts[1]+'"';
+		  	} 
+		  	if (varpts[2].length>1) {
+		  		varpts[2] = '"'+varpts[2]+'"';
+		  	} 
+		  	dispstr = dispstr.replace(new RegExp(varpts[0],regmod), varpts[1]+'_'+varpts[2]);
+		  	//this repvars was needed to workaround with mathjs confusion with subscripted variables
+		  	str = str.replace(new RegExp(varpts[0],"g"), "repvars"+i);
+		  	vars[i] = "repvars"+i;
+		  } else if (!isgreek && vars[i]!="varE") {
+			  varstoquote.push(vars[i]);
+		  }
+		  /*
+		  if (!isgreek && vars[i].match(/^\w+_\d*[a-zA-Z]+\w+$/)) {
+		  	if (!foundaltcap[i]) {
+		  		regmod = "gi";
+		  	} else {
+		  		regmod = "g";
+		  	}
+		  	//var varpts = vars[i].match(new RegExp(/^(\w+)_(\d*[a-zA-Z]+\w+)$/,regmod));
+		  	var varpts = new RegExp(/^(\w+)_(\d*[a-zA-Z]+\w+)$/,regmod).exec(vars[i]);
+		  	dispstr = dispstr.replace(new RegExp(varpts[0],regmod), '"'+varpts[1]+'"_"'+varpts[2]+'"');
+		  	//this repvars was needed to workaround with mathjs confusion with subscripted variables
+		  	str = str.replace(varpts[0], "repvars"+i);
+		  	vars[i] = "repvars"+i;
+		  }
 		  if (!isgreek && !vars[i].match(/^(\w)_\d+$/) && vars[i]!="varE") {
 			  varstoquote.push(vars[i]);
 		  }
+		  */
 	  }
   }
+  vl = vars.join("|");
+  
   if (varstoquote.length>0) {
 	  vltq = varstoquote.join("|");
 	  var reg = new RegExp("("+vltq+")","g");
-	  dispstr = str.replace(reg,"\"$1\"");
+	  dispstr = dispstr.replace(reg,"\"$1\"");
   }
   dispstr = dispstr.replace("varE","E");
   
@@ -682,10 +739,13 @@ function AMpreview(inputId,outputId) {
 	  str = str.replace(reg,"$1*sin($1+");
   }
   vars = vl.split('|');
+
   var totesteqn = mathjs(str,vl);
+
   while (tstpt<ptlist.length && (isNaN(res) || res=="Infinity")) {
 	  var totest = '';
 	  testvals = ptlist[tstpt].split("~");
+
 	  for (var j=0; j<vars.length; j++) {
 		totest += "var " + vars[j] + "="+testvals[j]+";"; 
 	  }
@@ -931,7 +991,7 @@ function doonsubmit(form,type2,skipconfirm) {
 			str = str.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
 			str = str.replace(',','*NaN*'); //force eval error
 			//str = str.replace(/,/g,"");
-			if (calcformat[qn].indexOf('scinot')!=-1) {
+			if (calcformat[qn].indexOf('scinot')!=-1 || calcformat[qn].indexOf('allowxtimes')!=-1) {
 				str = str.replace(/(x|X|\u00D7)/,"*");
 			}
 			if (str.match(/^\s*[+-]?\s*((\d+(\.\d*)?)|(\.\d+))\s*%\s*$/)) {//single percent
@@ -997,21 +1057,39 @@ function doonsubmit(form,type2,skipconfirm) {
 		varlist = vlist[qn];
 		
 		vars = varlist.split("|");
-		for (var j=0; j<vars.length; j++) {
-			  if (vars[j] == "varE") {
-			  	  str = str.replace("E","varE");	
-			  } else if (vars[j].charCodeAt(0)>96) { //lowercase
-				  if (arraysearch(vars[j].toUpperCase(),vars)==-1) {
-					 // vars[j] = vars[j].toLowerCase();
-					  str = str.replace(new RegExp(vars[j],"gi"),vars[j]);	  
-				  }
-			  } else {
-				  if (arraysearch(vars[j].toLowerCase(),vars)==-1) {
-					//vars[j] = vars[j].toLowerCase();
-					str = str.replace(new RegExp(vars[j],"gi"),vars[j]);
-				  }
+		for (var i=0; i<vars.length; i++) {
+			foundaltcap = false;
+			for (var j=0; j<vars.length; j++) {
+				if (i!=j && vars[j].toLowerCase()==vars[i].toLowerCase() && vars[j]!=vars[i]) {
+					foundaltcap = true;
+					break;
+				}
+			}
+			if (!foundaltcap) {
+				str = str.replace(new RegExp(vars[i],"gi"),vars[i]);
+			}
+			
+			if (vars[i].length>2 && vars[i].match(/^\w+_\w+$/)) {
+				var varpts = vars[i].match(/^(\w+)_(\w+)$/);
+				str = str.replace(new RegExp(varpts[0],"g"), "repvars"+i);
+				vars[i] = "repvars"+i;
+			} else if (vars[i] == "varE") {
+				str = str.replace("E","varE");	
+			}
+			
+			/*else if (vars[i].charCodeAt(0)>96) { //lowercase
+			  if (arraysearch(vars[i].toUpperCase(),vars)==-1) {
+				//vars[i] = vars[i].toLowerCase();
+				str = str.replace(new RegExp(vars[i],"gi"),vars[i]);	  
 			  }
-		  }
+			} else {
+			  if (arraysearch(vars[i].toLowerCase(),vars)==-1) {
+				//vars[i] = vars[i].toLowerCase();
+				str = str.replace(new RegExp(vars[i],"gi"),vars[i]);	  
+			  }
+			}
+			*/
+		}
 		varlist = vars.join("|");
 		
 		if (fl!='') {

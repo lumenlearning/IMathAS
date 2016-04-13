@@ -265,6 +265,8 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 						$hintloc[$iidx] = $hintpart[$usenum];
 					} else if (strpos($hintpart[$usenum],'button"')!==false) {
 						$hintloc[$iidx] = "<p>{$hintpart[$usenum]}</p>\n";
+					} else if (isset($hintlabel)) {
+						$hintloc[$iidx] = "<p>$hintlabel {$hintpart[$usenum]}</p>\n";	
 					} else {
 						$hintloc[$iidx] = "<p><i>" . _('Hint:') . "</i> {$hintpart[$usenum]}</p>\n";
 					}
@@ -284,6 +286,8 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 					$hintloc = $hints[$usenum];
 				} else if (strpos($hints[$usenum],'button"')!==false) {
 					$hintloc = "<p>{$hints[$usenum]}</p>\n";
+				} else if (isset($hintlabel)) {
+					$hintloc = "<p>$hintlabel {$hints[$usenum]}</p>\n";
 				} else {
 					$hintloc = "<p><i>" . _('Hint:') . "</i> {$hints[$usenum]}</p>\n";
 				}
@@ -1664,6 +1668,31 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		if (isset($answer)) {
 			$sa = makeprettydisp($answer);
+			$greekletters = array('alpha','beta','chi','delta','epsilon','gamma','phi','psi','sigma','rho','theta','lambda','mu','nu','omega');
+
+			for ($i = 0; $i < count($variables); $i++) {
+				if (strlen($variables[$i])>1 && $variables[$i]!='varE') {
+					$isgreek = false;
+					$varlower = strtolower($variables[$i]);
+					for ($j = 0; $j< count($greekletters);$j++) {
+						if ($varlower==$greekletters[$j]) {
+							$isgreek = true;
+							break;
+						}
+					}
+					if (!$isgreek && preg_match('/^(\w+)_(\w+)$/',$variables[$i],$matches)) {
+						if (strlen($matches[1])>1) {
+							$matches[1] = '"'.$matches[1].'"';
+						}
+						if (strlen($matches[2])>1) {
+							$matches[2] = '"'.$matches[2].'"';
+						}
+						$sa = str_replace($matches[0], $matches[1].'_'.$matches[2], $sa);
+					} else if (!$isgreek && $variables[$i]!='varE') {
+						$sa = str_replace($variables[$i], '"'.$variables[$i].'"', $sa);
+					}
+				}
+			}
 		}
 	} else if ($anstype == "ntuple") {
 		if (isset($options['answerboxsize'])) {if (is_array($options['answerboxsize'])) {$sz = $options['answerboxsize'][$qn];} else {$sz = $options['answerboxsize'];}}
