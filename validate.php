@@ -1,4 +1,5 @@
 <?php
+session_start();
 //IMathAS:  Checks user's login - prompts if none. 
 //(c) 2006 David Lippman
  header('P3P: CP="ALL CUR ADM OUR"');
@@ -22,7 +23,7 @@
  	 $randf = 'rand';
  }
  
- session_start();
+ //session_start();
  $sessionid = session_id();
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
  	 $urlmode = 'https://';
