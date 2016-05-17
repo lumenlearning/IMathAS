@@ -15,7 +15,15 @@ $now = $currentTime;
     echo $this->render("../../itemHeader/_indexWithLeftContent", ['link_title' => [AppUtility::t('Home', false), $course->name,'Thread'], 'link_url' => [AppUtility::getHomeURL() . 'site/index', AppUtility::getHomeURL() . 'course/course/course?cid=' . $course->id,AppUtility::getHomeURL() . 'forum/forum/thread?cid=' . $course->id.'&forum='.$forumData->id]]);
     ?>
 </div>
-<form id="add-thread" enctype="multipart/form-data" action="<?php AppUtility::getURLFromHome('forum','forum/add-new-thread')?>" method="post">
+
+
+
+<?php $form = ActiveForm::begin(
+['action' => '',
+'id' => 'add-thread',
+'options' => ['method' => 'post']])
+ ?>
+
 <div class ="title-container">
     <div class="row">
         <div class="pull-left page-heading">
@@ -170,7 +178,3 @@ $now = $currentTime;
     </div>
 </div>
 </form>
-
-
-
-
