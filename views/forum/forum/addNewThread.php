@@ -177,4 +177,4 @@ $now = $currentTime;
         <a href="#" class="btn btn-primary add-new-thread" id="addNewThread"><i class="fa fa-share"></i>&nbsp;Create Thread</a>
     </div>
 </div>
-</form>
+<?php ActiveForm::end() ?>
