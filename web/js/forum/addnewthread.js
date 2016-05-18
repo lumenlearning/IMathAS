@@ -17,6 +17,7 @@ $(document).ready(function () {
         }
         else
         {
+          console.log(subject);
             document.forms["add-thread"].submit();
         }
     });
@@ -35,5 +36,3 @@ $(document).ready(function () {
         i++;
     });
 });
-
-

@@ -46,7 +46,9 @@ $now = $currentTime;
     <div class="col-sm-12 col-md-12" style="padding-top: 30px;">
         <div class="col-sm-2 col-md-2 subject-label"><?php echo AppUtility::t('Subject')?></div>
         <div class="col-sm-10 col-md-10">
-            <input type=text size=0 style="width: 100%;height: 40px; border: #6d6d6d 1px solid;" name=subject value="" class="subject form-control" maxlength="60">
+            <!-- <input type=text size=0 style="width: 100%;height: 40px; border: #6d6d6d 1px solid;" name=subject value="" class="subject form-control" maxlength="60"> -->
+            <?= $form->field($model, 'subject')->textInput(['value' =>'Im so ahhhhhhhh!!!', 'id' => 'subject','class' => 'subject','size' =>'0','style'=>'width: 100%;height: 40px; border: #6d6d6d 1px solid;']); ?>
+
         </div>
     </div>
     <BR class=form>
