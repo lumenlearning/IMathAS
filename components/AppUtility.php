@@ -24,6 +24,7 @@ use app\models\Wiki;
 use Yii;
 use yii\base\Component;
 use app\models\Links;
+use yii\helpers\HtmlPurifier;
 
 require_once("../filter/filter.php");
 
@@ -3300,7 +3301,7 @@ class AppUtility extends Component
                     }
                     echo '</p>';
                 }
-                echo filter($message[$child]);
+                echo HtmlPurifier::process($message[$child]);
                 if ($haspoints) {
                     if ($caneditscore && $ownerid[$child]!=$userid) {
                         echo '<hr/>';

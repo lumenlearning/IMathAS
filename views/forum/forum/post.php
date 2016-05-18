@@ -10,6 +10,7 @@ $this->title = 'Post';
 $currentLevel = AppConstant::NUMERIC_ZERO;
 
 ?>
+
 <div class="item-detail-header">
     <?php if($currentUser->rights > AppConstant::STUDENT_RIGHT) {
         echo $this->render("../../itemHeader/_indexWithLeftContent", ['link_title' => [AppUtility::t('Home', false), $course->name,AppUtility::t('Forum', false),AppUtility::t('Thread', false)], 'link_url' => [AppUtility::getHomeURL() . 'site/index', AppUtility::getHomeURL() . 'course/course/course?cid=' . $course->id,AppUtility::getHomeURL() . 'forum/forum/search-forum?cid=' . $course->id,AppUtility::getHomeURL() .'forum/forum/thread?cid=' . $courseId . '&forum=' . $forumid]]);
@@ -86,7 +87,7 @@ $currentLevel = AppConstant::NUMERIC_ZERO;
         <button class="btn post-btn-color expand" onclick="showall()">&nbsp;Show All</button>
         <button  class="btn post-btn-color expand" onclick="hideall()">&nbsp;Hide All</button>
 
-      <?php 
+      <?php
         echo "<br/>";echo "<br/>";
         if ($caneditscore && $haspoints) {
             echo "<form method=post action=\"thread?cid=$courseId&forum=$forumid&score=true\">";
@@ -119,4 +120,3 @@ $currentLevel = AppConstant::NUMERIC_ZERO;
          </div>\n";
     } ?>
 </div>
-

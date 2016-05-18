@@ -128,9 +128,9 @@ class ForumPosts extends BaseImasForumPosts
 
     public function createThread($params, $userId, $postType, $reply, $date, $isNonValue=null,$fileName=null,$tag=null)
     {
-      // var_dump( '<pre>');
-      //   var_dump($params);
-      //   var_dump( '</pre>');
+        // var_dump( '<pre>');
+        // var_dump($params['message']);
+        // var_dump( '</pre>');
         $maxid = $this->find()->max('id');
         $maxid = $maxid + AppConstant::NUMERIC_ONE;
         $this->id = $maxid;
