@@ -15,13 +15,21 @@ $(document).ready(function () {
             $(".subject").css('border-color', 'red');
             $('#flash-message').html("<div class='alert alert-danger'>Subject cannot be blank.");
         }
+        else if(subject =="yes")
+        {
+        alert("abeer is in the building");
+
+        }
         else
         {
           console.log(subject);
             document.forms["add-thread"].submit();
         }
     });
-
+// var filterScripTag(input){
+//
+//
+// }
     $("input").keyup(function(e){
         if(e.keyCode == 8 || e.keyCode == 46)
         {

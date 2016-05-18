@@ -8,6 +8,7 @@ use app\models\_base\BaseImasForumPosts;
 use Yii;
 use app\controllers\AppController;
 use yii\db\Query;
+use  yii\helpers\HtmlPurifier;
 
 
 class ForumPosts extends BaseImasForumPosts
@@ -126,19 +127,21 @@ class ForumPosts extends BaseImasForumPosts
     }
 
     public function createThread($params, $userId, $postType, $reply, $date, $isNonValue=null,$fileName=null,$tag=null)
-    {   var_dump( '<pre>');
-        var_dump($params['ForumPosts']);
-        var_dump( '</pre>');
+    {
+      // var_dump( '<pre>');
+      //   var_dump($params);
+      //   var_dump( '</pre>');
         $maxid = $this->find()->max('id');
         $maxid = $maxid + AppConstant::NUMERIC_ONE;
         $this->id = $maxid;
         $this->forumid = isset($params['forumid']) ? $params['forumid'] : null;
         $this->threadid = isset($maxid) ? $maxid : null;
-        if (empty($params['subject']))
+        if (empty($params["ForumPosts"]['subject']))
         {
             $params['subject'] = '(None)';
         }
-        $this->subject = trim($params['subject']);
+        // $sunjectpurrified = HtmlPurifier::process($params["ForumPosts"]['subject']);
+        $this->subject = trim($params["ForumPosts"]['subject']);
         $this->userid = isset($userId) ? $userId : null;
         $this->message = isset($params['message']) ? $params['message'] : null;
         $postdate = AppController::dateToString();
