@@ -1,6 +1,8 @@
 <?php
 use app\components\AppUtility;
 use app\components\AppConstant;
+use yii\helpers\Html;
+
 $this->title = AppUtility::t('View Forum Grade', false);
 $this->params['breadcrumbs'][] = $this->title;
 
