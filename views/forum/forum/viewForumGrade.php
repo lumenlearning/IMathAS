@@ -34,7 +34,8 @@ $showLink = ($canEditScore || time() < $user['enddate']);
 </div>
 <div class="tab-content shadowBox">
  <br><div class="col-md-12 col-sm-12"><?php AppUtility::t('Grades on forum')?> <b><?php echo Html::encode($user['name'])?></b>
-     <?php AppUtility::t('for')?> <b><?php echo trim(ucfirst($user['FirstName'])).' '. (ucfirst($user['LastName']))?></b></div>
+    <!-- controversial encoding below -->
+     <?php AppUtility::t('for')?> <b><?php echo Html::encode(trim(ucfirst($user['FirstName']))).' '. (Html::encode(ucfirst($user['LastName'])))?></b></div>
 <?php
 
 $scores = array();
