@@ -3,6 +3,9 @@ use app\components\AppUtility;
 use app\components\AppConstant;
 use yii\helpers\Html;
 
+// note: imported variable values from $responseDate <--- ForumController are all populated with reliance upon class id (user,student,teacher, etc). Thus, first view is that these variables are not susceptible to user influence, encoding will still be enacted for enhanced security -->
+
+
 $this->title = AppUtility::t('View Forum Grade', false);
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -13,14 +16,16 @@ $canEditScore = (($isTeacher) || (($isTutor) && $tutorEdit == AppConstant::NUMER
 $showLink = ($canEditScore || time() < $user['enddate']);
 ?>
 <div class="item-detail-header">
+  <!-- encode $course->name -->
     <?php
-        echo $this->render("../../itemHeader/_indexWithLeftContent", ['link_title' => [AppUtility::t('Home', false), $course->name], 'link_url' => [AppUtility::getHomeURL() . 'site/index', AppUtility::getHomeURL() . 'course/course/course?cid=' . $course->id]]);
+        echo $this->render("../../itemHeader/_indexWithLeftContent", ['link_title' => [AppUtility::t('Home', false), Html::encode($course->name)], 'link_url' => [AppUtility::getHomeURL() . 'site/index', AppUtility::getHomeURL() . 'course/course/course?cid=' . $course->id]]);
     ?>
 </div>
 <div class = "title-container">
     <div class="row">
         <div class="pull-left page-heading">
-            <div class="vertical-align title-page"><?php echo $this->title ?></div>
+           <!-- encode title juuust to be on the safe side -->
+            <div class="vertical-align title-page"><?php echo Html::encode($this->title) ?></div>
         </div>
     </div>
 </div>
@@ -28,7 +33,7 @@ $showLink = ($canEditScore || time() < $user['enddate']);
     <?php echo $this->render("../../course/course/_toolbarTeacher", ['course' => $course, 'section' => 'gradebook']);?>
 </div>
 <div class="tab-content shadowBox">
- <br><div class="col-md-12 col-sm-12"><?php AppUtility::t('Grades on forum')?> <b><?php echo $user['name']?></b>
+ <br><div class="col-md-12 col-sm-12"><?php AppUtility::t('Grades on forum')?> <b><?php echo Html::encode($user['name'])?></b>
      <?php AppUtility::t('for')?> <b><?php echo trim(ucfirst($user['FirstName'])).' '. (ucfirst($user['LastName']))?></b></div>
 <?php
 
