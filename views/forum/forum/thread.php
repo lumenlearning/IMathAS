@@ -60,7 +60,11 @@ $now = $currentTime;
 <input type="hidden" name="from" value="<?php echo $unRead; ?>">
 <div class="tab-content shadowBox ">
     <div class="inner-content col-md-12 col-sm-12 padding-left-right-thirty padding-bottom-eight">
-        <form id="myForm">
+        <?php
+        $form = ActiveForm::begin([
+            'id' => 'myForm',
+        ]);
+        ?>
             <div class="padding-left-zero col-md-5 col-sm-8">
                 <div class="view-drop-down col-md-8  col-sm-8 padding-left-right-zero">
                     <span class="floatleft padding-right-ten padding-top-five"><?php echo AppUtility::t('View Options',false)?></span>
@@ -104,7 +108,7 @@ $now = $currentTime;
             <input type=hidden id="page" name=page value="<?php echo $page;?>">
             <input type=hidden id="cid" name=cid value="<?php echo $course->id;?>">
             <input type=hidden id="forum" name=forum value="<?php echo $forumid;?>">
-        </form>
+        <?php ActiveForm::end(); ?>
     </div>
 
     <?php
