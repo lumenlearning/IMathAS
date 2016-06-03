@@ -279,6 +279,7 @@ if (isset($CFG['CPS']['theme'])) {
 	  unset($dbserver);
 	  unset($dbusername);
 	  unset($dbpassword);
+	  mysql_query("set session sql_mode=''");
   }
   //clean up post and get if magic quotes aren't on
   function addslashes_deep($value) {
