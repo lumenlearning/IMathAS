@@ -18,14 +18,6 @@ $this->title = $pageTitle;
 
     ?>
 
-
-
-    <?php
-        $form = ActiveForm::begin([
-                'id' => "",
-                'options' => ['enctype' => 'multipart/form-data'],
-            ]);
-    ?>
     <?php if ($modifyForumId){ ?>
         <input type="hidden" name="modifyFid" value="<?php echo $modifyForumId;?>">
     <?php } ?>
@@ -49,12 +41,12 @@ $this->title = $pageTitle;
         <div class="name-of-item">
             <div class="col-md-2 col-sm-3 padding-right-zero"><?php AppUtility::t('Name of Forum')?></div>
             <div class="col-md-10 col-sm-9">
-                <?php $title = AppUtility::t('Enter forum name here', false);
+                <?php
+               $title = AppUtility::t('Enter forum name here', false);
                 if ($forumData) {
                     $title = Html::encode($forumData['name']);
                 } ?>
-
-                <input class="name form-control" id="name-forum" maxlength="60" type=text size=0 style="width: 100%;height: 40px; border: #a9a9a9 1px solid;" name=name value="<?php echo trim($title);?>" ondblclick="this.value=' '">
+                <?= $form->field($model,'name')->textInput(['value'=>"abve",'maxlength' => "60" , 'id'=> 'name-forum', 'type'=> 'text', 'size'=> '0','style'=>'width: 100%;height: 40px; border: #a9a9a9 1px solid;' , 'class'=>"name form-control"]) ?>
             </div>
         </div>
         <BR class=form>

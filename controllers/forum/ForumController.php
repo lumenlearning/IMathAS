@@ -2024,10 +2024,11 @@ class ForumController extends AppController
             }
             return $this->redirect(AppUtility::getURLFromHome('course', 'course/course?cid=' . $course->id));
         }
+        $model= new Forums();
         $this->includeJS(["editor/tiny_mce.js", "forum/addforum.js", "general.js"]);
         $this->includeCSS(['course/items.css']);
         $responseData = array('course' => $course, 'groupNameId' => $groupNameId, 'groupNameLabel' => $groupNameLabel, 'saveTitle' => $saveTitle, 'pageTitle' => $pageTitle, 'rubricsLabel' => $rubricsLabel, 'rubricsId' => $rubricsId, 'pageOutcomesList' => $pageOutcomesList,
-            'pageOutcomes' => $pageOutcomes, 'defaultValue' => $defaultValue, 'forumData' => $forumData, 'modifyForumId' => $modifyForumId,
+            'pageOutcomes' => $pageOutcomes,'model'=>$model, 'defaultValue' => $defaultValue, 'forumData' => $forumData, 'modifyForumId' => $modifyForumId,
             'gbcatsLabel' => $gbCatsLabel, 'gbcatsId' => $gbCatsId, 'block' => $block,'page_formActionTag' => $page_formActionTag);
         return $this->renderWithData('addForum', $responseData);
     }
