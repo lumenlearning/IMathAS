@@ -1907,14 +1907,14 @@ class ForumController extends AppController
                 $postDate = AppUtility::parsedatetime($params['postDate'], $params['postTime']);
                 $replyByDate = AppUtility::parsedatetime($params['replyByDate'], $params['replyByTime']);
                 $settingValue = $params['allow-anonymous-posts'] + $params['allow-students-to-modify-posts'] + $params['allow-students-to-delete-own-posts'] + $params['like-post'] + $params['viewing-before-posting'];
-                $finalArray['name'] = trim($params['name']);
+                $finalArray['name'] = trim($params['Forums']['name']);
                 if ($params['description'] == AppConstant::FORUM_DESCRIPTION) {
                     $finalArray['description'] = '';
                 } else {
                     /*
                      * Apply html lawed here
                      */
-                    $finalArray['description'] = $params['description'];
+                    $finalArray['description'] = $params['Forums']['description'];
                 }
                 $finalArray['courseid'] = $params['cid'];
                 $finalArray['settings'] = $settingValue;
