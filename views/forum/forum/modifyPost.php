@@ -15,7 +15,7 @@ $currentTime = AppUtility::parsedatetime(date('m/d/Y'), date('h:i a'));
 $now = $currentTime;
 
 $form = ActiveForm::begin([
-    'id' => '',
+    'id' => 'modifyPostform',
     'options' => ['enctype' => 'multipart/form-data'],
     ]);
     ?>
@@ -47,9 +47,9 @@ $form = ActiveForm::begin([
         <div class="col-sm-2 subject-label"><?php echo AppUtility::t('Subject');
             ?></div>
         <div class="col-sm-10">
-        <!-- $thread is defined on line 686 of FC, and receives the return from app/models/forms/ThreadForm function 'thread' which is this: $thread = ForumPosts::find()->where(['forumid' => $forumid])->orderBy(['posttype'=> $sortBy ,'id' => $sortBy])->all(); 
+        <!-- $thread is defined on line 686 of FC, and receives the return from app/models/forms/ThreadForm function 'thread' which is this: $thread = ForumPosts::find()->where(['forumid' => $forumid])->orderBy(['posttype'=> $sortBy ,'id' => $sortBy])->all();
         The data being perused is possibly input from user so subsequent $thread is encoded -->
-            <input type=text maxlength="60" value="<?php echo Html::encode($thread[0]['subject']) ?>" size=0 style="width: 100%; height: 40px; border:#6d6d6d 1px solid;"  name=subject class="subject textbox padding-left-ten">
+            <?= $form->field($model, 'subject')->textInput(['value'=>Html::encode($thread[0]['subject']),'maxlength' => true ,'type'=> 'text', 'size'=> '0','class'=>'subject' ,'style'=>"width: 100%; height: 40px; border:#6d6d6d 1px solid;" ,'class'=>"subject textbox padding-left-ten" ,'maxlength'=> "60"])->label(false) ?>
         </div>
     </div>
     <BR class=form>

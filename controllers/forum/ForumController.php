@@ -772,10 +772,11 @@ class ForumController extends AppController
 
             }
         }
+        $model = new ForumPosts();
         $this->setReferrer();
         $this->includeCSS(['forums.css']);
         $this->includeJS(["editor/tiny_mce.js", 'editor/tiny_mce_src.js', 'general.js', 'forum/modifypost.js']);
-        $responseData = array('threadId' => $threadId, 'forumId' => $forumId, 'course' => $course, 'thread' => $threadArray, 'currentUser' => $currentUser, 'threadCreatedUserData' => $threadCreatedUserData, 'forumData' => $forumData, 'forumPostData' => $forumPostData, 'userId' => $userId);
+        $responseData = array('threadId' => $threadId, 'model' =>$model,'forumId' => $forumId, 'course' => $course, 'thread' => $threadArray, 'currentUser' => $currentUser, 'threadCreatedUserData' => $threadCreatedUserData, 'forumData' => $forumData, 'forumPostData' => $forumPostData, 'userId' => $userId);
         return $this->renderWithData('modifyPost', $responseData);
     }
 
