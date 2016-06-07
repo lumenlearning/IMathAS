@@ -51,7 +51,7 @@ $now = $currentTime;
     <div class="col-sm-12 col-md-12" style="padding-top: 30px;">
         <div class="col-sm-2 col-md-2 subject-label"><?php echo AppUtility::t('Subject')?></div>
         <div class="col-sm-10 col-md-10">
-          <?= $form->field($model, 'subject')->textInput(['maxlength' => true ,'type'=> 'text', 'size'=> '0','class'=>'subject' ,'style'=>'width:100%;height: 40px; border: #6d6d6d 1px solid;' ,'class'=>"subject form-control" ,'maxlength'=> "60"]) ?>
+          <?= $form->field($model, 'subject')->textInput(['maxlength' => true ,'type'=> 'text', 'size'=> '0','class'=>'subject' ,'style'=>'width:100%;height: 40px; border: #6d6d6d 1px solid;' ,'class'=>"subject form-control" ,'maxlength'=> "60"])->label(false) ?>
         </div>
     </div>
     <BR class=form>
@@ -77,7 +77,7 @@ $now = $currentTime;
         <div class="col-sm-2 col-md-2 message-label"><?php echo AppUtility::t('Message')?></div>
         <div class="col-sm-10 col-md-10 message-div">
             <div class=editor>
-                <?= $form->field($model, 'message')->textArea(['id' =>'message','style'=>'width: 100%','rows' => '12', 'cols' => '5']) ?>
+                <?= $form->field($model, 'message')->textArea(['id' =>'message','style'=>'width: 100%','rows' => '12', 'cols' => '5'])->label(false) ?>
 
             </div>
         </div>
