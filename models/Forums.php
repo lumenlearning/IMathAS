@@ -111,12 +111,12 @@ class Forums extends BaseImasForums {
     public function updateForum($params,$endDate,$startDate,$postDate,$replyByDate,$settingValue,$cntingb)
     {
         $updateForumData = Forums::findOne(['id' => $params['modifyFid']]);
-        $updateForumData->name = trim($params['name']);
+        $updateForumData->name = trim($params ["Forums"]['name']);
         if(empty($params['forum-description']))
         {
             $params['forum-description'] = ' ';
         }
-        $updateForumData->description = trim($params['description']);
+        $updateForumData->description = trim($params ["Forums"]['description']);
         $updateForumData->courseid = $params['cid'];
         $updateForumData->settings = $settingValue;
 

@@ -1504,7 +1504,7 @@ class CourseController extends AppController
 //            if (count($exceptions) > 0) {
 //                upsendexceptions($items);
 //            }
-            
+
             if (isset($folder))
             {
                 $now = time() + $previewShift;

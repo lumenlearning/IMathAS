@@ -752,11 +752,10 @@ class ForumController extends AppController
                     $j++;
                 }
             }
-
             $fileName = implode('@@', $files);
-
-            if (strlen(trim($params['subject'])) > AppConstant::NUMERIC_ZERO)
+            if (strlen(trim($params['ForumPosts']['subject'])) > AppConstant::NUMERIC_ZERO)
             {
+              error_log("over here");
                 $threadIdOfPost = ForumPosts::modifyPost($params, $fileName);
                 $contentTrackRecord = new ContentTrack();
                 if ($currentUser->rights == AppConstant::STUDENT_RIGHT) {
@@ -772,10 +771,11 @@ class ForumController extends AppController
 
             }
         }
+        $model = new ForumPosts();
         $this->setReferrer();
         $this->includeCSS(['forums.css']);
         $this->includeJS(["editor/tiny_mce.js", 'editor/tiny_mce_src.js', 'general.js', 'forum/modifypost.js']);
-        $responseData = array('threadId' => $threadId, 'forumId' => $forumId, 'course' => $course, 'thread' => $threadArray, 'currentUser' => $currentUser, 'threadCreatedUserData' => $threadCreatedUserData, 'forumData' => $forumData, 'forumPostData' => $forumPostData, 'userId' => $userId);
+        $responseData = array('threadId' => $threadId, 'model' =>$model,'forumId' => $forumId, 'course' => $course, 'thread' => $threadArray, 'currentUser' => $currentUser, 'threadCreatedUserData' => $threadCreatedUserData, 'forumData' => $forumData, 'forumPostData' => $forumPostData, 'userId' => $userId);
         return $this->renderWithData('modifyPost', $responseData);
     }
 
@@ -1907,14 +1907,14 @@ class ForumController extends AppController
                 $postDate = AppUtility::parsedatetime($params['postDate'], $params['postTime']);
                 $replyByDate = AppUtility::parsedatetime($params['replyByDate'], $params['replyByTime']);
                 $settingValue = $params['allow-anonymous-posts'] + $params['allow-students-to-modify-posts'] + $params['allow-students-to-delete-own-posts'] + $params['like-post'] + $params['viewing-before-posting'];
-                $finalArray['name'] = trim($params['name']);
+                $finalArray['name'] = trim($params['Forums']['name']);
                 if ($params['description'] == AppConstant::FORUM_DESCRIPTION) {
                     $finalArray['description'] = '';
                 } else {
                     /*
                      * Apply html lawed here
                      */
-                    $finalArray['description'] = $params['description'];
+                    $finalArray['description'] = $params['Forums']['description'];
                 }
                 $finalArray['courseid'] = $params['cid'];
                 $finalArray['settings'] = $settingValue;
@@ -2024,10 +2024,11 @@ class ForumController extends AppController
             }
             return $this->redirect(AppUtility::getURLFromHome('course', 'course/course?cid=' . $course->id));
         }
+        $model= new Forums();
         $this->includeJS(["editor/tiny_mce.js", "forum/addforum.js", "general.js"]);
         $this->includeCSS(['course/items.css']);
         $responseData = array('course' => $course, 'groupNameId' => $groupNameId, 'groupNameLabel' => $groupNameLabel, 'saveTitle' => $saveTitle, 'pageTitle' => $pageTitle, 'rubricsLabel' => $rubricsLabel, 'rubricsId' => $rubricsId, 'pageOutcomesList' => $pageOutcomesList,
-            'pageOutcomes' => $pageOutcomes, 'defaultValue' => $defaultValue, 'forumData' => $forumData, 'modifyForumId' => $modifyForumId,
+            'pageOutcomes' => $pageOutcomes,'model'=>$model, 'defaultValue' => $defaultValue, 'forumData' => $forumData, 'modifyForumId' => $modifyForumId,
             'gbcatsLabel' => $gbCatsLabel, 'gbcatsId' => $gbCatsId, 'block' => $block,'page_formActionTag' => $page_formActionTag);
         return $this->renderWithData('addForum', $responseData);
     }

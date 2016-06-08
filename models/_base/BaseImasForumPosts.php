@@ -45,6 +45,7 @@ class BaseImasForumPosts extends \yii\db\ActiveRecord
         return [
             [['forumid', 'threadid', 'userid', 'postdate', 'views', 'parent', 'posttype', 'isanon'], 'integer'],
             [['message', 'files'], 'string'],
+            [['subject'],'required'],
 //            ['files', 'skipOnEmpty' => 'false', 'extensions' => 'png, jpg, jpeg, pdf'],
             [['subject', 'tag'], 'string', 'max' => 254],
             [['message', 'subject'],'filter','filter'=>'\yii\helpers\HtmlPurifier::process'],

@@ -8,6 +8,7 @@ use yii\helpers\HtmlPurifier;
 use yii\widgets\ActiveForm;
 use app\components\AssessmentUtility;
 
+
 // The base model is BaseImasForumPosts which has subject and message purified
 $this->title = AppUtility::t('Modify Post',false);
 $this->params['breadcrumbs'][] = $this->title;
@@ -15,8 +16,9 @@ $currentTime = AppUtility::parsedatetime(date('m/d/Y'), date('h:i a'));
 $now = $currentTime;
 
 $form = ActiveForm::begin([
-    'id' => '',
+    'id' => 'modifyPostform',
     'options' => ['enctype' => 'multipart/form-data'],
+    'enableAjaxValidation' => true,
     ]);
     ?>
  <!-- $course is defined in line 672 of ForumController, where it receives result of query. Thus any parameters attached to course, as well as $course itself, will be from the back-end and secure -->
@@ -47,9 +49,9 @@ $form = ActiveForm::begin([
         <div class="col-sm-2 subject-label"><?php echo AppUtility::t('Subject');
             ?></div>
         <div class="col-sm-10">
-        <!-- $thread is defined on line 686 of FC, and receives the return from app/models/forms/ThreadForm function 'thread' which is this: $thread = ForumPosts::find()->where(['forumid' => $forumid])->orderBy(['posttype'=> $sortBy ,'id' => $sortBy])->all(); 
+        <!-- $thread is defined on line 686 of FC, and receives the return from app/models/forms/ThreadForm function 'thread' which is this: $thread = ForumPosts::find()->where(['forumid' => $forumid])->orderBy(['posttype'=> $sortBy ,'id' => $sortBy])->all();
         The data being perused is possibly input from user so subsequent $thread is encoded -->
-            <input type=text maxlength="60" value="<?php echo Html::encode($thread[0]['subject']) ?>" size=0 style="width: 100%; height: 40px; border:#6d6d6d 1px solid;"  name=subject class="subject textbox padding-left-ten">
+            <?= $form->field($model, 'subject')->textInput(['value'=>Html::encode($thread[0]['subject']),'maxlength' => true ,'type'=> 'text', 'size'=> '0','class'=>'subject' ,'style'=>"width: 100%; height: 40px; border:#6d6d6d 1px solid;" ,'class'=>"subject textbox padding-left-ten" ,'maxlength'=> "60"])->label(false) ?>
         </div>
     </div>
     <BR class=form>
@@ -58,9 +60,7 @@ $form = ActiveForm::begin([
         <div class="col-sm-2 message-label"><?php echo AppUtility::t('Message');?></div>
         <div class="col-sm-10 message-div">
             <div class=editor>
-                <textarea cols=5 rows=12 id=message name=message style="width: 100%">
-                    <?php echo HTMLPurifier::process($thread[0]['message']);?>
-                </textarea>
+              <?= $form->field($model, 'message')->textArea(['value' =>HTMLPurifier::process($thread[0]['message']) ,'id' =>'message','style'=>'width: 100%','rows' => '12', 'cols' => '5'])->label(false) ?>
             </div>
         </div>
     </div>
@@ -96,7 +96,7 @@ $form = ActiveForm::begin([
             <span class="col-sm-2 align-title"><?php echo AppUtility::t('Post Type');?></span>
             <span class="col-sm-10" id="post-type-radio-list">
 
-                 <!-- radio button list displayed beneath Message text area -->
+                 <! radio button list displayed beneath Message text area -->
                  <tr><div class='radio student-enroll override-hidden'><label class='checkbox-size'><td>
                                  <input type='radio' checked name='post-type' id="regular" value='0'value="0"<?php AssessmentUtility::writeHtmlChecked($thread[0]['postType'], AppConstant::NUMERIC_ZERO);?> >
                                  <span class='cr'><i class='cr-icon fa fa-check align-check'></i></span></label></td><td ><?php echo AppUtility::t('Regular');?></td></div></tr>
