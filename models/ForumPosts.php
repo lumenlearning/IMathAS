@@ -118,7 +118,7 @@ class ForumPosts extends BaseImasForumPosts
         if($params['postanon']){
             $this->isanon = $isaNon;
         }
-        $this->message = isset($params['post-reply']) ? $params['post-reply'] : null;
+        $this->message = isset($params["ForumPosts"]['postreply']) ? $params["ForumPosts"]['postreply'] : null;
         $postdate = time();
         $this->postdate =$postdate;
         $this->files = $fileName;

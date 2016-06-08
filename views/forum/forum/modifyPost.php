@@ -18,7 +18,6 @@ $now = $currentTime;
 $form = ActiveForm::begin([
     'id' => 'modifyPostform',
     'options' => ['enctype' => 'multipart/form-data'],
-    'enableAjaxValidation' => true,
     ]);
     ?>
  <!-- $course is defined in line 672 of ForumController, where it receives result of query. Thus any parameters attached to course, as well as $course itself, will be from the back-end and secure -->
@@ -51,7 +50,7 @@ $form = ActiveForm::begin([
         <div class="col-sm-10">
         <!-- $thread is defined on line 686 of FC, and receives the return from app/models/forms/ThreadForm function 'thread' which is this: $thread = ForumPosts::find()->where(['forumid' => $forumid])->orderBy(['posttype'=> $sortBy ,'id' => $sortBy])->all();
         The data being perused is possibly input from user so subsequent $thread is encoded -->
-            <?= $form->field($model, 'subject')->textInput(['value'=>Html::encode($thread[0]['subject']),'maxlength' => true ,'type'=> 'text', 'size'=> '0','class'=>'subject' ,'style'=>"width: 100%; height: 40px; border:#6d6d6d 1px solid;" ,'class'=>"subject textbox padding-left-ten" ,'maxlength'=> "60"])->label(false) ?>
+            <?= $form->field($model, 'subject')->textInput(['value'=>Html::encode($thread[0]['subject']),'maxlength' => true ,'type'=> 'text', 'size'=> '0' ,'style'=>"width: 100%; height: 40px; border:#6d6d6d 1px solid;" ,'class'=>"subject textbox padding-left-ten" ])->label(false) ?>
         </div>
     </div>
     <BR class=form>
@@ -185,4 +184,4 @@ $form = ActiveForm::begin([
           <input class="btn btn-primary add-new-thread" type="submit" id="save-changes" value="Save changes">
       </div>
 </div>
-<?php ActiveForm::end(); ?>
+</form>

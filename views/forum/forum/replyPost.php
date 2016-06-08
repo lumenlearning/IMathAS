@@ -3,6 +3,8 @@ use app\components\AppUtility;
 use app\components\AppConstant;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
+use yii\helpers\HtmlPurifier;
+
 
 $this->title = AppUtility::t(' post Reply',false);
 $this->params['breadcrumbs'][] = Html::encode($this->title);
@@ -52,9 +54,10 @@ $form = ActiveForm::begin([
         <div class="col-sm-12 col-md-12 padding-top" style="padding-bottom: 20px">
             <div class="col-sm-1 col-md-1 "><?php echo AppUtility::t('Message')?></div>
             <?php echo "<div class='max-width-hundred-per left col-md-11 col-sm-11'>
-        <div class= 'editor post-reply-message-textarea'>
-        <textarea id='post-reply' name='post-reply' style='width: 70%;' rows='12' cols='20'></textarea>
-        </div></div><br>"; ?>
+        <div class= 'editor post-reply-message-textarea'>".
+
+       $form->field($model, 'postreply')->textArea(['value' =>HTMLPurifier::process($thread[0]['message']) ,'style'=>'width: 70%','rows' => '12', 'cols' => '20'])->label(false).
+        "</div></div><br>"; ?>
         </div>
     <?php
     if (!$isTeacher && $allowanon==1) {

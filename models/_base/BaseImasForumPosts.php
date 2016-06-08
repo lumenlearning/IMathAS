@@ -48,6 +48,7 @@ class BaseImasForumPosts extends \yii\db\ActiveRecord
             [['subject'],'required'],
 //            ['files', 'skipOnEmpty' => 'false', 'extensions' => 'png, jpg, jpeg, pdf'],
             [['subject', 'tag'], 'string', 'max' => 254],
+            [['message'],'required'],
             [['message', 'subject'],'filter','filter'=>'\yii\helpers\HtmlPurifier::process'],
 
         ];

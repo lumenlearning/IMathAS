@@ -1274,7 +1274,8 @@ class ForumController extends AppController
         }
         $this->includeCSS(['forums.css']);
         $this->includeJS(['editor/tiny_mce.js', 'editor/tiny_mce_src.js', 'general.js', 'forum/replypost.js']);
-        $responseData = array('reply' => $threadArray, 'course' => $course, 'forumId' => $forumId, 'threadId' => $threadId, 'parentId' => $Id, 'isPost' => $isPost, 'currentUser' => $userData, 'threadData' => $threadData, 'isTeacher' => $isTeacher, 'allowanon' => $allowanon, 'points' => $points, 'hasPoints' => $hasPoints,
+        $model =  new ForumPosts();
+        $responseData = array('model' =>$model,'reply' => $threadArray, 'course' => $course, 'forumId' => $forumId, 'threadId' => $threadId, 'parentId' => $Id, 'isPost' => $isPost, 'currentUser' => $userData, 'threadData' => $threadData, 'isTeacher' => $isTeacher, 'allowanon' => $allowanon, 'points' => $points, 'hasPoints' => $hasPoints,
         'replyTo' => $replyTo);
         return $this->renderWithData('replyPost', $responseData);
     }

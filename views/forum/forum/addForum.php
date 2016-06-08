@@ -12,7 +12,7 @@ $this->title = $pageTitle;
 
 <?php
 $form = ActiveForm::begin([
-  'id' => '',
+  'id' => 'addnewforum',
   'options' => ['enctype' => 'multipart/form-data'],
 ]);
 ?>
