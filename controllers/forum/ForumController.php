@@ -752,11 +752,10 @@ class ForumController extends AppController
                     $j++;
                 }
             }
-
             $fileName = implode('@@', $files);
-
-            if (strlen(trim($params['subject'])) > AppConstant::NUMERIC_ZERO)
+            if (strlen(trim($params['ForumPosts']['subject'])) > AppConstant::NUMERIC_ZERO)
             {
+              error_log("over here");
                 $threadIdOfPost = ForumPosts::modifyPost($params, $fileName);
                 $contentTrackRecord = new ContentTrack();
                 if ($currentUser->rights == AppConstant::STUDENT_RIGHT) {

@@ -8,6 +8,7 @@ use yii\helpers\HtmlPurifier;
 use yii\widgets\ActiveForm;
 use app\components\AssessmentUtility;
 
+
 // The base model is BaseImasForumPosts which has subject and message purified
 $this->title = AppUtility::t('Modify Post',false);
 $this->params['breadcrumbs'][] = $this->title;
@@ -58,9 +59,7 @@ $form = ActiveForm::begin([
         <div class="col-sm-2 message-label"><?php echo AppUtility::t('Message');?></div>
         <div class="col-sm-10 message-div">
             <div class=editor>
-                <textarea cols=5 rows=12 id=message name=message style="width: 100%">
-                    <?php echo HTMLPurifier::process($thread[0]['message']);?>
-                </textarea>
+              <?= $form->field($model, 'message')->textArea(['value' =>HTMLPurifier::process($thread[0]['message']) ,'id' =>'message','style'=>'width: 100%','rows' => '12', 'cols' => '5'])->label(false) ?>
             </div>
         </div>
     </div>

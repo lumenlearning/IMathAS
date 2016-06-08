@@ -53,8 +53,8 @@ class ForumPosts extends BaseImasForumPosts
     public static function modifyPost($params,$fileName)
     {
         $threadPost = ForumPosts::findOne(['id' => $params['threadId']]);
-        $threadPost->subject = trim($params['subject']);
-        $threadPost->message = $params['message'];
+        $threadPost->subject = trim($params['ForumPosts']['subject']);
+        $threadPost->message = $params['ForumPosts']['message'];
         if($params['always-replies'] == 'date')
             {
                 $replyBy = AppUtility::parsedatetime($params['startDate'], $params['startTime']);
@@ -127,6 +127,7 @@ class ForumPosts extends BaseImasForumPosts
 
     public function createThread($params, $userId, $postType, $reply, $date, $isNonValue=null,$fileName=null,$tag=null)
     {
+
         $maxid = $this->find()->max('id');
         $maxid = $maxid + AppConstant::NUMERIC_ONE;
         $this->id = $maxid;
@@ -138,7 +139,7 @@ class ForumPosts extends BaseImasForumPosts
         }
         $this->subject = trim($params['ForumPosts']['subject']);
         $this->userid = isset($userId) ? $userId : null;
-        $this->message = isset($params['ForumPosts']['message']) ? $params['message'] : null;
+        $this->message = isset($params['ForumPosts']['message']) ? $params['ForumPosts']['message'] : null;
         $postdate = AppController::dateToString();
         $this->postdate = $postdate;
         $this->posttype = $postType;
