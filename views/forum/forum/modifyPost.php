@@ -18,6 +18,7 @@ $now = $currentTime;
 $form = ActiveForm::begin([
     'id' => 'modifyPostform',
     'options' => ['enctype' => 'multipart/form-data'],
+    'enableAjaxValidation' => true,
     ]);
     ?>
  <!-- $course is defined in line 672 of ForumController, where it receives result of query. Thus any parameters attached to course, as well as $course itself, will be from the back-end and secure -->
@@ -95,7 +96,7 @@ $form = ActiveForm::begin([
             <span class="col-sm-2 align-title"><?php echo AppUtility::t('Post Type');?></span>
             <span class="col-sm-10" id="post-type-radio-list">
 
-                 <!-- radio button list displayed beneath Message text area -->
+                 <! radio button list displayed beneath Message text area -->
                  <tr><div class='radio student-enroll override-hidden'><label class='checkbox-size'><td>
                                  <input type='radio' checked name='post-type' id="regular" value='0'value="0"<?php AssessmentUtility::writeHtmlChecked($thread[0]['postType'], AppConstant::NUMERIC_ZERO);?> >
                                  <span class='cr'><i class='cr-icon fa fa-check align-check'></i></span></label></td><td ><?php echo AppUtility::t('Regular');?></td></div></tr>
