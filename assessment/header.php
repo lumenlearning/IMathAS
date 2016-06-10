@@ -49,7 +49,7 @@ if (isset($CFG['locale'])) {
 		echo '<script type="text/javascript" src="'.$imasroot.'/i18n/locale/'.$lang.'/messages.js"></script>';
 	}
 }
-echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/general.js?ver=060516\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/general.js?ver=060616\"></script>\n";
 if (isset($sessiondata['coursetheme'])) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
 		$coursetheme = str_replace('_fw','',$sessiondata['coursetheme']);
@@ -135,12 +135,12 @@ div { zoom: 1; }
 }
 </style> 
 <![endif]--> 
-<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=052016";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=061016";?>" type="text/javascript"></script>
 <script src="<?php echo $imasroot . "/javascript/confirmsubmit.js?v=012115";?>" type="text/javascript"></script>
 <!--[if lt IE 9]>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
 <script type="text/javascript" src="<?php echo $imasroot;?>/javascript/excanvas_min.js?v=120811"></script><![endif]-->
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/drawing_min.js?v=012116"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/drawing_min.js?v=061016"></script>
 <?php
 echo "<script type=\"text/javascript\">imasroot = '$imasroot';</script>";
 if (isset($useeditor) && $sessiondata['useed']==1) {
@@ -160,12 +160,12 @@ if (isset($useeditor) && $sessiondata['useed']==1) {
 	}
 	if (!isset($CFG['GEN']['noFileBrowser'])) {
 		if ($sessiondata['usetiny4']==1) {
-			echo 'var fileBrowserCallBackFunc = fileBrowserCallBack;';
+			echo 'var filePickerCallBackFunc = filePickerCallBack;';
 		} else {
 			echo 'var fileBrowserCallBackFunc = "fileBrowserCallBack";';
 		}
 	} else {
-		echo 'var fileBrowserCallBackFunc = null;';
+		echo 'var fileBrowserCallBackFunc = null; var filePickerCallBackFunc = null;';
 	}
 	echo 'initeditor("textareas","mceEditor");';
 	echo '</script>';

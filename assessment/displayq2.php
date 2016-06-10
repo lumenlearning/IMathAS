@@ -1008,7 +1008,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (!isset($GLOBALS['choicesdata'])) {
 				$GLOBALS['choicesdata'] = array();
 			}
-			$GLOBALS['choicesdata'][$qn] = array($anstype, $questions);
+			if ($GLOBALS['capturechoices']=='shuffled') {
+				$GLOBALS['choicesdata'][$qn] = array($anstype, $questions, $answer, $randkeys);
+			} else {
+				$GLOBALS['choicesdata'][$qn] = array($anstype, $questions);
+			}
 		}
 		
 		//trim out unshuffled showans
@@ -1160,7 +1164,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (!isset($GLOBALS['choicesdata'])) {
 				$GLOBALS['choicesdata'] = array();
 			}
-			$GLOBALS['choicesdata'][$qn] = array($anstype, $questions);
+			if ($GLOBALS['capturechoices']=='shuffled') {
+				$GLOBALS['choicesdata'][$qn] = array($anstype, $questions, $answers, $randkeys);
+			} else {
+				$GLOBALS['choicesdata'][$qn] = array($anstype, $questions);
+			}
 		}
 		
 		$labits = explode('|',$la);
@@ -2560,7 +2568,12 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if ($colorbox!='') { $out .= '</div>';}
 			$out .= "<input type=\"hidden\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" />";
 			$out .= "<script type=\"text/javascript\">canvases[$qn] = [$qn,'$bg',{$settings[0]},{$settings[1]},{$settings[2]},{$settings[3]},5,{$settings[6]},{$settings[7]},$def,$dotline,$locky,$snaptogrid];";
-			
+			if (isset($GLOBALS['capturedrawinit'])) {
+				if (!isset($GLOBALS['drawinitdata'])) {
+					$GLOBALS['drawinitdata'] = array();
+				}
+				$GLOBALS['drawinitdata'][$qn] = "'$bg',{$settings[0]},{$settings[1]},{$settings[2]},{$settings[3]},5,{$settings[6]},{$settings[7]},$def,$dotline,$locky,$snaptogrid";
+			}
 			$la = str_replace(array('(',')'),array('[',']'),$la);
 			$la = explode(';;',$la);
 			if ($la[0]!='') {
@@ -6079,7 +6092,7 @@ function checkanswerformat($tocheck,$ansformats) {
 		}
 	} 
 	if (in_array("notrig",$ansformats)) {
-		if (preg_match('/(sin|cos|tan|cot|csc|sec)/',$tocheck)) {
+		if (preg_match('/(sin|cos|tan|cot|csc|sec)/i',$tocheck)) {
 			return false;
 		}
 	} 
@@ -6229,7 +6242,7 @@ function rawscoretocolor($sc,$aw) {
 }
 
 function normalizemathunicode($str) {
-	$str = str_replace(array('（','）','∞','∪','⁄ ','≤','≥','÷'), array('(',')','oo','U','/','<=','>=','/'), $str);
+	$str = str_replace(array('（','）','∞','∪','⁄ ','≤','≥','÷','⋅'), array('(',')','oo','U','/','<=','>=','/','*'), $str);
 	$str = preg_replace('/\bOO\b/i','oo', $str);
 	return $str;	
 }
