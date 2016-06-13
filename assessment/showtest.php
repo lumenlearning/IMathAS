@@ -939,7 +939,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 		$placeinhead .= '<script src="'.$imasroot.'/javascript/ytapi.js"></script>';
 	}
 	if ($testsettings['displaymethod'] == "LivePoll") {
-		$placeinhead .= '<script src="http://'.$CFG['GEN']['livepollserver'].':3000/socket.io/socket.io.js"></script>';
+		$placeinhead .= '<script src="https://'.$CFG['GEN']['livepollserver'].':3000/socket.io/socket.io.js"></script>';
 		$placeinhead .= '<script src="'.$imasroot.'/javascript/livepoll.js"></script>';
 		$livepollroom = $testsettings['id'].'-'.($sessiondata['isteacher']?'teachers':'students');
 		$now = time();
@@ -1217,7 +1217,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	if ($testsettings['testtype']=="Practice" && !$isreview) {
 		echo "<div class=right><span style=\"color:#f00\">Practice Assessment.</span>  <a href=\"showtest.php?regenall=fromscratch\">", _('Create new version.'), "</a></div>";
 	}
-	if (!$isreview && !$superdone && !$testsettings['displaymethod']=="LivePoll") {
+	if (!$isreview && !$superdone && $testsettings['displaymethod']!="LivePoll") {
 		$duetimenote = '';
 		if ($exceptionduedate > 0) {
 			$timebeforedue = $exceptionduedate - time();
@@ -1266,7 +1266,8 @@ if (!isset($_REQUEST['embedpostback'])) {
 		}
 	} else if ($testsettings['displaymethod']=="LivePoll") {
 		$duetimenote = '<span id="livepolltopright">&nbsp;</span>';	
-	}
+	} 
+	
 	$restrictedtimelimit = false;
 	if ($testsettings['timelimit']>0 && !$isreview && !$superdone) {
 		$now = time();
@@ -2131,7 +2132,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 					$livepollsig = base64_encode(sha1($tocheck . $CFG['GEN']['livepollpassword'] . $now));
 				}
 				
-				$r = file_get_contents('http://'.$CFG['GEN']['livepollserver'].':3000/qscored?aid='.$aid.'&qn='.$qn.'&user='.$userid.'&score='.urlencode($rawscore).'&now='.$now.'&la='.urlencode($arv).'&sig='.$livepollsig);
+				$r = file_get_contents('https://'.$CFG['GEN']['livepollserver'].':3000/qscored?aid='.$aid.'&qn='.$qn.'&user='.$userid.'&score='.urlencode($rawscore).'&now='.$now.'&la='.urlencode($arv).'&sig='.$livepollsig);
 				echo '{success: true}';
 			//}
 			exit;
@@ -2154,7 +2155,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 			$regenstr = '';
 			
 			
-			$r = file_get_contents('http://'.$CFG['GEN']['livepollserver'].':3000/startq?aid='.$aid.'&qn='.$qn.'&seed='.$seed.'&startt='.$startt.'&now='.$now.'&sig='.$livepollsig);
+			$r = file_get_contents('https://'.$CFG['GEN']['livepollserver'].':3000/startq?aid='.$aid.'&qn='.$qn.'&seed='.$seed.'&startt='.$startt.'&now='.$now.'&sig='.$livepollsig);
 			
 			if ($r=='success') {
 				echo '{success: true}';
@@ -2192,7 +2193,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 			$query = "UPDATE imas_livepoll_status SET curquestion='$qn',curstate='$newstate' WHERE assessmentid='$aid'";
 			mysql_query($query) or die("Query failed : " . mysql_error());
 			
-			$r = file_get_contents('http://'.$CFG['GEN']['livepollserver'].':3000/stopq?aid='.$aid.'&qn='.$qn.'&newstate='.$newstate.'&now='.$now.'&sig='.$livepollsig);
+			$r = file_get_contents('https://'.$CFG['GEN']['livepollserver'].':3000/stopq?aid='.$aid.'&qn='.$qn.'&newstate='.$newstate.'&now='.$now.'&sig='.$livepollsig);
 			
 			if ($r=='success') {
 				echo '{success: true}';
