@@ -18,7 +18,8 @@ $CFG['GEN']['AWSforcoursefiles'] = true;
 $CFG['GEN']['doSafeCourseDelete'] = true;
 
 $CFG['GEN']['pandocserver'] = '54.191.55.159';//'54.212.251.50';
-$CFG['GEN']['livepollserver'] = '54.191.55.159';
+$CFG['GEN']['livepollserver'] = 'livepoll.myopenmath.com';
+$CFG['GEN']['livepollpassword'] = 'testing';
 
 //force use of better hashed pw
 $CFG['GEN']['newpasswords'] = "only";
