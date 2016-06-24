@@ -56,7 +56,7 @@
  //check for bad sessionids.  
  if (strlen($sessionid)<10) { 
 	 if (function_exists('session_regenerate_id')) { session_regenerate_id(); }
-	echo "Error.  Please <a href=\"$imasroot/index.php\">Home</a>try again</a>";
+	echo "Error.  Please <a href=\"$imasroot/index.php\">try again</a>";
 	exit;	 
  }
  $sessiondata = array();
@@ -356,10 +356,6 @@
 	
 	if (isset($_GET['mathjax'])) {
 		$sessiondata['mathdisp'] = 1;
-		writesessiondata();
-	}
-	if (isset($_GET['usetiny4'])) {
-		$sessiondata['usetiny4'] = ($_GET['usetiny4']=='false')?0:1;
 		writesessiondata();
 	}
 	

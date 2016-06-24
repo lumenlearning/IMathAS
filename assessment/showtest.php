@@ -885,11 +885,11 @@
 if (!isset($_REQUEST['embedpostback'])) {
 	if ($testsettings['eqnhelper']==1 || $testsettings['eqnhelper']==2) {
 		$placeinhead = '<script type="text/javascript">var eetype='.$testsettings['eqnhelper'].'</script>';
-		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqnhelper.js?v=030112\"></script>";
+		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqnhelper.js?v=062216\"></script>";
 		$placeinhead .= '<style type="text/css"> div.question input.btn { margin-left: 10px; } </style>';
 		
 	} else if ($testsettings['eqnhelper']==3 || $testsettings['eqnhelper']==4) {
-		$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/assessment/mathquill.css?v=102113\" type=\"text/css\" />";
+		$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/assessment/mathquill.css?v=062416\" type=\"text/css\" />";
 		if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')!==false) {
 			$placeinhead .= '<!--[if lte IE 7]><style style="text/css">
 				.mathquill-editable.empty { width: 0.5em; }
@@ -900,7 +900,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 				</style><![endif]-->';
 		}
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquill_min.js?v=102113\"></script>";
-		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquilled.js?v=070214\"></script>";
+		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquilled.js?v=062216\"></script>";
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/AMtoMQ.js?v=102113\"></script>";
 		$placeinhead .= '<style type="text/css"> div.question input.btn { margin-left: 10px; } </style>';
 		
@@ -908,7 +908,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	
 	//IP: eqntips 
 	if ($testsettings['showtips']==2) {
-		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqntips.js?v=032810\"></script>";
+		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqntips.js?v=062216\"></script>";
 	}
 	$placeinhead .= '<script type="text/javascript">
 	   function toggleintroshow(n) {
@@ -944,7 +944,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 		$livepollroom = $testsettings['id'].'-'.($sessiondata['isteacher']?'teachers':'students');
 		$now = time();
 		if (isset($CFG['GEN']['livepollpassword'])) {
-			$livepollsig = base64_encode(sha1($livepollroom . $CFG['GEN']['livepollpassword'] . $now));
+			$livepollsig = base64_encode(sha1($livepollroom . $CFG['GEN']['livepollpassword'] . $now,true));
 		}
 		$placeinhead .= '<script type="text/javascript">
 				if (typeof io != "undefined") {livepoll.init("'.$CFG['GEN']['livepollserver'].'","'.$livepollroom.'","'.$now.'","'.$livepollsig.'");}
@@ -2129,7 +2129,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 				$tocheck = $aid.$qn.$userid.$rawscore.$arv;
 				$now = time();
 				if (isset($CFG['GEN']['livepollpassword'])) {
-					$livepollsig = base64_encode(sha1($tocheck . $CFG['GEN']['livepollpassword'] . $now));
+					$livepollsig = base64_encode(sha1($tocheck . $CFG['GEN']['livepollpassword'] . $now,true));
 				}
 				
 				$r = file_get_contents('https://'.$CFG['GEN']['livepollserver'].':3000/qscored?aid='.$aid.'&qn='.$qn.'&user='.$userid.'&score='.urlencode($rawscore).'&now='.$now.'&la='.urlencode($arv).'&sig='.$livepollsig);
@@ -2150,7 +2150,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 			mysql_query($query) or die("Query failed : " . mysql_error());
 			
 			if (isset($CFG['GEN']['livepollpassword'])) {
-				$livepollsig = base64_encode(sha1($aid.$qn .$seed. $CFG['GEN']['livepollpassword'] . $now));
+				$livepollsig = base64_encode(sha1($aid.$qn .$seed. $CFG['GEN']['livepollpassword'] . $now, true));
 			}
 			$regenstr = '';
 			
@@ -2187,7 +2187,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 				$newstate=3;
 			}
 			if (isset($CFG['GEN']['livepollpassword'])) {
-				$livepollsig = base64_encode(sha1($aid.$qn . $newstate. $CFG['GEN']['livepollpassword'] . $now));
+				$livepollsig = base64_encode(sha1($aid.$qn . $newstate. $CFG['GEN']['livepollpassword'] . $now,true));
 			}
 			
 			$query = "UPDATE imas_livepoll_status SET curquestion='$qn',curstate='$newstate' WHERE assessmentid='$aid'";

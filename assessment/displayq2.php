@@ -1443,6 +1443,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		if (!isset($hidepreview)) {
+			$out .= 'onKeyUp="updateLivePreview(this)" ';
+		}
 		$out .= "/>$rightb";
 		$out .= getcolormark($colorbox);
 		if (!isset($GLOBALS['nocolormark']) && isset($rightanswrongformat) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
@@ -1454,7 +1457,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />\n";
 		if (!isset($hidepreview)) {
-			$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"calculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
+			$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"calculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 		}
 		$preview .= "$leftb<span id=p$qn></span>$rightb ";
 		$out .= "<script type=\"text/javascript\">calctoproc[$qn] = 1; calcformat[$qn] = '$answerformat';</script>\n";
@@ -1556,7 +1559,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "</table>\n";
 			$out .= '</td><td class="matrixright">&nbsp;</td></tr></table>';
 			$out .= getcolormark($colorbox);
-			if (!isset($hidepreview)) {$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"matrixcalc('qn$qn','p$qn',{$answersize[0]},{$answersize[1]})\" /> &nbsp;\n";}
+			if (!isset($hidepreview)) {$preview .= "<input type=button id=\"pbtn$qn\" class=btn value=\"" . _('Preview') . "\" onclick=\"matrixcalc('qn$qn','p$qn',{$answersize[0]},{$answersize[1]})\" /> &nbsp;\n";}
 			$preview .= "<span id=p$qn></span>\n";
 			$out .= "<script type=\"text/javascript\">matcalctoproc[$qn] = 1; matsize[$qn]='{$answersize[0]},{$answersize[1]}';</script>\n";
 			$tip .= formathint(_('each element of the matrix'),$ansformats,'calcmatrix');
@@ -1565,7 +1568,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (!isset($sz)) { $sz = 20;}
 			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"$la\" autocomplete=\"off\" />\n";
 			$out .= getcolormark($colorbox);
-			$out .= "<input type=button value=\"" . _('Preview') . "\" onclick=\"matrixcalc('tc$qn','p$qn')\" /> &nbsp;\n";
+			if (!isset($hidepreview)) {
+				$preview .= "<input type=button value=\"" . _('Preview') . "\" onclick=\"matrixcalc('tc$qn','p$qn')\" /> &nbsp;\n";
+			}
 			$out .= "<span id=p$qn></span> \n";
 			$out .= "<script type=\"text/javascript\">matcalctoproc[$qn] = 1;</script>\n";
 			$tip = _('Enter your answer as a matrix, like ((2,3,4),(1,4,5))');
@@ -1619,7 +1624,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
-		
+		if (!isset($hidepreview)) {
+			$out .= 'onKeyUp="updateLivePreview(this)" ';
+		}
 		$out .= "/>\n";
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />";
 		$out .= "<input type=\"hidden\" id=\"qn$qn-vals\" name=\"qn$qn-vals\" />";
@@ -1627,7 +1634,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (!isset($GLOBALS['nocolormark']) && isset($rightanswrongformat) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
 			$out .= ' '.formhoverover('<span style="color:#f60;font-size:80%">(Format)</span>','Your answer is equivalent to the correct answer, but is not simplified or is in the wrong format');
 		}
-		if (!isset($hidepreview)) {$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"AMpreview('tc$qn','p$qn')\" /> &nbsp;\n";}
+		if (!isset($hidepreview)) {$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"AMpreview('tc$qn','p$qn')\" /> &nbsp;\n";}
 		$preview .= "<span id=p$qn></span>\n";
 		
 		if (!isset($variables)) { $variables = "x";}
@@ -1755,6 +1762,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['hidepreview'])) {if (is_array($options['hidepreview'])) {$hidepreview = $options['hidepreview'][$qn];} else {$hidepreview = $options['hidepreview'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = explode(',',$answerformat);
 		
@@ -1803,11 +1811,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		if (!isset($hidepreview)) {
+			$out .= 'onKeyUp="updateLivePreview(this)" ';
+		}
 		$out .= "/>";
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />";
 		$out .= getcolormark($colorbox);
 		if (!isset($hidepreview)) {
-			$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"ntuplecalc('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
+			$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"ntuplecalc('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 		}
 		$preview .= "<span id=p$qn></span> ";
 		$out .= "<script type=\"text/javascript\">ntupletoproc[$qn] = 1; calcformat[$qn] = '$answerformat';</script>\n";
@@ -1855,6 +1866,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['hidepreview'])) {if (is_array($options['hidepreview'])) {$hidepreview = $options['hidepreview'][$qn];} else {$hidepreview = $options['hidepreview'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = explode(',',$answerformat);
 		
@@ -1887,11 +1899,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		if (!isset($hidepreview)) {
+			$out .= 'onKeyUp="updateLivePreview(this)" ';
+		}
 		$out .= "/>";
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />";
 		$out .= getcolormark($colorbox);
 		if (!isset($hidepreview)) {
-			$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"complexcalc('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
+			$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"complexcalc('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 		}
 		$preview .= "<span id=p$qn></span> ";
 		$out .= "<script type=\"text/javascript\">complextoproc[$qn] = 1;</script>\n";
@@ -1982,6 +1997,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else if ($useeqnhelper && $displayformat == 'usepreview') {
 				$out .= "onfocus=\"showeedd('qn$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 			}
+			if ($displayformat == 'usepreview') {
+				$out .= 'onKeyUp="updateLivePreview(this)" ';
+			}
 			$addlclass = '';
 			if ($displayformat=='debit') { $out .= 'onkeyup="editdebit(this)" style="text-align: right;" ';}
 			else if ($displayformat=='credit') { $out .= 'onkeyup="editcredit(this)" style="text-align: right;" '; $addlclass=' creditbox';}
@@ -1991,7 +2009,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= getcolormark($colorbox);
 			
 			if ($displayformat == 'usepreview') {
-				$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"stringqpreview('qn$qn','p$qn','$answerformat')\" /> &nbsp;\n";
+				$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"stringqpreview('qn$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 				$preview .= "<span id=p$qn></span> ";
 			} else if ($displayformat == 'typeahead') {
 				if (!is_array($questions)) {
@@ -2234,8 +2252,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($multi>0) { $qn = $multi*1000+$qn;} 
 		
 		if (in_array('inequality',$ansformats)) {
-			$tip = sprintf(_('Enter your answer using inequality notation.  Example: 3 <= %s < 4'), $variables) . " <br/>";
-			$tip .= sprintf(_('Use or to combine intervals.  Example: %s < 2 or %s >= 3'), $variables, $variables) . "<br/>";
+			$tip = sprintf(_('Enter your answer using inequality notation.  Example: 3 &lt;= %s &lt; 4'), $variables) . " <br/>";
+			$tip .= sprintf(_('Use or to combine intervals.  Example: %s &lt; 2 or %s &gt;= 3'), $variables, $variables) . "<br/>";
 			$tip .= _('Enter <i>all real numbers</i> for solutions of that type') . "<br/>";
 			$shorttip = _('Enter an interval using inequalities');
 		} else {
@@ -2271,11 +2289,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper,". (in_array('inequality',$ansformats)?"'ineq'":"'int'") .")\" onblur=\"hideee();hideeedd();\" ";
 		}
+		if (!isset($hidepreview)) {
+			$out .= 'onKeyUp="updateLivePreview(this)" ';
+		}
 		$out .= '/>';
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />";
 		$out .= getcolormark($colorbox);
 		if (!isset($hidepreview)) {
-			$preview .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"intcalculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
+			$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"intcalculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 		}
 		$preview .= "<span id=p$qn></span> ";
 		$out .= "<script type=\"text/javascript\">intcalctoproc[$qn] = 1 ; calcformat[$qn] = '$answerformat';</script>\n";
@@ -2406,6 +2427,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$plot = showplot("",$settings[0],$settings[1],$settings[2],$settings[3],$sclinglbl,$sclinggrid,$settings[6],$settings[7]);
 			$insat = strpos($plot,');',strpos($plot,'axes'))+2;
 			$plot = substr($plot,0,$insat).str_replace("'",'"',substr($backg,5)).substr($plot,$insat);
+		} else if (!is_array($backg) && $backg=='none') {
+			$plot = showasciisvg("initPicture(0,10,0,10);",$settings[6],$settings[7]);
 		} else {
 			$plot = showplot($backg,$settings[0],$settings[1],$settings[2],$settings[3],$sclinglbl,$sclinggrid,$settings[6],$settings[7]);
 		}
@@ -2419,9 +2442,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$plot = addfractionaxislabels($plot,$grid[4]);
 		}
 		
+		
 		if ($settings[8]!="") {
 		}
 		$bg = getgraphfilename($plot);
+		
 		$dotline = 0;
 		if ($colorbox!='') { $out .= '<div class="'.$colorbox.'" id="qnwrap'.$qn.'">';}
 		if (isset($GLOBALS['hidedrawcontrols'])) {
@@ -2534,6 +2559,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						$out .= "onclick=\"settool(this,$qn,0)\">" . _('Line') . "</span>";
 					} else if ($answerformat[$i]=='lineseg') {
 						$out .= "onclick=\"settool(this,$qn,0.5)\">" . _('Line Segment') . "</span>";
+					} else if ($answerformat[$i]=='freehand') {
+						$out .= "onclick=\"settool(this,$qn,0.7)\">" . _('Freehand Draw') . "</span>";
 					} else if ($answerformat[$i]=='dot') {
 						$out .= "onclick=\"settool(this,$qn,1)\">" . _('Dot') . "</span>";
 					} else if ($answerformat[$i]=='opendot') {
@@ -2551,6 +2578,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$def = 0;
 				} else if ($answerformat[0]=='lineseg') {
 					$def = 0.5;
+				} else if ($answerformat[0]=='freehand') {
+					$def = 0.7;
 				} else if ($answerformat[0]=='dot') {
 					$def = 1;
 				} else if ($answerformat[0]=='opendot') {

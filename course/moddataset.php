@@ -650,23 +650,16 @@
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/codemirror/codemirror-compressed.js"></script>';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/codemirror/imathas.js"></script>';
 	$placeinhead .= '<link rel="stylesheet" href="'.$imasroot.'/javascript/codemirror/codemirror_min.css">';
-	if ($sessiondata['usetiny4']==1) {
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=111612"></script>';
-		$placeinhead .= '<script type="text/javascript">usetiny4 = true;</script>';
-	} else {
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/editor/tiny_mce.js?v=082911"></script>';
-	}
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=111612"></script>';
+	
+	$placeinhead .= '<script src="//sagecell.sagemath.org/embedded_sagecell.js"></script>'.PHP_EOL;
 	$placeinhead .= '<script type="text/javascript">
 	  var editoron = 0; var seditoron = 0;
 	  var coursetheme = "'.$coursetheme.'";';
 	if (!isset($CFG['GEN']['noFileBrowser'])) {
-		if ($sessiondata['usetiny4']==1) {
-			$placeinhead .= 'var filePickerCallBackFunc = filePickerCallBack;';
-		} else {
-			$placeinhead .= 'var fileBrowserCallBackFunc = "fileBrowserCallBack";';
-		}
+		$placeinhead .= 'var filePickerCallBackFunc = filePickerCallBack;';
 	} else {
-		$placeinhead .= 'var fileBrowserCallBackFunc = null;';
+		$placeinhead .= 'var filePickerCallBackFunc = null;';
 	}
 	
 	if (isset($_GET['id'])) {
@@ -699,13 +692,8 @@
 	        } 
 	        console.log(toinit.join(","));
 	        initeditor("exact",toinit.join(","),1);
-	     } else {';
-	     	if ($sessiondata['usetiny4']==1) {
-			$placeinhead .= 'tinymce.remove("#"+el);';
-		} else {
-			$placeinhead .= 'tinyMCE.execCommand("mceRemoveControl",true,el);';
-		}
-	$placeinhead .= '
+	     } else {
+	     	tinymce.remove("#"+el);
 		qtextbox.rows -= 3;
 		qtextbox.value = qtextbox.value.replace(/<span\s+class="AM"[^>]*>(.*?)<\\/span>/g,"$1");
 		if (el=="qtext") {setupQtextEditor();}
@@ -738,9 +726,10 @@
 			matchTags: true,
 			mode: "imathasqtext",
 			smartIndent: true,
+			lineWrapping: true,
 			indentUnit: 2
 		      });
-		qEditor.setSize("100%",6+14*qtextbox.rows);
+		//qEditor.setSize("100%",6+14*qtextbox.rows);
 	   }
 		      
 	   $(function() {
@@ -750,10 +739,13 @@
 			autoCloseBrackets: true,
 			mode: "text/x-imathas",
 			smartIndent: true,
+			lineWrapping: true,
 			indentUnit: 2
 		      });
-		controlEditor.setSize("100%",6+14*document.getElementById("control").rows);
+		//controlEditor.setSize("100%",6+14*document.getElementById("control").rows);
 	   });
+
+
 	   function checklicense() {
 	   	var lic = $("#license").val();
 	   	console.log(lic+","+originallicense);
@@ -769,25 +761,35 @@
 	   }
 	   
 	   function incctrlboxsize() {
+	   	$("#ccbox").find(".CodeMirror-scroll").css("min-height",0).css("max-height","none");
 	   	controlEditor.setSize("100%",$(controlEditor.getWrapperElement()).height()+28);
 	   }
 	   function decctrlboxsize() {
+	  	 $("#ccbox").find(".CodeMirror-scroll").css("min-height",0).css("max-height","none");
 	   	controlEditor.setSize("100%",$(controlEditor.getWrapperElement()).height()-28);
 	   }
 	   function incqtboxsize() {
 	   	if (!editoron) {
+	   		$("#qtbox").find(".CodeMirror-scroll").css("min-height",0).css("max-height","none");
 	   		qEditor.setSize("100%",$(qEditor.getWrapperElement()).height()+28);
 	   		document.getElementById("qtext").rows += 2;
 	   	}
 	   }
 	   function decqtboxsize() {
 	   	if (!editoron) {
+	   		$("#qtbox").find(".CodeMirror-scroll").css("min-height",0).css("max-height","none");
 	   		qEditor.setSize("100%",$(qEditor.getWrapperElement()).height()-28);
 	   		document.getElementById("qtext").rows -= 2;
 	   	}
 	   }
 	   </script>';
-	$placeinhead .= '<style type="text/css">.CodeMirror {border: 1px solid #ccc;}</style>';
+	$placeinhead .= "<script src=\"$imasroot/javascript/solver.js?ver=230616\" type=\"text/javascript\"></script>\n";
+	$placeinhead .= '<style type="text/css">.CodeMirror {font-size: medium;border: 1px solid #ccc;}
+		#ccbox .CodeMirror, #qtbox .CodeMirror {height: auto;}
+		#ccbox .CodeMirror-scroll {min-height:220px; max-height:600px;}
+		#qtbox .CodeMirror-scroll {min-height:150px; max-height:600px;}
+		</style>';
+	$placeinhead .= "<link href=\"$imasroot/course/solver.css?ver=230616\" rel=\"stylesheet\">";
 	
 	require("../header.php");
 	
@@ -992,10 +994,12 @@ Question type: <select name=qtype <?php if (!$myq) echo "disabled=\"disabled\"";
 </p>
 <div id=ccbox>
 Common Control: <span class="noselect"><span class=pointer onclick="incctrlboxsize('control')">[+]</span><span class=pointer onclick="decctrlboxsize('control')">[-]</span></span>
+<input type=button id="solveropenbutton" value="Solver">
 <input type=submit value="Save">
 <input type=submit name=test value="Save and Test Question"><BR>
 <textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(20,substr_count($line['control'],"\n")+3));?> id=control name=control <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo str_replace(array(">","<"),array("&gt;","&lt;"),$line['control']);?></textarea>
 </div>
+
 
 <div id=qtbox>
 Question Text: <span class="noselect"><span class=pointer onclick="incqtboxsize('qtext')">[+]</span><span class=pointer onclick="decqtboxsize('qtext')">[-]</span></span>
@@ -1088,6 +1092,53 @@ if ($line['deleted']==1 && ($myrights==100 || $ownerid==$userid)) {
 </p>
 </form>
 
+<?php
+$placeinfooter='
+<div id="solverpopup" style="display: none" class="solverpopup">
+	<div id="solvertopbar">
+		<div id="solverclosebutton">X</div>
+		<span>Solver</span>
+	</div>
+	<div id="solverinsides">
+	<div id="operationselect">
+	Select and drag or copy an expression from your question code.
+	<img id="solverinputhelpicon" src="/imathas/img/help.gif" alt="Help"><br/>
+	<div id="solverinputhelp" style="display: none;">
+	</div>
+	<input id="imathastosage" type="text" size="30">
+	<select id="solveroperation" name="solveroperation">
+		<option id="solverchoose" value="">Choose</option>
+		<option id="solversolve" value="solve">Solve</option>
+		<option id="solversolve" value="simplify">Simplify</option>
+		<option id="solverdiff" value="diff">Differentiate</option>
+		<option id="solverint" value="integral">Integrate</option>
+		<option id="solverplot" value="plot">Plot</option>
+		</select>
+	<button id="solvergobutton" type="button">Go</button>
+	</div>
+	<div id="sagemathcode" style="display: none;"></div>
+	<div id="sagecellcontainer">
+		<div id="sagecell"></div>
+		<img id="solverhelpicon" src="/imathas/img/help.gif" alt="Help"><br/>
+	</div>
+	<div id="solverhelpbody" style="display: none">
+	</div>
+	<div id="sagecelloutput"></div>
+    <div id="sagetocontroldiv" style="display: none;" >
+		Drag this to the Common Control box or use the buttons below.
+	<img id="solveroutputhelpicon" src="/imathas/img/help.gif" alt="Help"><br/>
+	<div id="sagetocontrolresult">
+		<p><span id="sagetocontrol" draggable="true"></span></p>
+	</div>
+	</div>
+	<div id="solveroutputhelp" style="display: none;">
+	</div>
+	<input id="solverappendalone" type="button" value="Insert in Common Control">
+	<input id="solverappend" type="button" value="Insert as $answer">
+	</div>
+</div>
+';
+?>
 
 <?php
 	require("../footer.php");

@@ -49,7 +49,7 @@ if (isset($CFG['locale'])) {
 		echo '<script type="text/javascript" src="'.$imasroot.'/i18n/locale/'.$lang.'/messages.js"></script>';
 	}
 }
-echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/general.js?ver=060616\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/general.js?ver=062416\"></script>\n";
 if (isset($sessiondata['coursetheme'])) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
 		$coursetheme = str_replace('_fw','',$sessiondata['coursetheme']);
@@ -66,7 +66,7 @@ if ($isdiag) {
 }
 //$sessiondata['mathdisp'] = 3;
 if (!isset($sessiondata['mathdisp'])) {
-	echo '<script type="text/javascript">var AMnoMathML = true;var ASnoSVG = true;var AMisGecko = 0;var AMnoTeX = false; function rendermathnode(el) {AMprocessNode(el);}</script>';
+	echo '<script type="text/javascript">var AMnoMathML = true;var ASnoSVG = true;var AMisGecko = 0;var AMnoTeX = false; var mathRenderer = "none"; function rendermathnode(el) {AMprocessNode(el);};</script>';
 	echo '<script type="text/javascript" src="'.$imasroot.'/mathjax/MathJax.js?config=AM_CHTML&rev=2.6.1"></script>';
 	echo "<script src=\"$imasroot/javascript/mathgraphcheck.js?v=021215\" type=\"text/javascript\"></script>\n";
 } else if ($sessiondata['mathdisp']==1 || $sessiondata['mathdisp']==3) {
@@ -84,7 +84,7 @@ if (!isset($sessiondata['mathdisp'])) {
 	//echo '<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=AM_HTMLorMML"></script>';
 	//echo '<script>window.MathJax || document.write(\'<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="'.$imasroot.'/mathjax/MathJax.js?config=AM_HTMLorMML"><\/script>\')</script>';
 	echo '<script type="text/javascript" src="'.$imasroot.'/mathjax/MathJax.js?config=AM_CHTML&rev=2.6.1"></script>';
-	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = false; var MathJaxCompatible = true; function rendermathnode(node) { MathJax.Hub.Queue(["Typeset", MathJax.Hub, node]); } </script>'; 
+	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = false; var MathJaxCompatible = true; var mathRenderer = "MathJax"; function rendermathnode(node) { MathJax.Hub.Queue(["Typeset", MathJax.Hub, node]); } </script>'; 
 	echo '<style type="text/css">span.MathJax { font-size: 105%;}</style>';
 } else if ($sessiondata['mathdisp']==6) {
 	//Katex experimental
@@ -106,14 +106,14 @@ if (!isset($sessiondata['mathdisp'])) {
 	echo '<script src="'.$imasroot.'/katex/katex.min.js"></script>';
 	echo '<link rel="stylesheet" href="'.$imasroot.'/katex/katex.min.css"/>';
 	echo '<script type="text/javascript" src="'.$imasroot.'/katex/auto-render.js"></script>';
-	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = true; var MathJaxCompatible = true; function rendermathnode(node) {renderMathInElement(node);}</script>'; 
+	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = true; var MathJaxCompatible = true; var mathRenderer = "Katex"; function rendermathnode(node) {renderMathInElement(node);}</script>'; 
 	//echo '<style type="text/css">span.AM { font-size: 105%;}</style>';
 } else if ($sessiondata['mathdisp']==2) {
 	echo '<script type="text/javascript">var AMTcgiloc = "'.$mathimgurl.'";</script>'; 
 	echo "<script src=\"$imasroot/javascript/ASCIIMathTeXImg_min.js?v=092314\" type=\"text/javascript\"></script>\n";
-	echo "<script type=\"text/javascript\">var usingASCIIMath = false;var MathJaxCompatible = false;function rendermathnode(el) {AMprocessNode(el);}</script>";
+	echo "<script type=\"text/javascript\">var usingASCIIMath = false;var MathJaxCompatible = false;var mathRenderer = \"img\";function rendermathnode(el) {AMprocessNode(el);}</script>";
 } else if ($sessiondata['mathdisp']==0) {
-	echo '<script type="text/javascript">var noMathRender = true; var usingASCIIMath = false; var MathJaxCompatible = false; function rendermathnode(el) {}</script>';	
+	echo '<script type="text/javascript">var noMathRender = true; var usingASCIIMath = false; var MathJaxCompatible = false; var mathRenderer = "none";function rendermathnode(el) {}</script>';	
 } 
 echo "<script src=\"$imasroot/javascript/mathjs.js?v=052016\" type=\"text/javascript\"></script>\n";
 if ($sessiondata['graphdisp']==1) {
@@ -135,21 +135,16 @@ div { zoom: 1; }
 }
 </style> 
 <![endif]--> 
-<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=061016";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/AMhelpers_min.js?v=062316";?>" type="text/javascript"></script>
 <script src="<?php echo $imasroot . "/javascript/confirmsubmit.js?v=012115";?>" type="text/javascript"></script>
 <!--[if lt IE 9]>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
 <script type="text/javascript" src="<?php echo $imasroot;?>/javascript/excanvas_min.js?v=120811"></script><![endif]-->
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/drawing_min.js?v=061016"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/drawing_min.js?v=062316"></script>
 <?php
 echo "<script type=\"text/javascript\">imasroot = '$imasroot';</script>";
 if (isset($useeditor) && $sessiondata['useed']==1) {
-	if ($sessiondata['usetiny4']==1) {
-		echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=111612"></script>';
-		echo '<script type="text/javascript">usetiny4 = true;</script>';
-	} else {
-		echo '<script type="text/javascript" src="'.$imasroot.'/editor/tiny_mce.js?v=111612"></script>';
-	}
+	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=111612"></script>';
 	echo "\n";
 	echo '<script type="text/javascript">';
 	echo 'var usingTinymceEditor = true;';
@@ -159,13 +154,9 @@ if (isset($useeditor) && $sessiondata['useed']==1) {
 		echo 'var coursetheme = "'.$coursetheme.'";';
 	}
 	if (!isset($CFG['GEN']['noFileBrowser'])) {
-		if ($sessiondata['usetiny4']==1) {
-			echo 'var filePickerCallBackFunc = filePickerCallBack;';
-		} else {
-			echo 'var fileBrowserCallBackFunc = "fileBrowserCallBack";';
-		}
+		echo 'var filePickerCallBackFunc = filePickerCallBack;';
 	} else {
-		echo 'var fileBrowserCallBackFunc = null; var filePickerCallBackFunc = null;';
+		echo 'var filePickerCallBackFunc = null;';
 	}
 	echo 'initeditor("textareas","mceEditor");';
 	echo '</script>';

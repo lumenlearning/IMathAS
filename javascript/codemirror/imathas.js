@@ -86,6 +86,8 @@
   var imathasBuiltin = "exp sec csc cot sech csch coth nthlog sinn cosn tann secn cscn cotn rand rrand rands rrands randfrom randsfrom jointrandfrom diffrandsfrom nonzerorand nonzerorrand nonzerorands nonzerorrands diffrands diffrrands nonzerodiffrands nonzerodiffrrands singleshuffle jointshuffle makepretty makeprettydisp showplot addlabel showarrays horizshowarrays showasciisvg listtoarray arraytolist calclisttoarray sortarray consecutive gcd lcm calconarray mergearrays sumarray dispreducedfraction diffarrays intersectarrays joinarray unionarrays count polymakepretty polymakeprettydisp makexpretty makexprettydisp calconarrayif in_array prettyint prettyreal prettysigfig arraystodots subarray showdataarray arraystodoteqns array_flip arrayfindindex fillarray array_reverse root getsnapwidthheight is_numeric sign prettynegs dechex hexdec numtowords randname randmalename randfemalename randnames randmalenames randfemalenames randcity randcities prettytime definefunc evalfunc safepow arrayfindindices stringtoarray strtoupper strtolower ucfirst makereducedfraction makereducedmixednumber stringappend stringprepend textonimage addplotborder addlabelabs makescinot today numtoroman sprintf arrayhasduplicates addfractionaxislabels decimaltofraction ifthen multicalconarray htmlentities formhoverover formpopup connectthedots jointsort stringpos stringlen stringclean substr substr_count str_replace makexxpretty makexxprettydisp forminlinebutton makenumberrequiretimes comparenumbers comparefunctions getnumbervalue showrecttable htmldisp getstuans checkreqtimes stringtopolyterms getfeedbacktxt getfeedbacktxtessay getfeedbacktxtnumber explode gettwopointlinedata getdotsdata gettwopointdata getlinesdata adddrawcommand array_unique ABarray scoremultiorder scorestring randstate randstates";
   imathasBuiltin += " nCr nPr mean stdev percentile quartile TIquartile Excelquartile median freqdist frequency histogram fdhistogram fdbargraph normrand boxplot normalcdf tcdf invnormalcdf invtcdf invtcdf2 linreg expreg countif binomialpdf binomialcdf chicdf invchicdf chi2cdf invchi2cdf fcdf invfcdf piechart mosaicplot checklineagainstdata chi2teststat checkdrawnlineagainstdata ineqplot ineqbetweenplot linegraph linegraphbrackets forminterval intervalstodraw reduceradical reduceradicalfrac reducequadraticform matrix matrixformat matrixsystemdisp matrixsum matrixdiff matrixscalar matrixprod matrixaugment matrixrowscale matrixrowswap matrixrowcombine matrixrowcombine3 matrixidentity matrixtranspose matrixrandinvertible matrixrandunreduce matrixinverse matrixinversefrac matrixsolve matrixsolvefrac polyregression matrixgetentry matrixgetrow matrixgetcol matrixgetsubmatrix matrixdisplaytable matrixreduce matrixnumsolutions dotp crossp vecnorm vecsum vecdiff vecprod veccompareset veccomparesamespan";
   imathasBuiltin += " loadlibrary importcodefrom includecodefrom setseed";
+  var imathasSpecialVars = keywords("$ansprompt $displayformat $answerformat $questions $answers $answer $questiontitle $answertitle $answersize $variables $strflags $domain $answerboxsize $hidepreview $matchlist $noshuffle $reqdecimals $reqsigfigs $grid $snaptogrid $background $scoremethod $reltolerance $abstolerance $requiretimes $requiretimeslistpart $partweights $partialcredit $anstypes");
+  var imathasDisallowedVars = keywords("$link $qidx $qnidx $seed $qdata $toevalqtxt $la $laarr $shanspt $GLOBALS $laparts $anstype $kidx $iidx $tips $options $partla $partnum $score $disallowedvar $allowedmacros $wherecount $countcnt $myrights $myspecialrights");
   CodeMirror.registerHelper("hintWords", "php", [imathasKeywords, imathasAtoms, imathasBuiltin].join(" ").split(" "));
   CodeMirror.registerHelper("wordChars", "php", /[\w$]/);
 
@@ -101,7 +103,13 @@
     hooks: {
       "$": function(stream) {
         stream.eatWhile(/[\w\$_]/);
-        return "variable-2";
+        if (imathasSpecialVars.propertyIsEnumerable(stream.current())) {
+        	return "variable-3";
+        } else if (imathasDisallowedVars.propertyIsEnumerable(stream.current())) {
+        	return "error";
+        } else {
+        	return "variable-2";
+        }
       },
       "<": function(stream, state) {
         var before;
@@ -239,13 +247,26 @@ CodeMirror.defineMode("imathasqtext", function(config, parserConfig) {
   var imathasqtextOverlay = {
     token: function(stream, state) {
       var ch,curdepth;
-      if (stream.match("{$")) {
+      if (stream.match(/^\{\$[a-zA-Z_]/)) {
+      	  curdepth=0;
       	  while ((ch = stream.next()) != null) {
-      	  	  if (ch=="}") {
+      	  	  if (ch=='[') {
+      	  	  	  curdepth++;
+		  } else if (ch==']') {
+			  curdepth--;
+		  } else if (ch=="}") {
       	  	  	  stream.eat("}");
-      	  	  	  return "variable-2";
+      	  	  	  if (curdepth>0) {
+      	  	  	  	  return "error";
+      	  	  	  } else {
+      	  	  	  	  return "variable-2";
+      	  	  	  }
+      	  	  } else if (curdepth==0 && ch.match(/[^\w\$]/)) {
+      	  	  	 stream.backUp(1);
+      	  	  	 return "error"; 
       	  	  }
       	  }
+      	  return "error";
       } else if (stream.match(/^\$[a-zA-Z_]/)) {
       	curdepth=0;
         while ((ch = stream.next()) != null) {
@@ -253,7 +274,7 @@ CodeMirror.defineMode("imathasqtext", function(config, parserConfig) {
           	  curdepth++;
           } else if (ch==']') {
           	  curdepth--;
-          	  if (curdepth==0 && stream.peek()!='[') {
+          	  if (curdepth==0) {
           	  	  return "variable-2";
           	  }
           } else if (curdepth==0 && (stream.peek()==null || ch.match(/\W/))) {
@@ -261,10 +282,14 @@ CodeMirror.defineMode("imathasqtext", function(config, parserConfig) {
           	  	  stream.backUp(1);
           	  }
           	  return "variable-2";
+          } else if (curdepth>0 && ch.match(/[^\w\$]/)) {
+          	  stream.backUp(1);
+          	  return "error";
           } 
         }
+        if (ch==null) {return "variable-2";}
       } 
-      while (stream.next() != null && !stream.match(/^\$[a-zA-Z_]/, false) && !stream.match("{$", false)) {}
+      while (stream.next() != null && !stream.match(/^\$[a-zA-Z_]/, false) && !stream.match(/^\{\$[a-zA-Z_]/, false)) {}
       return null;
     }
   };

@@ -2,7 +2,7 @@
 var closetimer	= 0;
 var ddmenuitem	= 0;
 var homemenuloaded = 0;
-var usetiny4 = false;
+
 // open hidden layer
 function mopen(id,cid) {	
 	if (id=='homemenu' && homemenuloaded==0) {
@@ -281,7 +281,7 @@ function chkAllNone(frmid, arr, mark, skip) {
   return false;
 }
 
-function initeditor4(edmode,edids,css){
+function initeditor(edmode,edids,css){
 	var cssmode = css || 0;
 	var selectorstr = '';
 	if (edmode=="exact") { //list of IDs
@@ -315,8 +315,35 @@ function initeditor4(edmode,edids,css){
 		content_style: "body {background-color: #ffffff !important;}",
 		table_class_list: [{title: "None", value:''},
 			{title:"Gridded", value:"gridded"},
-			{title:"Gridded Centered", value:"gridded centered"}]
-	}
+			{title:"Gridded Centered", value:"gridded centered"}],
+		style_formats_merge: true,
+		style_formats: [{
+			title: "Font Family",
+			items: [
+			    {title: 'Arial', inline: 'span', styles: { 'font-family':'arial'}},
+			    {title: 'Book Antiqua', inline: 'span', styles: { 'font-family':'book antiqua'}},
+			    {title: 'Comic Sans MS', inline: 'span', styles: { 'font-family':'comic sans ms,sans-serif'}},
+			    {title: 'Courier New', inline: 'span', styles: { 'font-family':'courier new,courier'}},
+			    {title: 'Georgia', inline: 'span', styles: { 'font-family':'georgia,palatino'}},
+			    {title: 'Helvetica', inline: 'span', styles: { 'font-family':'helvetica'}},
+			    {title: 'Impact', inline: 'span', styles: { 'font-family':'impact,chicago'}},
+			    {title: 'Open Sans', inline: 'span', styles: { 'font-family':'Open Sans'}},
+			    {title: 'Symbol', inline: 'span', styles: { 'font-family':'symbol'}},
+			    {title: 'Tahoma', inline: 'span', styles: { 'font-family':'tahoma'}},
+			    {title: 'Terminal', inline: 'span', styles: { 'font-family':'terminal,monaco'}},
+			    {title: 'Times New Roman', inline: 'span', styles: { 'font-family':'times new roman,times'}},
+			    {title: 'Verdana', inline: 'span', styles: { 'font-family':'Verdana'}}
+			]
+			},
+			{title: "Font Size", items: [
+                                {title: '8pt', inline:'span', styles: { fontSize: '12px', 'font-size': '8px' } },
+                                {title: '10pt', inline:'span', styles: { fontSize: '12px', 'font-size': '10px' } },
+                                {title: '12pt', inline:'span', styles: { fontSize: '12px', 'font-size': '12px' } },
+                                {title: '14pt', inline:'span', styles: { fontSize: '12px', 'font-size': '14px' } },
+                                {title: '16pt', inline:'span', styles: { fontSize: '12px', 'font-size': '16px' } }
+                        ]
+                }]
+        }
 	if (document.documentElement.clientWidth<540) {
 		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor";
 		edsetup.toolbar2 = " alignleft aligncenter | bullist numlist outdent indent  | link unlink image | asciimath asciimathcharmap asciisvg";
@@ -328,80 +355,6 @@ function initeditor4(edmode,edids,css){
 	
 };
 
-
-function initeditor(edmode,edids,css) {
-	if (usetiny4) {
-		initeditor4(edmode,edids,css);
-		return;
-	}
-	var cssmode = css || 0;
-	var edsetup = {
-	    mode : edmode,
-	    theme : "advanced",
-	    theme_advanced_buttons1 : "fontselect,fontsizeselect,formatselect,bold,italic,underline,strikethrough,separator,sub,sup,separator,cut,copy,paste,pasteword,undo,redo",
-	    theme_advanced_buttons2 : "justifyleft,justifycenter,justifyright,justifyfull,separator,numlist,bullist,outdent,indent,separator,forecolor,backcolor,separator,hr,anchor,link,unlink,charmap,image,"+((fileBrowserCallBackFunc != null)?"attach,":"") + "table"+((document.documentElement.clientWidth<900 || (coursetheme.match(/_fw/) && typeof assessbackgsubmit==='function'))?"":",tablecontrols,separator")+",code,separator,asciimath,asciimathcharmap,asciisvg",
-	    theme_advanced_buttons3 : "",
-	    theme_advanced_fonts : "Arial=arial,helvetica,sans-serif,Courier New=courier new,courier,monospace,Georgia=georgia,times new roman,times,serif,Tahoma=tahoma,arial,helvetica,sans-serif,Times=times new roman,times,serif,Verdana=verdana,arial,helvetica,sans-serif",
-	    theme_advanced_toolbar_location : "top",
-	    theme_advanced_toolbar_align : "left",
-	    theme_advanced_statusbar_location : "bottom",
-	    theme_advanced_source_editor_height: "500",
-	    plugins : 'asciimath,asciisvg,dataimage,table,inlinepopups,paste,media,advlist'+((fileBrowserCallBackFunc != null)?",attach":""),
-	    gecko_spellcheck : true,
-	    extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder],param[name|value],@[sscr]',
-	    content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme,
-	    popup_css_add : imasroot+'/themes/'+coursetheme,
-	    theme_advanced_resizing : true,
-	    table_styles: "Gridded=gridded;Gridded Centered=gridded centered",
-	    cleanup_callback : "imascleanup",
-	    convert_urls: false,
-	    AScgiloc : imasroot+'/filter/graph/svgimg.php',
-	    ASdloc : imasroot+'/javascript/d.svg',
-	    file_browser_callback : fileBrowserCallBackFunc
-	}
-	if (document.documentElement.clientWidth<600) {
-		edsetup.theme_advanced_buttons1 = "fontsizeselect,formatselect,bold,italic,underline,separator,sub,sup,separator,asciimath,asciimathcharmap,asciisvg";
-		edsetup.theme_advanced_buttons2 = "justifyleft,justifycenter,separator,numlist,bullist,outdent,indent,separator,forecolor,backcolor,separator,link,unlink,charmap,image,"+((fileBrowserCallBackFunc != null)?"attach,":"") + "table";
-	} 
-	if (edmode=="exact") {
-		edsetup.elements = edids
-	} else if (edmode=="textareas") {
-		edsetup.editor_selector = edids;
-	}
-	for (var i in tinyMCE.editors) {
-		tinyMCE.editors[i].remove();
-	}
-	tinyMCE.init(edsetup);	
-}
-
-function fileBrowserCallBack(field_name, url, type, win) {
-	var connector = imasroot+"/editor/file_manager.php";
-	
-	my_field = field_name;
-	my_win = win;
-	switch (type) {
-		case "image":
-			connector += "?type=img";
-			break;
-		case "file":
-			connector += "?type=files";
-			break;
-	}
-	tinyMCE.activeEditor.windowManager.open({
-		file : connector,
-		title : 'File Manager',
-		width : 350,  
-		height : 450,
-		resizable : "yes",
-		inline : "yes",  
-		close_previous : "no"
-	    }, {
-		window : win,
-		input : field_name
-	    });
-
-	//window.open(connector, "file_manager", "modal,width=450,height=440,scrollbars=1");
-}
 function filePickerCallBack(callback, value, meta) {
 	var connector = imasroot+"/tinymce4/file_manager.php";
 
