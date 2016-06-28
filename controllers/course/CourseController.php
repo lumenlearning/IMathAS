@@ -2083,10 +2083,6 @@ class CourseController extends AppController
             case AppConstant::ASSESSMENT:
                 AssessmentSession::deleteByAssessmentId($itemId);
                 Questions::deleteByAssessmentId($itemId);
-                var_dump("////////////////////////");
-                var_dump("////////////////////////");
-                var_dump("////////////////////////");
-                var_dump("over here");
                  Assessments::deleteAssessmentById($itemId);
                 break;
             case AppConstant::CALENDAR:

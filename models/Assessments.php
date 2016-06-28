@@ -191,9 +191,7 @@ class Assessments extends BaseImasAssessments
     }
 
     public static function getByAssessmentIds($assessmentIdList)
-    {
-
-        return Assessments::find()->where(['IN', 'id', $assessmentIdList])->all();
+    {        return Assessments::find()->where(['IN', 'id', $assessmentIdList])->all();
     }
 
     public static function setStartDate($shift, $typeId)
@@ -244,11 +242,11 @@ class Assessments extends BaseImasAssessments
         $query = "SELECT imas_assessments.name,imas_assessments.timelimit,imas_assessments.defpoints,imas_assessments.tutoredit,imas_assessments.defoutcome,";
         $query .= "imas_assessments.showhints,imas_assessments.deffeedback,imas_assessments.enddate,imas_assessment_sessions.* ";
         $query .= "FROM imas_assessments,imas_assessment_sessions ";
-        $query .= "WHERE imas_assessments.id=imas_assessment_sessions.assessmentid AND imas_assessment_sessions.id='$assessmentId'";
+        $query .= "WHERE imas_assessments.id=imas_assessment_sessions.assessmentid AND imas_assessment_sessions.id=:assessmentId";
         if (!$isteacher && !$istutor) {
             $query .= " AND imas_assessment_sessions.userid='$userId'";
         }
-        $command = Yii::$app->db->createCommand($query);
+        $command = Yii::$app->db->createCommand($query)->bindValues([':assessmentId'=>$courseId]);
         $data = $command->queryOne();
         return $data;
     }

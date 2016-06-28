@@ -3178,6 +3178,8 @@ class GradebookController extends AppController
             $assessmentId = $params['asid'];
         }
         $assessmentData = Assessments::getByCourseIdJoinWithSessionData($assessmentId, $params['uid'], $isteacher, $istutor);
+        var_dump($assessmentData);
+
         if (!$isteacher && !$istutor) {
             $rv = new ContentTrack;
             $rv->insertFromGradebook($currentUser->id, $courseId, 'gbviewasid', $assessmentData['assessmentid'], time());
