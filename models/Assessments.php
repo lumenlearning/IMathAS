@@ -21,6 +21,9 @@ class Assessments extends BaseImasAssessments
 
     public function create($values)
     {
+        var_dump("////////////");
+        var_dump("////////////");
+        var_dump("This is the create function in assesment controller need to be tested for just in case");
         $this->attributes = $values;
         $this->save();
     }
@@ -49,6 +52,7 @@ class Assessments extends BaseImasAssessments
 
     public static function getByCourse($courseId)
     {
+        var_dump("test this(break it to be extra sure for  fun )");
         return Assessments::find()->select('id,name')->where(['courseid' => $courseId])->orderBy('name')->all();
     }
 
@@ -84,7 +88,8 @@ class Assessments extends BaseImasAssessments
 
     public static function updateAssessment($params)
     {
-        $assessment = Assessments::findOne(['id' => $params['id']]);
+        $id = $params['id'];
+        $assessment = Assessments::findOne(['id' => $id]);
         if($assessment){
             $data = AppUtility::removeEmptyAttributes($params);
             $assessment->attributes = $data;
