@@ -303,13 +303,14 @@ function initeditor(edmode,edids,css){
 		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme,
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
-		file_picker_callback : filePickerCallBackFunc,
+		file_picker_callback: filePickerCallBackFunc,
 		file_browser_types: 'file image',
 		//imagetools_cors_hosts: ['s3.amazonaws.com'],
 		images_upload_url: imasroot+'/tinymce4/upload_handler.php',
 		//images_upload_credentials: true,
 		paste_data_images: true,
 		default_link_target: "_blank",
+		browser_spellcheck: true,
 		resize: "both",
 		width: '100%',
 		content_style: "body {background-color: #ffffff !important;}",
@@ -340,7 +341,8 @@ function initeditor(edmode,edids,css){
                                 {title: '10pt', inline:'span', styles: { fontSize: '12px', 'font-size': '10px' } },
                                 {title: '12pt', inline:'span', styles: { fontSize: '12px', 'font-size': '12px' } },
                                 {title: '14pt', inline:'span', styles: { fontSize: '12px', 'font-size': '14px' } },
-                                {title: '16pt', inline:'span', styles: { fontSize: '12px', 'font-size': '16px' } }
+                                {title: '16pt', inline:'span', styles: { fontSize: '12px', 'font-size': '16px' } },
+                                {title: '20pt', inline:'span', styles: { fontSize: '12px', 'font-size': '20px' } }
                         ]
                 }]
         }
