@@ -1504,7 +1504,7 @@ class CourseController extends AppController
 //            if (count($exceptions) > 0) {
 //                upsendexceptions($items);
 //            }
-            
+
             if (isset($folder))
             {
                 $now = time() + $previewShift;
@@ -2083,7 +2083,11 @@ class CourseController extends AppController
             case AppConstant::ASSESSMENT:
                 AssessmentSession::deleteByAssessmentId($itemId);
                 Questions::deleteByAssessmentId($itemId);
-                Assessments::deleteAssessmentById($itemId);
+                var_dump("////////////////////////");
+                var_dump("////////////////////////");
+                var_dump("////////////////////////");
+                var_dump("over here");
+                 Assessments::deleteAssessmentById($itemId);
                 break;
             case AppConstant::CALENDAR:
                 Items::deleteByTypeIdName($itemId,$ItemType['itemtype']);

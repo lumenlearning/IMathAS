@@ -99,8 +99,8 @@ class Assessments extends BaseImasAssessments
     }
 
     public static function deleteAssessmentById($assessmentId)
-    {
-        $assessmentData = Assessments::findOne(['id', $assessmentId]);
+    {   var_dump("abeer is in the error nwsqkja");
+        $assessmentData = Assessments::findOne(['id'=> $assessmentId]);
         if ($assessmentData) {
             $assessmentData->delete();
         }
