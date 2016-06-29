@@ -244,9 +244,14 @@ class Assessments extends BaseImasAssessments
         $query .= "FROM imas_assessments,imas_assessment_sessions ";
         $query .= "WHERE imas_assessments.id=imas_assessment_sessions.assessmentid AND imas_assessment_sessions.id=:assessmentId";
         if (!$isteacher && !$istutor) {
-            $query .= " AND imas_assessment_sessions.userid='$userId'";
+            $query .= " AND imas_assessment_sessions.userid=:userId";
+            $command = Yii::$app->db->createCommand($query)->bindValues([':assessmentId'=>$courseId,':userId'=> $userId]);
+
         }
+        else{
         $command = Yii::$app->db->createCommand($query)->bindValues([':assessmentId'=>$courseId]);
+
+        }
         $data = $command->queryOne();
         return $data;
     }
