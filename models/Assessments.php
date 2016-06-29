@@ -21,9 +21,7 @@ class Assessments extends BaseImasAssessments
 
     public function create($values)
     {
-        var_dump("////////////");
-        var_dump("////////////");
-        var_dump("This is the create function in assesment controller need to be tested for just in case");
+
         $this->attributes = $values;
         $this->save();
     }
@@ -52,7 +50,6 @@ class Assessments extends BaseImasAssessments
 
     public static function getByCourse($courseId)
     {
-        var_dump("test this(break it to be extra sure for  fun )");
         return Assessments::find()->select('id,name')->where(['courseid' => $courseId])->orderBy('name')->all();
     }
 
@@ -99,7 +96,7 @@ class Assessments extends BaseImasAssessments
     }
 
     public static function deleteAssessmentById($assessmentId)
-    {   var_dump("abeer is in the error nwsqkja");
+    {   
         $assessmentData = Assessments::findOne(['id'=> $assessmentId]);
         if ($assessmentData) {
             $assessmentData->delete();
@@ -246,15 +243,13 @@ class Assessments extends BaseImasAssessments
         if (!$isteacher && !$istutor) {
             $query .= " AND imas_assessment_sessions.userid=:userId";
             $command = Yii::$app->db->createCommand($query)->bindValues([':assessmentId'=>$courseId,':userId'=> $userId]);
-
         }
-        else{
-        $command = Yii::$app->db->createCommand($query)->bindValues([':assessmentId'=>$courseId]);
-
+        else {
+            $command = Yii::$app->db->createCommand($query)->bindValues([':assessmentId'=>$courseId]);
         }
         $data = $command->queryOne();
         return $data;
-    }
+      }
 
     public static function getByGroupSetId($deleteGrpSet)
     {
