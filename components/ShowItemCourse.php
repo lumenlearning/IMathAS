@@ -65,16 +65,16 @@ class ShowItemCourse extends Component
                 $blocklist[] = $i+AppConstant::NUMERIC_ONE;
             }
         }
-
         if ($canEdit && !$isStudent)
         {
-          $abeer = ShowItemCourse::generateAddItem($parent,'t',$studview);
+            echo ShowItemCourse::generateAddItem($parent,'t',$studview);
         }
 
         for ($i = AppConstant::NUMERIC_ZERO; $i < count($items); $i++)
         {
             if (is_array($items[$i]))
             {
+
                 /*
                  * if is a block
                  */
@@ -92,6 +92,7 @@ class ShowItemCourse extends Component
                       continue;
                   }
                 }
+
                 $items[$i]['name'] = stripslashes($items[$i]['name']);
                 if ($canEdit && !$studview && !$isStudent) {
                     echo ShowItemCourse::generatemoveselect($i,count($items),$parent,$blocklist);
@@ -835,7 +836,8 @@ class ShowItemCourse extends Component
                     <?php if ($tlwrds != '') {
                         echo "onclick='return confirm(\"", sprintf(_('This assessment has a time limit of %s.  Click OK to start or continue working on the assessment.'), $tlwrds), "\")' ";
                     }
-                    echo ">".$line['name']."</a></b>";
+                    // This is not encoded because for some reason it messes up the html tags instead of purly encodeing them
+                    echo ">". $line['name']."</a></b>";
                     if ($line['enddate'] != AppConstant::ALWAYS_TIME) {
                         echo "<BR> $endname $endDate \n";
                     }
@@ -894,7 +896,7 @@ class ShowItemCourse extends Component
                     echo "<div class=title><b>";?>
 
                     <a href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/show-test?id='.$typeid . '&cid=' . $courseId) ?>"
-                    <?php echo ">".$line['name']."</a></b><BR> ", sprintf(_('Past Due Date of %s.  Showing as Review'), $endDate).'.';
+                    <?php echo ">".HTML::encode($line['name'])."</a></b><BR> ", sprintf(_('Past Due Date of %s.  Showing as Review'), $endDate).'.';
                     if ($line['reviewdate'] != AppConstant::ALWAYS_TIME) {
                         echo " ", _('until'), " $reviewdate \n";
                     }
@@ -956,7 +958,7 @@ class ShowItemCourse extends Component
                         }
                     }
                     echo "<div class=title><i>"; ?>
-                    <a href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/show-test?id='.$typeid . '&cid=' . $courseId) ?>"><?php echo $line['name'] ?></a>
+                    <a href="<?php echo AppUtility::getURLFromHome('assessment', 'assessment/show-test?id='.$typeid . '&cid=' . $courseId) ?>"><?php echo HTML::encode($line['name']) ?></a>
                   <?php  echo '<span class="instrdates">';
                     echo "<br/><i>$show</i>\n";
                     echo '</span>';
@@ -1382,7 +1384,7 @@ class ShowItemCourse extends Component
                 $line = Forums::getById($typeid);
 
                 if (strpos($line['description'],'<p ') !== AppConstant::NUMERIC_ZERO) {
-                    $line['description'] = '<p>'. HtmlPurifier::process($line['description']).'</p>';
+                    $line['description'] = '<p>'.HtmlPurifier::process($line['description']).'</p>';
                     if (preg_match('/^\s*<p[^>]*>\s*<\/p>\s*$/',$line['description'])) {
                         $line['description'] = '';
                     }
@@ -1426,7 +1428,7 @@ class ShowItemCourse extends Component
                        <?php }
                     }
                     echo "<div class=title> "; ?>
-                    <b><a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/thread?cid='.$courseId.'&forumid='.$line['id']);?>"><?php echo $line['name']?></a></b>
+                    <b><a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/thread?cid='.$courseId.'&forumid='.$line['id']);?>"><?php echo HTML::encode($line['name'])?></a></b>
                   <?php  if (isset($newPostCnts[$line['id']]) && $newPostCnts[$line['id']] > AppConstant::NUMERIC_ZERO) { ?>
                         <a style="color:red" href="<?php echo AppUtility::getURLFromHome('forum', 'forum/thread?cid='.$courseId.'&forumid='.$line['id'],'&page=-1')?>"><?php echo sprintf(_('New Posts (%s)'),$newPostCnts[$line['id']])?></a>
                   <?php  }
@@ -1473,7 +1475,8 @@ class ShowItemCourse extends Component
                              src="<?php echo AppUtility::getAssetURL() ?>img/iconForum.png"/>
                     <?php }
                     echo "<div class=title><i>"; ?>
-                    <b><a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/thread?cid='.$courseId.'&forumid='.$line['id'])?>"><?php echo $line['name']?></a></b></i>
+                      <!-- the fallowing $line['name'] is the one for the forum names  -->
+                    <b><a href="<?php echo AppUtility::getURLFromHome('forum', 'forum/thread?cid='.$courseId.'&forumid='.$line['id'])?>"><?php echo HTML::encode($line['name'])?></a></b></i>
                    <?php if (($newPostCnts[$line['id']]) && $newPostCnts[$line['id']] > AppConstant::NUMERIC_ZERO) { ?>
                         <a style="color:red" href="<?php echo AppUtility::getURLFromHome('forum', 'forum/thread?cid='.$courseId.'&forumid='.$line['id'],'&page=-1')?>"><?php sprintf(_('New Posts (%s)'),$newPostCnts[$line['id']])?></a>
                    <?php }
@@ -1588,7 +1591,7 @@ class ShowItemCourse extends Component
                             $defaultgroupid=AppConstant::NUMERIC_ZERO;
 
                     if ($isPublic) { ?>
-                         <a href="<?php echo AppUtility::getURLFromHome('wiki', 'wiki/view-wiki-public?courseId='.$courseId.'&wikiId='.$typeid.'&grp='.$defaultgroupid)?>"><?php echo $line['name']?></a>
+                         <a href="<?php echo AppUtility::getURLFromHome('wiki', 'wiki/view-wiki-public?courseId='.$courseId.'&wikiId='.$typeid.'&grp='.$defaultgroupid)?>"><?php echo HTML::encode($line['name'])?></a>
                    <?php } else {
                         if (($isStudent) && !($sessionData['stuview'])) {
                             $rec = "data-base=\"wiki-$typeid\"";
@@ -1597,7 +1600,7 @@ class ShowItemCourse extends Component
                         }?>
 
 <!--                        echo "<b><a href=\"#\" $rec>{$line['name']}</a></b>\n";-->
-                           <a href="<?php echo AppUtility::getURLFromHome('wiki', 'wiki/show-wiki?courseId='.$courseId.'&wikiId='.$typeid.'&grp='.$defaultgroupid)?>"><?php echo $line['name']?></a>
+                           <a href="<?php echo AppUtility::getURLFromHome('wiki', 'wiki/show-wiki?courseId='.$courseId.'&wikiId='.$typeid.'&grp='.$defaultgroupid)?>"><?php echo HTML::encode($line['name'])?></a>
                       <?php  if ($hasnew) {
                             echo " <span style=\"color:red\">", _('New Revisions'), "</span>";
                         }
@@ -1650,7 +1653,7 @@ class ShowItemCourse extends Component
                    <?php }
                     echo "<div class=title><i> <b>"; ?>
 <!--                    <a href=\"#\">{$line['name']}</a></b></i> ";-->
-                    <a href="<?php echo AppUtility::getURLFromHome('wiki', 'wiki/show-wiki?courseId='.$courseId.'&wikiId='.$typeid)?>"><?php echo $line['name']?></a>
+                    <a href="<?php echo AppUtility::getURLFromHome('wiki', 'wiki/show-wiki?courseId='.$courseId.'&wikiId='.$typeid)?>"><?php echo HTML::encode($line['name'])?></a>
                     <?php if ($hasnew) {
                         echo " <span style=\"color:red\">", _('New Revisions'), "</span>";
                     }
