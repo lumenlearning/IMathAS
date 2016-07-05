@@ -1549,7 +1549,8 @@ class QuestionController extends AppController
                     $errorMsg;
                     $outputMsg;
                 }
-                exit;
+                return $this->redirect(AppUtility::getURLFromHome('question', 'question/add-questions?cid=' . $courseId . '&aid=' . $params['aid']));
+
             }
         }
         $myName = $user['LastName'] . ',' . $user['FirstName'];
