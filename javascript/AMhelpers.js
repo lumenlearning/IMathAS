@@ -85,6 +85,11 @@ function setupLivePreview(qn) {
 			  	} else if (vlist.hasOwnProperty(qn)) {
 			  		text = AMnumfuncPrepVar(qn, text)[1];
 			  		
+			  	} else if (calcformat.hasOwnProperty(qn)) {
+			  		var format = calcformat[qn];
+			  		if (format.indexOf('list')==-1 && format.indexOf('set')==-1) {
+			  			text = text.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
+			  		}
 			  	}
 			  	return text;
 			  },
@@ -1459,7 +1464,7 @@ function assessbackgsubmitCallback(qn,noticetgt) {
 					if (typeof G_vmlCanvasManager != 'undefined') {
 						scripts[i] = scripts[i] + 'G_vmlCanvasManager.initElement(document.getElementById("canvas'+k[1]+'"));';
 					}
-					scripts[i] = scripts[i] + "initCanvases("+k[1]+");";     
+					scripts[i] = scripts[i] + "imathasDraw.initCanvases("+k[1]+");";     
 				    }
 				    eval(scripts[i]);
 			    }
@@ -1469,6 +1474,9 @@ function assessbackgsubmitCallback(qn,noticetgt) {
 		    }
 		    for (var i=0; i<initstack.length; i++) {
 		    	    var foo = initstack[i]();
+		    }
+		    if (LivePreviews.hasOwnProperty(qn)) {
+		    	 LivePreviews[qn].Init();	    
 		    }
 		    $(window).trigger("ImathasEmbedReload");
 		    initcreditboxes();
@@ -1939,4 +1947,62 @@ function initcreditboxes() {
 }
 initstack.push(initcreditboxes);
 	
-	
+function assessmentTimer(duration, timelimitkickout) {
+	var start = Date.now(), remaining, hours, minutes, seconds, countdowntimer, timestr;
+	function updatetimer() {
+		remaining = duration - Math.floor((Date.now() - start)/1000);
+		if (remaining <= 0) {
+			remaining = 0;
+			clearInterval(countdowntimer);
+			if (timelimitkickout) {
+				document.getElementById('timelimitholder').className = "";
+				document.getElementById('timelimitholder').style.color = "#f00";
+				document.getElementById('timelimitholder').innerHTML = _('Time limit expired - submitting now');
+				document.getElementById('timelimitholder').style.fontSize="300%";
+				if (document.getElementById("qform") == null) {
+					setTimeout("window.location.pathname='"+imasroot+"/assessment/showtest.php?action=skip&superdone=true'",2000); 
+					return;
+				} else {
+					var theform = document.getElementById("qform");
+					var action = theform.getAttribute("action");
+					theform.setAttribute("action",action+'&superdone=true');
+					if (doonsubmit(theform,true,true)) { setTimeout('document.getElementById("qform").submit()',2000);}
+				}
+				return 0;		
+			} else {
+				alert(_('Time Limit has elapsed'));
+			}
+		} // end remaining <= 0
+		seconds = Math.floor((remaining)%60);
+		minutes = Math.floor((remaining/60)%60);
+		hours = Math.floor(remaining/3600);
+		if (hours==0 && minutes <= 5) {document.getElementById("timeremaining").style.color="#f00";}
+		if (hours==0 && minutes==0 && seconds <= 5) {document.getElementById("timeremaining").style.fontSize="150%";}
+		timestr = ((hours>0)?hours+":":"") + ((hours>0 && minutes<10)?"0":"") + minutes+":" + (seconds<10?"0":"")+seconds;
+		document.getElementById("timeremaining").innerHTML = timestr;
+	}
+	countdowntimer = setInterval(updatetimer, 1000);
+	$(document).ready(function() {
+		var s = $("#timerwrap");
+		var pos = s.position();                   
+		$(window).scroll(function() {
+		   var windowpos = $(window).scrollTop();
+		   if (windowpos >= pos.top) {
+		     s.addClass("sticky");
+		   } else {
+		     s.removeClass("sticky");
+		   }
+		 });
+	});
+}
+function toggletimer() {
+	if ($("#timerhide").text()=="[x]") {
+		$("#timercontent").hide();
+		$("#timerhide").text("["+_("Show Timer")+"]");
+		$("#timerhide").attr("title","["+_("Show Timer")+"]");
+	} else {
+		$("#timercontent").show();
+		$("#timerhide").text("[x]");
+		$("#timerhide").attr("title",_("Hide Timer"));
+	}
+}

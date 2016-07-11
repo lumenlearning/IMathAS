@@ -131,13 +131,14 @@ var renderMathInText = function(text, delimiters) {
         } else {
             var span = document.createElement("span");
             var math = data[i].data;
-            if (data[i].format == "asciimath") {
+            if (data[i].format == "asciimath") {   
             	    math = "\\displaystyle "+AMTparseAMtoTeX(math);
             } else if (math.indexOf("\\displaystyle")==-1) {
             	    math = "\\displaystyle "+math;
             }
             try {
-                katex.render(math, span, {
+            	//bit of a hack since katex can't handle the alignment pieces of matrices
+                katex.render(math.replace(/matrix}{[clr]+}/,'matrix}'), span, {
                     displayMode: data[i].display
                 });
                 if (data[i].format == "asciimath") {
@@ -156,6 +157,7 @@ var renderMathInText = function(text, delimiters) {
                 	span.innerHTML = "\\("+data[i].data+"\\)";
                 }
                 MathJax.Hub.Queue(["Typeset",MathJax.Hub,span]);
+                usedMathJax = true;
             }
             fragment.appendChild(span);
         }
@@ -210,6 +212,7 @@ var extend = function(obj) {
     return obj;
 };
 
+var usedMathJax;
 var renderMathInElement = function(elem, options) {
     if (!elem) {
         throw new Error("No element provided to render");
@@ -217,7 +220,15 @@ var renderMathInElement = function(elem, options) {
 
     options = extend({}, defaultOptions, options);
 
+    usedMathJax = false;
     renderElem(elem, options.delimiters, options.ignoredTags);
+    if (window.hasOwnProperty("katexDoneCallback")) {
+    	    if (usedMathJax) {
+    	    	    MathJax.Hub.Queue(window.katexDoneCallback);
+    	    } else {
+    	    	    window.katexDoneCallback();
+    	    }
+    }
 };
 
 window.renderMathInElement = renderMathInElement;

@@ -940,7 +940,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	}
 	if ($testsettings['displaymethod'] == "LivePoll") {
 		$placeinhead .= '<script src="https://'.$CFG['GEN']['livepollserver'].':3000/socket.io/socket.io.js"></script>';
-		$placeinhead .= '<script src="'.$imasroot.'/javascript/livepoll.js"></script>';
+		$placeinhead .= '<script src="'.$imasroot.'/javascript/livepoll.js?v=071116"></script>';
 		$livepollroom = $testsettings['id'].'-'.($sessiondata['isteacher']?'teachers':'students');
 		$now = time();
 		if (isset($CFG['GEN']['livepollpassword'])) {
@@ -1223,7 +1223,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 			$timebeforedue = $exceptionduedate - time();
 			if ($timebeforedue>0 && ($testsettings['enddate'] - time()) < 0) { //past original due date
 				$duetimenote .= _('This assignment is past the original due date of ').tzdate('D m/d/Y g:i a',$testsettings['enddate']).'. ';
-				if ($exceptiontype==1) {
+				if ($exceptiontype>0) {
 					$duetimenote .= _('You have used a LatePass');
 				} else {
 					$duetimenote .= _('You were granted an extension');
@@ -1318,69 +1318,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 		if ($totremaining<300) {
 			echo 'style="color:#f00;" ';
 		}
-		echo ">$hours:$minutes:$seconds</span> ", _('remaining'), ".</span></span> <span onclick=\"toggletimer()\" style=\"color:#aaa;\" class=\"clickable\" id=\"timerhide\" title=\"",_('Hide'),"\">[x]</span></div>\n";
+		echo ">".(($hours>0)?$hours.":":"")."$minutes:$seconds</span> ", _('remaining'), ".</span></span> <span onclick=\"toggletimer()\" style=\"color:#aaa;\" class=\"clickable\" id=\"timerhide\" title=\"",_('Hide'),"\">[x]</span></div>\n";
 		echo "<script type=\"text/javascript\">\n";
-		echo " hours = $hours; minutes = $minutes; seconds = $seconds; done=false;\n";	
-		echo " function updatetime() {\n";
-		echo "	  seconds--;\n";
-		echo "    if (seconds==0 && minutes==0 && hours==0) {done=true; ";
-		if ($timelimitkickout) {
-			echo "		document.getElementById('timelimitholder').className = \"\";";
-			echo "		document.getElementById('timelimitholder').style.color = \"#f00\";";
-			echo "		document.getElementById('timelimitholder').innerHTML = \"", _('Time limit expired - submitting now'), "\";";
-			echo " 		document.getElementById('timelimitholder').style.fontSize=\"300%\";";
-			echo "		if (document.getElementById(\"qform\") == null) { ";
-			echo "			setTimeout(\"window.location.pathname='$imasroot/assessment/showtest.php?action=skip&superdone=true'\",2000); return;";
-			echo "		} else {";
-			echo "		var theform = document.getElementById(\"qform\");";
-			echo " 		var action = theform.getAttribute(\"action\");";
-			echo "		theform.setAttribute(\"action\",action+'&superdone=true');";
-			echo "		if (doonsubmit(theform,true,true)) { setTimeout('document.getElementById(\"qform\").submit()',2000);}} \n";
-			echo "		return 0;";
-			echo "      }";
-			
-		} else {
-			echo "		alert(\"", _('Time Limit has elapsed'), "\");}\n";
-		}
-		echo "    if (seconds==0 && minutes==5 && hours==0) {document.getElementById('timeremaining').style.color=\"#f00\";}\n";
-		echo "    if (seconds==5 && minutes==0 && hours==0) {document.getElementById('timeremaining').style.fontSize=\"150%\";}\n";
-		echo "    if (seconds < 0) { seconds=59; minutes--; }\n";
-		echo "    if (minutes < 0) { minutes=59; hours--;}\n";
-		echo "	  str = '';\n";
-		echo "	  if (hours > 0) { str += hours + ':';}\n";
-		echo "    if (hours > 0 && minutes <10) { str += '0';}\n";
-		echo "	  if (minutes >0) {str += minutes + ':';}\n";
-		echo "	    else if (hours>0) {str += '0:';}\n";
-		echo "      else {str += ':';}\n";
-		echo "    if (seconds<10) { str += '0';}\n";
-		echo "	  str += seconds + '';\n";
-		echo "	  document.getElementById('timeremaining').innerHTML = str;\n";
-		echo "    if (!done) {setTimeout(\"updatetime()\",1000);}\n";
-		echo " }\n";
-		echo " updatetime();\n";
-		echo ' $(document).ready(function() {
-			var s = $("#timerwrap");
-			var pos = s.position();                   
-			$(window).scroll(function() {
-			   var windowpos = $(window).scrollTop();
-			   if (windowpos >= pos.top) {
-			     s.addClass("sticky");
-			   } else {
-			     s.removeClass("sticky");
-			   }
-			   });
-			   });';
-		echo ' function toggletimer() {
-				if ($("#timerhide").text()=="[x]") {
-					$("#timercontent").hide();
-					$("#timerhide").text("['._("Show Timer").']");
-					$("#timerhide").attr("title","'._("Show Timer").'");
-				} else {
-					$("#timercontent").show();
-					$("#timerhide").text("[x]");
-					$("#timerhide").attr("title","'._("Hide").'");
-				}
-			}';
+		echo "assessmentTimer($totremaining,".($timelimitkickout?'true':'false').");";
 		echo "</script>\n";
 		}
 	} else if ($isreview) {

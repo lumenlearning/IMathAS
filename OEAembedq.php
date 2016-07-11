@@ -17,7 +17,7 @@ require("./assessment/displayq2.php");
 
 $sessiondata = array();
 $sessiondata['graphdisp'] = 1;
-$sessiondata['mathdisp'] = 3;
+$sessiondata['mathdisp'] = 6;
 $showtips = 2;
 $useeqnhelper = 4;
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/assessment/mathquill.css?v=102113\" type=\"text/css\" />";
@@ -39,12 +39,16 @@ $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqn
 $issigned = false;
 if (isset($_GET['jwt'])) {
 	try {
-		$QS = JWT::decode($_GET['jwt']);
+		//decode JWT.  Stupid hack to convert it into an assocc array
+		$QS = json_decode(json_encode(JWT::decode($_GET['jwt'])), true);
 	} catch (Exception $e) {
 	         echo "JWT Error: ".$e->getMessage();
 	         exit;
 	}
-	$issigned = true;
+	
+	if (isset($QS['auth'])) {
+		$issigned = true;
+	}
 } else {
 	$QS = $_GET;
 }
@@ -61,9 +65,20 @@ if (empty($QS['id'])) {
 
 $qsetid=intval($QS['id']);
 
-$sessiondata['coursetheme'] = $coursetheme;
-
 $page_formAction = "OEAembedq.php?id=$qsetid";
+
+if (isset($_GET['frame_id'])) {
+	$frameid = preg_replace('/[^\w:.-]/','',$_GET['frame_id']);
+	$page_formAction .= '&frame_id='.$frameid;
+} else {
+	$frameid = "OEAembedq-$qsetid";
+}
+if (isset($_REQUEST['theme'])) {
+	$theme = preg_replace('/\W/','',$_REQUEST['theme']);
+	$page_formAction .= '&theme='.$theme;
+	$sessiondata['coursetheme'] = $theme.'.css';
+}
+
 
 $showans = false;
 
@@ -97,8 +112,7 @@ if (isset($QS['showscored'])) {
 		$result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
 		$row = mysql_fetch_row($result);
 		$key = $row[0];
-		$params["auth"] = stripslashes($_POST['auth']);
-		$jwtcheck = JWT::decode($_POST['jwtchk'], $key);
+		$jwtcheck = json_decode(json_encode(JWT::decode($_POST['jwtchk'], $key)), true);
 		if ($jwtcheck['id'] != $qsetid || $jwtcheck['seed'] != $seed) {
 			echo "ID/Seed did not check";
 			exit;
@@ -148,12 +162,15 @@ if (isset($QS['showscored'])) {
 	$pts = getpts($after);
 	
 	$params = array('id'=>$qsetid, 'score'=>$pts, 'redisplay'=>"$seed;$rawafter;{$lastanswers[0]}");
+	if (isset($_POST['auth'])) {
+		$params["auth"] = stripslashes($_POST['auth']);
+	}
 		
 	$signed = JWT::encode($params, $key);
 	
 	echo '<script type="text/javascript">
 	$(function() {
-		window.parent.postMessage("updatescore='.$signed.'","*");
+		window.parent.postMessage(JSON.stringify({subject: "lti.ext.mom.updateScore", id: '.$qsetid.', score: '.$pts.', redisplay: "'.str_replace('"','\\"',$params["redisplay"]).'", jwt: "'.$signed.'", frame_id: "' . $frameid . '"}), "*");
 	});
 	</script>';
 	if ($scoredonsubmit) {
@@ -168,22 +185,30 @@ if (isset($QS['showscored'])) {
 	
 } else {
 	$lastanswers = array();
-	if (isset($QS['redisplay'])) {
+	if (isset($QS['redisplay']) && trim($QS['redisplay'])!='') {
 		//DE is requesting that the question be redisplayed
 		list($seed, $rawscores, $lastanswers[0]) = explode(';', $QS['redisplay'],3);
 		$rawscores = array();
 	} else {
 		if (isset($QS['auth'])) { //is signed
-			$seed = rand(1,4999);
+			if (isset($QS['seed']) && intval($QS['seed'])<5000) {
+				$seed = intval($QS['seed']);
+			} else {
+				$seed = rand(1,4999);
+			}
 		} else {
-			$seed = rand(5000,9999);
+			if (isset($QS['seed']) && intval($QS['seed'])>4999) {
+				$seed = intval($QS['seed']);
+			} else {
+				$seed = rand(5000,9999);
+			}
 		}
 	}
 	$doshowans = 0;
 	echo "<form id=\"qform\" method=\"post\" enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"doonsubmit()\">\n";
 	echo "<input type=\"hidden\" name=\"seed\" value=\"$seed\" />";
 	$scoredonsubmit = false;
-	if (isset($QS['showscoredonsubmit'])) {
+	if (isset($QS['showscoredonsubmit']) && ($QS['showscoredonsubmit']=='1' || $QS['showscoredonsubmit']=='true')) {
 		echo '<input type="hidden" name="showscoredonsubmit" value="1"/>';
 		$scoredonsubmit = true;
 	}
@@ -222,15 +247,28 @@ if (isset($QS['showscored'])) {
 }
 
 echo '<script type="text/javascript">
-	if (MathJax) {
+	function sendresizemsg() {
+	 if(self != top){
+	  var default_height = Math.max(
+              document.body.scrollHeight, document.body.offsetHeight,
+              document.documentElement.clientHeight, document.documentElement.scrollHeight,
+              document.documentElement.offsetHeight);
+	  window.parent.postMessage( JSON.stringify({
+	      subject: "lti.frameResize",
+	      height: default_height,
+	      frame_id: "'.$frameid.'"
+	  }), "*");
+	 }
+	}
+	if (mathRenderer == "Katex") {
+		window.katexDoneCallback = sendresizemsg;
+	} else if (MathJax) {
 		MathJax.Hub.Queue(function () {
-			var height = document.body.scrollHeight;
-			window.parent.postMessage("action=resize&id='.$qsetid.'&height="+height,"*");
+			sendresizemsg();
 		});
 	} else {
 		$(function() {
-			var height = document.body.scrollHeight;
-			window.parent.postMessage("action=resize&id='.$qsetid.'&height="+height,"*");
+			sendresizemsg();
 		});
 	}
 	</script>';
