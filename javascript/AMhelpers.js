@@ -155,6 +155,7 @@ function updateLivePreview(targ) {
 }
 
 function normalizemathunicode(str) {
+	str = str.replace(/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/g, "");
 	str = str.replace(/\u2013|\u2014|\u2015|\u2212/g, "-");
 	str = str.replace(/\u2044|\u2215/g, "/");
 	str = str.replace(/∞/g,"oo").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/∪/g,"U");
@@ -840,11 +841,8 @@ function AMnumfuncPrepVar(qn,str) {
   for (var i=0; i<vars.length; i++) {
 	  if (vars[i].length>1) {
 		  var isgreek = false;
-		  for (var j=0; j<greekletters.length;j++) {
-			  if (vars[i].toLowerCase()==greekletters[j]) {
-				isgreek = true; 
-				break;
-			  }
+		  if (arraysearch(vars[i].toLowerCase(), greekletters)!=-1) {
+			  isgreek = true; 
 		  }
 		  if (vars[i].match(/^\w+_\w+$/)) {
 		  	if (!foundaltcap[i]) {
@@ -857,10 +855,10 @@ function AMnumfuncPrepVar(qn,str) {
 		  	var remvarparen = new RegExp(varpts[1]+'_\\('+varpts[2]+'\\)', regmod);
 		  	dispstr = dispstr.replace(remvarparen, vars[i]);
 		  	str = str.replace(remvarparen, vars[i]);
-		  	if (varpts[1].length>1) {
+		  	if (varpts[1].length>1 && arraysearch(varpts[1].toLowerCase(), greekletters)==-1) {
 		  		varpts[1] = '"'+varpts[1]+'"';
 		  	} 
-		  	if (varpts[2].length>1) {
+		  	if (varpts[2].length>1 && arraysearch(varpts[2].toLowerCase(), greekletters)==-1) {
 		  		varpts[2] = '"'+varpts[2]+'"';
 		  	} 
 		  	dispstr = dispstr.replace(new RegExp(varpts[0],regmod), varpts[1]+'_'+varpts[2]);
@@ -898,19 +896,18 @@ function AMnumfuncPrepVar(qn,str) {
   dispstr = dispstr.replace("varE","E");
   dispstr = dispstr.replace(/@(\d+)@/g, indextofunc);	
   
-  return [str,dispstr];
+  return [str,dispstr,vars.join("|")];
 }
 
 //preview button for numfunc type
 function AMpreview(inputId,outputId) {
   var qn = inputId.slice(2);
   var strprocess = AMnumfuncPrepVar(qn, document.getElementById(inputId).value);
-  str = strprocess[0];
-  dispstr = strprocess[1];
-  
+  var str = strprocess[0];
+  var dispstr = strprocess[1];
+  var vl = strprocess[2];
   //the following does a quick syntax check of the formula
   
-  var vl = vlist[qn];
   var fl = flist[qn];
   
   ptlist = pts[qn].split(",");
@@ -1051,7 +1048,7 @@ function syntaxcheckexpr(str,format,vl) {
 		  err += "["+_("use function notation")+" - "+_("use $1 instead of $2",errstuff[1]+"("+errstuff[2]+")",errstuff[0])+"]. ";
 	  }
 	  if (vl) {
-	  	  reg = new RegExp("(arc|sqrt|root|ln|log|sinh|cosh|tanh|sech|csch|coth|sin|cos|tan|sec|csc|cot|abs|pi|e|sign|DNE|oo|"+vl+")", "ig");
+	  	  reg = new RegExp("(repvars\\d+|"+vl+"|arc|sqrt|root|ln|log|sinh|cosh|tanh|sech|csch|coth|sin|cos|tan|sec|csc|cot|abs|pi|e|sign|DNE|oo)", "ig");
 	  	  if (str.replace(reg,'').match(/[a-zA-Z]/)) {
 	  	  	err += _(" Check your variables - you might be using an incorrect one")+". ";	  
 	  	  }

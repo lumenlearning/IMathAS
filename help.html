@@ -1664,7 +1664,9 @@ The following macros create graphs or tables:
 		<li><b>dash</b>: enter "dash" if you want a dashed line, otherwise the line is solid</li>
 		<li><b>Examples</b>: "cos(x),red" or "x^2,,-2,2,open,closed" or "[t^2,t/3],blue,0,5,,,2,dash" or "1/x,black,-5,5!0" or "x=1,red,,,,,,dash"</li>
 		</ul>
-	<li><b>xmin,xmax,ymin,ymax</b>: Graphing window.  Defaults to -5 to 5 for both</li>
+	<li><b>xmin,xmax,ymin,ymax</b>: Graphing window.  Defaults to -5 to 5 for both. Use "0:-n" (for some value of n) for xmin or ymin to only 
+	       have gridlines and labels after 0, while still using -n to adjust spacing. This is an alternative to using addplotborder to create
+	       first quadrant graphs.</li>
 	<li><b>labels</b>: spacing of axes labels.  Defaults to 1. Set to "off" or 0 for none.  Use "xlbl:ylbl" for different spacing on each axis.</li>
 	<li><b>grid</b>: spacing of grid lines.  Defaults to 1.  Set to "off" or 0 for none.  Use "xgrid:ygrid" for different spacing on each axis.</li>
 	<li><b>width,height</b>:  The width and height (in pixels) of the graph.  Defaults to 200x200</li>
@@ -1884,6 +1886,9 @@ These macros are used to test various conditions.  They typically return true or
 <h2><a name="feedbackmacros">Feedback Macros</a></h2>
 These macros are used to select and format feedback messages to students.  They return a string which can be placed in the question text.
 <ul>
+<li><b>getfeedbackbasic(correct msg, incorrect msg, $thisq, [partnum])</b>:  Generates a feedback string based solely on whether the 
+  question was scored correct or not.  Provide the correct and incorrect messages to display, and provide $thisq.  Give a part number for
+  multipart questions to get part-based feedback.</li>
 <li><b>getfeedbacktxt(stuans, feedbacktxt, ans)</b>:  Gives feedback on multiple choice questions.  <br/>
   stuans should be the student answer, obtained from
    $stuanswers[$thisq] for single part questions, or using the getstuans macro for multipart. <br/>
@@ -2084,6 +2089,17 @@ Your answer was {$stuanswers[0][0]}.  If using it directly in a calculation, enc
 5) You can use the function getstuans($stuanswers,N,P) to retreive a student answer value.  This method bypasses some strange things that happen
 when there is a multipart question with only one part.
 </p>
+
+<h4>Other Reference Variables</h4>
+<p>A few other special purpose variables can be referenced:</p>
+<ul>
+<li><b>$scorenonzero</b>: This variable is only available on display, not during scoring. $scorenonzero[$thisq] (or $scorenonzero[$thisq][partindex] for multipart)
+   will be -1 if the question is unanswered, 0 if the score is zero, and 1 if the score is anything above 0.</li>
+<li><b>$scoreiscorrect</b>: This variable is only available on display, not during scoring. $scoreiscorrect[$thisq] (or $scoreiscorrect[$thisq][partindex] for multipart)
+   will be -1 if the question is unanswered, 1 if the score (before any penalties) is perfect, and 0 otherwise.</li>
+<li><b>$attemptn</b>: This variable holds the attempt number of the current attempt.  0 is the initial attempt, 1 is the next attempt, etc.</li>
+<li><b>$requestclearla</b>:  If you set $requestclearla=true in your code, it will request the display to clear out the student's last answer.
+  This might be useful if your question branches based on attempt count.  Example: <code>$requestclearla = true if ($attemptn==2 &amp;&amp; !$scoreiscorrect[$thisq])</code></li>
 
 <h4>Reusing Code</h4>
 <p>You can import in the Common Control code from another question using
@@ -2560,7 +2576,9 @@ drawn line from the correct line.
 	    values.  For example, to just set the window, you could use "0,10,0,10"<br/>
 	    If using $answerformat="numberline", set ymin and ymax to 0.<br/>If desired, you can set separate label and grid
 	    spacing using "xmin,xmax,ymin,ymax,xlabel:xgrid,ylabel:ygrid,imagewidth,imageheight".  You can specify axis labels using
-	    "xmin,xmax,ymin,ymax,xlabel:xgrid:xaxislabel,ylabel:ygrid:yaxislabel,imagewidth,imageheight"</dd>
+	    "xmin,xmax,ymin,ymax,xlabel:xgrid:xaxislabel,ylabel:ygrid:yaxislabel,imagewidth,imageheight".  
+	    To create first quadrant graphs, use "0:-n" (for some value of n) for xmin and/or ymin to only have gridlines and labels 
+	    after 0, while still using -n to adjust spacing. </dd>
 <dt>$snaptogrid = spacing (In Common Control)</dt>
 	<dd>Turns on snapping, where points will jump to a grid.  $snaptogrid = 1 will jump to the nearest
 	integer. $snaptogrid = 0.5 will jump to the nearest .5.  $snaptogrid = "2:4" will jump to the nearest
