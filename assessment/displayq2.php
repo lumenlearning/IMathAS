@@ -305,7 +305,11 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 				$answerbox[$iidx] = str_replace('<select','<select disabled="disabled"',$answerbox[$iidx]);
 			}
 			if (strpos($toevalqtxt,"\$previewloc[$iidx]")===false) {
-				$answerbox[$iidx] .= $previewloc[$iidx];
+				if (strpos($answerbox[$iidx],"previewloctemp$iidx")!==false) {
+					$answerbox[$iidx] = str_replace('<span id="previewloctemp'.$iidx.'"></span>', $previewloc[$iidx], $answerbox[$iidx]);
+				} else {
+					$answerbox[$iidx] .= $previewloc[$iidx];
+				}
 			}
 			if (isset($hideanswerboxes) && $hideanswerboxes==true) {
 				$answerbox[$iidx] = '';
@@ -319,7 +323,11 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			$answerbox = str_replace('<select','<select disabled="disabled"',$answerbox);
 		}
 		if (strpos($toevalqtxt,'$previewloc')===false) {
-			$answerbox .= $previewloc;
+			if (strpos($answerbox,"previewloctemp$qnidx")!==false) {
+				$answerbox = str_replace('<span id="previewloctemp'.$qnidx.'"></span>', $previewloc, $answerbox);
+			} else {
+				$answerbox .= $previewloc;
+			}
 		}
 		if (isset($hideanswerboxes) && $hideanswerboxes==true) {
 			$answerbox = '';
@@ -780,6 +788,7 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	if (isset($snaptogrid)) {$options['snaptogrid'] = $snaptogrid;}
 	if (isset($partweights)) {$options['partweights'] = $partweights;}
 	if (isset($partialcredit)) {$options['partialcredit'] = $partialcredit;}
+	if (isset($ansprompt)) {$options['ansprompt'] = $ansprompt;}
 	if (isset($anstypes)) {$options['anstypes'] = $anstypes;}
 	
 	$score = 0;
@@ -891,6 +900,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['reqsigfigs'])) {if (is_array($options['reqsigfigs'])) {$reqsigfigs = $options['reqsigfigs'][$qn];} else {$reqsigfigs = $options['reqsigfigs'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}} else {$displayformat='';}
 		if (isset($options['scoremethod']))if (is_array($options['scoremethod'])) {$scoremethod = $options['scoremethod'][$qn];} else {$scoremethod = $options['scoremethod'];}
+		if (!isset($answerformat)) { $answerformat = '';}
+		$ansformats = array_map('trim',explode(',',$answerformat));
 		
 		if (!isset($sz)) { $sz = 20;}
 		if (isset($ansprompt)) {$out .= "<label for=\"qn$qn\">$ansprompt</label>";}
@@ -906,10 +917,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$leftb = '';
 			$rightb = '';
 		}
-		if ($answerformat=='list' || $answerformat=='exactlist' ||  $answerformat=='orderedlist') {
+		if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) ||  in_array('orderedlist',$ansformats)) {
 			$tip = _('Enter your answer as a list of whole or decimal numbers separated with commas: Examples: -4, 3, 2.5') . "<br/>";
 			$shorttip = _('Enter a list of whole or decimal numbers');
-		} else if ($answerformat=='set' || $answerformat=='exactset') {
+		} else if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
 			$tip = _('Enter your answer as a set of whole or decimal numbers separated with commas: Example: {-4, 3, 2.5}') . "<br/>";
 			$shorttip = _('Enter a set of whole or decimal numbers');
 		} else {
@@ -976,8 +987,13 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		$out .= "class=\"text $colorbox$addlclass\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\" />$rightb";
 		$out .= getcolormark($colorbox);
 		if ($displayformat=='hidden') { $out .= '<script type="text/javascript">imasprevans['.$qstr.'] = "'.$la.'";</script>';}
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+			$answer = str_replace('"','',$answer);
+		}
 		if (isset($answer)) {
-			if ($answerformat=='parenneg' && $answer < 0) {
+			if (in_array('parenneg',$ansformats) && $answer < 0) {
 				$sa = '('.(-1*$answer).')';
 			} else {
 				$sa = $answer;
@@ -1402,8 +1418,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		
 		$la = explode('$#$',$la);
 		$la = $la[0];
-		
+		 
 		if (!isset($answerformat)) { $answerformat = '';}
+		$ansformats = array_map('trim',explode(',',$answerformat));
+		
 		if (isset($ansprompt)) {$out .= "<label for=\"tc$qn\">$ansprompt</label>";}
 		if ($displayformat=="point") {
 			$leftb = "(";
@@ -1417,7 +1435,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= "$leftb<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\" ";
 		
-		$ansformats = array_map('trim',explode(',',$answerformat));
+		
 		if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
 			$tip = _('Enter your answer as a list of values separated by commas: Example: -4, 3, 2') . "<br/>";
 			$eword = _('each value');
@@ -1450,6 +1468,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= "/>$rightb";
 		$out .= getcolormark($colorbox);
+		
 		if (!isset($GLOBALS['nocolormark']) && isset($rightanswrongformat) && (!isset($GLOBALS['noformatfeedback']) || $GLOBALS['noformatfeedback']==false)) {
 			if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
 				$out .= ' '.formhoverover('<span style="color:#f60;font-size:80%">(Format)</span>','One or more of your answers is equivalent to the correct answer, but is not simplified or is in the wrong format');
@@ -1457,13 +1476,18 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$out .= ' '.formhoverover('<span style="color:#f60;font-size:80%">(Format)</span>','Your answer is equivalent to the correct answer, but is not simplified or is in the wrong format');
 			}
 		}
+		
 		$out .= "<input type=\"hidden\" id=\"qn$qn\" name=\"qn$qn\" />\n";
 		if (!isset($hidepreview)) {
 			$preview .= "<input type=button class=btn id=\"pbtn$qn\" value=\"" . _('Preview') . "\" onclick=\"calculate('tc$qn','p$qn','$answerformat')\" /> &nbsp;\n";
 		}
 		$preview .= "$leftb<span id=p$qn></span>$rightb ";
+		
 		$out .= "<script type=\"text/javascript\">calctoproc[$qn] = 1; calcformat[$qn] = '$answerformat';</script>\n";
 		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+		}
 		if (isset($answer)) {
 			if (!is_numeric($answer)) {
 				$sa = '`'.$answer.'`';
@@ -1716,6 +1740,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
+		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (!isset($answerformat)) { $answerformat = '';}
+		$ansformats = array_map('trim',explode(',',$answerformat));
 		
 		if (!isset($sz)) { $sz = 20;}
 		if ($multi>0) { $qn = $multi*1000+$qn;} 
@@ -1755,10 +1783,15 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= '/>';
 		$out .= getcolormark($colorbox);
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+		}
 		if (isset($answer)) {
 			$sa = $answer;
 		}
 	} else if ($anstype == "calcntuple") {
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		if (isset($options['answerboxsize'])) {if (is_array($options['answerboxsize'])) {$sz = $options['answerboxsize'][$qn];} else {$sz = $options['answerboxsize'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
@@ -1825,6 +1858,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		$preview .= "<span id=p$qn></span> ";
 		$out .= "<script type=\"text/javascript\">ntupletoproc[$qn] = 1; calcformat[$qn] = '$answerformat';</script>\n";
 		//$tip .= "Enter DNE for Does Not Exist";
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+		}
 		if (isset($answer)) {
 			$sa = makeprettydisp($answer);
 		}
@@ -1833,12 +1870,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
-		
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
+		if (!isset($answerformat)) { $answerformat = '';}
+		$ansformats = array_map('trim',explode(',',$answerformat));
 		if (!isset($sz)) { $sz = 20;}
 		if ($multi>0) { $qn = $multi*1000+$qn;} 
 		
 		
-		if ($answerformat == "list") {
+		if (in_array('list',$ansformats)) {
 			$tip = _('Enter your answer as a list of complex numbers in a+bi form separated with commas.  Example: 2+5.5i,-3-4i') . "<br/>";
 			$shorttip = _('Enter a list of complex numbers');
 		} else {
@@ -1859,6 +1898,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$out .= '/>';
 		$out .= getcolormark($colorbox);
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+		}
 		if (isset($answer)) {
 			$sa = makepretty($answer);
 		}
@@ -1869,6 +1911,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['hidepreview'])) {if (is_array($options['hidepreview'])) {$hidepreview = $options['hidepreview'][$qn];} else {$hidepreview = $options['hidepreview'];}}
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 		
@@ -1912,6 +1955,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$preview .= "<span id=p$qn></span> ";
 		$out .= "<script type=\"text/javascript\">complextoproc[$qn] = 1;</script>\n";
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+		}
 		
 		//$tip .= "Enter DNE for Does Not Exist";
 		if (isset($answer)) {
@@ -2860,10 +2907,20 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['reqsigfigs'])) {if (is_array($options['reqsigfigs'])) {$reqsigfigs = $options['reqsigfigs'][$qn];} else {$reqsigfigs = $options['reqsigfigs'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
 		if (isset($options['requiretimeslistpart'])) {if (is_array($options['requiretimeslistpart'])) {$requiretimeslistpart = $options['requiretimeslistpart'][$qn];} else {$requiretimeslistpart = $options['requiretimeslistpart'];}}
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		
 		if (is_array($options['partialcredit'][$qn]) || ($multi>0 && is_array($options['partialcredit']))) {$partialcredit = $options['partialcredit'][$qn];} else {$partialcredit = $options['partialcredit'];}
+		if (!isset($answerformat)) { $answerformat = '';}
+		$ansformats = array_map('trim',explode(',',$answerformat));
+		
 		$givenans = normalizemathunicode($givenans);
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($givenans, $_POST["tc$qn"], $answer) = scorenosolninf($qn, $givenans, $answer, $ansprompt);
+		}
+		
 		$GLOBALS['partlastanswer'] = $givenans;
+		
+		
 		
 		if (isset($requiretimes) && checkreqtimes($givenans,$requiretimes)==0) {
 			return 0;
@@ -2905,22 +2962,25 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			if (trim($givenans)==='' || trim($givenans)==='0') { return 1;} else { return 0;}
 		}
 		if ($givenans == null) {return 0;}
-		if ($answerformat=='set' || $answerformat=='exactset') {
+		if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
 			$givenans = trim($givenans);
 			if ($givenans{0}!='{' || substr($givenans,-1)!='}') { return 0; }
 			$answer = str_replace(array('{','}'),'', $answer);
 			$givenans = str_replace(array('{','}'),'', $givenans);
 			$answerformat = str_replace('set','list',$answerformat);
+			$ansformats = array_map('trim',explode(',',$answerformat));
 		}
-		if ($answerformat=='exactlist') {
+		if (in_array('exactlist',$ansformats)) {
 			$gaarr = array_map('trim', explode(',',$givenans));
 			$gaarrcnt = count($gaarr);
 			$anarr = explode(',',$answer);
-		} else if ($answerformat=='orderedlist') {
+			$islist = true;
+		} else if (in_array('orderedlist',$ansformats)) {
 			$gamasterarr = array_map('trim', explode(',',$givenans));
 			$gaarr = $gamasterarr;
 			$anarr = explode(',',$answer);
-		} else if ($answerformat=='list') {
+			$islist = true;
+		} else if (in_array('list',$ansformats)) {
 			$tmp = array_map('trim', explode(',',$givenans));
 			sort($tmp);
 			$gaarr = array($tmp[0]);
@@ -2938,6 +2998,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$anarr[] = $tmp[$i];
 				}
 			}
+			$islist = true;
 		} else {
 			$givenans = preg_replace('/(\d)\s*,\s*(?=\d{3}\b)/','$1',$givenans);
 			$givenans = str_replace(',','99999999',$givenans); //force wrong ans on lingering commas
@@ -2949,17 +3010,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			} else {
 				$anarr = array($answer);
 			}
+			$islist = false;
 		}
 		
 		
 		$extrapennum = count($gaarr)+count($anarr);
 		
-		if ($answerformat=='orderedlist') {
+		if (in_array('orderedlist',$ansformats)) {
 			if (count($gamasterarr)!=count($anarr)) {
 				return 0;
 			}
 		}
-		if ($answerformat=='parenneg') {
+		if (in_array('parenneg',$ansformats)) {
 			foreach ($gaarr as $k=>$v) {
 				if ($v{0}=='(') {
 					$gaarr[$k] = -1*substr($v,1,-1);	
@@ -2970,7 +3032,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$correct = 0;
 		foreach($anarr as $i=>$answer) {
 			$foundloc = -1;
-			if ($answerformat=='orderedlist') {
+			if (in_array('orderedlist',$ansformats)) {
 				$gaarr = array($gamasterarr[$i]);
 			}
 			
@@ -3052,12 +3114,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 			if ($foundloc>-1) {
 				array_splice($gaarr,$foundloc,1); //remove from list
-				if (count($gaarr)==0 && $answerformat!='orderedlist') {
+				if (count($gaarr)==0 && !in_array('orderedlist',$ansformats)) {
 					break; //stop if no student answers left
 				}
 			}
 		}
-		if ($answerformat!='orderedlist') {
+		if (!in_array('orderedlist',$ansformats)) {
 			if ($gaarrcnt<=count($anarr)) {
 				$score = $correct/count($anarr);
 			} else {
@@ -3067,7 +3129,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$score = $correct/count($anarr);
 		}
 		if ($score<0) { $score = 0; }
-		if ($score==0 && isset($partialcredit) && strpos($answerformat,'list')===false && is_numeric($givenans)) {
+		if ($score==0 && isset($partialcredit) && !$islist && is_numeric($givenans)) {
 			foreach ($altanswers as $i=>$anans) {
 				if (isset($reqsigfigs)) {
 					if ($givenans*$anans < 0) { continue;} //move on if opposite signs
@@ -3399,17 +3461,23 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['abstolerance'])) {if (is_array($options['abstolerance'])) {$abstolerance = $options['abstolerance'][$qn];} else {$abstolerance = $options['abstolerance'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		if (!isset($answerformat)) { $answerformat = '';}
-		$givenans = str_replace('∞', 'oo', $givenans);
+		$givenans = normalizemathunicode($givenans);
 		$ansformats = array_map('trim',explode(',',$answerformat));
 		$answer = str_replace(' ','',$answer);
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($givenans, $_POST["tc$qn"], $answer) = scorenosolninf($qn, $givenans, $answer, $ansprompt);
+		}
 		
 		if ($anstype=='ntuple') {
 			$GLOBALS['partlastanswer'] = $givenans;
 		} else if ($anstype=='calcntuple') {
+			$_POST["tc$qn"] = normalizemathunicode($_POST["tc$qn"]);
 			$GLOBALS['partlastanswer'] = $_POST["tc$qn"].'$#$'.$givenans;
 			//test for correct format, if specified
 			if (checkreqtimes($_POST["tc$qn"],$requiretimes)==0) {
@@ -3432,10 +3500,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		
 		$givenans = str_replace(' ','',$givenans);
 		
-		if ($answer=='DNE' && strtoupper($givenans)=='DNE') {
-			return 1;
-		} else if ($answer=='oo' && $givenans=='oo') {
-			return 1;
+		if ($answer=='DNE') {
+			if (strtoupper($givenans)=='DNE') {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else if ($answer=='oo') {
+			if ($givenans=='oo') {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 		
 		preg_match_all('/([\(\[\<\{])(.*?)([\)\]\>\}])/', $givenans, $gaarr, PREG_SET_ORDER);
@@ -3521,17 +3597,23 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
 		if (isset($options['requiretimeslistpart'])) {if (is_array($options['requiretimeslistpart'])) {$requiretimeslistpart = $options['requiretimeslistpart'][$qn];} else {$requiretimeslistpart = $options['requiretimeslistpart'];}}
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($givenans, $_POST["tc$qn"], $answer) = scorenosolninf($qn, $givenans, $answer, $ansprompt);
+		}
+		
 		if ($anstype=='complex') {
 			$GLOBALS['partlastanswer'] = $givenans;
 		} else if ($anstype=='calccomplex') {
 			$GLOBALS['partlastanswer'] = $_POST["tc$qn"];
 			//test for correct format, if specified
-			if (checkreqtimes($_POST["tc$qn"],$requiretimes)==0) {
+			if (($answer!='DNE'&&$answer!='oo') && checkreqtimes($_POST["tc$qn"],$requiretimes)==0) {
 				return 0;
 			}
 			$tocheck = explode(',',$_POST["tc$qn"]);
@@ -3552,10 +3634,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						$cpts[1] = substr($cpts[1],1);
 					}
 					//echo $cpts[0].','.$cpts[1].'<br/>';
-					if ($answer!='DNE' && (!checkanswerformat($cpts[0],$ansformats) || !checkanswerformat($cpts[1],$ansformats))) {
+					if ($answer!='DNE'&&$answer!='oo' && (!checkanswerformat($cpts[0],$ansformats) || !checkanswerformat($cpts[1],$ansformats))) {
 						return 0;
 					}
-					if ($answer!='DNE' && isset($requiretimeslistpart) && checkreqtimes($tchk,$requiretimeslistpart)==0) {
+					if ($answer!='DNE'&&$answer!='oo' && isset($requiretimeslistpart) && checkreqtimes($tchk,$requiretimeslistpart)==0) {
 						return 0;
 					}
 				}
@@ -3566,8 +3648,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$answer = str_replace(' ','',makepretty($answer));
 		$givenans = str_replace(' ','',$givenans);
 		
-		if ($answer=='DNE' && strtoupper($givenans)=='DNE') {
-			return 1;
+		if ($answer=='DNE') {
+			if (strtoupper($givenans)=='DNE') {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else if ($answer=='oo') {
+			if ($givenans=='oo') {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 		
 		$gaarr = array_map('trim',explode(',',$givenans));
@@ -3631,11 +3723,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
 		if (isset($options['requiretimeslistpart'])) {if (is_array($options['requiretimeslistpart'])) {$requiretimeslistpart = $options['requiretimeslistpart'][$qn];} else {$requiretimeslistpart = $options['requiretimeslistpart'];}}
+		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		$givenans = normalizemathunicode($givenans);
-
+		$ansformats = array_map('trim',explode(',',$answerformat));
+		
+		
+		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
+			list($givenans, $_POST["tc$qn"], $answer) = scorenosolninf($qn, $givenans, $answer, $ansprompt);
+		}
+		
 		$GLOBALS['partlastanswer'] = $_POST["tc$qn"].'$#$'.$givenans;
 		$_POST["tc$qn"] = normalizemathunicode($_POST["tc$qn"]);
 		if ($answer==='') {
@@ -3650,7 +3749,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$formatok = "nowhole";
 		}
 		
-		$ansformats = array_map('trim',explode(',',$answerformat));
+		
 		
 		if (in_array("scinot",$ansformats)) {
 			$answer = str_replace('xx','*',$answer);
@@ -4236,8 +4335,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		//return $correct;
 	} else if ($anstype == "essay") {
 		require_once(dirname(__FILE__)."/../includes/htmLawed.php");
-		$htmlawedconfig = array('elements'=>'*-script-form');
-		$givenans = addslashes(htmLawed(stripslashes($givenans),$htmlawedconfig));
+		$givenans = addslashes(myhtmLawed(stripslashes($givenans)));
 		$givenans = preg_replace('/&(\w+;)/',"%$1",$givenans);
 		$GLOBALS['partlastanswer'] = $givenans;
 		if (isset($options['scoremethod']))if (is_array($options['scoremethod'])) {$scoremethod = $options['scoremethod'][$qn];} else {$scoremethod = $options['scoremethod'];}
@@ -6372,6 +6470,93 @@ function getcolormark($c,$wrongformat=false) {
 	} else {
 		return '';
 	}
+}
+
+function setupnosolninf($qn, $answerbox, $answer, $ansformats, $la, $ansprompt, $colorbox) {
+
+	$nosoln = _('No solution');
+	$infsoln = _('Infinite number of solutions');
+	if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
+		$specsoln = _('One or more solutions: ');
+	} else {
+		$specsoln = _('One solution: ');
+	}
+	
+	if (isset($ansprompt)) {
+		$anspromptp = explode(';', $ansprompt);
+		unset($ansprompt);
+		$specsoln = $anspromptp[0];
+		if (count($anspromptp)>1) {
+			$nosoln = $anspromptp[1];	
+		}
+		if (count($anspromptp)>2) {
+			$infsoln = $anspromptp[2];	
+		}
+	}
+	$out .= '<div class="'.$colorbox.'">';
+	
+	$out .= '<label><input type="radio" id="qs'.$qn.'" name="qs'.$qn.'" value="spec" '.(($la!='DNE'&&$la!='oo')?'checked':'').'>'.$specsoln;
+	if ($la=='DNE' || $la=='oo') {
+		$laqs = $la;
+		$answerbox = str_replace('value="'.$la.'"','value=""',$answerbox);
+	} else {
+		$laqs = '';
+	}
+	
+	$out .= str_replace(getcolormark($colorbox),'',$answerbox);
+	
+	$out .= '<span id="previewloctemp'.$qn.'"></span>';
+	$out .= '</label><br/>';
+	
+	$out .= '<label><input type="radio" id="qs'.$qn.'" name="qs'.$qn.'" value="DNE" '.($laqs=='DNE'?'checked':'').'>'.$nosoln.'</label><br/>';
+	if (in_array('nosolninf',$ansformats)) {
+		$out .= '<label><input type="radio" id="qs'.$qn.'" name="qs'.$qn.'" value="inf" '.($laqs=='oo'?'checked':'').'>'.$infsoln.'</label>';
+	}
+	$out .= '<span class="floatright">'.getcolormark($colorbox).'</span>';
+	$out .= '</div>';
+	
+	if (preg_match('/^inf/',$answer) || $answer=='oo' || $answer==$infsoln) {
+		$answer = '"'.$infsoln.'"';
+	}
+	if (preg_match('/^no\s*solution/',$answer) || $answer=='DNE' || $answer==$nosoln) {
+		$answer = '"'.$nosoln.'"';
+	}
+	
+	return array($out,$answer);
+}
+
+function scorenosolninf($qn, $givenans, $answer, $ansprompt) {
+	$nosoln = _('No solution');
+	$infsoln = _('Infinite number of solutions');
+	if (isset($ansprompt)) {
+		$anspromptp = explode(';', $ansprompt);
+		unset($ansprompt);
+		$specsoln = $anspromptp[0];
+		if (count($anspromptp)>1) {
+			$nosoln = $anspromptp[1];	
+		}
+		if (count($anspromptp)>2) {
+			$infsoln = $anspromptp[2];	
+		}
+	}
+	if (preg_match('/^inf/',$answer) || $answer==$infsoln) {
+		$answer = 'oo';
+	}
+	if (preg_match('/^no\s*solution/',$answer) || $answer==$nosoln) {
+		$answer = 'DNE';
+	}
+	$qs = $_POST["qs$qn"];
+	if ($qs=='DNE') {
+		$givenans = "DNE";
+		$newpost = "DNE";
+	} else if ($qs=='inf') {
+		$givenans = "oo";
+		$newpost = "oo";
+	} else {
+		$newpost = $_POST["tc$qn"];	
+	}
+	
+	return array($givenans, $newpost, $answer);
 }
 
 function rawscoretocolor($sc,$aw) {
