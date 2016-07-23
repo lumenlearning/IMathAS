@@ -265,6 +265,7 @@ function calculate(inputId,outputId,format) {
 
 //Function to convert inequalities into interval notation
 function ineqtointerval(strw) {
+	strw = strw.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
 	var strpts = strw.split(/or/);
 	for (i=0; i<strpts.length; i++) {
 		str = strpts[i];
@@ -375,7 +376,7 @@ function intcalculate(inputId,outputId,format) {
 				  if (!isNaN(res) && res!="Infinity") {
 					 // if (format.indexOf('fraction')!=-1 || format.indexOf('reducedfraction')!=-1 || format.indexOf('mixednumber')!=-1) {
 						  vals[j] = vals[j];
-						  calcvals[j] = (Math.abs(res)<1e-15?0:res)+wrapAMnotice(err);
+						  calcvals[j] = (Math.abs(res)<1e-15?0:res).toString();//+wrapAMnotice(err);
 					  //} else {
 						//  str = "`"+str+" =` "+(Math.abs(res)<1e-15?0:res)+err;
 					  //}
@@ -383,7 +384,7 @@ function intcalculate(inputId,outputId,format) {
 				  	  calcvals[j] = _("undefined");
 				  }
 				  if (err != '') {
-				  	  fullerr += wrapAMnotice(err);
+				  	  fullerr += err;
 				  }
 				  
 			  }
@@ -2014,5 +2015,25 @@ function toggletimer() {
 		$("#timercontent").show();
 		$("#timerhide").text("[x]");
 		$("#timerhide").attr("title",_("Hide Timer"));
+	}
+}
+function toggleintroshow(n) {
+      var link = document.getElementById("introtoggle"+n);
+      var content = document.getElementById("intropiece"+n);
+      if (link.innerHTML.match("Hide")) {
+	   link.innerHTML = link.innerHTML.replace("Hide","Show");
+	   content.style.display = "none";
+      } else {
+	   link.innerHTML = link.innerHTML.replace("Show","Hide");
+	   content.style.display = "block";
+      }
+}
+function togglemainintroshow(el) {
+	if ($("#intro").hasClass("hidden")) {
+		$(el).html("'._("Hide Intro/Instructions").'");
+		$("#intro").removeClass("hidden").addClass("intro");
+	} else {
+		$("#intro").addClass("hidden");
+		$(el).html("'._("Show Intro/Instructions").'");
 	}
 }
