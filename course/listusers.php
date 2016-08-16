@@ -238,7 +238,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			//DB $query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
 			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$query = "SELECT imas_users.FirstName,imas_users.LastName,imas_users.email ";
-			$query .= "FROM imas_students JOIN imas_users ON imas_students.userid=imas_users.id WHERE imas_students.courseid=:courseid AND imas_users.id IN ($ulist)";
+			$query .= "FROM imas_students JOIN imas_users ON imas_students.userid=imas_users.id WHERE imas_students.courseid=:courseid AND imas_users.id IN ($ulist) ";
 			$query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':courseid'=>$cid));

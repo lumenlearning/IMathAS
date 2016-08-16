@@ -367,6 +367,7 @@ show Roster
   unenroll
   lock (link and button)
   copy emails
+	manage latepasses - assign latepasses
 show Gradebook
   single stu gradebook
     view assessment, change score.  clearq. clear scores. clear attempt.  Change score for group.
@@ -471,12 +472,15 @@ Import libraries
 Diagnostics
 	Listing page
 	enter diag, take diag, view score
+Redeem latepass.  Un-use latepass
+embedq, OEAembedq
+
 
 TO TEST:
 LTI
 outcome service (need live)
 install, upgrade
-Use latepass
-OEAembeq, embedq
 quickdrill
 directaccess
+
+TODO:  remove mathchat and all references

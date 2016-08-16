@@ -55,7 +55,7 @@ if ($type=='notstart') {
 	//DB }
 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	//DB while ($row = mysql_fetch_row($result)) {
-	$query = "SELECT ims.userid FROM imas_students AS ims LEFT JOIN imas_assessment_sessions AS ias ON ims.userid=ias.userid AND ias.assessmentid=:assessmentid";
+	$query = "SELECT ims.userid FROM imas_students AS ims LEFT JOIN imas_assessment_sessions AS ias ON ims.userid=ias.userid AND ias.assessmentid=:assessmentid ";
 	$query .= "WHERE ias.id IS NULL AND ims.courseid=:courseid AND ims.locked=0 ";
 	if ($secfilter!=-1) {
 		$query .= " AND ims.section=:section ";

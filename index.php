@@ -73,7 +73,7 @@ if ($showmessagesgadget) {
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 	$query = "SELECT imas_msgs.id,imas_msgs.title,imas_msgs.senddate,imas_users.LastName,imas_users.FirstName,imas_msgs.courseid ";
 	$query .= "FROM imas_msgs LEFT JOIN imas_users ON imas_users.id=imas_msgs.msgfrom WHERE ";
-	$query .= "imas_msgs.msgto=:msgto AND (imas_msgs.isread=0 OR imas_msgs.isread=4)";
+	$query .= "imas_msgs.msgto=:msgto AND (imas_msgs.isread=0 OR imas_msgs.isread=4) ";
 	$query .= "ORDER BY senddate DESC ";
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':msgto'=>$userid));

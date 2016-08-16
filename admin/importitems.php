@@ -205,7 +205,7 @@ function additem($itemtoadd,$item,$questions,$qset) {
 			//DB $query .= "VALUES ($typeid,'{$questions[$qid]['qsetid']}','{$questions[$qid]['points']}','{$questions[$qid]['attempts']}','{$questions[$qid]['penalty']}','{$questions[$qid]['category']}','{$questions[$qid]['regen']}','{$questions[$qid]['showans']}')";
 			//DB mysql_query($query) or die("error on: $query: " . mysql_error());
 			//DB $questions[$qid]['systemid'] = mysql_insert_id();
-			$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans)";
+			$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans) ";
 			$query .= "VALUES (:assessmentid, :questionsetid, :points, :attempts, :penalty, :category, :regen, :showans)";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':assessmentid'=>$typeid, ':questionsetid'=>$questions[$qid]['qsetid'], ':points'=>$questions[$qid]['points'],
@@ -303,7 +303,7 @@ function additem($itemtoadd,$item,$questions,$qset) {
 		//DB $query .= "VALUES ('{$item[$itemtoadd]['name']}','{$item[$itemtoadd]['summary']}','$cid','{$item[$itemtoadd]['avail']}','{$item[$itemtoadd]['startdate']}','{$item[$itemtoadd]['enddate']}','{$item[$itemtoadd]['postby']}','{$item[$itemtoadd]['replyby']}','{$item[$itemtoadd]['defdisplay']}','{$item[$itemtoadd]['points']}','{$item[$itemtoadd]['cntingb']}','{$item[$itemtoadd]['settings']}')";
 		//DB mysql_query($query) or die("error on: $query: " . mysql_error());
 		//DB $typeid = mysql_insert_id();
-		$query = "INSERT INTO imas_forums (name,description,courseid,avail,startdate,enddate,postby,replyby,defdisplay,points,cntingb,settings)";
+		$query = "INSERT INTO imas_forums (name,description,courseid,avail,startdate,enddate,postby,replyby,defdisplay,points,cntingb,settings) ";
 		$query .= "VALUES (:name, :description, :courseid, :avail, :startdate, :enddate, :postby, :replyby, :defdisplay, :points, :cntingb, :settings)";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':name'=>$item[$itemtoadd]['name'], ':description'=>$item[$itemtoadd]['summary'], ':courseid'=>$cid,
@@ -316,7 +316,7 @@ function additem($itemtoadd,$item,$questions,$qset) {
 		//DB $query .= "VALUES ('$cid','{$item[$itemtoadd]['title']}','{$item[$itemtoadd]['text']}','{$item[$itemtoadd]['avail']}','{$item[$itemtoadd]['startdate']}','{$item[$itemtoadd]['enddate']}','{$item[$itemtoadd]['oncal']}','{$item[$itemtoadd]['caltag']}')";
 		//DB mysql_query($query) or die("error on: $query: " . mysql_error());
 		//DB $typeid = mysql_insert_id();
-		$query = "INSERT INTO imas_inlinetext (courseid,title,text,avail,startdate,enddate,oncal,caltag)";
+		$query = "INSERT INTO imas_inlinetext (courseid,title,text,avail,startdate,enddate,oncal,caltag) ";
 		$query .= "VALUES (:courseid, :title, :text, :avail, :startdate, :enddate, :oncal, :caltag)";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':courseid'=>$cid, ':title'=>$item[$itemtoadd]['title'], ':text'=>$item[$itemtoadd]['text'],
@@ -352,7 +352,7 @@ function additem($itemtoadd,$item,$questions,$qset) {
 		//DB $query .= "VALUES ('$cid','{$item[$itemtoadd]['title']}','{$item[$itemtoadd]['summary']}','{$item[$itemtoadd]['text']}','{$item[$itemtoadd]['avail']}','{$item[$itemtoadd]['startdate']}','{$item[$itemtoadd]['enddate']}','{$item[$itemtoadd]['oncal']}','{$item[$itemtoadd]['caltag']}','{$item[$itemtoadd]['target']}')";
 		//DB mysql_query($query) or die("error on: $query: " . mysql_error());
 		//DB $typeid = mysql_insert_id();
-		$query = "INSERT INTO imas_linkedtext (courseid,title,summary,text,avail,startdate,enddate,oncal,caltag,target)";
+		$query = "INSERT INTO imas_linkedtext (courseid,title,summary,text,avail,startdate,enddate,oncal,caltag,target) ";
 		$query .= "VALUES (:courseid, :title, :summary, :text, :avail, :startdate, :enddate, :oncal, :caltag, :target)";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':courseid'=>$cid, ':title'=>$item[$itemtoadd]['title'], ':summary'=>$item[$itemtoadd]['summary'],
