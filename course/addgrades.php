@@ -162,8 +162,8 @@
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$query = "INSERT INTO imas_grades (gradetype,gradetypeid,userid,score,feedback) VALUES ";
 			$query .= "(:gradetype, :gradetypeid, :userid, :score, :feedback)";
-			$stm = $DBH->prepare($query);
-			$stm->execute(array(':gradetype'=>'offline', ':gradetypeid'=>$_GET['gbitem'], ':userid'=>$row[0], ':score'=>$score, ':feedback'=>''));
+			$stm2 = $DBH->prepare($query);
+			$stm2->execute(array(':gradetype'=>'offline', ':gradetypeid'=>$_GET['gbitem'], ':userid'=>$row[0], ':score'=>$score, ':feedback'=>''));
 		}
 	} else {
 		///regular submit

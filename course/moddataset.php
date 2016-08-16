@@ -267,14 +267,14 @@
 					}
 					//DB $query = "DELETE FROM imas_qimages WHERE id='{$row[0]}'";
 					//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-					$stm = $DBH->prepare("DELETE FROM imas_qimages WHERE id=:id");
-					$stm->execute(array(':id'=>$row[0]));
+					$stm2 = $DBH->prepare("DELETE FROM imas_qimages WHERE id=:id");
+					$stm2->execute(array(':id'=>$row[0]));
 					$imgcnt--;
 					if ($imgcnt==0) {
 						//DB $query = "UPDATE imas_questionset SET hasimg=0 WHERE id='{$_GET['id']}'";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm = $DBH->prepare("UPDATE imas_questionset SET hasimg=0 WHERE id=:id");
-						$stm->execute(array(':id'=>$_GET['id']));
+						$stm2 = $DBH->prepare("UPDATE imas_questionset SET hasimg=0 WHERE id=:id");
+						$stm2->execute(array(':id'=>$_GET['id']));
 					}
 				} else if ($row[2]!=$_POST['imgvar-'.$row[0]] || $row[3]!=$_POST['imgalt-'.$row[0]]) {
 					$newvar = str_replace('$','',$_POST['imgvar-'.$row[0]]);
@@ -285,8 +285,8 @@
 					} else {
 						//DB $query = "UPDATE imas_qimages SET var='$newvar',alttext='$newalt' WHERE id='{$row[0]}'";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm = $DBH->prepare("UPDATE imas_qimages SET var=:var,alttext=:alttext WHERE id=:id");
-						$stm->execute(array(':var'=>$newvar, ':alttext'=>$newalt, ':id'=>$row[0]));
+						$stm2 = $DBH->prepare("UPDATE imas_qimages SET var=:var,alttext=:alttext WHERE id=:id");
+						$stm2->execute(array(':var'=>$newvar, ':alttext'=>$newalt, ':id'=>$row[0]));
 					}
 				}
 			}
@@ -352,8 +352,8 @@
 					if (!isset($_POST['delimg-'.$row[3]])) {
 						//DB $query = "INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES ('$qsetid','{$row[0]}','{$row[1]}','{$row[2]}')";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm = $DBH->prepare("INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES (:qsetid, :var, :filename, :alttext)");
-						$stm->execute(array(':qsetid'=>$qsetid, ':var'=>$row[0], ':filename'=>$row[1], ':alttext'=>$row[2]));
+						$stm2 = $DBH->prepare("INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES (:qsetid, :var, :filename, :alttext)");
+						$stm2->execute(array(':qsetid'=>$qsetid, ':var'=>$row[0], ':filename'=>$row[1], ':alttext'=>$row[2]));
 					}
 				}
 			}

@@ -952,7 +952,7 @@ if (!empty($dbsetup)) {  //initial setup - just write upgradecounter.txt
 			 	 echo "<p>Query failed: ($query) : ".$DBH->errorInfo()."</p>";
 			 }
 			 //grab msg to instr settings and move to asssessments
-			 $query = "SELECT id,msgset FROM imas_courses WHERE msgset>9";
+			  $query = "SELECT id,msgset FROM imas_courses WHERE msgset>9";
 			  $res = $DBH->query($query);
 			  //DB while ($row = mysql_fetch_row($res)) {
 				$stm = $DBH->prepare("UPDATE imas_assessments SET msgtoinstr=1 WHERE courseid=:courseid");

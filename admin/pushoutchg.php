@@ -32,9 +32,9 @@ if ($myrights==100) {
    	   	   	   //DB $query = "UPDATE imas_questions SET $setst WHERE questionsetid={$line['questionsetid']} AND points=9999 AND attempts=9999";
                //DB mysql_query($query) or die("Query failed : " . mysql_error());
    	   	   	   //DB $n += mysql_affected_rows();
-               $stm = $DBH->prepare("UPDATE imas_questions SET points=:points,attempts=:attempts WHERE questionsetid=:questionsetid AND points=9999 AND attempts=9999");
-               $stm->execute(array(':points'=>$line['points'], ':attempts'=>$line['attempts'], ':questionsetid'=>$line['questionsetid']));
-   	   	   	   $n += $stm->rowCount();
+               $stm2 = $DBH->prepare("UPDATE imas_questions SET points=:points,attempts=:attempts WHERE questionsetid=:questionsetid AND points=9999 AND attempts=9999");
+               $stm2->execute(array(':points'=>$line['points'], ':attempts'=>$line['attempts'], ':questionsetid'=>$line['questionsetid']));
+   	   	   	   $n += $stm2->rowCount();
    	   	   	   $nq++;
    	   	   }
    	   	   echo "<p>Pushed out Question settings for $nq questions.  $n total changes made.</p>";
@@ -52,9 +52,9 @@ if ($myrights==100) {
    	   	   	   //DB $query = "UPDATE imas_assessments SET intro='".addslashes($row[1])."' WHERE name='{$row[0]}'";
    	   	   	   //DB mysql_query($query) or die("Query failed : " . mysql_error());
    	   	   	   //DB $n += mysql_affected_rows();
-   	   	   	   $stm = $DBH->prepare("UPDATE imas_assessments SET intro=:intro WHERE name=:name");
-   	   	   	   $stm->execute(array(':name'=>$row[0], ':intro'=>$row[1]));
-   	   	   	   $n += $stm->rowCount();
+   	   	   	   $stm2 = $DBH->prepare("UPDATE imas_assessments SET intro=:intro WHERE name=:name");
+   	   	   	   $stm2->execute(array(':name'=>$row[0], ':intro'=>$row[1]));
+   	   	   	   $n += $stm2->rowCount();
    	   	   	   $na++;
    	   	   }
    	   	   echo "<p>Pushed out Intro/Instructions for $na assessments.  $n total changes made.</p>";
@@ -71,9 +71,9 @@ if ($myrights==100) {
    	   	   	   //DB $query = "UPDATE imas_assessments SET caltag='".addslashes($row[1])."',calrtag='".addslashes($row[2])."' WHERE name='{$row[0]}'";
    	   	   	   //DB mysql_query($query) or die("Query failed : " . mysql_error());
    	   	   	   //DB $n += mysql_affected_rows();
-   	   	   	   $stm = $DBH->prepare("UPDATE imas_assessments SET caltag=:caltag,calrtag=:calrtag WHERE name=:name");
-   	   	   	   $stm->execute(array(':name'=>$row[0], ':caltag'=>$row[1], ':calrtag'=>$row[2]));
-   	   	   	   $n += $stm->rowCount();
+   	   	   	   $stm2 = $DBH->prepare("UPDATE imas_assessments SET caltag=:caltag,calrtag=:calrtag WHERE name=:name");
+   	   	   	   $stm2->execute(array(':name'=>$row[0], ':caltag'=>$row[1], ':calrtag'=>$row[2]));
+   	   	   	   $n += $stm2->rowCount();
    	   	   	   $na++;
    	   	   }
    	   	   echo "<p>Pushed out Calendar Tags for $na assessments.  $n total changes made.</p>";

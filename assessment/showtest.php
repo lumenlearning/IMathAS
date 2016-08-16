@@ -3250,7 +3250,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	}
 
 	function showscores($questions,$attempts,$testsettings) {
-		global $isdiag,$allowregen,$isreview,$noindivscores,$scores,$bestscores,$qi,$superdone,$timelimitkickout, $reviewatend;
+		global $DBH,$isdiag,$allowregen,$isreview,$noindivscores,$scores,$bestscores,$qi,$superdone,$timelimitkickout, $reviewatend;
 
 		$total = 0;
 		$lastattempttotal = 0;

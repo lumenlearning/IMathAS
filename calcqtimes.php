@@ -181,8 +181,8 @@ if ($lastfirstupdate==0) {
 		}
 		//DB $query = "UPDATE imas_questionset SET avgtime='$avg' WHERE id=$qsid";
 		//DB mysql_query($query) or die("Query failed : " . mysql_error());
-		$stm = $DBH->prepare("UPDATE imas_questionset SET avgtime=:avgtime WHERE id=:id");
-		$stm->execute(array(':avgtime'=>$avg, ':id'=>$qsid));
+		$stm2 = $DBH->prepare("UPDATE imas_questionset SET avgtime=:avgtime WHERE id=:id");
+		$stm2->execute(array(':avgtime'=>$avg, ':id'=>$qsid));
 	}
 }
 

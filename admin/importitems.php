@@ -261,8 +261,8 @@ function additem($itemtoadd,$item,$questions,$qset) {
 					}, $row[2]);
 				//DB $query = "UPDATE imas_questionset SET control='$control',qtext='$qtext' WHERE id={$row[0]}";
 				//DB mysql_query($query) or die("error on: $query: " . mysql_error());
-				$stm = $DBH->prepare("UPDATE imas_questionset SET control=:control,qtext=:qtext WHERE id=:id");
-				$stm->execute(array(':control'=>$control, ':qtext'=>$qtext, ':id'=>$row[0]));
+				$stm2 = $DBH->prepare("UPDATE imas_questionset SET control=:control,qtext=:qtext WHERE id=:id");
+				$stm2->execute(array(':control'=>$control, ':qtext'=>$qtext, ':id'=>$row[0]));
 			}
 		}
 

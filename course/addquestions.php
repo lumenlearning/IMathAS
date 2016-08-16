@@ -340,8 +340,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				}
 				//DB $query = "UPDATE imas_assessment_sessions SET bestscores='$slist' WHERE id='{$row[0]}'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("UPDATE imas_assessment_sessions SET bestscores=:bestscores WHERE id=:id");
-				$stm->execute(array(':bestscores'=>$slist, ':id'=>$row[0]));
+				$stm2 = $DBH->prepare("UPDATE imas_assessment_sessions SET bestscores=:bestscores WHERE id=:id");
+				$stm2->execute(array(':bestscores'=>$slist, ':id'=>$row[0]));
 			}
 
 			header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/addquestions.php?cid=$cid&aid=$aid");

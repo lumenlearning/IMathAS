@@ -575,8 +575,8 @@ function delqimgs($qsid) {
 		}
 		//DB $query = "DELETE FROM imas_qimages WHERE id='{$row[0]}'";
 		//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-		$stm = $DBH->prepare("DELETE FROM imas_qimages WHERE id=:id");
-		$stm->execute(array(':id'=>$row[0]));
+		$stm2 = $DBH->prepare("DELETE FROM imas_qimages WHERE id=:id");
+		$stm2->execute(array(':id'=>$row[0]));
 	}
 }
 ?>

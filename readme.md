@@ -334,6 +334,7 @@ add assessment.
 	clear assess atempts
 	categorize q's
 	end msg
+	video cues
 	print
 		oriignal printtest
 		cut-and-paste
@@ -341,6 +342,7 @@ add assessment.
 add inlinetext
 add linkedtext (file, page of text)
   view linkedtext item
+	delete linked text with file
 add wiki
   view.  edit.  edit again. view revision history. clear history. current version snapshot
 add drill.  
@@ -435,6 +437,7 @@ Display assessment
 	Print Version
 Edit question. Add new question
 	test question
+	Add image, template question with image. delete question w image
 Tutorial style editor, Add and edit
 copy course items
 	copy block of items
@@ -443,6 +446,8 @@ copy course items
 import items (basic)
 Take assessment as student (no group)
 	view category summary at end
+	embedded display
+	livepoll
 Take assessment as student (group)
 	Add self to group
 	Add another stu to group (copies assessment)
@@ -456,19 +461,22 @@ Tree reader
 Utils:
 	lookup. approvepending. stucnt, detstucnt. replace youtube vids.
 	emulate user. list/update extref. list wronglibs
-
+Edit rubrics
+	use rubric
+External tools:
+	Add, edit, delete.
+	Launch external tool
+Export libraries
+Import libraries
+Diagnostics
+	Listing page
+	enter diag, take diag, view score
 
 TO TEST:
 LTI
-External tools. outcome service
+outcome service (need live)
 install, upgrade
-Diagnostic launch
-lib import/export
-delete item with file, delete question with file
 Use latepass
-embedded assess
 OEAembeq, embedq
-Add, use rubrics
-Define video times
 quickdrill
 directaccess

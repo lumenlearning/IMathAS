@@ -707,20 +707,20 @@ switch($_GET['action']) {
 				deleteallaidfiles($line[0]);
 				//DB $query = "DELETE FROM imas_questions WHERE assessmentid='{$line[0]}'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("DELETE FROM imas_questions WHERE assessmentid=:assessmentid");
-				$stm->execute(array(':assessmentid'=>$line[0]));
+				$stm2 = $DBH->prepare("DELETE FROM imas_questions WHERE assessmentid=:assessmentid");
+				$stm2->execute(array(':assessmentid'=>$line[0]));
 				//DB $query = "DELETE FROM imas_assessment_sessions WHERE assessmentid='{$line[0]}'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
-				$stm->execute(array(':assessmentid'=>$line[0]));
+				$stm2 = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
+				$stm2->execute(array(':assessmentid'=>$line[0]));
 				//DB $query = "DELETE FROM imas_exceptions WHERE assessmentid='{$line[0]}' AND itemtype='A'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE assessmentid=:assessmentid AND itemtype='A'");
-				$stm->execute(array(':assessmentid'=>$line[0]));
+				$stm2 = $DBH->prepare("DELETE FROM imas_exceptions WHERE assessmentid=:assessmentid AND itemtype='A'");
+				$stm2->execute(array(':assessmentid'=>$line[0]));
 				//DB $query = "DELETE FROM imas_livepoll_status WHERE assessmentid='{$line[0]}'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
-				$stm->execute(array(':assessmentid'=>$line[0]));
+				$stm2 = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
+				$stm2->execute(array(':assessmentid'=>$line[0]));
 			}
 
 			//DB $query = "DELETE FROM imas_assessments WHERE courseid='{$_GET['id']}'";
@@ -737,8 +737,8 @@ switch($_GET['action']) {
 			while ($line = $stm->fetch(PDO::FETCH_NUM)) {
 				//DB $query = "DELETE FROM imas_drillassess_sessions WHERE drillassessid='{$line[0]}'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("DELETE FROM imas_drillassess_sessions WHERE drillassessid=:drillassessid");
-				$stm->execute(array(':drillassessid'=>$line[0]));
+				$stm2 = $DBH->prepare("DELETE FROM imas_drillassess_sessions WHERE drillassessid=:drillassessid");
+				$stm2->execute(array(':drillassessid'=>$line[0]));
 			}
 			//DB $query = "DELETE FROM imas_drillassess WHERE courseid='{$_GET['id']}'";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -872,8 +872,8 @@ switch($_GET['action']) {
 				if ($row[1]>0) {
 					//DB $query = "DELETE FROM imas_grades WHERE gradetypeid={$row[2]} AND gradetype='exttool'";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetypeid=:gradetypeid AND gradetype='exttool'");
-					$stm->execute(array(':gradetypeid'=>$row[2]));
+					$stm2 = $DBH->prepare("DELETE FROM imas_grades WHERE gradetypeid=:gradetypeid AND gradetype='exttool'");
+					$stm2->execute(array(':gradetypeid'=>$row[2]));
 				}
 			}
 
@@ -1228,9 +1228,9 @@ switch($_GET['action']) {
 			//DB $query = "SELECT id FROM imas_users WHERE  lastaccess<$old AND (rights=0 OR rights=10)";
 			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			//DB while ($row = mysql_fetch_row($result)) {
-			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE  lastaccess<:old AND (rights=0 OR rights=10)");
-			$stm->execute(array(':old'=>$old));
-			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+			$sstm = $DBH->prepare("SELECT id FROM imas_users WHERE  lastaccess<:old AND (rights=0 OR rights=10)");
+			$sstm->execute(array(':old'=>$old));
+			while ($row = $sstm->fetch(PDO::FETCH_NUM)) {
 				$uid = $row[0];
 				//DB $query = "DELETE FROM imas_assessment_sessions WHERE userid='$uid'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());

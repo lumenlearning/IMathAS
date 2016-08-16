@@ -323,6 +323,9 @@ if (isset($_POST['SID'])) {
 	$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, lastaccess) ";
 	$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :lastaccess);";
 	$stm = $DBH->prepare($query);
+	if (!isset($_POST['passwd'])) {
+		$_POST['passwd'] = "none";
+	}
 	$stm->execute(array(':SID'=>$diagSID, ':password'=>$_POST['passwd'], ':rights'=>10, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$eclass, ':lastaccess'=>$now));
 	$userid = $DBH->lastInsertId();
 	//DB $query = "INSERT INTO imas_students (userid,courseid,section) VALUES ('$userid','$pcid','{$_POST['teachers']}');";

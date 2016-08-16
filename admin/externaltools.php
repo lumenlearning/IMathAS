@@ -59,7 +59,7 @@ if (isset($_POST['tname'])) {
 			$query = "UPDATE imas_external_tools SET name=:name,url=:url,ltikey=:ltikey,";
 			$query .= "secret=:secret,custom=:custom,privacy=:privacy";
 
-			$qarry = array(':name'=>$_POST['tname'], ':url'=>$_POST['url'], ':ltikey'=>$_POST['key'], ':secret'=>$_POST['secret'], ':custom'=>$_POST['custom'], ':privacy'=>$privacy);
+			$qarr = array(':name'=>$_POST['tname'], ':url'=>$_POST['url'], ':ltikey'=>$_POST['key'], ':secret'=>$_POST['secret'], ':custom'=>$_POST['custom'], ':privacy'=>$privacy);
 			if ($isadmin) {
 				if ($_POST['scope']==0) {
 					$query .= ',groupid=0';
@@ -78,10 +78,11 @@ if (isset($_POST['tname'])) {
         $qarr[':courseid'] = $cid;
 			} else if ($isgrpadmin) {
 				//DB $query .= "AND groupid='$groupid'";
-        $query .= "AND groupid=:groupid";
-        $qarr[':groupid'] = $groupid;
+        $query .= "AND groupid=:groupid2";
+        $qarr[':groupid2'] = $groupid;
 			}
 		}
+
     $stm = $DBH->prepare($query);
     $stm->execute($qarr);
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());

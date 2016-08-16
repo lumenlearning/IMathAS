@@ -847,17 +847,17 @@ function copyrubrics($offlinerubrics=array()) {
 	$rub_ins_stm = $DBH->prepare("INSERT INTO imas_rubrics (ownerid,groupid,name,rubrictype,rubric) VALUES (:ownerid,-1,:name,:rubrictype,:rubric)");
 	$iqins = null; $ifupd = null; $igupd=null;
 
-	$stm = $DBH->prepare("SELECT id FROM imas_rubrics WHERE id IN ($list) AND NOT (ownerid=:ownerid OR groupid=:groupid)"); //$list sanitized above
+	$stm = $DBH->prepare("SELECT id,name,rubrictype,rubric FROM imas_rubrics WHERE id IN ($list) AND NOT (ownerid=:ownerid OR groupid=:groupid)"); //$list sanitized above
 	$stm->execute(array(':ownerid'=>$userid, ':groupid'=>$groupid));
-	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+	while ($srcrub = $stm->fetch(PDO::FETCH_NUM)) {
 		//echo "handing {$row[0]} which I don't have access to<br/>";
 		//DB $query = "SELECT name,rubrictype,rubric FROM imas_rubrics WHERE id={$row[0]}";
 		//DB $r = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $rubrow = addslashes_deep(mysql_fetch_row($r));
-		$stm = $DBH->prepare("SELECT name,rubrictype,rubric FROM imas_rubrics WHERE id=:id");
-		$stm->execute(array(':id'=>$row[0]));
+		//$stm2 = $DBH->prepare("SELECT name,rubrictype,rubric FROM imas_rubrics WHERE id=:id");
+		//$stm2->execute(array(':id'=>$row[0]));
 		//$rubrow = addslashes_deep($stm->fetch(PDO::FETCH_NUM));
-		$srcrub = $stm->fetch(PDO::FETCH_ASSOC);
+		//$srcrub = $stm2->fetch(PDO::FETCH_ASSOC);
 		//DB $query = "SELECT id FROM imas_rubrics WHERE rubric='{$rubrow[2]}' AND (ownerid=$userid OR groupid=$groupid)";
 		//DB $rr = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB if (mysql_num_rows($rr)>0) {
@@ -877,7 +877,7 @@ function copyrubrics($offlinerubrics=array()) {
 			//echo "created $newid<br/>";
 		}
 
-		$qfound = array_keys($qrubrictrack,$row[0]);
+		$qfound = array_keys($qrubrictrack,$srcrub['id']);
 		if (count($qfound)>0) {
 			if ($iqupd===null) {
 				$iqupd = $DBH->prepare("UPDATE imas_questions SET rubric=:rubric WHERE id=:id");
@@ -890,7 +890,7 @@ function copyrubrics($offlinerubrics=array()) {
 
 			}
 		}
-		$ffound = array_keys($frubrictrack,$row[0]);
+		$ffound = array_keys($frubrictrack,$srcrub['id']);
 		if (count($ffound)>0) {
 			if ($ifupd===null) {
 				$ifupd = $DBH->prepare("UPDATE imas_forums SET rubric=:rubric WHERE id=:id");
@@ -901,7 +901,7 @@ function copyrubrics($offlinerubrics=array()) {
 				$ifupd->execute(array(':rubric'=>$newid, ':id'=>$fid));
 			}
 		}
-		$ofound = array_keys($offlinerubrics,$row[0]);
+		$ofound = array_keys($offlinerubrics,$srcrub['id']);
 		if (count($ofound)>0) {
 			if ($igupd===null) {
 				$igupd = $DBH->prepare("UPDATE imas_gbitems SET rubric=:rubric WHERE id=:id");

@@ -138,8 +138,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			if (count($toadd)>0) {
 				//DB $query = "INSERT INTO imas_stugroupmembers (userid,stugroupid) VALUES ".implode(',',$toadd);
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("INSERT INTO imas_stugroupmembers (userid,stugroupid) VALUES ".implode(',',$toadd));
-				$stm->execute($toaddval);
+				$ins_grpmem_stm = $DBH->prepare("INSERT INTO imas_stugroupmembers (userid,stugroupid) VALUES ".implode(',',$toadd));
+				$ins_grpmem_stm->execute($toaddval);
 			}
 		}
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/managestugrps.php?cid=$cid");
@@ -244,7 +244,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 							//DB $rowgrptest[1] = $grpid; //use new groupid
 							$rowgrptest['agroupid'] = $grpid;
 							//DB while ($row = mysql_fetch_row($result)) {
-							while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+							while ($row = $stm2->fetch(PDO::FETCH_ASSOC)) {
 								deleteasidfilesfromstring2($row['lastanswers'].$row['bestlastanswers'],'id',$row['id'],$row['assessmentid']);
 							}
 						}
