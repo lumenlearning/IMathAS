@@ -75,7 +75,6 @@ function enditem($canedit) {
 				}
 			}
 			//DB $items[$i]['name'] = stripslashes($items[$i]['name']);;
-			$items[$i]['name'] = $items[$i]['name'];;
 			if ($canedit) {
 				echo generatemoveselect($i,count($items),$parent,$blocklist);
 			}
