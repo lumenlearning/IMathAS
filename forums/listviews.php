@@ -18,9 +18,10 @@ $thread = intval($_GET['thread']);
 //DB $query .= " WHERE imas_forum_threads.id=$thread AND imas_forums.courseid='$cid'";
 //DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
 //DB if (mysql_num_rows($result)==0) {
-$stm = $DBH->prepare($query .= " WHERE imas_forum_threads.id=:id AND imas_forums.courseid=:courseid");
-$stm->execute(array(':id'=>$thread, ':courseid'=>$cid));
 $query = "SELECT imas_forums.id FROM imas_forums JOIN imas_forum_threads ON imas_forums.id=imas_forum_threads.forumid ";
+$query .= "WHERE imas_forum_threads.id=:id AND imas_forums.courseid=:courseid"
+$stm = $DBH->prepare($query);
+$stm->execute(array(':id'=>$thread, ':courseid'=>$cid));
 if ($stm->rowCount()==0) {
 	echo 'Invalid thread';
 	exit;

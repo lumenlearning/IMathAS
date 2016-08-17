@@ -20,10 +20,10 @@ $postid = intval($_GET['postid']);
 $like = intval($_GET['like']);
 
 if ($like==0) {
-	//DB $query = "DELETE FROM imas_forum_likes WHERE postid=$postid AND userid='$userid'";	
+	//DB $query = "DELETE FROM imas_forum_likes WHERE postid=$postid AND userid='$userid'";
 	//DB $result = mysql_query($query);
 	//DB $aff =  mysql_affected_rows();
-	$stm = $DBH->prepare("DELETE FROM imas_forum_likes WHERE postid=:postid AND userid=:userid";	);
+	$stm = $DBH->prepare("DELETE FROM imas_forum_likes WHERE postid=:postid AND userid=:userid");
 	$stm->execute(array(':postid'=>$postid, ':userid'=>$userid));
 	$aff =  $stm->rowCount();
 } else {
@@ -43,7 +43,7 @@ if ($like==0) {
 		$stm->execute(array(':id'=>$postid));
 		if ($stm->rowCount()==0) {echo "fail";exit;}
 		$threadid = $stm->fetchColumn(0);
-		
+
 		//DB $query = "INSERT INTO imas_forum_likes (userid,threadid,postid,type) VALUES ";
 		//DB $query .= "('$userid',$threadid,$postid,$isteacher)";
 		//DB mysql_query($query);
@@ -57,12 +57,10 @@ if ($like==0) {
 
 $likes = array(0,0,0);
 //DB $query = "SELECT type,count(*) FROM imas_forum_likes WHERE postid='$postid'";
-//DB $query .= "GROUP BY type";	
+//DB $query .= "GROUP BY type";
 //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 //DB while ($row = mysql_fetch_row($result)) {
-$query = "SELECT type,count(*) FROM imas_forum_likes WHERE postid=:postid";
-$query .= "GROUP BY type";	
-$stm = $DBH->prepare($query);
+$stm = $DBH->prepare("SELECT type,count(*) FROM imas_forum_likes WHERE postid=:postid GROUP BY type");
 $stm->execute(array(':postid'=>$postid));
 while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	$likes[$row[0]] = $row[1];

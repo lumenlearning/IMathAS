@@ -245,17 +245,17 @@ R validate        26
  /simplelti
   0 all  
 
-/forums
-C forums             7  
-C listlikes          2
-C listviews          2
-C newthreads         6
-C posthandler        53
-C posts              22
-C postsbyname        11
-C recordlikes        5
-C savetagged         2
-C thread             25
+/forums							done
+R forums             7  
+R listlikes          2
+R listviews          2
+R newthreads         6
+R posthandler        53
+R posts              22
+R postsbyname        11
+R recordlikes        5
+R savetagged         2
+R thread             25
 
 /includes             done
  C calendardisp     11
@@ -508,6 +508,11 @@ Fresh install, dbsetup.
 Upgrade
 	Don't throw exception on redo query
 	Actual upgrade path rewrites untested
+main forum list view
+	search by thread, by post
+new threads list
+	mark all read
+
 
 TO TEST:
 external tool consumer outcome service (need live)

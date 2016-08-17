@@ -10,7 +10,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid)) {
 	exit;
 }
 if (isset($teacherid)) {
-	$isteacher = true;	
+	$isteacher = true;
 } else {
 	$isteacher = false;
 }
@@ -189,7 +189,7 @@ if (!$canviewall) {
 	$stm->execute(array(':id'=>$cid));
 	if (($stm->fetchColumn(0)%5)==0) {
 		$allowmsg = true;
-	} 
+	}
 }
 if ($postbeforeview && !$canviewall) {
 	//DB $query = "SELECT id FROM imas_forum_posts WHERE forumid='$forumid' AND parent=0 AND userid='$userid' LIMIT 1";
@@ -232,7 +232,7 @@ if ($oktoshow) {
 		$query .= "LEFT JOIN imas_students ON imas_students.userid=imas_forum_posts.userid AND imas_students.courseid=:courseid ";
 		$query .= "WHERE (imas_forum_posts.id=:id OR imas_forum_posts.threadid=:threadid) ORDER BY imas_forum_posts.id";
 		//$query = "SELECT imas_forum_posts.*,imas_users.FirstName,imas_users.LastName,imas_users.email,imas_users.hasuserimg from imas_forum_posts,imas_users ";
-		//$query .= "WHERE imas_forum_posts.userid=imas_users.id AND (imas_forum_posts.id='$threadid' OR imas_forum_posts.threadid='$threadid') ORDER BY imas_forum_posts.id";	
+		//$query .= "WHERE imas_forum_posts.userid=imas_users.id AND (imas_forum_posts.id='$threadid' OR imas_forum_posts.threadid='$threadid') ORDER BY imas_forum_posts.id";
 	}
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':courseid'=>$cid, ':id'=>$threadid, ':threadid'=>$threadid));
@@ -246,7 +246,7 @@ if ($oktoshow) {
 				$allowreply = ($canviewall || (time()<$line['replyby']));
 			}
 		}
-		
+
 		if ($line['id']==$threadid) {
 			$newviews = $line['views']+1;
 		}
@@ -262,7 +262,7 @@ if ($oktoshow) {
 		} else if ($n>1) {
 			$line['subject'] = "Re<sup>$n</sup>: ".$line['subject'];
 		}
-		
+
 		$subject[$line['id']] = $line['subject'];
 		if ($sessiondata['graphdisp']==0) {
 			$line['message'] = preg_replace('/<embed[^>]*alt="([^"]*)"[^>]*>/',"[$1]", $line['message']);
@@ -271,7 +271,7 @@ if ($oktoshow) {
 		$posttype[$line['id']] = $line['posttype'];
 		$ownerid[$line['id']] = $line['userid'];
 		$hasuserimg[$line['id']] = $line['hasuserimg'];
-		
+
 		if ($line['files']!='') {
 			$files[$line['id']] = $line['files'];
 		}
@@ -291,23 +291,23 @@ if ($oktoshow) {
 			$email[$line['id']] = $line['email'];
 		}
 		$likes[$line['id']] = array(0,0,0);
-		
+
 	}
-	
+
 	if ($allowlikes) {
 		//get likes
 		//DB $query = "SELECT postid,type,count(*) FROM imas_forum_likes WHERE threadid='$threadid'";
-		//DB $query .= "GROUP BY postid,type";	
+		//DB $query .= "GROUP BY postid,type";
 		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 		//DB while ($row = mysql_fetch_row($result)) {
-		$query = "SELECT postid,type,count(*) FROM imas_forum_likes WHERE threadid=:threadid";
-		$query .= "GROUP BY postid,type";	
+		$query = "SELECT postid,type,count(*) FROM imas_forum_likes WHERE threadid=:threadid ";
+		$query .= "GROUP BY postid,type";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':threadid'=>$threadid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$likes[$row[0]][$row[1]] = $row[2];
 		}
-		
+
 		//DB $query = "SELECT postid FROM imas_forum_likes WHERE threadid='$threadid' AND userid='$userid'";
 		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 		//DB while ($row = mysql_fetch_row($result)) {
@@ -317,7 +317,7 @@ if ($oktoshow) {
 			$mylikes[] = $row[0];
 		}
 	}
-	
+
 	if (count($files)>0) {
 		require_once('../includes/filehandler.php');
 	}
@@ -326,12 +326,12 @@ if ($oktoshow) {
 	//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->prepare("UPDATE imas_forum_posts SET views=:views WHERE id=:id");
 	$stm->execute(array(':views'=>$newviews, ':id'=>$threadid));
-	
+
 	//DB $query = "UPDATE imas_forum_threads SET views=views+1 WHERE id='$threadid'";
 	//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->prepare("UPDATE imas_forum_threads SET views=views+1 WHERE id=:id");
 	$stm->execute(array(':id'=>$threadid));
-	
+
 	//mark as read
 	//DB $query = "SELECT lastview,tagged FROM imas_forum_views WHERE userid='$userid' AND threadid='$threadid'";
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -342,8 +342,7 @@ if ($oktoshow) {
 	//DB $lastview = mysql_result($result,0,0);
 	//DB $tagged = mysql_result($result,0,1);
 	if ($stm->rowCount()>0) {
-		$lastview = $stm->fetchColumn(0);
-		$tagged = $stm->fetchColumn(1);
+		list($lastview, $tagged) = $stm->fetch(PDO::FETCH_NUM);
 		//DB $query = "UPDATE imas_forum_views SET lastview=$now WHERE userid='$userid' AND threadid='$threadid'";
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$stm = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE userid=:userid AND threadid=:threadid");
@@ -360,7 +359,7 @@ if ($oktoshow) {
 
 echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=$cid\">$coursename</a> &gt; ";
 if ($page==-4) {
-	echo "<a href=\"forums.php?cid=$cid\">Forum Search</a> ";	
+	echo "<a href=\"forums.php?cid=$cid\">Forum Search</a> ";
 } else if ($page==-3) {
 	echo "<a href=\"newthreads.php?cid=$cid\">New Threads</a> ";
 } else {
@@ -373,13 +372,13 @@ if (!$oktoshow) {
 } else {
 	echo '<div id="headerposts" class="pagetitle"><h2>Forum: '.$forumname.'</h2></div>';
 	echo "<b style=\"font-size: 120%\">Post: {$subject[$threadid]}</b><br/>\n";
-	
+
 	//DB $query = "SELECT id FROM imas_forum_threads WHERE forumid='$forumid' AND id<'$threadid' ";
-	$query = "SELECT id FROM imas_forum_threads WHERE forumid=:forumid AND id<:threadid";
+	$query = "SELECT id FROM imas_forum_threads WHERE forumid=:forumid AND id<:threadid ";
 	$array = array(':forumid'=>$forumid, ':threadid'=>$threadid);
 	if ($groupset>0 && $groupid!=-1) {
 		//DB $query .= "AND (stugroupid='$groupid' OR stugroupid=0) ";
-		$query .= "AND (stugroupid=:stugroupid OR stugroupid=0)";
+		$query .= "AND (stugroupid=:stugroupid OR stugroupid=0) ";
 		$array[':stugroupid']=$groupid;
 	}
 	$query .= "ORDER BY id DESC LIMIT 1";
@@ -396,7 +395,7 @@ if (!$oktoshow) {
 	} else {
 		echo "Prev ";
 	}
-	
+
 	//DB $query = "SELECT id FROM imas_forum_threads WHERE forumid='$forumid' AND id>'$threadid' ";
 	$query ="SELECT id FROM imas_forum_threads WHERE forumid=:forumid AND id>:threadid ";
 	$array = array(':forumid'=>$forumid, ':threadid'=>$threadid);
@@ -427,13 +426,13 @@ if (!$oktoshow) {
 	}
 	//echo "<br/><b style=\"font-size: 120%\">Post: {$subject[$threadid]}</b><br/>\n";
 	//echo "<b style=\"font-size: 100%\">Forum: $forumname</b></p>";
-	
+
 	echo '| <button onclick="expandall()">'._('Expand All').'</button>';
 	echo '<button onclick="collapseall()">'._('Collapse All').'</button> | ';
 	echo '<button onclick="showall()">'._('Show All').'</button>';
 	echo '<button onclick="hideall()">'._('Hide All').'</button>';
-	
-	
+
+
 	/*if ($view==2) {
 	echo "<a href=\"posts.php?view=$view&cid=$cid&forum=$forumid&page=$page&thread=$threadid&view=0\">View Expanded</a>";
 } else {
@@ -534,7 +533,7 @@ function savelike(el) {
 
 function printchildren($base,$restricttoowner=false) {
 	$curdir = rtrim(dirname(__FILE__), '/\\');
-	global $children,$date,$subject,$message,$poster,$email,$forumid,$threadid,$isteacher,$cid,$userid,$ownerid,$points;
+	global $DBH,$children,$date,$subject,$message,$poster,$email,$forumid,$threadid,$isteacher,$cid,$userid,$ownerid,$points;
 	global $feedback,$posttype,$lastview,$myrights,$allowreply,$allowmod,$allowdel,$allowlikes,$view,$page,$allowmsg;
 	global $haspoints,$imasroot,$postby,$replyby,$files,$CFG,$rubric,$pointsposs,$hasuserimg,$urlmode,$likes,$mylikes,$section;
 	global $canviewall, $caneditscore, $canviewscore;
@@ -542,10 +541,10 @@ function printchildren($base,$restricttoowner=false) {
 		$itemicons = array('web'=>'web.png', 'doc'=>'doc.png', 'wiki'=>'wiki.png',
 		'html'=>'html.png', 'forum'=>'forum.png', 'pdf'=>'pdf.png',
 		'ppt'=>'ppt.png', 'zip'=>'zip.png', 'png'=>'image.png', 'xls'=>'xls.png',
-		'gif'=>'image.png', 'jpg'=>'image.png', 'bmp'=>'image.png', 
-		'mp3'=>'sound.png', 'wav'=>'sound.png', 'wma'=>'sound.png', 
-		'swf'=>'video.png', 'avi'=>'video.png', 'mpg'=>'video.png', 
-		'nb'=>'mathnb.png', 'mws'=>'maple.png', 'mw'=>'maple.png'); 
+		'gif'=>'image.png', 'jpg'=>'image.png', 'bmp'=>'image.png',
+		'mp3'=>'sound.png', 'wav'=>'sound.png', 'wma'=>'sound.png',
+		'swf'=>'video.png', 'avi'=>'video.png', 'mpg'=>'video.png',
+		'nb'=>'mathnb.png', 'mws'=>'maple.png', 'mw'=>'maple.png');
 	} else {
 		$itemicons = $CFG['CPS']['itemicons'];
 	}
@@ -556,7 +555,7 @@ function printchildren($base,$restricttoowner=false) {
 		echo "<div class=block> ";
 		echo '<span class="leftbtns">';
 		if (isset($children[$child])) {
-			if ($view==1) { 
+			if ($view==1) {
 				$lbl = '+';
 				$img = "expand";
 			} else {
@@ -574,16 +573,16 @@ function printchildren($base,$restricttoowner=false) {
 		}
 		echo '</span>';
 		echo "<span class=right>";
-		
+
 		if ($view==2) {
 			echo "<input type=button class=\"shbtn\" value=\"Show\" onClick=\"toggleitem(this)\">\n";
 		} else {
 			echo "<input type=button class=\"shbtn\" value=\"Hide\" onClick=\"toggleitem(this)\">\n";
 		}
-		
+
 		if ($isteacher) {
 			echo "<a href=\"posts.php?view=$view&cid=$cid&forum=$forumid&thread=$threadid&page=$page&move=$child\">Move</a> \n";
-		} 
+		}
 		if ($isteacher || ($ownerid[$child]==$userid && $allowmod)) {
 			if (($base==0 && time()<$postby) || ($base>0 && time()<$replyby) || $isteacher) {
 				echo "<a href=\"posts.php?view=$view&cid=$cid&forum=$forumid&thread=$threadid&page=$page&modify=$child\" onclick=\"return checkchgstatus(1,$child)\">Modify</a> \n";
@@ -595,7 +594,7 @@ function printchildren($base,$restricttoowner=false) {
 		if ($posttype[$child]!=2 && $myrights > 5 && $allowreply) {
 			echo "<a href=\"posts.php?view=$view&cid=$cid&forum=$forumid&thread=$threadid&page=$page&modify=reply&replyto=$child\" onclick=\"return checkchgstatus(0,$child)\">Reply</a>";
 		}
-		
+
 		echo "</span>\n";
 		echo '<span style="float:left">';
 		echo "<b>{$subject[$child]}</b><br/>Posted by: ";
@@ -625,8 +624,7 @@ function printchildren($base,$restricttoowner=false) {
 				$query = "SELECT ias.id FROM imas_assessment_sessions AS ias JOIN imas_assessments AS ia ON ia.id=ias.assessmentid ";
 				$query .= "WHERE ia.courseid=:courseid AND ia.name=:name AND ias.userid=:ownerid";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':courseid'=>$cid, ':name'=>$aname, ':ownerid'=>intval($ownerid[$child])));
-				$aname = $matches[2];
+				$stm->execute(array(':courseid'=>$cid, ':name'=>$matches[2], ':ownerid'=>intval($ownerid[$child])));
 				if ($stm->rowCount()>0) {
 					$r = $stm->fetch(PDO::FETCH_NUM);
 					echo " <a class=\"small\" href=\"$imasroot/course/gb-viewasid.php?cid=$cid&uid={$ownerid[$child]}&asid={$r[0]}\" target=\"_popoutgradebook\">[assignment]</a>";
@@ -635,12 +633,12 @@ function printchildren($base,$restricttoowner=false) {
 		}
 		echo ', ';
 		echo tzdate("D, M j, Y, g:i a",$date[$child]);
-		
+
 		if ($date[$child]>$lastview) {
 			echo " <span style=\"color:red;\">New</span>\n";
 		}
 		echo '</span>';
-		
+
 		if ($allowlikes) {
 			$icon = (in_array($child,$mylikes))?'liked':'likedgray';
 			$likemsg = 'Liked by ';
@@ -676,7 +674,7 @@ function printchildren($base,$restricttoowner=false) {
 			} else {
 				$likemsg = 'Click to like this post. '.$likemsg;;
 			}
-			
+
 			echo '<div class="likewrap">';
 			echo "<img id=\"likeicon$child\" class=\"likeicon$likeclass\" src=\"$imasroot/img/$icon.png\" title=\"$likemsg\" onclick=\"savelike(this)\">";
 			echo " <span class=\"pointer\" id=\"likecnt$child\" onclick=\"GB_show('"._('Post Likes')."','listlikes.php?cid=$cid&amp;post=$child',500,500);\">".($likecnt>0?$likecnt:'').' </span> ';
@@ -738,8 +736,8 @@ function printchildren($base,$restricttoowner=false) {
 				echo '</div>';
 			}
 		}
-		
-		
+
+
 		echo "<div class=\"clear\"></div></div>\n";
 		echo '<div class="forumgrp'.(($view==1)?' hidden':'').'">';
 		if (isset($children[$child])) { //if has children

@@ -74,8 +74,7 @@ function enditem($canedit) {
 					continue;
 				}
 			}
-			//DB $items[$i]['name'] = stripslashes($items[$i]['name']);;		
- -			$items[$i]['name'] = $items[$i]['name'];;		
+			//DB $items[$i]['name'] = stripslashes($items[$i]['name']);;
 			if ($canedit) {
 				echo generatemoveselect($i,count($items),$parent,$blocklist);
 			}
@@ -1840,7 +1839,7 @@ function enditem($canedit) {
 
    //instructor-only tree-based quick view of full course
    function quickview($items,$parent,$showdates=false,$showlinks=true) {
-	   global $DBH, $teacherid,$cid,$imasroot,$userid,$openblocks,$firstload,$sessiondata,$previewshift,$hideicons,$exceptions,$latepasses,$CFG;
+	   global $DBH,$teacherid,$cid,$imasroot,$userid,$openblocks,$firstload,$sessiondata,$previewshift,$hideicons,$exceptions,$latepasses,$CFG;
 	   if (!is_array($openblocks)) {$openblocks = array();}
 	   $itemtypes = array();  $iteminfo = array();
 	   //DB $query = "SELECT id,itemtype,typeid FROM imas_items WHERE courseid='$cid'";
@@ -1909,8 +1908,9 @@ function enditem($canedit) {
 	   $now = time() + $previewshift;
 	   for ($i=0;$i<count($items); $i++) {
 		   if (is_array($items[$i])) { //is a block
-				 //DB $items[$i]['name'] = stripslashes($items[$i]['name']);	
-				  	$items[$i]['name'] = $items[$i]['name'];
+			//DB $items[$i]['name'] = stripslashes($items[$i]['name']);
+			$items[$i]['name'] = $items[$i]['name'];
+
 			if ($items[$i]['startdate']==0) {
 				$startdate = _('Always');
 			} else {

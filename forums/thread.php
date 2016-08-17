@@ -10,7 +10,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid)) {
 	exit;
 }
 if (isset($teacherid)) {
-	$isteacher = true;	
+	$isteacher = true;
 } else {
 	$isteacher = false;
 }
@@ -49,14 +49,13 @@ if (($isteacher || isset($tutorid)) && isset($_POST['score'])) {
 		$existingscores[$row[0]] = $row[1];
 	}
 	$postuserids = array();
-	$refids = "'".implode("','",array_keys($_POST['score']))."'";
+	//DB $refids = "'".implode("','",array_keys($_POST['score']))."'";
+	$refids = implode(',', array_map('intval', array_keys($_POST['score'])));
 	//DB $query = "SELECT id,userid FROM imas_forum_posts WHERE id IN ($refids)";
 	//DB $res = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	//DB while ($row = mysql_fetch_row($res)) {
-	$stm = $DBH->prepare("SELECT id,userid FROM imas_forum_posts WHERE id IN (:refids)");
-	$stm->execute(array(':refids'=>$refids));
+	$stm = $DBH->query("SELECT id,userid FROM imas_forum_posts WHERE id IN ($refids)");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		
 		$postuserids[$row[0]] = $row[1];
 	}
 	foreach($_POST['score'] as $k=>$v) {
@@ -78,7 +77,7 @@ if (($isteacher || isset($tutorid)) && isset($_POST['score'])) {
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':gradetype'=>'forum', ':gradetypeid'=>$forumid, ':userid'=>$postuserids[$k], ':refid'=>$k, ':score'=>$v, ':feedback'=>$feedback));
 			}
-			mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		} else {
 			if (isset($existingscores[$k])) {
 				//DB $query = "DELETE FROM imas_grades WHERE id='{$existingscores[$k]}'";
@@ -102,7 +101,7 @@ if (($isteacher || isset($tutorid)) && isset($_POST['score'])) {
 	} else {
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/thread.php?page=$page&cid=$cid&forum=$forumid");
 	}
-	exit;	
+	exit;
 }
 //DB $query = "SELECT name,postby,replyby,settings,groupsetid,sortby,taglist,enddate,avail,postinstr,replyinstr,allowlate FROM imas_forums WHERE id='$forumid'";
 //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -174,7 +173,7 @@ if ($groupsetid>0) {
 		if (count($limthreads)==0) {
 			$limthreads = '0';
 		} else {
-			$limthreads = implode(',',$limthreads);
+			$limthreads = implode(',',$limthreads); //INT from DB - safe
 		}
 	}
 } else {
@@ -192,20 +191,22 @@ if (isset($_GET['tagfilter'])) {
 }
 if ($tagfilter != '') {
 	//DB $query = "SELECT threadid FROM imas_forum_posts WHERE tag='".addslashes($tagfilter)."'";
-	$stm = $DBH->prepare("SELECT threadid FROM imas_forum_posts WHERE tag=:tagfilter");
-	$stm->execute(array(':tagfilter'=>$tagfilter));
+	$query = "SELECT threadid FROM imas_forum_posts WHERE tag=:tagfilter";
 	if ($dofilter) {
 		$query .= " AND threadid IN ($limthreads)";
 	}
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare($query);
+	$stm->execute(array(':tagfilter'=>$tagfilter));
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$limthreads = array();
-	while ($row = mysql_fetch_row($result)) {
+	//DB while ($row = mysql_fetch_row($result)) {
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$limthreads[] = $row[0];
 	}
 	if (count($limthreads)==0) {
 		$limthreads = '0';
 	} else {
-		$limthreads = implode(',',$limthreads);
+		$limthreads = implode(',',$limthreads);  //INT from DB - safe
 	}
 	$dofilter = true;
 }
@@ -214,9 +215,9 @@ if (isset($_GET['search']) && trim($_GET['search'])!='') {
 	require("../header.php");
 	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=$cid\">$coursename</a> &gt; ";
 	echo "<a href=\"thread.php?page=$page&cid=$cid&forum=$forumid\">Forum Topics</a> &gt; Search Results</div>\n";
-	
+
 	echo "<h2>Forum Search Results</h2>";
-	
+
 	if (!isset($_GET['allforums']) && $postbeforeview && !$canviewall) {
 		//DB $query = "SELECT id FROM imas_forum_posts WHERE forumid='$forumid' AND parent=0 AND userid='$userid' LIMIT 1";
 		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -230,44 +231,51 @@ if (isset($_GET['search']) && trim($_GET['search'])!='') {
 			exit;
 		}
 	}
-	
+
 	$safesearch = $_GET['search'];
-	$safesearch = str_replace(' and ', ' ',$safesearch);
+	$safesearch = trim(str_replace(' and ', ' ',$safesearch));
 	$searchterms = explode(" ",$safesearch);
-	$searchlikes = "(imas_forum_posts.message LIKE '%".implode("%' AND imas_forum_posts.message LIKE '%",$searchterms)."%')";
-	$searchlikes2 = "(imas_forum_posts.subject LIKE '%".implode("%' AND imas_forum_posts.subject LIKE '%",$searchterms)."%')";
-	$searchlikes3 = "(imas_users.LastName LIKE '%".implode("%' AND imas_users.LastName LIKE '%",$searchterms)."%')";
+	//DB $searchlikes = "(imas_forum_posts.message LIKE '%".implode("%' AND imas_forum_posts.message LIKE '%",$searchterms)."%')";
+	//DB $searchlikes2 = "(imas_forum_posts.subject LIKE '%".implode("%' AND imas_forum_posts.subject LIKE '%",$searchterms)."%')";
+	//DB $searchlikes3 = "(imas_users.LastName LIKE '%".implode("%' AND imas_users.LastName LIKE '%",$searchterms)."%')";
 	if (isset($_GET['allforums'])) {
 		//DB $query = "SELECT imas_forums.id,imas_forum_posts.threadid,imas_forum_posts.subject,imas_forum_posts.message,imas_users.FirstName,imas_users.LastName,imas_forum_posts.postdate,imas_forums.name,imas_forum_posts.isanon FROM imas_forum_posts,imas_forums,imas_users ";
 		//DB $query .= "WHERE imas_forum_posts.forumid=imas_forums.id ";
 		$query = "SELECT imas_forums.id,imas_forum_posts.threadid,imas_forum_posts.subject,imas_forum_posts.message,imas_users.FirstName,imas_users.LastName,imas_forum_posts.postdate,imas_forums.name,imas_forum_posts.isanon FROM imas_forum_posts,imas_forums,imas_users ";
 		$query .= "WHERE imas_forum_posts.forumid=imas_forums.id ";
-		$array = [];			
+		$array = [];
 		if (!$canviewall) {
 			//DB $query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now AND imas_forums.enddate>$now)) AND (imas_forums.settings&16)=0 ";
-			$query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<:now AND imas_forums.enddate>:now2)) AND (imas_forums.settings&16)=0 ";
-			array_merge($array ,[':now'=>$now, ':now2'=>$now]);
+			$query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now AND imas_forums.enddate>$now)) AND (imas_forums.settings&16)=0 ";
 		}
-		//DB $query .= "AND imas_users.id=imas_forum_posts.userid AND imas_forums.courseid='$cid' AND ($searchlikes OR $searchlikes2 OR $searchlikes3)";
-		$query .= "AND imas_users.id=imas_forum_posts.userid AND imas_forums.courseid=:courseid AND (:searchlikes OR :searchlikes2 OR :searchlikes3)";
-		array_merge($array,[':courseid'=>$cid, ':searchlikes'=>$searchlikes, ':searchlikes2'=>$searchlikes2, ':searchlikes3'=>$searchlikes3]);
+		$query .= "AND imas_users.id=imas_forum_posts.userid AND imas_forums.courseid=? ";
+		$array[] = $cid;
 	} else {
 		//DB $query = "SELECT imas_forum_posts.forumid,imas_forum_posts.threadid,imas_forum_posts.subject,imas_forum_posts.message,imas_users.FirstName,imas_users.LastName,imas_forum_posts.postdate ";
 		//DB $query .= "FROM imas_forum_posts,imas_users WHERE imas_forum_posts.forumid='$forumid' AND imas_users.id=imas_forum_posts.userid AND ($searchlikes OR $searchlikes2 OR $searchlikes3)";
 		$query = "SELECT imas_forum_posts.forumid,imas_forum_posts.threadid,imas_forum_posts.subject,imas_forum_posts.message,imas_users.FirstName,imas_users.LastName,imas_forum_posts.postdate ";
-		$query .= "FROM imas_forum_posts,imas_users WHERE imas_forum_posts.forumid=:forumid AND imas_users.id=imas_forum_posts.userid AND (:searchlikes OR :searchlikes2 OR :searchlikes3)";
-		array_merge($array,[':forumid'=>$forumid, ':searchlikes'=>$searchlikes, ':searchlikes2'=>$searchlikes2, ':searchlikes3'=>$searchlikes3]);
+		$query .= "FROM imas_forum_posts,imas_users WHERE imas_forum_posts.forumid=? AND imas_users.id=imas_forum_posts.userid ";
+		$array = array($forumid);
 	}
+	//DB $query .= "AND imas_users.id=imas_forum_posts.userid AND imas_forums.courseid='$cid' AND ($searchlikes OR $searchlikes2 OR $searchlikes3)";
+	//DB $query .= "AND imas_users.id=imas_forum_posts.userid AND imas_forums.courseid=:courseid AND (:searchlikes OR :searchlikes2 OR :searchlikes3)";
+	//DB array_merge($array,[':courseid'=>$cid, ':searchlikes'=>$searchlikes, ':searchlikes2'=>$searchlikes2, ':searchlikes3'=>$searchlikes3]);
+	$searchlikesarr = array();
+	foreach ($searchterms as $t) {
+		$searchlikesarr[] = '(imas_forum_posts.message LIKE ? OR imas_forum_posts.subject LIKE ? OR imas_users.LastName LIKE ?)';
+		array_push($array, "%$t%", "%$t%", "%$t%");
+	}
+	$searchlikes = implode(' AND ', $searchlikesarr);
+	$query .= "AND ($searchlikes) ";
 	if ($dofilter) {
 		//DB $query .= " AND imas_forum_posts.threadid IN ($limthreads)";
-		$query .= " AND imas_forum_posts.threadid IN (:limthreads)";
-		$array[':limthreads']=$limthreads;
+		$query .= " AND imas_forum_posts.threadid IN ($limthreads)";
 	}
-	
+
 	$query .= " ORDER BY imas_forum_posts.postdate DESC";
 	$stm = $DBH->prepare($query);
 	$stm->execute($array);
-	
+
 	// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -283,7 +291,7 @@ if (isset($_GET['search']) && trim($_GET['search'])!='') {
 		}
 		echo "<br/>Posted by: $name, ";
 		echo tzdate("F j, Y, g:i a",$row[6]);
-		
+
 		echo "</div><div class=blockitems>";
 		echo filter($row[3]);
 		echo "<p><a href=\"posts.php?cid=$cid&forum={$row[0]}&thread={$row[1]}\">Show full thread</a></p>";
@@ -296,14 +304,12 @@ if (isset($_GET['search']) && trim($_GET['search'])!='') {
 if (isset($_GET['markallread'])) {
 	//DB $query = "SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid='$forumid'";
 	$query ="SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid=:forumid";
-	$array =array(':forumid'=>$forumid);
 	if ($dofilter) {
 		//DB $query .= " AND threadid IN ($limthreads)";
-		$query .= " AND threadid IN (:limthreads)";
-		$array[':limthreads']=$limthreads;
+		$query .= " AND threadid IN ($limthreads)";
 	}
-	$stm= $DBH->prepare();
-	$stm->execute($array);
+	$stm= $DBH->prepare($query);
+	$stm->execute(array(':forumid'=>$forumid));
 	// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$now = time();
 	//DB while ($row = mysql_fetch_row($result)) {
@@ -344,27 +350,27 @@ if (($postby>0 && $postby<2000000000) || ($replyby>0 && $replyby<2000000000)) {
 		}
 		$latepasses = $studentinfo['latepasses'];
 	}
-	
+
 	require_once("../includes/exceptionfuncs.php");
 	$infoline = array('replyby'=>$replyby, 'postby'=>$postby, 'enddate'=>$enddate, 'allowlate'=>$allowlate);
 	list($canundolatepassP, $canundolatepassR, $canundolatepass, $canuselatepassP, $canuselatepassR, $postby, $replyby, $enddate) = getCanUseLatePassForums($exception, $infoline);
 	if ($postby>0 && $postby<2000000000) {
-		if ($postby>$now) { 
+		if ($postby>$now) {
 			$duedates .= sprintf(_('New Threads due %s. '), tzdate("D n/j/y, g:i a",$postby));
 		} else {
-			$duedates .= sprintf(_('New Threads were due %s. '), tzdate("D n/j/y, g:i a",$postby));   
+			$duedates .= sprintf(_('New Threads were due %s. '), tzdate("D n/j/y, g:i a",$postby));
 		}
 	}
 	if ($replyby>0 && $replyby<2000000000) {
 		//if ($duedates != '') {$duedates .= '<br/>';}
-		if ($replyby>$now) { 
+		if ($replyby>$now) {
 			$duedates .= sprintf(_('Replies due %s. '), tzdate("D n/j/y, g:i a",$replyby));
 		} else {
-			$duedates .= sprintf(_('Replies were due %s. '), tzdate("D n/j/y, g:i a",$replyby));   
+			$duedates .= sprintf(_('Replies were due %s. '), tzdate("D n/j/y, g:i a",$replyby));
 		}
 	}
 	//if ($duedates != '' && ($canuselatepassP || $canuselatepassR || $canundolatepass)) {$duedates .= '<br/>';}
-	if ($canuselatepassP || $canuselatepassR) {	
+	if ($canuselatepassP || $canuselatepassR) {
 		$duedates .= " <a href=\"$imasroot/course/redeemlatepassforum.php?cid=$cid&fid=$forumid&from=forum\">". _('Use LatePass'). "</a>";
 		if ($canundolatepass) {
 			$duedates .= ' |';
@@ -404,7 +410,7 @@ if ($postinstr != '' || $replyinstr != '') {
 		echo _('View Post Instructions');
 	} else if ($replyinstr != '') {
 		echo _('View Reply Instructions');
-	} 
+	}
 	echo '</a>';
 	echo '<div id="postreplyinstr" style="display:none;" class="intro">';
 	if ($postinstr != '') {
@@ -418,32 +424,33 @@ if ($postinstr != '' || $replyinstr != '') {
 	echo '</div><br/>';
 }
 
+//DB $query = "SELECT threadid,COUNT(id) AS postcount,MAX(postdate) AS maxdate FROM imas_forum_posts ";
+//DB $query .= "WHERE forumid='$forumid' ";
 $query = "SELECT threadid,COUNT(id) AS postcount,MAX(postdate) AS maxdate FROM imas_forum_posts ";
-$query .= "WHERE forumid='$forumid' ";
+$query .= "WHERE forumid=:forumid ";
 if ($dofilter) {
-	$query .= " AND threadid IN ($limthreads)";
+	$query .= "AND threadid IN ($limthreads) ";
 }
-
 $query .= "GROUP BY threadid";
-$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+$stm = $DBH->prepare($query);
+$stm->execute(array(':forumid'=>$forumid));
+//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 $postcount = array();
 $maxdate = array();
 
-while ($row = mysql_fetch_row($result)) {
+//DB while ($row = mysql_fetch_row($result)) {
+while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	$postcount[$row[0]] = $row[1] -1;
 	$maxdate[$row[0]] = $row[2];
 }
 
 //DB $query = "SELECT threadid,lastview,tagged FROM imas_forum_views WHERE userid='$userid'";
 $query= "SELECT threadid,lastview,tagged FROM imas_forum_views WHERE userid=:userid";
-$array=(array(':userid'=>$userid));
 if ($dofilter) {
-	//DB $query .= " AND threadid IN ($limthreads)";
-	$query .= " AND threadid IN (:limthreads)";
-	$array[':limthreads']=$limthreads;
+	$query .= " AND threadid IN ($limthreads)";
 }
 $stm = $DBH->prepare($query);
-$stm->execute($array);
+$stm->execute(array(':userid'=>$userid));
 // $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 $lastview = array();
 $flags = array();
@@ -454,7 +461,7 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$flags[$row[0]] = 1;
 	}
 }
-$flaggedlist = implode(',',array_keys($flags));
+$flaggedlist = implode(',', array_map('intval', array_keys($flags)));
 //make new list
 $newpost = array();
 foreach (array_keys($maxdate) as $tid) {
@@ -462,7 +469,7 @@ foreach (array_keys($maxdate) as $tid) {
 		$newpost[] = $tid;
 	}
 }
-$newpostlist = implode(',',$newpost);
+$newpostlist = implode(',', array_map('intval', $newpost));
 if ($page==-1 && count($newpost)==0) {
 	$page = 1;
 } else if ($page==-2 && count($flags)==0) {
@@ -471,17 +478,15 @@ if ($page==-1 && count($newpost)==0) {
 $prevnext = '';
 if ($page>0) {
 	$query = "SELECT COUNT(id) FROM imas_forum_posts WHERE parent=0 AND forumid=:forumid";
-	$array [':forumid'] = $forumid;
 	if ($dofilter) {
-		$query .= " AND threadid IN (:limthreads)";
-		$array [':limthreads'] = $limthreads;
+		$query .= " AND threadid IN ($limthreads)";
 	}
 	$stm = $DBH->prepare($query);
-	$stm->execute($array);
+	$stm->execute(array(':forumid'=>$forumid));
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	//DB $numpages = ceil(mysql_result($result,0,0)/$threadsperpage);
 	$numpages = ceil($stm->fetchColumn(0)/$threadsperpage);
-	
+
 	if ($numpages > 1) {
 		$prevnext .= "Page: ";
 		if ($page < $numpages/2) {
@@ -511,7 +516,7 @@ if ($page>0) {
 			$prevnext .= "<a href=\"thread.php?page=$numpages&cid=$cid&forum=$forumid\">$numpages</a> ";
 		}
 		$prevnext .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		
+
 		if ($page>1) {
 			$prevnext .= "<a href=\"thread.php?page=".($page-1)."&cid=$cid&forum=$forumid\">Previous</a> ";
 		} else {
@@ -522,7 +527,7 @@ if ($page>0) {
 		} else {
 			$prevnext .= "| Next ";
 		}
-		
+
 		echo "<div>$prevnext</div>";
 	}
 }
@@ -541,7 +546,7 @@ if ($isteacher && $groupsetid>0) {
 	} else {
 		$curfilter = -1;
 	}
-	
+
 	$groupnames = array();
 	$groupnames[0] = "Non-group-specific";
 	//DB $query = "SELECT id,name FROM imas_stugroups WHERE groupsetid='$groupsetid' ORDER BY id";
@@ -551,14 +556,14 @@ if ($isteacher && $groupsetid>0) {
 	$grpnums = 1;
 	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		if ($row[1] == 'Unnamed group') { 
+		if ($row[1] == 'Unnamed group') {
 			$row[1] .= " $grpnums";
 			$grpnums++;
 		}
 		$groupnames[$row[0]] = $row[1];
 	}
 	natsort($groupnames);
-	
+
 	//DB $query = "SELECT id,name FROM imas_stugroups WHERE groupsetid='$groupsetid' ORDER BY id";
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->prepare("SELECT id,name FROM imas_stugroups WHERE groupsetid=:groupsetid ORDER BY id");
@@ -601,7 +606,7 @@ if ($page<0) {
 	$toshow[] =  "<a href=\"thread.php?cid=$cid&forum=$forumid&page=-2\">Limit to Flagged</a>";
 	if ($taglist!='') {
 		$p = strpos($taglist,':');
-		
+
 		$tagselect = 'Filter by '.substr($taglist,0,$p).': ';
 		$tagselect .= '<select id="tagfilter" onChange="chgtagfilter()"><option value="" ';
 		if ($tagfilter=='') {
@@ -610,7 +615,7 @@ if ($page<0) {
 		$tagselect .= '>All</option>';
 		$tags = explode(',',substr($taglist,$p+1));
 		foreach ($tags as $tag) {
-			$tag =  str_replace('"','&quot;',$tag);   
+			$tag =  str_replace('"','&quot;',$tag);
 			$tagselect .= '<option value="'.$tag.'" ';
 			if ($tag==$tagfilter) {$tagselect .= 'selected="selected"';}
 			$tagselect .= '>'.$tag.'</option>';
@@ -618,8 +623,8 @@ if ($page<0) {
 		$tagselect .= '</select>';
 		$toshow[] = $tagselect;
 	}
-	
-} 
+
+}
 if (count($newpost)>0) {
 	$toshow[] =  "<button type=\"button\" onclick=\"window.location.href='thread.php?page=$page&cid=$cid&forum=$forumid&markallread=true'\">"._('Mark all Read')."</button>";
 }
@@ -641,118 +646,79 @@ echo "</p>";
 		</thead>
 		<tbody>
 			<?php
-			
-			
+
+
 			//DB $query = "SELECT imas_forum_posts.id,count(imas_forum_views.userid) FROM imas_forum_views,imas_forum_posts ";
 			//DB $query .= "WHERE imas_forum_views.threadid=imas_forum_posts.id AND imas_forum_posts.parent=0 AND ";
 			//DB $query .= "imas_forum_posts.forumid='$forumid' ";
 			$query = "SELECT imas_forum_posts.id,count(imas_forum_views.userid) FROM imas_forum_views,imas_forum_posts ";
 			$query .= "WHERE imas_forum_views.threadid=imas_forum_posts.id AND imas_forum_posts.parent=0 AND ";
 			$query .= "imas_forum_posts.forumid=:forumid ";
-			$array = array(':forumid'=>$forumid);
 			if ($dofilter) {
-				$query .= "AND imas_forum_posts.threadid IN (:limthreads) ";
-				$array [':limthreads'] = $limthreads;
+				$query .= "AND imas_forum_posts.threadid IN ($limthreads) ";
 			}
 			if ($page==-1) {
-				$query .= "AND imas_forum_posts.threadid IN (:newpostlist) ";
-				$array [':newpostlist'] = $newpostlist;
+				$query .= "AND imas_forum_posts.threadid IN ($newpostlist) ";
 			} else if ($page==-2) {
-				$query .= "AND imas_forum_posts.threadid IN (:flaggedlist) ";
-				$array [':flaggedlist'] = $flaggedlist;
-			} 
+				$query .= "AND imas_forum_posts.threadid IN ($flaggedlist) ";
+			}
 			$query .= "GROUP BY imas_forum_posts.id";
 			$stm = $DBH->prepare($query);
-			$stm->execute($array);
-			// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			while ($row = mysql_fetch_row($result)) {
-				$uniqviews[$row[0]] = $row[1]-1;
-			}
-			
-			
-			//DB $query = "SELECT imas_forum_posts.id,count(imas_forum_views.userid) FROM imas_forum_views,imas_forum_posts ";
-			//DB $query .= "WHERE imas_forum_views.threadid=imas_forum_posts.id AND imas_forum_posts.parent=0 AND ";
-			//DB $query .= "imas_forum_posts.forumid='$forumid' ";
-			$query = "SELECT imas_forum_posts.id,count(imas_forum_views.userid) FROM imas_forum_views,imas_forum_posts ";
-			$query .= "WHERE imas_forum_views.threadid=imas_forum_posts.id AND imas_forum_posts.parent=0 AND ";
-			$query .= "imas_forum_posts.forumid=:forumid ";
-			$array = array(':forumid'=>$forumid);
-			if ($dofilter) {
-				$query .= "AND imas_forum_posts.threadid IN (:limthreads) ";
-				$array [':limthreads'] = $limthreads;
-			}
-			if ($page==-1) {
-				$query .= "AND imas_forum_posts.threadid IN (:newpostlist) ";
-				$array [':newpostlist'] = $newpostlist;
-			} else if ($page==-2) {
-				$query .= "AND imas_forum_posts.threadid IN (:flaggedlist) ";
-				$array [':flaggedlist'] = $flaggedlist;
-			} 
-			$query .= "GROUP BY imas_forum_posts.id";
-			$stm = $DBH->prepare($query);
-			$stm->execute($array);
+			$stm->execute(array(':forumid'=>$forumid));
 			// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$uniqviews[$row[0]] = $row[1]-1;
 			}
-			
-			//DB $query = "SELECT imas_forum_posts.*,imas_forum_threads.views as tviews,imas_users.LastName,imas_users.FirstName,imas_forum_threads.stugroupid FROM imas_forum_posts,imas_users,imas_forum_threads WHERE ";
-			//DB $query .= "imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND imas_forum_posts.parent=0 AND imas_forum_posts.forumid='$forumid' ";	
-			$query = "SELECT imas_forum_posts.*,imas_forum_threads.views as tviews,imas_users.LastName,imas_users.FirstName,imas_forum_threads.stugroupid FROM imas_forum_posts,imas_users,imas_forum_threads WHERE ";
-			$query .= "imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND imas_forum_posts.parent=0 AND imas_forum_posts.forumid=:forumid ";	
-			$array = array(':forumid'=>$forumid);
-			if ($dofilter) {
-				$query .= "AND imas_forum_posts.threadid IN (:limthreads) ";
-				$array [':limthreads'] = $limthreads;
 
+			//DB $query = "SELECT imas_forum_posts.*,imas_forum_threads.views as tviews,imas_users.LastName,imas_users.FirstName,imas_forum_threads.stugroupid FROM imas_forum_posts,imas_users,imas_forum_threads WHERE ";
+			//DB $query .= "imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND imas_forum_posts.parent=0 AND imas_forum_posts.forumid='$forumid' ";
+			$query = "SELECT imas_forum_posts.*,imas_forum_threads.views as tviews,imas_users.LastName,imas_users.FirstName,imas_forum_threads.stugroupid FROM imas_forum_posts,imas_users,imas_forum_threads WHERE ";
+			$query .= "imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND imas_forum_posts.parent=0 AND imas_forum_posts.forumid=:forumid ";
+			if ($dofilter) {
+				$query .= "AND imas_forum_posts.threadid IN ($limthreads) ";
 			}
 			if ($page==-1) {
-				$query .= "AND imas_forum_posts.threadid IN (:newpostlist) ";
-				$array [':newpostlist'] = $newpostlist;
-
+				$query .= "AND imas_forum_posts.threadid IN ($newpostlist) ";
 			} else if ($page==-2) {
-				$query .= "AND imas_forum_posts.threadid IN (:flaggedlist) ";
-				$array [':flaggedlist'] = $flaggedlist;
-
-			} 
+				$query .= "AND imas_forum_posts.threadid IN ($flaggedlist) ";
+			}
 			if ($sortby==0) {
 				$query .= "ORDER BY imas_forum_posts.posttype DESC,imas_forum_posts.id DESC ";
 			} else if ($sortby==1) {
 				$query .= "ORDER BY imas_forum_posts.posttype DESC,imas_forum_threads.lastposttime DESC ";
 			}
-			$offset = ($page-1)*$threadsperpage;
-			$offset = intval($offset);
+			$offset = intval(($page-1)*$threadsperpage);
 			$threadsperpage =intval($threadsperpage);
 			if ($page>0) {
 				//DB $query .= "LIMIT $offset,$threadsperpage";
-					$query .= "LIMIT $offset,$threadsperpage";
+				$query .= "LIMIT $offset,$threadsperpage";
 			}
 			// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 			$stm = $DBH->prepare($query);
-			$stm->execute($array);
-			
-			// $query = "SELECT imas_forum_posts.*,imas_forum_threads.views as tviews,imas_users.LastName,imas_users.FirstName,imas_forum_threads.stugroupid FROM imas_forum_posts,imas_users,imas_forum_threads WHERE ";
-			// $query .= "imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND imas_forum_posts.parent=0 AND imas_forum_posts.forumid='$forumid' ";	
-			// 
-			// if ($dofilter) {
-			// 	$query .= "AND imas_forum_posts.threadid IN ($limthreads) ";
-			// }
-			// if ($page==-1) {
-			// 	$query .= "AND imas_forum_posts.threadid IN ($newpostlist) ";
-			// } else if ($page==-2) {
-			// 	$query .= "AND imas_forum_posts.threadid IN ($flaggedlist) ";
-			// } 
-			// if ($sortby==0) {
-			// 	$query .= "ORDER BY imas_forum_posts.posttype DESC,imas_forum_posts.id DESC ";
-			// } else if ($sortby==1) {
-			// 	$query .= "ORDER BY imas_forum_posts.posttype DESC,imas_forum_threads.lastposttime DESC ";
-			// }
-			// $offset = ($page-1)*$threadsperpage;
-			// if ($page>0) {
-			// 	$query .= "LIMIT $offset,$threadsperpage";// OFFSET $offset";
-			// }
-			// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			$stm->execute(array(':forumid'=>$forumid));
+
+			//DB $query = "SELECT imas_forum_posts.*,imas_forum_threads.views as tviews,imas_users.LastName,imas_users.FirstName,imas_forum_threads.stugroupid FROM imas_forum_posts,imas_users,imas_forum_threads WHERE ";
+			//DB $query .= "imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND imas_forum_posts.parent=0 AND imas_forum_posts.forumid='$forumid' ";
+			//DB
+			//DB if ($dofilter) {
+			//DB 	$query .= "AND imas_forum_posts.threadid IN ($limthreads) ";
+			//DB }
+			//DB if ($page==-1) {
+			//DB 	$query .= "AND imas_forum_posts.threadid IN ($newpostlist) ";
+			//DB } else if ($page==-2) {
+			//DB 	$query .= "AND imas_forum_posts.threadid IN ($flaggedlist) ";
+			//DB }
+			//DB if ($sortby==0) {
+			//DB 	$query .= "ORDER BY imas_forum_posts.posttype DESC,imas_forum_posts.id DESC ";
+			//DB } else if ($sortby==1) {
+			//DB 	$query .= "ORDER BY imas_forum_posts.posttype DESC,imas_forum_threads.lastposttime DESC ";
+			//DB }
+			//DB $offset = ($page-1)*$threadsperpage;
+			//DB if ($page>0) {
+			//DB 	$query .= "LIMIT $offset,$threadsperpage";//DB OFFSET $offset";
+			//DB }
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 			//DB if (mysql_num_rows($result)==0) {
 			if ($stm->rowCount()==0) {
 				echo '<tr><td colspan='.(($isteacher && $grpaid>0 && !$dofilter)?5:4).'>No posts have been made yet.  Click Add New Thread to start a new discussion</td></tr>';
@@ -789,7 +755,7 @@ echo "</p>";
 				}
 				if ($isteacher || ($line['userid']==$userid && $allowmod && time()<$postby)) {
 					echo "<a href=\"thread.php?page=$page&cid=$cid&forum={$line['forumid']}&modify={$line['id']}\">Modify</a> ";
-				} 
+				}
 				if ($isteacher || ($allowdel && $line['userid']==$userid && $posts==0)) {
 					echo "<a href=\"thread.php?page=$page&cid=$cid&forum={$line['forumid']}&remove={$line['id']}\">Remove</a>";
 				}
@@ -800,14 +766,14 @@ echo "</p>";
 					$name = "{$line['LastName']}, {$line['FirstName']}";
 				}
 				echo "<b><a href=\"posts.php?cid=$cid&forum=$forumid&thread={$line['id']}&page=$page$grpqs\">{$line['subject']}</a></b>: $name";
-				
+
 				echo "</td>\n";
 				if ($isteacher && $groupsetid>0 && !$dofilter) {
 					echo '<td class=c>'.$groupnames[$line['stugroupid']].'</td>';
 				}
-				
+
 				echo "<td class=c>$posts</td>";
-				
+
 				if ($isteacher) {
 					echo '<td class="pointer c" onclick="GB_show(\''._('Thread Views').'\',\'listviews.php?cid='.$cid.'&amp;thread='.$line['id'].'\',500,500);">';
 				} else {
@@ -829,6 +795,6 @@ echo "</p>";
 	if ($prevnext!='') {
 		echo "<p>$prevnext</p>";
 	}
-	
+
 	require("../footer.php");
 	?>

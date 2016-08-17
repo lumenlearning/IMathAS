@@ -1,7 +1,7 @@
 <?php
 	//Lists forum posts by Student name
 	//(c) 2006 David Lippman
-	
+
 	require("../validate.php");
 	/*if (!isset($teacherid) && !isset($tutorid)) {
 	   require("../header.php");
@@ -10,21 +10,22 @@
 	   exit;
 	}*/
 	if (isset($teacherid)) {
-		$isteacher = true;	
+		$isteacher = true;
 	} else {
 		$isteacher = false;
 	}
-	
+
 	$forumid = $_GET['forum'];
 	$cid = $_GET['cid'];
-	
+
 	if (isset($_GET['markallread'])) {
 		//DB $query = "SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid='$forumid'";
 		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$stm = $DBH->prepare("SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid=:forumid");
 		$stm->execute(array(':forumid'=>$forumid));
 		$now = time();
-		while ($row = mysql_fetch_row($result)) {
+		//DB while ($row = mysql_fetch_row($result)) {
+		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			//DB $query = "SELECT id FROM imas_forum_views WHERE userid='$userid' AND threadid='{$row[0]}'";
 			//DB $r2 = mysql_query($query) or die("Query failed : $query " . mysql_error());
 			//DB if (mysql_num_rows($r2)>0) {
@@ -45,7 +46,7 @@
 		}
 		}
 	}
-	
+
 	//DB $query = "SELECT settings,replyby,defdisplay,name,points,rubric,tutoredit, groupsetid FROM imas_forums WHERE id='$forumid'";
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	//DB list($forumsettings, $replyby, $defdisplay, $forumname, $pointspos, $rubric, $tutoredit, $groupsetid) = mysql_fetch_row($result);
@@ -57,15 +58,15 @@
 	$allowdel = ($isteacher || (($forumsettings&4)==4));
 	$postbeforeview = (($forumsettings&16)==16);
 	$haspoints = ($pointspos>0);
-	
+
 	$canviewall = (isset($teacherid) || isset($tutorid));
 	$caneditscore = (isset($teacherid) || (isset($tutorid) && $tutoredit==1));
 	$canviewscore = (isset($teacherid) || (isset($tutorid) && $tutoredit<2));
 	$allowreply = ($canviewall || (time()<$replyby));
-	
+
 	$caller = "byname";
 	include("posthandler.php");
-	
+
 	$placeinhead = '<link rel="stylesheet" href="'.$imasroot.'/forums/forums.css?ver=082911" type="text/css" />';
 	if ($haspoints && $caneditscore && $rubric != 0) {
 		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/rubric.js?v=120311"></script>';
@@ -73,7 +74,7 @@
 	}
 	require("../header.php");
 	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=$cid\">$coursename</a> &gt; <a href=\"thread.php?cid=$cid&forum=$forumid&page=$page\">Forum Topics</a> &gt; Posts by Name</div>\n";
-	
+
 	echo '<div id="headerpostsbyname" class="pagetitle">';
 	echo "<h2>Posts by Name - $forumname</h2>\n";
 	echo '</div>';
@@ -97,7 +98,7 @@
 	   if (node.className == 'blockitems') {
 	       node.className = 'hidden';
 	       butn.value = '+';
-	   } else { 
+	   } else {
 	       node.className = 'blockitems';
 	       butn.value = '-';
 	   }
@@ -116,7 +117,7 @@
 		for (var i=0; i<bcnt; i++) {
 		    var node = document.getElementById('m'+i);
 		    node.className = 'pseudohidden';
-		  }	
+		  }
 	}
 	function togglecollapseall() {
 	  for (var i=0; i<bcnt; i++) {
@@ -134,13 +135,13 @@
 		} else if (e.which) {
 			var key = e.which;
 		}
-		
+
 		if (key==40 || key==38) {
 			var i;
 			for (i = 0; i < field.form.elements.length; i++)
 			   if (field == field.form.elements[i])
 			       break;
-			
+
 		      if (key==38) {
 			      i = i-2;
 			      if (i<0) { i=0;}
@@ -188,7 +189,7 @@
 			echo printrubrics(array($row));
 		}
 	}
-	
+
 	$scores = array();
 	$feedback = array();
 	if ($haspoints) {
@@ -231,32 +232,30 @@
 		if (count($limthreads)==0) {
 			$limthreads = '0';
 		} else {
-			$limthreads = implode(',',$limthreads);
+			$limthreads = implode(',',$limthreads); //INT from DB - safe
 		}
 	}
-	
+
 	//DB $query = "SELECT imas_forum_posts.*,imas_users.FirstName,imas_users.LastName,imas_users.email,imas_users.hasuserimg,ifv.lastview from imas_forum_posts JOIN imas_users ";
 	//DB $query .= "ON imas_forum_posts.userid=imas_users.id LEFT JOIN (SELECT DISTINCT threadid,lastview FROM imas_forum_views WHERE userid='$userid') AS ifv ON ";
 	//DB $query .= "ifv.threadid=imas_forum_posts.threadid WHERE imas_forum_posts.forumid='$forumid' AND imas_forum_posts.isanon=0 ";
 	$query = "SELECT imas_forum_posts.*,imas_users.FirstName,imas_users.LastName,imas_users.email,imas_users.hasuserimg,ifv.lastview from imas_forum_posts JOIN imas_users ";
 	$query .= "ON imas_forum_posts.userid=imas_users.id LEFT JOIN (SELECT DISTINCT threadid,lastview FROM imas_forum_views WHERE userid=:userid) AS ifv ON ";
 	$query .= "ifv.threadid=imas_forum_posts.threadid WHERE imas_forum_posts.forumid=:forumid AND imas_forum_posts.isanon=0 ";
-	$array = array(':userid'=>$userid, ':forumid'=>$forumid);
 	if ($dofilter) {
-		$query .= "AND imas_forum_posts.threadid IN (:limthreads) ";
-		$array[':limthreads'] =$limthreads;
+		$query .= "AND imas_forum_posts.threadid IN ($limthreads) ";
 	}
 	$query .= "ORDER BY imas_users.LastName,imas_users.FirstName,imas_forum_posts.postdate DESC";
 	// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->prepare($query);
-	$stm->execute($array);
+	$stm->execute(array(':userid'=>$userid, ':forumid'=>$forumid));
 
 	$laststu = -1;
 	$cnt = 0;
 	echo "<input type=\"button\" value=\"Expand All\" onclick=\"toggleshowall()\" id=\"toggleall\"/> ";
 
 	echo "<button type=\"button\" onclick=\"window.location.href='postsbyname.php?cid=$cid&forum=$forumid&markallread=true'\">"._('Mark all Read')."</button><br/>";
-	
+
 	if ($caneditscore && $haspoints) {
 		echo "<form method=post action=\"thread.php?cid=$cid&forum=$forumid&page=$page&score=true\" onsubmit=\"onsubmittoggle()\">";
 	}
@@ -291,7 +290,7 @@
 		} else {
 			$postcnt++;
 		}
-		
+
 		$content .= '<span class="right">';
 		if ($haspoints) {
 			if ($caneditscore) {
@@ -299,7 +298,7 @@
 				if (isset($scores[$line['id']])) {
 					$content .= $scores[$line['id']];
 				}
-				
+
 				$content .= "\"/> Pts ";
 				if ($rubric != 0) {
 					$content .= printrubriclink($rubric,$pointspos,"score{$line['id']}", "feedback{$line['id']}").' ';
@@ -354,11 +353,11 @@
 		echo "<div><input type=submit value=\"Save Grades\" /></div>";
 		echo "</form>";
 	}
-	
+
 	echo "<p>Color code<br/>Black: New thread</br><span style=\"color:green;\">Green: Reply</span></p>";
-	
+
 	echo "<p><a href=\"thread.php?cid=$cid&forum=$forumid&page={$_GET['page']}\">Back to Thread List</a></p>";
-	
+
 	require("../footer.php");
-	
+
 ?>

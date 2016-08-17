@@ -1,4 +1,3 @@
-
 <?php
 // localhost/imathas/course/claimbadge.php?cid=3942&badgid=4&userid=108534
 require("../validate.php");

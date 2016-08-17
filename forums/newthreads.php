@@ -24,9 +24,8 @@ $query .= "ON mfv.threadid=imas_forum_threads.id AND mfv.userid=:userid WHERE im
 $array[':userid']=  $userid;
 $array[':courseid']=$cid;
 if (!isset($teacherid)) {
-  $query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid= :userid)) ";
-  $array[':userid']=$userid;
-  
+  $query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid=:userid2)) ";
+  $array[':userid2']=$userid;
 }
 $query .= "AND (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL))";
 $stm = $DBH->prepare($query);
@@ -47,35 +46,34 @@ $lastforum = '';
 if (isset($_GET['markallread'])) {
   $now = time();
   if (count($forumids)>0) {
-    $forumidlist = implode(',',$forumids);
+    $forumidlist = implode(',', array_map('intval', $forumids));
     //DB $query = "SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid IN ($forumidlist)";
     //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-    $stm = $DBH->prepare("SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid IN (:forumidlist)");
-    $stm->execute(array(':forumidlist'=>$forumidlist));
-    
+    $stm = $DBH->query("SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid IN ($forumidlist)");
+
     $threadids = array();
     while ($row = $stm->fetch(PDO::FETCH_NUM)) {
       $threadids[] = $row[0];
     }
     if (count($threadids)>0) {
-      $threadlist = implode(',',$threadids);
+      $threadlist = implode(',', $threadids);  //INT vals from DB - safe
       $toupdate = array();
       //DB $query = "SELECT threadid FROM imas_forum_views WHERE userid='$userid' AND threadid IN ($threadlist)";
       //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
       //DB while ($row = mysql_fetch_row($result)) {
       //DB $to
-      $stm = $DBH->prepare("SELECT threadid FROM imas_forum_views WHERE userid=:userid AND threadid IN (:threadlist)");
-      $stm->execute(array(':userid'=>$userid, ':threadlist'=>$threadlist));
+      $stm = $DBH->prepare("SELECT threadid FROM imas_forum_views WHERE userid=:userid AND threadid IN ($threadlist)");
+      $stm->execute(array(':userid'=>$userid));
       while ($row = $stm->fetch(PDO::FETCH_NUM)) {
         $toupdate[] = $row[0];
       }
       if (count($toupdate)>0) {
-        $touplodatelist= implode(',',$toupdate);
+        $toupdatelist= implode(',', $toupdate); //INT vals from DB - safe
         //DB $query = "UPDATE imas_forum_views SET lastview=$now WHERE userid='$userid AND threadid IN ($toupdatelist)'";
         //DB mysql_query($query) or die("Query failed : $query " . mysql_error());
-  $stm = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE userid=':userid AND threadid IN (:toupdatelist)'");
-  $stm->execute(array(':lastview'=>$now, ':userid'=>$userid, ':toupdatelist'=>$toupdatelist));
-  }
+  			$stm = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE userid=:userid AND threadid IN ($toupdatelist)");
+  			$stm->execute(array(':lastview'=>$now, ':userid'=>$userid));
+  		}
       $toinsert = array_diff($threadids,$toupdate);
       if (count($toinsert)>0) {
         //DB $query = "INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES ";
@@ -86,14 +84,13 @@ if (isset($_GET['markallread'])) {
         $first = true;
         foreach($toinsert as $i=>$tid) {
           if (!$first) {
-            $query .= ",('$userid','$tid',$now)";
-            array_merge($array,[':userid'=>$userid, ':threadid'=>$tid, ':lastview'=>$now]);
-          } else {
-            $query .= "('$userid','$tid',$now)";
-            array_merge($array,[':userid'=>$userid, ':threadid'=>$tid, ':lastview'=>$now]);
+						$query .= ',';
+					}
+          //DB $query .= "('$userid','$tid',$now)";
+					$query .= "(?,?,?)";
+          array_push($array, $userid, $tid, $now);
 
-            $first = false;
-          }
+          $first = false;
         }
         $stm = $DBH->prepare($query);
         $stm->execute($array);
@@ -117,7 +114,7 @@ echo '<div id="headernewthreads" class="pagetitle"><h2>New Forum Posts</h2></div
 echo "<p><button type=\"button\" onclick=\"window.location.href='newthreads.php?from=$from&cid=$cid&markallread=true'\">"._('Mark all Read')."</button></p>";
 
 if (count($lastpost)>0) {
-  $threadids = implode(',',array_keys($lastpost));
+  $threadids = implode(',', array_map('intval', array_keys($lastpost)));
   //DB $query = "SELECT imas_forum_posts.*,imas_users.LastName,imas_users.FirstName,imas_forum_threads.lastposttime FROM imas_forum_posts,imas_users,imas_forum_threads ";
   //DB $query .= "WHERE imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND ";
   //DB $query .= "imas_forum_posts.threadid IN ($threadids) AND imas_forum_posts.parent=0 ORDER BY imas_forum_posts.forumid, imas_forum_threads.lastposttime DESC";
@@ -125,9 +122,8 @@ if (count($lastpost)>0) {
   //DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
   $query = "SELECT imas_forum_posts.*,imas_users.LastName,imas_users.FirstName,imas_forum_threads.lastposttime FROM imas_forum_posts,imas_users,imas_forum_threads ";
   $query .= "WHERE imas_forum_posts.userid=imas_users.id AND imas_forum_posts.threadid=imas_forum_threads.id AND ";
-  $query .= "imas_forum_posts.threadid IN (:threadids) AND imas_forum_posts.parent=0 ORDER BY imas_forum_posts.forumid, imas_forum_threads.lastposttime DESC";
-  $stm = $DBH->prepare($query);
-  $stm->execute(array(':threadids'=>$threadids));
+  $query .= "imas_forum_posts.threadid IN ($threadids) AND imas_forum_posts.parent=0 ORDER BY imas_forum_posts.forumid, imas_forum_threads.lastposttime DESC";
+  $stm = $DBH->query($query);
   while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
     if ($forumname[$line['threadid']]!=$lastforum) {
       if ($lastforum!='') { echo '</tbody></table>';}
