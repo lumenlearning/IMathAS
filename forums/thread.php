@@ -303,7 +303,7 @@ if (isset($_GET['search']) && trim($_GET['search'])!='') {
 
 if (isset($_GET['markallread'])) {
 	//DB $query = "SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid='$forumid'";
-	$query ="SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid=:forumid";
+	$query = "SELECT DISTINCT threadid FROM imas_forum_posts WHERE forumid=:forumid";
 	if ($dofilter) {
 		//DB $query .= " AND threadid IN ($limthreads)";
 		$query .= " AND threadid IN ($limthreads)";
@@ -319,18 +319,18 @@ if (isset($_GET['markallread'])) {
 		$stm2 = $DBH->prepare("SELECT id FROM imas_forum_views WHERE userid=:userid AND threadid=:threadid");
 		$stm2->execute(array(':userid'=>$userid, ':threadid'=>$row[0]));
 		//DB if (mysql_num_rows($r2)>0) {
-		//DB $r2id = mysql_result($r2,0,0);
-		//DB $query = "UPDATE imas_forum_views SET lastview=$now WHERE id='$r2id'";
-		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
-		$stm = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE id=:id");
-		$stm->execute(array(':lastview'=>$now, ':id'=>$r2id));
-		if ($stm->rowCount()>0) {
-			$r2id = $stm->fetchColumn(0);
+		if ($stm2->rowCount()>0) {
+			//DB $r2id = mysql_result($r2,0,0);
+			//DB $query = "UPDATE imas_forum_views SET lastview=$now WHERE id='$r2id'";
+			//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+			$r2id = $stm2->fetchColumn(0);
+			$stm2 = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE id=:id");
+			$stm2->execute(array(':lastview'=>$now, ':id'=>$r2id));
 		} else{
 			//DB $query = "INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES ('$userid','{$row[0]}',$now)";
 			//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$stm = $DBH->prepare("INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES (:userid, :threadid, :lastview)");
-			$stm->execute(array(':userid'=>$userid, ':threadid'=>$row[0], ':lastview'=>$now));
+			$stm2 = $DBH->prepare("INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES (:userid, :threadid, :lastview)");
+			$stm2->execute(array(':userid'=>$userid, ':threadid'=>$row[0], ':lastview'=>$now));
 		}
 	}
 }

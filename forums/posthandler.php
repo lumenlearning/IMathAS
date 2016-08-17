@@ -357,6 +357,11 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			$stm->execute(array(':id'=>$_GET['modify']));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
 			$replyby = $line['replyby'];
+			if ($groupsetid>0 && $isteacher && $line['parent']==0) {
+				$stm = $DBH->prepare("SELECT stugroupid FROM imas_forum_threads WHERE id=:id");
+				$stm->execute(array(':id'=>$line['threadid']));
+				$curstugroupid = $stm->fetchColumn(0);
+			}
 			echo '<div id="headerposthandler" class="pagetitle"><h2>Modify Post</h2></div>';
 		} else {
 			if ($_GET['modify']=='reply') {
@@ -644,9 +649,14 @@ if (isset($_GET['modify'])) { //adding or modifying post
 					//DB $query = "SELECT id,name FROM imas_stugroups WHERE groupsetid='$groupsetid' ORDER BY name";
 					//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 					//DB while ($row = mysql_fetch_row($result)) {
-					$stm = $DBH->prepare("SELECT id,name FROM imas_stugroups WHERE groupsetid=:groupsetid ORDER BY name");
+					$grpnums = 1;
+					$stm = $DBH->prepare("SELECT id,name FROM imas_stugroups WHERE groupsetid=:groupsetid ORDER BY name,id");
 					$stm->execute(array(':groupsetid'=>$groupsetid));
 					while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+						if ($row[1] == 'Unnamed group') {
+							$row[1] .= " $grpnums";
+							$grpnums++;
+						}
 						echo '<option value="'.$row[0].'" ';
 						if ($curstugroupid==$row[0]) { echo 'selected="selected"';}
 						echo '>'.$row[1].'</option>';

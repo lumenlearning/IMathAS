@@ -36,13 +36,13 @@
 				$r2id = $stm2->fetchColumn(0);
 				//DB $query = "UPDATE imas_forum_views SET lastview=$now WHERE id='$r2id'";
 				//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
-				$stm = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE id=:id");
-				$stm->execute(array(':lastview'=>$now, ':id'=>$r2id));
+				$stm2 = $DBH->prepare("UPDATE imas_forum_views SET lastview=:lastview WHERE id=:id");
+				$stm2->execute(array(':lastview'=>$now, ':id'=>$r2id));
 			} else{
 				//DB $query = "INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES ('$userid','{$row[0]}',$now)";
 				//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
-				$stm = $DBH->prepare("INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES (:userid, :threadid, :lastview)");
-				$stm->execute(array(':userid'=>$userid, ':threadid'=>$row[0], ':lastview'=>$now));
+				$stm2 = $DBH->prepare("INSERT INTO imas_forum_views (userid,threadid,lastview) VALUES (:userid, :threadid, :lastview)");
+				$stm2->execute(array(':userid'=>$userid, ':threadid'=>$row[0], ':lastview'=>$now));
 		}
 		}
 	}
@@ -247,6 +247,7 @@
 	}
 	$query .= "ORDER BY imas_users.LastName,imas_users.FirstName,imas_forum_posts.postdate DESC";
 	// $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':userid'=>$userid, ':forumid'=>$forumid));
 

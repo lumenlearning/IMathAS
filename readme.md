@@ -464,6 +464,8 @@ Take assessment as student (no group)
 	view category summary at end
 	embedded display
 	livepoll
+	message instructor about question
+	post question to forum
 Take assessment as student (group)
 	Add self to group
 	Add another stu to group (copies assessment)
@@ -512,6 +514,31 @@ main forum list view
 	search by thread, by post
 new threads list
 	mark all read
+forum thread list
+	search, search all forums
+	flag post
+	limit to flagged
+	move to different forum
+	move to be a reply
+	remove thread
+	mark all read
+	list thread views
+View post
+	next/prev
+	mark unread
+	assign score, change score
+	Mark unread
+	like post
+	view likes
+List posts by name
+	change scores
+	mark all read
+Add thread
+	modify post
+	post reply
+
+
+	** to test:  categories, files
 
 
 TO TEST:

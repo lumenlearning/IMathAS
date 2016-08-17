@@ -32,11 +32,11 @@ echo '<h4>'._('Post Likes').'</h4>';
 //DB $query .= "imas_forum_likes AS ifl ON iu.id=ifl.userid WHERE ifl.postid=$postid ORDER BY iu.LastName,iu.FirstName";
 //DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
 //DB if (mysql_num_rows($result)==0) {
-$stm = $DBH->prepare($query .= "imas_forum_likes AS ifl ON iu.id=ifl.userid WHERE ifl.postid=:postid ORDER BY iu.LastName,iu.FirstName");
-$stm->execute(array(':postid'=>$postid));
 $query = "SELECT iu.LastName,iu.FirstName FROM imas_users AS iu JOIN ";
+$query .= "imas_forum_likes AS ifl ON iu.id=ifl.userid WHERE ifl.postid=:postid ORDER BY iu.LastName,iu.FirstName";
+$stm = $DBH->prepare($query);
+$stm->execute(array(':postid'=>$postid));
 if ($stm->rowCount()==0) {
-	
 	echo '<p>'._('No post likes').'</p>';
 } else {
 	echo '<ul class="nomark">';
