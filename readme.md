@@ -492,12 +492,13 @@ LTI:
 	place_aid launch to assessment
 	grade returns
 Remove mathchat and all references
-
+Fresh install, dbsetup.  
+Upgrade
+	Don't throw exception on redo query
+	Actual upgrade path rewrites untested
 
 TO TEST:
-outcome service (need live)
-install, upgrade
-
+external tool consumer outcome service (need live)
 
 TODO: Addforums, chgforums
 convert specialty MOM/WAMAP pages, like flashcards

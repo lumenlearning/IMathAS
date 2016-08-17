@@ -47,6 +47,8 @@ if (!empty($dbsetup)) {  //initial setup - just write upgradecounter.txt
 		$last = $stm->fetchColumn(0);
 	}
 
+	$DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+
 	if ($last==$latest) {
 		echo "No changes to make.";
 	} else {

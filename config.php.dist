@@ -1,12 +1,17 @@
 <?php
-  //IMathAS:  Main config file.  Edit this file!
+  //IMathAS:  Main config file.
+	//This shows some examples of how you can modify the config.php 
+	//created automatically by install.php
   //(c) 2006 David Lippman
 
   //these settings must be editted before running dbsetup.php
   $dbserver = "localhost";  		//database server
   $dbname = "imas";			//database name
   $dbusername = "imasuser";		//database user
-  $dbpassword = "K87zpaxAUtcCd62B";	//database user's password
+  $dbpassword = "1234";	//database user's password
+
+	//error reporting level.  Set to 0 for production servers.
+	error_reporting(E_ALL & ~E_NOTICE);
 
   //The name for this installation.  For personalization
   $installname = "IMathAS";
@@ -180,10 +185,6 @@
   //no need to change anything from here on
   /* Connecting, selecting database */
   //if (!isset($dbsetup)) {
-	 $link = mysql_connect($dbserver,$dbusername, $dbpassword)
-	  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
-	 mysql_select_db($dbname)
-	  or die("<p>Could not select database</p></div></body></html>");
 
     // MySQL with PDO_MYSQL
      try {
@@ -194,12 +195,11 @@
      } catch(PDOException $e) {
       die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
      }
+		 $DBH->query("set session sql_mode=\'\'");
 
 	  unset($dbserver);
 	  unset($dbusername);
 	  unset($dbpassword);
-	  $query = "set session sql_mode=''";
-          $result = mysql_query($query);
 
   //}
   //clean up post and get if magic quotes aren't on

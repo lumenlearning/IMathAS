@@ -15,6 +15,9 @@ if (isset($_POST['dbserver'])) {
 \$dbusername = \"{$_POST['dbusername']}\";
 \$dbpassword = \"{$_POST['dbpassword']}\";
 
+//error reporting level.  Set to 0 for production servers.
+error_reporting(E_ALL & ~E_NOTICE);
+
 //install name
 \$installname = \"{$_POST['installname']}\";
 
@@ -108,11 +111,12 @@ $contents .= '
 	} catch(PDOException $e) {
 	 die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
 	}
+	$DBH->query("set session sql_mode=\'\'");
 
 	  unset($dbserver);
 	  unset($dbusername);
 	  unset($dbpassword);
-		$DBH->query("set session sql_mode=\'\'");
+
 
 ?>';
 $file = fopen('config.php','w');

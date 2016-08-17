@@ -18,7 +18,8 @@ include("config.php");
 //DB $query = "SELECT ver FROM imas_dbschema WHERE id=1";
 //DB $result = mysql_query($query);
 //DB if ($result!==false) {
-$stm = $DBH->query("SELECT ver FROM imas_dbschema WHERE id=1");
+//DB $stm = $DBH->query("SELECT ver FROM imas_dbschema WHERE id=1");
+$stm = $DBH->query("SHOW TABLES LIKE 'imas_dbschema'");
 if ($stm->rowCount()>0) {
 	echo "It appears the database setup has already been run.  Aborting.  If you need to ";
 	echo "rerun the setup, clear out your database";
@@ -41,7 +42,7 @@ if (isset($_POST['dbsetup'])) { //called from install script
 	echo "<span class=form>Password</span>";
 	echo "<span class=formright><input type=type name=password value=\"root\"></span><br class=form>\n";
 	echo "<span class=form>Email</span>";
-	echo "<span class=formright><input type=type name=email value=\"root@$dbserver\"></span><br class=form>\n";
+	echo "<span class=formright><input type=type name=email value=\"root@yourserver.com\"></span><br class=form>\n";
 	echo "</fieldset>\n";
 	echo "<div class=submit><input type=submit value=\"Set up database\"></div>\n";
 	echo "</form>\n";
