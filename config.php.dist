@@ -1,6 +1,6 @@
 <?php
   //IMathAS:  Main config file.
-	//This shows some examples of how you can modify the config.php 
+	//This shows some examples of how you can modify the config.php
 	//created automatically by install.php
   //(c) 2006 David Lippman
 
@@ -184,8 +184,6 @@
 
   //no need to change anything from here on
   /* Connecting, selecting database */
-  //if (!isset($dbsetup)) {
-
     // MySQL with PDO_MYSQL
      try {
       $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
@@ -201,7 +199,6 @@
 	  unset($dbusername);
 	  unset($dbpassword);
 
-  //}
   //clean up post and get if magic quotes aren't on
   function addslashes_deep($value) {
 	return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));

@@ -18,6 +18,33 @@ if (!empty($dbsetup)) {  //initial setup - just write upgradecounter.txt
 	//fwrite($handle,$latest);
 	//fclose($handle);
 } else { //doing upgrade
+	$c = file_get_contents("config.php");
+	if (strpos($c, '$DBH')===false) {
+		echo '<p>The database connection mechanism has been updated to PDO. You will
+					need to revise your config.php before continuing to use the system.
+					In your existing config.php, remove everything below the line
+					<code>//no need to change anything from here on</code> and replace it
+					with the following code</p>
+<pre>
+/* Connecting, selecting database */
+// MySQL with PDO_MYSQL
+try {
+	$DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+	$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
+	$GLOBALS["DBH"] = $DBH;
+} catch(PDOException $e) {
+	die("Could not connect to database: " . $e->getMessage());
+}
+$DBH->query("set session sql_mode=\'\'");
+
+unset($dbserver);
+unset($dbusername);
+unset($dbpassword);
+</pre>
+					<p>On a production server, you may wish to set the PDO::ATTR_ERRMODE to PDO::ERRMODE_SILENT to hide database errors from users.</p>
+					<p>Run upgrade.php again after making those changes</p>';
+					exit;
+	}
 	if (php_sapi_name() == 'cli') { //allow direct calling from command line
 		require("config.php");
 	} else {
@@ -27,6 +54,7 @@ if (!empty($dbsetup)) {  //initial setup - just write upgradecounter.txt
 			exit;
 		}
 	}
+
 	//DB $query = "SELECT ver FROM imas_dbschema WHERE id=1";
 	//DB $result = mysql_query($query);
 	$stm = $DBH->query("SELECT ver FROM imas_dbschema WHERE id=1");

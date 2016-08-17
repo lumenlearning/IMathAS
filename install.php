@@ -106,7 +106,6 @@ $contents .= '
 	try {
 	 $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
 	 $DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
-	 // global $DBH;
 	 $GLOBALS["DBH"] = $DBH;
 	} catch(PDOException $e) {
 	 die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");

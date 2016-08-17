@@ -523,6 +523,8 @@ forum thread list
 	remove thread
 	mark all read
 	list thread views
+	filter by group
+	filter by category
 View post
 	next/prev
 	mark unread
@@ -536,9 +538,9 @@ List posts by name
 Add thread
 	modify post
 	post reply
-
-
-	** to test:  categories, files
+	group thread
+	thread with file, delete
+	post with category
 
 
 TO TEST:
