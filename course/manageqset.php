@@ -218,7 +218,7 @@ if ($myrights<20) {
 					$libarray = array();
 				}
 				//DB $chglist = "'".implode("','",$libarray)."'";
-        $chglist = array_map('intval', $libarray);
+        $chglist = implode(',', array_map('intval', $libarray));
 
 				$alllibs = array();
 				//DB $query = "SELECT qsetid,libid FROM imas_library_items WHERE qsetid IN ($chglist)";
@@ -892,6 +892,10 @@ if ($myrights<20) {
         $searchlikes = "imas_questionset.ancestors REGEXP ? AND ";
         $searchlikevals[] = '[[:<:]]'.substr($safesearch,8).'[[:>:]]';
 
+			} else if (substr($safesearch,0,3)=='id=') {
+				//DB $searchlikes = "imas_questionset.id='".substr($safesearch,3)."' AND ";
+				$searchlikes = "imas_questionset.id=? AND ";
+				$searchlikevals = array(substr($safesearch,3));
 			} else {
 				$searchterms = explode(" ",$safesearch);
 				$searchlikes = '';
@@ -904,20 +908,19 @@ if ($myrights<20) {
 					}
 				}
         //DB $searchlikes .= "((imas_questionset.description LIKE '%".implode("%' AND imas_questionset.description LIKE '%",$searchterms)."%') ";
-				$searchlikes = "((imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
-				foreach ($searchterms as $t) {
-					$searchlikevals[] = "%$t%";
-				}
-				if (substr($safesearch,0,3)=='id=') {
-          //DB $searchlikes = "imas_questionset.id='".substr($safesearch,3)."' AND ";
-					$searchlikes = "imas_questionset.id=? AND ";
-          $searchlikevals = array(substr($safesearch,3));
-				} else if (is_numeric($safesearch)) {
-          //DB $searchlikes .= "OR imas_questionset.id='$safesearch') AND ";
-					$searchlikes .= "OR imas_questionset.id=?) AND ";
-					$searchlikevals[] = $safesearch;
-				} else {
-					$searchlikes .= ") AND";
+				if (count($searchterms)>0) {
+					$searchlikes .= "((imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
+					foreach ($searchterms as $t) {
+						$searchlikevals[] = "%$t%";
+					}
+
+					if (is_numeric($safesearch)) {
+	          //DB $searchlikes .= "OR imas_questionset.id='$safesearch') AND ";
+						$searchlikes .= "OR imas_questionset.id=?) AND ";
+						$searchlikevals[] = $safesearch;
+					} else {
+						$searchlikes .= ") AND";
+					}
 				}
 			}
 		}
@@ -937,6 +940,7 @@ if ($myrights<20) {
 			$sessiondata['searchall'.$cid] = $searchall;
 			$sessiondata['lastsearch'.$cid] = '';
 			$searchlikes = '';
+			$searchlikevals = array();
 			$search = '';
 			$safesearch = '';
 			writesessiondata();

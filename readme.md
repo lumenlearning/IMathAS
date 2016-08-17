@@ -407,6 +407,11 @@ Manage Questions
   search id=
   search mine only
 	mark wrong libs. mark broken
+	transfer one, group
+	Library Assignment
+	Change rights
+	delete one, group
+	change license
   ** test rest
 Manage Libraries
 	Add library. modify.

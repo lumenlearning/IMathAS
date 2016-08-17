@@ -574,6 +574,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				//DB $searchlikes = "imas_questionset.description REGEXP '$safesearch' AND ";
 				$searchlikes = "imas_questionset.description REGEXP ? AND ";
 				$searchlikevals[] = $safesearch;
+			} else if (substr($safesearch,0,3)=='id=') {
+				//DB $searchlikes = "imas_questionset.id='".substr($safesearch,3)."' AND ";
+				$searchlikes = "imas_questionset.id=? AND ";
+				$searchlikevals = array(substr($safesearch,3));
 			} else {
 				$searchterms = explode(" ",$safesearch);
 				$searchlikes = '';
@@ -586,20 +590,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					}
 				}
 				//DB $searchlikes .= "((imas_questionset.description LIKE '%".implode("%' AND imas_questionset.description LIKE '%",$searchterms)."%') ";
-				$searchlikes = "((imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
-				foreach ($searchterms as $t) {
-					$searchlikevals[] = "%$t%";
-				}
-				if (substr($safesearch,0,3)=='id=') {
-					//DB $searchlikes = "imas_questionset.id='".substr($safesearch,3)."' AND ";
-					$searchlikes = "imas_questionset.id=? AND ";
-					$searchlikevals = array(substr($safesearch,3));
-				} else if (is_numeric($safesearch)) {
-					//DB $searchlikes .= "OR imas_questionset.id='$safesearch') AND ";
-					$searchlikes .= "OR imas_questionset.id=?) AND ";
-					$searchlikevals[] = $safesearch;
-				} else {
-					$searchlikes .= ") AND";
+				if (count($searchterms)>0) {
+					$searchlikes .= "((imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
+					foreach ($searchterms as $t) {
+						$searchlikevals[] = "%$t%";
+					}
+
+					if (is_numeric($safesearch)) {
+	          //DB $searchlikes .= "OR imas_questionset.id='$safesearch') AND ";
+						$searchlikes .= "OR imas_questionset.id=?) AND ";
+						$searchlikevals[] = $safesearch;
+					} else {
+						$searchlikes .= ") AND";
+					}
 				}
 			}
 		}
@@ -619,6 +622,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$sessiondata['searchall'.$aid] = $searchall;
 			$sessiondata['lastsearch'.$aid] = '';
 			$searchlikes = '';
+			$searchlikevals = array();
 			$search = '';
 			$safesearch = '';
 			writesessiondata();
