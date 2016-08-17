@@ -412,7 +412,7 @@ Manage Questions
 	Change rights
 	delete one, group
 	change license
-  ** test rest
+	list library
 Manage Libraries
 	Add library. modify.
 	change parent
