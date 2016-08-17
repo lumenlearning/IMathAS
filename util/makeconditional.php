@@ -22,7 +22,7 @@ if (isset($_POST['aidorder'])) {
 
 	//DB $query = "SELECT id,defpoints,itemorder FROM imas_assessments WHERE id IN ($aidlist) AND courseid='$cid'";
 	$stm = $DBH->query("SELECT id,defpoints,itemorder FROM imas_assessments WHERE id IN ($aidlist) AND courseid=$cid"); //presanitized
-	$result = mysql_query($query) or die("Query failed : " . mysql_error());
+	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$possible = array();
 	//DB while ($line = mysql_fetch_assoc($result)) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {

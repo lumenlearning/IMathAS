@@ -783,7 +783,7 @@ if ($myrights<20) {
           $stm = $DBH->prepare("UPDATE imas_questionset SET ownerid=:ownerid WHERE id=:id");
           $stm->execute(array(':ownerid'=>$_POST['newowner'], ':id'=>$_GET['transfer']));
         }
-				mysql_query($query) or die("Query failed : " . mysql_error());
+				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			}
 
 			header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/manageqset.php?cid=$cid");

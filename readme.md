@@ -348,6 +348,7 @@ add wiki
 add drill.  
   Add question to drill
   Open drill
+add forum.  modify
 add a block
 show block content: expand, folder, treereader
 delete block
@@ -418,6 +419,7 @@ Export
 	export OEA JSON
 Mass chg assessment
 	basic change with a couple items
+Mass chg forums
 Mass change Blocks
 Mass Chg dates
 time shift
@@ -489,12 +491,14 @@ LTI:
 		No place_aid launch: Make placement, change placement
 	place_aid launch to assessment
 	grade returns
-
+Remove mathchat and all references
 
 
 TO TEST:
 outcome service (need live)
 install, upgrade
 
-TODO:  remove mathchat and all references
+
+TODO: Addforums, chgforums
 convert specialty MOM/WAMAP pages, like flashcards
+.php.dist files

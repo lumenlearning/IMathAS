@@ -172,9 +172,12 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 		$pagetitle = "Enroll a New Student";
 
 		if (isset($_POST['SID'])) {
-			$query = "SELECT id FROM imas_users WHERE SID='{$_POST['SID']}'";
-			$result = mysql_query($query) or die("Query failed : " . mysql_error());
-			if (mysql_num_rows($result)>0) {
+			//DB $query = "SELECT id FROM imas_users WHERE SID='{$_POST['SID']}'";
+			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+			//DB if (mysql_num_rows($result)>0) {
+			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE SID=:SID");
+			$stm->execute(array(':SID'=>$_POST['SID']));
+			if ($stm->rowCount()>0) {
 				$overwriteBody = 1;
 				$body = "$loginprompt '{$_POST['SID']}' is used.  <a href=\"listusers.php?cid=$cid&newstu=new\">Try Again</a>\n";
 			} else {
