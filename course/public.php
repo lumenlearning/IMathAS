@@ -11,7 +11,7 @@
 	//DB $query = "SELECT name,theme,itemorder,hideicons,picicons,allowunenroll,msgset,chatset,topbar,cploc FROM imas_courses WHERE id='$cid'";
 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
-	$stm = $DBH->prepare("SELECT name,theme,itemorder,hideicons,picicons,allowunenroll,msgset,chatset,topbar,cploc FROM imas_courses WHERE id=:id");
+	$stm = $DBH->prepare("SELECT name,theme,itemorder,hideicons,picicons,allowunenroll,msgset,topbar,cploc FROM imas_courses WHERE id=:id");
 	$stm->execute(array(':id'=>$cid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($line == null) {

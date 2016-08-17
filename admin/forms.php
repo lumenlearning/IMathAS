@@ -193,7 +193,6 @@ switch($_GET['action']) {
 			$avail = $line['available'];
 			$lockaid = $line['lockaid'];
 			$ltisecret = $line['ltisecret'];
-			$chatset = $line['chatset'];
 			$showlatepass = $line['showlatepass'];
 			$istemplate = $line['istemplate'];
 			$deflatepass = $line['deflatepass'];
@@ -218,7 +217,6 @@ switch($_GET['action']) {
 
 			$topbar = isset($CFG['CPS']['topbar'])?$CFG['CPS']['topbar'][0]:array(array(),array(),0);
 			$theme = isset($CFG['CPS']['theme'])?$CFG['CPS']['theme'][0]:$defaultcoursetheme;
-			$chatset = isset($CFG['CPS']['chatset'])?$CFG['CPS']['chatset'][0]:0;
 			$showlatepass = isset($CFG['CPS']['showlatepass'])?$CFG['CPS']['showlatepass'][0]:0;
 			$istemplate = 0;
 			$avail = 0;
@@ -431,14 +429,6 @@ switch($_GET['action']) {
 			echo '> Show</span><br class="form"/>';
 		}
 
-		if (!isset($CFG['CPS']['chatset']) || $CFG['CPS']['chatset'][1]==1) {
-			if (isset($mathchaturl) && $mathchaturl!='') {
-				echo '<span class="form">Enable live chat:</span><span class="formright">';
-				echo '<input type=checkbox name="chatset" value="1" ';
-				if ($chatset==1) {echo 'checked="checked"';};
-				echo ' /></span><br class="form" />';
-			}
-		}
 		if (!isset($CFG['CPS']['deflatepass']) || $CFG['CPS']['deflatepass'][1]==1) {
 			echo '<span class="form">Auto-assign LatePasses on course enroll:</span><span class="formright">';
 			echo '<input type="text" size="3" name="deflatepass" value="'.$deflatepass.'"/> LatePasses</span><br class="form" />';

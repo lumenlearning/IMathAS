@@ -94,7 +94,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	//DB $query = "SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,chatset,topbar,cploc,latepasshrs FROM imas_courses WHERE id='$cid'";
 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
-	$stm = $DBH->prepare("SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,chatset,topbar,cploc,latepasshrs FROM imas_courses WHERE id=:id");
+	$stm = $DBH->prepare("SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,topbar,cploc,latepasshrs FROM imas_courses WHERE id=:id");
 	$stm->execute(array(':id'=>$cid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($line == null) {
@@ -109,7 +109,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	$items = unserialize($line['itemorder']);
 	$msgset = $line['msgset']%5;
 	$toolset = $line['toolset'];
-	$chatset = $line['chatset'];
 	$latepasshrs = $line['latepasshrs'];
 	$useleftbar = (($line['cploc']&1)==1);
 	$useleftstubar = (($line['cploc']&2)==2);
@@ -401,35 +400,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 		}
 	}
 
-	//get active chatters
-	if (isset($mathchaturl) &&  $chatset==1) {
-		if (substr($mathchaturl,0,4)=='http') {
-			//remote mathchat
-			$url = $mathchaturl.'?isactive='.$cid.'&sep='.time();
-			$timeout = 2;
-			$old = ini_set('default_socket_timeout', $timeout);
-			$fp = @fopen($url,'r');
-			if ($fp!==false) {
-				ini_set('default_socket_timeout', $old);
-				stream_set_timeout($fp,2);
-				stream_set_blocking($fp,0);
-				$activechatters = fread($fp,100);
-				fclose($fp);
-			} else {
-				$activechatters = '?';
-			}
-		} else {
-			//local mathchat
-			$on = time() - 15;
-			//DB $query = "SELECT name FROM mc_sessions WHERE mc_sessions.room='$cid' AND lastping>$on";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $activechatters =  mysql_num_rows($result);
-			$stm = $DBH->prepare("SELECT name FROM mc_sessions WHERE mc_sessions.room=:room AND lastping>:on");
-			$stm->execute(array(':room'=>$cid, ':on'=>$on));
-			$activechatters =  $stm->rowCount();
-		}
-	}
-
 	//get latepasses
 	if (!isset($teacherid) && !isset($tutorid) && $previewshift==-1 && isset($studentinfo)) {
 	   //$query = "SELECT latepass FROM imas_students WHERE userid='$userid' AND courseid='$cid'";
@@ -531,11 +501,6 @@ if ($overwriteBody==1) {
 			<?php echo _('Messages'); ?></a> <?php echo $newmsgs ?> <br/>
 			<a href="<?php echo $imasroot ?>/forums/forums.php?cid=<?php echo $cid ?>&folder=<?php echo $_GET['folder'] ?>" class="essen">
 			<?php echo _('Forums'); ?></a> <?php echo $newpostscnt ?>
-<?php
-		if (isset($mathchaturl) &&  $chatset==1) {
-			echo "<br/><a href=\"$mathchaturl?uname=".urlencode($userfullname)."&amp;room=$cid&amp;roomname=".urlencode($coursename)."\" target=\"chat\">", _('Chat'), "</a> ($activechatters)";
-		}
-?>
 		</p>
 	<?php
 	if (isset($CFG['CPS']['leftnavtools']) && $CFG['CPS']['leftnavtools']=='limited') {
@@ -628,9 +593,6 @@ if ($overwriteBody==1) {
 			if (($toolset&1)==0) {
 				echo '<a href="showcalendar.php?cid='.$cid.'" class="essen">'._('Calendar').'</a>';
 			}
-			if (isset($mathchaturl) && $chatset==1) {
-				echo "<br/><a href=\"$mathchaturl?uname=".urlencode($userfullname)."&amp;room=$cid&amp;roomname=".urlencode($coursename)."\"  target=\"chat\">", _('Chat'), "</a>  ($activechatters)";
-			}
 			echo '</p>';
 		}
 	?>
@@ -720,9 +682,6 @@ if ($overwriteBody==1) {
 		if (($toolset&2)==0) {
 			echo '<a href="'.$imasroot.'/forums/forums.php?cid='.$cid.'&amp;folder='.$_GET['folder'].'">';
 			echo _('Forums').'</a> '.$newpostscnt.'<br/>';
-		}
-		if (isset($mathchaturl) && $chatset==1) {
-			echo "<a href=\"$mathchaturl?uname=".urlencode($userfullname)."&amp;room=$cid&amp;roomname=".urlencode($coursename)."\"  target=\"chat\">"._('Chat')."</a>  ($activechatters) <br/>";
 		}
 	?>
 		</span>

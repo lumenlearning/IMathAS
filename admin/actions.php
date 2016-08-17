@@ -298,16 +298,6 @@ switch($_GET['action']) {
 			}
 		}
 
-		if (isset($CFG['CPS']['chatset']) && $CFG['CPS']['chatset'][1]==0) {
-			$chatset = intval($CFG['CPS']['chatset'][0]);
-		} else {
-			if (isset($_POST['chatset'])) {
-				$chatset = 1;
-			} else {
-				$chatset = 0;
-			}
-		}
-
 		if (isset($CFG['CPS']['deftime']) && $CFG['CPS']['deftime'][1]==0) {
 			$deftime = $CFG['CPS']['deftime'][0];
 		} else {
@@ -405,11 +395,11 @@ switch($_GET['action']) {
 		if ($_GET['action']=='modify') {
 			//DB $query = "UPDATE imas_courses SET name='{$_POST['coursename']}',enrollkey='{$_POST['ekey']}',hideicons='$hideicons',available='$avail',lockaid='{$_POST['lockaid']}',picicons='$picicons',chatset=$chatset,showlatepass=$showlatepass,";
 			//DB $query .= "allowunenroll='$unenroll',copyrights='$copyrights',msgset='$msgset',toolset='$toolset',topbar='$topbar',cploc='$cploc',theme='$theme',ltisecret='{$_POST['ltisecret']}',istemplate=$istemplate,deftime='$deftime',deflatepass='$deflatepass' WHERE id='{$_GET['id']}'";
-			$query = "UPDATE imas_courses SET name=:name,enrollkey=:enrollkey,hideicons=:hideicons,available=:available,lockaid=:lockaid,picicons=:picicons,chatset=:chatset,showlatepass=:showlatepass,";
+			$query = "UPDATE imas_courses SET name=:name,enrollkey=:enrollkey,hideicons=:hideicons,available=:available,lockaid=:lockaid,picicons=:picicons,showlatepass=:showlatepass,";
 			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,topbar=:topbar,cploc=:cploc,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass WHERE id=:id";
 			$stm = $DBH->prepare($query);
 			$qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
-				':picicons'=>$picicons, ':chatset'=>$chatset, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
+				':picicons'=>$picicons, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
 				':toolset'=>$toolset, ':topbar'=>$topbar, ':cploc'=>$cploc, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
 				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':id'=>$_GET['id']);
 			if ($myrights<75) {
@@ -429,11 +419,11 @@ switch($_GET['action']) {
 			//DB $query .= "('{$_POST['coursename']}','$userid','{$_POST['ekey']}','$hideicons','$picicons','$unenroll','$copyrights','$msgset',$toolset,$chatset,$showlatepass,'$itemorder','$topbar','$cploc','$avail',$istemplate,'$deftime','$deflatepass','$theme','{$_POST['ltisecret']}','$blockcnt');";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			//DB $cid = mysql_insert_id();
-			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,chatset,showlatepass,itemorder,topbar,cploc,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt) VALUES ";
-			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :chatset, :showlatepass, :itemorder, :topbar, :cploc, :available, :istemplate, :deftime, :deflatepass, :theme, :ltisecret, :blockcnt);";
+			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,topbar,cploc,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt) VALUES ";
+			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :topbar, :cploc, :available, :istemplate, :deftime, :deflatepass, :theme, :ltisecret, :blockcnt);";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':name'=>$_POST['coursename'], ':ownerid'=>$userid, ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':picicons'=>$picicons,
-				':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':toolset'=>$toolset, ':chatset'=>$chatset, ':showlatepass'=>$showlatepass,
+				':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':toolset'=>$toolset, ':showlatepass'=>$showlatepass,
 				':itemorder'=>$itemorder, ':topbar'=>$topbar, ':cploc'=>$cploc, ':available'=>$avail, ':istemplate'=>$istemplate, ':deftime'=>$deftime,
 				':deflatepass'=>$deflatepass, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':blockcnt'=>$blockcnt));
 			$cid = $DBH->lastInsertId();

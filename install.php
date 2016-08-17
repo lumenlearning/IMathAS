@@ -74,14 +74,6 @@ if ($pass) {
 ";
 }
 
-if ($_POST['mathchaturl']==0) {
-	$contents .= "//Math chat disabled \n//\$mathchaturl = \"\$imasroot/mathchat/index.php\";\n\n";
-} else if ($_POST['mathchaturl']==1) {
-	$contents .= "//Math chat enabled \n\$mathchaturl = \"\$imasroot/mathchat/index.php\";\n\n";
-} else if ($_POST['mathchaturl']==2) {
-	$contents .= "//Math chat enabled \n\$mathchaturl = \"{$_POST['mathchaturlurl']}\";\n\n";
-}
-
 if (!empty($_POST['sessionpath'])) {
 	$contents .= "//session path \n\$sessionpath = \"{$_POST['sessionpath']}\";\n\n";
 } else {
@@ -283,15 +275,6 @@ subdirectory.<br/>
 Absolute path or full url to Mimetex CGI, for math image fallback.  If you cannot install it
 on your local installation, you can use the default public server.<br/>
 <input type="text" name="mathimgurl" size="80" value="http://www.imathas.com/cgi-bin/mimetex.cgi" />
-</p>
-
-<p>
-Enable live chat?  If lots of people use this, it could overburden the server.  You can
-use a live chat from another server to distribute load if you want.<br/>
-<input type="radio" name="mathchaturl" value="0" checked="checked" /> Disable<br/>
-<input type="radio" name="mathchaturl" value="1" /> Enable using this server<br/>
-<input type="radio" name="mathchaturl" value="2" /> Enable, using this url:
-<input type="text" name="mathchaturlurl" size="80" value="http://otherserver.edu/imathasroot/mathchat/index.php"/>
 </p>
 
 <p>

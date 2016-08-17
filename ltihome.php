@@ -133,7 +133,6 @@ if (isset($_POST['createcourse'])) {
 		$cploc = isset($CFG['CPS']['cploc'])?$CFG['CPS']['cploc'][0]:1;
 		$topbar = isset($CFG['CPS']['topbar'])?$CFG['CPS']['topbar'][0]:array(array(),array(),0);
 		$theme = isset($CFG['CPS']['theme'])?$CFG['CPS']['theme'][0]:$defaultcoursetheme;
-		$chatset = isset($CFG['CPS']['chatset'])?$CFG['CPS']['chatset'][0]:0;
 		$showlatepass = isset($CFG['CPS']['showlatepass'])?$CFG['CPS']['showlatepass'][0]:0;
 
 		$avail = 0;
@@ -145,11 +144,11 @@ if (isset($_POST['createcourse'])) {
 		//DB $query .= "('{$sessiondata['lti_context_label']}','$userid','$randkey','$hideicons','$picicons','$unenroll','$copyrights','$msgset',$chatset,$showlatepass,'$itemorder','$topbar','$cploc','$avail','$theme','$randkey','$blockcnt');";
 		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $cid = mysql_insert_id();
-		$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,chatset,showlatepass,itemorder,topbar,cploc,available,theme,ltisecret,blockcnt) VALUES ";
-		$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :chatset, :showlatepass, :itemorder, :topbar, :cploc, :available, :theme, :ltisecret, :blockcnt);";
+		$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,topbar,cploc,available,theme,ltisecret,blockcnt) VALUES ";
+		$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :topbar, :cploc, :available, :theme, :ltisecret, :blockcnt);";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':name'=>$sessiondata['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
-			':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':chatset'=>$chatset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
+			':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 			':topbar'=>$topbar, ':cploc'=>$cploc, ':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
 		$cid = $DBH->lastInsertId();
 		//if ($myrights==40) {
