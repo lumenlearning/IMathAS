@@ -60,7 +60,8 @@ function copyitem($itemid,$gbcats,$sethidden=false) {
 		$stm->execute(array(':id'=>$typeid));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
 		if ($sethidden) {$row['avail'] = 0;}
-		$row['title'] .= stripslashes($_POST['append']);
+		//DB $row['title'] .= stripslashes($_POST['append']);
+		$row['title'] .= $_POST['append'];
 		$fileorder = $row['fileorder'];
 		//DB array_pop($row);
 		//DB $row = "'".implode("','",addslashes_deep($row))."'";
@@ -128,7 +129,8 @@ function copyitem($itemid,$gbcats,$sethidden=false) {
 			$row['text'] = 'exttool:'.implode('~~',$tool);
 		}
 		if ($sethidden) {$row['avail'] = 0;}
-		$row['title'] .= stripslashes($_POST['append']);
+		//DB $row['title'] .= stripslashes($_POST['append']);
+		$row['title'] .= $_POST['append'];
 		if ($row['outcomes']!='') {
 			$curoutcomes = explode(',',$row['outcomes']);
 			$newoutcomes = array();
@@ -171,7 +173,8 @@ function copyitem($itemid,$gbcats,$sethidden=false) {
 			$row['gbcategory'] = 0;
 		}
 		$rubric = $row['rubric']; //array_pop($row);
-		$row[0] .= stripslashes($_POST['append']);
+		//DB $row[0] .= stripslashes($_POST['append']);
+		$row[0] .= $_POST['append'];
 		if ($row['outcomes']!='') {
 			$curoutcomes = explode(',',$row['outcomes']);
 			$newoutcomes = array();
@@ -256,7 +259,8 @@ function copyitem($itemid,$gbcats,$sethidden=false) {
 		$stm->execute(array(':id'=>$typeid));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
 		if ($sethidden) {$row['avail'] = 0;}
-		$row['name'] .= stripslashes($_POST['append']);
+		//DB $row['name'] .= stripslashes($_POST['append']);
+		$row['name'] .= $_POST['append'];
 		//DB $row = "'".implode("','",addslashes_deep($row))."'";
 		$query = "INSERT INTO imas_wikis (courseid,name,description,startdate,enddate,editbydate,avail,settings,groupsetid) ";
 		$query .= "VALUES (:courseid,:name,:description,:startdate,:enddate,:editbydate,:avail,:settings,:groupsetid)";
@@ -275,9 +279,10 @@ function copyitem($itemid,$gbcats,$sethidden=false) {
 		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT name,summary,startdate,enddate,avail,caltag,itemdescr,itemids,scoretype,showtype,n,classbests,showtostu FROM imas_drillassess WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
-		$row = $stm->fetch(PDO::FETCH_NUM);
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
 		if ($sethidden) {$row['avail'] = 0;}
-		$row['name'] .= stripslashes($_POST['append']);
+		//DB $row['name'] .= stripslashes($_POST['append']);
+		$row['name'] .= $_POST['append'];
 		//DB $row = "'".implode("','",addslashes_deep($row))."'";
 		$query = "INSERT INTO imas_drillassess (courseid,name,summary,startdate,enddate,avail,caltag,itemdescr,itemids,scoretype,showtype,n,classbests,showtostu) ";
 		$query .= "VALUES (:courseid,:name,:summary,:startdate,:enddate,:avail,:caltag,:itemdescr,:itemids,:scoretype,:showtype,:n,:classbests,:showtostu)";
@@ -324,7 +329,8 @@ function copyitem($itemid,$gbcats,$sethidden=false) {
 
 		$reqscoreaid = $row['reqscoreaid'];
 		unset($row['reqscoreaid']);
-		$row['name'] .= stripslashes($_POST['append']);
+		//DB $row['name'] .= stripslashes($_POST['append']);
+		$row['name'] .= $_POST['append'];
 
 		$row['courseid'] = $cid;
 
@@ -554,7 +560,8 @@ function copysub($items,$parent,&$addtoarr,$gbcats,$sethidden=false) {
 		if (is_array($item)) {
 			if (array_search($parent.'-'.($k+1),$checked)!==FALSE) { //copy block
 				$newblock = array();
-				$newblock['name'] = $item['name'].stripslashes($_POST['append']);
+				//DB $newblock['name'] = $item['name'].stripslashes($_POST['append']);
+				$newblock['name'] = $item['name'].$_POST['append'];
 				$newblock['id'] = $blockcnt;
 				$blockcnt++;
 				$newblock['startdate'] = $item['startdate'];
@@ -658,7 +665,8 @@ function copyallsub($items,$parent,&$addtoarr,$gbcats,$sethidden=false) {
 	foreach ($items as $k=>$item) {
 		if (is_array($item)) {
 			$newblock = array();
-			$newblock['name'] = $item['name'].stripslashes($_POST['append']);
+			//DB $newblock['name'] = $item['name'].stripslashes($_POST['append']);
+			$newblock['name'] = $item['name'].$_POST['append'];
 			$newblock['id'] = $blockcnt;
 			$blockcnt++;
 			$newblock['startdate'] = $item['startdate'];
@@ -748,7 +756,8 @@ function getsubinfo($items,$parent,$pre,$itemtypelimit=false,$spacer='|&nbsp;&nb
 		if (is_array($item)) {
 			$ids[] = $parent.'-'.($k+1);
 			$types[] = "Block";
-			$names[] = stripslashes($item['name']);
+			//DB $names[] = stripslashes($item['name']);
+			$names[] = $item['name'];
 			$prespace[] = $pre;
 			$parents[] = $parent;
 			$gitypeids[] = '';
@@ -849,7 +858,7 @@ function copyrubrics($offlinerubrics=array()) {
 
 	$stm = $DBH->prepare("SELECT id,name,rubrictype,rubric FROM imas_rubrics WHERE id IN ($list) AND NOT (ownerid=:ownerid OR groupid=:groupid)"); //$list sanitized above
 	$stm->execute(array(':ownerid'=>$userid, ':groupid'=>$groupid));
-	while ($srcrub = $stm->fetch(PDO::FETCH_NUM)) {
+	while ($srcrub = $stm->fetch(PDO::FETCH_ASSOC)) {
 		//echo "handing {$row[0]} which I don't have access to<br/>";
 		//DB $query = "SELECT name,rubrictype,rubric FROM imas_rubrics WHERE id={$row[0]}";
 		//DB $r = mysql_query($query) or die("Query failed : " . mysql_error());

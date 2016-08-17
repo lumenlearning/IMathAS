@@ -441,9 +441,10 @@ Edit question. Add new question
 	Add image, template question with image. delete question w image
 Tutorial style editor, Add and edit
 copy course items
-	copy block of items
+	copy block of items (all types)
 	copy whole course
 	copy offline. copy outcomes
+	copy calendar items
 import items (basic)
 Take assessment as student (no group)
 	view category summary at end
@@ -474,13 +475,29 @@ Diagnostics
 	enter diag, take diag, view score
 Redeem latepass.  Un-use latepass
 embedq, OEAembedq
+Quickdrill generator. Run quickdrill
+Direct access:
+	existing student
+	existing account
+	create new account and enroll
+LTI:
+	Launch (ltiorgname didn't display - possible $SESSION issue? But OK in DB)
+		Instructor: require login
+		Student:  create account
+		New instructor, trigger course copy
+	LTI home:
+		No place_aid launch: Make placement, change placement
+	place_aid launch to assessment
+	grade returns
+
+
+
 
 
 TO TEST:
 LTI
 outcome service (need live)
 install, upgrade
-quickdrill
-directaccess
 
 TODO:  remove mathchat and all references
+convert specialty MOM/WAMAP pages, like flashcards

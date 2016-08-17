@@ -196,11 +196,11 @@ if (isset($_POST['createcourse'])) {
 			//DB $frid = array_shift($row);
 			//DB $irow = "'".implode("','",addslashes_deep($row))."'";
 			//DB $query .= "('$cid',$irow)";
-			//DB $query = "INSERT INTO imas_gbcats (courseid,name,scale,scaletype,chop,dropn,weight) VALUES ($row[0],$row[1],$row[2],$row[3],$row[4],$row[5],$row[6)";
+			//DB $query = "INSERT INTO imas_gbcats (courseid,name,scale,scaletype,chop,dropn,weight) VALUES ($row[0],$row[1],$row[2],$row[3],$row[4],$row[5],$row[6])";
 			//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
 			//DB $gbcats[$frid] = mysql_insert_id();
 			$frid = $row[0];
-			$stm2->execute(array(':courseid'=>$cid, ':name'=>$row[1], ':scale'=>$row[2], ':scaletype'=>$row[3], ':chop'=>$row[4], ':dropn'=>$row[5], ':weight'=>$row[6));
+			$stm2->execute(array(':courseid'=>$cid, ':name'=>$row[1], ':scale'=>$row[2], ':scaletype'=>$row[3], ':chop'=>$row[4], ':dropn'=>$row[5], ':weight'=>$row[6]));
 			$gbcats[$frid] = $DBH->lastInsertId();
 		}
 		$copystickyposts = true;
