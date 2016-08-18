@@ -56,7 +56,7 @@ R getpostlist     6
 0 help            0
 R index           12
 0 infoheader.dist
-R install         1   check - need to remove addslashes after done  (addslashes are still there... is this for you to remove or us?)
+R install         1   
 R installexamples 3
 0 loginpage.dist
 R ltihome         30
@@ -65,7 +65,7 @@ R ltihome         30
 R newinstructor.dist  4
 R OEAembedq       3
 C showlinkedtextpublic  5
-C upgrade         237  lots of logic to check
+C upgrade         237  
 R validate        26
 
 /admin            done
@@ -115,13 +115,13 @@ R validate        26
  R addassessment    24
  R addblock         5
  R addcalendar      6
- R adddrillassess   14 messy logic on search
- * addforum            come back to this after merging forum exception branched
+ R adddrillassess   14
+ C addforum         19   
  R addgrades        26
  R addinlinetext    17
  R addlinkedtext    13
  R addoutcomes      12
- R addquestions     29 messy logic on search like adddrill
+ R addquestions     29
  R addquestionssave 3
  R addrubric        4
  R addvideotimes    3
@@ -130,7 +130,7 @@ R validate        26
  R categorize       8
  R chgassessments   11
  R chgblocks        3
- * chkforums          come back to this after merging forum exception branched
+ C chgforums        7
  R chgoffline       6
  R claimbadge       3
  R contentstats     3
