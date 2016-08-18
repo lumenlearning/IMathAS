@@ -655,6 +655,8 @@ if ($myrights<20) {
 
 	} else if (isset($_POST['chgrights'])) {
 		if (isset($_POST['qtochg'])) {
+			//DB $chglist = "'".implode("','",explode(',',$_POST['qtochg']))."'";
+			$chglist = implode(',', array_map('intval', explode(',',$_POST['qtochg'])));
 			if ($isgrpadmin) {
 				//DB $query = "SELECT imas_questionset.id FROM imas_questionset,imas_users WHERE imas_questionset.ownerid=imas_users.id AND imas_questionset.id IN ($chglist) AND imas_users.groupid='$groupid'";
 				//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -673,8 +675,6 @@ if ($myrights<20) {
 					$stm->execute(array(':userights'=>$_POST['newrights']));
 				}
 			} else {
-				//DB $chglist = "'".implode("','",explode(',',$_POST['qtochg']))."'";
-        $chglist = implode(',', array_map('intval', explode(',',$_POST['qtochg'])));
 				if (!$isadmin) {
           //DB $query = "UPDATE imas_questionset SET userights='{$_POST['newrights']}' WHERE id IN ($chglist)";
 					//DB $query .= " AND ownerid='$userid'";

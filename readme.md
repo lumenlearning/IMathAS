@@ -387,7 +387,9 @@ show Gradebook
     edit grade one stu
   manage offline: change and delete
   gb settings. view and categories
-  mass exception:  set, clear
+  mass exception:  
+		set, clear.  require redo q
+		set, clear forum exception
   Lock
   Unenroll all
   set GB comment

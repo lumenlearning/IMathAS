@@ -293,12 +293,11 @@ if ($myrights<20) {
 					//DB $query = "UPDATE imas_libraries SET parent='{$_POST['libs']}',lastmoddate=$now WHERE id IN ($parlist)";
 					$query = "UPDATE imas_libraries SET parent=:parent,lastmoddate=:lastmoddate WHERE id IN ($parlist)";
 					$qarr = array(':parent'=>$_POST['libs'], ':lastmoddate'=>$now);
-          if (!$isadmin) {
+          if ($isgrpadmin) {
             //DB $query .= " AND groupid='$groupid'";
             $query .= " AND groupid=:groupid";
             $qarr[':groupid']=$groupid;
-          }
-          if (!$isadmin && !$isgrpadmin) {
+          } else if (!$isadmin && !$isgrpadmin) {
             //DB $query .= " AND ownerid='$userid'";
             $query .= " AND ownerid=:ownerid";
             $qarr[':ownerid'] = $userid;
@@ -336,12 +335,11 @@ if ($myrights<20) {
 			//DB $query = "DELETE FROM imas_libraries WHERE id='{$_GET['remove']}'";
       $query = "DELETE FROM imas_libraries WHERE id=:id";
       $qarr = array(':id'=>$_GET['remove']);
-      if (!$isadmin) {
+      if ($isgrpadmin) {
         //DB $query .= " AND groupid='$groupid'";
         $query .= " AND groupid=:groupid";
         $qarr[':groupid']=$groupid;
-      }
-      if (!$isadmin && !$isgrpadmin) {
+      } else if (!$isadmin && !$isgrpadmin) {
         //DB $query .= " AND ownerid='$userid'";
         $query .= " AND ownerid=:ownerid";
         $qarr[':ownerid'] = $userid;
@@ -414,12 +412,11 @@ if ($myrights<20) {
 			//DB $query = "UPDATE imas_libraries SET ownerid='{$_POST['newowner']}',groupid='$newgpid' WHERE imas_libraries.id='{$_GET['transfer']}'";
 			$query = "UPDATE imas_libraries SET ownerid=:ownerid,groupid=:groupid WHERE imas_libraries.id=:id";
 			$qarr = array(':ownerid'=>$_POST['newowner'], ':groupid'=>$newgpid, ':id'=>$_GET['transfer']);
-      if (!$isadmin) {
+      if ($isgrpadmin) {
         //DB $query .= " AND groupid='$groupid'";
         $query .= " AND groupid=:groupid";
         $qarr[':groupid']=$groupid;
-      }
-      if (!$isadmin && !$isgrpadmin) {
+      } else if (!$isadmin && !$isgrpadmin) {
         //DB $query .= " AND ownerid='$userid'";
         $query .= " AND ownerid=:ownerid";
         $qarr[':ownerid'] = $userid;
@@ -488,12 +485,11 @@ if ($myrights<20) {
         }
 				$query .= " WHERE id=:id";
 
-        if (!$isadmin) {
+        if ($isgrpadmin) {
           //DB $query .= " AND groupid='$groupid'";
           $query .= " AND groupid=:groupid";
           $qarr[':groupid']=$groupid;
-        }
-        if (!$isadmin && !$isgrpadmin) {
+        } else if (!$isadmin) {
           //DB $query .= " AND ownerid='$userid'";
           $query .= " AND ownerid=:ownerid";
           $qarr[':ownerid'] = $userid;
@@ -511,14 +507,17 @@ if ($myrights<20) {
 
 			if ($_GET['modify']!="new") {
 				$pagetitle = "Modify Library\n";
-				if (!$isadmin) {
+				if ($isgrpadmin) {
+					$stm = $DBH->prepare("SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id=:id AND groupid=:groupid");
+					$stm->execute(array(':id'=>$_GET['modify'], ':groupid'=>$groupid));
+				} else if ($isadmin) {
+					//DB $query = "SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id='{$_GET['modify']}'";
+          $stm = $DBH->prepare("SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id=:id");
+          $stm->execute(array(':id'=>$_GET['modify']));
+				} else {
 					//DB $query = "SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id='{$_GET['modify']}' AND ownerid='$userid'";
 					$stm = $DBH->prepare("SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id=:id AND ownerid=:ownerid");
 					$stm->execute(array(':id'=>$_GET['modify'], ':ownerid'=>$userid));
-				} else {
-          //DB $query = "SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id='{$_GET['modify']}'";
-          $stm = $DBH->prepare("SELECT name,userights,parent,sortorder FROM imas_libraries WHERE id=:id");
-          $stm->execute(array(':id'=>$_GET['modify']));
         }
 				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB if ($row = mysql_fetch_row($result)) {
@@ -534,7 +533,10 @@ if ($myrights<20) {
 					$parent = $_GET['parent'];
 				}
 			}
-			if (!isset($name)) { $name = '';}
+			if (!isset($name)) {
+				$name = '';
+				$pagetitle = "Add Library\n";
+			}
 			if (!isset($rights)) {
 				if ($isadmin || $allownongrouplibs) {
 					$rights = 8;
