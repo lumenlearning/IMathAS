@@ -58,7 +58,7 @@ Read   Deleted   Deleted by Sender   Tagged
 	*/
 	if (isset($_POST['remove'])) {
 		//DB $checklist = "'".implode("','",$_POST['checked'])."'";
-		$checklist = array_map('intval', $_POST['checked']);
+		$checklist = implode(',', array_map('intval', $_POST['checked']));
 		$query = "DELETE FROM imas_msgs WHERE id IN ($checklist) AND (isread&2)=2";
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$DBH->query($query);
@@ -68,7 +68,7 @@ Read   Deleted   Deleted by Sender   Tagged
 	}
 	if (isset($_POST['unsend'])) {
 		//DB $checklist = "'".implode("','",$_POST['checked'])."'";
-		$checklist = array_map('intval', $_POST['checked']);
+		$checklist = implode(',', array_map('intval', $_POST['checked']));
 		$query = "DELETE FROM imas_msgs WHERE id IN ($checklist)";
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$DBH->query($query);
