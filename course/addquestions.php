@@ -545,12 +545,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else {
 				$searchmine = 0;
 			}
+			$sessiondata['searchmine'.$cid] = $searchmine;
 			if (isset($_POST['newonly'])) {
 				$newonly = 1;
 			} else {
 				$newonly = 0;
 			}
-			$sessiondata['searchmine'.$cid] = $searchmine;
+			$sessiondata['searchnewonly'.$cid] = $newonly;
 			writesessiondata();
 		} else if (isset($sessiondata['lastsearch'.$cid])) {
 			$safesearch = trim($sessiondata['lastsearch'.$cid]); //str_replace("+"," ",$sessiondata['lastsearch'.$cid]);
@@ -559,11 +560,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$search = str_replace('"','&quot;',$search);
 			$searchall = $sessiondata['searchall'.$cid];
 			$searchmine = $sessiondata['searchmine'.$cid];
+			$newonly = $sessiondata['searchnewonly'.$cid];
 		} else {
 			$search = '';
 			$searchall = 0;
 			$searchmine = 0;
 			$safesearch = '';
+			$newonly = 0;
 		}
 		$searchlikevals = array();
 		if (trim($safesearch)=='') {

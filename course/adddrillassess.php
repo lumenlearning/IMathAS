@@ -34,7 +34,6 @@ if ($stm->rowCount()==0) {
 	$showtype = '4';
 	$n = 30;
 	$showtostu = 7;
-	$itemids = array();
 	$itemdescr = array();
 	$daid = 0;
 	$drillname = "Enter title here";
@@ -260,7 +259,7 @@ if (isset($_GET['record'])) {
 		//DB $search = stripslashes($safesearch);
 		$search = $safesearch;
 		$search = str_replace('"','&quot;',$search);
-		$sessiondata['lastsearch'.$cid] = str_replace(" ","+",$safesearch);
+		$sessiondata['lastsearch'.$cid] = $safesearch; //str_replace(" ","+",$safesearch);
 		if (isset($_POST['searchall'])) {
 			$searchall = 1;
 		} else {
@@ -272,12 +271,13 @@ if (isset($_GET['record'])) {
 		} else {
 			$searchmine = 0;
 		}
+		$sessiondata['searchmine'.$cid] = $searchmine;
 		if (isset($_POST['newonly'])) {
 			$newonly = 1;
 		} else {
 			$newonly = 0;
 		}
-		$sessiondata['searchmine'.$cid] = $searchmine;
+		$sessiondata['searchnewonly'.$cid] = $newonly;
 		writesessiondata();
 	}
 	if (isset($_POST['libs'])) {
@@ -334,17 +334,19 @@ require("../header.php");
 //remember search
 
 if (isset($sessiondata['lastsearch'.$cid])) {
-	$safesearch = str_replace("+"," ",$sessiondata['lastsearch'.$cid]);
+	$safesearch = trim($sessiondata['lastsearch'.$cid]); //str_replace("+"," ",$sessiondata['lastsearch'.$cid]);
 	//DB $search = stripslashes($safesearch);
 	$search = $safesearch;
 	$search = str_replace('"','&quot;',$search);
 	$searchall = $sessiondata['searchall'.$cid];
 	$searchmine = $sessiondata['searchmine'.$cid];
+	$newonly = $sessiondata['searchnewonly'.$cid];
 } else {
 	$search = '';
 	$searchall = 0;
 	$searchmine = 0;
 	$safesearch = '';
+	$newonly = 0;
 }
 
 $searchlikevals = array();
