@@ -536,7 +536,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 			echo htmlentities($message);
 			echo "</textarea></div></span><br class=form>\n";
 			if ($replyto>0) {
-				echo '<span class="form"></span><span class="formright"><input type="checkbox" name="sendunread" value="1"/> '._('Mark original message unread').'</span><br class="form"/>';
+				echo '<span class="form"></span><span class="formright"><label><input type="checkbox" name="sendunread" value="1"/> '._('Mark original message unread').'</label></span><br class="form"/>';
 			}
 			echo '<div class="submit"><button type="submit" name="submit" value="send">'._('Send Message').'</button></div>';
 
@@ -772,12 +772,20 @@ function chgfilter() {
 	$query .= " ORDER BY imas_courses.name";
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':msgto'=>$userid));
+	$msgcourses = array();
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		echo "<option value=\"{$row[0]}\" ";
-		if ($filtercid==$row[0]) {
+		$msgcourses[$row[0]] = $row[1];
+	}
+	if (!isset($msgcourses[$cid])) {
+		$msgcourses[$cid] = $coursename;
+	}
+	natsort($msgcourses);
+	foreach ($msgcourses as $k=>$v) {
+		echo "<option value=\"$k\" ";
+		if ($filtercid==$k) {
 			echo 'selected=1';
 		}
-		echo " >{$row[1]}</option>";
+		echo " >$v</option>";
 	}
 	echo "</select> ";
 	echo 'By sender: <select id="filteruid" onchange="chgfilter()"><option value="0" ';

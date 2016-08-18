@@ -14,7 +14,7 @@
 		echo "<html><body>No item specified. <a href=\"course.php?cid={$_GET['cid']}\">Try again</a></body></html>\n";
 		exit;
 	}
-	if (strpos($_SERVER['HTTP_REFERER'],'treereader')!==false) {
+	if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'],'treereader')!==false) {
 		$shownav = false;
 		$flexwidth = true;
 		$nologo = true;

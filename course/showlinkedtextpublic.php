@@ -14,7 +14,7 @@
 		require("../validate.php");
 		$fcid = $cid;
 		$cid = $pubcid;
-	} else if (preg_match('/cid=(\d+)/',$_SERVER['HTTP_REFERER'],$matches) && $matches[1]!=$cid) {
+	} else if (isset($_SERVER['HTTP_REFERER']) && preg_match('/cid=(\d+)/',$_SERVER['HTTP_REFERER'],$matches) && $matches[1]!=$cid) {
 		$pubcid = $cid;  //swap out cid's before calling validate
 		$cid = intval($matches[1]);
 		$_GET['cid'] = intval($matches[1]);
