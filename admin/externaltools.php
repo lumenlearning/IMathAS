@@ -44,14 +44,17 @@ if (isset($_POST['tname'])) {
 	if (!empty($_POST['tname']) && !empty($_POST['key']) && !empty($_POST['secret'])) {
 		$query = '';
 		if ($_GET['id']=='new') {
+			//DB $query = "INSERT INTO imas_external_tools (name,url,ltikey,secret,custom,privacy,groupid,courseid) VALUES ";
+			//DB $query .= "('{$_POST['tname']}','{$_POST['url']}','{$_POST['key']}','{$_POST['secret']}','{$_POST['custom']}',$privacy";
 			$query = "INSERT INTO imas_external_tools (name,url,ltikey,secret,custom,privacy,groupid,courseid) VALUES ";
-			$query .= "('{$_POST['tname']}','{$_POST['url']}','{$_POST['key']}','{$_POST['secret']}','{$_POST['custom']}',$privacy";
+			$query .= "(:name, :url, :ltikey, :secret, :custom, :privacy, :groupid, :courseid)";
+			$stm = $DBH->prepare($query);
 			if ($isteacher) {
-				$query .= ",$groupid,$cid)";
+				$stm->execute(array(':name'=>$_POST['tname'], ':url'=>$_POST['url'], ':ltikey'=>$_POST['key'], ':secret'=>$_POST['secret'], ':custom'=>$_POST['custom'], ':privacy'=>$privacy, ':groupid'=>$groupid, ':courseid'=>$cid));
 			} else if ($isgrpadmin || ($isadmin && $_POST['scope']==1)) {
-				$query .= ",$groupid,0)";
+				$stm->execute(array(':name'=>$_POST['tname'], ':url'=>$_POST['url'], ':ltikey'=>$_POST['key'], ':secret'=>$_POST['secret'], ':custom'=>$_POST['custom'], ':privacy'=>$privacy, ':groupid'=>$groupid, ':courseid'=>0));
 			} else {
-				$query .= ",0,0)";
+				$stm->execute(array(':name'=>$_POST['tname'], ':url'=>$_POST['url'], ':ltikey'=>$_POST['key'], ':secret'=>$_POST['secret'], ':custom'=>$_POST['custom'], ':privacy'=>$privacy, ':groupid'=>0, ':courseid'=>0));
 			}
 		} else {
 			//DB $query = "UPDATE imas_external_tools SET name='{$_POST['tname']}',url='{$_POST['url']}',ltikey='{$_POST['key']}',";

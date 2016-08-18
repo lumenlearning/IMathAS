@@ -132,8 +132,12 @@
 				$stm = $DBH->prepare("SELECT id FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid and (itemtype='F' OR itemtype='P' OR itemtype='R')");
 				$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$fid));
 				if ($stm->rowCount()==0) {
+					//DB $query = "INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,itemtype) VALUES ";
+					//DB $query .= "('$stu','$fid',$postbydate,$replybydate,'$forumitemtype')";
 					$query = "INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,itemtype) VALUES ";
-					$query .= "('$stu','$fid',$postbydate,$replybydate,'$forumitemtype')";
+					$query .= "(:userid, :assessmentid, :startdate, :enddate, :itemtype)";
+					$stm = $DBH->prepare($query);
+					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$fid, ':startdate'=>$postbydate, ':enddate'=>$replybydate, ':itemtype'=>$forumitemtype));
 				} else {
 					//DB $eid = mysql_result($result,0,0);
 					$eid = $stm->fetchColumn(0);

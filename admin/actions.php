@@ -71,9 +71,14 @@ switch($_GET['action']) {
 		//DB $query = "UPDATE imas_users SET password='$md5pw' WHERE id='{$_GET['id']}'";
 		//DB if ($myrights < 100) { $query .= " AND groupid='$groupid' AND rights<100"; }
 		//DB mysql_query($query) or die("Query failed : " . mysql_error());
-		$stm = $DBH->prepare("UPDATE imas_users SET password=:password WHERE id=:id");
-		$stm->execute(array(':password'=>$md5pw, ':id'=>$_GET['id']));
-		if ($myrights < 100) { $query .= " AND groupid='$groupid' AND rights<100"; }
+		
+		if ($myrights < 100) {
+			$stm = $DBH->prepare("UPDATE imas_users SET password=:password WHERE id=:id AND groupid=:groupid AND rights<100");
+			$stm->execute(array(':password'=>$md5pw, ':id'=>$_GET['id'], ':groupid'=>$groupid));
+		} else {
+			$stm = $DBH->prepare("UPDATE imas_users SET password=:password WHERE id=:id");
+			$stm->execute(array(':password'=>$md5pw, ':id'=>$_GET['id']));
+		}
 		break;
 	case "deladmin":
 		if ($myrights < 75) { echo "You don't have the authority for this action"; break;}

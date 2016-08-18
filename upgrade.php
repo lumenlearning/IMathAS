@@ -165,8 +165,9 @@ unset($dbpassword);
 			//if postback
 			if (isset($_POST['diag'])) {
 				foreach ($_POST['diag'] as $did=>$uid) {
-					$query = "UPDATE imas_diags SET ownerid='$uid' WHERE id='$did'";
-					$DBH->query($query);
+					//DB $query = "UPDATE imas_diags SET ownerid='$uid' WHERE id='$did'";
+					$stm = $DBH->prepare("UPDATE imas_diags SET ownerid=:ownerid WHERE id=:id");
+					$stm->execute(array(':ownerid'=>$uid, ':id'=>$did));
 				}
 			} else {
 				//change diag owner to userid from groupid
