@@ -481,7 +481,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		if (($qdata['solutionopts']&2)==2 && $qdata['solution']!='') {
 			$addr = $urlmode. $_SERVER['HTTP_HOST'] . "$imasroot/assessment/showsoln.php?id=".$qidx.'&sig='.md5($qidx.$GLOBALS['sessiondata']['secsalt']);
 			$addr .= '&t='.($qdata['solutionopts']&1).'&cid='.$GLOBALS['cid'];
-			echo formpopup("Written Example",$addr,730,500,"button",true,"soln",$qref);
+			echo formpopup(_("Written Example"),$addr,730,500,"button",true,"soln",$qref);
 		}
 		echo '</p></div>';
 	}
@@ -977,7 +977,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$qnref = ($multi-1).'-'.($qn%1000);
 			}
-			if ($useeqnhelper && $useeqnhelper>2 && !(isset($scoremethod) && $scoremethod=='acct')) {
+			if ($useeqnhelper && $useeqnhelper>2 && !(isset($scoremethod) && $scoremethod=='acct') && !in_array('nosoln',$ansformats) && !in_array('nosolninf',$ansformats)) {
 				$out .= "onfocus=\"showeebasicdd('qn$qn',0);showehdd('qn$qn','$shorttip','$qnref');\" onblur=\"hideebasice();hideebasicedd();hideeh();\" onclick=\"reshrinkeh('qn$qn')\" ";
 			} else {
 				$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
@@ -2435,7 +2435,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					if (strpos($grid[$i],':')!==false) {
 						$pts = explode(':',$grid[$i]);
 						foreach ($pts as $k=>$v) {
-							$pts[$k] = evalbasic($v);
+							if ($v{0}==="h") {
+								$pts[$k] = "h".evalbasic(substr($v,1));
+							} else {
+								$pts[$k] = evalbasic($v);
+							}
 						}
 						$settings[$i] = implode(':',$pts);
 					} else {
@@ -2443,6 +2447,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					}
 				}
 			}
+
 			$origxmin = $settings[0];
 			if (strpos($settings[0],'0:')===0) {
 				$settings[0] = substr($settings[0],2);
@@ -2467,7 +2472,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (strpos($settings[4],':')!==false) {
 				$settings[4] = explode(':',$settings[4]);
 				if ($settings[4][0]{0}=='h') {
-					$sclinglbl = substr($settings[4][0],1).':0:1';
+					$sclinglbl = substr($settings[4][0],1).':0:off';
 				} else {
 					$sclinglbl = $settings[4][0];
 				}
@@ -2684,7 +2689,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				}
 			}
 
-
+			//fix la's that were encoded incorrectly
+			$la = str_replace(',,' , ',' , $la);
+			$la = str_replace(';,' , ';' , $la);
 
 			if (strpos($snaptogrid,':')!==false) { $snaptogrid = "'$snaptogrid'";}
 			$out .= '</span></div>';
@@ -2922,8 +2929,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (is_array($options['partialcredit'][$qn]) || ($multi>0 && is_array($options['partialcredit']))) {$partialcredit = $options['partialcredit'][$qn];} else {$partialcredit = $options['partialcredit'];}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
+		if ($multi>0) { $qn = $multi*1000+$qn;}
 
 		$givenans = normalizemathunicode($givenans);
+
 		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
 			list($givenans, $_POST["tc$qn"], $answer) = scorenosolninf($qn, $givenans, $answer, $ansprompt);
 		}
@@ -2962,8 +2971,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$exactsigfig = false;
 			}
 		}
-
-		if ($multi>0) { $qn = $multi*1000+$qn;}
 
 		if ($answer==='') {
 			if (trim($givenans)==='') { return 1;} else { return 0;}
@@ -6549,10 +6556,10 @@ function scorenosolninf($qn, $givenans, $answer, $ansprompt) {
 			$infsoln = $anspromptp[2];
 		}
 	}
-	if (preg_match('/^inf/',$answer) || $answer==$infsoln) {
+	if (preg_match('/^inf/',$answer) || $answer===$infsoln) {
 		$answer = 'oo';
 	}
-	if (preg_match('/^no\s*solution/',$answer) || $answer==$nosoln) {
+	if (preg_match('/^no\s*solution/',$answer) || $answer===$nosoln) {
 		$answer = 'DNE';
 	}
 	$qs = $_POST["qs$qn"];
