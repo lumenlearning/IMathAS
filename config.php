@@ -192,8 +192,8 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  
  $defaultcoursetheme = "otbs_fw.css";
  $CFG['CPS']['theme'] = array("otbs_fw.css",1);
- $CFG['CPS']['themelist'] ="otbs_fw.css,otbs.css,modern.css,angelish.css,facebookish.css,otbsreader.css";
- $CFG['CPS']['themenames'] = "Lumen Fixed Width,Lumen Fluid,Modern,Clean,Social,Reader";
+ $CFG['CPS']['themelist'] ="otbs_fw.css,otbs.css,modern.css,angelish.css,facebookish.css,otbsreader.css,embed_fw.css,embedsans_fw.css";
+ $CFG['CPS']['themenames'] = "MyOpenMath Fixed Width,MyOpenMath Fluid,Modern,Clean,Social,Reader,Reading Fixed Width,Reading Sans Fixed";
 	 
  $CFG['TE']['navicons'] = array(
 	 'untried'=>'te_blue_arrow.png',

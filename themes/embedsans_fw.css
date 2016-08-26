@@ -328,7 +328,13 @@ div.todoquestion {
 	border: 0px; 
 }
 /*all questions*/
+.mceContentBody {
+	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
+	font-size: 15px;
+}
 div.question {
+	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
+	font-size: 15px;
 	background-color: #F7FCFF; 
 	border: 1px solid #C3D4DD;
 	line-height: 1.4em;
