@@ -83,7 +83,9 @@ class BaseImasAssessments extends \yii\db\ActiveRecord
             [['displaymethod', 'deffeedback'], 'string', 'max' => 20],
             [['deffeedbacktext'], 'string', 'max' => 512],
             [['password'], 'string', 'max' => 15],
-            [['ltisecret'], 'string', 'max' => 10]
+            [['ltisecret'], 'string', 'max' => 10],
+            [['summary', 'intro','name','password','timelimit'],'filter','filter'=>'\yii\helpers\HtmlPurifier::process'],
+
         ];
     }
 

@@ -59,7 +59,6 @@ class BaseImasForums extends \yii\db\ActiveRecord
             [['courseid', 'startdate', 'enddate', 'settings', 'sortby', 'defdisplay', 'replyby', 'postby', 'grpaid', 'groupsetid', 'points', 'cntingb', 'gbcategory', 'tutoredit', 'rubric', 'avail', 'forumtype'], 'integer'],
             [['name', 'caltag'], 'string', 'max' => 254],
             [['description','name'],'filter','filter'=>'\yii\helpers\HtmlPurifier::process'],
-            // [['name'],'filter','filter'=>'\yii\helpers\Html::encode'],
         ];
     }
 
