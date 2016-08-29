@@ -1,3 +1,4 @@
+<?php if (!isset($imasroot)) {exit;} ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,7 +40,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=070816"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=082816"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -56,7 +57,8 @@ if (isset($ispublic) && $ispublic && !isset($sessiondata['mathdisp'])) {
 }
 if (!isset($sessiondata['mathdisp'])) {
 	echo '<script type="text/javascript">var AMnoMathML = true;var ASnoSVG = true;var AMisGecko = 0;var AMnoTeX = false;</script>';
-	echo '<script type="text/javascript" src="'.$imasroot.'/mathjax/MathJax.js?config=AM_CHTML&rev=2.6.1"></script>';
+	//echo '<script type="text/javascript" src="'.$imasroot.'/mathjax/MathJax.js?config=AM_CHTML&rev=2.6.1"></script>';
+	echo '<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_CHTML"></script>';
 	echo "<script src=\"$imasroot/javascript/mathgraphcheck.js?v=021215\" type=\"text/javascript\"></script>\n";
 } else if ($sessiondata['mathdisp']==1 || $sessiondata['mathdisp']==3) {
 	//merged, eliminating original AsciiMath display; MathJax only now
