@@ -1,5 +1,6 @@
 <?php
 $nologo = true;
+require("../../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 require("../../header.php");
 $pagetitle ="Instructor Info";
