@@ -29,7 +29,7 @@ a:hover {
 
 div.mainbody {
 	height:auto;
-	
+
 }
 
 
@@ -90,7 +90,7 @@ div.block .instronly {
 
 /*Icons*/
 div.icon {
-	color:#00d;	
+	color:#00d;
 	border: 1px solid #00f;
 	font-weight: bolder;
 }
@@ -121,7 +121,7 @@ table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
 	background-color: #E2E2E2;
 }
 tr.even {
-	background-color: #fff;	
+	background-color: #fff;
 }
 tr.odd {
 	background-color: #E9E9E9;
@@ -238,7 +238,7 @@ span.padright {
 }
 .headerwrapper {
 	background:#FFF;
-	border: 0px;	
+	border: 0px;
 	margin: 0;
 	margin: 0px;
 	margin-bottom: 0px;
@@ -254,7 +254,7 @@ span.padright {
 div#headercontent, div#navlistcont {
 	max-width: 1000px;
 	margin: auto;
-	
+
 }
 div#headercontent {
 	height: 70px;
@@ -302,7 +302,7 @@ div#centercontent div.breadcrumb {
 div.breadcrumb a {
 	color: #ddf;
 }
-	
+
 
 .midwrapper {
 	padding-left: 15px;
@@ -357,15 +357,15 @@ div.seqqinfoinactive {
 
 }
 div.todoquestion {
-	background-color: #ffffcc; 
-	border: 0px; 
+	background-color: #ffffcc;
+	border: 0px;
 }
 /*all questions*/
 div.question {
-	background-color: #EAE7F2; 
+	background-color: #EAE7F2;
 	border: 1px solid #bbd;
 	width: auto;
-	
+
 }
 div.inset {
 	margin-right: 0px;
@@ -383,7 +383,6 @@ div.intro {
 div.navbar {
 	position: relative;
 	float: left;
-	left: 0px;
 	background: #f0e6f0;
 	border: 1px solid #bbd;
 	color:#000;
@@ -400,7 +399,7 @@ span.done {
 
 ul#navlist {
 	background-color: #660066;
-	
+
 }
 ul#navlist li a {
 	padding: 2px 8px;
@@ -423,7 +422,7 @@ div#viewbuttoncont {
 }
 div#viewbuttoncont a {
 	color: #fff;
-	display: inline-block;	
+	display: inline-block;
 	padding: 3px 5px;
 	margin-left: 2px;
 }
@@ -446,4 +445,3 @@ div#headerhome, div#homelinkbox {
 a.newnote, a.newnote:link, a.newnote:visited {
 	color: #f00;
 }
-
