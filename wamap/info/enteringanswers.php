@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <?php
-	$dbsetup = true; //prevents connection to database
+	 $flexwidth = true; $dbsetup = true; //prevents connection to database
 	include("../../config.php");
 ?>
 <html>
@@ -25,13 +25,13 @@ img {
 <h4>Answer Types</h4>
 <p class="ind">
 Each question requests a specific type of answer.  Usually a question will display a hint
-at the end of the question as to what type of answer is expected.  In addition to 
+at the end of the question as to what type of answer is expected.  In addition to
 multiple choice questions and other standard types, this system also features several mathematical
 answer types.  Read on for suggestions on entering answers for these types.</p>
 
 <h4>Numerical Answers</h4>
 <p class="ind">
-Some question ask for numerical answers.  Acceptable answers include whole numbers, integers (negative numbers), and decimal values. 
+Some question ask for numerical answers.  Acceptable answers include whole numbers, integers (negative numbers), and decimal values.
 </p>
 <p class="ind">
 In special cases, you may need to enter DNE for "Does not exist", oo for infinity, or -oo for negative infinity.
@@ -44,21 +44,21 @@ If your answer is not an exact value, you'll want to enter at least 3 decimal pl
 <p class="ind">
 Some questions ask for fractions or mixed number answers.
 </p>
-<p class="ind">Enter fractions like 2/3 for <img src="answerimgs/23.gif">. If not specified, the fraction 
+<p class="ind">Enter fractions like 2/3 for <img src="answerimgs/23.gif">. If not specified, the fraction
 does not need to be reduced, so <img src="answerimgs/24.gif"> is considered the same as <img src="answerimgs/12.gif">.</p>
 <p class="ind">
-For a reduced fraction answer, be sure to reduce your fraction to lowest terms. 
+For a reduced fraction answer, be sure to reduce your fraction to lowest terms.
 If <img src="answerimgs/12.gif"> is the correct answer, <img src="answerimgs/24.gif"> is not reduced, and would be marked wrong.</p>
 
-<p class="ind">For both fraction and reduced fraction type problems, improper 
+<p class="ind">For both fraction and reduced fraction type problems, improper
 fractions are OK, like <img src="answerimgs/103.gif">, but mixed numbers will not be accepted.</p>
 
 <p class="ind">
-For a mixed number problem, enter your answer like 5_1/3 for <img src="answerimgs/513.gif">. Improper 
+For a mixed number problem, enter your answer like 5_1/3 for <img src="answerimgs/513.gif">. Improper
 fractions will not be accepted. Also, be sure to reduce the fractional portion of the mixed number to lowest terms.</p>
 
 <h4>Calculations</h4>
-<p class="ind">Some questions allow calculations be entered as answers.  You can also enter whole numbers, 
+<p class="ind">Some questions allow calculations be entered as answers.  You can also enter whole numbers,
 negative numbers, or decimal numbers.  If you enter a decimal value, be sure to give <i>at least</i> 3 decimal places.</p>
 
 <p class="ind">
@@ -76,7 +76,7 @@ Alternatively, you can enter mathematical expressions.  Some examples:
 <p class="ind">You can use the Preview button to see how the computer is interpreting what you have entered</p>
 
 <h4>Algebraic Expressions</h4>
-<p class="ind">Some questions ask for algebraic expression answers.  With these types of questions, 
+<p class="ind">Some questions ask for algebraic expression answers.  With these types of questions,
 be sure to use the variables indicated.  In your answer, you can also use mathematical expressions for numerical calculations.</p>
 
 <p class="ind">
@@ -100,7 +100,7 @@ With any function like sqrt, log, or sin, be sure to put parentheses around the 
 <p class="ind">Note that the shorthand notation sin^2(x) will display correctly but not evaluate correctly; use (sin(x))^2 instead.</p>
 
 <p class="ind">
-Unless the problem gives specific directions, any algebraically equivalent expression is acceptable.  
+Unless the problem gives specific directions, any algebraically equivalent expression is acceptable.
 For example, if the answer was <img src="answerimgs/f1.gif">, then <img src="answerimgs/f2.gif"> and <img src="answerimgs/f3.gif"> would also be acceptable.</p>
 
 <p class="ind">

@@ -1,5 +1,5 @@
 <?php
-$nologo = true;
+$nologo = true; $flexwidth = true;
 require("../../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 require("../../header.php");
@@ -14,7 +14,7 @@ require("../infoheader.php");
 <h2>For Students</h2>
 <ul class="nomark">
 <li>New to WAMAP?  <a href="/forms.php?action=newuser">Register as a new student</a>, then login. <br/>
-Once logged in, 
+Once logged in,
 enter the Course ID and enrollment key provided by your instructor to sign up for your course</li>
 <li><a href="/wamap/info/enteringanswers.php">Help with entering answers</a></li>
 </ul>

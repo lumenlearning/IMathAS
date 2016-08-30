@@ -1,5 +1,5 @@
 <?php
-$nologo = true;
+$nologo = true;  $flexwidth = true;
 require("../../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 require("../../header.php");
@@ -14,7 +14,7 @@ require("../infoheader.php");
 purposes.  Here's a few.
 
 <h4>Drill &amp; Practice</h4>
-<p>Create sets of drill and practice problems to reinforce mastery of math skills.  
+<p>Create sets of drill and practice problems to reinforce mastery of math skills.
 Because questions are algorithmically generated, students can practice virtually
 unlimited versions of the questions.  Students receive immediate feedback, allowing
 them to correct mistakes immediately.</p>
@@ -27,7 +27,7 @@ options, you can allow students multiple attempts per problem, or even allow stu
 to keep trying similar problems until they earn full credit.  Since each student
 receives a different version of each question, even if you go over a homework question
 in class, students still have to work through their version of the question to earn credit.
-Students can work together on homework without being able to just copy answers.  And you 
+Students can work together on homework without being able to just copy answers.  And you
 can easily make due date exceptions for individual students if needed.</p>
 
 <h4>Take-Home Tests</h4>
@@ -39,7 +39,7 @@ partial credit if desired.</p>
 
 <h4>In-Class Tests, Quizzes, Group Work</h4>
 <p>If you're lucky enough to teach in a computer classroom, you can use WAMAP to deliver
-tests or quizzes.  You can also create individual or group work assignments can be 
+tests or quizzes.  You can also create individual or group work assignments can be
 worked on during class</p>
 
 <h4>Encourage Communication</h4>
@@ -51,11 +51,11 @@ a point-and-click graphing tool.</p>
 a student a message about an assignment, quoting the specific question.</p>
 
 <h4>Track Student Progress</h4>
-<p>WAMAP's integrated gradebook will let you track your students' progress.  You can 
+<p>WAMAP's integrated gradebook will let you track your students' progress.  You can
 even enter your offline grades, so students can track their overall progress in your
 course.</p>
 
-<p>For online assignments, you can view how your class performed on each individual 
+<p>For online assignments, you can view how your class performed on each individual
 question, allowing you to identify areas of weakness.</p>
 
 <h4>Share Information With Your Students</h4>
@@ -63,8 +63,8 @@ question, allowing you to identify areas of weakness.</p>
 lectures, your syllabus, handouts, and other information in your course page.</p>
 
 <h2>About the Questions</h2>
-<p>Over 4000 questions are ready to use ranging from arithmetic through calculus, 
-or you can create your own questions.  WAMAP questions are algorithmically generated, 
+<p>Over 4000 questions are ready to use ranging from arithmetic through calculus,
+or you can create your own questions.  WAMAP questions are algorithmically generated,
 including support for algorithmically generated graphs and charts.  A variety of
 answer types can be computer graded, including:
 <ul>

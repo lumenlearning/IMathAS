@@ -11,12 +11,12 @@
  	ini_set('session.gc_maxlifetime',86400);
 	session_start();
 	$sessionid = session_id();
-		
+
 	if (!isset($_GET['id'])) {
 		$query = "SELECT id,name FROM imas_diags WHERE public=3 OR public=7";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//echo "<html><body><h1>Diagnostics</h1><ul>";
-		$nologo = true;
+		$nologo = true; $loadinginfoheader = true;
 		$infopath = isset($CFG['GEN']['directaccessincludepath'])?$CFG['GEN']['directaccessincludepath']:'';
 		$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/{$infopath}infopages.css\" type=\"text/css\">\n";
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
@@ -38,7 +38,7 @@
 		exit;
 	}
 	$diagid = $_GET['id'];
-	
+
 	$query = "SELECT * from imas_diags WHERE id='$diagid'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$line = mysql_fetch_array($result, MYSQL_ASSOC);
@@ -52,7 +52,7 @@
 		$diagqtr = $line['term'];
 	}
 	$sel1 = explode(',',$line['sel1list']);
-	
+
 	if (!($line['public']&1)) {
 		echo "<html><body>", _('This diagnostic is not currently available to be taken'), "</body></html>";
 		exit;
@@ -76,7 +76,7 @@
 			}
 		}
 	}
-	
+
 	$query = "SELECT sessiondata FROM imas_sessions WHERE sessionid='$sessionid'";
 	$result =  mysql_query($query) or die("Query failed : " . mysql_error());
 	//if (isset($sessiondata['mathdisp'])) {
@@ -96,7 +96,7 @@ if (isset($_POST['SID'])) {
 	$_POST['SID'] = trim(str_replace('-','',$_POST['SID']));
 	if (trim($_POST['SID'])=='' || trim($_POST['firstname'])=='' || trim($_POST['lastname'])=='') {
 		echo "<html><body>", _('Please enter your ID, first name, and lastname.'), "  <a href=\"index.php?id=$diagid\">", _('Try Again'), "</a>\n";
-			exit; 
+			exit;
 	}
 	$query = "SELECT entryformat,sel1list from imas_diags WHERE id='$diagid'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -140,10 +140,10 @@ if (isset($_POST['SID'])) {
 		echo " <a href=\"index.php?id=$diagid\">", _('Try Again'), "</a>\n";
 		exit;
 	}
-	
+
 	if ($_POST['course']==-1) {
 		echo "<html><body>", sprintf(_('Please select a %1$s and %2$s.'), $line['sel1name'], $line['sel2name']), "  <a href=\"index.php?id=$diagid\">", _('Try Again'), "</a>\n";
-			exit; 
+			exit;
 	}
 	$pws = explode(';',$line['pws']);
 	if (trim($pws[0])!='') {
@@ -201,7 +201,7 @@ if (isset($_POST['SID'])) {
 				$query = "SELECT password FROM imas_users WHERE SID='$diagSID'";
 				$result = mysql_query($query) or die("Query failed : " . mysql_error());
 				if (mysql_num_rows($result)>0 && strtoupper(mysql_result($result,0,0))==strtoupper($_POST['passwd'])) {
-					
+
 				} else {
 					echo "<html><body>", _('Error, password incorrect or expired.'), "  <a href=\"index.php?id=$diagid\">", _('Try Again'), "</a>\n";
 					exit;
@@ -211,7 +211,7 @@ if (isset($_POST['SID'])) {
 	}
 	$cnt = 0;
 	$now = time();
-	
+
 	$query = "SELECT id FROM imas_users WHERE SID='$diagSID'";
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	if (mysql_num_rows($result)>0) {
@@ -237,7 +237,7 @@ if (isset($_POST['SID'])) {
 			}
 		}
 		//if ($allowreentry) {
-			
+
 			$sessiondata['mathdisp'] = $_POST['mathdisp'];//1;
 			$sessiondata['graphdisp'] = $_POST['graphdisp'];//1;
 			//$sessiondata['mathdisp'] = 1;
@@ -270,16 +270,16 @@ if (isset($_POST['SID'])) {
 		//	exit;
 		//}
 	}
-	
+
 	$eclass = $sel1[$_POST['course']] . '@' . $_POST['teachers'];
-	
+
 	$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, lastaccess) ";
 	$query .= "VALUES ('$diagSID','{$_POST['passwd']}',10,'{$_POST['firstname']}','{$_POST['lastname']}','$eclass',$now);";
 	mysql_query($query) or die("Query failed : " . mysql_error());
 	$userid = mysql_insert_id();
 	$query = "INSERT INTO imas_students (userid,courseid,section) VALUES ('$userid','$pcid','{$_POST['teachers']}');";
 	mysql_query($query) or die("Query failed : " . mysql_error());
-	
+
 	$sessiondata['mathdisp'] = $_POST['mathdisp'];//1;
 	$sessiondata['graphdisp'] = $_POST['graphdisp'];//1;
 	$sessiondata['useed'] = 1;
@@ -294,7 +294,7 @@ if (isset($_POST['SID'])) {
 	$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$aids = explode(',',$line['aidlist']);
 	$paid = $aids[$_POST['course']];
-	
+
 	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/assessment/showtest.php?cid=$pcid&id=$paid");
 	exit;
 }
@@ -323,7 +323,7 @@ require((isset($CFG['GEN']['diagincludepath'])?$CFG['GEN']['diagincludepath']:'.
 var teach = new Array();
 
 <?php
-	
+
 	$sel2 = explode(';',$line['sel2list']);
 	foreach ($sel2 as $k=>$v) {
 		echo "teach[$k] = new Array('".implode("','",explode('~',$sel2[$k]))."');\n";
@@ -367,14 +367,14 @@ for ($i=0;$i<count($sel1);$i++) {
 		echo "<span class=form>", _('Access password:'), "</span>  <input class=form type=password size=40 name=passwd><BR class=form>";
 	}
 ?>
-<input type="hidden" id="tzoffset" name="tzoffset" value=""> 
-<input type="hidden" id="tzname" name="tzname" value=""> 
+<input type="hidden" id="tzoffset" name="tzoffset" value="">
+<input type="hidden" id="tzname" name="tzname" value="">
 <script>
-  var thedate = new Date();  
-  document.getElementById("tzoffset").value = thedate.getTimezoneOffset();  
-  var tz = jstz.determine(); 
+  var thedate = new Date();
+  document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
+  var tz = jstz.determine();
   document.getElementById("tzname").value = tz.name();
-</script>	
+</script>
 <div id="submit" class="submit" style="display:none"><input type=submit value='<?php echo _('Access Diagnostic'); ?>'></div>
 <input type=hidden name="mathdisp" id="mathdisp" value="2" />
 <input type=hidden name="graphdisp" id="graphdisp" value="2" />
@@ -400,7 +400,7 @@ function determinesetup() {
 	}
 	if (MathJaxCompatible) {
 		document.getElementById("mathdisp").value = "1";
-	} 
+	}
 	if (!ASnoSVG) {
 		document.getElementById("graphdisp").value = "1";
 	}

@@ -23,12 +23,12 @@ $CFG['GEN']['livepollpassword'] = 'testing';
 
 //force use of better hashed pw
 $CFG['GEN']['newpasswords'] = "only";
-  
+
 if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
- /*** WAMAP.org config ***/	
+ /*** WAMAP.org config ***/
 
   $AWSkey = getenv('AWS_ACCESS_KEY_ID');
-  $AWSsecret = getenv('AWS_SECRET_KEY');  
+  $AWSsecret = getenv('AWS_SECRET_KEY');
   $AWSbucket = 'wamapdata';  //SWITCH to 'wamapdata'
   $dbserver = getenv('PARAM2');
   $dbname = 'wamap';  //SWITCH to 'wamap'
@@ -38,12 +38,12 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 	$imasroot = getenv('imasroot');
   }
 
- 
+
   $CFG['GEN']['directaccessincludepath'] = 'wamap/';
   $CFG['GEN']['diagincludepath'] = '../wamap/';
   $loginpage = 'wamap/loginpage.php';
- 
- 	
+
+
   $installname = "WAMAP";
   $longloginprompt = "Enter a username.  Use only numbers, letters, or the _ character.";
   $loginprompt = "Username";
@@ -57,11 +57,11 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $allownongrouplibs = false;
   $allowcourseimport = false;
   $enablebasiclti = true;
-  $mathchaturl = "http://www.imathas.com/cur/mathchat/index.php";
-  
+  //$mathchaturl = "http://www.imathas.com/cur/mathchat/index.php";
+
   //user for course templates
   $templateuser = 890;
-  
+
   //special configs
   $CFG['GEN']['allowInstrImportStuByName'] = false;
   $CFG['CPS']['cploc'] = array(7,0);
@@ -69,7 +69,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
   $CFG['GEN']['allowteacherexport'] = 1;
   $CFG['GEN']['LTIorgid'] = 'www.wamap.org';
-  
+
   $CFG['CPS']['chatset'] = array(0,0);
   $CFG['CPS']['hideicons'] = array(0,0);
   $CFG['CPS']['picicons'] =  array(1,0);
@@ -77,36 +77,36 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['CPS']['showlatepass'] = array(1,0);
   $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,9",1),0);
   $CFG['CPS']['templateoncreate'] = true;
-  
+
    //and most of the gradebook settings
   $CFG['GBS']['defgbmode'] = 1011;
   $CFG['GBS']['orderby'] = 1;
- 
+
   $CFG['GEN']['skipbrowsercheck'] = true;
-  
+
   $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on wamap.org';
-  
+
   $CFG['GEN']['homelayout'] = '|0,1,2|10,11|0,1';
   $CFG['GEN']['noimathasimportfornonadmins'] = true;
-  
+
   $CFG['AMS']['defpoints'] = 1;
   $CFG['AMS']['showtips'] = 2;
   $CFG['AMS']['eqnhelper'] = 4;
-  
+
   $defaultcoursetheme = "wamap.css";
   $CFG['CPS']['theme'] = array("wamap.css",1);
   //$CFG['CPS']['themelist'] ="angelish.css,angelish_fw.css,angelishgreen.css,angelishpurple.css,default.css,facebookish.css,modern.css,halloween3_dark,";
   //$CFG['CPS']['themenames'] = "WAMAP Standard,WAMAP Standard Fixed Width,WAMAP Standard Green,WAMAP Standard Purple,OldSchool Retro,Social,Clean,Halloween,";
-  
+
   $CFG['GEN']['headerinclude'] = "headercontentwamap.php";
   $CFG['GEN']['hidedefindexmenu'] = true;
-  
+
   $CFG['GEN']['mathjaxonly'] = true;
   //$CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
-  
-/*** end WAMAP.org config ***/	
+
+/*** end WAMAP.org config ***/
 } else {
-	
+
 /*** MyOpenMath config ***/
 
   //database access settings
@@ -164,19 +164,19 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['GEN']['headerinclude'] = "headercontent.php";
  $CFG['GEN']['headerscriptinclude'] = "momga.js";
  $CFG['GEN']['noimathasimportfornonadmins'] = true;
-	 
+
  //can set almost any assessment setting this way
  $CFG['AMS']['defpoints'] = 1;
  $CFG['AMS']['showtips'] = 2;
  $CFG['AMS']['eqnhelper'] = 4;
 
  $CFG['AMS']['guesslib'] = true;
-	 
+
  //and most of the gradebook settings
  $CFG['GBS']['defgbmode'] = 1011;
  $CFG['GBS']['orderby'] = 1;
  $CFG['GBS']['lockheader'] = true;
- 
+
  //and course settings.  All but themelist are in the form
  //array(defvalue, allowchange)
  $CFG['CPS']['hideicons'] = array(0,0);
@@ -186,15 +186,15 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['CPS']['chatset'] = array(0,0);
  $CFG['CPS']['showlatepass'] = array(1,0);
  $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,9",1),0);
- 
+
  //$CFG['CPS']['leftnavtools'] = 'limited';
  $CFG['CPS']['templateoncreate'] = true;
- 
+
  $defaultcoursetheme = "otbs_fw.css";
  $CFG['CPS']['theme'] = array("otbs_fw.css",1);
  $CFG['CPS']['themelist'] ="otbs_fw.css,otbs.css,modern.css,angelish.css,facebookish.css,otbsreader.css,embed_fw.css,embedsans_fw.css";
  $CFG['CPS']['themenames'] = "MyOpenMath Fixed Width,MyOpenMath Fluid,Modern,Clean,Social,Reader,Reading Fixed Width,Reading Sans Fixed";
-	 
+
  $CFG['TE']['navicons'] = array(
 	 'untried'=>'te_blue_arrow.png',
 	 'canretrywrong'=>'te_red_redo.png',
@@ -204,7 +204,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 	 'wrong'=>'te_red_ex.png',
 	 'partial'=>'te_yellow_check.png');
 
- $CFG['CPS']['miniicons'] = array( 
+ $CFG['CPS']['miniicons'] = array(
  	 'assess'=>'assess_tiny.png',
  	 'drill'=>'assess_tiny.png',
  	 'inline'=>'inline_tiny.png',
@@ -213,12 +213,12 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  	 'wiki'=>'wiki_tiny.png',
  	 'folder'=>'folder_tiny.png',
  	 'calendar'=>'1day.png');
- 	 
+
  $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
  $CFG['GEN']['badgebase'] = 'badgebasemom.png';
 
  $CFG['GEN']['guesttempaccts'] = array(518);
- 
+
  $CFG['GEN']['hidedefindexmenu'] = true;
  $CFG['GEN']['forcecanvashttps'] = true;
  $CFG['GEN']['addwww'] = true;
@@ -226,11 +226,11 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['GEN']['enrollonnewinstructor'] = array(1,11);
  $smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
  $CFG['GEN']['logopad'] = '20px';
- 
+
  $CFG['GEN']['skipbrowsercheck'] = true;
- 
+
  $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
-  
+
  /*** end MyOpenMath config ***/
 }
 
@@ -258,7 +258,7 @@ if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
 	$m->setMessageFromString(null,$message);
 	$ses->sendEmail($m);
  }
- 
+
 
 //Uncomment to change the default course theme, also used on the home & admin page:
 //$defaultcoursetheme = "default.css"
@@ -273,11 +273,11 @@ if (isset($CFG['CPS']['theme'])) {
   }
   /* Connecting, selecting database */
   if (!isset($dbsetup)) {
-	 $link = mysql_connect($dbserver,$dbusername, $dbpassword) 
+	 $link = mysql_connect($dbserver,$dbusername, $dbpassword)
 	  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
-	 mysql_select_db($dbname) 
+	 mysql_select_db($dbname)
 	  or die("<p>Could not select database</p></div></body></html>");
-	  
+
 	  unset($dbserver);
 	  unset($dbusername);
 	  unset($dbpassword);
