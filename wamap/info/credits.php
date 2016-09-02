@@ -1,5 +1,6 @@
 <?php
-$nologo = true;
+$nologo = true; $flexwidth = true;
+require("../../config.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 require("../../header.php");
 $pagetitle ="Credits";
@@ -24,9 +25,9 @@ require("../infoheader.php");
 <p class="ind">Hosting provided by <a href="http://lumenlearning.com">Lumen Learning</a></p>
 
 <h4>Question Content</h4>
-<p class="ind">The core question library and templated courses were developed with grant support from the Washington State Distance Learning Council.  The content 
+<p class="ind">The core question library and templated courses were developed with grant support from the Washington State Distance Learning Council.  The content
 continues to grow with contributions from our users.  Thanks to all of you!</p>
-<p class="ind">Other questions were translated from the University of Rochester 
+<p class="ind">Other questions were translated from the University of Rochester
 
 <a href="http://webwork.math.rochester.edu">WebWork</a> question library</p>
 
@@ -39,7 +40,7 @@ continues to grow with contributions from our users.  Thanks to all of you!</p>
 <h4>IMathAS Software Credits</h4>
 <p class="ind">Lead Developer:  <a href="mailto:dlippman@imathas.com">David Lippman</a></p>
 <p class="ind">Contributing Developers:  David Moore</p>
-<p class="ind">Support: Software development has been partially supported by <a href="http://www.transitionmathproject.org">Transition Math Project</a> 
+<p class="ind">Support: Software development has been partially supported by <a href="http://www.transitionmathproject.org">Transition Math Project</a>
   and <a href="http://www.pierce.ctc.edu">Pierce College</a></p>
 <p class="ind">Special thanks to all the users who have contributed suggestions for improvement!</p>
 <p class="ind">IMathAS is licensed under the <a href="http://www.gnu.org/copyleft/gpl.html">GNU Public License</a></p>

@@ -319,6 +319,7 @@ function initPicture(x_min,x_max,y_min,y_max) {
       qnode.setAttribute("style","display:inline; "+picture.getAttribute("style"));
       qnode.setAttribute("width",picture.getAttribute("width"));
       qnode.setAttribute("height",picture.getAttribute("height"));
+      qnode.setAttribute("alt",picture.getAttribute("alt"));
       if (picture.parentNode!=null)
         picture.parentNode.replaceChild(qnode,picture);
       else
@@ -827,6 +828,9 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
   if (ytick!=null) {dy = ytick}
   if (dox==null) {dox = true;}
   if (doy==null) {doy = true;}
+  var fqonlyx = false; var fqonlyy = false;
+  if (dox=="fq") {fqonlyx = true;}
+  if (doy=="fq") {fqonlyy = true;}
   if (dox=="off" || dox==0) { dox = false;} else {dox = true;}
   if (doy=="off" || doy==0) { doy = false;} else {doy = true;}
  
@@ -846,7 +850,7 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
 
   dx = (dx==null?xunitlength:dx*xunitlength);
   dy = (dy==null?dx:dy*yunitlength);
-  fontsize = Math.floor(Math.min(dx/1.5,dy/1.5,16));//alert(fontsize)
+  fontsize = Math.floor(Math.min(Math.abs(dx)/1.5, Math.abs(dy)/1.5,16));//alert(fontsize)
   ticklength = fontsize/4;
   if (xgrid!=null) gdx = xgrid;
   if (ygrid!=null) gdy = ygrid;
@@ -869,16 +873,20 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
     st="";
     if (dox && gdx>0) {
 	    for (x = origin[0]; x<=winxmax; x = x+gdx)
-	      if (x>=winxmin) st += " M"+x+","+gridymin+" "+x+","+gridymax;
-	    for (x = origin[0]-gdx; x>=winxmin; x = x-gdx)
-	      if (x<=winxmax) st += " M"+x+","+gridymin+" "+x+","+gridymax;
+	      if (x>=winxmin) st += " M"+x+","+gridymin+" "+x+","+(fqonlyy?height-origin[1]:gridymax);
+	    if (!fqonlyx) {
+	    	    for (x = origin[0]-gdx; x>=winxmin; x = x-gdx)
+	    	    	    if (x<=winxmax) st += " M"+x+","+gridymin+" "+x+","+(fqonlyy?height-origin[1]:gridymax);
+	    }
     }
    
     if (doy && gdy>0) {
-	    for (y = height-origin[1]; y<=winymax; y = y+gdy)
-	      if (y>=winymin) st += " M"+gridxmin+","+y+" "+gridxmax+","+y;
+	    if (!fqonlyy) {
+	      for (y = height-origin[1]; y<=winymax; y = y+gdy)
+	        if (y>=winymin) st += " M"+(fqonlyx?origin[0]:gridxmin)+","+y+" "+gridxmax+","+y;
+	    }
 	    for (y = height-origin[1]-gdy; y>=winymin; y = y-gdy)
-	      if (y<=winymax) st += " M"+gridxmin+","+y+" "+gridxmax+","+y;
+	        if (y<=winymax) st += " M"+(fqonlyx?origin[0]:gridxmin)+","+y+" "+gridxmax+","+y;
     }
     pnode.setAttribute("d",st);
     pnode.setAttribute("stroke-width", .5);
@@ -888,26 +896,32 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
   } 
   pnode = myCreateElementSVG("path");
   if (dox) {
-	  st="M"+winxmin+","+(height-origin[1])+" "+winxmax+","+
+	  st="M"+(fqonlyx?origin[0]:winxmin)+","+(height-origin[1])+" "+winxmax+","+
     (height-origin[1]);
   }
   if (doy) {
-	  st += " M"+origin[0]+","+winymin+" "+origin[0]+","+winymax;
+	  st += " M"+origin[0]+","+winymin+" "+origin[0]+","+(fqonlyy?height-origin[1]:winymax);
   }
   
-  if (dox) {
+  if (dox && dx>0) {
 	  for (x = origin[0]; x<winxmax; x = x+dx)
 	    if (x>=winymin) st += " M"+x+","+(height-origin[1]+ticklength)+" "+x+","+
 		   (height-origin[1]-ticklength);
-	  for (x = origin[0]-dx; x>winxmin; x = x-dx)
-	   if (x<=winxmax) st += " M"+x+","+(height-origin[1]+ticklength)+" "+x+","+
-		   (height-origin[1]-ticklength);
+	  if (!fqonlyx) {
+	    for (x = origin[0]-dx; x>winxmin; x = x-dx)
+	      if (x<=winxmax) st += " M"+x+","+(height-origin[1]+ticklength)+" "+x+","+
+	  	  	(height-origin[1]-ticklength);
+	  }
   }
-  if (doy) {
-	  for (y = height-origin[1]; y<winymax; y = y+dy)
-	    if (y>=winymin) st += " M"+(origin[0]+ticklength)+","+y+" "+(origin[0]-ticklength)+","+y;
+  if (doy && dy>0) {
+	   if (!fqonlyy) {
+	     for (y = height-origin[1]; y<winymax; y = y+dy)
+	      if (y>=winymin) st += " M"+(origin[0]+ticklength)+","+y+" "+(origin[0]-ticklength)+","+y;
+	   }
+	 
 	  for (y = height-origin[1]-dy; y>winymin; y = y-dy)
-	    if (y<=winymax) st += " M"+(origin[0]+ticklength)+","+y+" "+(origin[0]-ticklength)+","+y;
+	      if (y<=winymax) st += " M"+(origin[0]+ticklength)+","+y+" "+(origin[0]-ticklength)+","+y;
+	  
   }
   if (labels!=null) with (Math) {
     ldx = dx/xunitlength;
@@ -920,17 +934,21 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
     var ddy = floor(1.1-log(ldy)/log(10))+1;
     if (ddy<0) { ddy = 0;}
     if (ddx<0) { ddx = 0;}
-    if (dox) {
+    if (dox && dx>0) {
 	    for (x = (doy?ldx:0); x<=xmax; x = x+ldx)
 	      if (x>=xmin) text([x,ly],chopZ(x.toFixed(ddx)),lxp);
-	    for (x = -ldx; xmin<=x; x = x-ldx)
-	      if (x<=xmax) text([x,ly],chopZ(x.toFixed(ddx)),lxp);
+	    if (!fqonlyx) {
+	      for (x = -ldx; xmin<=x; x = x-ldx)
+	        if (x<=xmax) text([x,ly],chopZ(x.toFixed(ddx)),lxp);
+	    }
     }
-    if (doy) {
+    if (doy && dy>0) {
 	    for (y = (dox?ldy:0); y<=ymax; y = y+ldy)
 	      if (y>=ymin) text([lx,y],chopZ(y.toFixed(ddy)),lyp);
-	    for (y = -ldy; ymin<=y; y = y-ldy)
-	      if (y<=ymax) text([lx,y],chopZ(y.toFixed(ddy)),lyp);
+      	    if (!fqonlyy) {
+	      for (y = -ldy; ymin<=y; y = y-ldy)
+	        if (y<=ymax) text([lx,y],chopZ(y.toFixed(ddy)),lyp);
+	    }
     }
   }
   pnode.setAttribute("d",st);
@@ -988,7 +1006,7 @@ function parseShortScript(sscript,gw,gh) {
 	picture.setAttribute("height", sa[10]);
 	picture.style.width = sa[9] + "px";
 	picture.style.height = sa[10] + "px";
-	
+
 	if (sa.length > 10) {
 		commands = 'setBorder(5);';
 		commands += 'width=' +sa[9] + '; height=' +sa[10] + ';';
@@ -996,31 +1014,45 @@ function parseShortScript(sscript,gw,gh) {
 		commands += 'axes(' + sa[4] +','+ sa[5] +','+ sa[6] +','+ sa[7] +','+ sa[8]+ ');';
 				
 		var inx = 11;
-		var eqnlist = 'Graphs: ';
+		var varlet = '';
+		var eqnlist = 'Graphs on the window x='+sa[0]+' to '+sa[1]+' and y='+sa[2]+' to '+sa[3]+': ';
 		
 		while (sa.length > inx+9) {
 		   commands += 'stroke="' + sa[inx+7] + '";';
+		   eqnlist += sa[inx+7] + " ";
 		   commands += 'strokewidth="' + sa[inx+8] + '";'
 		   //commands += 'strokedasharray="' + sa[inx+9] + '";'	
 		   if (sa[inx+9] != "") {
 			   commands += 'strokedasharray="' + sa[inx+9].replace(/\s+/g,',') + '";';
+			   if (sa[inx+9]=='2') {
+			   	   eqnlist += "dotted ";
+			   } else if (sa[inx+9]=='5') {
+			   	   eqnlist += "dashed ";
+			   } else if (sa[inx+9]=='5 2') {
+			   	   eqnlist += "tight dashed ";
+			   } else if (sa[inx+9]=='7 3 2 3') {
+			   	   eqnlist += "dash-dot ";
+			   } 
 		   }
 		   if (sa[inx]=="slope") {
-			   eqnlist += "dy/dx="+sa[inx+1] + "; ";
+			   eqnlist += "slopefield where dy/dx="+sa[inx+1] + ". ";
 			commands += 'slopefield("' + sa[inx+1] + '",' + sa[inx+2] + ',' + sa[inx+2] + ');'; 
 		   } else if (sa[inx]=="label") {
-			   eqnlist += "label="+sa[inx+1] + "; ";
+			   eqnlist += "label with text "+sa[inx+1] + ' at the point ('+sa[inx+5]+','+sa[inx+6]+'). ';
 			   commands += 'text(['+sa[inx+5]+','+sa[inx+6]+'],"'+sa[inx+1]+'");';
 		   } else {
 			if (sa[inx]=="func") {
-				eqnlist += "y="+sa[inx+1] + "; ";
+				eqnlist += "graph of y="+sa[inx+1];
 				eqn = '"' + sa[inx+1] + '"';
+				varlet = 'x';
 			} else if (sa[inx] == "polar") {
-				eqnlist += "r="+sa[inx+1] + "; ";
+				eqnlist += "polar graph of r="+sa[inx+1];
 				eqn = '["cos(t)*(' + sa[inx+1] + ')","sin(t)*(' + sa[inx+1] + ')"]';
+				varlet = 'r';
 			} else if (sa[inx] == "param") {
-				eqnlist += "[x,y]=["+sa[inx+1] + "," + sa[inx+2] + "]; ";
+				eqnlist += "parametric graph of x(t)="+sa[inx+1] + ", y(t)=" + sa[inx+2];
 				eqn = '["' + sa[inx+1] + '","'+ sa[inx+2] + '"]';
+				varlet = 't';
 			}
 			
 			
@@ -1028,13 +1060,31 @@ function parseShortScript(sscript,gw,gh) {
 		//	if ((sa[inx+5]!='null')&&(sa[inx+5].length>0)) {
 				//commands += 'myplot(' + eqn +',"' + sa[inx+3] +  '","' + sa[inx+4]+'",' + sa[inx+5] + ',' + sa[inx+6]  +');';
 				commands += 'plot(' + eqn +',' + sa[inx+5] + ',' + sa[inx+6] +',null,null,' + sa[inx+3] +  ',' + sa[inx+4] +');';
-			
+				eqnlist += " from " + varlet + '='+sa[inx+5]+ ' ';
+				if (sa[inx+3]==1) { 
+					eqnlist += 'with an arrow ';
+				} else if (sa[inx+3]==2) {
+					eqnlist += 'with an open dot ';
+				} else if (sa[inx+3]==3) {
+					eqnlist += 'with a closed dot ';
+				}
+				eqnlist += "to "+varlet+'='+sa[inx+6]+' ';
+				if (sa[inx+4]==1) { 
+					eqnlist += 'with an arrow ';
+				} else if (sa[inx+4]==2) {
+					eqnlist += 'with an open dot ';
+				} else if (sa[inx+4]==3) {
+					eqnlist += 'with a closed dot ';
+				}
 			} else {
 				commands += 'plot(' + eqn +',null,null,null,null,' + sa[inx+3] +  ',' + sa[inx+4]+');';
 			}
+			eqnlist += '. ';
 		   }
 		   inx += 10;
 		}
+	
+		picture.setAttribute("alt",eqnlist);
 		
 		try {
 			eval(commands);
@@ -1043,7 +1093,7 @@ function parseShortScript(sscript,gw,gh) {
 			//alert("Graph not ready");
 		}
 		
-		picture.setAttribute("alt",eqnlist);
+		
 		//picture.setAttribute("width", sa[9]);
 		//picture.setAttribute("height", sa[9]);
 		

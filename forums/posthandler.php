@@ -62,8 +62,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 		$_POST['subject'] = addslashes(htmlentities(stripslashes($_POST['subject'])));
 		
 		require_once("../includes/htmLawed.php");
-		$htmlawedconfig = array('elements'=>'*-script-form');
-		$_POST['message'] = addslashes(htmLawed(stripslashes($_POST['message']),$htmlawedconfig));
+		$_POST['message'] = addslashes(myhtmLawed(stripslashes($_POST['message'])));
 		$_POST['subject'] = trim(strip_tags($_POST['subject']));
 		if (trim($_POST['subject'])=='') {
 			$_POST['subject']= '(none)';
@@ -78,6 +77,12 @@ if (isset($_GET['modify'])) { //adding or modifying post
 						$groupid = 0;
 					}
 				} 
+			}
+			if (isset($studentid)) {
+				if (time()>$postby) {
+					echo 'Post rejected - it is after the New Threads due date.';
+					exit;
+				}
 			}
 			$query = "INSERT INTO imas_forum_posts (forumid,subject,message,userid,postdate,parent,posttype,isanon,replyby,tag) VALUES ";
 			$query .= "('$forumid','{$_POST['subject']}','{$_POST['message']}','$userid',$now,0,'$type','$isanon',$replyby,'$tag')";
@@ -288,6 +293,12 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				echo '<div id="headerposthandler" class="pagetitle"><h2>Post Reply</h2></div>';
 			} else if ($_GET['modify']=='new') {
 				echo "Add Thread</div>\n";
+				if (isset($studentid)) {
+					if (time()>$postby) {
+						echo 'It is after the New Threads due date.';
+						exit;
+					}
+				}
 				$line['subject'] = "";
 				$line['message'] = "";
 				$line['posttype'] = 0;

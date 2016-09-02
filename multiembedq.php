@@ -21,6 +21,7 @@
 
 require("./config.php");
 require("i18n/i18n.php");
+require("includes/JWT.php");
 header('P3P: CP="ALL CUR ADM OUR"');
 $sessiondata = array();
 $sessiondata['graphdisp'] = 1;
@@ -29,41 +30,56 @@ $showtips = 2;
 $useeqnhelper = 4;
 $useeditor = 1;
 
+if (isset($CFG['GEN']['JWTsecret'])) {
+	$JWTsecret = $CFG['GEN']['JWTsecret'];
+} else if (getenv('AWS_SECRET_KEY')) {
+	$JWTsecret = getenv('AWS_SECRET_KEY');
+} else {
+	$JWTsecret = "testing";
+}
+
 if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
  	 $urlmode = 'https://';
 } else {
  	 $urlmode = 'http://';
 }
 
-session_start();
  
 function saveAssessData() {
-	global $qids, $seeds, $rawscores, $attempts, $lastanswers, $sameseed, $theme, $targetid;
-	$_SESSION['qids'] = $qids;
-	$_SESSION['seeds'] = $seeds;
-	$_SESSION['rawscores'] = $rawscores;
-	$_SESSION['attempts'] = $attempts;
-	$_SESSION['lastanswers'] = $lastanswers;
-	$_SESSION['sameseed'] = $sameseed;
-	$_SESSION['theme'] = $theme;
-	$_SESSION['targetid'] = $targetid;
-	
+	global $qids, $seeds, $rawscores, $attempts, $lastanswers, $sameseed, $theme, $targetid, $JWTsecret;
+	$JWTsess['qids'] = $qids;
+	$JWTsess['seeds'] = $seeds;
+	$JWTsess['rawscores'] = $rawscores;
+	$JWTsess['attempts'] = $attempts;
+	$JWTsess['lastanswers'] = $lastanswers;
+	$JWTsess['sameseed'] = $sameseed;
+	$JWTsess['theme'] = $theme;
+	$JWTsess['targetid'] = $targetid;
+	return JWT::encode($JWTsess, $JWTsecret);
 }
 
-if (isset($_SESSION['qids']) && (!isset($_GET['id']) || $_GET['id']==implode('-',$_SESSION['qids'])) && !isset($_GET['regen'])) {
-	$qids = $_SESSION['qids'];
-	$seeds = $_SESSION['seeds'];
-	$rawscores = $_SESSION['rawscores'];
-	$attempts = $_SESSION['attempts'];
-	$lastanswers = $_SESSION['lastanswers'];
-	$sameseed = $_SESSION['sameseed'];
-	$theme = $_SESSION['theme'];
-	$targetid = $_SESSION['targetid'];
+$JWTsess = array();
+if (isset($_REQUEST['asidverify'])) {
+	try {
+		$JWTsess = JWT::decode($_REQUEST['asidverify'], $JWTsecret);
+	} catch (Exception $e) {
+		echo "Invalid session or something";
+		exit;
+	}
+}
+
+if (isset($JWTsess->qids) && (!isset($_GET['id']) || $_GET['id']==implode('-',$JWTsess->qids)) && !isset($_GET['regen'])) {
+	$qids = $JWTsess->qids;
+	$seeds = $JWTsess->seeds;
+	$rawscores = $JWTsess->rawscores;
+	$attempts = $JWTsess->attempts;
+	$lastanswers = $JWTsess->lastanswers;
+	$sameseed = $JWTsess->sameseed;
+	$theme = $JWTsess->theme;
+	$targetid = $JWTsess->targetid;
 } else {
 	$qids = explode("-",$_GET['id']);
-	foreach ($qids as $i=>$v) {
-		$qids[$i] = intval($v);
-	}
+	
 	if (isset($_GET['sameseed']) && $_GET['sameseed']==1) {
 		$seeds = array_fill(0,count($qids), rand(5000,9999));
 		$sameseed = 1;
@@ -82,10 +98,17 @@ if (isset($_SESSION['qids']) && (!isset($_GET['id']) || $_GET['id']==implode('-'
 	}
 	if (isset($_GET['iframe_resize_id'])) {
 		$targetid = preg_replace('/[^\w:.-]/','',$_GET['iframe_resize_id']);
+	} else if (isset($_GET['frame_id'])) {
+		$targetid = preg_replace('/[^\w:.-]/','',$_GET['frame_id']);
 	}
-	saveAssessData();
+	$jwtstring = saveAssessData();
 }
-	
+foreach ($qids as $i=>$v) {
+	$qids[$i] = intval($v);
+}
+foreach ($seeds as $i=>$v) {
+	$seeds[$i] = intval($v);
+}
 require("./assessment/displayq2.php");                 
 
 if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
@@ -101,7 +124,7 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 	
 	list($unitrawscore,$rawscores[$qn]) = scoreq($qn,$qids[$qn],$seeds[$qn],$_POST["qn$qn"],$attempts[$qn],1);
 	$attempts[$qn]++;
-	saveAssessData();
+	$jwtstring = saveAssessData();
 	
 	if (strpos($rawscores[$qn],'~')!==false) {
 		$colors = explode('~',$rawscores[$qn]);
@@ -115,28 +138,16 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$qn.',\'submitnotice'.$qn.'\')" /><span id="submitnotice'.$qn.'"></span></div>';
 	echo '<input type="hidden" id="verattempts'.$qn.'" value="'.$attempts[$qn].'"/>';
 	echo $quesout;
+	
+	//"save" session
+	echo '<script type="text/javscript">$("#asidverify").val("'.$jwtstring.'");</script>';
 	exit;
 }
 	
 
-$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/assessment/mathquill.css?v=102113\" type=\"text/css\" />";
-if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')!==false) {
-	$placeinhead .= '<!--[if lte IE 7]><style style="text/css">
-		.mathquill-editable.empty { width: 0.5em; }
-		.mathquill-rendered-math .numerator.empty, .mathquill-rendered-math .empty { padding: 0 0.25em;}
-		.mathquill-rendered-math sup { line-height: .8em; }
-		.mathquill-rendered-math .numerator {float: left; padding: 0;}
-		.mathquill-rendered-math .denominator { clear: both;width: auto;float: left;}
-		</style><![endif]-->';
-}
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquill_min.js?v=102113\"></script>";
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquilled.js?v=070214\"></script>";
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/AMtoMQ.js?v=102113\"></script>";
-$placeinhead .= '<style type="text/css"> html,body {margin:0px;} div.question input.btn { margin-left: 10px; } </style>';
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqntips.js?v=032810\"></script>";
                         
 $flexwidth = true; //tells header to use non _fw stylesheet
-$placeinhead .= '<style type="text/css">div.question {width: auto;} div.review {width: auto; margin-top: 5px;} body {height:auto;}</style>';
+$placeinhead = '<style type="text/css">html,body {margin:0px;} div.question {width: auto;} div.review {width: auto; margin-top: 5px;} body {height:auto;}</style>';
 
 if ($theme != '') {
 	$sessiondata['coursetheme'] = $theme.'.css';
@@ -145,7 +156,7 @@ require("./assessment/header.php");
 
 echo '<script type="text/javascript">var assesspostbackurl="' .$urlmode. $_SERVER['HTTP_HOST'] . $imasroot . '/multiembedq.php?embedpostback=true&action=scoreembed";</script>';
 			
-echo '<input type="hidden" id="asidverify" value="0"/>';
+echo '<input type="hidden" id="asidverify" value="'.$jwtstring.'"/>';
 echo '<input type="hidden" id="disptime" value="'.time().'"/>';
 echo '<input type="hidden" id="isreview" value="0"/>';
 echo '<p><a href="multiembedq.php?id='.$_GET['id'].'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.'">Try Another Version of ';
@@ -170,11 +181,19 @@ foreach ($qids as $i=>$qid) {
 if ($targetid != '') {
 echo '<script type="text/javascript">
 	function sendresizemsg() {
+	 if(self != top){
+	  var default_height = Math.max(
+              document.body.scrollHeight, document.body.offsetHeight,
+              document.documentElement.clientHeight, document.documentElement.scrollHeight,
+              document.documentElement.offsetHeight);
 	  window.parent.postMessage( JSON.stringify({
 	      subject: "lti.frameResize",
 	      height: default_height,
-	      iframe_resize_id: "'.$targetid.'"
+	      iframe_resize_id: "'.$targetid.'",
+	      element_id: "'.$targetid.'",
+	      frame_id: "'.$targetid.'"
 	  }), "*");
+	 }
 	}
 	if (MathJax) {
 		MathJax.Hub.Queue(function () {
@@ -185,6 +204,9 @@ echo '<script type="text/javascript">
 			sendresizemsg();
 		});
 	}
+	$(function() {
+		$(window).on("ImathasEmbedReload", sendresizemsg);
+	});
 </script>';
 }
 

@@ -5,6 +5,7 @@
 body {
 	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
 	font-size: 15px;
+	line-height: 1.4em;
 	background-color:#F5F2ED;
 	background-image:url(../img/simplebg.png);
 	background-position:center top;
@@ -281,6 +282,13 @@ span.link {
 div.ddmenu {
 	background: #F2F2F2;
 	border:1px solid #C3CAC2;
+	padding: 5px;
+	position: absolute;
+	right:auto;
+	text-align:left;
+	visibility:hidden;
+	margin: 0px;
+	z-index: 100;
 }
 div.ddmenu li {
 	padding-bottom: 2px;
@@ -329,6 +337,10 @@ div.inset {
 	margin-right: 0px;
 }
 
+div.prequestion {
+	background-color: #E8F1F6;
+	border: 1px solid #CAD7DF;
+}
 div.review { /*info bar*/
 	margin-top: -6px;
 	background-color: #E8F1F6;

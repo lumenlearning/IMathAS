@@ -39,6 +39,7 @@ var AsciisvgDialog = {
 		} else {
 			el = top.tinymce.activeEditor.selection.getNode();
 			ed.dom.setAttrib(el,"sscr",this.sscr);
+			ed.dom.setAttrib(el,"data-sscr",this.sscr);
 			ed.dom.setAttrib(el,"src",this.AScgiloc + '?sscr='+encodeURIComponent(this.sscr));
 			ed.dom.setAttrib(el,"width",this.width);
 			ed.dom.setAttrib(el,"height",this.height);
@@ -93,7 +94,6 @@ var AsciisvgDialog = {
 			newopt.value = type + ',' + eq1 + ',' + eq2 + ',' + m_gstart + ',' + m_gend + ',,' + ',' + m_color + ',' + m_strokewidth + ',' + m_strokedash;
 		 }
 		
-	 
 		graphs.options[graphs.options.length] = newopt;
 		graphs.selectedIndex = graphs.options.length - 1;
 		this.graphit();
@@ -137,6 +137,14 @@ var AsciisvgDialog = {
 	
 		m_xscl = document.getElementById("xscl").value;
 		m_yscl = document.getElementById("yscl").value;
+		if (m_xscl<0) {
+			m_xscl = -1*m_xscl;
+			document.getElementById("xscl").value = m_xscl;
+		}
+		if (m_yscl<0) {
+			m_yscl = -1*m_yscl;
+			document.getElementById("yscl").value = m_yscl;
+		}
 		if (m_xscl == "") m_xscl = null
 		if (m_yscl == "") m_yscl = null
 		if (document.getElementById("labels").checked) {

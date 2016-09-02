@@ -39,7 +39,17 @@ if (isset($_POST['checked'])) { //form submitted
 			$postby = parsedatetime($_POST['postbydate'],$_POST['postbytime']);
 		}
 		$sets[] = "postby='$postby'";
-	}	
+	}
+	if (isset($_POST['chgallowlate'])) {
+		$allowlate = 0;
+		if ($_POST['allowlate']>0) {
+			$allowlate = $_POST['allowlate'] + 10*$_POST['allowlateon'];
+			if (isset($_POST['latepassafterdue'])) {
+				$allowlate += 100;
+			}
+		}
+		$sets[] = "allowlate=$allowlate";
+	}
 	if (isset($_POST['chgcaltag'])) {
 		$sets[] = "caltag='".$_POST['caltagpost'].'--'.$_POST['caltagreply']."'";
 	}
@@ -126,7 +136,7 @@ if (isset($_POST['checked'])) { //form submitted
 			$taglist = trim($_POST['taglist']);
 		} else {
 			$taglist = '';
-		}	
+		}
 		$sets[] = "taglist='$taglist'";
 	}
 	if (count($sets)>0 & count($checked)>0) {
@@ -135,7 +145,7 @@ if (isset($_POST['checked'])) { //form submitted
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 	}
 	if (isset($_POST['chgsubscribe'])) {
-		
+
 		if (isset($_POST['subscribe'])) {
 			//add any subscriptions we don't already have
 			$query = "SELECT forumid FROM imas_forum_subscriptions WHERE forumid IN ($checkedlist) AND userid='$userid'";
@@ -158,13 +168,13 @@ if (isset($_POST['checked'])) { //form submitted
 			//remove any existing subscriptions
 			$query = "DELETE FROM imas_forum_subscriptions WHERE forumid IN ($checkedlist) AND userid='$userid'";
 			mysql_query($query) or die("Query failed : " . mysql_error());
-			
+
 		}
-			
+
 	}
 	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/course.php?cid=$cid");
 	exit;
-} 
+}
 
 //prep for output
 $forumitems = array();
@@ -200,19 +210,38 @@ $hr = floor($coursedeftime/60)%12;
 $min = $coursedeftime%60;
 $am = ($coursedeftime<12*60)?'am':'pm';
 $deftime = (($hr==0)?12:$hr).':'.(($min<10)?'0':'').$min.' '.$am;
-	
+
 
 $replybydate = tzdate("m/d/Y",time()+7*24*60*60);
 $replybytime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 $postbydate = tzdate("m/d/Y",time()+7*24*60*60);
 $postbytime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 
+$page_allowlateSelect = array();
+$page_allowlateSelect['val'][0] = 0;
+$page_allowlateSelect['label'][0] = "None";
+$page_allowlateSelect['val'][1] = 1;
+$page_allowlateSelect['label'][1] = "Unlimited";
+for ($k=1;$k<9;$k++) {
+	$page_allowlateSelect['val'][] = $k+1;
+	$page_allowlateSelect['label'][] = "Up to $k";
+}
+$page_allowlateonSelect = array();
+$page_allowlateonSelect['val'][0] = 0;
+$page_allowlateonSelect['label'][0] = "Posts and Replies (1 LatePass for both)";
+//doesn't work yet
+//$page_allowlateonSelect['val'][1] = 1;
+//$page_allowlateonSelect['label'][1] = "Posts or Replies (1 LatePass each)";
+$page_allowlateonSelect['val'][1] = 2;
+$page_allowlateonSelect['label'][1] = "Posts only";
+$page_allowlateonSelect['val'][2] = 3;
+$page_allowlateonSelect['label'][2] = "Replies only";
 
 //HTML output
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 $placeinhead .= '<style type="text/css">
 table td {
-	border-bottom: 1px solid #ccf;	
+	border-bottom: 1px solid #ccf;
 }
 </style>
 <script type="text/javascript">
@@ -232,7 +261,7 @@ function valform() {
 $(function() {
 	$(".chgbox").change(function() {
 			$(this).parents("tr").toggleClass("odd");
-	});	
+	});
 })
 </script>';
 
@@ -249,17 +278,17 @@ if (count($forumitems)==0) {
 	echo '<p>No forums to change.</p>';
 	require("../footer.php");
 	exit;
-} 
+}
 
 ?>
 Check: <a href="#" onclick="return chkAllNone('mainform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('mainform','checked[]',false)">None</a>
-		
+
 <ul class=nomark>
 
 <?php
 
 foreach($forumitems as $id=>$name) {
-	echo '<li><input type="checkbox" name="checked[]" value="'.$id.'" /> '.$name.'</li>';		
+	echo '<li><input type="checkbox" name="checked[]" value="'.$id.'" /> '.$name.'</li>';
 }
 ?>
 </ul>
@@ -284,10 +313,10 @@ foreach($forumitems as $id=>$name) {
 <tr class="coptr">
 	<td><input type="checkbox" name="chgpostby" class="chgbox" /></td>
 	<td class="r">Students can create new threads:</td>
-	<td>  
+	<td>
 	<input type=radio name="postby" value="Always" checked="checked"/>Always<br/>
 	<input type=radio name="postby" value="Never" />Never<br/>
-	<input type=radio name="postby" value="Date" />Before: 
+	<input type=radio name="postby" value="Date" />Before:
 	<input type=text size=10 name="postbydate" value="<?php echo $postbydate;?>">
 	<a href="#" onClick="displayDatePicker('postbydate', this); return false">
 	<img src="../img/cal.gif" alt="Calendar"/></A>
@@ -299,26 +328,39 @@ foreach($forumitems as $id=>$name) {
 <tr class="coptr">
 	<td><input type="checkbox" name="chgreplyby" class="chgbox" /></td>
 	<td class="r">Students can reply to posts:</td>
-	<td>  
+	<td>
 	<input type=radio name="replyby" value="Always" checked="checked"/>Always<br/>
 	<input type=radio name="replyby" value="Never" />Never<br/>
-	<input type=radio name="replyby" value="Date" />Before: 
+	<input type=radio name="replyby" value="Date" />Before:
 	<input type=text size=10 name="replybydate" value="<?php echo $replybydate;?>">
 	<a href="#" onClick="displayDatePicker('replybydate', this); return false">
 	<img src="../img/cal.gif" alt="Calendar"/></A>
 	at <input type=text size=10 name=replybytime value="<?php echo $replybytime;?>">
-	
+
 	</td>
+</tr>
+<tr class="coptr">
+	<td><input type="checkbox" name="chgallowlate" class="chgbox" /></td>
+	<td class="r">Allow use of LatePasses?:</td>
+	<td>
+		<?php
+		writeHtmlSelect("allowlate",$page_allowlateSelect['val'],$page_allowlateSelect['label'],0);
+		echo ' on ';
+		writeHtmlSelect("allowlateon",$page_allowlateonSelect['val'],$page_allowlateonSelect['label'],0);
+		?>
+		<br/><label><input type="checkbox" name="latepassafterdue"> Allow LatePasses after due date, within 1 LatePass period</label>
+	</td>
+
 </tr>
 <tr class="coptr">
 	<td><input type="checkbox" name="chgcaltag" class="chgbox" /></td>
 	<td class="r">Calendar icon:</td>
-	<td> 
-	New Threads: <input name="caltagpost" type=text size=1 value="FP"/>, 
-	Replies: <input name="caltagreply" type=text size=1 value="FR"/>
+	<td>
+	New Threads: <input name="caltagpost" type=text size=8 value="FP"/>,
+	Replies: <input name="caltagreply" type=text size=8 value="FR"/>
 	</td>
 </tr>
-		
+
 
 <tr class="coptr">
 	<td><input type="checkbox" name="chgallowanon" class="chgbox"/></td>
@@ -380,7 +422,7 @@ foreach($forumitems as $id=>$name) {
 	<td class="r">Sort threads by: </td>
 	<td>
 	<input type="radio" name="sortby" value="0" checked="checked"/> Thread start date<br/>
-	<input type="radio" name="sortby" value="1" /> Most recent reply date	
+	<input type="radio" name="sortby" value="1" /> Most recent reply date
 	</td>
 </tr>
 
@@ -398,7 +440,7 @@ foreach($forumitems as $id=>$name) {
 	<td><input type="checkbox" name="chggbcat" class="chgbox"/></td>
 	<td class="r">Gradebook category: </td>
 	<td>
-<?php 
+<?php
 writeHtmlSelect ("gbcat",$page_gbcatSelect['val'],$page_gbcatSelect['label'],null,"Default",0," id=gbcat");
 ?>
 	</td>
@@ -415,14 +457,14 @@ writeHtmlSelect ("gbcat",$page_gbcatSelect['val'],$page_gbcatSelect['label'],nul
 	<td><input type="checkbox" name="chgtaglist" class="chgbox"/></td>
 	<td class="r">Categorize posts?: </td>
 	<td>
-		<input type=checkbox name="usetags" value="1" <?php if ($line['taglist']!='') { echo "checked=1";}?> 
+		<input type=checkbox name="usetags" value="1" <?php if ($line['taglist']!='') { echo "checked=1";}?>
 		  onclick="document.getElementById('tagholder').style.display=this.checked?'':'none';" />
 		 <span id="tagholder" style="display:<?php echo ($line['taglist']=='')?"none":"inline"; ?>">
 		   Enter in format CategoryDescription:category,category,category<br/>
 		   <textarea rows="2" cols="60" name="taglist"><?php echo $line['taglist'];?></textarea>
 		 </span>
 	</td>
-</tr>	
+</tr>
 
 </tbody>
 </table>
@@ -432,7 +474,3 @@ writeHtmlSelect ("gbcat",$page_gbcatSelect['val'],$page_gbcatSelect['label'],nul
 <?php
 require("../footer.php");
 ?>
-	
-	
-	
-

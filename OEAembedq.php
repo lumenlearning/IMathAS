@@ -17,34 +17,27 @@ require("./assessment/displayq2.php");
 
 $sessiondata = array();
 $sessiondata['graphdisp'] = 1;
-$sessiondata['mathdisp'] = 3;
+$sessiondata['mathdisp'] = 6;
+$sessiondata['secsalt'] = "12345";
+$cid = "embedq";
 $showtips = 2;
 $useeqnhelper = 4;
-$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/assessment/mathquill.css?v=102113\" type=\"text/css\" />";
-if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')!==false) {
-	$placeinhead .= '<!--[if lte IE 7]><style style="text/css">
-		.mathquill-editable.empty { width: 0.5em; }
-		.mathquill-rendered-math .numerator.empty, .mathquill-rendered-math .empty { padding: 0 0.25em;}
-		.mathquill-rendered-math sup { line-height: .8em; }
-		.mathquill-rendered-math .numerator {float: left; padding: 0;}
-		.mathquill-rendered-math .denominator { clear: both;width: auto;float: left;}
-		</style><![endif]-->';
-}
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquill_min.js?v=102113\"></script>";
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/mathquilled.js?v=070214\"></script>";
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/AMtoMQ.js?v=102113\"></script>";
-$placeinhead .= '<style type="text/css"> html,body {margin:0px;} div.question input.btn { margin-left: 10px; } </style>';
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/eqntips.js?v=032810\"></script>";
+
+$placeinhead = '<style type="text/css"> html,body {margin:0px;} </style>';
 
 $issigned = false;
 if (isset($_GET['jwt'])) {
 	try {
-		$QS = JWT::decode($_GET['jwt']);
+		//decode JWT.  Stupid hack to convert it into an assocc array
+		$QS = json_decode(json_encode(JWT::decode($_GET['jwt'])), true);
 	} catch (Exception $e) {
 	         echo "JWT Error: ".$e->getMessage();
 	         exit;
 	}
-	$issigned = true;
+
+	if (isset($QS['auth'])) {
+		$issigned = true;
+	}
 } else {
 	$QS = $_GET;
 }
@@ -61,9 +54,20 @@ if (empty($QS['id'])) {
 
 $qsetid=intval($QS['id']);
 
-$sessiondata['coursetheme'] = $coursetheme;
-
 $page_formAction = "OEAembedq.php?id=$qsetid";
+
+if (isset($_GET['frame_id'])) {
+	$frameid = preg_replace('/[^\w:.-]/','',$_GET['frame_id']);
+	$page_formAction .= '&frame_id='.$frameid;
+} else {
+	$frameid = "OEAembedq-$qsetid";
+}
+if (isset($_REQUEST['theme'])) {
+	$theme = preg_replace('/\W/','',$_REQUEST['theme']);
+	$page_formAction .= '&theme='.$theme;
+	$sessiondata['coursetheme'] = $theme.'.css';
+}
+
 
 $showans = false;
 
@@ -77,17 +81,17 @@ require("./assessment/header.php");
 
 if (isset($QS['showscored'])) {
 	//DE is requesting that the question be redisplayed with right/wrong markers
-	
+
 	$lastanswers = array();
 	list($seed, $rawscores, $lastanswers[0]) = explode(';', $QS['showscored'], 3);
 	$rawscores = explode('~',$rawscores);
 	$seed = intval($seed);
-	
+
 	$showans = (($issigned || $seed>4999)  && (!isset($QS['showans']) || $QS['showans']=='true'));
-	
-	
+
+
 	displayq(0, $qsetid, $seed, $showans?2:0, true, 0,false,false,false,$rawscores);
-		
+
 } else if (isset($_POST['seed'])) {
 	//time to score the question
 	$seed = intval($_POST['seed']);
@@ -97,8 +101,7 @@ if (isset($QS['showscored'])) {
 		$result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
 		$row = mysql_fetch_row($result);
 		$key = $row[0];
-		$params["auth"] = stripslashes($_POST['auth']);
-		$jwtcheck = JWT::decode($_POST['jwtchk'], $key);
+		$jwtcheck = json_decode(json_encode(JWT::decode($_POST['jwtchk'], $key)), true);
 		if ($jwtcheck['id'] != $qsetid || $jwtcheck['seed'] != $seed) {
 			echo "ID/Seed did not check";
 			exit;
@@ -107,6 +110,7 @@ if (isset($QS['showscored'])) {
 			exit;
 		}
 		$scoredonsubmit = $jwtcheck['scoredonsubmit'];
+    $showans = $jwtcheck['showans'];
 	} else {
 		$key = '';
 		if ($seed<5000) {
@@ -114,8 +118,9 @@ if (isset($QS['showscored'])) {
 			exit;
 		}
 		$scoredonsubmit = isset($_POST['showscoredonsubmit']);
+    $showans = $_POST['showans'];
 	}
-	
+
 	$lastanswers = array();
 
 	list($score,$rawscores) = scoreq(0,$qsetid,$seed,$_POST['qn0'],1);
@@ -132,7 +137,7 @@ if (isset($QS['showscored'])) {
 		$after = implode('~',$after);
 	}
 	if (strpos($rawscores,'~')===false) {
-		$rawafter = round($scores,1);
+		$rawafter = round($rawscores,1);
 		if ($rawafter < 0) { $rawafter = 0;}
 	} else {
 		$fparts = explode('~',$rawscores);
@@ -144,51 +149,70 @@ if (isset($QS['showscored'])) {
 		$rawafter = implode('~',$rawafter);
 	}
 	$lastanswers[0] = stripslashes($lastanswers[0]);
-	
+
 	$pts = getpts($after);
-	
+
 	$params = array('id'=>$qsetid, 'score'=>$pts, 'redisplay'=>"$seed;$rawafter;{$lastanswers[0]}");
-		
+	if (isset($_POST['auth'])) {
+		$params["auth"] = stripslashes($_POST['auth']);
+	}
+
 	$signed = JWT::encode($params, $key);
-	
+
 	echo '<script type="text/javascript">
 	$(function() {
-		window.parent.postMessage("updatescore='.$signed.'","*");
+		window.parent.postMessage(JSON.stringify({subject: "lti.ext.mom.updateScore", id: '.$qsetid.', score: '.$pts.', redisplay: "'.str_replace('"','\\"',$params["redisplay"]).'", jwt: "'.$signed.'", frame_id: "' . $frameid . '"}), "*");
 	});
 	</script>';
 	if ($scoredonsubmit) {
 		$rawscores = explode('~',$rawafter);
-		
-		$showans = (($issigned || $seed>4999)  && (!isset($QS['showans']) || $QS['showans']=='true'));
-		
+
+		// set above
+    // $showans = (($issigned || $seed>4999)  && (!isset($QS['showans']) || $QS['showans']=='true'));
+
 		displayq(0, $qsetid, $seed, $showans?2:0, true, 0,false,false,false,$rawscores);
 	} else {
 		echo '<p>Saving score... <img src="img/updating.gif"/></p>';
 	}
-	
+
 } else {
 	$lastanswers = array();
-	if (isset($QS['redisplay'])) {
+	if (isset($QS['redisplay']) && trim($QS['redisplay'])!='') {
 		//DE is requesting that the question be redisplayed
 		list($seed, $rawscores, $lastanswers[0]) = explode(';', $QS['redisplay'],3);
 		$rawscores = array();
 	} else {
 		if (isset($QS['auth'])) { //is signed
-			$seed = rand(1,4999);
+			if (isset($QS['seed']) && intval($QS['seed'])<5000) {
+				$seed = intval($QS['seed']);
+			} else {
+				$seed = rand(1,4999);
+			}
 		} else {
-			$seed = rand(5000,9999);
+			if (isset($QS['seed']) && intval($QS['seed'])>4999) {
+				$seed = intval($QS['seed']);
+			} else {
+				$seed = rand(5000,9999);
+			}
 		}
 	}
 	$doshowans = 0;
 	echo "<form id=\"qform\" method=\"post\" enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"doonsubmit()\">\n";
 	echo "<input type=\"hidden\" name=\"seed\" value=\"$seed\" />";
 	$scoredonsubmit = false;
-	if (isset($QS['showscoredonsubmit'])) {
+	if (isset($QS['showscoredonsubmit']) && ($QS['showscoredonsubmit']=='1' || $QS['showscoredonsubmit']=='true')) {
 		echo '<input type="hidden" name="showscoredonsubmit" value="1"/>';
 		$scoredonsubmit = true;
 	}
+  if (($issigned || $seed>4999)  && (!isset($QS['showans']) || $QS['showans']=='true')) {
+    echo '<input type="hidden" name="showans" value="1"/>';
+		$showansonsubmit = true;
+  } else {
+    echo '<input type="hidden" name="showans" value="0"/>';
+		$showansonsubmit = false;
+  }
 	if (isset($QS['auth'])) {
-		$verarr = array("id"=>$qsetid, "seed"=>$seed, 'scoredonsubmit'=>$scoredonsubmit);
+		$verarr = array("id"=>$qsetid, "seed"=>$seed, 'scoredonsubmit'=>$scoredonsubmit, 'showans'=>$showansonsubmit);
 		$query = "SELECT password FROM imas_users WHERE SID='".addslashes(stripslashes($QS['auth']))."'";
 		$result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
 		$row = mysql_fetch_row($result);
@@ -197,11 +221,11 @@ if (isset($QS['showscored'])) {
 		echo '<input type="hidden" name="auth" value="'.$QS['auth'].'"/>';
 	}
 	if (isset($QS['showhints']) && $QS['showhints']==0) {
-		$showhints = false;	
+		$showhints = false;
 	} else {
 		$showhints = true;
 	}
-		
+
 	displayq(0, $qsetid, $seed, $doshowans, $showhints, 0);
 	if ($jssubmit) {
 		echo '<input type="submit" id="submitbutton" style="display:none;"/>';
@@ -218,19 +242,32 @@ if (isset($QS['showscored'])) {
 		echo "<input type=submit name=\"check\" value=\"" . _('Submit') . "\">\n";
 	}
 	echo "</form>\n";
-	
+
 }
 
 echo '<script type="text/javascript">
-	if (MathJax) {
+	function sendresizemsg() {
+	 if(self != top){
+	  var default_height = Math.max(
+              document.body.scrollHeight, document.body.offsetHeight,
+              document.documentElement.clientHeight, document.documentElement.scrollHeight,
+              document.documentElement.offsetHeight);
+	  window.parent.postMessage( JSON.stringify({
+	      subject: "lti.frameResize",
+	      height: default_height,
+	      frame_id: "'.$frameid.'"
+	  }), "*");
+	 }
+	}
+	if (mathRenderer == "Katex") {
+		window.katexDoneCallback = sendresizemsg;
+	} else if (MathJax) {
 		MathJax.Hub.Queue(function () {
-			var height = document.body.scrollHeight;
-			window.parent.postMessage("action=resize&id='.$qsetid.'&height="+height,"*");
+			sendresizemsg();
 		});
 	} else {
 		$(function() {
-			var height = document.body.scrollHeight;
-			window.parent.postMessage("action=resize&id='.$qsetid.'&height="+height,"*");
+			sendresizemsg();
 		});
 	}
 	</script>';
@@ -245,8 +282,8 @@ function getansweights($code,$seed) {
 		if (is_array($weights)) {
 			return $weights;
 		}
-		
-	} 
+
+	}
 	if (!$foundweights) {
 		preg_match('/anstypes\s*=(.*)/',$code,$match);
 		$n = substr_count($match[1],',')+1;
@@ -273,6 +310,7 @@ function sandboxgetweights($code,$seed) {
 }
 
 function printscore($sc,$qsetid,$seed) {
+	global $imasroot;
 	$poss = 1;
 	if (strpos($sc,'~')===false) {
 		$sc = str_replace('-1','N/A',$sc);
@@ -290,8 +328,8 @@ function printscore($sc,$qsetid,$seed) {
 		//adjust for rounding
 		$diff = $poss - array_sum($ptposs);
 		$ptposs[count($ptposs)-1] += $diff;
-		
-		
+
+
 		$pts = getpts($sc);
 		$sc = str_replace('-1','N/A',$sc);
 		//$sc = str_replace('~',', ',$sc);
@@ -299,7 +337,7 @@ function printscore($sc,$qsetid,$seed) {
 		foreach ($scarr as $k=>$v) {
 			if ($ptposs[$k]==0) {
 				$pm = 'gchk';
-			} else if (!is_numeric($v) || $v==0) { 
+			} else if (!is_numeric($v) || $v==0) {
 				$pm = 'redx';
 			} else if (abs($v-$ptposs[$k])<.011) {
 				$pm = 'gchk';
@@ -310,9 +348,9 @@ function printscore($sc,$qsetid,$seed) {
 			$scarr[$k] = "$bar $v/{$ptposs[$k]}";
 		}
 		$sc = implode(', ',$scarr);
-		//$ptposs = implode(', ',$ptposs); 
+		//$ptposs = implode(', ',$ptposs);
 		$out = sprintf(_('%1$s out of %2$s (parts: %3$s)'), $pts, $poss, $sc);
-	}	
+	}
 	$bar = '<span class="scorebarholder">';
 	if ($poss==0) {
 		$w = 30;
@@ -320,16 +358,16 @@ function printscore($sc,$qsetid,$seed) {
 		$w = round(30*$pts/$poss);
 	}
 	if ($w==0) {$w=1;}
-	if ($w < 15) { 
+	if ($w < 15) {
 	     $color = "#f".dechex(floor(16*($w)/15))."0";
 	} else if ($w==15) {
 	     $color = '#ff0';
-	} else { 
+	} else {
 	     $color = "#". dechex(floor(16*(2-$w/15))) . "f0";
 	}
-	
+
 	$bar .= '<span class="scorebarinner" style="background-color:'.$color.';width:'.$w.'px;">&nbsp;</span></span> ';
-	return $bar . $out;	
+	return $bar . $out;
 }
 
 function getpts($sc) {
@@ -343,7 +381,7 @@ function getpts($sc) {
 		$sc = explode('~',$sc);
 		$tot = 0;
 		foreach ($sc as $s) {
-			if ($s>0) { 
+			if ($s>0) {
 				$tot+=$s;
 			}
 		}

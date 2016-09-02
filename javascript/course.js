@@ -221,6 +221,12 @@ function showcalcontentsid(elid) {
 					html += caleventsarr[elid].data[i].name;
 				}
 				html += ' New Threads Due '+caleventsarr[elid].data[i].time;
+				if (caleventsarr[elid].data[i].allowlate==1) {
+					html += ' <a href="redeemlatepassforum.php?cid='+cid+'&fid='+caleventsarr[elid].data[i].id+'">Use LatePass</a>';
+				}
+				if (caleventsarr[elid].data[i].undolate==1) {
+					html += ' <a href="redeemlatepassforum.php?cid='+cid+'&fid='+caleventsarr[elid].data[i].id+'&undo=true">Un-use LatePass</a>';
+				}
 				if (caleventsarr[elid].data[i].editlink!=null) {
 					html += ' <a href="addforum.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">Modify</a>';
 				}
@@ -234,6 +240,12 @@ function showcalcontentsid(elid) {
 					html += caleventsarr[elid].data[i].name;
 				}
 				html += ' Replies Due '+caleventsarr[elid].data[i].time;
+				if (caleventsarr[elid].data[i].allowlate==1) {
+					html += ' <a href="redeemlatepassforum.php?cid='+cid+'&fid='+caleventsarr[elid].data[i].id+'">Use LatePass</a>';
+				}
+				if (caleventsarr[elid].data[i].undolate==1) {
+					html += ' <a href="redeemlatepassforum.php?cid='+cid+'&fid='+caleventsarr[elid].data[i].id+'&undo=true">Un-use LatePass</a>';
+				}
 				if (caleventsarr[elid].data[i].editlink!=null) {
 					html += ' <a href="addforum.php?cid='+cid+'&id='+caleventsarr[elid].data[i].id+'">Modify</a>';
 				}
@@ -410,3 +422,21 @@ function onYouTubeIframeAPIReady() {
 	YouTubeApiLoaded = true;
 }
 */
+$(function() {$("#leftcontenttoggle").on("click", function(e) {
+	var el = $("#leftcontenttoggle");
+	$("#leftcontent").toggleClass("hiddenmobile").css("top",el.position().top+el.outerHeight(true)-10);
+	el.toggleClass("leftcontentactive");
+	if (!$("#leftcontent").hasClass("hiddenmobile")) {
+		$(document).on("click.lefttoggle", function(e) {
+			var container = $("#leftcontent");
+			var togglebtn = $("#leftcontenttoggle");
+			if (!container.is(e.target) && container.has(e.target).length===0
+				 && !togglebtn.is(e.target) && togglebtn.has(e.target).length===0) {
+				$("#leftcontenttoggle").trigger("click");
+			}
+		});
+	} else {
+		$(document).off("click.lefttoggle");
+	}
+	e.preventDefault();});
+});

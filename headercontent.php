@@ -2,7 +2,7 @@
 if ($coursetheme=='otbsreader.css') {
 	$nologo = true;
 }
-if (!isset($flexwidth) && ($coursetheme=='otbs_fw.css' || $coursetheme=='otbs.css')) {
+if (!isset($flexwidth) && ($coursetheme=='otbs_fw.css' || $coursetheme=='otbs.css' || $coursetheme=='embed_fw.css' || $coursetheme=='embedsans_fw.css')) {
 	$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 ?>
 <div id="headercontent">

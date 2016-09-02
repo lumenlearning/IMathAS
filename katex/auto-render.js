@@ -1,9 +1,9 @@
-(function() {
-		
+function setupKatexAutoRender() {
+
 var findEndOfMath = function(delimiter, text, startIndex) {
     // Adapted from
     // https://github.com/Khan/perseus/blob/master/src/perseus-markdown.jsx
-    
+
     var index = startIndex;
     var braceLevel = 0;
 
@@ -137,7 +137,8 @@ var renderMathInText = function(text, delimiters) {
             	    math = "\\displaystyle "+math;
             }
             try {
-                katex.render(math, span, {
+            	//bit of a hack since katex can't handle the alignment pieces of matrices
+                katex.render(math.replace(/matrix}{[clr]+}/,'matrix}'), span, {
                     displayMode: data[i].display
                 });
                 if (data[i].format == "asciimath") {
@@ -156,6 +157,7 @@ var renderMathInText = function(text, delimiters) {
                 	span.innerHTML = "\\("+data[i].data+"\\)";
                 }
                 MathJax.Hub.Queue(["Typeset",MathJax.Hub,span]);
+                usedMathJax = true;
             }
             fragment.appendChild(span);
         }
@@ -210,6 +212,7 @@ var extend = function(obj) {
     return obj;
 };
 
+var usedMathJax;
 var renderMathInElement = function(elem, options) {
     if (!elem) {
         throw new Error("No element provided to render");
@@ -217,13 +220,21 @@ var renderMathInElement = function(elem, options) {
 
     options = extend({}, defaultOptions, options);
 
+    usedMathJax = false;
     renderElem(elem, options.delimiters, options.ignoredTags);
+    if (window.hasOwnProperty("katexDoneCallback")) {
+    	    if (usedMathJax) {
+    	    	    MathJax.Hub.Queue(window.katexDoneCallback);
+    	    } else {
+    	    	    window.katexDoneCallback();
+    	    }
+    }
 };
 
 window.renderMathInElement = renderMathInElement;
-
-})();
-
+window.rendermathnode = function (node) {renderMathInElement(node);}
 $(function() {
-	renderMathInElement(document.body);	
+	renderMathInElement(document.body);
 });
+
+};

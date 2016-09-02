@@ -1,8 +1,8 @@
-<?php 
+<?php
 if ($coursetheme=='otbsreader.css') {
 	$nologo = true;
 }
-if (!isset($flexwidth) && ($coursetheme=='wamap_fw.css' || $coursetheme=='wamap.css')) {
+if (!isset($flexwidth) && ($coursetheme=='wamap_fw.css' || $coursetheme=='wamap.css') && !isset($loadinginfoheader)) {
 	$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 ?>
 <div id="headercontent">
@@ -25,7 +25,7 @@ if (isset($userid) && $selfhasuserimg==1) {
 }
 ?>
 <div id="headerrightlinks">
-<?php 
+<?php
 if (isset($userid)) {
 	if ($myrights > 5) {
 		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\"/></a><br/>";
@@ -33,17 +33,15 @@ if (isset($userid)) {
 		echo '&nbsp;<br/><span id="myname">'.$userfullname.'</span><br/>';
 	}
 }
-
+echo '</div>';
+echo '<div id="headerbarlogo"><a href="'.$imasroot.'/index.php"><img src="'.$imasroot.'/wamap/img/wamaplogo.png" /></a>';
 ?>
-</div>
-<div id="headerbarlogo"><a href="<?php echo $imasroot;?>/index.php"><img src="<?php echo $imasroot;?>/wamap/img/wamaplogo.png" /></a>
-
 <span style="padding-left: 50px;">
 <?php
 if (isset($userid)) {
 	echo "<a href=\"$imasroot/index.php\">Home</a> | ";
 	echo '<a href="#" onclick="jQuery(\'#homemenu\').css(\'left\',jQuery(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> | ';
-	
+
 	if (isset($teacherid)) {
 		echo "<a href=\"$imasroot/help.php?section=coursemanagement\">Help</a> ";
 	} else {
