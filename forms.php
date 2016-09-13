@@ -19,7 +19,7 @@ if (isset($_GET['greybox'])) {
 } else {
 	$gb = '';
 }
-require("header.php");	
+require("header.php");
 
 switch($_GET['action']) {
 	case "newuser":
@@ -41,7 +41,7 @@ switch($_GET['action']) {
 		} else if (isset($CFG['GEN']['TOSpage'])) {
 			echo "<span class=form><label for=\"agree\">I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></label></span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
 		}
-		
+
 		if (!$emailconfirmation) {
 			$doselfenroll = false;
 			//DB $query = "SELECT id,name FROM imas_courses WHERE (istemplate&4)=4 AND available<4 ORDER BY name";
@@ -128,7 +128,7 @@ switch($_GET['action']) {
 		echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><span class=formright><input type=checkbox id=msgnot name=msgnot ";
 		if ($line['msgnotify']==1) {echo "checked=1";}
 		echo " /></span><BR class=form>\n";
-		
+
 		echo "<span class=form><label for=\"stupic\">Picture:</label></span>";
 		echo "<span class=\"formright\">";
 		if ($line['hasuserimg']==1) {
@@ -151,7 +151,7 @@ switch($_GET['action']) {
 			echo '>'.$i.'</option>';
 		}
 		echo '</select></span><br class="form" />';
-		
+
 		$pagelayout = explode('|',$line['homelayout']);
 		foreach($pagelayout as $k=>$v) {
 			if ($v=='') {
@@ -165,17 +165,17 @@ switch($_GET['action']) {
 			$hpsets .= '<input type="checkbox" name="homelayout10" ';
 			if (in_array(10,$pagelayout[2])) {$hpsets .= 'checked="checked"';}
 			$hpsets .=  ' /> New messages widget<br/>';
-			
+
 			$hpsets .= '<input type="checkbox" name="homelayout11" ';
 			if (in_array(11,$pagelayout[2])) {$hpsets .= 'checked="checked"';}
 			$hpsets .= ' /> New forum posts widget<br/>';
 		}
 		if (!isset($CFG['GEN']['fixedhomelayout']) || !in_array(3,$CFG['GEN']['fixedhomelayout'])) {
-			
+
 			$hpsets .= '<input type="checkbox" name="homelayout3-0" ';
 			if (in_array(0,$pagelayout[3])) {$hpsets .= 'checked="checked"';}
 			$hpsets .= ' /> New messages notes on course list<br/>';
-			
+
 			$hpsets .= '<input type="checkbox" name="homelayout3-1" ';
 			if (in_array(1,$pagelayout[3])) {$hpsets .= 'checked="checked"';}
 			$hpsets .= ' /> New posts notes on course list<br/>';
@@ -184,21 +184,21 @@ switch($_GET['action']) {
 			echo '<span class="form">Show on home page:</span><span class="formright">';
 			echo $hpsets;
 			echo '</span><br class="form" />';
-			
+
 		}
 		echo '<span class="form">'._('Overwrite default course theme on all pages:').'</span><span class="formright">';
 		echo '<select name="theme">';
 		echo '<option value="" '.($line['theme']==''?'selected':'').'>'._('Use course default theme').'</option>';
 		if (isset($CFG['GEN']['stuthemes'])) {
 			foreach ($CFG['GEN']['stuthemes'] as $k=>$v) {
-				echo '<option value="'.$k.'" '.($line['theme']==$k?'selected':'').'>'._($v).'</option>';					
-			} 
+				echo '<option value="'.$k.'" '.($line['theme']==$k?'selected':'').'>'._($v).'</option>';
+			}
 		} else {
 			echo '<option value="highcontrast.css" '.($line['theme']=='highcontrast.css'?'selected':'').'>'._('High contrast, dark on light').'</option>';
 			echo '<option value="highcontrast_dark.css" '.($line['theme']=='highcontrast_dark.css'?'selected':'').'>'._('High contrast, light on dark').'</option>';
 		}
 		echo '</select><br class="form" />';
-		
+
 		if (isset($CFG['GEN']['translatewidgetID'])) {
 			echo '<span class="form">Attempt to translate pages into another language:</span>';
 			echo '<span class="formright">';
@@ -210,7 +210,7 @@ switch($_GET['action']) {
 			unset($CFG['GEN']['translatewidgetID']);
 		}
 		echo '</fieldset>';
-		
+
 		if ($myrights>19) {
 			echo '<fieldset id="userinfoinstructor"><legend>Instructor Options</legend>';
 			echo "<span class=form><label for=\"qrd\">Make new questions private by default?<br/>(recommended for new users):</label></span><span class=formright><input type=checkbox id=qrd name=qrd ";
@@ -226,7 +226,7 @@ switch($_GET['action']) {
 				$stm->execute(array(':id'=>$line['deflib']));
 				$lname = $stm->fetchColumn(0);
 			}
-			
+
 			echo "<script type=\"text/javascript\">";
 			echo "var curlibs = '{$line['deflib']}';";
 			echo "function libselect() {";
@@ -242,7 +242,7 @@ switch($_GET['action']) {
 			echo "</script>";
 			echo "<span class=form>Default question library:</span><span class=formright> <span id=\"libnames\">$lname</span><input type=hidden name=\"libs\" id=\"libs\"  value=\"{$line['deflib']}\">\n";
 			echo " <input type=button value=\"Select Library\" onClick=\"libselect()\"></span><br class=form> ";
-			
+
 			echo "<span class=form>Use default question library for all templated questions?</span>";
 			echo "<span class=formright><input type=checkbox name=\"usedeflib\"";
 			if ($line['usedeflib']==1) {echo "checked=1";}
@@ -252,7 +252,7 @@ switch($_GET['action']) {
 			echo "edit a question (that's not yours) in an assessment.  You can elect to have all templated questions ";
 			echo "be assigned to this library.</p>";
 			echo '</fieldset>';
-			
+
 		}
 		if ($tzname!='') {
 			echo '<fieldset><legend>Timezone</legend>';
@@ -265,11 +265,11 @@ switch($_GET['action']) {
 			}
 			echo '</select></p>';
 			echo '</fieldset>';
-			
-			
+
+
 		}
 		echo "<div class=submit><input type=submit value='Update Info'></div>\n";
-		
+
 		//echo '<p><a href="forms.php?action=googlegadget">Get Google Gadget</a> to monitor your messages and forum posts</p>';
 		echo "</form>\n";
 		break;
@@ -319,7 +319,7 @@ switch($_GET['action']) {
 			echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; Unenroll</div>\n";
 		}
 		echo '<div id="headerforms" class="pagetitle"><h2>Unenroll</h2></div>';
-		
+
 		echo "Are you SURE you want to unenroll from this course?  All assessment attempts will be deleted.\n";
 		echo "<p><input type=button onclick=\"window.location='actions.php?action=unenroll&cid={$_GET['cid']}'\" value=\"Really Unenroll\">\n";
 		echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='./course/course.php?cid={$_GET['cid']}'\"></p>\n";
@@ -340,7 +340,7 @@ switch($_GET['action']) {
 			echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; Username Lookup</div>\n";
 		}
 		echo '<div id="headerforms" class="pagetitle"><h2>Lookup Username</h2></div>';
-		echo "<form method=post action=\"actions.php?action=lookupusername$gb\">\n"; 
+		echo "<form method=post action=\"actions.php?action=lookupusername$gb\">\n";
 		echo "If you can't remember your username, enter your email address below.  An email will be sent to your email address with your username. ";
 		echo "<p>Email: <input type=text name=\"email\"/></p>";
 		echo "<p><input type=submit value=\"Submit\" /></p></form>";
@@ -371,7 +371,7 @@ switch($_GET['action']) {
 				$allcourses[] = $row[0];
 				echo '<br/><input type="checkbox" name="checked[]" class="teaching" value="'.$row[0].'" ';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> '.$row[1]; 	
+				echo '/> '.$row[1];
 			}
 			echo '</p>';
 		}
@@ -387,7 +387,7 @@ switch($_GET['action']) {
 				$allcourses[] = $row[0];
 				echo '<br/><input type="checkbox" name="checked[]" class="tutoring" value="'.$row[0].'" ';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> '.$row[1]; 	
+				echo '/> '.$row[1];
 			}
 			echo '</p>';
 		}
@@ -403,7 +403,7 @@ switch($_GET['action']) {
 				$allcourses[] = $row[0];
 				echo '<br/><input type="checkbox" name="checked[]" class="taking" value="'.$row[0].'" ';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> '.$row[1]; 	
+				echo '/> '.$row[1];
 			}
 			echo '</p>';
 		}
