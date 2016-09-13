@@ -270,17 +270,18 @@ $questions = array(
 			),
 		'def'=>'CC'
 		)
-	
+
 	);
 
 
 if (isset($_GET['filterby'])) {
-	$_SESSION['pfilter-'.$_GET['filterby']] = stripslashes($_GET['filterval']);
+	//DB $_SESSION['pfilter-'.$_GET['filterby']] = stripslashes($_GET['filterval']);
+	$_SESSION['pfilter-'.$_GET['filterby']] = $_GET['filterval'];
 }
 
 if (isset($_GET['modify'])) {
 	if (isset($_POST['title'])) {
-		//submitting	
+		//submitting
 		$tosave = array();
 		foreach ($questions as $key=>$arr) {
 			if ($arr['type']=='input' || $arr['type']=='textarea' || $arr['type']=='radio' || $arr['type']=='select') {
@@ -303,23 +304,32 @@ if (isset($_GET['modify'])) {
 			$tosave['postedon'] = time();
 			$tosave['lastmod'] = time();
 			$keys = implode(',',array_keys($tosave));
-			$vals = "'".implode("','",array_values($tosave))."'";
-			$query = "INSERT INTO projects ($keys) VALUES ($vals)";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$_GET['modify'] = mysql_insert_id();
+			//DB $vals = "'".implode("','",array_values($tosave))."'";
+			$phs = ':'.implode(',:', array_keys($tosave));
+			//DB $query = "INSERT INTO projects ($keys) VALUES ($vals)";
+			$stm = $DBH->prepare("INSERT INTO projects ($keys) VALUES ($phs)");
+			$stm->execute($tosave);
+			$_GET['modify'] = $DBH->lastInsertId();
 			$files = array();
 		} else {
 			$sets = array();
+			$qarr = array();
 			foreach ($tosave as $k=>$v) {
-				$sets[] = "$k='$v'";
+				$sets[] = "$k=:$k";
+				$qarr[":$k"] = $v;
 			}
 			$sets[] = 'lastmod='.time();
 			$sets = implode(',',$sets);
-			$query = "UPDATE projects SET $sets WHERE id='{$_GET['modify']}'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$query = "SELECT files FROM projects WHERE id='{$_GET['modify']}'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$files = mysql_result($result,0,0);
+			//DB $query = "UPDATE projects SET $sets WHERE id='{$_GET['modify']}'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			$stm = $DBH->prepare("UPDATE projects SET $sets WHERE id=:id");
+			$stm->execute($qarr + array(':id'=>$_GET['modify']));
+			//DB $query = "SELECT files FROM projects WHERE id='{$_GET['modify']}'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $files = mysql_result($result,0,0);
+			$stm = $DBH->prepare("SELECT files FROM projects WHERE id=:id");
+			$stm->execute(array(':id'=>$_GET['modify']));
+			$files = $stm->fetchColumn(0);
 			if ($files=='') {
 				$files = array();
 			} else {
@@ -328,7 +338,8 @@ if (isset($_GET['modify'])) {
 		}
 		if (isset($_POST['filedesc'])) {
 			foreach ($_POST['filedesc'] as $i=>$v) {
-				$files[2*$i] = stripslashes(str_replace('@@','@',$v));
+				//DB $files[2*$i] = stripslashes(str_replace('@@','@',$v));
+				$files[2*$i] = str_replace('@@','@',$v);
 			}
 			for ($i=count($files)/2-1;$i>=0;$i--) {
 				if (isset($_POST['filedel'][$i])) {
@@ -342,13 +353,14 @@ if (isset($_GET['modify'])) {
 		while (isset($_POST['newfiledesc-'.$i])) {
 			if (isset($_POST['newweblink-'.$i]) && substr($_POST['newweblink-'.$i],0,4)=='http') {
 				if (!isset($_FILES['newfile-'.$i]) || !is_uploaded_file($_FILES['newfile-'.$i]['tmp_name'])) {
-					$files[] = stripslashes($_POST['newfiledesc-'.$i]);
+					//DB $files[] = stripslashes($_POST['newfiledesc-'.$i]);
+					$files[] = $_POST['newfiledesc-'.$i];
 					$files[] = '#'.$_POST['newweblink-'.$i];
 				}
 			}
 			$i++;
 		}
-			
+
 		if (isset($_FILES['newfile-0'])) {
 			$i = 0;
 			$badextensions = array(".php",".php3",".php4",".php5",".bat",".com",".pl",".p");
@@ -361,32 +373,45 @@ if (isset($_GET['modify'])) {
 					$_POST['newfiledesc-'.$i] = str_replace('@@','@',$_POST['newfiledesc-'.$i]);
 					$extension = strtolower(strrchr($userfilename,"."));
 					if (!in_array($extension,$badextensions) && storeuploadedfile('newfile-'.$i,'projects/'.$_GET['modify'].'/'.$userfilename,"public")) {
-						$files[] = stripslashes($_POST['newfiledesc-'.$i]);
+						//DB $files[] = stripslashes($_POST['newfiledesc-'.$i]);
+						$files[] = $_POST['newfiledesc-'.$i];
 						$files[] = $userfilename;
 					}
-					
+
 				}
 				$i++;
 			}
 		}
-		$files = addslashes(implode('@@',$files));
-		$query = "UPDATE projects SET files='$files' WHERE id='{$_GET['modify']}'";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+		//DB $files = addslashes(implode('@@',$files));
+		$files = implode('@@',$files);
+		//DB $query = "UPDATE projects SET files='$files' WHERE id='{$_GET['modify']}'";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$stm = $DBH->prepare("UPDATE projects SET files=:files WHERE id=:id");
+		$stm->execute(array(':files'=>$files, ':id'=>$_GET['modify']));
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
-		exit;		
+		exit;
 	} else {
 		//adding / modifying a task form
 		if ($_GET['modify'] != 'new') {
-			$query = "SELECT * from projects WHERE id='{$_GET['modify']}'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$line = mysql_fetch_array($result, MYSQL_ASSOC);
+			//DB $query = "SELECT * from projects WHERE id='{$_GET['modify']}'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
+			$stm = $DBH->prepare("SELECT * from projects WHERE id=:id");
+			$stm->execute(array(':id'=>$_GET['modify']));
+			$line = $stm->fetch(PDO::FETCH_ASSOC);
 		} else {
-			$query = "SELECT name FROM imas_groups WHERE id='$groupid'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$college = mysql_result($result,0,0);
-			$query = "SELECT email FROM imas_users WHERE id='$userid'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$email = mysql_result($result,0,0);
+			//DB $query = "SELECT name FROM imas_groups WHERE id='$groupid'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $college = mysql_result($result,0,0);
+			$stm = $DBH->prepare("SELECT name FROM imas_groups WHERE id=:id");
+			$stm->execute(array(':id'=>$groupid));
+			$college = $stm->fetchColumn(0);
+			//DB $query = "SELECT email FROM imas_users WHERE id='$userid'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $email = mysql_result($result,0,0);
+			$stm = $DBH->prepare("SELECT email FROM imas_users WHERE id=:id");
+			$stm->execute(array(':id'=>$userid));
+			$email = $stm->fetchColumn(0);
 			$line = array('dev'=>$userfullname,'college'=>$college,'contact'=>$email);
 		}
 		$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
@@ -416,7 +441,7 @@ if (isset($_GET['modify'])) {
 					}
 					echo '<br/>';
 				}
-				
+
 			} else if ($arr['type']=='select') {
 				echo '<select name="'.$key.'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
@@ -424,7 +449,7 @@ if (isset($_GET['modify'])) {
 				foreach ($arr['arr'] as $k=>$v) {
 					echo '<option value="'.$k.'" ';
 					if ($k==$line[$key] || ((!isset($line[$key]) || $line[$key]=='') && $k==$arr['def'])) {echo 'selected="selected"';}
-					
+
 					echo '/> '.$v.'</option>';
 				}
 				echo '</select>';
@@ -443,7 +468,7 @@ if (isset($_GET['modify'])) {
 					}
 					echo '<br/>';
 				}
-				
+
 			} else if ($arr['type']=='selecttwowother') {
 				if ($line[$key]!='') {
 					if (strpos($line[$key],';')===false) {
@@ -473,9 +498,9 @@ if (isset($_GET['modify'])) {
 				echo '<br/>';
 			}
 			echo '</p>';
-			
+
 		}
-	
+
 		echo "<p>Files: <i>When possible, please include editable (Word, TeX, etc.) versions of the files.</i><br/>";
 		if ($line['files']!='') {
 			$files = explode('@@',$line['files']);
@@ -497,10 +522,13 @@ if (isset($_GET['modify'])) {
 		exit;
 	}
 } else if (isset($_GET['remove'])) {
-	$query = "SELECT ownerid,files FROM projects WHERE id='{$_GET['remove']}'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	if (mysql_result($result,0,0)==$userid || $myrights==100 || $userid==745) {
-		$files = mysql_result($result,0,1);
+	//DB $query = "SELECT ownerid,files FROM projects WHERE id='{$_GET['remove']}'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare("SELECT ownerid,files FROM projects WHERE id=:id");
+	$stm->execute(array(':id'=>$_GET['remove']));
+	list($ownerid,$files) = $stm->fetch(PDO::FETCH_NUM);
+	if ($ownerid==$userid || $myrights==100 || $userid==745) {
+		//DB $files = mysql_result($result,0,1);
 		if ($files != '') {
 			$files = explode('@@',$files);
 			for ($i=0;$i<count($files)/2;$i++) {
@@ -509,32 +537,44 @@ if (isset($_GET['modify'])) {
 				}
 			}
 		}
-		$query = "DELETE FROM projects WHERE id='{$_GET['remove']}'";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+		//DB $query = "DELETE FROM projects WHERE id='{$_GET['remove']}'";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$stm = $DBH->prepare("DELETE FROM projects WHERE id=:id");
+		$stm->execute(array(':id'=>$_GET['remove']));
 	}
 	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
-	exit;	
+	exit;
 } else if (isset($_GET['saverating']) && isset($_POST['rating'])) {
 	$_POST['comments'] = preg_replace("/\n\n\n+/","\n\n",$_POST['comments']);
 	$_POST['comments'] = strip_tags($_POST['comments']);
 	$_POST['comments'] = str_replace("\n","<br/>",$_POST['comments']);
-	$query = "SELECT id FROM tasks_ratings WHERE taskid='{$_POST['taskid']}' AND userid='$userid'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $query = "SELECT id FROM tasks_ratings WHERE taskid='{$_POST['taskid']}' AND userid='$userid'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare("SELECT id FROM tasks_ratings WHERE taskid=:taskid AND userid=:userid");
+	$stm->execute(array(':taskid'=>$_POST['taskid'], ':userid'=>$userid));
 	$now = time();
-	if (mysql_num_rows($result)>0) { //updating
-		$id = mysql_result($result,0,0);
-		$query = "UPDATE tasks_ratings SET rating='{$_POST['rating']}',comment='{$_POST['comments']}',rateon=$now WHERE id=$id";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB if (mysql_num_rows($result)>0) {
+		//DB $id = mysql_result($result,0,0);
+	if ($stm->rowCount()>0) {
+		$id = $stm->fetchColumn(0);
+		//DB $query = "UPDATE tasks_ratings SET rating='{$_POST['rating']}',comment='{$_POST['comments']}',rateon=$now WHERE id=$id";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$stm = $DBH->prepare("UPDATE tasks_ratings SET rating=:rating,comment=:comment,rateon=:rateon WHERE id=:id");
+		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':id'=>$id));
 	} else {//insert
+		//DB $query = "INSERT INTO tasks_ratings (rating,comment,rateon,userid,taskid) VALUES ";
+		//DB $query .= "('{$_POST['rating']}','{$_POST['comments']}',$now,'$userid','{$_POST['taskid']}')";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$query = "INSERT INTO tasks_ratings (rating,comment,rateon,userid,taskid) VALUES ";
-		$query .= "('{$_POST['rating']}','{$_POST['comments']}',$now,'$userid','{$_POST['taskid']}')";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$query .= "(:rating, :comment, :rateon, :userid, :taskid)";
+		$stm = $DBH->prepare($query);
+		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':userid'=>$userid, ':taskid'=>$_POST['taskid']));
 	}
 	echo getratingsfor($_POST['taskid']);
-	
+
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
-	$placeinhead .= '<script type="text/javascript"> 
+	$placeinhead .= '<script type="text/javascript">
 		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/index.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
@@ -543,10 +583,13 @@ if (isset($_GET['modify'])) {
 	echo '<div id="ratingholder">';
 	echo getratingsfor($_GET['id']);
 	echo '</div>';
-	
-	$query = "SELECT projects.*,iu.LastName,iu.FirstName FROM projects JOIN imas_users AS iu ON projects.ownerid=iu.id WHERE projects.id='{$_GET['id']}'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	$line = mysql_fetch_array($result, MYSQL_ASSOC);
+
+	//DB $query = "SELECT projects.*,iu.LastName,iu.FirstName FROM projects JOIN imas_users AS iu ON projects.ownerid=iu.id WHERE projects.id='{$_GET['id']}'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
+	$stm = $DBH->prepare("SELECT projects.*,iu.LastName,iu.FirstName FROM projects JOIN imas_users AS iu ON projects.ownerid=iu.id WHERE projects.id=:id");
+	$stm->execute(array(':id'=>$_GET['id']));
+	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	echo '<table class="gb"><tbody>';
 	foreach ($questions as $key=>$arr) {
 		if ((trim($line[$key])=='' || $line[$key]=='N') && !isset($arr['showalways'])) { continue;}
@@ -584,8 +627,8 @@ if (isset($_GET['modify'])) {
 		}
 		echo '</td></tr>';
 	}
-	
-	
+
+
 	if ($line['files']!='') {
 		$canpreview = array('doc','docx','xls','xlsx','html','ppt','pptx','pdf');
 		echo '<tr><td class="r">Files:</td><td>';
@@ -599,7 +642,7 @@ if (isset($_GET['modify'])) {
 				$url = substr($fl[2*$i+1],1);
 			}
 			echo '<a href="'.$url.'" target="_blank">';
-			
+
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
 			} else {
@@ -616,7 +659,7 @@ if (isset($_GET['modify'])) {
 		}
 		echo '</td></tr>';
 	}
-	
+
 	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.$line['FirstName'].' '.$line['LastName'].'</td></tr>';
 	echo '<tr><td class="r">Last Updated</td><td>'.date("F j, Y, g:i a", $line['lastmod']).'</td></tr>';
 	echo '</tbody></table>';
@@ -624,7 +667,7 @@ if (isset($_GET['modify'])) {
 } else {
 	$nologo = true;
 	$address = 'http://' .  $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php";
-	
+
 	$placeinhead .= '<script type="text/javascript">
 		function chgfilter(el) {
 			window.location.href = "'.$address.'?filterby="+el.id+"&filterval="+el.value;
@@ -632,7 +675,7 @@ if (isset($_GET['modify'])) {
 		</script>';
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/tablesorter.js"></script>';
-	
+
 	require("../../header.php");
 	echo '<div class="cp">';
 	foreach ($questions as $key=>$arr) {
@@ -671,25 +714,35 @@ if (isset($_GET['modify'])) {
 	$query = "SELECT projects.*,iu.FirstName,iu.LastName,count(ar.rating) AS ratingcnt,avg(ar.rating) AS ratingavg FROM ";
 	$query .= "projects LEFT JOIN tasks_ratings AS ar ON ar.taskid=projects.id ";
 	$query .= "JOIN imas_users AS iu ON projects.ownerid=iu.id WHERE 1 ";
+	$qarr = array();
 	foreach ($questions as $key=>$arr) {
 		if (isset($arr['searchby']) && $arr['searchby']==false) {continue;}
 		if (isset($_SESSION['pfilter-'.$key]) && $_SESSION['pfilter-'.$key]!='-1') {
 			if ($arr['type'] == 'radio' || $arr['type'] == 'select' ) {
-				$query .= 'AND projects.'. $key .'=\''.addslashes($_SESSION['pfilter-'.$key]).'\' ';
+				//DB $query .= 'AND arithmetic.'. $key .'=\''.addslashes($_SESSION['pfilter-'.$key]).'\' ';
+				$query .= 'AND projects.'. $key .'=? ';
+				$qarr[] = $_SESSION['pfilter-'.$key];
 			} else if ($arr['type'] == 'checkbox') {
-				$query .= 'AND projects.'. $key .' LIKE \'%'.addslashes($_SESSION['pfilter-'.$key]).'%\' ';
-			} else if ($arr['type'] == 'selecttwowother') {
-				$query .= 'AND projects.'. $key .' LIKE \'%;'.addslashes($_SESSION['pfilter-'.$key]).';%\' ';
-			} 
+				//DB $query .= 'AND arithmetic.'. $key .' LIKE \'%'.addslashes($_SESSION['pfilter-'.$key]).'%\' ';
+				$query .= 'AND projects.'. $key .' LIKE ? ';
+				$qarr[] = '%'.$_SESSION['pfilter-'.$key].'%';
+			} else if ($arr['type'] == 'selecttwoother') {
+				//DB $query .= 'AND arithmetic.'. $key .' LIKE \'%;'.addslashes($_SESSION['pfilter-'.$key]).';%\' ';
+				$query .= 'AND projects.'. $key .' LIKE ? ';
+				$qarr[] = '%;'.$_SESSION['pfilter-'.$key].';%';
+			}
 		}
 	}
 	$query .= "GROUP BY projects.id ORDER BY id DESC";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare($query);
+	$stm->execute($qarr);
 	$i = 0;
 	$lines = array();
 	$ratetimescnt = 0;
 	$totcnt = 0;
-	while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		$lines[] = $line;
 		if ($line['ratingcnt']>0) {
 			$ratetimescnt += $line['ratingavg']*$line['ratingcnt'];
@@ -716,13 +769,13 @@ if (isset($_GET['modify'])) {
 		}
 		$line['topic'] =  implode('; ',$out);
 		if ($line['ratingavg']==null) {$line['ratingavg'] = 0;}
-		
+
 		echo '<tr ';
 		if ($i%2==0) { echo 'class="even"';} else {echo 'class="odd"';}
 		echo '>';
 		$i++;
 		echo '<td><a href="index.php?id='.$line['id'].'">'.$line['title'].'</a></td>';
-		
+
 		echo '<td>'.$line['topic'].'</td>';
 		if ($line['ratingcnt']>0) {
 			$v = $line['ratingcnt']/($line['ratingcnt'] + 5);
@@ -740,7 +793,7 @@ if (isset($_GET['modify'])) {
 		echo $dev[0];
 		if (count($dev)>1) {
 			echo ' et al.';
-		} 
+		}
 		echo '</td><td>';
 		if ($line['ownerid']==$userid || $myrights==100 || $userid==745) {
 			echo '<span style="font-size: 70%" class="nowrap"><a href="index.php?modify='.$line['id'].'">Modify</a> | ';
@@ -756,24 +809,29 @@ if (isset($_GET['modify'])) {
 	echo '</p>';
 	echo '</body></html>';
 
-}	
+}
 
 function getratingsfor($id) {
-	global $userid;
+	global $DBH,$userid;
+	//DB $query = "SELECT tr.rating,tr.comment,tr.userid,iu.FirstName,iu.LastName,tr.rateon FROM tasks_ratings AS tr JOIN imas_users AS iu ON tr.userid=iu.id ";
+	//DB $query .= "WHERE tr.taskid='$id' ORDER BY tr.rateon DESC";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$query = "SELECT tr.rating,tr.comment,tr.userid,iu.FirstName,iu.LastName,tr.rateon FROM tasks_ratings AS tr JOIN imas_users AS iu ON tr.userid=iu.id ";
-	$query .= "WHERE tr.taskid='$id' ORDER BY tr.rateon DESC";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$query .= "WHERE tr.taskid=:taskid ORDER BY tr.rateon DESC";
+	$stm = $DBH->prepare($query);
+	$stm->execute(array(':taskid'=>$id));
 	$ratings = array();
 	$i = 0;
 	$myrating = -1;
 	$totrat = 0;
-	while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
 		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],$line['rateon']);
 		$totrat += $line['rating'];
 		$i++;
 	}
-	
+
 	$out = '<div class="arating">';
 	if ($i>0) {
 		$totrat /= $i;
@@ -784,7 +842,7 @@ function getratingsfor($id) {
 		$out .= 'No ratings yet';
 	}
 	$out .= '</div>';
-		
+
 	if ($myrating==-1) { //not yet rated
 		$rating = 0;
 		$comments = '';
@@ -821,7 +879,7 @@ function getratingsfor($id) {
 		$out .= ' <i style="color:red;">Rating Saved</i>';
 	}
 	$out .= '</div>';
-		
+
 	foreach ($ratings as $i=>$rating) {
 		if ($i==$myrating) {continue;}
 		$out .= '<div class="arating">';
@@ -849,11 +907,11 @@ function getratingsfor($id) {
 function time_elapsed_string($ptime) {
 	//from http://www.zachstronaut.com/posts/2009/01/20/php-relative-date-time-string.html
     $etime = time() - $ptime;
-    
+
     if ($etime < 1) {
         return 'a second ago';
     }
-    
+
     $a = array( 12 * 30 * 24 * 60 * 60  =>  'year',
                 30 * 24 * 60 * 60       =>  'month',
                 24 * 60 * 60            =>  'day',
@@ -861,7 +919,7 @@ function time_elapsed_string($ptime) {
                 60                      =>  'minute',
                 1                       =>  'second'
                 );
-    
+
     foreach ($a as $secs => $str) {
         $d = $etime / $secs;
         if ($d >= 1) {
@@ -870,7 +928,3 @@ function time_elapsed_string($ptime) {
         }
     }
 }
-	
-		
-	
-

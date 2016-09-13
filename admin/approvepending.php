@@ -13,8 +13,10 @@ if (isset($_GET['go'])) {
 	if (isset($_POST['skip'])) {
 		$offset++;
 	} else 	if (isset($_POST['deny'])) {
-		$query = "UPDATE imas_users SET rights=10 WHERE id='{$_POST['id']}'";
-		mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB $query = "UPDATE imas_users SET rights=10 WHERE id='{$_POST['id']}'";
+		//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		$stm = $DBH->prepare("UPDATE imas_users SET rights=10 WHERE id=:id");
+		$stm->execute(array(':id'=>$_POST['id']));
 		if (isset($CFG['GEN']['enrollonnewinstructor'])) {
 			require("../includes/unenroll.php");
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $rcid) {
@@ -25,18 +27,26 @@ if (isset($_GET['go'])) {
 		if ($_POST['group']>-1) {
 			$group = intval($_POST['group']);
 		} else if (trim($_POST['newgroup'])!='') {
-			$query = "INSERT INTO imas_groups (name) VALUES ('{$_POST['newgroup']}')";
-			mysql_query($query) or die("Query failed : " . mysql_error());
-			$group = mysql_insert_id();
+			//DB $query = "INSERT INTO imas_groups (name) VALUES ('{$_POST['newgroup']}')";
+			//DB mysql_query($query) or die("Query failed : " . mysql_error());
+			//DB $group = mysql_insert_id();
+			$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
+			$stm->execute(array(':name'=>$_POST['newgroup']));
+			$group = $DBH->lastInsertId();
 		} else {
 			$group = 0;
 		}
-		$query = "UPDATE imas_users SET rights=40,groupid=$group WHERE id='{$_POST['id']}'";
-		mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB $query = "UPDATE imas_users SET rights=40,groupid=$group WHERE id='{$_POST['id']}'";
+		//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		$stm = $DBH->prepare("UPDATE imas_users SET rights=40,groupid=:groupid WHERE id=:id");
+		$stm->execute(array(':groupid'=>$group, ':id'=>$_POST['id']));
 		
-		$query = "SELECT FirstName,SID,email FROM imas_users WHERE id='{$_POST['id']}'";
-		$result = mysql_query($query) or die("Query failed : " . mysql_error());
-		$row = mysql_fetch_row($result);
+		//DB $query = "SELECT FirstName,SID,email FROM imas_users WHERE id='{$_POST['id']}'";
+		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB $row = mysql_fetch_row($result);
+		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$_POST['id']));
+		$row = $stm->fetch(PDO::FETCH_NUM);
 		
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
@@ -54,7 +64,7 @@ if (isset($_GET['go'])) {
 			$message .= '<p>I\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
 			$message .= '<p>I\'ve also signed you up for the WAMAP Training Course.  This course has video tutorials and assignments that will walk you through learning how to use WAMAP in your classes.</p>';
 			$message .= '<p>If you are from outside Washington State, please be aware that WAMAP.org is only intended for regular use by Washington State faculty.  You are welcome to use this site for trial purposes.  If you wish to continue using it, we ask you set up your own installation of the IMathAS software, or use MyOpenMath.com if using content built around an open textbook.</p>';
-	
+
 			$message .= '<p>David Lippman<br/>dlippman@pierce.ctc.edu<br/>Instructor, Math @ Pierce College and WAMAP administrator</p>';
 		}
 		if (isset($CFG['GEN']['useSESmail'])) {
@@ -68,17 +78,24 @@ if (isset($_GET['go'])) {
 }
 
 require("../header.php");
-$query = "SELECT id,SID,LastName,FirstName,email FROM imas_users WHERE rights=0 OR rights=12 LIMIT 1 OFFSET $offset";
-$result = mysql_query($query) or die("Query failed : " . mysql_error());
-if (mysql_num_rows($result)==0) {
+//DB $query = "SELECT id,SID,LastName,FirstName,email FROM imas_users WHERE rights=0 OR rights=12 LIMIT 1 OFFSET $offset";
+//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+//DB if (mysql_num_rows($result)==0) {
+$stm = $DBH->query("SELECT id,SID,LastName,FirstName,email FROM imas_users WHERE rights=0 OR rights=12 LIMIT 1 OFFSET $offset"); //sanitized above
+if ($stm->rowCount()==0) {
 	echo 'No one to approve';
 } else {
-	$row = mysql_fetch_row($result);
+	//DB $row = mysql_fetch_row($result);
+	$row = $stm->fetch(PDO::FETCH_NUM);
 	
-	$query = "SELECT log FROM imas_log WHERE log LIKE 'New Instructor Request: {$row[0]}::%'";
-	$res = mysql_query($query) or die("Query failed : " . mysql_error());
-	if (mysql_num_rows($res)>0) {
-		$log = explode('::', mysql_result($res,0,0));
+	//DB $query = "SELECT log FROM imas_log WHERE log LIKE 'New Instructor Request: {$row[0]}::%'";
+	//DB $res = mysql_query($query) or die("Query failed : " . mysql_error());
+	//DB if (mysql_num_rows($res)>0) {
+		//DB $log = explode('::', mysql_result($res,0,0));
+	$stm = $DBH->prepare("SELECT log FROM imas_log WHERE log LIKE :log");
+	$stm->execute(array(':log'=>"New Instructor Request: {$row[0]}::%"));
+	if ($stm->rowCount()>0) {
+		$log = explode('::', $stm->fetchColumn(0));
 		$details = $log[1];
 	} else {
 		$details = '';
@@ -96,9 +113,11 @@ if (mysql_num_rows($result)==0) {
 		}
 	}
 	echo '<p>Group: <select name="group"><option value="-1">New Group</option>';
-	$query = "SELECT id,name FROM imas_groups ORDER BY name";
-	$result = mysql_query($query) or die("Query failed : " . mysql_error());
-	while ($row = mysql_fetch_row($result)) {
+	//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
+	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+	//DB while ($row = mysql_fetch_row($result)) {
+	$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		echo '<option value="'.$row[0].'">'.$row[1].'</option>';
 	}
 	echo '</select> New group: <input type="text" name="newgroup" size="20" /></p>';
@@ -107,5 +126,3 @@ if (mysql_num_rows($result)==0) {
 }
 require("../footer.php");
 ?>
-		
-

@@ -25,17 +25,22 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 		require_once("../includes/filehandler.php");
 		//deleteasidfilesbyquery(array('id'=>$sessiondata['sessiontestid']),1);
 		deleteasidfilesbyquery2('id',$sessiondata['sessiontestid'],null,1);
-		$query = "DELETE FROM imas_assessment_sessions WHERE id='{$sessiondata['sessiontestid']}' LIMIT 1";
-		$result = mysql_query($query) or die("Query failed : $query: " . mysql_error());		
+		//DB $query = "DELETE FROM imas_assessment_sessions WHERE id='{$sessiondata['sessiontestid']}' LIMIT 1";
+		//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
+		$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE id=:id LIMIT 1");
+		$stm->execute(array(':id'=>$sessiondata['sessiontestid']));
 	}
    
 	if (isset($teacherid) && isset($_GET['from']) && isset($_GET['to'])) {
 		$from = $_GET['from'];
 		$to = $_GET['to'];
 		$block = $_GET['block'];
-		$query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-		$result = mysql_query($query) or die("Query failed : " . mysql_error());
-		$items = unserialize(mysql_result($result,0,0));
+		//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
+		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB $items = unserialize(mysql_result($result,0,0));
+		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
+		$stm->execute(array(':id'=>$_GET['cid']));
+		$items = unserialize($stm->fetchColumn(0));
 		$blocktree = explode('-',$block);
 		$sub =& $items;
 		for ($i=1;$i<count($blocktree)-1;$i++) {
@@ -77,15 +82,21 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 				array_splice($curblock,$to-1,0,$itemtomove);
 			}
 		}
-		$itemlist = addslashes(serialize($items));
-		$query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='{$_GET['cid']}'";
-		mysql_query($query) or die("Query failed : " . mysql_error()); 
+		//DB $itemlist = addslashes(serialize($items));
+		$itemlist = serialize($items);
+		//DB $query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='{$_GET['cid']}'";
+		//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
+		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$_GET['cid']));
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/course.php?cid={$_GET['cid']}");
 	}
 		
-	$query = "SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,chatset,topbar,cploc,latepasshrs FROM imas_courses WHERE id='$cid'";
-	$result = mysql_query($query) or die("Query failed : " . mysql_error());
-	$line = mysql_fetch_array($result, MYSQL_ASSOC);
+	//DB $query = "SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,chatset,topbar,cploc,latepasshrs FROM imas_courses WHERE id='$cid'";
+	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
+	$stm = $DBH->prepare("SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,topbar,cploc,latepasshrs FROM imas_courses WHERE id=:id");
+	$stm->execute(array(':id'=>$cid));
+	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($line == null) {
 		$overwriteBody = 1;
 		$body = _("Course does not exist.  <a hre=\"../index.php\">Return to main page</a>") . "</body></html>\n";
@@ -98,7 +109,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	$items = unserialize($line['itemorder']);
 	$msgset = $line['msgset']%5;
 	$toolset = $line['toolset'];
-	$chatset = $line['chatset'];
 	$latepasshrs = $line['latepasshrs'];
 	$useleftbar = (($line['cploc']&1)==1);
 	$useleftstubar = (($line['cploc']&2)==2);
@@ -124,9 +134,12 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 		} else {
 			$sub['newflag']=0;
 		}
-		$itemlist = addslashes(serialize($items));
-		$query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='$cid'";
-		mysql_query($query) or die("Query failed : " . mysql_error()); 	   
+		//DB $itemlist = addslashes(serialize($items));
+		$itemlist = serialize($items);
+		//DB $query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='$cid'";
+		//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
+		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
 	}
 	
 	//enable teacher guest access
@@ -168,16 +181,25 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	$now = time() + $previewshift;
 	$exceptions = array();
 	if (!isset($teacherid) && !isset($tutorid)) {
+		//DB $query = "SELECT items.id,ex.startdate,ex.enddate,ex.islatepass,ex.waivereqscore,ex.itemtype FROM ";
+		//DB $query .= "imas_exceptions AS ex,imas_items as items,imas_assessments as i_a WHERE ex.userid='$userid' AND ";
+		//DB $query .= "ex.assessmentid=i_a.id AND (items.typeid=i_a.id AND items.itemtype='Assessment' AND items.courseid='$cid') ";
+		//DB $query .= "UNION SELECT items.id,ex.startdate,ex.enddate,ex.islatepass,ex.waivereqscore,ex.itemtype FROM ";
+		//DB $query .= "imas_exceptions AS ex,imas_items as items,imas_forums as i_f WHERE ex.userid='$userid' AND ";
+		//DB $query .= "ex.assessmentid=i_f.id AND (items.typeid=i_f.id AND items.itemtype='Forum' AND items.courseid='$cid') ";
 		$query = "SELECT items.id,ex.startdate,ex.enddate,ex.islatepass,ex.waivereqscore,ex.itemtype FROM ";
-		$query .= "imas_exceptions AS ex,imas_items as items,imas_assessments as i_a WHERE ex.userid='$userid' AND ";
-		$query .= "ex.assessmentid=i_a.id AND (items.typeid=i_a.id AND items.itemtype='Assessment' AND items.courseid='$cid') ";
+		$query .= "imas_exceptions AS ex,imas_items as items,imas_assessments as i_a WHERE ex.userid=:userid AND ";
+		$query .= "ex.assessmentid=i_a.id AND (items.typeid=i_a.id AND items.itemtype='Assessment' AND items.courseid=:courseid) ";
 		$query .= "UNION SELECT items.id,ex.startdate,ex.enddate,ex.islatepass,ex.waivereqscore,ex.itemtype FROM ";
-		$query .= "imas_exceptions AS ex,imas_items as items,imas_forums as i_f WHERE ex.userid='$userid' AND ";
-		$query .= "ex.assessmentid=i_f.id AND (items.typeid=i_f.id AND items.itemtype='Forum' AND items.courseid='$cid') ";
+		$query .= "imas_exceptions AS ex,imas_items as items,imas_forums as i_f WHERE ex.userid=:userid2 AND ";
+		$query .= "ex.assessmentid=i_f.id AND (items.typeid=i_f.id AND items.itemtype='Forum' AND items.courseid=:courseid2) ";
+		$stm = $DBH->prepare($query);
+		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':userid2'=>$userid, ':courseid2'=>$cid));
 		// $query .= "AND (($now<i_a.startdate AND ex.startdate<$now) OR ($now>i_a.enddate AND $now<ex.enddate))";
 		//$query .= "AND (ex.startdate<$now AND $now<ex.enddate)";
-		$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+		//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$exceptions[$line['id']] = array($line['startdate'],$line['enddate'],$line['islatepass'],$line['waivereqscore'],$line['itemtype']);
 		}
 	}
@@ -233,8 +255,10 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 				if ($i!=count($backtrack)-1) {
 					$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder={$backtrack[$i][1]}\">";
 				}
-				$sendcrumb .= "<a href=\"course.php?cid=$cid&folder={$backtrack[$i][1]}\">".stripslashes($backtrack[$i][0]).'</a>';
-				$curBreadcrumb .= stripslashes($backtrack[$i][0]);
+				//DB $sendcrumb .= "<a href=\"course.php?cid=$cid&folder={$backtrack[$i][1]}\">".stripslashes($backtrack[$i][0]).'</a>';
+				$sendcrumb .= "<a href=\"course.php?cid=$cid&folder={$backtrack[$i][1]}\">".$backtrack[$i][0].'</a>';
+				//DB $curBreadcrumb .= stripslashes($backtrack[$i][0]);
+				$curBreadcrumb .= $backtrack[$i][0];
 				if ($i!=count($backtrack)-1) {
 					$curBreadcrumb .= "</a>";
 				}
@@ -252,7 +276,8 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 			if ($i!=count($backtrack)-1) {
 				$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder={$backtrack[$i][1]}\">";
 			}
-			$curBreadcrumb .= stripslashes($backtrack[$i][0]);
+				//DB $curBreadcrumb .= stripslashes($backtrack[$i][0]);
+				$curBreadcrumb .= $backtrack[$i][0];
 			if ($i!=count($backtrack)-1) {
 				$curBreadcrumb .= "</a>";
 			}
@@ -271,9 +296,12 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	
 	
 	if ($msgset<4) {
-	   $query = "SELECT COUNT(id) FROM imas_msgs WHERE msgto='$userid' AND courseid='$cid' AND (isread=0 OR isread=4)";
-	   $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	   $msgcnt = mysql_result($result,0,0);
+	   //DB $query = "SELECT COUNT(id) FROM imas_msgs WHERE msgto='$userid' AND courseid='$cid' AND (isread=0 OR isread=4)";
+	   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+	   //DB $msgcnt = mysql_result($result,0,0);
+	   $stm = $DBH->prepare("SELECT COUNT(id) FROM imas_msgs WHERE msgto=:msgto AND courseid=:courseid AND (isread=0 OR isread=4)");
+	   $stm->execute(array(':msgto'=>$userid, ':courseid'=>$cid));
+	   $msgcnt = $stm->fetchColumn(0);
 	   if ($msgcnt>0) {
 		   $newmsgs = " <a href=\"$imasroot/msgs/newmsglist.php?cid=$cid\" style=\"color:red\">" . sprintf(_('New (%d)'), $msgcnt) . "</a>";
 	   } else {
@@ -295,27 +323,47 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	$query .= "AND (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL))) AS newitems ";
 	*/
 	$now = time();
+	//DB $query = "SELECT imas_forum_threads.forumid, COUNT(imas_forum_threads.id) FROM imas_forum_threads ";
+	//DB $query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid='$cid' ";
+	//DB if (!isset($teacherid)) {
+		//DB $query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now && imas_forums.enddate>$now)) ";
+	//DB }
+	//DB $query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid='$userid' ";
+	//DB $query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
+	//DB if (!isset($teacherid)) {
+		//DB $query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid='$userid')) ";
+	//DB }
+	//DB $query .= "GROUP BY imas_forum_threads.forumid";
 	$query = "SELECT imas_forum_threads.forumid, COUNT(imas_forum_threads.id) FROM imas_forum_threads ";
-	$query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid='$cid' ";
+	$query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid=:courseid ";
 	if (!isset($teacherid)) {
 		$query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now && imas_forums.enddate>$now)) ";
 	}
-	$query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid='$userid' ";
+	$query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid=:userid ";
 	$query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
 	if (!isset($teacherid)) {
-		$query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid='$userid')) ";
+		$query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid=:userid2)) ";
 	}
 	$query .= "GROUP BY imas_forum_threads.forumid";
+	$stm = $DBH->prepare($query);
+	if (!isset($teacherid)) {
+		$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid, ':userid2'=>$userid));
+	} else {
+		$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
+	}
 	
+
+
 	/*$query = "SELECT imas_forum_threads.forumid,imas_forum_threads.id FROM imas_forum_threads ";
 	$query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid='$cid' ";
 	$query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid='$userid' ";
 	$query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
 	$query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid='$userid')) ";
 	*/
-	$result = mysql_query($query) or die("Query failed : " . mysql_error());
+	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$newpostcnts = array();
-	while ($row = mysql_fetch_row($result)) {
+	//DB while ($row = mysql_fetch_row($result)) {
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$newpostcnts[$row[0]] = $row[1];
 	}
 	if (array_sum($newpostcnts)>0) {
@@ -342,36 +390,13 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($gues
 	//get read linked items
 	$readlinkeditems = array();
 	if ($coursetheme=='otbsreader.css' && isset($studentid)) {
-		$query = "SELECT DISTINCT typeid FROM imas_content_track WHERE userid='$userid' AND type='linkedlink' AND courseid='$cid'";
-		$result = mysql_query($query) or die("Query failed : " . mysql_error());
-		while ($row = mysql_fetch_row($result)) {
+		//DB $query = "SELECT DISTINCT typeid FROM imas_content_track WHERE userid='$userid' AND type='linkedlink' AND courseid='$cid'";
+		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB while ($row = mysql_fetch_row($result)) {
+		$stm = $DBH->prepare("SELECT DISTINCT typeid FROM imas_content_track WHERE userid=:userid AND type='linkedlink' AND courseid=:courseid");
+		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$readlinkeditems[$row[0]] = true;	
-		}
-	}
-	
-	//get active chatters
-	if (isset($mathchaturl) &&  $chatset==1) {
-		if (substr($mathchaturl,0,4)=='http') {
-			//remote mathchat
-			$url = $mathchaturl.'?isactive='.$cid.'&sep='.time();
-			$timeout = 2;
-			$old = ini_set('default_socket_timeout', $timeout);
-			$fp = @fopen($url,'r');
-			if ($fp!==false) {
-				ini_set('default_socket_timeout', $old);
-				stream_set_timeout($fp,2);
-				stream_set_blocking($fp,0);
-				$activechatters = fread($fp,100);
-				fclose($fp);
-			} else {
-				$activechatters = '?';
-			}
-		} else {  
-			//local mathchat
-			$on = time() - 15;
-			$query = "SELECT name FROM mc_sessions WHERE mc_sessions.room='$cid' AND lastping>$on";
-			$result = mysql_query($query) or die("Query failed : " . mysql_error());
-			$activechatters =  mysql_num_rows($result);
 		}
 	}
 	
@@ -476,11 +501,6 @@ if ($overwriteBody==1) {
 			<?php echo _('Messages'); ?></a> <?php echo $newmsgs ?> <br/>
 			<a href="<?php echo $imasroot ?>/forums/forums.php?cid=<?php echo $cid ?>&folder=<?php echo $_GET['folder'] ?>" class="essen">
 			<?php echo _('Forums'); ?></a> <?php echo $newpostscnt ?>
-<?php 
-		if (isset($mathchaturl) &&  $chatset==1) {
-			echo "<br/><a href=\"$mathchaturl?uname=".urlencode($userfullname)."&amp;room=$cid&amp;roomname=".urlencode($coursename)."\" target=\"chat\">", _('Chat'), "</a> ($activechatters)";
-		}
-?>
 		</p>
 	<?php
 	if (isset($CFG['CPS']['leftnavtools']) && $CFG['CPS']['leftnavtools']=='limited') {
@@ -573,9 +593,6 @@ if ($overwriteBody==1) {
 			if (($toolset&1)==0) {	
 				echo '<a href="showcalendar.php?cid='.$cid.'" class="essen">'._('Calendar').'</a>';
 			}
-			if (isset($mathchaturl) && $chatset==1) {
-				echo "<br/><a href=\"$mathchaturl?uname=".urlencode($userfullname)."&amp;room=$cid&amp;roomname=".urlencode($coursename)."\"  target=\"chat\">", _('Chat'), "</a>  ($activechatters)";
-			}
 			echo '</p>';
 		}
 	?>
@@ -665,9 +682,6 @@ if ($overwriteBody==1) {
 		if (($toolset&2)==0) {
 			echo '<a href="'.$imasroot.'/forums/forums.php?cid='.$cid.'&amp;folder='.$_GET['folder'].'">';
 			echo _('Forums').'</a> '.$newpostscnt.'<br/>';
-		}
-		if (isset($mathchaturl) && $chatset==1) {
-			echo "<a href=\"$mathchaturl?uname=".urlencode($userfullname)."&amp;room=$cid&amp;roomname=".urlencode($coursename)."\"  target=\"chat\">"._('Chat')."</a>  ($activechatters) <br/>";
 		}
 	?>
 		</span>
@@ -919,4 +933,3 @@ function makeTopMenu() {
 
 
 ?>
-

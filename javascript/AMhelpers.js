@@ -1104,6 +1104,7 @@ function doonsubmit(form,type2,skipconfirm) {
 			}
 		}
 	}
+	imathasDraw.encodea11ydraw();
 
 	for (var qn in intcalctoproc) { //i=0; i<intcalctoproc.length; i++) {
 		qn = parseInt(qn);
@@ -1481,7 +1482,7 @@ function assessbackgsubmitCallback(qn,noticetgt) {
 					}
 				}
 		    /*
-				if (LivePreviews.hasOwnProperty(qn)) {
+		    if (LivePreviews.hasOwnProperty(qn)) {
 		    	 LivePreviews[qn].Init();
 		    }
 				*/

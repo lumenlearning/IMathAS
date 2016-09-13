@@ -241,7 +241,8 @@ if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
 
  ini_set("upload_max_filesize", "10485760");
  ini_set("post_max_size", "10485760");
- error_reporting(0);
+ //louder than usual during beta of PDO
+ error_reporting(E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
  $CFG['GEN']['useSESmail'] = true;
  function SESmail($email,$from,$subject,$message,$replyto='') {
@@ -272,25 +273,20 @@ if (isset($CFG['CPS']['theme'])) {
   	  $coursetheme = $defaultcoursetheme;
   }
   /* Connecting, selecting database */
-  if (!isset($dbsetup)) {
-	 $link = mysql_connect($dbserver,$dbusername, $dbpassword)
-	  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
-	 mysql_select_db($dbname)
-	  or die("<p>Could not select database</p></div></body></html>");
+  try {
+	  $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+	  //$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
+		//loud during beta
+		$DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	  // global $DBH;
+	  $GLOBALS["DBH"] = $DBH;
+  } catch(PDOException $e) {
+	  die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
+  }
 
-	  unset($dbserver);
-	  unset($dbusername);
-	  unset($dbpassword);
-	  mysql_query("set session sql_mode=''");
-  }
-  //clean up post and get if magic quotes aren't on
-  function addslashes_deep($value) {
-	return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));
-  }
-  if (!get_magic_quotes_gpc()) {
-   $_GET    = array_map('addslashes_deep', $_GET);
-   $_POST  = array_map('addslashes_deep', $_POST);
-   $_COOKIE = array_map('addslashes_deep', $_COOKIE);
-  }
+  unset($dbserver);
+  unset($dbusername);
+  unset($dbpassword);
+  $DBH->query("set session sql_mode=''");
 
 ?>

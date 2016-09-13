@@ -1,5 +1,5 @@
 <?php
-	
+
 	require("../config.php");
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
@@ -21,9 +21,12 @@
 		} else if ($_POST['password']!=$_POST['password2']) {
 			echo "<p style=\"color:red\">Passwords entered do not match.</p>";
 		} else {
-			$query = "SELECT id FROM imas_users WHERE SID='{$_POST['username']}'";
-			$result = mysql_query($query) or die("Query failed : " . mysql_error());
-			if (mysql_num_rows($result)>0) {
+			//DB $query = "SELECT id FROM imas_users WHERE SID='{$_POST['username']}'";
+			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+			//DB if (mysql_num_rows($result)>0) {
+			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE SID=:SID");
+			$stm->execute(array(':SID'=>$_POST['username']));
+			if ($stm->rowCount()>0) {
 				echo "<p style=\"color:red\">Username <b>{$_POST['username']}</b> is already in use.  Please try another</p>\n";
 			} else {
 				if (isset($CFG['GEN']['homelayout'])) {
@@ -31,16 +34,22 @@
 				} else {
 					$homelayout = '|0,1,2||0,1';
 				}
-				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
 				require_once("../includes/password.php");
 				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
-				
-				$query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}', '$homelayout');";
-				mysql_query($query) or die("Query failed : " . mysql_error());
-				$newuserid = mysql_insert_id();
-				$query = "INSERT INTO imas_students (userid,courseid) VALUES ('$newuserid',1),('$newuserid',438)";
-				mysql_query($query) or die("Query failed : " . mysql_error());
-				
+				//DB $query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
+				//DB $query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}', '$homelayout');";
+				//DB mysql_query($query) or die("Query failed : " . mysql_error());
+				//DB $newuserid = mysql_insert_id();
+				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
+				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :homelayout);";
+				$stm = $DBH->prepare($query);
+				$stm->execute(array(':SID'=>$_POST['username'], ':password'=>$md5pw, ':rights'=>12, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':homelayout'=>$homelayout));
+				$newuserid = $DBH->lastInsertId();
+				//DB $query = "INSERT INTO imas_students (userid,courseid) VALUES ('$newuserid',1),('$newuserid',438)";
+				//DB mysql_query($query) or die("Query failed : " . mysql_error());
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES (:userid, :courseid),(:userid2, :courseid2)");
+				$stm->execute(array(':userid'=>$newuserid, ':courseid'=>1, ':userid2'=>$newuserid, ':courseid2'=>438));
+
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 				$headers .= "From: $installname <$sendfrom>\r\n";
@@ -52,18 +61,20 @@
 				$message .= "Phone: {$_POST['phone']} <br/>\n";
 				$message .= "Username: {$_POST['username']} <br/>\n";
 				mail($newacctemail,$subject,$message,$headers);
-				
+
 				$now = time();
-				$query = "INSERT INTO imas_log (time, log) VALUES ($now, 'New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>')";
-				mysql_query($query) or die("Query failed : " . mysql_error());
-				
-				
+				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, 'New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>')";
+				//DB mysql_query($query) or die("Query failed : " . mysql_error());
+				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
+				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>"));
+
+
 				$message = "<p>Your new account request has been sent.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.</p>";
 				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
 				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
 				mail($_POST['email'],$subject,$message,$headers);
-				
+
 				echo $message;
 				require("footer.php");
 				exit;
@@ -77,7 +88,7 @@
 	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
 	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
 	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
-	
+
 	echo "<h3>New Instructor Account Request</h3>\n";
 	echo "<p>The IMathAS software and this webserver hosting are offered free of charge for use by instructors and their students from ";
 	echo "<b>Washington State</b> schools and colleges.  Users from other locations are encouraged to use our sister site <a href=\"http://www.myopenmath.com\">MyOpenMath</a>,";
@@ -90,7 +101,7 @@
 	echo "<span class=form>Phone Number</span><span class=formright><input type=text name=phone value=\"$phone\" size=40></span><br class=form />\n";
 	echo "<span class=form>School &amp; District / College</span><span class=formright><input type=text name=school value=\"$school\" size=40></span><br class=form />\n";
 	echo "<span class=form>Web address of a page on your school web site listing you as an instructor<br/><span style=\"font-size: 75%\">Or a link to your school's staff directory.  If we can't verify you are an instructor easily, it will delay your account approval, or your request will be ignored.</span></span><span class=formright><input type=text name=verurl value=\"$verurl\" size=40></span><br class=form />\n";
-	
+
 	echo "<span class=form>Requested Username<br/><span style=\"font-size: 75%\">Use only numbers, letters, . or the _ character.</span></span><span class=formright><input type=text name=username value=\"$username\" size=40></span><br class=form />\n";
 	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
 	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";

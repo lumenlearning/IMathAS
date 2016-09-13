@@ -2,11 +2,15 @@
 require("../config.php");
 $addr = "https://www.wamap.org/course/quickdrill.php";
 
+//DB $query = "SELECT i_qs.description,i_qs.id FROM imas_questionset as i_qs JOIN imas_library_items as ili ON ili.qsetid=i_qs.id ";
+//DB $query .= "WHERE ili.libid=1270 ORDER BY i_qs.description";
+//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
 $query = "SELECT i_qs.description,i_qs.id FROM imas_questionset as i_qs JOIN imas_library_items as ili ON ili.qsetid=i_qs.id ";
 $query .= "WHERE ili.libid=1270 ORDER BY i_qs.description";
-$result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
+$stm = $DBH->query($query);
 $optionlist = '';
-while ($row = mysql_fetch_row($result)) {
+//DB while ($row = mysql_fetch_row($result)) {
+while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	$optionlist .= '<option value="'.$row[1].'">'.$row[0].'</option>';
 }
 ?>
@@ -27,7 +31,7 @@ while ($row = mysql_fetch_row($result)) {
 		 url += '&'+mode+'='+val;
 	 }
 	 url += '&public=true';
-	 document.getElementById("output").innerHTML = "<p>URL to use: "+url+"</p><p><a href=\""+url+"\" target=\"_blank\">Try it</a></p>"; 
+	 document.getElementById("output").innerHTML = "<p>URL to use: "+url+"</p><p><a href=\""+url+"\" target=\"_blank\">Try it</a></p>";
  }
  </script>
  </head>
