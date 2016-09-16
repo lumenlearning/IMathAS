@@ -242,6 +242,7 @@ if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
  ini_set("upload_max_filesize", "10485760");
  ini_set("post_max_size", "10485760");
  //louder than usual during beta of PDO
+ ini_set('display_errors',1);
  error_reporting(E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
  $CFG['GEN']['useSESmail'] = true;
