@@ -42,7 +42,7 @@
 					$md5pw = md5($_POST['password']);
 				}
 				//DB $query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
-				//DB $query .= "VALUES ('{$_POST['username']}','$md5pw',0,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}','$homelayout');";
+				//DB $query .= "VALUES ('{$_POST['username']}','$md5pw',12,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}','$homelayout');";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB $newuserid = mysql_insert_id();
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";

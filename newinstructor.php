@@ -46,7 +46,7 @@
 				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
 				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :homelayout);";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':SID'=>$_POST['username'], ':password'=>$md5pw, ':rights'=>0, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':homelayout'=>$homelayout));
+				$stm->execute(array(':SID'=>$_POST['username'], ':password'=>$md5pw, ':rights'=>12, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':homelayout'=>$homelayout));
 				$newuserid = $DBH->lastInsertId();
 				if (isset($CFG['GEN']['enrollonnewinstructor'])) {
 					$valbits = array();
@@ -77,7 +77,7 @@
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>"));
 
 
-				$message = "<p>Your new account request has been sent.</p>  ";
+				$message = "<p>Your new account request has been sent, for username {$_POST['username']}.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
 				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
 				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
