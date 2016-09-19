@@ -36,12 +36,9 @@
 					$homelayout = '|0,1,2||0,1';
 				}
 
-				if (isset($CFG['GEN']['newpasswords'])) {
-					require_once("./includes/password.php");
-					$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
-				} else {
-					$md5pw = md5($_POST['password']);
-				}
+				require_once("includes/password.php");
+				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
 				//DB $query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
 				//DB $query .= "VALUES ('{$_POST['username']}','$md5pw',0,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}','$homelayout');";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -71,7 +68,7 @@
 				$message .= "School: {$_POST['school']} <br/>\n";
 				$message .= "Phone: {$_POST['phone']} <br/>\n";
 				$message .= "Username: {$_POST['username']} <br/>\n";
-				mail($sendfrom,$subject,$message,$headers);
+				mail($accountapproval,$subject,$message,$headers);
 
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
