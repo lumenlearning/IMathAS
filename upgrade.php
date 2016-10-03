@@ -1,7 +1,7 @@
 <?php
 //change counter; increase by 1 each time a change is made
 //TODO:  change linked text tex to mediumtext
-$latest = 111;
+$latest = 113;
 
 
 @set_time_limit(0);
@@ -1861,6 +1861,22 @@ unset($dbpassword);
 			 if ($res===false) {
 				 echo "<p>Query failed: ($query) : ".$DBH->errorInfo()."</p>";
 			 }
+			 echo '<p>Added forum latepass columns</p>';
+		}
+		if ($last<112) {
+			//fix residual database f-up from bltilaunch copy of template not inserting imas_gbscheme record
+			$res = $DBH->query('INSERT INTO imas_gbscheme (courseid) SELECT ic.id FROM imas_courses AS ic LEFT JOIN imas_gbscheme ON ic.id=imas_gbscheme.courseid WHERE imas_gbscheme.id IS NULL');
+			if ($res===false) {
+				echo "<p>Query failed: ($query) : ".$DBH->errorInfo()."</p>";
+			}
+		}
+		if ($last<113) {
+			$query = "ALTER TABLE  `imas_assessment_sessions` ADD `ver` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0';";
+			$res = $DBH->query($query);
+			if ($res===false) {
+				echo "<p>Query failed: ($query) : ".$DBH->errorInfo()."</p>";
+			}
+			echo '<p>Added assessment sessions ver</p>';
 		}
 		/*$handle = fopen("upgradecounter.txt",'w');
 		if ($handle===false) {
