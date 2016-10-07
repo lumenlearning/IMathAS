@@ -525,6 +525,10 @@ function scorequestion($qn, $rectime=true) {
 		} else {
 			$time = 0;  //for all at once display, where time is not useful info
 		}
+		if (!isset($qi[$questions[$qn]]) || !isset($qi[$questions[$qn]]['questionsetid']) || $qi[$questions[$qn]]['questionsetid']===null) {
+			error_log(print_r($qi));
+			error_log(print_r($testsettings));
+		}
 		//DB $query = "INSERT INTO imas_firstscores (courseid,qsetid,score,scoredet,timespent) VALUES ";
 		//DB $query .= "('".addslashes($testsettings['courseid'])."','".$qi[$questions[$qn]]['questionsetid']."','".round(100*getpts($unitrawscore))."','".$rawscores[$qn]."','$time')";
 		$query = "INSERT INTO imas_firstscores (courseid,qsetid,score,scoredet,timespent) VALUES ";
