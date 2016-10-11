@@ -382,10 +382,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var addqaddr = '$address';
 		</script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=082816\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=101016\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $urlmode . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/savelibassignflag.php';</script>";
-	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=081716\" type=\"text/css\" />";
+	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=101016\" type=\"text/css\" />";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/iconfonts/style.css?v=081316\" type=\"text/css\" />";
 	$useeditor = "textsegmenteditor";
 
@@ -472,7 +472,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		if (isset($text_segments[$qncnt])) {
 			foreach ($text_segments[$qncnt] as $text_seg) {
 				//stupid hack: putting a couple extra unused entries in array so length>=5
-				$jsarr .= '["text", "'.str_replace('"','\\"',trim($text_seg['text'])).'",'.($text_seg['displayUntil']-$text_seg['displayBefore']+1).','.$text_seg['ispage'].',"'.str_replace('"','\\"',trim($text_seg['pagetitle'])).'",1],';
+				$jsarr .= '["text", "'.str_replace(array("\\",'"'),array("\\\\",'\\"'),trim($text_seg['text'])).'",'.($text_seg['displayUntil']-$text_seg['displayBefore']+1).','.$text_seg['ispage'].',"'.str_replace('"','\\"',trim($text_seg['pagetitle'])).'",1],';
 			}
 		}
 		if (strpos($items[$i],'~')!==false) {
