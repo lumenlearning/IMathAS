@@ -96,7 +96,11 @@ if (isset($_GET['showresults']) && is_array($sessiondata['drillresults'])) {
 		$message  = "<h4>This is an automated message.  Do not respond to this email</h4>\r\n";
 		$message .= "<p>Quick Drill Results for $stuname</p>";
 		$message .= "<p>$out</p>";
-		mail($_GET['email'],'QuickDrill Results',$message,$headers);
+		if (isset($CFG['GEN']['useSESmail'])) {
+			SESmail($_GET['email'], $sendfrom, 'QuickDrill Results',$message);
+		} else {
+			mail($_GET['email'],'QuickDrill Results',$message,$headers);
+		}
 		echo "<p>Email Sent</p>";
 	}
 	exit;
