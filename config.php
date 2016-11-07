@@ -24,12 +24,6 @@ $CFG['GEN']['livepollpassword'] = 'testing';
 //force use of better hashed pw
 $CFG['GEN']['newpasswords'] = "only";
 
-$CFG['FCM'] = array(
-  	  'SenderId' => '680665776094',
-  	  'webApiKey' => 'AIzaSyAfFxZMM5wEUezNDaP5ZxRrXG18FPnvUHE',
-  	  'serverApiKey' => getenv('FCM_SERVER_KEY')
-  	  );
-
 if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** WAMAP.org config ***/
 
@@ -110,7 +104,12 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['GEN']['mathjaxonly'] = true;
   //$CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
 
-  $CFG['FCM']['icon'] = '/wamap/img/large_icon.png';
+   $CFG['FCM'] = array(
+  	  'SenderId' => '994085988951',
+  	  'webApiKey' => 'AIzaSyCPYLTUn1kFIU3BjP2wMP07FiSmzpTwpd4',
+  	  'serverApiKey' => getenv('FCM_SERVER_KEY_W'),
+  	  'icon' => '/wamap/img/large_icon.png'
+  	  );
   
 /*** end WAMAP.org config ***/
 } else {
@@ -239,7 +238,12 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 
  $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
  
- $CFG['FCM']['icon'] = '/img/MOMico.png';
+ $CFG['FCM'] = array(
+  	  'SenderId' => '680665776094',
+  	  'webApiKey' => 'AIzaSyAfFxZMM5wEUezNDaP5ZxRrXG18FPnvUHE',
+  	  'serverApiKey' => getenv('FCM_SERVER_KEY'),
+  	  'icon' => '/img/MOMico.png'
+  	  );
  
  /*** end MyOpenMath config ***/
 }
