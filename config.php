@@ -240,7 +240,6 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
  
  $CFG['FCM']['icon'] = '/img/MOMico.png';
- $CFG['FCM']['badge'] = '/img/MOMbadge.png';
  
  /*** end MyOpenMath config ***/
 }
