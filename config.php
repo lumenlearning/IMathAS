@@ -298,10 +298,26 @@ if (isset($CFG['CPS']['theme'])) {
   } catch(PDOException $e) {
 	  die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
   }
-
+    $DBH->query("set session sql_mode=''");
+    
+    
+    
+    /*$link = mysql_connect($dbserver,$dbusername, $dbpassword)
+	  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
+	 mysql_select_db($dbname)
+	  or die("<p>Could not select database</p></div></body></html>");
+		function addslashes_deep($value) {
+		return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));
+	  }
+	  if (!get_magic_quotes_gpc()) {
+	   $_GET    = array_map('addslashes_deep', $_GET);
+	   $_POST  = array_map('addslashes_deep', $_POST);
+	   $_COOKIE = array_map('addslashes_deep', $_COOKIE);
+	 }
+*/
   unset($dbserver);
   unset($dbusername);
   unset($dbpassword);
-  $DBH->query("set session sql_mode=''");
+
 
 ?>
