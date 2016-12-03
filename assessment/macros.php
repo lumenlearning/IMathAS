@@ -590,7 +590,7 @@ function addfractionaxislabels($plot,$step) {
 			$xd = $n;
 		}
 		if ($d!=1) {$xd .= "/$d";}
-		$outst .= "line([$x,$tm],[$x,$tx]); text([$x,$tx],\"$xd\",\"below\");";
+		$outst .= "line([$x,$tm],[$x,$tx]); text([$x,$tm],\"$xd\",\"below\");";
 		$step++;
 	}
 	return str_replace("' />","$outst' />",$plot);
@@ -2180,9 +2180,13 @@ function evalbasic($str) {
 
 function formhoverover($label,$tip) {
 	if (function_exists('filter')) {
-		return '<span class="link" onmouseover="tipshow(this,\''.str_replace("'","\\'",htmlentities(filter($tip))).'\')" onmouseout="tipout()">'.$label.'</span>';
+		//return '<span class="link" onmouseover="tipshow(this,\''.str_replace("'","\\'",htmlentities(filter($tip))).'\')" onmouseout="tipout()">'.$label.'</span>';
+		return '<span role="button" tabindex="0" class="link" data-tip="'.htmlentities(filter($tip)).'" onmouseover="tipshow(this)" onfocus="tipshow(this)" onmouseout="tipout()" onblur="tipout()">'.$label.'</span>';
+
 	} else {
-		return '<span class="link" onmouseover="tipshow(this,\''.str_replace("'","\\'",htmlentities($tip)).'\')" onmouseout="tipout()">'.$label.'</span>';
+		///return '<span class="link" onmouseover="tipshow(this,\''.str_replace("'","\\'",htmlentities($tip)).'\')" onmouseout="tipout()">'.$label.'</span>';
+		return '<span role="button" tabindex="0" class="link" data-tip="'.htmlentities($tip).'" onmouseover="tipshow(this)" onfocus="tipshow(this)" onmouseout="tipout()" onblur="tipout()">'.$label.'</span>';
+
 	}
 }
 

@@ -75,17 +75,26 @@ function arraysearch(needle,hay) {
       return -1;
    }
 
-var tipobj = 0;
+var tipobj = 0; var curtipel = null;
 function tipshow(el,tip) {
 	if (typeof tipobj!= 'object') {
 		tipobj = document.createElement("div");
 		tipobj.className = "tips";
+		tipobj.setAttribute("role","tooltip");
+		tipobj.id = "hovertipsholder";
 		document.getElementsByTagName("body")[0].appendChild(tipobj);
 	}
-	tipobj.innerHTML = tip;
+	curtipel = el;
+	if (el.hasAttribute("data-tip")) {
+		tipobj.innerHTML = el.getAttribute("data-tip");
+	} else {
+		tipobj.innerHTML = tip;
+	}
 	tipobj.style.left = "5px";
 	tipobj.style.display = "block";
-
+	tipobj.setAttribute("aria-hidden","false");
+	el.setAttribute("aria-describedby", "hovertipsholder");
+	
 	if (typeof usingASCIIMath!='undefined' && typeof noMathRender != 'undefined') {
 		if (usingASCIIMath && !noMathRender) {
 			rendermathnode(tipobj);
@@ -110,7 +119,7 @@ function tipshow(el,tip) {
 	  }
 
         x += scrOfX;
-        if ((p[0] + tipobj.offsetWidth)>x) {
+        if ((p[0] + tipobj.offsetWidth)>x-10) {
         	p[0] = x - tipobj.offsetWidth - 30;
         }
 
@@ -146,6 +155,11 @@ function popupwindow(id,content,width,height,scroll) {
 }
 function tipout(el) {
 	tipobj.style.display = "none";
+	tipobj.setAttribute("aria-hidden","true");
+	if (curtipel) {
+		curtipel.removeAttribute("aria-describedby");
+	}
+	curtipel = null;
 }
 
 function findPos(obj) { //from quirksmode.org
