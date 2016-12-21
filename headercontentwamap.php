@@ -5,7 +5,7 @@ if ($coursetheme=='otbsreader.css') {
 if (!isset($flexwidth) && ($coursetheme=='wamap_fw.css' || $coursetheme=='wamap.css') && !isset($loadinginfoheader)) {
 	$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 ?>
-<div id="headercontent">
+<div id="headercontent" role="navigation" aria-label="System Navigation">
 <?php
 $usernameinheader = true;
 if (isset($userid) && $selfhasuserimg==1) {
@@ -13,11 +13,11 @@ if (isset($userid) && $selfhasuserimg==1) {
 		echo "<a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">";
 	}
 	if(isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
-		echo "<img src=\"{$urlmode}s3.amazonaws.com/{$GLOBALS['AWSbucket']}/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
+		echo "<img src=\"{$urlmode}s3.amazonaws.com/{$GLOBALS['AWSbucket']}/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\" alt=\"User Picture\"/>";
 	} else {
 		$curdir = rtrim(dirname(__FILE__), '/\\');
 		$galleryPath = "$curdir/course/files/";
-		echo "<img src=\"$imasroot/course/files/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
+		echo "<img src=\"$imasroot/course/files/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\" alt=\"User Picture\"/>";
 	}
 	if ($myrights > 5) {
 		echo '</a>';
@@ -28,19 +28,19 @@ if (isset($userid) && $selfhasuserimg==1) {
 <?php
 if (isset($userid)) {
 	if ($myrights > 5) {
-		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\"/></a><br/>";
+		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a><br/>";
 	} else {
 		echo '&nbsp;<br/><span id="myname">'.$userfullname.'</span><br/>';
 	}
 }
 echo '</div>';
-echo '<div id="headerbarlogo"><a href="'.$imasroot.'/index.php"><img src="'.$imasroot.'/wamap/img/wamaplogo.png" /></a>';
+echo '<div id="headerbarlogo"><a href="'.$imasroot.'/index.php"><img src="'.$imasroot.'/wamap/img/wamaplogo.png" alt="WAMAP"/></a>';
 ?>
 <span style="padding-left: 50px;">
 <?php
 if (isset($userid)) {
 	echo "<a href=\"$imasroot/index.php\">Home</a> | ";
-	echo '<a href="#" onclick="jQuery(\'#homemenu\').css(\'left\',jQuery(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> | ';
+	echo '<a href="#" onclick="jQuery(\'#homemenu\').css(\'left\',jQuery(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle" alt=""/></a> | ';
 
 	if (isset($teacherid)) {
 		echo "<a href=\"$imasroot/help.php?section=coursemanagement\">Help</a> ";

@@ -53,7 +53,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $newacctemail = "dlippman@pierce.ctc.edu";
   $accountapproval = "dlippman@pierce.ctc.edu";
   $colorshift = true;
-  $smallheaderlogo = '<img src="/wamap/img/wamaplogosmall.gif"/>';
+  $smallheaderlogo = '<img src="/wamap/img/wamaplogosmall.gif" alt="Show courses list"/>';
   $allownongrouplibs = false;
   $allowcourseimport = false;
   $enablebasiclti = true;
@@ -231,7 +231,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['GEN']['addwww'] = true;
  $CFG['GEN']['TOSpage'] = $imasroot.'/termsofuse.php';
  $CFG['GEN']['enrollonnewinstructor'] = array(1,11);
- $smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
+ $smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif" alt="Show courses list"/>';
  $CFG['GEN']['logopad'] = '20px';
 
  $CFG['GEN']['skipbrowsercheck'] = true;
