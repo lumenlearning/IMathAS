@@ -75,17 +75,26 @@ function arraysearch(needle,hay) {
       return -1;
    }
 
-var tipobj = 0;
+var tipobj = 0; var curtipel = null;
 function tipshow(el,tip) {
 	if (typeof tipobj!= 'object') {
 		tipobj = document.createElement("div");
 		tipobj.className = "tips";
+		tipobj.setAttribute("role","tooltip");
+		tipobj.id = "hovertipsholder";
 		document.getElementsByTagName("body")[0].appendChild(tipobj);
 	}
-	tipobj.innerHTML = tip;
+	curtipel = el;
+	if (el.hasAttribute("data-tip")) {
+		tipobj.innerHTML = el.getAttribute("data-tip");
+	} else {
+		tipobj.innerHTML = tip;
+	}
 	tipobj.style.left = "5px";
 	tipobj.style.display = "block";
-
+	tipobj.setAttribute("aria-hidden","false");
+	el.setAttribute("aria-describedby", "hovertipsholder");
+	
 	if (typeof usingASCIIMath!='undefined' && typeof noMathRender != 'undefined') {
 		if (usingASCIIMath && !noMathRender) {
 			rendermathnode(tipobj);
@@ -110,7 +119,7 @@ function tipshow(el,tip) {
 	  }
 
         x += scrOfX;
-        if ((p[0] + tipobj.offsetWidth)>x) {
+        if ((p[0] + tipobj.offsetWidth)>x-10) {
         	p[0] = x - tipobj.offsetWidth - 30;
         }
 
@@ -146,6 +155,11 @@ function popupwindow(id,content,width,height,scroll) {
 }
 function tipout(el) {
 	tipobj.style.display = "none";
+	tipobj.setAttribute("aria-hidden","true");
+	if (curtipel) {
+		curtipel.removeAttribute("aria-describedby");
+	}
+	curtipel = null;
 }
 
 function findPos(obj) { //from quirksmode.org
@@ -281,6 +295,7 @@ function chkAllNone(frmid, arr, mark, skip) {
   return false;
 }
 
+var tinyMCEPreInit = {base: imasroot+"/tinymce4"};
 function initeditor(edmode,edids,css,inline,setupfunction){
 	var cssmode = css || 0;
 	var inlinemode = inline || 0;
@@ -298,7 +313,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		selector: selectorstr,
 		inline: inlinemode,
 		plugins: [
-			"advlist attach image charmap anchor",
+			"advlist autolink attach image charmap anchor",
 			"searchreplace code link textcolor",
 			"media table paste asciimath asciisvg rollups"
 		],
@@ -353,13 +368,13 @@ function initeditor(edmode,edids,css,inline,setupfunction){
                 }]
         }
 	if (document.documentElement.clientWidth<385) {
-		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline";
+		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline | saveclose";
 		edsetup.toolbar2 = "bullist numlist outdent indent  | link image | asciimath asciisvg";
 	} else if (document.documentElement.clientWidth<465) {
-		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline forecolor";
+		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline forecolor | saveclose";
 		edsetup.toolbar2 = "bullist numlist outdent indent  | link unlink image | asciimath asciisvg";
 	} else if (document.documentElement.clientWidth<575) {
-		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor";
+		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor | saveclose";
 		edsetup.toolbar2 = " alignleft aligncenter | bullist numlist outdent indent  | link unlink image | asciimath asciimathcharmap asciisvg";
 	}
 	if (setupfunction) {
@@ -641,7 +656,7 @@ jQuery(document).ready(function($) {
 	$('body').fitVids();
 	$('a[target="_blank"]').each(function() {
 		if (!this.href.match(/youtu/) && !this.href.match(/vimeo/)) {
-		   $(this).append(' <img src="'+imasroot+'/img/extlink.png"/>')
+		   $(this).append(' <img src="'+imasroot+'/img/extlink.png" alt="External link"/>')
 		}
 	});
 });

@@ -1,6 +1,6 @@
 <?php
 require_once("config.php");
-$query = "SELECT count(*) FROM imas_users";
-$result = mysql_query($query) or exit(500);
+$DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$DBH->query("SELECT count(*) FROM imas_users");
 echo 'Success';
 ?>

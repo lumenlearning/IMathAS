@@ -104,6 +104,13 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
   $CFG['GEN']['mathjaxonly'] = true;
   //$CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
 
+   $CFG['FCM'] = array(
+  	  'SenderId' => '994085988951',
+  	  'webApiKey' => 'AIzaSyCPYLTUn1kFIU3BjP2wMP07FiSmzpTwpd4',
+  	  'serverApiKey' => getenv('FCM_SERVER_KEY_W'),
+  	  'icon' => '/wamap/img/large_icon.png'
+  	  );
+  
 /*** end WAMAP.org config ***/
 } else {
 
@@ -230,7 +237,14 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['GEN']['skipbrowsercheck'] = true;
 
  $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
-
+ 
+ $CFG['FCM'] = array(
+  	  'SenderId' => '680665776094',
+  	  'webApiKey' => 'AIzaSyAfFxZMM5wEUezNDaP5ZxRrXG18FPnvUHE',
+  	  'serverApiKey' => getenv('FCM_SERVER_KEY'),
+  	  'icon' => '/img/MOMico.png'
+  	  );
+ 
  /*** end MyOpenMath config ***/
 }
 
@@ -241,7 +255,9 @@ if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
 
  ini_set("upload_max_filesize", "10485760");
  ini_set("post_max_size", "10485760");
- error_reporting(0);
+ //louder than usual during beta of PDO
+ ini_set('display_errors',1);
+ error_reporting(E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
  $CFG['GEN']['useSESmail'] = true;
  function SESmail($email,$from,$subject,$message,$replyto='') {
@@ -272,25 +288,36 @@ if (isset($CFG['CPS']['theme'])) {
   	  $coursetheme = $defaultcoursetheme;
   }
   /* Connecting, selecting database */
-  if (!isset($dbsetup)) {
-	 $link = mysql_connect($dbserver,$dbusername, $dbpassword)
+  try {
+	  $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+	  //$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
+		//loud during beta
+		$DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	  // global $DBH;
+	  $GLOBALS["DBH"] = $DBH;
+  } catch(PDOException $e) {
+	  die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
+  }
+    $DBH->query("set session sql_mode=''");
+    
+    
+    
+    /*$link = mysql_connect($dbserver,$dbusername, $dbpassword)
 	  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
 	 mysql_select_db($dbname)
 	  or die("<p>Could not select database</p></div></body></html>");
+		function addslashes_deep($value) {
+		return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));
+	  }
+	  if (!get_magic_quotes_gpc()) {
+	   $_GET    = array_map('addslashes_deep', $_GET);
+	   $_POST  = array_map('addslashes_deep', $_POST);
+	   $_COOKIE = array_map('addslashes_deep', $_COOKIE);
+	 }
+*/
+  unset($dbserver);
+  unset($dbusername);
+  unset($dbpassword);
 
-	  unset($dbserver);
-	  unset($dbusername);
-	  unset($dbpassword);
-	  mysql_query("set session sql_mode=''");
-  }
-  //clean up post and get if magic quotes aren't on
-  function addslashes_deep($value) {
-	return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));
-  }
-  if (!get_magic_quotes_gpc()) {
-   $_GET    = array_map('addslashes_deep', $_GET);
-   $_POST  = array_map('addslashes_deep', $_POST);
-   $_COOKIE = array_map('addslashes_deep', $_COOKIE);
-  }
 
 ?>

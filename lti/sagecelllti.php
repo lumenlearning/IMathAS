@@ -3,28 +3,36 @@ $dbusername = getenv('PARAM4');
 $dbpassword = getenv('PARAM5');
 $dbserver = getenv('PARAM2');
 $dbname = "sagecell";
-$link = mysql_connect($dbserver,$dbusername, $dbpassword) 
-  or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
-mysql_select_db($dbname);
+//DB $link = mysql_connect($dbserver,$dbusername, $dbpassword)
+//DB   or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");
+//DB mysql_select_db($dbname);
+try {
+	$DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+	$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
+	// global $DBH;
+	$GLOBALS["DBH"] = $DBH;
+} catch(PDOException $e) {
+	die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
+}
 
-function addslashes_deep($value) {
+/*function addslashes_deep($value) {
 	return (is_array($value) ? array_map('addslashes_deep', $value) : addslashes($value));
   }
 if (!get_magic_quotes_gpc()) {
    $_GET    = array_map('addslashes_deep', $_GET);
    $_POST  = array_map('addslashes_deep', $_POST);
    $_COOKIE = array_map('addslashes_deep', $_COOKIE);
-} 
-
+}
+*/
 if (empty($_POST['oauth_consumer_key'])) {
 	echo 'Error: provide a key (any key - your domain name is suggested)';
 	exit;
-} 
+}
 if (empty($_POST['resource_link_id'])) {
 	echo 'Resource link id is required';
 	exit;
 }
-$ltirole = strtolower($_REQUEST['roles']);          
+$ltirole = strtolower($_REQUEST['roles']);
 if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false) {
 	$ltirole = 'instructor';
 } else {
@@ -38,20 +46,31 @@ if (isset($_GET['save'])) {
 	$code = $_POST['code'];
 	if ($_GET['id']!='new') {
 		$id = intval($_GET['id']);
-		$query = "UPDATE celldata SET code='$code' WHERE id=$id";
-		mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB $query = "UPDATE celldata SET code='$code' WHERE id=$id";
+		//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		$stm = $DBH->prepare("UPDATE celldata SET code=:code WHERE id=:id");
+		$stm->execute(array(':code'=>$code, ':id'=>$id));
 	} else {
+		//DB $query = "INSERT INTO celldata (domain,linkid,code) VALUES ";
+		//DB $query .= "('$domain','$linkid','$code')";
+		//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		//DB $id = mysql_insert_id();
 		$query = "INSERT INTO celldata (domain,linkid,code) VALUES ";
-		$query .= "('$domain','$linkid','$code')";
-		mysql_query($query) or die("Query failed : " . mysql_error());
-		$id = mysql_insert_id();
+		$query .= "(:domain, :linkid, :code)";
+		$stm = $DBH->prepare($query);
+		$stm->execute(array(':domain'=>$domain, ':linkid'=>$linkid, ':code'=>$code));
+		$id = $DBH->lastInsertId();
 	}
-} 
-$query = "SELECT code,id FROM celldata WHERE domain='$domain' AND linkid='$linkid'";
-$result = mysql_query($query) or die("Query failed : " . mysql_error());
-if (mysql_num_rows($result)>0) {
-	$code = mysql_result($result,0,0);
-	$id = mysql_result($result,0,1);
+}
+//DB $query = "SELECT code,id FROM celldata WHERE domain='$domain' AND linkid='$linkid'";
+//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+//DB if (mysql_num_rows($result)>0) {
+	//DB $code = mysql_result($result,0,0);
+	//DB $id = mysql_result($result,0,1);
+$stm = $DBH->prepare("SELECT code,id FROM celldata WHERE domain=:domain AND linkid=:linkid");
+$stm->execute(array(':domain'=>$domain, ':linkid'=>$linkid));
+if ($stm->rowCount()>0) {
+	list($code, $id) = $stm->fetch(PDO::FETCH_NUM);
 } else {
 	$code = "a = solve(x^2+3*x-2==0,x); print a\nplot(x^2+3*x-2,(-4,4))";
 	$id = 'new';
@@ -68,9 +87,9 @@ if (mysql_num_rows($result)>0) {
 $(sagecell.init(
     function() {
         singlecell.makeSagecell({
-            inputLocation: '#sagecell1', 
+            inputLocation: '#sagecell1',
             replaceOutput: true,
-            hide: ['messages', 'computationID', 'files', 'sageMode', 
+            hide: ['messages', 'computationID', 'files', 'sageMode',
                    'editorToggle', 'sessionTitle', 'done'],
             evalButtonText: 'Evaluate'})
     }
@@ -103,4 +122,3 @@ if ($ltirole == 'instructor') {
 ?>
 </body>
 </html>
-

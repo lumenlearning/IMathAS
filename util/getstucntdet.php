@@ -45,9 +45,11 @@ ul {
 		$skipcid = array();
 	}
 	
-	$query = "SELECT id FROM imas_courses WHERE (istemplate&4)=4";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	while ($row = mysql_fetch_row($result)) {
+	//DB $query = "SELECT id FROM imas_courses WHERE (istemplate&4)=4";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB while ($row = mysql_fetch_row($result)) {
+	$stm = $DBH->query("SELECT id FROM imas_courses WHERE (istemplate&4)=4");
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$skipcid[] = $row[0];
 	}
 	$skipcids = implode(',',$skipcid);
@@ -61,11 +63,13 @@ ul {
 	$query .= "JOIN imas_users as u ";
 	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
 	
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->query($query);
 	$lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = ''; $grpinstrcnt = 0;
 	$lastemail = '';
 	$seencid = array();
-	while ($row = mysql_fetch_row($result)) {
+	//DB while ($row = mysql_fetch_row($result)) {
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		if ($row[1].', '.$row[2]!=$lastuser) {
 			if ($lastuser != '') {
 				$grpdata .= '<li><b>'.$lastuser.'</b><ul>';

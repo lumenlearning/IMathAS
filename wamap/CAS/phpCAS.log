@@ -293,3 +293,93 @@ EBA1 .|    <= false
 EBA1 .<= false
 EBA1 .authentication was checked (by phpCAS::checkAuthentication() at C:\GoogleSVN\trunk\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
 EBA1 .exit()
+3532 .START ****************** [CAS.php:414]
+3532 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:360]
+3532 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+3532 .|    <= ''
+3532 .<= ''
+3532 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:363]
+3532 .<= ''
+3532 .=> phpCAS::checkAuthentication() [tcclaunch.php:373]
+3532 .|    => CASClient::checkAuthentication() [CAS.php:884]
+3532 .|    |    => CASClient::isAuthenticated() [client.php:732]
+3532 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+3532 .|    |    |    |    no user found [client.php:895]
+3532 .|    |    |    <= false
+3532 .|    |    |    no ticket found [client.php:825]
+3532 .|    |    <= false
+3532 .|    |    user is not authenticated (cache reset) [client.php:767]
+3532 .|    |    => CASClient::redirectToCas(true) [client.php:768]
+3532 .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+3532 .|    |    |    |    => CASClient::getURL() [client.php:331]
+3532 .|    |    |    |    <= 'http://localhost/myopenmath/wamap/CAS/tcclaunch.php'
+3532 .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fmyopenmath%2Fwamap%2FCAS%2Ftcclaunch.php&gateway=true'
+3532 .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fmyopenmath%2Fwamap%2FCAS%2Ftcclaunch.php&gateway=true
+3532 .|    |    |    exit()
+3532 .|    |    |    -
+3532 .|    |    -
+3532 .|    -
+AB8C .START ****************** [CAS.php:414]
+AB8C .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:360]
+AB8C .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+AB8C .|    <= ''
+AB8C .<= ''
+AB8C .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:363]
+AB8C .<= ''
+AB8C .=> phpCAS::checkAuthentication() [tcclaunch.php:373]
+AB8C .|    => CASClient::checkAuthentication() [CAS.php:884]
+AB8C .|    |    => CASClient::isAuthenticated() [client.php:732]
+AB8C .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+AB8C .|    |    |    |    no user found [client.php:895]
+AB8C .|    |    |    <= false
+AB8C .|    |    |    no ticket found [client.php:825]
+AB8C .|    |    <= false
+AB8C .|    <= false
+AB8C .<= false
+AB8C .authentication was checked (by phpCAS::checkAuthentication() at D:\myopenmath\wamap\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+AB8C .exit()
+E105 .START ****************** [CAS.php:414]
+E105 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:360]
+E105 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+E105 .|    <= ''
+E105 .<= ''
+E105 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:363]
+E105 .<= ''
+E105 .=> phpCAS::checkAuthentication() [tcclaunch.php:373]
+E105 .|    => CASClient::checkAuthentication() [CAS.php:884]
+E105 .|    |    => CASClient::isAuthenticated() [client.php:732]
+E105 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+E105 .|    |    |    |    no user found [client.php:895]
+E105 .|    |    |    <= false
+E105 .|    |    |    no ticket found [client.php:825]
+E105 .|    |    <= false
+E105 .|    |    user is not authenticated (cache reset) [client.php:767]
+E105 .|    |    => CASClient::redirectToCas(true) [client.php:768]
+E105 .|    |    |    => CASClient::getServerLoginURL(true, false) [client.php:912]
+E105 .|    |    |    |    => CASClient::getURL() [client.php:331]
+E105 .|    |    |    |    <= 'http://localhost/myopenmath/wamap/CAS/tcclaunch.php'
+E105 .|    |    |    <= 'https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fmyopenmath%2Fwamap%2FCAS%2Ftcclaunch.php&gateway=true'
+E105 .|    |    |    Redirect to : https://my.tacomacc.edu:443/cas/login?service=http%3A%2F%2Flocalhost%2Fmyopenmath%2Fwamap%2FCAS%2Ftcclaunch.php&gateway=true
+E105 .|    |    |    exit()
+E105 .|    |    |    -
+E105 .|    |    -
+E105 .|    -
+3DD3 .START ****************** [CAS.php:414]
+3DD3 .=> phpCAS::client('2.0', 'my.tacomacc.edu', 443, '/cas', false) [tcclaunch.php:360]
+3DD3 .|    => CASClient::CASClient('2.0', false, 'my.tacomacc.edu', 443, '/cas', false) [CAS.php:315]
+3DD3 .|    <= ''
+3DD3 .<= ''
+3DD3 .=> phpCAS::setNoCasServerValidation() [tcclaunch.php:363]
+3DD3 .<= ''
+3DD3 .=> phpCAS::checkAuthentication() [tcclaunch.php:373]
+3DD3 .|    => CASClient::checkAuthentication() [CAS.php:884]
+3DD3 .|    |    => CASClient::isAuthenticated() [client.php:732]
+3DD3 .|    |    |    => CASClient::wasPreviouslyAuthenticated() [client.php:791]
+3DD3 .|    |    |    |    no user found [client.php:895]
+3DD3 .|    |    |    <= false
+3DD3 .|    |    |    no ticket found [client.php:825]
+3DD3 .|    |    <= false
+3DD3 .|    <= false
+3DD3 .<= false
+3DD3 .authentication was checked (by phpCAS::checkAuthentication() at D:\myopenmath\wamap\CAS\CAS.php:887) but the method returned FALSE [CAS.php:484]
+3DD3 .exit()

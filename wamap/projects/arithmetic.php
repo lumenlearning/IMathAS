@@ -5,7 +5,7 @@ ini_set("max_execution_time", "600");
 ini_set("memory_limit", "104857600");
 ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
-date_default_timezone_set('America/Los_Angeles'); 
+date_default_timezone_set('America/Los_Angeles');
 if (isset($_GET['public'])) {
 	require("../../config.php");
 	$ispublic = true;
@@ -126,7 +126,7 @@ $questions = array(
 			'ALG-INT'=>'Solving equations with signed numbers',
 			'GR'=>'Graphing',
 			'GR-PL'=>'The coordinate plane',
-			'GR-EQN'=>'Plotting points to graph an equation'			
+			'GR-EQN'=>'Plotting points to graph an equation'
 			)
 		),
 	"type"=>array(
@@ -261,9 +261,9 @@ if (isset($_GET['sql'])) {
 	$sql .= 'files TEXT NOT NULL DEFAULT \'\')'."\n";
 	echo $sql;
 	exit;
-	
+
 	/*
-	
+
 CREATE TABLE IF NOT EXISTS `arithmetic_ratings` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `taskid` int(10) unsigned NOT NULL,
@@ -278,12 +278,13 @@ CREATE TABLE IF NOT EXISTS `arithmetic_ratings` (
 }
 
 if (isset($_GET['filterby'])) {
-	$_SESSION['pfilter-'.$_GET['filterby']] = stripslashes($_GET['filterval']);
+	//DB $_SESSION['pfilter-'.$_GET['filterby']] = stripslashes($_GET['filterval']);
+	$_SESSION['pfilter-'.$_GET['filterby']] = $_GET['filterval'];
 }
 
 if (isset($_GET['modify']) && !$ispublic) {
 	if (isset($_POST['title'])) {
-		//submitting	
+		//submitting
 		$tosave = array();
 		foreach ($questions as $key=>$arr) {
 			if ($arr['type']=='input' || $arr['type']=='textarea' || $arr['type']=='radio' || $arr['type']=='select') {
@@ -305,24 +306,35 @@ if (isset($_GET['modify']) && !$ispublic) {
 			$tosave['ownerid'] = $userid;
 			$tosave['postedon'] = time();
 			$tosave['lastmod'] = time();
-			$keys = implode(',',array_keys($tosave));
-			$vals = "'".implode("','",array_values($tosave))."'";
-			$query = "INSERT INTO arithmetic ($keys) VALUES ($vals)";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$_GET['modify'] = mysql_insert_id();
+			$keys = implode(',', array_keys($tosave)); //safe values, provided by us
+			//DB $vals = "'".implode("','",array_values($tosave))."'";
+			$phs = ':'.implode(',:', array_keys($tosave));
+			//DB $query = "INSERT INTO arithmetic ($keys) VALUES ($vals)";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $_GET['modify'] = mysql_insert_id();
+			$stm = $DBH->prepare("INSERT INTO arithmetic ($keys) VALUES ($phs)");
+			$stm->execute($tosave);
+			$_GET['modify'] = $DBH->lastInsertId();
 			$files = array();
 		} else {
 			$sets = array();
+			$qarr = array();
 			foreach ($tosave as $k=>$v) {
-				$sets[] = "$k='$v'";
+				$sets[] = "$k=:$k";
+				$qarr[":$k"] = $v;
 			}
 			$sets[] = 'lastmod='.time();
 			$sets = implode(',',$sets);
-			$query = "UPDATE arithmetic SET $sets WHERE id='{$_GET['modify']}'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$query = "SELECT files FROM arithmetic WHERE id='{$_GET['modify']}'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$files = mysql_result($result,0,0);
+			//DB $query = "UPDATE arithmetic SET $sets WHERE id='{$_GET['modify']}'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			$stm = $DBH->prepare("UPDATE arithmetic SET $sets WHERE id=:id");
+			$stm->execute($qarr + array(':id'=>$_GET['modify']));
+			//DB $query = "SELECT files FROM arithmetic WHERE id='{$_GET['modify']}'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $files = mysql_result($result,0,0);
+			$stm = $DBH->prepare("SELECT files FROM arithmetic WHERE id=:id");
+			$stm->execute(array(':id'=>$_GET['modify']));
+			$files = $stm->fetchColumn(0);
 			if ($files=='') {
 				$files = array();
 			} else {
@@ -331,7 +343,8 @@ if (isset($_GET['modify']) && !$ispublic) {
 		}
 		if (isset($_POST['filedesc'])) {
 			foreach ($_POST['filedesc'] as $i=>$v) {
-				$files[2*$i] = stripslashes(str_replace('@@','@',$v));
+				//DB $files[2*$i] = stripslashes(str_replace('@@','@',$v));
+				$files[2*$i] = str_replace('@@','@',$v);
 			}
 			for ($i=count($files)/2-1;$i>=0;$i--) {
 				if (isset($_POST['filedel'][$i])) {
@@ -345,13 +358,14 @@ if (isset($_GET['modify']) && !$ispublic) {
 		while (isset($_POST['newfiledesc-'.$i])) {
 			if (isset($_POST['newweblink-'.$i]) && substr($_POST['newweblink-'.$i],0,4)=='http') {
 				if (!isset($_FILES['newfile-'.$i]) || !is_uploaded_file($_FILES['newfile-'.$i]['tmp_name'])) {
-					$files[] = stripslashes($_POST['newfiledesc-'.$i]);
+					//DB $files[] = stripslashes($_POST['newfiledesc-'.$i]);
+					$files[] = $_POST['newfiledesc-'.$i];
 					$files[] = '#'.$_POST['newweblink-'.$i];
 				}
 			}
 			$i++;
 		}
-			
+
 		if (isset($_FILES['newfile-0'])) {
 			$i = 0;
 			$badextensions = array(".php",".php3",".php4",".php5",".bat",".com",".pl",".p");
@@ -364,32 +378,45 @@ if (isset($_GET['modify']) && !$ispublic) {
 					$_POST['newfiledesc-'.$i] = str_replace('@@','@',$_POST['newfiledesc-'.$i]);
 					$extension = strtolower(strrchr($userfilename,"."));
 					if (!in_array($extension,$badextensions) && storeuploadedfile('newfile-'.$i,'arithmetic/'.$_GET['modify'].'/'.$userfilename,"public")) {
-						$files[] = stripslashes($_POST['newfiledesc-'.$i]);
+						//DB $files[] = stripslashes($_POST['newfiledesc-'.$i]);
+						$files[] = $_POST['newfiledesc-'.$i];
 						$files[] = $userfilename;
 					}
-					
+
 				}
 				$i++;
 			}
 		}
-		$files = addslashes(implode('@@',$files));
-		$query = "UPDATE arithmetic SET files='$files' WHERE id='{$_GET['modify']}'";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+		//DB $files = addslashes(implode('@@',$files));
+		$files = implode('@@',$files);
+		//DB $query = "UPDATE arithmetic SET files='$files' WHERE id='{$_GET['modify']}'";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$stm = $DBH->prepare("UPDATE arithmetic SET files=:files WHERE id=:id");
+		$stm->execute(array(':files'=>$files, ':id'=>$_GET['modify']));
 		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/arithmetic.php");
-		exit;		
+		exit;
 	} else {
 		//adding / modifying a task form
 		if ($_GET['modify'] != 'new') {
-			$query = "SELECT * from arithmetic WHERE id='{$_GET['modify']}'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$line = mysql_fetch_array($result, MYSQL_ASSOC);
+			//DB $query = "SELECT * from arithmetic WHERE id='{$_GET['modify']}'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
+			$stm = $DBH->prepare("SELECT * from arithmetic WHERE id=:id");
+			$stm->execute(array(':id'=>$_GET['modify']));
+			$line = $stm->fetch(PDO::FETCH_ASSOC);
 		} else {
-			$query = "SELECT name FROM imas_groups WHERE id='$groupid'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$college = mysql_result($result,0,0);
-			$query = "SELECT email FROM imas_users WHERE id='$userid'";
-			$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			$email = mysql_result($result,0,0);
+			//DB $query = "SELECT name FROM imas_groups WHERE id='$groupid'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $college = mysql_result($result,0,0);
+			$stm = $DBH->prepare("SELECT name FROM imas_groups WHERE id=:id");
+			$stm->execute(array(':id'=>$groupid));
+			$college = $stm->fetchColumn(0);
+			//DB $query = "SELECT email FROM imas_users WHERE id='$userid'";
+			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+			//DB $email = mysql_result($result,0,0);
+			$stm = $DBH->prepare("SELECT email FROM imas_users WHERE id=:id");
+			$stm->execute(array(':id'=>$userid));
+			$email = $stm->fetchColumn(0);
 			$line = array('dev'=>$userfullname,'college'=>$college,'contact'=>$email);
 		}
 		$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
@@ -419,7 +446,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					}
 					echo '<br/>';
 				}
-				
+
 			} else if ($arr['type']=='select') {
 				echo '<select name="'.$key.'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
@@ -427,7 +454,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 				foreach ($arr['arr'] as $k=>$v) {
 					echo '<option value="'.$k.'" ';
 					if ($k==$line[$key] || ((!isset($line[$key]) || $line[$key]=='') && $k==$arr['def'])) {echo 'selected="selected"';}
-					
+
 					echo '/> '.$v.'</option>';
 				}
 				echo '</select>';
@@ -446,7 +473,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					}
 					echo '<br/>';
 				}
-				
+
 			} else if ($arr['type']=='selecttwoother') {
 				if ($line[$key]!='') {
 					if (strpos($line[$key],';')===false) {
@@ -483,9 +510,9 @@ if (isset($_GET['modify']) && !$ispublic) {
 				echo '<br/>';
 			}
 			echo '</p>';
-			
+
 		}
-	
+
 		echo "<p>Files: <i>When possible, please include editable (Word, TeX, etc.) versions of the files.</i><br/>";
 		if ($line['files']!='') {
 			$files = explode('@@',$line['files']);
@@ -507,10 +534,12 @@ if (isset($_GET['modify']) && !$ispublic) {
 		exit;
 	}
 } else if (isset($_GET['summary'])) {
-	$query = "SELECT topic,purpose FROM arithmetic WHERE 1";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $query = "SELECT topic,purpose FROM arithmetic WHERE 1";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->query("SELECT topic,purpose FROM arithmetic WHERE 1");
 	$cnts = array();
-	while ($row = mysql_fetch_row($result)) {
+	//DB while ($row = mysql_fetch_row($result)) {
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$tp = explode(';',$row[0]);
 		if (count($tp)<3) {continue;}
 		for ($i=1;$i<3;$i++) {
@@ -535,16 +564,16 @@ if (isset($_GET['modify']) && !$ispublic) {
 	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="arithmetic.php'.($ispublic?'?public=true':'').'">Task List</a> &gt; Topic coverage summary</div>';
 	echo '<p>Topic Coverage Summary</p>';
-	
+
 	echo '<table class="gb"><thead><tr><th>Topic</th>';
 	foreach ($questions['purpose']['arr'] as $k=>$v) {
 		echo '<th>'.$v.'</th>';
-	} 
+	}
 	echo '</tr></thead><tbody>';
 	foreach ($questions['topic']['arr'] as $tk=>$tv) {
 		if (strpos($tk,'-')===false) {
 		   echo '<tr><td colspan="'.(count($questions['purpose']['arr'])+1).'"><b>'.$tv.'</b></td></tr>';
-		   
+
 		} else {
 			echo '<tr><td>'.$tv.'</td>';
 			foreach ($questions['purpose']['arr'] as $k=>$v) {
@@ -555,7 +584,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					echo '-';
 				}
 				echo '</td>';
-			} 
+			}
 			echo '</tr>';
 		}
 	}
@@ -564,10 +593,13 @@ if (isset($_GET['modify']) && !$ispublic) {
 	echo '</body></html>';
 	exit;
 } else if (isset($_GET['remove']) && !$ispublic) {
-	$query = "SELECT ownerid,files FROM arithmetic WHERE id='{$_GET['remove']}'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	if (mysql_result($result,0,0)==$userid || $myrights==100 || $userid==745) {
-		$files = mysql_result($result,0,1);
+	//DB $query = "SELECT ownerid,files FROM arithmetic WHERE id='{$_GET['remove']}'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare("SELECT ownerid,files FROM arithmetic WHERE id=:id");
+	$stm->execute(array(':id'=>$_GET['remove']));
+	list($ownerid,$files) = $stm->fetch(PDO::FETCH_NUM);
+	if ($ownerid==$userid || $myrights==100 || $userid==745) {
+		//DB $files = mysql_result($result,0,1);
 		if ($files != '') {
 			$files = explode('@@',$files);
 			for ($i=0;$i<count($files)/2;$i++) {
@@ -576,32 +608,44 @@ if (isset($_GET['modify']) && !$ispublic) {
 				}
 			}
 		}
-		$query = "DELETE FROM arithmetic WHERE id='{$_GET['remove']}'";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+		//DB $query = "DELETE FROM arithmetic WHERE id='{$_GET['remove']}'";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$stm = $DBH->prepare("DELETE FROM arithmetic WHERE id=:id");
+		$stm->execute(array(':id'=>$_GET['remove']));
 	}
 	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/arithmetic.php");
-	exit;	
+	exit;
 } else if (isset($_GET['saverating']) && isset($_POST['rating']) && !$ispublic) {
 	$_POST['comments'] = preg_replace("/\n\n\n+/","\n\n",$_POST['comments']);
 	$_POST['comments'] = strip_tags($_POST['comments']);
 	$_POST['comments'] = str_replace("\n","<br/>",$_POST['comments']);
-	$query = "SELECT id FROM arithmetic_ratings WHERE taskid='{$_POST['taskid']}' AND userid='$userid'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $query = "SELECT id FROM arithmetic_ratings WHERE taskid='{$_POST['taskid']}' AND userid='$userid'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare("SELECT id FROM arithmetic_ratings WHERE taskid=:taskid AND userid=:userid");
+	$stm->execute(array(':taskid'=>$_POST['taskid'], ':userid'=>$userid));
 	$now = time();
-	if (mysql_num_rows($result)>0) { //updating
-		$id = mysql_result($result,0,0);
-		$query = "UPDATE arithmetic_ratings SET rating='{$_POST['rating']}',comment='{$_POST['comments']}',rateon=$now WHERE id=$id";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB if (mysql_num_rows($result)>0) {
+		//DB $id = mysql_result($result,0,0);
+	if ($stm->rowCount()>0) {
+		$id = $stm->fetchColumn(0);
+		//DB $query = "UPDATE arithmetic_ratings SET rating='{$_POST['rating']}',comment='{$_POST['comments']}',rateon=$now WHERE id=$id";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$stm = $DBH->prepare("UPDATE arithmetic_ratings SET rating=:rating,comment=:comment,rateon=:rateon WHERE id=:id");
+		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':id'=>$id));
 	} else {//insert
+		//DB $query = "INSERT INTO arithmetic_ratings (rating,comment,rateon,userid,taskid) VALUES ";
+		//DB $query .= "('{$_POST['rating']}','{$_POST['comments']}',$now,'$userid','{$_POST['taskid']}')";
+		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$query = "INSERT INTO arithmetic_ratings (rating,comment,rateon,userid,taskid) VALUES ";
-		$query .= "('{$_POST['rating']}','{$_POST['comments']}',$now,'$userid','{$_POST['taskid']}')";
-		mysql_query($query) or die("Query failed : $query " . mysql_error());
+		$query .= "(:rating, :comment, :rateon, :userid, :taskid)";
+		$stm = $DBH->prepare($query);
+		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':userid'=>$userid, ':taskid'=>$_POST['taskid']));
 	}
 	echo getratingsfor($_POST['taskid']);
-	
+
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
-	$placeinhead .= '<script type="text/javascript"> 
+	$placeinhead .= '<script type="text/javascript">
 		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/arithmetic.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
@@ -610,10 +654,13 @@ if (isset($_GET['modify']) && !$ispublic) {
 	echo '<div id="ratingholder">';
 	echo getratingsfor($_GET['id']);
 	echo '</div>';
-	
-	$query = "SELECT arithmetic.*,iu.LastName,iu.FirstName FROM arithmetic JOIN imas_users AS iu ON arithmetic.ownerid=iu.id WHERE arithmetic.id='{$_GET['id']}'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	$line = mysql_fetch_array($result, MYSQL_ASSOC);
+
+	//DB $query = "SELECT arithmetic.*,iu.LastName,iu.FirstName FROM arithmetic JOIN imas_users AS iu ON arithmetic.ownerid=iu.id WHERE arithmetic.id='{$_GET['id']}'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
+	$stm = $DBH->prepare("SELECT arithmetic.*,iu.LastName,iu.FirstName FROM arithmetic JOIN imas_users AS iu ON arithmetic.ownerid=iu.id WHERE arithmetic.id=:id");
+	$stm->execute(array(':id'=>$_GET['id']));
+	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	echo '<table class="gb"><tbody>';
 	foreach ($questions as $key=>$arr) {
 		if ((trim($line[$key])=='' || $line[$key]=='N') && !isset($arr['showalways'])) { continue;}
@@ -651,8 +698,8 @@ if (isset($_GET['modify']) && !$ispublic) {
 		}
 		echo '</td></tr>';
 	}
-	
-	
+
+
 	if ($line['files']!='') {
 		$canpreview = array('doc','docx','xls','xlsx','html','ppt','pptx','pdf');
 		echo '<tr><td class="r">Files:</td><td>';
@@ -666,7 +713,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 				$url = substr($fl[2*$i+1],1);
 			}
 			echo '<a href="'.$url.'" target="_blank">';
-			
+
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
 			} else {
@@ -683,7 +730,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		}
 		echo '</td></tr>';
 	}
-	
+
 	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.$line['FirstName'].' '.$line['LastName'].'</td></tr>';
 	echo '<tr><td class="r">Last Updated</td><td>'.date("F j, Y, g:i a", $line['lastmod']).'</td></tr>';
 	echo '</tbody></table>';
@@ -691,7 +738,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 } else {
 	$nologo = true;
 	$address = 'http://' .  $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/arithmetic.php".($ispublic?'?public=true':'?pb=true');
-	
+
 	$placeinhead .= '<script type="text/javascript">
 		function chgfilter(el) {
 			window.location.href = "'.$address.'&filterby="+el.id+"&filterval="+el.value;
@@ -699,7 +746,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		</script>';
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/tablesorter.js"></script>';
-	
+
 	require("../../header.php");
 	echo '<div class="cp">';
 	foreach ($questions as $key=>$arr) {
@@ -745,25 +792,35 @@ if (isset($_GET['modify']) && !$ispublic) {
 	$query = "SELECT arithmetic.*,iu.FirstName,iu.LastName,count(ar.rating) AS ratingcnt,avg(ar.rating) AS ratingavg FROM ";
 	$query .= "arithmetic LEFT JOIN arithmetic_ratings AS ar ON ar.taskid=arithmetic.id ";
 	$query .= "JOIN imas_users AS iu ON arithmetic.ownerid=iu.id WHERE 1 ";
+	$qarr = array();
 	foreach ($questions as $key=>$arr) {
 		if (isset($arr['searchby']) && $arr['searchby']==false) {continue;}
 		if (isset($_SESSION['pfilter-'.$key]) && $_SESSION['pfilter-'.$key]!='-1') {
 			if ($arr['type'] == 'radio' || $arr['type'] == 'select' ) {
-				$query .= 'AND arithmetic.'. $key .'=\''.addslashes($_SESSION['pfilter-'.$key]).'\' ';
+				//DB $query .= 'AND arithmetic.'. $key .'=\''.addslashes($_SESSION['pfilter-'.$key]).'\' ';
+				$query .= 'AND arithmetic.'. $key .'=? ';
+				$qarr[] = $_SESSION['pfilter-'.$key];
 			} else if ($arr['type'] == 'checkbox') {
-				$query .= 'AND arithmetic.'. $key .' LIKE \'%'.addslashes($_SESSION['pfilter-'.$key]).'%\' ';
+				//DB $query .= 'AND arithmetic.'. $key .' LIKE \'%'.addslashes($_SESSION['pfilter-'.$key]).'%\' ';
+				$query .= 'AND arithmetic.'. $key .' LIKE ? ';
+				$qarr[] = '%'.$_SESSION['pfilter-'.$key].'%';
 			} else if ($arr['type'] == 'selecttwoother') {
-				$query .= 'AND arithmetic.'. $key .' LIKE \'%;'.addslashes($_SESSION['pfilter-'.$key]).';%\' ';
-			} 
+				//DB $query .= 'AND arithmetic.'. $key .' LIKE \'%;'.addslashes($_SESSION['pfilter-'.$key]).';%\' ';
+				$query .= 'AND arithmetic.'. $key .' LIKE ? ';
+				$qarr[] = '%;'.$_SESSION['pfilter-'.$key].';%';
+			}
 		}
 	}
 	$query .= "GROUP BY arithmetic.id ORDER BY id DESC";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$stm = $DBH->prepare($query);
+	$stm->execute($qarr);
 	$i = 0;
 	$lines = array();
 	$ratetimescnt = 0;
 	$totcnt = 0;
-	while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		$lines[] = $line;
 		if ($line['ratingcnt']>0) {
 			$ratetimescnt += $line['ratingavg']*$line['ratingcnt'];
@@ -790,13 +847,13 @@ if (isset($_GET['modify']) && !$ispublic) {
 		}
 		$line['topic'] =  implode('; ',$out);
 		if ($line['ratingavg']==null) {$line['ratingavg'] = 0;}
-		
+
 		echo '<tr ';
 		if ($i%2==0) { echo 'class="even"';} else {echo 'class="odd"';}
 		echo '>';
 		$i++;
 		echo '<td><a href="arithmetic.php?id='.$line['id'].($ispublic?'&amp;public=true':'').'">'.$line['title'].'</a></td>';
-		
+
 		echo '<td>'.$line['topic'].'</td>';
 		if ($line['ratingcnt']>0) {
 			$v = $line['ratingcnt']/($line['ratingcnt'] + 5);
@@ -814,7 +871,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		echo $dev[0];
 		if (count($dev)>1) {
 			echo ' et al.';
-		} 
+		}
 		echo '</td><td>';
 		if ($line['ownerid']==$userid || $myrights==100 || $userid==745) {
 			echo '<span style="font-size: 70%" class="nowrap"><a href="arithmetic.php?modify='.$line['id'].'">Modify</a> | ';
@@ -830,24 +887,29 @@ if (isset($_GET['modify']) && !$ispublic) {
 	echo '</p>';
 	echo '</body></html>';
 
-}	
+}
 
 function getratingsfor($id) {
-	global $userid, $ispublic;
+	global $DBH,$userid, $ispublic;
+	//DB $query = "SELECT tr.rating,tr.comment,tr.userid,iu.FirstName,iu.LastName,tr.rateon FROM arithmetic_ratings AS tr JOIN imas_users AS iu ON tr.userid=iu.id ";
+	//DB $query .= "WHERE tr.taskid='$id' ORDER BY tr.rateon DESC";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$query = "SELECT tr.rating,tr.comment,tr.userid,iu.FirstName,iu.LastName,tr.rateon FROM arithmetic_ratings AS tr JOIN imas_users AS iu ON tr.userid=iu.id ";
-	$query .= "WHERE tr.taskid='$id' ORDER BY tr.rateon DESC";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	$query .= "WHERE tr.taskid=:taskid ORDER BY tr.rateon DESC";
+	$stm = $DBH->prepare($query);
+	$stm->execute(array(':taskid'=>$id));
 	$ratings = array();
 	$i = 0;
 	$myrating = -1;
 	$totrat = 0;
-	while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
 		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],$line['rateon']);
 		$totrat += $line['rating'];
 		$i++;
 	}
-	
+
 	$out = '<div class="arating">';
 	if ($i>0) {
 		$totrat /= $i;
@@ -858,7 +920,7 @@ function getratingsfor($id) {
 		$out .= 'No ratings yet';
 	}
 	$out .= '</div>';
-		
+
 	if ($myrating==-1) { //not yet rated
 		$rating = 0;
 		$comments = '';
@@ -924,11 +986,11 @@ function getratingsfor($id) {
 function time_elapsed_string($ptime) {
 	//from http://www.zachstronaut.com/posts/2009/01/20/php-relative-date-time-string.html
     $etime = time() - $ptime;
-    
+
     if ($etime < 1) {
         return 'a second ago';
     }
-    
+
     $a = array( 12 * 30 * 24 * 60 * 60  =>  'year',
                 30 * 24 * 60 * 60       =>  'month',
                 24 * 60 * 60            =>  'day',
@@ -936,7 +998,7 @@ function time_elapsed_string($ptime) {
                 60                      =>  'minute',
                 1                       =>  'second'
                 );
-    
+
     foreach ($a as $secs => $str) {
         $d = $etime / $secs;
         if ($d >= 1) {
@@ -945,7 +1007,3 @@ function time_elapsed_string($ptime) {
         }
     }
 }
-	
-		
-	
-

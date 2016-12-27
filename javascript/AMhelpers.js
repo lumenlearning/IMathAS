@@ -2,8 +2,8 @@
 //(c) 2006 David Lippman
 
 //define these to be overwritten later in case the corresponding options aren't used
-var updateeeddpos = function() { };
-var updateehpos = function() { };
+function updateeeddpos() {}
+function updateehpos() {}
 
 var LivePreviews = [];
 function setupLivePreview(qn) {
@@ -547,6 +547,7 @@ function ntuplecalc(inputId,outputId,format) {
 //preview for calccomplex
 function complexcalc(inputId,outputId,format) {
 	var fullstr = document.getElementById(inputId).value;
+	var outcalced, outstr, err;
 	fullstr = normalizemathunicode(fullstr);
 	fullstr = fullstr.replace(/\s+/g,'');
 	if (fullstr.match(/DNE/i)) {
@@ -554,7 +555,7 @@ function complexcalc(inputId,outputId,format) {
 		outcalced = 'DNE';
 		outstr = 'DNE';
 	} else {
-		var outcalced = ''; var err='';
+		outcalced = ''; err='';
 		var arr = fullstr.split(',');
 		for (var cnt=0; cnt<arr.length; cnt++) {
 			var prep = mathjs(arr[cnt],'i');
@@ -611,6 +612,7 @@ function complexcalc(inputId,outputId,format) {
 function parsecomplex(v) {
 	var real,imag,c,nd,p,R,L;
 	v = v.replace(/\s/,'');
+	v = v.replace(/\((\d+\*?i|i)\)\/(\d+)/g,'$1/$2');
 	v = v.replace(/sin/,'s$n');
 	v = v.replace(/pi/,'p$');
 	var len = v.length;
@@ -636,6 +638,7 @@ function parsecomplex(v) {
 					break;
 				}
 			}
+			if (L<0) {L=0;}
 			//look right
 			nd = 0;
 
@@ -650,8 +653,19 @@ function parsecomplex(v) {
 				}
 			}
 			//which is bigger?
-			if (p-L>1 && R-p>1) {
-				return _('error - invalid form');
+			if (p-L>0 && R-p>0 && (R==len || L==0)) {
+				if (R==len) { //real + AiB
+					real = v.substr(0,L);
+					imag = v.substr(L,p-L);
+				} else if (L==0) {
+					real = v.substr(R);
+					imag = v.substr(0,p);
+				} else {
+					return _('error - invalid form');
+				}
+				imag += '*'+v.substr(p+1+(v.charAt(p+1)=='*'?1:0),R-p-1);
+				imag = imag.replace("-*","-1*").replace("+*","+1*");
+				imag = imag.replace(/(\+|-)1\*(.+)/g,'$1$2');
 			} else if (p-L>1) {
 				imag = v.substr(L,p-L);
 				real = v.substr(0,L) + v.substr(p+1);
@@ -700,6 +714,7 @@ function parsecomplex(v) {
 		real = real.replace("p$","pi");
 		imag = imag.replace("s$n","sin");
 		imag = imag.replace("p$","pi");
+		imag = imag.replace(/\*\//g,"/");
 		return [real,imag];
 	}
 }
@@ -1104,6 +1119,7 @@ function doonsubmit(form,type2,skipconfirm) {
 			}
 		}
 	}
+	imathasDraw.encodea11ydraw();
 
 	for (var qn in intcalctoproc) { //i=0; i<intcalctoproc.length; i++) {
 		qn = parseInt(qn);
@@ -1245,53 +1261,16 @@ function doonsubmit(form,type2,skipconfirm) {
 		str = document.getElementById("tc"+qn).value;
 		str = str.replace(/,/g,"");
 		str = normalizemathunicode(str);
+		var strprocess = AMnumfuncPrepVar(qn, str);
+		str = strprocess[0];
+		varlist = strprocess[2];
+
 		if (iseqn[qn]==1) {
 			str = str.replace(/(.*)=(.*)/,"$1-($2)");
 		} else {
 			if (str.match("=")) {continue;}
 		}
 		fl = flist[qn];
-		varlist = vlist[qn];
-
-		vars = varlist.split("|");
-		for (var i=0; i<vars.length; i++) {
-			foundaltcap = false;
-			for (var j=0; j<vars.length; j++) {
-				if (i!=j && vars[j].toLowerCase()==vars[i].toLowerCase() && vars[j]!=vars[i]) {
-					foundaltcap = true;
-					break;
-				}
-			}
-			if (!foundaltcap) {
-				str = str.replace(new RegExp(vars[i],"gi"),vars[i]);
-				regmod = "gi";
-			} else {
-				regmod = "g";
-			}
-
-			if (vars[i].length>2 && vars[i].match(/^\w+_\w+$/)) {
-				var varpts = vars[i].match(/^(\w+)_(\w+)$/);
-				str = str.replace(new RegExp(varpts[1]+'_\\('+varpts[2]+'\\)', regmod), vars[i]);
-				str = str.replace(new RegExp(varpts[0],"g"), "repvars"+i);
-				vars[i] = "repvars"+i;
-			} else if (vars[i] == "varE") {
-				str = str.replace("E","varE");
-			}
-
-			/*else if (vars[i].charCodeAt(0)>96) { //lowercase
-			  if (arraysearch(vars[i].toUpperCase(),vars)==-1) {
-				//vars[i] = vars[i].toLowerCase();
-				str = str.replace(new RegExp(vars[i],"gi"),vars[i]);
-			  }
-			} else {
-			  if (arraysearch(vars[i].toLowerCase(),vars)==-1) {
-				//vars[i] = vars[i].toLowerCase();
-				str = str.replace(new RegExp(vars[i],"gi"),vars[i]);
-			  }
-			}
-			*/
-		}
-		varlist = vars.join("|");
 
 		if (fl!='') {
 			reg = new RegExp("("+fl+")\\(","g");
@@ -1481,7 +1460,7 @@ function assessbackgsubmitCallback(qn,noticetgt) {
 					}
 				}
 		    /*
-				if (LivePreviews.hasOwnProperty(qn)) {
+		    if (LivePreviews.hasOwnProperty(qn)) {
 		    	 LivePreviews[qn].Init();
 		    }
 				*/

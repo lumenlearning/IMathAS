@@ -100,10 +100,13 @@ function handleClickTextSegmentButton(e) {
 
 function refreshTable() {
 	document.getElementById("curqtbl").innerHTML = generateTable();
-	 if (usingASCIIMath) {
-	      rendermathnode(document.getElementById("curqtbl"));
-         }
-         updateqgrpcookie();
+	if (usingASCIIMath) {
+		$("#curqtbl tr:not(.textsegmentrow)").each(function(i,el) {
+			rendermathnode(el);
+		});
+
+  }
+  updateqgrpcookie();
 	initeditor("selector","div.textsegment",null,true /*inline*/,editorSetup);
 	tinymce.init({
 		selector: "h4.textsegment",
@@ -429,7 +432,7 @@ function generateMoveSelect2(num) {
 
 		if (!curistxt) {
 			if (itemarray[i-1].length<5) { //is group
-				qcnt += itemarray[i-1][2].length;
+				qcnt += itemarray[i-1][0];//itemarray[i-1][2].length;
 			} else {
 				qcnt++;
 			}
@@ -793,8 +796,8 @@ function generateOutput() {
 			out += itemarray[i][0]+'|'+itemarray[i][1];
 			for (var j=0; j<itemarray[i][2].length; j++) {
 				out += '~'+itemarray[i][2][j][0];
-				qcnt++;
 			}
+			qcnt += itemarray[i][0];
 		} else {
 			if (out.length>0) {
 				out += ',';
@@ -851,7 +854,7 @@ function generateTable() {
 		html += "<th>Template</th><th>Remove</th>";
 	}
 	html += "</thead><tbody>";
-	var text_segment_count = 0;
+	var text_segment_count = 0; var curqnum = 0;
 	for (var i=0; i<itemcount; i++) {
 		curistext = 0;
 		curisgroup = 0;
@@ -866,7 +869,7 @@ function generateTable() {
 			var curitems = new Array();
 			curitems[0] = itemarray[i];
 		}
-
+		curqnum = i-text_segment_count;
 		//var ms = generateMoveSelect(i,itemcount);
 		var ms = generateMoveSelect2(i);
 		for (var j=0; j<curitems.length; j++) {
@@ -882,7 +885,7 @@ function generateTable() {
 			if (beentaken) {
 				if (curisgroup) {
 					if (j==0) {
-						html += "<td>"+(i+1)+"</td><td><b>Group</b>, choosing "+itemarray[i][0];
+						html += "<td>Q"+(curqnum+1)+"</td><td><b>Group</b>, choosing "+itemarray[i][0];
 						if (itemarray[i][1]==0) {
 							html += " without";
 						} else if (itemarray[i][1]==1) {
@@ -890,9 +893,12 @@ function generateTable() {
 						}
 						html += " replacement</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="+curclass+">";
 					}
-					html += "<td>&nbsp;"+(i+1)+'-'+(j+1);
+					html += "<td>&nbsp;Q"+(curqnum+1)+'-'+(j+1);
+				} else if (curistext) {
+					//html += "<td>Text"+(text_segment_count+1);
+					html += "<td>"+ms;
 				} else {
-					html += "<td>"+(i+1);
+					html += "<td>Q"+(curqnum+1);
 				}
 				html += "<input type=hidden id=\"qc"+ln+"\" name=\"checked[]\" value=\""+(curisgroup?i+'-'+j:i)+":"+curitems[j][0]+"\"/>";
 				html += "</td>";
@@ -903,9 +909,9 @@ function generateTable() {
 						html += "<input type=checkbox id=\"qc"+ln+"\" name=\"checked[]\" value=\""+(curisgroup?i+'-'+j:i)+":"+curitems[j][0]+"\"/></td><td>";
 					} else {
 						if (itemarray[i][3]==1) {
-							html += "<img src=\""+imasroot+"/img/collapse.gif\" onclick=\"collapseqgrp("+i+")\"/>";
+							html += "<img src=\""+imasroot+"/img/collapse.gif\" onclick=\"collapseqgrp("+i+")\" alt=\"Collapse\"/>";
 						} else {
-							html += "<img src=\""+imasroot+"/img/expand.gif\" onclick=\"expandqgrp("+i+")\"/>";
+							html += "<img src=\""+imasroot+"/img/expand.gif\" onclick=\"expandqgrp("+i+")\" alt=\"Expand\"/>";
 						}
 						html += '</td><td>';
 					}
@@ -967,31 +973,36 @@ function generateTable() {
 					html += "<div class=\"text-segment-icon\"><button id=\"edit-button"+i+"\" type=\"button\" title=\"Expand and Edit\" class=\"text-segment-button\"><span id=\"edit-button-span"+i+"\" class=\"icon-pencil text-segment-icon\"></span></button></div></div></div></td>";
 					html += "<td>"+generateShowforSelect(i)+"</td>";
 				}
-				if (beentaken) {
-					html += "<td></td>";
-				} else {
+				//if (beentaken) {
+				//	html += "<td></td>";
+				//} else {
 					html += "<td class=c><a href=\"#\" onclick=\"return removeitem('"+i+"');\">Remove</a></td>";
-				}
+				//}
 			} else {
 				html += "<td><input type=hidden name=\"curq[]\" id=\"oqc"+ln+"\" value=\""+curitems[j][1]+"\"/>"+curitems[j][2]+"</td>"; //description
 				html += "<td class=\"nowrap\"><div";
 				if ((curitems[j][7]&16) == 16) {
 					html += " class=\"ccvid\"";
+					var altbase = "Captioned video";
+				} else {
+					var altbase = "Video";
 				}
 				html += ">";
 				if ((curitems[j][7]&1) == 1) {
 					var showicons = "";
+					var altadd = "";
 				} else {
 					var showicons = "_no";
+					var altadd = " disabled";
 				}
 				if ((curitems[j][7]&4) == 4) {
-					html += '<img src="'+imasroot+'/img/video_tiny'+showicons+'.png"/>';
+					html += '<img src="'+imasroot+'/img/video_tiny'+showicons+'.png" alt="'+altbase+altadd+'"/>';
 				}
 				if ((curitems[j][7]&2) == 2) {
-					html += '<img src="'+imasroot+'/img/html_tiny'+showicons+'.png"/>';
+					html += '<img src="'+imasroot+'/img/html_tiny'+showicons+'.png" alt="Help Resource'+altadd+'"/>';
 				}
 				if ((curitems[j][7]&8) == 8) {
-					html += '<img src="'+imasroot+'/img/assess_tiny'+showicons+'.png"/>';
+					html += '<img src="'+imasroot+'/img/assess_tiny'+showicons+'.png" alt="Detailed solution'+altadd+'"/>';
 				}
 				html += "</div></td>";
 				html += "<td>"+curitems[j][1]+"</td>";
@@ -1019,7 +1030,7 @@ function generateTable() {
 					if (curitems[j][6]==1) {
 						html += "<td><span class='red'>Withdrawn</span></td>";
 					} else {
-						html += "<td><a href=\"addquestions.php?aid="+curaid+"&cid="+curcid+"&withdraw="+(curisgroup?i+'-'+j:i)+"\">Withdraw</a></td>";
+						html += "<td><a href=\"addquestions.php?aid="+curaid+"&cid="+curcid+"&withdraw="+(curisgroup?curqnum+'-'+j:curqnum)+"\">Withdraw</a></td>";
 					}
 				} else {
 					html += "<td class=c><a href=\"moddataset.php?id="+curitems[j][1]+"&template=true&aid="+curaid+"&cid="+curcid+"\">Template</a></td>"; //add link
@@ -1034,15 +1045,19 @@ function generateTable() {
 		}
 		alt = 1-alt;
 	}
-	if (!beentaken) {
-		html += '<tr><td></td><td></td><td colspan=8><button type=\"button\" onclick="addtextsegment()" title="Insert Instructions or Video for Question" id="add-text-button"><span class="icon-plus" style="font-size:0.8em"></span> Text</button>';
-		if (text_segment_count > 1) {
-			html += " <div class=\"text-segment-icon text-segment-iconglobal\"><button id=\"edit-buttonglobal\" type=\"button\" title=\"Expand All\" class=\"text-segment-button text-segment-button-global\"><span id=\"edit-button-spanglobal\" class=\"icon-enlarge2\"></span></button></div>";
-			html += " <div class=\"text-segment-icon text-segment-iconglobal\"><button id=\"collapse-buttonglobal\" type=\"button\" title=\"Collapse All\" class=\"text-segment-button text-segment-button-global\"><span id=\"collapse-button-spanglobal\" class=\"icon-shrink2\"></span></button></div>";
-		}
-		html += '<div class="text-segment-iconglobal"><img src="'+imasroot+'/img/help.gif" alt="Help" onClick="window.open(\''+imasroot+'/help.php?section=questionintrotext\',\'help\',\'top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420)+'\')"/></div>';
-		html += '</td><td></td><td></td></tr>';
+	if (beentaken) {
+		html += '<tr><td></td>';
+	} else {
+		html += '<tr><td></td><td></td>';
 	}
+	html += '<td colspan=8><button type=\"button\" onclick="addtextsegment()" title="Insert Instructions or Video for Question" id="add-text-button"><span class="icon-plus" style="font-size:0.8em"></span> Text</button>';
+	if (text_segment_count > 1) {
+		html += " <div class=\"text-segment-icon text-segment-iconglobal\"><button id=\"edit-buttonglobal\" type=\"button\" title=\"Expand All\" class=\"text-segment-button text-segment-button-global\"><span id=\"edit-button-spanglobal\" class=\"icon-enlarge2\"></span></button></div>";
+		html += " <div class=\"text-segment-icon text-segment-iconglobal\"><button id=\"collapse-buttonglobal\" type=\"button\" title=\"Collapse All\" class=\"text-segment-button text-segment-button-global\"><span id=\"collapse-button-spanglobal\" class=\"icon-shrink2\"></span></button></div>";
+	}
+	html += '<div class="text-segment-iconglobal"><img src="'+imasroot+'/img/help.gif" alt="Help" onClick="window.open(\''+imasroot+'/help.php?section=questionintrotext\',\'help\',\'top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420)+'\')"/></div>';
+	html += '</td><td></td><td></td></tr>';
+
 	html += "</tbody></table>";
 	document.getElementById("pttotal").innerHTML = pttotal;
 	return html;

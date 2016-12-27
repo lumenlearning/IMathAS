@@ -8,9 +8,12 @@ if (!isset($teacherid)) {
 
 $id = intval($_GET['id']);
 
-$query = "SELECT intro FROM imas_assessments WHERE id=$id";
-$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-$row = mysql_fetch_row($result);
+//DB $query = "SELECT intro FROM imas_assessments WHERE id=$id";
+//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
+//DB $row = mysql_fetch_row($result);
+$stm = $DBH->prepare("SELECT intro FROM imas_assessments WHERE id=:id");
+$stm->execute(array(':id'=>$id));
+$row = $stm->fetch(PDO::FETCH_NUM);
 
 $text = preg_replace('/[PAGE[^\]]*]/sm','',$row[0]);
 $text = preg_replace('/<p[^>]*>(\s|&nbsp;)*(\[QUESTION.*?\])(\s|&nbsp;)*<\/p>/sm', ' $2 ', $text);
@@ -42,12 +45,14 @@ while (isset($sp[$n])) {
 		$out .= '[Q '.implode('-',$qn).']';
 	}
 	$out .= '</p>';
-	
+
 	$out .= $text;
 }
 
-$out = addslashes($out);
-$query = "UPDATE imas_assessments SET intro='$out',displaymethod='SkipAround' WHERE id='$id'";
-mysql_query($query) or die("Query failed :$query " . mysql_error());
+//DB $out = addslashes($out);
+//DB $query = "UPDATE imas_assessments SET intro='$out',displaymethod='SkipAround' WHERE id='$id'";
+//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
+$stm = $DBH->prepare("UPDATE imas_assessments SET intro=:intro,displaymethod='SkipAround' WHERE id=:id");
+$stm->execute(array(':intro'=>$out, ':id'=>$id));
 
 ?>

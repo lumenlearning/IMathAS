@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require("../validate.php");
 
@@ -8,11 +8,14 @@ if (isset($teacherid)) {
 	} else {
 		$depth = 2;
 	}
-	$query = "SELECT itemorder FROM imas_courses WHERE id='$cid'";
-	$result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	list($items,$blockcnt) = mysql_fetch_row($result);
+	//DB $query = "SELECT itemorder FROM imas_courses WHERE id='$cid'";
+	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
+	//DB list($items,$blockcnt) = mysql_fetch_row($result);
+	$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
+	$stm->execute(array(':id'=>$cid));
+	list($items,$blockcnt) = $stm->fetch(PDO::FETCH_NUM);
 	$items = unserialize($items);
-	
+
 	function rec($items,$curdepth,$ind) {
 		global $depth,$cid;
 		foreach ($items as $it) {

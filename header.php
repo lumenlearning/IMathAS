@@ -10,14 +10,14 @@
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
 </script>
-<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=071416";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=111016";?>" type="text/css" />
 <?php if (isset($coursetheme)) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
 		$coursetheme = str_replace('_fw','',$coursetheme);
 	}
 	?>
-<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=121713";?>" type="text/css" />
-<link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=071416" media="only screen and (max-width:480px)"/>
+<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=111016";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=111016" media="only screen and (max-width:480px)"/>
 
 <?php } ?>
 <link rel="shortcut icon" href="/favicon.ico" />
@@ -40,7 +40,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=082816"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=091516"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -93,7 +93,7 @@ if (!isset($sessiondata['mathdisp'])) {
 		}
 		MathJax.Ajax.config.path["Local"] = "'.$imasroot.'/mathjax/extensions";
 		MathJax.Hub.config.extensions.push("[Local]/InputToDataAttrCDN.js");
-		MathJax.Hub.Register.StartupHook("End Config", setupKatexAutoRenderWhenReady);
+		MathJax.Hub.Register.StartupHook("Begin Config", setupKatexAutoRenderWhenReady);
 		</script>
 		<script type="text/javascript">
 		function setupKatexAutoRenderWhenReady() {
@@ -124,7 +124,7 @@ if (!isset($sessiondata['mathdisp'])) {
 }
 echo "<script src=\"$imasroot/javascript/mathjs.js?ver=052016\" type=\"text/javascript\"></script>\n";
 if (isset($sessiondata['graphdisp']) && $sessiondata['graphdisp']==1) {
-	echo "<script src=\"$imasroot/javascript/ASCIIsvg_min.js?ver=070516\" type=\"text/javascript\"></script>\n";
+	echo "<script src=\"$imasroot/javascript/ASCIIsvg_min.js?ver=102316\" type=\"text/javascript\"></script>\n";
 	echo "<script type=\"text/javascript\">var usingASCIISvg = true;</script>";
 	//echo "<script src=\"$imasroot/course/editor/plugins/AsciiSvg/ASCIIsvgAddon.js\" type=\"text/javascript\"></script>\n";
 } else if (isset($sessiondata['graphdisp'])) {
@@ -136,7 +136,8 @@ if (isset($placeinhead)) {
 	echo $placeinhead;
 }
 if (isset($useeditor) && $sessiondata['useed']==1) {
-	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=082716"></script>';
+	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=100516"></script>';
+	//echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=082716"></script>';
 	echo "\n";
 	echo '<script type="text/javascript">';
 	echo 'var coursetheme = "'.$coursetheme.'";';
@@ -145,7 +146,9 @@ if (isset($useeditor) && $sessiondata['useed']==1) {
 	} else {
 		echo 'var filePickerCallBackFunc = null;';
 	}
-	echo 'initeditor("exact","'.$useeditor.'");';
+	if ($useeditor!="noinit") {
+		echo 'initeditor("exact","'.$useeditor.'");';
+	}
 	echo '</script>';
 }
 
