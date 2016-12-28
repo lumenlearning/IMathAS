@@ -128,7 +128,8 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 	$imasroot = getenv('imasroot');
   }
 
-
+  $loginpage = 'lumen/loginpage.php';
+  
   //install name
   $installname = "LuMOM";
 
