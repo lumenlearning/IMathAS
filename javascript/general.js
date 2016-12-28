@@ -781,7 +781,12 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 	    }
 	});
-
+	$("div.breadcrumb").attr("role","navigation").attr("aria-label",_("Navigation breadcrumbs"));
+	$("div.cpmid,div.cp").attr("role","group").attr("aria-label",_("Control link group"));
+	if ($("#centercontent").length) {
+		$("#centercontent").attr("role","main");
+		$(".midwrapper").removeAttr("role");
+	}
 });
 
 /* ========================================================================
