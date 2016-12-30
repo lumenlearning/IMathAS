@@ -250,7 +250,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 
 //session path
 if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
-	$sessionpath = "/tmp";
+	$sessionpath = "/efs_volume";
 }
 
  ini_set("upload_max_filesize", "10485760");
