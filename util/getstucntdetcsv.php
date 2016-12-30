@@ -55,6 +55,7 @@
 	exportascsv(array('Course Name',
 		'Course ID',
 		'Course Active Students',
+		'Is LTI',
 		'Instructor',
 		'Email',
 		'Total Active Students for Instructor',
@@ -90,6 +91,12 @@
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$grpnames[$row[0]] = $row[1];
 	}
+	
+	$lticourses = array();
+	$stm = $DBH->query('SELECT courseid,contextid FROM imas_lti_courses WHERE 1');
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+		$lticourses[$row[0]] = $row[1];
+	}
 
 	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email,g.parent,g.grouptype FROM imas_students AS s JOIN imas_teachers AS t ";
 	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
@@ -98,7 +105,8 @@
 	}
 	$query .= "JOIN imas_courses AS c ON t.courseid=c.id ";
 	$query .= "JOIN imas_users as u ";
-	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
+	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid ";
+	$query .= "GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
 
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->query($query);
@@ -138,13 +146,14 @@
 			$lastparent = (($row[7]>0)?$grpnames[$row[7]]:"");
 			$lastiscust = (($row[8]==1)?'Y':'N');
 		}
+		$islti = (isset($lticourses[$row[3]])?'Y':'N');
 		if (!in_array($row[3],$seencid)) {
 			$grpcnt += $row[5];
 			$instrstucnt += $row[5];
 			$seencid[] = $row[3];
-			$userdata[] = array($row[4],$row[3],$row[5]);
+			$userdata[] = array($row[4],$row[3],$row[5],$islti);
 		} else {
-			$userdata[] = array($row[4],$row[3],$row[5].'(*)');
+			$userdata[] = array($row[4],$row[3],$row[5].'(*)',$islti);
 			//$userdata .= "<sup>*</sup>";
 		}
 		//$userdata .= "</li>";
