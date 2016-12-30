@@ -371,6 +371,7 @@ if (isset($CFG['GEN']['hometitle'])) {
 	echo _('Welcome to'), " $installname, $userfullname";
 }
 echo '</h2>';
+echo '<div style="background-color: #ffdddd; padding:10px 20px;margin-bottom:10px"><p><b>NOTICE</b>: '.$installname.' will be down for scheduled maintenence starting 5pm Pacific time Friday Dec 30.<br/>Maintenence is expected to take 3-5 hours.</p></div>';
 if ($myrights==100 && count($brokencnt)>0) {
 	echo '<span class="noticetext">'.array_sum($brokencnt).'</span> questions, '.(array_sum($brokencnt)-$brokencnt[0]).' public, reported broken systemwide';
 }
