@@ -10,7 +10,7 @@
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
 </script>
-<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=111016";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=120516";?>" type="text/css" />
 <?php if (isset($coursetheme)) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
 		$coursetheme = str_replace('_fw','',$coursetheme);
@@ -40,7 +40,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=091516"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=120416"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -201,7 +201,7 @@ function getactivetab() {
 	return array($t,$s);
 }
 if (isset($cid) && isset($teacherid) && $coursetopbar[2]==1 && count($coursetopbar[1])>0 && !isset($flexwidth)) {
-	echo '<div id="navlistcont">';
+	echo '<div id="navlistcont" role="navigation" aria-label="'._('Course Navigation').'">';
 	echo '<ul id="navlist">';
 	$a = array_fill(0,11,"");
 	$c = getactivetab();
@@ -248,7 +248,7 @@ if (isset($cid) && isset($teacherid) && $coursetopbar[2]==1 && count($coursetopb
 	echo '</div>';
 	$didnavlist = true;
 } else if (isset($cid) && !isset($teacherid) && $coursetopbar[2]==1 && count($coursetopbar[0])>0 && !isset($flexwidth)) {
-	echo '<div id="navlistcont">';
+	echo '<div id="navlistcont" role="navigation" aria-label="'._('Course Navigation').'">';
 	echo '<ul id="navlist">';
 	$a = array_fill(0,11,"");
 	$c = getactivetab();
@@ -282,7 +282,7 @@ if (isset($cid) && isset($teacherid) && $coursetopbar[2]==1 && count($coursetopb
 if (!isset($flexwidth)) {
 	echo '</div>';
 }
-echo '<div class="midwrapper">';
+echo '<div class="midwrapper" role="main">';
 
 //load filter
 $curdir = rtrim(dirname(__FILE__), '/\\');

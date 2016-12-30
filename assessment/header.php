@@ -147,10 +147,12 @@ div { zoom: 1; }
 <!--[if lt IE 9]>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
 <script type="text/javascript" src="<?php echo $imasroot;?>/javascript/excanvas_min.js?v=120811"></script><![endif]-->
-<script src="<?php echo $imasroot . "/javascript/assessment_min.js?v=120316";?>" type="text/javascript"></script>
+
+<script src="<?php echo $imasroot . "/javascript/assessment_min.js?v=120616";?>" type="text/javascript"></script>
 
 <?php
 /*
+
 
 <script src="<?php echo $imasroot . "/javascript/general.js?v=082616";?>" type="text/javascript"></script>
 <script src="<?php echo $imasroot . "/javascript/mathjs.js?v=082616";?>" type="text/javascript"></script>
@@ -244,7 +246,7 @@ if (!isset($coursetopbar)) {
 }
 
 if (isset($cid) && !isset($flexwidth) && !$isdiag && (!isset($sessiondata['intreereader']) || $sessiondata['intreereader']==false) && $sessiondata['isteacher'] && $coursetopbar[2]==1 && count($coursetopbar[1])>0) {
-	echo '<div id="navlistcont">';
+	echo '<div id="navlistcont" role="navigation" aria-label="'._('Course Navigation').'">';
 	echo '<ul id="navlist">';
 	echo "<li><a href=\"$imasroot/course/course.php?cid=$cid\">Course</a></li> ";
 	if (in_array(0,$coursetopbar[1]) && $msgset<4) { //messages
@@ -279,7 +281,7 @@ if (isset($cid) && !isset($flexwidth) && !$isdiag && (!isset($sessiondata['intre
 	echo '<br class="clear" />';
 	echo '</div>';
 } else if (isset($cid) && !isset($flexwidth) && !$isdiag && (!isset($sessiondata['intreereader']) || $sessiondata['intreereader']==false) && !$sessiondata['isteacher'] && $coursetopbar[2]==1 && count($coursetopbar[0])>0) {
-	echo '<div id="navlistcont">';
+	echo '<div id="navlistcont" role="navigation" aria-label="'._('Course Navigation').'">';
 	echo '<ul id="navlist">';
 	echo "<li><a href=\"$imasroot/course/course.php?cid=$cid\">Course</a></li> ";
 	if (in_array(0,$coursetopbar[0]) && $msgset<4) { //messages
@@ -304,7 +306,7 @@ if (isset($cid) && !isset($flexwidth) && !$isdiag && (!isset($sessiondata['intre
 if (!isset($flexwidth)) {
 	echo '</div>';
 }
-echo '<div class="midwrapper">';
+echo '<div class="midwrapper" role="main">'; 
 
 
 ?>

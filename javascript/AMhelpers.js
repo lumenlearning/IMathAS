@@ -1465,7 +1465,6 @@ function assessbackgsubmitCallback(qn,noticetgt) {
 		    }
 				*/
 		    $(window).trigger("ImathasEmbedReload");
-		    initcreditboxes();
 
 		    var pagescroll = 0;
 		    if(typeof window.pageYOffset!= 'undefined'){
@@ -1932,6 +1931,7 @@ function initcreditboxes() {
 	});
 }
 initstack.push(initcreditboxes);
+$(window).on("ImathasEmbedReload", initcreditboxes);
 
 function initqsclickchange() {
 	$('input[id^=qs][value=spec]').each(function(i,qsel) {
@@ -1946,6 +1946,22 @@ function initqsclickchange() {
 $(window).on("ImathasEmbedReload", initqsclickchange);
 initstack.push(initqsclickchange);
 
+function initShowAnswer() {
+	$("input.sabtn + span.hidden").attr("aria-hidden",true).attr("aria-expanded",false);
+	$("input.sabtn").each(function() {
+		var idnext = $(this).siblings("span:first-of-type").attr("id");
+		$(this).attr("aria-expanded",false).attr("aria-controls",idnext)
+		  .off("click.sashow").on("click.sashow", function() {
+			$(this).attr("aria-expanded",true)
+		  	  .siblings("span:first-of-type")
+				.attr("aria-expanded",true).attr("aria-hidden",false)
+				.removeClass("hidden");
+		});
+	});
+}
+$(window).on("ImathasEmbedReload", initShowAnswer);
+initstack.push(initShowAnswer);
+
 function assessmentTimer(duration, timelimitkickout) {
 	var start = Date.now(), remaining, hours, minutes, seconds, countdowntimer, timestr;
 	function updatetimer() {
@@ -1954,8 +1970,8 @@ function assessmentTimer(duration, timelimitkickout) {
 			remaining = 0;
 			clearInterval(countdowntimer);
 			if (timelimitkickout) {
-				document.getElementById('timelimitholder').className = "";
-				document.getElementById('timelimitholder').style.color = "#f00";
+				document.getElementById('timelimitholder').className = "noticetext";
+				//document.getElementById('timelimitholder').style.color = "#f00";
 				document.getElementById('timelimitholder').innerHTML = _('Time limit expired - submitting now');
 				document.getElementById('timelimitholder').style.fontSize="300%";
 				if (document.getElementById("qform") == null) {
@@ -1975,7 +1991,7 @@ function assessmentTimer(duration, timelimitkickout) {
 		seconds = Math.floor((remaining)%60);
 		minutes = Math.floor((remaining/60)%60);
 		hours = Math.floor(remaining/3600);
-		if (hours==0 && minutes <= 5) {document.getElementById("timeremaining").style.color="#f00";}
+		if (hours==0 && minutes < 5) {document.getElementById("timeremaining").className="noticetext";}
 		if (hours==0 && minutes==0 && seconds <= 5) {document.getElementById("timeremaining").style.fontSize="150%";}
 		timestr = ((hours>0)?hours+":":"") + ((hours>0 && minutes<10)?"0":"") + minutes+":" + (seconds<10?"0":"")+seconds;
 		document.getElementById("timeremaining").innerHTML = timestr;
@@ -2010,18 +2026,23 @@ function toggleintroshow(n) {
       var content = document.getElementById("intropiece"+n);
       if (link.innerHTML.match("Hide")) {
 	   link.innerHTML = link.innerHTML.replace("Hide","Show");
+	   $(link).attr("aria-expanded",false);
 	   content.style.display = "none";
+	   $(content).attr("aria-hidden",true).attr("aria-expanded",false);
       } else {
 	   link.innerHTML = link.innerHTML.replace("Show","Hide");
+	   $(link).attr("aria-expanded",true);
 	   content.style.display = "block";
+	   $(content).attr("aria-hidden",false).attr("aria-expanded",true);
       }
 }
 function togglemainintroshow(el) {
 	if ($("#intro").hasClass("hidden")) {
-		$(el).html(_("Hide Intro/Instructions"));
-		$("#intro").removeClass("hidden").addClass("intro");
+		$(el).html(_("Hide Intro/Instructions")).attr("aria-expanded",true);
+		$("#intro").removeClass("hidden").addClass("intro").attr("aria-hidden",false).attr("aria-expanded",true);
 	} else {
-		$("#intro").addClass("hidden");
-		$(el).html(_("Show Intro/Instructions"));
+		$("#intro").addClass("hidden").attr("aria-hidden",true).attr("aria-expanded",false);
+		$(el).html(_("Show Intro/Instructions")).attr("aria-expanded",false);
 	}
 }
+
