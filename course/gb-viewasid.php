@@ -533,7 +533,12 @@
 		}
 		//DB $line=mysql_fetch_array($result, MYSQL_ASSOC);
 		$line=$stm->fetch(PDO::FETCH_ASSOC);
-		$GLOBALS['assessver'] = $line['ver'];
+		if ($line['ver']==1 && $line['endtime']<1483117200) { //hack fix: Use 32-bit equivalent randomizers for assignments completed before rehost
+			$GLOBALS['assessver'] = 2;
+		} else {
+			$GLOBALS['assessver'] = $line['ver'];
+		}
+		
 
 		if (!$isteacher && !$istutor) {
 			//DB $query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
@@ -1262,7 +1267,11 @@
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$_GET['asid']));
 		$line=$stm->fetch(PDO::FETCH_ASSOC);
-		$GLOBALS['assessver'] = $line['ver'];
+		if ($line['ver']==1 && $line['endtime']<1483117200) { //hack fix: Use 32-bit equivalent randomizers for assignments completed before rehost
+			$GLOBALS['assessver'] = 2;
+		} else {
+			$GLOBALS['assessver'] = $line['ver'];
+		}
 
 		if (!$isteacher && !$istutor) {
 			//DB $query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
