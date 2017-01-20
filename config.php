@@ -24,6 +24,12 @@ $CFG['GEN']['livepollpassword'] = 'testing';
 //force use of better hashed pw
 $CFG['GEN']['newpasswords'] = "only";
 
+//Amazon's load balancer acts as proxy. Put the real IP address in REMOTE_ADDR
+//for storing as user's IP address
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
+	$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+}
+
 if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  /*** WAMAP.org config ***/
 
