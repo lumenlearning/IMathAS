@@ -4,7 +4,7 @@
 
 	require("../validate.php");
 	require("../includes/exceptionfuncs.php");
-	
+
 	$cid = $_GET['cid'];
 	$aid = $_GET['aid'];
 
@@ -15,7 +15,7 @@
 	$stm->execute(array(':id'=>$cid));
 	$latepasshrs = $stm->fetchColumn(0);
 	$now = time();
-	
+
 	//DB $query = "SELECT latepass FROM imas_students WHERE userid='$userid' AND courseid='$cid'";
 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	//DB $latepasses = mysql_result($result,0,0);
@@ -151,7 +151,7 @@
 					$stm = $DBH->prepare("UPDATE imas_exceptions SET enddate=:enddate,islatepass=islatepass+1 WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 					$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid, ':enddate'=>$enddate));
 				} else {
-					
+
 					//DB $query = "INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,islatepass,itemtype) VALUES ('$userid','$aid','$startdate','$enddate',1,'A')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 					$stm = $DBH->prepare("INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,islatepass,itemtype) VALUES (:userid, :assessmentid, :startdate, :enddate, :islatepass, :itemtype)");
@@ -215,7 +215,7 @@
 				echo '<p>You may use up to '.($allowlate%10-1-$usedlatepasses).' more LatePass(es) on this assessment.</p>';
 			}
 			echo "<p>You have $latepasses LatePass(es) remaining.  You can redeem one LatePass for a $latepasshrs hour ";
-			echo "extension on this assessment.  Are you sure you want to redeem a LatePass?</p>";
+			echo "extension on this assessment.  Late passes do not extend the assessment time limit. Are you sure you want to redeem a LatePass?</p>";
 			echo "<input type=submit value=\"Yes, Redeem LatePass\"/>";
 			if ((!isset($sessiondata['ltiitemtype']) || $sessiondata['ltiitemtype']!=0)) {
 				echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='course.php?cid=$cid'\"/>";
