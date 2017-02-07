@@ -1723,12 +1723,28 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$ovar[] = "x";
 		}
 
-		usort($variables,'lensort');
+		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
+		if (count($variables)>1 && count($fromto)>2) {
+			uasort($variables,'lensort');
+			$newdomain = array();
+			foreach($variables as $i=>$v) {
+				if (isset($fromto[$i*2+1])) {
+					$newdomain[] = $fromto[2*$i];
+					$newdomain[] = $fromto[2*$i+1];
+				} else {
+					$newdomain[] = $fromto[0];
+					$newdomain[] = $fromto[1];
+				}
+			}
+			$fromto = $newdomain;
+			$variables = array_values($variables);
+		} else {
+			usort($variables,'lensort');
+		}
 		usort($ofunc,'lensort');
 		$vlist = implode("|",$variables);
 		$flist = implode('|',$ofunc);
 		$out .= "<script type=\"text/javascript\">functoproc[$qn] = 1; vlist[$qn]=\"$vlist\"; flist[$qn]=\"$flist\";</script>\n";
-		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
 
 		for ($i = 0; $i < 20; $i++) {
 			for($j=0; $j < count($variables); $j++) {
@@ -4128,7 +4144,25 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$variables[$v] = 'varE';
 			$answer = str_replace('E','varE',$answer);
 		}
-		usort($variables,'lensort');
+		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
+		
+		if (count($variables)>1 && count($fromto)>2) {
+			uasort($variables,'lensort');
+			$newdomain = array();
+			foreach($variables as $i=>$v) {
+				if (isset($fromto[$i*2+1])) {
+					$newdomain[] = $fromto[2*$i];
+					$newdomain[] = $fromto[2*$i+1];
+				} else {
+					$newdomain[] = $fromto[0];
+					$newdomain[] = $fromto[1];
+				}
+			}
+			$fromto = $newdomain;
+			$variables = array_values($variables);
+		} else {
+			usort($variables,'lensort');
+		}
 
 		if (count($ofunc)>0) {
 			usort($ofunc,'lensort');
@@ -4137,8 +4171,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 		$vlist = implode("|",$variables);
 
-		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
-
+		
 		for ($i = 0; $i < 20; $i++) {
 			for($j=0; $j < count($variables); $j++) {
 				if (isset($fromto[2]) && $fromto[2]=="integers") {
@@ -5454,29 +5487,22 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				} else if ($ansvec[0]=='ls') { //line segment
 					for ($i=0; $i<count($vecs); $i++) {
 						if ($vecs[$i][4]!='ls') {continue;}
-						if (abs($ansvec[1]-$vecs[$i][0])>$defpttol*$reltolerance && abs($ansvec[1]-$vecs[$i][2])>$defpttol*$reltolerance) {
-							continue; //ans x1 doesn't match either vec x
-						}
-						if (abs($ansvec[1]-$vecs[$i][0])<=$defpttol*$reltolerance) { //x1 of ans matched first vec x
-							if (abs($ansvec[2]-$vecs[$i][1])>$defpttol*$reltolerance) {
-								continue;
-							}
+						if (abs($ansvec[1]-$vecs[$i][0])<=$defpttol*$reltolerance && abs($ansvec[2]-$vecs[$i][1])<=$defpttol*$reltolerance) { //x1 of ans matched first vec x
 							if (abs($ansvec[3]-$vecs[$i][2])>$defpttol*$reltolerance) {
 								continue;
 							}
 							if (abs($ansvec[4]-$vecs[$i][3])>$defpttol*$reltolerance) {
 								continue;
 							}
-						} else {
-							if (abs($ansvec[2]-$vecs[$i][3])>$defpttol*$reltolerance) {
-								continue;
-							}
+						} else if (abs($ansvec[1]-$vecs[$i][2])<=$defpttol*$reltolerance && abs($ansvec[2]-$vecs[$i][3])<=$defpttol*$reltolerance) { //x1 of ans matched second vec x
 							if (abs($ansvec[3]-$vecs[$i][0])>$defpttol*$reltolerance) {
 								continue;
 							}
 							if (abs($ansvec[4]-$vecs[$i][1])>$defpttol*$reltolerance) {
 								continue;
 							}
+						} else {
+							continue;
 						}
 						$scores[$key] = 1;
 						break;
