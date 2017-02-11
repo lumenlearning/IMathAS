@@ -426,7 +426,7 @@ if ($myrights>15) {
 	if ($custominfo!==false) {
 		$custominfo = json_decode($custominfo,true);
 		if ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd'])) {
-			echo '<div class="sysnotice">There have been changes to the instructor interface. ';
+			echo '<div class="sysnotice">2/11/17: There have been changes to the instructor interface. ';
 			if ($installname=='WAMAP') {
 				echo '<a href="https://www.wamap.org/forums/posts.php?cid=1&forum=1&thread=702655&page=1">Read here</a> ';
 			} else {
