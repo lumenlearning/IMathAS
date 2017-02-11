@@ -49,10 +49,18 @@ $placeinhead = '
    div.pagetitle h2 {
   	margin-top: 0px;
   	}
+   div.sysnotice {
+   	border: 1px solid #faa;
+   	background-color: #fff3f3;
+   	padding: 5px;
+   	margin-bottom: 5px;
+   	clear: both;
+   }
    #homefullwidth { clear: both;}
   </style>';
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
-$placeinhead .= '<script type="text/javascript">$(function() {
+if ($myrights>15) {
+  $placeinhead .= '<script type="text/javascript">$(function() {
   var html = \'<div class="floatright dropdown"><a role="button" tabindex=0 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="img/gears.png" alt="Options"/></a>\';
   html += \'<ul role="menu" class="dropdown-menu dropdown-menu-right">\';
   $(".courselist-teach li").css("clear","both").each(function (i,el) {
@@ -69,7 +77,18 @@ $placeinhead .= '<script type="text/javascript">$(function() {
   });
   $(".dropdown-toggle").dropdown();
   });
+  function dismisssysnotice(t,el) {
+  	var noticediv = $(el).closest(".sysnotice");
+  	$.ajax({
+  		url: imasroot+"/admin/dismisssysnotice.php?n="+t
+  	}).done(function(msg) {
+  		if (msg=="OK") {
+  			noticediv.slideUp();
+  		}
+  	});
+  }
   </script>';
+}
 $nologo = true;
 
 
@@ -399,7 +418,25 @@ if (isset($CFG['GEN']['hometitle'])) {
 	echo _('Welcome to'), " $installname, $userfullname";
 }
 echo '</h2>';
-
+if ($myrights>15) {
+	$stm = $DBH->prepare("SELECT custominfo FROM imas_students WHERE courseid=1 AND userid=:userid");
+	$stm->execute(array(':userid'=>$userid));
+	$custominfo = $stm->fetchColumn(0);
+	$noticetxt = '';
+	if ($custominfo!==false) {
+		$custominfo = json_decode($custominfo,true);
+		if ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd'])) {
+			echo '<div class="sysnotice">There have been changes to the instructor interface. ';
+			if ($installname=='WAMAP') {
+				echo '<a href="https://www.wamap.org/forums/posts.php?cid=1&forum=1&thread=702655&page=1">Read here</a> ';
+			} else {
+				echo '<a href="https://www.myopenmath.com/forums/posts.php?cid=1&forum=37&thread=238566&page=1">Read here</a> ';
+			}
+			echo 'for more info on the changes. ';
+			echo '<a href="#" onclick="dismisssysnotice(\'dd\',this);return false;" class="small">[Dismiss]</a></div>';
+		}
+	}
+}
 if ($myrights==100 && count($brokencnt)>0) {
 	echo '<span class="noticetext">'.array_sum($brokencnt).'</span> questions, '.(array_sum($brokencnt)-$brokencnt[0]).' public, reported broken systemwide';
 }
