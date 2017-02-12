@@ -24,6 +24,9 @@ $CFG['GEN']['livepollpassword'] = 'testing';
 //force use of better hashed pw
 $CFG['GEN']['newpasswords'] = "only";
 
+//hide Email button on Roster and GB pages
+$CFG['GEN']['noEmailButton'] = true;
+
 //Amazon's load balancer acts as proxy. Put the real IP address in REMOTE_ADDR
 //for storing as user's IP address
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
