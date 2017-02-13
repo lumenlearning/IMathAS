@@ -141,7 +141,7 @@ function enditem($canedit) {
 						echo " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$items[$i]['id']}');\">", _('Move'), '</a></li>';
 						echo " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">", _('Delete'), "</a></li>";
 						echo " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">", _('Copy'), "</a></li>";
-						
+						echo " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">", _('Toggle NewFlag'), "</a></li>";
 						echo '</ul>';
 						echo '</div>';
 					}
@@ -210,7 +210,7 @@ function enditem($canedit) {
 						echo " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$items[$i]['id']}');\">", _('Move'), '</a></li>';
 						echo " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">", _('Delete'), "</a></li>";
 						echo " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">", _('Copy'), "</a></li>";
-						
+						echo " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">", _('Toggle NewFlag'), "</a></li>";
 						echo '</ul>';
 						echo '</div>';
 					}
@@ -273,12 +273,12 @@ function enditem($canedit) {
 						echo ' <img src="../img/gearsdd.png" alt="Options" class="mida"/>';
 						echo '</a>';
 						echo '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu'.$i.'">';
-						echo " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\" $astyle>", _('Isolate'), "</a></li>";
+						echo " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">", _('Isolate'), "</a></li>";
 						echo " <li><a href=\"addblock.php?cid=$cid&id=$parent-$bnum\">", _('Modify'), "</a></li>";
 						echo " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$items[$i]['id']}');\">", _('Move'), '</a></li>';
 						echo " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">", _('Delete'), "</a></li>";
 						echo " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">", _('Copy'), "</a></li>";
-						
+						echo " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">", _('Toggle NewFlag'), "</a></li>";
 						echo '</ul>';
 						echo '</div>';
 					}
@@ -395,7 +395,7 @@ function enditem($canedit) {
 						echo " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$items[$i]['id']}');\">", _('Move'), '</a></li>';
 						echo " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">", _('Delete'), "</a></li>";
 						echo " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">", _('Copy'), "</a></li>";
-						
+						echo " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">", _('Toggle NewFlag'), "</a></li>";
 						echo '</ul>';
 						echo '</div>';
 					}
@@ -457,6 +457,7 @@ function enditem($canedit) {
 						echo " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$items[$i]['id']}');\">", _('Move'), '</a></li>';
 						echo " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">", _('Delete'), "</a></li>";
 						echo " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">", _('Copy'), "</a></li>";
+						echo " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">", _('Toggle NewFlag'), "</a></li>";
 						
 						echo '</ul>';
 						echo '</div>';
@@ -516,12 +517,12 @@ function enditem($canedit) {
 						echo ' <img src="../img/gearsdd.png" alt="Options" class="mida"/>';
 						echo '</a>';
 						echo '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu'.$i.'">';
-						echo " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\" $astyle>", _('Isolate'), "</a></li>";
+						echo " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">", _('Isolate'), "</a></li>";
 						echo " <li><a href=\"addblock.php?cid=$cid&id=$parent-$bnum\">", _('Modify'), "</a></li>";
 						echo " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$items[$i]['id']}');\">", _('Move'), '</a></li>';
 						echo " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">", _('Delete'), "</a></li>";
 						echo " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">", _('Copy'), "</a></li>";
-						
+						echo " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">", _('Toggle NewFlag'), "</a></li>";
 						echo '</ul>';
 						echo '</div>';
 					}
