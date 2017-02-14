@@ -425,6 +425,11 @@ if ($myrights>15) {
 	$noticetxt = '';
 	if ($custominfo!==false) {
 		$custominfo = json_decode($custominfo,true);
+		if ($installname!='WAMAP' && ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd']))) {
+			echo '<div class="sysnotice">2/13/17: There are <a href="https://www.myopenmath.com/forums/posts.php?cid=1&forum=37&thread=239763&page=1">changes coming</a> ';
+			echo 'to the mission and operation of MyOpenMath. ';
+			echo '<a href="#" onclick="dismisssysnotice(\'dd\',this);return false;" class="small">[Dismiss]</a></div>';
+		}
 		if ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd'])) {
 			echo '<div class="sysnotice">2/11/17: There have been changes to the instructor interface. ';
 			if ($installname=='WAMAP') {
