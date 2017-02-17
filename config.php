@@ -310,7 +310,7 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
  $CFG['GEN']['addteachersrights'] = 40;
  $CFG['GEN']['homelayout'] = '|0,1,2|10,11|0,1';
  $CFG['GEN']['headerinclude'] = "headercontent.php";
- $CFG['GEN']['headerscriptinclude'] = "momga.js";
+ //$CFG['GEN']['headerscriptinclude'] = "momga.js";
  $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
  //can set almost any assessment setting this way
