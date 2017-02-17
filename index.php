@@ -61,7 +61,7 @@ $placeinhead = '
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
 if ($myrights>15) {
   $placeinhead .= '<script type="text/javascript">$(function() {
-  var html = \'<div class="floatright dropdown"><a role="button" tabindex=0 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="img/gears.png" alt="Options"/></a>\';
+  var html = \'<div class="coursedd dropdown"><a role="button" tabindex=0 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="img/gears.png" alt="Options"/></a>\';
   html += \'<ul role="menu" class="dropdown-menu dropdown-menu-right">\';
   $(".courselist-teach li").css("clear","both").each(function (i,el) {
   	if ($(el).attr("data-isowner")=="true") {
@@ -72,7 +72,7 @@ if ($myrights>15) {
   		thishtml += \' <li><a href="admin/forms.php?from=home&action=transfer&id=\'+cid+\'">'._('Transfer ownership').'</a></li>\';
   		thishtml += \' <li><a href="admin/forms.php?from=home&action=delete&id=\'+cid+\'">'._('Delete').'</a></li>\';
   		thishtml += \'</ul></div>\';
-  		$(el).prepend(thishtml);
+  		$(el).append(thishtml);
   	} 
   });
   $(".dropdown-toggle").dropdown();
@@ -502,9 +502,6 @@ function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 			echo ' data-cid="'.$data[$i]['id'].'"';
 		}
 		echo '>';
-		if ($type != 'teach' || $data[$i]['ownerid']!=$userid || $myrights<40) {
-			echo '<span class="delx" onclick="return hidefromcourselist(this,'.$data[$i]['id'].',\''.$type.'\');" title="'._("Hide from course list").'" aria-label="'._("Hide from course list").'">x</span>';
-		} 
 		echo '<a href="course/course.php?folder=0&cid='.$data[$i]['id'].'">';
 		echo $data[$i]['name'].'</a>';
 		if (isset($data[$i]['available']) && (($data[$i]['available']&1)==1)) {
@@ -519,7 +516,9 @@ function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 		if ($shownewpostnote && isset($newpostcnt[$data[$i]['id']]) && $newpostcnt[$data[$i]['id']]>0) {
 			echo ' <a class="noticetext" href="forums/newthreads.php?from=home&cid='.$data[$i]['id'].'">', sprintf(_('Posts (%d)'), $newpostcnt[$data[$i]['id']]), '</a>';
 		}
-
+		if ($type != 'teach' || $data[$i]['ownerid']!=$userid || $myrights<40) {
+			echo '<div class="delx"><a href="#" onclick="return hidefromcourselist(this,'.$data[$i]['id'].',\''.$type.'\');" title="'._("Hide from course list").'" aria-label="'._("Hide from course list").'">x</a></div>';
+		}
 		echo '</li>';
 	}
 	if ($type=='teach' && $myrights>39 && count($data)==0) {
