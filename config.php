@@ -27,13 +27,11 @@ if ($configEnvironment == 'development') {
 
   require('config/ohm.php');
 
-} else if ($configEnvironment == 'staging' || $configEnvironment == 'production') {
+} else {
   //production beanstalk now requires the CONFIG_ENV to be set.
 
   require('config/myopenmath.php');
 
-} else {
-  throw new Exception("No config found for domain or configEnvironment");
 }
 
 
