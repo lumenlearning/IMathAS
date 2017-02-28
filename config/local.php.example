@@ -1,0 +1,18 @@
+<?php
+//IMathAS Math Config File.  Adjust settings here!
+
+//database access settings
+$dbserver = "localhost";
+$dbname = "myopenmath";
+$dbusername = "username";
+$dbpassword = "password";
+
+//error reporting level.  Set to 0 for production servers.
+error_reporting(E_ALL & ~E_NOTICE);
+
+$installname = "Lumen Ohm Local";
+$imasroot = "/myopenmath";
+
+require('ohm.php');
+//require('wamap.php');
+//require('myopenmath.php');
