@@ -469,6 +469,7 @@ ul#navlist {
 	height: 100%;
 	display: flex;
 	align-items: center;
+	background-color: #493FC4;
 }
 ul#navlist li {
 	height: 100%;
@@ -482,6 +483,7 @@ ul#navlist li a {
 	line-height: 35px;
 	height: 100%;
 	padding: 0 1em;
+	background-color: #493FC4;
 }
 div#headerbarlogo {
 	/*background: transparent url(../img/otbslogo.gif) no-repeat scroll left bottom;*/
@@ -511,7 +513,7 @@ ul#navlist li a {
 	border-right: none;
 }
 .activetab {
-	background-color: #1B128E;
+	background-color: #1B128E !important;
 }
 .hideinmobile {
 	display: none;

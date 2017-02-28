@@ -1,0 +1,19 @@
+div.contactform {
+	margin: 3px;
+  padding: 20px;
+  width: 400px;
+  text-align: center;
+  background-color: rgba(220,220,242,0.4);
+}
+
+input#mailsubject {
+  width: 250px;
+  margin-left: 10px;
+
+}
+
+textarea {
+  width: 250px;
+  height: 100px;
+  margin: 10px;
+}
