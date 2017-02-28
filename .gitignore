@@ -1,0 +1,8 @@
+# Local dev
+/.idea
+/.elasticbeanstalk
+.DS_Store
+
+# Runtime
+config/local.php
+
