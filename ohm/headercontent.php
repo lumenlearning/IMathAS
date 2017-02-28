@@ -30,7 +30,7 @@
 
 	<div id="headerbarlogo">
 		<a href="<?php echo $imasroot;?>/index.php">
-			<img alt="Lumen OHM, Online Learning Manager, logo" title="Click to return home" src="<?php echo $imasroot;?>/ohm/ohm-logo.png" height="60" />
+			<img alt="Lumen OHM, Online Learning Manager, logo" title="Click to return home" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" height="60" />
 		</a>
 	</div>
 	<div id="headerrightlinksgroup">
@@ -45,7 +45,7 @@
 				echo "<a href=\"$imasroot/actions.php?action=logout\" class=\"header-menu-item\">Log Out</a></div>";
 				// if user has more privileges than student...
 				if ($myrights > 10) {
-					echo "<a id=\"help-modal-open\" href=\"#\"><span id=\"help-button\"><img src=\"$imasroot/ohm/help-icon.png\" id=\"help-icon\" /><span>Help</span></span></a>";
+					echo "<a id=\"help-modal-open\" href=\"#\"><span id=\"help-button\"><img src=\"$imasroot/ohm/img/help-icon.png\" id=\"help-icon\" /><span>Help</span></span></a>";
 				}
 			}
 		?>
@@ -56,12 +56,12 @@
 	<script type="text/javascript" src="<?php echo $imasroot; ?>/ohm/js/helpModal.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(data) {
-			$.get("<?php echo $imasroot; ?>/ohm/help_modal.html", function(data) {
+			$.get("<?php echo $imasroot; ?>/ohm/help_modal.php", function(data) {
 				$('a#help-modal-open').click(function(e) {
 					modal.open({
 						content: data,
 						height: "600",
-						width: "1000"
+						width: "80%"
 					});
 					e.preventDefault();
 				});
