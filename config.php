@@ -104,8 +104,8 @@ if (strpos($_SERVER['HTTP_HOST'],'wamap.org')!==false) {
 
   $defaultcoursetheme = "wamap.css";
   $CFG['CPS']['theme'] = array("wamap.css",1);
-  //$CFG['CPS']['themelist'] ="angelish.css,angelish_fw.css,angelishgreen.css,angelishpurple.css,default.css,facebookish.css,modern.css,halloween3_dark,";
-  //$CFG['CPS']['themenames'] = "WAMAP Standard,WAMAP Standard Fixed Width,WAMAP Standard Green,WAMAP Standard Purple,OldSchool Retro,Social,Clean,Halloween,";
+  $CFG['CPS']['themelist'] ="wamap.css,wamap_fw.css,angelish.css,angelish3.css,angelishgreen.css,angelishmore.css,angelishpurple.css,angelish_fw.css,default.css,embed.css,embed_fw.css,embedsans.css,embedsans_fw.css,facebookish.css,halloween.css,halloween2.css,halloween3_dark.css,highcontrast.css,highcontrast_dark.css,modern.css,modern3.css,none.css,oliish.css,oliish2.css,otbs.css,otbs_fw.css,otbsreader.css,winter.css";
+  $CFG['CPS']['themenames'] = "WAMAP Standard,WAMAP Standard Fixed Width,angelish,angelish3,angelishgreen,angelishmore,angelishpurple,angelish_fw,default,embed,embed_fw,embed sans,embed sans FW,facebookish,halloween,halloween2,halloween3_dark,highcontrast,highcontrast_dark,modern,modern3,none,oliish,oliish2,otbs,otbs_fw,otbsreader,winter";
 
   $CFG['GEN']['headerinclude'] = "headercontentwamap.php";
   $CFG['GEN']['hidedefindexmenu'] = true;

@@ -9,6 +9,16 @@ body {
 	margin:0;
 	padding:0;
 }
+body.fw1000 {
+	background-color:#F7F7FF;
+	background-image:url(../img/simplebg.png);
+	background-position:center top;
+	background-repeat:repeat-y;
+}
+.fw1000 .midwrapper {
+	max-width: 970px;
+}
+
 html {
 	margin: 0;
 	padding: 0;

@@ -7,7 +7,20 @@ body {
 	font-size: 15px;
 	line-height: 1.4;
 }
-
+body.fw1000 {
+	background-color:#F5F2ED;
+	background-image:url(../img/simplebg.png);
+	background-position:center top;
+	background-repeat:repeat-y;
+	margin:0px;
+	padding:0px;
+}
+.fw1000 .midwrapper {
+	max-width: 980px;
+}
+.fw1000 .breadcrumb {
+	margin: 0px -10px;
+}
 h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6 {
   font-weight: 400;
   line-height: 1.2;
