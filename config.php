@@ -17,10 +17,6 @@ if ($configEnvironment == 'development') {
 
 } else if (strpos($_SERVER['HTTP_HOST'], 'wamap.org') !== false) {
 
-  // Wamap has a different database
-  $AWSbucket = 'wamapdata';
-  $dbname = 'wamap';
-
   require('config/wamap.php');
 
 } else if (strpos($_SERVER['HTTP_HOST'], 'lumenlearning.com') !== false) {
@@ -109,4 +105,3 @@ if (!get_magic_quotes_gpc()) {
 unset($dbserver);
 unset($dbusername);
 unset($dbpassword);
-
