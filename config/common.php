@@ -34,9 +34,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
 //database access settings
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');
 $AWSsecret = getenv('AWS_SECRET_KEY');
-$AWSbucket = getenv('PARAM1');
 $dbserver = getenv('DB_SERVER');
-$dbname = getenv('PARAM3');
 $dbusername = getenv('DB_USERNAME');
 $dbpassword = getenv('DB_PASSWORD');
 if (getenv('imasroot')!==false) {

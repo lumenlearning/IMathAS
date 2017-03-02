@@ -2,6 +2,10 @@
 
 /*** WAMAP.org config ***/
 
+//aws config
+$AWSbucket = getenv('myopenmath');
+$dbname = getenv('myopenmathdb');
+
 $CFG['GEN']['directaccessincludepath'] = 'wamap/';
 $CFG['GEN']['diagincludepath'] = '../wamap/';
 $loginpage = 'wamap/loginpage.php';

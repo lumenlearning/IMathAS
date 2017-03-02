@@ -4,6 +4,10 @@ $loginpage = 'ohm/loginpage.php';
 
 $installname = "Lumen OHM";
 
+//aws config
+$AWSbucket = getenv('myopenmath');
+$dbname = getenv('myopenmathdb');
+
 //login prompts
 $loginprompt = "Username";
 $longloginprompt = "Enter a username.  Use only numbers, letters, or the _ character.";

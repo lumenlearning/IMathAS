@@ -1,6 +1,10 @@
 <?php
 /*** MyOpenMath config ***/
 
+//aws config
+$AWSbucket = getenv('myopenmath');
+$dbname = getenv('myopenmathdb');
+
 //install name
 $installname = "MyOpenMath";
 
