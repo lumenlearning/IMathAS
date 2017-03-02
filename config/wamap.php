@@ -3,8 +3,8 @@
 /*** WAMAP.org config ***/
 
 //aws config
-$AWSbucket = getenv('myopenmath');
-$dbname = getenv('myopenmathdb');
+$AWSbucket = 'myopenmath';
+$dbname = 'myopenmathdb';
 
 $CFG['GEN']['directaccessincludepath'] = 'wamap/';
 $CFG['GEN']['diagincludepath'] = '../wamap/';

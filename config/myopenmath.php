@@ -2,8 +2,8 @@
 /*** MyOpenMath config ***/
 
 //aws config
-$AWSbucket = getenv('myopenmath');
-$dbname = getenv('myopenmathdb');
+$AWSbucket = 'myopenmath';
+$dbname = 'myopenmathdb';
 
 //install name
 $installname = "MyOpenMath";
