@@ -51,9 +51,9 @@ if (isset($_GET['getxml'])) {
   exit;
 }
 
-$dbusername = getenv('PARAM4');
-$dbpassword = getenv('PARAM5');
-$dbserver = getenv('PARAM2');
+$dbusername = getenv('DB_USERNAME');
+$dbpassword = getenv('DB_PASSWORD');
+$dbserver = getenv('DB_SERVER');
 $dbname = "ltidata";
 $tool = "ccrel";
 try {
