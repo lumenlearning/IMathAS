@@ -18,3 +18,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 $installname = "Lumen Ohm Local";
 $imasroot = "/myopenmath";
+
+//zendesk stuff
+$CFG['GEN']['zdapikey'] = 'api_key_goes_here';
+$CFG['GEN']['zdurl'] = 'api_url_goes_here';
