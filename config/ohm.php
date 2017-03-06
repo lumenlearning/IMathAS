@@ -115,7 +115,7 @@ $CFG['GEN']['skipbrowsercheck'] = true;
 $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
 
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY');
-$CFG['GEN']['zdurl'] = 'https://lumenlearning.zendesk.com/api/v2';
+$CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL');
 $CFG['GEN']['zduser'] = 'ohmsupport@lumenlearning.com';
 
 
