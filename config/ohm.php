@@ -74,10 +74,10 @@ $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,9",1),0);
 //$CFG['CPS']['leftnavtools'] = 'limited';
 $CFG['CPS']['templateoncreate'] = true;
 
-$defaultcoursetheme = "lumen_fw.css";
-$CFG['CPS']['theme'] = array("lumen_fw.css",1);
-$CFG['CPS']['themelist'] ="lumen_fw.css,lumen.css";
-$CFG['CPS']['themenames'] = "Lumen Fixed Width,Lumen Fluid";
+$defaultcoursetheme = "lumen.css";
+$CFG['CPS']['theme'] = array("lumen.css_fw1920",1);
+$CFG['CPS']['themelist'] ="lumen.css";
+$CFG['CPS']['themenames'] = "Lumen Theme";
 
 $CFG['TE']['navicons'] = array(
     'untried'=>'te_blue_arrow.png',

@@ -5,7 +5,7 @@
 	if ($coursetheme=='otbsreader.css') {
 		$nologo = true;
 	}
-	if (!isset($flexwidth) && $coursetheme == 'lumen_fw.css') {
+	if (!isset($flexwidth) && $coursetheme == 'lumen.css') {
 		$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 	?>
 	<div id="headercontent">
