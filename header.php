@@ -15,14 +15,22 @@
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
 </script>
-<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=021617b";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=022817b";?>" type="text/css" />
 <?php if (isset($coursetheme)) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
-		$coursetheme = str_replace('_fw','',$coursetheme);
+		$coursetheme = str_replace(array('_fw1920','_fw1000','_fw'),'',$coursetheme);
+	}
+	$isfw = false;
+	if (strpos($coursetheme,'_fw1920')!==false) {
+		$isfw = 1920;
+		$coursetheme = str_replace('_fw1920','',$coursetheme);
+	} else if (strpos($coursetheme,'_fw')!==false) {
+		$isfw = 1000;
+		$coursetheme = str_replace(array('_fw1000','_fw'),'',$coursetheme);
 	}
 	?>
-<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=111016";?>" type="text/css" />
-<link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=111016" media="only screen and (max-width:480px)"/>
+<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=022817";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=022817" media="only screen and (max-width:480px)"/>
 
 <?php } ?>
 <link rel="shortcut icon" href="/favicon.ico" />
@@ -172,15 +180,15 @@ if (isset($sessiondata['ltiitemtype'])) {
 	</script>';
 }
 echo "</head>\n";
-echo "<body>\n";
+if ($isfw!==false) {
+	echo "<body class=\"fw$isfw\">\n";
+} else {
+	echo "<body class=\"notfw\">\n";
+}
 
+echo '<div class="mainbody">';
 
 $insertinheaderwrapper = ' '; //"<h1>$coursename</h1>";
-if (isset($coursetheme) && strpos($coursetheme, '_fw')!==false) {
-	echo '<div class="mainbody isfw">';
-} else {
-	echo '<div class="mainbody notfw">';
-}
 if (isset($insertinheaderwrapper)) {
 	//echo '<div class="headerwrapper">'.$insertinheaderwrapper.'</div>';
 }

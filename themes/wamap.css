@@ -1,15 +1,34 @@
 /*General settings - fonts, overall page background, etc*/
+html {
+	margin: 0;
+	padding: 0;
+}
 body {
 	font-family: "Trebuchet MS", "Arial", "Helvetica", sans-serif;
 	font-size: 90%;
 	margin: 0;
 	padding:0;
 }
-.midwrapper {
-	margin-left: 10px;
-	margin-right: 10px;
-	position: relative;
+
+body.fw1000 {
+	background-color:#F5F2ED;
+	background-image:url(../img/simplebg.png);
+	background-position:center top;
+	background-repeat:repeat-y;
 }
+.fw1000 .midwrapper {
+	max-width: 980px;
+}
+.fw1000 .breadcrumb {
+	margin: 0px -10px;
+}
+.fw1000 #headercontent {
+	padding: 0px 10px;
+}
+.notfw .headerwrapper {
+	padding: 0px 10px;
+}
+	
 /*Link styles*/
 a:link {
 	text-decoration: none;
@@ -171,15 +190,21 @@ span.link {
 
 /*Containers for instructor leftbar, main content*/
 #leftcontent {
-		background:#eee;
-		/*border:1px solid #000;*/
-		color:#000;
+	background:#eee;
+	/*border:1px solid #000;*/
+	color:#000;
+	padding-left: 10px;
+	left: 10px;
 }
 
 #centercontent {
 	background:#fff;
 }
-
+.midwrapper {
+	padding-left: 10px;
+	padding-right: 10px;
+	position: relative;
+}
 div.ddmenu {
 	padding: 5px;
 	background: #F2F2F2;
@@ -282,8 +307,6 @@ span.padright {
 	margin-bottom: 0px;
 	/*height: 94px;*/
 	border-bottom: 2px solid #440044;
-	padding-left:10px;
-	padding-right:10px;
 }
 .headerwrapper h1 {
 	margin: 0;

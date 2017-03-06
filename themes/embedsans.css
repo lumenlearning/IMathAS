@@ -6,7 +6,20 @@ body {
 	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
 	font-size: 15px;
 }
-
+body.fw1000 {
+	background-color:#F5F2ED;
+	background-image:url(../img/simplebg.png);
+	background-position:center top;
+	background-repeat:repeat-y;
+	margin:0px;
+	padding:0px;
+}
+.fw1000 .midwrapper {
+	max-width: 980px;
+}
+.fw1000 .breadcrumb {
+	margin: 0px -10px;
+}
 h1,
 h2,
 h3 {
