@@ -20,7 +20,7 @@ var modal = (function() {
   });
 
   // Center the modal in the viewport
-  method.center = function () {
+  method.center = function() {
     var top, left;
 
     top = Math.max($(window).height() - $modal.outerHeight(), 0) / 2;
@@ -33,7 +33,7 @@ var modal = (function() {
   };
 
   // Open the modal
-  method.open = function (settings) {
+  method.open = function(settings) {
     $content.empty().append(settings.content);
 
     $modal.css({
@@ -45,21 +45,31 @@ var modal = (function() {
 
     $(window).bind('resize.modal', method.center);
 
-    $modal.show();
-    $overlay.show();
+    $modal.fadeIn(200);
+    $overlay.fadeIn(200);
   };
 
   // Close the modal
-  method.close = function () {
-    $modal.hide();
-    $overlay.hide();
-    $content.empty();
-    $(window).unbind('resize.modal');
+  method.close = function() {
+    $modal.fadeOut(300);
+    $overlay.fadeOut(300, function() {
+      $content.empty();
+      $(window).unbind('resize.modal');
+    });
   };
 
+  // Click 'x' to close
   $close.click(function(e){
     e.preventDefault();
     method.close();
+  });
+
+  // Press 'esc' to close
+  $(document).keyup(function(e){
+    if (e.keyCode == 27) {
+      e.preventDefault();
+      method.close();
+    }
   });
 
   return method;

@@ -574,7 +574,6 @@ ul#navlist li a {
 }
 #help-modal {
   position:absolute;
-  /*background:url(tint20.png) 0 0 repeat;*/
   background:rgba(0,0,0,0.2);
   border-radius:14px;
   padding:8px;
@@ -583,17 +582,69 @@ ul#navlist li a {
 #help-modal-content {
   border-radius:8px;
   background:#fff;
-  padding:20px;
+	height: 100%;
 }
 #help-modal-close {
   position:absolute;
-  background:url(../luthemes/lumen/img/close.png) 0 0 no-repeat;
+  background:url(../ohm/img/close.png) 0 0 no-repeat;
   width:25px;
   height:25px;
   display:block;
   text-indent:-9999px;
   top:-7px;
   right:-7px;
+}
+.modal-inner {
+	height: 560px;
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+}
+.modal-inner-columns {
+	width: 50%;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 20px 0;
+	padding: 0 20px;
+}
+.modal-inner-columns h2 {
+	font-weight: lighter;
+}
+.ask-icons {
+	height: 60px;
+	width: 60px;
+	display: block;
+	margin: 0.5em auto;
+}
+#community-icon {
+	background:url(../ohm/img/ask-community-icon.png) 0 0 no-repeat;
+	background-size: 60px;
+}
+#lumen-icon {
+	background:url(../ohm/img/ask-lumen-icon.png) 0 0 no-repeat;
+	background-size: 60px;
+}
+#community-button-container {
+	flex-grow: 1;
+	display: flex;
+}
+#community-button-container a {
+	align-self: center;
+}
+#community-button {
+	background-color: #fff;
+	border-color: #FFD600;
+	border-width: 2px;
+	border-radius: 4px;
+	padding: 24px;
+	line-height: 0;
+	color: #000;
+	cursor: pointer;
+}
+#community-button:hover {
+	background-color: #FFD600;
 }
 
 /* MEDIA QUERIES */

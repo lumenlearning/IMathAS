@@ -52,7 +52,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 				}
 			?>
 			<!-- <h2>Login to Lumen Ohm</h2> -->
-		<img id="login-logo" src="<?php echo $imasroot;?>/ohm/ohm-logo.png" />
+		<img id="login-logo" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" />
 		<div class="login-group">
 			<input id="uname-field" type="text" size="15" id="username" name="username" placeholder="Username" />
 			<input id="pw-field" type="password" size="15" name="password" placeholder="Password" />
