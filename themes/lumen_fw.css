@@ -633,7 +633,8 @@ ul#navlist li a {
 #community-button-container a {
 	align-self: center;
 }
-#community-button {
+#community-button,
+#lumen-button {
 	background-color: #fff;
 	border-color: #FFD600;
 	border-width: 2px;
@@ -643,8 +644,36 @@ ul#navlist li a {
 	color: #000;
 	cursor: pointer;
 }
-#community-button:hover {
+#community-button:hover,
+#lumen-button:hover {
 	background-color: #FFD600;
+}
+
+/* ZENDESK SUPPORT FORM */
+#ticket_form {
+    /*font-family: Verdana, Helvetica, sans-serif;
+    font-size: 14pt;*/
+    color: dimgray;
+    width: 340px;
+    padding: 0 8px;
+}
+.ticket_title {
+    font-weight: bold;
+    padding: 12px 0 0;
+}
+textarea {
+    vertical-align: top;
+    border-color: lightgray;
+}
+.field {
+    width: 100%;
+		margin: 5px 0;
+}
+.register {
+    font-size: 8pt;
+    color: gray;
+    padding: 8px 0;
+		text-align: left;
 }
 
 /* MEDIA QUERIES */

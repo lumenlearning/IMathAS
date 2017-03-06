@@ -43,7 +43,10 @@ $CFG['GEN']['allowinstraddtutors'] = true;
 $CFG['GEN']['addteachersrights'] = 40;
 $CFG['GEN']['homelayout'] = '|0,1,2|10,11|0,1';
 $CFG['GEN']['headerinclude'] = "ohm/headercontent.php";
-$CFG['GEN']['headerscriptinclude'] = "ohm/lumenga.js";
+$CFG['GEN']['headerscriptinclude'] = "ohm/js/lumenga.js";
+// $CFG['GEN']['headerscriptinclude'] = "ohm/js/helpModal.js";
+// $CFG['GEN']['headerscriptinclude'] = "ohm/js/zdHelpAjax.js";
+
 $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
 //can set almost any assessment setting this way
@@ -110,6 +113,11 @@ $CFG['GEN']['logopad'] = '20px';
 $CFG['GEN']['skipbrowsercheck'] = true;
 
 $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
+
+$CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY');
+$CFG['GEN']['zdurl'] = 'https://lumenlearning.zendesk.com/api/v2';
+$CFG['GEN']['zduser'] = 'ohmsupport@lumenlearning.com';
+
 
 /*$CFG['FCM'] = array(
      'SenderId' => '680665776094',

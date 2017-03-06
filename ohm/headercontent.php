@@ -54,6 +54,7 @@
 	</div>
 
 	<script type="text/javascript" src="<?php echo $imasroot; ?>/ohm/js/helpModal.js"></script>
+
 	<script type="text/javascript">
 		$(document).ready(function(data) {
 			$.get("<?php echo $imasroot; ?>/ohm/help_modal.php", function(data) {
