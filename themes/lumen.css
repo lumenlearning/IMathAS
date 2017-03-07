@@ -609,8 +609,17 @@ ul#navlist li a {
 	margin: 20px 0;
 	padding: 0 20px;
 }
+#community-inner-column,
+#user-inner-column {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
 .modal-inner-columns h2 {
 	font-weight: lighter;
+}
+#community-column {
+	border-right: 1px solid black;
 }
 .ask-icons {
 	height: 60px;
@@ -626,15 +635,27 @@ ul#navlist li a {
 	background:url(../ohm/img/ask-lumen-icon.png) 0 0 no-repeat;
 	background-size: 60px;
 }
-#community-button-container {
+#guides-icon {
+	background:url(../ohm/img/ask-guides-icon.png) 0 0 no-repeat;
+	background-size: 60px;
+}
+#community-button-container,
+#guides-button-container {
 	flex-grow: 1;
 	display: flex;
 }
-#community-button-container a {
+#community-button-container a,
+#guides-button-container a {
 	align-self: center;
 }
+div#community-button-container,
+div#lumen-button-container,
+div#guides-button-container {
+	margin: 2em;
+}
 #community-button,
-#lumen-button {
+#lumen-button,
+#guides-button {
 	background-color: #fff;
 	border-color: #FFD600;
 	border-width: 2px;
@@ -643,9 +664,11 @@ ul#navlist li a {
 	line-height: 0;
 	color: #000;
 	cursor: pointer;
+	white-space: nowrap;
 }
 #community-button:hover,
-#lumen-button:hover {
+#lumen-button:hover,
+#guides-button:hover {
 	background-color: #FFD600;
 }
 
@@ -669,14 +692,41 @@ textarea {
     width: 100%;
 		margin: 5px 0;
 }
-.register {
-    font-size: 8pt;
-    color: gray;
-    padding: 8px 0;
-		text-align: left;
-}
 
 /* MEDIA QUERIES */
+@media (max-width: 1024px) {
+	.modal-inner-columns h2 {
+		font-size: 28px;
+	}
+	div#help-modal {
+		height: auto;
+	}
+	.modal-inner {
+		flex-direction: column;
+		padding: 1em 3em;
+	}
+	.modal-inner-columns {
+		width: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	div.ask-icons {
+		display: none;
+	}
+	div#community-button-container,
+	div#lumen-button-container {
+		margin: 2.5em;
+	}
+	div#community-column,
+	div#community-inner-column {
+		border-right: none;
+		border-bottom: 1px solid black;
+	}
+	#ticket_form {
+		width: 80%;
+	}
+}
+
 @media (max-width: 900px) {
 	div#headercontent {
 		flex-direction: column;

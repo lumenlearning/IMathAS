@@ -61,7 +61,7 @@
 				$('a#help-modal-open').click(function(e) {
 					modal.open({
 						content: data,
-						height: "600",
+						height: "auto",
 						width: "80%"
 					});
 					e.preventDefault();
