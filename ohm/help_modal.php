@@ -32,7 +32,6 @@
     <div id="lumen-icon" class="ask-icons"></div>
 
     <div id="ticket_form">
-      <div class="ticket_title">Submit a ticket</div>
       <form id="zd-help-form">
         <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
         <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>

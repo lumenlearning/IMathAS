@@ -601,13 +601,16 @@ ul#navlist li a {
 	height: 100%;
 }
 .modal-inner-columns {
-	width: 50%;
+	/*width: 50%;*/
 	text-align: center;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	margin: 20px 0;
+	/*margin: 20px 0;*/
 	padding: 0 20px;
+}
+#community-inner-column {
+	border-bottom: 1px dotted black;
 }
 #community-inner-column,
 #user-inner-column {
@@ -619,7 +622,12 @@ ul#navlist li a {
 	font-weight: lighter;
 }
 #community-column {
-	border-right: 1px solid black;
+	width: 65%;
+	/*border-right: 1px solid black;*/
+	box-shadow: 0 0 15px grey;
+}
+#lumen-column {
+	width: 35%;
 }
 .ask-icons {
 	height: 60px;
@@ -677,12 +685,8 @@ div#guides-button-container {
     /*font-family: Verdana, Helvetica, sans-serif;
     font-size: 14pt;*/
     color: dimgray;
-    width: 340px;
+    width: 95%;
     padding: 0 8px;
-}
-.ticket_title {
-    font-weight: bold;
-    padding: 12px 0 0;
 }
 textarea {
     vertical-align: top;
@@ -706,9 +710,12 @@ textarea {
 		padding: 1em 3em;
 	}
 	.modal-inner-columns {
-		width: 100%;
 		margin: 0;
 		padding: 0;
+	}
+	#community-column,
+	#lumen-column {
+		width: 100%;
 	}
 	div.ask-icons {
 		display: none;
@@ -720,7 +727,10 @@ textarea {
 	div#community-column,
 	div#community-inner-column {
 		border-right: none;
-		border-bottom: 1px solid black;
+		border-bottom: 1px dotted black;
+	}
+	#community-column {
+		box-shadow: none;
 	}
 	#ticket_form {
 		width: 80%;
