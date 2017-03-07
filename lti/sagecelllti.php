@@ -1,7 +1,7 @@
 <?php
-$dbusername = getenv('PARAM4');
-$dbpassword = getenv('PARAM5');
-$dbserver = getenv('PARAM2');
+$dbusername = getenv('DB_USERNAME');
+$dbpassword = getenv('DB_PASSWORD');
+$dbserver = getenv('DB_SERVER');
 $dbname = "sagecell";
 //DB $link = mysql_connect($dbserver,$dbusername, $dbpassword)
 //DB   or die("<p>Could not connect : " . mysql_error() . "</p></div></body></html>");

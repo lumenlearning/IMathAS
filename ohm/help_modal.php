@@ -1,0 +1,45 @@
+<?php require '../config.php'; ?>
+
+<div class="modal-inner">
+
+  <!-- Community Support -->
+  <div class="modal-inner-columns" style="border-right:1px solid black">
+    <h2>Ask the Community</h2>
+    <div id="community-icon" class="ask-icons"></div>
+    <p>
+      The community lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    </p>
+    <div id="community-button-container">
+      <a href="#"><button id="community-button">Community Forums</button></a>
+    </div>
+  </div>
+
+  <!-- Lumen Support -->
+  <div class="modal-inner-columns">
+    <h2>Ask Lumen</h2>
+    <div id="lumen-icon" class="ask-icons"></div>
+
+    <div id="ticket_form">
+      <div class="ticket_title">Submit a ticket</div>
+      <form id="zd-help-form">
+        <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
+        <textarea placeholder="what's the problem?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
+        <select name="z_priority" id="z_priority" class="field">
+          <option value="low">Low - First reply within 1 business days. Request solved in 10 business days.</option>
+          <option value="normal">Normal - First reply within 1 business days. Request solved in 5 business days.</option>
+          <option value="high">High - First reply within 3 hours. Request solved in 2 business days.</option>
+          <option value="urgent">Urgent/Service Outage - Call (971)303-8980</option>
+        </select>
+        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
+        <div class="register">
+          <a href=<?php echo $CFG['GEN']['zdurl'] . "/login/registration"; ?> target="_blank">
+            Register</a> so our support team can email you to solve your problem.
+        </div>
+        <button id="lumen-button" type="submit">Submit</button>
+      </form>
+    </div>
+
+  </div><!-- End Lumen Support -->
+</div><!-- End Modal Inner -->
+
+<script src="ohm/js/zdHelpAjax.js" type="text/javascript"></script>

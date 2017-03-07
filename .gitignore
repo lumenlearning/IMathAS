@@ -1,0 +1,15 @@
+# Local dev
+/.idea
+/.elasticbeanstalk
+.DS_Store
+*.php~
+*.js~
+
+# Runtime
+config/local.php
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
