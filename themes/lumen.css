@@ -624,7 +624,7 @@ ul#navlist li a {
 #community-column {
 	width: 65%;
 	/*border-right: 1px solid black;*/
-	box-shadow: 0 0 15px grey;
+	box-shadow: 0 0 25px -6px grey;
 }
 #lumen-column {
 	width: 35%;
