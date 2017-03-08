@@ -782,6 +782,11 @@ div#guides-button-container {
 		justify-content: center;
 		height: 116px;
 	}
+	div#leftcolumn,
+	div#rightcolumn {
+		float: none;
+		width: auto;
+	}
 }
 
 @media (max-width: 650px) {
