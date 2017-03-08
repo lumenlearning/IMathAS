@@ -747,6 +747,9 @@ div#guides-button-container {
 	#lumen-column {
 		border-radius: 0 0 6px 6px;
 	}
+	#lumen-column h2 {
+		margin-top: 1em;
+	}
 	div.ask-icons {
 		display: none;
 	}

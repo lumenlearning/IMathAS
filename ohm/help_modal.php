@@ -36,7 +36,7 @@
         <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
         <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
         <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
-        <select name="z_priority" id="z_priority">
+        <select name="z_priority" id="z_priority" required>
           <option value="" disabled selected>urgency</option>
           <option value="low">Low - First reply within 1 business days. Request solved in 10 business days.</option>
           <option value="normal">Normal - First reply within 1 business days. Request solved in 5 business days.</option>
@@ -52,4 +52,4 @@
   </div><!-- End Lumen Support -->
 </div><!-- End Modal Inner -->
 
-<script src="ohm/js/zdHelpAjax.js" type="text/javascript"></script>
+<script src="<?php echo $imasroot; ?>/ohm/js/zdHelpAjax.js" type="text/javascript"></script>

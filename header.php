@@ -3,7 +3,7 @@
 <?php if (isset($CFG['locale'])) {
 	echo '<html lang="'.$CFG['locale'].'">';
 } else {
-	echo '<html lang="en">';	
+	echo '<html lang="en">';
 }
 ?>
 <head>
@@ -33,7 +33,7 @@
 <link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=022817" media="only screen and (max-width:480px)"/>
 
 <?php } ?>
-<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="shortcut icon" href="<?php echo $CFG['GEN']['favicon']; ?>" />
 <!--[if lte IE 6]>
 <style>
 div { zoom: 1; }

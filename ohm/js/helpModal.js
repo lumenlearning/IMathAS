@@ -59,13 +59,13 @@ var modal = (function() {
   };
 
   // Click 'x' to close
-  $close.click(function(e){
+  $close.click(function(e) {
     e.preventDefault();
     method.close();
   });
 
   // Press 'esc' to close
-  $(document).keyup(function(e){
+  $(document).keyup(function(e) {
     if (e.keyCode == 27) {
       e.preventDefault();
       method.close();
