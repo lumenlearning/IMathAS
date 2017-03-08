@@ -1,6 +1,6 @@
 <?php
 
-$imasroot = "/myopenmath";
+// $imasroot = "/myopenmath";
 $loginpage = 'ohm/loginpage.php';
 
 $installname = "Lumen OHM";
