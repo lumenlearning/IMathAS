@@ -14,7 +14,7 @@
         <a href="#"><button id="community-button">Community Forums</button></a>
       </div>
     </div>
-    <div id="user-inner-column">
+    <div id="guides-inner-column">
       <h2>User Guides</h2>
       <div id="guides-icon" class="ask-icons"></div>
       <p>
@@ -35,13 +35,14 @@
       <form id="zd-help-form">
         <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
         <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
-        <select name="z_priority" id="z_priority" class="field">
+        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
+        <select name="z_priority" id="z_priority">
+          <option value="" disabled selected>urgency</option>
           <option value="low">Low - First reply within 1 business days. Request solved in 10 business days.</option>
           <option value="normal">Normal - First reply within 1 business days. Request solved in 5 business days.</option>
           <option value="high">High - First reply within 3 hours. Request solved in 2 business days.</option>
           <option value="urgent">Urgent/Service Outage - Call (971)303-8980</option>
         </select>
-        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
         <div id="lumen-button-container">
           <button id="lumen-button" type="submit">Submit</button>
         </div>

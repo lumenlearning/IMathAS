@@ -613,7 +613,7 @@ ul#navlist li a {
 	border-bottom: 1px dotted black;
 }
 #community-inner-column,
-#user-inner-column {
+#guides-inner-column {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -623,11 +623,13 @@ ul#navlist li a {
 }
 #community-column {
 	width: 65%;
-	/*border-right: 1px solid black;*/
-	box-shadow: 0 0 25px -6px grey;
+	border-right: 1px dotted black;
 }
 #lumen-column {
 	width: 35%;
+	background-color: #1e74d1;
+	border-radius: 0 6px 6px 0;
+	color: #fff;
 }
 .ask-icons {
 	height: 60px;
@@ -661,8 +663,39 @@ div#lumen-button-container,
 div#guides-button-container {
 	margin: 2em;
 }
+.field {
+	padding: 10px;
+	width: 280px;
+	border: 1px solid #aaa;
+	border-bottom: 0;
+}
+#z_subject {
+	border-radius: 6px 6px 0 0;
+	margin-bottom: 0;
+}
+#z_description {
+	margin-top: 0;
+	border-radius: 0 0 6px 6px;
+	margin-bottom: 6px;
+}
+#z_email {
+	border-radius: 6px;
+	margin-bottom: 6px;
+}
+#z_priority {
+	width: 300px;
+	border: 1px solid #aaa;
+	border-bottom: 0;
+	border-radius: 6px;
+	background-color: #fff;
+	height: 35px;
+	left: 10px;
+	right: 10px;
+}
+#z_priority:first-child {
+	color: #aaa;
+}
 #community-button,
-#lumen-button,
 #guides-button {
 	background-color: #fff;
 	border-color: #FFD600;
@@ -675,30 +708,23 @@ div#guides-button-container {
 	white-space: nowrap;
 }
 #community-button:hover,
-#lumen-button:hover,
 #guides-button:hover {
 	background-color: #FFD600;
 }
-
-/* ZENDESK SUPPORT FORM */
-#ticket_form {
-    /*font-family: Verdana, Helvetica, sans-serif;
-    font-size: 14pt;*/
-    color: dimgray;
-    width: 95%;
-    padding: 0 8px;
+#lumen-button {
+	background-color: #155192;
+	color: #fff;
+	border: 1px solid #104074;
+	padding: 24px;
+	line-height: 0;
 }
-textarea {
-    vertical-align: top;
-    border-color: lightgray;
-}
-.field {
-    width: 100%;
-		margin: 5px 0;
+#lumen-button:hover {
+	color: #000;
+	background-color: #FFD600;
 }
 
 /* MEDIA QUERIES */
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
 	.modal-inner-columns h2 {
 		font-size: 28px;
 	}
@@ -707,7 +733,8 @@ textarea {
 	}
 	.modal-inner {
 		flex-direction: column;
-		padding: 1em 3em;
+		align-items: center;
+		/*padding: 1em 3em;*/
 	}
 	.modal-inner-columns {
 		margin: 0;
@@ -717,8 +744,15 @@ textarea {
 	#lumen-column {
 		width: 100%;
 	}
+	#lumen-column {
+		border-radius: 0 0 6px 6px;
+	}
 	div.ask-icons {
 		display: none;
+	}
+	div#community-inner-column,
+	div#guides-inner-column {
+		padding: 1em 3em;
 	}
 	div#community-button-container,
 	div#lumen-button-container {
@@ -734,6 +768,11 @@ textarea {
 	}
 	#ticket_form {
 		width: 80%;
+	}
+	#zd-help-form {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 }
 
