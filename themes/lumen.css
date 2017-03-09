@@ -722,6 +722,41 @@ div#guides-button-container {
 	color: #000;
 	background-color: #FFD600;
 }
+.response-icons {
+	min-width: 20px;
+	height: 20px;
+	margin-right: 10px;
+}
+#fail-response {
+	background-color: #FFBABA;
+	color: #D8000C;
+	padding: 10px;
+	border-radius: 6px;
+	margin: 1em;
+	display: flex;
+	align-items: center;
+	text-align: left;
+	font-size: 12px;
+}
+#success-response {
+	background-color: #DFF2BF;
+	color: #4F8A10;
+	padding: 10px;
+	border-radius: 6px;
+	margin: 1em;
+	display: flex;
+	align-items: center;
+	text-align: left;
+	font-size: 12px;
+}
+#success-icon {
+	background:url(../ohm/img/success-icon.png) 0 0 no-repeat;
+	background-size: 20px;
+}
+#fail-icon {
+	background:url(../ohm/img/fail-icon.png) 0 0 no-repeat;
+	background-size: 20px;
+}
 
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {

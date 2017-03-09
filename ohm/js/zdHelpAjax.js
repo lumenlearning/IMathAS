@@ -30,24 +30,25 @@ $('#zd-help-form').submit(function(e) {
   });
 
   // Callback handler that will be called on success (uncomment for testing)
-  // request.done(function (response, textStatus, jqXHR){
-  //     // Log a message to the console
-  //     console.log("Hooray, it worked!");
-  // });
+  request.done(function(response, textStatus, jqXHR) {
+    $('#submission-response').append('<div id="success-response"><div id="success-icon" class="response-icons"></div>Ticket has been submitted!</div>');
+  });
 
   // Callback handler that will be called on failure (uncomment for testing)
-  // request.fail(function (jqXHR, textStatus, errorThrown){
-  //     // Log the error to the console
-  //     console.error(
-  //         "The following error occurred: " +
-  //         textStatus, errorThrown
-  //     );
-  // });
+  request.fail(function(jqXHR, textStatus, errorThrown) {
+    $('#submission-response').append('<div id="fail-response"><div id="fail-icon" class="response-icons"></div><p>Oops! Something went wrong. Please contact our support team at <a href="mailto:support@lumenlearning.com" style="color: #D8000C;">support@lumenlearning.com</a></p></div>');
+
+    // Log the error to the console
+    console.error(
+      "The following error occurred: " +
+      textStatus, errorThrown
+    );
+  });
 
   // Callback handler that will be called on success or fail
   request.always(function () {
-      // Reenable the inputs
-      $inputs.prop("disabled", false);
-      $inputs.val("");
+    // Reenable the inputs
+    $inputs.prop("disabled", false);
+    $inputs.val("");
   });
 });

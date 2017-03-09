@@ -49,6 +49,8 @@
       </form>
     </div>
 
+    <div id="submission-response"></div>
+
   </div><!-- End Lumen Support -->
 </div><!-- End Modal Inner -->
 
