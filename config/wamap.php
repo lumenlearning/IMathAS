@@ -71,6 +71,8 @@ $CFG['GEN']['hidedefindexmenu'] = true;
 $CFG['GEN']['mathjaxonly'] = true;
 //$CFG['GEN']['translatewidgetID'] = '4c87c0627e615711-207414b9ebceeffe-g2defaf4d45bf3a67-d';
 
+$CFG['GEN']['favicon'] = '/wamap/favicon.ico';
+
 $CFG['FCM'] = array(
     'SenderId' => '994085988951',
     'webApiKey' => 'AIzaSyCPYLTUn1kFIU3BjP2wMP07FiSmzpTwpd4',

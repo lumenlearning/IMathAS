@@ -114,6 +114,8 @@ $CFG['GEN']['skipbrowsercheck'] = true;
 
 $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
 
+$CFG['GEN']['favicon'] = '/favicon.ico';
+
 $CFG['FCM'] = array(
 'SenderId' => '680665776094',
 'webApiKey' => 'AIzaSyAfFxZMM5wEUezNDaP5ZxRrXG18FPnvUHE',

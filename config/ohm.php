@@ -114,6 +114,8 @@ $CFG['GEN']['skipbrowsercheck'] = true;
 
 $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
 
+$CFG['GEN']['favicon'] = '/ohm/img/favicon.ico';
+
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY');
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL');
 $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
