@@ -695,8 +695,7 @@ div#guides-button-container {
 #z_priority:first-child {
 	color: #aaa;
 }
-#community-button,
-#guides-button {
+.modal-buttons {
 	background-color: #fff;
 	border-color: #FFD600;
 	border-width: 2px;
@@ -707,8 +706,7 @@ div#guides-button-container {
 	cursor: pointer;
 	white-space: nowrap;
 }
-#community-button:hover,
-#guides-button:hover {
+.modal-buttons:hover {
 	background-color: #FFD600;
 }
 #lumen-button {
@@ -717,6 +715,7 @@ div#guides-button-container {
 	border: 1px solid #104074;
 	padding: 24px;
 	line-height: 0;
+	cursor: pointer;
 }
 #lumen-button:hover {
 	color: #000;
@@ -756,6 +755,10 @@ div#guides-button-container {
 #fail-icon {
 	background:url(../ohm/img/fail-icon.png) 0 0 no-repeat;
 	background-size: 20px;
+}
+.new-tab-icon {
+	height: 10px;
+	margin-top: -10px;
 }
 
 /* MEDIA QUERIES */

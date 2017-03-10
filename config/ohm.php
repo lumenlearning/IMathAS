@@ -121,6 +121,8 @@ $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
 
 $CFG['GEN']['favicon'] = $imasroot . '/ohm/img/favicon.ico';
 
+$CFG['GEN']['communityforumlink'] = 'https://ohm.lumenlearning.com/course/course.php?cid=1&folder=0';
+
 /*$CFG['FCM'] = array(
      'SenderId' => '680665776094',
      'webApiKey' => 'AIzaSyAfFxZMM5wEUezNDaP5ZxRrXG18FPnvUHE',

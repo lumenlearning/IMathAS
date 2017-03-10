@@ -11,7 +11,11 @@
         The community lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
       </p>
       <div id="community-button-container">
-        <a href="#"><button id="community-button">Community Forums</button></a>
+        <a target="_blank" href="<?php echo $CFG['GEN']['communityforumlink']; ?>" style="text-decoration: none;">
+          <button id="community-button" class="modal-buttons">
+            Community Forums <img class="new-tab-icon" src="<?php echo $imasroot; ?>/ohm/img/new-tab-icon.png" alt="new tab icon">
+          </button>
+        </a>
       </div>
     </div>
     <div id="guides-inner-column">
@@ -21,7 +25,11 @@
          The User Guides lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
       </p>
       <div id="guides-button-container">
-        <a href="#"><button id="guides-button">User Guides</button></a>
+        <a target="_blank" href="https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447/">
+          <button id="guides-button" class="modal-buttons">
+            User Guides <img class="new-tab-icon" src="<?php echo $imasroot; ?>/ohm/img/new-tab-icon.png" alt="new tab icon">
+          </button>
+        </a>
       </div>
     </div>
   </div>
