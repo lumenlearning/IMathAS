@@ -732,7 +732,7 @@ div#guides-button-container {
 	color: #D8000C;
 	padding: 10px;
 	border-radius: 6px;
-	margin: 1em;
+	margin: 0 1em;
 	display: flex;
 	align-items: center;
 	text-align: left;
@@ -743,7 +743,7 @@ div#guides-button-container {
 	color: #4F8A10;
 	padding: 10px;
 	border-radius: 6px;
-	margin: 1em;
+	margin: 0 1em;
 	display: flex;
 	align-items: center;
 	text-align: left;

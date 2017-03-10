@@ -37,7 +37,7 @@
         <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
         <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
         <select name="z_priority" id="z_priority" required>
-          <option value="" disabled selected>urgency</option>
+          <option value="" disabled selected>priority</option>
           <option value="low">Low - First reply within 1 business days. Request solved in 10 business days.</option>
           <option value="normal">Normal - First reply within 1 business days. Request solved in 5 business days.</option>
           <option value="high">High - First reply within 3 hours. Request solved in 2 business days.</option>
