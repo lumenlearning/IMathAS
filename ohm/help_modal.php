@@ -4,11 +4,11 @@
 
   <!-- Community Support -->
   <div class="modal-inner-columns" id="community-column">
-    <div id="community-inner-column">
+    <div id="community-inner-column" style="width: 100%;">
       <h2>Ask the Community</h2>
       <div id="community-icon" class="ask-icons"></div>
       <p>
-        The community lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        Connect with other faculty to find out how they use OHM on their campus with their students.
       </p>
       <div id="community-button-container">
         <a target="_blank" href="<?php echo $CFG['GEN']['communityforumlink']; ?>" style="text-decoration: none;">
@@ -22,7 +22,7 @@
       <h2>User Guides</h2>
       <div id="guides-icon" class="ask-icons"></div>
       <p>
-         The User Guides lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        The OHM Faculty User Guide provides practical how-to information about using OHM and integrating OHM into your Learning Management System.
       </p>
       <div id="guides-button-container">
         <a target="_blank" href="https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447/">
@@ -38,7 +38,9 @@
   <div class="modal-inner-columns" id="lumen-column">
     <h2>Ask Lumen</h2>
     <div id="lumen-icon" class="ask-icons"></div>
-
+    <p>
+      Get personal assistance from Lumen's support team.
+    </p>
     <div id="ticket_form">
       <form id="zd-help-form">
         <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />

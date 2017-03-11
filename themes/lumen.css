@@ -617,6 +617,7 @@ ul#navlist li a {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	padding-bottom: 1em;
 }
 .modal-inner-columns h2 {
 	font-weight: lighter;
