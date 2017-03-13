@@ -8,7 +8,8 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 
 	$nologo = true;
-	require("../header.php");
+	$curdir = rtrim(dirname(__FILE__), '/\\');
+	require($curdir . "/../header.php");
 	if (isset($_SERVER['QUERY_STRING'])) {
 		 $querys = '?'.$_SERVER['QUERY_STRING'];
 	 } else {
