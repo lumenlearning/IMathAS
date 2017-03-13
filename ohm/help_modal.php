@@ -64,4 +64,9 @@
   </div><!-- End Lumen Support -->
 </div><!-- End Modal Inner -->
 
+<script type="text/javascript">
+  window.DEFAULT_SETTINGS = {
+    imasroot: '<?php echo $imasroot; ?>'
+  }
+</script>
 <script src="<?php echo $imasroot; ?>/ohm/js/zdHelpAjax.js" type="text/javascript"></script>

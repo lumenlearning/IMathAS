@@ -19,7 +19,7 @@ $('#zd-help-form').submit(function(e) {
 
   request = $.ajax({
     type: 'POST',
-    url: 'ohm/create_ticket.php',
+    url: window.DEFAULT_SETTINGS.imasroot + '/ohm/create_ticket.php',
     data: serializedData,
     success: function(res) {
       console.log("response:", res);
