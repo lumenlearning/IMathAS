@@ -829,6 +829,12 @@ div#guides-button-container {
 		float: none;
 		width: auto;
 	}
+	#centercontent {
+		margin-top: 35px;
+	}
+	#viewbuttoncont {
+		float: inherit !important;
+	}
 }
 
 @media (max-width: 650px) {
@@ -860,6 +866,16 @@ div#guides-button-container {
 	}
 	span#myname {
 		border: none;
+	}
+	div#navlistcont {
+		display: none;
+	}
+	#viewbuttoncont {
+		display: flex;
+		flex-direction: column;
+	}
+	#viewbuttoncont a {
+		margin-bottom: 4px;
 	}
 }
 
