@@ -408,6 +408,9 @@ span.done {
 span.padright {
 	padding-right: 120px;
 }
+span.formright {
+	width: auto !important;
+}
 .headerwrapper {
 	border: 0px;
 	margin: 0;
