@@ -629,6 +629,7 @@ ul#navlist li a {
 	flex-direction: column;
 	align-items: center;
 	padding-bottom: 1em;
+	width: 100%;
 }
 .modal-inner-columns h2 {
 	font-weight: lighter;
@@ -790,6 +791,9 @@ div#guides-button-container {
 		margin: 0;
 		padding: 0;
 	}
+	.modal-inner-columns div p {
+		margin: .5em 3em;
+	}
 	#community-column,
 	#lumen-column {
 		width: 100%;
@@ -805,7 +809,8 @@ div#guides-button-container {
 	}
 	div#community-inner-column,
 	div#guides-inner-column {
-		padding: 1em 3em;
+		width: 100%;
+		margin: 1em 3em;
 	}
 	div#community-button-container,
 	div#lumen-button-container {

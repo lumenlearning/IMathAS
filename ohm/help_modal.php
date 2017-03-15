@@ -4,7 +4,7 @@
 
   <!-- Community Support -->
   <div class="modal-inner-columns" id="community-column">
-    <div id="community-inner-column" style="width: 100%;">
+    <div id="community-inner-column">
       <h2>Ask the Community</h2>
       <div id="community-icon" class="ask-icons"></div>
       <p>
