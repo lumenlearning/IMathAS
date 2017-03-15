@@ -488,7 +488,16 @@ if ($overwriteBody==1) {
 		} else { echo '&nbsp;';}
 		?>
 		</span>
-		<?php echo $curBreadcrumb ?>
+		<?php 
+		
+		if ((!$useviewbuttons && isset($teacherid) && $useleftbar) || ($useleftstubar && (isset($studentid) || isset($tutorid)))) {
+			if ($didnavlist) {
+				$incclass = 'class="hideifnavlist"';
+			}
+			echo '<span id="leftcontenttoggle" '.$incclass.' aria-hidden="true"><img alt="menu" style="cursor:pointer" src="'.$imasroot.'/img/menu.png"></span> ';
+		}
+		echo $curBreadcrumb 
+		?>
 		<div class=clear></div>
 	</div>
 	
@@ -578,7 +587,7 @@ if ($overwriteBody==1) {
 		if (($toolset&1)==0) {$neededtools++;}
 		
 ?>
-		<div id="leftcontent" <?php if ($essentialsnavcnt<$neededtools+1) {echo 'class="needed"';}?>  role="navigation" aria-label="<?php echo _('Tools navigation');?>">
+		<div id="leftcontent" class="hiddenmobile<?php if ($essentialsnavcnt<$neededtools+1) {echo ' needed';}?>"  role="navigation" aria-label="<?php echo _('Tools navigation');?>">
 			
 <?php
 		if ($msgset<4 || ($toolset&2)==0 || ($toolset&1)==0) {
