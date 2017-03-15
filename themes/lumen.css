@@ -883,4 +883,7 @@ div#guides-button-container {
 	div#headercontent {
 		display: block !important;
 	}
+	span#leftcontenttoggle.hideifnavlist, .hideifnavlist {
+		display: inline-block !important;
+	}
 }
