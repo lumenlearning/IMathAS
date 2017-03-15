@@ -121,6 +121,7 @@ $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
 $CFG['GEN']['favicon'] = $imasroot . '/ohm/img/favicon.ico';
 
 $CFG['GEN']['communityforumlink'] = getenv('COMMUNITY_FORUM_URL');
+$CFG['GEN']['homelinkbox'] = false;
 /*$CFG['FCM'] = array(
      'SenderId' => '680665776094',
      'webApiKey' => 'AIzaSyAfFxZMM5wEUezNDaP5ZxRrXG18FPnvUHE',

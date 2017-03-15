@@ -73,7 +73,7 @@ if ($myrights>15) {
   		thishtml += \' <li><a href="admin/forms.php?from=home&action=delete&id=\'+cid+\'">'._('Delete').'</a></li>\';
   		thishtml += \'</ul></div>\';
   		$(el).append(thishtml);
-  	} 
+  	}
   });
   $(".dropdown-toggle").dropdown();
   });
@@ -391,26 +391,28 @@ if ($myrights==100) {
 /*** done pulling stuff.  Time to display something ***/
 require("header.php");
 $msgtotal = array_sum($newmsgcnt);
-echo '<div class="floatright" id="homelinkbox" role="navigation" aria-label="'._('Site tools').'">';
-if (!isset($CFG['GEN']['hidedefindexmenu'])) {
-	if ($myrights>5) {
-		echo "<a href=\"forms.php?action=chguserinfo\">", _('Change User Info'), "</a> | \n";
-		echo "<a href=\"forms.php?action=chgpwd\">", _('Change Password'), "</a> | \n";
+if (!isset($CFG['GEN']['homelinkbox'])) {
+	echo '<div class="floatright" id="homelinkbox" role="navigation" aria-label="'._('Site tools').'">';
+	if (!isset($CFG['GEN']['hidedefindexmenu'])) {
+		if ($myrights>5) {
+			echo "<a href=\"forms.php?action=chguserinfo\">", _('Change User Info'), "</a> | \n";
+			echo "<a href=\"forms.php?action=chgpwd\">", _('Change Password'), "</a> | \n";
+		}
+		echo '<a href="actions.php?action=logout">', _('Log Out'), '</a><br/>';
 	}
-	echo '<a href="actions.php?action=logout">', _('Log Out'), '</a><br/>';
-}
-echo '<a href="msgs/msglist.php?cid=0">', _('Messages'), '</a>';
-if ($msgtotal>0) {
-	echo ' <a href="msgs/newmsglist.php?cid=0" class="noticetext">', sprintf(_('New (%d)'), $msgtotal), '</a>';
-}
-if ($myrights > 9) {
-	echo " | <a href=\"help.php?section=usingimas\">", _('Help'), "</a>\n";
-}
-if ($myrights >=75) {
-	echo '<br/><a href="admin/admin.php">'._('Admin Page').'</a>';
+	echo '<a href="msgs/msglist.php?cid=0">', _('Messages'), '</a>';
+	if ($msgtotal>0) {
+		echo ' <a href="msgs/newmsglist.php?cid=0" class="noticetext">', sprintf(_('New (%d)'), $msgtotal), '</a>';
+	}
+	if ($myrights > 9) {
+		echo " | <a href=\"help.php?section=usingimas\">", _('Help'), "</a>\n";
+	}
+	if ($myrights >=75) {
+		echo '<br/><a href="admin/admin.php">'._('Admin Page').'</a>';
+	}
+	echo '</div>';
 }
 
-echo '</div>';
 echo '<div class="pagetitle" id="headerhome" role="banner"><h2>';
 if (isset($CFG['GEN']['hometitle'])) {
 	echo $CFG['GEN']['hometitle'];
@@ -532,7 +534,7 @@ function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 	} else if ($type=='teach' && $myrights>39) {
 		echo '<div class="center"><a class="abutton" href="admin/forms.php?from=home&action=addcourse">', _('Add New Course'), '</a></div>';
 	}
-	
+
 	echo '<div class="center">';
 	echo '<a id="unhidelink'.$type.'" '.($hashiddencourses?'':'style="display:none"').' class="small" href="admin/unhidefromcourselist.php?type='.$type.'">View hidden courses</a>';
 	echo '</div>';
