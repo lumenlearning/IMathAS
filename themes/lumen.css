@@ -558,9 +558,17 @@ ul#navlist li a {
 #myname {
 	color: #eee;
 	font-weight: bold;
-	border-right: 1px solid #eee;
-	padding-right: 1.25em;
+	padding-right: 0.5em;
 	cursor: default;
+	border-right: 1px solid #eee;
+}
+#avatar {
+	height: 14px;
+	width: 14px;
+	background-size: cover;
+	background-position: center;
+	/*border-radius: 50%;*/
+	margin: 0 .5em;
 }
 
 /* HELP MODAL */
@@ -879,6 +887,9 @@ div#guides-button-container {
 	}
 	#viewbuttoncont a {
 		margin-bottom: 4px;
+	}
+	#avatar {
+		display: none;
 	}
 }
 

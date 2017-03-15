@@ -9,24 +9,6 @@
 		$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 	?>
 	<div id="headercontent">
-	<?php
-	$usernameinheader = true;
-	if (isset($userid) && $selfhasuserimg==1) {
-		if ($myrights > 5) {
-			echo "<a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">";
-		}
-		if(isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
-			echo "<img src=\"{$urlmode}s3.amazonaws.com/{$GLOBALS['AWSbucket']}/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
-		} else {
-			$curdir = rtrim(dirname(__FILE__), '/\\');
-			$galleryPath = "$curdir/course/files/";
-			echo "<img src=\"$imasroot/course/files/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
-		}
-		if ($myrights > 5) {
-			echo '</a>';
-		}
-	}
-	?>
 
 	<div id="headerbarlogo">
 		<a href="<?php echo $imasroot;?>/index.php">
@@ -37,7 +19,14 @@
 		<?php
 			if (isset($userid)) {
 				if ($myrights > 5) {
-					echo "<span id=\"myname\" class=\"header-menu-item\">$userfullname</span>";
+					echo "<span id=\"myname\" class=\"header-menu-item\">$userfullname<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
+					// if (1 == $selfhasuserimg && isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
+					// 	$curdir = rtrim(dirname(__FILE__), '/\\');
+					// 	$galleryPath = "$curdir/course/files/";
+					// 	echo "<img id=\"avatar\" src=\"$imasroot/course/files/userimg_sm{$userid}.jpg\" />";
+					// } else {
+					// 	echo "<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" />";
+					// }
 					echo "<div id=\"headerrightlinks\"><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span class=\"header-menu-item\">User Settings</span></a>";
 					echo '<a href="#" class="header-menu-item" onclick="jQuery(\'#homemenu\').css({\'left\': jQuery(this).offset().left+\'px\', \'background-color\':\'#1E74D1\', \'color\':\'#fff\'});mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> ';
 					echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()"></div>';
