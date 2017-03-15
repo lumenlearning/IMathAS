@@ -449,9 +449,20 @@ div#headercontent, div#navlistcont {
 	max-width: 1920px;
 	padding: 0 2em;
 	margin: auto;
-
 }
-
+.headerbar-wrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+div#headerbar-menu-toggle {
+	display: none;
+}
+.menu-dropdown-btn {
+	height: 40px;
+	width: 40px;
+}
 div#navlistwrapper {
 	margin:auto;
 	max-width: 1920px;
@@ -497,11 +508,8 @@ div#headerbarlogo {
 div#headerbarlogo img {
 	vertical-align: -60%;
 }
-div#headerrightlinksgroup {
+div.linksgroup {
 	text-align: right;
-	/*float: right;*/
-	/*margin-top: 15px;
-	margin-right: 20px;*/
 	color: #666;
 	display: flex;
 	align-items: center;
@@ -854,16 +862,60 @@ div#guides-button-container {
 }
 
 @media (max-width: 650px) {
+	#myname {
+		padding-bottom: 0.5em;
+	}
+	div#headerbar-menu-toggle {
+		display: block;
+		cursor: pointer;
+	}
 	div#headercontent {
 		height: auto;
 		display: block;
 		padding: 1em;
+		padding-bottom: 0.5em;
 	}
-	div#headerrightlinksgroup {
+	div#headerrightlinks a {
+		line-height: 1.8;
+		padding: 0.3em 0;
+	}
+	div.linksgroup {
+		display: none;
+	}
+	div.linksgroup.responsive {
 		display: flex;
 		align-items: flex-start;
 		flex-direction: column;
 		margin-top: 1em;
+	}
+	div#navlistcont.responsive {
+		display: block;
+		height: auto;
+		padding: 0;
+	}
+	div#navlistcont {
+		display: none;
+	}
+	ul#navlist {
+		display: flex;
+		flex-direction: column;
+		align-items: baseline;
+	}
+	ul#navlist li {
+		width: 100%;
+	}
+	ul#navlist li a {
+		width: 100%;
+		padding: 0;
+		padding-left: 1.5em;
+		line-height: 1.8;
+		border-bottom: none;
+	}
+	a.header-menu-item {
+		padding: 0.3em 0.5em !important;
+	}
+	a#help-modal-open {
+		line-height: 1.8;
 	}
 	span#help-button {
 		background-color: transparent;
@@ -884,7 +936,7 @@ div#guides-button-container {
 		border: none;
 	}
 	div#navlistcont {
-		display: none;
+		/*display: none;*/
 	}
 	#viewbuttoncont {
 		display: flex;
