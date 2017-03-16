@@ -360,9 +360,7 @@
 				$sessiondata['intreereader'] = false;
 			}
 
-			//DB $query = "SELECT name,theme,topbar,msgset,toolset FROM imas_courses WHERE id='{$_GET['cid']}'";
-			//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-			$stm = $DBH->prepare("SELECT name,theme,topbar,msgset,toolset FROM imas_courses WHERE id=:id");
+			$stm = $DBH->prepare("SELECT name,theme,msgset,toolset FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['cid']));
 			$courseinfo = $stm->fetch(PDO::FETCH_ASSOC);
 			$sessiondata['courseid'] = intval($_GET['cid']);
@@ -374,10 +372,6 @@
 			}
 			$sessiondata['coursetheme'] = $coursetheme;
 
-			//DB $sessiondata['coursetopbar'] =  mysql_result($result,0,2);
-			//DB $sessiondata['msgqtoinstr'] = (floor( mysql_result($result,0,3)/5))&2;
-			//DB $sessiondata['coursetoolset'] = mysql_result($result,0,4);
-			$sessiondata['coursetopbar'] =  $courseinfo['topbar'];
 			$sessiondata['coursetoolset'] = $courseinfo['toolset'];
 			if (isset($studentinfo['timelimitmult'])) {
 				$sessiondata['timelimitmult'] = $studentinfo['timelimitmult'];
@@ -446,20 +440,12 @@
 				$stm->execute(array(':agroupid'=>$stugroupid, ':id'=>$line['id'], ':ver'=>$line['ver']));
 			}
 
-			//DB $query = "SELECT name,theme,topbar,msgset,toolset FROM imas_courses WHERE id='{$_GET['cid']}'";
-			//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-			$stm = $DBH->prepare("SELECT name,theme,topbar,msgset,toolset FROM imas_courses WHERE id=:id");
+			$stm = $DBH->prepare("SELECT name,theme,msgset,toolset FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['cid']));
 			$courseinfo = $stm->fetch(PDO::FETCH_ASSOC);
 			$sessiondata['courseid'] = intval($_GET['cid']);
-			//DB $sessiondata['coursename'] = mysql_result($result,0,0);
-			//DB $sessiondata['coursetheme'] = mysql_result($result,0,1);
 			$sessiondata['coursename'] = $courseinfo['name'];
 			$sessiondata['coursetheme'] = $courseinfo['theme'];
-			//DB $sessiondata['coursetopbar'] =  mysql_result($result,0,2);
-			//DB $sessiondata['msgqtoinstr'] = (floor( mysql_result($result,0,3)/5))&2;
-			//DB $sessiondata['coursetoolset'] = mysql_result($result,0,4);
-			$sessiondata['coursetopbar'] =  $courseinfo['topbar'];
 			$sessiondata['coursetoolset'] = $courseinfo['toolset'];
 			if (isset($studentinfo['timelimitmult'])) {
 				$sessiondata['timelimitmult'] = $studentinfo['timelimitmult'];
@@ -1139,7 +1125,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 			echo "&gt; ", _('View as student'), "</div>";
 		} else {
 			echo "<div class=breadcrumb>";
-			echo "<span style=\"float:right;\">$userfullname</span>";
+			echo "<span style=\"float:right;\" class=\"hideinmobile\">$userfullname</span>";
 			if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0) {
 				echo "$breadcrumbbase ", _('Assessment'), "</div>";
 			} else {

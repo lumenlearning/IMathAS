@@ -515,9 +515,9 @@ ul#navlist li a {
 .activetab {
 	background-color: #1B128E !important;
 }
-.hideinmobile {
+/*.hideinmobile {
 	display: none;
-}
+}*/
 .sysnotice {
 	border-radius: 4px;
 }
@@ -885,5 +885,8 @@ div#guides-button-container {
 	}
 	span#leftcontenttoggle.hideifnavlist, .hideifnavlist {
 		display: inline-block !important;
+	}
+	#viewbuttoncont {
+		display: none;
 	}
 }
