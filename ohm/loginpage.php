@@ -55,8 +55,8 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 			<!-- <h2>Login to Lumen Ohm</h2> -->
 		<img id="login-logo" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" />
 		<div class="login-group">
-			<input id="uname-field" type="text" size="15" id="username" name="username" placeholder="Username" aria-label="Username" />
-			<input id="pw-field" type="password" size="15" name="password" placeholder="Password" aria-label="Password" />
+			<input type="text" size="15" id="username" name="username" placeholder="Username" aria-label="Username" />
+			<input type="password" size="15" id="password" name="password" placeholder="Password" aria-label="Password" />
 			<button id="login-button" type="submit">Login</button>
 		</div>
 		<div id="settings">JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</div>

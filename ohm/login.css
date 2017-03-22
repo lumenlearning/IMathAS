@@ -57,16 +57,16 @@ div.mainbody {
 	display: block;
 	margin: 2em auto;
 }
-#uname-field, #pw-field {
+#username, #password {
 	padding: 0.5em 1em;
 	font-size: 16px;
 }
-#uname-field {
+#username {
 	border: 1px solid #aaa;
 	border-bottom: 0;
 	border-radius: 6px 6px 0 0;
 }
-#pw-field {
+#password {
 	border: 1px solid #aaa;
 	border-radius: 0 0 6px 6px;
 }
