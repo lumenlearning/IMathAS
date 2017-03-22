@@ -43,9 +43,7 @@ $CFG['GEN']['allowinstraddtutors'] = true;
 $CFG['GEN']['addteachersrights'] = 40;
 $CFG['GEN']['homelayout'] = '|0,1,2|10,11|0,1';
 $CFG['GEN']['headerinclude'] = "ohm/headercontent.php";
-$CFG['GEN']['headerscriptinclude'] = "ohm/js/lumenga.js";
-// $CFG['GEN']['headerscriptinclude'] = "ohm/js/helpModal.js";
-// $CFG['GEN']['headerscriptinclude'] = "ohm/js/zdHelpAjax.js";
+$CFG['GEN']['footerscriptinclude'] = "ohm/js/lumenga.js";
 
 $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
