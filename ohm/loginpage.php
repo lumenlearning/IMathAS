@@ -64,6 +64,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 
 		<!-- <div><a href="<?php// echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a><br/>
 		<a href="<?php// echo $imasroot; ?>/forms.php?action=lookupusername">Forgot Username</a></div>		<input type="hidden" id="tzoffset" name="tzoffset" value=""> -->
+		<input type="hidden" id="tzoffset" name="tzoffset" value="">
 		<input type="hidden" id="tzname" name="tzname" value="">
 		<input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
 		<script type="text/javascript">
