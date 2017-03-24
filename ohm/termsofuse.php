@@ -1,7 +1,7 @@
 <?php
-require("config.php");
+require("../config.php");
 $flexwidth = true;
-require("header.php");
+require("../header.php");
 ?>
 <h1>Terms of Use</h1>
 <p><strong>Intro</strong></p>
@@ -17,13 +17,13 @@ require("header.php");
 <p>For the free and open use of the system, instructor technical support is provided by volunteers and the user community, and is thus limited and not guaranteed. To create an institutional service agreement with guaranteed support and response times please make a request at <a href="http://www.lumenlearning.com/contact">http://www.lumenlearning.com/contact</a>.</p>
 <p><strong>Content Usage Rights</strong></p>
 <p>Copyrighted materials should not be posted or used in questions without the permission of the copyright owner, or under allowed use following a Creative Commons or similar open license. You shall be solely responsible for your own user created content and the consequences of posting or publishing them. MyOpenMath expressly disclaims any and all liability in connection with user created content.</p>
-<p>Any content you upload remains yours. &nbsp;However, if you create questions, assignments, or courses and set them to be available for use by other instructors, through that action you are granting explicit rights for others to use, copy, and redistribute modifications of your items, including redistribution to other non-commercial installations of the IMathAS software. 
-It is recommended that you include an explicit Creative Commons license on courses you choose to share. 
+<p>Any content you upload remains yours. &nbsp;However, if you create questions, assignments, or courses and set them to be available for use by other instructors, through that action you are granting explicit rights for others to use, copy, and redistribute modifications of your items, including redistribution to other non-commercial installations of the IMathAS software.
+It is recommended that you include an explicit Creative Commons license on courses you choose to share.
 Questions that are not set to be private may be used or adapted without attribution, including redistribution to other non-commercial installations of the IMathAS software; Other content must be used in accordance to any license you&rsquo;ve specified.</p>
 <p><strong>Restrictions on Use</strong></p>
 <p>You may not use or access MyOpenMath for any commercial purpose,
 including using or accessing the site for the purpose of providing
-paid support to other users.  For clarity, use of MyOpenMath by an instructor 
+paid support to other users.  For clarity, use of MyOpenMath by an instructor
 as a component of a course at an accredited school is not considered commercial use.
 You may not promote MyOpenMath in a way
 that implies that you control or own the site.</p>

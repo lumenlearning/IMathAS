@@ -5,6 +5,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 }
 //any extra CSS, javascript, etc needed for login page
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/ohm/login.css\" type=\"text/css\" />\n";
+	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 
 	$nologo = true;
@@ -56,14 +57,14 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		<img id="login-logo" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" />
 		<div class="login-group">
 			<input type="text" size="15" id="username" name="username" placeholder="Username" aria-label="Username" />
-			<input type="password" size="15" id="password" name="password" placeholder="Password" aria-label="Password" />
+			<input type="password" size="15" id="password" name="password" placeholder="Password"  aria-label="Password" />
 			<button id="login-button" type="submit">Login</button>
 		</div>
 		<div id="settings">JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</div>
 
 
-		<!-- <div><a href="<?php// echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a><br/>
-		<a href="<?php// echo $imasroot; ?>/forms.php?action=lookupusername">Forgot Username</a></div>		<input type="hidden" id="tzoffset" name="tzoffset" value=""> -->
+		<!-- <div><a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
+		<a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></div>		<input type="hidden" id="tzoffset" name="tzoffset" value=""> -->
 		<input type="hidden" id="tzoffset" name="tzoffset" value="">
 		<input type="hidden" id="tzname" name="tzname" value="">
 		<input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
@@ -75,11 +76,11 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		</script>
 
 		<div class="supplement-text">
-			<div><a target="_blank" href="http://lumenlearning.com/courseware-myopenmath/">What is Lumen Ohm?</a></br>
-			<a href="<?php echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a><br/>
-			<a href="<?php echo $imasroot; ?>/forms.php?action=lookupusername">Forgot Username</a></br>
-			<a href="<?php echo $imasroot; ?>/forms.php?action=newuser">Enroll in Your Course</a></div>
-
+		  <a target="_blank" href="http://lumenlearning.com/courseware-myopenmath/">What is Lumen Ohm?</a></br>
+			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
+			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></br>
+			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=newuser">Enroll in Your Course</a></br>
+			<a href="<?php echo $imasroot; ?>/ohm/newinstructor.php?">Request an instructor account</a>
 		</div>
 
 		<script type="text/javascript">

@@ -1,8 +1,10 @@
 <?php
 	require("../config.php");
+	echo "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/themes/lumen.css\" type=\"text/css\">\n";
 	$placeinhead .= '<style type="text/css">div { margin: 0px; padding: 0px;}</style>';
+
 	$nologo = true;
 	require("../header.php");
 	$pagetitle = "Instructor Account Request";
@@ -34,7 +36,7 @@
 					$homelayout = '|0,1,2||0,1';
 				}
 
-				require_once("includes/password.php");
+				require_once("../includes/password.php");
 				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
 				//DB $query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
@@ -83,7 +85,7 @@
 				mail($_POST['email'],$subject,$message,$headers);
 
 				echo $message;
-				require("footer.php");
+				require("../footer.php");
 				exit;
 			}
 		}
@@ -95,43 +97,34 @@
 	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
 	if (isset($_POST['verurl'])) {$school=$_POST['verurl'];} else {$verurl='';}
 	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
-
+	echo "<div class=lumensignupforms>";
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
-	echo '<p>Note: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges. ';
-	echo 'MyOpenMath does not currently provide instructor accounts to parents, home-schools, or tutors. MyOpenMath is only intended for use with children and adults over ';
-	echo 'the age of 13.</p>';
+	echo '<dl>';
+	echo '<dt><b>Note</b>: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges.</dt>';
+	echo '<dd>Lumen ohm does not currently provide instructor accounts to parents, home-schools, or tutors.</dd>';
+	echo '<dd>Lumen Ohm is only intended for use with children and adults over the age of 13. </dd></dl><br/>';
 	echo "<form method=\"post\" action=\"newinstructor.php\" onsubmit=\"return passwordchk();\">\n";
-	echo "<span class=\"form\">First Name</span><span class=\"formright\"><input type=text name=firstname value=\"$firstname\" size=40></span><br class=\"form\" />\n";
-	echo "<span class=\"form\">Last Name</span><span class=\"formright\"><input type=text name=lastname value=\"$lastname\" size=40></span><br class=\"form\" />\n";
-	echo "<span class=\"form\">Email Address</span><span class=\"formright\"><input type=text name=email value=\"$email\" size=40></span><br class=\"form\" />\n";
-	echo "<span class=\"form\">Phone Number</span><span class=\"formright\"><input type=text name=phone value=\"$phone\" size=40></span><br class=\"form\" />\n";
-	echo "<span class=\"form\">School &amp; District / College</span><span class=\"formright\"><input type=\"text\" name=\"school\" value=\"$school\" size=40></span><br class=\"form\" />\n";
-	echo "<span class=\"form\">Web page where your instructor status can be verified (e.g., a school directory)</span><span class=\"formright\"><input type=\"text\" name=\"verurl\" value=\"$verurl\" size=40></span><br class=\"form\" />\n";
-
-	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=\"formright\"><input type=text name=username value=\"$username\" size=40></span><br class=form />\n";
-	echo "<span class=form>Requested Password</span><span class=\"formright\"><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
-	echo "<span class=form>Retype Password</span><span class=\"formright\"><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";
+	echo "<input class='lumenform form' type=text name=firstname placeholder='First Name' value=\"$firstname\" size=40 aria-label='First Name' required>";
+	echo "<input class='lumenform form' type=text name=lastname  placeholder='Last Name' value=\"$lastname\" size=40 aria-label='Last Name' required></span>";
+	echo "<input class='lumenform form' type=email name=email     placeholder='Email' value=\"$email\" size=40 aria-label='Email' required>";
+	echo "<input class='lumenform form' type=tel name=phone placeholder='Phone Number' value=\"$phone\" size=40 aria-label='Phone Number' required>";
+	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"$school\" size=40 aria-label='School & District / College' required>";
+	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"$verurl\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
+	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
+	echo "<input  class='lumenform form' type=text name=username placeholder='Requested Username (letters,numbers, \"_\")' value=\"$username\" size=40>";
+	echo "<input  class='lumenform form' placeholder='Requested Password' type=password name=password id=\"password\" size=40 aria-label='Password' required>";
+	echo "<input  class='lumenform form' placeholder='Retype Password' type=password name=password2 id=\"password2\" size=40 aria-label='Retype Password' required>";
 	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
 	if (isset($CFG['GEN']['TOSpage'])) {
-		echo "<span class=\"form\"><label for=\"agree\">I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></label></span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+		echo "</br>
+		<label class=form>
+			<input type=checkbox name=agree id=agree aria-label=agree  aria-label='agree' required/>
+			<span>I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></span>
+		</label></br>";
 	}
-	echo "<div class=\"submit\"><input type=\"submit\" value=\"Request Account\"></div>\n";
+	echo "<button class=button type=submit>Submit</button>";
 	echo "</form>\n";
-	/*echo "<h4>Terms of Use</h4>\n";
-	echo "<p><em>The IMathAS software and this webserver hosting are offered free of charge for use by instructors and their students using ";
-	echo "open textbooks. ";
-	echo "There is <strong>no warranty</strong> and <strong>no guarantees</strong> attached with this offer.  The ";
-	echo "server or software might crash or mysteriously lose all your data.  Your account or this service may be terminated without warning.  ";
-	echo "Instructor technical support is provided by volunteers and the user community, and is thus limited and not guaranteed.  No student technical support is provided.  ";
-	echo "Use of this system is at your own risk.</em></p>\n";
-	echo "<p><em>Copyrighted materials should not be posted or used in questions without the permission of the copyright owner, or under allowed use following a ";
-	echo "Creative Commons or similar open license.  You shall be solely ";
-	echo "responsible for your own user created content and the consequences of posting or publishing them.  MyOpenMath expressly disclaims any and all liability in ";
-	echo "connection with user created content.</em></p>";
-	echo "<p><em>If you create questions, assignments, or courses and set them to be available for use by other instructors, through that action you are ";
-	echo "granting explicit rights for others to use, copy, and redistribute modifications of your items without compensation or attribution.</em></p>";
-	echo '<p><em>You have permission to export any open content on MyOpenMath to use on your own non-commercial installation of the IMathAS software.  ';
-	echo 'If you wish to use the content for commercial use, please contact the site administrator.</em></p>';
-	*/
+	echo "</div>";
+
 	require("../footer.php");
 ?>
