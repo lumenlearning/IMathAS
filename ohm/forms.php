@@ -33,7 +33,7 @@ switch($_GET['action']) {
 		$confirm_password='"Confirm Password"';
 		$choose_password ='"Choose a Password"';
 		echo "<div class=lumensignupforms>
-		<div id=headerforms class=pagetitle><h2>New User Signup</h2></div>
+		<div id=headerforms class=pagetitle><h2>New Student Signup</h2></div>
 		<form method=post action=../actions.php?action=newuser$gb onsubmit=\"return validateForm(this)\">\n
 		<input class='lumenform form' class=\"form\" type=\"text\" size=12 id=SID name=SID placeholder= ".$username_placeholder ." aria-label=Enter Username required>\n
 		<input class='lumenform form' type=\"password\" size=20 id=pw1 name=pw1 placeholder= ".$choose_password ." aria-label=Password required>\n
