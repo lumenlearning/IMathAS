@@ -76,19 +76,11 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		</script>
 
 		<div class="supplement-text">
-<<<<<<< HEAD
-		  <a target="_blank" href="http://lumenlearning.com/courseware-myopenmath/">What is Lumen Ohm?</a></br>
+		  <a target="_blank" href="http://lumenlearning.com/courseware-myopenmath/">What is Lumen OHM?</a></br>
 			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
 			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></br>
-			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=newuser">Enroll in Your Course</a></br>
-			<a href="<?php echo $imasroot; ?>/ohm/newinstructor.php?">Register as a New Student</a>
-=======
-			<div><a target="_blank" href="http://lumenlearning.com/courseware-myopenmath/">What is Lumen Ohm?</a></br>
-			<a href="<?php echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a><br/>
-			<a href="<?php echo $imasroot; ?>/forms.php?action=lookupusername">Forgot Username</a></br>
-			<a href="<?php echo $imasroot; ?>/forms.php?action=newuser">Register as a New Student</a></div>
-
->>>>>>> 2775e11... Change  'Enroll in Your Course' link to say 'Register as a New Student' on the login page
+			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=newuser">Register as a New Student</a></br>
+			<a href="<?php echo $imasroot; ?>/ohm/newinstructor.php?">Request an instructor account</a>
 		</div>
 
 		<script type="text/javascript">
