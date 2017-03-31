@@ -40,7 +40,7 @@ switch($_GET['action']) {
 		<input class='lumenform form' type=\"password\" size=20 id=pw2 name=pw2 placeholder= ".$confirm_password ." aria-label=Password required>\n
 	  <input class='lumenform form' type=\"text\" size=20 id=firstname name=firstname placeholder=Firstname  aria-label=firstname required>\n
 	  <input class='lumenform form' type=\"text\" size=20 id=lastname name=lastname placeholder=Lastname  aria-label=lastname required>\n
-		<input class='lumenform form' type=\"email\" size=60 id=email name=email placeholder=Email  aria-label=email required>\n
+		<input class='lumenform form' type=\"text\" size=60 id=email name=email placeholder=Email  aria-label=email required>\n
     <br/>
 		<label class=form>
       <input type=checkbox id=msgnot name=msgnot checked=checked aria-label=msgnot />
@@ -85,7 +85,7 @@ switch($_GET['action']) {
 			}
 			// <input class='lumenform form' type=\"text\" size=60 id=email name=email placeholder=Email  aria-label=email required>\n
 
-			echo '<input  class="lumenform form" type="number"  name="courseid" placeholder="Course Id"  aria-label="courseid"/>';
+			echo '<input  class="lumenform form" type="text"  name="courseid" placeholder="Course Id"  aria-label="courseid"/>';
 			echo '<input class="lumenform form" type="text" name="ekey" placeholder="Enrollment Key"  aria-label="Enrollment Key:"/>';
 			if ($doselfenroll) {
 				// echo '</div>';
@@ -364,7 +364,7 @@ switch($_GET['action']) {
 		      <div id=headerforms class=pagetitle><h2>Lookup Username</h2></div>
 					<form method=post action=../actions.php?action=lookupusername$gb>\n
 					<p class=directions>Forgot your username? Enter your email address below.</p>
-					<input class='lumenform form' type=email name=\"email\" placeholder=Email id=email  aria-label=Email required />
+					<input class='lumenform form' type=text name=\"email\" placeholder=Email id=email  aria-label=Email required />
 					<button class=button type=submit>Submit</button></form>
 					</div>";
 		break;

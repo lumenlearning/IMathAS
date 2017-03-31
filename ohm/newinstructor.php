@@ -106,8 +106,8 @@
 	echo "<form method=\"post\" action=\"newinstructor.php\" onsubmit=\"return passwordchk();\">\n";
 	echo "<input class='lumenform form' type=text name=firstname placeholder='First Name' value=\"$firstname\" size=40 aria-label='First Name' required>";
 	echo "<input class='lumenform form' type=text name=lastname  placeholder='Last Name' value=\"$lastname\" size=40 aria-label='Last Name' required></span>";
-	echo "<input class='lumenform form' type=email name=email     placeholder='Email' value=\"$email\" size=40 aria-label='Email' required>";
-	echo "<input class='lumenform form' type=tel name=phone placeholder='Phone Number' value=\"$phone\" size=40 aria-label='Phone Number' required>";
+	echo "<input class='lumenform form' type=text name=email     placeholder='Email' value=\"$email\" size=40 aria-label='Email' required>";
+	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"$phone\" size=40 aria-label='Phone Number' required>";
 	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"$school\" size=40 aria-label='School & District / College' required>";
 	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"$verurl\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
 	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
