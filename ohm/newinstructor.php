@@ -101,8 +101,8 @@
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
 	echo '<dl>';
 	echo '<dt><b>Note</b>: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges.</dt>';
-	echo '<dd>Lumen ohm does not currently provide instructor accounts to parents, home-schools, or tutors.</dd>';
-	echo '<dd>Lumen Ohm is only intended for use with children and adults over the age of 13. </dd></dl><br/>';
+	echo '<dd>Lumen OHM does not currently provide instructor accounts to parents, home-schools, or tutors.</dd>';
+	echo '<dd>Lumen OHM is only intended for use with children and adults over the age of 13. </dd></dl><br/>';
 	echo "<form method=\"post\" action=\"newinstructor.php\" onsubmit=\"return passwordchk();\">\n";
 	echo "<input class='lumenform form' type=text name=firstname placeholder='First Name' value=\"$firstname\" size=40 aria-label='First Name' required>";
 	echo "<input class='lumenform form' type=text name=lastname  placeholder='Last Name' value=\"$lastname\" size=40 aria-label='Last Name' required></span>";
