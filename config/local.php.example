@@ -1,6 +1,9 @@
 <?php
 //IMathAS Math Config File.  Adjust settings here!
 
+$imasroot = "/myopenmath";
+
+
 require('ohm.php');
 //require('wamap.php');
 //require('myopenmath.php');
@@ -17,7 +20,6 @@ $AWSbucket = null;
 error_reporting(E_ALL & ~E_NOTICE);
 
 $installname = "Lumen Ohm Local";
-$imasroot = "/myopenmath";
 
 //zendesk stuff
 $CFG['GEN']['zdapikey'] = 'api_key_goes_here';
