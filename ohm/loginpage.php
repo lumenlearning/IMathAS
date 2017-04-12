@@ -76,7 +76,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		</script>
 
 		<div class="supplement-text">
-		  <a target="_blank" href="http://lumenlearning.com/courseware-myopenmath/">What is Lumen OHM?</a></br>
+		  <a target="_blank" href="https://www.lumenlearning.com/what/ohm/">What is Lumen OHM?</a></br>
 			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
 			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></br>
 			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=newuser">Register as a New Student</a></br>
