@@ -5,7 +5,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 }
 //any extra CSS, javascript, etc needed for login page
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\" />\n";
-	//$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/md5.js\" ></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 	
 	$nologo = true;
@@ -25,18 +24,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	 $pagetitle = "Welcome";
 	 include("infoheader.php");
 	 
-	 $pref = 0;
-	 if (isset($_COOKIE['mathgraphprefs'])) {
-		 $prefparts = explode('-',$_COOKIE['mathgraphprefs']);
-		 if ($prefparts[0]==2 && $prefparts[1]==2) { //img all
-			$pref = 3;	 
-		 } else if ($prefparts[0]==2) { //img math
-			 $pref = 4;
-		 } else if ($prefparts[1]==2) { //img graph
-			 $pref = 2;
-		 }
-			 
-	 }
 ?>
 	
 
@@ -56,60 +43,31 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	}
 ?>
 <b>Login</b>
+
+<div><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</noscript></div>
+
 <table>
 <tr><td><label for="username"><?php echo $loginprompt;?></label>:</td><td><input type="text" size="15" id="username" name="username" /></td></tr>
 <tr><td><label for="password">Password</label>:</td><td><input type="password" size="15" id="password" name="password" /></td></tr>
 <tr><td></td><td><input type="submit" value="Login"></td></tr>
 </table>
-<div id="settings">JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</div>
+
 <div class="textright"><a href="<?php echo $imasroot; ?>/forms.php?action=newuser">Register as a new student</a></div>
 <div class="textright"><a href="<?php echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a><br/>
 <a href="<?php echo $imasroot; ?>/forms.php?action=lookupusername">Forgot Username</a></div>
 <input type="hidden" id="tzoffset" name="tzoffset" value=""> 
 <input type="hidden" id="tzname" name="tzname" value="">
 <input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
-<script type="text/javascript">        
+<script type="text/javascript">     
+$(function() {
         var thedate = new Date();  
-        document.getElementById("tzoffset").value = thedate.getTimezoneOffset();  
+        document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
         var tz = jstz.determine(); 
         document.getElementById("tzname").value = tz.name();
+        $("#username").focus();
+});
 </script> 
 
-
-<script type="text/javascript"> 
-        function updateloginarea() {
-		setnode = document.getElementById("settings"); 
-		var html = ""; 
-		html += 'Accessibility: ';
-		html += "<a href='#' onClick=\"window.open('<?php echo $imasroot;?>/help.php?section=loggingin','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))\">Help</a>";
-		html += '<div style="margin-top: 0px;margin-right:0px;text-align:right;padding:0px"><select name="access"><option value="0">Use defaults</option>';
-		html += '<option value="3">Force image-based display</option>';
-		html += '<option value="6">Use KaTeX display (experimental)</option>';
-		html += '<option value="1">Use text-based display</option></select></div>';
-		
-		if (!MathJaxCompatible) {
-			html += '<input type=hidden name="mathdisp" value="0">';
-		} else {
-			html += '<input type=hidden name="mathdisp" value="1">';
-		}
-		if (ASnoSVG) {
-			html += '<input type=hidden name="graphdisp" value="2">';
-		} else {
-			html += '<input type=hidden name="graphdisp" value="1">';
-		}
-		if (MathJaxCompatible && !ASnoSVG) {
-			html += '<input type=hidden name="isok" value=1>';
-		} 
-		setnode.innerHTML = html; 
-		document.getElementById("username").focus();
-	}
-	var existingonload = window.onload;
-	if (existingonload) {
-		window.onload = function() {existingonload(); updateloginarea();}
-	} else {
-		window.onload = updateloginarea;
-	}
-</script>
 </form>
 </div>
 <div class="text">
@@ -135,7 +93,7 @@ Then read more about <a href="<?php echo $imasroot;?>/info/classroom.php">using 
 
 <br class=clear>
 <p>&nbsp;</p>
-<p class="textright"><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2016 David Lippman<br/>
+<p class="textright"><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2017 David Lippman<br/>
 <a href="<?php echo $imasroot;?>/info/privacy.php">Privacy Policy</a></p>
 </div>
 <?php 
