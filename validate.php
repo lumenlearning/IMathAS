@@ -51,6 +51,7 @@
 		 'forum'=>'forum_tiny.png',
 		 'wiki'=>'wiki_tiny.png',
 		 'folder'=>'folder_tiny.png',
+		 'tree'=>'folder_tree_tiny.png',
 		 'calendar'=>'1day.png');
  }
 
@@ -415,8 +416,8 @@
 		$usefullwidth = true;
 	}
 
-	if (isset($_GET['mathjax'])) {
-		$sessiondata['mathdisp'] = 1;
+	if (isset($_GET['mathdisp'])) {
+		$sessiondata['mathdisp'] = intval($_GET['mathdisp']);
 		writesessiondata();
 	}
 
