@@ -346,7 +346,7 @@ switch($_GET['action']) {
 		break;
 	case "resetpw":
 		if ($gb == '') {
-			echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; Password Reset</div>\n";
+			echo "<div class=breadcrumb><a href=\"../index.php\">Home</a> &gt; Password Reset</div>\n";
 		}
 		echo "<div class=lumensignupforms>
 		      <div id=headerforms class=pagetitle><h2>Reset Password</h2></div>
