@@ -87,7 +87,9 @@ numerical or algebraic expression answers.
 <p>If you already have an account, you can log on using the box to the right.</p>
 <p>If you are new to WAMAP, use the links above to find information about using WAMAP in the classroom, or to access diagnostic assessments.</p>
 <br class="clear" />
-<p class="textright">WAMAP is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2016 David Lippman<br/>
+<p class="textright">WAMAP is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2017 David Lippman<br/>
+<a href="<?php echo $imasroot;?>/wamap/privacy.php">Privacy</a> | 
+<a href="https://docs.google.com/document/d/1vS2LLJSsoW6v9qa3P_ru5dv9NfmNDJGijZtBJp_eGEM/edit?usp=sharing">Accessibility</a> |
 <a href="/wamap/info/credits.php">Credits</a></p>
 </div>
 <?php

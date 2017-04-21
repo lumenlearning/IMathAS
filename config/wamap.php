@@ -44,6 +44,7 @@ $CFG['CPS']['unenroll'] = array(0,0);
 $CFG['CPS']['showlatepass'] = array(1,0);
 $CFG['CPS']['topbar'] = array(array("0,1,2,3,9","0,2,3,4,6,9",1),0);
 $CFG['CPS']['templateoncreate'] = true;
+$CFG['GEN']['TOSpage'] = $imasroot.'/wamap/termsofuse.php';
 
 //and most of the gradebook settings
 $CFG['GBS']['defgbmode'] = 1011;

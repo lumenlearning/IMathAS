@@ -105,19 +105,12 @@
 	echo "<span class=form>Requested Username<br/><span style=\"font-size: 75%\">Use only numbers, letters, . or the _ character.</span></span><span class=formright><input type=text name=username value=\"$username\" size=40></span><br class=form />\n";
 	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
 	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";
-	echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+	if (isset($CFG['GEN']['TOSpage'])) {
+		echo "<span class=form><label for=\"agree\">I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></label></span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
+	}
 	echo "<div class=submit><input type=submit value=\"Request Account\"></div>\n";
 	echo "</form>\n";
-	echo "<h4>Terms of Use</h4>\n";
-	echo "<p><em>There is <strong>no warranty</strong> and <strong>no guarantees</strong> attached with this offer.  The ";
-	echo "server or software might crash or mysteriously lose all your data.  Your account or this service may be terminated without warning.  ";
-	echo "Instructor technical support is provided by volunteers and the user community, and is thus limited and not guaranteed.  No student technical support is provided.  ";
-	echo "Use of this system is at your own risk.</em></p>\n";
-	echo "<p><em>Copyrighted materials should not be posted or used in questions without the permission of the copyright owner.  You shall be solely ";
-	echo "responsible for your own user created content and the consequences of posting or publishing them.  WAMAP expressly disclaims any and all liability in ";
-	echo "connection with user created content.</em></p>";
-	echo "<p><em>If you create questions, assignments, or courses and set them to be available for use by other instructors, through that action you are ";
-	echo "granting explicit rights for other instructors to use, copy, and redistribute modifications of your items to other instructors without compensation or attribution. ";
-	echo "This includes redistribution to other non-commercial installations of the IMathAS software.</em></p>";
+	
 	require("../footer.php");
 ?>

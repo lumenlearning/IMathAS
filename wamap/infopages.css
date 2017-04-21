@@ -11,6 +11,12 @@ div {
 	margin-right: 10px;
 	padding: 5px;
 }
+#GB_window {
+	padding: 0;
+}
+#GB_frameholder {
+	margin: 0 0 0 0;
+}
 a:link {
 	text-decoration: none;
 }
