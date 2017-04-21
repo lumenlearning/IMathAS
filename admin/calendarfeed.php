@@ -115,9 +115,11 @@ function flattenitems($items,&$addto,$viewall) {
 	}
 }
 
-$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
+$stm = $DBH->prepare("SELECT name,itemorder FROM imas_courses WHERE id=:id");
 $stm->execute(array(':id'=>$cid));
-$itemorder = unserialize($stm->fetchColumn(0));
+$row = $stm->fetch(PDO::FETCH_NUM);
+$coursename = trim($row[0]);
+$itemorder = unserialize($row[1]);
 $itemsimporder = array();
 
 flattenitems($itemorder,$itemsimporder,(isset($teacherid)||isset($tutorid)));
@@ -277,10 +279,19 @@ header('Content-Disposition: attachment; filename=calfeed.ics');
 
 $EOL = "\r\n";
 
+function calencode($v) {
+	$v = html_entity_decode($v);
+	return preg_replace('/([\,;])/','\\\$1', $v);
+	
+}
+
 echo 'BEGIN:VCALENDAR'.$EOL;
 echo 'PRODID:-//IMathAS//'.$installname.'//EN'.$EOL;
 echo 'VERSION:2.0'.$EOL;
-echo 'X-WR-CALNAME:'.$installname.': '.$coursename.$EOL;
+echo 'NAME:'.calencode($coursename).$EOL;
+echo 'DESCRIPTION:'.calencode($installname.': '.$coursename).$EOL;
+echo 'X-WR-CALNAME:'.calencode($coursename).$EOL;
+echo 'X-WR-CALDESC:'.calencode($installname.': '.$coursename).$EOL;
 
 foreach ($calevents as $event) {
 	echo 'BEGIN:VEVENT'.$EOL;
@@ -288,15 +299,15 @@ foreach ($calevents as $event) {
 	echo 'DTSTAMP:'.date('Ymd\THis\Z', $now).$EOL;
 	echo 'DTSTART:'.date('Ymd\THis\Z', $event[1]).$EOL;
 	echo 'DTEND:'.date('Ymd\THis\Z', $event[1]).$EOL;
-	echo 'SUMMARY:'.$event[2].$EOL;
+	echo 'SUMMARY:'.calencode($event[2]).$EOL;
 	if ($event[3] != '') {
-		echo 'DESCRIPTION:'.$event[3].$EOL;
+		echo 'DESCRIPTION:'.calencode($event[3]).$EOL;
 	}
 	if ($event[4] != '') { //alarm
 		echo 'BEGIN:VALARM'.$EOL;
 		echo 'TRIGGER:'.$event[4].$EOL;
 		echo 'ACTION:DISPLAY'.$EOL;
-		echo 'DESCRIPTION:'.($event[3]!=''?$event[3]:$event[2]).$EOL;
+		echo 'DESCRIPTION:'.calencode(($event[3]!=''?$event[3]:$event[2])).$EOL;
 		echo 'END:VALARM'.$EOL;
 	}
 	echo 'END:VEVENT'.$EOL;
