@@ -6,37 +6,20 @@ if (!isset($flexwidth) && ($coursetheme=='wamap_fw.css' || $coursetheme=='wamap.
 	$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 ?>
 <div id="headercontent" role="navigation" aria-label="System Navigation">
-<?php
-$usernameinheader = true;
-if (isset($userid) && $selfhasuserimg==1) {
-	if ($myrights > 5) {
-		echo "<a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">";
-	}
-	if(isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
-		echo "<img src=\"{$urlmode}s3.amazonaws.com/{$GLOBALS['AWSbucket']}/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\" alt=\"User Picture\"/>";
-	} else {
-		$curdir = rtrim(dirname(__FILE__), '/\\');
-		$galleryPath = "$curdir/course/files/";
-		echo "<img src=\"$imasroot/course/files/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\" alt=\"User Picture\"/>";
-	}
-	if ($myrights > 5) {
-		echo '</a>';
-	}
-}
-?>
 <div id="headerrightlinks">
 <?php
+$usernameinheader = true;
 if (isset($userid)) {
 	if ($myrights > 5) {
-		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a><br/>";
+		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a>";
 	} else {
-		echo '&nbsp;<br/><span id="myname">'.$userfullname.'</span><br/>';
+		echo '&nbsp;<br/><span id="myname">'.$userfullname.'</span>';
 	}
 }
 echo '</div>';
 echo '<div id="headerbarlogo"><a href="'.$imasroot.'/index.php"><img src="'.$imasroot.'/wamap/img/wamaplogo.png" alt="WAMAP"/></a>';
 ?>
-<span style="padding-left: 50px;">
+<span id="headermidlinks">
 <?php
 if (isset($userid)) {
 	echo "<a href=\"$imasroot/index.php\">Home</a> | ";
@@ -53,10 +36,34 @@ if (isset($userid)) {
 } else {
 	echo '</span>';
 }
+
+echo '</div>'; //headerbarlogo
 ?>
-
+<div id="headermenu">
+  <a tabindex=0 id="topnavmenu" aria-expanded="false" aria-controls="headermobilemenulist">
+      <img src="<?php echo $imasroot;?>/img/menu.png" alt="Options" class="mida"/>
+  </a>
 </div>
-
+<?php
+echo '</div>'; //headercontent
+?>
+<div class="headermobilemenu">
+    <ul id="headermobilemenulist" role="menu" aria-labelledby="topnavmenu" aria-hidden="true">
+      <?php
+    	if ($myrights > 5) {
+		echo "<li><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">Account Settings</a></li>";
+	}
+	/*
+	echo '<li><a href="'.$imasroot.'/index.php">Home</a></li>';
+	if (isset($teacherid)) {
+		echo "<li><a href=\"$imasroot/help.php?section=coursemanagement\">Help</a></li>";
+	} else {
+		echo "<li><a href=\"$imasroot/help.php?section=usingimas\">Help</a></li>";
+	}
+	*/
+	echo "<li><a href=\"$imasroot/actions.php?action=logout\">Log Out</a></li>";
+      ?>
+  </ul>
 </div>
 <?php
 $nologo = true;

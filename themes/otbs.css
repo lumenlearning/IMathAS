@@ -264,8 +264,9 @@ div#headercontent, div#navlistcont {
 }
 div#headercontent {
 	height: 70px;
-	padding: 0px 20px;
+	padding: 0px 10px;
 }
+
 div#navlistcont {
 	/*height: 24px;*/
 }
@@ -282,10 +283,24 @@ div#headerrightlinks {
 	text-align: right;
 	float: right;
 	margin-top: 15px;
-	margin-right: 20px;
 	color: #666;
 }
-
+div#headermenu {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	display:none;
+	cursor: pointer;
+}
+ul#headermobilemenulist li a {
+	background-color: #369
+} 
+ul#headermobilemenulist li a:hover, ul#headermobilemenulist li a:focus {
+	background-color: #036;
+}
+#headermidlinks {
+	padding-left: 30px;
+}
 .footerwrapper {
 	height: 20px;
 	/*margin:auto;
@@ -451,3 +466,49 @@ a.newnote, a.newnote:link, a.newnote:visited {
 	color: #f00;
 }
 
+@media only screen and (max-width: 700px) {
+	div#headerrightlinks {
+		display: none;
+	}
+	#headermidlinks {
+		display: none;
+	}
+	div#headermenu {
+		display: block;
+	}
+	div#headerbarlogo { 
+		padding-top:5px;
+		height:35px;
+	}
+	div#headercontent {
+		height: 45px;
+	}
+	div#headerbarlogo img {
+		height: 35px;
+	}	
+}
+@media only screen and (max-width: 700px) {
+	#headerhome h2{
+		font-size: medium;
+	}
+}
+
+@media only screen and (max-width: 700px) {
+	#navlist {
+		display: none;
+	}
+	#navlist.menuexpanded, ul#headermobilemenulist.menuexpanded {
+		display: block;
+	}
+	ul#navlist li {
+		display: list-item;
+	}
+	ul#navlist li a{
+		display: block;
+		float: none;
+		border-right: none;
+		padding: .3em 1em;
+		line-height: 1.3em;
+		border-bottom: 1px solid #fff;
+	}
+}

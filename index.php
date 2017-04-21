@@ -48,8 +48,8 @@ $placeinhead = '
   <style type="text/css">
    div.pagetitle h2 {
   	margin-top: 0px;
-  	}
-  div.sysnotice {
+   }
+   div.sysnotice {
    	border: 1px solid #faa;
    	background-color: #fff3f3;
    	padding: 5px;
@@ -420,6 +420,7 @@ if (isset($CFG['GEN']['hometitle'])) {
 	echo _('Welcome to'), " $installname, $userfullname";
 }
 echo '</h2>';
+echo '</div>';
 if ($myrights>15) {
 	$stm = $DBH->prepare("SELECT custominfo FROM imas_students WHERE courseid=1 AND userid=:userid");
 	$stm->execute(array(':userid'=>$userid));
@@ -445,13 +446,8 @@ if ($myrights>15) {
 	}
 }
 if ($myrights==100 && count($brokencnt)>0) {
-	echo '<span class="noticetext">'.array_sum($brokencnt).'</span> questions, '.(array_sum($brokencnt)-$brokencnt[0]).' public, reported broken systemwide';
+	echo '<div><span class="noticetext">'.array_sum($brokencnt).'</span> questions, '.(array_sum($brokencnt)-$brokencnt[0]).' public, reported broken systemwide</div>';
 }
-echo '</div>';
-if (isset($tzname) && isset($sessiondata['logintzname']) && $tzname!=$sessiondata['logintzname']) {
-	echo '<div class="sysnotice">'.sprintf(_('Notice: You have requested that times be displayed based on the <b>%s</b> time zone, and your computer is reporting you are currently in a different time zone. Be aware that times will display based on the %s timezone as requested, not your local time'),$tzname,$tzname).'</div>';
-}
-
 
 for ($i=0; $i<3; $i++) {
 	if ($i==0) {
