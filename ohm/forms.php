@@ -25,7 +25,7 @@ require("../header.php");
 switch($_GET['action']) {
 	case "newuser":
 		if ($gb == '') {
-			echo "<div class=breadcrumb><a href=\"/index.php\">Home</a> &gt; New User Signup</div>\n";
+			echo "<div class=breadcrumb><a href=\"$imasroot/index.php\">Home</a> &gt; New User Signup</div>\n";
 		}
 
 					// echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/validateform.js\"></script>\n
@@ -336,7 +336,7 @@ switch($_GET['action']) {
 	case "unenroll":
 		if (!isset($_GET['cid'])) { echo "Course ID not specified\n"; break;}
 		if ($gb == '') {
-			echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; Unenroll</div>\n";
+			echo "<div class=breadcrumb><a href=\"$imasroot/index.php\">Home</a> &gt; Unenroll</div>\n";
 		}
 		echo '<div id="headerforms" class="pagetitle"><h2>Unenroll</h2></div>';
 
@@ -346,7 +346,7 @@ switch($_GET['action']) {
 		break;
 	case "resetpw":
 		if ($gb == '') {
-			echo "<div class=breadcrumb><a href=\"/index.php\">Home</a> &gt; Password Reset</div>\n";
+			echo "<div class=breadcrumb><a href=\"$imasroot/index.php\">Home</a> &gt; Password Reset</div>\n";
 		}
 		echo "<div class=lumensignupforms>
 		      <div id=headerforms class=pagetitle><h2>Reset Password</h2></div>
@@ -358,7 +358,7 @@ switch($_GET['action']) {
 		break;
 	case "lookupusername":
 		if ($gb == '') {
-			echo "<div class=breadcrumb><a href=\"/index.php\">Home</a> &gt; Username Lookup</div>\n";
+			echo "<div class=breadcrumb><a href=\"$imasroot/index.php\">Home</a> &gt; Username Lookup</div>\n";
 		}
 		echo "<div class=lumensignupforms>
 		      <div id=headerforms class=pagetitle><h2>Lookup Username</h2></div>
