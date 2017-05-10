@@ -782,6 +782,9 @@ div#guides-button-container {
 	margin-top: -10px;
 }
 
+table.stats {
+	margin-left: 0px;
+}
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {
