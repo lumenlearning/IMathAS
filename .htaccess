@@ -21,6 +21,19 @@ Options -Indexes
 php_value upload_max_filesize 10M
 php_value max_input_vars 5000
 
+<Files "composer.json">
+deny from all
+</Files>
+
+<Files "composer.lock">
+deny from all
+</Files>
+
+<Files "phpunit.xml">
+deny from all
+</Files>
+
+
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^myopenmath\.com
 RewriteCond %{REQUEST_URI} !^(/bltilaunch\.php|/canvas\.php)$

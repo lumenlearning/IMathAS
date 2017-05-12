@@ -417,7 +417,7 @@ echo '<div class="pagetitle" id="headerhome" role="banner"><h2>';
 if (isset($CFG['GEN']['hometitle'])) {
 	echo $CFG['GEN']['hometitle'];
 } else {
-	echo _('Welcome to'), " $installname, $userfullname";
+	echo _('Welcome to'), " $installname, " . Sanitize::encodeStringForDisplay($userfullname);
 }
 echo '</h2>';
 echo '</div>';
@@ -504,7 +504,7 @@ function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 		}
 		echo '>';
 		echo '<a href="course/course.php?folder=0&cid='.$data[$i]['id'].'">';
-		echo $data[$i]['name'].'</a>';
+		echo Sanitize::encodeStringForDisplay($data[$i]['name']).'</a>';
 		if (isset($data[$i]['available']) && (($data[$i]['available']&1)==1)) {
 			echo ' <span style="color:green;">', _('Hidden'), '</span>';
 		}
@@ -567,15 +567,15 @@ function printMessagesGadget() {
 			$n++;
 		}
 		if ($n==1) {
-			$line['title'] = 'Re: '.$line['title'];
+			$line['title'] = 'Re: '.Sanitize::encodeStringForDisplay($line['title']);
 		} else if ($n>1) {
-			$line['title'] = "Re<sup>$n</sup>: ".$line['title'];
+			$line['title'] = "Re<sup>$n</sup>: ".Sanitize::encodeStringForDisplay($line['title']);
 		}
 		echo "<td><a href=\"msgs/viewmsg.php?cid={$line['courseid']}&type=new&msgid={$line['id']}\">";
 		echo $line['title'];
 		echo '</a></td>';
-		echo '<td>'.$line['LastName'].', '.$line['FirstName'].'</td>';
-		echo '<td>'.$page_coursenames[$line['courseid']].'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($line['LastName']).', '.Sanitize::encodeStringForDisplay($line['FirstName']).'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($page_coursenames[$line['courseid']]).'</td>';
 		echo '<td>'.tzdate("D n/j/y, g:i a",$line['senddate']).'</td>';
 		echo '</tr>';
 	}
@@ -626,9 +626,9 @@ function printPostsGadget() {
 			$n++;
 		}
 		if ($n==1) {
-			$subject = 'Re: '.$subject;
+			$subject = 'Re: '.Sanitize::encodeStringForDisplay($subject);
 		} else if ($n>1) {
-			$subject = "Re<sup>$n</sup>: ".$subject;
+			$subject = "Re<sup>$n</sup>: ".Sanitize::encodeStringForDisplay($subject);
 		}
 		echo "<td><a href=\"forums/posts.php?page=-3&cid={$line['courseid']}&forum={$line['id']}&thread={$line['threadid']}\">";
 		echo $subject;
@@ -636,9 +636,9 @@ function printPostsGadget() {
 		if ($threaddata[$line['threadid']]['isanon']==1) {
 			echo '<td>', _('Anonymous'), '</td>';
 		} else {
-			echo '<td>'.$threaddata[$line['threadid']]['LastName'].', '.$threaddata[$line['threadid']]['FirstName'].'</td>';
+			echo '<td>'.Sanitize::encodeStringForDisplay($threaddata[$line['threadid']]['LastName']).', '.Sanitize::encodeStringForDisplay($threaddata[$line['threadid']]['FirstName']).'</td>';
 		}
-		echo '<td>'.$page_coursenames[$line['courseid']].'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($page_coursenames[$line['courseid']]).'</td>';
 		echo '<td>'.tzdate("D n/j/y, g:i a",$line['lastposttime']).'</td>';
 		echo '</tr>';
 	}

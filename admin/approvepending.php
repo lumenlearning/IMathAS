@@ -1,10 +1,11 @@
 <?php
 
 require("../validate.php");
+
 if ($myrights<100) {exit;}
 
 if (isset($_GET['skipn'])) {
-	$offset = intval($_GET['skipn']);
+	$offset =  Sanitize::onlyInt(($_GET['skipn']));
 } else {
 	$offset = 0;
 }
@@ -51,15 +52,16 @@ if (isset($_GET['go'])) {
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 		$headers .= "From: $accountapproval\r\n";
-		$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.$row[0].'</p>';
+
+		$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row[0]).'</p>';
 		if ($installname == "MyOpenMath") {
-			$message .= '<p>Welcome to MyOpenMath.  Your account has been activated, and you\'re all set to log in at <a href="https://www.myopenmath.com">MyOpenMath.com</a> as an instructor using the username <b>'.$row[1].'</b> and the password you provided.</p>';
+			$message .= '<p>Welcome to MyOpenMath.  Your account has been activated, and you\'re all set to log in at <a href="https://www.myopenmath.com">MyOpenMath.com</a> as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
 			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.myopenmath.com/docs/docs.php">Getting Started Guide</a> helpful</p>';
 			$message .= '<p>I\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
 			$message .= '<p>I\'ve also signed you up for the MyOpenMath Training Course.  This course has video tutorials and assignments that will walk you through learning how to use MyOpenMath in your classes.</p>';
 			$message .= '<p>David Lippman<br/>admin@myopenmath.com<br/>MyOpenMath administrator</p>';
 		} else if ($installname=='WAMAP') {
-			$message .= 'Welcome to WAMAP.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.$row[1].'</b> and the password you provided.</p>';
+			$message .= 'Welcome to WAMAP.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
 			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.wamap.org/docs/docs.php">Getting Started Guide</a> helpful</p>';
 			$message .= '<p>I\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
 			$message .= '<p>I\'ve also signed you up for the WAMAP Training Course.  This course has video tutorials and assignments that will walk you through learning how to use WAMAP in your classes.</p>';
@@ -68,7 +70,7 @@ if (isset($_GET['go'])) {
 			$message .= '<p>David Lippman<br/>dlippman@pierce.ctc.edu<br/>Instructor, Math @ Pierce College and WAMAP administrator</p>';
 		}
 		if($installname == "Lumen OHM"){
-					$message .= '<p>Welcome to Lumen OHM.  Your account has been activated, and you\'re all set to log in at <a href="https://ohm.lumenlearning.com/">ohm.lumenlearning.com</a> as an instructor using the username <b>'.$row[1].'</b> and the password you provided.</p>';
+					$message .= '<p>Welcome to Lumen OHM.  Your account has been activated, and you\'re all set to log in at <a href="https://ohm.lumenlearning.com/">ohm.lumenlearning.com</a> as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
 					$message .= '<p>We\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
 					$message .= '<p>We\'ve also signed you up for the OHM Training Course.  This course has video tutorials and assignments that will walk you through learning how to use OHM in your classes.</p>';
 					$message .= '<p>Lumen Support <br/>support@lumenlearning.com<br/>Lumen OHM administrator</p>';
@@ -79,7 +81,7 @@ if (isset($_GET['go'])) {
 			mail($row[2],$installname . ' Account Approval',$message,$headers);
 		}
 	}
-	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . $imasroot . "/admin/approvepending.php?skipn=$offset");
+	header('Location: ' . $urlmode  . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . "/admin/approvepending.php?skipn=$offset");
 	exit;
 }
 
@@ -111,14 +113,14 @@ if ($stm->rowCount()==0) {
 
 	echo '<h2>Account Approval</h2>';
 	echo '<form method="post" action="approvepending.php?go=true&amp;skipn='.$offset.'">';
-	echo '<input type="hidden" name="id" value="'.$row[0].'"/>';
-	echo '<input type="hidden" name="email" value="'.$row[4].'"/>';
-	echo '<p>Username: '.$row[1].'<br/>Name: '.$row[2].', '.$row[3].' ('.$row[4].')</p>';
+	echo '<input type="hidden" name="email" value="'.Sanitize::encodeStringForDisplay($row[4]).'"/>';
+	echo '<input type="hidden" name="id" value="'.Sanitize::encodeStringForDisplay($row[0]).'"/>';
+	echo '<p>Username: '.Sanitize::encodeStringForDisplay($row[1]).'<br/>Name: '.Sanitize::encodeStringForDisplay($row[2]).', '.Sanitize::encodeStringForDisplay($row[3]).' ('.Sanitize::encodeStringForDisplay($row[4]).')</p>';
 	echo '<p>Request made: '.$reqdate.'</p>';
 	if ($details != '') {
 		echo "<p>$details</p>";
 		if (preg_match('/School:(.*?)<br/',$details,$matches)) {
-			echo '<p><a target="checkver" href="https://www.google.com/search?q='.urlencode($row[3].' '.$row[2].' '.$matches[1]).'">Search</a></p>';
+			echo '<p><a target="checkver" href="https://www.google.com/search?q='.Sanitize::encodeStringForUrl($row[3].' '.$row[2].' '.$matches[1]).'">Search</a></p>';
 		}
 	}
 	echo '<p>Group: <select name="group"><option value="-1">New Group</option>';
@@ -127,7 +129,7 @@ if ($stm->rowCount()==0) {
 	//DB while ($row = mysql_fetch_row($result)) {
 	$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		echo '<option value="'.$row[0].'">'.$row[1].'</option>';
+		echo '<option value="'.$row[0].'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
 	}
 	echo '</select> New group: <input type="text" name="newgroup" size="20" /></p>';
 	echo '<p><input type="submit" name="approve" value="Approve" /> <input type="submit" name="deny" value="Deny" /> <input type="submit" name="skip" value="Skip" /></p>';
