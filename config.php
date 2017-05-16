@@ -10,10 +10,14 @@ require('config/common.php');
 
 // *** CHOOSE THE APPROPRIATE CONFIG FILE FOR THE DOMAIN/CONFIG_ENV
 if ($configEnvironment == 'development') {
+  enableDisplayErrors();
 
   // You may want to include the appropriate prod config file inside your local.php
   // If you wanted OHM config for example, you should `require("ohm.php");`
   require('config/local.php');
+} else if ($configEnvironment == 'staging') {
+
+  enableDisplayErrors();
 
 } else if (strpos($_SERVER['HTTP_HOST'], 'wamap.org') !== false) {
 
@@ -42,9 +46,6 @@ if (strpos($_SERVER['HTTP_HOST'],'localhost')===false) {
 
 ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
-//louder than usual during beta of PDO
-ini_set('display_errors',1);
-error_reporting(E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
 $CFG['GEN']['useSESmail'] = true;
 function SESmail($email,$from,$subject,$message,$replyto='') {
@@ -60,6 +61,11 @@ function SESmail($email,$from,$subject,$message,$replyto='') {
   $m->setSubject($subject);
   $m->setMessageFromString(null,$message);
   $ses->sendEmail($m);
+}
+
+function enableDisplayErrors() {
+  ini_set('display_errors',1);
+  error_reporting(E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 }
 
 
