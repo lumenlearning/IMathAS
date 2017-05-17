@@ -782,8 +782,9 @@ div#guides-button-container {
 	margin-top: -10px;
 }
 
-table.stats {
+.question table{
 	margin-left: 0px;
+	width:auto;
 }
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
