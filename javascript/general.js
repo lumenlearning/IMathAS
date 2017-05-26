@@ -327,7 +327,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		selector: selectorstr,
 		inline: inlinemode,
 		plugins: [
-			"advlist autolink attach image charmap anchor",
+			"lists advlist autolink attach image charmap anchor",
 			"searchreplace code link textcolor",
 			"media table paste asciimath asciisvg rollups"
 		],
@@ -346,6 +346,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		paste_data_images: true,
 		default_link_target: "_blank",
 		browser_spellcheck: true,
+		branding: false,
 		resize: "both",
 		width: '100%',
 		content_style: "body {background-color: #ffffff !important;}",
