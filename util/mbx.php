@@ -5,7 +5,6 @@
 header("Content-Type: text/plain");
 
 require("../config.php");
-enableDisplayErrors();
 require("../i18n/i18n.php");
 require("mbxfilter.php");
 require("../assessment/displayq2.php");
