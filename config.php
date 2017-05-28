@@ -5,7 +5,7 @@ $configEnvironment = empty(getenv('CONFIG_ENV')) ? 'development' : getenv('CONFI
 
 // All common config options are here
 // The initial database config options are here as well
-require('config/common.php');
+require(__DIR__.'/config/common.php');
 
 
 // *** CHOOSE THE APPROPRIATE CONFIG FILE FOR THE DOMAIN/CONFIG_ENV
@@ -14,23 +14,23 @@ if ($configEnvironment == 'development') {
 
   // You may want to include the appropriate prod config file inside your local.php
   // If you wanted OHM config for example, you should `require("ohm.php");`
-  require('config/local.php');
+  require(__DIR__.'/config/local.php');
 } else if ($configEnvironment == 'staging') {
 
   enableDisplayErrors();
 
 } else if (strpos($_SERVER['HTTP_HOST'], 'wamap.org') !== false) {
 
-  require('config/wamap.php');
+  require(__DIR__.'/config/wamap.php');
 
 } else if (strpos($_SERVER['HTTP_HOST'], 'lumenlearning.com') !== false) {
 
-  require('config/ohm.php');
+  require(__DIR__.'/config/ohm.php');
 
 } else {
   //production beanstalk now requires the CONFIG_ENV to be set.
 
-  require('config/myopenmath.php');
+  require(__DIR__.'/config/myopenmath.php');
 
 }
 
