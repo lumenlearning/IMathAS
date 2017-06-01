@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__ . "/includes/security.php");
 
 // Can be 'development, 'staging', 'production'
 $configEnvironment = empty(getenv('CONFIG_ENV')) ? 'development' : getenv('CONFIG_ENV');
@@ -34,6 +35,11 @@ if ($configEnvironment == 'development') {
 
 }
 
+//base site url - use when generating full URLs to site pages.
+$httpmode = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on')
+    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https')
+    ? 'https://' : 'http://';
+$GLOBALS['basesiteurl'] = $httpmode . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot;
 
 
 

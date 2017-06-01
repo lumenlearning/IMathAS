@@ -87,7 +87,7 @@ if (isset($_GET['form'])) {
 					echo '<ul><li>Username: <a href="../admin/admin.php?showcourses='.$row['id'].'">'.Sanitize::encodeStringForDisplay($row['SID']).'</a></li>';
 					echo '<li>ID: '.$row['id'].'</li>';
 					if ($row['name']!=null) {
-						echo '<li>Group: '.$row['name'];
+						echo '<li>Group: '.Sanitize::encodeStringForDisplay($row['name']);
 						if ($row['grouptype']==1) {
 							echo ' (Lumen Customer)';
 						}
@@ -98,7 +98,7 @@ if (isset($_GET['form'])) {
 							//DB $r = mysql_fetch_row($res2);
 							$group_stm->execute(array(':id'=>$row['parent']));
 							$r = $group_stm->fetch(PDO::FETCH_NUM);
-							echo '<li>Parent Group: '.$r[0].'</li>';
+							echo '<li>Parent Group: '.Sanitize::encodeStringForDisplay($r[0]).'</li>';
 						}
 					}
 					echo '<li>Email: '.Sanitize::encodeStringForDisplay($row['email']).'</li>';
