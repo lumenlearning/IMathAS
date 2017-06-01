@@ -11,15 +11,9 @@ require(__DIR__.'/config/common.php');
 
 // *** CHOOSE THE APPROPRIATE CONFIG FILE FOR THE DOMAIN/CONFIG_ENV
 if ($configEnvironment == 'development') {
-  enableDisplayErrors();
-
   // You may want to include the appropriate prod config file inside your local.php
   // If you wanted OHM config for example, you should `require("ohm.php");`
   require(__DIR__.'/config/local.php');
-} else if ($configEnvironment == 'staging') {
-
-  enableDisplayErrors();
-
 } else if (strpos($_SERVER['HTTP_HOST'], 'wamap.org') !== false) {
 
   require(__DIR__.'/config/wamap.php');
@@ -33,6 +27,10 @@ if ($configEnvironment == 'development') {
 
   require(__DIR__.'/config/myopenmath.php');
 
+}
+
+if ($configEnvironment == 'development' || $configEnvironment == 'staging') {
+  enableDisplayErrors();
 }
 
 //base site url - use when generating full URLs to site pages.
