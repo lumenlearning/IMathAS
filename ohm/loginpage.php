@@ -11,11 +11,13 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	$nologo = true;
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	require($curdir . "/../header.php");
-	if (isset($_SERVER['QUERY_STRING'])) {
+	if (!empty($_SERVER['QUERY_STRING'])) {
 		 $querys = '?'.$_SERVER['QUERY_STRING'];
 	 } else {
 		 $querys = '';
 	 }
+	 $loginFormAction = $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::encodeStringForDisplay($querys);
+	 
 	 if (!empty($_SESSION['challenge'])) {
 		 $challenge = $_SESSION['challenge'];
 	 } else {
@@ -28,7 +30,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 
 <div class="login-wrapper">
 	<div id="loginbox">
-		<form method="post" action="<?php echo $_SERVER['PHP_SELF'].$querys;?>">
+		<form method="post" action="<?php echo $loginFormAction;?>">
 			<?php
 				if ($haslogin) {
 					if ($badsession) {
