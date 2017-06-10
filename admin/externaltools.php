@@ -1,5 +1,5 @@
 <?php
-require("../validate.php");
+require("../init.php");
 
 
 $isadmin = false;
@@ -30,7 +30,7 @@ if ($myrights == 75 && $cid=='admin') {
 	$isteacher = true;
 }
 if (isset($_GET['ltfrom'])) {
-	$ltfrom = '&amp;ltfrom='.$_GET['ltfrom'];
+	$ltfrom = '&amp;ltfrom='.Sanitize::encodeUrlParam($_GET['ltfrom']);
 } else {
 	$ltfrom = '';
 }
@@ -94,7 +94,7 @@ if (isset($_POST['tname'])) {
 	$ltfrom = str_replace('&amp;','&',$ltfrom);
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/externaltools.php?cid=$cid$ltfrom");
 	exit;
-} else if (isset($_GET['delete']) && $_GET['delete']=='true') {
+} else if (isset($_POST['delete']) && $_POST['delete']=='true') {
 	$id = Sanitize::onlyInt($_GET['id']);
 	if ($id>0) {
 		if ($isadmin) {
@@ -120,7 +120,7 @@ if (isset($_POST['tname'])) {
 	if ($isteacher) {
 		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 		if (isset($_GET['ltfrom'])) {
-			echo "&gt; <a href=\"../course/addlinkedtext.php?cid=$cid&amp;id={$_GET['ltfrom']}\">Modify Linked Text<a/> ";
+			echo "&gt; <a href=\"../course/addlinkedtext.php?cid=$cid&amp;id=".Sanitize::encodeUrlParam($_GET['ltfrom'])."\">Modify Linked Text<a/> ";
 		}
 	} else {
 		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"admin.php\">Admin</a> \n";
@@ -136,7 +136,8 @@ if (isset($_POST['tname'])) {
 		$name = $stm->fetchColumn(0);
 
 		echo '<p>Are you SURE you want to delete the tool <b>'.$name.'</b>?  Doing so will break ALL placements of this tool.</p>';
-		echo '<form method="post" action="externaltools.php?cid='.$cid.$ltfrom.'&amp;id='.$_GET['id'].'&amp;delete=true">';
+		echo '<form method="post" action="externaltools.php?cid='.$cid.$ltfrom.'&amp;id='.$_GET['id'].'">';
+		echo '<input type=hidden name=delete value=true />';
 		echo '<input type=submit value="Yes, I\'m Sure">';
 		echo '<input type=button value="Nevermind" class="secondarybtn" onclick="window.location=\'externaltools.php?cid='.$cid.'\'">';
 		echo '</form>';
@@ -172,7 +173,7 @@ if (isset($_POST['tname'])) {
 		foreach ($tochg as $v) {
 			${$v} = htmlentities(${$v});
 		}
-		echo '<form method="post" action="externaltools.php?cid='.$cid.$ltfrom.'&amp;id='.$_GET['id'].'">';
+		echo '<form method="post" action="externaltools.php?cid='.$cid.$ltfrom.'&amp;id='.Sanitize::onlyInt($_GET['id']).'">';
 ?>
 		<span class="form">Tool Name:</span>
 		<span class="formright"><input type="text" size="40" name="tname" value="<?php echo $name;?>" /></span>

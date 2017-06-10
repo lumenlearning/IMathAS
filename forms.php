@@ -1,11 +1,10 @@
 <?php
 //IMathAS:  Basic forms
 //(c) 2006 David Lippman
-require("config.php");
+require("init_without_validate.php");
 require("includes/htmlutil.php");
-require_once("includes/sanitize.php");
 if ($_GET['action']!="newuser" && $_GET['action']!="resetpw" && $_GET['action']!="lookupusername") {
-	require("validate.php");
+	require("init.php");
 } else {
 	if (isset($CFG['CPS']['theme'])) {
 		$defaultcoursetheme = $CFG['CPS']['theme'][0];
@@ -399,7 +398,8 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle"><h2>Unenroll</h2></div>';
 
 		echo "Are you SURE you want to unenroll from this course?  All assessment attempts will be deleted.\n";
-		echo "<p><input type=button onclick=\"window.location='actions.php?action=unenroll&cid=".Sanitize::courseId($_GET['cid'])."'\" value=\"Really Unenroll\">\n";
+		echo '<form method="post" action="actions.php?cid='.Sanitize::courseId($_GET['cid']).'">';
+		echo '<p><button name="action" value="unenroll">'._('Really Unenroll').'</button>';
 		echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='./course/course.php?cid=".Sanitize::courseId($_GET['cid'])."'\"></p>\n";
 		break;
 	case "resetpw":

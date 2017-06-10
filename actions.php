@@ -24,7 +24,7 @@ require_once("includes/sanitize.php");
 	require_once("includes/password.php");
 
 	if ($_GET['action']=="newuser") {
-		require_once("config.php");
+		require_once("init_without_validate.php");
 		$error = '';
 		if (isset($studentTOS) && !isset($_POST['agree'])) {
 			$error = "<p>You must agree to the Terms and Conditions to set up an account</p>";
@@ -239,7 +239,7 @@ require_once("includes/sanitize.php");
 		//header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
 		exit;
 	} else if ($_GET['action']=="confirm") {
-		require_once("config.php");
+		require_once("init_without_validate.php");
 		//DB $query = "UPDATE imas_users SET rights=10 WHERE id='{$_GET['id']}' AND rights=0";
 		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB if (mysql_affected_rows()>0) {
@@ -259,7 +259,7 @@ require_once("includes/sanitize.php");
 			require("footer.php");
 		}
 	} else if ($_GET['action']=="resetpw") {
-		require_once("config.php");
+		require_once("init_without_validate.php");
 		
 		if (isset($_POST['username'])) {
 			//DB $query = "SELECT id,email,rights FROM imas_users WHERE SID='{$_POST['username']}'";
@@ -380,7 +380,7 @@ require_once("includes/sanitize.php");
 
 		}
 	} else if ($_GET['action']=="lookupusername") {
-		require_once("config.php");
+		require_once("init_without_validate.php");
 		//DB $query = "SELECT SID,lastaccess FROM imas_users WHERE email='{$_POST['email']}' AND SID NOT LIKE 'lti-%'";
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB if (mysql_num_rows($result)>0) {
@@ -430,7 +430,7 @@ require_once("includes/sanitize.php");
 			exit;
 		}
 	} else if ($_GET['action']=="checkusername") {
-		require_once("config.php");
+		require_once("init_without_validate.php");
 		
 		$stm = $DBH->prepare("SELECT id FROM imas_users WHERE SID=:SID");
 		$stm->execute(array(':SID'=>$_GET['SID']));
@@ -442,7 +442,7 @@ require_once("includes/sanitize.php");
 		exit;
 	}
 
-	require("validate.php");
+	require("init.php");
 	if ($_GET['action']=="logout") {
 		$sessionid = session_id();
 		//DB $query = "DELETE FROM imas_sessions WHERE sessionid='$sessionid'";
@@ -610,7 +610,7 @@ require_once("includes/sanitize.php");
 				//mysql_query($query) or die("Query failed : " . mysql_error());
 			}
 		}
-	} else if ($_GET['action']=="unenroll") {
+	} else if ($_POST['action']=="unenroll") {
 		if ($myrights < 6) {
 			echo "<html><body>\nError: Guests can't unenroll from courses</body></html";
 			exit;
