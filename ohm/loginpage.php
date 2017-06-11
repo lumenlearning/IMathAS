@@ -85,5 +85,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	</footer>
 </div>
 <?php 
-	require("footer.php");
+	$curdir = rtrim(dirname(__FILE__), '/\\');
+	require($curdir . "/../footer.php");
 ?>
