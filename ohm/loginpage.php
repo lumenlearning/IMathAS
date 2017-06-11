@@ -84,3 +84,6 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		<a href="<?php echo $imasroot;?>/ohm/privacy.php">Privacy Policy</a></p>
 	</footer>
 </div>
+<?php 
+	require("footer.php");
+?>
