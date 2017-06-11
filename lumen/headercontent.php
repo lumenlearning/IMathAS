@@ -13,7 +13,7 @@ if (isset($userid) && $selfhasuserimg==1) {
 		echo "<a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">";
 	}
 	if(isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
-		echo "<img src=\"{$urlmode}s3.amazonaws.com/{$GLOBALS['AWSbucket']}/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
+		echo "<img src=\"{$urlmode}{$GLOBALS['AWSbucket']}.s3.amazonaws.com/cfiles/userimg_sm{$userid}.jpg\" style=\"float:right;margin-top:15px;\"/>";
 	} else {
 		$curdir = rtrim(dirname(__FILE__), '/\\');
 		$galleryPath = "$curdir/course/files/";
