@@ -52,3 +52,6 @@ echo "<h2>LuMOM Help</h2>
     <h3>Documentation</h3>
     <p>Read the <a href="../help.php">MyOpenMath documentation</a>.</p>
   </div>
+<?php
+require("../footer.php");
+?>
