@@ -2,7 +2,7 @@
 /*** MyOpenMath config ***/
 
 //aws config
-$AWSbucket = 'myopenmath';
+$AWSbucket = 'myopenmaths3';
 $dbname = 'myopenmathdb';
 
 //install name

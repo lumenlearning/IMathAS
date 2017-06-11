@@ -3,7 +3,7 @@
 /*** WAMAP.org config ***/
 
 //aws config
-$AWSbucket = 'wamapdata';
+$AWSbucket = 'wamaps3';
 $dbname = 'wamap';
 
 $CFG['GEN']['directaccessincludepath'] = 'wamap/';

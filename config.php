@@ -1,5 +1,4 @@
 <?php
-require_once(__DIR__ . "/includes/security.php");
 
 // Can be 'development, 'staging', 'production'
 $configEnvironment = empty(getenv('CONFIG_ENV')) ? 'development' : getenv('CONFIG_ENV');
