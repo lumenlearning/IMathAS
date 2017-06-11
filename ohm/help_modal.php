@@ -1,4 +1,4 @@
-<?php require '../config.php'; ?>
+<?php require '../init_without_validate.php'; ?>
 
 <div class="modal-inner">
 

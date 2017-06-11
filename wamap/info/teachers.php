@@ -1,6 +1,6 @@
 <?php
 $nologo = true;  $flexwidth = true;
-require("../../config.php");
+require("../../init_without_validate.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\">\n";
 require("../../header.php");
 $pagetitle ="Instructor Info";

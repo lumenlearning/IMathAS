@@ -1,5 +1,5 @@
 <?php
-require("../config.php");
+require("../init_without_validate.php");
 $addr = "https://www.wamap.org/course/quickdrill.php";
 
 //DB $query = "SELECT i_qs.description,i_qs.id FROM imas_questionset as i_qs JOIN imas_library_items as ili ON ili.qsetid=i_qs.id ";

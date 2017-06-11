@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <?php
 	 $flexwidth = true; $dbsetup = true; //prevents connection to database
-	include("../../config.php");
+	include("../../init_without_validate.php");
 ?>
 <html>
 <head>

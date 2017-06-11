@@ -1,5 +1,5 @@
 <?php
-require("config.php");
+require("init_without_validate.php");
 require("header.php");
 ?>
 <p dir="ltr"><strong>Subject: Action Required: Reset MyOpenMath Password</strong></p>

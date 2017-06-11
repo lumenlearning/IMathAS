@@ -6,7 +6,7 @@
 
 error_reporting(0);
 
-include("../../config.php");
+include("../../init_without_validate.php");
 require_once("../../includes/password.php");
 $ltiorg = 'tacomacc.edu';
 $ltiorgname = 'Tacoma CC';

@@ -1,6 +1,6 @@
 <?php
 $nologo = true;
-require("../config.php");
+require("../init_without_validate.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
 $placeinhead .= '<style type="text/css">ul.spaced li {padding-bottom: .5em;}</style>';
 require("../header.php");

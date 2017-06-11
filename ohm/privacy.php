@@ -1,6 +1,6 @@
 <?php
 $nologo = true;
-require("../config.php");
+require("../init_without_validate.php");
 $placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/themes/lumen.css\" type=\"text/css\">\n";
 require("../header.php");
 $pagetitle = "Privacy Policy";

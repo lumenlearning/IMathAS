@@ -7,10 +7,10 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 date_default_timezone_set('America/Los_Angeles');
 if (isset($_GET['public'])) {
-	require("../../config.php");
+	require("../../init_without_validate.php");
 	$ispublic = true;
 } else {
-	require("../../validate.php");
+	require("../../init.php");
 	$ispublic = false;
 }
 require("../../includes/filehandler.php");

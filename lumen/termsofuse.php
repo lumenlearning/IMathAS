@@ -1,5 +1,5 @@
 <?php
-require("config.php");
+require("../init_without_validate.php");
 $flexwidth = true;
 require("header.php");
 ?>

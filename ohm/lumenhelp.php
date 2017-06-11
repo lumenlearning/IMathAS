@@ -1,6 +1,5 @@
 <?php
-require("../config.php");
-require("../validate.php");
+require("../init.php");
 include("../header.php");
 $pagetitle = "Lumen Help";
 
