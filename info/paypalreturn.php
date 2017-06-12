@@ -1,7 +1,7 @@
 <?php
 //2013 MyOpenMath
 
-require("../validate.php");
+require("../init.php");
 
 //DB $query = "SELECT id,custominfo FROM imas_students WHERE userid='$userid' AND courseid='".$sessiondata['paypromptcourse']."'";
 //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());

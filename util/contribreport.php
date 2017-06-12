@@ -1,6 +1,6 @@
 <?php
 //reporting on contributions
-require("../validate.php");
+require("../init.php");
 
 if ($myrights<100) { exit;}
 
