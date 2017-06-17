@@ -4187,6 +4187,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		
+		$_POST["tc$qn"] = trim($_POST["tc$qn"]);
 		
 		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
 			list($givenans, $_POST["tc$qn"], $answer) = scorenosolninf($qn, '', $answer, $ansprompt);
@@ -4194,16 +4195,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 
 		$GLOBALS['partlastanswer'] = $_POST["tc$qn"];
 		
-		//handle nosolninf case
-		if ($_POST["tc$qn"]==='oo' || $_POST["tc$qn"]==='DNE') {
-			if ($answer==$_POST["tc$qn"]) {
-				return 1;
-			} else { 
-				return 0;
-			}
-		} else if ($answer==='DNE' || $answer==='oo') {
-			return 0;
-		}
 		$correct = true;
 
 		if (!isset($variables)) { $variables = "x";}
@@ -4259,6 +4250,17 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$tps[$i][$j] = $fromto[0] + ($fromto[1]-$fromto[0])*$RND->rand(0,499)/500.0 + 0.001;
 				}
 			}
+		}
+
+		//handle nosolninf case
+		if ($_POST["tc$qn"]==='oo' || $_POST["tc$qn"]==='DNE') {
+			if ($answer==$_POST["tc$qn"]) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else if ($answer==='DNE' || $answer==='oo') {
+			return 0;
 		}
 
 		if (!in_array('equation',$ansformats) && strpos($answer,'=')!==false) {
@@ -6265,7 +6267,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 
 		if ($multi>0) { $qn = $multi*1000+$qn;}
-		$filename = basename($_FILES["qn$qn"]['name']);
+		$filename = basename(str_replace('\\','/',$_FILES["qn$qn"]['name']));
 		$filename = preg_replace('/[^\w\.]/','',$filename);
 		$hasfile = false;
 		require_once(dirname(__FILE__)."/../includes/filehandler.php");

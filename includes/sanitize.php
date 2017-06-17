@@ -5,15 +5,16 @@ class Sanitize
 
 	private static $blacklistedFilenames = array(
 		'/^\./',
-		'/\.php$/',
-		'/\.php3$/',
-		'/\.php4$/',
-		'/\.php5$/',
-		'/\.bat$/',
-		'/\.com$/',
-		'/\.exe$/',
-		'/\.pl$/',
-		'/\.p$/'
+		'/\.php\d?($|\.)/',
+		'/\.bat($|\.)/',
+		'/\.com($|\.)/',
+		'/\.exe($|\.)/',
+		'/\.pl($|\.)/',
+		'/\.ph\d($|\.)/',
+		'/\.phtml?($|\.)/',
+		'/\.sh($|\.)/',
+		'/\.asp($|\.)/',
+		'/\.p($|\.)/'
 	);
 
 	/**
@@ -25,7 +26,7 @@ class Sanitize
 	 */
 	public static function sanitizeFilenameAndCheckBlacklist($uncleanFilename)
 	{
-		$safeFilename = preg_replace('/[^\da-z\._-]/i', '', $uncleanFilename);
+		$safeFilename = preg_replace('/[^\da-z\._\-]/i', '', $uncleanFilename);
 
 		if (self::isFilenameBlacklisted($safeFilename)) {
 			print("Invalid filename used! Halting.\n");
@@ -36,6 +37,33 @@ class Sanitize
 		return $safeFilename;
 	}
 
+
+	/**
+	 * Sanitize a file path and and check  the filenameagainst a blacklist.
+	 * Request processing is halted if the filename exists in the blacklist.
+	 *
+	 * @param $uncleanPath string The file path to sanitize and check.
+	 *   example:  ufiles/1/filename.doc
+	 * @return string A sanitized file path.
+	 */
+	public static function sanitizeFilePathAndCheckBlacklist($uncleanPath)
+	{
+		$saferFilePath = preg_replace('/[^\da-z\._\-\/]/i', '', $uncleanPath);
+		//prevent ../ paths
+		$cnt = 1;
+		while ($cnt>0) {  //repeat until there are no more
+			$saferFilePath = str_replace('../','',$saferFilePath,$cnt);
+		}
+
+		if (self::isFilenameBlacklisted(basename($saferFilePath)) || basename($saferFilePath)=='') {
+			print("Invalid filename used! Halting.\n");
+			// Normally, an exception would be thrown here, but we don't have exception handling. Yet! :)
+			exit;
+		}
+
+		return $saferFilePath;
+	}
+
 	/**
 	 * Check a filename to see if it's blacklisted.
 	 *
@@ -44,7 +72,7 @@ class Sanitize
 	 */
 	public static function isFilenameBlacklisted($filenameToCheck)
 	{
-
+		$filenameToCheck = strtolower($filenameToCheck);
 		foreach (self::$blacklistedFilenames as $blacklistedFilename) {
 			if (preg_match($blacklistedFilename, $filenameToCheck)) {
 				return true;
@@ -143,7 +171,7 @@ class Sanitize
 
 	/**
 	 * Sanitize a complete URL query string. (Everything after and without the '?' character in a URL)
-	 *  
+	 *
 	 *
 	 * Example input: "name=MyName&cid=994&color=blue"
 	 *
