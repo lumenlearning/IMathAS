@@ -12,12 +12,6 @@ require(__DIR__.'/config/common.php');
 if ($configEnvironment == 'development') {
   // You may want to include the appropriate prod config file inside your local.php
   // If you wanted OHM config for example, you should `require("ohm.php");`
-  if (file_exists(__DIR__ . '/ohm/maintenance_active')) {
-    $maintenance_text = file_get_contents(__DIR__ . '/ohm/maintenance_active');
-    require(__DIR__ . '/ohm/maintenance.php');
-    exit;
-  }
-
   require(__DIR__.'/config/local.php');
 
 } else if (strpos($_SERVER['HTTP_HOST'], 'wamap.org') !== false) {
