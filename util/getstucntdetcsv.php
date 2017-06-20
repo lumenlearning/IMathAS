@@ -56,6 +56,7 @@
 		'Course ID',
 		'Course Active Students',
 		'Is LTI',
+		'Template',
 		'Instructor',
 		'Email',
 		'Total Active Students for Instructor',
@@ -73,6 +74,14 @@
 	} else {
 		$skipcid = array();
 	}
+	
+	//pull template courses
+	$stm = $DBH->query("SELECT id,name FROM imas_courses WHERE (istemplate&1)=1 OR (istemplate&2)=2 ORDER BY name");
+	$templates = array();
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+		$templates[$row[0]] = $row[1];
+	}                                  
+	$templateids = array_keys($templates);
 
 	//DB $query = "SELECT id FROM imas_courses WHERE (istemplate&4)=4";
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
@@ -98,7 +107,7 @@
 		$lticourses[$row[0]] = $row[1];
 	}
 
-	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email,g.parent,g.grouptype FROM imas_students AS s JOIN imas_teachers AS t ";
+	$query = "SELECT g.name AS gname,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id) AS cnt,u.email,g.parent,g.grouptype,c.ancestors FROM imas_students AS s JOIN imas_teachers AS t ";
 	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
 	if ($end != $now) {
 		$query .= "AND s.lastaccess<$end ";
@@ -114,8 +123,8 @@
 	$lastemail; $instrstucnt = 0;
 	$seencid = array();
 	//DB while ($row = mysql_fetch_row($result)) {
-	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		if ($row[1].', '.$row[2]!=$lastuser) {
+	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+		if ($row['LastName'].', '.$row['FirstName']!=$lastuser) {
 			if ($lastuser != '') {
 				foreach ($userdata as $d) {
 					$d[] = $lastuser;
@@ -125,8 +134,8 @@
 				}
 			}
 			$userdata = array();
-			$lastuser = $row[1].', '.$row[2];
-			$lastemail = $row[6];
+			$lastuser = $row['LastName'].', '.$row['FirstName'];
+			$lastemail = $row['email'];
 			$instrstucnt = 0;
 			$grpinstrcnt++;
 		}
@@ -142,18 +151,24 @@
 				}
 			}
 			$grpcnt = 0;  $grpdata = array(); $grpinstrcnt = 0;
-			$lastgroup = $row[0];
-			$lastparent = (($row[7]>0)?$grpnames[$row[7]]:"");
-			$lastiscust = (($row[8]==1)?'Y':'N');
+			$lastgroup = $row['gname'];
+			$lastparent = (($row['parent']>0)?$grpnames[$row['parent']]:"");
+			$lastiscust = (($row['grouptype']==1)?'Y':'N');
 		}
-		$islti = (isset($lticourses[$row[3]])?'Y':'N');
-		if (!in_array($row[3],$seencid)) {
-			$grpcnt += $row[5];
-			$instrstucnt += $row[5];
-			$seencid[] = $row[3];
-			$userdata[] = array($row[4],$row[3],$row[5],$islti);
+		$islti = (isset($lticourses[$row['id']])?'Y':'N');
+		if (!in_array($row['id'],$seencid)) {
+			$grpcnt += $row['cnt'];
+			$instrstucnt += $row['cnt'];
+			$seencid[] = $row['id'];
+			$templatematches = array_intersect(explode(',', $row['ancestors']), $templateids);
+			if (count($templatematches)>0) {
+				$sourcetemplate = $templates[array_pop($templatematches)];
+			} else {
+				$sourcetemplate = '';
+			}
+			$userdata[] = array($row['cname'],$row['id'],$row['cnt'],$islti,$sourcetemplate);
 		} else {
-			$userdata[] = array($row[4],$row[3],$row[5].'(*)',$islti);
+			$userdata[] = array($row['cname'],$row['id'],$row['cnt'].'(*)',$islti,'');
 			//$userdata .= "<sup>*</sup>";
 		}
 		//$userdata .= "</li>";
