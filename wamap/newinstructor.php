@@ -65,8 +65,10 @@
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, 'New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
+				$_POST['verurl'] = Sanitize::fullUrl($_POST['verurl']);
+				$urldisplay = Sanitize::encodeStringForDisplay($_POST['verurl']);
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
-				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>"));
+				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
 
 				$message = "<p>Your new account request has been sent.</p>  ";
@@ -111,6 +113,6 @@
 	}
 	echo "<div class=submit><input type=submit value=\"Request Account\"></div>\n";
 	echo "</form>\n";
-	
+
 	require("../footer.php");
 ?>

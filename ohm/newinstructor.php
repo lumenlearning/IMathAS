@@ -73,9 +73,10 @@
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$urldisplay = htmlspecialchars($_POST['verurl']);
+				$_POST['verurl'] = Sanitize::fullUrl($_POST['verurl']);
+				$urldisplay = Sanitize::encodeStringForDisplay($_POST['verurl']);
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
-				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}}</a> <br/> Phone: {$_POST['phone']} <br/>"));
+				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
 				$message = "<p>Your new account request has been sent, for username {$_POST['username']}.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
@@ -95,7 +96,7 @@
 	if (isset($_POST['email'])) {$email=$_POST['email'];} else {$email='';}
 	if (isset($_POST['phone'])) {$phone=$_POST['phone'];} else {$phone='';}
 	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
-	if (isset($_POST['verurl'])) {$school=$_POST['verurl'];} else {$verurl='';}
+	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
 	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
 	echo "<div class=lumensignupforms>";
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
