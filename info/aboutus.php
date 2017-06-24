@@ -22,11 +22,12 @@ the IMathAS platform, and to provide students self-study opportunities.</p>
 <h2>Support</h2>
 <p>Community-based support is available through open support forums and training videos.</p>
  
-<p>More comprehensive support services are available for MyOpenMath through <a href="http://lumenlearning.com/open-courses-overview/">Lumen Learning</a>.  
- These services include faculty training, online and phone support for faculty, 
+<p>If you are in need of more comprehensive support services, then you should consider
+ using <a href="http://www.lumenlearning.com/what/ohm/">Lumen Learning's OHM platform</a>. 
+ These services include faculty training, support for faculty, 
  content and learning analytics, data-driven recommendations for improving content, 
  learning content improvements, service level agreements and backups, and long-term
- access to course data.  The Candela support packages typically cost less than 3% 
+ access to course data.  The support packages typically cost less than 3% 
  of what students currently pay for commercial products (yes, we mean 97% less).</p>
 
 <h2>How/Why is it Free?  Our Story</h2>
@@ -47,19 +48,20 @@ tied to his video examples.</p>
 <p>In 2011 David started MyOpenMath as a way to share with the world this software 
 system and all the great content that had been built around open textbooks.  
 He self-funded the site for the first year, then joined forces with Lumen Learning, 
-who had been using MyOpenMath with the Kaleidoscope Project.  Lumen now hosts the 
-MyOpenMath site, and leads continued content development, with plans to provide the 
-full arithmetic-through-calculus sequence in MyOpenMath using open textbooks.</p>
+who had been using MyOpenMath with the Kaleidoscope Project.  In 2017, Lumen split
+off their own version of MyOpenMath, called Lumen OHM, to help differentiate their
+supported service from the free, community MyOpenMath site.</p>
 
-<p>David and Lumen both feel very strongly that a free and open version of MyOpenMath 
+<p>David and Lumen both feel very strongly that a free community version of MyOpenMath 
 should always exist, without advertisements.  They are also committed that all the 
 content remain open as well, so it could be moved to a local install of the IMathAS 
-software if desired or needed.  To accomplish this, they are adopting a "freemium" model, 
-where the basic service will remain free with community-based support for faculty, 
-but <a href="http://lumenlearning.com/open-courses-overview/">additional services</a> are available to institutions for a fee.  
-Those services include instructor support, content support, and administrative services.  
-Students will never be directly charged, as ensuring student access to high quality 
-materials is our number one priority.</p>
+software if desired or needed.  For now, Lumen is providing financial support for
+MyOpenMath.  In the future, MyOpenMath will likely explore a "freemium" model, in which
+institutions will be able to pay an annual hosting fee in return for a basic
+service level agreement and data sharing contract, as well as access to additional 
+administrative features.  MyOpenMath will never provide instructor support services. 
+David's intention is that students will never be directly charged on MyOpenMath, 
+as ensuring student access to high quality materials is our number one priority.</p>
 
 <h2>Credits</h2>
 

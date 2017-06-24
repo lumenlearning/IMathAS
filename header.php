@@ -15,7 +15,7 @@
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
 </script>
-<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=042217";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=062617";?>" type="text/css" />
 <?php
 if (isset($coursetheme)) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
@@ -61,7 +61,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=052617"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=062617"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -89,7 +89,7 @@ if (!isset($sessiondata['mathdisp'])) {
 	}
 	//Contrib not hosted in CDN yet
 	//MathJax.Hub.config.extensions.push("[Contrib]/InputToDataAttr/InputToDataAttr.js");
-	
+
 	echo '<script type="text/x-mathjax-config">
 		if (MathJax.Hub.Browser.isChrome || MathJax.Hub.Browser.isSafari) {
 			MathJax.Hub.Config({"HTML-CSS": {preferredFont: "STIX", imageFont:null}, "messageStyle": "none", asciimath2jax: {ignoreClass:"skipmathrender"}});
@@ -226,7 +226,7 @@ function getactivetab() {
 	}
 	return $a;
 }
-if (isset($cid) && !isset($flexwidth)) {
+if (isset($cid) && !isset($flexwidth) && !isset($nocoursenav)) {
 	echo '<div id="navlistcont" role="navigation" aria-label="'._('Course Navigation').'">';
 	echo '<ul id="navlist">';
 	$a = array('course'=>'', 'msg'=>'', 'forum'=>'', 'cal'=>'', 'gb'=>'', 'roster'=>'');
@@ -237,13 +237,13 @@ if (isset($cid) && !isset($flexwidth)) {
 	if ($coursemsgset<4) { //messages
 		echo "<li><a {$a['msg']} href=\"$imasroot/msgs/msglist.php?cid=$cid\">Messages</a></li> ";
 	}
-	
+
 	if (($coursetoolset&2)==0) { //forums
 		echo "<li><a {$a['forum']} href=\"$imasroot/forums/forums.php?cid=$cid\">Forums</a></li>";
 	}
-	
+
 	if (isset($teacherid)) { //Roster
-		echo "<li><a {$a['roster']} href=\"$imasroot/course/listusers.php?cid=$cid\">Roster</a></li>\n"; 
+		echo "<li><a {$a['roster']} href=\"$imasroot/course/listusers.php?cid=$cid\">Roster</a></li>\n";
 	}
 
 	if (($coursetoolset&1)==0) { //Calendar
@@ -251,16 +251,16 @@ if (isset($cid) && !isset($flexwidth)) {
 	}
 
 	echo "<li><a {$a['gb']} href=\"$imasroot/course/gradebook.php?cid=$cid\">Gradebook</a></li>"; //Gradebook
-	
+
 	if (!isset($haslogout)) { //Log out
 		echo "<li><a href=\"$imasroot/actions.php?action=logout\">Log Out</a></li>";
 	}
 	echo '</ul>';
-	
+
 	echo '<div class="clear"></div>';
 	echo '</div>';
 	$didnavlist = true;
-	}
+}
 if (!isset($flexwidth)) {
 	echo '</div>';
 }
