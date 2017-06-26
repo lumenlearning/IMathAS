@@ -421,30 +421,32 @@ if (isset($CFG['GEN']['hometitle'])) {
 }
 echo '</h2>';
 echo '</div>';
-if ($myrights>15) {
-	$stm = $DBH->prepare("SELECT custominfo FROM imas_students WHERE courseid=1 AND userid=:userid");
-	$stm->execute(array(':userid'=>$userid));
-	$custominfo = $stm->fetchColumn(0);
-	$noticetxt = '';
-	if ($custominfo!==false) {
-		$custominfo = json_decode($custominfo,true);
-		if ($installname!='WAMAP' && ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd']))) {
-			echo '<div class="sysnotice">2/13/17: There are <a href="https://www.myopenmath.com/forums/posts.php?cid=1&forum=37&thread=239763&page=1">changes coming</a> ';
-			echo 'to the mission and operation of MyOpenMath. ';
-			echo '<a href="#" onclick="dismisssysnotice(\'dd\',this);return false;" class="small">[Dismiss]</a></div>';
-		}
-		if ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd'])) {
-			echo '<div class="sysnotice">2/11/17: There have been changes to the instructor interface. ';
-			if ($installname=='WAMAP') {
-				echo '<a href="https://www.wamap.org/forums/posts.php?cid=1&forum=1&thread=702655&page=1">Read here</a> ';
-			} else {
-				echo '<a href="https://www.myopenmath.com/forums/posts.php?cid=1&forum=37&thread=238566&page=1">Read here</a> ';
-			}
-			echo 'for more info on the changes. ';
-			echo '<a href="#" onclick="dismisssysnotice(\'dd\',this);return false;" class="small">[Dismiss]</a></div>';
-		}
-	}
-}
+// Disabled on 2017 Jun 26, until a better notification system is in place.
+// Keeping this commented code in case we need to display more notifications in the future.
+//if ($myrights>15) {
+//	$stm = $DBH->prepare("SELECT custominfo FROM imas_students WHERE courseid=1 AND userid=:userid");
+//	$stm->execute(array(':userid'=>$userid));
+//	$custominfo = $stm->fetchColumn(0);
+//	$noticetxt = '';
+//	if ($custominfo!==false) {
+//		$custominfo = json_decode($custominfo,true);
+//		if ($installname!='WAMAP' && ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd']))) {
+//			echo '<div class="sysnotice">2/13/17: There are <a href="https://www.myopenmath.com/forums/posts.php?cid=1&forum=37&thread=239763&page=1">changes coming</a> ';
+//			echo 'to the mission and operation of MyOpenMath. ';
+//			echo '<a href="#" onclick="dismisssysnotice(\'dd\',this);return false;" class="small">[Dismiss]</a></div>';
+//		}
+//		if ($custominfo===null || !isset($custominfo['noticedismiss']) || !isset($custominfo['noticedismiss']['dd'])) {
+//			echo '<div class="sysnotice">2/11/17: There have been changes to the instructor interface. ';
+//			if ($installname=='WAMAP') {
+//				echo '<a href="https://www.wamap.org/forums/posts.php?cid=1&forum=1&thread=702655&page=1">Read here</a> ';
+//			} else {
+//				echo '<a href="https://www.myopenmath.com/forums/posts.php?cid=1&forum=37&thread=238566&page=1">Read here</a> ';
+//			}
+//			echo 'for more info on the changes. ';
+//			echo '<a href="#" onclick="dismisssysnotice(\'dd\',this);return false;" class="small">[Dismiss]</a></div>';
+//		}
+//	}
+//}
 if ($myrights==100 && count($brokencnt)>0) {
 	echo '<div><span class="noticetext">'.array_sum($brokencnt).'</span> questions, '.(array_sum($brokencnt)-$brokencnt[0]).' public, reported broken systemwide</div>';
 }
