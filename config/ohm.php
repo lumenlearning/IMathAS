@@ -5,7 +5,7 @@ $loginpage = 'ohm/loginpage.php';
 $installname = "Lumen OHM";
 
 //aws config
-$AWSbucket = 'myopenmaths3';
+$AWSbucket = 'ohm-website-data';
 $dbname = 'myopenmathdb';
 
 //login prompts
