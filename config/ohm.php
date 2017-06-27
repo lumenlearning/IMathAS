@@ -1,11 +1,19 @@
 <?php
+/**
+ ************** IMPORTANT NOTICE ****************
+ *
+ * This is the PRODUCTION config file.
+ * Any changes made here will affect PRODUCTION!
+ *
+ ************** IMPORTANT NOTICE ****************
+ */
 
 $loginpage = 'ohm/loginpage.php';
 
 $installname = "Lumen OHM";
 
 //aws config
-$AWSbucket = $_ENV['S3_MAIN_BUCKET_NAME'];
+$AWSbucket = "development" == $configEnvironment ? null : $_ENV['S3_MAIN_BUCKET_NAME'];
 $dbname = 'myopenmathdb';
 
 //login prompts

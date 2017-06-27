@@ -1,7 +1,7 @@
 <?php
 //IMathAS Math Config File.  Adjust settings here!
 
-$imasroot = "/myopenmath";
+$imasroot = "/ohm";
 $AWSbucket = null;
 //$AWSkey = 'api_key_goes_here';
 //$AWSsecret = 'api_secret_goes_here';
