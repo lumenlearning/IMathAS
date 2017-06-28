@@ -59,7 +59,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 } else { // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 	$cid = Sanitize::courseId($_GET['cid']);
 	$block = Sanitize::encodeStringForDisplay($_GET['block']);
-	$page_formActionTag = "addinlinetext.php?block=$block&cid=$cid&folder=" . Sanitize::encodeStringForDisplay($_GET['folder']);
+	$page_formActionTag = "addinlinetext.php?" . Sanitize::generateQueryStringFromMap(array('block' => $block,
+            'cid' => $cid, 'folder' => $_GET['folder']));
 	$page_formActionTag .= "&tb=$totb";
 	$caltag = $_POST['caltag'];
 	if ($_POST['title']!= null || $_POST['text']!=null || $_POST['sdate']!=null) { //if the form has been submitted

@@ -17,16 +17,19 @@ $from = $_GET['from'];
 
 $curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 if ($from=='modq') {
-	$fromstr = '&amp;from=modq&amp;aid='.Sanitize::onlyInt($_GET['aid']).'&amp;qid='.Sanitize::onlyInt($_GET['qid']);
-	$returnstr = 'modquestion.php?cid='.$cid.'&amp;aid='.Sanitize::onlyInt($_GET['aid']).'&amp;id='.Sanitize::onlyInt($_GET['qid']);
+	$fromstr = '&amp;' . Sanitize::generateQueryStringFromMap(array('from' => 'modq', 'aid' => $_GET['aid'],
+			'qid' => $_GET['qid']));
+	$returnstr = 'modquestion.php?' . Sanitize::generateQueryStringFromMap(array('cid' => $cid,
+			'aid' => $_GET['aid'], 'id' => $_GET['qid']));
 	$curBreadcrumb .= "&gt; <a href=\"$returnstr\">Modify Question Settings</a> ";
 } else if ($from=='addg') {
-	$fromstr = '&amp;from=addg&amp;gbitem='.Sanitize::encodeStringForDisplay($_GET['gbitem']);
-	$returnstr = 'addgrades.php?cid='.$cid.'&amp;gbitem='.Sanitize::encodeStringForDisplay($_GET['gbitem']).'&amp;grades=all';
+	$fromstr = '&amp;' . Sanitize::generateQueryStringFromMap(array('from' => 'addg', 'gbitem' => $_GET['gbitem']));
+	$returnstr = 'addgrades.php?'. Sanitize::generateQueryStringFromMap(array('cid' => $cid,
+			'gbitem' => $_GET['gbitem'], 'grades' => 'all'));
 	$curBreadcrumb .= "&gt; <a href=\"$returnstr\">Offline Grades</a> ";
 } else if ($from=='addf') {
-	$fromstr = '&amp;from=addf&amp;fid='.Sanitize::onlyInt($_GET['fid']);
-	$returnstr = 'addforum.php?cid='.$cid.'&amp;id='.Sanitize::onlyInt($_GET['fid']);
+	$fromstr = '&amp;' . Sanitize::generateQueryStringFromMap(array('from' => 'addf', 'fid' => $_GET['fid']));
+	$returnstr = 'addforum.php?' . Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'id' => $_GET['fid']));
 	$curBreadcrumb .= "&gt; <a href=\"$returnstr\">Modify Forum</a> ";
 }
 

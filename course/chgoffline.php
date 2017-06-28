@@ -14,7 +14,7 @@ if (!isset($teacherid)) {
 $cid = Sanitize::courseId($_GET['cid']);
 
 if (isset($_POST['checked'])) { //form submitted
-	$checked = Sanitize::encodeStringForDisplay($_POST['checked']);
+	$checked = $_POST['checked'];
 	if ($_POST['submit']=="Delete") {
 		if (isset($_POST['confirm'])) {
 			$checked = explode(',',$checked);

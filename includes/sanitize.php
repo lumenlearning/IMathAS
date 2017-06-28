@@ -222,10 +222,11 @@ class Sanitize
 
 	/**
 	 * Generate a safe query string from a map of query arguments.
-	 *
-	 * Note: Usage of this method is strongly preferred over fullQueryString().
+	 * It is not necessary to "pre-sanitize" data passed to this method. It will all be URL-encoded.
 	 *
 	 * Example input: array( 'name' => 'MyName', 'cid' => 994 );
+	 *
+	 * Note: Usage of this method is strongly preferred over fullQueryString().
 	 *
 	 * @param $args array The entire query map.
 	 * @return string The encoded query string.
