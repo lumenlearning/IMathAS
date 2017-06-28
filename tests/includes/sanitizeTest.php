@@ -136,12 +136,12 @@ final class SanitizeTest extends TestCase
 	 * fullQuery
 	 */
 
-	public function testFullQueryMap()
+	public function testGenerateQueryStringFromMap()
 	{
 		$testQuery = array( 'name' => 'MyName&inject=badStuff', 'cid' => 994 );
 		$expectedQuery = "name=MyName%26inject%3DbadStuff&cid=994";
 
-		$result = Sanitize::fullQueryMap($testQuery);
+		$result = Sanitize::generateQueryStringFromMap($testQuery);
 
 		$this->assertEquals($expectedQuery, $result);
 	}

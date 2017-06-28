@@ -172,8 +172,17 @@ class Sanitize
 	 * Sanitize a full URL string. This should include the protocol (http/https), port, path,
 	 * and any query parameters.
 	 *
+	 * Warning: This method is NOT secure if any part of the URL was generated with data obtained from user input!
+	 *
+	 * For a more secure result, use generateQueryStringFromMap() with a combination of one of the following:
+	 *   - $GLOBALS['basesiteurl']
+	 *   - $imasroot
+	 *
+	 * This method may be used as a last resort, for example, if you have a fully formed URL instead of its parts.
+	 *
 	 * @param  string $url The full URL string.
 	 * @return string A sanitized URL.
+	 * @see generateQueryStringFromMap
 	 */
 	public static function fullUrl($url)
 	{
@@ -214,12 +223,14 @@ class Sanitize
 	/**
 	 * Generate a safe query string from a map of query arguments.
 	 *
+	 * Note: Usage of this method is strongly preferred over fullQueryString().
+	 *
 	 * Example input: array( 'name' => 'MyName', 'cid' => 994 );
 	 *
 	 * @param $args array The entire query map.
 	 * @return string The encoded query string.
 	 */
-	public static function fullQueryMap($args)
+	public static function generateQueryStringFromMap($args)
 	{
 		return http_build_query($args);
 	}
@@ -229,11 +240,12 @@ class Sanitize
 	 *
 	 * Example input: "name=MyName&cid=994&color=blue"
 	 *
-	 *  Do NOT use this for a string like "name=$name&color=$color", as it
-	 *  does not encode query parameters
+	 * Warning: This method is NOT secure if the query string was generated with data obtained from user input!
+	 * Example of insecure input: "name=${POST['name']}&color=${POST['color']}".
 	 *
 	 * @param $string string The entire query string.
 	 * @return string The encoded query string.
+	 * @see generateQueryStringFromMap
 	 */
 	public static function fullQueryString($string)
 	{
