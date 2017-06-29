@@ -1,0 +1,195 @@
+
+.marginp{
+	padding:10px;
+	text-align: center;
+	width: 388px;
+
+}
+p.error-msg {
+	color: #ff4646;
+	text-align: center;
+}
+.marginHeaderp{
+	margin-bottom: 10px;
+	/*margin-top: px;*/
+	font-size: 16px;
+}
+div.lumensignupforms form.enroll-div button.button{
+	width: 50%;
+}
+a.go-back{
+	margin-left: 20px;
+	align-self: right;
+}
+.box-shadow{
+	width: 400px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	padding:20px;
+	border-radius: 10px;
+}
+p span{
+	float: right;
+}
+div.row {
+	flex-direction: row;
+	align-content: space-between;
+	justify-content: space-between;
+	display: flex;
+}
+div h2{
+	align-self: center;
+}
+div#headerforms.left-align {
+	margin-right: 100px;
+}
+
+.enroll-div{
+	width: 100%;
+}
+ .field {
+	width: 388px;
+	position: relative;
+	margin: 10px;
+	padding: 0;
+	border-bottom: 1px solid #aaa;
+}
+.enroll label {
+	background: #fff;
+	color: #155192;
+	font-size: 1.25em;
+	font-weight: 600;
+	left: .75em;
+	opacity: 0;
+	padding: 0 .25em;
+	position: absolute;
+	top: 2em;
+	transition: all 0.1s linear;
+	z-index: -1;
+}
+.enroll label.show {
+	opacity: 1;
+	top: -1em;
+	z-index: 1;
+}
+.enroll input {
+	border: none;
+	margin: 0;
+}
+ .visuallyhidden {
+display: none;
+}
+
+.wizard-progress {
+	list-style: none;
+	list-style-image: none;
+	margin-top: 10px;
+	margin-bottom:10px;
+	padding: 0px;
+	/*margin-left: 5%;*/
+	/*align-self: center;*/
+
+}
+.wizard-progress li {
+	float: left;
+	text-align: center;
+	position: relative;
+	width: 100px;
+}
+.wizard-progress .step-name-wrapper {
+	display: table-cell;
+	height: 100%;
+	vertical-align: bottom;
+}
+
+.wizard-progress .step-num {
+	font-size: 14px;
+	font-weight: bold;
+	border: 3px solid #1E74D1;
+	border-radius: 50%;
+	width: 18px;
+	display: inline-block;
+	margin-top: 10px;
+	color:black;
+
+}
+.wizard-progress .step-num a{
+	text-decoration: none
+}
+
+.wizard-progress .step-num:after {
+	content: "";
+	display: block;
+	background: #1E74D1;
+	height: 5px;
+	width: 400px;
+	position: absolute;
+	bottom: 10px;
+	left: 60px;
+}
+
+.wizard-progress li:last-of-type .step-num:after {
+	display: none;
+}
+
+.wizard-progress .active-step .step-num {
+	background-color: #FFD600;
+	border: 3px solid  #1E74D1;
+	color:black;
+}
+.notlast{
+	margin-right:320px;
+}
+
+@media only screen and (max-width: 1077px) {
+	div#headerforms.left-align {
+		margin-right: 0;
+	}
+	div.row {
+		display: flex;
+		flex-direction: column;
+		align-content:center;
+		justify-content: center;
+	}
+	.wizard-progress .step-num:after {
+		width: 200px;
+	}
+	.notlast{
+		margin-right: 120px;
+	}
+}
+@media only screen and (max-width: 599px) {
+	.wizard-progress .step-num:after {
+		width: 130px;
+	}
+	.notlast{
+		margin-right:50px;
+	}
+}
+@media only screen and (max-width: 480px) {
+	h2{
+		font-size: 22px;
+	}
+	div.row {
+		align-items: center;
+	}
+	.box-shadow{
+		width: 350px;
+	}
+	.enroll .field {
+		width: 300px;
+	}
+	.enroll .field input {
+		width: 285px;
+	}
+	.marginp{
+		width: 300px;
+		text-align: center;
+	}
+	.wizard-progress .step-num:after {
+		width: 100px;
+	}
+	.notlast{
+		margin-right: 20px;
+	}
+
+}

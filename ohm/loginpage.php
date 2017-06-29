@@ -1,82 +1,70 @@
 <?php
-if (!isset($imasroot)) { //don't allow direct access to loginpage.php
-	header("Location: index.php");
-	exit;
-}
 //any extra CSS, javascript, etc needed for login page
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/ohm/login.css\" type=\"text/css\" />\n";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 
-	$nologo = true;
-	$curdir = rtrim(dirname(__FILE__), '/\\');
-	require($curdir . "/../header.php");
-	if (!empty($_SERVER['QUERY_STRING'])) {
-		 $querys = '?'.$_SERVER['QUERY_STRING'];
-	 } else {
-		 $querys = '';
-	 }
-	 $loginFormAction = $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::encodeStringForDisplay($querys);
-	 
-	 if (!empty($_SESSION['challenge'])) {
-		 $challenge = $_SESSION['challenge'];
-	 } else {
-		 //use of microtime guarantees no challenge used twice
-		 $challenge = base64_encode(microtime() . rand(0,9999));
-		 $_SESSION['challenge'] = $challenge;
-	 }
-
+$nologo = true;
+$curdir = rtrim(dirname(__FILE__), '/\\');
+require($curdir . "/../header.php");
+if (isset($_SERVER['QUERY_STRING'])) {
+	$querys = '?'.$_SERVER['QUERY_STRING'];
+} else {
+	$querys = '';
+}
+if (!empty($_SESSION['challenge'])) {
+	$challenge = $_SESSION['challenge'];
+} else {
+	//use of microtime guarantees no challenge used twice
+	$challenge = base64_encode(microtime() . rand(0,9999));
+	$_SESSION['challenge'] = $challenge;
+}
 ?>
 
 <div class="login-wrapper">
 	<div id="loginbox">
 		<form method="post" action="<?php echo $loginFormAction;?>">
 			<?php
-				if ($haslogin) {
-					if ($badsession) {
-						echo '<p class="error-msg">Unable to establish a session. Please check that your browser is set to allow session cookies.</p>';
-					} else {
-						echo "<p class=\"error-msg\">Oops! Wrong username or password.</p>\n";
-					}
+			if ($haslogin) {
+				if ($badsession) {
+					echo '<p class="error-msg">Unable to establish a session. Please check that your browser is set to allow session cookies.</p>';
+				} else {
+					echo "<p class=\"error-msg\">Oops! Wrong username or password.</p>\n";
 				}
-				if ($err!='') {
-					echo $err;
-				}
+			}
+			if ($err!='') {
+				echo $err;
+			}
 			?>
 			<!-- <h2>Login to Lumen Ohm</h2> -->
-		<img id="login-logo" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" />
-		<div class="login-group">
-			<input type="text" size="15" id="username" name="username" placeholder="Username" aria-label="Username" />
-			<input type="password" size="15" id="password" name="password" placeholder="Password"  aria-label="Password" />
-			<button id="login-button" type="submit">Login</button>
-		</div>
-		<div><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</noscript></div>
+			<img id="login-logo" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" />
+			<div class="login-group">
+				<input type="text" size="15" id="username" name="username" placeholder="Username" aria-label="Username" />
+				<input type="password" size="15" id="password" name="password" placeholder="Password"  aria-label="Password" />
+				<button id="login-button" class="login-button" type="submit">Login</button>
+			</div>
+			<div><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</noscript></div>
 
 
-		<!-- <div><a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
-		<a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></div>		<input type="hidden" id="tzoffset" name="tzoffset" value=""> -->
-		<input type="hidden" id="tzoffset" name="tzoffset" value="">
-		<input type="hidden" id="tzname" name="tzname" value="">
-		<input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
-		<script type="text/javascript">     
-		$(function() {
-			var thedate = new Date();  
-			document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
-			var tz = jstz.determine(); 
-			document.getElementById("tzname").value = tz.name();
-			$("#username").focus();
-		});
-		</script> 
+			<!-- <div><a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
+			<a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></div>		<input type="hidden" id="tzoffset" name="tzoffset" value=""> -->
+			<input type="hidden" id="tzoffset" name="tzoffset" value="">
+			<input type="hidden" id="tzname" name="tzname" value="">
+			<input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
+			<script type="text/javascript">
+			$(function() {
+				var thedate = new Date();
+				document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
+				var tz = jstz.determine();
+				document.getElementById("tzname").value = tz.name();
+				$("#username").focus();
+			});
+			</script>
+		</form>
+		<p class="or"><span>or</span></p>
 
-		<div class="supplement-text">
-		  <a target="_blank" href="https://www.lumenlearning.com/what/ohm/">What is Lumen OHM?</a></br>
-			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
-			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></br>
-			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=newuser">Register as a New Student</a></br>
-			<a href="<?php echo $imasroot; ?>/ohm/newinstructor.php?">Request an instructor account</a>
-		</div>
-
-		
+		<form action="<?php echo $imasroot; ?>/ohm/enroll.php" method="get"><div class="login-group">
+			<button id="enroll-button">Enroll</button></div>
 		</form>
 	</div>
 	<footer class="footer">
@@ -84,7 +72,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		<a href="<?php echo $imasroot;?>/ohm/privacy.php">Privacy Policy</a></p>
 	</footer>
 </div>
-<?php 
+<?php
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	require($curdir . "/../footer.php");
 ?>

@@ -49,7 +49,7 @@ div.mainbody {
 .login-group input {
 	height: 35px;
 }
-.login-group #login-button {
+.login-group #login-button,.login-group #enroll-button {
 	margin: 0.75em 0;
 }
 #login-logo {
@@ -70,7 +70,7 @@ div.mainbody {
 	border: 1px solid #aaa;
 	border-radius: 0 0 6px 6px;
 }
-#login-button {
+#login-button,#enroll-button{
 	background-color: #155192;
 	height: 45px;
 	color: #fff;
@@ -78,11 +78,12 @@ div.mainbody {
 	font-weight: bold;
 	border: 1px solid #104074;
 }
-#login-button:hover {
+#login-button:hover,#enroll-button:hover{
 	background-color: #FFD600;
 	color: #000;
 	cursor: pointer;
 }
+
 #access-select {
 	height: 35px;
 	width: 100%;
@@ -118,7 +119,31 @@ p.error-msg {
 	color: #999;
 	font-size: 14px;
 }
-
+.or {
+  line-height: 0.5;
+  text-align: center;
+}
+.or span {
+  display: inline-block;
+  position: relative;
+}
+.or span:before,
+.or span:after {
+  content: "";
+  position: absolute;
+  height: 5px;
+  border-bottom: 1px solid;
+  top: 0;
+  width: 125px;
+}
+.or span:before {
+  right: 100%;
+  margin-right: 15px;
+}
+.or span:after {
+  left: 100%;
+  margin-left: 15px;
+}
 @media only screen and (max-width: 480px) {
 	div.headerwrapper {
 		display: none;

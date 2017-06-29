@@ -115,7 +115,7 @@
 		$stm->execute(array(':now'=>$now, ':log'=>"$userid login from IP:{$_SERVER['REMOTE_ADDR']}"));
 
 
-		 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys);
+		 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::fullUrl($querys));
 		 exit;
 	 }
 
@@ -278,8 +278,15 @@
 		 }
 
 
+// If the post of ekey and courseid then look to see if already enrolled
+
+    if ($_POST['enrollandlogin']) {
+      header("Location:" . $GLOBALS['basesiteurl'] . "/actions.php?" . Sanitize::fullQueryString("action=enroll&cid=" . $_POST['cid'] . "&ekey=" . $_POST['ekey'] . "&enrollandlogin=1")); /* Redirect browser */
+      exit;
+    }
+
 		 if (!empty($_SERVER['QUERY_STRING'])) {
-			 $querys = '?' . $_SERVER['QUERY_STRING'] . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
+       $querys = '?' . $_SERVER['QUERY_STRING'] . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 } else {
 			 $querys = (!empty($addtoquerystring) ? '?' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 }
@@ -288,12 +295,16 @@
 		 //DB //mysql_query($query) or die("Query failed : " . mysql_error());
 
 		 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys);
-	 } else {
-		 if (empty($_SESSION['challenge'])) {
-			 $badsession = true;
-		 } else {
-		 	 $badsession = false;
-		 }
+   } else {
+     if (empty($_SESSION['challenge'])) {
+       $badsession = true;
+     } else {
+       if ($_POST['cid'] && $_POST['ekey']) {
+         header("Location:" . $GLOBALS['basesiteurl'] . "/ohm/registerorsignin.php?" . Sanitize::fullQueryString("cid=" . $_POST['cid'] . "&ekey=" . $_POST['ekey'] . "&relogin=true")); /* Redirect browser */
+         exit;
+       }
+       $badsession = false;
+     }
 		 /*  For login error tracking - requires add'l table
 		 if ($line==null) {
 			 $err = "Bad SID";

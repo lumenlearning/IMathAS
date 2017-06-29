@@ -60,6 +60,11 @@ switch($_GET['action']) {
 				<span>I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></span>
 			</label>";
 		}
+		if($_POST['enrollandregister']){
+			echo "<input  type='hidden'   name='enrollandregister'       value='enrollandregister'/>";
+			echo '<input  class="lumenform form" type="hidden"  name="courseid" placeholder="Course Id" value="'. $_POST['cid'] .'" aria-label="courseid" />';
+			echo '<input class="lumenform form" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. $_POST['ekey'].'" aria-label="Enrollment Key:" />';
+		}else{
 		if (!$emailconfirmation) {
 			$doselfenroll = false;
 			$stm = $DBH->query("SELECT id,name FROM imas_courses WHERE (istemplate&4)=4 AND available<4 ORDER BY name");
@@ -95,6 +100,7 @@ switch($_GET['action']) {
 				echo 'course, you need to enter the course ID and key provided by your instructor.</div>';
 			}
 		}
+	}
 		echo "<button class=button type=submit>Submit</button>
 		</form>
 		</div>";

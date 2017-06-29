@@ -4,6 +4,7 @@ a:visited {
 a:hover {
 	color: #ccc !important;
 }
+
 div.lumensignupforms button.button:hover{
 	background-color: #FFD600;
 	color: #000;
@@ -42,7 +43,7 @@ label.form{
 }
 
 div.lumensignupforms button.button{
-	margin-top: 5px;
+	margin-top: 10px;
 	background-color: #155192;
 	height: 45px;
 	color: #fff;
