@@ -1,6 +1,6 @@
-<div id="logo">
+<!--<div id="logo">
 <img src="<?php echo $imasroot; ?>/wamap/img/wamaptxt.gif" alt="WAMAP.org: Washington Mathematics Assessment and Placement"/>
-</div>
+</div>-->
 
 <ul id="navlist">
 <li><a href="<?php echo $imasroot; ?>/index.php">About Us</a></li>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 if ($coursetheme=='otbsreader.css') {
 	$nologo = true;
 }
@@ -7,7 +7,7 @@ if (!isset($flexwidth) && ($coursetheme=='otbs_fw.css' || $coursetheme=='otbs.cs
 ?>
 <div id="headercontent" role="navigation" aria-label="System Navigation">
 <div id="headerrightlinks">
-<?php 
+<?php
 $usernameinheader = true;
 if (isset($userid)) {
 	if ($myrights > 5) {
@@ -25,7 +25,7 @@ if (isset($userid)) {
 if (isset($userid)) {
 	echo "<a href=\"$imasroot/index.php\">Home</a> | ";
 	echo '<a href="#" onclick="jQuery(\'#homemenu\').css(\'left\',jQuery(this).offset().left+\'px\');mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle" alt=""/></a> | ';
-	
+
 	if (isset($teacherid)) {
 		echo "<a href=\"$imasroot/help.php?section=coursemanagement\">Help</a> ";
 	} else {
@@ -61,7 +61,9 @@ echo '</div>'; //headercontent
 		echo "<li><a href=\"$imasroot/help.php?section=usingimas\">Help</a></li>";
 	}
 	*/
-	echo "<li><a href=\"$imasroot/actions.php?action=logout\">Log Out</a></li>";
+	if ($myrights>0) {
+		echo "<li><a href=\"$imasroot/actions.php?action=logout\">Log Out</a></li>";
+	}
       ?>
   </ul>
 </div>
