@@ -1,16 +1,16 @@
-<?
+<?php
 require("../init_without_validate.php");
 require("../header.php");
 
 ?>
 <html>
 <head>
-  <? echo "<link rel='stylesheet' href='$imasroot/ohm/forms.css' type='text/css'>";?>
-  <? echo "<link rel='stylesheet' href='$imasroot/ohm/loginandenroll.css' type='text/css'>";?>
+  <?php echo "<link rel='stylesheet' href='$imasroot/ohm/forms.css' type='text/css'>";?>
+  <?php echo "<link rel='stylesheet' href='$imasroot/ohm/loginandenroll.css' type='text/css'>";?>
 
 </head>
 <body>
-<?
+<?php
 if($_GET['cid'] && $_GET['ekey']  ){
   $_POST['courseid']  = $_GET['cid'];
   $_POST['ekey']      = $_GET['ekey'] ;
@@ -30,8 +30,8 @@ if($_POST['courseid'] && $_POST['ekey']){
      $stm = $DBH->prepare(" SELECT FirstName,LastName FROM imas_users JOIN imas_teachers ON imas_teachers.userid = imas_users.id WHERE imas_teachers.courseid = :cid;");
      $stm->execute(array(':cid'=>$cid));
      $line = $stm->fetch(PDO::FETCH_ASSOC);
-     $FirstName= $line["FirstName"];
-     $LastName= $line["LastName"];
+     $FirstName= Sanitize::encodeStringForDisplay($line["FirstName"]);
+     $LastName= Sanitize::encodeStringForDisplay($line["LastName"]);
      $Detailsmessage = "
       <p>Course Name: <span>$coursename</span></p>
        <p>Course Id:<span> $cid</span></p>

@@ -1,4 +1,4 @@
-<?
+<?php
 require("../init_without_validate.php");
 require("../header.php");
 ?>
@@ -41,12 +41,12 @@ if(($_POST['courseid'] && $_POST['ekey'] && $_POST['verified'] || $_GET['cid'] &
   <p class='marginHeaderp'>Already have an OHM account?</p></center>
   <div class='login-wrapper'>"
   ?>
-  <?
+  <?php
   if ($_GET['relogin']) {
     echo "<p class=\"error-msg\">Oops! Wrong username or password. Please Re-enter</p>\n";
   }
   ?>
-  <?
+  <?php
   echo"<div id='loginbox'>
   <form action='$imasroot/actions.php?action=enroll' method=post>
   $hiddeninput

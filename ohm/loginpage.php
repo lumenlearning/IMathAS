@@ -5,8 +5,7 @@
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 
 $nologo = true;
-$curdir = rtrim(dirname(__FILE__), '/\\');
-require($curdir . "/../header.php");
+require(__DIR__ . "/../header.php");
 if (isset($_SERVER['QUERY_STRING'])) {
 	$querys = '?'.$_SERVER['QUERY_STRING'];
 } else {
@@ -73,6 +72,5 @@ if (!empty($_SESSION['challenge'])) {
 	</footer>
 </div>
 <?php
-	$curdir = rtrim(dirname(__FILE__), '/\\');
-	require($curdir . "/../footer.php");
+	require(__DIR__ . "/../footer.php");
 ?>
