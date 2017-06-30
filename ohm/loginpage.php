@@ -61,15 +61,13 @@ if (!empty($_SESSION['challenge'])) {
 			</script>
 		</form>
 		<p class="or"><span>or</span></p>
-
 		<form action="<?php echo $imasroot; ?>/ohm/enroll.php" method="get"><div class="login-group">
-			<button id="enroll-button">Enroll</button></div>
+			<button id="enroll-button">Enroll In a New Course</button></div>
 		</form>
 		<div class="supplement-text">
 	<a target="_blank" href="https://www.lumenlearning.com/what/ohm/">What is Lumen OHM?</a></br>
 	<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
 	<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></br>
-	<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=newuser">Register as a New Student</a></br>
 	<a href="<?php echo $imasroot; ?>/ohm/newinstructor.php?">Request an instructor account</a>
 </div>
 	</div>

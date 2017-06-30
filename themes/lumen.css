@@ -72,7 +72,7 @@ div.mainbody {
 	height:auto;
 }
 .headerwrapper, .footerwrapper {
-	background-color: #fff;
+	/*background-color: none;*/
 }
 .headerwrapper a:link,
 .headerwrapper a:visited,
