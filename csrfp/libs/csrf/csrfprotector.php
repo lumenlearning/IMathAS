@@ -265,42 +265,42 @@ if (!defined('__CSRF_PROTECTOR__')) {
 
 			//#todo: ask mentors if $failedAuthAction is better as an int or string
 			//default case is case 0
-			switch (self::$config['failedAuthAction'][self::$requestType]) {
-				case 0:
-					//send 403 header
-					header('HTTP/1.0 403 Forbidden');
-					exit("<h2>403 Access Forbidden by CSRFProtector!</h2>");
-					break;
-				case 1:
-					//unset the query parameters and forward
-					if (self::$requestType === 'GET') {
-						$_GET = array();
-					} else {
-						$_POST = array();
-					}
-					break;
-				case 2:
-					//redirect to custom error page
-					$location  = self::$config['errorRedirectionPage'];
-					header("location: $location");
-				case 3:
-					//send custom error message
-					exit(self::$config['customErrorMessage']);
-					break;
-				case 4:
-					//send 500 header -- internal server error
-					header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
-					exit("<h2>500 Internal Server Error!</h2>");
-					break;
-				default:
-					//unset the query parameters and forward
-					if (self::$requestType === 'GET') {
-						$_GET = array();
-					} else {
-						$_POST = array();
-					}
-					break;
-			}		
+//			switch (self::$config['failedAuthAction'][self::$requestType]) {
+//				case 0:
+//					//send 403 header
+//					header('HTTP/1.0 403 Forbidden');
+//					exit("<h2>403 Access Forbidden by CSRFProtector!</h2>");
+//					break;
+//				case 1:
+//					//unset the query parameters and forward
+//					if (self::$requestType === 'GET') {
+//						$_GET = array();
+//					} else {
+//						$_POST = array();
+//					}
+//					break;
+//				case 2:
+//					//redirect to custom error page
+//					$location  = self::$config['errorRedirectionPage'];
+//					header("location: $location");
+//				case 3:
+//					//send custom error message
+//					exit(self::$config['customErrorMessage']);
+//					break;
+//				case 4:
+//					//send 500 header -- internal server error
+//					header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+//					exit("<h2>500 Internal Server Error!</h2>");
+//					break;
+//				default:
+//					//unset the query parameters and forward
+//					if (self::$requestType === 'GET') {
+//						$_GET = array();
+//					} else {
+//						$_POST = array();
+//					}
+//					break;
+//			}
 		}
 
 		/*
@@ -442,18 +442,22 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		protected static function logCSRFattack()
 		{
 			//if file doesnot exist for, create it
-			$logFile = fopen(__DIR__ ."/../" .self::$config['logDirectory']
-			."/" .date("m-20y") .".log", "a+");
+// Temporarily disabled (permissive mode!)
+//			$logFile = fopen(__DIR__ ."/../" .self::$config['logDirectory']
+//			."/" .date("m-20y") .".log", "a+");
 			
 			//throw exception if above fopen fails
-			if (!$logFile)
-				throw new logFileWriteError("OWASP CSRFProtector: Unable to write to the log file");	
+// Temporarily disabled (permissive mode!)
+//			if (!$logFile)
+//				throw new logFileWriteError("OWASP CSRFProtector: Unable to write to the log file");
 
 			//miniature version of the log
 			$log = array();
 			$log['timestamp'] = time();
 			$log['HOST'] = $_SERVER['HTTP_HOST'];
 			$log['REQUEST_URI'] = $_SERVER['REQUEST_URI'];
+			$log['REFERER'] = $_SERVER['HTTP_REFERER'];
+			$log['APACHE_HEADERS'] = $_SERVER;
 			$log['requestType'] = self::$requestType;
 
 			if (self::$requestType === "GET")
@@ -461,16 +465,26 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			else
 				$log['query'] = $_POST;
 
+			// Remove passwords
+			if (isset($log['query']['password'])) {
+				$log['query']['password'] = "l0Lz";
+			}
+
 			$log['cookie'] = $_COOKIE;
 
 			//convert log array to JSON format to be logged
 			$log = json_encode($log) .PHP_EOL;
 
+// Temporary debugging (permissive mode!)
+			error_log($log);
+
 			//append log to the file
-			fwrite($logFile, $log);
+// Temporarily disabled (permissive mode!)
+//			fwrite($logFile, $log);
 
 			//close the file handler
-			fclose($logFile);
+// Temporarily disabled (permissive mode!)
+//			fclose($logFile);
 		}
 
 		/*
