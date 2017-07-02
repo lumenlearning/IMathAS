@@ -55,6 +55,20 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
             ':rights'=>40, ':email'=>$data[4], ':groupid'=>$_POST['groupid'], ':homelayout'=>$homelayout));
 
     $newuserid = $DBH->lastInsertId();
+
+    //enroll as stu if needed
+		if (isset($CFG['GEN']['enrollonnewinstructor'])) {
+			$valbits = array();
+			$valvals = array();
+			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
+				$valbits[] = "(?,?)";
+				array_push($valvals, $newuserid,$ncid);
+			}
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm->execute($valvals);
+		}
+
+    //copy courses
     $i = 5;
     while (isset($data[$i]) && $data[$i]!='' && intval($data[$i])>0) {
       echo "Copying course {$data[$i]}<br/>";
@@ -186,7 +200,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
     }
   }
 
-  echo "<p>Done. <a href=\"$imasroot/admin/admin.php\">Admin page</a></p>";
+  echo '<p>Done. <a href="../admin/admin.php">Admin page</a></p>';
 } else {
   require("../header.php");
   $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/admin/admin.php\">Admin</a>\n";
@@ -197,7 +211,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
   echo '<p>Column Format:</p><ul>';
   echo '<li>1) username</li><li>2) password</li><li>3) First Name</li>';
   echo '<li>4) Last Name</li><li>5) email</li>';
-  echo '<li>Columns 6 on can be course IDs to create copies of for that instructor</li></ul>';
+  echo '<li>Columns 6,7,etc. can be course IDs to create copies of for that instructor</li></ul>';
   echo '<p>Group: <select name="groupid"><option value="-1">Select...</option>';
 	$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -226,7 +240,7 @@ function fopen_utf8 ($filename, $mode) {
     $file = @fopen($filename, $mode);
     $bom = fread($file, 3);
     if ($bom != b"\xEF\xBB\xBF") {
-        rewind($file, 0);
+        rewind($file);
     }
     return $file;
 }

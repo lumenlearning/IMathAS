@@ -777,6 +777,7 @@ echo "</p>";
 					echo '</ul></span>';
 				}
 				echo "</span>\n";
+
 				if ($line['isanon']==1) {
 					$name = "Anonymous";
 				} else {
