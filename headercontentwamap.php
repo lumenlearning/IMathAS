@@ -61,7 +61,9 @@ echo '</div>'; //headercontent
 		echo "<li><a href=\"$imasroot/help.php?section=usingimas\">Help</a></li>";
 	}
 	*/
-	echo "<li><a href=\"$imasroot/actions.php?action=logout\">Log Out</a></li>";
+	if ($myrights>0) {
+		echo "<li><a href=\"$imasroot/actions.php?action=logout\">Log Out</a></li>";
+	}
       ?>
   </ul>
 </div>

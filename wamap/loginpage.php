@@ -4,10 +4,11 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	exit;
 }
 //any extra CSS, javascript, etc needed for login page
-	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css\" type=\"text/css\" />\n";
+	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/wamap/infopages.css?v=063017\" type=\"text/css\" />\n";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 	$nologo = true;
-	$flexwidth = true;
+	//$flexwidth = true;
+	$isloginpage = true;
 	require(dirname(__FILE__) ."/../header.php");
 	if (!empty($_SERVER['QUERY_STRING'])) {
 		 $querys = '?'.$_SERVER['QUERY_STRING'];
@@ -15,7 +16,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 		 $querys = '';
 	 }
 	 $loginFormAction = $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::encodeStringForDisplay($querys);
-	 
+
 	 if (!empty($_SESSION['challenge'])) {
 		 $challenge = $_SESSION['challenge'];
 	 } else {
@@ -62,15 +63,15 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 <input type="hidden" id="tzoffset" name="tzoffset" value="">
 <input type="hidden" id="tzname" name="tzname" value="">
 <input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
-<script type="text/javascript">     
+<script type="text/javascript">
 $(function() {
-        var thedate = new Date();  
+        var thedate = new Date();
         document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
-        var tz = jstz.determine(); 
+        var tz = jstz.determine();
         document.getElementById("tzname").value = tz.name();
         $("#username").focus();
 });
-</script> 
+</script>
 
 </form>
 </div>
@@ -90,7 +91,7 @@ numerical or algebraic expression answers.
 <p>If you are new to WAMAP, use the links above to find information about using WAMAP in the classroom, or to access diagnostic assessments.</p>
 <br class="clear" />
 <p class="textright">WAMAP is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2017 David Lippman<br/>
-<a href="<?php echo $imasroot;?>/wamap/privacy.php">Privacy</a> | 
+<a href="<?php echo $imasroot;?>/wamap/privacy.php">Privacy</a> |
 <a href="https://docs.google.com/document/d/1vS2LLJSsoW6v9qa3P_ru5dv9NfmNDJGijZtBJp_eGEM/edit?usp=sharing">Accessibility</a> |
 <a href="/wamap/info/credits.php">Credits</a></p>
 </div>
