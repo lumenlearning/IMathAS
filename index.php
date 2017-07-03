@@ -404,7 +404,7 @@ if (!isset($CFG['GEN']['homelinkbox'])) {
 	if ($msgtotal>0) {
 		echo ' <a href="msgs/newmsglist.php?cid=0" class="noticetext">', sprintf(_('New (%d)'), $msgtotal), '</a>';
 	}
-	if ($myrights > 9) {
+	if ($myrights > 9 && !isset($CFG['GEN']['hideindexhelp'])) {
 		echo " | <a href=\"help.php?section=usingimas\">", _('Help'), "</a>\n";
 	}
 	if ($myrights >=75) {
