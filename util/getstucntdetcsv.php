@@ -139,7 +139,7 @@
 			$instrstucnt = 0;
 			$grpinstrcnt++;
 		}
-		if ($row[0] != $lastgroup) {
+		if ($row['gname'] != $lastgroup) {
 			if ($lastgroup != '') {
 				foreach ($grpdata as $d) {
 					$d[] = $lastgroup;
