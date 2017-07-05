@@ -393,7 +393,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$stm = $DBH->prepare("UPDATE arithmetic SET files=:files WHERE id=:id");
 		$stm->execute(array(':files'=>$files, ':id'=>$_GET['modify']));
-		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/arithmetic.php");
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/wamap/projects/arithmetic.php");
 		exit;
 	} else {
 		//adding / modifying a task form
@@ -423,18 +423,18 @@ if (isset($_GET['modify']) && !$ispublic) {
 		$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 		require("../../header.php");
 		echo '<div class="breadcrumb"><a href="arithmetic.php">Task List</a> &gt; Add/Modify Task</div>';
-		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"arithmetic.php?modify={$_GET['modify']}\" onsubmit=\"return validateForm(this);\">\n";
+		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"arithmetic.php?modify=" . Sanitize::encodeStringForDisplay($_GET['modify']) . "\" onsubmit=\"return validateForm(this);\">\n";
 		foreach ($questions as $key=>$arr) {
 			echo '<p>';
 			echo $arr['short'].' <i>'.$arr['long'].'</i><br/>';
 			if ($arr['type']=='input') {
-				echo '<input type="text" name="'.$key.'" size="'.$arr['c'].'" value="'.$line[$key].'" ';
+				echo '<input type="text" name="' . Sanitize::encodeStringForDisplay($key) . '" size="' . Sanitize::encodeStringForDisplay($arr['c']) . '" value="' . Sanitize::encodeStringForDisplay($line[$key]) . '" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 				echo '/>';
 			} else if ($arr['type']=='textarea') {
 				echo '<textarea name="'.$key.'" rows="'.$arr['r'].'" cols="'.$arr['c'].'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
-				echo '>'.$line[$key].'</textarea>';
+				echo '>' . Sanitize::encodeStringForDisplay($line[$key]) . '</textarea>';
 			} else if ($arr['type']=='radio') {
 				foreach ($arr['arr'] as $k=>$v) {
 					echo '<input type="radio" name="'.$key.'" value="'.$k.'" ';
@@ -442,7 +442,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.$line[$arr['other']].'" />';
+						echo ', please specify: <input type="text" name="' . Sanitize::encodeStringForDisplay($arr['other']) . '" value="' . Sanitize::encodeStringForDisplay($line[$arr['other']]) . '" />';
 					}
 					echo '<br/>';
 				}
@@ -469,7 +469,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					if (in_array($k,$line[$key])) {echo 'checked="checked"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.$line[$arr['other']].'" />';
+						echo ', please specify: <input type="text" name="' . Sanitize::encodeStringForDisplay($arr['other']) . '" value="' . Sanitize::encodeStringForDisplay($line[$arr['other']]) . '" />';
 					}
 					echo '<br/>';
 				}
@@ -506,7 +506,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					if (!$firstgroup) { echo '</optgroup>';}
 					echo '</select> ';
 				}
-				echo '<br/>Other: <input type="text" name="'.$key.'-other" value="'.$line[$key][2].'" size="40"/>';
+				echo '<br/>Other: <input type="text" name="' . Sanitize::encodeStringForDisplay($key) . '-other" value="' . Sanitize::encodeStringForDisplay($line[$key][2]) . '" size="40" />';
 				echo '<br/>';
 			}
 			echo '</p>';
@@ -519,9 +519,9 @@ if (isset($_GET['modify']) && !$ispublic) {
 			for ($i=0;$i<count($files)/2;$i++) {
 				echo '<input type="text" name="filedesc['.$i.']" value="'.$files[2*$i].'" size="40"/> ';
 				if ($files[2*$i+1][0]!='#') {
-					echo '<a href="'.getuserfileurl('arithmetic/'.$_GET['modify'].'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
+					echo '<a href="' . getuserfileurl('arithmetic/' . Sanitize::encodeStringForDisplay($_GET['modify']) . '/' . $files[2*$i+1]) . '" target="_blank">View</a> ';
 				} else {
-					echo '<a href="'.substr($files[2*$i+1],1).'" target="_blank">Open Web Link</a> ';
+					echo '<a href="' . substr($files[2*$i+1],1) . '" target="_blank">Open Web Link</a> ';
 				}
 				echo 'Delete? <input type="checkbox" name="filedel['.$i.']" value="1"/><br/>';
 			}
@@ -613,7 +613,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		$stm = $DBH->prepare("DELETE FROM arithmetic WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['remove']));
 	}
-	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/arithmetic.php");
+	header('Location: ' . $GLOBALS['basesiteurl'] . "/wamap/projects/arithmetic.php");
 	exit;
 } else if (isset($_GET['saverating']) && isset($_POST['rating']) && !$ispublic) {
 	$_POST['comments'] = preg_replace("/\n\n\n+/","\n\n",$_POST['comments']);
@@ -641,7 +641,8 @@ if (isset($_GET['modify']) && !$ispublic) {
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':userid'=>$userid, ':taskid'=>$_POST['taskid']));
 	}
-	echo getratingsfor($_POST['taskid']);
+
+    echo getratingsfor(Sanitize::onlyInt($_POST['taskid']));
 
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
@@ -652,7 +653,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="arithmetic.php'.($ispublic?'?public=true':'').'">Task List</a> &gt; View Task</div>';
 	echo '<div id="ratingholder">';
-	echo getratingsfor($_GET['id']);
+	echo getratingsfor(Sanitize::onlyInt($_GET['id']));
 	echo '</div>';
 
 	//DB $query = "SELECT arithmetic.*,iu.LastName,iu.FirstName FROM arithmetic JOIN imas_users AS iu ON arithmetic.ownerid=iu.id WHERE arithmetic.id='{$_GET['id']}'";
@@ -666,7 +667,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		if ((trim($line[$key])=='' || $line[$key]=='N') && !isset($arr['showalways'])) { continue;}
 		echo '<tr><td class="r">'.$arr['short'].'</td><td>';
 		if ($arr['type']=='input' || $arr['type']=='textarea') {
-			echo $line[$key];
+			echo Sanitize::encodeStringForDisplay($line[$key]);
 		} else if ($arr['type']=='radio' || $arr['type']=='select') {
 			echo $arr['arr'][$line[$key]];
 		} else if ($arr['type']=='checkbox') {
@@ -694,7 +695,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 			echo implode('; ',$out);
 		}
 		if (($arr['type']=='radio' || $arr['type']=='checkbox') && isset($arr['other']) && $line[$arr['other']]!='') {
-			echo ': '.$line[$arr['other']];
+			echo ': ' . Sanitize::encodeStringForDisplay($line[$arr['other']]);
 		}
 		echo '</td></tr>';
 	}
@@ -712,7 +713,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 			} else {
 				$url = substr($fl[2*$i+1],1);
 			}
-			echo '<a href="'.$url.'" target="_blank">';
+			echo '<a href="' . Sanitize::fullUrl($url) . '" target="_blank">';
 
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
@@ -731,7 +732,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		echo '</td></tr>';
 	}
 
-	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.$line['FirstName'].' '.$line['LastName'].'</td></tr>';
+	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by ' . Sanitize::encodeStringForDisplay($line['FirstName']) . ' ' . Sanitize::encodeStringForDisplay($line['LastName']) . '</td></tr>';
 	echo '<tr><td class="r">Last Updated</td><td>'.date("F j, Y, g:i a", $line['lastmod']).'</td></tr>';
 	echo '</tbody></table>';
 	echo '</body></html>';
@@ -852,7 +853,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 		if ($i%2==0) { echo 'class="even"';} else {echo 'class="odd"';}
 		echo '>';
 		$i++;
-		echo '<td><a href="arithmetic.php?id='.$line['id'].($ispublic?'&amp;public=true':'').'">'.$line['title'].'</a></td>';
+		echo '<td><a href="arithmetic.php?id=' . Sanitize::onlyInt($line['id']) . ($ispublic ? '&amp;public=true' : '') . '">' . Sanitize::encodeStringForDisplay($line['title']) . '</a></td>';
 
 		echo '<td>'.$line['topic'].'</td>';
 		if ($line['ratingcnt']>0) {
@@ -874,8 +875,8 @@ if (isset($_GET['modify']) && !$ispublic) {
 		}
 		echo '</td><td>';
 		if ($line['ownerid']==$userid || $myrights==100 || $userid==745) {
-			echo '<span style="font-size: 70%" class="nowrap"><a href="arithmetic.php?modify='.$line['id'].'">Modify</a> | ';
-			echo '<a href="arithmetic.php?remove='.$line['id'].'" onclick="return confirm(\'Are you SURE you want to delete this item?\');">Remove</a></span>';
+			echo '<span style="font-size: 70%" class="nowrap"><a href="arithmetic.php?modify=' . Sanitize::onlyInt($line['id']) . '">Modify</a> | ';
+			echo '<a href="arithmetic.php?remove=' . Sanitize::onlyInt($line['id']) . '" onclick="return confirm(\'Are you SURE you want to delete this item?\');">Remove</a></span>';
 		}
 		echo '</td>';
 		echo '</tr>';

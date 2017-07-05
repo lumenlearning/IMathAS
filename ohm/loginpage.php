@@ -4,20 +4,23 @@
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 
-$nologo = true;
-require(__DIR__ . "/../header.php");
-if (isset($_SERVER['QUERY_STRING'])) {
-	$querys = '?'.$_SERVER['QUERY_STRING'];
-} else {
-	$querys = '';
-}
-if (!empty($_SESSION['challenge'])) {
-	$challenge = $_SESSION['challenge'];
-} else {
-	//use of microtime guarantees no challenge used twice
-	$challenge = base64_encode(microtime() . rand(0,9999));
-	$_SESSION['challenge'] = $challenge;
-}
+	$nologo = true;
+	require(__DIR__ . "/../header.php");
+	if (!empty($_SERVER['QUERY_STRING'])) {
+		 $querys = '?'.Sanitize::fullQueryString($_SERVER['QUERY_STRING']);
+	 } else {
+		 $querys = '';
+	 }
+	 $loginFormAction = $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys;
+	 
+	 if (!empty($_SESSION['challenge'])) {
+		 $challenge = $_SESSION['challenge'];
+	 } else {
+		 //use of microtime guarantees no challenge used twice
+		 $challenge = base64_encode(microtime() . rand(0,9999));
+		 $_SESSION['challenge'] = $challenge;
+	 }
+
 ?>
 
 <div class="login-wrapper">
