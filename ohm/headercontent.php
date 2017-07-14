@@ -25,7 +25,9 @@
 			if (isset($userid)) {
 				if ($myrights > 5) {
 					$usernameinheader = true;
-					echo "<span id=\"myname\" class=\"header-menu-item\">$userfullname<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
+					echo "<span id=\"myname\" class=\"header-menu-item\">" .
+                        Sanitize::encodeStringForDisplay($userfullname)
+                        . "<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
 					// User avatar logic
 					// if (1 == $selfhasuserimg && isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
 					// 	$curdir = rtrim(dirname(__FILE__), '/\\');
