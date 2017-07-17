@@ -83,13 +83,13 @@ ul {
 		}
 		if ($row[0] != $lastgroup) {
 			if ($lastgroup != '') {
-				echo "<p><b>$lastgroup</b>: $grpcnt students, $grpinstrcnt instructors";
+				echo "<p><b>" . Sanitize::encodeStringForDisplay($lastgroup) . "</b>: " . Sanitize::encodeStringForDisplay($grpcnt) . " students, " . Sanitize::encodeStringForDisplay($grpinstrcnt) . " instructors";
 				echo '<ul>'.$grpdata.'</ul></p>';
 			}
 			$grpcnt = 0;  $grpdata = ''; $grpinstrcnt = 0;
 			$lastgroup = $row[0];
 		}
-		$userdata .= "<li>".Sanitize::encodeStringForDisplay($row[4]).' ('.$row[3].'): <b>'.$row[5].'</b>';
+		$userdata .= "<li>".Sanitize::encodeStringForDisplay($row[4]).' ('.Sanitize::encodeStringForDisplay($row[3]).'): <b>'.Sanitize::encodeStringForDisplay($row[5]).'</b>';
 		if (!in_array($row[3],$seencid)) {
 			$grpcnt += $row[5];
 			$seencid[] = $row[3];
@@ -102,7 +102,7 @@ ul {
 	$grpdata .= $userdata;
 	$grpdata .= '</ul></li>';
 	$grpinstrcnt++;
-	echo "<p><b>$lastgroup</b>: $grpcnt students, $grpinstrcnt instructors";
+	echo "<p><b>" . Sanitize::encodeStringForDisplay($lastgroup) . "</b>: " . Sanitize::encodeStringForDisplay($grpcnt) . " students, " . Sanitize::encodeStringForDisplay($grpinstrcnt) . " instructors";
 	echo '<ul>'.$grpdata.'</ul></p>';
 	
 ?>

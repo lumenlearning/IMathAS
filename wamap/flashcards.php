@@ -38,7 +38,7 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
  <body>
  <h2>Quick Drill Link Generator</h2>
  <table border=0>
- <tr><td>Question to use:</td><td><select id="qid"><?php echo $optionlist;?></select></td></tr>
+ <tr><td>Question to use:</td><td><select id="qid"><?php echo Sanitize::encodeStringForDisplay($optionlist); ?></select></td></tr>
  <tr><td>Show answer option:</td><td><select id="sa">
  	<option value="0">Show score - reshow question with answer if wrong</option>
 	<option value="1">Show score - don't reshow question w answer if wrong</option>

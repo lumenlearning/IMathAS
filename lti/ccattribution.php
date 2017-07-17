@@ -35,14 +35,14 @@ if (isset($_GET['getxml'])) {
   <lticm:property name="tool_id">editor_button</lticm:property>
   <lticm:property name="privacy_level">public</lticm:property>
   <lticm:options name="editor_button">
-    <lticm:property name="url"><?php echo $urlmode.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];?></lticm:property>
-    <lticm:property name="icon_url"><?php echo $urlmode.$_SERVER['HTTP_HOST'].str_replace('.php','.png',$_SERVER['PHP_SELF']);?></lticm:property>
+    <lticm:property name="url"><?php echo $GLOBALS['basesiteurl'] . '/lti/ccattribution.php'; ?></lticm:property>
+    <lticm:property name="icon_url"><?php echo Sanitize::fullUrl($urlmode . $_SERVER['HTTP_HOST'] . str_replace('.php', '.png', $_SERVER['PHP_SELF']));?></lticm:property>
     <lticm:property name="text">CC License Generator</lticm:property>
     <lticm:property name="selection_width">700</lticm:property>
     <lticm:property name="selection_height">450</lticm:property>
   </lticm:options>
 </blti:extensions>
-<blti:icon><?php echo $urlmode.$_SERVER['HTTP_HOST'].str_replace('.php','.png',$_SERVER['PHP_SELF']);?></blti:icon>
+<blti:icon><?php echo Sanitize::fullUrl($urlmode . $_SERVER['HTTP_HOST'] . str_replace('.php', '.png', $_SERVER['PHP_SELF'])); ?></blti:icon>
 
       <cartridge_bundle identifierref="BLTI001_Bundle"/>
       <cartridge_icon identifierref="BLTI001_Icon"/>
@@ -285,8 +285,8 @@ if (isset($_POST['license'])) {
 		$stm->execute(array(':data'=>$html, ':tool'=>$tool, ':key'=>$key));
 	}
 
-	$returnurl = $_POST['returnurl'];
-	$url = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+	$returnurl = Sanitize::fullUrl($_POST['returnurl']);
+	$url = $GLOBALS['basesiteurl'];
 
 	//save data
 	if ($courseid!=0 && $userid!=0) {
@@ -773,7 +773,7 @@ function additem(el) {
 Page License: <select class="req" id="license" name="license">
 <?php
 	foreach ($licenses as $key=>$val) {
-		echo "<option value=\"$key\">$val</option>";
+		echo "<option value=\"" . Sanitize::encodeStringForDisplay($key) . "\">" . Sanitize::encodeStringForDisplay($val) . "</option>";
 	}
 ?>
 </select><br/>
@@ -791,10 +791,10 @@ Page License: <select class="req" id="license" name="license">
 <option value="pdspec">Public Domain, specific item</option>
 </select></p>
 
-<input type="hidden" name="returnurl" value="<?php echo $returnurl;?>"/>
-<input type="hidden" name="custom_canvas_course_id" value="<?php echo $courseid;?>"/>
-<input type="hidden" name="custom_canvas_user_id" value="<?php echo $userid;?>"/>
-<input type="hidden" name="oauth_consumer_key" value="<?php echo $consumerkey;?>"/>
+<input type="hidden" name="returnurl" value="<?php echo Sanitize::encodeStringForDisplay($returnurl); ?>"/>
+<input type="hidden" name="custom_canvas_course_id" value="<?php echo Sanitize::encodeStringForDisplay($courseid); ?>"/>
+<input type="hidden" name="custom_canvas_user_id" value="<?php echo Sanitize::encodeStringForDisplay($userid); ?>"/>
+<input type="hidden" name="oauth_consumer_key" value="<?php echo Sanitize::encodeStringForDisplay($consumerkey); ?>"/>
 <?php if (isset($_POST['custom_no_image'])) {
 	echo '<input type="hidden" name="noccimage" value="1"/>';
 }?>

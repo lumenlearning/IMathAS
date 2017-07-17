@@ -186,7 +186,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
     }
   }
 
-  echo '<p>Done. <a href="../admin/admin.php">Admin page</a></p>';
+  echo "<p>Done. <a href=\"$imasroot/admin/admin.php\">Admin page</a></p>";
 } else {
   require("../header.php");
   $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/admin/admin.php\">Admin</a>\n";
