@@ -287,7 +287,7 @@
 					$newalt = $_POST['imgalt-'.$row[0]];
 					$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
 					if (in_array($newvar,$disallowedvar)) {
-						$errmsg .= "<p>$newvar is not an allowed variable name</p>";
+						$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
 					} else {
 						//DB $query = "UPDATE imas_qimages SET var='$newvar',alttext='$newalt' WHERE id='{$row[0]}'";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
@@ -384,7 +384,7 @@
 			if (trim($_POST['newimgvar'])=='') {
 				$errmsg .= "<p>Need to specify variable for image to be referenced by</p>";
 			} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
-				$errmsg .= "<p>$newvar is not an allowed variable name</p>";
+				$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
 			} else {
 				$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/';
 				//$filename = basename($_FILES['imgfile']['name']);
@@ -526,7 +526,7 @@
 			$outputmsg .=  "<a href=\"addquestions.php?cid=$cid&aid=".Sanitize::onlyInt($_GET['aid'])."\">Return to Assessment</a>\n";
 		}
 		if ($_POST['test']=="Save and Test Question") {
-			$outputmsg .= "<script>addr = '$imasroot/course/testquestion.php?cid=$cid&qsetid={$_GET['id']}';";
+			$outputmsg .= "<script>addr = '$imasroot/course/testquestion.php?cid=$cid&qsetid=".Sanitize::encodeUrlParam($_GET['id'])."';";
 			//echo "function previewit() {";
 			$outputmsg .= "previewpop = window.open(addr,'Testing','width='+(.4*screen.width)+',height='+(.8*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(.6*screen.width-20));\n";
 			$outputmsg .= "previewpop.focus();";
@@ -806,10 +806,10 @@
 	// Build form action
 	$formAction = "moddataset.php?process=true"
 		. (isset($_GET['cid']) ? "&cid=$cid" : "")
-		. (isset($_GET['aid']) ? "&aid={$_GET['aid']}" : "")
-		. ((isset($_GET['id']) && !isset($_GET['template'])) ? "&id={$_GET['id']}" : "")
-		. (isset($_GET['template']) ? "&templateid={$_GET['id']}" : "")
-		. (isset($_GET['makelocal']) ? "&makelocal={$_GET['makelocal']}" : "")
+		. (isset($_GET['aid']) ? "&aid=".Sanitize::encodeUrlParam($_GET['aid']) : "")
+		. ((isset($_GET['id']) && !isset($_GET['template'])) ? "&id=".Sanitize::encodeUrlParam($_GET['id']) : "")
+		. (isset($_GET['template']) ? "&templateid=".Sanitize::encodeUrlParam($_GET['id']) : "")
+		. (isset($_GET['makelocal']) ? "&makelocal=".Sanitize::encodeUrlParam($_GET['makelocal']) : "")
 		. ($frompot==1 ? "&frompot=1" : "");
 
 	// If in quick-save mode, build return packet and exit here
@@ -1012,7 +1012,7 @@
 
 	} else if (isset($_GET['daid'])) {
 		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-		echo "&gt; <a href=\"adddrillassess.php?daid={$_GET['daid']}&cid=$cid\">Add Drill Assessment</a> &gt; Modify Questions</div>";
+		echo "&gt; <a href=\"adddrillassess.php?daid=".Sanitize::encodeUrlParam($_GET['daid'])."&cid=$cid\">Add Drill Assessment</a> &gt; Modify Questions</div>";
 	} else {
 		if ($_GET['cid']=="admin") {
 			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../admin/admin2.php\">Admin</a>";
@@ -1060,7 +1060,7 @@
 		echo "<p>This question is not set to allow you to modify the code.  You can only view the code and make additional library assignments</p>";
 	}
 ?>
-<form enctype="multipart/form-data" method=post action="<?php echo Sanitize::encodeStringForDisplay($formAction); ?>">
+<form enctype="multipart/form-data" method=post action="<?php echo $formAction; ?>">
 <input type="hidden" name="hasimg" value="<?php echo Sanitize::encodeStringForDisplay($line['hasimg']);?>"/>
 <p>
 Description:<BR>
@@ -1404,7 +1404,7 @@ if (FormData){ // Only allow quicksave if FormData object exists
 		});
 	}
 	quickSaveQuestion.url = "<?php echo $formAction;?>&quick=1";
-	quickSaveQuestion.testAddr = '<?php echo "$imasroot/course/testquestion.php?cid=$cid&qsetid={$_GET['id']}"; ?>';
+	quickSaveQuestion.testAddr = '<?php echo "$imasroot/course/testquestion.php?cid=$cid&qsetid=".Sanitize::encodeUrlParam($_GET['id']); ?>';
 	// Method to handle errors...
 	quickSaveQuestion.errorFunc = function(){
 		$(".quickSaveNotice").html("Error with Quick Save: try again, or use the \"Save\" option.");
