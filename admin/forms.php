@@ -897,7 +897,8 @@ switch($_GET['action']) {
 			} else {
 				echo "<td>{$row[1]}</td>";
 			}
-			echo "<td><a href=\"forms.php?action=modgroup&id={$row[0]}\">Modify</a></td>\n";
+			printf("<td><a href=\"forms.php?action=modgroup&id=%s\">Modify</a></td>\n",
+				Sanitize::encodeUrlParam($row[0]));
 			if ($row[0]==0) {
 				echo "<td></td>";
 			} else {

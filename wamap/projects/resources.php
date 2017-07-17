@@ -140,7 +140,7 @@ $questions = array(
 		'type'=>'input',
 		'c'=>80
 		)
-	
+
 	);
 
 
@@ -298,7 +298,7 @@ if (isset($_GET['modify'])) {
 			echo '<p>';
 			echo $arr['short'].' <i>'.$arr['long'].'</i><br/>';
 			if ($arr['type']=='input') {
-				echo '<input type="text" name="'.$key.'" size="'.$arr['c'].'" value="'.Sanitize::isFilenameBlacklisted($line[$key]).'" ';
+				echo '<input type="text" name="'.Sanitize::encodeStringForDisplay($key).'" size="'.Sanitize::encodeStringForDisplay($arr['c']).'" value="'.Sanitize::encodeStringForDisplay($line[$key]).'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 				echo '/>';
 			} else if ($arr['type']=='textarea') {
@@ -312,7 +312,7 @@ if (isset($_GET['modify'])) {
 					if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
+						echo ', please specify: <input type="text" name="'.Sanitize::encodeStringForDisplay($arr['other']).'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
 					}
 					echo '<br/>';
 				}
@@ -339,7 +339,7 @@ if (isset($_GET['modify'])) {
 					if (in_array($k,$line[$key])) {echo 'checked="checked"';}
 					echo '/> '.Sanitize::encodeStringForDisplay($v);
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
+						echo ', please specify: <input type="text" name="'.Sanitize::encodeStringForDisplay($arr['other']).'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
 					}
 					echo '<br/>';
 				}
@@ -369,7 +369,7 @@ if (isset($_GET['modify'])) {
 					}
 					echo '</select> ';
 				}
-				echo '<br/>Other: <input type="text" name="'.$key.'-other" value="'.Sanitize::encodeStringForDisplay($line[$key][2]).'" size="40"/>';
+				echo '<br/>Other: <input type="text" name="'.Sanitize::encodeStringForDisplay($key).'-other" value="'.Sanitize::encodeStringForDisplay($line[$key][2]).'" size="40"/>';
 				echo '<br/>';
 			}
 			echo '</p>';
@@ -516,7 +516,7 @@ if (isset($_GET['modify'])) {
 			} else {
 				$url = substr($fl[2*$i+1],1);
 			}
-			echo '<a href="'.$url.'" target="_blank">';
+			echo '<a href="'.Sanitize::encodeStringForDisplay($url).'" target="_blank">';
 
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
@@ -690,7 +690,7 @@ function getratingsfor($id) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
 		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],$line['rateon']);
-		$totrat += $line['rating'];
+		$totrat += Sanitize::onlyInt($line['rating']);
 		$i++;
 	}
 
