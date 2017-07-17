@@ -100,7 +100,7 @@ $(sagecell.init(
 </head>
 
 <body>
-<div id="sagecell1"><script type="text/code"><?php echo $code;?>
+<div id="sagecell1"><script type="text/code"><?php //Disabled until this page is functional. :) // echo $code;?>
 </script></div>
 <p>This web page provides a gateway to the <a href="http://www.sagemath.org/">Sage</a> computer algebra system.
 See <a href="http://www.sagemath.org/eval.html#Calculus/Basics/Differential">some examples</a> of what it can do, or

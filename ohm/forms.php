@@ -436,7 +436,7 @@ switch($_GET['action']) {
 			}
 			echo '</p>';
 		}
-		echo '<input type="hidden" name="allcourses" value="'.implode(',',$allcourses).'"/>';
+		echo '<input type="hidden" name="allcourses" value="'.Sanitize::encodeStringForDisplay(implode(',',$allcourses)).'"/>';
 		echo '<input type="submit" value="Save Changes"/>';
 		echo '</form>';
 		break;
@@ -476,7 +476,7 @@ switch($_GET['action']) {
 		echo "<p><a href=forms.php?action=googlegadget&regen=true$gb>Generate a new Access code<a/><br/>";
 		echo "<p><a href=../actions.php?action=googlegadget&clear=true$gb>Clear Access code</a></p>";
 		echo "<p>Note: This access code only allows Google to access a list of new posts and messages, and does not provide access to grades or any other data stored at $installname.  Be aware that this form of access is insecure and could be intercepted by a third party.</p>";
-		echo "<p>You can also bookmark <a href=\"getpostlist.php?key=$code\">this page</a> to be able to access your post list without needing to log in.</p>";
+		echo "<p>You can also bookmark <a href=\"getpostlist.php?key=".Sanitize::encodeUrlParam($code)."\">this page</a> to be able to access your post list without needing to log in.</p>";
 		break;
 }
 	require("../footer.php");
