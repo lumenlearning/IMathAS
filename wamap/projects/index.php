@@ -388,7 +388,7 @@ if (isset($_GET['modify'])) {
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$stm = $DBH->prepare("UPDATE projects SET files=:files WHERE id=:id");
 		$stm->execute(array(':files'=>$files, ':id'=>$_GET['modify']));
-		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
+		header('Location: ' . Sanitize::fullUrl($GLOBALS['basesiteurl'] . "/wamap/projects/index.php"));
 		exit;
 	} else {
 		//adding / modifying a task form
@@ -418,18 +418,18 @@ if (isset($_GET['modify'])) {
 		$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 		require("../../header.php");
 		echo '<div class="breadcrumb"><a href="index.php">Task List</a> &gt; Add/Modify Task</div>';
-		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"index.php?modify={$_GET['modify']}\" onsubmit=\"return validateForm(this);\">\n";
+		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"index.php?modify=" . Sanitize::encodeUrlParam($_GET['modify']) . "\" onsubmit=\"return validateForm(this);\">\n";
 		foreach ($questions as $key=>$arr) {
 			echo '<p>';
 			echo $arr['short'].' <i>'.$arr['long'].'</i><br/>';
 			if ($arr['type']=='input') {
-				echo '<input type="text" name="'.$key.'" size="'.$arr['c'].'" value="'.$line[$key].'" ';
+				echo '<input type="text" name="'.Sanitize::encodeStringForDisplay($key).'" size="'.Sanitize::encodeStringForDisplay($arr['c']).'" value="'.Sanitize::encodeStringForDisplay($line[$key]).'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 				echo '/>';
 			} else if ($arr['type']=='textarea') {
 				echo '<textarea name="'.$key.'" rows="'.$arr['r'].'" cols="'.$arr['c'].'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
-				echo '>'.$line[$key].'</textarea>';
+				echo '>'.Sanitize::encodeStringForDisplay($line[$key]).'</textarea>';
 			} else if ($arr['type']=='radio') {
 				foreach ($arr['arr'] as $k=>$v) {
 					echo '<input type="radio" name="'.$key.'" value="'.$k.'" ';
@@ -437,7 +437,7 @@ if (isset($_GET['modify'])) {
 					if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.$line[$arr['other']].'" />';
+						echo ', please specify: <input type="text" name="'.Sanitize::encodeStringForDisplay($arr['other']).'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
 					}
 					echo '<br/>';
 				}
@@ -464,7 +464,7 @@ if (isset($_GET['modify'])) {
 					if (in_array($k,$line[$key])) {echo 'checked="checked"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.$line[$arr['other']].'" />';
+						echo ', please specify: <input type="text" name="'.Sanitize::encodeStringForDisplay($arr['other']).'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
 					}
 					echo '<br/>';
 				}
@@ -494,7 +494,7 @@ if (isset($_GET['modify'])) {
 					}
 					echo '</select> ';
 				}
-				echo '<br/>Other: <input type="text" name="'.$key.'-other" value="'.$line[$key][2].'" size="40"/>';
+				echo '<br/>Other: <input type="text" name="'.Sanitize::encodeStringForDisplay($key).'-other" value="'.Sanitize::encodeStringForDisplay($line[$key][2]).'" size="40"/>';
 				echo '<br/>';
 			}
 			echo '</p>';
@@ -507,7 +507,7 @@ if (isset($_GET['modify'])) {
 			for ($i=0;$i<count($files)/2;$i++) {
 				echo '<input type="text" name="filedesc['.$i.']" value="'.$files[2*$i].'" size="40"/> ';
 				if ($files[2*$i+1][0]!='#') {
-					echo '<a href="'.getuserfileurl('projects/'.$_GET['modify'].'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
+					echo '<a href="'.getuserfileurl('projects/'.Sanitize::encodeStringForDisplay($_GET['modify']).'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
 				} else {
 					echo '<a href="'.substr($files[2*$i+1],1).'" target="_blank">Open Web Link</a> ';
 				}
@@ -542,7 +542,7 @@ if (isset($_GET['modify'])) {
 		$stm = $DBH->prepare("DELETE FROM projects WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['remove']));
 	}
-	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
+	header('Location: ' . Sanitize::fullUrl($GLOBALS['basesiteurl'] . "/wamap/projects/index.php"));
 	exit;
 } else if (isset($_GET['saverating']) && isset($_POST['rating'])) {
 	$_POST['comments'] = preg_replace("/\n\n\n+/","\n\n",$_POST['comments']);
@@ -570,7 +570,7 @@ if (isset($_GET['modify'])) {
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':userid'=>$userid, ':taskid'=>$_POST['taskid']));
 	}
-	echo getratingsfor($_POST['taskid']);
+	echo getratingsfor(Sanitize::onlyInt($_POST['taskid']));
 
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
@@ -581,7 +581,7 @@ if (isset($_GET['modify'])) {
 	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="index.php">Task List</a> &gt; View Task</div>';
 	echo '<div id="ratingholder">';
-	echo getratingsfor($_GET['id']);
+	echo getratingsfor(Sanitize::onlyInt($_GET['id']));
 	echo '</div>';
 
 	//DB $query = "SELECT projects.*,iu.LastName,iu.FirstName FROM projects JOIN imas_users AS iu ON projects.ownerid=iu.id WHERE projects.id='{$_GET['id']}'";
@@ -595,7 +595,7 @@ if (isset($_GET['modify'])) {
 		if ((trim($line[$key])=='' || $line[$key]=='N') && !isset($arr['showalways'])) { continue;}
 		echo '<tr><td class="r">'.$arr['short'].'</td><td>';
 		if ($arr['type']=='input' || $arr['type']=='textarea') {
-			echo $line[$key];
+			echo Sanitize::encodeStringForDisplay($line[$key]);
 		} else if ($arr['type']=='radio' || $arr['type']=='select') {
 			echo $arr['arr'][$line[$key]];
 		} else if ($arr['type']=='checkbox') {
@@ -614,16 +614,16 @@ if (isset($_GET['modify'])) {
 			$out = array();
 			for ($c=0;$c<2;$c++) {
 				if ($line[$key][$c] != '') {
-					$out[] = $arr['arr'][$line[$key][$c]];
+					$out[] = Sanitize::encodeStringForDisplay($arr['arr'][$line[$key][$c]]);
 				}
 			}
 			if ($line[$key][2]!='') {
-				$out[] = $line[$key][2];
+				$out[] = Sanitize::encodeStringForDisplay($line[$key][2]);
 			}
 			echo implode('; ',$out);
 		}
 		if (($arr['type']=='radio' || $arr['type']=='checkbox') && isset($arr['other']) && $line[$arr['other']]!='') {
-			echo ': '.$line[$arr['other']];
+			echo ': '.Sanitize::encodeStringForDisplay($line[$arr['other']]);
 		}
 		echo '</td></tr>';
 	}
@@ -641,7 +641,7 @@ if (isset($_GET['modify'])) {
 			} else {
 				$url = substr($fl[2*$i+1],1);
 			}
-			echo '<a href="'.$url.'" target="_blank">';
+			echo '<a href="'.urlencode($url).'" target="_blank">';
 
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
@@ -660,7 +660,7 @@ if (isset($_GET['modify'])) {
 		echo '</td></tr>';
 	}
 
-	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.$line['FirstName'].' '.$line['LastName'].'</td></tr>';
+	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.Sanitize::encodeStringForDisplay($line['FirstName']).' '.Sanitize::encodeStringForDisplay($line['LastName']).'</td></tr>';
 	echo '<tr><td class="r">Last Updated</td><td>'.date("F j, Y, g:i a", $line['lastmod']).'</td></tr>';
 	echo '</tbody></table>';
 	echo '</body></html>';
@@ -774,7 +774,7 @@ if (isset($_GET['modify'])) {
 		if ($i%2==0) { echo 'class="even"';} else {echo 'class="odd"';}
 		echo '>';
 		$i++;
-		echo '<td><a href="index.php?id='.$line['id'].'">'.$line['title'].'</a></td>';
+		echo '<td><a href="index.php?id='.Sanitize::onlyInt($line['id']).'">'.Sanitize::encodeStringForDisplay($line['title']).'</a></td>';
 
 		echo '<td>'.$line['topic'].'</td>';
 		if ($line['ratingcnt']>0) {
@@ -796,8 +796,8 @@ if (isset($_GET['modify'])) {
 		}
 		echo '</td><td>';
 		if ($line['ownerid']==$userid || $myrights==100 || $userid==745) {
-			echo '<span style="font-size: 70%" class="nowrap"><a href="index.php?modify='.$line['id'].'">Modify</a> | ';
-			echo '<a href="index.php?remove='.$line['id'].'" onclick="return confirm(\'Are you SURE you want to delete this item?\');">Remove</a></span>';
+			echo '<span style="font-size: 70%" class="nowrap"><a href="index.php?modify='.Sanitize::onlyInt($line['id']).'">Modify</a> | ';
+			echo '<a href="index.php?remove='.Sanitize::onlyInt($line['id']).'" onclick="return confirm(\'Are you SURE you want to delete this item?\');">Remove</a></span>';
 		}
 		echo '</td>';
 		echo '</tr>';
