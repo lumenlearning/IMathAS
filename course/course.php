@@ -575,7 +575,7 @@ if ($overwriteBody==1) {
 			}
 			if (($toolset&2)==0) {
 				echo '<a href="'.$imasroot.'/forums/forums.php?cid='.$cid.'&amp;folder=' . Sanitize::encodeUrlParam($_GET['folder']) . '" class="essen">';
-				echo _('Forums').'</a> '.$newpostscnt.'<br/>';
+				echo _('Forums').'</a> ' . $newpostscnt . '<br/>';
 			}
 		if (($toolset&1)==0) {
 			echo '<a href="showcalendar.php?cid='.$cid.'" class="essen">'._('Calendar').'</a><br/>';
