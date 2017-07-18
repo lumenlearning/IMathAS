@@ -70,11 +70,12 @@ if (isset($_GET['go'])) {
 			$message .= '<p>David Lippman<br/>dlippman@pierce.ctc.edu<br/>Instructor, Math @ Pierce College and WAMAP administrator</p>';
 		}
 		if($installname == "Lumen OHM"){
-					$message .= '<p>Welcome to Lumen OHM.  Your account has been activated, and you\'re all set to log in at <a href="https://ohm.lumenlearning.com/">ohm.lumenlearning.com</a> as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-					$message .= '<p>We\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
-					$message .= '<p>We\'ve also signed you up for the OHM Training Course.  This course has video tutorials and assignments that will walk you through learning how to use OHM in your classes.</p>';
-					$message .= '<p>Lumen Support <br/>support@lumenlearning.com<br/>Lumen OHM administrator</p>';
-		}
+			$message .= '<p>Welcome to Lumen OHM.  Your account has been activated, and you\'re all set to log in at <a href="https://ohm.lumenlearning.com/">ohm.lumenlearning.com</a> as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
+			$message .= '<p>We have added the OHM Training Course and OHM Support Course to your account to help you get started exploring and creating courses.</p>';
+			$message .= '<p>The OHM Training Course is a great way to learn how to use OHM to create and deliver your course. There you will find video tutorials and assignments that walk you through learning how to use OHM in your classes.</p>';
+			$message .= '<p>The Support Course has forums in which you can ask the OHM community questions, report problems, or find out about new system improvements.  Lumen OHM customer may also submit help requests through https://lumenlearning.zendesk.com/hc/en-us/requests/new for additional assistance.</p>';
+			$message .= '<p>Thank you,<br/>Lumen OHM administrator</p>';
+			}
 		if (isset($CFG['GEN']['useSESmail'])) {
 			SESmail($row[2], $accountapproval, $installname . ' Account Approval', $message);
 		} else {
