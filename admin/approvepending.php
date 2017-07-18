@@ -249,7 +249,8 @@ function sanitizeNewInstructorRequestLog($logtext) {
 	}
 	if (!empty($verificationUrl)) {
 		if (!empty($sanitizedLogText)) $sanitizedLogText .= "<br/>";
-		$sanitizedLogText .= "VerificationURL: " . Sanitize::encodeStringForDisplay($verificationUrl);
+		//$verificationUrl is html so dont sanitize 
+		$sanitizedLogText .= "VerificationURL: " . $verificationUrl;
 	}
 	if (!empty($phone)) {
 		if (!empty($sanitizedLogText)) $sanitizedLogText .= "<br/>";
