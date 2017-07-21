@@ -923,7 +923,7 @@ switch($_GET['action']) {
 		
 		echo "<form method=post action=\"actions.php?from=$from&id=".Sanitize::encodeUrlParam($_GET['id'])."\">\n";
 		echo '<input type=hidden name=action value="modgroup" />';
-		echo "Group name: <input type=text size=50 name=gpname id=gpname value=\"$gpname\"><br/>\n";
+		echo "Group name: <input type=text size=50 name=gpname id=gpname value=\"".Sanitize::encodeStringForDisplay($gpname)."\"><br/>\n";
 		echo 'Parent: <select name="parentid"><option value="0" ';
 		if ($parent==0) { echo ' selected="selected"';}
 		echo '>None</option>';
@@ -934,7 +934,7 @@ switch($_GET['action']) {
 		while ($r = $stm->fetch(PDO::FETCH_NUM)) {
 			echo '<option value="'.$r[0].'"';
 			if ($r[0]==$parent) { echo ' selected="selected"';}
-			echo '>'.$r[1].'</option>';
+			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
 		echo '</select><br/>';
 		echo '<input type="checkbox" id="iscust" name="iscust" ';

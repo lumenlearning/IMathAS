@@ -166,24 +166,24 @@
 				$forumcontent[$line['forumid']] = '';
 			}
 			$course = $forumcourse[$line['forumid']];
-			$url = $imasroot."/forums/posts.php?page=-2&amp;cid=$course&amp;forum={$line['forumid']}&amp;thread={$line['threadid']}";
+			$url = $imasroot."/forums/posts.php?page=-2&amp;cid=$course&amp;forum=" . Sanitize::onlyInt($line['forumid']) . "&amp;thread=" . Sanitize::onlyInt($line['threadid']);
 			/*$forumcontent[$line['forumid']] .= "<div style='font-size:100%;'>";
 			$forumcontent[$line['forumid']] .= "<a style='color: blue;' href='$url' target='_new'>{$line['subject']}</a>";
 			$forumcontent[$line['forumid']] .= " <span style='color: black;'>".Sanitize::encodeStringForDisplay("{$line['LastName']}, {$line['FirstName']}")."</span>";
 			$forumcontent[$line['forumid']] .= " <span style='color: gray;'>".Sanitize::encodeStringForDisplay($lastpost[$line['threadid']])."</span></div>";
 			*/
-			$forumcontent[$line['forumid']] .= "<tr><td><a style='color: blue;' href='$url' target='_new'>{$line['subject']}</a></td>";
+			$forumcontent[$line['forumid']] .= "<tr><td><a style='color: blue;' href='$url' target='_new'>" . Sanitize::encodeStringForDisplay($line['subject']) . "</a></td>";
 			$forumcontent[$line['forumid']] .= "<td><span style='color: black;'>".Sanitize::encodeStringForDisplay("{$line['LastName']}, {$line['FirstName']}")."</span><br/>";
 			$forumcontent[$line['forumid']] .= "<span style='color: gray;'>".Sanitize::encodeStringForDisplay($lastpost[$line['threadid']])."</span></td></tr>";
 		}
 
 		echo "<div style='font-size:100%; font-weight: 700; background-color: #ccf; margin-below:5px;'>New Posts</div>";
 		foreach($coursenames as $id=>$name) {
-			echo "<div style='font-size:100%; color: #606; font-weight: 700; '>$name</div>";
+			echo "<div style='font-size:100%; color: #606; font-weight: 700; '>" . Sanitize::encodeStringForDisplay($name) . "</div>";
 			echo "<div style='margin-left: 5px;'>";
 			asort($courseforums[$id]);
 			foreach($courseforums[$id] as $fid) {
-				echo "<div style='font-size:100%; color: green;'>{$forumname[$fid]}</div>";
+				echo "<div style='font-size:100%; color: green;'>" . Sanitize::encodeStringForDisplay($forumname[$fid]) . "</div>";
 				echo "<table border=0>";
 				echo $forumcontent[$fid];
 				echo '</table></div>';
@@ -229,9 +229,9 @@
 		} else if ($n>1) {
 			$line['title'] = "Re<sup>$n</sup>: ".$line['title'];
 		}
-		$url = "/msgs/viewmsg.php?cid=0&amp;type=msg&amp;msgid=".$line['id'];
+		$url = "/msgs/viewmsg.php?cid=0&amp;type=msg&amp;msgid=" . Sanitize::onlyInt($line['id']);
 		echo "<tr><td>";
-		echo "<a style='color: blue;' href='$url' target='_new'>".$line['title']."</a></td>";
+		echo "<a style='color: blue;' href='$url' target='_new'>" . Sanitize::encodeStringForDisplay($line['title']) . "</a></td>";
 		echo "<td><span style='color: black;'>".Sanitize::encodeStringForDisplay("{$line['LastName']}, {$line['FirstName']}")."</span><br/>";
 		echo "<span style='color: gray;'>".Sanitize::encodeStringForDisplay(formatdate($line['senddate']))."</span></td></tr>";
 	}
