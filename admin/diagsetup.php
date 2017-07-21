@@ -13,13 +13,39 @@ $overwriteBody = 0;
 $body = "";
 $pagetitle = "Diagnostic Setup";
 
-$curBreadcrumb = "<div class=breadcrumb>$breadcrumbbase <a href=\"$imasroot/admin/admin.php\">Admin</a> &gt; Diagnostic Setup</div>\n";
+$curBreadcrumb = "<div class=breadcrumb>$breadcrumbbase ";
+if (!empty($_GET['from'])) {
+	$from = Sanitize::simpleString($_GET['from']);
+	if ($from=='home') {
+		$backtrack = "$imasroot/index.php";
+	} else if ($from=='ld') {
+		$curBreadcrumb .= '<a href="admin2.php">'._('Admin').'</a> &gt; ';
+		$curBreadcrumb .= '<a href="listdiag.php">'._('Diagnostics').'</a> &gt; ';
+		$backtrack = 'listdiag.php';
+	} else if (substr($from,0,3)=='ldu') {
+		$uid = Sanitize::onlyInt(substr($from,3));
+		$curBreadcrumb .= '<a href="admin2.php">'._('Admin').'</a> &gt; ';
+		$curBreadcrumb .= '<a href="userdetails.php?id='.$uid.'">'._('User Details').'</a> &gt; ';
+		$curBreadcrumb .= '<a href="listdiag.php?show=u'.$uid.'">'._('Diagnostics').'</a> &gt; ';
+		$backtrack = 'listdiag.php?show=u'.$uid;
+	} else if (substr($from,0,3)=='ldg') {
+		$gid = Sanitize::onlyInt(substr($from,3));
+		$curBreadcrumb .= '<a href="admin2.php">'._('Admin').'</a> &gt; ';
+		$curBreadcrumb .= '<a href="admin2.php?groupdetails='.$gid.'">'._('Group Details').'</a> &gt; ';
+		$curBreadcrumb .= '<a href="listdiag.php?show=g'.$gid.'">'._('Diagnostics').'</a> &gt; ';
+		$backtrack = 'listdiag.php?show=g'.$gid;
+	}
+} else {
+	$curBreadcrumb .= "<a href=\"$imasroot/admin/admin.php\">Admin</a> &gt;";
+	$backtrack = 'admin.php';
+}
+$curBreadcrumb .= _("Diagnostic Setup").'</div>';
 
 	// SECURITY CHECK DATA PROCESSING
 if ($myrights<100 && ($myspecialrights&4)!=4) {
 	$overwriteBody = 1;
 	$body = "You don't have authority to access this page.";
-} elseif (isset($_GET['step']) && $_GET['step']==2) {  // STEP 2 DATA PROCESSING
+} elseif (isset($_GET['step']) && $_GET['step']==2 && isset($_POST['termtype'])) {  // STEP 2 DATA PROCESSING
 
 	$sel1 = array();
 	$ips = array();
@@ -107,7 +133,7 @@ if ($myrights<100 && ($myspecialrights&4)!=4) {
 	$page_cntScript = (isset($sel2[$s1]) && count($sel2[$s1])>0) ? "<script> cnt['out$k'] = ".count($sel2[$s1]).";</script>\n"  : "<script> cnt['out$k'] = 0;</script>\n";
 
 
-} elseif (isset($_GET['step']) && $_GET['step']==3) {  //STEP 3 DATA PROCESSING
+} elseif (isset($_GET['step']) && $_GET['step']==3 && isset($_POST['sel1list'])) {  //STEP 3 DATA PROCESSING
 	$sel1 = explode(',',$_POST['sel1list']);
 	$aids = array();
 	$forceregen = 0;
@@ -291,7 +317,7 @@ if ($overwriteBody==1) { //NO AUTHORITY
 ?>
 		<div id="headerdiagsetup" class="pagetitle"><h2>Diagnostic Setup</h2></div>
 		<h4>Second-level Selector - extra information</h4>
-		<form method=post action="diagsetup.php?step=3">
+		<form method=post action="diagsetup.php?step=3&amp;from=<?php echo $from;?>">
 
 			<input type=hidden name="sel1list" value="<?php echo Sanitize::encodeStringForDisplay($sel1list); ?>"/>
 			<input type=hidden name="iplist" value="<?php echo Sanitize::encodeStringForDisplay($iplist); ?>"/>
@@ -367,18 +393,18 @@ if ($overwriteBody==1) { //NO AUTHORITY
 		}
 
 		echo '<input type=submit value="Continue">';
-		echo '<form>';
+		echo '</form>';
 
 	} elseif (isset($_GET['step']) && $_GET['step']==3) {  //STEP 3 DISPLAY
 		echo $page_successMsg;
 		echo $page_diagLink;
 		echo $page_publicLink;
-		echo "<a href=\"$imasroot/admin/admin.php\">Return to Admin Page</a>\n";
+		echo "<a href=\"$backtrack\">"._('Done')."</a>\n";
 	} else {
 	 //STEP 1 DISPLAY
 ?>
 <div id="headerdiagsetup" class="pagetitle"><h2>Diagnostic Setup</h2></div>
-<form method=post action=diagsetup.php?step=2>
+<form method=post action=diagsetup.php?step=2&amp;from=<?php echo $from; ?>>
 
 <?php echo (isset($_GET['id'])) ? "	<input type=hidden name=id value=\"".Sanitize::encodeUrlParam($_GET['id'])."\"/>" : ""; ?>
 

@@ -605,7 +605,11 @@ if ($overwriteBody==1) {
 		<div id="centercontent">
 <?php
 	}
-   makeTopMenu();	
+
+if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migration_notice.php");}
+
+   makeTopMenu();
+
    echo "<div id=\"headercourse\" class=\"pagetitle\"><h2>".Sanitize::encodeStringForDisplay($curname)."</h2></div>\n";
    
    if (count($items)>0) {
