@@ -162,7 +162,7 @@
 				'cid' => $cid,
 				'asid' => 'new',
 				'uid' => $line['userid'],
-				'from' => 'gisolate'
+				'from' => 'gisolate',
 				'aid' => $aid
 			);
 
@@ -173,22 +173,22 @@
                 'cid' => $cid,
                 'asid' => $line['id'],
                 'uid' => $line['userid'],
-                'from' => 'gisolate'
+                'from' => 'gisolate',
 				'aid' => $aid
 			);
 
             echo '<td><a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . '">-</a></td><td>-</td><td></td>';
 			//if ($total<$minscore) {
 			if (($minscore<10000 && $total<$minscore) || ($minscore>10000 && $total<($minscore-10000)/100*$totalpossible)) {
-				echo Sanitize::onlyInt($total) . "&nbsp;(NC)";
+				echo Sanitize::onlyFloat($total) . "&nbsp;(NC)";
 			} else 	if ($IP==1 && $enddate>$now) {
-				echo Sanitize::onlyInt($total) . "&nbsp;(IP)";
+				echo Sanitize::onlyFloat($total) . "&nbsp;(IP)";
 			} else	if (($timelimit>0) &&($timeused > $timelimit*$line['timelimitmult'])) {
-				echo Sanitize::onlyInt($total) . "&nbsp;(OT)";
+				echo Sanitize::onlyFloat($total) . "&nbsp;(OT)";
 			} else if ($assessmenttype=="Practice") {
-				echo Sanitize::onlyInt($total) . "&nbsp;(PT)";
+				echo Sanitize::onlyFloat($total) . "&nbsp;(PT)";
 			} else {
-				echo Sanitize::onlyInt($total);
+				echo Sanitize::onlyFloat($total);
 				$tot += $total;
 				$n++;
 			}

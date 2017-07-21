@@ -270,9 +270,9 @@
 
 			echo '<td><a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . '">';
 			if ($thisenddate>$now) {
-				echo '<i>'.Sanitize::onlyInt($total);
+				echo '<i>'.Sanitize::onlyFloat($total);
 			} else {
-				echo Sanitize::onlyInt($total);
+				echo Sanitize::onlyFloat($total);
 			}
 			//if ($total<$minscore) {
 			if (($minscore<10000 && $total<$minscore) || ($minscore>10000 && $total<($minscore-10000)/100*$totalpossible)) {

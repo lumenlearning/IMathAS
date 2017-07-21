@@ -885,7 +885,7 @@ function gbstudisp($stu) {
 		}
 
 	}
-	echo "<form method=\"post\" id=\"qform\" action=\"gradebook.php?".Sanitize::encodeStringForDisplay($_SERVER['QUERY_STRING'])."&uid=" . Sanitize::onlyInt($stu) . "\">";
+	echo "<form method=\"post\" id=\"qform\" action=\"gradebook.php?".Sanitize::fullQueryString($_SERVER['QUERY_STRING'])."&uid=" . Sanitize::onlyInt($stu) . "\">";
 	//echo "<input type='button' onclick='conditionalColor(\"myTable\",1,50,80);' value='Color'/>";
 	if ($isteacher && $stu>0) {
 		echo '<button type="submit" value="Save Changes" style="display:none"; id="savechgbtn">', _('Save Changes'), '</button> ';
@@ -1004,7 +1004,7 @@ function gbstudisp($stu) {
                                 'uid' => $gbt[1][4][0]
                             );
 
-							echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap);
+							echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\"";
 
 							if ($afterduelatepass) {
 								echo ' onclick="return confirm(\''._('If you view this assignment, you will not be able to use a LatePass on it').'\');"';
@@ -1015,11 +1015,12 @@ function gbstudisp($stu) {
                             $querymap = array(
                                 'stu' => $stu,
                                 'cid' => $cid,
-                                'aid' => $gbt[1][1][$i][7],
-                                'uid' => $gbt[1][4][0]
+                                'aid' => $gbt[0][1][$i][7],
+                                'uid' => $gbt[1][4][0],
+                                'asid' => 'new'
                             );
 
-                            echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap);
+                            echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
 							$haslink = true;
 						}
 					}
@@ -1034,7 +1035,7 @@ function gbstudisp($stu) {
                                     'gbitem' => $gbt[0][1][$i][7]
                                 );
 
-                                echo '<a href="addgrades.php?' . Sanitize::generateQueryStringFromMap($querymap);
+                                echo '<a href="addgrades.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
 								$haslink = true;
 							}
 						} else {
@@ -1045,7 +1046,7 @@ function gbstudisp($stu) {
                                 'gbitem' => $gbt[0][1][$i][7]
                             );
 
-                            echo '<a href="addgrades.php?' . Sanitize::generateQueryStringFromMap($querymap);
+                            echo '<a href="addgrades.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
 							$haslink = true;
 						}
 					}
@@ -1058,7 +1059,7 @@ function gbstudisp($stu) {
                             'fid' => $gbt[0][1][$i][7]
                         );
 
-                        echo '<a href="viewforumgrade.php?' . Sanitize::generateQueryStringFromMap($querymap);
+                        echo '<a href="viewforumgrade.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
 						$haslink = true;
 					}
 				} else if ($gbt[0][1][$i][6]==3) {//exttool
@@ -1070,7 +1071,7 @@ function gbstudisp($stu) {
                             'lid' => $gbt[0][1][$i][7]
                         );
 
-					    echo '<a href="edittoolscores.php?' . Sanitize::generateQueryStringFromMap($querymap);
+					    echo '<a href="edittoolscores.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
 						$haslink = true;
 					}
 				}

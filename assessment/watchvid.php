@@ -1,4 +1,6 @@
 <?php
+require_once(__DIR__ . '/../includes/sanitize.php');
+
 $url = $_GET['url'];
 $doembed = false;
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
@@ -64,7 +66,8 @@ if (strpos($url,'vimeo.com/')!==false) {
 	//youtube
 	$vidid = substr($url,strpos($url,'.com/')+5);
 	$doembed = true;
-	$out = '<iframe width="640" height="510" src="http://player.vimeo.com/video/'.Sanitize::encodeUrlParam($vidid).'" frameborder="0" allowfullscreen></iframe>';
+	$videoUrl = 'http://player.vimeo.com/video/'.$vidid;
+	$out = '<iframe width="640" height="510" src="'.Sanitize::fullUrl($videoUrl).'" frameborder="0" allowfullscreen></iframe>';
 }
 if ($doembed) {
 	echo '<html><head><title>Video</title>';

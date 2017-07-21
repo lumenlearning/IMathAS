@@ -64,8 +64,8 @@
 				$headers .= "From: $installname <$sendfrom>\r\n";
 				$subject = "New Instructor Account Request";
 				// trim() removes newlines, which prevents SMTP command injection.
-				$message = sprintf("Name: %s %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['firstname'],
-					Sanitize::encodeStringForDisplay($_POST['lastname'])));
+				$message = sprintf("Name: %s %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['firstname']),
+					Sanitize::encodeStringForDisplay($_POST['lastname']));
 				$message .= sprintf("Email: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['email']));
 				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
 				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));

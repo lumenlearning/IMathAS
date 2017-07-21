@@ -29,7 +29,7 @@
 
 	$cid = Sanitize::courseId($_GET['cid']);
 	$page = Sanitize::onlyInt($_GET['page']);
-	$type = Sanitize::encodeStringForDisplay($_GET['type']);
+	$type = $_GET['type'];
 
 	$teacherof = array();
 	//DB $query = "SELECT courseid FROM imas_teachers WHERE userid='$userid'";
@@ -143,7 +143,7 @@
 	}
 	if (isset($teacherof[$line['courseid']])) {
 		echo " <a href=\"mailto:".Sanitize::emailAddress($line['email'])."\">email</a> | ";
-		echo " <a href=\"$imasroot/course/gradebook.php?cid=". Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeStringForDisplay($line['msgfrom'])."\" target=\"_popoutgradebook\">gradebook</a>";
+		echo " <a href=\"$imasroot/course/gradebook.php?cid=". Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeUrlParam($line['msgfrom'])."\" target=\"_popoutgradebook\">gradebook</a>";
 		if (preg_match('/Question\s+about\s+#(\d+)\s+in\s+(.*)\s*$/',$line['title'],$matches)) {
 			//DB $aname = addslashes($matches[2]);
 			$qn = $matches[1];
@@ -184,7 +184,7 @@
 				$stm->execute(array(':assessmentid'=>$adata['id'], ':userid'=>$line['msgfrom']));
 				if ($stm->rowCount()>0) {
 					$asid = $stm->fetchColumn(0);
-					echo " | <a href=\"$imasroot/course/gb-viewasid.php?cid=".Sanitize::courseId($line['courseid'])."&uid=".Sanitize::encodeStringForDisplay($line['msgfrom'])."&asid=".Sanitize::onlyInt($asid)."#qwrap".Sanitize::encodeStringForDisplay($qn)."\" target=\"_popoutgradebook\">assignment</a>";
+					echo " | <a href=\"$imasroot/course/gb-viewasid.php?cid=".Sanitize::courseId($line['courseid'])."&uid=".Sanitize::encodeUrlParam($line['msgfrom'])."&asid=".Sanitize::onlyInt($asid)."#qwrap".Sanitize::encodeUrlParam($qn)."\" target=\"_popoutgradebook\">assignment</a>";
 					if ($due<2000000000) {
 						echo ' <span class="small">Due '.Sanitize::encodeStringForDisplay($duedate).'</span>';
 					}
@@ -240,18 +240,18 @@
 			$cansendmsgs = true;
 		}
 		if ($cansendmsgs) {
-			echo "<button type=\"button\" onclick=\"window.location.href='msglist.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeStringForDisplay($filtercid)."&page=".Sanitize::encodeStringForDisplay($page)."&type=".Sanitize::encodeStringForDisplay($type)."&add=new&to=". Sanitize::encodeStringForDisplay($line['msgfrom']) ."&toquote=". $msgid."'\">"._('Reply')."</button> | ";
+			echo "<button type=\"button\" onclick=\"window.location.href='msglist.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&type=".Sanitize::encodeUrlParam($type)."&add=new&to=". Sanitize::encodeUrlParam($line['msgfrom']) ."&toquote=". $msgid."'\">"._('Reply')."</button> | ";
 		}
 		echo "<button type=\"button\" onclick=\"if(confirm('"._('Are you SURE you want to delete this message?')."')){window.location.href='msglist.php?cid=$cid&filtercid=$filtercid&page=$page&removeid=$msgid&type=$type'}\">"._('Delete')."</button>";
-		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?markunread=true&cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeStringForDisplay($filtercid)."&page=".Sanitize::encodeStringForDisplay($page)."&msgid=".Sanitize::encodeStringForDisplay($msgid)."&type=".Sanitize::encodeStringForDisplay($type)."\">"._('Mark Unread')."</button>";
+		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?markunread=true&cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&msgid=".Sanitize::encodeUrlParam($msgid)."&type=".Sanitize::encodeUrlParam($type)."'\">"._('Mark Unread')."</button>";
 
-		echo " | <a href=\"msghistory.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeStringForDisplay($filtercid)."&page=".Sanitize::encodeStringForDisplay($page)."&msgid=".Sanitize::onlyInt($msgid)."&type=".Sanitize::encodeStringForDisplay($type)."\">View Conversation</a> ";
+		echo " | <a href=\"msghistory.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&msgid=".Sanitize::onlyInt($msgid)."&type=".Sanitize::encodeUrlParam($type)."\">View Conversation</a> ";
 		if ($isteacher && $line['courseid']==$cid) {
-			echo " | <a href=\"$imasroot/course/gradebook.php?cid=".Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeStringForDisplay($line['msgfrom'])."\">Gradebook</a>";
+			echo " | <a href=\"$imasroot/course/gradebook.php?cid=".Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeUrlParam($line['msgfrom'])."\">Gradebook</a>";
 		}
 
 	} else if ($type=='sent' && $type!='allstu') {
-		echo "<a href=\"msghistory.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeStringForDisplay($filtercid)."&page=".Sanitize::encodeStringForDisplay($page)."&msgid=".Sanitize::encodeStringForDisplay($msgid)."&type=".$type."\">View Conversation</a>";
+		echo "<a href=\"msghistory.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&msgid=".Sanitize::encodeUrlParam($msgid)."&type=".$type."\">View Conversation</a>";
 
 	}
 	if ($type!='sent' && $type!='allstu' && ($line['isread']==0 || $line['isread']==4)) {
