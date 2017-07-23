@@ -1,0 +1,587 @@
+/*General settings - fonts, overall page background, etc*/
+
+
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700);
+
+body {
+	background-color:#FFFFFF;
+	/*font-family: Verdana,Tahoma,Arial,Helvetica,sans-serif;*/
+	/*font-family:"Minion Pro","Times New Roman",Times,serif;*/
+	/*font-family:normal Helvetica,Arial,sans-serif;*/
+	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
+	font-size: 15px;
+	line-height: 1.4;
+	margin:0;
+	padding:0;
+}
+body.fw1000 {
+	background-color:#FCFAFF;
+	background-image:url(../img/simplebg.png);
+	background-position:center top;
+	background-repeat:repeat-y;
+}
+.fw1000 .midwrapper {
+	max-width: 970px;
+}
+
+html {
+	margin: 0;
+	padding: 0;
+}
+
+h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6 {
+  font-weight: 400;
+  line-height: 1.2;
+}
+.pagetitle h2 {
+	font-size: 2em;
+}
+/*
+h1, .h1 {
+  font-size: 2.2em;
+}
+
+h2,.h2 {
+  font-size: 2em;
+}
+
+h3,.h3 {
+  font-size: 1.5em;
+}
+
+h4,.h4 {
+  font-size: 1.3em;
+}
+*/
+ul ul,
+ol ul,
+ul ol,
+ol ol {
+  margin-bottom: 0;
+}
+
+/*Link styles*/
+a, a:link, a:visited {
+	text-decoration: none;
+	color: #009;
+}
+a:hover {
+	text-decoration: underline;
+}
+
+div.mainbody {
+	height:auto;
+	
+}
+
+
+/*Container for course items*/
+div.item {
+	/*border: 1px solid #000;*/
+	/*background-color: #ffffff;*/
+	clear: both;
+	border-bottom: 1px solid #ccc;
+}
+
+/*Container for editor*/
+div.editor {
+	border: 1px solid #000;
+}
+
+/*Default block container*/
+div.block, div.blockitems div.blockitems div.block {
+	clear: both;
+	border: 1px solid #C3CAC2;
+	background-color: #d4e1ef; /*#DBD2DB /*#D1DBD2; /*#ddf;*/
+}
+
+/*Default block item container*/
+div.blockitems, div.blockitems div.blockitems div.blockitems {
+	/*border: 1px solid #000;*/
+	border: 1px solid #C3CAC2;
+	border-top: 0px;
+	background-color: #f5f7f9; /*#EAF2E7;/*#eef;*/
+}
+
+/*Second level default block container*/
+div.blockitems div.block {
+	border: 1px solid #C3C2CA;
+	background-color: #bdd0e4;
+}
+
+/*Second level default block item container */
+div.blockitems div.blockitems {
+	border: 1px solid #C3C2CA;
+	background-color: #e8ebef;
+}
+
+/*toggles for instronly items inside item wrappers */
+div.item:hover span.instronly, div.block:hover span.instronly {
+	visibility: visible;
+}
+span.instronly {
+	visibility: hidden;
+}
+
+.instrdates, .instronly {
+	font-size: 80%;
+}
+div.block .instronly {
+	display: block;
+}
+
+/*Icons*/
+div.icon {
+	color:#00d;	
+	border: 1px solid #00f;
+	font-weight: bolder;
+}
+
+
+
+/*Control panels*/
+div.cp {
+	/*border: 1px solid #000;*/
+	background-color: #ddd;
+}
+div.cpmid {
+	/*border: 1px solid #000;*/
+	background-color: #ddd;
+}
+
+
+
+
+table thead th {
+	font-weight:bold;
+	cursor:pointer;
+}
+
+/*Tables */
+table.cal thead th, div.caldatebar {
+	background-color: #cee0f1; /*#E2E2E2;*/
+}
+span.day {
+	background-color: #FFF;
+}
+td.today {
+	background-color: #dceffb;	
+}
+span.calitem {
+	border: 1px solid #fff;
+}
+table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
+	border-bottom: 2px solid #7c9ab7;
+	background-color: #cee0f1; /*#bfd4e8 /*#E2E2E2;*/
+}
+tr.even {
+	background-color: #fff;	
+}
+tr.odd {
+	background-color: #e8eef5;
+}
+tr.bordered  td {
+	border-top: 1px solid #000;
+	border-bottom: 1px solid #000;
+}
+tr.highlight {
+	background-color: #bedcff; /*#ddf;*/
+}
+tr.grid td {
+	border: 1px solid #000;
+}
+tr.dbltop td {
+	border-top: 3px double #000;
+}
+table.gbl td.locked, table.gbl th.locked {
+	border-right: 2px solid #00f;
+}
+#newmsglist th, #newpostlist th {
+	background-color: inherit;
+}
+
+/*Category header colors*/
+table.gb .catdf {
+	background-color: #eef;
+}
+table.gb .cat0 {
+	background-color: #dff;
+}
+table.gb .cat1 {
+	background-color: #dfd;
+}
+table.gb .cat2 {
+	background-color: #fdd;
+}
+table.gb .cat3 {
+	background-color: #ddf;
+}
+table.gb .cat4 {
+	background-color: #ffd;
+}
+table.gb .cat5 {
+	background-color: #fdf;
+}
+table.gb .cat6 {
+	background-color: #aaf;
+}
+table.gb .cat7 {
+	background-color: #afa;
+}
+table.gb .cat8 {
+	background-color: #faa;
+}
+table.gb .cat9 {
+	background-color: #aff;
+}
+.cattothdr {
+	font-variant: small-caps
+}
+
+/*Fake look of links for Javascript onclicks*/
+span.link {
+	text-decoration: underline;
+	color: #00f;
+	cursor: pointer;
+}
+
+
+/*Containers for instructor leftbar, main content*/
+#leftcontent {
+		/*position: relative;
+		float: left;
+		left:-15px;*/
+		position: absolute;
+		left: 10px;
+		top: 4em;
+		/*border:1px solid #000;*/
+		background: #fff;
+		color:#000;
+		margin-top: 0px;
+		font-size: 90%;
+		width: 180px;
+		padding-top: 0px;
+}
+#leftcontent.treeleftcontent {
+	background-color: #eee;
+}
+#leftcontent b {
+	display: block;
+	background: #336699;
+	color: #fff;
+	padding: 2px 4px;
+	margin: -4px -6px -10px -6px;
+}
+#leftcontent p {
+	border: 1px solid #ccc;
+	padding-top: 0px;
+	margin-bottom: 5px;
+	padding: 4px 6px;
+}
+
+#centercontent {
+		margin-left:180px;
+		background:#ffffff;
+		margin-right: 0px;
+		padding-bottom: 5px;
+}
+#headerlogo {
+	right: 0px;
+	top: 0px;
+	width: 30px;
+}
+
+span.padright {
+	padding-right: 40px;
+}
+.headerwrapper {
+	background:#FFF;
+	border: 0px;	
+	margin: 0;
+	margin: 0px;
+	margin-bottom: 0px;
+	/*height: 94px;*/
+	border-bottom: 2px solid #440044;
+}
+.headerwrapper h1 {
+	margin: 0;
+	padding: 30px 20px 0px;
+	color:#AE131E;
+	font-weight: normal;
+}
+div#headercontent, div#navlistcont {
+	/*width: 1000px;
+	margin: auto;*/
+	
+}
+div#headercontent {
+	height: 70px;
+	padding: 0px 10px;
+}
+
+div#navlistcont {
+	/*height: 24px;*/
+}
+div#headerbarlogo {
+	/*background: transparent url(../img/otbslogo.gif) no-repeat scroll left bottom;*/
+	padding-top: 10px;
+	height: 50px;
+	overflow: hidden;
+}
+div#headerbarlogo img {
+	vertical-align: -60%;
+}
+div#headerrightlinks {
+	text-align: right;
+	float: right;
+	margin-top: 15px;
+	color: #666;
+}
+div#headermenu {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	display:none;
+	cursor: pointer;
+}
+ul#headermobilemenulist li a {
+	background-color: #369
+} 
+ul#headermobilemenulist li a:hover, ul#headermobilemenulist li a:focus {
+	background-color: #036;
+}
+#headermidlinks {
+	padding-left: 30px;
+}
+.footerwrapper {
+	height: 20px;
+	/*margin:auto;
+	width:1000px;*/
+}
+
+div.breadcrumb {
+	border: 0;
+	background: #369;
+	color: #fff;
+	margin-bottom: 5px;
+	margin-left: -15px;
+	margin-right: -15px;
+	padding: .25em;
+	padding-left: 10px;
+	min-height: 1.5em;
+}
+div#centercontent div.breadcrumb {
+	margin-left: -10px;
+}
+div.breadcrumb a {
+	color: #ddf;
+}
+	
+
+.midwrapper {
+	padding-left: 15px;
+	padding-right: 15px;
+	position: relative;
+	/*margin:auto;
+	width:970px;*/
+}
+
+div.ddmenu {
+	padding: 5px;
+	background: #F2F2F2;
+	border:1px solid #C3CAC2;
+	position: absolute;
+	right:auto;
+	text-align:left;
+	visibility:hidden;
+	margin: 0px;
+	z-index: 100;
+}
+div.ddmenu li {
+	padding-bottom: 2px;
+}
+div.ddmenu ul.nomark li {
+	margin-top: 0px;
+}
+div.ddmenu ul.nomark {
+	padding-left: 0px;
+	margin-left: 15px;
+}
+/*colors and borders for assessments*/
+/*seq question css*/
+div.curquestion {
+
+}
+div.inactive {
+
+}
+hr.seq {
+
+}
+div.seqqinfocur {
+
+}
+div.seqqinfocur span.current{
+
+}
+div.seqqinfoavail {
+
+}
+div.seqqinfoinactive {
+
+}
+div.todoquestion {
+	background-color: #ffffcc; 
+	border: 0px; 
+}
+/*all questions*/
+div.question {
+	background-color: #F7FCFF; 
+	border: 1px solid #C3D4DD;
+	line-height: 1.4em;
+	width: auto;
+	
+}
+div.inset {
+	margin-right: 0px;
+}
+div.review { /*info bar*/
+	margin-top: -6px;
+	background-color: #e9f0f6;
+	border: 1px solid #CAD7DF;
+	font-size:85%;
+	width: auto;
+}
+div.intro {
+	border: 0px;
+	border: 1px solid #CCCCCC;
+	background-color: #F8F8F8;/*#FAFFFD;*/
+	padding: 10px;
+}
+div.navbar {
+	position: relative;
+	float: left;
+	left: 0px;
+	background: #f0e9f0;
+	border: 1px solid #bbd;
+	color:#000;
+}
+div.navbar a {
+	color: blue;
+}
+div.navbar.fixedonscroll {
+	position: static;
+	left: 15px;
+}
+div.navbar ul.qlist li {
+	font-size: 12px;
+}
+div.navbar ul.qlist li a {
+	font-size: 14px;
+}
+span.current {
+	background-color: #E0FF92;
+}
+span.done {
+	text-decoration: line-through;
+}
+
+ul#navlist {
+	background-color: #660066;
+	
+}
+ul#navlist li a {
+	padding: 2px 8px;
+	line-height: 20px;
+	background-color: #660066;
+}
+ul#navlist li a:hover {
+	background-color: #440044;
+}
+div#navlistwrapper {
+	margin:auto;
+	width:1000px;
+}
+div.additembox span {
+	background-color: #ddd;
+}
+div#viewbuttoncont {
+	float: right;
+	background: #fff;
+}
+div#viewbuttoncont a {
+	color: #fff;
+	display: inline-block;	
+	padding: 3px 5px;
+	margin-left: 2px;
+}
+div#viewbuttoncont a:hover {
+	text-decoration: none;
+}
+div#viewbuttoncont a.buttonactive {
+	background-color: #369;
+	cursor: default;
+}
+div#viewbuttoncont a.buttoninactive {
+	background-color: #69a;
+}
+div#viewbuttoncont a.buttoninactive:hover {
+	background-color: #036;
+}
+a.newnote, a.newnote:link, a.newnote:visited {
+	color: #f00;
+}
+
+button, a.button, input[type=button], input[type=submit] {
+	padding: 2px 8px;
+	height: auto;
+}
+
+	
+
+@media only screen and (max-width: 700px) {
+	div#headerrightlinks {
+		display: none;
+	}
+	#headermidlinks {
+		display: none;
+	}
+	div#headermenu {
+		display: block;
+	}
+	div#headerbarlogo { 
+		padding-top:5px;
+		height:35px;
+	}
+	div#headercontent {
+		height: 45px;
+	}
+	div#headerbarlogo img {
+		height: 35px;
+	}	
+}
+@media only screen and (max-width: 700px) {
+	#headerhome h2{
+		font-size: medium;
+	}
+}
+
+@media only screen and (max-width: 700px) {
+	#navlist {
+		display: none;
+	}
+	#navlist.menuexpanded, ul#headermobilemenulist.menuexpanded {
+		display: block;
+	}
+	ul#navlist li {
+		display: list-item;
+	}
+	ul#navlist li a{
+		display: block;
+		float: none;
+		border-right: none;
+		padding: .3em 1em;
+		line-height: 1.3em;
+		border-bottom: 1px solid #fff;
+	}
+}
