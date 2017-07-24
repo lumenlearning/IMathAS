@@ -240,18 +240,40 @@
 			$cansendmsgs = true;
 		}
 		if ($cansendmsgs) {
-			echo "<button type=\"button\" onclick=\"window.location.href='msglist.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&type=".Sanitize::encodeUrlParam($type)."&add=new&to=". Sanitize::encodeUrlParam($line['msgfrom']) ."&toquote=". $msgid."'\">"._('Reply')."</button> | ";
+			echo "<button type=\"button\" onclick=\"window.location.href='msglist.php?"
+				. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid,
+					'page' => $page, 'type' => $type, 'add' => 'new', 'to' => $line['msgfrom'], 'toquote' => $msgid))
+				. "'\">"._('Reply')."</button> | ";
 		}
-		echo "<button type=\"button\" onclick=\"if(confirm('"._('Are you SURE you want to delete this message?')."')){window.location.href='msglist.php?cid=$cid&filtercid=$filtercid&page=$page&removeid=$msgid&type=$type'}\">"._('Delete')."</button>";
-		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?markunread=true&cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&msgid=".Sanitize::encodeUrlParam($msgid)."&type=".Sanitize::encodeUrlParam($type)."'\">"._('Mark Unread')."</button>";
+		echo "<button type=\"button\" onclick=\"if(confirm('"._('Are you SURE you want to delete this message?')."')){window.location.href='msglist.php?"
+			. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid, 'page' => $page,
+				'removeid' => $msgid, 'type' => $type))
+			. "'}\">"._('Delete')."</button>";
+		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?"
+			. Sanitize::generateQueryStringFromMap(array('markunread' => 'true', 'cid' => $cid,
+				'filtercid' => $filtercid, 'page' => $page, 'msgid' => $msgid, 'type' => $type))
+			. "'\">"._('Mark Unread')."</button>";
 
-		echo " | <a href=\"msghistory.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&msgid=".Sanitize::onlyInt($msgid)."&type=".Sanitize::encodeUrlParam($type)."\">View Conversation</a> ";
+		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?"
+			. Sanitize::generateQueryStringFromMap(array('markunread' => 'true', 'cid' => $cid,
+				'filtercid' => $filtercid, 'page' => $page, 'msgid' => $msgid, 'type' => $type))
+			. "'\">"._('Mark Unread')."</button>";
+
+		echo " | <a href=\"msghistory.php?"
+			. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid, 'page' => $page,
+				'msgid' => $msgid, 'type' => $type))
+			."\">View Conversation</a> ";
 		if ($isteacher && $line['courseid']==$cid) {
-			echo " | <a href=\"$imasroot/course/gradebook.php?cid=".Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeUrlParam($line['msgfrom'])."\">Gradebook</a>";
+			echo " | <a href=\"$imasroot/course/gradebook.php?"
+				. Sanitize::generateQueryStringFromMap(array('cid' => $line['courseid'], 'stu' => $line['msgfrom']))
+			."\">Gradebook</a>";
 		}
 
 	} else if ($type=='sent' && $type!='allstu') {
-		echo "<a href=\"msghistory.php?cid=".Sanitize::courseId($cid)."&filtercid=".Sanitize::encodeUrlParam($filtercid)."&page=".Sanitize::encodeUrlParam($page)."&msgid=".Sanitize::encodeUrlParam($msgid)."&type=".$type."\">View Conversation</a>";
+		echo "<a href=\"msghistory.php?"
+			. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid, 'page' => $page,
+				'msgid' => $msgid, 'type' => $type))
+			."\">View Conversation</a>";
 
 	}
 	if ($type!='sent' && $type!='allstu' && ($line['isread']==0 || $line['isread']==4)) {

@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__ . '/../../../includes/sanitize.php');
+
 /**
  * @file CAS/client.php
  * Main class of the phpCAS library
@@ -1491,7 +1493,7 @@ class CASClient
 		$pgt_iou = $_GET['pgtIou'];
 		$pgt = $_GET['pgtId'];
 		phpCAS::trace('Storing PGT `'.$pgt.'\' (id=`'.$pgt_iou.'\')');
-		echo '<p>Storing PGT `'.$pgt.'\' (id=`'.$pgt_iou.'\').</p>';
+		echo '<p>Storing PGT `'.Sanitize::encodeStringForDisplay($pgt).'\' (id=`'.Sanitize::encodeStringForDisplay($pgt_iou).'\').</p>';
 		$this->storePGT($pgt,$pgt_iou);
 		$this->printHTMLFooter();
 		phpCAS::traceExit();

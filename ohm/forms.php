@@ -62,8 +62,8 @@ switch($_GET['action']) {
 		}
 		if($_POST['enrollandregister']){
 			echo "<input  type='hidden'   name='enrollandregister'       value='enrollandregister'/>";
-			echo '<input  class="lumenform form" type="hidden"  name="courseid" placeholder="Course Id" value="'. $_POST['cid'] .'" aria-label="courseid" />';
-			echo '<input class="lumenform form" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. $_POST['ekey'].'" aria-label="Enrollment Key:" />';
+			echo '<input  class="lumenform form" type="hidden"  name="courseid" placeholder="Course Id" value="'. Sanitize::courseId($_POST['cid']) .'" aria-label="courseid" />';
+			echo '<input class="lumenform form" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. Sanitize::encodeStringForDisplay($_POST['ekey']).'" aria-label="Enrollment Key:" />';
 		}else{
 		if (!$emailconfirmation) {
 			$doselfenroll = false;
@@ -400,7 +400,7 @@ switch($_GET['action']) {
 				$allcourses[] = $row[0];
 				echo '<br/><input type="checkbox" name="checked[]" class="teaching" value="'.$row[0].'" id="c'.$row[0].'"';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> <label for="c'.$row[0].'">'.$row[1].'</label>';
+				echo '/> <label for="c'.$row[0].'">'.Sanitize::encodeStringForDisplay($row[1]).'</label>';
 			}
 			echo '</p>';
 		}
@@ -416,7 +416,7 @@ switch($_GET['action']) {
 				$allcourses[] = $row[0];
 				echo '<br/><input type="checkbox" name="checked[]" class="tutoring" value="'.$row[0].'" id="c'.$row[0].'"';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> <label for="c'.$row[0].'">'.$row[1].'</label>';
+				echo '/> <label for="c'.$row[0].'">'.Sanitize::encodeStringForDisplay($row[1]).'</label>';
 			}
 			echo '</p>';
 		}
@@ -432,7 +432,7 @@ switch($_GET['action']) {
 				$allcourses[] = $row[0];
 				echo '<br/><input type="checkbox" name="checked[]" class="taking" value="'.$row[0].'" id="c'.$row[0].'"';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> <label for="c'.$row[0].'">'.$row[1].'</label>';
+				echo '/> <label for="c'.$row[0].'">'.Sanitize::encodeStringForDisplay($row[1]).'</label>';
 			}
 			echo '</p>';
 		}

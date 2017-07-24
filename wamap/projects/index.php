@@ -507,7 +507,8 @@ if (isset($_GET['modify'])) {
 			for ($i=0;$i<count($files)/2;$i++) {
 				echo '<input type="text" name="filedesc['.$i.']" value="'.$files[2*$i].'" size="40"/> ';
 				if ($files[2*$i+1][0]!='#') {
-					echo '<a href="'.getuserfileurl('projects/'.Sanitize::encodeStringForDisplay($_GET['modify']).'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
+					// $_GET['modify'] will be sanitized by getuserfileurl()
+					echo '<a href="'.getuserfileurl('projects/'.$_GET['modify'].'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
 				} else {
 					echo '<a href="'.substr($files[2*$i+1],1).'" target="_blank">Open Web Link</a> ';
 				}
@@ -575,7 +576,7 @@ if (isset($_GET['modify'])) {
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript">
-		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/index.php?saverating=true";
+		var ratingssaveurl = "'. $GLOBALS['basesiteurl'] . '/wamap/projects/index.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
 	require("../../header.php");
@@ -666,7 +667,7 @@ if (isset($_GET['modify'])) {
 	echo '</body></html>';
 } else {
 	$nologo = true;
-	$address = 'http://' .  $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php";
+	$address = $GLOBALS['basesiteurl'] . "/wamap/projects/index.php";
 
 	$placeinhead .= '<script type="text/javascript">
 		function chgfilter(el) {

@@ -320,7 +320,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 		echo '<optgroup label="Your Courses">';
 		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			echo '<option value="'.$row[0].'">'.$row[1].'</option>';
+			printf('<option value="%d">%s</option>', $row[0], Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo '</optgroup>';
 	}
@@ -371,7 +371,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 		echo '<optgroup label="Assessment">';
 		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			echo '<option value="'.$row[0].'">'.$row[1].'</option>';
+			printf('<option value="%d">%s</option>', $row[0], Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo '</optgroup>';
 	}
