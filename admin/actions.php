@@ -37,7 +37,7 @@ switch($_POST['action']) {
 		$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
 		$stm->execute(array(':userid'=>$be, ':sessionid'=>$sessionid));
 		break;
-	case "chgrights":  
+	case "chgrights":
 		if ($myrights < 100 && $_POST['newrights']>75) {echo "You don't have the authority for this action"; break;}
 		if ($myrights < 75) { echo "You don't have the authority for this action"; break;}
 
@@ -157,7 +157,7 @@ switch($_POST['action']) {
 		$stm->execute(array(':userid'=>$_GET['id']));
 		$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE userid=:userid");
 		$stm->execute(array(':userid'=>$_GET['id']));
-		
+
 		$stm = $DBH->prepare("DELETE FROM imas_msgs WHERE msgto=:msgto AND isread>1");
 		$stm->execute(array(':msgto'=>$_GET['id']));
 		$stm = $DBH->prepare("UPDATE imas_msgs SET isread=isread+2 WHERE msgto=:msgto AND isread<2");
@@ -167,7 +167,7 @@ switch($_POST['action']) {
 		$stm = $DBH->prepare("UPDATE imas_msgs SET isread=isread+4 WHERE msgfrom=:msgfrom AND isread<2");
 		$stm->execute(array(':msgfrom'=>$_GET['id']));
 		//todo: delete user picture files
-		//todo: delete user file uploads 
+		//todo: delete user file uploads
 		require_once("../includes/filehandler.php");
 		deletealluserfiles($_GET['id']);
 		//todo: delete courses if any
@@ -176,7 +176,7 @@ switch($_POST['action']) {
 		$stm = $DBH->prepare("SELECT password FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$userid));
 		$line = $stm->fetch(PDO::FETCH_ASSOC);
-	
+
 		if ((md5($_POST['oldpw'])==$line['password'] || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['oldpw'], $line['password'])) ) && ($_POST['newpw1'] == $_POST['newpw2'])) {
 			$md5pw =md5($_POST['newpw1']);
 			if (isset($CFG['GEN']['newpasswords'])) {
@@ -259,7 +259,7 @@ switch($_POST['action']) {
 	case "modify":
 	case "addcourse":
 		if ($myrights < 40) { echo "You don't have the authority for this action"; break;}
-		
+
 		if (isset($CFG['CPS']['templateoncreate']) && isset($_POST['usetemplate']) && $_POST['usetemplate']>0) {
 			$coursetocheck = intval($_POST['usetemplate']);
 			$stm = $DBH->prepare("SELECT termsurl FROM imas_courses WHERE id=:id");
@@ -284,23 +284,23 @@ switch($_POST['action']) {
 		} else {
 			$theme = $_POST['theme'];
 		}
-		
+
 		//legacy values - remove eventually
 		$picicons = 1;
 		$hideicons = 0;
-		
+
 		if (isset($CFG['CPS']['unenroll']) && $CFG['CPS']['unenroll'][1]==0) {
 			$unenroll = $CFG['CPS']['unenroll'][0];
 		} else {
 			$unenroll = $_POST['allowunenroll'] + $_POST['allowenroll'];
 		}
-		
+
 		if (isset($CFG['CPS']['copyrights']) && $CFG['CPS']['copyrights'][1]==0) {
 			$copyrights = $CFG['CPS']['copyrights'][0];
 		} else {
 			$copyrights = $_POST['copyrights'];
 		}
-		
+
 		if (isset($CFG['CPS']['msgset']) && $CFG['CPS']['msgset'][1]==0) {
 			$msgset = $CFG['CPS']['msgset'][0];
 		} else {
@@ -312,7 +312,7 @@ switch($_POST['action']) {
 				$msgset += 5*2;
 			}
 		}
-		
+
 		if (isset($CFG['CPS']['deftime']) && $CFG['CPS']['deftime'][1]==0) {
 			$deftime = $CFG['CPS']['deftime'][0];
 		} else {
@@ -325,7 +325,7 @@ switch($_POST['action']) {
 			$tmatches[1] = $tmatches[1]%12;
 			if($tmatches[3]=="pm") {$tmatches[1]+=12; }
 			$deftime = $tmatches[1]*60 + $tmatches[2];
-			
+
 			preg_match('/(\d+)\s*:(\d+)\s*(\w+)/',$_POST['defstime'],$tmatches);
 			if (count($tmatches)==0) {
 				preg_match('/(\d+)\s*([a-zA-Z]+)/',$_POST['defstime'],$tmatches);
@@ -336,13 +336,13 @@ switch($_POST['action']) {
 			if($tmatches[3]=="pm") {$tmatches[1]+=12; }
 			$deftime += 10000*($tmatches[1]*60 + $tmatches[2]);
 		}
-		
+
 		if (isset($CFG['CPS']['deflatepass']) && $CFG['CPS']['deflatepass'][1]==0) {
 			$deflatepass = $CFG['CPS']['deflatepass'][0];
 		} else {
 			$deflatepass = intval($_POST['deflatepass']);
 		}
-		
+
 		if (isset($CFG['CPS']['showlatepass']) && $CFG['CPS']['showlatepass'][1]==0) {
 			$showlatepass = intval($CFG['CPS']['showlatepass'][0]);
 		} else {
@@ -352,15 +352,15 @@ switch($_POST['action']) {
 				$showlatepass = 0;
 			}
 		}
-		
+
 		if (isset($CFG['CPS']['toolset']) && $CFG['CPS']['toolset'][1]==0) {
 			$toolset = $CFG['CPS']['toolset'][0];
 		} else {
 			$toolset = 1*!isset($_POST['toolset-cal']) + 2*!isset($_POST['toolset-forum']) + 4*!isset($_POST['toolset-reord']);
 		}
-		
+
 		$avail = 1 - $_POST['stuavail'];
-		
+
 		$istemplate = 0;
 		if (($myspecialrights&1)==1 || $myrights==100) {
 			if (isset($_POST['isgrptemplate'])) {
@@ -372,7 +372,7 @@ switch($_POST['action']) {
 				$istemplate += 1;
 			}
 		}
-		if ($myrights==100) {	
+		if ($myrights==100) {
 			if (isset($_POST['isselfenroll'])) {
 				$istemplate += 4;
 			}
@@ -380,9 +380,9 @@ switch($_POST['action']) {
 				$istemplate += 8;
 			}
 		}
-		
+
 		$_POST['ltisecret'] = trim($_POST['ltisecret']);
-		
+
 		if ($_POST['action']=='modify') {
 			$query = "UPDATE imas_courses SET name=:name,enrollkey=:enrollkey,hideicons=:hideicons,available=:available,lockaid=:lockaid,picicons=:picicons,showlatepass=:showlatepass,";
 			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass WHERE id=:id";
@@ -416,19 +416,19 @@ switch($_POST['action']) {
 			$orderby = intval(isset($CFG['GBS']['orderby'])?$CFG['GBS']['orderby']:0);
 			$defgbmode = intval(isset($CFG['GBS']['defgbmode'])?$CFG['GBS']['defgbmode']:21);
 			$usersort = intval(isset($CFG['GBS']['usersort'])?$CFG['GBS']['usersort']:0);
-			
+
 			$stm = $DBH->prepare("INSERT INTO imas_gbscheme (courseid,useweights,orderby,defgbmode,usersort) VALUES (:courseid, :useweights, :orderby, :defgbmode, :usersort)");
 			$stm->execute(array(':courseid'=>$cid, ':useweights'=>$useweights, ':orderby'=>$orderby, ':defgbmode'=>$defgbmode, ':usersort'=>$usersort));
-			
-			
+
+
 			if (isset($CFG['CPS']['templateoncreate']) && isset($_POST['usetemplate']) && $_POST['usetemplate']>0) {
-				
+
 				$stm = $DBH->prepare("SELECT useweights,orderby,defaultcat,defgbmode,stugbmode FROM imas_gbscheme WHERE courseid=:courseid");
 				$stm->execute(array(':courseid'=>$_POST['usetemplate']));
 				$row = $stm->fetch(PDO::FETCH_NUM);
 				$stm = $DBH->prepare("UPDATE imas_gbscheme SET useweights=:useweights,orderby=:orderby,defaultcat=:defaultcat,defgbmode=:defgbmode,stugbmode=:stugbmode WHERE courseid=:courseid");
 				$stm->execute(array(':useweights'=>$row[0], ':orderby'=>$row[1], ':defaultcat'=>$row[2], ':defgbmode'=>$row[3], ':stugbmode'=>$row[4], ':courseid'=>$cid));
-				
+
 				$gbcats = array();
 				$gb_cat_ins = null;
 				$stm = $DBH->prepare("SELECT id,name,scale,scaletype,chop,dropn,weight,hidden,calctype FROM imas_gbcats WHERE courseid=:courseid");
@@ -458,7 +458,7 @@ switch($_POST['action']) {
 					$ancestors = intval($_POST['usetemplate']).','.$ancestors;
 				}
 				$outcomes = array();
-				
+
 				$query = 'SELECT imas_questionset.id,imas_questionset.replaceby FROM imas_questionset JOIN ';
 				$query .= 'imas_questions ON imas_questionset.id=imas_questions.questionsetid JOIN ';
 				$query .= 'imas_assessments ON imas_assessments.id=imas_questions.assessmentid WHERE ';
@@ -466,9 +466,9 @@ switch($_POST['action']) {
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':courseid'=>$_POST['usetemplate']));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-					$replacebyarr[$row[0]] = $row[1];  
+					$replacebyarr[$row[0]] = $row[1];
 				}
-				
+
 				if ($outcomesarr!='') {
 					$stm = $DBH->prepare("SELECT id,name,ancestors FROM imas_outcomes WHERE courseid=:courseid");
 					$stm->execute(array(':courseid'=>$_POST['usetemplate']));
@@ -537,10 +537,10 @@ switch($_POST['action']) {
 					}
 				}
 				copyrubrics();
-				
+
 			}
 			$DBH->commit();
-			
+
 			require("../header.php");
 			echo '<div class="breadcrumb">'.$breadcrumbbase.' Course Creation Confirmation</div>';
 			echo '<h2>Your course has been created!</h2>';
@@ -619,11 +619,11 @@ switch($_POST['action']) {
 				$stm2 = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
 				$stm2->execute(array(':assessmentid'=>$line[0]));
 			}
-			
+
 			$stm = $DBH->prepare("DELETE FROM imas_assessments WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
-			
+
+
 			$stm = $DBH->prepare("SELECT id FROM imas_drillassess WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($line = $stm->fetch(PDO::FETCH_NUM)) {
@@ -632,7 +632,7 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_drillassess WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			$stm = $DBH->prepare("SELECT id FROM imas_forums WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -653,20 +653,20 @@ switch($_POST['action']) {
 				$query .= "WHERE imas_forum_threads.forumid=:forumid";
 				$stm2 = $DBH->prepare($query);
 				$stm2->execute(array(':forumid'=>$row[0]));
-				
+
 				$stm2 = $DBH->prepare("DELETE FROM imas_forum_posts WHERE forumid=:forumid");
 				$stm2->execute(array(':forumid'=>$row[0]));
-				
+
 				$stm2 = $DBH->prepare("DELETE FROM imas_forum_threads WHERE forumid=:forumid");
 				$stm2->execute(array(':forumid'=>$row[0]));
-				
+
 				$stm2 = $DBH->prepare("DELETE FROM imas_exceptions WHERE assessmentid=:assessmentid AND (itemtype='F' OR itemtype='P' OR itemtype='R')");
 				$stm2->execute(array(':assessmentid'=>$row[0]));
-				
+
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_forums WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			$stm2 = $DBH->prepare("SELECT id FROM imas_wikis WHERE courseid=:courseid");
 			$stm2->execute(array(':courseid'=>$_GET['id']));
 			while ($wid = $stm2->fetch(PDO::FETCH_NUM)) {
@@ -677,7 +677,7 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_wikis WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			//delete inline text files
 			$stm3 = $DBH->prepare("SELECT id FROM imas_inlinetext WHERE courseid=:courseid");
 			$stm3->execute(array(':courseid'=>$_GET['id']));
@@ -702,7 +702,7 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_inlinetext WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			//delete linked text files
 			$stm = $DBH->prepare("SELECT text,points,id FROM imas_linkedtext WHERE courseid=:courseid AND text LIKE 'file:%'");
 			$stm->execute(array(':courseid'=>$_GET['id']));
@@ -720,8 +720,8 @@ switch($_POST['action']) {
 					$stm2->execute(array(':gradetypeid'=>$row[2]));
 				}
 			}
-			
-			
+
+
 			$stm = $DBH->prepare("DELETE FROM imas_linkedtext WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			$stm = $DBH->prepare("DELETE FROM imas_items WHERE courseid=:courseid");
@@ -732,7 +732,7 @@ switch($_POST['action']) {
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			$stm = $DBH->prepare("DELETE FROM imas_tutors WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			$stm = $DBH->prepare("SELECT id FROM imas_gbitems WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -745,10 +745,10 @@ switch($_POST['action']) {
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			$stm = $DBH->prepare("DELETE FROM imas_gbcats WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			$stm = $DBH->prepare("DELETE FROM imas_calitems WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			$stm = $DBH->prepare("SELECT id FROM imas_stugroupset WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -763,14 +763,14 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_stugroupset WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
-			
+
 			$stm = $DBH->prepare("DELETE FROM imas_external_tools WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			$stm = $DBH->prepare("DELETE FROM imas_content_track WHERE courseid=:courseid");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 
 			$DBH->commit();
-		}	
+		}
 		break;
 	case "remteacher":
 		if ($myrights < 40) { echo "You don't have the authority for this action"; break;}
@@ -793,7 +793,7 @@ switch($_POST['action']) {
 				} else {
 					//break;
 				}
-				
+
 				//$query = "DELETE imas_teachers FROM imas_users,imas_teachers WHERE imas_teachers.id='{$_GET['tid']}' ";
 				//$query .= "AND imas_teachers.userid=imas_users.id AND imas_users.groupid='$groupid'";
 			} else {
@@ -801,7 +801,7 @@ switch($_POST['action']) {
 				$stm->execute(array(':id'=>$tid));
 			}
 		}
-		
+
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/forms.php?action=chgteachers&id=". Sanitize::courseId($_GET['cid']));
 		exit;
 	case "addteacher":
@@ -900,7 +900,7 @@ switch($_POST['action']) {
 					if ($GLOBALS['filehandertypecfiles'] == 's3') {
 						$n = $tar->extractToS3("qimages","public");
 					} else {
-						$n = $tar->extractToDir("../assessment/qimages/");	
+						$n = $tar->extractToDir("../assessment/qimages/");
 					}
 					require("../header.php");
 					echo "<p>Extracted $n files.  <a href=\"admin2.php\">Continue</a></p>\n";
@@ -912,7 +912,7 @@ switch($_POST['action']) {
 					require("../footer.php");
 					exit;
 				}
-				
+
 			}
 			unlink($uploadfile);
 			break;
@@ -941,7 +941,7 @@ switch($_POST['action']) {
 							$zip->extractTo("../course/files/", array($zip->getNameIndex($i)));
 							relocatecoursefileifneeded("../course/files/".$zip->getNameIndex($i),$zip->getNameIndex($i));
 							$ne++;
-						} 
+						}
 					}
 					require("../header.php");
 					echo "<p>Extracted $ne files.  Skipped $ns files.  <a href=\"admin2.php\">Continue</a></p>\n";
@@ -953,7 +953,7 @@ switch($_POST['action']) {
 					require("../footer.php");
 					exit;
 				}
-				
+
 			}
 			unlink($uploadfile);
 			break;
@@ -996,7 +996,7 @@ switch($_POST['action']) {
 			$stm = $DBH->prepare("DELETE FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 			$stm->execute(array(':courseid'=>$_GET['id'], ':userid'=>$userid));
 		}
-		
+
 		break;
 	case "deloldusers":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
@@ -1109,7 +1109,7 @@ switch($_POST['action']) {
 		$stm = $DBH->prepare("SELECT imas_users.id,imas_users.groupid FROM imas_users JOIN imas_diags ON imas_users.id=imas_diags.ownerid AND imas_diags.id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$row = $stm->fetch(PDO::FETCH_NUM);
-		if (($myrights<75 && $row[0]==$userid) || ($myrights==75 && $row[1]==$groupid) || $myrights==100) { 
+		if (($myrights<75 && $row[0]==$userid) || ($myrights==75 && $row[1]==$groupid) || $myrights==100) {
 			$stm = $DBH->prepare("DELETE FROM imas_diags WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			$stm = $DBH->prepare("DELETE FROM imas_diag_onetime WHERE diag=:diag");

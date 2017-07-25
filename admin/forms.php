@@ -69,7 +69,7 @@ switch($_GET['action']) {
 		echo "<span class=form>Verify new password:</span>  <input class=form type=password name=newpw2 size=40> <BR class=form>\n";
 		echo '<div class=submit><button type=submit name="action" value="chgpwd">'._('Save').'</button></div></form>';
 		break;
-	
+
 	case "chgrights":
 	case "newadmin":
 		echo "<form method=post action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
@@ -184,7 +184,7 @@ switch($_GET['action']) {
 			echo '><label for="specialrights8">Create public (open to all) question libraries</label><br/>';
 		}
 		echo '</span><br class="form"/>';
-		
+
 		if ($myrights == 100) {
 			echo "<span class=form>Assign to group: </span>";
 			echo "<span class=formright><select name=\"group\" id=\"group\">";
@@ -202,14 +202,14 @@ switch($_GET['action']) {
 			}
 			echo "</select><br class=form />\n";
 		}
-		
-		
+
+
 		echo "<div class=submit><input type=submit value=Save></div></form>\n";
 		break;
 	case "modify":
 	case "addcourse":
 		if ($myrights < 40) { echo "You don't have the authority for this action"; break;}
-		
+
 		$isadminview = false;
 		if ($_GET['action']=='modify') {
 			//DB $query = "SELECT * FROM imas_courses WHERE id='{$_GET['id']}'";
@@ -261,7 +261,7 @@ switch($_GET['action']) {
 			$picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
 			$allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
 			//0 no un, 1 allow un;  0 allow enroll, 2 no enroll
-			
+
 			$copyrights = isset($CFG['CPS']['copyrights'])?$CFG['CPS']['copyrights'][0]:0;
 			$msgset = isset($CFG['CPS']['msgset'])?$CFG['CPS']['msgset'][0]:0;
 			$toolset = isset($CFG['CPS']['toolset'])?$CFG['CPS']['toolset'][0]:0;
@@ -291,11 +291,11 @@ switch($_GET['action']) {
 		} else {
 			$defstimedisp = $deftimedisp;
 		}
-		
+
 		if (isset($_GET['cid'])) {
 			$cid = Sanitize::courseId($_GET['cid']);
 			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; Course Settings</div>";
-		} 
+		}
 		echo '<div id="headerforms" class="pagetitle"><h2>';
 		if ($_GET['action']=='modify') {
 			echo _('Course Settings');
@@ -339,14 +339,14 @@ switch($_GET['action']) {
 			}
 			echo '</select></span><br class="form"/>';
 		}
-		
+
 		if (!isset($CFG['CPS']['deftime']) || $CFG['CPS']['deftime'][1]==1) {
 			echo "<span class=form>Default start/end time for new items:</span><span class=formright>";
 			echo 'Start: <input name="defstime" type="text" size="8" value="'.Sanitize::encodeStringForDisplay($defstimedisp).'"/>, ';
 			echo 'end: <input name="deftime" type="text" size="8" value="'.Sanitize::encodeStringForDisplay($deftimedisp).'"/>';
 			echo '</span><br class="form"/>';
 		}
-		
+
 		if (!isset($CFG['CPS']['theme']) || $CFG['CPS']['theme'][1]==1) {
 			echo "<span class=form>Theme:</span><span class=formright>";
 			echo " <select name=\"theme\">";
@@ -376,10 +376,10 @@ switch($_GET['action']) {
 				}
 				echo '</option>';
 			}
-			
+
 			echo " </select></span><br class=\"form\" />";
 		}
-		
+
 		if (!isset($CFG['CPS']['unenroll']) || $CFG['CPS']['unenroll'][1]==1) {
 			echo "<span class=form>Allow students to self-<u>un</u>enroll</span><span class=formright>";
 			echo '<input type=radio name="allowunenroll" value="0" ';
@@ -387,7 +387,7 @@ switch($_GET['action']) {
 			echo '/> No <input type=radio name="allowunenroll" value="1" ';
 			if (($allowunenroll&1)==1) { echo "checked=1";}
 			echo '/> Yes </span><br class=form />';
-			
+
 			echo "<span class=form>Allow students to self-enroll</span><span class=formright>";
 			echo '<input type=radio name="allowenroll" value="2" ';
 			if (($allowunenroll&2)==2) { echo "checked=1";}
@@ -428,14 +428,14 @@ switch($_GET['action']) {
 			echo '<input type="checkbox" name="toolset-cal" value="1" ';
 			if (($toolset&1)==0) { echo 'checked="checked"';}
 			echo '> Calendar<br/>';
-			
+
 			echo '<input type="checkbox" name="toolset-forum" value="2" ';
 			if (($toolset&2)==0) { echo 'checked="checked"';}
 			echo '> Forum List';
-			
+
 			echo '</span><br class=form />';
 		}
-		
+
 		if (!isset($CFG['CPS']['deflatepass']) || $CFG['CPS']['deflatepass'][1]==1) {
 			echo '<span class="form">Auto-assign LatePasses on course enroll:</span><span class="formright">';
 			echo '<input type="text" size="3" name="deflatepass" value="'.Sanitize::encodeStringForDisplay($deflatepass).'"/> LatePasses</span><br class="form" />';
@@ -453,7 +453,7 @@ switch($_GET['action']) {
 			if ($showlatepass==1) {echo 'checked="checked"';};
 			echo ' /></span><br class="form" />';
 		}
-		
+
 		if (isset($enablebasiclti) && $enablebasiclti==true && isset($_GET['id'])) {
 			echo '<span class="form">LTI access secret (max 10 chars; blank to not use)</span>';
 			echo '<span class="formright"><input name="ltisecret" type="text" value="'.Sanitize::encodeStringForDisplay($ltisecret).'" maxlength="10"/> ';
@@ -465,7 +465,7 @@ switch($_GET['action']) {
 				echo 'Key: LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_1 (to only allow access through the LMS )';
 			} else {
 				echo 'Course ID not yet set.';
-			}		
+			}
 			echo '</span></span><br class="form" />';
 		}
 		if (($myspecialrights&1)==1 || ($myspecialrights&2)==2 || $myrights==100) {
@@ -493,7 +493,7 @@ switch($_GET['action']) {
 			}
 			echo '</span><br class="form" />';
 		}
-		
+
 		if (isset($CFG['CPS']['templateoncreate']) && $_GET['action']=='addcourse' ) {
 			echo '<span class="form">Use content from a template course:</span>';
 			echo '<span class="formright"><select name="usetemplate" onchange="templatepreviewupdate(this)">';
@@ -566,8 +566,8 @@ switch($_GET['action']) {
 			echo '  } else {outel.innerHTML = "";}';
 			echo '}</script>';
 		}
-		
-		
+
+
 		echo "<div class=submit><input type=submit value=Submit></div></form>\n";
 		break;
 	case "chgteachers":
@@ -580,7 +580,7 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle">';
 		printf("<h2>%s</h2>\n", Sanitize::encodeStringForDisplay($line['name']));
 		echo '</div>';
-		
+
 		echo "<h4>Current Teachers:</h4>\n";
 		//DB $query = "SELECT imas_users.FirstName,imas_users.LastName,imas_teachers.id,imas_teachers.userid ";
 		//DB $query .= "FROM imas_users,imas_teachers WHERE imas_teachers.courseid='{$_GET['id']}' AND " ;
@@ -601,9 +601,9 @@ switch($_GET['action']) {
 		$onlyone = ($num==1);
 		//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
-			
+
 				printf('<tr><td><input type="checkbox" name="tid[]" value="%d"/></td>', $line['id']);
-			
+
 			printf("<td>%s, %s</td>", Sanitize::encodeStringForDisplay($line['LastName']),
 				Sanitize::encodeStringForDisplay($line['FirstName']));
 			/*if ($onlyone) {
@@ -616,7 +616,7 @@ switch($_GET['action']) {
 			$used[$line['userid']] = true;
 		}
 		echo "</table></form>\n";
-		
+
 		echo "<h4>Potential Teachers:</h4>\n";
 		if ($myrights<100) {
 			//DB $query = "SELECT id,FirstName,LastName,rights FROM imas_users WHERE rights>19 AND (rights<76 or rights>78) AND groupid='$groupid' ORDER BY LastName;";
@@ -649,7 +649,7 @@ switch($_GET['action']) {
 	case "importmacros":
 		echo "<h3>Install Macro File</h3>\n";
 		echo "<p><b>Warning:</b> Macro Files have a large security risk.  <b>Only install macro files from a trusted source</b></p>\n";
-		echo "<p><b>Warning:</b> Install will overwrite any existing macro file of the same name</p>\n"; 
+		echo "<p><b>Warning:</b> Install will overwrite any existing macro file of the same name</p>\n";
 		echo "<form enctype=\"multipart/form-data\" method=post action=\"actions.php?from=".Sanitize::encodeUrlParam($from)."\">\n";
 		echo '<input type=hidden name=action value="importmacros" />';
 		echo "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"300000\" />\n";
@@ -657,11 +657,11 @@ switch($_GET['action']) {
 		echo "<div class=submit><input type=submit value=\"Submit\"></div>\n";
 		echo "</form>\n";
 		break;
-	
+
 	case "importqimages":
 		echo "<h3>Install Question Images</h3>\n";
 		echo "<p><b>Warning:</b> This has a large security risk.  <b>Only install question images from a trusted source</b>, and where you've verified the archive only contains images.</p>\n";
-		echo "<p><b>Warning:</b> Install will ignore files with the same filename as existing files.</p>\n"; 
+		echo "<p><b>Warning:</b> Install will ignore files with the same filename as existing files.</p>\n";
 		echo "<form enctype=\"multipart/form-data\" method=post action=\"actions.php?from=".Sanitize::encodeUrlParam($from)."\">\n";
 		echo '<input type=hidden name=action value="importqimages" />';
 		echo "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"5000000\" />\n";
@@ -672,7 +672,7 @@ switch($_GET['action']) {
 	case "importcoursefiles":
 		echo "<h3>Install Course files</h3>\n";
 		echo "<p><b>Warning:</b> This has a large security risk.  <b>Only install course files from a trusted source</b>, and where you've verified the archive only contains regular files (no PHP files).</p>\n";
-		echo "<p><b>Warning:</b> Install will ignore files with the same filename as existing files.</p>\n"; 
+		echo "<p><b>Warning:</b> Install will ignore files with the same filename as existing files.</p>\n";
 		echo "<form enctype=\"multipart/form-data\" method=post action=\"actions.php?from=".Sanitize::encodeUrlParam($from)."\">\n";
 		echo '<input type=hidden name=action value="importcoursefiles" />';
 		echo "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"10000000\" />\n";
@@ -698,7 +698,7 @@ switch($_GET['action']) {
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			printf("<option value=\"%d\">%s, %s</option>\n", $row[0], Sanitize::encodeStringForDisplay($row[2]),
+			printf("<option value=\"%d\">%s, %s</option>\n",Sanitize::encodeStringForDisplay($row[0]), Sanitize::encodeStringForDisplay($row[2]),
 				Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo "</select>\n";
@@ -736,11 +736,11 @@ switch($_GET['action']) {
 			} else {
 				echo '<td>No</td>';
 			}
-			echo "<td><a href=\"forms.php?action=modltidomaincred&id={$row[0]}\">Modify</a></td>\n";
+			echo "<td><a href=\"forms.php?action=modltidomaincred&id=".Sanitize::encodeUrlParam($row[0])."\">Modify</a></td>\n";
 			if ($row[0]==0) {
 				echo "<td></td>";
 			} else {
-				echo "<td><a href=\"forms.php?from=".Sanitize::encodeUrlParam($from)."&action=delltidomaincred&id={$row[0]}\">Delete</a></td>\n";
+				echo "<td><a href=\"forms.php?from=".Sanitize::encodeUrlParam($from)."&action=delltidomaincred&id=".Sanitize::encodeUrlParam($row[0])."\">Delete</a></td>\n";
 			}
 			echo "</tr>\n";
 		}
@@ -760,8 +760,9 @@ switch($_GET['action']) {
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
+
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			printf('<option value="%d">%s</option>', $row[0], Sanitize::encodeStringForDisplay($row[1]));
+			printf('<option value="%d">%s</option>', Sanitize::encodeStringForDisplay($row[0]), Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo '</select><br/>';
 		echo "<input type=submit value=\"Add LTI Credentials\"></p>\n";
@@ -780,7 +781,7 @@ switch($_GET['action']) {
 		echo '</strong>?</p>';
 		echo '<form method="POST" action="actions.php?from='.Sanitize::encodeUrlParam($from).'&id='.Sanitize::encodeUrlParam($_GET['id']).'">';
 		echo '<p><button type=submit name="action" value="delltidomaincred">'._('Delete').'</button>';
-		echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='$backloc'\"></p>\n";
+		echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='".Sanitize::encodeStringForJavascript($backloc)."'\"></p>\n";
 		echo '</form>';
 		break;
 	case "modltidomaincred":
@@ -863,7 +864,7 @@ switch($_GET['action']) {
 		$stm = $DBH->prepare("SELECT id,peername,peerdescription,url,secret,lastpull FROM imas_federation_peers WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
-		printf("<form method=post action=\"actions.php?action=modfedpeers&id=%d\">\n", $row['id']);
+		printf("<form method=post action=\"actions.php?action=modfedpeers&id=%d\">\n", Sanitize::onlyInt($row['id']));
 		echo "Modify federation peer: <br/>";
 		printf("Install Name: <input type=text name=\"peername\" value=\"%s\" size=20><br/>\n",
 			Sanitize::encodeStringForDisplay($row['peername']));
