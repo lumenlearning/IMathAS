@@ -793,7 +793,7 @@ function chgfilter() {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$msgcourses[$row[0]] = $row[1];
 	}
-	if (!isset($msgcourses[$cid])) {
+	if (!isset($msgcourses[$cid]) && $cid>0) {
 		$msgcourses[$cid] = $coursename;
 	}
 	natsort($msgcourses);
@@ -907,9 +907,9 @@ function chgfilter() {
 			$n++;
 		}
 		if ($n==1) {
-			$line['title'] = 'Re: '.$line['title'];
+			$line['title'] = 'Re: ' . Sanitize::encodeStringForDisplay($line['title']);
 		} else if ($n>1) {
-			$line['title'] = "Re<sup>$n</sup>: ".$line['title'];
+			$line['title'] = "Re<sup>$n</sup>: " . Sanitize::encodeStringForDisplay($line['title']);
 		}
 		echo "<tr id=\"tr{$line['id']}\" ";
 		if (($line['isread']&8)==8) {
@@ -918,7 +918,7 @@ function chgfilter() {
 		echo "><td><input type=checkbox name=\"checked[]\" value=\"{$line['id']}\"/></td><td>";
 		echo "<a href=\"viewmsg.php?page=$page&cid=$cid&filtercid=$filtercid&filteruid=$filteruid&type=msg&msgid={$line['id']}\">";
 		if (($line['isread']&1)==0) {
-			echo "<b>{$line['title']}</b>";
+			echo "<b>" . $line['title']. "</b>";
 		} else {
 			echo $line['title'];
 		}
@@ -946,7 +946,8 @@ function chgfilter() {
 			echo "<img class=\"pointer\" id=\"tag{$line['id']}\" src=\"$imasroot/img/flagempty.gif\" onClick=\"toggletagged({$line['id']});return false;\" alt=\"Not flagged\"/>";
 		}
 		echo '</td>';
-		echo "<td>{$line['LastName']}, {$line['FirstName']}</td>";
+		printf('<td>%s, %s</td>', Sanitize::encodeStringForDisplay($line['LastName']),
+            Sanitize::encodeStringForDisplay($line['FirstName']));
 
 
 		if ($line['name']==null) {

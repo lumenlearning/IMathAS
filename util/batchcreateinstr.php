@@ -10,6 +10,7 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 
 require("../init.php");
+require_once("../includes/copyiteminc.php");
 
 if ($myrights<100) {
   echo "You're not authorized for this page";
@@ -32,6 +33,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
   }
   $handle = fopen_utf8($_FILES['uploadedfile']['tmp_name'],'r');
   while (($data = fgetcsv($handle,2096))!==false) {
+    if (trim($data[0])=='') {continue;}
     if (count($data)<5) {
       echo "Invalid row - skipping<br/>";
       continue;
@@ -55,6 +57,20 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
             ':rights'=>40, ':email'=>$data[4], ':groupid'=>$_POST['groupid'], ':homelayout'=>$homelayout));
 
     $newuserid = $DBH->lastInsertId();
+
+    //enroll as stu if needed
+		if (isset($CFG['GEN']['enrollonnewinstructor'])) {
+			$valbits = array();
+			$valvals = array();
+			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
+				$valbits[] = "(?,?)";
+				array_push($valvals, $newuserid,$ncid);
+			}
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm->execute($valvals);
+		}
+
+    //copy courses
     $i = 5;
     while (isset($data[$i]) && $data[$i]!='' && intval($data[$i])>0) {
       echo "Copying course {$data[$i]}<br/>";
@@ -147,7 +163,6 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
       $removewithdrawn = true;
       $usereplaceby = "all";
       $newitems = array();
-      require("../includes/copyiteminc.php");
       copyallsub($items,'0',$newitems,$gbcats);
       doaftercopy($sourcecid);
       $itemorder = serialize($newitems);
@@ -186,7 +201,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
     }
   }
 
-  echo '<p>Done. <a href="../admin/admin.php">Admin page</a></p>';
+  echo "<p>Done. <a href=\"$imasroot/admin/admin.php\">Admin page</a></p>";
 } else {
   require("../header.php");
   $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/admin/admin.php\">Admin</a>\n";
@@ -197,7 +212,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
   echo '<p>Column Format:</p><ul>';
   echo '<li>1) username</li><li>2) password</li><li>3) First Name</li>';
   echo '<li>4) Last Name</li><li>5) email</li>';
-  echo '<li>Columns 6 on can be course IDs to create copies of for that instructor</li></ul>';
+  echo '<li>Columns 6,7,etc. can be course IDs to create copies of for that instructor</li></ul>';
   echo '<p>Group: <select name="groupid"><option value="-1">Select...</option>';
 	$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {

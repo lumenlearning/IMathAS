@@ -485,30 +485,32 @@ if (!(isset($teacherid))) {
 			}
 
 		} elseif (isset($_GET['action']) && $_GET['action']=="select") { //DATA MANIPULATION FOR second option
+			$items = false;
+			
+			$stm = $DBH->prepare("SELECT id,itemorder,picicons FROM imas_courses WHERE id IN (?,?)");
+			$stm->execute(array($_POST['ctc'], $cid));
+			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+				if ($row['id']==$_POST['ctc']) {
+					$items = unserialize($row['itemorder']);
+					$picicons = $row['picicons'];
+				} else if ($row['id']==$cid) {
+					$existblocks = array();
+					buildexistblocks(unserialize($row['itemorder']),'0');
+				}
+			}
+			if ($items===false) {
+				echo 'Error with course to copy';
+				exit;
+			}
 
-			//DB $query = "SELECT itemorder,picicons FROM imas_courses WHERE id='{$_POST['ctc']}'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB list($itemorder,$picicons) = mysql_fetch_row($result);
-			$stm = $DBH->prepare("SELECT itemorder,picicons FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$_POST['ctc']));
-			list($itemorder,$picicons) = $stm->fetch(PDO::FETCH_NUM);
-			$items = unserialize($itemorder);
 			$ids = array();
 			$types = array();
 			$names = array();
 			$sums = array();
 			$parents = array();
+			require_once("../includes/loaditemshowdata.php");
+			$itemshowdata = loadItemShowData($items,false,true,false,false,false,true);	
 			getsubinfo($items,'0','',false,' ');
-
-			//DB $query = "SELECT itemorder FROM imas_courses WHERE id='$cid'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $items = unserialize(mysql_result($result,0,0));
-			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$cid));
-			$items = unserialize($stm->fetchColumn(0));
-			$existblocks = array();
-
-			buildexistblocks($items,'0');
 
 			$i=0;
 			$page_blockSelect = array();
@@ -591,17 +593,17 @@ function writeCourseInfo($line, $skipcopyright=2) {
 	if ($line['termsurl']!='') {
 		$itemclasses[] = 'termsurl';
 	}
-	echo '<input type="radio" name="ctc" value="'.$line['id'].'" '.((count($itemclasses)>0)?'class="'.implode(' ',$itemclasses).'"':'');
+	echo '<input type="radio" name="ctc" value="' . Sanitize::encodeStringForDisplay($line['id']) . '" ' . ((count($itemclasses)>0)?'class="' . implode(' ',$itemclasses) . '"':'');
 	if ($line['termsurl']!='') {
 		echo ' data-termsurl="'.$line['termsurl'].'"';
 	}
 	echo '>';
-	echo $line['name'];
+	echo Sanitize::encodeStringForDisplay($line['name']);
 
 	if ($line['copyrights']<$skipcopyright) {
 		echo "&copy;\n";
 	} else {
-		echo " <a href=\"course.php?cid={$line['id']}\" target=\"_blank\" class=\"small\">Preview</a>";
+		echo " <a href=\"course.php?cid=" . Sanitize::courseId($line['id']) . "\" target=\"_blank\" class=\"small\">Preview</a>";
 	}
 }
 
@@ -686,8 +688,8 @@ if ($overwriteBody==1) {
 //DISPLAY BLOCK FOR selecting calendar items to copy
 ?>
 	<form id="qform" method=post action="copyitems.php?cid=<?php echo $cid ?>&action=copycalitems">
-	<input type=hidden name=ekey id=ekey value="<?php echo $_POST['ekey'] ?>">
-	<input type=hidden name=ctc id=ctc value="<?php echo $_POST['ctc'] ?>">
+	<input type=hidden name=ekey id=ekey value="<?php echo Sanitize::encodeStringForDisplay($_POST['ekey']); ?>">
+	<input type=hidden name=ctc id=ctc value="<?php echo Sanitize::encodeStringForDisplay($_POST['ctc']); ?>">
 	<h4>Select Calendar Items to Copy</h4>
 	Check: <a href="#" onclick="return chkAllNone('qform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('qform','checked[]',false)">None</a>
 
@@ -702,11 +704,11 @@ if ($overwriteBody==1) {
 			if ($alt==0) {echo "		<tr class=even>"; $alt=1;} else {echo "		<tr class=odd>"; $alt=0;}
 ?>
 			<td>
-			<input type=checkbox name='checked[]' value='<?php echo $calitems[$i][0];?>' checked="checked"/>
+			<input type=checkbox name='checked[]' value='<?php echo Sanitize::encodeStringForDisplay($calitems[$i][0]); ?>' checked="checked"/>
 			</td>
 			<td class="nowrap"><?php echo tzdate("m/d/Y",$calitems[$i][1]); ?></td>
-			<td><?php echo $calitems[$i][2]; ?></td>
-			<td><?php echo $calitems[$i][3]; ?></td>
+			<td><?php echo Sanitize::encodeStringForDisplay($calitems[$i][2]); ?></td>
+			<td><?php echo Sanitize::encodeStringForDisplay($calitems[$i][3]); ?></td>
 		</tr>
 <?php
 		}
@@ -737,8 +739,8 @@ if ($overwriteBody==1) {
 	</script>
 
 	<form id="qform" method=post action="copyitems.php?cid=<?php echo $cid ?>&action=copy" onsubmit="return copyitemsonsubmit();">
-	<input type=hidden name=ekey id=ekey value="<?php echo $_POST['ekey'] ?>">
-	<input type=hidden name=ctc id=ctc value="<?php echo $_POST['ctc'] ?>">
+	<input type=hidden name=ekey id=ekey value="<?php echo Sanitize::encodeStringForDisplay($_POST['ekey']); ?>">
+	<input type=hidden name=ctc id=ctc value="<?php echo Sanitize::encodeStringForDisplay($_POST['ctc']); ?>">
 	<p>What to copy:
 	<?php
 		if ($_POST['ekey']=='') { echo ' <a class="small" target="_blank" href="course.php?cid='.$_POST['ctc'].'">Preview source course</a>';}
@@ -868,13 +870,13 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 	?>
 				<li class=lihdr>
 					<span class=dd>-</span>
-					<span class=hdr onClick="toggle('g<?php echo $line['groupid'] ?>')">
-						<span class=btn id="bg<?php echo $line['groupid'] ?>">+</span>
+					<span class=hdr onClick="toggle('g<?php echo Sanitize::encodeStringForJavascript($line['groupid']); ?>')">
+						<span class=btn id="bg<?php echo Sanitize::encodeStringForDisplay($line['groupid']); ?>">+</span>
 					</span>
-					<span class=hdr onClick="toggle('g<?php echo $line['groupid'] ?>')">
-						<span id="ng<?php echo $line['groupid'] ?>" ><?php echo $grpnames[$line['groupid']] ?></span>
+					<span class=hdr onClick="toggle('g<?php echo Sanitize::encodeStringForJavascript($line['groupid']); ?>')">
+						<span id="ng<?php echo Sanitize::encodeStringForDisplay($line['groupid']); ?>" ><?php echo Sanitize::encodeStringForDisplay($grpnames[$line['groupid']]); ?></span>
 					</span>
-					<ul class=hide id="g<?php echo $line['groupid'] ?>">
+					<ul class=hide id="g<?php echo Sanitize::encodeStringForDisplay($line['groupid']); ?>">
 
 	<?php
 						$lastgroup = $line['groupid'];
@@ -886,15 +888,15 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 	?>
 				<li class=lihdr>
 					<span class=dd>-</span>
-					<span class=hdr onClick="toggle(<?php echo $line['userid'] ?>)">
-						<span class=btn id="b<?php echo $line['userid'] ?>">+</span>
+					<span class=hdr onClick="toggle(<?php echo Sanitize::encodeStringForJavascript($line['userid']); ?>)">
+						<span class=btn id="b<?php echo Sanitize::encodeStringForDisplay($line['userid']); ?>">+</span>
 					</span>
-					<span class=hdr onClick="toggle(<?php echo $line['userid'] ?>)">
-						<span id="n<?php echo $line['userid'] ?>" ><?php echo Sanitize::encodeStringForDisplay($line['LastName']) . ", " . Sanitize::encodeStringForDisplay($line['FirstName']) . "\n" ?>
+					<span class=hdr onClick="toggle(<?php echo Sanitize::encodeStringForJavascript($line['userid']); ?>)">
+						<span id="n<?php echo Sanitize::encodeStringForDisplay($line['userid']); ?>" ><?php echo Sanitize::encodeStringForDisplay($line['LastName']) . ", " . Sanitize::encodeStringForDisplay($line['FirstName']) . "\n" ?>
 						</span>
 					</span>
-					<a href="mailto:<?php echo $line['email'] ?>">Email</a>
-					<ul class=hide id="<?php echo $line['userid'] ?>">
+					<a href="mailto:<?php echo Sanitize::emailAddress($line['email']); ?>">Email</a>
+					<ul class=hide id="<?php echo Sanitize::encodeStringForDisplay($line['userid']); ?>">
 	<?php
 						$lastteacher = $line['userid'];
 					}
@@ -1006,15 +1008,15 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 ?>
 					<li class=lihdr>
 						<span class=dd>-</span>
-						<span class=hdr onClick="toggle(<?php echo $line['userid'] ?>)">
-							<span class=btn id="b<?php echo $line['userid'] ?>">+</span>
+						<span class=hdr onClick="toggle(<?php echo Sanitize::encodeStringForJavascript($line['userid']); ?>)">
+							<span class=btn id="b<?php echo Sanitize::encodeStringForDisplay($line['userid']); ?>">+</span>
 						</span>
-						<span class=hdr onClick="toggle(<?php echo $line['userid'] ?>)">
-							<span id="n<?php echo $line['userid'] ?>"><?php echo Sanitize::encodeStringForDisplay($line['LastName']) . ", " . Sanitize::encodeStringForDisplay($line['FirstName']) . "\n" ?>
+						<span class=hdr onClick="toggle(<?php echo Sanitize::encodeStringForJavascript($line['userid']); ?>)">
+							<span id="n<?php echo Sanitize::encodeStringForDisplay($line['userid']); ?>"><?php echo Sanitize::encodeStringForDisplay($line['LastName']) . ", " . Sanitize::encodeStringForDisplay($line['FirstName']) . "\n" ?>
 							</span>
 						</span>
-						<a href="mailto:<?php echo $line['email'] ?>">Email</a>
-						<ul class=hide id="<?php echo $line['userid'] ?>">
+						<a href="mailto:<?php echo Sanitize::emailAddress($line['email']); ?>">Email</a>
+						<ul class=hide id="<?php echo Sanitize::encodeStringForDisplay($line['userid']); ?>">
 <?php
 					$lastteacher = $line['userid'];
 				}

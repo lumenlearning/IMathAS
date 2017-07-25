@@ -47,9 +47,15 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	//DB $query = "SELECT qtype,control,qcontrol,qtext,answer,hasimg,extref,solution,solutionopts FROM imas_questionset WHERE id='$qidx'";
 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	//DB $qdata = mysql_fetch_array($result, MYSQL_ASSOC);
-	$stm = $DBH->prepare("SELECT qtype,control,qcontrol,qtext,answer,hasimg,extref,solution,solutionopts FROM imas_questionset WHERE id=:id");
-	$stm->execute(array(':id'=>$qidx));
-	$qdata = $stm->fetch(PDO::FETCH_ASSOC);
+	if (isset($GLOBALS['qdatafordisplayq'])) {
+		$qdata = $GLOBALS['qdatafordisplayq'];
+	} else if (isset($GLOBALS['qi']) && isset($GLOBALS['qi'][$GLOBALS['questions'][$qnidx]]['qtext'])) {
+		$qdata = $GLOBALS['qi'][$GLOBALS['questions'][$qnidx]];
+	} else {
+		$stm = $DBH->prepare("SELECT qtype,control,qcontrol,qtext,answer,hasimg,extref,solution,solutionopts FROM imas_questionset WHERE id=:id");
+		$stm->execute(array(':id'=>$qidx));
+		$qdata = $stm->fetch(PDO::FETCH_ASSOC);
+	}
 
 	if ($qdata['hasimg']>0) {
 		//DB $query = "SELECT var,filename,alttext FROM imas_qimages WHERE qsetid='$qidx'";
@@ -614,12 +620,16 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	unset($abstolerance);
 	$RND->srand($seed);
 	$GLOBALS['inquestiondisplay'] = false;
-	//DB $query = "SELECT qtype,control,answer FROM imas_questionset WHERE id='$qidx'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB $qdata = mysql_fetch_array($result, MYSQL_ASSOC);
-	$stm = $DBH->prepare("SELECT qtype,control,answer FROM imas_questionset WHERE id=:id");
-	$stm->execute(array(':id'=>$qidx));
-	$qdata = $stm->fetch(PDO::FETCH_ASSOC);
+	
+	if (isset($GLOBALS['qdatafordisplayq'])) {
+		$qdata = $GLOBALS['qdatafordisplayq'];
+	} else if (isset($GLOBALS['qi']) && isset($GLOBALS['qi'][$GLOBALS['questions'][$qnidx]]['qtext'])) {
+		$qdata = $GLOBALS['qi'][$GLOBALS['questions'][$qnidx]];
+	} else {
+		$stm = $DBH->prepare("SELECT qtype,control,answer FROM imas_questionset WHERE id=:id");
+		$stm->execute(array(':id'=>$qidx));
+		$qdata = $stm->fetch(PDO::FETCH_ASSOC);
+	}
 
 	if (isset($GLOBALS['lastanswers'])) {
 		foreach ($GLOBALS['lastanswers'] as $iidx=>$ar) {
@@ -848,18 +858,25 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	}
 
 	if (isset($reqdecimals)) {
+		$hasGlobalAbstol = false;
+		if (is_array($anstypes) && !isset($abstolerance)  && !isset($reltolerance)) {
+			$abstolerance = array();
+		} else if (isset($anstypes) && isset($abstolerance) && !is_array($abstolerance)) {
+			$abstolerance = array_fill(0,count($anstypes),$abstolerance);
+			$hasGlobalAbstol = true;
+		}
 		if (is_array($reqdecimals)) {
 			foreach ($reqdecimals as $kidx=>$vval) {
-				if (!isset($abstolerance[$kidx]) && !isset($reltolerance[$kidx])) {
+				if (($hasGlobalAbstol || !isset($abstolerance[$kidx])) && (!is_array($reltolerance) || !isset($reltolerance[$kidx]))) {
 					$abstolerance[$kidx] = 0.5/(pow(10,$vval));
 				}
 			}
 		} else {
 			if (!isset($abstolerance) && !isset($reltolerance)) { //set global abstol
 				$abstolerance = 0.5/(pow(10,$reqdecimals));
-			} else if (isset($anstypes)) {
+			} else if (isset($anstypes) && !isset($reltolerance)) {
 				foreach ($anstypes as $kidx=>$vval) {
-					if (!isset($abstolerance[$kidx]) && !isset($reltolerance[$kidx])) {
+					if (!isset($abstolerance[$kidx]) && (!is_array($reltolerance) || !isset($reltolerance[$kidx]))) {
 						$abstolerance[$kidx] = 0.5/(pow(10,$reqdecimals));
 					}
 				}
@@ -6730,14 +6747,14 @@ function checkreqtimes($tocheck,$rtimes) {
 	if (is_numeric($cleanans) && $cleanans>0 && $cleanans<1) {
 		$cleanans = ltrim($cleanans,'0');
 	}
-	$ignore_case = false;
+	$ignore_case = true;
 	if ($rtimes != '') {
 		$list = array_map('trim',explode(",",$rtimes));
 		for ($i=0;$i < count($list);$i+=2) {
-			if ($list[$i]=='' || strlen($list[$i+1])<2) {continue;}
+			if ($list[$i]=='' || ($list[$i]!='ignore_case' && strlen($list[$i+1])<2)) {continue;}
 			$list[$i+1] = trim($list[$i+1]);
 			if ($list[$i]=='ignore_case') {
-				$ignore_case = ($list[$i+1]=='1' || $list[$i+1]=='true' || $list[$i+1]=='=1');
+				$ignore_case = ($list[$i+1]==='1' || $list[$i+1]==='true' || $list[$i+1]==='=1');
 				continue;
 			}
 			$comp = substr($list[$i+1],0,1);

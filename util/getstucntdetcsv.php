@@ -74,13 +74,13 @@
 	} else {
 		$skipcid = array();
 	}
-	
+
 	//pull template courses
 	$stm = $DBH->query("SELECT id,name FROM imas_courses WHERE (istemplate&1)=1 OR (istemplate&2)=2 ORDER BY name");
 	$templates = array();
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$templates[$row[0]] = $row[1];
-	}                                  
+	}
 	$templateids = array_keys($templates);
 
 	//DB $query = "SELECT id FROM imas_courses WHERE (istemplate&4)=4";
@@ -100,7 +100,7 @@
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$grpnames[$row[0]] = $row[1];
 	}
-	
+
 	$lticourses = array();
 	$stm = $DBH->query('SELECT courseid,contextid FROM imas_lti_courses WHERE 1');
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {

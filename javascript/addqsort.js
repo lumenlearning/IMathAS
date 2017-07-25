@@ -430,7 +430,7 @@ function generateMoveSelect2(num) {
 
 		if (!curistxt) {
 			if (itemarray[i-1].length<5) { //is group
-				qcnt += itemarray[i-1][0];//itemarray[i-1][2].length;
+				qcnt += parseInt(itemarray[i-1][0]);//itemarray[i-1][2].length;
 			} else {
 				qcnt++;
 			}
@@ -1017,7 +1017,7 @@ function generateTable() {
 					curpt = curitems[j][4];
 				}
 				html += "<td class=c><a href=\"modquestion.php?id="+curitems[j][0]+"&aid="+curaid+"&cid="+curcid+"&loc="+(curisgroup?(curqnum+1)+'-'+(j+1):curqnum+1)+"\">Change</a></td>"; //settings
-				if (curitems[j][5]) {
+				if (curitems[j][5]==1) {
 					html += "<td class=c><a href=\"moddataset.php?id="+curitems[j][1]+"&qid="+curitems[j][0]+"&aid="+curaid+"&cid="+curcid+"\">Edit</a></td>"; //edit
 				} else {
 					html += "<td class=c><a href=\"moddataset.php?id="+curitems[j][1]+"&template=true&makelocal="+curitems[j][0]+"&aid="+curaid+"&cid="+curcid+"\">Edit</a></td>"; //edit makelocal

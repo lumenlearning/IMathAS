@@ -80,6 +80,6 @@
 		<a href="<?php echo $imasroot;?>/ohm/privacy.php">Privacy Policy</a></p>
 	</footer>
 </div>
-<?php
+<?php 
 	require(__DIR__ . "/../footer.php");
 ?>

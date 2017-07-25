@@ -57,8 +57,10 @@ function getitemstolookup($items,$inpublic,$viewall,&$tolookup,$onlyopen,$ispubl
 *	$viewall:	Is this a teacher/tutor able to see all items?
 *	$inpublic:	Are we in a public block?
 *	$ispublic:	Are we loading this from public.php? 
+* 	$limittype: 	Limit item type loaded
+*	$limited:	True to only return ids and names/summaries
 ***/
-function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=false) {
+function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=false,$limittype=false,$limited=false) {
 	global $DBH;
 	$itemshowdata = array();
 	
@@ -66,8 +68,16 @@ function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=fa
 	getitemstolookup($items,$inpublic,$viewall,$itemstolookup,$onlyopen,$ispublic);
 	$typelookups = array();
 	if (count($itemstolookup)>0) {
-		$itemlist = implode(',', array_map('intval', $itemstolookup));
-		$stm = $DBH->query("SELECT itemtype,typeid,id FROM imas_items WHERE id IN ($itemlist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($itemstolookup);
+		$query = "SELECT itemtype,typeid,id FROM imas_items WHERE id IN ($placeholders)";
+		if ($limittype!==false) {
+			$query .= " AND itemtype=?";
+			$stm = $DBH->prepare($query);
+			$stm->execute(array_merge($itemstolookup, array($limittype)));
+		} else {
+			$stm = $DBH->prepare($query);
+			$stm->execute($itemstolookup);
+		}
 		
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			if (!isset($typelookups[$line['itemtype']])) {$typelookups[$line['itemtype']] = array();}
@@ -79,48 +89,84 @@ function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=fa
 		}
 	}
 	if (isset($typelookups['Assessment']) && !$ispublic) {
-		$typelist = implode(',', array_keys($typelookups['Assessment']));
-		$stm = $DBH->query("SELECT id,name,summary,startdate,enddate,reviewdate,deffeedback,reqscore,reqscoreaid,avail,allowlate,timelimit FROM imas_assessments WHERE id IN ($typelist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['Assessment']);
+		if ($limited) {
+			$tosel = 'id,name,summary';
+		} else {
+			$tosel = 'id,name,summary,startdate,enddate,reviewdate,deffeedback,reqscore,reqscoreaid,avail,allowlate,timelimit';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM imas_assessments WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['Assessment']));
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$line['itemtype'] = 'Assessment';
 			$itemshowdata[$typelookups['Assessment'][$line['id']]] = $line;
 		}
 	}
 	if (isset($typelookups['InlineText'])) {
-		$typelist = implode(',', array_keys($typelookups['InlineText']));
-		$stm = $DBH->query("SELECT id,title,text,startdate,enddate,fileorder,avail,isplaylist FROM imas_inlinetext WHERE id IN ($typelist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['InlineText']);
+		if ($limited) {
+			$tosel = 'id,title,text';
+		} else {
+			$tosel = 'id,title,text,startdate,enddate,fileorder,avail,isplaylist';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM imas_inlinetext WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['InlineText']));
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$line['itemtype'] = 'InlineText';
 			$itemshowdata[$typelookups['InlineText'][$line['id']]] = $line;
 		}
 	}
 	if (isset($typelookups['Drill']) && !$ispublic) {
-		$typelist = implode(',', array_keys($typelookups['Drill']));
-		$stm = $DBH->query("SELECT id,name,summary,startdate,enddate,avail FROM imas_drillassess WHERE id IN ($typelist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['Drill']);
+		if ($limited) {
+			$tosel = 'id,name,summary';
+		} else {
+			$tosel = 'id,name,summary,startdate,enddate,avail';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM imas_drillassess WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['Drill']));
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$line['itemtype'] = 'Drill';
 			$itemshowdata[$typelookups['Drill'][$line['id']]] = $line;
 		}
 	}
 	if (isset($typelookups['LinkedText'])) {
-		$typelist = implode(',', array_keys($typelookups['LinkedText']));
-		$stm = $DBH->query("SELECT id,title,summary,text,startdate,enddate,avail,target FROM imas_linkedtext WHERE id IN ($typelist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['LinkedText']);
+		if ($limited) {
+			$tosel = 'id,title,summary';
+		} else {
+			$tosel = 'id,title,summary,text,startdate,enddate,avail,target';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM imas_linkedtext WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['LinkedText']));
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$line['itemtype'] = 'LinkedText';
 			$itemshowdata[$typelookups['LinkedText'][$line['id']]] = $line;
 		}
 	}
 	if (isset($typelookups['Forum']) && !$ispublic) {
-		$typelist = implode(',', array_keys($typelookups['Forum']));
-		$stm = $DBH->query("SELECT id,name,description,startdate,enddate,groupsetid,avail,postby,replyby,allowlate FROM imas_forums WHERE id IN ($typelist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['Forum']);
+		if ($limited) {
+			$tosel = 'id,name,description';
+		} else {
+			$tosel = 'id,name,description,startdate,enddate,groupsetid,avail,postby,replyby,allowlate';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM imas_forums WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['Forum']));
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$line['itemtype'] = 'Forum';
 			$itemshowdata[$typelookups['Forum'][$line['id']]] = $line;
 		}
 	}
 	if (isset($typelookups['Wiki'])) {
-		$typelist = implode(',', array_keys($typelookups['Wiki']));
-		$stm = $DBH->query("SELECT id,name,description,startdate,enddate,editbydate,avail,settings,groupsetid FROM imas_wikis WHERE id IN ($typelist)");
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['Wiki']);
+		if ($limited) {
+			$tosel = 'id,name,description';
+		} else {
+			$tosel = 'id,name,description,startdate,enddate,editbydate,avail,settings,groupsetid';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM imas_wikis WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['Wiki']));
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$line['itemtype'] = 'Wiki';
 			$itemshowdata[$typelookups['Wiki'][$line['id']]] = $line;
