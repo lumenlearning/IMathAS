@@ -1030,7 +1030,7 @@
 	echo "<div id='outputmsgContainer'>$outputmsg</div>";
 
 	echo '<div id="headermoddataset" class="pagetitle">';
-	echo "<h2>$addmod QuestionSet Question</h2>\n";
+	echo "<h2>" . Sanitize::encodeStringForDisplay($addmod) . " QuestionSet Question</h2>\n";
 	echo '</div>';
 
 	if (strpos($line['control'],'end stored values - Tutorial Style')!==false) {
@@ -1053,21 +1053,21 @@
 
 	}
 	if (isset($_GET['qid'])) {
-		echo "<p><a href=\"moddataset.php?id={$_GET['id']}&cid=$cid&aid=".Sanitize::onlyInt($_GET['aid'])."&template=true&makelocal={$_GET['qid']}\">Template this question</a> for use in this assessment.  ";
+		echo "<p><a href=\"moddataset.php?id=" . Sanitize::onlyInt($_GET['id']) . "&cid=$cid&aid=".Sanitize::onlyInt($_GET['aid'])."&template=true&makelocal=" . Sanitize::onlyInt($_GET['qid'] . "\">Template this question</a> for use in this assessment.  ";
 		echo "This will let you modify the question for this assessment only without affecting the library version being used in other assessments.</p>";
 	}
 	if (!$myq) {
 		echo "<p>This question is not set to allow you to modify the code.  You can only view the code and make additional library assignments</p>";
 	}
 ?>
-<form enctype="multipart/form-data" method=post action="<?php echo $formAction; ?>">
-<input type="hidden" name="hasimg" value="<?php echo $line['hasimg'];?>"/>
+<form enctype="multipart/form-data" method=post action="<?php echo Sanitize::encodeStringForDisplay($formAction); ?>">
+<input type="hidden" name="hasimg" value="<?php echo Sanitize::encodeStringForDisplay($line['hasimg']);?>"/>
 <p>
 Description:<BR>
-<textarea cols=60 rows=4 name=description <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo $line['description'];?></textarea>
+<textarea cols=60 rows=4 name=description <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo Sanitize::encodeStringForDisplay($line['description']);?></textarea>
 </p>
 <p>
-Author: <?php echo $line['author']; ?> <input type="hidden" name="author" value="<?php echo $author; ?>">
+Author: <?php echo Sanitize::encodeStringForDisplay($line['author']); ?> <input type="hidden" name="author" value="<?php echo Sanitize::encodeStringForDisplay($author); ?>">
 </p>
 <p>
 <?php
