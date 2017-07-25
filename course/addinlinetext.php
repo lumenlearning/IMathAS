@@ -514,24 +514,26 @@ function movefile(from) {
 			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="document.getElementById('datediv').style.display='block';document.getElementById('altcaldiv').style.display='none';"/>Show by Dates<br/>
 			<input type=radio name="avail" value="2" <?php writeHtmlChecked($line['avail'],2);?> onclick="document.getElementById('datediv').style.display='none';document.getElementById('altcaldiv').style.display='block';"/>Show Always<br/>
 		</span><br class="form"/>
-
+		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">
-
-		<span class=form>Available After:</span>
+		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
+		<span class=form>Start Date:</span>
 		<span class=formright>
 			<input type=radio name="sdatetype" value="0" <?php writeHtmlChecked($startdate,'0',0) ?>/>
-			 Always until end date<br/>
+			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
+			 Always avalible until End Date<br/>
 			<input type=radio name="sdatetype" value="sdate" <?php writeHtmlChecked($startdate,'0',1) ?>/>
 			<input type=text size=10 name=sdate value="<?php echo $sdate;?>">
 			<a href="#" onClick="displayDatePicker('sdate', this); return false">
 			<img src="../img/cal.gif" alt="Calendar"/></a>
 			at <input type=text size=10 name=stime value="<?php echo $stime;?>">
 		</span><BR class=form>
-
-		<span class=form>Available Until:</span>
+		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
+		<span class=form>End Date:</span>
 		<span class=formright>
 			<input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($enddate,'2000000000',0) ?>/>
-			Always after start date<br/>
+			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
+			Always avalible after Start Date<br/>
 			<input type=radio name="edatetype" value="edate" <?php writeHtmlChecked($enddate,'2000000000',1) ?>/>
 			<input type=text size=10 name=edate value="<?php echo $edate;?>">
 			<a href="#" onClick="displayDatePicker('edate', this, 'sdate', 'start date'); return false">

@@ -851,10 +851,11 @@ if ($overwriteBody==1) {
 		</span><br class="form"/>
 
 		<div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">
-
+		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<span class=form>Start Date:</span>
 		<span class=formright>
 			<input type=radio name="sdatetype" value="0" <?php writeHtmlChecked($startdate,"0",0); ?>/>
+			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 			Always open until Due Date<br/>
 			<input type=radio name="sdatetype" value="sdate" <?php writeHtmlChecked($startdate,"0",1); ?>/>
 			<input type=text size=10 name="sdate" value="<?php echo $sdate;?>">
@@ -862,10 +863,11 @@ if ($overwriteBody==1) {
 			<img src="../img/cal.gif" alt="Calendar"/></A>
 			at <input type=text size=10 name=stime value="<?php echo $stime;?>">
 		</span><BR class=form>
-
+			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<span class=form>Due Date:</span>
 		<span class=formright>
 			<input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($enddate,"2000000000",0); ?>/>
+			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 			 Always open after Start Date<br/>
 			<input type=radio name="edatetype" value="edate"  <?php writeHtmlChecked($enddate,"2000000000",1); ?>/>
 			<input type=text size=10 name="edate" value="<?php echo $edate;?>">
