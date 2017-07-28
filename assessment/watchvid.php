@@ -2,7 +2,6 @@
 require_once(__DIR__ . '/../includes/sanitize.php');
 
 $url = $_GET['url'];
-require('../includes/sanitize.php');
 $doembed = false;
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
 	 $urlmode = 'https://';
