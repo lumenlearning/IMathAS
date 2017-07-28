@@ -59,6 +59,13 @@
 
 					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits)); //known INTs - safe
 				}
+
+				$headers  = 'MIME-Version: 1.0' . "\r\n";
+				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+				$headers .= "From: $installname <$sendfrom>\r\n";
+				$subject = "New Instructor Account Request";
+
+
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
