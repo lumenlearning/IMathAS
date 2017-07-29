@@ -94,17 +94,17 @@ table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
 	border-bottom: 2px solid #0f0;
 	background-color: #fef;
 }
-tr.even {
+tr.even, tr.even td {
 	background-color: #fff;	
 }
-tr.odd {
+tr.odd, tr.odd td {
 	background-color: #ddf;
 }
 tr.bordered  td {
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
 }
-tr.highlight {
+tr.highlight, tr.highlight td {
 	background-color: #fdf;
 }
 tr.grid td {

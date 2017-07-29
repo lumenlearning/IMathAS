@@ -174,17 +174,17 @@ table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
 	border-bottom: 2px solid #7c9ab7;
 	background-color: #cee0f1; /*#bfd4e8 /*#E2E2E2;*/
 }
-tr.even {
+tr.even, tr.even td {
 	background-color: #fff;	
 }
-tr.odd {
+tr.odd, tr.odd td {
 	background-color: #e8eef5;
 }
 tr.bordered  td {
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
 }
-tr.highlight {
+tr.highlight, tr.highlight td {
 	background-color: #bedcff; /*#ddf;*/
 }
 tr.grid td {
@@ -195,6 +195,14 @@ tr.dbltop td {
 }
 table.gbl td.locked, table.gbl th.locked {
 	border-right: 2px solid #00f;
+}
+.dropdown-header {
+	background-color: #369;
+}
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+	background-color: #cee0f1;	
 }
 #newmsglist th, #newpostlist th {
 	background-color: inherit;

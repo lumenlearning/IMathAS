@@ -128,25 +128,25 @@ table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
 	background-color: #eef;
 	color: #000;
 }
-tr.even {
+tr.even, tr.even td {
 	background-color: #fff;
 	color: #000;	
 }
-tr.odd {
+tr.odd, tr.odd td {
 	background-color: #ccc;
 	color: #000;	
 }
-table.gb tr.even a {
+table.gb tr.even, tr.even td a {
 	color: #000;
 }
-table.gb tr.odd a {
+table.gb tr.odd, tr.odd td a {
 	color: #000;
 }
 tr.bordered  td {
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
 }
-tr.highlight {
+tr.highlight, tr.highlight td {
 	background-color: #999;
 }
 tr.grid td {
