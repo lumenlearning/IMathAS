@@ -350,7 +350,7 @@ if ($myrights<20) {
 				$overwriteBody = 1;
 				$body = "No libraries selected.  <a href=\"managelibs.php?cid=$cid\">Go back</a>\n";
 			} else {
-				$tlist = implode(",",Sanitize::encodeStringForDisplay($_POST['nchecked']));
+				$tlist = Sanitize::encodeStringForDisplay(implode(",",$_POST['nchecked']));
 			}
 		}
 	} else if (isset($_GET['transfer'])) {

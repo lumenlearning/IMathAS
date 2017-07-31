@@ -296,9 +296,9 @@ if ($overwriteBody==1) {
 	echo "&gt; Mass Change Dates</div>\n";
 	echo '<div id="headermasschgdates" class="pagetitle"><h2>Mass Change Dates</h2></div>';
 
-	echo "<script type=\"text/javascript\">var filteraddr = \"$imasroot/course/masschgdates.php?cid=$cid&orderby=" . Sanitize::encodeStringForJavascript($orderby) . "\";";
+	echo "<script type=\"text/javascript\">var filteraddr = \"$imasroot/course/masschgdates.php?cid=$cid&orderby=" . Sanitize::encodeUrlParam($orderby) . "\";";
 
-	echo "var orderaddr = \"$imasroot/course/masschgdates.php?cid=$cid&filter=" . Sanitize::encodeStringForJavascript($filter) . "\";</script>";
+	echo "var orderaddr = \"$imasroot/course/masschgdates.php?cid=$cid&filter=" . Sanitize::encodeUrlParam($filter) . "\";</script>";
 
 	echo '<p>Order by: <select id="orderby" onchange="chgorderby()">';
 	echo '<option value="0" ';

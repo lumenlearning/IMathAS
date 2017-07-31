@@ -698,7 +698,7 @@ switch($_GET['action']) {
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			printf("<option value=\"%d\">%s, %s</option>\n",Sanitize::encodeStringForDisplay($row[0]), Sanitize::encodeStringForDisplay($row[2]),
+			printf("<option value=\"%d\">%s, %s</option>\n",$row[0], Sanitize::encodeStringForDisplay($row[2]),
 				Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo "</select>\n";

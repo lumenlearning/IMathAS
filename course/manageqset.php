@@ -91,7 +91,7 @@ if ($myrights<20) {
 				$curBreadcrumb .= " &gt; <a href=\"manageqset.php?cid=$cid\">Manage Question Set </a>";
 				$curBreadcrumb .= " &gt; Confirm Delete";
 				if (isset($_POST['remove'])) {
-					$rlist = implode(",",Sanitize::encodeStringForDisplay($_POST['nchecked']));
+					$rlist = Sanitize::encodeStringForDisplay(implode(",",$_POST['nchecked']));
 				} else {
 					$rlist = Sanitize::encodeStringForDisplay($_GET['remove']);
 				}
@@ -604,7 +604,7 @@ if ($myrights<20) {
 			$curBreadcrumb .= " &gt; <a href=\"manageqset.php?cid=$cid\">Manage Question Set </a>";
 			$curBreadcrumb .= " &gt; Change Question Rights";
 
-			$clist = implode(",", Sanitize::encodeStringForDisplay($_POST['nchecked']));
+			$clist = Sanitize::encodeStringForDisplay(implode(",", $_POST['nchecked']));
 
 			if (!isset($_POST['nchecked'])) {
 				$overwriteBody = 1;
