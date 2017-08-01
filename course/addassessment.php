@@ -879,7 +879,7 @@ if ($overwriteBody==1) {
 		<span class=form>Keep open as review:</span>
 		<span class=formright>
 			<input type=radio name="doreview" value="0" <?php writeHtmlChecked($line['reviewdate'],0,0); ?>> Never<br/>
-			<input type=radio name="doreview" value="2000000000" <?php writeHtmlChecked($line['reviewdate'],2000000000,0); ?>> Always after Due Date<br/>
+			<input type=radio name="doreview" value="2000000000" <?php writeHtmlChecked($line['reviewdate'],2000000000,0); ?>> Always after due date<br/>
 			<input type=radio name="doreview" value="rdate" <?php if ($line['reviewdate']>0 && $line['reviewdate']<2000000000) { echo "checked=1";} ?>> Until:
 			<input type=text size=10 name=rdate value="<?php echo $rdate;?>">
 			<a href="#" onClick="displayDatePicker('rdate', this, 'edate', 'due date'); return false">
