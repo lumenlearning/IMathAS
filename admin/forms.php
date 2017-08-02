@@ -93,6 +93,8 @@ switch($_GET['action']) {
 			$oldrights = $line['rights'];
 			$oldspecialrights = $line['specialrights'];
 		}
+		echo '<input type=hidden name=oldrole value="'.Sanitize::onlyInt($oldrights).'" />';
+		echo '<input type=hidden name=username value="'.Sanitize::encodeStringForDisplay($line['SID']).'" />';
 		echo '<script type="text/javascript">
 			function onrightschg() {
 				var selrights = this.value;

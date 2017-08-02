@@ -4,6 +4,16 @@
 require("../init.php");
 require_once("../includes/password.php");
 
+
+function returnrole($role_num){
+ 	if ($role_num == 5) {return "Guest User";}
+ 	if ($role_num == 10) {return "Student";}
+ 	if ($role_num == 20) {return "Teacher";}
+ 	if ($role_num == 40) {return "Limited Course Creator";}
+ 	if ($role_num == 75) {return "Group Admin";}
+ 	if ($role_num == 100) {return "Full Admin";}
+}
+
 $from = 'admin';
 if (isset($_GET['from'])) {
 	if ($_GET['from']=='home') {
@@ -137,7 +147,40 @@ switch($_POST['action']) {
 			echo "Username in use - left unchanged";
 			exit;
 		}
-		break;
+		if($_POST['oldrole'] == 10 && $_POST['oldrole'] < $_POST['newrights'] ){
+    //  If they are a student being given more right they will be inrolled in
+      if (isset($CFG['GEN']['enrollonnewinstructor'])) {
+        $valbits = array();
+        $valvals = array();
+        $userid = Sanitize::onlyInt($_GET['id']);
+        foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
+          $valbits[] = "(?,?)";
+          array_push($valvals, $userid,$ncid);
+        }
+        $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+        $stm->execute($valvals);
+      }
+
+		}
+    if($_POST['oldrole'] != $_POST['newrights']){
+
+      $headers  = 'MIME-Version: 1.0' . "\r\n";
+      $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+      $headers .= "From: $accountapproval\r\n";
+      $message  = "<p>Dear ".Sanitize::encodeStringForDisplay($_POST['firstname']).", </p>";
+      $message .= "<p>This is a notification from Lumen OHM. Your account with the username, ". Sanitize::encodeStringForDisplay($_POST['username']).", has been changed from ".returnrole($_POST['oldrole'])." to ".returnrole($_POST['newrights']).".</p>";
+      //<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
+      $message .= "<p>If you have any questions or concerns, please contact us through https://lumenlearning.zendesk.com/hc/en-us/requests/new. </br>Please do not reply to this email as it is not monitored.</p>";
+      $message .= "<p>Thanks,</p><p>Lumen OHM Administrator</p>";
+      //<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
+      if (isset($CFG['GEN']['useSESmail'])) {
+        SESmail($_POST['email'],$accountapproval, $installname . ' Role Change', $message);
+      } else {
+        mail($row[2],$installname . ' Role Change',$message,$headers);
+      }
+
+    }
+    break;
 	case "resetpwd":
 		if ($myrights < 75) { echo "You don't have the authority for this action"; break;}
 		if (isset($_POST['newpw'])) {
