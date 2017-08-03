@@ -5,6 +5,7 @@ $fall2017GroupIds = array(
 	277 => 'Fulton Montgomery CC',
 	485 => 'Tallahassee CC',
 	571 => 'Northern Virginia Community College',
+	658 => 'Oakwood University',
 );
 
 $ohmGroupIds = array(
@@ -21,7 +22,6 @@ $ohmGroupIds = array(
 	376 => 'Utah Valley University',
 	378 => 'Wytheville Community College',
 	421 => 'Wiley College',
-	658 => 'Oakwood University',
 	684 => 'Virginia Highlands CC',
 	730 => 'New River Community College',
 	796 => 'Florida Memorial Univ',
