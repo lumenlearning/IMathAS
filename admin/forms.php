@@ -595,8 +595,8 @@ switch($_GET['action']) {
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':courseid'=>$_GET['id']));
 		$num = $stm->rowCount();
-		echo '<form method="post" action="actions.php?"' . Sanitize::generateQueryStringFromMap(array(
-				'from' => $from, 'cid' => $_GET['id'], 'tot' => $num));
+		echo '<form method="post" action="actions.php?' . Sanitize::generateQueryStringFromMap(array(
+				'from' => $from, 'cid' => $_GET['id'], 'tot' => $num)) . '">';
 		echo '<input type=hidden name=action value="remteacher" />';
 		echo 'With Selected: <input type="submit" value="Remove as Teacher"/>';
 		echo "<table cellpadding=5>\n";
