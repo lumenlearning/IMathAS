@@ -1053,7 +1053,7 @@
 
 	}
 	if (isset($_GET['qid'])) {
-		echo "<p><a href=\"moddataset.php?id=" . Sanitize::onlyInt($_GET['id']) . "&cid=$cid&aid=".Sanitize::onlyInt($_GET['aid'])."&template=true&makelocal=" . Sanitize::onlyInt($_GET['qid'] . "\">Template this question</a> for use in this assessment.  ";
+		echo "<p><a href=\"moddataset.php?id=" . Sanitize::onlyInt($_GET['id']) . "&cid=$cid&aid=".Sanitize::onlyInt($_GET['aid'])."&template=true&makelocal=" . Sanitize::onlyInt($_GET['qid']) . "\">Template this question</a> for use in this assessment.  ";
 		echo "This will let you modify the question for this assessment only without affecting the library version being used in other assessments.</p>";
 	}
 	if (!$myq) {
