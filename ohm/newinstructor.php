@@ -28,7 +28,7 @@
 			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE SID=:SID");
 			$stm->execute(array(':SID'=>$_POST['username']));
 			if ($stm->rowCount()>0) {
-				echo "<p>Username <b>{$_POST['username']}</b> is already in use.  Please try another</p>\n";
+				echo "<p>Username <b>".Sanitize::encodeStringForDisplay($_POST['username'])."</b> is already in use.  Please try another</p>\n";
 			} else {
 				if (isset($CFG['GEN']['homelayout'])) {
 					$homelayout = $CFG['GEN']['homelayout'];
@@ -74,12 +74,12 @@
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
-				$message = "<p>Your new account request has been sent, for username {$_POST['username']}.</p>  ";
+				$message = "<p>Your new account request has been sent, for username ".Sanitize::encodeStringForDisplay($_POST['username']).".</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
 				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
 				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
 				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-				mail($_POST['email'],$subject,$message,$headers);
+				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
 
 				echo $message;
 				require("../footer.php");
@@ -87,13 +87,13 @@
 			}
 		}
 	}
-	if (isset($_POST['firstname'])) {$firstname=$_POST['firstname'];} else {$firstname='';}
-	if (isset($_POST['lastname'])) {$lasname=$_POST['lastname'];} else {$lastname='';}
-	if (isset($_POST['email'])) {$email=$_POST['email'];} else {$email='';}
-	if (isset($_POST['phone'])) {$phone=$_POST['phone'];} else {$phone='';}
-	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
-	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
-	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
+	if (isset($_POST['firstname'])) {$firstname=Sanitize::encodeStringForDisplay($_POST['firstname']);} else {$firstname='';}
+	if (isset($_POST['lastname'])) {$lasname=Sanitize::encodeStringForDisplay($_POST['lastname']);} else {$lastname='';}
+	if (isset($_POST['email'])) {$email=Sanitize::encodeStringForDisplay($_POST['email']);} else {$email='';}
+	if (isset($_POST['phone'])) {$phone=Sanitize::encodeStringForDisplay($_POST['phone']);} else {$phone='';}
+	if (isset($_POST['school'])) {$school=Sanitize::encodeStringForDisplay($_POST['school']);} else {$school='';}
+	if (isset($_POST['verurl'])) {$verurl=Sanitize::encodeStringForDisplay($_POST['verurl']);} else {$verurl='';}
+	if (isset($_POST['username'])) {$username=Sanitize::encodeStringForDisplay($_POST['username']);} else {$username='';}
 	echo "<div class=lumensignupforms>";
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
 	echo '<dl>';

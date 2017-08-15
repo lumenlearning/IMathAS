@@ -413,7 +413,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 				$message = '';
 			}
 
-			echo "<form method=post action=\"msglist.php?page=$page&type=".Sanitize::encodeUrlParam($type)."&cid=$cid&add={$_GET['add']}&replyto=".Sanitize::onlyInt($replyto).'"';
+			echo "<form method=post action=\"msglist.php?page=$page&type=".Sanitize::encodeUrlParam($type)."&cid=$cid&add=".Sanitize::encodeUrlParam($_GET['add'])."&replyto=".Sanitize::onlyInt($replyto).'"';
 			if (!isset($_GET['to'])) {
 				echo " onsubmit=\"return checkrecipient();\"";
 			}
@@ -429,7 +429,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':courseid'=>$courseid, ':id'=>$_GET['to']));
 				$row = $stm->fetch(PDO::FETCH_NUM);
-				echo $row[0].', '.$row[1];
+				printf('%s, %s', Sanitize::encodeStringForDisplay($row[0]), Sanitize::encodeStringForDisplay($row[1]));
 				$ismsgsrcteacher = false;
 				if ($courseid==$cid && $isteacher) {
 					$ismsgsrcteacher = true;
@@ -481,7 +481,8 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 							if ($cnt==1 && $msgset==1 && !$isteacher) {
 								echo ' selected="selected"';
 							}
-							echo ">{$row[2]}, {$row[1]}</option>";
+							printf(">%s, %s</option>", Sanitize::encodeStringForDisplay($row[2]),
+                                Sanitize::encodeStringForDisplay($row[1]));
 						}
             //DB $query = "SELECT imas_users.id,imas_users.FirstName,imas_users.LastName FROM ";
       			//DB $query .= "imas_users,imas_tutors WHERE imas_users.id=imas_tutors.userid AND ";
@@ -615,7 +616,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 	}
 
 	$pagetitle = "Messages";
-	$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/msg.js\"></script>";
+	$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/msg.js?v=072217\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var AHAHsaveurl = '". $GLOBALS['basesiteurl'] . "/msgs/savetagged.php?cid=$cid';</script>";
 	$placeinhead .= '<style type="text/css"> tr.tagged {background-color: #dff;}</style>';
 	require("../header.php");
@@ -897,6 +898,7 @@ function chgfilter() {
 		echo "<tr><td></td><td>No messages</td><td></td></tr>";
 	}
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
+	$cnt = 0;
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if (trim($line['title'])=='') {
 			$line['title'] = '[No Subject]';
@@ -912,8 +914,11 @@ function chgfilter() {
 			$line['title'] = "Re<sup>$n</sup>: " . Sanitize::encodeStringForDisplay($line['title']);
 		}
 		echo "<tr id=\"tr{$line['id']}\" ";
+		$stripe = ($cnt%2==0)?'even':'odd';
 		if (($line['isread']&8)==8) {
-			echo 'class="tagged" ';
+			echo 'class="tagged '.$stripe.'" ';
+		} else {
+			echo 'class="'.$stripe.'"';
 		}
 		echo "><td><input type=checkbox name=\"checked[]\" value=\"{$line['id']}\"/></td><td>";
 		echo "<a href=\"viewmsg.php?page=$page&cid=$cid&filtercid=$filtercid&filteruid=$filteruid&type=msg&msgid={$line['id']}\">";
@@ -956,6 +961,8 @@ function chgfilter() {
 		echo "<td>".Sanitize::encodeStringForDisplay($line['name'])."</td>";
 		$senddate = tzdate("F j, Y, g:i a",$line['senddate']);
 		echo "<td>$senddate</td></tr>";
+		
+		$cnt++;
 	}
 ?>
 	</tbody>

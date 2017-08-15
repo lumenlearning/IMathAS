@@ -21,16 +21,16 @@ $useremail = $stm->fetchColumn(0);
 </head>
 
 <?php
-echo "<h2>LuMOM Help</h2>
+echo "<h2>Lumen Help</h2>
 <div class=\"helpsection\">
   <h3>Contact Us</h3>
   <p>Contact Lumen's support team by filling out the form below.</p>
   <div class=\"contactform\">
     <form method=\"post\" name=\"emailform\" action=\"contactformsubmit.php\">
-      <input type=\"hidden\" name=\"firstname\" value=$userfirstname>
-      <input type=\"hidden\" name=\"lastname\" value=$userlastname>
-      <input type=\"hidden\" name=\"email\" value=$useremail>
-      <input type=\"hidden\" name=\"id\" value=$userid>
+      <input type=\"hidden\" name=\"firstname\" value=" . Sanitize::encodeStringForDisplay($userfirstname) . ">
+      <input type=\"hidden\" name=\"lastname\" value=" . Sanitize::encodeStringForDisplay($userlastname) . ">
+      <input type=\"hidden\" name=\"email\" value=" . Sanitize::encodeStringForDisplay($useremail) . ">
+      <input type=\"hidden\" name=\"id\" value=" . Sanitize::encodeStringForDisplay($userid) . ">
       <label for=\"subject\">Subject: </label><input id=\"mailsubject\" type=\"text\" name=\"subject\"><br>
       <label for=\"message\">Message: </label><textarea name=\"message\"></textarea><br>
       <input type=\"submit\" value=\"Submit\">

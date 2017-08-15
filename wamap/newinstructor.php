@@ -27,7 +27,7 @@
 			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE SID=:SID");
 			$stm->execute(array(':SID'=>$_POST['username']));
 			if ($stm->rowCount()>0) {
-				echo "<p style=\"color:red\">Username <b>{$_POST['username']}</b> is already in use.  Please try another</p>\n";
+				echo "<p style=\"color:red\">Username <b>".Sanitize::encodeStringForDisplay($_POST['username'])."</b> is already in use.  Please try another</p>\n";
 			} else {
 				if (isset($CFG['GEN']['homelayout'])) {
 					$homelayout = $CFG['GEN']['homelayout'];
@@ -54,12 +54,13 @@
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 				$headers .= "From: $installname <$sendfrom>\r\n";
 				$subject = "New Instructor Account Request";
-				$message = "Name: {$_POST['firstname']} {$_POST['lastname']} <br/>\n";
-				$message .= "Email: {$_POST['email']} <br/>\n";
-				$message .= "School: {$_POST['school']} <br/>\n";
-				$message .= "VerificationURL: {$_POST['verurl']} <br/>\n";
-				$message .= "Phone: {$_POST['phone']} <br/>\n";
-				$message .= "Username: {$_POST['username']} <br/>\n";
+				$message = sprintf("Name: %s %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['firstname']),
+					Sanitize::encodeStringForDisplay($_POST['lastname']));
+				$message .= sprintf("Email: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['email']));
+				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
+				$message .= sprintf("VerificationURL: %s <br/>\n", Sanitize::fullUrl($_POST['verurl']));
+				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));
+				$message .= sprintf("Username: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['username']));
 				mail($newacctemail,$subject,$message,$headers);
 
 				$now = time();
@@ -83,13 +84,13 @@
 			}
 		}
 	}
-	if (isset($_POST['firstname'])) {$firstname=$_POST['firstname'];} else {$firstname='';}
-	if (isset($_POST['lastname'])) {$lastname=$_POST['lastname'];} else {$lastname='';}
-	if (isset($_POST['email'])) {$email=$_POST['email'];} else {$email='';}
-	if (isset($_POST['phone'])) {$phone=$_POST['phone'];} else {$phone='';}
-	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
-	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
-	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
+	if (isset($_POST['firstname'])) {$firstname=Sanitize::encodeStringForDisplay($_POST['firstname']);} else {$firstname='';}
+	if (isset($_POST['lastname'])) {$lastname=Sanitize::encodeStringForDisplay($_POST['lastname']);} else {$lastname='';}
+	if (isset($_POST['email'])) {$email=Sanitize::encodeStringForDisplay($_POST['email']);} else {$email='';}
+	if (isset($_POST['phone'])) {$phone=Sanitize::encodeStringForDisplay($_POST['phone']);} else {$phone='';}
+	if (isset($_POST['school'])) {$school=Sanitize::encodeStringForDisplay($_POST['school']);} else {$school='';}
+	if (isset($_POST['verurl'])) {$verurl=Sanitize::fullUrl($_POST['verurl']);} else {$verurl='';}
+	if (isset($_POST['username'])) {$username=Sanitize::encodeStringForDisplay($_POST['username']);} else {$username='';}
 
 	echo "<h3>New Instructor Account Request</h3>\n";
 	echo "<p>The IMathAS software and this webserver hosting are offered free of charge for use by instructors and their students from ";

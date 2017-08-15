@@ -293,26 +293,26 @@ if (isset($_GET['modify'])) {
 		$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 		require("../../header.php");
 		echo '<div class="breadcrumb"><a href="resources.php">Resource List</a> &gt; Add/Modify Resource</div>';
-		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"resources.php?modify={$_GET['modify']}\" onsubmit=\"return validateForm(this);\">\n";
+		echo "<form enctype=\"multipart/form-data\" method=\"post\" action=\"resources.php?modify=".Sanitize::encodeUrlParam($_GET['modify'])."\" onsubmit=\"return validateForm(this);\">\n";
 		foreach ($questions as $key=>$arr) {
 			echo '<p>';
 			echo $arr['short'].' <i>'.$arr['long'].'</i><br/>';
 			if ($arr['type']=='input') {
-				echo '<input type="text" name="'.$key.'" size="'.$arr['c'].'" value="'.$line[$key].'" ';
+				echo '<input type="text" name="'.$key.'" size="'.$arr['c'].'" value="'.Sanitize::isFilenameBlacklisted($line[$key]).'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 				echo '/>';
 			} else if ($arr['type']=='textarea') {
 				echo '<textarea name="'.$key.'" rows="'.$arr['r'].'" cols="'.$arr['c'].'" ';
 				if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
-				echo '>'.$line[$key].'</textarea>';
+				echo '>'.Sanitize::encodeStringForDisplay($line[$key]).'</textarea>';
 			} else if ($arr['type']=='radio') {
 				foreach ($arr['arr'] as $k=>$v) {
-					echo '<input type="radio" name="'.$key.'" value="'.$k.'" ';
+					echo '<input type="radio" name="'.$key.'" value="'.Sanitize::encodeStringForDisplay($k).'" ';
 					if ($k==$line[$key] || ((!isset($line[$key]) || $line[$key]=='') && $k==$arr['def'])) {echo 'checked="checked"';}
 					if ($arr['req']==1) { echo ' class="req" title="'.$arr['short'].'"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.$line[$arr['other']].'" />';
+						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
 					}
 					echo '<br/>';
 				}
@@ -325,7 +325,7 @@ if (isset($_GET['modify'])) {
 					echo '<option value="'.$k.'" ';
 					if ($k==$line[$key] || ((!isset($line[$key]) || $line[$key]=='') && $k==$arr['def'])) {echo 'selected="selected"';}
 
-					echo '/> '.$v.'</option>';
+					echo '/> '.Sanitize::encodeStringForDisplay($v).'</option>';
 				}
 				echo '</select>';
 			} else if ($arr['type']=='checkbox') {
@@ -335,11 +335,11 @@ if (isset($_GET['modify'])) {
 					$line[$key] = array();
 				}
 				foreach ($arr['arr'] as $k=>$v) {
-					echo '<input type="checkbox" name="'.$key.'[]" value="'.$k.'" ';
+					echo '<input type="checkbox" name="'.$key.'[]" value="'.Sanitize::encodeStringForDisplay($k).'" ';
 					if (in_array($k,$line[$key])) {echo 'checked="checked"';}
-					echo '/> '.$v;
+					echo '/> '.Sanitize::encodeStringForDisplay($v);
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.$line[$arr['other']].'" />';
+						echo ', please specify: <input type="text" name="'.$arr['other'].'" value="'.Sanitize::encodeStringForDisplay($line[$arr['other']]).'" />';
 					}
 					echo '<br/>';
 				}
@@ -363,13 +363,13 @@ if (isset($_GET['modify'])) {
 					if ($line[$key][$c]=='') {echo 'selected="selected"';}
 					echo '>None Selected</option>';
 					foreach ($arr['arr'] as $k=>$v) {
-						echo '<option value="'.$k.'" ';
+						echo '<option value="'.Sanitize::encodeStringForDisplay($k).'" ';
 						if ($line[$key][$c]==$k) {echo 'selected="selected"';}
-						echo '>'.$v.'</option>';
+						echo '>'.Sanitize::encodeStringForDisplay($v).'</option>';
 					}
 					echo '</select> ';
 				}
-				echo '<br/>Other: <input type="text" name="'.$key.'-other" value="'.$line[$key][2].'" size="40"/>';
+				echo '<br/>Other: <input type="text" name="'.$key.'-other" value="'.Sanitize::encodeStringForDisplay($line[$key][2]).'" size="40"/>';
 				echo '<br/>';
 			}
 			echo '</p>';
@@ -380,9 +380,9 @@ if (isset($_GET['modify'])) {
 		if ($line['files']!='') {
 			$files = explode('@@',$line['files']);
 			for ($i=0;$i<count($files)/2;$i++) {
-				echo '<input type="text" name="filedesc['.$i.']" value="'.$files[2*$i].'" size="40"/> ';
+				echo '<input type="text" name="filedesc['.$i.']" value="'.Sanitize::encodeStringForDisplay($files[2*$i]).'" size="40"/> ';
 				if ($files[2*$i+1][0]!='#') {
-					echo '<a href="'.getuserfileurl('resources/'.$_GET['modify'].'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
+					echo '<a href="'.getuserfileurl('resources/'.Sanitize::encodeStringForJavascript($_GET['modify']).'/'.Sanitize::encodeStringForJavascript($files[2*$i+1])).'" target="_blank">View</a> ';
 				} else {
 					echo '<a href="'.substr($files[2*$i+1],1).'" target="_blank">Open Web Link</a> ';
 				}
@@ -417,7 +417,7 @@ if (isset($_GET['modify'])) {
 		$stm = $DBH->prepare("DELETE FROM resources WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['remove']));
 	}
-	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/resources.php");
+	header('Location: ' . $GLOBALS['basesiteurl'] . "/wamap/projects/resources.php");
 	exit;
 } else if (isset($_GET['saverating']) && isset($_POST['rating'])) {
 	$_POST['comments'] = preg_replace("/\n\n\n+/","\n\n",$_POST['comments']);
@@ -450,7 +450,7 @@ if (isset($_GET['modify'])) {
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript">
-		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/resources.php?saverating=true";
+		var ratingssaveurl = "'. $GLOBALS['basesiteurl'] . '/wamap/projects/resources.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
 	require("../../header.php");
@@ -470,7 +470,7 @@ if (isset($_GET['modify'])) {
 		if ((trim($line[$key])=='' || $line[$key]=='N') && !isset($arr['showalways'])) { continue;}
 		echo '<tr><td class="r">'.$arr['short'].'</td><td>';
 		if ($arr['type']=='input' || $arr['type']=='textarea') {
-			echo $line[$key];
+			echo Sanitize::encodeStringForDisplay($line[$key]);
 		} else if ($arr['type']=='radio' || $arr['type']=='select') {
 			echo $arr['arr'][$line[$key]];
 		} else if ($arr['type']=='checkbox') {
@@ -498,7 +498,7 @@ if (isset($_GET['modify'])) {
 			echo implode('; ',$out);
 		}
 		if (($arr['type']=='radio' || $arr['type']=='checkbox') && isset($arr['other']) && $line[$arr['other']]!='') {
-			echo ': '.$line[$arr['other']];
+			echo ': '.Sanitize::encodeStringForDisplay($line[$arr['other']]);
 		}
 		echo '</td></tr>';
 	}
@@ -523,11 +523,11 @@ if (isset($_GET['modify'])) {
 			} else {
 				echo "<img alt=\"doc\" src=\"$imasroot/img/doc.png\" class=\"mida\"/> ";
 			}*/
-			echo $fl[2*$i].'</a>';
+			echo Sanitize::encodeStringForDisplay($fl[2*$i]).'</a>';
 			if ($fl[2*$i+1][0]!='#') {
 				$extension = ltrim(strtolower(strrchr($fl[2*$i+1],".")),'.');
 				if (in_array($extension,$canpreview)) {
-					echo ' <a style="font-size: 70%" href="#" onclick="GB_show(\'Preview\',\'http://docs.google.com/viewer?embedded=true&url='.urlencode($url).'\',700,780);return false;">Preview</a>';
+					echo ' <a style="font-size: 70%" href="#" onclick="GB_show(\'Preview\',\'http://docs.google.com/viewer?embedded=true&url='.Sanitize::encodeUrlParam($url).'\',700,780);return false;">Preview</a>';
 				}
 			}
 			//if (count($fl)>2) {echo '</li>';}
@@ -535,13 +535,13 @@ if (isset($_GET['modify'])) {
 		echo '</td></tr>';
 	}
 
-	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.$line['FirstName'].' '.$line['LastName'].'</td></tr>';
+	echo '<tr><td class="r">Posted</td><td>'.date("F j, Y, g:i a", $line['postedon']).' by '.Sanitize::encodeStringForDisplay($line['FirstName'].' '.$line['LastName']).'</td></tr>';
 	echo '<tr><td class="r">Last Updated</td><td>'.date("F j, Y, g:i a", $line['lastmod']).'</td></tr>';
 	echo '</tbody></table>';
 	echo '</body></html>';
 } else {
 	$nologo = true;
-	$address = 'http://' .  $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/resources.php";
+	$address = $GLOBALS['basesiteurl'] . "/resources.php";
 
 	$placeinhead .= '<script type="text/javascript">
 		function chgfilter(el) {
@@ -566,11 +566,11 @@ if (isset($_GET['modify'])) {
 			if (!isset($_SESSION['pfilter-'.$key])) {echo 'selected="selected"';}
 			echo '>All</option>';
 			foreach ($arr['arr'] as $k=>$v) {
-				echo '<option value="'.$k.'" ';
+				echo '<option value="'.Sanitize::encodeStringForDisplay($k).'" ';
 				if ($k == $_SESSION['pfilter-'.$key]) {
 					echo 'selected="selected"';
 				}
-				echo '>'.$v.'</option>';
+				echo '>'.Sanitize::encodeStringForDisplay($v).'</option>';
 			}
 			echo '</select></span>&nbsp; ';
 		}
@@ -636,9 +636,9 @@ if (isset($_GET['modify'])) {
 		if ($i%2==0) { echo 'class="even"';} else {echo 'class="odd"';}
 		echo '>';
 		$i++;
-		echo '<td><a href="resources.php?id='.$line['id'].'">'.$line['title'].'</a></td>';
+		echo '<td><a href="resources.php?id='.Sanitize::encodeUrlParam($line['id']).'">'.Sanitize::encodeStringForDisplay($line['title']).'</a></td>';
 
-		echo '<td>'.$line['type'].'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($line['type']).'</td>';
 		if ($line['ratingcnt']>0) {
 			$v = $line['ratingcnt']/($line['ratingcnt'] + 5);
 			$baysian = round($line['ratingavg']*$v + $ratingavg*(1-$v) - 1/$line['ratingcnt'],3);
@@ -647,19 +647,19 @@ if (isset($_GET['modify'])) {
 		}
 		echo '<td class="nowrap"><span class="inline-rating" order="sortby'.$baysian.'"><ul class="star-rating">';
 		echo '<li class="current-rating" style="width:'.(round(20*$line['ratingavg'])).'%">Currently '.round($line['ratingavg'],1).'/5 stars</li>';
-		echo '</ul></span> ('.$line['ratingcnt'].')</td>';
+		echo '</ul></span> ('.Sanitize::encodeStringForDisplay($line['ratingcnt']).')</td>';
 		echo '<td class="nowrap">'.date('n/j/y',$line['postedon']).'</td>';
 		echo '<td class="nowrap">'.date('n/j/y',$line['lastmod']).'</td><td class="nowrap">';
 		//echo $line['LastName']. ', '.$line['FirstName'].'</td><td>';
 		$dev = explode(',',$line['dev']);
-		echo $dev[0];
+		echo Sanitize::encodeStringForDisplay($dev[0]);
 		if (count($dev)>1) {
 			echo ' et al.';
 		}
 		echo '</td><td>';
 		if ($line['ownerid']==$userid || $myrights==100 || $userid==745) {
-			echo '<span style="font-size: 70%" class="nowrap"><a href="resources.php?modify='.$line['id'].'">Modify</a> | ';
-			echo '<a href="resources.php?remove='.$line['id'].'" onclick="return confirm(\'Are you SURE you want to delete this item?\');">Remove</a></span>';
+			echo '<span style="font-size: 70%" class="nowrap"><a href="resources.php?modify='.Sanitize::encodeUrlParam($line['id']).'">Modify</a> | ';
+			echo '<a href="resources.php?remove='.Sanitize::encodeStringForDisplay($line['id']).'" onclick="return confirm(\'Are you SURE you want to delete this item?\');">Remove</a></span>';
 		}
 		echo '</td>';
 		echo '</tr>';
@@ -726,8 +726,8 @@ function getratingsfor($id) {
 		<li><a href="#" title="4 stars out of 5" class="four-stars" onclick="return recordrating(4);">4</a></li>
 		<li><a href="#" title="5 stars out of 5" class="five-stars" onclick="return recordrating(5);">5</a></li>
 		</ul></span>';
-	$out .= '<input type="hidden" id="rating" name="rating" value="'.$rating.'"/>';
-	$out .= '<input type="hidden" name="taskid" value="'.$id.'"/>';
+	$out .= '<input type="hidden" id="rating" name="rating" value="'.Sanitize::encodeStringForDisplay($rating).'"/>';
+	$out .= '<input type="hidden" name="taskid" value="'.Sanitize::encodeStringForDisplay($id).'"/>';
 	$out .= '<br/>Comments:<br/>';
 	$out .= '<textarea rows="4" style="width:90%" name="comments">'.str_replace('<br/>',"\n",$comments).'</textarea>';
 	if ($myrating==-1) {
@@ -746,7 +746,7 @@ function getratingsfor($id) {
 		if ($i==$myrating) {continue;}
 		$out .= '<div class="arating">';
 		$out .= '<span class="inline-rating"><ul class="star-rating">';
-		$out .= '<li class="current-rating" style="width:'.(20*$rating[0]).'%">Currently '.$rating[0].'/5 stars</li>';
+		$out .= '<li class="current-rating" style="width:'.(20*$rating[0]).'%">Currently '.Sanitize::encodeStringForDisplay($rating[0]).'/5 stars</li>';
 		$out .= '</ul></span>';
 		if ($rating[1]!='') {
 			$out .= '<br/>';
@@ -760,7 +760,7 @@ function getratingsfor($id) {
 				$out .= $rating[1];
 			}
 		}
-		$out .= '<br/><i>'.$rating[2].', '.time_elapsed_string($rating[3]).'</i>';
+		$out .= '<br/><i>'.Sanitize::encodeStringForDisplay($rating[2]).', '.time_elapsed_string($rating[3]).'</i>';
 		$out .= '</div>';
 	}
 	return $out;

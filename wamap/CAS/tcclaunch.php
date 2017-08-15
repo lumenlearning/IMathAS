@@ -105,7 +105,7 @@ if (isset($_GET['launch'])) {
 	$nologo = true;
 	require("../header.php");
 	echo "<h4>Logging in to $installname</h4>";
-	echo "<form method=\"post\" action=\"{$_SERVER['PHP_SELF']}?launch=true$cidqs\" >";
+	echo "<form method=\"post\" action=\"".$imasroot."/wamap/CAS/tcclaunch.php?launch=true$cidqs\" >";
 	?>
 	<div id="settings"><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.
 	Please enable JavaScript and reload this page</noscript></div>
@@ -239,7 +239,7 @@ if (isset($_GET['launch'])) {
 		}
 		if ($infoerr=='') { // no error, so create!
 			if (isset($_REQUEST['onlyekey']) && !isset($_SESSION['userid'])) {
-				echo "Unexpected error: lost userid, <a href=\"http://".$_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . "?userinfo=ask$cidqs\">Try Again</a>";
+				echo "Unexpected error: lost userid, <a href=\"" . $GLOBALS['basesiteurl'] . "/wamap/CAS/tcclaunch.php?userinfo=ask$cidqs\">Try Again</a>";
 				exit;
 			} else if (isset($_REQUEST['onlyekey']) && isset($_SESSION['userid'])) {
 				$userid = $_SESSION['userid'];
@@ -283,7 +283,7 @@ if (isset($_GET['launch'])) {
 		if (isset($infoerr)) {
 			echo '<p style="color:red">'.$infoerr.'</p>';
 		}
-		echo "<form method=\"post\" action=\"{$_SERVER['PHP_SELF']}?userinfo=set$cidqs\" ";
+		echo "<form method=\"post\" action=\"".$imasroot."/wamap/CAS/tcclaunch.php?userinfo=set$cidqs\" ";
 		if ($lti_only) {
 			//using LTI for authentication; don't need username/password
 			//only request name
@@ -299,18 +299,18 @@ if (isset($_GET['launch'])) {
 			//tying LTI to IMAthAS account
 			//give option to provide existing account info, or provide full new student info
 			echo "<p>If you already have an account on $installname, enter your username and ";
-			echo "password below to enable automated signon from $ltiorgname</p>";
-			echo "<span class=form><label for=\"curSID\">$loginprompt:</label></span> <input class=form type=text size=12 id=\"curSID\" name=\"curSID\"><BR class=form>\n";
+			echo "password below to enable automated signon from ".Sanitize::encodeStringForDisplay($ltiorgname)."</p>";
+			echo "<span class=form><label for=\"curSID\">".Sanitize::encodeStringForDisplay($loginprompt).":</label></span> <input class=form type=text size=12 id=\"curSID\" name=\"curSID\"><BR class=form>\n";
 			echo "<span class=form><label for=\"curPW\">Password:</label></span><input class=form type=password size=20 id=\"curPW\" name=\"curPW\"><BR class=form>\n";
 			echo "<div class=submit><input type=submit value='Sign In'></div>\n";
 			echo "<p>If you do not already have an account on $installname, provide the information below to create an account ";
 			echo "and enable automated signon from $ltiorgname</p>";
-			echo "<span class=form><label for=\"SID\">$longloginprompt:</label></span> <input class=form type=text size=12 id=SID name=SID><BR class=form>\n";
+			echo "<span class=form><label for=\"SID\">".Sanitize::encodeStringForDisplay($longloginprompt).":</label></span> <input class=form type=text size=12 id=SID name=SID><BR class=form>\n";
 			echo "<span class=form><label for=\"pw1\">Choose a password:</label></span><input class=form type=password size=20 id=pw1 name=pw1><BR class=form>\n";
 			echo "<span class=form><label for=\"pw2\">Confirm password:</label></span> <input class=form type=password size=20 id=pw2 name=pw2><BR class=form>\n";
-			echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text value=\"$deffirst\" size=20 id=firstnam name=firstname><BR class=form>\n";
-			echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text value=\"$deflast\" size=20 id=lastname name=lastname><BR class=form>\n";
-			echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text value=\"$defemail\" size=60 id=email name=email><BR class=form>\n";
+			echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deffirst)."\" size=20 id=firstnam name=firstname><BR class=form>\n";
+			echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deflast)."\" size=20 id=lastname name=lastname><BR class=form>\n";
+			echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
 			echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
 		} else if (isset($_GET['onlyekey'])) {
 			echo '<input type="hidden" name="onlyekey" value="1" />';
@@ -343,7 +343,7 @@ if (isset($_GET['launch'])) {
 	$stm->execute(array(':sessionid'=>$sessionid));
 	if ($stm->rowCount()==0) {
 		//reporterror("No session recorded");
-		echo "If you haven't connected your CAS account with your WAMAP account yet, <a href=\"http://".$_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . "?userinfo=ask$cidqs\">Click Here</a>";
+		echo "If you haven't connected your CAS account with your WAMAP account yet, <a href=\"".$GLOBALS['basesiteurl']."/wamap/CAS/tcclaunch.php?userinfo=ask$cidqs\">Click Here</a>";
 		exit;
 	} else {
 		//DB $userid = mysql_result($result,0,0);
@@ -399,7 +399,7 @@ if (isset($_GET['launch'])) {
 				$stm->execute(array(':id'=>$cid));
 				if ($stm->rowCount()>0 && trim($stm->fetchColumn(0)) == '') {
 					//no enrollment key, just enroll them
-					header("Location: http://" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . "?userinfo=set$cidqs");
+					header("Location: ".$GLOBALS['basesiteurl']."/wamap/CAS/tcclaunch.php?userinfo=set$cidqs");
 					exit;
 				}
 				$askforuserinfo = true;
@@ -458,9 +458,9 @@ if (isset($_GET['launch'])) {
 //either first connect or bad info on first submit
 if ($askforuserinfo == true) {
 	if ($infoerr!='') {
-		echo "error $infoerr.  <a href=\"http://".$_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . "?userinfo=ask$cidqs\">Try again</a>";
+		echo "error $infoerr.  <a href=\"".$GLOBALS['basesiteurl']."/wamap/CAS/tcclaunch.php?userinfo=ask$cidqs\">Try again</a>";
 	} else {
-		header("Location: http://" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . "?userinfo=ask$cidqs");
+		header("Location: " . $GLOBALS['basesiteurl'] . "/wamap/CAS/tcclaunch.php?userinfo=ask$cidqs");
 	}
 	exit;
 
@@ -520,13 +520,13 @@ if (!$promptforsettings && !$createnewsession) {
 	$stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id");
 	$stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 	if (isset($cid)) {
-		header("Location: http://" . $_SERVER['HTTP_HOST'] . $imasroot . "/course/course.php?cid=$cid");
+		header("Location: " . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid");
 	} else {
-		header("Location: http://" . $_SERVER['HTTP_HOST'] . $imasroot . "/index.php");
+		header("Location: " . $GLOBALS['basesiteurl'] . "/index.php");
 	}
 	exit;
 } else {
-	header("Location: http://" . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . "?accessibility=ask$cidqs");
+	header("Location: " . $GLOBALS['basesiteurl'] . "/wamap/CAS/tcclaunch.php?accessibility=ask$cidqs");
 	exit;
 }
 

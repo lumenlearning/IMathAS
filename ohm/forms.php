@@ -62,8 +62,8 @@ switch($_GET['action']) {
 		}
 		if($_POST['enrollandregister']){
 			echo "<input  type='hidden'   name='enrollandregister'       value='enrollandregister'/>";
-			echo '<input  class="lumenform form" type="hidden"  name="courseid" placeholder="Course Id" value="'. $_POST['cid'] .'" aria-label="courseid" />';
-			echo '<input class="lumenform form" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. $_POST['ekey'].'" aria-label="Enrollment Key:" />';
+			echo '<input  class="lumenform form" type="hidden"  name="courseid" placeholder="Course Id" value="'. Sanitize::courseId($_POST['cid']) .'" aria-label="courseid" />';
+			echo '<input class="lumenform form" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. Sanitize::encodeStringForDisplay($_POST['ekey']).'" aria-label="Enrollment Key:" />';
 		}else{
 		if (!$emailconfirmation) {
 			$doselfenroll = false;
@@ -77,7 +77,7 @@ switch($_GET['action']) {
 				echo '<optgroup label="Self-study courses">';
 				//DB while ($row = mysql_fetch_row($result)) {
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-					echo '<option value="'.$row[0].'">'.$row[1].'</option>';
+					echo '<option value="'.Sanitize::encodeStringForDisplay($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
 				}
 				echo '</optgroup>';
 				echo '</select>';
@@ -133,8 +133,8 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle"><h2>User Profile</h2></div>';
 		echo "<form enctype=\"multipart/form-data\" method=post action=../actions.php?action=chguserinfo$gb>\n";
 		echo '<fieldset id="userinfoprofile"><legend>Profile Settings</legend>';
-		echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname value=\"{$line['FirstName']}\" /><br class=\"form\" />\n";
-		echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname value=\"{$line['LastName']}\"><BR class=form>\n";
+		echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname value=\"".Sanitize::encodeStringForDisplay($line['FirstName'])."\" /><br class=\"form\" />\n";
+		echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname value=\"".Sanitize::encodeStringForDisplay($line['LastName'])."\"><BR class=form>\n";
 		if ($myrights>10 && $groupid>0) {
 			//DB $query = "SELECT name FROM imas_groups WHERE id=".intval($groupid);
 			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -142,7 +142,7 @@ switch($_GET['action']) {
 			$stm = $DBH->prepare("SELECT name FROM imas_groups WHERE id=:id");
 			$stm->execute(array(':id'=>$groupid));
 			$r = $stm->fetch(PDO::FETCH_NUM);
-			echo '<span class="form">'._('Group').':</span><span class="formright">'.$r[0].'</span><br class="form"/>';
+			echo '<span class="form">'._('Group').':</span><span class="formright">'.Sanitize::encodeStringForDisplay($r[0]).'</span><br class="form"/>';
 		}
 		echo '<span class="form"><label for="dochgpw">Change Password?</label></span> <span class="formright"><input type="checkbox" name="dochgpw" onclick="togglechgpw(this.checked)" /></span><br class="form" />';
 		echo '<div style="display:none" id="pwinfo">';
@@ -150,7 +150,7 @@ switch($_GET['action']) {
 		echo "<span class=form><label for=\"newpw1\">Enter new password:</label></span>  <input class=form type=password id=newpw1 name=newpw1 size=40> <BR class=form>\n";
 		echo "<span class=form><label for=\"newpw1\">Verify new password:</label></span>  <input class=form type=password id=newpw2 name=newpw2 size=40> <BR class=form>\n";
 		echo '</div>';
-		echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text size=60 id=email name=email value=\"{$line['email']}\"><BR class=form>\n";
+		echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text size=60 id=email name=email value=\"".Sanitize::encodeStringForDisplay($line['email'])."\"><BR class=form>\n";
 		echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><span class=formright><input type=checkbox id=msgnot name=msgnot ";
 		if ($line['msgnotify']==1) {echo "checked=1";}
 		echo " /></span><BR class=form>\n";
@@ -254,7 +254,7 @@ switch($_GET['action']) {
 			}
 
 			echo "<script type=\"text/javascript\">";
-			echo "var curlibs = '{$line['deflib']}';";
+			echo "var curlibs = '".encodeStringForJavascript($line['deflib'])."';";
 			echo "function libselect() {";
 			echo "  window.open('$imasroot/course/libtree2.php?libtree=popup&type=radio&libs='+curlibs,'libtree','width=400,height='+(.7*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width-420));";
 			echo " }";
@@ -266,7 +266,7 @@ switch($_GET['action']) {
 			echo "  document.getElementById(\"libnames\").innerHTML = libn;";
 			echo "}";
 			echo "</script>";
-			echo "<span class=form>Default question library:</span><span class=formright> <span id=\"libnames\">$lname</span><input type=hidden name=\"libs\" id=\"libs\"  value=\"{$line['deflib']}\">\n";
+			echo "<span class=form>Default question library:</span><span class=formright> <span id=\"libnames\">".Sanitize::encodeStringForDisplay($lname)."</span><input type=hidden name=\"libs\" id=\"libs\"  value=\"".Sanitize::encodeStringForDisplay($line['deflib'])."\">\n";
 			echo " <input type=button value=\"Select Library\" onClick=\"libselect()\"></span><br class=form> ";
 
 			echo "<span class=form><label for=usedeflib>Use default question library for all templated questions?</label></span>";
@@ -318,7 +318,7 @@ switch($_GET['action']) {
 			echo '<optgroup label="Self-study courses">';
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				echo '<option value="'.$row[0].'">'.$row[1].'</option>';
+				echo '<option value="'.Sanitize::encodeStringForDisplay($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
 			}
 			echo '</optgroup>';
 			echo '</select></p>';
@@ -398,9 +398,9 @@ switch($_GET['action']) {
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$allcourses[] = $row[0];
-				echo '<br/><input type="checkbox" name="checked[]" class="teaching" value="'.$row[0].'" id="c'.$row[0].'"';
+				echo '<br/><input type="checkbox" name="checked[]" class="teaching" value="'.Sanitize::encodeStringForDisplay($row[0]).'" id="c'.Sanitize::encodeStringForDisplay($row[0]).'"';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> <label for="c'.$row[0].'">'.$row[1].'</label>';
+				echo '/> <label for="c'.Sanitize::encodeStringForDisplay($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</label>';
 			}
 			echo '</p>';
 		}
@@ -414,9 +414,9 @@ switch($_GET['action']) {
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$allcourses[] = $row[0];
-				echo '<br/><input type="checkbox" name="checked[]" class="tutoring" value="'.$row[0].'" id="c'.$row[0].'"';
+				echo '<br/><input type="checkbox" name="checked[]" class="tutoring" value="'.Sanitize::encodeStringForDisplay($row[0]).'" id="c'.Sanitize::encodeStringForDisplay($row[0]).'"';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> <label for="c'.$row[0].'">'.$row[1].'</label>';
+				echo '/> <label for="c'.Sanitize::encodeStringForDisplay($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</label>';
 			}
 			echo '</p>';
 		}
@@ -430,9 +430,9 @@ switch($_GET['action']) {
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$allcourses[] = $row[0];
-				echo '<br/><input type="checkbox" name="checked[]" class="taking" value="'.$row[0].'" id="c'.$row[0].'"';
+				echo '<br/><input type="checkbox" name="checked[]" class="taking" value="'.Sanitize::encodeStringForDisplay($row[0]).'" id="c'.Sanitize::encodeStringForDisplay($row[0]).'"';
 				if (!in_array($row[0],$hidelist)) {echo 'checked="checked"';}
-				echo '/> <label for="c'.$row[0].'">'.$row[1].'</label>';
+				echo '/> <label for="c'.Sanitize::encodeStringForDisplay($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</label>';
 			}
 			echo '</p>';
 		}
@@ -473,7 +473,7 @@ switch($_GET['action']) {
 		echo "to gain access to your data</p>";
 
 		echo '<p>Add to iGoogle: <a href="http://fusion.google.com/add?source=atgs&moduleurl=http%3A//'.$_SERVER['HTTP_HOST'].$imasroot.'/google-postreader.php"><img src="http://gmodules.com/ig/images/plus_google.gif" border="0" alt="Add to Google"></a></p>';
-		echo "<p>Access Code: $code</p>";
+		echo "<p>Access Code:". Sanitize::encodeStringForDisplay($code)."</p>";
 		echo "<p><a href=forms.php?action=googlegadget&regen=true$gb>Generate a new Access code<a/><br/>";
 		echo "<p><a href=../actions.php?action=googlegadget&clear=true$gb>Clear Access code</a></p>";
 		echo "<p>Note: This access code only allows Google to access a list of new posts and messages, and does not provide access to grades or any other data stored at $installname.  Be aware that this form of access is insecure and could be intercepted by a third party.</p>";

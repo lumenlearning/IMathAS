@@ -469,7 +469,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 					if (in_array($k,$line[$key])) {echo 'checked="checked"';}
 					echo '/> '.$v;
 					if (isset($arr['other']) && $v=='Other') {
-						echo ', please specify: <input type="text" name="' . Sanitize::encodeStringForDisplay($arr['other']) . '" value="' . Sanitize::encodeStringForDisplay($line[$arr['other']]) . '" />';
+						echo ', please specify: <input type="text" name="' . $arr['other'] . '" value="' . Sanitize::encodeStringForDisplay($line[$arr['other']]) . '" />';
 					}
 					echo '<br/>';
 				}
@@ -647,7 +647,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
 	$placeinhead .= '<script type="text/javascript">
-		var ratingssaveurl = "'. $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/arithmetic.php?saverating=true";
+		var ratingssaveurl = "'. $GLOBALS['basesiteurl'] . '/wamap/projects/arithmetic.php?saverating=true";
 		</script>';
 	$placeinhead .= '<script type="text/javascript" src="validate.js?v=2"></script>';
 	require("../../header.php");
@@ -738,7 +738,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 	echo '</body></html>';
 } else {
 	$nologo = true;
-	$address = 'http://' .  $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/arithmetic.php".($ispublic?'?public=true':'?pb=true');
+	$address = $GLOBALS['basesiteurl'] . "/wamap/projects/arithmetic.php".($ispublic?'?public=true':'?pb=true');
 
 	$placeinhead .= '<script type="text/javascript">
 		function chgfilter(el) {

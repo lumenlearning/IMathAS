@@ -206,22 +206,26 @@ table {
 	width: 100%;
 }
 
+table.mce-item-table {
+	width: auto;
+}
+
 /*Tables */
 table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
 	border-bottom: 2px solid #9362E1;
 	background-color: #eee7fa;
 }
-tr.even {
+tr.even, tr.even td {
 	background-color: #fff;
 }
-tr.odd {
+tr.odd, tr.odd td {
 	background-color: #f8f6fc;
 }
 tr.bordered  td {
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
 }
-tr.highlight {
+tr.highlight, tr.highlight td {
 	background-color: #ddf;
 }
 tr.grid td {

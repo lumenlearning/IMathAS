@@ -126,17 +126,17 @@ table.gb thead th, table.gbl thead th, table.gbl thead th.locked {
 	border-bottom: 2px solid #C3C2CA;
 	background-color: #E2E2E2;
 }
-tr.even {
+tr.even, tr.even td {
 	background-color: #fff;	
 }
-tr.odd {
+tr.odd, tr.odd td {
 	background-color: #E9E9E9;
 }
 tr.bordered  td {
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
 }
-tr.highlight {
+tr.highlight, tr.highlight td {
 	background-color: #ddf;
 }
 tr.grid td {
@@ -187,6 +187,14 @@ table.gb .cat9 {
 	font-variant: small-caps
 }
 
+.dropdown-header {
+	background-color: #369;
+}
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+	background-color: #E9E9E9;	
+}
 /*Fake look of links for Javascript onclicks*/
 span.link {
 	text-decoration: underline;
