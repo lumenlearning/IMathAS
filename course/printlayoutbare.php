@@ -249,7 +249,8 @@ if ($overwriteBody==1) {
 				echo "<div class=hdrm>\n";
 
 				echo "<div id=headerleft>$headerleft</div><div id=headerright>$headerright</div>\n";
-				echo "<div id=intro>".Sanitize::encodeStringForDisplay($line['intro'])."</div>\n";
+				// $line['intro'] contains HTML.
+				echo "<div id=intro>{$line['intro']}</div>\n";
 				echo "</div>\n";
 				echo "</div>\n";
 
@@ -293,7 +294,8 @@ if ($overwriteBody==1) {
 			echo "<div class=hdrm>\n";
 
 			echo "<div id=headerleft>$headerleft</div><div id=headerright>$headerright</div>\n";
-			echo "<div id=intro>".Sanitize::encodeStringForDisplay($line['intro'])."</div>\n";
+			// $line['intro'] contains HTML.
+			echo "<div id=intro>{$line['intro']}</div>\n";
 			echo "</div>\n";
 			echo "</div>\n";
 			for ($i=0; $i<$numq; $i++) {
