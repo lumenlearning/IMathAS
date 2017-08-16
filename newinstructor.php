@@ -75,7 +75,7 @@
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$_POST['verurl'] = Sanitize::fullUrl($_POST['verurl']);
+				$_POST['verurl'] = Sanitize::url($_POST['verurl']);
 				$urldisplay = Sanitize::encodeStringForDisplay($_POST['verurl']);
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));

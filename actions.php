@@ -611,7 +611,7 @@ require_once("includes/sanitize.php");
 
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
           if($_GET['enrollandlogin']){
-						header("Location:" . $GLOBALS['basesiteurl'] . "/course/course.php?folder=0&cid=".$_POST['cid']); /* Redirect browser */
+						header("Location:" . $GLOBALS['basesiteurl'] . "/course/course.php?folder=0&cid=".Sanitize::courseId($_POST['cid'])); /* Redirect browser */
 						exit;
 					}
 					require("header.php");

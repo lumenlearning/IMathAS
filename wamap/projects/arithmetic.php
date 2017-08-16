@@ -692,7 +692,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 			if ($line[$key][2]!='') {
 				$out[] = $line[$key][2];
 			}
-			echo implode('; ',$out);
+			echo Sanitize::encodeStringForDisplay(implode('; ',$out));
 		}
 		if (($arr['type']=='radio' || $arr['type']=='checkbox') && isset($arr['other']) && $line[$arr['other']]!='') {
 			echo ': ' . Sanitize::encodeStringForDisplay($line[$arr['other']]);
@@ -713,7 +713,7 @@ if (isset($_GET['modify']) && !$ispublic) {
 			} else {
 				$url = substr($fl[2*$i+1],1);
 			}
-			echo '<a href="' . Sanitize::fullUrl($url) . '" target="_blank">';
+			echo '<a href="' . Sanitize::url($url) . '" target="_blank">';
 
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
@@ -964,21 +964,21 @@ function getratingsfor($id) {
 		if ($i==$myrating) {continue;}
 		$out .= '<div class="arating">';
 		$out .= '<span class="inline-rating"><ul class="star-rating">';
-		$out .= '<li class="current-rating" style="width:'.(20*$rating[0]).'%">Currently '.$rating[0].'/5 stars</li>';
+		$out .= '<li class="current-rating" style="width:'.(20*$rating[0]).'%">Currently '.Sanitize::encodeStringForDisplay($rating[0]).'/5 stars</li>';
 		$out .= '</ul></span>';
 		if ($rating[1]!='') {
 			$out .= '<br/>';
 			if (strlen($rating[1])>200) {
-				$out .= substr($rating[1],0,140);
+				$out .= Sanitize::encodeStringForDisplay(substr($rating[1],0,140));
 				$out .= '<span style="display:none;" id="hiddencomment'.$i.'">';
-				$out .= substr($rating[1],140);
+				$out .= Sanitize::encodeStringForDisplay(substr($rating[1],140));
 				$out .= '</span>';
 				$out .= ' <a href="#" onclick="commentshowhide(this,'.$i.');return false;">[more...]</a>';
 			} else {
-				$out .= $rating[1];
+				$out .= Sanitize::encodeStringForDisplay($rating[1]);
 			}
 		}
-		$out .= '<br/><i>'.$rating[2].', '.time_elapsed_string($rating[3]).'</i>';
+		$out .= '<br/><i>'.Sanitize::encodeStringForDisplay($rating[2]).', '.Sanitize::encodeStringForDisplay(time_elapsed_string($rating[3])).'</i>';
 		$out .= '</div>';
 	}
 	return $out;

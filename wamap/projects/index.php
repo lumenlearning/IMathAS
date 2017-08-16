@@ -388,7 +388,7 @@ if (isset($_GET['modify'])) {
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$stm = $DBH->prepare("UPDATE projects SET files=:files WHERE id=:id");
 		$stm->execute(array(':files'=>$files, ':id'=>$_GET['modify']));
-		header('Location: ' . Sanitize::fullUrl($GLOBALS['basesiteurl'] . "/wamap/projects/index.php"));
+		header('Location: ' . Sanitize::url($GLOBALS['basesiteurl'] . "/wamap/projects/index.php"));
 		exit;
 	} else {
 		//adding / modifying a task form
@@ -543,7 +543,7 @@ if (isset($_GET['modify'])) {
 		$stm = $DBH->prepare("DELETE FROM projects WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['remove']));
 	}
-	header('Location: ' . Sanitize::fullUrl($GLOBALS['basesiteurl'] . "/wamap/projects/index.php"));
+	header('Location: ' . Sanitize::url($GLOBALS['basesiteurl'] . "/wamap/projects/index.php"));
 	exit;
 } else if (isset($_GET['saverating']) && isset($_POST['rating'])) {
 	$_POST['comments'] = preg_replace("/\n\n\n+/","\n\n",$_POST['comments']);

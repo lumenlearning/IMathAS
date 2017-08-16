@@ -70,7 +70,7 @@
 			echo '<p><button type=submit name=confirm value=true>'._('Delete Item').'</button>';
 
 			printf(" <input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addgrades.php?stu=%s&cid=%s&gbitem=%d&grades=all'\" />",
-				Sanitize::encodeUrlParam($_GET['stu']), $cid, $_GET['del']);
+				Sanitize::encodeUrlParam($_GET['stu']), $cid, Sanitize::encodeUrlParam($_GET['del']));
 			
 			echo '</p></form>';
 			require("../footer.php");
