@@ -2661,7 +2661,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (strpos($settings[2],'0:')===0) {
 				$settings[2] = substr($settings[2],2);
 			}
-			if (strpos($grid[4],'pi')!==false) {
+			if (strpos($grid[4],'/')!==false) {
 				if (strpos($settings[4],':')!==false) {
 					$settings4pts = explode(':',$settings[4]);
 					$settings[4] = 2*($settings[1] - $settings[0]).':'.$settings4pts[1];
@@ -2747,7 +2747,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (is_array($settings[5]) && count($settings[5]>2)) {
 			$plot = addlabel($plot,0,$settings[3],$settings[5][2],"black","belowright");
 		}
-		if (isset($grid) && strpos($grid[4],'pi')!==false) {
+		if (isset($grid) && strpos($grid[4],'/')!==false) {
 			$plot = addfractionaxislabels($plot,$grid[4]);
 		}
 
@@ -2851,6 +2851,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						$out .= "<img src=\"$imasroot/img/tpexp.png\" onclick=\"imathasDraw.settool(this,$qn,8.3)\" ";
 						if (count($answerformat)>1 && $answerformat[1]=='exp') { $out .= 'class="sel" '; $def = 8.3;}
 						$out .= ' alt="Exponential"/>';
+					}
+					if (in_array('log',$answerformat)) {
+						$out .= "<img src=\"$imasroot/img/tplog.png\" onclick=\"imathasDraw.settool(this,$qn,8.4)\" ";
+						if (count($answerformat)>1 && $answerformat[1]=='log') { $out .= 'class="sel" '; $def = 8.4;}
+						$out .= ' alt="Logarithm"/>';
 					}
 					if ($settings[6]*($settings[3]-$settings[2]) == $settings[7]*($settings[1]-$settings[0])) {
 						//only circles if equal spacing in x and y
@@ -3100,14 +3105,14 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					}
 					$saarr = array_merge($saarr,$backg);
 					$sa = showplot($saarr,$origxmin,$settings[1],$origymin,$settings[3],$sclinglbl,$sclinggrid,$settings[6],$settings[7]);
-					if (isset($grid) && strpos($grid[4],'pi')!==false) {
+					if (isset($grid) && strpos($grid[4],'/')!==false) {
 						$sa = addfractionaxislabels($sa,$grid[4]);
 					}
 				}
 
 			} else {
 				$sa = showplot($saarr,$origxmin,$settings[1],$origymin,$settings[3],$sclinglbl,$sclinggrid,$settings[6],$settings[7]);
-				if (isset($grid) && strpos($grid[4],'pi')!==false) {
+				if (isset($grid) && strpos($grid[4],'/')!==false) {
 					$sa = addfractionaxislabels($sa,$grid[4]);
 				}
 			}
@@ -4207,7 +4212,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 
 		$correct = 0;
-
+		$correctanyformat = 0;
 		foreach($anarr as $i=>$anss) {
 			$foundloc = -1;
 			if (in_array('orderedlist',$ansformats)) {
@@ -4239,15 +4244,15 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						if (is_array($anans)) {
 							if (($anans[1]=="(" && $givenans>$anans[2]) || ($anans[1]=="[" && $givenans>=$anans[2])) {
 								if (($anans[4]==")" && $givenans<$anans[3]) || ($anans[4]=="]" && $givenans<=$anans[3])) {
-									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+									if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 								}
 							}
 						} else if ($anans=="DNE" && strtoupper($givenans)=="DNE") {
-							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						} else if (($anans=="+oo" || $anans=="oo") && ($givenans=="+oo" || $givenans=="oo")) {
-							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						} else if ($anans=="-oo" && $givenans=="-oo") {
-							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						}/* moved to preprocessing
 						else if (is_numeric($givenans)) {
 							//try evaling answer
@@ -4264,7 +4269,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 								if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 									$formatok = "nopart";  $partformatok = false;
 								}
-								if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+								if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 							}
 						} else {
 							if ($anans==0) {
@@ -4272,14 +4277,14 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 									if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 										$formatok = "nopart";  $partformatok = false;
 									}
-									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+									if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 								}
 							} else {
 								if (abs($anans - $givenans)/(abs($anans)+(abs($anans)>1?1E-12:(abs($anans)*1E-12))) < $reltolerance+1E-12) {
 									if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 										$formatok = "nopart";  $partformatok = false;
 							}
-									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+									if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						}
 					}
 				}
@@ -4305,7 +4310,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 		}
 		if ($score<0) { $score = 0; }
-		if ($formatok != "all") {
+		if ($formatok != "all" && $correctanyformat>0) {
 			$GLOBALS['partlastanswer'] .= '$f$1';
 			if ($formatok == 'nowhole') {
 				$score = 0;
@@ -5135,6 +5140,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$ansabs = array();
 			$anssqrts = array();
 			$ansexps = array();
+			$anslogs = array();
 			$anscoss = array();
 			$ansvecs = array();
 			$ansrats = array();
@@ -5280,7 +5286,30 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						$xop = $x2p;
 					}
 					$settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
-					if (strpos($function[0],'abs')!==false) { //is abs
+					if (strpos($function[0],'log')!==false || strpos($function[0],'ln')!==false) { //is log
+						//treat like x=ab^y
+						if (!is_nan($y1)) {
+							$yap = $y1p;
+							$xap = $x1p;
+							$yb = @$func($x1-1);
+							$xbp = $x1p - $pixelsperx;
+						} else {
+							$yap = $y3p;
+							$xap = $x3p;
+							$yb = @$func($x3+1);
+							$xbp = $x3p + $pixelsperx;
+						}
+						$ybp = $settings[7] - ($yb-$settings[2])*$pixelspery - $imgborder;
+						
+						if ($ybp>$yap) {
+							$base = safepow(($xop-$xbp)/($xop-$xap), 1/($ybp-$yap));
+						} else {
+							$base = safepow(($xop-$xap)/($xop-$xbp), 1/($yap-$ybp));
+						}
+						$str = ($xop-$xbp)/safepow($base,$ybp-$yop);
+						$anslogs[$key] = array($str,$base);
+						
+					} else if (strpos($function[0],'abs')!==false) { //is abs
 						$y0 = $func($x0);
 						$y4 = $func($x4);
 						$y0p = $settings[7] - ($y0-$settings[2])*$pixelspery - $imgborder;
@@ -5525,6 +5554,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							}
 							//$exps[] = array($str,$base);
 							$exps[] = array($pts[1]-$xop, $adjy1, $pts[3]-$xop, $adjy2, $base);
+						}
+					} else if ($pts[0]==8.4) {
+						$adjx2 = $xop - $pts[3];
+						$adjx1 = $xop - $pts[1];
+						if ($adjx1*$adjx2>0 && $pts[2]!=$pts[4]) {
+							$base = safepow($adjx2/$adjx1,1/($pts[4]-$pts[2]));
+							if (abs($pts[2]-$yop)<abs($pts[4]-$yop)) {
+								$str = $adjx1/safepow($base,$pts[2]-$yop);
+							} else {
+								$str = $adjx2/safepow($base,$pts[4]-$yop);
+							}
+							$logs[] = array($pts[2]-$yop, $adjx1, $pts[4]-$yop, $adjx2, $base);
 						}
 					} else if ($pts[0]==8.2) { //rational
 						if ($pts[1]!=$pts[3] && $pts[2]!=$pts[4]) {
@@ -5858,6 +5899,27 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					}
 					//check right point if base<=
 					if ($ansexp[1]<=1 && abs($ansexp[0]*safepow($ansexp[1],$exps[$i][2]) - $exps[$i][3]) >$defpttol*$reltolerance) {
+						continue;
+					}
+
+					$scores[$key] = 1;
+					break;
+				}
+			}
+
+			foreach ($anslogs as $key=>$anslog) {
+				$scores[$key] = 0;
+				for ($i=0; $i<count($logs); $i++) {
+					//check base
+					if (abs($anslog[1]-$logs[$i][4])/(abs($anslog[1]-1)+1e-18)>$deftol*$reltolerance) {
+						continue;
+					}
+					//check bottom point if base>1
+					if ($anslog[1]>1 && abs($anslog[0]*safepow($anslog[1],$logs[$i][0]) - $logs[$i][1]) >$defpttol*$reltolerance) {
+						continue;
+					}
+					//check top point if base<=
+					if ($anslog[1]<=1 && abs($anslog[0]*safepow($anslog[1],$logs[$i][2]) - $logs[$i][3]) >$defpttol*$reltolerance) {
 						continue;
 					}
 
