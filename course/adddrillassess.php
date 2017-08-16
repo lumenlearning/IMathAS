@@ -36,8 +36,7 @@ if ($stm->rowCount()==0) {
 	$n = 30;
 	$showtostu = 7;
 	$daid = 0;
-	$drillname = "Enter title here";
-	$drillsummary = "<p>Enter summary here (displays on course page)</p>";
+	$drillsummary = "";
 	$startdate = time();
 	$enddate = time() + 7*24*60*60;
 	$avail = 1;
@@ -655,7 +654,7 @@ printf("<form id=\"selform\" method=\"post\" action=\"adddrillassess.php?cid=%s&
     $cid, $daid, Sanitize::encodeUrlParam($block), Sanitize::encodeUrlParam($totb));
 ?>
 		<span class=form>Title: </span>
-		<span class=formright><input type=text size=60 name="title" value="<?php echo Sanitize::encodeStringForDisplay($drillname);?>">
+		<span class=formright><input type=text size=60 name="title" placeholder="Enter title here" value="<?php echo Sanitize::encodeStringForDisplay($drillname);?>" required>
 		</span><BR class=form>
 
 		Summary<BR>

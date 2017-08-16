@@ -273,8 +273,6 @@ switch($_GET['action']) {
 			$deftime = $line['deftime'];
 		} else {
 			$courseid = _("Will be assigned when the course is created");
-			$name = "Enter course name here";
-			$ekey = "Enter enrollment key here";
 			$hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
 			$picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
 			$allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
@@ -327,15 +325,15 @@ switch($_GET['action']) {
 		}
 		if ($_GET['action']=="modify") { echo "&id=".Sanitize::encodeUrlParam($_GET['id']); }
 		echo "\">\n";
-		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" />';
+		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" required/>';
 		echo "<span class=form>Course ID:</span><span class=formright>".Sanitize::encodeStringForDisplay($courseid)."</span><br class=form>\n";
 		if ($isadminview) {
 			echo '<span class="form">Owner:</span><span class="formright">';
 			printf('%s, %s (%s)</span><br class="form"/>', Sanitize::encodeStringForDisplay($udat['LastName']),
 				Sanitize::encodeStringForDisplay($udat['FirstName']), Sanitize::encodeStringForDisplay($udat['name']));
 		}
-		echo "<span class=form>Enter Course name:</span><input class=form type=text size=80 name=\"coursename\" value=\"".Sanitize::encodeStringForDisplay($name)."\"><BR class=form>\n";
-		echo "<span class=form>Enter Enrollment key:</span><input class=form type=text size=30 name=\"ekey\" value=\"".Sanitize::encodeStringForDisplay($ekey)."\"><BR class=form>\n";
+		echo "<span class=form>Enter Course name:</span><input class=form type=text size=80 name=\"coursename\" placeholder='Enter course name here' value=\"".Sanitize::encodeStringForDisplay($name)."\" required><BR class=form>\n";
+		echo "<span class=form>Enter Enrollment key:</span><input class=form type=text size=30 name=\"ekey\"    placeholder='Enter enrollment key here' value=\"".Sanitize::encodeStringForDisplay($ekey)."\"    ><BR class=form>\n";
 		echo '<span class=form>Available?</span><span class=formright>';
 		echo '<input type="checkbox" name="stuavail" value="1" ';
 		if (($avail&1)==0) { echo 'checked="checked"';}

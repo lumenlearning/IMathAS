@@ -335,11 +335,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			if (substr($line['text'],0,4)=='http') {
 				$type = 'web';
 				$webaddr = $line['text'];
-				$line['text'] = "<p>Enter text here</p>";
+				$line['text'] = "";
 			} else if (substr($line['text'],0,5)=='file:') {
 				$type = 'file';
 				$filename = substr($line['text'],5);
-				$line['text'] = "<p>Enter text here</p>";
+				$line['text'] = "";
 			} else if (substr($line['text'],0,8)=='exttool:') {
 				$type = 'tool';
 				$points= $line['points'];
@@ -357,7 +357,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$tutoredit = $toolparts[5];
 					$gradesecret = $toolparts[6];
 				}
-				$line['text'] = "<p>Enter text here</p>";
+				$line['text'] = "";
 			} else {
 				$type = 'text';
 			}
@@ -372,9 +372,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$savetitle = _("Save Changes");
 		} else {
 			//set defaults
-			$line['title'] = "Enter title here";
-			$line['summary'] = "<p>Enter summary here (displays on course page)</p>";
-			$line['text'] = "<p>Enter text here</p>";
+			$line['summary'] = "";
+			$line['text'] = "";
 			$line['avail'] = 1;
 			$line['oncal'] = 0;
 			$line['caltag'] = '!';
@@ -528,7 +527,7 @@ if ($overwriteBody==1) {
 
 	<form enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
 		<span class=form>Title: </span>
-		<span class=formright><input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$line['title']);?>">
+		<span class=formright><input type=text size=60 name=title placeholder="Enter title here" value="<?php echo str_replace('"','&quot;',$line['title']);?>" required>
 		</span><BR class=form>
 
 		Summary<BR>

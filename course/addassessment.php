@@ -492,9 +492,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$savetitle = _("Save Changes");
 		} else {  //INITIAL LOAD IN ADD MODE
 			//set defaults
-			$line['name'] = "Enter assessment name";
-			$line['summary'] = "<p>Enter summary here (shows on course page)</p>";
-			$line['intro'] = "<p>Enter intro/instructions</p>";
+			$line['summary'] = "<p></p>";
+			$line['intro'] = "<p></p>";
 			$startdate = time()+60*60;
 			$enddate = time() + 7*24*60*60;
 			$line['startdate'] = $startdate;
@@ -831,7 +830,7 @@ if ($overwriteBody==1) {
 
 	<form method=post action="<?php echo $page_formActionTag ?>">
 		<span class=form>Assessment Name:</span>
-        <span class=formright><input type=text size=30 name=name value="<?php echo Sanitize::encodeStringForDisplay($line['name']); ?>"></span><BR class=form>
+        <span class=formright><input type=text size=30 name=name placeholder="Enter assessment name" value="<?php echo Sanitize::encodeStringForDisplay($line['name']); ?>" required></span><BR class=form>
 
 		Summary:<BR>
 		<div class=editor>

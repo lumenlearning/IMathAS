@@ -330,8 +330,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$savetitle = _("Save Changes");
 	} else {
 		//set defaults
-		$line['title'] = "Enter title here";
-		$line['text'] = "<p>Enter text here</p>";
+		$line['text'] = "";
 		$line['avail'] = 1;
 		$line['oncal'] = 0;
 		$line['caltag'] = '!';
@@ -467,7 +466,7 @@ function movefile(from) {
 	<form enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
 	<span class=form>Title: </span>
 	<span class=formright>
-		<input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$line['title']);?>"><br/>
+		<input type=text size=60 name=title placeholder="Enter title here" value="<?php echo str_replace('"','&quot;',$line['title']);?>" required><br/>
 		<input type="checkbox" name="hidetitle" value="1" <?php writeHtmlChecked($hidetitle,true) ?>/>
 		Hide title and icon
 	</span><BR class=form>
