@@ -10,7 +10,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	$nologo = true;
 	require("header.php");
 	if (!empty($_SERVER['QUERY_STRING'])) {
-		 $querys = '?'.$_SERVER['QUERY_STRING'];
+		 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']);
 	 } else {
 		 $querys = '';
 	 }

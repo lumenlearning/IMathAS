@@ -11,7 +11,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	$nologo = true;
 	require("header.php");
 	if (isset($_SERVER['QUERY_STRING'])) {
-		 $querys = '?'.$_SERVER['QUERY_STRING'];
+		 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']);
 	 } else {
 		 $querys = '';
 	 }
@@ -42,7 +42,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 
 
 <div id="loginbox">
-<form method="post" action="<?php echo $_SERVER['PHP_SELF'].$querys;?>">
+<form method="post" action="<?php echo $GLOBALS['basesiteurl'].'/lumen/loginpage.php'.$querys;?>">
 <?php
 	if ($haslogin) {
 		if ($badsession) {

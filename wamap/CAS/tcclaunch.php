@@ -195,7 +195,7 @@ if (isset($_GET['launch'])) {
 					$stm = $DBH->prepare("SELECT id FROM imas_users WHERE SID=:SID");
 					$stm->execute(array(':SID'=>$_POST['SID']));
 					if ($stm->rowCount()>0) {
-						$infoerr = "$loginprompt '{$_POST['SID']}' already used.  Please select another.";
+						$infoerr = "$loginprompt '" . Sanitize::encodeStringForDisplay($_POST['SID']) . "' already used.  Please select another.";
 					}
 				}
 				if (isset($_POST['msgnot'])) {

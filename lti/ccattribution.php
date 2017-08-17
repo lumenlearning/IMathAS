@@ -334,7 +334,7 @@ if (isset($_POST['license'])) {
 	header('Location: ' . $returnurl .'?embed_type=oembed&endpoint='.urlencode($url).'&url='.urlencode($url.'/'.$key));
 	exit;
 } else {
-	$returnurl = $_POST['launch_presentation_return_url'];
+	$returnurl = Sanitize::fullUrl($_POST['launch_presentation_return_url']);
 	//DB $storekey = $db->real_escape_string("$consumerkey-$courseid-$userid");
 	$storekey = "$consumerkey-$courseid-$userid";
 	//DB $query = "SELECT data FROM ltidata WHERE tool='$tool' AND datakey='$storekey'";

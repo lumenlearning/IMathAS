@@ -263,7 +263,7 @@ if (isset($_GET['modify'])) {
 		//DB mysql_query($query) or die("Query failed : $query " . mysql_error());
 		$stm = $DBH->prepare("UPDATE resources SET files=:files WHERE id=:id");
 		$stm->execute(array(':files'=>$files, ':id'=>$_GET['modify']));
-		header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/resources.php");
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/wamap/projects/resources.php");
 		exit;
 	} else {
 		//adding / modifying a task form
@@ -445,7 +445,7 @@ if (isset($_GET['modify'])) {
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':rating'=>$_POST['rating'], ':comment'=>$_POST['comments'], ':rateon'=>$now, ':userid'=>$userid, ':taskid'=>$_POST['taskid']));
 	}
-	echo getratingsfor($_POST['taskid']);
+	echo getratingsfor(Sanitize::onlyInt($_POST['taskid']));
 
 } else if (isset($_GET['id'])) {
 	$placeinhead .= '<link rel="stylesheet" href="tasks.css" type="text/css" />';
@@ -456,7 +456,7 @@ if (isset($_GET['modify'])) {
 	require("../../header.php");
 	echo '<div class="breadcrumb"><a href="resources.php">Resource List</a> &gt; View Resource</div>';
 	echo '<div id="ratingholder">';
-	echo getratingsfor($_GET['id']);
+	echo getratingsfor(Sanitize::onlyInt($_GET['id']));
 	echo '</div>';
 
 	//DB $query = "SELECT resources.*,iu.LastName,iu.FirstName FROM resources JOIN imas_users AS iu ON resources.ownerid=iu.id WHERE resources.id='{$_GET['id']}'";
