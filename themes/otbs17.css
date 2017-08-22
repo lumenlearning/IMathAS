@@ -467,9 +467,6 @@ div.intro {
 	padding: 10px;
 }
 div.navbar {
-	position: relative;
-	float: left;
-	left: 0px;
 	background-color: #e9f0f6;
 	border: 1px solid #CAD7DF;
 	/*background: #f0e9f0;
@@ -479,10 +476,12 @@ div.navbar {
 div.navbar a {
 	color: blue;
 }
+/*
 div.navbar.fixedonscroll {
 	position: static;
 	left: 15px;
 }
+*/
 div.navbar ul.qlist li {
 	font-size: 12px;
 }

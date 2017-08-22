@@ -411,9 +411,6 @@ div.intro {
 	background-color: #ccf;
 }
 div.navbar {
-	position: relative;
-	float: left;
-	left: 0px;
 	background: #f0e6f0;
 	border: 1px solid #bbd;
 	color:#000;

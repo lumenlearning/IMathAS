@@ -84,6 +84,10 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
 	//print_r($newitems);
 	echo "EXPORT DESCRIPTION\n";
 	echo $_POST['description']."\n";
+	echo "EXPORT OWNERID\n";
+	echo $line['ownerid']."\n";
+	echo "INSTALLNAME\n";
+	echo $installname."\n";
 	echo "ITEM LIST\n";
 	echo serialize($newitems)."\n";
 	$coursefiles = array();
@@ -379,6 +383,10 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
 			echo rtrim($line['description']) . "\n";
 			echo "\nAUTHOR\n";
 			echo rtrim($line['author']) . "\n";
+			echo "\nOWNERID\n";
+			echo rtrim($line['ownerid']) . "\n";
+			echo "\nUSERIGHTS\n";
+			echo rtrim($line['userights']) . "\n";
 			echo "\nCONTROL\n";
 			echo rtrim($line['control']) . "\n";
 			echo "\nQCONTROL\n";
