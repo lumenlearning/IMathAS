@@ -1319,7 +1319,8 @@ function getnextprev(formn,loc) {
 				echo '>'.$page_questionTable[$qid]['extref'].'</div></td>';
 				echo '<td>'.$qid.'</td>';
 				echo '<td>'.$page_questionTable[$qid]['preview'].'</td>';
-				echo '<td>'.Sanitize::encodeStringForDisplay($page_questionTable[$qid]['action']).'</td>';
+				// $page_questionTable[$qid]['action'] contains HTML. Do not sanitize here.
+				echo '<td>'.$page_questionTable[$qid]['action'].'</td>';
 				echo '<td>'.Sanitize::encodeStringForDisplay($page_questionTable[$qid]['type']).'</td>';
 				echo '<td class="c">'.Sanitize::encodeStringForDisplay($page_questionTable[$qid]['times']).'</td>';
 				echo '<td>'.$page_questionTable[$qid]['lastmod'].'</td>';
