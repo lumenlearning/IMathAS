@@ -254,7 +254,7 @@
 			require("../footer.php");
 			exit;
 		}
-		echo "<input type=hidden name=\"tolist\" value=\"" . implode(',',Sanitize::encodeStringForDisplay($_POST['checked'])) . "\">\n";
+		echo "<input type=hidden name=\"tolist\" value=\"" . Sanitize::encodeStringForDisplay(implode(',',$_POST['checked'])) . "\">\n";
 		//DB $tolist = "'".implode("','",$_POST['checked'])."'";
 		$tolist = implode(',', array_map('intval', $_POST['checked']));
 	}
