@@ -83,9 +83,9 @@ if (isset($_GET['launch'])) {
 	$stm = $DBH->prepare("UPDATE imas_sessions SET sessiondata=:sessiondata,tzoffset=:tzoffset WHERE sessionid=:sessionid");
 	$stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':sessionid'=>$sessionid));
 	if (isset($cid)) {
-		header("Location: http://" . $_SERVER['HTTP_HOST'] . $imasroot . "/course/course.php?cid=$cid");
+		header("Location: http://" . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid");
 	} else {
-		header("Location: http://" . $_SERVER['HTTP_HOST'] . $imasroot . "/index.php");
+		header("Location: http://" . $GLOBALS['basesiteurl'] . "/index.php");
 	}
 
 	exit;

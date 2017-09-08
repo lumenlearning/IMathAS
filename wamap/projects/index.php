@@ -828,7 +828,7 @@ function getratingsfor($id) {
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
-		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],$line['rateon']);
+		$ratings[$i] = array($line['rating'],Sanitize::encodeStringForDisplay($line['comment']),$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
 		$totrat += $line['rating'];
 		$i++;
 	}
@@ -896,7 +896,7 @@ function getratingsfor($id) {
 				$out .= '</span>';
 				$out .= ' <a href="#" onclick="commentshowhide(this,'.$i.');return false;">[more...]</a>';
 			} else {
-				$out .= $rating[1];
+				$out .= Sanitize::encodeStringForDisplay($rating[1]);
 			}
 		}
 		$out .= '<br/><i>'.$rating[2].', '.time_elapsed_string($rating[3]).'</i>';

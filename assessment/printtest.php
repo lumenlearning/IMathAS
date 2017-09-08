@@ -265,7 +265,7 @@
 			$qattempts = $qi[$questions[$i]]['attempts'];
 			if ($scoredview) {
 				echo "<div>#".($i+1)." ";
-				echo printscore($scores[$i], $i);
+				echo printscore(Sanitize::encodeStringForDisplay($scores[$i]), $i);
 				echo "</div>";
 			} else {
 				echo "<div>#".($i+1)." Points possible: ".Sanitize::encodeStringForDisplay($points).".  Total attempts: ".Sanitize::encodeStringForDisplay($qattempts)."</div>";
@@ -346,7 +346,7 @@
 								}
 							}
 
-							echo str_replace(array('&','%nbsp;'),array('; ','&nbsp;'),strip_tags($laarr[$k]));
+							echo Sanitize::encodeStringForDisplay(str_replace(array('&','%nbsp;'),array('; ','&nbsp;'),$laarr[$k]));
 						}
 						$cnt++;
 					}

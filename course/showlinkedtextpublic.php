@@ -107,7 +107,7 @@
 	</script>';
 
 	require("../header.php");
-	echo "<div class=breadcrumb>$breadcrumbbase $titlesimp</div>";
+	echo "<div class=breadcrumb>$breadcrumbbase ".Sanitize::encodeStringForDisplay($titlesimp)."</div>";
 
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;">';
 	$navbuttons = '';

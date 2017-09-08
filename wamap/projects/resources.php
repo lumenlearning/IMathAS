@@ -467,6 +467,7 @@ if (isset($_GET['modify'])) {
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	echo '<table class="gb"><tbody>';
 	foreach ($questions as $key=>$arr) {
+		$key = Sanitize::simpleString($key);
 		if ((trim($line[$key])=='' || $line[$key]=='N') && !isset($arr['showalways'])) { continue;}
 		echo '<tr><td class="r">'.$arr['short'].'</td><td>';
 		if ($arr['type']=='input' || $arr['type']=='textarea') {
@@ -495,7 +496,7 @@ if (isset($_GET['modify'])) {
 			if ($line[$key][2]!='') {
 				$out[] = $line[$key][2];
 			}
-			echo implode('; ',$out);
+			echo Sanitize::encodeStringForDisplay(implode('; ',$out));
 		}
 		if (($arr['type']=='radio' || $arr['type']=='checkbox') && isset($arr['other']) && $line[$arr['other']]!='') {
 			echo ': '.Sanitize::encodeStringForDisplay($line[$arr['other']]);
@@ -689,7 +690,7 @@ function getratingsfor($id) {
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
-		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],$line['rateon']);
+		$ratings[$i] = array($line['rating'],Sanitize::encodeStringForDisplay($line['comment']),$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
 		$totrat += Sanitize::onlyInt($line['rating']);
 		$i++;
 	}

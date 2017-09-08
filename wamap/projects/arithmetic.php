@@ -906,7 +906,7 @@ function getratingsfor($id) {
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
-		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],$line['rateon']);
+		$ratings[$i] = array($line['rating'],Sanitize::encodeStringForDisplay($line['comment']),$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
 		$totrat += $line['rating'];
 		$i++;
 	}
@@ -944,7 +944,7 @@ function getratingsfor($id) {
 			<li><a href="#" title="4 stars out of 5" class="four-stars" onclick="return recordrating(4);">4</a></li>
 			<li><a href="#" title="5 stars out of 5" class="five-stars" onclick="return recordrating(5);">5</a></li>
 			</ul></span>';
-		$out .= '<input type="hidden" id="rating" name="rating" value="'.$rating.'"/>';
+		$out .= '<input type="hidden" id="rating" name="rating" value="'.Sanitize::encodeStringForDisplay($rating).'"/>';
 		$out .= '<input type="hidden" name="taskid" value="'.$id.'"/>';
 		$out .= '<br/>Comments:<br/>';
 		$out .= '<textarea rows="4" style="width:90%" name="comments">'.str_replace('<br/>',"\n",$comments).'</textarea>';
