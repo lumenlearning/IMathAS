@@ -90,7 +90,7 @@
 	$outputmsg = '';
 	$errmsg = '';
 	if (isset($_POST['qtext'])) {
-		require("../includes/filehandler.php");
+		require_once("../includes/filehandler.php");
 		$now = time();
 		//DB $_POST['qtext'] = stripsmartquotes(stripslashes($_POST['qtext']));
 		//DB $_POST['control'] = addslashes(stripsmartquotes(stripslashes($_POST['control'])));
@@ -112,7 +112,7 @@
 		}
 
 		if (strpos($_POST['qtext'],'data:image')!==false) {
-			require("../includes/htmLawed.php");
+			require_once("../includes/htmLawed.php");
 			$_POST['qtext'] = convertdatauris($_POST['qtext']);
 		}
 		//DB $_POST['qtext'] = addslashes($_POST['qtext']);

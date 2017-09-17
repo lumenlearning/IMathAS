@@ -15,7 +15,10 @@ try {
 	echo "Error:", $e->getMessage();
 	exit;
 }
-
+if (!isset($JWTsess->uid)) {
+	echo 'Invalid token parameters';
+	exit;
+}
 $userid = intval($JWTsess->uid);
 $cid = intval($JWTsess->cid);
 $alarms = array('T'=>'', 'A'=>'', 'F'=>'', 'C'=>'');
@@ -43,7 +46,7 @@ if (isset($JWTsess->T) && $a = toalarmformat($JWTsess->C)) {
 	
 require("../includes/calendardata.php");
 
-$calevents = getCalendarEventData($cid, $userid);
+list($coursename,$calevents) = getCalendarEventData($cid, $userid);
 
 //add alarms
 foreach ($calevents as $k=>$v) {

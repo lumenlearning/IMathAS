@@ -7,7 +7,7 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 date_default_timezone_set('America/Los_Angeles');
 require("../../init.php");
-require("../../includes/filehandler.php");
+require_once("../../includes/filehandler.php");
 $placeinhead = "<script type=\"text/javascript\">
 
   var _gaq = _gaq || [];

@@ -112,7 +112,7 @@ switch($_POST['action']) {
 
 		if ($myrights == 100 || ($myspecialrights&32)==32) { //update library groupids
 			$arr[':groupid'] = $_POST['group'];
-			
+
 			$query = "UPDATE imas_users SET rights=:rights,specialrights=:specialrights,groupid=:groupid,FirstName=:FirstName,LastName=:LastName,email=:email";
 			if ($chgSID) {
 				$query .= ',SID=:SID';
@@ -127,7 +127,7 @@ switch($_POST['action']) {
 			$stm->execute(array(':groupid'=>$_POST['group'], ':ownerid'=>$_GET['id']));
 		} else {
 			$arr[':groupid'] = $groupid;
-			
+
 			$query = "UPDATE imas_users SET rights=:rights,specialrights=:specialrights,FirstName=:FirstName,LastName=:LastName,email=:email";
 			if ($chgSID) {
 				$query .= ',SID=:SID';
@@ -987,11 +987,11 @@ switch($_POST['action']) {
 		if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
 			if (strpos($uploadfile,'.tar.gz')!==FALSE) {
 				include("../includes/tar.class.php");
-				include("../includes/filehandler.php");
+				require_once("../includes/filehandler.php");
 				$tar = new tar();
 				$tar->openTAR($uploadfile);
 				if ($tar->hasFiles()) {
-					if ($GLOBALS['filehandertypecfiles'] == 's3') {
+					if (getfilehandlertype('filehandlertypecfiles') == 's3') {
 						$n = $tar->extractToS3("qimages","public");
 					} else {
 						$n = $tar->extractToDir("../assessment/qimages/");
@@ -1022,7 +1022,7 @@ switch($_POST['action']) {
 		$uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
 		if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
 			if (strpos($uploadfile,'.zip')!==FALSE && class_exists('ZipArchive')) {
-				require("../includes/filehandler.php");
+				require_once("../includes/filehandler.php");
 				$zip = new ZipArchive();
 				$res = $zip->open($uploadfile);
 				$ne = 0;  $ns = 0;
