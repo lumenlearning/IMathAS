@@ -107,8 +107,8 @@ $html = mb_convert_encoding($html, 'UTF-8', mb_detect_encoding($html, 'UTF-8, IS
 
 $parseUrl = parse_url($url);
 $parent = (substr($parseUrl['path'], -1) == '/') ? $parseUrl['path'] : dirname($parseUrl['path']) . "/";
-$basedir = $parseUrl["scheme"]."://".$parseUrl["host"].((isset($parseUrl["port"]))?":".$parseUrl["port"]:"").$parent;
-$rootdir = $parseUrl["scheme"]."://".$parseUrl["host"].((isset($parseUrl["port"]))?":".$parseUrl["port"]:"");
+$basedir = Sanitize::url($parseUrl["scheme"]."://".$parseUrl["host"].((isset($parseUrl["port"]))?":".$parseUrl["port"]:"").$parent);
+$rootdir = Sanitize::url($parseUrl["scheme"]."://".$parseUrl["host"].((isset($parseUrl["port"]))?":".$parseUrl["port"]:""));
 
 
 if (strpos($html, '<body')===false) {

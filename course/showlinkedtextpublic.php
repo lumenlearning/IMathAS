@@ -177,7 +177,8 @@
 		$navbuttons .= '<div class="clear"></div>';
 	}
 	if ($navbuttons != '') {
-		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1', $text);
+		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1',
+			Sanitize::outgoingHtml($text));
 	}
 	echo filter($text);
 	echo '</div>';
