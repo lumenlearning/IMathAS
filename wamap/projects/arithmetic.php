@@ -906,7 +906,7 @@ function getratingsfor($id) {
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
-		$ratings[$i] = array($line['rating'],Sanitize::encodeStringForDisplay($line['comment']),$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
+		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
 		$totrat += $line['rating'];
 		$i++;
 	}
@@ -937,7 +937,7 @@ function getratingsfor($id) {
 			$out .= '<b>Your rating</b>: ';
 		}
 		$out .= '<span class="inline-rating"><ul class="star-rating">
-			<li id="current-rating" class="current-rating" style="width:'.(20*$rating).'%;">Currently '.$rating.'/5 Stars.</li>
+			<li id="current-rating" class="current-rating" style="width:'.(20*$rating).'%;">Currently '.Sanitize::onlyInt($rating).'/5 Stars.</li>
 			<li><a href="#" title="1 star out of 5" class="one-star" onclick="return recordrating(1);">1</a></li>
 			<li><a href="#" title="2 stars out of 5" class="two-stars" onclick="return recordrating(2);">2</a></li>
 			<li><a href="#" title="3 stars out of 5" class="three-stars" onclick="return recordrating(3);">3</a></li>
@@ -945,9 +945,9 @@ function getratingsfor($id) {
 			<li><a href="#" title="5 stars out of 5" class="five-stars" onclick="return recordrating(5);">5</a></li>
 			</ul></span>';
 		$out .= '<input type="hidden" id="rating" name="rating" value="'.Sanitize::encodeStringForDisplay($rating).'"/>';
-		$out .= '<input type="hidden" name="taskid" value="'.$id.'"/>';
+		$out .= '<input type="hidden" name="taskid" value="'.Sanitize::encodeStringForDisplay($id).'"/>';
 		$out .= '<br/>Comments:<br/>';
-		$out .= '<textarea rows="4" style="width:90%" name="comments">'.str_replace('<br/>',"\n",$comments).'</textarea>';
+		$out .= '<textarea rows="4" style="width:90%" name="comments">'.str_replace('<br/>',"\n",Sanitize::encodeStringForDisplay($comments)).'</textarea>';
 		if ($myrating==-1) {
 			$out .= '<br/><input type="button" value="Save Rating" onclick="saverating()"/>';
 		} else {
@@ -964,7 +964,7 @@ function getratingsfor($id) {
 		if ($i==$myrating) {continue;}
 		$out .= '<div class="arating">';
 		$out .= '<span class="inline-rating"><ul class="star-rating">';
-		$out .= '<li class="current-rating" style="width:'.(20*$rating[0]).'%">Currently '.Sanitize::encodeStringForDisplay($rating[0]).'/5 stars</li>';
+		$out .= '<li class="current-rating" style="width:'.(20*$rating[0]).'%">Currently '.Sanitize::onlyInt($rating[0]).'/5 stars</li>';
 		$out .= '</ul></span>';
 		if ($rating[1]!='') {
 			$out .= '<br/>';

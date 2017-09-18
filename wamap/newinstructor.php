@@ -76,7 +76,7 @@
 				$message .= "<p>This request is processed by hand, so please be patient.</p>";
 				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding ".Sanitize::emailAddress($sendfrom)." to your contacts list.";
 				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-				mail($_POST['email'],$subject,$message,$headers);
+				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
 
 				echo $message;
 				require("footer.php");

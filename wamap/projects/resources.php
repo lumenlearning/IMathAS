@@ -690,7 +690,7 @@ function getratingsfor($id) {
 	//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if ($line['userid']==$userid) {$myrating = $i;}
-		$ratings[$i] = array($line['rating'],Sanitize::encodeStringForDisplay($line['comment']),$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
+		$ratings[$i] = array($line['rating'],$line['comment'],$line['FirstName'].' '.$line['LastName'],Sanitize::onlyInt($line['rateon']));
 		$totrat += Sanitize::onlyInt($line['rating']);
 		$i++;
 	}
@@ -720,7 +720,7 @@ function getratingsfor($id) {
 		$out .= '<b>Your rating</b>: ';
 	}
 	$out .= '<span class="inline-rating"><ul class="star-rating">
-		<li id="current-rating" class="current-rating" style="width:'.(20*$rating).'%;">Currently '.$rating.'/5 Stars.</li>
+		<li id="current-rating" class="current-rating" style="width:'.(20*$rating).'%;">Currently '.Sanitize::onlyInt($rating).'/5 Stars.</li>
 		<li><a href="#" title="1 star out of 5" class="one-star" onclick="return recordrating(1);">1</a></li>
 		<li><a href="#" title="2 stars out of 5" class="two-stars" onclick="return recordrating(2);">2</a></li>
 		<li><a href="#" title="3 stars out of 5" class="three-stars" onclick="return recordrating(3);">3</a></li>
@@ -730,7 +730,7 @@ function getratingsfor($id) {
 	$out .= '<input type="hidden" id="rating" name="rating" value="'.Sanitize::encodeStringForDisplay($rating).'"/>';
 	$out .= '<input type="hidden" name="taskid" value="'.Sanitize::encodeStringForDisplay($id).'"/>';
 	$out .= '<br/>Comments:<br/>';
-	$out .= '<textarea rows="4" style="width:90%" name="comments">'.str_replace('<br/>',"\n",$comments).'</textarea>';
+	$out .= '<textarea rows="4" style="width:90%" name="comments">'.str_replace('<br/>',"\n",Sanitize::encodeStringForDisplay($comments)).'</textarea>';
 	if ($myrating==-1) {
 		$out .= '<br/><input type="button" value="Save Rating" onclick="saverating()"/>';
 	} else {
@@ -752,13 +752,13 @@ function getratingsfor($id) {
 		if ($rating[1]!='') {
 			$out .= '<br/>';
 			if (strlen($rating[1])>200) {
-				$out .= substr($rating[1],0,140);
+				$out .= Sanitize::encodeStringForDisplay(substr($rating[1],0,140));
 				$out .= '<span style="display:none;" id="hiddencomment'.$i.'">';
-				$out .= substr($rating[1],140);
+				$out .= Sanitize::encodeStringForDisplay(substr($rating[1],140));
 				$out .= '</span>';
 				$out .= ' <a href="#" onclick="commentshowhide(this,'.$i.');return false;">[more...]</a>';
 			} else {
-				$out .= $rating[1];
+				$out .= Sanitize::encodeStringForDisplay($rating[1]);
 			}
 		}
 		$out .= '<br/><i>'.Sanitize::encodeStringForDisplay($rating[2]).', '.time_elapsed_string($rating[3]).'</i>';

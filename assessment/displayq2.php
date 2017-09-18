@@ -281,15 +281,15 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		$laparts = explode("&",$la);
 
 		foreach ($anstypes as $kidx=>$anstype) {
-			$qcol = ($qdata['qtype']=="multipart" && isset($qcolors[$kidx]))?(is_numeric($qcolors[$kidx])?rawscoretocolor($qcolors[$kidx],$answeights[$kidx]):$qcolors[$kidx]):'';
+			$qcol = ($qdata['qtype']=="multipart" && isset($qcolors[$kidx]))?(is_numeric($qcolors[$kidx])?rawscoretocolor(Sanitize::encodeStringForDisplay($qcolors[$kidx]),$answeights[$kidx]):Sanitize::encodeStringForDisplay($qcolors[$kidx])):'';
 			list($answerbox[$kidx],$entryTips[$kidx],$shanspt[$kidx],$previewloc[$kidx]) = makeanswerbox($anstype,$kidx,$laparts[$kidx],$options,$qnidx+1,$qcol);
 		}
 	} else {
-		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor($qcolors[0],1):$qcolors[0]):'';
+		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor(Sanitize::encodeStringForDisplay($qcolors[0]),1):Sanitize::encodeStringForDisplay($qcolors[0])):'';
 		list($answerbox,$entryTips[0],$shanspt[0],$previewloc) = makeanswerbox(Sanitize::simpleString($qdata['qtype']),$qnidx,$la,$options,0,$qcol);
 	}
 	if ($qdata['qtype']=='conditional') {
-		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor($qcolors[0],1):$qcolors[0]):'';
+		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor(Sanitize::encodeStringForDisplay($qcolors[0]),1):Sanitize::encodeStringForDisplay($qcolors[0])):'';
 		if ($qcol!='') {
 			if (strpos($toevalqtxt, '<div')!==false || strpos($toevalqtxt, '<table')!==false) {
 				$toevalqtxt = '<div class=\\"'.$qcol.'\\" style=\\"display:block\\">'.$toevalqtxt.str_replace('"','\\"',getcolormark($qcol)).'</div>';
@@ -1002,6 +1002,9 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 
 function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 	global $RND,$myrights, $useeqnhelper, $showtips, $imasroot;
+
+	$anstype = Sanitize::simpleString($anstype);
+
 	$out = '';
 	$tip = '';
 	$sa = '';
@@ -5315,7 +5318,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							$xbp = $x3p + $pixelsperx;
 						}
 						$ybp = $settings[7] - ($yb-$settings[2])*$pixelspery - $imgborder;
-						
+
 						if ($ybp>$yap) {
 							$base = safepow(($xop-$xbp)/($xop-$xap), 1/($ybp-$yap));
 						} else {
@@ -5323,7 +5326,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						}
 						$str = ($xop-$xbp)/safepow($base,$ybp-$yop);
 						$anslogs[$key] = array($str,$base);
-						
+
 					} else if (strpos($function[0],'abs')!==false) { //is abs
 						$y0 = $func($x0);
 						$y4 = $func($x4);
