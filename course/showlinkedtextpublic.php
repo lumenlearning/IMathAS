@@ -177,10 +177,9 @@
 		$navbuttons .= '<div class="clear"></div>';
 	}
 	if ($navbuttons != '') {
-		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1',
-			Sanitize::outgoingHtml($text));
+		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1', $text);
 	}
-	echo filter($text);
+	echo Sanitize::outgoingHtml(filter($text));
 	echo '</div>';
 	if (!($_GET['from'])) {
 		echo "<div class=right><a href=\"course.php?cid=$cid\">Back</a></div>\n";
