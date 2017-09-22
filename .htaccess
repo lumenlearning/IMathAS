@@ -50,3 +50,13 @@ RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 RewriteCond %{HTTP_HOST} wamap\.org
 RewriteCond %{REQUEST_URI} ^(/CAS/|/cmpt/|/projects/|/PCA.html|/evergreen.php|/renton.php|/flashcards.php|/verifyuser.php|/favicon.ico)
 RewriteRule ^(.*)$ /wamap/$1
+
+# Annoying vulnerability scans
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule (.*admin.*) http://localhost/$1 [R=301,L,NC]
+RewriteRule (.*mysql.*) http://localhost/$1 [R=301,L,NC]
+RewriteRule ^sql(.*) http://localhost/$1 [R=301,L,NC]
+RewriteRule ^db(.*) http://localhost/$1 [R=301,L,NC]
+RewriteRule ^php(.*) http://localhost/$1 [R=301,L,NC]
+RewriteRule ^pma(.*) http://localhost/$1 [R=301,L,NC]
+
