@@ -13,3 +13,4 @@ config/local.php
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
+.env
