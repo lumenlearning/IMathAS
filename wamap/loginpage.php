@@ -11,7 +11,7 @@ if (!isset($imasroot)) { //don't allow direct access to loginpage.php
 	$isloginpage = true;
 	require(dirname(__FILE__) ."/../header.php");
 	if (!empty($_SERVER['QUERY_STRING'])) {
-		 $querys = '?'.$_SERVER['QUERY_STRING'];
+		 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']);
 	 } else {
 		 $querys = '';
 	 }

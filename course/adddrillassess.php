@@ -36,8 +36,7 @@ if ($stm->rowCount()==0) {
 	$n = 30;
 	$showtostu = 7;
 	$daid = 0;
-	$drillname = "Enter title here";
-	$drillsummary = "<p>Enter summary here (displays on course page)</p>";
+	$drillsummary = "";
 	$startdate = time();
 	$enddate = time() + 7*24*60*60;
 	$avail = 1;
@@ -485,11 +484,11 @@ if (!$beentaken) {
 				$i = $line['id'];
 				$page_questionTable[$i]['checkbox'] = "<input type=checkbox name='nchecked[]' value='" . Sanitize::encodeStringForDisplay($line['id']) . "' id='qo$ln'>";
 				if (in_array($i,$itemids)) {
-					$page_questionTable[$i]['desc'] = '<span style="color: #999">'.filter($line['description']).'</span>';
+					$page_questionTable[$i]['desc'] = '<span style="color: #999">'.Sanitize::encodeStringForDisplay(filter($line['description'])).'</span>';
 				} else {
-					$page_questionTable[$i]['desc'] = filter($line['description']);
+					$page_questionTable[$i]['desc'] = Sanitize::encodeStringForDisplay(filter($line['description']));
 				}
-				$page_questionTable[$i]['preview'] = "<input type=button value=\"Preview\" onClick=\"previewq('selform','qo$ln',{$line['id']},true,false)\"/>";
+				$page_questionTable[$i]['preview'] = "<input type=button value=\"Preview\" onClick=\"previewq('selform','qo$ln',". Sanitize::onlyInt($line['id']).",true,false)\"/>";
 				$page_questionTable[$i]['type'] = $line['qtype'];
 				if ($line['avgtime']>0) {
 					$page_useavgtimes = true;
@@ -655,7 +654,7 @@ printf("<form id=\"selform\" method=\"post\" action=\"adddrillassess.php?cid=%s&
     $cid, $daid, Sanitize::encodeUrlParam($block), Sanitize::encodeUrlParam($totb));
 ?>
 		<span class=form>Title: </span>
-		<span class=formright><input type=text size=60 name="title" value="<?php echo Sanitize::encodeStringForDisplay($drillname);?>">
+		<span class=formright><input type=text size=60 name="title" placeholder="Enter title here" value="<?php echo Sanitize::encodeStringForDisplay($drillname);?>" required>
 		</span><BR class=form>
 
 		Summary<BR>
@@ -827,14 +826,14 @@ if (!$beentaken) {
 					for ($i=0;$i<count($page_libqids[$page_libstouse[$j]]); $i++) {
 						$qid =$page_libqids[$page_libstouse[$j]][$i];
 						if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
-?>
 
+?>
 					<td><?php echo $page_questionTable[$qid]['checkbox'] ?></td>
 					<td><?php echo $page_questionTable[$qid]['desc'] ?></td>
 					<td class="nowrap"><?php echo $page_questionTable[$qid]['extref'] ?></td>
 					<td><?php echo Sanitize::encodeStringForDisplay($qid) ?></td>
 					<td><?php echo $page_questionTable[$qid]['preview'] ?></td>
-					<td><?php echo $page_questionTable[$qid]['type'] ?></td>
+					<td><?php echo Sanitize::encodeStringForDisplay($page_questionTable[$qid]['type']) ?></td>
 <?php
 						if ($searchall==1) {
 ?>

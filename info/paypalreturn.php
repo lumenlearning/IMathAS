@@ -23,7 +23,7 @@ if (isset($_GET['cancel'])) {
 	$stm = $DBH->prepare("UPDATE imas_students SET custominfo=:custominfo WHERE id=:id");
 	$stm->execute(array(':custominfo'=>$ci, ':id'=>$stuid));
 
-	header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] .$imasroot . '/course/course.php?cid='.$sessiondata['paypromptcourse']);
+	header('Location: ' . $GLOBALS['basesiteurl'] . '/course/course.php?cid='.$sessiondata['paypromptcourse']);
 	exit;
 } else if (isset($_GET['done'])) {
 	$custominfo['payprompttime'] = 2000000000;

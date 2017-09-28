@@ -59,7 +59,7 @@
 			}
 			$vidid = str_replace(array(" ","\n","\r","\t"),'',$vidid);
 		}
-		return $vidid;
+		return Sanitize::simpleString($vidid);
  	}
 
  	$cid = Sanitize::courseId($_GET['cid']);
@@ -90,7 +90,7 @@
 	$outputmsg = '';
 	$errmsg = '';
 	if (isset($_POST['qtext'])) {
-		require("../includes/filehandler.php");
+		require_once("../includes/filehandler.php");
 		$now = time();
 		//DB $_POST['qtext'] = stripsmartquotes(stripslashes($_POST['qtext']));
 		//DB $_POST['control'] = addslashes(stripsmartquotes(stripslashes($_POST['control'])));
@@ -287,7 +287,7 @@
 					$newalt = $_POST['imgalt-'.$row[0]];
 					$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
 					if (in_array($newvar,$disallowedvar)) {
-						$errmsg .= "<p>$newvar is not an allowed variable name</p>";
+						$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
 					} else {
 						//DB $query = "UPDATE imas_qimages SET var='$newvar',alttext='$newalt' WHERE id='{$row[0]}'";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
@@ -384,7 +384,7 @@
 			if (trim($_POST['newimgvar'])=='') {
 				$errmsg .= "<p>Need to specify variable for image to be referenced by</p>";
 			} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
-				$errmsg .= "<p>$newvar is not an allowed variable name</p>";
+				$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
 			} else {
 				$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/';
 				//$filename = basename($_FILES['imgfile']['name']);
@@ -526,7 +526,7 @@
 			$outputmsg .=  "<a href=\"addquestions.php?cid=$cid&aid=".Sanitize::onlyInt($_GET['aid'])."\">Return to Assessment</a>\n";
 		}
 		if ($_POST['test']=="Save and Test Question") {
-			$outputmsg .= "<script>addr = '$imasroot/course/testquestion.php?cid=$cid&qsetid={$_GET['id']}';";
+			$outputmsg .= "<script>addr = '$imasroot/course/testquestion.php?cid=$cid&qsetid=".Sanitize::encodeUrlParam($_GET['id'])."';";
 			//echo "function previewit() {";
 			$outputmsg .= "previewpop = window.open(addr,'Testing','width='+(.4*screen.width)+',height='+(.8*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(.6*screen.width-20));\n";
 			$outputmsg .= "previewpop.focus();";
@@ -806,10 +806,10 @@
 	// Build form action
 	$formAction = "moddataset.php?process=true"
 		. (isset($_GET['cid']) ? "&cid=$cid" : "")
-		. (isset($_GET['aid']) ? "&aid={$_GET['aid']}" : "")
-		. ((isset($_GET['id']) && !isset($_GET['template'])) ? "&id={$_GET['id']}" : "")
-		. (isset($_GET['template']) ? "&templateid={$_GET['id']}" : "")
-		. (isset($_GET['makelocal']) ? "&makelocal={$_GET['makelocal']}" : "")
+		. (isset($_GET['aid']) ? "&aid=".Sanitize::encodeUrlParam($_GET['aid']) : "")
+		. ((isset($_GET['id']) && !isset($_GET['template'])) ? "&id=".Sanitize::encodeUrlParam($_GET['id']) : "")
+		. (isset($_GET['template']) ? "&templateid=".Sanitize::encodeUrlParam($_GET['id']) : "")
+		. (isset($_GET['makelocal']) ? "&makelocal=".Sanitize::encodeUrlParam($_GET['makelocal']) : "")
 		. ($frompot==1 ? "&frompot=1" : "");
 
 	// If in quick-save mode, build return packet and exit here
@@ -1012,7 +1012,7 @@
 
 	} else if (isset($_GET['daid'])) {
 		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-		echo "&gt; <a href=\"adddrillassess.php?daid={$_GET['daid']}&cid=$cid\">Add Drill Assessment</a> &gt; Modify Questions</div>";
+		echo "&gt; <a href=\"adddrillassess.php?daid=".Sanitize::encodeUrlParam($_GET['daid'])."&cid=$cid\">Add Drill Assessment</a> &gt; Modify Questions</div>";
 	} else {
 		if ($_GET['cid']=="admin") {
 			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../admin/admin2.php\">Admin</a>";
@@ -1045,7 +1045,7 @@
 	if (isset($inusecnt) && $inusecnt>0) {
 		echo '<p class=noticetext>This question is currently being used in ';
 		if ($inusecnt>1) {
-			echo $inusecnt.' assessments that are not yours.  ';
+			echo Sanitize::onlyInt($inusecnt).' assessments that are not yours.  ';
 		} else {
 			echo 'one assessment that is not yours.  ';
 		}
@@ -1060,7 +1060,7 @@
 		echo "<p>This question is not set to allow you to modify the code.  You can only view the code and make additional library assignments</p>";
 	}
 ?>
-<form enctype="multipart/form-data" method=post action="<?php echo Sanitize::encodeStringForDisplay($formAction); ?>">
+<form enctype="multipart/form-data" method=post action="<?php echo $formAction; ?>">
 <input type="hidden" name="hasimg" value="<?php echo Sanitize::encodeStringForDisplay($line['hasimg']);?>"/>
 <p>
 Description:<BR>
@@ -1109,8 +1109,8 @@ if (!isset($line['ownerid']) || isset($_GET['template']) || $line['ownerid']==$u
 ?>
 </p>
 <script>
-var curlibs = '<?php echo $inlibs;?>';
-var locklibs = '<?php echo $locklibs;?>';
+var curlibs = '<?php echo Sanitize::encodeStringForJavascript($inlibs);?>';
+var locklibs = '<?php echo Sanitize::encodeStringForJavascript($locklibs);?>';
 function libselect() {
 	window.open('libtree.php?libtree=popup&cid=<?php echo $cid;?>&selectrights=1&libs='+curlibs+'&locklibs='+locklibs,'libtree','width=400,height='+(.7*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width-420));
 }
@@ -1151,7 +1151,7 @@ function decboxsize(box) {
 
 </script>
 <p>
-My library assignments: <span id="libnames"><?php echo $lnames;?></span><input type=hidden name="libs" id="libs" size="10" value="<?php echo $inlibs;?>">
+My library assignments: <span id="libnames"><?php echo Sanitize::encodeStringForDisplay($lnames);?></span><input type=hidden name="libs" id="libs" size="10" value="<?php echo Sanitize::encodeStringForDisplay($inlibs);?>">
 <input type=button value="Select Libraries" onClick="libselect()">
 </p>
 <p>
@@ -1253,8 +1253,8 @@ if (isset($images['vars']) && count($images['vars'])>0) {
 			$urlimg = "$imasroot/assessment/qimages/{$images['files'][$id]}";
 		}
 		echo "<li>";
-		echo "Variable: <input type=\"text\" name=\"imgvar-$id\" value=\"\$$var\" size=\"10\"/> <a href=\"$urlimg\" target=\"_blank\">View</a> ";
-		echo "Description: <input type=\"text\" size=\"20\" name=\"imgalt-$id\" value=\"{$images['alttext'][$id]}\"/> Delete? <input type=checkbox name=\"delimg-$id\"/>";
+		echo "Variable: <input type=\"text\" name=\"imgvar-$id\" value=\"\$".Sanitize::encodeStringForDisplay($var)."\" size=\"10\"/> <a href=\"".Sanitize::url($urlimg)."\" target=\"_blank\">View</a> ";
+		echo "Description: <input type=\"text\" size=\"20\" name=\"imgalt-$id\" value=\"".Sanitize::encodeStringForDisplay($images['alttext'][$id])."\"/> Delete? <input type=checkbox name=\"delimg-$id\"/>";
 		echo "</li>";
 	}
 }
@@ -1276,11 +1276,11 @@ echo '<ul id="helpbtnlist">';
 if (count($extref)>0) {
 	for ($i=0;$i<count($extref);$i++) {
 		$extrefpt = explode('!!',$extref[$i]);
-		echo '<li>Type: '.ucfirst($extrefpt[0]);
+		echo '<li>Type: '.Sanitize::encodeStringForDisplay(ucfirst($extrefpt[0]));
 		if ($extrefpt[0]=='video' && count($extrefpt)>2 && $extrefpt[2]==1) {
 			echo ' (cc)';
 		}
-		echo ', URL: <a href="'.$extrefpt[1].'">'.$extrefpt[1]."</a>.  Delete? <input type=\"checkbox\" name=\"delhelp-$i\"/></li>";
+	echo ', URL: <a href="'.Sanitize::url($extrefpt[1]).'">'.Sanitize::encodeStringForDisplay($extrefpt[1])."</a>.  Delete? <input type=\"checkbox\" name=\"delhelp-$i\"/></li>";
 	}
 }
 echo '</ul></div>'; //helpbtnlist, helpbtnwrap
@@ -1404,7 +1404,7 @@ if (FormData){ // Only allow quicksave if FormData object exists
 		});
 	}
 	quickSaveQuestion.url = "<?php echo $formAction;?>&quick=1";
-	quickSaveQuestion.testAddr = '<?php echo "$imasroot/course/testquestion.php?cid=$cid&qsetid={$_GET['id']}"; ?>';
+	quickSaveQuestion.testAddr = '<?php echo "$imasroot/course/testquestion.php?cid=$cid&qsetid=".Sanitize::encodeUrlParam($_GET['id']); ?>';
 	// Method to handle errors...
 	quickSaveQuestion.errorFunc = function(){
 		$(".quickSaveNotice").html("Error with Quick Save: try again, or use the \"Save\" option.");

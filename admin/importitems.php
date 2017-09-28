@@ -12,6 +12,7 @@ ini_set("post_max_size", "10485760");
 
 /*** master php includes *******/
 require("../init.php");
+require_once(__DIR__ . "/../includes/htmLawed.php");
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -43,7 +44,7 @@ $updateqcnt = 0;
 function additem($itemtoadd,$item,$questions,$qset) {
 
 	global $DBH,$newlibs;
-	global $userid, $userights, $cid, $missingfiles, $newqcnt, $updateqcnt;
+	global $userid, $userights, $cid, $missingfiles, $newqcnt, $updateqcnt, $sourceinstall;
 	$mt = microtime();
 	if ($item[$itemtoadd]['type'] == "Assessment") {
 		//add assessment.  set $typeid
@@ -57,6 +58,32 @@ function additem($itemtoadd,$item,$questions,$qset) {
 		$valsets = ":courseid";
 		$tosets = 'courseid';
 		$qarr[':courseid'] = $cid;
+
+		// Sanitize summary content.
+		$item[$itemtoadd]['summary'] = myhtmLawed($item[$itemtoadd]['summary']);
+
+        // Sanitize endmsg content.
+        if (isset($item[$itemtoadd]['endmsg'])) {
+            $data = unserialize($item[$itemtoadd]['endmsg']);
+            $data['commonmsg'] = myhtmLawed($data['commonmsg']);
+            $data['def'] = myhtmLawed($data['def']);
+            foreach (array_keys($data['msgs']) as $k) {
+                $data['msgs'][$k] = myhtmLawed($data['msgs'][$k]);
+            }
+        }
+
+
+		// Sanitize intro content.
+        if (isset($item[$itemtoadd]['intro'])) {
+            $json = json_decode($item[$itemtoadd]['intro']);
+            if (null != $json) {
+                $json[0] = myhtmLawed($json[0]);
+                for ($i = 1; $i < count($json); $i++) {
+                    $json[$i]['text'] = myhtmLawed($json[$i]['text']);
+                }
+            }
+        }
+
 		foreach ($setstoadd as $set) {
 			if (isset($item[$itemtoadd][$set])) {
 				$tosets .= ','.$set;
@@ -186,11 +213,21 @@ function additem($itemtoadd,$item,$questions,$qset) {
 				} else {
 					$hasimg = 0;
 				}
+				if (isset($qset['userights'][$n]) && isset($_POST['reuseqrights'])) {
+					$thisqrights = $qset['userights'][$n];
+				} else {
+					$thisqrights = $userights;
+				}
+				if (isset($GLOBALS['mapusers']) && isset($GLOBALS['mapusers'][$sourceinstall][$qset['ownerid'][$n]])) {
+					$thisownerid = $GLOBALS['mapusers'][$sourceinstall][$qset['ownerid'][$n]]['id'];
+				} else {
+					$thisownerid = $userid;
+				}
 				$query = "INSERT INTO imas_questionset (adddate,lastmoddate,uniqueid,ownerid,author,userights,description,qtype,control,qcontrol,qtext,answer,solution,solutionopts,extref,license,ancestorauthors,otherattribution,hasimg,importuid) ";
 				$query .= "VALUES (:adddate, :lastmoddate, :uniqueid, :ownerid, :author, :userights, :description, :qtype, :control, :qcontrol, :qtext, :answer, :solution, :solutionopts, :extref, :license, :ancestorauthors, :otherattribution, :hasimg, :importuid)";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':adddate'=>$now, ':lastmoddate'=>$qset['lastmod'][$n], ':uniqueid'=>$qset['uniqueid'][$n], ':ownerid'=>$userid,
-					':author'=>$qset['author'][$n], ':userights'=>$userights, ':description'=>$qset['description'][$n], ':qtype'=>$qset['qtype'][$n],
+				$stm->execute(array(':adddate'=>$now, ':lastmoddate'=>$qset['lastmod'][$n], ':uniqueid'=>$qset['uniqueid'][$n], ':ownerid'=>$thisownerid,
+					':author'=>$qset['author'][$n], ':userights'=>$thisqrights, ':description'=>$qset['description'][$n], ':qtype'=>$qset['qtype'][$n],
 					':control'=>$qset['control'][$n], ':qcontrol'=>$qset['qcontrol'][$n], ':qtext'=>$qset['qtext'][$n], ':answer'=>$qset['answer'][$n],
 					':solution'=>$qset['solution'][$n], ':solutionopts'=>$qset['solutionopts'][$n], ':extref'=>$qset['extref'][$n], ':license'=>$qset['license'][$n],
 					':ancestorauthors'=>$qset['ancestorauthors'][$n], ':otherattribution'=>$qset['otherattribution'][$n], ':hasimg'=>$hasimg, ':importuid'=>$importuid));
@@ -318,6 +355,22 @@ function additem($itemtoadd,$item,$questions,$qset) {
 		$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$typeid));
 	} else if ($item[$itemtoadd]['type'] == "Forum") {
 		$settings = explode("\n",$item[$itemtoadd]['settings']);
+
+		// Sanitize description content.
+		if (isset($item[$itemtoadd]['description'])) {
+			$item[$itemtoadd]['description'] = myhtmLawed($item[$itemtoadd]['description']);
+		}
+
+		// Sanitize postinstr content.
+		if (isset($item[$itemtoadd]['postinstr'])) {
+			$item[$itemtoadd]['postinstr'] = myhtmLawed($item[$itemtoadd]['postinstr']);
+		}
+
+		// Sanitize replyinstr content.
+		if (isset($item[$itemtoadd]['replyinstr'])) {
+			$item[$itemtoadd]['replyinstr'] = myhtmLawed($item[$itemtoadd]['replyinstr']);
+        }
+
 		foreach ($settings as $set) {
 			$pair = explode('=',$set);
 			$item[$itemtoadd][$pair[0]] = $pair[1];
@@ -335,6 +388,11 @@ function additem($itemtoadd,$item,$questions,$qset) {
 			':points'=>$item[$itemtoadd]['points'], ':cntingb'=>$item[$itemtoadd]['cntingb'], ':settings'=>$item[$itemtoadd]['settings']));
 		$typeid = $DBH->lastInsertId();
 	} else if ($item[$itemtoadd]['type'] == "InlineText") {
+		// Sanitize text content.
+		if (isset($item[$itemtoadd]['text'])) {
+			$item[$itemtoadd]['text'] = myhtmLawed($item[$itemtoadd]['text']);
+		}
+
 		//DB $query = "INSERT INTO imas_inlinetext (courseid,title,text,avail,startdate,enddate,oncal,caltag)";
 		//DB $query .= "VALUES ('$cid','{$item[$itemtoadd]['title']}','{$item[$itemtoadd]['text']}','{$item[$itemtoadd]['avail']}','{$item[$itemtoadd]['startdate']}','{$item[$itemtoadd]['enddate']}','{$item[$itemtoadd]['oncal']}','{$item[$itemtoadd]['caltag']}')";
 		//DB mysql_query($query) or die("error on: $query: " . mysql_error());
@@ -375,6 +433,16 @@ function additem($itemtoadd,$item,$questions,$qset) {
 			$stm->execute(array(':id'=>$typeid, ':fileorder'=>implode(',',$fileorder)));
 		}
 	} else if ($item[$itemtoadd]['type'] == "LinkedText") {
+		// Sanitize text content.
+		if (isset($item[$itemtoadd]['text'])) {
+			$item[$itemtoadd]['text'] = myhtmLawed($item[$itemtoadd]['text']);
+		}
+
+		// Sanitize summary content.
+		if (isset($item[$itemtoadd]['summary'])) {
+			$item[$itemtoadd]['summary'] = myhtmLawed($item[$itemtoadd]['summary']);
+		}
+
 		//DB $query = "INSERT INTO imas_linkedtext (courseid,title,summary,text,avail,startdate,enddate,oncal,caltag,target)";
 		//DB $query .= "VALUES ('$cid','{$item[$itemtoadd]['title']}','{$item[$itemtoadd]['summary']}','{$item[$itemtoadd]['text']}','{$item[$itemtoadd]['avail']}','{$item[$itemtoadd]['startdate']}','{$item[$itemtoadd]['enddate']}','{$item[$itemtoadd]['oncal']}','{$item[$itemtoadd]['caltag']}','{$item[$itemtoadd]['target']}')";
 		//DB mysql_query($query) or die("error on: $query: " . mysql_error());
@@ -426,6 +494,12 @@ function parsefile($file) {
 		switch ((string)$line) {
 			case  "EXPORT DESCRIPTION":
 				$desc = rtrim(fgets($handle, 4096));
+				break;
+			case  "INSTALLNAME":
+				$sourceinstall = rtrim(fgets($handle, 4096));
+				break;
+			case  "EXPORT OWNERID":
+				$ownerid = rtrim(fgets($handle, 4096));
 				break;
 			case  "ITEM LIST":
 				$itemlist = rtrim(fgets($handle, 44096));
@@ -518,6 +592,8 @@ function parsefile($file) {
 			case  "UNIQUEID":
 			case  "LASTMOD":
 			case  "AUTHOR":
+			case  'OWNERID':
+			case  'USERIGHTS':
 			case  "CONTROL":
 			case  "QCONTROL":
 			case  "QTEXT":
@@ -544,7 +620,7 @@ function parsefile($file) {
 		}
 	}
 
-	return array($desc,$itemlist,$item,$questions,$qset);
+	return array($desc,$itemlist,$item,$questions,$qset,$sourceinstall,$ownerid);
 }
 
 function copysub($items,$parent,&$addtoarr) {
@@ -602,7 +678,7 @@ if (!(isset($teacherid))) {
 	//FORM HAS BEEN POSTED, STEP 3 DATA MANIPULATION
 	if (isset($_POST['process'])) {
 		$filename = rtrim(dirname(__FILE__), '/\\') .'/import/' . Sanitize::sanitizeFilenameAndCheckBlacklist($_POST['filename']);
-		list ($desc,$itemlist,$item,$questions,$qset) = parsefile($filename);
+		list ($desc,$itemlist,$item,$questions,$qset,$sourceinstall,$ownerid) = parsefile($filename);
 
 		$userights = $_POST['userights'];
 		$newlibs = explode(",",$_POST['libs']);
@@ -664,7 +740,7 @@ if (!(isset($teacherid))) {
 			echo Sanitize::encodeStringForDisplay($_FILES["userfile"]['error']);
 			exit;
 		}
-		list ($desc,$itemlist,$item,$questions,$qset) = parsefile($uploadfile);
+		list ($desc,$itemlist,$item,$questions,$qset,$sourceinstall,$ownerid) = parsefile($uploadfile);
 		if (!isset($desc)) {
 			$page_fileErrorMsg .=  "This does not appear to be a course items file.  It may be ";
 			$page_fileErrorMsg .=  "a question or library export.\n";
@@ -760,6 +836,8 @@ function chkgrp(frm, arr, mark) {
 				<option value="3">Allow use by all and modifications by group</option>
 				<option value="4">Allow use and modifications by all</option>
 			</select>
+			<br/><input type="checkbox" name="reuseqrights" checked /> Use rights in import, if available.
+			
 		</p>
 		<p>
 

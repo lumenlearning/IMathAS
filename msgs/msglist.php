@@ -94,7 +94,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':courseid'=>$cid));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				$opts[] = "<option value=\"{$row[0]}\">{$row[2]}, {$row[1]}</option>";
+				$opts[] = "<option value=\"".Sanitize::onlyInt($row[0])."\">".Sanitize::encodeStringForDisplay("$row[2], $row[1]")."</option>";
 			}
 
 			//DB $query = "SELECT imas_users.id,imas_users.FirstName,imas_users.LastName FROM ";
@@ -347,7 +347,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 						else if ($i==0) { $courseopts .= _("Student"); }
 						$courseopts .= '">';
 						foreach ($course_array[$i] as $r) {
-							$courseopts .= '<option value="'.$r['id'].'">'.$r['name'].'</option>';
+							$courseopts .= '<option value="'.Sanitize::encodeStringForDisplay($r['id']).'">'.Sanitize::encodeStringForDisplay($r['name']).'</option>';
 						}
 						$courseopts .= '</optgroup>';
 					}
@@ -361,10 +361,10 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 				$stm = $DBH->prepare("SELECT title,message,courseid FROM imas_msgs WHERE id=:id");
 				$stm->execute(array(':id'=>$replyto));
         list($title, $message, $courseid) = $stm->fetch(PDO::FETCH_NUM);
-				$title = "Re: ".str_replace('"','&quot;',$title);
+				$title = _("Re: ").$title;
 				if (isset($_GET['toquote'])) {
 					//DB $message = mysql_result($result,0,1);
-					$message = '<br/><hr/>In reply to:<br/>'.$message;
+					$message = '<br/><hr/>'._('In reply to:').'<br/>'.$message;
 				} else {
 					$message = '';
 				}
@@ -386,17 +386,22 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 
 				$message = '<br/><hr/>'.$message;
 				//$message .= '<span class="hidden">QREF::'.htmlentities($_GET['quoteq']).'</span>';
-				if (isset($parts[3])) {  //sending out of assessment instructor
+				if (isset($parts[3]) && $parts[3] === 'reperr') {
+					$title = "Problem with question ID ".Sanitize::onlyInt($parts[1]);
+					$stm = $DBH->prepare("SELECT ownerid FROM imas_questionset WHERE id=:id");
+					$stm->execute(array(':id'=>$parts[1]));
+					$_GET['to'] = $stm->fetchColumn(0);
+				} else if (isset($parts[3]) && $parts[3]>0) {  //sending out of assessment instructor
 					//DB $query = "SELECT name FROM imas_assessments WHERE id='".intval($parts[3])."'";
 					//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 					$stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
 					$stm->execute(array(':id'=>$parts[3]));
 					if (isset($teacherid) || isset($tutorid)) {
 						//DB $title = 'Question #'.($parts[0]+1).' in '.str_replace('"','&quot;',mysql_result($result,0,0));
-						$title = 'Question #'.($parts[0]+1).' in '.str_replace('"','&quot;',$stm->fetchColumn(0));
+						$title = 'Question #'.($parts[0]+1).' in '.$stm->fetchColumn(0);
 					} else {
 						//DB $title = 'Question about #'.($parts[0]+1).' in '.str_replace('"','&quot;',mysql_result($result,0,0));
-						$title = 'Question about #'.($parts[0]+1).' in '.str_replace('"','&quot;',$stm->fetchColumn(0));
+						$title = 'Question about #'.($parts[0]+1).' in '.$stm->fetchColumn(0);
 					}
 					if ($_GET['to']=='instr') {
 						unset($_GET['to']);
@@ -444,8 +449,8 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 					}
 				}
 				if ($ismsgsrcteacher) {
-					echo " <a href=\"mailto:{$row[2]}\">email</a> | ";
-					echo " <a href=\"$imasroot/course/gradebook.php?cid=$courseid&stu=$to\" target=\"_popoutgradebook\">gradebook</a>";
+					echo " <a href=\"mailto:".Sanitize::emailAddress($row[2])."\">email</a> | ";
+					echo " <a href=\"$imasroot/course/gradebook.php?cid=".Sanitize::courseId($courseid)."&stu=". Sanitize::onlyInt($to)."\" target=\"_popoutgradebook\">gradebook</a>";
 					if ($row[3]!=null) {
 						echo " | Last login ".tzdate("F j, Y, g:i a",$row[3]);
 					}
@@ -459,7 +464,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 						echo " <img style=\"vertical-align: middle;\" src=\"$imasroot/course/files/userimg_sm$to.jpg\"  onclick=\"togglepic(this)\" alt=\"User picture\"/><br/>";
 					}
 				}
-				echo "<input type=hidden name=courseid value=\"$courseid\"/>\n";
+				echo "<input type=hidden name=courseid value=\"".Sanitize::courseId($courseid)."\"/>\n";
 			} else {
 				if ($filtercid>0) {
 					echo "<select name=\"to\" id=\"to\">";
@@ -477,7 +482,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 						$stm->execute(array(':courseid'=>$courseid));
 						$cnt = $stm->rowCount();
 						while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-							echo "<option value=\"{$row[0]}\"";
+							echo "<option value=\"".Sanitize::onlyInt($row[0])."\"";
 							if ($cnt==1 && $msgset==1 && !$isteacher) {
 								echo ' selected="selected"';
 							}
@@ -531,7 +536,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 						}
 					}
 					echo "</select>";
-					echo "<input type=hidden name=courseid value=\"$courseid\"/>\n";
+					echo "<input type=hidden name=courseid value=\"".Sanitize::courseId($courseid)."\"/>\n";
 				} else {
 					echo '<select name="courseid" onchange="updateTo(this)" aria-label="Select a course">';
 					echo '<option value="0">Select a course...</option>';
@@ -803,7 +808,7 @@ function chgfilter() {
 		if ($filtercid==$k) {
 			echo 'selected=1';
 		}
-		echo " >$v</option>";
+		echo " >".Sanitize::encodeStringForDisplay($v)."</option>";
 	}
 	echo "</select> ";
 	echo 'By sender: <select id="filteruid" onchange="chgfilter()"><option value="0" ';
@@ -832,11 +837,11 @@ function chgfilter() {
     $stm->execute(array(':msgto'=>$userid));
   }
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		echo "<option value=\"{$row[0]}\" ";
+		echo "<option value=\"".Sanitize::onlyInt($row[0])."\" ";
 		if ($filteruid==$row[0]) {
 			echo 'selected=1';
 		}
-		echo " >{$row[1]}, {$row[2]}</option>";
+		echo " >".Sanitize::encodeStringForDisplay($row[1]).", ".Sanitize::encodeStringForDisplay($row[2])."</option>";
 	}
 	echo "</select></p>";
 
@@ -913,19 +918,19 @@ function chgfilter() {
 		} else if ($n>1) {
 			$line['title'] = "Re<sup>$n</sup>: " . Sanitize::encodeStringForDisplay($line['title']);
 		}
-		echo "<tr id=\"tr{$line['id']}\" ";
+		printf("<tr id=\"tr%d\" ", Sanitize::onlyInt($line['id']));
 		$stripe = ($cnt%2==0)?'even':'odd';
 		if (($line['isread']&8)==8) {
 			echo 'class="tagged '.$stripe.'" ';
 		} else {
 			echo 'class="'.$stripe.'"';
 		}
-		echo "><td><input type=checkbox name=\"checked[]\" value=\"{$line['id']}\"/></td><td>";
-		echo "<a href=\"viewmsg.php?page=$page&cid=$cid&filtercid=$filtercid&filteruid=$filteruid&type=msg&msgid={$line['id']}\">";
+		echo "><td><input type=checkbox name=\"checked[]\" value=\"".Sanitize::onlyInt($line['id'])."\"/></td><td>";
+		echo "<a href=\"viewmsg.php?page=$page&cid=$cid&filtercid=$filtercid&filteruid=$filteruid&type=msg&msgid=".Sanitize::onlyInt($line['id'])."\">";
 		if (($line['isread']&1)==0) {
-			echo "<b>" . $line['title']. "</b>";
+			echo "<b>" . Sanitize::encodeStringForDisplay($line['title']). "</b>";
 		} else {
-			echo $line['title'];
+			echo Sanitize::encodeStringForDisplay($line['title']);
 		}
 		echo "</a></td><td>";
 		if ($line['replied']==1) {
@@ -946,9 +951,9 @@ function chgfilter() {
 
 		echo "</td><td>";
 		if (($line['isread']&8)==8) {
-			echo "<img class=\"pointer\" id=\"tag{$line['id']}\" src=\"$imasroot/img/flagfilled.gif\" onClick=\"toggletagged({$line['id']});return false;\" alt=\"Flagged\"/>";
+			echo "<img class=\"pointer\" id=\"tag".Sanitize::onlyInt($line['id'])."\" src=\"$imasroot/img/flagfilled.gif\" onClick=\"toggletagged(".Sanitize::onlyInt($line['id']).");return false;\" alt=\"Flagged\"/>";
 		} else {
-			echo "<img class=\"pointer\" id=\"tag{$line['id']}\" src=\"$imasroot/img/flagempty.gif\" onClick=\"toggletagged({$line['id']});return false;\" alt=\"Not flagged\"/>";
+			echo "<img class=\"pointer\" id=\"tag".Sanitize::onlyInt($line['id'])."\" src=\"$imasroot/img/flagempty.gif\" onClick=\"toggletagged(".Sanitize::onlyInt($line['id']).");return false;\" alt=\"Not flagged\"/>";
 		}
 		echo '</td>';
 		printf('<td>%s, %s</td>', Sanitize::encodeStringForDisplay($line['LastName']),

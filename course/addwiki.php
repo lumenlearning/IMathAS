@@ -184,8 +184,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 			$savetitle = _("Save Changes");
 		} else {
-			$line['name'] = "Enter Wiki Name here";
-			$line['description'] = "<p>Enter Wiki description here</p>";
+			$line['description'] = "";
 			$line['avail'] = 1;
 			$line['groupsetid'] = 0;
 			$startdate = time();
@@ -288,7 +287,7 @@ if ($started) {
 
 	<form method=post action="addwiki.php<?php echo $page_formActionTag; ?>">
 		<span class=form>Name: </span>
-		<span class=formright><input type=text size=60 name=name value="<?php echo str_replace('"','&quot;',$line['name']);?>"></span>
+		<span class=formright><input type=text size=60 name=name placeholder="Enter Wiki Name here" value="<?php echo str_replace('"','&quot;',$line['name']);?>" required></span>
 		<BR class=form>
 
 		Description:<BR>

@@ -444,7 +444,7 @@ div.todoquestion {
 }
 /*all questions*/
 div.question {
-	background-color: #F7FCFF; 
+	background-color: #FFF; /*#F7FCFF;*/ 
 	border: 1px solid #C3D4DD;
 	line-height: 1.4em;
 	width: auto;
@@ -467,20 +467,21 @@ div.intro {
 	padding: 10px;
 }
 div.navbar {
-	position: relative;
-	float: left;
-	left: 0px;
-	background: #f0e9f0;
-	border: 1px solid #bbd;
+	background-color: #e9f0f6;
+	border: 1px solid #CAD7DF;
+	/*background: #f0e9f0;
+	border: 1px solid #bbd;*/
 	color:#000;
 }
 div.navbar a {
 	color: blue;
 }
+/*
 div.navbar.fixedonscroll {
 	position: static;
 	left: 15px;
 }
+*/
 div.navbar ul.qlist li {
 	font-size: 12px;
 }
@@ -488,7 +489,20 @@ div.navbar ul.qlist li a {
 	font-size: 14px;
 }
 span.current {
-	background-color: #E0FF92;
+	background-color: #FFF; /*#E0FF92;*/
+}
+span.spanbutton {
+	padding: 2px 5px;
+	border-radius: 4px;
+	border: 1px solid #CAD7DF;
+	background: #e9f0f6;
+}
+span.spanbutton:active {
+	border: 1px solid #CAD7DF;
+	background: #e9f0f6;
+}
+span.spanbutton:hover {
+	background: #CAD7DF;
 }
 span.done {
 	text-decoration: line-through;

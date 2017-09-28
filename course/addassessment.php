@@ -81,7 +81,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$cid, Sanitize::encodeStringForDisplay($coursename));
 			$body .= sprintf("&gt; <a href=\"addassessment.php?cid=%s&id=%d\">Modify Assessment</a> &gt; Clear Attempts</div>\n",
 				$cid, Sanitize::onlyInt($_GET['id']));
-			$body .= sprintf("<h3>%s</h3>", $assessmentname);
+			$body .= sprintf("<h3>%s</h3>", Sanitize::encodeStringForDisplay($assessmentname));
 			$body .= "<p>Are you SURE you want to delete all attempts (grades) for this assessment?</p>";
 			$body .= '<form method="POST" action="'.sprintf('addassessment.php?cid=%s&id=%d',$cid, Sanitize::onlyInt($_GET['id'])).'">';
 			$body .= '<p><button type=submit name=clearattempts value=confirmed>'._('Yes, Clear').'</button>';
@@ -492,9 +492,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$savetitle = _("Save Changes");
 		} else {  //INITIAL LOAD IN ADD MODE
 			//set defaults
-			$line['name'] = "Enter assessment name";
-			$line['summary'] = "<p>Enter summary here (shows on course page)</p>";
-			$line['intro'] = "<p>Enter intro/instructions</p>";
+			$line['summary'] = "<p></p>";
+			$line['intro'] = "<p></p>";
 			$startdate = time()+60*60;
 			$enddate = time() + 7*24*60*60;
 			$line['startdate'] = $startdate;
@@ -831,7 +830,7 @@ if ($overwriteBody==1) {
 
 	<form method=post action="<?php echo $page_formActionTag ?>">
 		<span class=form>Assessment Name:</span>
-        <span class=formright><input type=text size=30 name=name value="<?php echo Sanitize::encodeStringForDisplay($line['name']); ?>"></span><BR class=form>
+        <span class=formright><input type=text size=30 name=name placeholder="Enter assessment name" value="<?php echo Sanitize::encodeStringForDisplay($line['name']); ?>" required></span><BR class=form>
 
 		Summary:<BR>
 		<div class=editor>
@@ -927,7 +926,7 @@ if ($overwriteBody==1) {
 			<span class=form>Require Password (blank for none):</span>
 			<span class=formright><input type="password" name="assmpassword" id="assmpassword" value="<?php echo Sanitize::encodeStringForDisplay($line['password']); ?>" autocomplete="new-password"> <a href="#" onclick="apwshowhide(this);return false;">Show</a></span><br class=form />
 			<span class=form>Time Limit (minutes, 0 for no time limit): </span>
-			<span class=formright><input type=text size=4 name=timelimit value="<?php echo abs($timelimit);?>">
+			<span class=formright><input type=text size=4 name=timelimit value="<?php echo Sanitize::onlyFloat(abs($timelimit));?>">
 				<input type="checkbox" name="timelimitkickout" <?php if ($timelimit<0) echo 'checked="checked"';?> /> Kick student out at timelimit</span><BR class=form>
 			<span class=form>Display method: </span>
 			<span class=formright>

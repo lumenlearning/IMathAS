@@ -75,7 +75,7 @@
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$_POST['verurl'] = Sanitize::fullUrl($_POST['verurl']);
+				$_POST['verurl'] = Sanitize::url($_POST['verurl']);
 				$urldisplay = Sanitize::encodeStringForDisplay($_POST['verurl']);
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
@@ -109,10 +109,15 @@
 	echo "<span class=form>First Name</span><span class=formright><input type=text name=firstname value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40></span><br class=form />\n";
 	echo "<span class=form>Last Name</span><span class=formright><input type=text name=lastname value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40></span><br class=form />\n";
 	echo "<span class=form>Email Address</span><span class=formright><input type=text name=email value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40></span><br class=form />\n";
+	echo '<span class=form></span><span class="formright small">For fastest approval, use your .edu address. You can change it later.</span><br class=form />';
 	echo "<span class=form>Phone Number</span><span class=formright><input type=text name=phone value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40></span><br class=form />\n";
 	echo "<span class=form>School &amp; District / College</span><span class=formright><input type=text name=school value=\"".Sanitize::encodeStringForDisplay($school)."\" size=40></span><br class=form />\n";
-	echo "<span class=form>Web page where your instructor status can be verified (e.g., a school directory)</span><span class=formright><input type=text name=verurl value=\"".Sanitize::encodeStringForDisplay($verurl)."\" size=40></span><br class=form />\n";
-
+	echo '<span class=form></span><span class="formright small">Give the full name. There are a lot of BCC\'s out there, so abbreviations slow us down.</span><br class=form />';
+	echo "<span class=form>Instructor verification page</span><span class=formright><input type=text name=verurl value=\"".Sanitize::encodeStringForDisplay($verurl)."\" size=40></span><br class=form />\n";
+	echo '<span class=form></span><span class="formright small">Provide a direct link to a web page showing you, or to the school\'s online directory. Make sure the site doesn\'t require a login. ';
+	echo 'If you just type something like "see school directory" or provide a link to the college\'s home page, ';
+	echo 'our volunteers will probably decide your request is too much work and delay approving it. Don\'t say "call ____"; we won\'t. ';
+	echo 'If you are not listed on a website, you can have your supervisor (someone who can be verified) email admin@myopenmath.com. </span><br class=form />';
 	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=formright><input type=text name=username value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40></span><br class=form />\n";
 	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
 	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";

@@ -103,6 +103,8 @@ if ($canviewall) {
 	}
 
 	//Gbmode : Links NC Dates
+	$hidesection = (((floor($gbmode/100000)%10)&1)==1);
+	$hidecode = (((floor($gbmode/100000)%10)&2)==2);
 	$showpics = floor($gbmode/10000)%10 ; //0 none, 1 small, 2 big
 	$totonleft = ((floor($gbmode/1000)%10)&1) ; //0 right, 1 left
 	$avgontop = ((floor($gbmode/1000)%10)&2) ; //0 bottom, 2 top
@@ -368,7 +370,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 
 } else { //show instructor view
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js?v=012811\"></script>\n";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablescroller2.js?v=080317\"></script>\n";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablescroller2.js?v=091217\"></script>\n";
 	$placeinhead .= "<script type=\"text/javascript\">\n";
 	$placeinhead .= 'var ts = new tablescroller("myTable",';
 	if (isset($_COOKIE["gblhdr-$cid"]) && $_COOKIE["gblhdr-$cid"]==1) {
@@ -420,7 +422,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 	$togglehtml .= '<li><a data-pics="0">'. _('None'). '</a></li>';
 	$togglehtml .= '<li><a data-pics="1">'. _('Small').'</a></li>';
 	$togglehtml .= '<li><a data-pics="2">'. _('Big'). '</a></li>';
-	
+
 	if ($isteacher) {
 		$togglehtml .= '<li class="dropdown-header">'. _('NewFlag'). '</li>';
 		$togglehtml .= '<li><a data-newflag="0">'. _('Off'). '</a></li>';
@@ -428,7 +430,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 	}
 	$togglehtml .= '</ul></span>';
 	$i++;
-	
+
 	if ($isteacher) {
 		echo '<span class="dropdown">';
 		echo ' <a tabindex=0 class="dropdown-toggle arrow-down" id="dropdownMenu'.$i.'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
@@ -438,7 +440,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 		echo " <li><a href=\"chgoffline.php?cid=$cid\">", _('Manage'), "</a></li>";
 		echo '</ul></span> &nbsp; ';
 		$i++;
-			
+
 		echo '<a href="gb-export.php?cid='.$cid.'&export=true">'._('Export').'</a> &nbsp; ';
 		echo "<a href=\"gbsettings.php?cid=$cid\">", _('Settings'), "</a> &nbsp; ";
 		echo "<a href=\"gbcomments.php?cid=$cid&stu=0\">", _('Comments'), "</a> &nbsp; ";
@@ -496,7 +498,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 	echo "<option value=4 "; writeHtmlSelected($availshow,4); echo ">", _('Available Only'), "</option>";
 	echo "<option value=1 "; writeHtmlSelected($availshow,1); echo ">", _('Past &amp; Available'), "</option>";
 	echo "<option value=2 "; writeHtmlSelected($availshow,2); echo ">", _('All'), "</option></select> &nbsp; ";
-	
+
 	if (!$isteacher) {
 		echo $togglehtml;
 	}
@@ -530,7 +532,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 		}
 
 		echo '</ul></span>';
-	
+
 		/*echo _('With Selected:'), '  <button type="submit" name="posted" value="Print Report" title="',_("Generate printable grade reports"),'">',_('Print Report'),'</button> ';
 		if (!isset($CFG['GEN']['noEmailButton'])) {
 			echo '<button type="submit" name="posted" value="E-mail" title="',_("Send e-mail to the selected students"),'">',_('E-mail'),'</button> ';
@@ -670,7 +672,7 @@ function gbstudisp($stu) {
 			echo '<img id="updatingicon" style="display:none" src="'.$imasroot.'/img/updating.gif" alt="Updating..."/>';
 			echo ' <span class="small">('.Sanitize::encodeStringForDisplay($gbt[1][0][1]).')</span>';
 		} else {
-			echo strip_tags($gbt[1][0][0]) . ' <span class="small">('.Sanitize::encodeStringForDisplay($gbt[1][0][1]).')</span>';
+			echo Sanitize::encodeStringForDisplay($gbt[1][0][0]) . ' <span class="small">('.Sanitize::encodeStringForDisplay($gbt[1][0][1]).')</span>';
 
 			$now = time();
 		}
@@ -683,7 +685,7 @@ function gbstudisp($stu) {
 		if ($isteacher) {
 			echo '<div style="clear:both;display:inline-block" class="cpmid secondary">';
 			//echo '<a href="mailto:'.$stuemail.'">', _('Email'), '</a> | ';
-			echo "<a href=\"#\" onclick=\"GB_show('Send Email','$imasroot/course/sendmsgmodal.php?to=$stu&sendtype=email&cid=" . Sanitize::courseId($cid) . "',800,'auto')\" title=\"Send Email\">", _('Email'), "</a> | ";
+			echo "<a href=\"#\" onclick=\"GB_show('Send Email','$imasroot/course/sendmsgmodal.php?to=" . Sanitize::onlyInt($stu) . "&sendtype=email&cid=" . Sanitize::courseId($cid) . "',800,'auto')\" title=\"Send Email\">", _('Email'), "</a> | ";
 
 			//echo "<a href=\"$imasroot/msgs/msglist.php?cid={$_GET['cid']}&add=new&to=$stu\">", _('Message'), "</a> | ";
 			echo "<a href=\"#\" onclick=\"GB_show('Send Message','$imasroot/course/sendmsgmodal.php?to=" . Sanitize::onlyInt($stu) . "&sendtype=msg&cid=" . Sanitize::courseId($cid) . "',800,'auto')\" title=\"Send Message\">", _('Message'), "</a> | ";
@@ -892,7 +894,7 @@ function gbstudisp($stu) {
                         $querymap = array(
                             'cid' => $cid,
                             'stu' => $stu,
-                            'grades' => $gbt[1][4][0],
+                            'uid' => $gbt[1][4][0],
                             'fid' => $gbt[0][1][$i][7]
                         );
 
@@ -1232,7 +1234,8 @@ function gbstudisp($stu) {
 		echo '</p>';
 		if ($hasoutcomes) {
 			echo '<p>';
-			echo '<a href="outcomereport.php?stu='.$stu.'&report=outstu&cid='.$cid.'&type='.$outcometype.'">';
+			echo '<a href="outcomereport.php?' . Sanitize::generateQueryStringFromMap(array('stu' => $stu,
+					'report' => 'outstu', 'cid' => $cid, 'type' => $outcometype)) . '">';
 			echo _('View Outcome Report');
 			echo '</a>';
 			echo '</p>';
@@ -1247,11 +1250,12 @@ function gbstudisp($stu) {
 	echo "</form>";
 
 	echo "<script>initSortTable('myTable',Array($sarr),false);</script>\n";
-	
+
 }
 
 function gbinstrdisp() {
-	global $DBH,$hidenc,$showpics,$isteacher,$istutor,$cid,$gbmode,$stu,$availshow,$catfilter,$secfilter,$totonleft,$imasroot,$isdiag,$tutorsection,$avgontop,$hidelocked,$colorize,$urlmode,$overridecollapse,$includeduedate,$lastlogin;
+	global $DBH,$hidenc,$showpics,$isteacher,$istutor,$cid,$gbmode,$stu,$availshow,$catfilter,$secfilter,$totonleft,$imasroot,$isdiag,$tutorsection;
+	global $avgontop,$hidelocked,$colorize,$urlmode,$overridecollapse,$includeduedate,$lastlogin,$hidesection,$hidecode;
 
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	if ($availshow==4) {

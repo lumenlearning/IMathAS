@@ -36,13 +36,13 @@ if (isset($_GET['getxml'])) {
   <lticm:property name="privacy_level">public</lticm:property>
   <lticm:options name="editor_button">
     <lticm:property name="url"><?php echo $GLOBALS['basesiteurl'] . '/lti/ccattribution.php'; ?></lticm:property>
-    <lticm:property name="icon_url"><?php echo Sanitize::fullUrl($urlmode . $_SERVER['HTTP_HOST'] . str_replace('.php', '.png', $_SERVER['PHP_SELF']));?></lticm:property>
+    <lticm:property name="icon_url"><?php echo Sanitize::url($urlmode . $_SERVER['HTTP_HOST'] . str_replace('.php', '.png', $_SERVER['PHP_SELF']));?></lticm:property>
     <lticm:property name="text">CC License Generator</lticm:property>
     <lticm:property name="selection_width">700</lticm:property>
     <lticm:property name="selection_height">450</lticm:property>
   </lticm:options>
 </blti:extensions>
-<blti:icon><?php echo Sanitize::fullUrl($urlmode . $_SERVER['HTTP_HOST'] . str_replace('.php', '.png', $_SERVER['PHP_SELF'])); ?></blti:icon>
+<blti:icon><?php echo Sanitize::url($urlmode . $_SERVER['HTTP_HOST'] . str_replace('.php', '.png', $_SERVER['PHP_SELF'])); ?></blti:icon>
 
       <cartridge_bundle identifierref="BLTI001_Bundle"/>
       <cartridge_icon identifierref="BLTI001_Icon"/>
@@ -285,7 +285,7 @@ if (isset($_POST['license'])) {
 		$stm->execute(array(':data'=>$html, ':tool'=>$tool, ':key'=>$key));
 	}
 
-	$returnurl = Sanitize::fullUrl($_POST['returnurl']);
+	$returnurl = Sanitize::url($_POST['returnurl']);
 	$url = $GLOBALS['basesiteurl'];
 
 	//save data
@@ -334,7 +334,7 @@ if (isset($_POST['license'])) {
 	header('Location: ' . $returnurl .'?embed_type=oembed&endpoint='.urlencode($url).'&url='.urlencode($url.'/'.$key));
 	exit;
 } else {
-	$returnurl = $_POST['launch_presentation_return_url'];
+	$returnurl = Sanitize::fullUrl($_POST['launch_presentation_return_url']);
 	//DB $storekey = $db->real_escape_string("$consumerkey-$courseid-$userid");
 	$storekey = "$consumerkey-$courseid-$userid";
 	//DB $query = "SELECT data FROM ltidata WHERE tool='$tool' AND datakey='$storekey'";

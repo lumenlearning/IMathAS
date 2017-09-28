@@ -46,7 +46,7 @@ if ($myrights < 75) {
       $groupname = $stm->fetchColumn(0);
     }
     $page = 'groupdetails';
-    $pagetitle = _("Group Members").': '. $groupname;
+    $pagetitle = _("Group Members").': '. Sanitize::encodeStringForDisplay($groupname);
 
     $curBreadcrumb = $curBreadcrumb . ' <a href="admin2.php">' . _('Admin') . '</a> &gt; ' . _("Group Members");
 
@@ -59,15 +59,15 @@ if ($myrights < 75) {
     $hasp1 = false;
     if (trim($_GET['findteacher'])!=='') {
       $limitToTeacher = true;
-      $words = preg_split('/\s+/', trim($_GET['findteacher']));
+      $words = preg_split('/\s+/', str_replace(',',' ',trim($_GET['findteacher'])));
       $pagetitle = _("Select Teacher");
     } else if (trim($_GET['finduser'])!=='') {
       $limitToTeacher = false;
-      $words = preg_split('/\s+/', trim($_GET['finduser']));
+      $words = preg_split('/\s+/', str_replace(',',' ',trim($_GET['finduser'])));
       $pagetitle = _("Select User");
     }
     if (count($words)==1 && strpos($words[0],'@')!==false) {
-      $query = "SELECT iu.id,LastName,iu.FirstName,iu.email,iu.SID,iu.rights,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id "; 
+      $query = "SELECT iu.id,LastName,iu.FirstName,iu.email,iu.SID,iu.rights,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id ";
       $query .= "WHERE (iu.email=? OR iu.SID=?)";
       if ($limitToTeacher) {
         $query .= " AND iu.rights>11";
@@ -80,7 +80,7 @@ if ($myrights < 75) {
         $possible_users[] = $row;
       }
     } else if (count($words)==1) {
-      $query = "SELECT iu.id,LastName,iu.FirstName,iu.email,iu.SID,iu.rights,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id "; 
+      $query = "SELECT iu.id,LastName,iu.FirstName,iu.email,iu.SID,iu.rights,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id ";
       $query .= "WHERE (iu.LastName LIKE ? OR iu.FirstName Like ? OR iu.SID LIKE ?)";
       if ($limitToTeacher) {
         $query .= " AND iu.rights>11";
@@ -100,7 +100,7 @@ if ($myrights < 75) {
         $possible_users[] = $row;
       }
     } else if (count($words)==2) {
-      $query = "SELECT iu.id,LastName,iu.FirstName,iu.email,iu.SID,iu.rights,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id "; 
+      $query = "SELECT iu.id,LastName,iu.FirstName,iu.email,iu.SID,iu.rights,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id ";
       $query .= "WHERE ((iu.LastName LIKE ? AND iu.FirstName Like ?) OR (iu.LastName LIKE ? AND iu.FirstName Like ?))";
       if ($limitToTeacher) {
         $query .= " AND iu.rights>11";
@@ -259,7 +259,7 @@ if ($overwriteBody==1) {
         echo '<tbody>';
         $alt = 0;
         foreach ($possible_users as $user) {
-          $priorityclass = "p".$user['priority']; 
+          $priorityclass = "p".Sanitize::onlyInt($user['priority']);
           if ($alt==0) {echo "<tr class=\"even $priorityclass\">"; $alt=1;} else {echo "<tr class=\"odd $priorityclass\">"; $alt=0;}
           echo '<td><a href="userdetails.php?id='.Sanitize::encodeUrlParam($user['id']).'">';
           echo Sanitize::encodeStringForDisplay($user['LastName'].', '.$user['FirstName']) . '</a></td>';
@@ -295,7 +295,7 @@ if ($overwriteBody==1) {
         echo '<li>'._('No group found').'</li>';
       }
       foreach ($possible_groups as $group) {
-        $priorityclass = "p".$group['priority']; 
+        $priorityclass = "p".$group['priority'];
         echo '<li class="'.$priorityclass.'"><a href="admin2.php?groupdetails='.Sanitize::encodeUrlParam($group['id']).'">';
         echo Sanitize::encodeStringForDisplay($group['name']).'</a></li>';
       }
@@ -308,7 +308,7 @@ if ($overwriteBody==1) {
         echo '<tbody>';
         $alt = 0;
         foreach ($possible_groups as $group) {
-          $priorityclass = "p".$group['priority']; 
+          $priorityclass = "p".Sanitize::onlyInt($group['priority']);
           if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
           echo '<td class="'.$priorityclass.'"><a href="admin2.php?groupdetails='.Sanitize::encodeUrlParam($group['id']).'">';
           echo Sanitize::encodeStringForDisplay($group['name']).'</a></td></tr>';
@@ -318,7 +318,7 @@ if ($overwriteBody==1) {
         echo '<script type="text/javascript">
           initSortTable("myTable",Array("S"),true);
           </script>';
-          
+
     } else if ($page=='groupadmin' || $page=='groupdetails') {
       if ($page=='groupadmin') {
         $from = 'admin2';
@@ -339,7 +339,9 @@ if ($overwriteBody==1) {
       echo '<th>'._('Role').'</th>';
       echo '<th>'._('Last Login').'</th>';
       echo '<th>'._('Edit').'</th>';
-      echo '<th>'._('Delete').'</th>';
+      if ($page != 'groupadmin') {
+      	      echo '<th>'._('Delete').'</th>';
+      }
       echo '</tr></thead>';
       echo '<tbody>';
       $alt = 0;
@@ -355,13 +357,15 @@ if ($overwriteBody==1) {
           echo '<td>'.Sanitize::encodeStringForDisplay($user['email']).'</td>';
           echo '<td>'.Sanitize::encodeStringForDisplay($user['role']).'</td>';
           echo '<td>'.Sanitize::encodeStringForDisplay($user['lastaccess']).'</td>';
-          echo '<td><a href="forms.php?from='.$from.'&action=chgrights&id='.$user['id'].'">'._('Edit').'</a></td>';
-          echo '<td><a href="forms.php?from='.$from.'&action=deladmin&id='.$user['id'].'">'._('Delete').'</a></td>';
+          echo '<td><a href="forms.php?from='.$from.'&action=chgrights&id='.Sanitize::onlyInt($user['id']).'">'._('Edit').'</a></td>';
+	  if ($page != 'groupadmin') {
+        	  echo '<td><a href="forms.php?from='.$from.'&action=deladmin&id=' .Sanitize::onlyInt($user['id']).'">'._('Delete').'</a></td>';
+	  }
           echo '</tr>';
       }
       echo '</tbody></table>';
       echo '<script type="text/javascript">
-  		  initSortTable("myTable",Array("S","S","S","S","D",false,false),true);
+  		  initSortTable("myTable",Array("S","S","S","S","D",false'.(($page != 'groupadmin')?',false':'').'),true);
   		  </script>';
 
     } else if ($page=='main') {

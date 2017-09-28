@@ -107,7 +107,7 @@
 	</script>';
 
 	require("../header.php");
-	echo "<div class=breadcrumb>$breadcrumbbase $titlesimp</div>";
+	echo "<div class=breadcrumb>$breadcrumbbase ".Sanitize::encodeStringForDisplay($titlesimp)."</div>";
 
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;">';
 	$navbuttons = '';
@@ -177,14 +177,15 @@
 		$navbuttons .= '<div class="clear"></div>';
 	}
 	if ($navbuttons != '') {
-		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1', $text);
+		$text = preg_replace('/(<hr[^>]*>\s*<div[^>]*smallattr[^>]*>)/sm', $navbuttons.'$1',
+			Sanitize::outgoingHtml($text));
 	}
 	echo filter($text);
 	echo '</div>';
 	if (!($_GET['from'])) {
 		echo "<div class=right><a href=\"course.php?cid=$cid\">Back</a></div>\n";
 	} else if ($fcid>0) {
-		echo "<div class=right><a href=\"{$_SERVER['HTTP_REFERER']}\">Back</a></div>\n";
+		echo "<div class=right><a href=\"" . Sanitize::url($_SERVER['HTTP_REFERER']) . "\">Back</a></div>\n";
 	} else {
 		echo "<div class=right><a href=\"public.php?cid=$cid\">Return to the Public Course Page</a></div>\n";
 	}

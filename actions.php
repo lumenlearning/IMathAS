@@ -610,10 +610,12 @@ require_once("includes/sanitize.php");
 					}
 
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-          if($_GET['enrollandlogin']){
-						header("Location:" . $GLOBALS['basesiteurl'] . "/course/course.php?folder=0&cid=".$_POST['cid']); /* Redirect browser */
+					//================= OHM-specific changes begin here =====================
+					if($_GET['enrollandlogin']){
+						header("Location:" . $GLOBALS['basesiteurl'] . "/course/course.php?folder=0&cid=".Sanitize::courseId($_POST['cid'])); /* Redirect browser */
 						exit;
 					}
+					//================= OHM-specific changes end here =====================
 					require("header.php");
 					echo $pagetopper;
 					echo '<p>You have been enrolled in course ID '.Sanitize::courseId($_POST['cid']).'</p>';

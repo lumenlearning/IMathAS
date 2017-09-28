@@ -54,7 +54,12 @@ switch($_GET['action']) {
 		echo '</form>';
 		break;
 	case "deladmin":
-		echo "<p>Are you sure you want to delete this user?</p>\n";
+		$stm = $DBH->prepare("SELECT FirstName,LastName,SID FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$_GET['id']));
+		$line = $stm->fetch(PDO::FETCH_ASSOC);
+		echo "<p>Are you sure you want to delete this user, <b>";
+		printf("%s, %s (%s)", Sanitize::encodeStringForDisplay($line['LastName']), Sanitize::encodeStringForDisplay($line['FirstName']), Sanitize::encodeStringForDisplay($line['SID']));
+		echo "</b>?</p>\n";
 		echo '<form method="POST" action="actions.php?from='.Sanitize::encodeUrlParam($from).'&id='.Sanitize::encodeUrlParam($_GET['id']).'">';
 		echo '<p><button type=submit name="action" value="deladmin">'._('Delete').'</button>';
 		echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='".Sanitize::encodeStringForJavascript($backloc)."'\"></p>\n";
@@ -101,8 +106,8 @@ switch($_GET['action']) {
 				if (selrights<75) {
 					$("input[name^=specialrights]").prop("checked",false);
 				} else if (selrights==75) {
-					$("#specialrights1,#specialrights4,#specialrights8").prop("checked",true);
-					$("#specialrights2").prop("checked",false);
+					$("input[name^=specialrights]").prop("checked",false);
+					$("#specialrights1,#specialrights4,#specialrights8,#specialrights16").prop("checked",true);
 				} else if (selrights==100) {
 					$("input[name^=specialrights]").prop("checked",true);
 				}
@@ -155,9 +160,11 @@ switch($_GET['action']) {
 		echo "<input type=radio name=\"newrights\" value=\"40\" ";
 		if ($oldrights == 40) {echo "CHECKED";}
 		echo "> Limited Course Creator <BR>\n";
-		echo "<input type=radio name=\"newrights\" value=\"75\" ";
-		if ($oldrights == 75) {echo "CHECKED";}
-		echo "> Group Admin <BR>\n";
+		if ($myrights>=75) {
+			echo "<input type=radio name=\"newrights\" value=\"75\" ";
+			if ($oldrights == 75) {echo "CHECKED";}
+			echo "> Group Admin <BR>\n";
+		}
 		if ($myrights==100) {
 			echo "<input type=radio name=\"newrights\" value=\"100\" ";
 			if ($oldrights == 100) {echo "CHECKED";}
@@ -185,9 +192,23 @@ switch($_GET['action']) {
 			if (($oldspecialrights&8)==8) { echo 'checked';}
 			echo '><label for="specialrights8">Create public (open to all) question libraries</label><br/>';
 		}
+		if ($myrights>=75) {
+			echo '<input type="checkbox" name="specialrights16" id="specialrights16" ';
+			if (($oldspecialrights&16)==16) { echo 'checked';}
+			echo '><label for="specialrights16">Create new instructor accounts (own group)</label><br/>';
+		}
+		if ($myrights==100) {
+			echo '<input type="checkbox" name="specialrights32" id="specialrights32" ';
+			if (($oldspecialrights&32)==32) { echo 'checked';}
+			echo '><label for="specialrights32">Create new instructor accounts (any group)</label><br/>';
+			
+			echo '<input type="checkbox" name="specialrights64" id="specialrights64" ';
+			if (($oldspecialrights&64)==64) { echo 'checked';}
+			echo '><label for="specialrights64">Approve instructor account requests</label><br/>';
+		}
 		echo '</span><br class="form"/>';
 
-		if ($myrights == 100) {
+		if ($myrights == 100 || ($myspecialrights&32)==32) {
 			echo "<span class=form>Assign to group: </span>";
 			echo "<span class=formright><select name=\"group\" id=\"group\">";
 			echo "<option value=0>Default</option>\n";
@@ -196,7 +217,7 @@ switch($_GET['action']) {
 			//DB while ($row = mysql_fetch_row($result)) {
 			$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', $row[0]);
+				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
 				if ($oldgroup==$row[0]) {
 					echo "selected=1";
 				}
@@ -257,8 +278,6 @@ switch($_GET['action']) {
 			$deftime = $line['deftime'];
 		} else {
 			$courseid = _("Will be assigned when the course is created");
-			$name = "Enter course name here";
-			$ekey = "Enter enrollment key here";
 			$hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
 			$picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
 			$allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
@@ -311,15 +330,15 @@ switch($_GET['action']) {
 		}
 		if ($_GET['action']=="modify") { echo "&id=".Sanitize::encodeUrlParam($_GET['id']); }
 		echo "\">\n";
-		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" />';
+		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" required/>';
 		echo "<span class=form>Course ID:</span><span class=formright>".Sanitize::encodeStringForDisplay($courseid)."</span><br class=form>\n";
 		if ($isadminview) {
 			echo '<span class="form">Owner:</span><span class="formright">';
 			printf('%s, %s (%s)</span><br class="form"/>', Sanitize::encodeStringForDisplay($udat['LastName']),
 				Sanitize::encodeStringForDisplay($udat['FirstName']), Sanitize::encodeStringForDisplay($udat['name']));
 		}
-		echo "<span class=form>Enter Course name:</span><input class=form type=text size=80 name=\"coursename\" value=\"".Sanitize::encodeStringForDisplay($name)."\"><BR class=form>\n";
-		echo "<span class=form>Enter Enrollment key:</span><input class=form type=text size=30 name=\"ekey\" value=\"".Sanitize::encodeStringForDisplay($ekey)."\"><BR class=form>\n";
+		echo "<span class=form>Enter Course name:</span><input class=form type=text size=80 name=\"coursename\" placeholder='Enter course name here' value=\"".Sanitize::encodeStringForDisplay($name)."\" required><BR class=form>\n";
+		echo "<span class=form>Enter Enrollment key:</span><input class=form type=text size=30 name=\"ekey\"    placeholder='Enter enrollment key here' value=\"".Sanitize::encodeStringForDisplay($ekey)."\"    ><BR class=form>\n";
 		echo '<span class=form>Available?</span><span class=formright>';
 		echo '<input type="checkbox" name="stuavail" value="1" ';
 		if (($avail&1)==0) { echo 'checked="checked"';}
@@ -335,7 +354,7 @@ switch($_GET['action']) {
 			$stm = $DBH->prepare("SELECT id,name FROM imas_assessments WHERE courseid=:courseid ORDER BY name");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', $row[0]);
+				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
 				if ($lockaid==$row[0]) { echo 'selected="1"';}
 				printf(">%s</option>", Sanitize::encodeStringForDisplay($row[1]));
 			}
@@ -604,7 +623,7 @@ switch($_GET['action']) {
 		//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 
-				printf('<tr><td><input type="checkbox" name="tid[]" value="%d"/></td>', $line['id']);
+				printf('<tr><td><input type="checkbox" name="tid[]" value="%d"/></td>', Sanitize::onlyInt($line['id']));
 
 			printf("<td>%s, %s</td>", Sanitize::encodeStringForDisplay($line['LastName']),
 				Sanitize::encodeStringForDisplay($line['FirstName']));
@@ -638,7 +657,7 @@ switch($_GET['action']) {
 			if (trim($line['LastName'])=='' && trim($line['FirstName'])=='') {continue;}
 			if ($used[$line['id']]!=true) {
 				//if ($line['rights']<20) { $type = "Tutor/TA/Proctor";} else {$type = "Teacher";}
-				printf('<tr><td><input type="checkbox" name="atid[]" value="%d"/></td>', $line['id']);
+				printf('<tr><td><input type="checkbox" name="atid[]" value="%d"/></td>', Sanitize::onlyInt($line['id']));
 				printf("<td>%s, %s </td> ", Sanitize::encodeStringForDisplay($line['LastName']),
 					Sanitize::encodeStringForDisplay($line['FirstName']));
 				//echo "<td><a href=\"actions.php?from=$from&action=addteacher&cid=".Sanitize::onlyInt($_GET['id'])."&tid={$line['id']}\">Add as Teacher</a></td></tr>\n";
@@ -700,7 +719,7 @@ switch($_GET['action']) {
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			printf("<option value=\"%d\">%s, %s</option>\n",$row[0], Sanitize::encodeStringForDisplay($row[2]),
+			printf("<option value=\"%d\">%s, %s</option>\n",Sanitize::onlyInt($row[0]), Sanitize::encodeStringForDisplay($row[2]),
 				Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo "</select>\n";
@@ -814,7 +833,7 @@ switch($_GET['action']) {
 		//DB while ($r = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 		while ($r = $stm->fetch(PDO::FETCH_NUM)) {
-			printf('<option value="%d"', $r[0]);
+			printf('<option value="%d"', Sanitize::onlyInt($r[0]));
 			if ($r[0]==$row[5]) { echo ' selected="selected"';}
 			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
@@ -828,26 +847,39 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle">';
 		echo "<h3>View Federation Peers</h3>\n";
 		echo '</div>';
-		echo "<table><tr><th>Name</th><th>Description</th><th>Their Last Pull</th><th>Our Last Pull</th><th>Modify</th><th>Delete</th></tr>\n";
+		echo "<table><tr><th>Name</th><th>Description</th><th>Their Last Pull</th><th>Our Last Pull</th><th>Modify</th><th>Delete</th><th>Pull</th></tr>\n";
 
 		$query = "SELECT ifp.id,ifp.peername,ifp.peerdescription,ifp.lastpull,max(pulls.pulltime) as uspull FROM imas_federation_peers AS ifp ";
 		$query .= "LEFT JOIN imas_federation_pulls AS pulls ON ifp.id=pulls.peerid GROUP BY pulls.peerid";
+
+		$query = "SELECT ifp.*,pulls.pulltime AS uspull,pulls.step FROM imas_federation_peers AS ifp ";
+		$query .= "LEFT JOIN imas_federation_pulls as pulls ON ifp.id=pulls.peerid WHERE ";
+		$query .= "pulls.id=(SELECT id FROM imas_federation_pulls AS ifps WHERE ifps.peerid=ifp.id ORDER BY pulltime DESC LIMIT 1) ";
+		$query .= "OR pulls.id IS NULL";
 		$stm = $DBH->query($query);
 		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-			$lastpull = $row['lastpull'] > 0 ? tzdate("n/j/y", $row['lastpull']) : 'Never';
-			$uspull = $row['uspull'] === null ? 'Never' : tzdate("n/j/y", $row['uspull']);
+			$lastpull = $row['lastpull'] > 0 ? tzdate("n/j/y", $row['lastpull']) : _('Never');
+			$uspull = $row['uspull'] === null ? _('Never') : tzdate("n/j/y", $row['uspull']);
 
 			printf("<tr><td>%s</td><td>%s</td>", Sanitize::encodeStringForDisplay($row['peername']),
 				Sanitize::encodeStringForDisplay($row['peerdescription']));
-			printf('<td>%s</td>', Sanitize::encodeStringForDisplay($lastpull));
-			printf('<td>%s</td>', Sanitize::encodeStringForDisplay($uspull));
-			printf('<td><a href="forms.php?action=modfedpeers&id=%d">Modify</a></td>\n', $row['id']);
-			printf("<td><a href=\"actions.php?action=delfedpeers&id=%d\" onclick=\"return confirm('Are you sure?');\">Delete</a></td>\n", $row['id']);
+			echo '<td>'.Sanitize::encodeStringForDisplay($lastpull).'</td>';
+			echo '<td>'.Sanitize::encodeStringForDisplay($uspull);
+			if ($row['uspull']!==null && $row['step']<99) {
+				echo '<br/>'._('Incomplete').'. <a href="federationpull.php?peer='.Sanitize::onlyInt($row['id']).'">'._('Continue').'</a>.';
+			}
+			echo '</td>';
+			printf('<td><a href="forms.php?action=modfedpeers&id=%d&from=%s">', $row['id'], Sanitize::encodeUrlParam($from));
+			echo _('Modify'),'</a></td>';
+			printf("<td><a href=\"actions.php?action=delfedpeers&id=%d&from=%s\" onclick=\"return confirm('Are you sure?');\">", $row['id'],  Sanitize::encodeUrlParam($from));
+			echo _('Delete'),'</a></td>';
+			echo '<td><a href="federationpull.php?peer='.Sanitize::onlyInt($row['id']).'&stage=-1">'._('Start New Pull').'</a></td>';
 			echo "</tr>\n";
 		}
 		echo "</table>\n";
-		echo "<form method=post action=\"actions.php?action=modfedpeers&id=new\">\n";
+		echo "<form method=post action=\"actions.php?id=new&from=".Sanitize::encodeUrlParam($from)."\">\n";
 		echo "<p>Add new federation peer: <br/>";
+		echo '<input type="hidden" name="action" value="modfedpeers" />';
 		echo "Install Name: <input type=text name=\"peername\" size=20><br/>\n";
 		echo "Description: <input type=text name=\"peerdescription\" size=50><br/>\n";
 		echo "Root URL: <input type=text name=\"url\" size=50><br/>\n";
@@ -866,8 +898,9 @@ switch($_GET['action']) {
 		$stm = $DBH->prepare("SELECT id,peername,peerdescription,url,secret,lastpull FROM imas_federation_peers WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
-		printf("<form method=post action=\"actions.php?action=modfedpeers&id=%d\">\n", Sanitize::onlyInt($row['id']));
+		printf("<form method=post action=\"actions.php?id=%d&from=%s\">\n", Sanitize::onlyInt($row['id']), Sanitize::encodeUrlParam($from));
 		echo "Modify federation peer: <br/>";
+		echo '<input type="hidden" name="action" value="modfedpeers" />';
 		printf("Install Name: <input type=text name=\"peername\" value=\"%s\" size=20><br/>\n",
 			Sanitize::encodeStringForDisplay($row['peername']));
 		printf("Description: <input type=text name=\"peerdescription\" value=\"%s\" size=50><br/>\n",
@@ -893,11 +926,12 @@ switch($_GET['action']) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			if ($alt==0) {echo "<tr class=\"even\">"; $alt=1;} else {echo "<tr class=\"odd\">"; $alt=0;}
 			if ($from=='admin2') {
-				echo '<td><a href="admin2.php?groupdetails='.$row[0].'">'.$row[1].'</a></td>';
+				echo '<td><a href="admin2.php?groupdetails='.Sanitize::onlyInt($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</a></td>';
 			} else {
-				echo "<td>{$row[1]}</td>";
+				echo "<td>".Sanitize::encodeStringForDisplay($row[1])."</td>";
 			}
-			echo "<td><a href=\"forms.php?action=modgroup&id={$row[0]}\">Modify</a></td>\n";
+			printf("<td><a href=\"forms.php?action=modgroup&id=%s\">Modify</a></td>\n",
+				Sanitize::encodeUrlParam($row[0]));
 			if ($row[0]==0) {
 				echo "<td></td>";
 			} else {

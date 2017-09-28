@@ -69,11 +69,11 @@ if ($myrights<20) {
 				}
 				//remlist now only contains questions ok to remove
 				$now = time();
-				
+
 				//delete all library items for that question, regardless of owner
 				$stm = $DBH->prepare("UPDATE imas_library_items SET deleted=1,lastmoddate=:now WHERE qsetid IN ($remlist) AND deleted=0");
 				$stm->execute(array(':now'=>$now));
-				
+
 				//now delete the questions
 				$stm = $DBH->prepare("UPDATE imas_questionset SET deleted=1,lastmoddate=:now WHERE id IN ($remlist)");
 				$stm->execute(array(':now'=>$now));
@@ -141,7 +141,7 @@ if ($myrights<20) {
 			$pagetitle ="Transfer Ownership";
 			$curBreadcrumb .= " &gt; <a href=\"manageqset.php?cid=$cid\">Manage Question Set </a>";
 			$curBreadcrumb .= " &gt; Transfer QSet";
-		
+
 			if (isset($_POST['transfer']) && !isset($_POST['nchecked'])) {
 				$overwriteBody = 1;
 				$body = "No questions selected.  <a href=\"manageqset.php?cid=$cid\">Go back</a>\n";
@@ -215,7 +215,7 @@ if ($myrights<20) {
 						$dellibs[$row[0]][] = $row[1];
 					}
 				}
-				
+
 				//pull a list of non-deleted library items for these questions that user has the rights to modify
 				if ($isadmin) {
 					$query = "SELECT ili.qsetid,ili.libid FROM imas_library_items AS ili LEFT JOIN imas_libraries AS il ON ";
@@ -263,9 +263,9 @@ if ($myrights<20) {
 							$toundel = array();
 						}
 						$toaddnew = array_values(array_diff($toadd, $toundel));
-						
-						$alladded = array_merge($toaddnew,$toundel);				
-						
+
+						$alladded = array_merge($toaddnew,$toundel);
+
 						foreach ($toundel as $libid) {
 							if ($libid==0) { continue;} //no need to add to unassigned using "keep existing"
 							$undel_stm->execute(array(':libid'=>$libid, ':qsetid'=>$qsetid, ':ownerid'=>$userid, ':now'=>$now));
@@ -291,7 +291,7 @@ if ($myrights<20) {
 					$del_stm = $DBH->prepare("UPDATE imas_library_items SET deleted=1,lastmoddate=:now WHERE libid=:libid AND qsetid=:qsetid");
 					$sel_stm = $DBH->prepare("SELECT id,deleted FROM imas_library_items WHERE qsetid=:qsetid AND (deleted=0 OR (libid=0 AND deleted=1)) ORDER BY deleted");
 					$unassn_undel_stm = $DBH->prepare("UPDATE imas_library_items SET deleted=0,lastmoddate=:now WHERE libid=0 AND qsetid=:qsetid");
-					
+
 					foreach ($libarray as $qsetid) { //for each question
 						//determine which checked libraries it's not already in
 						if (isset($alllibs[$qsetid])) {
@@ -308,7 +308,7 @@ if ($myrights<20) {
 						//print_r($toundel);
 						//print_r($toaddnew);
 						//exit;
-						
+
 						//and add them
 						foreach ($toundel as $libid) {
 							if ($libid==0) { continue;} //we'll handle unassigned later
@@ -553,7 +553,7 @@ if ($myrights<20) {
 			$curBreadcrumb .= " &gt; <a href=\"manageqset.php?cid=$cid\">Manage Question Set </a>";
 			$curBreadcrumb .= " &gt; "._("Change Question License/Attribution");
 
-			$clist = implode(",",$_POST['nchecked']);
+			$clist = Sanitize::encodeStringForDisplay(implode(",",$_POST['nchecked']));
 
 			if (!isset($_POST['nchecked'])) {
 				$overwriteBody = 1;
@@ -612,7 +612,7 @@ if ($myrights<20) {
 			}
 		}
 	} else if (isset($_GET['transfer'])) {
-		
+
 		//postback handled by $_POST['transfer'] block
 		$pagetitle = "Transfer Ownership";
 		$curBreadcrumb .= " &gt; <a href=\"manageqset.php?cid=$cid\">Manage Question Set </a>";
@@ -673,6 +673,8 @@ if ($myrights<20) {
 				$body = "Must provide a search term when searching all libraries <a href=\"manageqset.php\">Try again</a>";
 				$searchall = 0;
 			}
+			$hidepriv = 0;
+			$skipfederated = 0;
 			if ($isadmin) {
 				if (isset($_POST['hidepriv'])) {
 					$hidepriv = 1;
@@ -680,6 +682,12 @@ if ($myrights<20) {
 					$hidepriv = 0;
 				}
 				$sessiondata['hidepriv'.$cid] = $hidepriv;
+				if (isset($_POST['skipfederated'])) {
+					$skipfederated = 1;
+				} else {
+					$skipfederated = 0;
+				}
+				$sessiondata['skipfederated'.$cid] = $skipfederated;
 			}
 
 			writesessiondata();
@@ -690,16 +698,21 @@ if ($myrights<20) {
 			$search = str_replace('"','&quot;',$search);
 			$searchall = $sessiondata['searchall'.$cid];
 			$searchmine = $sessiondata['searchmine'.$cid];
+			$hidepriv = 0; $skipfederated = 0;
 			if ($isadmin) {
 				$hidepriv = $sessiondata['hidepriv'.$cid];
+				$skipfederated = $sessiondata['skipfederated'.$cid];
 			}
 		} else {
 			$search = '';
 			$searchall = 0;
 			$searchmine = 0;
+			$hidepriv = 0; 
+			$skipfederated = 0;
 			$safesearch = '';
 		}
     $searchlikevals = array();
+		$isIDsearch = false;
 		if (trim($safesearch)=='') {
 			$searchlikes = '';
 		} else {
@@ -737,10 +750,11 @@ if ($myrights<20) {
 						$searchlikevals[] = "%$t%";
 					}
 
-					if (is_numeric($safesearch)) {
+					if (ctype_digit($safesearch)) {
 	          //DB $searchlikes .= "OR imas_questionset.id='$safesearch') AND ";
 						$searchlikes .= "OR imas_questionset.id=?) AND ";
 						$searchlikevals[] = $safesearch;
+						$isIDsearch = true;
 					} else {
 						$searchlikes .= ") AND";
 					}
@@ -820,15 +834,27 @@ if ($myrights<20) {
 			//DB $query .= "AND (imas_library_items.libid > 0 OR imas_users.groupid='$groupid')";
 			$query .= "AND (imas_users.groupid=? OR imas_questionset.userights>0) ";
 			$qarr[] = $groupid;
-			$query .= "AND (imas_library_items.libid > 0 OR imas_users.groupid=?)";
-			$qarr[] = $groupid;
+			if ($isIDsearch) {
+				$query .= "AND (imas_library_items.libid > 0 OR imas_users.groupid=? OR imas_questionset.id=?)";
+				$qarr[] = $groupid;
+				$qarr[] = $safesearch;
+			} else {
+				$query .= "AND (imas_library_items.libid > 0 OR imas_users.groupid=?)";
+				$qarr[] = $groupid;
+			}
 		} else {
 			//DB $query .= "AND (imas_questionset.ownerid='$userid' OR imas_questionset.userights>0) ";
 			//DB $query .= "AND (imas_library_items.libid > 0 OR imas_questionset.ownerid='$userid')";
 			$query .= "AND (imas_questionset.ownerid=? OR imas_questionset.userights>0) ";
 			$qarr[] = $userid;
-			$query .= "AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=?)";
-			$qarr[] = $userid;
+			if ($isIDsearch) {
+				$query .= "AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=? OR imas_questionset.id=?)";
+				$qarr[] = $userid;
+				$qarr[] = $safesearch;
+			} else {
+				$query .= "AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=?)";
+				$qarr[] = $userid;
+			}
 		}
 		if ($searchall==0) {
 			$query .= " AND imas_library_items.libid IN ($llist)";
@@ -837,6 +863,10 @@ if ($myrights<20) {
 			//DB $query .= " AND imas_questionset.ownerid='$userid'";
 			$query .= " AND imas_questionset.ownerid=?";
 			$qarr[] = $userid;
+		}
+		if ($skipfederated==1) {
+			$query .= " AND imas_questionset.id NOT IN (SELECT iq.id FROM imas_questionset AS iq JOIN imas_library_items as ili on ili.qsetid=iq.id AND ili.deleted=0";
+			$query .= " JOIN imas_libraries AS il ON ili.libid=il.id AND il.deleted=0 WHERE il.federationlevel>0)";
 		}
 		$query.= " ORDER BY imas_library_items.libid,imas_library_items.junkflag,imas_questionset.replaceby,imas_questionset.id ";
 		if ($searchall==1 || (($isadmin || $isgrpadmin) && $llist{0}=='0')) {
@@ -870,13 +900,13 @@ if ($myrights<20) {
 			}
 			$i = $line['id'];
 
-			$page_questionTable[$i]['checkbox'] = "<input type=checkbox name='nchecked[]' value='" . $line['id'] . "' id='qo$ln'>";
+			$page_questionTable[$i]['checkbox'] = "<input type=checkbox name='nchecked[]' value='" . Sanitize::onlyInt($line['id']) . "' id='qo$ln'>";
 			if ($line['userights']==0) {
-				$page_questionTable[$i]['desc'] = '<span class="noticetext">'.filter($line['description']).'</span>';
+				$page_questionTable[$i]['desc'] = '<span class="noticetext">'.Sanitize::encodeStringForDisplay(filter($line['description'])).'</span>';
 			} else if ($line['replaceby']>0 || $line['junkflag']>0) {
-				$page_questionTable[$i]['desc'] = '<span class="grey"><i>'.filter($line['description']).'</i></span>';
+				$page_questionTable[$i]['desc'] = '<span class="grey"><i>'.Sanitize::encodeStringForDisplay(filter($line['description'])).'</i></span>';
 			} else {
-				$page_questionTable[$i]['desc'] = filter($line['description']);
+				$page_questionTable[$i]['desc'] = Sanitize::encodeStringForDisplay(filter($line['description']));
 			}
 
 			if ($line['extref']!='') {
@@ -903,7 +933,7 @@ if ($myrights<20) {
 			}
 
 
-			$page_questionTable[$i]['preview'] = "<input type=button value=\"Preview\" onClick=\"previewq('selform',$ln,{$line['id']})\"/>";
+			$page_questionTable[$i]['preview'] = "<input type=button value=\"Preview\" onClick=\"previewq('selform',$ln,".Sanitize::onlyInt($line['id']).")\"/>";
 			$page_questionTable[$i]['type'] = $line['qtype'];
 			if ($searchall==1) {
 				$page_questionTable[$i]['lib'] = "<a href=\"manageqset.php?cid=$cid&listlib={$line['libid']}\">List lib</a>";
@@ -927,7 +957,7 @@ if ($myrights<20) {
 			} else {
 				$page_questionTable[$i]['mine'] = '';
 			}
-			$page_questionTable[$i]['action'] = "<select onchange=\"doaction(this.value,{$line['id']})\"><option value=\"0\">Action..</option>";
+			$page_questionTable[$i]['action'] = "<select onchange=\"doaction(this.value,".Sanitize::onlyInt($line['id']).")\"><option value=\"0\">Action..</option>";
 			if ($isadmin || ($isgrpadmin && $line['groupid']==$groupid) || $line['ownerid']==$userid || ($line['userights']==3 && $line['groupid']==$groupid) || $line['userights']>3) {
 				$page_questionTable[$i]['action'] .= '<option value="mod">Modify Code</option>';
 			} else {
@@ -1059,7 +1089,7 @@ function getnextprev(formn,loc) {
 		Are you SURE you want to delete these questions from the Question Set.  This will make them unavailable
 		to all users.  If any are currently being used in an assessment, it will mess up that assessment.
 		<form method=post action="manageqset.php?cid=<?php echo $cid ?>&confirmed=true">
-			<input type=hidden name=remove value="<?php echo $rlist ?>">
+			<input type=hidden name=remove value="<?php echo Sanitize::encodeStringForDisplay($rlist); ?>">
 			<p>
 				<input type=submit value="Really Delete">
 				<input type=button value="Nevermind" class="secondarybtn" onclick="window.location='manageqset.php?cid=<?php echo $cid ?>'">
@@ -1069,7 +1099,7 @@ function getnextprev(formn,loc) {
 	} else if (isset($_POST['transfer']) || isset($_GET['transfer'])) {
 ?>
 		<form method=post action="manageqset.php?cid=<?php echo $cid ?>">
-			<input type=hidden name=transfer value="<?php echo $tlist ?>">
+			<input type=hidden name=transfer value="<?php echo Sanitize::encodeStringForDisplay($tlist); ?>">
 			Transfer question ownership to:
 
 			<?php writeHtmlSelect("newowner",$page_transferUserList['val'],$page_transferUserList['label']); ?>
@@ -1108,7 +1138,7 @@ function getnextprev(formn,loc) {
 		</script>
 		<form method=post action="manageqset.php?cid=<?php echo $cid ?>">
 			<input type=hidden name=chglib value="true">
-			<input type=hidden name=qtochg value="<?php echo $clist ?>">
+			<input type=hidden name=qtochg value="<?php echo Sanitize::encodeStringForDisplay($clist); ?>">
 			What do you want to do with these questions?<br/>
 			<input type=radio name="action" value="0" onclick="chglibtoggle(this)" checked="checked"/> Add to libraries, keeping any existing library assignments<br/>
 			<input type=radio name="action" value="1" onclick="chglibtoggle(this)"/> Add to libraries, removing existing library assignments<br/>
@@ -1138,7 +1168,7 @@ function getnextprev(formn,loc) {
 			</p>
 			<p>Select the library into which to put the new copies:</p>
 
-			<input type=hidden name=qtochg value="<?php echo $clist ?>">
+			<input type=hidden name=qtochg value="<?php echo Sanitize::encodeStringForDisplay($clist); ?>">
 
 			<?php include("libtree.php"); ?>
 
@@ -1154,7 +1184,7 @@ function getnextprev(formn,loc) {
 	<form method=post action="manageqset.php?cid=<?php echo $cid ?>">
 		<input type=hidden name="license" value="true">
 
-		<input type=hidden name=qtochg value="<?php echo $clist ?>">
+		<input type=hidden name=qtochg value="<?php echo Sanitize::encodeStringForDisplay($clist); ?>">
 
 		<p>This will allow you to change the license or attribution on questions, if you have the rights to change them</p>
 
@@ -1210,7 +1240,7 @@ function getnextprev(formn,loc) {
 				</select>
 			</p>
 
-			<input type="hidden" name="qtochg" value="<?php echo $clist ?>">
+			<input type="hidden" name="qtochg" value="<?php echo Sanitize::encodeStringForDisplay($clist); ?>">
 
 
 			<p>
@@ -1223,7 +1253,7 @@ function getnextprev(formn,loc) {
 ?>
 		Are you SURE you want to delete this question from the Question Set.  This will make it unavailable
 		to all users.  If it is currently being used in an assessment, it will mess up that assessment.
-	
+
 		<form method=post action="manageqset.php?cid=<?php echo $cid ?>&confirmed=true">
 			<input type=hidden name=remove value="<?php echo Sanitize::onlyInt($_GET['remove']); ?>">
 			<p>
@@ -1234,7 +1264,7 @@ function getnextprev(formn,loc) {
 <?php
 	} else if (isset($_GET['transfer'])) {
 ?>
-		
+
 		<form method=post action="manageqset.php?cid=<?php echo $cid ?>">
 			<input type=hidden name=transfer value="<?php echo Sanitize::onlyInt($_GET['transfer']); ?>">
 			Transfer question ownership to:
@@ -1246,7 +1276,7 @@ function getnextprev(formn,loc) {
 				<input type=button value="Nevermind" class="secondarybtn" onclick="window.location='manageqset.php?cid=<?php echo $cid ?>'">
 			</p>
 		</form>
-		
+
 <?php
 	} else { //DEFAULT DISPLAY
 
@@ -1267,6 +1297,9 @@ function getnextprev(formn,loc) {
 			echo "<input type=checkbox name=\"hidepriv\" value=\"1\" ";
 			if ($hidepriv==1) {echo "checked=1";}
 			echo "/>Hide Private ";
+			echo "<input type=checkbox name=\"skipfederated\" value=\"1\" ";
+			if ($skipfederated==1) {echo "checked=1";}
+			echo "/>Hide Federated ";
 		}
 
 		echo '<input type=submit value="Search" title="List or search selected libraries">';

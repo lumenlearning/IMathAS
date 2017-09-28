@@ -4,16 +4,16 @@
 
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r");
 array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates");
-function mergearrays($a,$b) {
-	if (!is_array($a)) {
-		$a = array($a);
+function mergearrays() {
+	$args = func_get_args();
+	foreach ($args as $k=>$arg) {
+		if (!is_array($arg)) {
+			$args[$k] = array($arg);
+		}
 	}
-	if (!is_array($b)) {
-		$b = array($b);
-	}
-	return array_merge($a,$b);
+	return call_user_func_array('array_merge',$args);
 }
 function arrayfindindex($n,$h) {
 	return array_search($n,$h);
@@ -2239,6 +2239,7 @@ function formhoverover($label,$tip) {
 
 function formpopup($label,$content,$width=600,$height=400,$type='link',$scroll='null',$id='popup',$ref='') {
 	global $urlmode;
+	$labelSanitized = Sanitize::encodeStringForDisplay($label);
 	if ($scroll != null) {
 		$scroll = ','.$scroll;
 	}
@@ -2264,17 +2265,17 @@ function formpopup($label,$content,$width=600,$height=400,$type='link',$scroll='
 		$rec = '';
 	}
 	if (strpos($label,'<img')!==false) {
-		return str_replace('<img', '<img class="clickable" onClick="'.$rec.'popupwindow(\''.$id.'\',\''.str_replace('\'','\\\'',htmlentities($content)).'\','.$width.','.$height.$scroll.')"',$label);
+		return str_replace('<img', '<img class="clickable" onClick="'.$rec.'popupwindow(\''.$id.'\',\''.str_replace('\'','\\\'',htmlentities($content)).'\','.$width.','.$height.$scroll.')"',$labelSanitized);
 	} else {
 		if ($type=='link') {
-			return '<span class="link" onClick="'.$rec.'popupwindow(\''.$id.'\',\''.str_replace('\'','\\\'',htmlentities($content)).'\','.$width.','.$height.$scroll.')">'.$label.'</span>';
+			return '<span class="link" onClick="'.$rec.'popupwindow(\''.$id.'\',\''.str_replace('\'','\\\'',htmlentities($content)).'\','.$width.','.$height.$scroll.')">'.$labelSanitized.'</span>';
 		} else if ($type=='button') {
 			if (substr($content,0,31)=='http://www.youtube.com/watch?v=') {
 				$content = $GLOBALS['basesiteurl'] . "/assessment/watchvid.php?url=".Sanitize::encodeUrlParam($content);
 				$width = 660;
 				$height = 525;
 			}
-			return '<span class="spanbutton" onClick="'.$rec.'popupwindow(\''.$id.'\',\''.str_replace('\'','\\\'',htmlentities($content)).'\','.$width.','.$height.$scroll.')">'.$label.'</span>';
+			return '<span class="spanbutton" onClick="'.$rec.'popupwindow(\''.$id.'\',\''.str_replace('\'','\\\'',htmlentities($content)).'\','.$width.','.$height.$scroll.')">'.$labelSanitized.'</span>';
 		}
 	}
 }

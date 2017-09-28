@@ -58,7 +58,7 @@
 					Sanitize::encodeStringForDisplay($_POST['lastname']));
 				$message .= sprintf("Email: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['email']));
 				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
-				$message .= sprintf("VerificationURL: %s <br/>\n", Sanitize::fullUrl($_POST['verurl']));
+				$message .= sprintf("VerificationURL: %s <br/>\n", Sanitize::url($_POST['verurl']));
 				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));
 				$message .= sprintf("Username: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['username']));
 				mail($newacctemail,$subject,$message,$headers);
@@ -66,7 +66,7 @@
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, 'New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: {$_POST['verurl']} <br/> Phone: {$_POST['phone']} <br/>')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$_POST['verurl'] = Sanitize::fullUrl($_POST['verurl']);
+				$_POST['verurl'] = Sanitize::url($_POST['verurl']);
 				$urldisplay = Sanitize::encodeStringForDisplay($_POST['verurl']);
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
@@ -74,9 +74,9 @@
 
 				$message = "<p>Your new account request has been sent.</p>  ";
 				$message .= "<p>This request is processed by hand, so please be patient.</p>";
-				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
+				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding ".Sanitize::emailAddress($sendfrom)." to your contacts list.";
 				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-				mail($_POST['email'],$subject,$message,$headers);
+				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
 
 				echo $message;
 				require("footer.php");
@@ -89,7 +89,7 @@
 	if (isset($_POST['email'])) {$email=Sanitize::encodeStringForDisplay($_POST['email']);} else {$email='';}
 	if (isset($_POST['phone'])) {$phone=Sanitize::encodeStringForDisplay($_POST['phone']);} else {$phone='';}
 	if (isset($_POST['school'])) {$school=Sanitize::encodeStringForDisplay($_POST['school']);} else {$school='';}
-	if (isset($_POST['verurl'])) {$verurl=Sanitize::fullUrl($_POST['verurl']);} else {$verurl='';}
+	if (isset($_POST['verurl'])) {$verurl=Sanitize::url($_POST['verurl']);} else {$verurl='';}
 	if (isset($_POST['username'])) {$username=Sanitize::encodeStringForDisplay($_POST['username']);} else {$username='';}
 
 	echo "<h3>New Instructor Account Request</h3>\n";

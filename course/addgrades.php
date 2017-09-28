@@ -62,7 +62,7 @@
 			$stm = $DBH->prepare("SELECT name FROM imas_gbitems WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['del']));
 			$itemname = $stm->fetchColumn(0);
-			
+
 			echo "<p>Are you SURE you want to delete <strong>".Sanitize::encodeStringForDisplay($itemname);
 			echo "</strong> and all associated grades from the gradebook?</p>";
 			echo '<form method="POST" action="'.sprintf("addgrades.php?stu=%s&cid=%s&del=%s",
@@ -70,7 +70,7 @@
 			echo '<p><button type=submit name=confirm value=true>'._('Delete Item').'</button>';
 
 			printf(" <input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addgrades.php?stu=%s&cid=%s&gbitem=%d&grades=all'\" />",
-				Sanitize::encodeUrlParam($_GET['stu']), $cid, $_GET['del']);
+				Sanitize::encodeUrlParam($_GET['stu']), $cid, Sanitize::encodeUrlParam($_GET['del']));
 			
 			echo '</p></form>';
 			require("../footer.php");
@@ -701,7 +701,7 @@ at <input type=text size=10 name=stime value="<?php echo Sanitize::encodeStringF
 			}
 			echo "\" onkeypress=\"return onenter(event,this)\" onkeyup=\"onarrow(event,this)\" onblur=\"this.value = doonblur(this.value);\" />";
 			if ($rubric != 0) {
-				echo printrubriclink($rubric,$points,"score{$row[0]}","feedback{$row[0]}");
+				echo printrubriclink($rubric,$points,"score". Sanitize::onlyint($row[0]),"feedback". Sanitize::onlyint($row[0]));
 			}
 			echo "</td>";
 			printf('<td><textarea cols=60 rows=1 id="feedback%d" name="feedback[%d]">%s</textarea></td>',

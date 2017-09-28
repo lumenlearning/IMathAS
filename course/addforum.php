@@ -308,8 +308,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$savetitle = _("Save Changes");
 		} else {  //ADD MODE
 			//set defaults
-			$line['name'] = "Enter Forum Name here";
-			$line['description'] = "<p>Enter forum description here</p>";
+			$line['description'] = "";
 			$line['avail'] = 1;
 			$line['caltag'] = 'FP--FR';
 			$line['forumtype'] = 0;
@@ -517,7 +516,7 @@ if ($overwriteBody==1) {
 
 	<form method=post action="addforum.php<?php echo $page_formActionTag ?>">
 		<span class=form>Name: </span>
-		<span class=formright><input type=text size=60 name=name value="<?php echo Sanitize::encodeStringForDisplay($line['name']);?>"></span>
+		<span class=formright><input type=text size=60 name=name placeholder="Enter Forum Name here" value="<?php echo Sanitize::encodeStringForDisplay($line['name']);?>" required></span>
 		<BR class=form>
 
 		Description:<BR>

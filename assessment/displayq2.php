@@ -17,6 +17,10 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	//$starttime = microtime(true);
 	global $DBH, $RND, $imasroot, $myrights, $showtips, $urlmode, $CFG;
 
+	$qnidx = Sanitize::onlyInt($qnidx);
+	$qidx = Sanitize::onlyInt($qidx);
+	$seed = Sanitize::onlyInt($seed);
+
 	if (!isset($_SESSION['choicemap'])) { $_SESSION['choicemap'] = array(); }
 	
 	//clear out choicemap if needed
@@ -284,15 +288,15 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		$laparts = explode("&",$la);
 
 		foreach ($anstypes as $kidx=>$anstype) {
-			$qcol = ($qdata['qtype']=="multipart" && isset($qcolors[$kidx]))?(is_numeric($qcolors[$kidx])?rawscoretocolor($qcolors[$kidx],$answeights[$kidx]):$qcolors[$kidx]):'';
+			$qcol = ($qdata['qtype']=="multipart" && isset($qcolors[$kidx]))?(is_numeric($qcolors[$kidx])?rawscoretocolor(Sanitize::encodeStringForDisplay($qcolors[$kidx]),$answeights[$kidx]):Sanitize::encodeStringForDisplay($qcolors[$kidx])):'';
 			list($answerbox[$kidx],$entryTips[$kidx],$shanspt[$kidx],$previewloc[$kidx]) = makeanswerbox($anstype,$kidx,$laparts[$kidx],$options,$qnidx+1,$qcol);
 		}
 	} else {
-		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor($qcolors[0],1):$qcolors[0]):'';
-		list($answerbox,$entryTips[0],$shanspt[0],$previewloc) = makeanswerbox($qdata['qtype'],$qnidx,$la,$options,0,$qcol);
+		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor(Sanitize::encodeStringForDisplay($qcolors[0]),1):Sanitize::encodeStringForDisplay($qcolors[0])):'';
+		list($answerbox,$entryTips[0],$shanspt[0],$previewloc) = makeanswerbox(Sanitize::simpleString($qdata['qtype']),$qnidx,$la,$options,0,$qcol);
 	}
 	if ($qdata['qtype']=='conditional') {
-		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor($qcolors[0],1):$qcolors[0]):'';
+		$qcol = isset($qcolors[0])?(is_numeric($qcolors[0])?rawscoretocolor(Sanitize::encodeStringForDisplay($qcolors[0]),1):Sanitize::encodeStringForDisplay($qcolors[0])):'';
 		if ($qcol!='') {
 			if (strpos($toevalqtxt, '<div')!==false || strpos($toevalqtxt, '<table')!==false) {
 				$toevalqtxt = '<div class=\\"'.$qcol.'\\" style=\\"display:block\\">'.$toevalqtxt.str_replace('"','\\"',getcolormark($qcol)).'</div>';
@@ -424,6 +428,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 					$showanswerloc[$iidx] .= "<span id=\"showansbtn$qnidx-$iidx\">".filter(_('Answer:') . " {$shanspt[$iidx]}</span>\n");
 				} else {
 					$showanswerloc[$iidx] .= "<input id=\"showansbtn$qnidx-$iidx\" class=\"sabtn\" type=button value=\"". _('Show Answer'). "\" />"; //AMprocessNode(document.getElementById(\"ans$qnidx-$iidx\"));'>";
+					// $shanspt can contain HTML.
 					$showanswerloc[$iidx] .= filter(" <span id=\"ans$qnidx-$iidx\" class=\"hidden\">{$shanspt[$iidx]}</span>\n");
 				}
 			} else if ($doshowans && isset($showanswer) && is_array($showanswer)) { //use part specific showanswer
@@ -567,6 +572,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			echo ">", _('Box'), " ".($iidx+1).": <span id=\"tips$qnidx-$iidx\">".filter($entryTip)."</span></p>";
 		}
 		if ($doshowans && strpos($toevalqtxt,'$showanswerloc')===false && is_array($showanswerloc) && isset($showanswerloc[$iidx])) {
+			// $showanswerloc contains HTML.
 			echo '<div>'.$showanswerloc[$iidx].'</div>';
 		}
 		/*if ($doshowans && (!isset($showanswer) || (is_array($showanswer) && !isset($showanswer[$iidx]))) && $shanspt[$iidx]!=='') {
@@ -613,7 +619,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	if ($qdata['qtype']=="multipart" ) {
 		return $anstypes;
 	} else {
-		return array($qdata['qtype']);
+		return array(Sanitize::simpleString($qdata['qtype']));
 	}
 }
 
@@ -944,7 +950,7 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 		$scores = array();  $raw = array(); $accpts = 0;
 		foreach ($anstypes as $kidx=>$anstype) {
 			$partnum = ($qnidx+1)*1000 + $kidx;
-			$raw[$kidx] = scorepart($anstype,$kidx,$_POST["qn$partnum"],$options,$qnidx+1);
+			$raw[$kidx] = scorepart($anstype,$kidx,$_POST["qn".Sanitize::onlyInt($partnum)],$options,$qnidx+1);
 			if (isset($scoremethod) && $scoremethod=='acct') {
 				if ($anstype=='string' && $answer[$kidx]==='') {
 					$scores[$kidx] = $raw[$kidx]-1;  //0 if correct, -1 if wrong
@@ -1005,6 +1011,9 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 
 function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 	global $RND,$myrights, $useeqnhelper, $showtips, $imasroot;
+
+	$anstype = Sanitize::simpleString($anstype);
+
 	$out = '';
 	$tip = '';
 	$sa = '';
@@ -1557,7 +1566,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$leftb = '';
 			$rightb = '';
 		}
-		$out .= "$leftb<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\" ";
+		$out .= "$leftb<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 
 
 		if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
@@ -1656,7 +1665,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			for ($row=0; $row<$answersize[0]; $row++) {
 				$out .= "<tr>";
 				for ($col=0; $col<$answersize[1]; $col++) {
-					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" value=\"{$las[$count]}\"  autocomplete=\"off\" /></td>\n";
+					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" value=\"".Sanitize::encodeStringForDisplay($las[$count])."\"  autocomplete=\"off\" /></td>\n";
 					$count++;
 				}
 				$out .= "</tr>";
@@ -1673,7 +1682,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			}
 			if (!isset($sz)) { $sz = 20;}
 			$tip = _('Enter your answer as a matrix filled with numbers, like ((2,3,4),(3,4,5))');
-			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\" ";
+			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=qn$qn id=qn$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 			if ($showtips==2) {
 				$out .= "onfocus=\"showehdd('qn$qn','$tip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
 			}
@@ -1724,7 +1733,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			for ($row=0; $row<$answersize[0]; $row++) {
 				$out .= "<tr>";
 				for ($col=0; $col<$answersize[1]; $col++) {
-					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"{$las[$count]}\" autocomplete=\"off\" /></td>\n";
+					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"".Sanitize::encodeStringForDisplay($las[$count])."\" autocomplete=\"off\" /></td>\n";
 					$count++;
 				}
 				$out .= "</tr>";
@@ -1746,7 +1755,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$shorttip = _('Enter your answer as a matrix, like ((2,3,4),(1,4,5))');
 			$tip = $shorttip.'<br/>'.formathint(_('each element of the matrix'),$ansformats,'calcmatrix');
 			if (!isset($sz)) { $sz = 20;}
-			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"$la\" autocomplete=\"off\" ";
+			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 			if ($showtips==2) {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
@@ -1800,7 +1809,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else {
 			$shorttip = _('Enter an algebraic expression');
 		}
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"$la\" autocomplete=\"off\" ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -1971,7 +1980,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$tip .= _('Enter DNE for Does Not Exist');
 
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\" ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -2031,7 +2040,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$tip .= formathint('each value',$ansformats,'calcntuple');
 
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\" ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -2088,7 +2097,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 
 		$tip .= _('Enter DNE for Does Not Exist');
 
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\"  ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -2131,7 +2140,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		$tip .= formathint('each value',$ansformats,'calccomplex');
 
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\"  ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -2201,7 +2210,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= '</select>';
 			$out .= getcolormark($colorbox);
 		} else if ($answerformat=='MQexperimental') {
-			$out .= "<input type=\"text\" style=\"position:absolute;visibility:hidden\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" />";
+			$out .= "<input type=\"text\" style=\"position:absolute;visibility:hidden\" name=\"qn$qn\" id=\"qn$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" />";
 			$out .= "<span class=\"$colorbox mathquill-embedded-latex MQE$qn\">";
 			if ($displayformat != '') {
 				$laprts = explode(';',$la);
@@ -2233,7 +2242,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				   setTimeout(function(){$(".MQE'.$qn.'").find("textarea").blur();}, 25);
 				});</script>';
 		} else {
-			$out .= "<input type=\"text\"  size=\"$sz\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" autocomplete=\"off\"  ";
+			$out .= "<input type=\"text\"  size=\"$sz\" name=\"qn$qn\" id=\"qn$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 
 			if ($showtips==2) { //eqntips: work in progress
 				if ($multi==0) {
@@ -2376,7 +2385,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$la = htmlentities($la);
 			}
 			if ($rows<2) {
-				$out .= "<input type=\"text\" class=\"text $colorbox\" size=\"$cols\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" /> ";
+				$out .= "<input type=\"text\" class=\"text $colorbox\" size=\"$cols\" name=\"qn$qn\" id=\"qn$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" /> ";
 				$out .= getcolormark($colorbox);
 			} else {
 				if ($colorbox!='') { $out .= '<div class="'.$colorbox.'">';}
@@ -2386,7 +2395,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				} else {
 					$out .= "cols=\"$cols\" ";
 				}
-				$out .= ">$la</textarea>\n";
+				$out .= sprintf(">%s</textarea>\n", Sanitize::encodeStringForDisplay($la));
 				$out .= getcolormark($colorbox);
 				if ($colorbox!='') { $out .= '</div>';}
 			}
@@ -2444,7 +2453,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else if (in_array('normalcurve',$ansformats)) {
 			$out .= _('Enter an interval corresponding to the region to be shaded');
 		}
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\"  ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 		if (in_array('normalcurve',$ansformats) && $GLOBALS['sessiondata']['graphdisp']!=0) {
 			$out .= 'style="position:absolute;visibility:hidden;" ';
 		}
@@ -2535,7 +2544,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
 		}
 
-		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"$la\" autocomplete=\"off\"  ";
+		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -2637,6 +2646,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$settings = array(-5,5,-5,5,1,1,300,300,"","");
 			$locky = 0;
 		}
+		$xsclgridpts = array('');
 		if (isset($grid)) {
 			if (!is_array($grid)) {
 				$grid = array_map('trim',explode(',',$grid));
@@ -2669,13 +2679,16 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (strpos($settings[2],'0:')===0) {
 				$settings[2] = substr($settings[2],2);
 			}
-			if (strpos($grid[4],'pi')!==false) {
+			if (isset($grid[4])) {
+				$xsclgridpts = explode(':',$grid[4]);
+			} 
+			if (strpos($xsclgridpts[0],'/')!==false || strpos($xsclgridpts[0],'pi')!==false) {
 				if (strpos($settings[4],':')!==false) {
 					$settings4pts = explode(':',$settings[4]);
 					$settings[4] = 2*($settings[1] - $settings[0]).':'.$settings4pts[1];
 				} else {
-				$settings[4] = 2*($settings[1] - $settings[0]).':'.$settings[4];
-			}
+					$settings[4] = 2*($settings[1] - $settings[0]).':'.$settings[4];
+				}
 			}
 		} else {
 			$origxmin = $settings[0];
@@ -2755,8 +2768,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (is_array($settings[5]) && count($settings[5]>2)) {
 			$plot = addlabel($plot,0,$settings[3],$settings[5][2],"black","belowright");
 		}
-		if (isset($grid) && strpos($grid[4],'pi')!==false) {
-			$plot = addfractionaxislabels($plot,$grid[4]);
+		if (isset($grid) && (strpos($xsclgridpts[0],'/')!==false || strpos($xsclgridpts[0],'pi')!==false)) {
+			$plot = addfractionaxislabels($plot,$xsclgridpts[0]);
 		}
 
 
@@ -2860,6 +2873,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						if (count($answerformat)>1 && $answerformat[1]=='exp') { $out .= 'class="sel" '; $def = 8.3;}
 						$out .= ' alt="Exponential"/>';
 					}
+					if (in_array('log',$answerformat)) {
+						$out .= "<img src=\"$imasroot/img/tplog.png\" onclick=\"imathasDraw.settool(this,$qn,8.4)\" ";
+						if (count($answerformat)>1 && $answerformat[1]=='log') { $out .= 'class="sel" '; $def = 8.4;}
+						$out .= ' alt="Logarithm"/>';
+					}
 					if ($settings[6]*($settings[3]-$settings[2]) == $settings[7]*($settings[1]-$settings[0])) {
 						//only circles if equal spacing in x and y
 						if (count($answerformat)==1 || in_array('circle',$answerformat)) {
@@ -2950,7 +2968,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (strpos($snaptogrid,':')!==false) { $snaptogrid = "'$snaptogrid'";}
 			$out .= getcolormark($colorbox);
 			if ($colorbox!='') { $out .= '</div>';}
-			$out .= "<input type=\"hidden\" name=\"qn$qn\" id=\"qn$qn\" value=\"$la\" />";
+			$out .= "<input type=\"hidden\" name=\"qn$qn\" id=\"qn$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" />";
 			$out .= "<script type=\"text/javascript\">canvases[$qn] = [$qn,'$bg',{$settings[0]},{$settings[1]},{$settings[2]},{$settings[3]},5,{$settings[6]},{$settings[7]},$def,$dotline,$locky,$snaptogrid];";
 			if (isset($GLOBALS['capturedrawinit'])) {
 				if (!isset($GLOBALS['drawinitdata'])) {
@@ -3108,15 +3126,15 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					}
 					$saarr = array_merge($saarr,$backg);
 					$sa = showplot($saarr,$origxmin,$settings[1],$origymin,$settings[3],$sclinglbl,$sclinggrid,$settings[6],$settings[7]);
-					if (isset($grid) && strpos($grid[4],'pi')!==false) {
-						$sa = addfractionaxislabels($sa,$grid[4]);
+					if (isset($grid) && (strpos($xsclgridpts[0],'/')!==false || strpos($xsclgridpts[0],'pi')!==false)) {
+						$sa = addfractionaxislabels($sa,$xsclgridpts[0]);
 					}
 				}
 
 			} else {
 				$sa = showplot($saarr,$origxmin,$settings[1],$origymin,$settings[3],$sclinglbl,$sclinggrid,$settings[6],$settings[7]);
-				if (isset($grid) && strpos($grid[4],'pi')!==false) {
-					$sa = addfractionaxislabels($sa,$grid[4]);
+				if (isset($grid) && (strpos($xsclgridpts[0],'/')!==false || strpos($xsclgridpts[0],'pi')!==false)) {
+					$sa = addfractionaxislabels($sa,$xsclgridpts[0]);
 				}
 			}
 			if ($answerformat[0]=="polygon") {
@@ -3897,6 +3915,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (count($gaarr)==0) {
 			return 0;
 		}
+		$gaarrcnt = count($gaarr);
 		$extrapennum = count($gaarr)+count($anarr);
 		$correct = 0;
 		foreach ($anarr as $i=>$answer) {
@@ -3934,7 +3953,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				}
 			}
 		}
-		$score = $correct/count($anarr) - count($gaarr)/$extrapennum;
+		if ($gaarrcnt<=count($anarr)) {
+			$score = $correct/count($anarr);
+		} else {
+			$score = $correct/count($anarr) - ($gaarrcnt-count($anarr))/$extrapennum;  //take off points for extranous stu answers
+		}
+		//$score = $correct/count($anarr) - count($gaarr)/$extrapennum;
 		if ($score<0) { $score = 0; }
 		return ($score);
 
@@ -4215,7 +4239,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 
 		$correct = 0;
-
+		$correctanyformat = 0;
 		foreach($anarr as $i=>$anss) {
 			$foundloc = -1;
 			if (in_array('orderedlist',$ansformats)) {
@@ -4247,15 +4271,15 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						if (is_array($anans)) {
 							if (($anans[1]=="(" && $givenans>$anans[2]) || ($anans[1]=="[" && $givenans>=$anans[2])) {
 								if (($anans[4]==")" && $givenans<$anans[3]) || ($anans[4]=="]" && $givenans<=$anans[3])) {
-									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+									if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 								}
 							}
 						} else if ($anans=="DNE" && strtoupper($givenans)=="DNE") {
-							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						} else if (($anans=="+oo" || $anans=="oo") && ($givenans=="+oo" || $givenans=="oo")) {
-							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						} else if ($anans=="-oo" && $givenans=="-oo") {
-							if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						}/* moved to preprocessing
 						else if (is_numeric($givenans)) {
 							//try evaling answer
@@ -4272,7 +4296,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 								if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 									$formatok = "nopart";  $partformatok = false;
 								}
-								if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+								if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 							}
 						} else {
 							if ($anans==0) {
@@ -4280,14 +4304,14 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 									if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 										$formatok = "nopart";  $partformatok = false;
 									}
-									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+									if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 								}
 							} else {
 								if (abs($anans - $givenans)/(abs($anans)+(abs($anans)>1?1E-12:(abs($anans)*1E-12))) < $reltolerance+1E-12) {
 									if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 										$formatok = "nopart";  $partformatok = false;
 							}
-									if ($partformatok) {$correct += 1;}; $foundloc = $j; break 2;
+									if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						}
 					}
 				}
@@ -4313,7 +4337,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 		}
 		if ($score<0) { $score = 0; }
-		if ($formatok != "all") {
+		if ($formatok != "all" && $correctanyformat>0) {
 			$GLOBALS['partlastanswer'] .= '$f$1';
 			if ($formatok == 'nowhole') {
 				$score = 0;
@@ -5143,6 +5167,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$ansabs = array();
 			$anssqrts = array();
 			$ansexps = array();
+			$anslogs = array();
 			$anscoss = array();
 			$ansvecs = array();
 			$ansrats = array();
@@ -5288,7 +5313,30 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						$xop = $x2p;
 					}
 					$settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
-					if (strpos($function[0],'abs')!==false) { //is abs
+					if (strpos($function[0],'log')!==false || strpos($function[0],'ln')!==false) { //is log
+						//treat like x=ab^y
+						if (!is_nan($y1)) {
+							$yap = $y1p;
+							$xap = $x1p;
+							$yb = @$func($x1-1);
+							$xbp = $x1p - $pixelsperx;
+						} else {
+							$yap = $y3p;
+							$xap = $x3p;
+							$yb = @$func($x3+1);
+							$xbp = $x3p + $pixelsperx;
+						}
+						$ybp = $settings[7] - ($yb-$settings[2])*$pixelspery - $imgborder;
+
+						if ($ybp>$yap) {
+							$base = safepow(($xop-$xbp)/($xop-$xap), 1/($ybp-$yap));
+						} else {
+							$base = safepow(($xop-$xap)/($xop-$xbp), 1/($yap-$ybp));
+						}
+						$str = ($xop-$xbp)/safepow($base,$ybp-$yop);
+						$anslogs[$key] = array($str,$base);
+
+					} else if (strpos($function[0],'abs')!==false) { //is abs
 						$y0 = $func($x0);
 						$y4 = $func($x4);
 						$y0p = $settings[7] - ($y0-$settings[2])*$pixelspery - $imgborder;
@@ -5533,6 +5581,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							}
 							//$exps[] = array($str,$base);
 							$exps[] = array($pts[1]-$xop, $adjy1, $pts[3]-$xop, $adjy2, $base);
+						}
+					} else if ($pts[0]==8.4) {
+						$adjx2 = $xop - $pts[3];
+						$adjx1 = $xop - $pts[1];
+						if ($adjx1*$adjx2>0 && $pts[2]!=$pts[4]) {
+							$base = safepow($adjx2/$adjx1,1/($pts[4]-$pts[2]));
+							if (abs($pts[2]-$yop)<abs($pts[4]-$yop)) {
+								$str = $adjx1/safepow($base,$pts[2]-$yop);
+							} else {
+								$str = $adjx2/safepow($base,$pts[4]-$yop);
+							}
+							$logs[] = array($pts[2]-$yop, $adjx1, $pts[4]-$yop, $adjx2, $base);
 						}
 					} else if ($pts[0]==8.2) { //rational
 						if ($pts[1]!=$pts[3] && $pts[2]!=$pts[4]) {
@@ -5866,6 +5926,27 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					}
 					//check right point if base<=
 					if ($ansexp[1]<=1 && abs($ansexp[0]*safepow($ansexp[1],$exps[$i][2]) - $exps[$i][3]) >$defpttol*$reltolerance) {
+						continue;
+					}
+
+					$scores[$key] = 1;
+					break;
+				}
+			}
+
+			foreach ($anslogs as $key=>$anslog) {
+				$scores[$key] = 0;
+				for ($i=0; $i<count($logs); $i++) {
+					//check base
+					if (abs($anslog[1]-$logs[$i][4])/(abs($anslog[1]-1)+1e-18)>$deftol*$reltolerance) {
+						continue;
+					}
+					//check bottom point if base>1
+					if ($anslog[1]>1 && abs($anslog[0]*safepow($anslog[1],$logs[$i][0]) - $logs[$i][1]) >$defpttol*$reltolerance) {
+						continue;
+					}
+					//check top point if base<=
+					if ($anslog[1]<=1 && abs($anslog[0]*safepow($anslog[1],$logs[$i][2]) - $logs[$i][3]) >$defpttol*$reltolerance) {
 						continue;
 					}
 
@@ -7068,24 +7149,24 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 		$listtype = "list";
 	}
 	if (in_array('fraction',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4) or as a whole number (like 4 or -2)'), $eword);
-		$shorttip = $islist?sprintf(_('Enter a %s of fractions or whole numbers'), $listtype):_('Enter a fraction or whole number');
+		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4) or as an integer (like 4 or -2)'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of fractions or integers'), $listtype):_('Enter a fraction or integer');
 	} else if (in_array('reducedfraction',$ansformats)) {
 		if (in_array('fracordec',$ansformats)) {
-			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6), as a whole number (like 4 or -2), or as an exact decimal (like 0.5 or 1.25)'), $eword);
-			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions, whole numbers, or exact decimals'), $listtype):_('Enter a reduced fraction, whole number, or exact decimal');
+			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6), as an integer (like 4 or -2), or as an exact decimal (like 0.5 or 1.25)'), $eword);
+			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions, integers, or exact decimals'), $listtype):_('Enter a reduced fraction, integer, or exact decimal');
 		} else {
-			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6) or as a whole number (like 4 or -2)'), $eword);
-			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions or whole numbers'), $listtype):_('Enter a reduced fraction or whole number');
+			$tip .= sprintf(_('Enter %s as a reduced fraction (like 5/3, not 10/6) or as an integer (like 4 or -2)'), $eword);
+			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions or integers'), $listtype):_('Enter a reduced fraction or integer');
 		}
 	} else if (in_array('mixednumber',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a reduced mixed number or as a whole number.  Example: 2 1/2 = 2 &frac12;'), $eword);
-		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or whole numbers'), $listtype):_('Enter a mixed number or whole number');
+		$tip .= sprintf(_('Enter %s as a reduced mixed number or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or integers'), $listtype):_('Enter a mixed number or integer');
 	} else if (in_array('mixednumberorimproper',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a reduced mixed number, reduced proper or improper fraction, or as a whole number.  Example: 2 1/2 = 2 &frac12;'), $eword);
-		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or whole numbers'), $listtype):_('Enter a reduced mixed number, proper or improper fraction, or whole number');
+		$tip .= sprintf(_('Enter %s as a reduced mixed number, reduced proper or improper fraction, or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or integers'), $listtype):_('Enter a reduced mixed number, proper or improper fraction, or integer');
 	} else if (in_array('fracordec',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4), a whole number (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
+		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4), an integer (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of fractions or exact decimals'), $listtype):_('Enter a fraction or exact decimal');
 	} else if (in_array('scinot',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
@@ -7094,6 +7175,10 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 		$tip .= sprintf(_('Enter %s as a number (like 5, -3, 2.2172) or as a calculation (like 5/3, 2^3, 5+4)'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of mathematical expressions'), $listtype):_('Enter a mathematical expression');
 	}
+	if ((in_array('fraction',$ansformats) || in_array('reducedfraction',$ansformats)) && !in_array('allowmixed',$ansformats)) {
+		$tip .= '<br/>'._('Do not enter mixed numbers');
+		$shorttip .= _(' (no mixed numbers)');
+	}
 	if ($calledfrom != 'calcmatrix') {
 		$tip .= "<br/>" . _('Enter DNE for Does Not Exist, oo for Infinity');
 	}
@@ -7101,7 +7186,7 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 		$tip .= "<br/>" . _('Decimal values are not allowed');
 	} else if (isset($reqdecimals)) {
 		if ($reqdecimals == 0) {
-			$tip .= "<br/>" . _('Your answer should be accurate to the nearest whole number.');
+			$tip .= "<br/>" . _('Your answer should be accurate to the nearest integer.');
 		} else {
 			$tip .= "<br/>" . sprintf(_('Your answer should be accurate to %d decimal places.'), $reqdecimals);
 		}
@@ -7167,7 +7252,7 @@ function setupnosolninf($qn, $answerbox, $answer, $ansformats, $la, $ansprompt, 
 	$out .= '<li><input type="radio" id="qs'.$qn.'-s" name="qs'.$qn.'" value="spec" '.(($la!='DNE'&&$la!='oo')?'checked':'').'><label for="qs'.$qn.'-s">'.$specsoln.'</label>';
 	if ($la=='DNE' || $la=='oo') {
 		$laqs = $la;
-		$answerbox = str_replace('value="'.$la.'"','value=""',$answerbox);
+		$answerbox = str_replace('value="'.$la.'"','value=""', $answerbox);
 	} else {
 		$laqs = '';
 	}

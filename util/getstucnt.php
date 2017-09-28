@@ -1,6 +1,6 @@
 <?php
 	require("../init.php");
-	if ($myrights<40) {
+	if ($myrights<100 && ($myspecialrights&(32+64))==0) {
 		exit;
 	}
 	$now = time();
@@ -91,7 +91,7 @@
 		$grpcnt += $row[2];
 	}
 	echo "<b>".Sanitize::encodeStringForDisplay($lastgroup). "</b>: " .Sanitize::onlyInt($grpcnt) ."<br/>";
-	echo Sanitize::encodeStringForDisplay($grpdata);
+	echo $grpdata;
 
 	echo "<p>Active students last hour: ";
 	$date = $now - 60*60;

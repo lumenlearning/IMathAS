@@ -157,7 +157,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$processingerror = true;
 			}
 		} else if ($_POST['linktype']=='web') {
-			$_POST['text'] = trim(strip_tags($_POST['web']));
+			$_POST['text'] = Sanitize::url($_POST['web']);
 			if (substr($_POST['text'],0,4)!='http') {
 				$processingerror = true;
 			}
@@ -335,11 +335,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			if (substr($line['text'],0,4)=='http') {
 				$type = 'web';
 				$webaddr = $line['text'];
-				$line['text'] = "<p>Enter text here</p>";
+				$line['text'] = "";
 			} else if (substr($line['text'],0,5)=='file:') {
 				$type = 'file';
 				$filename = substr($line['text'],5);
-				$line['text'] = "<p>Enter text here</p>";
+				$line['text'] = "";
 			} else if (substr($line['text'],0,8)=='exttool:') {
 				$type = 'tool';
 				$points= $line['points'];
@@ -357,7 +357,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$tutoredit = $toolparts[5];
 					$gradesecret = $toolparts[6];
 				}
-				$line['text'] = "<p>Enter text here</p>";
+				$line['text'] = "";
 			} else {
 				$type = 'text';
 			}
@@ -372,9 +372,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$savetitle = _("Save Changes");
 		} else {
 			//set defaults
-			$line['title'] = "Enter title here";
-			$line['summary'] = "<p>Enter summary here (displays on course page)</p>";
-			$line['text'] = "<p>Enter text here</p>";
+			$line['summary'] = "";
+			$line['text'] = "";
 			$line['avail'] = 1;
 			$line['oncal'] = 0;
 			$line['caltag'] = '!';
@@ -528,7 +527,7 @@ if ($overwriteBody==1) {
 
 	<form enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
 		<span class=form>Title: </span>
-		<span class=formright><input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$line['title']);?>">
+		<span class=formright><input type=text size=60 name=title placeholder="Enter title here" value="<?php echo str_replace('"','&quot;',$line['title']);?>" required>
 		</span><BR class=form>
 
 		Summary<BR>
@@ -566,9 +565,9 @@ if ($overwriteBody==1) {
 			<span class="formright">
 			<?php if ($filename != '') {
 				require_once("../includes/filehandler.php");
-				echo '<input type="hidden" name="curfile" value="'.$filename.'"/>';
+				echo '<input type="hidden" name="curfile" value="'.Sanitize::encodeStringForDisplay($filename).'"/>';
 				$alink = getcoursefileurl($filename);
-				echo 'Current file: <a href="' . Sanitize::encodeStringForDisplay($alink) . '">'.basename($filename).'</a><br/>Replace ';
+				echo 'Current file: <a target="_blank" href="' . Sanitize::url($alink) . '">'.Sanitize::encodeStringForDisplay(basename($filename)).'</a><br/>Replace ';
 			} else {
 				echo 'Attach ';
 			}
@@ -621,7 +620,7 @@ if ($overwriteBody==1) {
 				<span class="formright">
 	<?php
 		writeHtmlSelect("tutoredit",$page_tutorSelect['val'],$page_tutorSelect['label'],$tutoredit);
-		echo '<input type="hidden" name="gradesecret" value="'.$gradesecret.'"/>';
+		echo '<input type="hidden" name="gradesecret" value="'.Sanitize::encodeStringForDisplay($gradesecret).'"/>';
 	?>
 			</span><br class="form" />
 			</div>
@@ -667,7 +666,7 @@ if ($overwriteBody==1) {
 			<input type=radio name="oncal" value=0 <?php writeHtmlChecked($line['oncal'],0); ?> /> No<br/>
 			<input type=radio name="oncal" value=1 <?php writeHtmlChecked($line['oncal'],1); ?> /> Yes, on Available after date (will only show after that date)<br/>
 			<input type=radio name="oncal" value=2 <?php writeHtmlChecked($line['oncal'],2); ?> /> Yes, on Available until date<br/>
-			With tag: <input name="caltag" type=text size=8 value="<?php echo $line['caltag'];?>"/>
+			With tag: <input name="caltag" type=text size=8 value="<?php echo Sanitize::encodeStringForDisplay($line['caltag']);?>"/>
 		</span><br class="form" />
 		</div>
 		<div id="altcaldiv" style="display:<?php echo ($line['avail']==2)?"block":"none"; ?>">
@@ -678,7 +677,7 @@ if ($overwriteBody==1) {
 			<input type=text size=10 name="cdate" value="<?php echo $sdate;?>">
 			<a href="#" onClick="displayDatePicker('cdate', this); return false">
 			<img src="../img/cal.gif" alt="Calendar"/></a> <br/>
-			With tag: <input name="altcaltag" type=text size=8 value="<?php echo $line['caltag'];?>"/>
+			With tag: <input name="altcaltag" type=text size=8 value="<?php echo Sanitize::encodeStringForDisplay($line['caltag']);?>"/>
 		</span><BR class=form>
 		</div>
 <?php

@@ -2,7 +2,7 @@
 
 require("../init.php");
 
-if ($myrights<100) {exit;}
+if ($myrights<100 && ($myspecialrights&64)!=64) {exit;}
 
 if (isset($_GET['skipn'])) {
 	$offset =  Sanitize::onlyInt(($_GET['skipn']));
@@ -59,7 +59,12 @@ if (isset($_GET['go'])) {
 			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.myopenmath.com/docs/docs.php">Getting Started Guide</a> helpful</p>';
 			$message .= '<p>I\'ve signed you up as a "student" in the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
 			$message .= '<p>I\'ve also signed you up for the MyOpenMath Training Course.  This course has video tutorials and assignments that will walk you through learning how to use MyOpenMath in your classes.</p>';
-			$message .= '<p>David Lippman<br/>admin@myopenmath.com<br/>MyOpenMath administrator</p>';
+			$message .= '<p>These will be your primary source of support; MyOpenMath does not provide individual email or phone support. We encourage you to form a learning community at your college to support each other in learning and using the system.</p>';
+			$message .= '<p>Please keep in mind that MyOpenMath is run and supported by volunteers from the user community. Likewise, all courses and questions were created by your colleagues, and shared out of the kindness of their hearts. ';
+			$message .= 'There is no big company or grant-funded nonprofit keeping this thing going. No one is paid by MyOpenMath to create or maintain content or provide support, ';
+			$message .= 'so please be respectful of the volunteers you interact with, and consider contributing back in the future.</p>'; 
+			$message .= '<p>We hope you enjoy both the cost savings and freedoms using open resources provide.</p>';
+			$message .= '<p>David Lippman<br/>admin@myopenmath.com<br/>MyOpenMath administrator / lead developer (volunteer) and full-time math faculty</p>';
 		} else if ($installname=='WAMAP') {
 			$message .= 'Welcome to WAMAP.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
 			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.wamap.org/docs/docs.php">Getting Started Guide</a> helpful</p>';
@@ -157,7 +162,7 @@ if ($stm->rowCount()==0) {
 	$opts = '';
 	$groups = array();
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		$opts .= '<option value="'.$row[0].'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
+		$opts .= '<option value="'.Sanitize::onlyInt($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
 		if ($school!='' && !$havesuggestion) {
 			$groups[] = array(levenshtein($school,normalizeGroup($row[1])), $row[0], $row[1]);
 		}
@@ -185,7 +190,7 @@ if ($stm->rowCount()==0) {
 		} else {
 			foreach ($groups as $group) {
 				if ($group[0]>=$breakdist) {break;}
-				echo '<option value="'.$group[1].'"'.($first&&$group[0]<3?' selected':'').'>'.Sanitize::encodeStringForDisplay($group[2]).'</option>';
+				echo '<option value="'.Sanitize::onlyInt($group[1]).'"'.($first&&$group[0]<3?' selected':'').'>'.Sanitize::encodeStringForDisplay($group[2]).'</option>';
 				$first = false;
 			}
 		}
@@ -250,7 +255,7 @@ function sanitizeNewInstructorRequestLog($logtext) {
 	}
 	if (!empty($verificationUrl)) {
 		if (!empty($sanitizedLogText)) $sanitizedLogText .= "<br/>";
-		//$verificationUrl is html so dont sanitize 
+		//$verificationUrl is html so dont sanitize
 		$sanitizedLogText .= "VerificationURL: " . $verificationUrl;
 	}
 	if (!empty($phone)) {

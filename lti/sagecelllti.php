@@ -100,7 +100,7 @@ $(sagecell.init(
 </head>
 
 <body>
-<div id="sagecell1"><script type="text/code"><?php echo $code;?>
+<div id="sagecell1"><script type="text/code"><?php //Disabled until this page is functional. :) // echo $code;?>
 </script></div>
 <p>This web page provides a gateway to the <a href="http://www.sagemath.org/">Sage</a> computer algebra system.
 See <a href="http://www.sagemath.org/eval.html#Calculus/Basics/Differential">some examples</a> of what it can do, or
@@ -108,11 +108,11 @@ see the <a href="http://www.sagemath.org/doc/reference/index.html">reference man
 <?php
 if ($ltirole == 'instructor') {
 	echo '<p>Instructors can set default code which will show when students view this placement of this tool.  Students will be able to modify the code, but not save their changes.</p>';
-	echo '<form method="post" action="sagecelllti.php?save=true&amp;id='.$id.'" onsubmit="getcode()">';
+	echo '<form method="post" action="sagecelllti.php?save=true&amp;id='.Sanitize::onlyInt($id).'" onsubmit="getcode()">';
 	echo '<input type="submit" value="Save Default Code"/>';
 	echo '<input type="hidden" name="oauth_consumer_key" value="'.Sanitize::encodeStringForDisplay($domain).'"/>';
 	echo '<input type="hidden" name="resource_link_id" value="'.Sanitize::encodeStringForDisplay($linkid).'"/>';
-	echo '<input type="hidden" name="roles" value="'.$ltirole.'"/>';
+	echo '<input type="hidden" name="roles" value="'.Sanitize::encodeStringForDisplay($ltirole).'"/>';
 	echo '<textarea style="visibility:hidden;position:absolute;" name="code" id="savecode"></textarea>';
 	echo '</form>';
 	echo '<script type="text/javascript">
