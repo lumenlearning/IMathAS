@@ -987,7 +987,7 @@ switch($_POST['action']) {
 		if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
 			if (strpos($uploadfile,'.tar.gz')!==FALSE) {
 				include("../includes/tar.class.php");
-				include_once("../includes/filehandler.php");
+				require_once("../includes/filehandler.php");
 				$tar = new tar();
 				$tar->openTAR($uploadfile);
 				if ($tar->hasFiles()) {

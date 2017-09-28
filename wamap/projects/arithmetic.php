@@ -13,7 +13,7 @@ if (isset($_GET['public'])) {
 	require("../../init.php");
 	$ispublic = false;
 }
-require("../../includes/filehandler.php");
+require_once("../../includes/filehandler.php");
 /*$placeinhead = "<script type=\"text/javascript\">
 
   var _gaq = _gaq || [];
