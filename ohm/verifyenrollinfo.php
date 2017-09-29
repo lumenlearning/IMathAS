@@ -74,3 +74,6 @@ if($_POST['courseid'] && $_POST['ekey']){
 
 
 }
+?>
+</body>
+</html>

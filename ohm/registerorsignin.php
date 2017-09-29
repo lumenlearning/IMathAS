@@ -137,3 +137,5 @@ if(($_POST['courseid'] && $_POST['ekey'] && $_POST['verified'] || $_GET['cid'] &
 }
 
 ?>
+</body>
+</html>
