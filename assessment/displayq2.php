@@ -2443,7 +2443,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (in_array('normalcurve',$ansformats) && $GLOBALS['sessiondata']['graphdisp']!=0) {
 			$out .=  '<div style="background:#fff;padding:10px;">';
 			$out .=  '<p style="margin:0px";>Shade: <select id="shaderegions'.$qn.'" onchange="imathasDraw.chgnormtype(this.id.substring(12));"><option value="1L">' . _('Left of a value') . '</option><option value="1R">' . _('Right of a value') . '</option>';
-			$out .=  '<option value="2B">' . _('Between two values') . '</option><option value="2O">' . _('2 regions') . '</option></select>. ' . _('Click and drag and arrows to adjust the values.');
+			$out .=  '<option value="2B">' . _('Between two values') . '</option><option value="2O">' . _('2 regions') . '</option></select>. ' . _('Click and drag the arrows to adjust the values.');
 
 			$out .=  '<div style="position: relative; width: 500px; height:200px;padding:0px;">';
 			//for future development of non-standard normal
@@ -3316,16 +3316,27 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$anarr = explode(',',$answer);
 			$islist = true;
 		} else if (in_array('list',$ansformats)) {
-			$tmp = array_map('trim', explode(',',$givenans));
-			sort($tmp);
-			$gaarr = array($tmp[0]);
-			for ($i=1;$i<count($tmp);$i++) {
-				if ($tmp[$i]-$tmp[$i-1]>1E-12) {
-					$gaarr[] = $tmp[$i];
+			$tmp = array();
+			$gaarr = array();
+			foreach (array_map('trim', explode(',',$givenans)) as $v) {
+				if (is_numeric($v)) {
+					$tmp[] = $v;
+				} else {
+					$gaarr[] = $v;
+				}
+			}
+			//$tmp = array_map('trim', explode(',',$givenans));
+			if (count($tmp)>0) {
+				sort($tmp);
+				$gaarr[] = $tmp[0];
+				for ($i=1;$i<count($tmp);$i++) {
+					if ($tmp[$i]-$tmp[$i-1]>1E-12) {
+						$gaarr[] = $tmp[$i];
+					}
 				}
 			}
 			$gaarrcnt = count($gaarr);
-			$tmp = explode(',',$answer);
+			$tmp = array_map('trim', explode(',',$answer));
 			sort($tmp);
 			$anarr = array($tmp[0]);
 			for ($i=1;$i<count($tmp);$i++) {
@@ -3335,10 +3346,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 			$islist = true;
 		} else {
-			$givenans = preg_replace('/(\d)\s*,\s*(?=\d{3}\b)/','$1',$givenans);
-			$givenans = str_replace(',','99999999',$givenans); //force wrong ans on lingering commas
-
-			$gaarr = array(str_replace(array('$',',',' ','/','^','*'),'',$givenans));
+			$givenan = preg_replace('/(\d)\s*,\s*(?=\d{3}\b)/','$1',$givenan);
+			$givenan = str_replace(',','99999999',$givenan); //force wrong ans on lingering commas
+			$gaarr = array($givenans);
 
 			if (strpos($answer,'[')===false && strpos($answer,'(')===false) {
 				$anarr = array(str_replace(',','',$answer));
@@ -3346,6 +3356,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$anarr = array($answer);
 			}
 			$islist = false;
+		}
+		foreach ($gaarr as $k=>$v) {
+			$gaarr[$k] = str_replace(array('$',',',' ','/','^','*'),'',$v);
 		}
 
 
@@ -3372,6 +3385,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 
 			foreach($gaarr as $j=>$givenans) {
+
 				$givenans = trim($givenans);
 				if (isset($requiretimeslistpart) && checkreqtimes($givenans,$requiretimeslistpart)==0) {
 					continue;
@@ -3400,9 +3414,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						}
 					} else {//{if (is_numeric($givenans)) {
 						//$givenans = preg_replace('/[^\-\d\.eE]/','',$givenans); //strip out units, dollar signs, whatever
-						$givenans = preg_replace('/^((-|\+)?\d*\.?\d*E?\-?\d*)[^+\-]*$/','$1',trim($givenans)); //strip out units
+						if (preg_match('/\d\s*(x|y|z|r|t|i|X|Y|Z|I)([^a-zA-Z]|$)/', $givenans)) {
+							//has a variable - don't strip
+						} else {
+							$givenans = preg_replace('/^((-|\+)?\d*\.?\d*E?\-?\d*)[^+\-]*$/','$1',trim($givenans)); //strip out units
+						}
 						if (is_numeric($givenans)) {
-
 							if (isset($reqsigfigs)) {
 								if ($givenans*$anans < 0) { continue;} //move on if opposite signs
 								if ($anans!=0) {
@@ -3463,6 +3480,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		} else {
 			$score = $correct/count($anarr);
 		}
+
 		if ($score<0) { $score = 0; }
 		if ($score==0 && isset($partialcredit) && !$islist && is_numeric($givenans)) {
 			foreach ($altanswers as $i=>$anans) {
