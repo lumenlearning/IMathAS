@@ -8,6 +8,7 @@
     <testsuites>
         <testsuite name="All Tests">
             <directory>tests</directory>
+            <directory>ohm/tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

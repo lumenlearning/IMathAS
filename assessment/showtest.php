@@ -39,6 +39,43 @@
 	$exceptionduedate = 0;
 	//error_reporting(0);  //prevents output of error messages
 
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if (20 > $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
+		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
+
+		if (!isset($GLOBALS['groupid']) || 1 > $GLOBALS['groupid']) {
+			throw new \OHM\StudentPaymentException(sprintf(
+				"User ID %d (%s) is not a member of a group. Unable to get student payment info.",
+				$GLOBALS['userid'], $GLOBALS['username']));
+		}
+
+		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
+		try {
+			$courseAndStudentPaymentInfo = $studentPayment->getCourseAndStudentPaymentInfo();
+		} catch (OHM\StudentPaymentException $e) {
+			echo "Student payment API error. See server logs for details.";
+			error_log("Student payment API error: " . $e->getMessage());
+			exit;
+		}
+
+		if ($courseAndStudentPaymentInfo->getCourseRequiresStudentPayment()) {
+			if (!$courseAndStudentPaymentInfo->getStudentHasValidAccessCode()) {
+				require_once(__DIR__ . "/../ohm/fragments/assessments_payment.php");
+				exit;
+			}
+		}
+	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+
 	//check to see if test starting test or returning to test
 	if (isset($_GET['id'])) {
 		//check dates, determine if review

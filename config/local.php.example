@@ -10,6 +10,14 @@ require('ohm.php');
 //require('wamap.php');
 //require('myopenmath.php');
 
+// Lumen student payment authorization API
+$GLOBALS['student_pay_api']['enabled'] = false;
+$GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/studentpay_api/v1'; // No trailing slash!
+$GLOBALS['student_pay_api']['timeout'] = 5;
+$GLOBALS['student_pay_api']['jwt_secret'] = 'secret_goes_here';
+$GLOBALS['student_pay_api']['trial_period_human'] = "14 days";
+$GLOBALS['student_pay_api']['trial_extension_period_human'] = "48 hours";
+
 //database access settings
 $dbserver = "localhost";
 $dbname = "myopenmath";
