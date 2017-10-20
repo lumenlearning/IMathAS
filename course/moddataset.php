@@ -381,7 +381,20 @@
 		//upload image files if attached
 		if ($_FILES['imgfile']['name']!='') {
 			$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
-			if (trim($_POST['newimgvar'])=='') {
+			if (!is_uploaded_file($_FILES['imgfile']['tmp_name'])) {
+				switch($_FILES['imgfile']['error']){
+			    case 1:
+			    case 2: //uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form
+			      $errmsg .= "The file you are trying to upload is too big.";
+			      break;
+			    case 3: //uploaded file was only partially uploaded
+			      $errmsg .= "The file you are trying upload was only partially uploaded.";
+			      break;
+			    default: //a default error, just in case!  :)
+			      $errmsg .= "There was a problem with your upload.";
+			      break;
+					}
+			} else if (trim($_POST['newimgvar'])=='') {
 				$errmsg .= "<p>Need to specify variable for image to be referenced by</p>";
 			} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
 				$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
@@ -927,6 +940,7 @@
 
 	   function setupQtextEditor() {
 	   	var qtextbox = document.getElementById("qtext");
+			qtextbox.value = qtextbox.value.replace(/<br\s*\/>\s*<br\s*\/>/g, "\n<br /><br />\n");
 	   	qEditor = CodeMirror.fromTextArea(qtextbox, {
 			matchTags: true,
 			mode: "imathasqtext",
@@ -936,6 +950,7 @@
 			tabSize: 2,
 			styleSelectedText:true
 		      });
+			for (var i=0;i<qEditor.lineCount();i++) { qEditor.indentLine(i); }
 		//qEditor.setSize("100%",6+14*qtextbox.rows);
 	   }
 
@@ -1316,6 +1331,14 @@ if ($line['deleted']==1 && ($myrights==100 || $ownerid==$userid)) {
 </form>
 
 <script type="text/javascript">
+$("input[name=imgfile]").on("change", function(event) {
+	var maxsize = $("input[name=MAX_FILE_SIZE]").val();
+	if (this.files && this.files[0] && this.files[0].size>maxsize) {
+		alert("Your image is too large. Size cannot exceed "+maxsize+" btyes");
+		$(this).val("");
+	}
+});
+
 if (FormData){ // Only allow quicksave if FormData object exists
 	var quickSaveQuestion = function(){
 		// Add text to notice areas
