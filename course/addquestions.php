@@ -384,10 +384,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var addqaddr = '$address';
 		</script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=012317\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=092017\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=100517\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";
-	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=101016\" type=\"text/css\" />";
+	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=100517\" type=\"text/css\" />";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/iconfonts/style.css?v=081316\" type=\"text/css\" />";
 	$useeditor = "noinit";
 
@@ -544,8 +544,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 			$qsdata = array();
 			for ($j=(strpos($subs[0],'|')===false)?0:1;$j<count($subs);$j++) {
+				if (!isset($questionjsarr[$subs[$j]])) {continue;} //should never happen
 				$qsdata[] = $questionjsarr[$subs[$j]];
 			}
+			if (count($qsdata)==0) { continue; } //should never happen
 			if (strpos($subs[0],'|')===false) { //for backwards compat
 				$jsarr[] = array(1,0,$qsdata,$closegrp);
 				$qncnt++;
@@ -558,6 +560,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$qncnt += $grpparts[0];
 			}
 		} else {
+			if (!isset($questionjsarr[$items[$i]])) {continue;} //should never happen
 			$jsarr[] = $questionjsarr[$items[$i]];
 			$qncnt++;
 		}
