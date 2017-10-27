@@ -17,3 +17,13 @@ Online Homework Manager, an IMathAS fork.
 
 [https://docs.google.com/spreadsheets/d/1-DodYMSwghGrveh4RLIpQgHkaymyEtkZqMjWz4jei4o/edit#gid=0](https://docs.google.com/spreadsheets/d/1-DodYMSwghGrveh4RLIpQgHkaymyEtkZqMjWz4jei4o/edit#gid=0)
 
+# Rights
+
+
+	if ($role_num == 5) {return "Guest User";}
+	if ($role_num == 10) {return "Student";}
+	if ($role_num == 20) {return "Teacher";}
+	if ($role_num == 40) {return "Limited Course Creator";}
+	if ($role_num == 75) {return "Group Admin";}
+	if ($role_num == 100) {return "Full Admin";}
+
