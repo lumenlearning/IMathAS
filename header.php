@@ -61,7 +61,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=071917"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=091817"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -160,11 +160,12 @@ if (isset($placeinhead)) {
 	echo $placeinhead;
 }
 if (isset($useeditor) && $sessiondata['useed']==1) {
-	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=062917"></script>';
+	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=091717"></script>';
 	//echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=082716"></script>';
 	echo "\n";
 	echo '<script type="text/javascript">';
 	echo 'var coursetheme = "'.$coursetheme.'";';
+	echo 'var tinymceUseSnippets = '.($myrights>10?1:0).';';
 	if (!isset($CFG['GEN']['noFileBrowser'])) {
 		echo 'var filePickerCallBackFunc = filePickerCallBack;';
 	} else {

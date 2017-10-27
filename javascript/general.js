@@ -328,23 +328,22 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		inline: inlinemode,
 		plugins: [
 			"lists advlist autolink attach image charmap anchor",
-			"searchreplace code link textcolor",
+			"searchreplace code link textcolor snippet",
 			"media table paste asciimath asciisvg rollups colorpicker"
 		],
 		menubar: false,//"edit insert format table tools ",
-		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | code | saveclose",
+		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
 		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg",
 		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder],param[name|value],@[sscr]',
 		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme,
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
 		file_picker_callback: filePickerCallBackFunc,
-		file_browser_types: 'file image',
+		file_picker_types: 'file image',
 		//imagetools_cors_hosts: ['s3.amazonaws.com'],
 		images_upload_url: imasroot+'/tinymce4/upload_handler.php',
 		//images_upload_credentials: true,
 		paste_data_images: true,
-		paste_webkit_styles: "color font-size text-decoration",
 		default_link_target: "_blank",
 		browser_spellcheck: true,
 		branding: false,
@@ -355,6 +354,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 			{title:"Gridded", value:"gridded"},
 			{title:"Gridded Centered", value:"gridded centered"}],
 		style_formats_merge: true,
+		snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
 		style_formats: [{
 			title: "Font Family",
 			items: [
@@ -396,9 +396,10 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 	if (setupfunction) {
 		edsetup.setup = setupfunction;
 	}
-	for (var i in tinymce.editors) {
-		tinymce.editors[i].remove();
-	}
+	//for (var i in tinymce.editors) {
+	//	tinymce.editors[i].remove();
+	//}
+	tinymce.remove();
 	tinymce.init(edsetup);
 
 };

@@ -3,9 +3,9 @@
 //(c) 2010 David Lippman
 
 /*** master php includes *******/
-require_once("../init.php");
-require_once("../includes/htmlutil.php");
-require_once("../includes/stugroups.php");
+require("../init.php");
+require("../includes/htmlutil.php");
+require("../includes/stugroups.php");
 require_once("../includes/filehandler.php");
 
 /*** pre-html data manipulation, including function code *******/
