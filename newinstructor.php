@@ -117,7 +117,7 @@
 	echo '<span class=form></span><span class="formright small">Provide a direct link to a web page showing you, or to the school\'s online directory. Make sure the site doesn\'t require a login. ';
 	echo 'If you just type something like "see school directory" or provide a link to the college\'s home page, ';
 	echo 'our volunteers will probably decide your request is too much work and delay approving it. Don\'t say "call ____"; we won\'t. ';
-	echo 'If you are not listed on a website, you can have your supervisor (someone who can be verified) email admin@myopenmath.com. </span><br class=form />';
+	echo 'If you are not listed on a website, you can have your supervisor (someone who can be verified) email admin@myopenmath.com, and enter here "see email from ___".</span><br class=form />';
 	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=formright><input type=text name=username value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40></span><br class=form />\n";
 	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
 	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";
