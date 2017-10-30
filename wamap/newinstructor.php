@@ -79,7 +79,7 @@
 				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
 
 				echo $message;
-				require("footer.php");
+				require("../footer.php");
 				exit;
 			}
 		}

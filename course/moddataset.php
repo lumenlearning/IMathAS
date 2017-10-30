@@ -222,7 +222,7 @@
 
 			//checked separately above now
 			//if (!$isadmin && !$isgrpadmin) { $query .= " AND (ownerid='$userid' OR userights>2);";}
-			if ($isok) {
+			if ($isok && !isset($_POST['justupdatelibs'])) {
 				//DB $query = "UPDATE imas_questionset SET description='{$_POST['description']}',author='{$_POST['author']}',userights='{$_POST['userights']}',license='{$_POST['license']}',";
 				//DB $query .= "otherattribution='{$_POST['addattr']}',qtype='{$_POST['qtype']}',control='{$_POST['control']}',qcontrol='{$_POST['qcontrol']}',solution='{$_POST['solution']}',";
 				//DB $query .= "qtext='{$_POST['qtext']}',answer='{$_POST['answer']}',lastmoddate=$now,extref='$extref',replaceby=$replaceby,solutionopts=$solutionopts";
@@ -381,7 +381,20 @@
 		//upload image files if attached
 		if ($_FILES['imgfile']['name']!='') {
 			$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
-			if (trim($_POST['newimgvar'])=='') {
+			if (!is_uploaded_file($_FILES['imgfile']['tmp_name'])) {
+				switch($_FILES['imgfile']['error']){
+			    case 1:
+			    case 2: //uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form
+			      $errmsg .= "The file you are trying to upload is too big.";
+			      break;
+			    case 3: //uploaded file was only partially uploaded
+			      $errmsg .= "The file you are trying upload was only partially uploaded.";
+			      break;
+			    default: //a default error, just in case!  :)
+			      $errmsg .= "There was a problem with your upload.";
+			      break;
+					}
+			} else if (trim($_POST['newimgvar'])=='') {
 				$errmsg .= "<p>Need to specify variable for image to be referenced by</p>";
 			} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
 				$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
@@ -927,6 +940,7 @@
 
 	   function setupQtextEditor() {
 	   	var qtextbox = document.getElementById("qtext");
+			qtextbox.value = qtextbox.value.replace(/<br\s*\/>\s*<br\s*\/>/g, "\n<br /><br />\n");
 	   	qEditor = CodeMirror.fromTextArea(qtextbox, {
 			matchTags: true,
 			mode: "imathasqtext",
@@ -936,6 +950,7 @@
 			tabSize: 2,
 			styleSelectedText:true
 		      });
+			for (var i=0;i<qEditor.lineCount();i++) { qEditor.indentLine(i); }
 		//qEditor.setSize("100%",6+14*qtextbox.rows);
 	   }
 
@@ -1112,7 +1127,8 @@ if (!isset($line['ownerid']) || isset($_GET['template']) || $line['ownerid']==$u
 var curlibs = '<?php echo Sanitize::encodeStringForJavascript($inlibs);?>';
 var locklibs = '<?php echo Sanitize::encodeStringForJavascript($locklibs);?>';
 function libselect() {
-	window.open('libtree.php?libtree=popup&cid=<?php echo $cid;?>&selectrights=1&libs='+curlibs+'&locklibs='+locklibs,'libtree','width=400,height='+(.7*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width-420));
+	//window.open('libtree.php?libtree=popup&cid=<?php echo $cid;?>&selectrights=1&libs='+curlibs+'&locklibs='+locklibs,'libtree','width=400,height='+(.7*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width-420));
+	GB_show('Library Select','libtree2.php?cid=<?php echo $cid;?>&libtree=popup&selectrights=1&libs='+curlibs+'&locklibs='+locklibs,500,500);
 }
 function setlib(libs) {
 	if (libs.charAt(0)=='0' && libs.indexOf(',')>-1) {
@@ -1126,6 +1142,7 @@ function setlibnames(libn) {
 		libn = libn.substring(11);
 	}
 	document.getElementById("libnames").innerHTML = libn;
+	$("#libonlysubmit").show();
 }
 function swapentrymode() {
 	var butn = document.getElementById("entrymode");
@@ -1153,6 +1170,10 @@ function decboxsize(box) {
 <p>
 My library assignments: <span id="libnames"><?php echo Sanitize::encodeStringForDisplay($lnames);?></span><input type=hidden name="libs" id="libs" size="10" value="<?php echo Sanitize::encodeStringForDisplay($inlibs);?>">
 <input type=button value="Select Libraries" onClick="libselect()">
+<?php
+if (isset($_GET['id']) && $myq) {
+	echo '<span id=libonlysubmit style="display:none"><input type=submit name=justupdatelibs value="Save Library Change Only"/></span>';
+} ?>
 </p>
 <p>
 Question type: <select name=qtype <?php if (!$myq) echo "disabled=\"disabled\"";?>>
@@ -1310,6 +1331,14 @@ if ($line['deleted']==1 && ($myrights==100 || $ownerid==$userid)) {
 </form>
 
 <script type="text/javascript">
+$("input[name=imgfile]").on("change", function(event) {
+	var maxsize = $("input[name=MAX_FILE_SIZE]").val();
+	if (this.files && this.files[0] && this.files[0].size>maxsize) {
+		alert("Your image is too large. Size cannot exceed "+maxsize+" btyes");
+		$(this).val("");
+	}
+});
+
 if (FormData){ // Only allow quicksave if FormData object exists
 	var quickSaveQuestion = function(){
 		// Add text to notice areas
@@ -1432,7 +1461,7 @@ if (FormData){ // Only allow quicksave if FormData object exists
 	// Show Quick Save and Preview buttons
 	$(function() {
 		$(".quickSaveButton").css("display", "inline");
-		//$(".saveandtest").remove();
+		$(".saveandtest").remove();
 	});
 } else { // No FormData object
 	$(function() {

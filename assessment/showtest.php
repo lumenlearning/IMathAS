@@ -175,6 +175,45 @@
 		}
 
 		//check for password
+
+		if (trim($adata['password'])!='' && preg_match('/^\d{1,3}\.(\*|\d{1,3})\.(\*|\d{1,3})\.[\d\*\-]+/',$adata['password'])) {
+			//if PW is an IP address, compare against user's
+			$userip = explode('.', $_SERVER['REMOTE_ADDR']);
+			$pwips = explode(',', $adata['password']);
+			$isoneIPok = false;
+			foreach ($pwips as $pwip) {
+				$pwip = explode('.', $pwip);
+				$thisIPok = true;
+				for ($i=0;$i<3;$i++) {
+					if ($pwip[$i]!=$userip[$i] && $pwip[$i]!='*') {
+						$thisIPok = false;
+					}
+				}
+				$lastpts = explode('-',$pwip[3]);
+				if (count($lastpts)==1) {
+					if ($lastpts[0]=='*') {
+
+					} else if ($lastpts[0]!=$userip[3]) {
+						$thisIPok = false;
+					}
+				} else {
+					if ($userip[3]<$lastpts[0] || $useripd[3]>$lastpts[1]) {
+						$thisIPok = false;
+					}
+				}
+				if ($thisIPok) {
+					$isoneIPok = true;
+					break;
+				}
+			}
+			if ($isoneIPok) {
+				$adata['password'] = '';
+			} else {
+				echo "<p>Not authorized from this computer</p>";
+				require("../footer.php");
+				exit;
+			}
+		}
 		if (trim($adata['password'])!='' && !isset($teacherid) && !isset($tutorid)) { //has passwd
 			$pwfail = true;
 			if (isset($_POST['password'])) {
@@ -1086,8 +1125,17 @@ if (!isset($_REQUEST['embedpostback'])) {
 
 	$cid = $testsettings['courseid'];
 	if ($testsettings['displaymethod'] == "VideoCue") {
+		$viddata = unserialize($testsettings['viddata']);
+		$vidid = array_shift($viddata);
+		if (is_array($vidid)) {
+		  list($vidid,$vidar) = $vidid;
+		} else {
+		  $vidar = "16:9";
+		}
+
 		//$placeinhead .= '<script src="'.$urlmode.'www.youtube.com/player_api"></script>';
-		$placeinhead = '<script src="'.$imasroot.'/javascript/ytapi.js"></script>';
+		$placeinhead = "<script>var vidAspectRatio = '$vidar'</script>";
+		$placeinhead .= '<script src="'.$imasroot.'/javascript/ytapi.js?v=101817"></script>';
 	}
 	if ($testsettings['displaymethod'] == "LivePoll") {
 		$placeinhead = '<script src="https://'.$CFG['GEN']['livepollserver'].':3000/socket.io/socket.io.js"></script>';
@@ -1846,11 +1894,11 @@ if (!isset($_REQUEST['embedpostback'])) {
 					}
 				}
 
-				if ($reattemptsremain == false && $showeachscore && $testsettings['showans']!='N') {
+				if (($reattemptsremain == false || $regenonreattempt) && $showeachscore && $testsettings['showans']!='N') {
 					//TODO i18n
-
+					unset($GLOBALS['nocolormark']);
 					echo "<p>" . _("This question, with your last answer");
-					if (($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') {
+					if ((($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') && $reattemptsremain == false) {
 						echo _(" and correct answer");
 						$showcorrectnow = true;
 					} else if (($showansduring && $qi[$questions[$qn]]['showans']=='0' && $testsettings['showans']==$attempts[$qn]) ||
@@ -1982,7 +2030,8 @@ if (!isset($_REQUEST['embedpostback'])) {
 					if ($lefttodo == 0 && $testsettings['testtype']!="NoScores") {
 						echo "<a href=\"showtest.php?action=skip&amp;done=true\">", _('When you are done, click here to see a summary of your score'), "</a>\n";
 					}
-					if (!$reattemptsremain && $testsettings['showans']!='N') {// && $showeachscore) {
+					if ($testsettings['showans']!='N') {// && $showeachscore) {  //(!$reattemptsremain || $regenonreattempt) &&
+						unset($GLOBALS['nocolormark']);
 						echo "<p>", _('Question with last attempt is displayed for your review only'), "</p>";
 
 						if (!$noraw && $showeachscore) {
@@ -1995,7 +2044,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 						} else {
 							$colors = array();
 						}
-						$qshowans = ((($showansafterlast && $qi[$questions[$next]]['showans']=='0') || $qi[$questions[$next]]['showans']=='F' || $qi[$questions[$next]]['showans']=='J') ||
+						$qshowans = (((($showansafterlast && $qi[$questions[$next]]['showans']=='0') || $qi[$questions[$next]]['showans']=='F' || $qi[$questions[$next]]['showans']=='J') && !$reattemptsremain) ||
 							($showansduring && $qi[$questions[$next]]['showans']=='0' && $attempts[$next]>=$testsettings['showans']) ||
 							($qi[$questions[$next]]['showansduring'] && $attempts[$next]>=$qi[$questions[$next]]['showans']));
 						if ($qshowans) {
@@ -2182,7 +2231,6 @@ if (!isset($_REQUEST['embedpostback'])) {
 
 				//is it video question?
 				if ($testsettings['displaymethod'] == "VideoCue") {
-
 					$viddata = unserialize($testsettings['viddata']);
 
 					foreach ($viddata as $i=>$v) {
@@ -2218,8 +2266,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 						}
 					}
 				}
-
-				embedshowicon($qn);
+				if ($testsettings['displaymethod'] != "VideoCue") {
+					embedshowicon($qn);
+				}
 				if (!$sessiondata['istutorial']) {
 					echo '<div class="prequestion">';
 					$divopen = true;
@@ -2781,6 +2830,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 					echo "<p><a href=\"showtest.php?action=embeddone\">", _('When you are done, click here to see a summary of your score'), "</a></p>\n";
 				}
 				echo '</div>';
+				echo '<div><button class="hamburger" id="videocuedmenubtn" aria-label="Video Navigation Menu" aria-hidden="true" aria-expanded="false" aria-controls="videonav"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button></div>';
 				$intro = '';
 			}
 			echo '<script type="text/javascript">var assesspostbackurl="' . $GLOBALS['basesiteurl'] . '/assessment/showtest.php?embedpostback=true&action=scoreembed&page='.Sanitize::encodeUrlParam($_GET['page']).'";</script>';
@@ -2850,7 +2900,6 @@ if (!isset($_REQUEST['embedpostback'])) {
 				echo "<div class=inset>\n";
 				echo "<a name=\"beginquestions\"></a>\n";
 			} else if ($testsettings['displaymethod'] == "VideoCue") {
-				$viddata = unserialize($testsettings['viddata']);
 
 				//asychronously load YouTube API
 				//echo '<script type="text/javascript">var tag = document.createElement(\'script\');tag.src = "//www.youtube.com/player_api";var firstScriptTag = document.getElementsByTagName(\'script\')[0];firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);</script>';
@@ -2860,16 +2909,16 @@ if (!isset($_REQUEST['embedpostback'])) {
 				  //tag.src = "//www.youtube.com/iframe_api";
 				showvideoembednavbar($viddata);
 				$dovidcontrol = true;
-				echo '<div class="inset" style="position: relative; margin-left: 225px; overflow: visible;">';
+				echo '<div class="inset videocued">';
 				echo "<a name=\"beginquestions\"></a>\n";
 				echo '<div id="playerwrapper"><div id="player"></div></div>';
 				$outarr = array();
-				for ($i=1;$i<count($viddata);$i++) {
+				for ($i=0;$i<count($viddata);$i++) {
 					if (isset($viddata[$i][2])) {
 						$outarr[] = $viddata[$i][1].':{qn:'.$viddata[$i][2].'}';
 					}
 				}
-				echo '<script type="text/javascript">var thumbSet = initVideoObject("'.$viddata[0].'",{'.implode(',',$outarr).'}); </script>';
+				echo '<script type="text/javascript">var thumbSet = initVideoObject("'.$vidid.'",{'.implode(',',$outarr).'}); </script>';
 
 				$qmin = 0;
 				$qmax = count($questions);
@@ -2891,7 +2940,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 				if ($dovidcontrol) { $quesout .= ' style="position: absolute; width:100%; visibility:hidden; top:0px;left:-1000px;" ';}
 				$quesout .= '>';
 				ob_start();
-				embedshowicon($i);
+				if ($testsettings['displaymethod'] != "VideoCue") {
+					embedshowicon($i);
+				}
 				if (hasreattempts($i)) {
 
 					basicshowq($i,false);
@@ -3152,11 +3203,11 @@ if (!isset($_REQUEST['embedpostback'])) {
 		5: title for the part immediately following the Q]
 		*/
 		echo "<a href=\"#beginquestions\"><img class=skipnav src=\"$imasroot/img/blank.gif\" alt=\"", _('Skip Navigation'), "\" /></a>\n";
-		echo '<div class="navbar" style="width:175px" role="navigation" aria-label="'._("Video and question navigation").'">';
-		echo '<ul class="qlist" style="margin-left:-10px">';
+		echo '<div id="videonav" class="navbar videocued" role="navigation" aria-label="'._("Video and question navigation").'">';
+		echo '<ul class="navlist">';
 		$timetoshow = 0;
-		for ($i=1; $i<count($viddata); $i++) {
-			echo '<li style="margin-bottom:7px;">';
+		for ($i=0; $i<count($viddata); $i++) {
+			echo '<li>';
 			echo '<a href="#" onclick="thumbSet.jumpToTime('.$timetoshow.',true);return false;">'.$viddata[$i][0].'</a>';
 			if (isset($viddata[$i][2])) {
 				echo '<br/>&nbsp;&nbsp;<a style="font-size:75%;" href="#" onclick="thumbSet.jumpToQ('.$viddata[$i][1].',false);return false;">', _('Jump to Question'), '</a>';
@@ -3182,12 +3233,12 @@ if (!isset($_REQUEST['embedpostback'])) {
 
 		echo '<div class="navbar fixedonscroll" role="navigation" aria-label="'._("Page and question navigation").'">';
 		echo "<h4>", _('Pages'), "</h4>\n";
-		echo '<ul class="qlist" style="margin-left:-10px">';
+		echo '<ul class="navlist">';
 		$jsonbits = array();
 		$max = (count($pginfo)-1)/2;
 		$totposs = 0;
 		for ($i = 0; $i < $max; $i++) {
-			echo '<li style="margin-bottom:7px;">';
+			echo '<li>';
 			if ($curpg == $i) { echo "<span class=current>";}
 			if (trim($pginfo[2*$i+1])=='') {
 				$pginfo[2*$i+1] =  $i+1;

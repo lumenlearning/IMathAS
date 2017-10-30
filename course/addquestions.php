@@ -261,7 +261,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			list($itemorder, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
 			$itemorder = explode(',', $itemorder);
 
-
 			$qids = array();
 			if ($isingroup && $_POST['withdrawtype']!='full') { //is group remove
 				$qids = explode('~',$itemorder[$toremove]);
@@ -385,12 +384,12 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var addqaddr = '$address';
 		</script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=012317\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=031617\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=100517\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";
-	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=101016\" type=\"text/css\" />";
+	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=100517\" type=\"text/css\" />";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/iconfonts/style.css?v=081316\" type=\"text/css\" />";
-	$useeditor = "textsegmenteditor";
+	$useeditor = "noinit";
 
 	//DEFAULT LOAD PROCESSING GOES HERE
 	//load filter.  Need earlier than usual header.php load
@@ -545,8 +544,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 			$qsdata = array();
 			for ($j=(strpos($subs[0],'|')===false)?0:1;$j<count($subs);$j++) {
+				if (!isset($questionjsarr[$subs[$j]])) {continue;} //should never happen
 				$qsdata[] = $questionjsarr[$subs[$j]];
 			}
+			if (count($qsdata)==0) { continue; } //should never happen
 			if (strpos($subs[0],'|')===false) { //for backwards compat
 				$jsarr[] = array(1,0,$qsdata,$closegrp);
 				$qncnt++;
@@ -559,6 +560,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$qncnt += $grpparts[0];
 			}
 		} else {
+			if (!isset($questionjsarr[$items[$i]])) {continue;} //should never happen
 			$jsarr[] = $questionjsarr[$items[$i]];
 			$qncnt++;
 		}
@@ -715,6 +717,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 		if (!$beentaken) {
 			//potential questions
+			$lnamesarr = array();
 			$libsortorder = array();
 			if (substr($searchlibs,0,1)=="0") {
 				$lnamesarr[0] = "Unassigned";
@@ -1263,7 +1266,14 @@ if ($overwriteBody==1) {
 		<input type=button value="Done" title="Exit back to course page" onClick="window.location='course.php?cid=<?php echo $cid ?>'">
 		<input type=button value="Assessment Settings" title="Modify assessment settings" onClick="window.location='addassessment.php?cid=<?php echo $cid ?>&id=<?php echo $aid ?>'">
 		<input type=button value="Categorize Questions" title="Categorize questions by outcome or other groupings" onClick="window.location='categorize.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'">
-		<input type=button value="Create Print Version" onClick="window.location='printtest.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'">
+		<input type=button value="Create Print Version" onClick="window.location='<?php
+		if (isset($CFG['GEN']['pandocserver'])) {
+			echo 'printlayoutword.php?cid='.$cid.'&aid='.$aid;
+		} else {
+			echo 'printtest.php?cid='.$cid.'&aid='.$aid;
+		}
+		?>'">
+
 		<input type=button value="Define End Messages" title="Customize messages to display based on the assessment score" onClick="window.location='assessendmsg.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'">
 		<input type=button value="Preview" title="Preview this assessment" onClick="window.open('<?php echo $imasroot;?>/assessment/showtest.php?cid=<?php echo $cid ?>&id=<?php echo $aid ?>','Testing','width='+(.4*screen.width)+',height='+(.8*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(.6*screen.width-20))">
 	</p>

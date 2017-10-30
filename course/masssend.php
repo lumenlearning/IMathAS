@@ -2,7 +2,6 @@
 //IMathAS:  Mass send email or message to students; called from List Users or Gradebook
 //(c) 2006 David Lippman
 
-
 	if (!(isset($teacherid))) {
 		require("../header.php");
 		echo "You need to log in as a teacher to access this page";
@@ -57,8 +56,8 @@
 					$firstnames[$row[2]] = strip_tags($row[0]);
 					$lastnames[$row[2]] = strip_tags($row[1]);
 
-					if ($row[3]==1) {
-						$emailaddys[$row[2]] = "{$row[0]} {$row[1]} <{$row[4]}>";
+					if ($row[3]==1 && $row[4]!='' && $row[4]!='none@none.com') {
+						$emailaddys[$row[2]] = Sanitize::simpleASCII("{$row[0]} {$row[1]}"). ' <'. Sanitize::emailAddress($row[4]) .'>';
 					}
 				}
 			}
@@ -105,7 +104,8 @@
 						':senddate'=>$now, ':isread'=>$isread, ':courseid'=>$cid));
 					$msgid = $DBH->lastInsertId();
 					if (isset($emailaddys[$msgto])) {
-						mail(Sanitize::emailAddress($emailaddys[$msgto]),'New message notification',$messagep1.$msgid.$messagep2,$headers);
+						//email address is sanitized above
+						mail($emailaddys[$msgto],'New message notification',$messagep1.$msgid.$messagep2,$headers);
 					}
 				}
 			}
@@ -123,10 +123,10 @@
 					$tolist[] = $row[0];
 				}
 			}
-			$sentto = implode('<br/>',$fullnames);
+			$sentto = implode('<br/>', array_map('Sanitize::encodeStringForDisplay',$fullnames));
 			//DB $message = $_POST['message'] . addslashes("<p>Instructor note: Message sent to these students from course $coursename: <br/> $sentto </p>\n");
 			// $_POST['message'] is sanitized by htmlLawed near line 40.
-			$message = $_POST['message'] . "<p>Instructor note: Message sent to these students from course ".Sanitize::encodeStringForDisplay($coursename).": <br/> ".Sanitize::emailAddress($sentto)." </p>\n";
+			$message = $_POST['message'] . "<p>Instructor note: Message sent to these students from course ".Sanitize::encodeStringForDisplay($coursename).": <br/> ".$sentto." </p>\n";
 			if (isset($_POST['tutorcopy'])) {
 				$message .= '<p>A copy was sent to all tutors.</p>';
 				$stm = $DBH->prepare("SELECT imas_users.id FROM imas_tutors,imas_users WHERE imas_tutors.courseid=:courseid AND imas_tutors.userid=imas_users.id ");
@@ -155,20 +155,17 @@
 			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->query("SELECT FirstName,LastName,email,id FROM imas_users WHERE id IN ($tolist)");
 			$emailaddys = array();
+			$fullnames = array();
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				if (!in_array($row[3],$toignore)) {
-					$emailaddys[] = "{$row[0]} {$row[1]} <{$row[2]}>";
+				if (!in_array($row[3],$toignore) && $row[2]!='' && $row[2]!='none@none.com') {
+					$emailaddys[] = Sanitize::simpleASCII("{$row[0]} {$row[1]}"). ' <'. Sanitize::emailAddress($row[2]) .'>';
 					$firstnames[] = $row[0];
 					$lastnames[] = $row[1];
+					$fullnames[] = $row[1].', '.$row[0];
 				}
 			}
 
-			//if (isset($_POST['limit']) && $_POST['aidselect']!=0) {
-				$sentto = implode('<br/>',$emailaddys);
-			//} else {
-			//	$sentto = "All students";
-			//}
 			//DB $subject = stripslashes($_POST['subject']);
 			//DB $message = stripslashes($_POST['message']);
 			$subject = $_POST['subject']; // Sanitized by strip_tags near line 40.
@@ -186,24 +183,23 @@
 			$stm = $DBH->prepare("SELECT FirstName,LastName,email FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$userid));
 			$row = $stm->fetch(PDO::FETCH_NUM);
-			$self = "{$row[0]} {$row[1]} <{$row[2]}>";
+			$self = Sanitize::simpleASCII("{$row[0]} {$row[1]}"). ' <'. Sanitize::emailAddress($row[2]) .'>';
 			//$headers .= "From: $self\r\n";
 			$headers .= "From: $sendfrom\r\n";
-			$headers .= "Reply-To: ".Sanitize::emailAddress($self)."\r\n";
+			//$self is sanitized above
+			$headers .= "Reply-To: ".$self."\r\n";
 			$message = "<p><b>Note:</b>This email was sent by ".htmlentities($self)." from $installname. If you need to reply, make sure your reply goes to their email address.</p><p></p>".$message;
 			$teacheraddys = array();
 			if ($_POST['self']!="none") {
 				$teacheraddys[] = $self;
 			}
 			foreach ($emailaddys as $k=>$addy) {
-				$addy = trim($addy);
-				if ($addy!='' && $addy!='none@none.com') {
-					mail(Sanitize::emailAddress($addy),$subject,str_replace(array('LastName','FirstName'),array($lastnames[$k],$firstnames[$k]),$message),$headers);
-				}
+				//$addy is sanitized above
+				mail($addy,$subject,str_replace(array('LastName','FirstName'),array($lastnames[$k],$firstnames[$k]),$message),$headers);
 			}
 
-
-			$message .= "<p>Instructor note: Email sent to these students from course ".Sanitize::encodeStringForDisplay($coursename).": <br/> ".Sanitize::emailAddress($sentto)." </p>\n";
+			$sentto = implode('<br/>', array_map('Sanitize::encodeStringForDisplay',$fullnames));
+			$message .= "<p>Instructor note: Email sent to these students from course ".Sanitize::encodeStringForDisplay($coursename).": <br/> ".$sentto." </p>\n";
 			if (isset($_POST['tutorcopy'])) {
 				$message .= '<p>A copy was sent to all tutors.</p>';
 			}
@@ -219,7 +215,9 @@
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-					$teacheraddys[] = "{$row[0]} {$row[1]} <{$row[2]}>";
+					if ($row[2]!='' && $row[2]!='none@none.com') {
+						$teacheraddys[] = Sanitize::simpleASCII("{$row[0]} {$row[1]}"). ' <'. Sanitize::emailAddress($row[2]) .'>';
+					}
 				}
 				$message .= "<p>A copy was also emailed to all instructors for this course</p>\n";
 			}
@@ -229,16 +227,18 @@
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':courseid'=>$cid));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-					$teacheraddys[] = "{$row[0]} {$row[1]} <{$row[2]}>";
+					if ($row[2]!='' && $row[2]!='none@none.com') {
+						$teacheraddys[] = Sanitize::simpleASCII("{$row[0]} {$row[1]}"). ' <'. Sanitize::emailAddress($row[2]) .'>';
+					}
 				}
 			}
 			//$headers  = 'MIME-Version: 1.0' . "\r\n";
 			//$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 			//$headers .= "From: $sendfrom\r\n";
 			foreach ($teacheraddys as $addy) {
-				mail(Sanitize::emailAddress($addy),$subject,$message,$headers);
+				//$teacheraddys sanitized above
+				mail($addy,$subject,$message,$headers);
 			}
-			//mail(implode(', ',$emailaddys),$subject,$message,$headers);
 		}
 		if ($calledfrom=='lu') {
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid");

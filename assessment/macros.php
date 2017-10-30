@@ -5,7 +5,7 @@
 
 
 array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r");
-array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates");
+array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber");
 function mergearrays() {
 	$args = func_get_args();
 	foreach ($args as $k=>$arg) {
@@ -254,11 +254,17 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 		$path .= "fill=\"none\";";
 
 		if ($isxequals) { //handle x-equals case separately
+			if (isset($function[2]) && $function[2]!='') {
+				$thisymin = $function[2];
+			} else {$thisymin = $yymin; }
+			if (isset($function[3]) && $function[3]!='') {
+				$thisymax = $function[3];
+			} else {$thisymax = $yymax;}
 			$alt .= "<table class=stats><thead><tr><th>x</th><th>y</th></thead></tr><tbody>";
-			$alt .= "<tr><td>$val</td><td>$ymin</td></tr>";
-			$alt .= "<tr><td>$val</td><td>$ymax</td></tr>";
+			$alt .= "<tr><td>$val</td><td>$thisymin</td></tr>";
+			$alt .= "<tr><td>$val</td><td>$thisymax</td></tr>";
 			$alt .= '</tbody></table>';
-			$path .= "line([$val,$ymin],[$val,$ymax]);";
+			$path .= "line([$val,$thisymin],[$val,$thisymax]);";
 			$path .= "stroke=\"none\";strokedasharray=\"none\";";
 			if ($function[1]=='red' || $function[1]=='green') {
 				$path .= "fill=\"trans{$function[1]}\";";
@@ -267,10 +273,10 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			}
 			if ($isineq) {
 				if ($ineqtype{0}=='<') {
-					$path .= "rect([$xxmin,$yymin],[$val,$yymax]);";
+					$path .= "rect([$xxmin,$thisymin],[$val,$thisymax]);";
 					$alt .= "Shaded left";
 				} else {
-					$path .= "rect([$val,$yymin],[$xxmax,$yymax]);";
+					$path .= "rect([$val,$thisymin],[$xxmax,$thisymax]);";
 					$alt .= "Shaded right";
 				}
 			}
@@ -632,9 +638,21 @@ function showasciisvg($script) {
 
 function showarrays() {
 	$alist = func_get_args();
+	$format = "default";
+	$caption = "";
 	if (count($alist)<2) {return false;}
 	if (count($alist)%2==1) {
-		$format = substr($alist[count($alist)-1],0,1);
+		if (is_array($alist[count($alist)-1])) {
+		 	$opts = $alist[count($alist)-1];
+			if (isset($opts['align'])) {
+				$format = $opts['align'];
+			}
+			if (isset($opts['caption'])) {
+				$caption = $opts['caption'];
+			}
+		} else {
+			$format = substr($alist[count($alist)-1],0,1);
+		}
 	}
 	if (count($alist)<4 && is_array($alist[0])) {
 		for ($i=0;$i<count($alist[0]);$i++) {
@@ -644,10 +662,17 @@ function showarrays() {
 		$alist = $newalist;
 	}
 	$out = '<table class=stats>';
+	if ($caption != '') {
+		$out .= '<caption>'.Sanitize::encodeStringForDisplay($caption).'</caption>';
+	}
 	$hashdr = false;
+	$maxlength = 0;
 	for ($i = 0; $i<floor(count($alist)/2); $i++) {
 		if ($alist[2*$i]!='') {
-			$hashdr = true; break;
+			$hashdr = true;
+		}
+		if (count($alist[2*$i+1])>$maxlength) {
+			$maxlength = count($alist[2*$i+1]);
 		}
 	}
 	if ($hashdr) {
@@ -658,7 +683,7 @@ function showarrays() {
 		$out .= "</tr></thead>";
 	}
 	$out .= "<tbody>";
-	for ($j = 0; $j<count($alist[1]); $j++) {
+	for ($j = 0; $j<$maxlength; $j++) {
 		$out .="<tr>";
 		for ($i = 0; $i<floor(count($alist)/2); $i++) {
 			if ($format=='c' || $format=='C') {
@@ -670,7 +695,11 @@ function showarrays() {
 			} else {
 				$out .= '<td>';
 			}
-			$out .= "{$alist[2*$i+1][$j]}</td>";
+			if (isset($alist[2*$i+1][$j])) {
+				$out .= $alist[2*$i+1][$j];
+			}
+
+			$out .= "</td>";
 		}
 		$out .="</tr>";
 	}
@@ -711,11 +740,20 @@ function horizshowarrays() {
 	$alist = func_get_args();
 	if (count($alist)<2) {return false;}
 
-
-	$out = '<table class=stats>';
+	$maxlength = 0;
+	for ($i=0; $i<count($alist)/2; $i++) {
+		if (count($alist[2*$i+1])>$maxlength) {
+			$maxlength = count($alist[2*$i+1]);
+		}
+	}
+		$out = '<table class=stats>';
 	for ($i=0; $i<count($alist)/2; $i++) {
 		$out .= "<tr><th scope=\"row\"><b>{$alist[2*$i]}</b></th>";
-		$out .= "<td>" . implode("</td><td>",$alist[2*$i+1]) . "</td></tr>\n";
+		$out .= "<td>" . implode("</td><td>",$alist[2*$i+1]) . "</td>";
+		if (count($alist[2*$i+1])<$maxlength) {
+			$out .= str_repeat('<td></td>', $maxlength - count($alist[2*$i+1]));
+		}
+		$out .= "</tr>\n";
 	}
 	$out .= "</tbody></table>\n";
 	return $out;
@@ -1574,6 +1612,20 @@ function prettyint($n) {
 function prettyreal($n,$d,$comma=',') {
 	return number_format($n,$d,'.',$comma);
 }
+function prettysmallnumber($n) {
+	if (abs($n)<.01) {
+		$a = explode("E",$n);
+		if (count($a)==2) {
+			if ($n<0) {
+				$sign = '-';
+			} else {
+				$sign = '';
+			}
+			$n = $sign."0.".str_repeat("0", -$a[1]-1).str_replace('.','',abs($a[0]));
+		}
+	}
+	return $n;
+}
 
 function prettysigfig($a,$sigfig,$comma=',',$choptrailing=false) {
 	if ($a==0) { return 0;}
@@ -1902,16 +1954,23 @@ function prettytime($time,$in,$out) {
 	$min = $time/60;
 	$outst = '';
 	if (strpos($out,'clock')!==false) { //clock time
-		$ampm = ($hrs<12?"am":"pm");
 		$hrs = floor($hrs);
+		$min = floor($min -60*$hrs);
+		$sec = round($time - 60*$min - 3600*$hrs);
+		while ($hrs>24) {
+			$hrs -= 24;
+		}
+		$ampm = ($hrs<12?"am":"pm");
+		if ($hrs>=13) {
+			$hrs -= 12;
+		} else if ($hrs==0) {
+			$hrs = 12;
+		}
 		if ($out=='sclock') {
-			$min = floor($min -60*$hrs);
-			$sec = round($time - 60*$min - 3600*$hrs);
 			if ($min<10) {	$min = '0'.$min;}
 			if ($sec<10) {	$sec = '0'.$sec;}
 			$outst = "$hrs:$min:$sec $ampm";
 		} else {
-			$min = round($min -60*$hrs);
 			if ($min<10) {	$min = '0'.$min;}
 			$outst = "$hrs:$min $ampm";
 		}

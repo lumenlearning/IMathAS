@@ -99,6 +99,7 @@ function handleClickTextSegmentButton(e) {
 }
 
 function refreshTable() {
+	tinymce.remove();
 	document.getElementById("curqtbl").innerHTML = generateTable();
 	if (usingASCIIMath) {
 		rendermathnode(document.getElementById("curqtbl"));
@@ -837,7 +838,6 @@ function updateqgrpcookie() {
 function generateTable() {
 	olditemarray = itemarray;
 	itemcount = itemarray.length;
-	tinymce.editors = []; // clear any previous editors
 	var alt = 0;
 	var ln = 0;
 	var pttotal = 0;
@@ -856,7 +856,8 @@ function generateTable() {
 		html += "<th>Template</th><th>Remove</th>";
 	}
 	html += "</thead><tbody>";
-	var text_segment_count = 0; var curqnum = 0;
+	var text_segment_count = 0; var curqnum = 0; var curqitemloc = 0;
+	var badgrppoints = false; var badthisgrppoints = false; var grppoints = -1;
 	for (var i=0; i<itemcount; i++) {
 		curistext = 0;
 		curisgroup = 0;
@@ -871,9 +872,10 @@ function generateTable() {
 			var curitems = new Array();
 			curitems[0] = itemarray[i];
 		}
-		curqnum = i-text_segment_count;
+		curqitemloc = i-text_segment_count;
 		//var ms = generateMoveSelect(i,itemcount);
 		var ms = generateMoveSelect2(i);
+		grppoints = -1; badthisgrppoints = false;
 		for (var j=0; j<curitems.length; j++) {
 			if (alt == 0) {
 				curclass = 'even';
@@ -1014,12 +1016,25 @@ function generateTable() {
 				}
 				html += "<td>"+curitems[j][3]+"</td>"; //question type
 				if (curitems[j][4]==9999) { //points
-					html += "<td>"+defpoints+"</td>";
 					curpt = defpoints;
 				} else {
-					html += "<td>"+curitems[j][4]+"</td>";
 					curpt = curitems[j][4];
 				}
+				if (curisgroup) {
+					if (grppoints==-1) {
+						grppoints = curpt;
+					} else if (curpt != grppoints) {
+						badgrppoints = true;
+						badthisgrppoints = true;
+					}
+				}
+				if (badthisgrppoints) {
+					html += "<td><span class=noticehighlight>"+curpt+"</span></td>"; //points
+				} else {
+					html += "<td>"+curpt+"</td>"; //points
+				}
+
+
 				html += "<td class=c><a href=\"modquestion.php?id="+curitems[j][0]+"&aid="+curaid+"&cid="+curcid+"&loc="+(curisgroup?(curqnum+1)+'-'+(j+1):curqnum+1)+"\">Change</a></td>"; //settings
 				if (curitems[j][5]==1) {
 					html += "<td class=c><a href=\"moddataset.php?id="+curitems[j][1]+"&qid="+curitems[j][0]+"&aid="+curaid+"&cid="+curcid+"\">Edit</a></td>"; //edit
@@ -1031,7 +1046,7 @@ function generateTable() {
 					if (curitems[j][6]==1) {
 						html += "<td><span class='red'>Withdrawn</span></td>";
 					} else {
-						html += "<td><a href=\"addquestions.php?aid="+curaid+"&cid="+curcid+"&withdraw="+(curisgroup?curqnum+'-'+j:curqnum)+"\">Withdraw</a></td>";
+						html += "<td><a href=\"addquestions.php?aid="+curaid+"&cid="+curcid+"&withdraw="+(curisgroup?curqitemloc+'-'+j:curqitemloc)+"\">Withdraw</a></td>";
 					}
 				} else {
 					html += "<td class=c><a href=\"moddataset.php?id="+curitems[j][1]+"&template=true&aid="+curaid+"&cid="+curcid+"\">Template</a></td>"; //add link
@@ -1043,6 +1058,7 @@ function generateTable() {
 		}
 		if (curistext==0) {
 			pttotal += curpt*(curisgroup?itemarray[i][0]:1);
+			curqnum += curisgroup?itemarray[i][0]:1;
 		}
 		alt = 1-alt;
 	}
@@ -1060,6 +1076,9 @@ function generateTable() {
 	html += '</td><td></td><td></td></tr>';
 
 	html += "</tbody></table>";
+	if (badgrppoints) {
+		html += "<p class=noticetext>WARNING: All question in a group should be given the same point values.</p>";
+	}
 	document.getElementById("pttotal").innerHTML = pttotal;
 	return html;
 }
@@ -1140,7 +1159,7 @@ function submitChanges() {
 			status + "\n" +req.statusText+
 			"\nError: "+errorThrown
 		itemarray = olditemarray;
-		generateTable();
+		refreshTable();
 	})
 }
 
