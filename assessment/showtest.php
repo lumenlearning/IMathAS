@@ -48,23 +48,28 @@
 		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
 		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
 
+		// We can't check for student payment if we don't know which group (school) they're in.
 		if (!isset($GLOBALS['groupid']) || 1 > $GLOBALS['groupid']) {
 			throw new \OHM\StudentPaymentException(sprintf(
 				"User ID %d (%s) is not a member of a group. Unable to get student payment info.",
 				$GLOBALS['userid'], $GLOBALS['username']));
 		}
 
+		// Determine if this course requires student payment for assessments.
 		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
 		try {
-			$courseAndStudentPaymentInfo = $studentPayment->getCourseAndStudentPaymentInfo();
+			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
 		} catch (OHM\StudentPaymentException $e) {
+			// TODO: Need a pretty page for API failures. (or better behavior)
 			echo "Student payment API error. See server logs for details.";
 			error_log("Student payment API error: " . $e->getMessage());
+			error_log("Stack trace: " . $e->getTraceAsString());
 			exit;
 		}
 
-		if ($courseAndStudentPaymentInfo->getCourseRequiresStudentPayment()) {
-			if (!$courseAndStudentPaymentInfo->getStudentHasValidAccessCode()) {
+		// Student does not have an access code and is not in trial. Display payment/trial page.
+		if ($studentPayStatus->getCourseRequiresStudentPayment()) {
+			if (!$studentPayStatus->getStudentHasValidAccessCode() && !$studentPayStatus->getStudentIsInTrial()) {
 				require_once(__DIR__ . "/../ohm/fragments/assessments_payment.php");
 				exit;
 			}

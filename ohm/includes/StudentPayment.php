@@ -5,12 +5,13 @@ namespace OHM;
 require_once(__DIR__ . "/StudentPaymentApi.php");
 require_once(__DIR__ . "/StudentPaymentDb.php");
 require_once(__DIR__ . "/../models/StudentPayStatus.php");
+require_once(__DIR__ . "/../models/StudentPayApiResult.php");
 
 /**
  * Class StudentPayment - Determine if a student has a valid access code for a course.
  *
  * If cached information is available in MySQL, it will be used.
- * If not, an API call will be made to the student payment API, cached, and returned.
+ * If not, an API call will be made to the student payment API. The results will be cached in MySQL and returned.
  *
  * @package OHM
  * @see StudentPaymentApi
@@ -116,8 +117,8 @@ class StudentPayment
 
 		// Get the course status from the student payment API.
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
-		$studentPayStatus->setCourseRequiresStudentPayment($studentPayApiResult->getCourseRequiresStudentPayment());
 		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
+		$studentPayStatus->setCourseRequiresStudentPayment($studentPayApiResult->getCourseRequiresStudentPayment());
 
 		// Cache the course status. (in MySQL)
 		$this->studentPaymentDb->setCourseRequiresStudentPayment(
@@ -126,7 +127,7 @@ class StudentPayment
 		// The API returns student payment as well.
 		// Let's store that (in MySQL) to reduce the number of future API calls.
 		if ($studentPayStatus->getCourseRequiresStudentPayment()) {
-			if (StudentPayStatus::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
+			if (StudentPayApiResult::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
 				$studentPayStatus->setStudentHasValidAccessCode(true);
 			} else {
 				$studentPayStatus->setStudentHasValidAccessCode(false);
@@ -162,10 +163,19 @@ class StudentPayment
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
 		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
 
-		if (StudentPayStatus::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
+		// Set valid access code status
+		if (StudentPayApiResult::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
 			$studentPayStatus->setStudentHasValidAccessCode(true);
 		} else {
 			$studentPayStatus->setStudentHasValidAccessCode(false);
+		}
+
+		// Set trial status
+		if (StudentPayApiResult::IN_TRIAL == $studentPayApiResult->getStudentPaymentStatus()
+			|| StudentPayApiResult::TRIAL_STARTED == $studentPayApiResult->getStudentPaymentStatus()) {
+			$studentPayStatus->setStudentIsInTrial(true);
+		} else {
+			$studentPayStatus->setStudentIsInTrial(false);
 		}
 
 		// Cache the student data. (in MySQL) -- We only cache if the student has a valid access code.
@@ -189,6 +199,7 @@ class StudentPayment
 		$studentPayApiResult = $this->studentPaymentApi->activateCode($accessCode);
 
 		$studentPayStatus = new StudentPayStatus();
+		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
 		$studentPayStatus->setStudentHasValidAccessCode(
 			"ok" == $studentPayApiResult->getStudentPaymentStatus() ? true : false);
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
@@ -206,9 +217,15 @@ class StudentPayment
 		$studentPayApiResult = $this->studentPaymentApi->beginTrial();
 
 		$studentPayStatus = new StudentPayStatus();
+		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
 		$studentPayStatus->setStudentHasValidAccessCode(false);
-		$studentPayStatus->setStudentPaymentRawStatus(\OHM\StudentPayStatus::IN_TRIAL);
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
+
+		if (StudentPayApiResult::TRIAL_STARTED == $studentPayApiResult->getStudentPaymentStatus()) {
+			$studentPayStatus->setStudentIsInTrial(true);
+		} else {
+			$studentPayStatus->setStudentIsInTrial(false);
+		}
 
 		return $studentPayStatus;
 	}

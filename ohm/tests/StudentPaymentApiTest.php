@@ -4,6 +4,7 @@ namespace OHM;
 
 require_once(__DIR__ . '/../includes/StudentPaymentApi.php');
 require_once(__DIR__ . '/../models/StudentPayStatus.php');
+require_once(__DIR__ . '/../models/StudentPayApiResult.php');
 require_once(__DIR__ . "/../../ohm/mocks/PDOMock.php");
 require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
 
@@ -13,6 +14,7 @@ $GLOBALS['student_pay_api']['enabled'] = true;
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/student_auth/v1';
 $GLOBALS['student_pay_api']['timeout'] = 10;
 $GLOBALS['student_pay_api']['jwt_secret'] = 'phptest_secret_goes_here';
+$GLOBALS['student_pay_api']['debug'] = false;
 
 
 /**
@@ -29,9 +31,9 @@ final class StudentPaymentApiTest extends TestCase
 	private $pdoStatementMock;
 
 	private static $paidResponse =
-		'{"course_requires_student_payment": true, "student_status": "' . StudentPayStatus::PAID . '"}';
+		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::PAID . '"}';
 	private static $notPaidResponse =
-		'{"course_requires_student_payment": true, "student_status": "' . StudentPayStatus::NOT_PAID . '"}';
+		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::NOT_PAID . '"}';
 	private static $unexpectedResponse = 'unexpected response text';
 
 
@@ -61,7 +63,7 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
 
 		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
-		$this->assertEquals(StudentPayStatus::PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::PAID, $studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testGetActivationStatusFromApi_NotPaid()
@@ -74,7 +76,7 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
 
 		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
-		$this->assertEquals(StudentPayStatus::NOT_PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::NOT_PAID, $studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testGetActivationStatusFromApi_NoResponse()

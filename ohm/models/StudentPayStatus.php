@@ -9,14 +9,9 @@ namespace OHM;
 class StudentPayStatus
 {
 
-	const NOT_PAID = "not_paid";
-	const PAID = "paid";
-	const IN_TRIAL = "in_trial";
-	const CAN_EXTEND = "can_extend";
-	const ALL_TRIALS_EXPIRED = "expired";
-
 	private $courseRequiresStudentPayment; // boolean
 	private $studentHasValidAccessCode; // boolean
+	private $studentIsInTrial; // boolean
 	private $studentPaymentRawStatus; // string
 	private $userMessage; // string
 
@@ -37,6 +32,8 @@ class StudentPayStatus
 	}
 
 	/**
+	 * The student has a valid access code for assessments.
+	 *
 	 * @return boolean
 	 */
 	public function getStudentHasValidAccessCode()
@@ -50,6 +47,24 @@ class StudentPayStatus
 	public function setStudentHasValidAccessCode($studentHasValidAccessCode)
 	{
 		$this->studentHasValidAccessCode = $studentHasValidAccessCode;
+	}
+
+	/**
+	 * The student is currently in a trial for assessments.
+	 *
+	 * @return mixed
+	 */
+	public function getStudentIsInTrial()
+	{
+		return $this->studentIsInTrial;
+	}
+
+	/**
+	 * @param mixed $studentIsInTrial
+	 */
+	public function setStudentIsInTrial($studentIsInTrial)
+	{
+		$this->studentIsInTrial = $studentIsInTrial;
 	}
 
 	/**

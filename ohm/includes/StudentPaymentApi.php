@@ -59,6 +59,17 @@ class StudentPaymentApi
 	}
 
 	/**
+	 * Log a debugging message, if debugging for student payments is enabled.
+	 * @param $message string The debug message to log.
+	 */
+	private function debug($message)
+	{
+		if ($GLOBALS['student_pay_api']['debug']) {
+			error_log($message);
+		}
+	}
+
+	/**
 	 * Get the activation status for a student's enrollment in a course.
 	 *
 	 * @return StudentPayApiResult A StudentPayApiResult object.
@@ -71,10 +82,11 @@ class StudentPaymentApi
 		if (null == $this->curl) {
 			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
 				\Sanitize::generateQueryStringFromMap(array(
-					'group_id' => $this->groupId,
-					'course_id' => $this->courseId,
+					'institution_id' => $this->groupId,
+					'section_id' => $this->courseId,
 					'enrollment_id' => $enrollmentId
 				));
+			$this->debug("Student API URL = " . $requestUrl);
 			$this->curl = new CurlRequest($requestUrl);
 		}
 
@@ -83,25 +95,11 @@ class StudentPaymentApi
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
 		$result = $this->curl->execute();
-
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		if (0 == $status) {
-			throw new StudentPaymentException("Unable to connect to student payment API.");
-		} elseif (200 != $status) {
-			throw new StudentPaymentException("Unexpected status returned from student payment API: " . $status);
-		}
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200]);
 		$this->curl->close();
 
-		$apiResponse = json_decode($result, true);
-
-		if (null == $apiResponse) {
-			throw new StudentPaymentException("Unexpected content returned from student payment API. " . $result);
-		}
-
-		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setCourseRequiresStudentPayment($apiResponse['course_requires_student_payment']);
-		$studentPayApiResult->setStudentPaymentStatus($apiResponse['student_status']);
 		return $studentPayApiResult;
 	}
 
@@ -117,12 +115,14 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		if (null == $this->curl) {
-			$this->curl = new CurlRequest($GLOBALS['student_pay_api']['base_url'] . '/student_pay/activation_code');
+			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
+			$this->debug("Student API URL = " . $requestUrl);
+			$this->curl = new CurlRequest($requestUrl);
 		}
 
 		$requestData = array(
-			'group_id' => $this->groupId,
-			'course_id' => $this->courseId,
+			'institution_id' => $this->groupId,
+			'section_id' => $this->courseId,
 			'enrollment_id' => $enrollmentId,
 			'code' => $activationCode
 		);
@@ -136,25 +136,10 @@ class StudentPaymentApi
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
 		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
 		$result = $this->curl->execute();
-
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		if (0 == $status) {
-			throw new StudentPaymentException("Unable to connect to student payment API.");
-		} elseif (200 != $status && 204 != $status) {
-			throw new StudentPaymentException("Unexpected status returned from student payment API: " . $status);
-		}
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204]);
 		$this->curl->close();
-
-		$apiResponse = json_decode($result, true);
-
-		if (null == $apiResponse) {
-			throw new StudentPaymentException("Unexpected content returned from student payment API: " . $result);
-		}
-
-		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setStudentPaymentStatus($apiResponse['status']);
-		$studentPayApiResult->setApiUserMessage($apiResponse['message']);
 
 		return $studentPayApiResult;
 	}
@@ -170,12 +155,14 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		if (null == $this->curl) {
-			$this->curl = new CurlRequest($GLOBALS['student_pay_api']['base_url'] . '/student_pay/trial');
+			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay/trials';
+			$this->debug("Student API URL = " . $requestUrl);
+			$this->curl = new CurlRequest($requestUrl);
 		}
 
 		$requestData = array(
-			'group_id' => $this->groupId,
-			'course_id' => $this->courseId,
+			'institution_id' => $this->groupId,
+			'section_id' => $this->courseId,
 			'enrollment_id' => $enrollmentId
 		);
 
@@ -188,25 +175,61 @@ class StudentPaymentApi
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
 		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
 		$result = $this->curl->execute();
-
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		if (0 == $status) {
-			throw new StudentPaymentException("Unable to connect to student payment API.");
-		} elseif (200 != $status && 204 != $status) {
-			throw new StudentPaymentException("Unexpected status returned from student payment API: " . $status);
-		}
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204]);
 		$this->curl->close();
 
-		$apiResponse = json_decode($result, true);
+		return $studentPayApiResult;
+	}
 
+	/**
+	 * Parse a student payment API response.
+	 *
+	 * @param $status integer An HTTP status code.
+	 * @param $responseBody string The raw response body.
+	 * @param $acceptableHttpStatusList mixed An array of acceptable integer status codes.
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	private function parseApiResponse($status, $responseBody, $acceptableHttpStatusList)
+	{
+		$this->debug(sprintf("Student payment API HTTP status %d. Raw response: %s", $status, $responseBody));
+
+		$apiResponse = json_decode($responseBody, true);
+
+		if (0 == $status) {
+			// curl returns 0 on http failure
+			throw new StudentPaymentException("Unable to connect to student payment API.");
+		}
 		if (null == $apiResponse) {
-			throw new StudentPaymentException("Unexpected content returned from student payment API: " . $result);
+			// json_decode failed to find valid json content
+			throw new StudentPaymentException("Unexpected content returned from student payment API: "
+				. $responseBody);
+		}
+		if (!isset($apiResponse['status'])) {
+			// All endpoints should return a status in the json payload.
+			throw new StudentPaymentException(sprintf(
+				"Student payment API did not return a status in JSON payload. Content: %s", $status,
+				$responseBody));
+		}
+		if (!in_array($status, $acceptableHttpStatusList)) {
+			throw new StudentPaymentException(sprintf(
+				"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
+				$responseBody));
 		}
 
 		$studentPayApiResult = new StudentPayApiResult();
 		$studentPayApiResult->setStudentPaymentStatus($apiResponse['status']);
-		$studentPayApiResult->setApiUserMessage($apiResponse['message']);
+		if (isset($apiResponse['message'])) {
+			$studentPayApiResult->setApiUserMessage($apiResponse['message']);
+		}
+		if (isset($apiResponse['section_requires_student_payment'])) {
+			$studentPayApiResult->setCourseRequiresStudentPayment($apiResponse['section_requires_student_payment']);
+		}
+		if (isset($apiResponse['errors'])) {
+			$studentPayApiResult->setErrors($apiResponse['errors']);
+		}
 
 		return $studentPayApiResult;
 	}

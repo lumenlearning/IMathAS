@@ -5,9 +5,17 @@ namespace OHM;
 class StudentPayApiResult
 {
 
+	const NOT_PAID = "trial_not_started";
+	const IN_TRIAL = "in_trial";
+	const CAN_EXTEND = "can_extend";
+	const ALL_TRIALS_EXPIRED = "expired";
+	const TRIAL_STARTED = "trial_started";
+	const PAID = "paid";
+
 	private $courseRequiresStudentPayment; // boolean
 	private $studentPaymentStatus; // string (not_paid, in_trial, can_extend, etc)
 	private $apiUserMessage; // string (message to be displayed to the user)
+	private $errors; // array of strings (errors returned from the API)
 
 	/**
 	 * @return mixed
@@ -55,6 +63,22 @@ class StudentPayApiResult
 	public function setApiUserMessage($apiUserMessage)
 	{
 		$this->apiUserMessage = $apiUserMessage;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getErrors()
+	{
+		return $this->errors;
+	}
+
+	/**
+	 * @param mixed $errors
+	 */
+	public function setErrors($errors)
+	{
+		$this->errors = $errors;
 	}
 
 }

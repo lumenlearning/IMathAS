@@ -10,12 +10,12 @@ require_once(__DIR__ . "/../../header.php");
  * $courseAndStudentPaymentInfo is created in showtest.php and must contain valid data.
  */
 
-$paymentStatus = $courseAndStudentPaymentInfo->getStudentPaymentRawStatus();
+$paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
 
-$canEnterCode = array(\OHM\StudentPayStatus::NOT_PAID, \OHM\StudentPayStatus::IN_TRIAL,
-	\OHM\StudentPayStatus::CAN_EXTEND, \OHM\StudentPayStatus::ALL_TRIALS_EXPIRED);
-$canBeginTrial = array(\OHM\StudentPayStatus::NOT_PAID);
-$canExtendTrial = array(\OHM\StudentPayStatus::CAN_EXTEND);
+$canEnterCode = array(\OHM\StudentPayApiResult::NOT_PAID, \OHM\StudentPayApiResult::IN_TRIAL,
+	\OHM\StudentPayApiResult::CAN_EXTEND, \OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
+$canBeginTrial = array(\OHM\StudentPayApiResult::NOT_PAID);
+$canExtendTrial = array(\OHM\StudentPayApiResult::CAN_EXTEND);
 ?>
 
 
@@ -41,7 +41,7 @@ if (in_array($paymentStatus, $canExtendTrial)) {
 }
 if (!$validApiResponse) {
 	error_log(sprintf("Unknown response from student payment API: paymentStatus='%s'", $paymentStatus));
-    require_once(__DIR__ . "/payment_api_error.php");
+    require_once(__DIR__ . "/student_payment_error.php");
 }
 
 require_once(__DIR__ . "/../../footer.php");
