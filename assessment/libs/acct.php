@@ -291,15 +291,29 @@ function scorestatement($stua, $answer, $s, $sn) {
 		if (isset($sg['elements'])) {
 			$n = count($sg['elements'])/2;
 			$usedans = array();
-			for ($i=$sn;$i<$sn+2*$n;$i+=2) {
+			$i = $sn;
+			//for ($i=$sn;$i<$sn+2*$n;$i+=2) {
+			for ($iidx=0;$iidx<count($sg['elements']);$iidx+=2) {
+				if (isset($sg['fixed']) && in_array($iidx, $sg['fixed'])) {
+					$i += 1;
+					continue; //don't need to swap since only one answer
+				}
 				$matchtype = -1;  $matchval = -1;
-				for ($k=$sn;$k<$sn+2*$n;$k+=2) {
+				$stua[$i+1] = floatval(str_replace(array('$',',',' '), '', $stua[$i+1]));
+				//for ($k=$sn;$k<$sn+2*$n;$k+=2) {
+				$k = $sn;
+				for ($kidx=0;$kidx<count($sg['elements']);$kidx+=2) {
+					if (isset($sg['fixed']) && in_array($kidx, $sg['fixed'])) {
+						$k += 1;
+						continue; //don't need to swap since only one answer
+					}
 					if (trim(strtolower($stua[$i]))==trim(strtolower($answer[$k]))) {
 						$matchtype = $k;
 						break;
 					} else if (abs($stua[$i+1]-$answer[$k+1])<.01) {
 						$matchval = $k;
 					}
+					$k += 2;
 				}
 				if ($matchtype > -1 && !in_array($matchtype,$usedans)) {
 					$tmp = array();
@@ -325,8 +339,10 @@ function scorestatement($stua, $answer, $s, $sn) {
 						$answer[$matchval+$k] = $tmp[$k];
 					}
 				}
+				$i += 2;
 			}
-			$sn += 2*count($sg['elements'])/2;
+			//$sn += 2*count($sg['elements'])/2;
+			$sn = $i;
 		}
 		if (isset($sg['totrows'])) {
 			$sn += 2*($sg['totrows'] - $n);
@@ -429,14 +445,14 @@ function makejournal($j, $sn, $ops, &$anstypes, &$questions, &$answer, &$showans
 			$anstypes[$sn] = 'string'; $displayformat[$sn] = $disptype; $questions[$sn] = $ops; $answer[$sn] = $jd['debits'][$i]; $answerboxsize[$sn] = $maxsizedescr;
 
 			if ($jd['debits'][$i+1]=='') {
-				$anstypes[$sn+1] = 'string'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
+				$anstypes[$sn+1] = 'number'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
 				$sa .= '<td>'.$jd['debits'][$i].'</td><td class="r"></td><td></td></tr>';
 			} else {
 				$jd['debits'][$i+1] = str_replace(array('$',',',' '),'',$jd['debits'][$i+1])*1;
 				$sa .= '<td>'.$jd['debits'][$i].'</td><td class="r">'.($hasdecimals?number_format($jd['debits'][$i+1],2,'.',','):number_format($jd['debits'][$i+1])).'</td><td></td></tr>';
 				$anstypes[$sn+1] = 'number'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = $jd['debits'][$i+1]; $answerboxsize[$sn+1] = $maxsizeentry;
 			}
-			$anstypes[$sn+2] = 'string'; $displayformat[$sn+2] = 'credit'; $answer[$sn+2] = ''; $answerboxsize[$sn+2] = $maxsizeentry;
+			$anstypes[$sn+2] = 'number'; $displayformat[$sn+2] = 'credit'; $answer[$sn+2] = ''; $answerboxsize[$sn+2] = $maxsizeentry;
 
 			$sn += 3;
 		}
@@ -450,7 +466,7 @@ function makejournal($j, $sn, $ops, &$anstypes, &$questions, &$answer, &$showans
 			$sa .= '<td>&nbsp;&nbsp;&nbsp;'.$jd['credits'][$i].'</td><td></td><td class="r">'.($hasdecimals?number_format($jd['credits'][$i+1],2,'.',','):number_format($jd['credits'][$i+1])).'</td></tr>';
 			//$anstypes[$sn] = 'string'; $displayformat[$sn] = 'typeahead'; $questions[$sn] = $ops;  $answer[$sn] = $jd['credits'][$i]; $answerboxsize[$sn] = $maxsizedescr;
 			$anstypes[$sn] = 'string'; $displayformat[$sn] = $disptype; $questions[$sn] = $ops;  $answer[$sn] =$jd['credits'][$i]; $answerboxsize[$sn] = $maxsizedescr;
-			$anstypes[$sn+1] = 'string'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
+			$anstypes[$sn+1] = 'number'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
 			$anstypes[$sn+2] = 'number'; $displayformat[$sn+2] = 'credit'; $answer[$sn+2] = $jd['credits'][$i+1]; $answerboxsize[$sn+2] = $maxsizeentry;
 
 			$sn += 3;
@@ -1120,6 +1136,8 @@ function scoreTchart($stua,$answer,$numrows,$leftentries,$rightentries, $sn) {
 	$cntright = count($rightentries);
 	//change blanks to zeros
 	for ($i=0;$i<$numrows;$i++) {
+		$stua[$sn+2*$i] = str_replace(array('$',','),'',$stua[$sn+2*$i]);
+		$stua[$sn+2*$i+1] = str_replace(array('$',','),'',$stua[$sn+2*$i+1]);
 		if (trim($stua[$sn+2*$i])=='') {
 			$stua[$sn+2*$i] = 0;
 		}

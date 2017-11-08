@@ -274,7 +274,7 @@ function GB_show(caption,url,width,height) {
 	document.getElementById("GB_window").style.width = width + "px";
 	document.getElementById("GB_window").style.height = (h-30) + "px";
 	//document.getElementById("GB_window").style.left = ((w - width)/2)+"px";
-	document.getElementById("GB_frame").style.height = (h - 30 -34)+"px";
+	document.getElementById("GB_frame").style.height = (h - 30 -36)+"px";
 
 	document.getElementById("GB_window").focus();
 	$(document).on('keydown.GB', function(evt) {
@@ -328,23 +328,22 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		inline: inlinemode,
 		plugins: [
 			"lists advlist autolink attach image charmap anchor",
-			"searchreplace code link textcolor",
+			"searchreplace code link textcolor snippet",
 			"media table paste asciimath asciisvg rollups colorpicker"
 		],
 		menubar: false,//"edit insert format table tools ",
-		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | code | saveclose",
+		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
 		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg",
 		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder],param[name|value],@[sscr]',
 		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme,
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
 		file_picker_callback: filePickerCallBackFunc,
-		file_browser_types: 'file image',
+		file_picker_types: 'file image',
 		//imagetools_cors_hosts: ['s3.amazonaws.com'],
 		images_upload_url: imasroot+'/tinymce4/upload_handler.php',
 		//images_upload_credentials: true,
 		paste_data_images: true,
-		paste_webkit_styles: "color font-size text-decoration",
 		default_link_target: "_blank",
 		browser_spellcheck: true,
 		branding: false,
@@ -355,6 +354,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 			{title:"Gridded", value:"gridded"},
 			{title:"Gridded Centered", value:"gridded centered"}],
 		style_formats_merge: true,
+		snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
 		style_formats: [{
 			title: "Font Family",
 			items: [
@@ -396,9 +396,10 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 	if (setupfunction) {
 		edsetup.setup = setupfunction;
 	}
-	for (var i in tinymce.editors) {
-		tinymce.editors[i].remove();
-	}
+	//for (var i in tinymce.editors) {
+	//	tinymce.editors[i].remove();
+	//}
+	tinymce.remove();
 	tinymce.init(edsetup);
 
 };
@@ -623,7 +624,7 @@ function hidefromcourselist(el,cid,type) {
 	if (confirm("Are you SURE you want to hide this course from your course list?")) {
 		jQuery.ajax({
 				type: "GET",
-				url: imasroot+'/admin/hidefromcourselist.php?cid='+cid+'&type='+type
+				url: imasroot+'/admin/hidefromcourselist.php?tohide='+cid+'&type='+type
 		}).done(function(msg) {
 			if (msg=='OK') {
 				jQuery(el).closest("ul.courselist > li").slideUp();
@@ -672,19 +673,20 @@ jQuery(document).ready(function($) {
 	$('a[href*="vimeo"]').each(setupvideoembeds);
 	$('body').fitVids();
 });
-
-jQuery.fn.isolatedScroll = function() {
-    this.bind('mousewheel DOMMouseScroll', function (e) {
-        var delta = e.wheelDelta || (e.originalEvent && e.originalEvent.wheelDelta) || -e.detail,
-            bottomOverflow = this.scrollTop + jQuery(this).outerHeight() - this.scrollHeight >= 0,
-            topOverflow = this.scrollTop <= 0;
-
-        if ((delta < 0 && bottomOverflow) || (delta > 0 && topOverflow)) {
-            e.preventDefault();
-        }
-    });
-    return this;
-};
+jQuery(document).ready(function() {
+	jQuery.fn.isolatedScroll = function() {
+	    this.bind('mousewheel DOMMouseScroll', function (e) {
+		var delta = e.wheelDelta || (e.originalEvent && e.originalEvent.wheelDelta) || -e.detail,
+		    bottomOverflow = this.scrollTop + jQuery(this).outerHeight() - this.scrollHeight >= 0,
+		    topOverflow = this.scrollTop <= 0;
+	
+		if ((delta < 0 && bottomOverflow) || (delta > 0 && topOverflow)) {
+		    e.preventDefault();
+		}
+	    });
+	    return this;
+	};
+});
 
 jQuery(document).ready(function($) {
 	var fixedonscrollel = $('.fixedonscroll');

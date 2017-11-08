@@ -32,7 +32,7 @@ END;
 <link rel="stylesheet" href="$imasroot/course/libtree.css?v=090317" type="text/css" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript" src="$imasroot/javascript/general.js?v=031111"></script>
-<script type="text/javascript" src="$imasroot/javascript/libtree2.js?v=090317"></script>
+<script type="text/javascript" src="$imasroot/javascript/libtree2.js?v=101717"></script>
 </head>
 <body>
 <form id="libselectform">
@@ -52,8 +52,8 @@ END;
 		$qarr[':groupid'] = $groupid;
 	} else {
 		//owned, group
-		$query .= "AND (imas_libraries.ownerid=:userid OR imas_libraries.userights>2) ";
-		$query .= "OR (imas_libraries.userights>0 AND imas_libraries.userights<3 AND imas_libraries.groupid=:groupid) ";
+		$query .= "AND ((imas_libraries.ownerid=:userid OR imas_libraries.userights>2) ";
+		$query .= "OR (imas_libraries.userights>0 AND imas_libraries.userights<3 AND imas_libraries.groupid=:groupid)) ";
 		$qarr[':groupid'] = $groupid;
 		$qarr[':userid'] = $userid;
 	}
@@ -158,7 +158,8 @@ END;
 	}
 
 	function printlist($parent) {
-		global $treearr,$names,$ltlibs,$checked,$toopen, $select,$isempty,$rights,$sortorder,$ownerids,$isadmin,$selectrights,$allsrights,$published,$userid,$locked,$groupids,$groupid,$isgrpadmin,$federated;
+		global $treearr,$names,$ltlibs,$checked,$toopen, $select,$isempty,$rights,$sortorder,$ownerids,$isadmin,$selectrights,$allsrights,$published,$userid;
+		global $locked,$groupids,$groupid,$isgrpadmin,$federated,$parents;
 		$newchildren = array();
 		$arr = array();
 		if ($parent==0 && isset($published)) {
@@ -210,14 +211,16 @@ END;
 					} else {
 						$thisjson[3] = -1;
 						$thisjson[4] = 0;
-					}	
+					}
 				}
 				$thisjson[5] = $federated[$child];
-				if ($isadmin && $parent==0 && $rights[$child]<5) {
+				if ($isadmin && $parent==0 && $rights[$child]<5 && $ownerids[$child]!=$userid && ($rights[$child]==0 || $groupids[$child]!=$groupid)) {
 					if ($rights[$child]==0) {
 						$toplevelprivate[] = $thisjson;
+						$parents[$child] = -2;
 					} else {
 						$toplevelgroup[] = $thisjson;
+						$parents[$child] = -3;
 					}
 				} else {
 					$treearr[$parent][] = $thisjson;
@@ -228,10 +231,12 @@ END;
 			if (count($toplevelprivate)>0) {
 				$treearr[$parent][] = array(-2,0,_('Root Level Private Libraries'),-1,0,0);
 				$treearr[-2] = $toplevelprivate;
+				$parents[-2] = 0;
 			}
 			if (count($toplevelprivate)>0) {
 				$treearr[$parent][] = array(-3,2,_('Root Level Group Libraries'),-1,0,0);
 				$treearr[-3] = $toplevelgroup;
+				$parents[-3] = 0;
 			}
 		}
 		foreach ($newchildren as $newchild) {
@@ -285,6 +290,7 @@ END;
 				setshow($parents[$id]);
 			}
 		} else {
+			
 			if (isset($parents[$id]) && $parents[$id]!=0) {
 				setshow($parents[$id]);
 			}

@@ -43,7 +43,7 @@ initstack = new Array();
 window.onload = init;
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<link rel="stylesheet" href="<?php echo $imasroot . "/assessment/mathtest.css?ver=072617";?>" type="text/css"/>
+<link rel="stylesheet" href="<?php echo $imasroot . "/assessment/mathtest.css?ver=101817";?>" type="text/css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
@@ -71,7 +71,7 @@ if (isset($sessiondata['coursetheme'])) {
 	}
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/$coursetheme?v=042217\"/>\n";
 }
-echo '<link rel="stylesheet" href="'.$imasroot.'/handheld.css?v=042217" media="handheld,only screen and (max-width:480px)"/>';
+echo '<link rel="stylesheet" href="'.$imasroot.'/handheld.css?v=101817" media="handheld,only screen and (max-width:480px)"/>';
 if ($isdiag) {
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/diag/print.css\" media=\"print\"/>\n";
 } else {
@@ -182,12 +182,13 @@ div { zoom: 1; }
 //assessment_min.js bundles: general.js, mathjs.js, AMhelpers.js, confirmsubmit.js, drawing.js, and eqntips.js
 echo "<script type=\"text/javascript\">imasroot = '$imasroot';</script>";
 if (isset($useeditor) && $sessiondata['useed']==1) {
-	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=062917"></script>';
+	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=091717"></script>';
 	//echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=082716"></script>';
 	echo "\n";
 	echo '<script type="text/javascript">';
 	echo 'var usingTinymceEditor = true;';
 	echo 'var coursetheme = "'.$coursetheme.'";';
+	echo 'var tinymceUseSnippets = '.($myrights>10?1:0).';';
 	if (!isset($CFG['GEN']['noFileBrowser'])) {
 		echo 'var filePickerCallBackFunc = filePickerCallBack;';
 	} else {
@@ -231,8 +232,32 @@ if (isset($CFG['GEN']['translatewidgetID'])) {
 }
 if (isset($sessiondata['ltiitemtype'])) {
 	echo '<script type="text/javascript">
-	$(function(){parent.postMessage(JSON.stringify({subject:\'lti.frameResize\', height: $(document).height()+"px"}), \'*\');});
+	function sendLTIresizemsg() {
+		var default_height = Math.max(
+							document.body.scrollHeight, document.body.offsetHeight,
+							document.documentElement.clientHeight, document.documentElement.scrollHeight,
+							document.documentElement.offsetHeight)+100;
+		parent.postMessage(JSON.stringify({subject:\'lti.frameResize\', height: default_height}), \'*\');
+	}
+	if (mathRenderer == "Katex") {
+		window.katexDoneCallback = sendLTIresizemsg;
+	} else if (typeof MathJax != "undefined") {
+		MathJax.Hub.Queue(function () {
+			sendLTIresizemsg();
+		});
+	} else {
+		$(function() {
+			sendLTIresizemsg();
+		});
+	}
 	</script>';
+	if ($sessiondata['mathdisp']==1 || $sessiondata['mathdisp']==3) {
+		echo '<script type="text/x-mathjax-config">
+			MathJax.Hub.Queue(function () {
+				sendLTIresizemsg();
+			});
+		</script>';
+	}
 }
 echo '</head>';
 if ($isfw!==false) {

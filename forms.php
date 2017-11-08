@@ -1,11 +1,11 @@
 <?php
 //IMathAS:  Basic forms
 //(c) 2006 David Lippman
-require("init_without_validate.php");
-require("includes/htmlutil.php");
+
 if ($_GET['action']!="newuser" && $_GET['action']!="resetpw" && $_GET['action']!="lookupusername") {
 	require("init.php");
 } else {
+	require("init_without_validate.php");
 	if (isset($CFG['CPS']['theme'])) {
 		$defaultcoursetheme = $CFG['CPS']['theme'][0];
 	} else if (!isset($defaultcoursetheme)) {
@@ -13,6 +13,8 @@ if ($_GET['action']!="newuser" && $_GET['action']!="resetpw" && $_GET['action']!
 	}
 	$coursetheme = $defaultcoursetheme;
 }
+require("includes/htmlutil.php");
+
 if (isset($_GET['greybox'])) {
 	$gb = '&greybox=true';
 	$flexwidth = true;
@@ -176,6 +178,10 @@ switch($_GET['action']) {
 		echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><span class=formright><input type=checkbox id=msgnot name=msgnot ";
 		if ($line['msgnotify']==1) {echo "checked=1";}
 		echo " /></span><BR class=form>\n";
+		if (isset($CFG['FCM']) && isset($CFG['FCM']['webApiKey']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== false) {
+			echo '<span class=form>'._('Push notifications:').'</span><span class=formright>';
+			echo '<a href="'.$imasroot.'/admin/FCMsetup.php">'.('Setup push notifications on this device').'</a></span><br class=form>';
+		}
 
 		echo "<span class=form><label for=\"stupic\">Picture:</label></span>";
 		echo "<span class=\"formright\">";
