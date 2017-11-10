@@ -14,30 +14,38 @@ $paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
 
 $canEnterCode = array(\OHM\StudentPayApiResult::NOT_PAID, \OHM\StudentPayApiResult::IN_TRIAL,
 	\OHM\StudentPayApiResult::CAN_EXTEND, \OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
-$canBeginTrial = array(\OHM\StudentPayApiResult::NOT_PAID);
-$canExtendTrial = array(\OHM\StudentPayApiResult::CAN_EXTEND);
+$notPaid = array(\OHM\StudentPayApiResult::NOT_PAID);
+$inTrial = array(\OHM\StudentPayApiResult::IN_TRIAL);
+$extendTrial = array(\OHM\StudentPayApiResult::CAN_EXTEND);
+$trialsExpired = array(\OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
+
+$userDisplayName = explode(' ', $GLOBALS['userfullname'])[0];
+if ('' == trim($userDisplayName)) {
+    $userDisplayName = $GLOBALS['username'];
+}
 ?>
 
-
-<p>Hello, <?php echo $GLOBALS['username']; ?>!</p>
-<p>No access code was found for your account.</p>
-<br/>
-
+<div class="access-wrapper">
+<div class="access-block">
 
 <?php
 
 $validApiResponse = false;
-if (in_array($paymentStatus, $canEnterCode)) {
-    $validApiResponse = true;
-	require_once(__DIR__ . "/assessments_activate_code.php");
-}
-if (in_array($paymentStatus, $canBeginTrial)) {
+if (in_array($paymentStatus, $notPaid)) {
 	$validApiResponse = true;
 	require_once(__DIR__ . "/assessments_begin_trial.php");
 }
-if (in_array($paymentStatus, $canExtendTrial)) {
+if (in_array($paymentStatus, $inTrial)) {
+	$validApiResponse = true;
+	require_once(__DIR__ . "/assessments_in_trial.php");
+}
+if (in_array($paymentStatus, $extendTrial)) {
 	$validApiResponse = true;
 	require_once(__DIR__ . "/assessments_extend_trial.php");
+}
+if (in_array($paymentStatus, $trialsExpired)) {
+	$validApiResponse = true;
+	require_once(__DIR__ . "/assessments_trials_expired.php");
 }
 if (!$validApiResponse) {
 	error_log(sprintf("Unknown response from student payment API: paymentStatus='%s'", $paymentStatus));
@@ -47,3 +55,5 @@ if (!$validApiResponse) {
 require_once(__DIR__ . "/../../footer.php");
 ?>
 
+</div><!-- end .access-block -->
+</div><!-- end .access-wrapper -->

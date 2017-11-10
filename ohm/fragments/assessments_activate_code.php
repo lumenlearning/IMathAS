@@ -8,8 +8,9 @@
     <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::encodeStringForDisplay($_REQUEST['cid']); ?>"/>
     <input type="hidden" name="assessment_id" value="<?php echo Sanitize::encodeStringForDisplay($_REQUEST['id']); ?>"/>
-    Access code:
-    <input type="text" name="access_code" placeholder="Enter access code"/>
-    <input type="submit" value="Activate"/>
+    <div class="access_code_input_wrapper">
+      <label for="access_code">Already have an access code?</label>
+      <input type="text" name="access_code" id="access_code" placeholder="ENTER CODE"/>
+      <button type="submit" id="access_code_submit">Activate</button>
+    </div>
 </form>
-
