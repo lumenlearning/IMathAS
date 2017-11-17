@@ -4,6 +4,10 @@
  */
 ?>
 
+<?php
+$bookstore_url = "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1";
+?>
+
 <h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, you have <span class="emphasis"># of days</span> remaining in your trial!</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
@@ -12,7 +16,7 @@
 <p class="blurb">
   Before your trial access expires, you should purchase a permanent access code
 	from your campus bookstore. You can purchase one at your campus bookstore
-	(ask for [access code name]) or on the bookstore website[URL].
+	(ask for <span class="emphasis">OHM Platform Access Code</span>) or on the <a href="<?php echo $bookstore_url; ?>">bookstore website</a>.
 </p>
 
 <?php
@@ -24,6 +28,6 @@ if (in_array($paymentStatus, $canEnterCode)) {
 
 <div class="trial_button_wrapper">
   <p>
-    <a href="#">Continue to assessment</a>
+    <a onClick="goBack()">Continue to assessment</a>
   </p>
 </div>

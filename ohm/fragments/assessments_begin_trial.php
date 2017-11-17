@@ -40,6 +40,6 @@ if (in_array($paymentStatus, $canEnterCode)) {
   </form>
   <br/>
   <p>
-    <a href="#">I'll start my trial later</a>
+    <a onClick="goBack()">I'll start my trial later</a>
   </p>
 </div>

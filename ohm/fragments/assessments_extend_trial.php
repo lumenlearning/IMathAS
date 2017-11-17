@@ -11,8 +11,7 @@
 </div>
 <p class="blurb">
   You need to enter an access code to take the rest of your OHM assessments and
-  complete this course. [Bookstore instructions] Ask for:
-  [course name](Waymaker Bundle) / or OHM Platform Access Code.
+  complete this course. Ask for: <span class="emphasis">OHM Platform Access Code</span>.
 </p>
 
 <?php
@@ -39,6 +38,6 @@ if (in_array($paymentStatus, $canEnterCode)) {
   </form>
   <br/>
   <p>
-    <a href="#">Exit to save my pass for later</a>
+    <a onClick="goBack()">Exit to save my pass for later</a>
   </p>
 </div>

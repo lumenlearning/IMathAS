@@ -888,6 +888,9 @@ div#guides-button-container {
 	flex-direction: column;
 	padding: 2em 0 0;
 }
+.trial_button_wrapper a {
+	cursor: pointer;
+}
 input#access_code {
 	border: 1px solid #ccc;
 	box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);

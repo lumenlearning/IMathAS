@@ -1,4 +1,7 @@
 <?php
+
+$placeinhead = '<script type="text/javascript">function goBack(){window.history.back();}</script>';
+
 require_once(__DIR__ . "/../models/StudentPayStatus.php");
 
 require_once(__DIR__ . "/../../init.php");
