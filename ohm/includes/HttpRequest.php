@@ -4,7 +4,11 @@ namespace OHM;
 
 interface HttpRequest
 {
-	public function __construct($url);
+	public function __construct();
+
+	public function reset();
+
+	public function setUrl($url);
 
 	public function setOption($name, $value);
 

@@ -45,7 +45,17 @@ def update_payment_settings():
     print("\nRequest data: " + request.data)
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
-        "section_id": 42,
+        "status": "ok",
+    }
+    return json.dumps(result)
+
+
+@app.route("/enrollment_events", methods=['POST'])
+def update_payment_settings():
+    print("\nRequest data: " + request.data)
+    print("Authorization: " + request.headers.get('Authorization'))
+    result = {
+        "status": "ok",
     }
     return json.dumps(result)
 

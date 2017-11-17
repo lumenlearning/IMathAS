@@ -16,18 +16,19 @@ require_once(__DIR__ . "/includes/StudentPaymentApi.php");
  * 3. On failure: Display a useful message to the user with a link back to the assessment.
  */
 
-$action = Sanitize::simpleString($_POST['action']);
-$groupId = Sanitize::onlyInt($_POST['group_id']);
-$courseId = Sanitize::courseId($_POST['course_id']);
-$assessmentId = Sanitize::onlyInt($_POST['assessment_id']);
+$action = Sanitize::simpleString($_REQUEST['action']);
+$groupId = Sanitize::onlyInt($_REQUEST['group_id']);
+$courseId = Sanitize::courseId($_REQUEST['course_id']);
+$assessmentId = Sanitize::onlyInt($_REQUEST['assessment_id']);
 
-$validActions = array('activate_code', 'begin_trial', 'extend_trial');
+$validActions = array('activate_code', 'begin_trial', 'extend_trial', 'decline_trial');
 
 if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($assessmentId)) {
 	header("Location: " . $GLOBALS['basesiteurl']);
 	exit;
 }
 
+$courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
 		$assessmentId, $courseId); // used by fragments/student_payment_error.php
 
@@ -93,13 +94,6 @@ if ("begin_trial" == $action) {
 	}
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
-		try {
-			$studentPayment->logBeginTrial();
-		} catch (\OHM\StudentPaymentException $e) {
-			// We don't want to block the user due to a metrics-related failure.
-			error_log("Failed to log event for student beginning an assessment trial. " . $e->getMessage());
-			error_log($e->getTraceAsString());
-		}
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
@@ -142,6 +136,20 @@ if ("extend_trial" == $action) {
 	}
 }
 
+if ("decline_trial" == $action) {
+	$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
+	$studentPayStatus = null;
 
+	try {
+		$studentPayStatus = $studentPayment->logDeclineTrial();
+	} catch (\OHM\StudentPaymentException $e) {
+		// Don't block the user due to a metrics-related failure.
+		error_log("Failed to log event for student declining an assessment trial. " . $e->getMessage());
+		error_log($e->getTraceAsString());
+	}
+
+	header("Location: " . $courseUrl);
+	exit;
+}
 
 

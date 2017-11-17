@@ -34,32 +34,24 @@ class StudentPaymentApi
 	 * @param $groupId integer The student's group ID. (MySQL imas_groups. ID column)
 	 * @param $courseId integer The course ID. (MySQM imas_courses, ID column)
 	 * @param $studentId integer The student's user ID. (MySQL imas_users table, ID column)
+	 * @param $curl HttpRequest An implementation of HttpRequest. (optional; for unit testing)
+	 * @param $studentPaymentDb StudentPaymentDb An implementation of StudentPaymentDb. (optional; for unit testing)
 	 */
-	public function __construct($groupId, $courseId, $studentId)
+	public function __construct($groupId, $courseId, $studentId, $curl = null, $studentPaymentDb = null)
 	{
 		$this->groupId = $groupId;
 		$this->courseId = $courseId;
 		$this->studentId = $studentId;
-
-		$this->studentPaymentDb = new StudentPaymentDb($groupId, $courseId, $studentId);
-	}
-
-	/**
-	 * Curl object setter. Used during testing.
-	 * @param $curlHandle object The curl object to use for HTTP requests.
-	 */
-	public function setCurl($curlHandle)
-	{
-		$this->curl = $curlHandle;
-	}
-
-	/**
-	 * StudentPaymentDb object setter. Used during testing.
-	 * @param object $studentPaymentDb The StudentPaymentDb object to use for DB operations.
-	 */
-	public function setStudentPaymentDb($studentPaymentDb)
-	{
+		$this->curl = $curl;
 		$this->studentPaymentDb = $studentPaymentDb;
+
+		if (null == $curl) {
+			$this->curl = new CurlRequest();
+		}
+
+		if (null == $studentPaymentDb) {
+			$this->studentPaymentDb = new StudentPaymentDb($groupId, $courseId, $studentId);
+		}
 	}
 
 	/**
@@ -81,18 +73,18 @@ class StudentPaymentApi
 	 */
 	public function getActivationStatusFromApi()
 	{
+		$this->curl->reset();
+
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
-		if (null == $this->curl) {
-			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
-				\Sanitize::generateQueryStringFromMap(array(
-					'institution_id' => $this->groupId,
-					'section_id' => $this->courseId,
-					'enrollment_id' => $enrollmentId
-				));
-			$this->debug("Student API URL = " . $requestUrl);
-			$this->curl = new CurlRequest($requestUrl);
-		}
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
+			\Sanitize::generateQueryStringFromMap(array(
+				'institution_id' => $this->groupId,
+				'section_id' => $this->courseId,
+				'enrollment_id' => $enrollmentId
+			));
+		$this->debug("Student API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
 
 		$headers = array('Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret']);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
@@ -116,13 +108,13 @@ class StudentPaymentApi
 	 */
 	public function activateCode($activationCode)
 	{
+		$this->curl->reset();
+
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
-		if (null == $this->curl) {
-			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
-			$this->debug("Student API URL = " . $requestUrl);
-			$this->curl = new CurlRequest($requestUrl);
-		}
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
+		$this->debug("Student API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
 
 		$requestData = array(
 			'institution_id' => $this->groupId,
@@ -156,13 +148,13 @@ class StudentPaymentApi
 	 */
 	public function beginTrial()
 	{
+		$this->curl->reset();
+
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
-		if (null == $this->curl) {
-			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay/trials';
-			$this->debug("Student API URL = " . $requestUrl);
-			$this->curl = new CurlRequest($requestUrl);
-		}
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay/trials';
+		$this->debug("Student API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
 
 		$requestData = array(
 			'institution_id' => $this->groupId,
@@ -188,23 +180,64 @@ class StudentPaymentApi
 	}
 
 	/**
-	 * Notify the student payment API that a student has started a trial. This is for metrics.
+	 * Notify the student payment API that a student has started an assessment while under trial.
+	 * This is for metrics.
 	 *
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.
 	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
-	public function logBeginTrial()
+	public function logBeginAssessmentDuringTrial()
 	{
+		$this->curl->reset();
+
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
-		if (null == $this->curl) {
-			$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/enrollment_events';
-			$this->debug("Student API URL = " . $requestUrl);
-			$this->curl = new CurlRequest($requestUrl);
-		}
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/enrollment_events';
+		$this->debug("Student API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
 
 		$requestData = array(
 			'event_type' => 'free_quiz_started',
+			'institution_id' => $this->groupId,
+			'section_id' => $this->courseId,
+			'enrollment_id' => $enrollmentId
+		);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Content-Type: application/json',
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
+	/**
+	 * Notify the student payment API that a student has declined a trial. This is for metrics.
+	 *
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function logDeclineTrial()
+	{
+		$this->curl->reset();
+
+		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/enrollment_events';
+		$this->debug("Student API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$requestData = array(
+			'event_type' => 'refused_trial_start',
 			'institution_id' => $this->groupId,
 			'section_id' => $this->courseId,
 			'enrollment_id' => $enrollmentId
