@@ -239,5 +239,22 @@ class StudentPayment
 	{
 		return $this->beginTrial();
 	}
+
+	/**
+	 * Record the fact that the user has started an assessments trial. This is for metrics.
+	 *
+	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 */
+	public function logBeginTrial()
+	{
+		$studentPayApiResult = $this->studentPaymentApi->logBeginTrial();
+
+		$studentPayStatus = new StudentPayStatus();
+		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
+		$studentPayStatus->setStudentHasValidAccessCode(false);
+		$studentPayStatus->setStudentIsInTrial(true);
+
+		return $studentPayStatus;
+	}
 }
 

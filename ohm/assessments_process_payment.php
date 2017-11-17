@@ -1,8 +1,9 @@
 <?php
 
-require_once(__DIR__ . "/includes/StudentPayment.php");
-
 require_once(__DIR__ . "/../init.php");
+
+require_once(__DIR__ . "/includes/StudentPayment.php");
+require_once(__DIR__ . "/includes/StudentPaymentApi.php");
 
 /**
  * This file is only accessed on form submission when a student enters an access code,
@@ -27,8 +28,6 @@ if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($as
 	exit;
 }
 
-$accessCodeMinLength = $GLOBALS['student_pay_api']['access_code_min_length'];
-$accessCodeMaxLength = $GLOBALS['student_pay_api']['access_code_max_length'];
 $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
 		$assessmentId, $courseId); // used by fragments/student_payment_error.php
 
@@ -36,7 +35,7 @@ $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=
 if ("activate_code" == $action) {
 	$accessCode = trim($_POST['access_code']);
 
-	$validationError = validateAccessCodeStructure($accessCode);
+	$validationError = \OHM\StudentPaymentApi::validateAccessCodeStructure($accessCode);
 	if (null != $validationError) {
 		$studentPayUserMessage = $validationError; // used by fragments/student_payment_error.php
 		require_once(__DIR__ . "/../header.php");
@@ -94,6 +93,13 @@ if ("begin_trial" == $action) {
 	}
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
+		try {
+			$studentPayment->logBeginTrial();
+		} catch (\OHM\StudentPaymentException $e) {
+			// We don't want to block the user due to a metrics-related failure.
+			error_log("Failed to log event for student beginning an assessment trial. " . $e->getMessage());
+			error_log($e->getTraceAsString());
+		}
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
@@ -137,25 +143,5 @@ if ("extend_trial" == $action) {
 }
 
 
-/**
- * Determine if an access code is well formed.
- *
- * @param $code string A valid assessment access code.
- * @return string Null on validation success. Error message on validation failure.
- */
-function validateAccessCodeStructure($code)
-{
-	$sanitizedCode = preg_replace("/[^234679acdefghjkmnpqrtwxyz]/i", "", $code);
-	if ($sanitizedCode != $code) {
-		return "Invalid characters found in access code. Please check your access code and try again.";
-	}
 
-	if ($GLOBALS['accessCodeMinLength'] > strlen($sanitizedCode)
-		|| $GLOBALS['accessCodeMaxLength'] < strlen($sanitizedCode)) {
-		return sprintf("Access code must be between %d and %d characters.", $GLOBALS['accessCodeMinLength'],
-			$GLOBALS['accessCodeMaxLength']);
-	}
-
-	return null;
-}
 

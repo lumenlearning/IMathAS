@@ -7,7 +7,9 @@ require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 /**
  * Class StudentPaymentDb - Database operations related to student payment for assessments.
  *
- * This class is typically not used directly. (@see StudentPayment)
+ * In most cases, this class not used directly. The StudentPayment is usually used instead.
+ *
+ * @see StudentPayment
  *
  * @package OHM
  */
