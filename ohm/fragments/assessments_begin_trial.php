@@ -2,9 +2,7 @@
 /**
  * This file is included from fragments/assessments_payment.php.
  */
-?>
 
-<?php
 $assess_name_stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id AND courseid=:courseid LIMIT 1");
 $assess_name_stm->execute(array(':id'=>Sanitize::onlyInt($_REQUEST['id']), ':courseid'=>$cid));
 $assessmentName = $assess_name_stm->fetchColumn(0);
@@ -34,8 +32,8 @@ if (in_array($paymentStatus, $canEnterCode)) {
   <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments_process_payment.php">
       <input type="hidden" name="action" value="begin_trial"/>
       <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
-      <input type="hidden" name="course_id" value="<?php echo Sanitize::encodeStringForDisplay($_REQUEST['cid']); ?>"/>
-      <input type="hidden" name="assessment_id" value="<?php echo Sanitize::encodeStringForDisplay($_REQUEST['id']); ?>"/>
+      <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($_REQUEST['cid']); ?>"/>
+      <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($_REQUEST['id']); ?>"/>
       <button id="begin_trial" type="submit">Begin Trial (<?php echo $GLOBALS['student_pay_api']['trial_period_human']; ?>)</button>
   </form>
   <br/>

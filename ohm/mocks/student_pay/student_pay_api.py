@@ -51,7 +51,7 @@ def update_payment_settings():
 
 
 @app.route("/enrollment_events", methods=['POST'])
-def update_payment_settings():
+def enrollment_events():
     print("\nRequest data: " + request.data)
     print("Authorization: " + request.headers.get('Authorization'))
     result = {

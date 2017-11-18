@@ -48,7 +48,8 @@
 		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
 		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
 
-		// We can't check for student payment if we don't know which group (school) they're in.
+
+		// We need the student's group ID before we can check for student payment.
 		if (!isset($GLOBALS['groupid']) || 1 > $GLOBALS['groupid']) {
 			throw new \OHM\StudentPaymentException(sprintf(
 				"User ID %d (%s) is not a member of a group. Unable to get student payment info.",
@@ -61,7 +62,7 @@
 			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
 		} catch (OHM\StudentPaymentException $e) {
 			// TODO: Need a pretty page for API failures. (or better behavior)
-			echo "Student payment API error. See server logs for details.";
+			echo "Access code API error. See server logs for details.";
 			error_log("Student payment API error: " . $e->getMessage());
 			error_log("Stack trace: " . $e->getTraceAsString());
 			exit;
