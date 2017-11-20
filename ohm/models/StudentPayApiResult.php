@@ -19,7 +19,7 @@ class StudentPayApiResult
 	private $errors; // array of strings (errors returned from the API)
 
 	/**
-	 * @return mixed
+	 * @return boolean
 	 */
 	public function getCourseRequiresStudentPayment()
 	{
@@ -27,7 +27,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @param mixed $courseRequiresStudentPayment
+	 * @param boolean $courseRequiresStudentPayment
 	 */
 	public function setCourseRequiresStudentPayment($courseRequiresStudentPayment)
 	{
@@ -35,7 +35,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getStudentPaymentStatus()
 	{
@@ -43,7 +43,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @param mixed $studentPaymentStatus
+	 * @param string $studentPaymentStatus
 	 */
 	public function setStudentPaymentStatus($studentPaymentStatus)
 	{
@@ -51,7 +51,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @return mixed
+	 * @return integer
 	 */
 	public function getTrialExpiresInSeconds()
 	{
@@ -59,7 +59,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @param mixed $trialExpiresInSeconds
+	 * @param integer $trialExpiresInSeconds
 	 */
 	public function setTrialExpiresInSeconds($trialExpiresInSeconds)
 	{
@@ -67,7 +67,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getApiUserMessage()
 	{
@@ -75,7 +75,7 @@ class StudentPayApiResult
 	}
 
 	/**
-	 * @param mixed $apiUserMessage
+	 * @param string $apiUserMessage
 	 */
 	public function setApiUserMessage($apiUserMessage)
 	{

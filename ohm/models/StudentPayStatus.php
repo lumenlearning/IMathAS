@@ -53,7 +53,7 @@ class StudentPayStatus
 	/**
 	 * The student is currently in a trial for assessments.
 	 *
-	 * @return mixed
+	 * @return boolean
 	 */
 	public function getStudentIsInTrial()
 	{
@@ -61,7 +61,7 @@ class StudentPayStatus
 	}
 
 	/**
-	 * @param mixed $studentIsInTrial
+	 * @param boolean $studentIsInTrial
 	 */
 	public function setStudentIsInTrial($studentIsInTrial)
 	{
@@ -69,7 +69,7 @@ class StudentPayStatus
 	}
 
 	/**
-	 * @return mixed
+	 * @return integer
 	 */
 	public function getStudentTrialTimeRemainingSeconds()
 	{
@@ -77,7 +77,7 @@ class StudentPayStatus
 	}
 
 	/**
-	 * @param mixed $studentTrialTimeRemainingSeconds If the student is currently in a trial.
+	 * @param integer $studentTrialTimeRemainingSeconds If the student is currently in a trial.
 	 */
 	public function setStudentTrialTimeRemainingSeconds($studentTrialTimeRemainingSeconds)
 	{
@@ -105,7 +105,7 @@ class StudentPayStatus
 	/**
 	 * A message to be displayed to the user, as returned from the student payment API.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public function getUserMessage()
 	{
@@ -113,7 +113,7 @@ class StudentPayStatus
 	}
 
 	/**
-	 * @param mixed $userMessage
+	 * @param string $userMessage
 	 */
 	public function setUserMessage($userMessage)
 	{
