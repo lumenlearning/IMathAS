@@ -7,10 +7,10 @@
 <?php
 $assess_name_stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id AND courseid=:courseid LIMIT 1");
 $assess_name_stm->execute(array(':id'=>Sanitize::onlyInt($_REQUEST['id']), ':courseid'=>$cid));
-$assessment_name = $assess_name_stm->fetchColumn(0);
+$assessmentName = $assess_name_stm->fetchColumn(0);
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, are you ready to start working on <span class="emphasis"><?php echo $assessment_name; ?></span>?</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, are you ready to start working on <span class="emphasis"><?php echo $assessmentName; ?></span>?</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
 	<h2 id="subhead">You need to purchase access</h2>
