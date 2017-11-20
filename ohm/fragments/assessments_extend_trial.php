@@ -37,7 +37,5 @@ if (in_array($paymentStatus, $canEnterCode)) {
       <button id="begin_trial" type="submit" value="Extend Trial">Use my free 24 hour pass</button>
   </form>
   <br/>
-  <p>
-    <a onClick="goBack()">Exit to save my pass for later</a>
-  </p>
+  <a onClick="goBack()">Exit to save my pass for later</a>
 </div>

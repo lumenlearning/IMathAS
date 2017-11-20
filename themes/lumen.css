@@ -881,12 +881,16 @@ div#guides-button-container {
 	margin-right: 10px;
 	text-transform: uppercase;
 }
+.access-block #error-text {
+	text-align: center;
+}
 .trial_button_wrapper {
 	align-items: center;
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
 	padding: 2em 0 0;
+	text-decoration: underline;
 }
 .trial_button_wrapper a {
 	cursor: pointer;
