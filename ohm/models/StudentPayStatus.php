@@ -12,6 +12,7 @@ class StudentPayStatus
 	private $courseRequiresStudentPayment; // boolean
 	private $studentHasValidAccessCode; // boolean
 	private $studentIsInTrial; // boolean
+	private $studentTrialTimeRemainingSeconds; // integer
 	private $studentPaymentRawStatus; // string
 	private $userMessage; // string
 
@@ -65,6 +66,22 @@ class StudentPayStatus
 	public function setStudentIsInTrial($studentIsInTrial)
 	{
 		$this->studentIsInTrial = $studentIsInTrial;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getStudentTrialTimeRemainingSeconds()
+	{
+		return $this->studentTrialTimeRemainingSeconds;
+	}
+
+	/**
+	 * @param mixed $studentTrialTimeRemainingSeconds If the student is currently in a trial.
+	 */
+	public function setStudentTrialTimeRemainingSeconds($studentTrialTimeRemainingSeconds)
+	{
+		$this->studentTrialTimeRemainingSeconds = $studentTrialTimeRemainingSeconds;
 	}
 
 	/**

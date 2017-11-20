@@ -146,6 +146,10 @@ class StudentPayment
 	 * Determine if a student has a valid access code. This will attempt to get data from MySQL
 	 * before hitting the student payment API.
 	 *
+	 * Note: A student's access code status is only stored in the database if they have a valid
+	 * access code. For "in trial" status, we always need to hit the API to get their remaining
+	 * trial time.
+	 *
 	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
 	 * @return mixed $studentPayStatus The same StudentPayStatus object with updated data.
 	 */
@@ -174,6 +178,7 @@ class StudentPayment
 		if (StudentPayApiResult::IN_TRIAL == $studentPayApiResult->getStudentPaymentStatus()
 			|| StudentPayApiResult::TRIAL_STARTED == $studentPayApiResult->getStudentPaymentStatus()) {
 			$studentPayStatus->setStudentIsInTrial(true);
+			$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 		} else {
 			$studentPayStatus->setStudentIsInTrial(false);
 		}

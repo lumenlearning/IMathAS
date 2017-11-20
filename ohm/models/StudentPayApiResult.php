@@ -14,6 +14,7 @@ class StudentPayApiResult
 
 	private $courseRequiresStudentPayment; // boolean
 	private $studentPaymentStatus; // string (not_paid, in_trial, can_extend, etc)
+	private $trialExpiresInSeconds; // integer
 	private $apiUserMessage; // string (message to be displayed to the user)
 	private $errors; // array of strings (errors returned from the API)
 
@@ -47,6 +48,22 @@ class StudentPayApiResult
 	public function setStudentPaymentStatus($studentPaymentStatus)
 	{
 		$this->studentPaymentStatus = $studentPaymentStatus;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getTrialExpiresInSeconds()
+	{
+		return $this->trialExpiresInSeconds;
+	}
+
+	/**
+	 * @param mixed $trialExpiresInSeconds
+	 */
+	public function setTrialExpiresInSeconds($trialExpiresInSeconds)
+	{
+		$this->trialExpiresInSeconds = $trialExpiresInSeconds;
 	}
 
 	/**

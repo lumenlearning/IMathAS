@@ -2,6 +2,9 @@
 /**
  * This file is included from fragments/assessments_payment.php.
  */
+
+$trialTimeRemaining = gmdate("z days, H hours, i minutes",
+    $studentPayStatus->getStudentTrialTimeRemainingSeconds());
 ?>
 
 <?php

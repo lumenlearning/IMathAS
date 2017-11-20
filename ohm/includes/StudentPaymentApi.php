@@ -301,6 +301,9 @@ class StudentPaymentApi
 		if (isset($apiResponse['message'])) {
 			$studentPayApiResult->setApiUserMessage($apiResponse['message']);
 		}
+		if (isset($apiResponse['trial_expired_in'])) {
+			$studentPayApiResult->setTrialExpiresInSeconds($apiResponse['trial_expired_in']);
+		}
 		if (isset($apiResponse['section_requires_student_payment'])) {
 			$studentPayApiResult->setCourseRequiresStudentPayment($apiResponse['section_requires_student_payment']);
 		}
