@@ -24,6 +24,8 @@ if (in_array($paymentStatus, $canEnterCode)) {
 
 <div class="trial_button_wrapper">
   <p>
-    To exit, use your browser’s "back" button
+    <a onClick="goBack()">
+			Go Back
+		</a>
   </p>
 </div>
