@@ -3,13 +3,9 @@
  * This file is included from fragments/assessments_payment.php.
  */
 
+$bookstoreUrl = "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1";
 $trialTimeRemaining = gmdate("z days, H hours, i minutes",
     $studentPayStatus->getStudentTrialTimeRemainingSeconds());
-?>
-
-<?php
-$bookstoreUrl = "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1";
-$trialTimeRemaining = "14 days, 3 hours, 12 minutes";
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, you have <span class="emphasis"><?php echo $trialTimeRemaining; ?></span> remaining in your trial!</h1>
