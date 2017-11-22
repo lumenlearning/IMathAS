@@ -4,8 +4,11 @@
  */
 
 $bookstoreUrl = "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1";
-$trialTimeRemaining = gmdate("z days, H hours, i minutes",
-    $studentPayStatus->getStudentTrialTimeRemainingSeconds());
+
+$trialDays = gmdate("z", $studentPayStatus->getStudentTrialTimeRemainingSeconds());
+$trialHours = gmdate("H", $studentPayStatus->getStudentTrialTimeRemainingSeconds());
+$trialMins = gmdate("i minutes", $studentPayStatus->getStudentTrialTimeRemainingSeconds());
+$trialTimeRemaining = sprintf("%d days, %d hours, %d minutes", $trialDays, $trialHours, $trialMins);
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, you have <span class="emphasis"><?php echo $trialTimeRemaining; ?></span> remaining in your trial!</h1>

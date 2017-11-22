@@ -44,35 +44,37 @@
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	if (20 > $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+
+	// The business decision is to allow students through to assessments if we encounter any
+	// problems checking access codes. This includes failure to interact with the payment API.
+
+	if (isStudentPayEnabled() && !haveGroupId()) {
+		// We need the student's group ID before we can check a student's access code status.
+		error_log(sprintf(
+			"User ID %d (%s) is not a member of a group. Unable to get student access code status.",
+			$GLOBALS['userid'], $GLOBALS['username']));
+	}
+
+	if (isStudentPayEnabled() && haveGroupId()) {
 		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
 		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
 
-
-		// We need the student's group ID before we can check for student payment.
-		if (!isset($GLOBALS['groupid']) || 1 > $GLOBALS['groupid']) {
-			throw new \OHM\StudentPaymentException(sprintf(
-				"User ID %d (%s) is not a member of a group. Unable to get student payment info.",
-				$GLOBALS['userid'], $GLOBALS['username']));
-		}
-
-		// Determine if this course requires student payment for assessments.
 		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
+		$studentPayStatus = null;
 		try {
 			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
 		} catch (OHM\StudentPaymentException $e) {
-			// TODO: Need a pretty page for API failures. (or better behavior)
-			echo "Access code API error. See server logs for details.";
+			// See notes above re: business decisions
 			error_log("Student payment API error: " . $e->getMessage());
 			error_log("Stack trace: " . $e->getTraceAsString());
-			exit;
 		}
 
-		// Student does not have an access code and is not in trial. Display payment/trial page.
-		if ($studentPayStatus->getCourseRequiresStudentPayment()) {
-			if (!$studentPayStatus->getStudentHasValidAccessCode() && !$studentPayStatus->getStudentIsInTrial()) {
+		if (null != $studentPayStatus) {
+			$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
+			$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
+
+			if ($courseRequiresPayment && !$studentHasAccessCode) {
 				require_once(__DIR__ . "/../ohm/fragments/assessments_payment.php");
-				exit;
 			}
 		}
 	}
@@ -3762,4 +3764,43 @@ if (!isset($_REQUEST['embedpostback'])) {
 			echo "<a href=\"../course/course.php?cid={$testsettings['courseid']}\">", _('Return to Course Page'), "</a></p>\n";
 		}
 	}
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	/**
+	 * Determine if student payment status should be checked for assessments.
+	 *
+	 * @return boolean True if yes, False if no.
+	 */
+	function isStudentPayEnabled()
+	{
+		// 20 = student
+		if (20 > $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine if we have a valid group ID for a user. If not, log details and return false.
+	 *
+	 * @return boolean True if yes, False if no.
+	 */
+	function haveGroupId()
+	{
+		if (isset($GLOBALS['groupid']) && 1 <= $GLOBALS['groupid']) {
+			return true;
+		}
+
+		return false;
+	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 ?>

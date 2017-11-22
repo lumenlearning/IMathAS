@@ -15,7 +15,7 @@ def get_payment_status():
     result = {
         "status": "in_trial",
         "section_requires_student_payment": True,
-        "trial_expired_in": 86400
+        "trial_expired_in": 1024567
     }
     return json.dumps(result)
 
