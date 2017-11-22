@@ -10,3 +10,4 @@ namespace OHM;
 class StudentPaymentException extends \Exception
 {
 }
+
