@@ -1,9 +1,9 @@
 <?php
 /**
- * This file is included from fragments/assessments_payment.php.
+ * This file is included from fragments/activation.php.
  */
 ?>
-<form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments_process_payment.php">
+<form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments/process_activation.php">
     <input type="hidden" name="action" value="activate_code"/>
     <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($_REQUEST['cid']); ?>"/>

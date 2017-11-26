@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is included from fragments/assessments_payment.php.
+ * This file is included from fragments/activation.php.
  */
 ?>
 
@@ -17,7 +17,7 @@
 <?php
 if (in_array($paymentStatus, $canEnterCode)) {
   $validApiResponse = true;
-  require_once(__DIR__ . "/assessments_activate_code.php");
+  require_once(__DIR__ . "/activate_code.php");
 }
 ?>
 
@@ -29,7 +29,7 @@ if (in_array($paymentStatus, $canEnterCode)) {
 </p>
 
 <div class="trial_button_wrapper">
-  <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments_process_payment.php">
+  <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments/process_activation.php">
       <input type="hidden" name="action" value="extend_trial"/>
       <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
       <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($_REQUEST['cid']); ?>"/>

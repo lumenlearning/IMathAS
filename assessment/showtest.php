@@ -74,7 +74,7 @@
 			$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 
 			if ($courseRequiresPayment && !$studentHasAccessCode) {
-				require_once(__DIR__ . "/../ohm/fragments/assessments_payment.php");
+				require_once(__DIR__ . "/../ohm/assessments/activation.php");
 			}
 		}
 	}

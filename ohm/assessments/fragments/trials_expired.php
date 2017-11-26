@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is included from fragments/assessments_payment.php.
+ * This file is included from fragments/activation.php.
  */
 ?>
 
@@ -18,7 +18,7 @@
 <?php
 if (in_array($paymentStatus, $canEnterCode)) {
   $validApiResponse = true;
-  require_once(__DIR__ . "/assessments_activate_code.php");
+  require_once(__DIR__ . "/activate_code.php");
 }
 ?>
 

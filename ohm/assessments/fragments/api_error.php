@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is included from fragments/assessments_payment.php.
+ * This file is included from fragments/activation.php.
  */
 
 echo "<p id='error-text'>An error occurred while checking assessment access code status.</p>";

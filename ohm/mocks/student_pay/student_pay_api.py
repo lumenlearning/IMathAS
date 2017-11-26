@@ -6,6 +6,13 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+# Valid status strings:
+#   trial_not_started
+#   trial_started
+#   in_trial
+#   can_extend
+#   expired
+#   paid
 
 # /student_pay/v1/student_pay?userid=asdf&auth_code=1234
 @app.route("/student_pay", methods=['GET'])

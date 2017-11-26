@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is included from fragments/assessments_payment.php.
+ * This file is included from fragments/activation.php.
  */
 
 $bookstoreUrl = "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1";
@@ -25,7 +25,7 @@ $trialTimeRemaining = sprintf("%d days, %d hours, %d minutes", $trialDays, $tria
 <?php
 if (in_array($paymentStatus, $canEnterCode)) {
     $validApiResponse = true;
-  require_once(__DIR__ . "/assessments_activate_code.php");
+  require_once(__DIR__ . "/activate_code.php");
 }
 ?>
 

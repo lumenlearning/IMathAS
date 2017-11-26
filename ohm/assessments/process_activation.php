@@ -1,10 +1,4 @@
 <?php
-
-require_once(__DIR__ . "/../init.php");
-
-require_once(__DIR__ . "/includes/StudentPayment.php");
-require_once(__DIR__ . "/includes/StudentPaymentApi.php");
-
 /**
  * This file is only accessed on form submission when a student enters an access code,
  * begins a trial, or extends a trial for paid assessments.
@@ -15,6 +9,12 @@ require_once(__DIR__ . "/includes/StudentPaymentApi.php");
  * 2. On success: Redirect the user back to the assessment.
  * 3. On failure: Display a useful message to the user with a link back to the assessment.
  */
+
+require_once(__DIR__ . "/../../init.php");
+
+require_once(__DIR__ . "/../includes/StudentPayment.php");
+require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
+
 
 $action = Sanitize::simpleString($_REQUEST['action']);
 $groupId = Sanitize::onlyInt($_REQUEST['group_id']);
@@ -30,7 +30,7 @@ if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($as
 
 $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
-		$assessmentId, $courseId); // used by fragments/student_payment_error.php
+		$assessmentId, $courseId); // used by fragments/api_error.php
 
 
 if ("activate_code" == $action) {
@@ -38,10 +38,10 @@ if ("activate_code" == $action) {
 
 	$validationError = \OHM\StudentPaymentApi::validateAccessCodeStructure($accessCode);
 	if (null != $validationError) {
-		$studentPayUserMessage = $validationError; // used by fragments/student_payment_error.php
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+		$studentPayUserMessage = $validationError; // used by fragments/api_error.php
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 
@@ -55,10 +55,10 @@ if ("activate_code" == $action) {
 		error_log(sprintf("Exception while attempting to activate student access code. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
 		$studentPayUserMessage = "Error while attempting to activate access code."
-			. " Please check your access code or contact support."; // used by fragments/student_payment_error.php
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+			. " Please check your access code or contact support."; // used by fragments/api_error.php
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 
@@ -66,10 +66,10 @@ if ("activate_code" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		$studentPayUserMessage = "Failed to activate access code."; // used by fragments/student_payment_error.php
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+		$studentPayUserMessage = "Failed to activate access code."; // used by fragments/api_error.php
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 }
@@ -84,12 +84,12 @@ if ("begin_trial" == $action) {
 		// We have no global application process for catching exceptions and displaying pretty error pages.
 		error_log(sprintf("Exception while attempting to begin student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		// used by fragments/student_payment_error.php
+		// used by fragments/api_error.php
 		$studentPayUserMessage = "Error while attempting to begin trial."
 			. " Please check your access code or contact support.";
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 
@@ -97,10 +97,10 @@ if ("begin_trial" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		$studentPayUserMessage = "Failed to begin trial."; // used by fragments/student_payment_error.php
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+		$studentPayUserMessage = "Failed to begin trial."; // used by fragments/api_error.php
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 }
@@ -115,12 +115,12 @@ if ("extend_trial" == $action) {
 		// We have no global application process for catching exceptions and displaying pretty error pages.
 		error_log(sprintf("Exception while attempting to extend student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		// used by fragments/student_payment_error.php
+		// used by fragments/api_error.php
 		$studentPayUserMessage = "Error while attempting to begin trial."
 			. " Please check your access code or contact support.";
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 
@@ -128,10 +128,10 @@ if ("extend_trial" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		$studentPayUserMessage = "Failed to begin trial."; // used by fragments/student_payment_error.php
-		require_once(__DIR__ . "/../header.php");
-		require_once(__DIR__ . "/fragments/student_payment_error.php");
-		require_once(__DIR__ . "/../footer.php");
+		$studentPayUserMessage = "Failed to begin trial."; // used by fragments/api_error.php
+		require_once(__DIR__ . "/../../header.php");
+		require_once(__DIR__ . "/fragments/api_error.php");
+		require_once(__DIR__ . "/../../footer.php");
 		exit;
 	}
 }
