@@ -39,51 +39,6 @@
 	$exceptionduedate = 0;
 	//error_reporting(0);  //prevents output of error messages
 
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-
-	// The business decision is to allow students through to assessments if we encounter any
-	// problems checking access codes. This includes failure to interact with the payment API.
-
-	if (isStudentPayEnabled() && !haveGroupId()) {
-		// We need the student's group ID before we can check a student's access code status.
-		error_log(sprintf(
-			"User ID %d (%s) is not a member of a group. Unable to get student access code status.",
-			$GLOBALS['userid'], $GLOBALS['username']));
-	}
-
-	if (isStudentPayEnabled() && haveGroupId()) {
-		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
-		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
-
-		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
-		$studentPayStatus = null;
-		try {
-			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
-		} catch (OHM\StudentPaymentException $e) {
-			// See notes above re: business decisions
-			error_log("Student payment API error: " . $e->getMessage());
-			error_log("Stack trace: " . $e->getTraceAsString());
-		}
-
-		if (null != $studentPayStatus) {
-			$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
-			$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
-
-			if ($courseRequiresPayment && !$studentHasAccessCode) {
-				require_once(__DIR__ . "/../ohm/assessments/activation.php");
-			}
-		}
-	}
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-
 	//check to see if test starting test or returning to test
 	if (isset($_GET['id'])) {
 		//check dates, determine if review
@@ -579,6 +534,58 @@
 	$stm = $DBH->prepare("SELECT * FROM imas_assessment_sessions WHERE id=:id");
 	$stm->execute(array(':id'=>$testid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
+
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+
+	// The business decision is to allow students through to assessments if we encounter any
+	// problems checking access codes. This includes failure to interact with the payment API.
+
+	if (isStudentPayEnabled() && !haveGroupId()) {
+		// We need the student's group ID before we can check a student's access code status.
+		error_log(sprintf(
+			"User ID %d (%s) is not a member of a group. Unable to get student access code status.",
+			$GLOBALS['userid'], $GLOBALS['username']));
+	}
+
+	$courseId = $sessiondata['courseid'];
+	$courseName = $sessiondata['coursename'];
+	$assessmentId = $line['assessmentid'];
+
+	if (isStudentPayEnabled() && haveGroupId()) {
+		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
+		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
+
+		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
+		$studentPayStatus = null;
+		try {
+			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
+		} catch (OHM\StudentPaymentException $e) {
+			// See notes above re: business decisions
+			error_log("Student payment API error: " . $e->getMessage());
+			error_log("Stack trace: " . $e->getTraceAsString());
+		}
+
+		if (null != $studentPayStatus) {
+			$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
+			$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
+
+			if ($courseRequiresPayment && !$studentHasAccessCode) {
+				require_once(__DIR__ . "/../ohm/assessments/activation.php");
+			}
+		}
+	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+
+
 	$GLOBALS['assessver'] = $line['ver'];
 	if (strpos($line['questions'],';')===false) {
 		$questions = explode(",",$line['questions']);

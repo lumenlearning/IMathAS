@@ -32,8 +32,8 @@ if (in_array($paymentStatus, $canEnterCode)) {
   <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments/process_activation.php">
       <input type="hidden" name="action" value="extend_trial"/>
       <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
-      <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($_REQUEST['cid']); ?>"/>
-      <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($_REQUEST['id']); ?>"/>
+      <input type="hidden" name="course_id" value="<?php echo $courseId; ?>"/>
+      <input type="hidden" name="assessment_id" value="<?php echo $assessmentId; ?>"/>
       <button id="begin_trial" type="submit" value="Extend Trial">Use my free 24 hour pass</button>
   </form>
   <br/>
