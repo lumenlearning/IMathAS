@@ -826,7 +826,6 @@ div#guides-button-container {
 	align-items: center;
 	display: flex;
 	flex-direction: column;
-	height: 100vh;
 	justify-content: center;
 }
 .access-block {
@@ -835,7 +834,7 @@ div#guides-button-container {
 	box-shadow: 0px 0px 20px #ccc;
 	color: #222;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	margin-top: 100px;
+	margin-top: 20px;
 	max-width: 1200px;
 	padding: 40px 80px;
 	width: 90%;
