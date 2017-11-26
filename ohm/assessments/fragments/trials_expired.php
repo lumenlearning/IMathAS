@@ -4,7 +4,7 @@
  */
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, your 2 week trial access has ended.</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, your 2 week trial access has ended.</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
 	<h2 id="subhead">You need to purchase access</h2>

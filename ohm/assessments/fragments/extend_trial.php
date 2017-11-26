@@ -4,7 +4,7 @@
  */
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, your 2 week trial access has ended.</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, your 2 week trial access has ended.</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
 	<h2 id="subhead">You need to purchase access</h2>
@@ -32,8 +32,8 @@ if (in_array($paymentStatus, $canEnterCode)) {
   <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments/process_activation.php">
       <input type="hidden" name="action" value="extend_trial"/>
       <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
-      <input type="hidden" name="course_id" value="<?php echo $courseId; ?>"/>
-      <input type="hidden" name="assessment_id" value="<?php echo $assessmentId; ?>"/>
+      <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
+      <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
       <button id="begin_trial" type="submit" value="Extend Trial">Use my free 24 hour pass</button>
   </form>
   <br/>

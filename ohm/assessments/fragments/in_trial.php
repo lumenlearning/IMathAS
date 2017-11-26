@@ -11,7 +11,7 @@ $trialMins = gmdate("i minutes", $studentPayStatus->getStudentTrialTimeRemaining
 $trialTimeRemaining = sprintf("%d days, %d hours, %d minutes", $trialDays, $trialHours, $trialMins);
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo $userDisplayName; ?></span>, you have <span class="emphasis"><?php echo $trialTimeRemaining; ?></span> remaining in your trial!</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you have <span class="emphasis"><?php echo $trialTimeRemaining; ?></span> remaining in your trial!</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
 	<h2 id="subhead">You need to purchase access</h2>
