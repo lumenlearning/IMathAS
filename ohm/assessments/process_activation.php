@@ -33,32 +33,29 @@ $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=
 		$assessmentId, $courseId); // used by fragments/api_error.php
 
 
+$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
+
+/*
+ * User is attempting to activate an access code.
+ */
 if ("activate_code" == $action) {
 	$accessCode = trim($_POST['access_code']);
 
 	$validationError = \OHM\StudentPaymentApi::validateAccessCodeStructure($accessCode);
 	if (null != $validationError) {
-		$studentPayUserMessage = $validationError; // used by fragments/api_error.php
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage($validationError);
 		exit;
 	}
 
-	$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 	$studentPayStatus = null;
-
 	try {
 		$studentPayStatus = $studentPayment->activateCode($accessCode);
 	} catch (\OHM\StudentPaymentException $e) {
 		// We have no global application process for catching exceptions and displaying pretty error pages.
 		error_log(sprintf("Exception while attempting to activate student access code. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		$studentPayUserMessage = "Error while attempting to activate access code."
-			. " Please check your access code or contact support."; // used by fragments/api_error.php
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage("Error while attempting to activate access code."
+			. " Please check your access code or contact support.");
 		exit;
 	}
 
@@ -66,30 +63,24 @@ if ("activate_code" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		$studentPayUserMessage = "Failed to activate access code."; // used by fragments/api_error.php
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage("Failed to activate access code. Please check your access code or contact support.");
 		exit;
 	}
 }
 
+/*
+ * User is attempting to begin a trial.
+ */
 if ("begin_trial" == $action) {
-	$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 	$studentPayStatus = null;
-
 	try {
 		$studentPayStatus = $studentPayment->beginTrial();
 	} catch (\OHM\StudentPaymentException $e) {
 		// We have no global application process for catching exceptions and displaying pretty error pages.
 		error_log(sprintf("Exception while attempting to begin student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		// used by fragments/api_error.php
-		$studentPayUserMessage = "Error while attempting to begin trial."
-			. " Please check your access code or contact support.";
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage("Error while attempting to begin trial."
+			. " Please check your access code or contact support.");
 		exit;
 	}
 
@@ -97,30 +88,24 @@ if ("begin_trial" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		$studentPayUserMessage = "Failed to begin trial."; // used by fragments/api_error.php
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage("Failed to begin trial.");
 		exit;
 	}
 }
 
+/*
+ * User is attempting to extend a trial.
+ */
 if ("extend_trial" == $action) {
-	$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 	$studentPayStatus = null;
-
 	try {
 		$studentPayStatus = $studentPayment->extendTrial();
 	} catch (\OHM\StudentPaymentException $e) {
 		// We have no global application process for catching exceptions and displaying pretty error pages.
 		error_log(sprintf("Exception while attempting to extend student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		// used by fragments/api_error.php
-		$studentPayUserMessage = "Error while attempting to begin trial."
-			. " Please check your access code or contact support.";
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage("Error while attempting to begin trial."
+			. " Please check your access code or contact support.");
 		exit;
 	}
 
@@ -128,28 +113,25 @@ if ("extend_trial" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		$studentPayUserMessage = "Failed to begin trial."; // used by fragments/api_error.php
-		require_once(__DIR__ . "/../../header.php");
-		require_once(__DIR__ . "/fragments/api_error.php");
-		require_once(__DIR__ . "/../../footer.php");
+		displayProcessErrorPage("Failed to begin trial.");
 		exit;
 	}
 }
 
-if ("decline_trial" == $action) {
-	$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
-	$studentPayStatus = null;
 
-	try {
-		$studentPayStatus = $studentPayment->logDeclineTrial();
-	} catch (\OHM\StudentPaymentException $e) {
-		// Don't block the user due to a metrics-related failure.
-		error_log("Failed to log event for student declining an assessment trial. " . $e->getMessage());
-		error_log($e->getTraceAsString());
-	}
+/**
+ * Display an error page after a failure to interact with the student payments API.
+ *
+ * @param $message string The message to display on the error page.
+ */
+function displayProcessErrorPage($message)
+{
+	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
-	header("Location: " . $courseUrl);
+	$studentPayUserMessage = $message; // Used by fragments/api_error.php
+
+	require_once(__DIR__ . "/../../header.php");
+	require_once(__DIR__ . "/fragments/api_error.php");
+	require_once(__DIR__ . "/../../footer.php");
 	exit;
 }
-
-

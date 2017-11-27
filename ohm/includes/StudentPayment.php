@@ -117,26 +117,16 @@ class StudentPayment
 
 		// Get the course status from the student payment API.
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
-		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
-		$studentPayStatus->setCourseRequiresStudentPayment($studentPayApiResult->getCourseRequiresStudentPayment());
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
 
 		// Cache the course status. (in MySQL)
 		$this->studentPaymentDb->setCourseRequiresStudentPayment(
 			$studentPayApiResult->getCourseRequiresStudentPayment());
 
 		// The API returns student payment as well.
-		// Let's store that (in MySQL) to reduce the number of future API calls.
-		if ($studentPayStatus->getCourseRequiresStudentPayment()) {
-			if (StudentPayApiResult::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
-				$studentPayStatus->setStudentHasValidAccessCode(true);
-			} else {
-				$studentPayStatus->setStudentHasValidAccessCode(false);
-			}
-
-			// Cache the student access code status -- only if the student has a valid access code.
-			if ($studentPayStatus->getStudentHasValidAccessCode()) {
-				$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
-			}
+		// If the student has a valid access code, let's store that state (in MySQL) to minimize API traffic.
+		if ($studentPayStatus->getCourseRequiresStudentPayment() && $studentPayStatus->getStudentHasValidAccessCode()) {
+			$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
 		}
 
 		return $studentPayStatus;
@@ -165,27 +155,48 @@ class StudentPayment
 
 		// Get the student's access code status from the student payment API.
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
+
+		// If the student has a valid access code, let's store that state (in MySQL) to minimize API traffic.
+		if ($studentPayStatus->getStudentHasValidAccessCode()) {
+			$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
+		}
+
+		return $studentPayStatus;
+	}
+
+	/**
+	 * Map the values from a student payment API response object to a StudentPayStatus object.
+	 *
+	 * @param $studentPayApiResult StudentPayApiResult An instance of StudentPayApiResult.
+	 * @param $studentPayStatus StudentPayStatus An instance of StudentPayStatus.
+	 * @return StudentPayStatus The updated StudentPayStatus object.
+	 */
+	public function mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus)
+	{
+		// Student payment raw status
 		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
 
-		// Set valid access code status
+		// Course requires payment
+		$studentPayStatus->setCourseRequiresStudentPayment($studentPayApiResult->getCourseRequiresStudentPayment());
+
+		// Response from API appropriate for display to the user
+		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
+
+		// Student has valid access code
 		if (StudentPayApiResult::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
 			$studentPayStatus->setStudentHasValidAccessCode(true);
 		} else {
 			$studentPayStatus->setStudentHasValidAccessCode(false);
 		}
 
-		// Set trial status
+		// Student is in trial
 		if (StudentPayApiResult::IN_TRIAL == $studentPayApiResult->getStudentPaymentStatus()
 			|| StudentPayApiResult::TRIAL_STARTED == $studentPayApiResult->getStudentPaymentStatus()) {
 			$studentPayStatus->setStudentIsInTrial(true);
 			$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 		} else {
 			$studentPayStatus->setStudentIsInTrial(false);
-		}
-
-		// Cache the student data. (in MySQL) -- We only cache if the student has a valid access code.
-		if ($studentPayStatus->getStudentHasValidAccessCode()) {
-			$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
 		}
 
 		return $studentPayStatus;
@@ -202,12 +213,11 @@ class StudentPayment
 	public function activateCode($accessCode)
 	{
 		$studentPayApiResult = $this->studentPaymentApi->activateCode($accessCode);
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
-		$studentPayStatus = new StudentPayStatus();
-		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
-		$studentPayStatus->setStudentHasValidAccessCode(
-			"ok" == $studentPayApiResult->getStudentPaymentStatus() ? true : false);
-		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
+		if ("ok" == $studentPayApiResult->getStudentPaymentStatus()) {
+			$studentPayStatus->setStudentHasValidAccessCode(true);
+		}
 
 		return $studentPayStatus;
 	}
@@ -220,17 +230,7 @@ class StudentPayment
 	public function beginTrial()
 	{
 		$studentPayApiResult = $this->studentPaymentApi->beginTrial();
-
-		$studentPayStatus = new StudentPayStatus();
-		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
-		$studentPayStatus->setStudentHasValidAccessCode(false);
-		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
-
-		if (StudentPayApiResult::TRIAL_STARTED == $studentPayApiResult->getStudentPaymentStatus()) {
-			$studentPayStatus->setStudentIsInTrial(true);
-		} else {
-			$studentPayStatus->setStudentIsInTrial(false);
-		}
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
 		return $studentPayStatus;
 	}
@@ -253,11 +253,7 @@ class StudentPayment
 	public function logBeginAssessmentDuringTrial()
 	{
 		$studentPayApiResult = $this->studentPaymentApi->logBeginAssessmentDuringTrial();
-
-		$studentPayStatus = new StudentPayStatus();
-		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
-		$studentPayStatus->setStudentHasValidAccessCode(false);
-		$studentPayStatus->setStudentIsInTrial(true);
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
 		return $studentPayStatus;
 	}
@@ -271,11 +267,7 @@ class StudentPayment
 	public function logDeclineTrial()
 	{
 		$studentPayApiResult = $this->studentPaymentApi->logDeclineTrial();
-
-		$studentPayStatus = new StudentPayStatus();
-		$studentPayStatus->setStudentPaymentRawStatus($studentPayApiResult->getStudentPaymentStatus());
-		$studentPayStatus->setStudentHasValidAccessCode(false);
-		$studentPayStatus->setStudentIsInTrial(true);
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
 		return $studentPayStatus;
 	}
