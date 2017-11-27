@@ -106,7 +106,7 @@ function displayStudentPaymentPage($phpFilename) {
     extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
 	if (!$GLOBALS['pageDisplayed']) {
-		$placeinhead = '<script type="text/javascript">function goBack(){window.history.back();}</script>';
+		$placeinhead = '<script src="' . $GLOBALS['basesiteurl'] . '/ohm/js/common/goBack.js" type="text/javascript"></script>';
 		require_once(__DIR__ . "/../../header.php");
 	}
 
@@ -120,4 +120,3 @@ function displayStudentPaymentPage($phpFilename) {
 
     return true;
 }
-
