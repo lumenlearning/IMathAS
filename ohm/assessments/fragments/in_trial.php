@@ -31,6 +31,6 @@ if (in_array($paymentStatus, $canEnterCode)) {
 
 <div class="trial_button_wrapper">
   <p>
-    <a onClick="goBack()">Continue to assessment</a>
+    <a href="<?php $GLOBALS['basesiteurl'] . '/assessment/showtest.php'; ?>">Continue to assessment</a>
   </p>
 </div>
