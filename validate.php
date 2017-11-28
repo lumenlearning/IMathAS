@@ -408,6 +408,11 @@
 	if (isset($sessiondata['isdiag']) && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
 	}
+	
+	//TEMP: Hide course browser from non-admins
+	if ($myrights<100) {
+		unset($CFG['coursebrowser']);
+	}
 
 	if (isset($sessiondata['ltiitemtype'])) {
 		$flexwidth = true;
