@@ -714,46 +714,6 @@ $placeinhead .= '<script type="text/javascript">
 		}
 		GB_hide();
 	}
-	function lookupcid() {
-		$("#cidlookuperr").text("");
-		var cidtolookup = $("#cidlookup").val();
-		$.ajax({
-			type: "POST",
-			url: "copyitems.php?cid="+cid,
-			data: { cidlookup: cidtolookup},
-			dataType: "json"
-		}).done(function(res) {
-			if ($.isEmptyObject(res)) {
-				$("#cidlookuperr").text("Course ID not found");
-				$("#cidlookupout").hide();
-			} else {
-				$("#cidlookupctc").val(res.id);
-				if (res.needkey) {
-					res.name += " &copy;";
-				} else {
-					res.name +=  " <a href=\"course.php?cid="+res.id+"\" target=\"_blank\" class=\"small\">Preview</a>";
-				}
-				$("#cidlookupname").html(res.name);
-				if (res.termsurl != "") {
-					$("#cidlookupctc").addClass("termsurl");
-					$("#cidlookupctc").attr("data-termsurl",res.termsurl);
-				} else {
-					$("#cidlookupctc").removeClass("termsurl");
-					$("#cidlookupctc").removeAttr("data-termsurl");
-				}
-				if (res.needkey) {
-					$("#cidlookupctc").addClass("copyr");
-				} else {
-					$("#cidlookupctc").removeClass("copyr");
-				}
-				$("#cidlookupctc").prop("checked",true).trigger("change");
-				$("#cidlookupout").show();
-			}
-		}).fail(function() {
-			$("#cidlookuperr").text("Lookup error");
-			$("#cidlookupout").hide();
-		});
-	}
 		</script>';
 require("../header.php");
 }
