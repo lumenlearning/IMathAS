@@ -21,7 +21,7 @@ def get_payment_status():
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
         "status": "in_trial",
-        "section_requires_student_payment": True,
+        "section_requires_student_payment": False,
         "trial_expired_in": 1024567
     }
     return json.dumps(result)

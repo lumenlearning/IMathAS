@@ -14,8 +14,8 @@ require_once(__DIR__ . "/../models/StudentPayApiResult.php");
  * If not, an API call will be made to the student payment API. The results will be cached in MySQL and returned.
  *
  * @package OHM
- * @see StudentPaymentApi
- * @see StudentPaymentDb
+ * @see StudentPaymentApi Used for interaction with the student payments API.
+ * @see StudentPaymentDb Used for OHM db interaction related to student payments.
  */
 class StudentPayment
 {
@@ -48,7 +48,7 @@ class StudentPayment
 
 	/**
 	 * StudentPaymentDb object setter. Used during testing.
-	 * @param object $studentPaymentDb The StudentPaymentDb object to use for DB operations.
+	 * @param StudentPaymentDb $studentPaymentDb The StudentPaymentDb object to use for DB operations.
 	 */
 	public function setStudentPaymentDb($studentPaymentDb)
 	{
@@ -84,7 +84,7 @@ class StudentPayment
 		}
 
 		// If the group uses student payments, determine if the course requires student payment.
-		$studentPayStatus = $this->getCoursePayStatusCacheFirst($studentPayStatus);
+		$studentPayStatus = $this->getCoursePayStatus($studentPayStatus);
 		if (!$studentPayStatus->getCourseRequiresStudentPayment()) {
 			return $studentPayStatus;
 		}
@@ -95,38 +95,39 @@ class StudentPayment
 	}
 
 	/**
-	 * Determine if a course requires student payment. This will attempt to get data from MySQL
-	 * before hitting the student payment API.
+	 * Determine if a course requires student payment.
 	 *
-	 * The student payment API also returns the student's "has valid access code" status. To
-	 * reduce the number of API calls made, this information will be cached and returned as well,
-	 * via the StudentPayStatus object.
+	 * IMPORTANT NOTES:
+	 * - As of 2017 Nov 28, OHM is the authoritative source for this information.
+	 * - In the future, we may obtain this from the student payment API.
+	 *   - See THIS commit diff for previously WORKING code to make that happen.
 	 *
 	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
-	 * @return mixed $studentPayStatus The same StudentPayStatus object with updated data.
+	 * @return StudentPayStatus $studentPayStatus The same StudentPayStatus object with updated data.
 	 */
-	public function getCoursePayStatusCacheFirst($studentPayStatus)
+	public function getCoursePayStatus($studentPayStatus)
+	{
+		// Note: In the future, the student payment API may become the authoritative source for this data.
+		// When this happens, search this entire file for the variable named $sadFace.
+		return $this->getCoursePayStatusFromDatabase($studentPayStatus);
+	}
+
+	/**
+	 * Determine if a course requires student payment. (get directly from database)
+	 *
+	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
+	 * @return StudentPayStatus $studentPayStatus The same StudentPayStatus object with updated data.
+	 */
+	public function getCoursePayStatusFromDatabase($studentPayStatus)
 	{
 		$courseRequiresStudentPay = $this->studentPaymentDb->getCourseRequiresStudentPayment();
 
-		// If the database has what we want, return the data immediately.
 		if (null != $courseRequiresStudentPay) {
 			$studentPayStatus->setCourseRequiresStudentPayment($courseRequiresStudentPay);
-			return $studentPayStatus;
-		}
-
-		// Get the course status from the student payment API.
-		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
-		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
-
-		// Cache the course status. (in MySQL)
-		$this->studentPaymentDb->setCourseRequiresStudentPayment(
-			$studentPayApiResult->getCourseRequiresStudentPayment());
-
-		// The API returns student payment as well.
-		// If the student has a valid access code, let's store that state (in MySQL) to minimize API traffic.
-		if ($studentPayStatus->getCourseRequiresStudentPayment() && $studentPayStatus->getStudentHasValidAccessCode()) {
-			$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
+		} else {
+			// IMPORTANT NOTE -- As of 2017 Nov 28:
+			// If we have no value in the database, NULL == course does not require access code.
+			$studentPayStatus->setCourseRequiresStudentPayment(false);
 		}
 
 		return $studentPayStatus;
@@ -141,7 +142,7 @@ class StudentPayment
 	 * trial time.
 	 *
 	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
-	 * @return mixed $studentPayStatus The same StudentPayStatus object with updated data.
+	 * @return StudentPayStatus $studentPayStatus The same StudentPayStatus object with updated data.
 	 */
 	public function getStudentPayStatusCacheFirst($studentPayStatus)
 	{
@@ -198,6 +199,10 @@ class StudentPayment
 		} else {
 			$studentPayStatus->setStudentIsInTrial(false);
 		}
+
+		// Override API value for "course requires access code" with DB value. (API always returns false)
+		$sadFaceOverride = $this->getCoursePayStatusFromDatabase($studentPayStatus);
+		$studentPayStatus->setCourseRequiresStudentPayment($sadFaceOverride->getCourseRequiresStudentPayment());
 
 		return $studentPayStatus;
 	}
