@@ -390,11 +390,11 @@ switch($_GET['action']) {
 		// #### Begin OHM-specific code #####################################################
 		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
-			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $_GET['cid'], null);
+			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $_GET['id'], null);
 			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
-			echo '<span class=form>Student pay?</span><span class=formright>';
+			echo '<span class=form>Student payment?</span><span class=formright>';
 			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
-			echo '<label for="studentpay">Assessments require student payment</label></span><br class="form"/>';
+			echo '<label for="studentpay">Assessments require student payment / access code</label></span><br class="form"/>';
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
