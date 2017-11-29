@@ -922,6 +922,22 @@ button#begin_trial:hover {
 	cursor: pointer;
 }
 
+button#student_payment_toggle {
+	background-color: #5847D6;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 1em;
+	color: white;
+	height: 35px;
+	margin: 0;
+	margin-left: -1px;
+	padding: 0 1.2em;
+}
+
+button#student_payment_toggle:hover {
+	background-color: #7B6DDF;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {

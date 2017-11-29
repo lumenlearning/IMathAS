@@ -1223,9 +1223,18 @@ switch($_GET['action']) {
 		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
 			$studentPaymentDb = new \OHM\StudentPaymentDb($_GET['id'], null, null);
-			$checked = $studentPaymentDb->getGroupRequiresStudentPayment() ? 'checked' : '';
-			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
-			echo '<label for="studentpay">Courses may require student payment</label><br/>';
+
+			if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
+				$toggleDisableStudentPaymentsButtonText = "Disable";
+				$ajaxSetStudentPayment = "false";
+			} else {
+				$toggleDisableStudentPaymentsButtonText = "Enable";
+				$ajaxSetStudentPayment = "true";
+			}
+
+			printf('<br/><button id="student_payment_toggle" type="button"'
+				. ' onClick="setGroupStudentPayment(%s);">%s student payments</button><br/><br/>',
+				$ajaxSetStudentPayment, $toggleDisableStudentPaymentsButtonText);
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
