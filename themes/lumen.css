@@ -936,6 +936,7 @@ button#student_payment_toggle {
 
 button#student_payment_toggle:hover {
 	background-color: #7B6DDF;
+	cursor: pointer;
 }
 
 /* MEDIA QUERIES */

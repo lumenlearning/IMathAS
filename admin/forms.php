@@ -3,6 +3,21 @@
 //(c) 2006 David Lippman
 require("../init.php");
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+$placeinhead .= '<script type="text/javascript" src="' . $imasroot . '/ohm/js/student_pay/studentPayAjax.js"></script>';
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 require("../header.php");
 require("../includes/htmlutil.php");
 
@@ -1233,8 +1248,8 @@ switch($_GET['action']) {
 			}
 
 			printf('<br/><button id="student_payment_toggle" type="button"'
-				. ' onClick="setGroupStudentPayment(%s);">%s student payments</button><br/><br/>',
-				$ajaxSetStudentPayment, $toggleDisableStudentPaymentsButtonText);
+				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button><br/><br/>',
+				$ajaxSetStudentPayment, $groupId, $toggleDisableStudentPaymentsButtonText);
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
