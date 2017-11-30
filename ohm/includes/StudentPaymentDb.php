@@ -202,4 +202,24 @@ class StudentPaymentDb
 		$stm->execute(array(':required' => $studentPaymentRequired, ':groupid' => $this->groupId));
 	}
 
+	/**
+	 * Toggle student payments for all courses belonging to a group ID.
+	 *
+	 * @param $groupId integer The group ID.
+	 * @param $paymentSetting boolean True or false; the payment setting to apply to the courses.
+	 * @return boolean True on success.
+	 */
+	public function setStudentPaymentAllCoursesByGroupId($groupId, $paymentSetting)
+	{
+		$stm = $this->dbh->prepare("UPDATE imas_courses AS c
+										JOIN imas_users AS u ON c.ownerid = u.id
+										SET student_pay_required = :paymentSetting
+											WHERE u.groupid = :groupId");
+		$stm->execute(array(
+			':groupId' => $groupId,
+			':paymentSetting' => $paymentSetting
+		));
+
+		return true;
+	}
 }

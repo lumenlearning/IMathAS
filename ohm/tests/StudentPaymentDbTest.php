@@ -151,5 +151,22 @@ final class StudentPaymentDbTest extends TestCase
 		$this->studentPaymentDb->setGroupRequiresStudentPayment("asdf");
 	}
 
+	/*
+	 * setStudentPaymentAllCoursesByGroupId
+	 */
+
+	public function testSetStudentPaymentAllCoursesByGroupId()
+	{
+		// Mock return data
+		$dbResult = array(42);
+
+		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+		$this->pdoStatementMock->method('fetch')->willReturn($dbResult);
+
+		$result = $this->studentPaymentDb->setStudentPaymentAllCoursesByGroupId(1234, true);
+
+		$this->assertTrue($result);
+	}
+
 }
 
