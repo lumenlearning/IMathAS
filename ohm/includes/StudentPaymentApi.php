@@ -15,6 +15,8 @@ require_once(__DIR__ . "/CurlRequest.php");
  * used so we can cache/persist state in the database to reduce the number of API calls
  * made and record metrics.
  *
+ * Note: IDs are currently sent in API requests as strings, as required by the API.
+ *
  * @see StudentPayment For a higher level abstraction with database caching / persistence.
  *
  * @package OHM
@@ -79,9 +81,9 @@ class StudentPaymentApi
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
 			\Sanitize::generateQueryStringFromMap(array(
-				'institution_id' => $this->groupId,
-				'section_id' => $this->courseId,
-				'enrollment_id' => $enrollmentId
+				'institution_id' => "$this->groupId",
+				'section_id' => "$this->courseId",
+				'enrollment_id' => "$enrollmentId"
 			));
 		$this->debug("Student API URL = " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
@@ -117,9 +119,9 @@ class StudentPaymentApi
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = array(
-			'institution_id' => $this->groupId,
-			'section_id' => $this->courseId,
-			'enrollment_id' => $enrollmentId,
+			'institution_id' => "$this->groupId",
+			'section_id' => "$this->courseId",
+			'enrollment_id' => "$enrollmentId",
 			'code' => $activationCode
 		);
 
@@ -157,9 +159,9 @@ class StudentPaymentApi
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = array(
-			'institution_id' => $this->groupId,
-			'section_id' => $this->courseId,
-			'enrollment_id' => $enrollmentId
+			'institution_id' => "$this->groupId",
+			'section_id' => "$this->courseId",
+			'enrollment_id' => "$enrollmentId"
 		);
 
 		$headers = array(
@@ -198,9 +200,9 @@ class StudentPaymentApi
 
 		$requestData = array(
 			'event_type' => 'free_quiz_started',
-			'institution_id' => $this->groupId,
-			'section_id' => $this->courseId,
-			'enrollment_id' => $enrollmentId
+			'institution_id' => "$this->groupId",
+			'section_id' => "$this->courseId",
+			'enrollment_id' => "$enrollmentId"
 		);
 
 		$headers = array(
@@ -238,9 +240,9 @@ class StudentPaymentApi
 
 		$requestData = array(
 			'event_type' => 'refused_trial_start',
-			'institution_id' => $this->groupId,
-			'section_id' => $this->courseId,
-			'enrollment_id' => $enrollmentId
+			'institution_id' => "$this->groupId",
+			'section_id' => "$this->courseId",
+			'enrollment_id' => "$enrollmentId"
 		);
 
 		$headers = array(
