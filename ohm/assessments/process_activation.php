@@ -128,10 +128,19 @@ function displayProcessErrorPage($message)
 {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
-	$studentPayUserMessage = $message; // Used by fragments/api_error.php
-
+	$placeinhead = '<script src="' . $GLOBALS['basesiteurl'] . '/ohm/js/common/goBack.js" type="text/javascript"></script>';
 	require_once(__DIR__ . "/../../header.php");
+
+	echo '<div class="access-wrapper">';
+	echo '<div class="access-block">';
+
+	$studentPayUserMessage = $message; // Used by fragments/api_error.php
 	require_once(__DIR__ . "/fragments/api_error.php");
+
+	echo '</div><!-- end .access-block -->';
+	echo '</div><!-- end .access-wrapper -->';
+
 	require_once(__DIR__ . "/../../footer.php");
+
 	exit;
 }
