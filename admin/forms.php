@@ -1249,7 +1249,7 @@ switch($_GET['action']) {
 
 			printf('<br/><button id="student_payment_toggle" type="button"'
 				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button>',
-				$ajaxSetStudentPayment, $GLOBALS['groupid'], $toggleDisableStudentPaymentsButtonText);
+				$ajaxSetStudentPayment, $_GET['id'], $toggleDisableStudentPaymentsButtonText);
 
 			echo '<span id="student_payment_toggle_message"></span><br/><br/>';
 		}
