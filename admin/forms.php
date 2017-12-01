@@ -1248,8 +1248,10 @@ switch($_GET['action']) {
 			}
 
 			printf('<br/><button id="student_payment_toggle" type="button"'
-				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button><br/><br/>',
+				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button>',
 				$ajaxSetStudentPayment, $GLOBALS['groupid'], $toggleDisableStudentPaymentsButtonText);
+
+			echo '<span id="student_payment_toggle_message"></span><br/><br/>';
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################

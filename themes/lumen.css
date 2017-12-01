@@ -934,6 +934,10 @@ button#student_payment_toggle {
 	padding: 0 1.2em;
 }
 
+span#student_payment_toggle_message {
+	margin: 10px;
+}
+
 button#student_payment_toggle:hover {
 	background-color: #7B6DDF;
 	cursor: pointer;
