@@ -223,14 +223,41 @@ class StudentPaymentApi
 	}
 
 	/**
-	 * Notify the student payment API that a student has declined a trial. This is for metrics.
+	 * Notify the student payment API that a student has seen the activation code page, for metrics.
+	 *
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function logActivationPageSeen()
+	{
+		return $this->logEvent('saw_activation_code_page');
+	}
+
+	/**
+	 * Notify the student payment API that a student has declined a trial, for metrics.
 	 *
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.
 	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
 	public function logDeclineTrial()
 	{
+		return $this->logEvent('refused_trial_start');
+	}
+
+	/**
+	 * Notify the student payment API of an event, for metrics.
+	 *
+	 * @param $eventType string The raw event type string to send.
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function logEvent($eventType)
+	{
 		$this->curl->reset();
+
+		if (empty($eventType)) {
+			throw new StudentPaymentException("No event type was specified.");
+		}
 
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
@@ -239,7 +266,7 @@ class StudentPaymentApi
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = array(
-			'event_type' => 'refused_trial_start',
+			'event_type' => "$eventType", // Quoted to ensure the value is always sent as a string.
 			'institution_id' => "$this->groupId",
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId"
