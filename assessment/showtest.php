@@ -556,12 +556,16 @@
 	$courseName = $sessiondata['coursename'];
 	$assessmentId = $line['assessmentid'];
 
-	if (isStudentPayEnabled() && haveGroupId()) {
+	$studentPayment = null;
+	$studentPayStatus = null;
+
+	if (isStudentPayEnabled()) {
 		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
 		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
-
 		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
-		$studentPayStatus = null;
+	}
+
+	if (isStudentPayEnabled() && haveGroupId()) {
 		try {
 			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
 		} catch (OHM\StudentPaymentException $e) {
@@ -579,6 +583,12 @@
 			}
 		}
 	}
+
+	if ($studentPayStatus->getStudentIsInTrial() && "continue_trial" == $_REQUEST['ref']) {
+		$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+	}
+
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################
