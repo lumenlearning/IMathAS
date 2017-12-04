@@ -4,6 +4,7 @@ $init_skip_csrfp = true;
 include("../../init_without_validate.php");
 unset($init_skip_csrfp);
 
+echo '<link rel="stylesheet" type="text/css" href="' . $imasroot . '/themes/lumen.css" />';
 
 if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) {
   $urlmode = 'https://';
@@ -26,7 +27,7 @@ $errors = [];
 
 //verify necessary POST values for LTI.  OAuth specific will be checked later
 if (empty($_REQUEST['lti_version'])) {
-  reporterror("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again");
+  reporterror("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again.");
 }
 
 //check OAuth Signature!
@@ -64,18 +65,26 @@ if (empty($_REQUEST['oauth_consumer_key'])) {
 
 // Display the success message or list the errors
 // todo: pretty styling
-if(empty($errors)){
-  echo "<h1>Everything looks great!</h1>";
-} else{
 
-  echo "<h1>There were errors</h1>";
-  echo "<ul>";
+echo '<div id="ohm-integration-message">
+        <div id="logo"><img src="' . $imasroot . '/ohm/img/ohm-logo-color-400.png" alt="lumen learning online homework manager logo" /></div>
+        <div id="text">';
+
+if(empty($errors)){
+  echo '<h1>OHM Integration Successful!</h1>
+        <p>Lumen OHM has been successfully integrated.</p>';
+} else {
+
+  echo '<h1>There Were Errors</h1>';
+  echo '<ul>';
 
   foreach($errors as $val) {
     printf('<li>%s</li>', Sanitize::encodeStringForDisplay($val));
   }
 
-  echo "</ul>";
+  echo '</ul>';
 }
+
+echo '</div></div>';
 
 ?>

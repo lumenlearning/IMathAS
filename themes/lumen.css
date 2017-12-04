@@ -790,6 +790,37 @@ div#guides-button-container {
 	margin-left: 0px;
 	width:auto;
 }
+
+/* OHM INTEGRATION */
+#ohm-integration-message {
+    font-weight: normal;
+    line-height: 1.5;
+    padding: 2em;
+    -webkit-font-antialiased: antialiased;
+}
+#ohm-integration-message #logo {
+    /*float: right;*/
+    margin-bottom: 4em;
+}
+#ohm-integration-message #logo img {
+    height: 80px;
+}
+#ohm-integration-message #text {
+    /*clear: both;*/
+}
+#ohm-integration-message #text h1 {
+	font-size: 2rem;
+}
+#ohm-integration-message #text p {
+    font-size: 1.1rem;
+}
+#ohm-integration-message #text ul {
+	font-size: 1.1rem;
+}
+#ohm-integration-message #text li {
+    margin-bottom: 0.5em;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {
