@@ -6,6 +6,7 @@
  */
 
 require_once(__DIR__ . "/../models/StudentPayStatus.php");
+require_once(__DIR__ . "/../includes/StudentPayment.php");
 
 // Constants representing student access code state.
 $canEnterCode = array(\OHM\StudentPayApiResult::NOT_PAID, \OHM\StudentPayApiResult::IN_TRIAL,
@@ -22,6 +23,7 @@ if ('' == trim($userDisplayName)) {
 	$userDisplayName = $GLOBALS['username'];
 }
 
+$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
 
 $paymentStatus = $GLOBALS['studentPayStatus']->getStudentPaymentRawStatus();
 $pageDisplayed = false;
@@ -29,6 +31,7 @@ $trialReminderPageDisplayed = false;
 
 if (in_array($paymentStatus, $inTrial)) {
 	if (!seenTrialReminderPage($GLOBALS['assessmentId'])) {
+		$studentPayment->logActivationPageSeen();
 		setTrialReminderCookie($GLOBALS['assessmentId']);
 		$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/in_trial.php");
 	} else {
@@ -36,14 +39,17 @@ if (in_array($paymentStatus, $inTrial)) {
 	}
 }
 if (in_array($paymentStatus, $notPaid)) {
+	$studentPayment->logActivationPageSeen();
 	setTrialReminderCookie($assessmentId);
 	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/begin_trial.php");
 }
 if (in_array($paymentStatus, $extendTrial)) {
+	$studentPayment->logActivationPageSeen();
 	setTrialReminderCookie($assessmentId);
 	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/extend_trial.php");
 }
 if (in_array($paymentStatus, $trialsExpired)) {
+	$studentPayment->logActivationPageSeen();
 	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/trials_expired.php");
 }
 

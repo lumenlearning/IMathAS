@@ -182,44 +182,14 @@ class StudentPaymentApi
 	}
 
 	/**
-	 * Notify the student payment API that a student has started an assessment while under trial.
-	 * This is for metrics.
+	 * Notify the student payment API that a student is taking an assessment while under trial, for metrics.
 	 *
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.
 	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
-	public function logBeginAssessmentDuringTrial()
+	public function logTakeAssessmentDuringTrial()
 	{
-		$this->curl->reset();
-
-		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
-
-		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/enrollment_events';
-		$this->debug("Student API URL = " . $requestUrl);
-		$this->curl->setUrl($requestUrl);
-
-		$requestData = array(
-			'event_type' => 'free_quiz_started',
-			'institution_id' => "$this->groupId",
-			'section_id' => "$this->courseId",
-			'enrollment_id' => "$enrollmentId"
-		);
-
-		$headers = array(
-			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
-			'Content-Type: application/json',
-		);
-		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
-		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
-		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
-		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
-		$result = $this->curl->execute();
-		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
-
-		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204]);
-		$this->curl->close();
-
-		return $studentPayApiResult;
+		return $this->logEvent('free_quiz_started');
 	}
 
 	/**

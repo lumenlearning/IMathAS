@@ -251,18 +251,30 @@ class StudentPayment
 	}
 
 	/**
-	 * Record the fact that the user has started an assessment while under trial. This is for metrics.
+	 * Record the fact that the user is taking an assessment while under trial. This is for metrics.
 	 *
 	 * @return StudentPayStatus An instance of StudentPayStatus.
 	 */
-	public function logBeginAssessmentDuringTrial()
+	public function logTakeAssessmentDuringTrial()
 	{
-		$studentPayApiResult = $this->studentPaymentApi->logBeginAssessmentDuringTrial();
+		$studentPayApiResult = $this->studentPaymentApi->logTakeAssessmentDuringTrial();
 		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
 		return $studentPayStatus;
 	}
 
+	/**
+	 * Record the fact that the user has seen the activation code page. This is for metrics.
+	 *
+	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 */
+	public function logActivationPageSeen()
+	{
+		$studentPayApiResult = $this->studentPaymentApi->logActivationPageSeen();
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+
+		return $studentPayStatus;
+	}
 
 	/**
 	 * Record the fact that the user has declined an assessments trial. This is for metrics.
