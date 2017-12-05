@@ -257,8 +257,16 @@ class StudentPayment
 	 */
 	public function logTakeAssessmentDuringTrial()
 	{
-		$studentPayApiResult = $this->studentPaymentApi->logTakeAssessmentDuringTrial();
-		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+		$studentPayStatus = null;
+		try {
+			$studentPayApiResult = $this->studentPaymentApi->logTakeAssessmentDuringTrial();
+			$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+		} catch (StudentPaymentException $e) {
+			// Don't allow metrics logging failures to halt the experience!
+			error_log("Exception while logging student payment event: Student taking assessment. "
+				. $e->getMessage());
+			error_log($e->getTraceAsString());
+		}
 
 		return $studentPayStatus;
 	}
@@ -270,21 +278,16 @@ class StudentPayment
 	 */
 	public function logActivationPageSeen()
 	{
-		$studentPayApiResult = $this->studentPaymentApi->logActivationPageSeen();
-		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
-
-		return $studentPayStatus;
-	}
-
-	/**
-	 * Record the fact that the user has declined an assessments trial. This is for metrics.
-	 *
-	 * @return StudentPayStatus An instance of StudentPayStatus.
-	 */
-	public function logDeclineTrial()
-	{
-		$studentPayApiResult = $this->studentPaymentApi->logDeclineTrial();
-		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+		$studentPayStatus = null;
+		try {
+			$studentPayApiResult = $this->studentPaymentApi->logActivationPageSeen();
+			$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+		} catch (StudentPaymentException $e) {
+			// Don't allow metrics logging failures to halt the experience!
+			error_log("Exception while logging student payment event: Activation page seen. "
+				. $e->getMessage());
+			error_log($e->getTraceAsString());
+		}
 
 		return $studentPayStatus;
 	}
