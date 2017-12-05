@@ -75,7 +75,7 @@ if(empty($errors)){
         <p>Lumen OHM has been successfully integrated.</p>';
 } else {
 
-  echo '<h1>There Were Errors</h1>';
+  echo '<h1>It looks like we\'ve encountered some errors:</h1>';
   echo '<ul>';
 
   foreach($errors as $val) {
@@ -83,6 +83,11 @@ if(empty($errors)){
   }
 
   echo '</ul>';
+  echo '<p>
+            Please take a screenshot of this page and send us an email at <a href="mailto:support@lumenlearning.com">support@lumenlearning.com</a>, letting us know 
+            you\'re having trouble setting your Lumen LTI connection, and which institute you are from. Someone from 
+            our support team will then get in touch to help troubleshoot these problems.
+        </p>';
 }
 
 echo '</div></div>';
