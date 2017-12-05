@@ -262,7 +262,7 @@ class StudentPaymentApi
 	/**
 	 * Parse a student payment API response.
 	 *
-	 * @param $status integer An HTTP status code.
+	 * @param $status integer The HTTP status code received from the API.
 	 * @param $responseBody string The raw response body.
 	 * @param $acceptableHttpStatusList mixed An array of acceptable integer status codes.
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.

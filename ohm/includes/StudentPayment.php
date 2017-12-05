@@ -214,6 +214,7 @@ class StudentPayment
 	 *
 	 * @param $accessCode string The access code.
 	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 * @throws StudentPaymentException Thrown if unable to activate a code.
 	 */
 	public function activateCode($accessCode)
 	{
@@ -231,6 +232,7 @@ class StudentPayment
 	 * Begin a trial.
 	 *
 	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 * @throws StudentPaymentException Thrown if unable to begin a trial.
 	 */
 	public function beginTrial()
 	{
@@ -244,6 +246,7 @@ class StudentPayment
 	 * Extend a trial.
 	 *
 	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 * @throws StudentPaymentException Thrown if unable to extend a trial.
 	 */
 	public function extendTrial()
 	{

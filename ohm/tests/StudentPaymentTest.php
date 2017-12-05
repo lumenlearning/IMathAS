@@ -137,5 +137,157 @@ final class StudentPaymentTest extends TestCase
 		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
 	}
 
+	/*
+	 * mapApiResultToPayStatus
+	 */
+
+	public function testMapApiResultToPayStatus_InTrial()
+	{
+		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setApiUserMessage("API user message");
+		$studentPayApiResult->setCourseRequiresStudentPayment(true);
+		$studentPayApiResult->setStudentPaymentStatus("in_trial");
+		$studentPayApiResult->setTrialExpiresInSeconds(42);
+
+		$studentPayStatus = $this->studentPayment->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+
+		$this->assertEquals("API user message", $studentPayStatus->getUserMessage());
+		$this->assertEquals("in_trial", $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertEquals(42, $studentPayStatus->getStudentTrialTimeRemainingSeconds());
+		$this->assertTrue($studentPayStatus->getCourseRequiresStudentPayment());
+		$this->assertTrue($studentPayStatus->getStudentIsInTrial());
+		$this->assertFalse($studentPayStatus->getStudentHasValidAccessCode());
+	}
+
+	public function testMapApiResultToPayStatus_HasActivationCode()
+	{
+		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setApiUserMessage("API user message");
+		$studentPayApiResult->setCourseRequiresStudentPayment(true);
+		$studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::PAID);
+
+		$studentPayStatus = $this->studentPayment->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+
+		$this->assertEquals("API user message", $studentPayStatus->getUserMessage());
+		$this->assertEquals(StudentPayApiResult::PAID, $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertNull($studentPayStatus->getStudentTrialTimeRemainingSeconds());
+		$this->assertTrue($studentPayStatus->getCourseRequiresStudentPayment());
+		$this->assertFalse($studentPayStatus->getStudentIsInTrial());
+		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
+	}
+
+	/*
+	 * activateCode
+	 */
+
+	public function testActivateCode()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("ok");
+
+		$this->studentPaymentApiMock->method('activateCode')->willReturn($studentPayApiResult);
+
+		$studentPayStatus = $this->studentPayment->activateCode('asdf');
+
+		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
+		$this->assertEquals('ok', $studentPayStatus->getStudentPaymentRawStatus());
+	}
+
+	/*
+	 * beginTrial
+	 */
+
+	public function testBeginTrial()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("trial_started");
+
+		$this->studentPaymentApiMock->method('beginTrial')->willReturn($studentPayApiResult);
+
+		$studentPayStatus = $this->studentPayment->beginTrial();
+
+		$this->assertTrue($studentPayStatus->getStudentIsInTrial());
+		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayStatus->getStudentPaymentRawStatus());
+	}
+
+	/*
+	 * extendTrial
+	 */
+
+	public function testExtendTrial()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("trial_started");
+
+		$this->studentPaymentApiMock->method('beginTrial')->willReturn($studentPayApiResult);
+
+		$studentPayStatus = $this->studentPayment->extendTrial();
+
+		$this->assertTrue($studentPayStatus->getStudentIsInTrial());
+		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayStatus->getStudentPaymentRawStatus());
+	}
+
+	/*
+	 * logTakeAssessmentDuringTrial
+	 */
+
+	public function testLogTakeAssessmentDuringTrial()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("ok");
+
+		$this->studentPaymentApiMock->method('logTakeAssessmentDuringTrial')->willReturn($studentPayApiResult);
+
+		$studentPayStatus = $this->studentPayment->logTakeAssessmentDuringTrial();
+
+		$this->assertEquals("ok", $studentPayStatus->getStudentPaymentRawStatus());
+	}
+
+	public function testLogTakeAssessmentDuringTrial_Exception()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("dg94hnxkgu4hkd0e");
+
+		$this->studentPaymentApiMock->method('logTakeAssessmentDuringTrial')
+			->will($this->throwException(new StudentPaymentException('unit_test')));
+
+		$studentPayStatus = $this->studentPayment->logTakeAssessmentDuringTrial();
+
+		$this->assertNull($studentPayStatus);
+	}
+
+	/*
+	 * logActivationPageSeen
+	 */
+
+	public function testLogActivationPageSeen()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("ok");
+
+		$this->studentPaymentApiMock->method('logActivationPageSeen')->willReturn($studentPayApiResult);
+
+		$studentPayStatus = $this->studentPayment->logActivationPageSeen();
+
+		$this->assertEquals("ok", $studentPayStatus->getStudentPaymentRawStatus());
+	}
+
+	public function testLogActivationPageSeen_Exception()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("dg94hnxkgu4hkd0e");
+
+		$this->studentPaymentApiMock->method('logActivationPageSeen')
+			->will($this->throwException(new StudentPaymentException('unit_test')));
+
+		$studentPayStatus = $this->studentPayment->logActivationPageSeen();
+
+		$this->assertNull($studentPayStatus);
+	}
+
 }
 

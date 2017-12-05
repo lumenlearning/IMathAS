@@ -32,11 +32,14 @@ final class StudentPaymentApiTest extends TestCase
 	private $pdoMock;
 	private $pdoStatementMock;
 
-	private static $paidResponse =
-		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::PAID . '"}';
-	private static $notPaidResponse =
+	const PAID_RESPONSE = '{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::PAID . '"}';
+	const NOT_PAID_RESPONSE =
 		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::NOT_PAID . '"}';
-	private static $unexpectedResponse = 'unexpected response text';
+	const TRIAL_STARTED_RESPONSE = '{"status":"' . StudentPayApiResult::TRIAL_STARTED . '"}';
+	const IN_TRIAL_RESPONSE = '{"status":"' . StudentPayApiResult::IN_TRIAL
+	. '","section_requires_student_payment":true,"trial_expired_in":1234}';
+	const EVENT_LOGGED_OK_RESPONSE = '{"status": "ok"}';
+	const UNEXPECTED_RESPONSE = 'unexpected response text';
 
 
 	function setUp()
@@ -50,6 +53,24 @@ final class StudentPaymentApiTest extends TestCase
 			$this->studentPaymentDbMock);
 	}
 
+	/**
+	 * Call protected/private method of a class.
+	 *
+	 * @param object &$object Instantiated object that we will run method on.
+	 * @param string $methodName Method name to call
+	 * @param array $parameters Array of parameters to pass into method.
+	 *
+	 * @return mixed Method return.
+	 */
+	public function invokePrivateMethod(&$object, $methodName, array $parameters = array())
+	{
+		$reflection = new \ReflectionClass(get_class($object));
+		$method = $reflection->getMethod($methodName);
+		$method->setAccessible(true);
+
+		return $method->invokeArgs($object, $parameters);
+	}
+
 	/*
 	 * getActivationStatusFromApi
 	 */
@@ -57,7 +78,8 @@ final class StudentPaymentApiTest extends TestCase
 	function testGetActivationStatusFromApi_Paid()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn($this::$paidResponse);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAID_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
 
@@ -70,7 +92,8 @@ final class StudentPaymentApiTest extends TestCase
 	function testGetActivationStatusFromApi_NotPaid()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn($this::$notPaidResponse);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::NOT_PAID_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
 
@@ -83,6 +106,7 @@ final class StudentPaymentApiTest extends TestCase
 	function testGetActivationStatusFromApi_NoResponse()
 	{
 		$this->curlMock->method('getInfo')->willReturn(0);
+		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 
 		$this->expectException(StudentPaymentException::class);
@@ -93,6 +117,7 @@ final class StudentPaymentApiTest extends TestCase
 	function testGetActivationStatusFromApi_Non200Response()
 	{
 		$this->curlMock->method('getInfo')->willReturn(404);
+		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 
 		$this->expectException(StudentPaymentException::class);
@@ -103,7 +128,8 @@ final class StudentPaymentApiTest extends TestCase
 	function testGetActivationStatusFromApi_UnexpectedResponse()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn($this::$unexpectedResponse);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::UNEXPECTED_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 
 		$this->expectException(StudentPaymentException::class);
@@ -114,10 +140,126 @@ final class StudentPaymentApiTest extends TestCase
 	/*
 	 * activateCode
 	 */
+	function testActivateCode()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAID_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
+
+		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
+
+		$this->assertEquals(StudentPayApiResult::PAID, $studentPayApiResult->getStudentPaymentStatus());
+	}
 
 	/*
-	 * updateActivation
+	 * beginTrial
 	 */
+
+	function testBeginTrial()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::TRIAL_STARTED_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
+
+		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
+
+		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	/*
+	 * logEvent
+	 */
+
+	function testLogEvent()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::EVENT_LOGGED_OK_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
+
+		$studentPayApiResult = $this->studentPaymentApi->logEvent('asdf');
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testLogEvent_MissingEventType_Null()
+	{
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$this->expectException(StudentPaymentException::class);
+
+		$this->studentPaymentApi->logEvent(null);
+	}
+
+	function testLogEvent_MissingEventType_EmptyString()
+	{
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$this->expectException(StudentPaymentException::class);
+
+		$this->studentPaymentApi->logEvent('');
+	}
+
+	/*
+	 * parseApiResponse
+	 */
+
+	function testParseApiResponse_notPaid_and_notInTrial()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::NOT_PAID_RESPONSE, array('200')));
+
+		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
+		$this->assertEquals(StudentPayApiResult::NOT_PAID, $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testParseApiResponse_beginTrial()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::TRIAL_STARTED_RESPONSE, array('200')));
+
+		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testParseApiResponse_inTrial()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::IN_TRIAL_RESPONSE, array('200')));
+
+		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
+		$this->assertEquals(1234, $studentPayApiResult->getTrialExpiresInSeconds());
+		$this->assertEquals(StudentPayApiResult::IN_TRIAL, $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testParseApiResponse_extendTrial()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::TRIAL_STARTED_RESPONSE, array('200')));
+
+		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testParseApiResponse_hasAccessCode()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::PAID_RESPONSE, array('200')));
+
+		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
+		$this->assertEquals(StudentPayApiResult::PAID, $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testParseApiResponse_sendEnrollmentEvent()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::EVENT_LOGGED_OK_RESPONSE, array('200')));
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
 
 	/*
 	 * validateAccessCodeStructure
