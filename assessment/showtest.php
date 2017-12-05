@@ -584,9 +584,13 @@
 		}
 	}
 
-	if ($studentPayStatus->getStudentIsInTrial() && "continue_trial" == $_REQUEST['ref']) {
+	$shouldLogEvent = array('begin_trial', 'extend_trial', 'continue_trial');
+	$logEventType = getActivationLogEventType();
+	if ($studentPayStatus->getStudentIsInTrial() && in_array($logEventType, $shouldLogEvent)) {
 		$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
+		deleteActivationLogEventTypeCookie();
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+		exit;
 	}
 
 	// #### End OHM-specific code #######################################################
@@ -3814,6 +3818,30 @@ if (!isset($_REQUEST['embedpostback'])) {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Return the student payments type of event we want to log.
+	 *
+	 * This information is obtained from a session cookie or a query string value.
+	 *
+	 * @return null
+	 */
+	function getActivationLogEventType()
+	{
+		if (isset($_COOKIE['activation_event'])) {
+			return $_COOKIE['activation_event'];
+		} else if (!is_null($_REQUEST['activation_event'])) {
+			return $_REQUEST['activation_event'];
+		} else {
+			return null;
+		}
+	}
+
+	function deleteActivationLogEventTypeCookie()
+	{
+		unset($_COOKIE['activation_event']);
+		setcookie('activation_event', null, -1, '/');
 	}
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################

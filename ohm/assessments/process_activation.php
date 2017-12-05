@@ -85,6 +85,7 @@ if ("begin_trial" == $action) {
 	}
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
+		setcookie("activation_event", "begin_trial", 0, '/');
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
@@ -110,6 +111,7 @@ if ("extend_trial" == $action) {
 	}
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
+		setcookie("activation_event", "extend_trial", 0, '/');
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
