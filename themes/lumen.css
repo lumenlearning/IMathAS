@@ -793,20 +793,20 @@ div#guides-button-container {
 
 /* OHM INTEGRATION */
 #ohm-integration-message {
+		font-family: "Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
     font-weight: normal;
     line-height: 1.5;
     padding: 2em;
     -webkit-font-antialiased: antialiased;
 }
 #ohm-integration-message #logo {
-    /*float: right;*/
     margin-bottom: 4em;
 }
 #ohm-integration-message #logo img {
     height: 80px;
 }
 #ohm-integration-message #text {
-    /*clear: both;*/
+
 }
 #ohm-integration-message #text h1 {
 	font-size: 2rem;
