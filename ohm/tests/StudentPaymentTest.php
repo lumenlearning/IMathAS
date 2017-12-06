@@ -168,12 +168,12 @@ final class StudentPaymentTest extends TestCase
 		$studentPayApiResult = new StudentPayApiResult();
 		$studentPayApiResult->setApiUserMessage("API user message");
 		$studentPayApiResult->setCourseRequiresStudentPayment(true);
-		$studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::PAID);
+		$studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::IS_ACTIVATED);
 
 		$studentPayStatus = $this->studentPayment->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
 		$this->assertEquals("API user message", $studentPayStatus->getUserMessage());
-		$this->assertEquals(StudentPayApiResult::PAID, $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertEquals(StudentPayApiResult::IS_ACTIVATED, $studentPayStatus->getStudentPaymentRawStatus());
 		$this->assertNull($studentPayStatus->getStudentTrialTimeRemainingSeconds());
 		$this->assertTrue($studentPayStatus->getCourseRequiresStudentPayment());
 		$this->assertFalse($studentPayStatus->getStudentIsInTrial());
@@ -204,14 +204,15 @@ final class StudentPaymentTest extends TestCase
 	public function testBeginTrial()
 	{
 		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setStudentPaymentStatus("trial_started");
+		$studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::START_TRIAL_SUCCESS);
 
 		$this->studentPaymentApiMock->method('beginTrial')->willReturn($studentPayApiResult);
 
 		$studentPayStatus = $this->studentPayment->beginTrial();
 
 		$this->assertTrue($studentPayStatus->getStudentIsInTrial());
-		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertEquals(StudentPayApiResult::START_TRIAL_SUCCESS,
+			$studentPayStatus->getStudentPaymentRawStatus());
 	}
 
 	/*
@@ -221,14 +222,15 @@ final class StudentPaymentTest extends TestCase
 	public function testExtendTrial()
 	{
 		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setStudentPaymentStatus("trial_started");
+		$studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::START_TRIAL_SUCCESS);
 
 		$this->studentPaymentApiMock->method('beginTrial')->willReturn($studentPayApiResult);
 
 		$studentPayStatus = $this->studentPayment->extendTrial();
 
 		$this->assertTrue($studentPayStatus->getStudentIsInTrial());
-		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertEquals(StudentPayApiResult::START_TRIAL_SUCCESS,
+			$studentPayStatus->getStudentPaymentRawStatus());
 	}
 
 	/*

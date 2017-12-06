@@ -32,10 +32,13 @@ final class StudentPaymentApiTest extends TestCase
 	private $pdoMock;
 	private $pdoStatementMock;
 
-	const PAID_RESPONSE = '{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::PAID . '"}';
-	const NOT_PAID_RESPONSE =
-		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::NOT_PAID . '"}';
-	const TRIAL_STARTED_RESPONSE = '{"status":"' . StudentPayApiResult::TRIAL_STARTED . '"}';
+	const ACTIVATION_SUCCESS_RESPONSE = '{"message":"You have successfully submitted your code.","status":"'
+	. StudentPayApiResult::ACTIVATION_SUCCESS . '"}';
+	const HAS_ACTIVATION_CODE_RESPONSE = '{"status":"' . StudentPayApiResult::IS_ACTIVATED
+	. '","section_requires_student_payment":true,"trial_expired_in":1209422}';
+	const NO_TRIAL_NO_ACTIVATION_RESPONSE =
+		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::NO_TRIAL_NO_ACTIVATION . '"}';
+	const TRIAL_STARTED_RESPONSE = '{"status":"' . StudentPayApiResult::START_TRIAL_SUCCESS . '"}';
 	const IN_TRIAL_RESPONSE = '{"status":"' . StudentPayApiResult::IN_TRIAL
 	. '","section_requires_student_payment":true,"trial_expired_in":1234}';
 	const EVENT_LOGGED_OK_RESPONSE = '{"status": "ok"}';
@@ -75,10 +78,10 @@ final class StudentPaymentApiTest extends TestCase
 	 * getActivationStatusFromApi
 	 */
 
-	function testGetActivationStatusFromApi_Paid()
+	function testGetActivationStatusFromApi_HasAccessCode()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAID_RESPONSE);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::HAS_ACTIVATION_CODE_RESPONSE);
 		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
@@ -86,13 +89,13 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
 
 		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
-		$this->assertEquals(StudentPayApiResult::PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::IS_ACTIVATED, $studentPayApiResult->getStudentPaymentStatus());
 	}
 
-	function testGetActivationStatusFromApi_NotPaid()
+	function testGetActivationStatusFromApi_NoTrialAndNoActivation()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::NOT_PAID_RESPONSE);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::NO_TRIAL_NO_ACTIVATION_RESPONSE);
 		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
@@ -100,7 +103,8 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
 
 		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
-		$this->assertEquals(StudentPayApiResult::NOT_PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::NO_TRIAL_NO_ACTIVATION,
+			$studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testGetActivationStatusFromApi_NoResponse()
@@ -143,14 +147,15 @@ final class StudentPaymentApiTest extends TestCase
 	function testActivateCode()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAID_RESPONSE);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::ACTIVATION_SUCCESS_RESPONSE);
 		$this->curlMock->expects($this->once())->method('reset');
 		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
 		$this->pdoStatementMock->method('fetchColumn')->willReturn(1); // return an enrollment ID
 
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
 
-		$this->assertEquals(StudentPayApiResult::PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::ACTIVATION_SUCCESS,
+			$studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	/*
@@ -167,7 +172,8 @@ final class StudentPaymentApiTest extends TestCase
 
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi(12);
 
-		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::START_TRIAL_SUCCESS,
+			$studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	/*
@@ -212,10 +218,11 @@ final class StudentPaymentApiTest extends TestCase
 	function testParseApiResponse_notPaid_and_notInTrial()
 	{
 		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(200, StudentPaymentApiTest::NOT_PAID_RESPONSE, array('200')));
+			array(200, StudentPaymentApiTest::NO_TRIAL_NO_ACTIVATION_RESPONSE, array('200')));
 
 		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
-		$this->assertEquals(StudentPayApiResult::NOT_PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::NO_TRIAL_NO_ACTIVATION,
+			$studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testParseApiResponse_beginTrial()
@@ -223,7 +230,8 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
 			array(200, StudentPaymentApiTest::TRIAL_STARTED_RESPONSE, array('200')));
 
-		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::START_TRIAL_SUCCESS,
+			$studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testParseApiResponse_inTrial()
@@ -241,16 +249,17 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
 			array(200, StudentPaymentApiTest::TRIAL_STARTED_RESPONSE, array('200')));
 
-		$this->assertEquals(StudentPayApiResult::TRIAL_STARTED, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::START_TRIAL_SUCCESS,
+			$studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testParseApiResponse_hasAccessCode()
 	{
 		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(200, StudentPaymentApiTest::PAID_RESPONSE, array('200')));
+			array(200, StudentPaymentApiTest::HAS_ACTIVATION_CODE_RESPONSE, array('200')));
 
 		$this->assertTrue($studentPayApiResult->getCourseRequiresStudentPayment());
-		$this->assertEquals(StudentPayApiResult::PAID, $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(StudentPayApiResult::IS_ACTIVATED, $studentPayApiResult->getStudentPaymentStatus());
 	}
 
 	function testParseApiResponse_sendEnrollmentEvent()

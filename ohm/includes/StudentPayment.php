@@ -185,15 +185,16 @@ class StudentPayment
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
 
 		// Student has valid access code
-		if (StudentPayApiResult::PAID == $studentPayApiResult->getStudentPaymentStatus()) {
+		$validHasAccessCode = array(StudentPayApiResult::IS_ACTIVATED, StudentPayApiResult::ACTIVATION_SUCCESS);
+		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validHasAccessCode)) {
 			$studentPayStatus->setStudentHasValidAccessCode(true);
 		} else {
 			$studentPayStatus->setStudentHasValidAccessCode(false);
 		}
 
 		// Student is in trial
-		if (StudentPayApiResult::IN_TRIAL == $studentPayApiResult->getStudentPaymentStatus()
-			|| StudentPayApiResult::TRIAL_STARTED == $studentPayApiResult->getStudentPaymentStatus()) {
+		$validIsInTrial = array(StudentPayApiResult::IN_TRIAL, StudentPayApiResult::START_TRIAL_SUCCESS);
+		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validIsInTrial)) {
 			$studentPayStatus->setStudentIsInTrial(true);
 			$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 		} else {

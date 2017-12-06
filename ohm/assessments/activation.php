@@ -9,9 +9,9 @@ require_once(__DIR__ . "/../models/StudentPayStatus.php");
 require_once(__DIR__ . "/../includes/StudentPayment.php");
 
 // Constants representing student access code state.
-$canEnterCode = array(\OHM\StudentPayApiResult::NOT_PAID, \OHM\StudentPayApiResult::IN_TRIAL,
+$canEnterCode = array(\OHM\StudentPayApiResult::NO_TRIAL_NO_ACTIVATION, \OHM\StudentPayApiResult::IN_TRIAL,
 	\OHM\StudentPayApiResult::CAN_EXTEND, \OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
-$notPaid = array(\OHM\StudentPayApiResult::NOT_PAID);
+$notPaid = array(\OHM\StudentPayApiResult::NO_TRIAL_NO_ACTIVATION);
 $inTrial = array(\OHM\StudentPayApiResult::IN_TRIAL);
 $extendTrial = array(\OHM\StudentPayApiResult::CAN_EXTEND);
 $trialsExpired = array(\OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
