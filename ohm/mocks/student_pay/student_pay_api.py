@@ -6,13 +6,22 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# Valid status strings:
+
+# Valid status strings:  (and sample live responses)
 #   trial_not_started
+#       {"status":"trial_not_started","section_requires_student_payment":true,"trial_expired_in":0}
 #   trial_started
+#       {"status":"trial_started"}
 #   in_trial
+#       {"status":"in_trial","section_requires_student_payment":true,"trial_expired_in":1209463}
 #   can_extend
+#       ??
 #   expired
-#   paid
+#       ??
+#   activation_code_claimed
+#       {"message":"You have successfully submitted your code.","status":"activation_code_claimed"}
+#   has_access
+#       {"status":"has_access","section_requires_student_payment":true,"trial_expired_in":1209422}
 
 # /student_pay/v1/student_pay?userid=asdf&auth_code=1234
 @app.route("/student_pay", methods=['GET'])
@@ -21,7 +30,7 @@ def get_payment_status():
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
         "status": "in_trial",
-        "section_requires_student_payment": False,
+        "section_requires_student_payment": True,
         "trial_expired_in": 1024567
     }
     return json.dumps(result)
@@ -32,8 +41,8 @@ def activate_access_code():
     print("\nRequest data: " + request.data)
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
-        "status": "ok",
-        "message": "Your code has been activated"
+        "status": "activation_code_claimed",
+        "message": "You have successfully submitted your code."
     }
     return json.dumps(result)
 
@@ -44,16 +53,6 @@ def begin_trial():
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
         "status": "trial_started",
-    }
-    return json.dumps(result)
-
-
-@app.route("/student_pay_settings", methods=['POST'])
-def update_payment_settings():
-    print("\nRequest data: " + request.data)
-    print("Authorization: " + request.headers.get('Authorization'))
-    result = {
-        "status": "ok",
     }
     return json.dumps(result)
 
