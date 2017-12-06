@@ -407,9 +407,9 @@ switch($_GET['action']) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
 			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $_GET['id'], null);
 			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
-			echo '<span class=form>Student payment?</span><span class=formright>';
+			echo '<span class=form>Assessments require activation?</span><span class=formright>';
 			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
-			echo '<label for="studentpay">Assessments require student payment / access code</label></span><br class="form"/>';
+			echo '<label for="studentpay">Students must provide an access code for assessments</label></span><br class="form"/>';
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
