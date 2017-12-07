@@ -5,6 +5,7 @@ namespace OHM;
 require_once(__DIR__ . "/../../includes/sanitize.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 require_once(__DIR__ . "/../models/StudentPayApiResult.php");
+require_once(__DIR__ . "/../models/LumenistrationInstitution.php");
 require_once(__DIR__ . "/StudentPaymentDb.php");
 require_once(__DIR__ . "/CurlRequest.php");
 
@@ -260,7 +261,7 @@ class StudentPaymentApi
 	}
 
 	/**
-	 * Parse a student payment API response.
+	 * Parse an API response containing course and/or student data.
 	 *
 	 * @param $status integer The HTTP status code received from the API.
 	 * @param $responseBody string The raw response body.
@@ -311,6 +312,52 @@ class StudentPaymentApi
 		}
 
 		return $studentPayApiResult;
+	}
+
+	/**
+	 * Parse an API response containing Institution data.
+	 *
+	 * @param $status integer The HTTP status code received from the API.
+	 * @param $responseBody string The raw response body.
+	 * @param $acceptableHttpStatusList mixed An array of acceptable integer status codes.
+	 * @return LumenistrationInstitution An instance of LumenistrationInstitution.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	private function parseInstitutionResponse($status, $responseBody, $acceptableHttpStatusList)
+	{
+		$this->debug(sprintf("Student payment API HTTP status %d. Raw response: %s", $status, $responseBody));
+
+		$apiResponse = json_decode($responseBody, true);
+
+		if (0 == $status) {
+			// curl returns 0 on http failure
+			throw new StudentPaymentException("Unable to connect to student payment API.");
+		}
+		if (null == $apiResponse) {
+			// json_decode failed to find valid json content
+			throw new StudentPaymentException("Unexpected content returned from student payment API: "
+				. $responseBody);
+		}
+		if (!isset($apiResponse['id'])) {
+			// All endpoints should return a status in the json payload.
+			throw new StudentPaymentException(sprintf(
+				"Student payment API did not return an institution ID in JSON payload. Content: %s", $status,
+				$responseBody));
+		}
+
+		$lumenistrationInstitution = new LumenistrationInstitution();
+		$lumenistrationInstitution->setId($apiResponse['id']);
+		$lumenistrationInstitution->setName($apiResponse['name']);
+		$lumenistrationInstitution->setBookstoreInformation($apiResponse['bookstore_information']);
+		$lumenistrationInstitution->setBookstoreUrl($apiResponse['bookstore_url']);
+
+		$allExternalIds = array();
+		foreach ($apiResponse['external_ids'] as $externalId) {
+			$allExternalIds[] = $externalId;
+		}
+		$lumenistrationInstitution->setExternalIds($allExternalIds);
+
+		return $lumenistrationInstitution;
 	}
 
 	/**
