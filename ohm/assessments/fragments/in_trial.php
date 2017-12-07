@@ -3,23 +3,45 @@
  * This file is included from fragments/activation.php.
  */
 
-$bookstoreUrl = "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1";
+// TODO: Get bookstore url from the API
+$bookstoreUrl = "#";
 
-$trialDays = gmdate("z", $studentPayStatus->getStudentTrialTimeRemainingSeconds());
-$trialHours = gmdate("H", $studentPayStatus->getStudentTrialTimeRemainingSeconds());
-$trialMins = gmdate("i minutes", $studentPayStatus->getStudentTrialTimeRemainingSeconds());
-$trialTimeRemaining = sprintf("%d days, %d hours, %d minutes", $trialDays, $trialHours, $trialMins);
+$trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
+
+// less than 1 minute left in trial
+if (60 > $trialTimeRemaining) {
+	$formattedTimeRemaining = 'less than 1 minute';
+}
+// less than 1 hour left in trial
+else if (3600 > $trialTimeRemaining) {
+	$formattedTimeRemaining = gmdate('i', $trialTimeRemaining) . ' minutes';
+}
+// 1 hour left in trial
+else if (3600 <= $trialTimeRemaining && 7200 > $trialTimeRemaining) {
+	$formattedTimeRemaining = gmdate('H', $trialTimeRemaining) . ' hour';
+}
+// less than 1 day left in trial
+else if (86400 > $trialTimeRemaining) {
+	$formattedTimeRemaining = gmdate('H', $trialTimeRemaining) . ' hours';
+}
+// days remaining in trial
+else if (86400 <= $trialTimeRemaining) {
+	$formattedTimeRemaining = gmdate('d', $trialTimeRemaining) . ' days';
+}
+
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you have <span class="emphasis"><?php echo $trialTimeRemaining; ?></span> remaining in your trial!</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you have <span class="emphasis"><?php echo $formattedTimeRemaining; ?></span> left in your Lumen OHM trial.</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
-	<h2 id="subhead">You need to purchase access</h2>
+	<h2 id="subhead">Don’t forget to purchase a Lumen OHM course activation code</h2>
 </div>
 <p class="blurb">
-  Before your trial access expires, you should purchase a permanent access code
-	from your campus bookstore. You can purchase one at your campus bookstore
-	(ask for <span class="emphasis">OHM Platform Access Code</span>) or on the <a href="<?php echo $bookstoreUrl; ?>">bookstore website</a>.
+	Before your trial runs out you should purchase a course activation code. Once
+	your trial has ended you will still be able to view your course materials, but
+	you will need this code to complete your Lumen OHM assessments. You can
+	purchase one at your campus bookstore (ask for the Lumen OHM activation code
+	for your course) or on the bookstore <a href="<?php echo $bookstoreUrl; ?>">website</a>.
 </p>
 
 <?php

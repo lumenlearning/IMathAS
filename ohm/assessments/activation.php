@@ -15,6 +15,7 @@ $notPaid = array(\OHM\StudentPayApiResult::NO_TRIAL_NO_ACTIVATION);
 $inTrial = array(\OHM\StudentPayApiResult::IN_TRIAL);
 $extendTrial = array(\OHM\StudentPayApiResult::CAN_EXTEND);
 $trialsExpired = array(\OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
+$codeClaimed = array(\OHM\StudentPayApiResult::ACTIVATION_SUCCESS);
 
 
 // Used inside page fragments.
@@ -51,6 +52,10 @@ if (in_array($paymentStatus, $extendTrial)) {
 if (in_array($paymentStatus, $trialsExpired)) {
 	$studentPayment->logActivationPageSeen();
 	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/trials_expired.php");
+}
+if (in_array($paymentStatus, $codeClaimed)) {
+	$studentPayment->logActivationPageSeen();
+	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/confirmation.php");
 }
 
 // A page has been displayed, but not the trial reminder page. (need to add footer content)

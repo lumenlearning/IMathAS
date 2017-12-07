@@ -6,19 +6,24 @@
 $assessNameStm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id AND courseid=:courseid LIMIT 1");
 $assessNameStm->execute(array(':id'=>$assessmentId, ':courseid'=>$courseId));
 $assessmentName = $assessNameStm->fetchColumn(0);
+
+// TODO: Get bookstore url from the API
+$bookstoreUrl = "#";
+
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, are you ready to start working on <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>?</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
-	<h2 id="subhead">You need to purchase access</h2>
+	<h2 id="subhead">Ready to start your 2 week trial?</h2>
 </div>
 <p class="blurb">
-  You are about to open <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>, which is an
-  assessment powered by Lumen  OHM.  By opening this assessment, you will begin
-  your 2 week trial access.  Before your trial runs out, you’ll need to
-  purchase your access code from your campus bookstore. Ask for:
-  <span class="emphasis">OHM Platform Access Code</span>.
+	<span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>, is
+	an assessment powered by Lumen OHM.  By starting you will begin your 2 week
+	trial for the assessments in this Lumen OHM course.  Before your trial runs
+	out you should get an OHM course activation code. You can purchase one at your
+	campus bookstore (ask for the Lumen OHM activation code for your course) or
+	on the bookstore <a href="<?php echo $bookstoreUrl; ?>">website</a>.
 </p>
 
 <?php
