@@ -187,14 +187,15 @@ final class StudentPaymentTest extends TestCase
 	public function testActivateCode()
 	{
 		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setStudentPaymentStatus("ok");
+		$studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::ACTIVATION_SUCCESS);
 
 		$this->studentPaymentApiMock->method('activateCode')->willReturn($studentPayApiResult);
 
 		$studentPayStatus = $this->studentPayment->activateCode('asdf');
 
 		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
-		$this->assertEquals('ok', $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertEquals(StudentPayApiResult::ACTIVATION_SUCCESS,
+			$studentPayStatus->getStudentPaymentRawStatus());
 	}
 
 	/*

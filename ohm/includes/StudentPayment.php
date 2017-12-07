@@ -222,7 +222,8 @@ class StudentPayment
 		$studentPayApiResult = $this->studentPaymentApi->activateCode($accessCode);
 		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
-		if ("ok" == $studentPayApiResult->getStudentPaymentStatus()) {
+		if (StudentPayApiResult::ACTIVATION_SUCCESS == $studentPayApiResult->getStudentPaymentStatus()) {
+			$this->studentPaymentDb->setStudentHasActivationCode(true);
 			$studentPayStatus->setStudentHasValidAccessCode(true);
 		}
 

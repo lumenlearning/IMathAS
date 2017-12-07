@@ -6,6 +6,11 @@
 require_once(__DIR__ . '/../../init.php');
 require_once(__DIR__ . '/../../header.php');
 
+if (!isset($_COOKIE['stupayasscode'])) {
+    header("Location: " . $GLOBALS['basesiteurl']);
+    exit;
+}
+
 // User Name
 $userDisplayName = explode(' ', $GLOBALS['userfullname'])[0];
 if ('' == trim($userDisplayName)) {
@@ -45,14 +50,14 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 	<br/>
 	<div id="confirmation-details">
 		<p><strong>Student Name: </strong><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></span></p>
-		<p><strong>Course Name: </strong><span class="emphasis"><?php echo $courseName; ?></span></p>
-		<p><strong>Access Code Submitted: </strong><span class="emphasis" style="text-transform:uppercase;"><?php echo $accessCode; ?></span></p>
+		<p><strong>Course Name: </strong><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($courseName); ?></span></p>
+		<p><strong>Access Code Submitted: </strong><span class="emphasis" style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
 		<p><strong>Timestamp: </strong><span class="emphasis"><?php echo $timestamp_string; ?></span></p>
 	</div>
 
 	<div class="trial_button_wrapper">
 	  <p>
-	    <a href="<?php echo $GLOBALS['basesiteurl'] . '/assessment/showtest.php?activation_event=continue_trial'; ?>">Continue to assessment</a>
+	    <a href="<?php echo $GLOBALS['basesiteurl'] . '/assessment/showtest.php'; ?>">Continue to assessment</a>
 	  </p>
 	</div>
 

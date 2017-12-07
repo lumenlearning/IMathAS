@@ -29,7 +29,7 @@ def get_payment_status():
     print("\nRequest data: " + request.data)
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
-        "status": "has_access",
+        "status": "trial_not_started",
         "section_requires_student_payment": True,
         "trial_expired_in": 1024567
     }
