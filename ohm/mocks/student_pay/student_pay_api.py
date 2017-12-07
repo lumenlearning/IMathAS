@@ -84,4 +84,6 @@ def get_institution_data(id):
     return json.dumps(result)
 
 
-app.run()
+if __name__ == '__main__':
+    app.run()
+

@@ -13,8 +13,7 @@ This is a simple mock of the student payment API. It returns static content.
 
 ## Subsequent usage
 
-	$ . venv/bin/activate
-	$ ./student_pay_api.py
+	$ ./start.sh
 
 # Notes
 
