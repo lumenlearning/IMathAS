@@ -29,7 +29,7 @@ def get_payment_status():
     print("\nRequest data: " + request.data)
     print("Authorization: " + request.headers.get('Authorization'))
     result = {
-        "status": "expired",
+        "status": "has_access",
         "section_requires_student_payment": True,
         "trial_expired_in": 1024567
     }
@@ -79,11 +79,10 @@ def get_institution_data(id):
             "2204": "43627281-b00b-4142-8e4c-1e435fe4f1c1"
         },
         "bookstore_information": "This is a great book store. It has many books.",
-        "bookstore_url": "http://wsubookie.bncollege.com/webapp/wcs/stores/servlet/BNCBHomePage?storeId=15064&catalogId=10001&langId=-1"
+        "bookstore_url": "https://localhost/"
     }
     return json.dumps(result)
 
 
 if __name__ == '__main__':
     app.run()
-

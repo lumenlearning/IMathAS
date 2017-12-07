@@ -60,7 +60,14 @@ if ("activate_code" == $action) {
 	}
 
 	if ($studentPayStatus->getStudentHasValidAccessCode()) {
-		header("Location: " . $GLOBALS['assessmentUrl']);
+		header("Location: " . $GLOBALS['basesiteurl'] . "/ohm/assessments/activation_confirmation.php?" . Sanitize::generateQueryStringFromMap(array(
+			'courseId' => $courseId,
+			'assessmentId' => $assessmentId
+		)));
+
+		setcookie('stupayasscode', $accessCode, 0, $GLOBALS['basesiteurl'] . '/ohm/assessments');
+		setcookie('stupayasscodetimestamp', time(), 0, $GLOBALS['basesiteurl'] . '/ohm/assessments');
+
 		exit;
 	} else {
 		displayProcessErrorPage("Failed to activate access code. Please check your access code or contact support.");
