@@ -497,7 +497,7 @@
 				if ($pt==-1) {
 					$pt = 'N/A';
 				}
-				echo "<input type=text size=4 id=\"ud-" . Sanitize::onlyInt($line['id']) . "-".Sanitize::onlyFloat($loc)."\" name=\"ud-" . Sanitize::onlyInt($line['id']) . "-".Sanitize::onlyFloat($loc)."\" value=\"".Sanitize::encodeStringForDisplay($pt)."\">";
+				echo "<input type=text size=4 id=\"scorebox$cnt\" name=\"ud-" . Sanitize::onlyInt($line['id']) . "-".Sanitize::onlyFloat($loc)."\" value=\"".Sanitize::encodeStringForDisplay($pt)."\">";
 				if ($rubric != 0) {
 					echo printrubriclink($rubric,$points,"scorebox$cnt","fb-". $loc.'-'. Sanitize::onlyInt($line['id']),($loc+1));
 				}
