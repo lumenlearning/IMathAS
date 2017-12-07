@@ -67,4 +67,21 @@ def enrollment_events():
     return json.dumps(result)
 
 
+@app.route("/institutions/<int:id>", methods=['GET'])
+def get_institution_data(id):
+    print("\nRequest data: " + request.data)
+    print("Authorization: " + request.headers.get('Authorization'))
+    result = {
+        "id": "957c5216-7857-4b5a-9cb8-17c0c32bb608",
+        "name": "Hogwarts School of Witchcraft and Wizardry",
+        "external_ids": {
+            "4": "43627281-b00b-4142-8e4c-1e435fe4f1c1",
+            "2204": "43627281-b00b-4142-8e4c-1e435fe4f1c1"
+        },
+        "bookstore_information": "This is a great book store. It has many books.",
+        "bookstore_url": "https://localhost/"
+    }
+    return json.dumps(result)
+
+
 app.run()
