@@ -54,7 +54,6 @@ if (in_array($paymentStatus, $trialsExpired)) {
 	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/trials_expired.php");
 }
 if (in_array($paymentStatus, $codeClaimed)) {
-	$studentPayment->logActivationPageSeen();
 	$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/confirmation.php");
 }
 
