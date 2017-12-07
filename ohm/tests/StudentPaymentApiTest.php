@@ -217,9 +217,29 @@ final class StudentPaymentApiTest extends TestCase
 	}
 
 	/*
-	 * parseApiResponse
+	 * getInstitutionData
 	 */
 
+	function testGetInstitutionData()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::INSTITUTION_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$result = $this->studentPaymentApi->getInstitutionData();
+
+		$this->assertEquals('957c5216-7857-4b5a-9cb8-17c0c32bb608', $result->getId());
+		$this->assertEquals('Hogwarts School of Witchcraft and Wizardry', $result->getName());
+		$this->assertEquals('Hello, world!', $result->getBookstoreInformation());
+		$this->assertEquals('https://www.lumenlearning.com/', $result->getBookstoreUrl());
+		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['4']);
+		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
+	}
+
+
+	/*
+	 * parseApiResponse
+	 */
 
 	function testParseApiResponse_curlFailed()
 	{

@@ -89,7 +89,10 @@ class StudentPaymentApi
 		$this->debug("Student API URL = " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
-		$headers = array('Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret']);
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json'
+		);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
@@ -128,6 +131,7 @@ class StudentPaymentApi
 
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
 			'Content-Type: application/json',
 		);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
@@ -167,6 +171,7 @@ class StudentPaymentApi
 
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
 			'Content-Type: application/json',
 		);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
@@ -245,6 +250,7 @@ class StudentPaymentApi
 
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
 			'Content-Type: application/json',
 		);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
@@ -258,6 +264,36 @@ class StudentPaymentApi
 		$this->curl->close();
 
 		return $studentPayApiResult;
+	}
+
+	/**
+	 * Get institution data for the group by its ID. (ID specified in class constructor)
+	 *
+	 * @return LumenistrationInstitution An instance of LumenistrationInstitution.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function getInstitutionData()
+	{
+		$this->curl->reset();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/institutions/' . $this->groupId;
+		$this->debug("Lumenistration API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$lumenistrationInstitution = $this->parseInstitutionResponse($status, $result, [200]);
+		$this->curl->close();
+
+		return $lumenistrationInstitution;
 	}
 
 	/**
