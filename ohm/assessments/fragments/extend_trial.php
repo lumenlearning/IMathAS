@@ -3,9 +3,6 @@
  * This file is included from fragments/activation.php.
  */
 
-// TODO: Get bookstore url from the API
-$bookstoreUrl = "#";
-
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, it’s time to enter your Lumen OHM activation code.</h1>
@@ -19,7 +16,7 @@ $bookstoreUrl = "#";
 
 	You can purchase an activation code at your campus bookstore (ask for the
 	Lumen OHM activation code for your course) or on the bookstore
-	<a href="<?php echo $bookstoreUrl; ?>">website</a>.
+	<a href="<?php echo $institutionData->getBookstoreUrl(); ?>">website</a>.
 </p>
 
 <?php

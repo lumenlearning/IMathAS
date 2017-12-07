@@ -7,9 +7,6 @@ $assessNameStm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id A
 $assessNameStm->execute(array(':id'=>$assessmentId, ':courseid'=>$courseId));
 $assessmentName = $assessNameStm->fetchColumn(0);
 
-// TODO: Get bookstore url from the API
-$bookstoreUrl = "#";
-
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, are you ready to start working on <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>?</h1>
@@ -23,7 +20,7 @@ $bookstoreUrl = "#";
 	trial for the assessments in this Lumen OHM course.  Before your trial runs
 	out you should get an OHM course activation code. You can purchase one at your
 	campus bookstore (ask for the Lumen OHM activation code for your course) or
-	on the bookstore <a href="<?php echo $bookstoreUrl; ?>">website</a>.
+	on the bookstore <a href="<?php echo $institutionData->getBookstoreUrl(); ?>">website</a>.
 </p>
 
 <?php

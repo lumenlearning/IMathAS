@@ -3,9 +3,6 @@
  * This file is included from fragments/activation.php.
  */
 
-// TODO: Get bookstore url from the API
-$bookstoreUrl = "#";
-
 $trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
 
 // less than 1 minute left in trial
@@ -41,7 +38,7 @@ else if (86400 <= $trialTimeRemaining) {
 	your trial has ended you will still be able to view your course materials, but
 	you will need this code to complete your Lumen OHM assessments. You can
 	purchase one at your campus bookstore (ask for the Lumen OHM activation code
-	for your course) or on the bookstore <a href="<?php echo $bookstoreUrl; ?>">website</a>.
+	for your course) or on the bookstore <a href="<?php echo $institutionData->getBookstoreUrl(); ?>">website</a>.
 </p>
 
 <?php
