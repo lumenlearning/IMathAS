@@ -32,6 +32,7 @@ final class StudentPaymentApiTest extends TestCase
 	private $pdoMock;
 	private $pdoStatementMock;
 
+	// Responses for course/student status.
 	const ACTIVATION_SUCCESS_RESPONSE = '{"message":"You have successfully submitted your code.","status":"'
 	. StudentPayApiResult::ACTIVATION_SUCCESS . '"}';
 	const HAS_ACTIVATION_CODE_RESPONSE = '{"status":"' . StudentPayApiResult::IS_ACTIVATED
@@ -42,6 +43,10 @@ final class StudentPaymentApiTest extends TestCase
 	const IN_TRIAL_RESPONSE = '{"status":"' . StudentPayApiResult::IN_TRIAL
 	. '","section_requires_student_payment":true,"trial_expired_in":1234}';
 	const EVENT_LOGGED_OK_RESPONSE = '{"status": "ok"}';
+
+	// Responses for institution data
+	const INSTITUTION_RESPONSE = '{"id":"957c5216-7857-4b5a-9cb8-17c0c32bb608","name":"Hogwarts School of Witchcraft and Wizardry","external_ids":{"4":"43627281-b00b-4142-8e4c-1e435fe4f1c1","2204":"43627281-b00b-4142-8e4c-1e435fe4f1c1"},"bookstore_information":"Hello, world!","bookstore_url":"https://www.lumenlearning.com/"}';
+
 	const UNEXPECTED_RESPONSE = 'unexpected response text';
 
 
@@ -215,6 +220,39 @@ final class StudentPaymentApiTest extends TestCase
 	 * parseApiResponse
 	 */
 
+
+	function testParseApiResponse_curlFailed()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(0, null, array('200')));
+	}
+
+	function testParseApiResponse_nullResponse()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, null, array('200')));
+	}
+
+	function testParseApiResponse_emptyResponse()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, '', array('200')));
+	}
+
+	function testParseApiResponse_missingStatus()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, '{}', array('200')));
+	}
+
 	function testParseApiResponse_notPaid_and_notInTrial()
 	{
 		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
@@ -268,6 +306,55 @@ final class StudentPaymentApiTest extends TestCase
 			array(200, StudentPaymentApiTest::EVENT_LOGGED_OK_RESPONSE, array('200')));
 
 		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	/*
+	 * parseInstitutionResponse
+	 */
+
+	function testParseInstitutionResponse_curlFailed()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseInstitutionResponse',
+			array(0, null, array('200')));
+	}
+
+	function testParseInstitutionResponse_nullResponse()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseInstitutionResponse',
+			array(200, null, array('200')));
+	}
+
+	function testParseInstitutionResponse_emptyResponse()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseInstitutionResponse',
+			array(200, '', array('200')));
+	}
+
+	function testParseInstitutionResponse_missingId()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->invokePrivateMethod($this->studentPaymentApi, 'parseInstitutionResponse',
+			array(200, '{}', array('200')));
+	}
+
+	function testParseInstitutionResponse()
+	{
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'parseInstitutionResponse',
+			array(200, StudentPaymentApiTest::INSTITUTION_RESPONSE, array('200')));
+
+		$this->assertEquals('957c5216-7857-4b5a-9cb8-17c0c32bb608', $result->getId());
+		$this->assertEquals('Hogwarts School of Witchcraft and Wizardry', $result->getName());
+		$this->assertEquals('Hello, world!', $result->getBookstoreInformation());
+		$this->assertEquals('https://www.lumenlearning.com/', $result->getBookstoreUrl());
+		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['4']);
+		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
 	}
 
 	/*

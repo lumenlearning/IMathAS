@@ -279,7 +279,7 @@ class StudentPaymentApi
 			// curl returns 0 on http failure
 			throw new StudentPaymentException("Unable to connect to student payment API.");
 		}
-		if (null == $apiResponse) {
+		if (null == $apiResponse || '' == $apiResponse) {
 			// json_decode failed to find valid json content
 			throw new StudentPaymentException("Unexpected content returned from student payment API: "
 				. $responseBody);
@@ -333,7 +333,7 @@ class StudentPaymentApi
 			// curl returns 0 on http failure
 			throw new StudentPaymentException("Unable to connect to student payment API.");
 		}
-		if (null == $apiResponse) {
+		if (null == $apiResponse || '' == $apiResponse) {
 			// json_decode failed to find valid json content
 			throw new StudentPaymentException("Unexpected content returned from student payment API: "
 				. $responseBody);
@@ -352,8 +352,8 @@ class StudentPaymentApi
 		$lumenistrationInstitution->setBookstoreUrl($apiResponse['bookstore_url']);
 
 		$allExternalIds = array();
-		foreach ($apiResponse['external_ids'] as $externalId) {
-			$allExternalIds[] = $externalId;
+		foreach ($apiResponse['external_ids'] as $key => $value) {
+			$allExternalIds["$key"] = "$value"; // enclosed in quotes to force string type
 		}
 		$lumenistrationInstitution->setExternalIds($allExternalIds);
 
