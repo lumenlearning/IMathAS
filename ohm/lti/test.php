@@ -57,7 +57,7 @@ if (empty($_REQUEST['context_id'])) {
   array_push($errors, "Course information not provided (LTI parameter 'context_id' is required)");
 }
 if (empty($_REQUEST['roles'])) {
-  array_push($errors, "Role of user not provided (LTI parameter 'roles' is required");
+  array_push($errors, "Role of user not provided (LTI parameter 'roles' is required)");
 }
 if (empty($_REQUEST['oauth_consumer_key'])) {
   array_push($errors, "No 'oauth_consumer_key' was sent");
@@ -83,9 +83,9 @@ if(empty($errors)){
   }
 
   echo '</ul>';
-  echo '<p>
+  echo '<p style="margin-top: 35px;">
             Please take a screenshot of this page and send us an email at <a href="mailto:support@lumenlearning.com">support@lumenlearning.com</a>, letting us know 
-            you\'re having trouble setting your Lumen LTI connection, and which institute you are from. Someone from 
+            you\'re having trouble setting your Lumen LTI connection, and which institution you are from. Someone from
             our support team will then get in touch to help troubleshoot these problems.
         </p>';
 }
