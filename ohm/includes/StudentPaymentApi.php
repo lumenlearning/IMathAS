@@ -320,16 +320,16 @@ class StudentPaymentApi
 			throw new StudentPaymentException("Unexpected content returned from student payment API: "
 				. $responseBody);
 		}
-		if (!isset($apiResponse['status'])) {
-			// All endpoints should return a status in the json payload.
-			throw new StudentPaymentException(sprintf(
-				"Student payment API did not return a status in JSON payload. Content: %s", $status,
-				$responseBody));
-		}
 		if (!in_array($status, $acceptableHttpStatusList)) {
 			throw new StudentPaymentException(sprintf(
 				"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
 				$responseBody));
+		}
+		if (!isset($apiResponse['status'])) {
+			// All endpoints should return a status in the json payload.
+			throw new StudentPaymentException(sprintf(
+				"Student payment API did not return a status in JSON payload. HTTP status: %s, Content: %s",
+				$status, $responseBody));
 		}
 
 		$studentPayApiResult = new StudentPayApiResult();
@@ -374,11 +374,16 @@ class StudentPaymentApi
 			throw new StudentPaymentException("Unexpected content returned from student payment API: "
 				. $responseBody);
 		}
-		if (!isset($apiResponse['id'])) {
+		if (!in_array($status, $acceptableHttpStatusList)) {
+			throw new StudentPaymentException(sprintf(
+				"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
+				$responseBody));
+		}
+		if (!isset($apiResponse['name'])) {
 			// All endpoints should return a status in the json payload.
 			throw new StudentPaymentException(sprintf(
-				"Student payment API did not return an institution ID in JSON payload. Content: %s", $status,
-				$responseBody));
+				"Student payment API did not return an institution name in JSON payload. HTTP Status: %s, Content: %s",
+				$status, $responseBody));
 		}
 
 		$lumenistrationInstitution = new LumenistrationInstitution();
