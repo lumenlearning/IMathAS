@@ -6,12 +6,14 @@ class StudentPayApiResult
 {
 
 	const NO_TRIAL_NO_ACTIVATION = "trial_not_started";
-	const START_TRIAL_SUCCESS = "trial_started";
 	const IN_TRIAL = "in_trial";
 	const CAN_EXTEND = "can_extend";
 	const ALL_TRIALS_EXPIRED = "expired";
-	const ACTIVATION_SUCCESS = "activation_code_claimed";
 	const IS_ACTIVATED = "has_access";
+
+	const START_TRIAL_SUCCESS = "trial_started";
+	const EXTEND_TRIAL_SUCCESS = "extended";
+	const ACTIVATION_SUCCESS = "activation_code_claimed";
 
 	private $courseRequiresStudentPayment; // boolean
 	private $studentPaymentStatus; // string (not_paid, in_trial, can_extend, etc)

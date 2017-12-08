@@ -193,7 +193,8 @@ class StudentPayment
 		}
 
 		// Student is in trial
-		$validIsInTrial = array(StudentPayApiResult::IN_TRIAL, StudentPayApiResult::START_TRIAL_SUCCESS);
+		$validIsInTrial = array(StudentPayApiResult::IN_TRIAL, StudentPayApiResult::START_TRIAL_SUCCESS,
+			StudentPayApiResult::EXTEND_TRIAL_SUCCESS);
 		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validIsInTrial)) {
 			$studentPayStatus->setStudentIsInTrial(true);
 			$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
