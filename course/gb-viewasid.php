@@ -278,7 +278,7 @@
 			$body .= "<p>Are you sure you want to clear this $pers's scores for this assessment?</p>";
 			$body .= '<form method="POST" action="gb-viewasid.php?'.$querystring.'">';
 			$body .= '<p><button type=submit name="clearscores" value="confirmed">'._('Really Clear').'</button> ';
-			$body .= "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"gb-viewasid.php?$querystring'\"></p>\n";
+			$body .= "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='gb-viewasid.php?$querystring'\"></p>\n";
 			$body .= '</form>';
 			//exit;
 		}
@@ -728,7 +728,8 @@
 				$saenddate = $exped;
 			}
 			require("../includes/exceptionfuncs.php");
-			$useexception = getCanUseAssessException($exception, $line, true);
+			$exceptionfuncs = new ExceptionFuncs($userid, $cid, !($isteacher || $istutor));
+			$useexception = $exceptionfuncs->getCanUseAssessException($exception, $line, true);
 		}
 
 		if ($isteacher) {

@@ -138,7 +138,7 @@ require_once("includes/sanitize.php");
 			$message .= "and paste it into your webbrowser:</p>\r\n";
 			$message .= "<a href=\"" . $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id\">";
 			$message .= $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id</a>\r\n";
-			mail(Sanitize::emailAddress($_POST['email']),'IMathAS Confirmation',$message,$headers);
+			mail(Sanitize::emailAddress($_POST['email']),$installname.' Confirmation',$message,$headers);
 			require("header.php");
 			if ($gb == '') {
 				echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; New User Signup</div>\n";
@@ -287,9 +287,9 @@ require_once("includes/sanitize.php");
 				$message .= $GLOBALS['basesiteurl'] . "/forms.php?action=resetpw&id=$id&code=$code</a>\r\n";
 
 				if (isset($CFG['GEN']['useSESmail'])) {
-					SESmail(Sanitize::emailAddress($email), $sendfrom, 'Password Reset Request',$message);
+					SESmail(Sanitize::emailAddress($email), $sendfrom, $installname.' Password Reset Request',$message);
 				} else {
-					mail(Sanitize::emailAddress($email),'Password Reset Request',$message,$headers);
+					mail(Sanitize::emailAddress($email), $installname.' Password Reset Request',$message,$headers);
 				}
 
 				require("header.php");

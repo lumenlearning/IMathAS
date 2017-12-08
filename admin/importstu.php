@@ -38,15 +38,14 @@ function parsecsv($data) {
 			$ln = $fncol[count($fncol)-1];
 		}
 	}
-	$fn = preg_replace('/\W/','',$fn);
-	$ln = preg_replace('/\W/','',$ln);
+	$fn = preg_replace('/[^\w\'-]/','',$fn);
+	$ln = preg_replace('/[^\w\'-]/','',$ln);
 	$fn = ucfirst(strtolower($fn));
 	$ln = ucfirst(strtolower($ln));
-	if ($_POST['unusecol']==0) {
-		$un = strtolower($fn.'_'.$ln);
+	if (empty($_POST['unloc'])) {
+		$un = '';
 	} else {
 		$un = $data[$_POST['unloc']-1];
-		//$un = preg_replace('/\W/','',$un);
 	}
 	if ($_POST['emailloc']>0) {
 		$email = $data[$_POST['emailloc']-1];
@@ -68,7 +67,7 @@ function parsecsv($data) {
 	} else {
 		$sec = 0;
 	}
-	if ($_POST['pwtype']==3) {
+	if (!empty($_POST['pwcol'])) {
 		$pw = $data[$_POST['pwcol']-1];
 	} else {
 		$pw = 0;
@@ -109,6 +108,15 @@ if (!(isset($teacherid)) && $myrights<100) {
 		if (isset($CFG['GEN']['newpasswords'])) {
 			require_once("../includes/password.php");
 		}
+		if ($isadmin) {
+			$ncid = Sanitize::onlyInt($_POST['enrollcid']);
+		} else {
+			$ncid = $cid;
+		}
+		$stm = $DBH->prepare("SELECT deflatepass FROM imas_courses WHERE id=:cid");
+		$stm->execute(array(':cid'=>$ncid));
+		$deflatepass = $stm->fetchColumn(0);
+		
 		$filename = rtrim(dirname(__FILE__), '/\\') .'/import/' . Sanitize::sanitizeFilenameAndCheckBlacklist($_POST['filename']);
 		$handle = fopen_utf8($filename,'r');
 		if ($_POST['hdr']==1) {
@@ -120,6 +128,7 @@ if (!(isset($teacherid)) && $myrights<100) {
 			for ($i=0;$i<count($arr);$i++) {
 				$arr[$i] = trim($arr[$i]);
 			}
+
 			//DB addslashes_deep($arr);
 			if (trim($arr[0])=='' || trim($arr[0])=='_') {
 				continue;
@@ -138,9 +147,12 @@ if (!(isset($teacherid)) && $myrights<100) {
 				echo "Email ".Sanitize::encodeStringForDisplay($arr[3])." is invalid; skipping<br/>\n";
 				continue;
 			}
-			if ((isset($CFG['acct']['passwordFormat']) && !checkFormatAgainstRegex($arr[6], $CFG['acct']['passwordFormat'])) ||
-						strlen($arr[6]) < isset($CFG['acct']['passwordMinlength'])?$CFG['acct']['passwordMinlength']:6) {
-				echo "Password for username ".Sanitize::encodeStringForDisplay($arr[0])." is invalid; skipping<br/>\n";
+			if (strlen($arr[6]) < (isset($CFG['acct']['passwordMinlength'])?$CFG['acct']['passwordMinlength']:6)) {
+				echo "Password for username ".Sanitize::encodeStringForDisplay($arr[0])." is too short; skipping<br/>\n";
+				continue;
+			}
+			if (isset($CFG['acct']['passwordFormat']) && !checkFormatAgainstRegex($arr[6], $CFG['acct']['passwordFormat'])) {
+				echo "Password for username ".Sanitize::encodeStringForDisplay($arr[0])." is invalid format; skipping<br/>\n";
 				continue;
 			}
 
@@ -154,43 +166,12 @@ if (!(isset($teacherid)) && $myrights<100) {
 				$id = $stm->fetchColumn(0);
 				echo "Username ".Sanitize::encodeStringForDisplay($arr[0])." already existed in system; using existing<br/>\n";
 			} else {
-				if (($_POST['pwtype']==0 || $_POST['pwtype']==1) && strlen($arr[0])<4) {
-					if (isset($CFG['GEN']['newpasswords'])) {
-						$pw = password_hash($arr[0], PASSWORD_DEFAULT);
-					} else {
-						$pw = md5($arr[0]);
-					}
+				if (isset($CFG['GEN']['newpasswords'])) {
+					$pw = password_hash($arr[6], PASSWORD_DEFAULT);
 				} else {
-					if ($_POST['pwtype']==0) {
-						if (isset($CFG['GEN']['newpasswords'])) {
-							$pw = password_hash(substr($arr[0],0,4), PASSWORD_DEFAULT);
-						} else {
-							$pw = md5(substr($arr[0],0,4));
-						}
-					} else if ($_POST['pwtype']==1) {
-						if (isset($CFG['GEN']['newpasswords'])) {
-							$pw = password_hash(substr($arr[0],-4), PASSWORD_DEFAULT);
-						} else {
-							$pw = md5(substr($arr[0],-4));
-						}
-					} else if ($_POST['pwtype']==2) {
-						if (isset($CFG['GEN']['newpasswords'])) {
-							$pw = password_hash($_POST['defpw'], PASSWORD_DEFAULT);
-						} else {
-							$pw = md5($_POST['defpw']);
-						}
-					} else if ($_POST['pwtype']==3) {
-						if (trim($arr[6])=='') {
-							echo "Password for ".Sanitize::encodeStringForDisplay($arr[0])." is blank; skipping import<br/>";
-							continue;
-						}
-						if (isset($CFG['GEN']['newpasswords'])) {
-							$pw = password_hash($arr[6], PASSWORD_DEFAULT);
-						} else {
-							$pw = md5($arr[6]);
-						}
-					}
+					$pw = md5($arr[6]);
 				}
+				
 				//DB $query = "INSERT INTO imas_users (SID,FirstName,LastName,email,rights,password) VALUES ('$arr[0]','$arr[1]','$arr[2]','$arr[3]',10,'$pw')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB $id = mysql_insert_id();
@@ -199,11 +180,7 @@ if (!(isset($teacherid)) && $myrights<100) {
 				$id = $DBH->lastInsertId();
 			}
 			if ($_POST['enrollcid']!=0 || !$isadmin) {
-				if ($isadmin) {
-					$ncid = Sanitize::onlyInt($_POST['enrollcid']);
-				} else {
-					$ncid = $cid;
-				}
+
 				//DB $vals = "'$id','$ncid'";
 				//DB $query = "SELECT id FROM imas_students WHERE userid='$id' AND courseid='$ncid'";
 				//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
@@ -226,10 +203,11 @@ if (!(isset($teacherid)) && $myrights<100) {
 				//DB }
 				//DB $query .= ") VALUES ($vals)";
 
-				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section) VALUES (:userid, :courseid, :code, :section)");
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section,latepass) VALUES (:userid, :courseid, :code, :section, :latepass)");
 				$stm->execute(array(':userid'=>$id, ':courseid'=>$ncid,
 					':code'=>($_POST['codetype']==1)?$arr[4]:null,
-					':section'=>($_POST['sectype']>0)?$arr[5]:null));
+					':section'=>($_POST['sectype']>0)?$arr[5]:null,
+					':latepass'=>$deflatepass));
 			}
 
 		}
@@ -400,33 +378,15 @@ if ($overwriteBody==1) {
 
 		<span class=form>Email address is in column:<br/>Enter 0 if no email column</span>
 		<span class=formright><input type=text name=emailloc size=4 value="7"></span><br class=form>
-<?php
-if (!isset($CFG['GEN']['allowInstrImportStuByName']) || $CFG['GEN']['allowInstrImportStuByName']==false) {
-?>
 
 		<span class=form>Unique username is in column:</span>
 		<span class=formright>
-			<input type=hidden name=unusecol value="1"/><input type=text name=unloc size=4 value="2"/>
+			<input type=text name=unloc size=4 value="2"/>
 		</span><br class=form>
-<?php
-} else {
-	?>
 
-		<span class=form>Does a column contain a desired username:</span>
+		<span class=form>Password is in column:</span>
 		<span class=formright>
-			<input type=radio name=unusecol value="1" CHECKED>Yes, Column
-			<input type=text name=unloc size=4 value="2"/><br/>
-			<input type=radio name=unusecol value="0">No, Use as username: firstname_lastname
-		</span><br class=form>
-<?php
-}
-?>
-		<span class=form>Set password to:</span>
-		<span class=formright>
-			<input type=radio name=pwtype value="3">Use value in column
-			<input type=text name="pwcol" size=4 value="1"/><br/>
-			<input type=radio name=pwtype value="2">Set to:
-			<input type=text name="defpw" value="password"/>
+			<input type=text name="pwcol" size=4 value="1"/>
 		</span><br class=form>
 
 		<span class=form>Assign code number?</span>

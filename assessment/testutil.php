@@ -99,7 +99,11 @@ function getquestioninfo($qns,$testsettings,$preloadqsdata=false) {
 		}
 		$line['allowregen'] = 1-floor($line['regen']/3);  //0 if no, 1 if use default
 		$line['regen'] = $line['regen']%3;
+		if ($line['showans']=='0') {
+			$line['showans'] = $testsettings['showans'];
+		}
 		$line['showansduring'] = (is_numeric($line['showans']) && $line['showans'] > 0);
+		$line['showansafterlast'] = ($line['showans']==='F' || $line['showans']==='R' || $line['showans']==='J');
 		if (!$preloadqsdata) {
 			unset($line['qtype']);
 			unset($line['control']);
@@ -1103,6 +1107,17 @@ function embedshowicon($qn) {
 		} else {
 			echo "<img class=\"embedicon\" src=\"$imasroot/img/q_emptybox.gif\" alt=\""._('Unattempted')."\"/> ";
 		}
+	}
+}
+
+//output appropriate breadcrumbs for entering an assessment
+// like on the password entry page, latepass confirmation, etc.
+// this is light breadcrumbs rather than full
+function showEnterAssessmentBreadcrumbs($aname) {
+	global $isdiag, $sessiondata, $breadcrumbbase, $coursename;
+	if (!$isdiag && strpos($_SERVER['HTTP_REFERER'],'treereader')===false && !(isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0)) {
+		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=".Sanitize::courseId($_GET['cid'])."\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
+		echo '&gt; ', Sanitize::encodeStringForDisplay($aname), '</div>';
 	}
 }
 

@@ -24,6 +24,7 @@
 		echo "</body></html>\n";
 		exit;
 	}
+
 	$actas = false;
 	$isreview = false;
 	if (isset($teacherid) && isset($_GET['actas'])) {
@@ -31,12 +32,25 @@
 		unset($teacherid);
 		$actas = true;
 	}
+	$isRealStudent = (isset($studentid) && !$actas && !isset($sessiondata['stuview']));
+	$latepasses = 0;
+	if (!isset($sessiondata['stuview'])) { //want to load for actas too
+		require_once("../includes/exceptionfuncs.php");
+		if ($isRealStudent) {
+			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $studentinfo['latepasses'], $latepasshrs);
+			$latepasses = $studentinfo['latepasses'];
+		} else {
+			$exceptionfuncs = new ExceptionFuncs($userid, $cid, false);
+		}
+	}
+	$useexception = false;
+	$inexception = false;
+	$exceptionduedate = 0;
+
 	include("displayq2.php");
 	include("testutil.php");
 	include("asidutil.php");
 
-	$inexception = false;
-	$exceptionduedate = 0;
 	//error_reporting(0);  //prevents output of error messages
 
 	//check to see if test starting test or returning to test
@@ -58,26 +72,15 @@
 			$assessmentclosed = true;
 		}
 		$canuselatepass = false;
-		if (!$actas) {
-			if (isset($studentid)) {
-				//DB $query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
-				//DB $query .= "('$userid','$cid','assess','$aid',$now)";
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
-				$query .= "(:userid, :courseid, :type, :typeid, :viewtime)";
-				$stm = $DBH->prepare($query);
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':type'=>'assess', ':typeid'=>$aid, ':viewtime'=>$now));
-			}
 
-			//DB $query = "SELECT startdate,enddate FROM imas_exceptions WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-			//DB $result2 = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $row = mysql_fetch_row($result2);
-			$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
-			$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
-			$row = $stm2->fetch(PDO::FETCH_NUM);
-			if ($row!=null) {
-				require_once("../includes/exceptionfuncs.php");
-				$useexception = getCanUseAssessException($row, $adata, true);
+		if (!$actas) {
+			if ($isRealStudent) {
+				$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+				$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
+				$row = $stm2->fetch(PDO::FETCH_NUM);
+				if ($row!=null) {
+					$useexception = $exceptionfuncs->getCanUseAssessException($row, $adata, true);
+				}
 			}
 			if ($row!=null && $useexception) {
 				if ($now<$row[0] || $row[1]<$now) { //outside exception dates
@@ -105,49 +108,33 @@
 					}
 				}
 			}
+			if (($assessmentclosed || $isreview) && $adata['avail']>0 && $isRealStudent) {
+				if ($latepasses>0) {
+					list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($row, $adata);
+				}
+			}
+		}
+		if ($isreview && $canuselatepass && !isset($_GET['goreview'])) {
+			//ask them if they're sure they want review mode vs latepass
+			require("header.php");
+			showEnterAssessmentBreadcrumbs($adata['name']);
+			echo '<p>'._('This assessment is past the due date, and is now in un-graded review mode where no scores will be saved.').'</p>';
+			echo '<p>'.sprintf(_('You have %d LatePass(es) available which you could use to re-open the assignment for scored work.'), $latepasses).'</p>';
+			echo '<p><button type="button" onclick="window.location.href=\'../course/redeemlatepass.php?cid='.$cid.'&aid='.$aid.'\'">'._('Use LatePass').'</button> ';
+			echo _('This will re-open the assessment for graded work').'</p>';
+			echo '<p><button type="button" onclick="window.location.href=\'showtest.php?cid='.$cid.'&id='.$aid.'&goreview=true\'">'.('Continue in Review Mode').'</button> ';
+			echo '<span class="noticetext">'._('If you open the assessment in un-graded review mode now, you will not be able to use a LatePass later').'</span></p>';
+			require("../footer.php");
+			exit;
 		}
 		if ($assessmentclosed) {
 			require("header.php");
+			showEnterAssessmentBreadcrumbs($adata['name']);
 			echo '<p>', _('This assessment is closed'), '</p>';
 			if ($adata['avail']>0) {
-				$viewedassess = array();
-				if ($adata['enddate']<$now && $adata['allowlate']>10 && !$actas && !isset($sessiondata['stuview'])) {
-					//DB $query = "SELECT typeid FROM imas_content_track WHERE courseid='$cid' AND userid='$userid' AND type='gbviewasid'";
-					//DB $r2 = mysql_query($query) or die("Query failed : " . mysql_error());
-					//DB while ($r = mysql_fetch_row($r2)) {
-					$stm2 = $DBH->prepare("SELECT typeid FROM imas_content_track WHERE courseid=:courseid AND userid=:userid AND type='gbviewasid'");
-					$stm2->execute(array(':courseid'=>$cid, ':userid'=>$userid));
-					while ($r = $stm2->fetch(PDO::FETCH_NUM)) {
-						$viewedassess[] = $r[0];
-					}
-				}
 
-				if (!isset($teacherid) && !isset($tutorid) && !$actas && !isset($sessiondata['stuview'])) {
-					//DB $query = "SELECT latepasshrs FROM imas_courses WHERE id='".$cid."'";
-					//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-					//DB $latepasshrs = mysql_result($result,0,0);
-					$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:cid");
-					$stm->execute(array(':cid'=>$cid));
-					$latepasshrs = $stm->fetchColumn(0);
-
-					//DB $query = "SELECT latepass FROM imas_students WHERE userid='$userid' AND courseid='$cid'";
-					//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-					//DB $latepasses = mysql_result($result,0,0);
-					$stm = $DBH->prepare("SELECT latepass FROM imas_students WHERE userid=:userid AND courseid=:courseid");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
-					$latepasses = $stm->fetchColumn(0);
-				} else {
-					$latepasses = 0;
-					$latepasshrs = 0;
-				}
-
-				if (!$actas && $latepasses>0) {
-					require_once("../includes/exceptionfuncs.php");
-					list($useexception, $canundolatepass, $canuselatepass) = getCanUseAssessException($row, $adata);
-
-					if ($canuselatepass) {
-						echo "<p><a href=\"$imasroot/course/redeemlatepass.php?cid=$cid&aid=$aid\">", _('Use LatePass'), "</a></p>";
-					}
+				if (!$actas && $canuselatepass) {
+					echo "<p><a href=\"$imasroot/course/redeemlatepass.php?cid=$cid&aid=$aid\">", _('Use LatePass'), "</a></p>";
 				}
 
 				if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0 && $sessiondata['ltiitemid']==$aid) {
@@ -162,7 +149,7 @@
 						$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 						if ($stm->rowCount()>0) {
 							echo '<p><a href="../course/gb-viewasid.php?cid='.$cid.'&asid='.$stm->fetchColumn(0).'" ';
-							if ($adata['allowlate']>10 && ($now - $adata['enddate'])<$latepasshrs*3600 && !in_array($aid,$viewedassess) && $latepasses>0 && !isset($sessiondata['stuview']) && !$actas) {
+							if (!$actas && $canuselatepass) {
 								echo ' onclick="return confirm(\''._('If you view this scored assignment, you will not be able to use a LatePass on it').'\');"';
 							}
 							echo '>', _('View your scored assessment'), '</p>';
@@ -225,10 +212,7 @@
 			}
 			if ($pwfail) {
 				require("../header.php");
-				if (!$isdiag && strpos($_SERVER['HTTP_REFERER'],'treereader')===false && !(isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0)) {
-					echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid=".Sanitize::courseId($_GET['cid'])."\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-					echo '&gt; ', _('Assessment'), '</div>';
-				}
+				showEnterAssessmentBreadcrumbs($adata['name']);
 				echo $out;
 				echo '<h2>'.$adata['name'].'</h2>';
 				if (strpos($adata['name'],'RPNow') !== false && strpos($_SERVER['HTTP_USER_AGENT'],'RPNow') === false) {
@@ -245,17 +229,23 @@
 			}
 		}
 
+		//log assessment access
+		if ($isRealStudent) {
+			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
+			$query .= "(:userid, :courseid, :type, :typeid, :viewtime)";
+			$stm = $DBH->prepare($query);
+			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':type'=>$isreview?'assessreview':'assess', ':typeid'=>$aid, ':viewtime'=>$now));
+		}
+
 		//get latepass info
-		if (!isset($teacherid) && !isset($tutorid) && !$actas && !isset($sessiondata['stuview'])) {
-		   //DB $query = "SELECT latepass FROM imas_students WHERE userid='$userid' AND courseid='{$adata['courseid']}'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB $sessiondata['latepasses'] = mysql_result($result,0,0);
+		if ($isRealStudent) {
 		   $stm = $DBH->prepare("SELECT latepass FROM imas_students WHERE userid=:userid AND courseid=:courseid");
 		   $stm->execute(array(':userid'=>$userid, ':courseid'=>$adata['courseid']));
 		   $sessiondata['latepasses'] = $stm->fetchColumn(0);
 		} else {
 			$sessiondata['latepasses'] = 0;
 		}
+		$sessiondata['latepasshrs'] = $latepasshrs;
 
 		$sessiondata['istutorial'] = $adata['istutorial'];
 		$_SESSION['choicemap'] = array();
@@ -684,19 +674,18 @@
 		leavetestmsg();
 		exit;
 	}
-	if (!isset($sessiondata['actas'])) {
+	if (!$actas) {
 		//DB $query = "SELECT startdate,enddate,islatepass,exceptionpenalty FROM imas_exceptions WHERE userid='$userid' AND assessmentid='{$line['assessmentid']}' AND itemtype='A'";
 		//DB $result2 = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $row = mysql_fetch_row($result2);
 		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,exceptionpenalty FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$line['assessmentid']));
-		$row = $stm2->fetch(PDO::FETCH_NUM);
-		if ($row!=null) {
-			require_once("../includes/exceptionfuncs.php");
-			$useexception = getCanUseAssessException($row, $testsettings, true);
+		$exceptionrow = $stm2->fetch(PDO::FETCH_NUM);
+		if ($exceptionrow != null) {
+			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $testsettings, true);
 		}
-		if ($row!=null && $useexception) {
-			if ($now<$row[0] || $row[1]<$now) { //outside exception dates
+		if ($exceptionrow!=null && $useexception) {
+			if ($now<$exceptionrow[0] || $exceptionrow[1]<$now) { //outside exception dates
 				if ($now > $testsettings['startdate'] && $now<$testsettings['reviewdate']) {
 					$isreview = true;
 				} else {
@@ -709,13 +698,13 @@
 			} else { //in exception
 				if ($testsettings['enddate']<$now) { //exception is for past-due-date
 					$inexception = true;
-					$exceptiontype = $row[2];
-					if ($row[3]!==null) {
-						$testsettings['exceptionpenalty'] = $row[3];
+					$exceptiontype = $exceptionrow[2];
+					if ($exceptionrow[3]!==null) {
+						$testsettings['exceptionpenalty'] = $exceptionrow[3];
 					}
 				}
 			}
-			$exceptionduedate = $row[1];
+			$exceptionduedate = $exceptionrow[1];
 		} else { //has no exception
 			if ($now < $testsettings['startdate'] || $testsettings['enddate'] < $now) {//outside normal dates
 				if ($now > $testsettings['startdate'] && $now<$testsettings['reviewdate']) {
@@ -737,8 +726,7 @@
 		$stm2->execute(array(':userid'=>$sessiondata['actas'], ':assessmentid'=>$line['assessmentid']));
 		$row = $stm2->fetch(PDO::FETCH_NUM);
 		if ($row!=null) {
-			require_once("../includes/exceptionfuncs.php");
-			$useexception = getCanUseAssessException($row, $testsettings, true);
+			$useexception = $exceptionfuncs->getCanUseAssessException($row, $testsettings, true);
 			if ($useexception) {
 				$exceptionduedate = $row[1];
 			}
@@ -813,8 +801,6 @@
 
 	$allowregen = (!$superdone && ($testsettings['testtype']=="Practice" || $testsettings['testtype']=="Homework"));
 	$showeachscore = ($testsettings['testtype']=="Practice" || $testsettings['testtype']=="AsGo" || $testsettings['testtype']=="Homework");
-	$showansduring = is_numeric($testsettings['showans']);
-	$showansafterlast = ($testsettings['showans']==='F' || $testsettings['showans']==='J');
 	$noindivscores = ($testsettings['testtype']=="EndScore" || $testsettings['testtype']=="EndReviewWholeTest" || $testsettings['testtype']=="NoScores");
 	$reviewatend = ($testsettings['testtype']=="EndReview" || $testsettings['testtype']=="EndReviewWholeTest");
 	$reattemptduring = !($testsettings['testtype']=="EndScore" || $testsettings['testtype']=="EndReviewWholeTest");
@@ -1224,38 +1210,12 @@ if (!isset($_REQUEST['embedpostback'])) {
 			}
 			$out .= '</a> ';
 		}
-		$latepasscnt = 0;
-		if ($testsettings['allowlate']%10>1 && isset($exceptionduedate) && $exceptionduedate>0) {
-			//DB $query = "SELECT latepasshrs FROM imas_courses WHERE id='".$testsettings['courseid']."'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $latepasshrs = mysql_result($result,0,0);
-			$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$testsettings['courseid']));
-			$latepasshrs = $stm->fetchColumn(0);
-			$latepasscnt = round(($exceptionduedate - $testsettings['enddate'])/(3600*$latepasshrs));
+		$canuselatepass = false;
+		if ($isRealStudent) {
+			list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $testsettings);
 		}
-		if (($testsettings['allowlate']%10==1 || $testsettings['allowlate']%10-1>$latepasscnt) && $sessiondata['latepasses']>0 && !$isreview) {
+		if ($canuselatepass && !$isreview) {
 			$out .= "<a href=\"$imasroot/course/redeemlatepass.php?cid=$cid&aid={$testsettings['id']}\" onclick=\"return confirm('". _('This will discard any unsaved work.'). "');\">". _('Redeem LatePass'). "</a> ";
-		}
-		if ($isreview && !(isset($exceptionduedate) && $exceptionduedate>0) && $testsettings['allowlate']>10 && $sessiondata['latepasses']>0 && !isset($sessiondata['stuview']) && !$actas) {
-			//DB $query = "SELECT latepasshrs FROM imas_courses WHERE id='".$testsettings['courseid']."'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $latepasshrs = mysql_result($result,0,0);
-			$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$testsettings['courseid']));
-			$latepasshrs = $stm->fetchColumn(0);
-			$viewedassess = array();
-			//DB $query = "SELECT typeid FROM imas_content_track WHERE courseid='".$testsettings['courseid']."' AND userid='$userid' AND type='gbviewasid'";
-			//DB $r2 = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB while ($r = mysql_fetch_row($r2)) {
-			$stm2 = $DBH->prepare("SELECT typeid FROM imas_content_track WHERE courseid=:courseid AND userid=:userid AND type='gbviewasid'");
-			$stm2->execute(array(':userid'=>$userid, ':courseid'=>$testsettings['courseid']));
-			while ($r = $stm2->fetch(PDO::FETCH_NUM)) {
-				$viewedassess[] = $r[0];
-			}
-			if ((time() - $testsettings['enddate'])<$latepasshrs*3600 && !in_array($testsettings['id'],$viewedassess)) {
-				$out .= "<a href=\"$imasroot/course/redeemlatepass.php?cid=$cid&aid={$testsettings['id']}\" onclick=\"return confirm('". _('This will discard any unsaved work.'). "');\">". _('Redeem LatePass'). "</a> ";
-			}
 		}
 		if ($out != '') {
 			echo '<p>'.$out.'</p>';
@@ -1263,11 +1223,8 @@ if (!isset($_REQUEST['embedpostback'])) {
 
 		if ($sessiondata['ltiitemid']==$testsettings['id'] && $isreview) {
 			if ($testsettings['origshowans']!='N') {
-				echo '<p><a href="../course/gb-viewasid.php?cid='.$cid.'&asid='.$testid.'" ';
-				if ($isreview && !(isset($exceptionduedate) && $exceptionduedate>0) && $testsettings['allowlate']>10 && $sessiondata['latepasses']>0 && !isset($sessiondata['stuview']) && !$actas && (time() - $testsettings['enddate'])<$latepasshrs*3600 && !in_array($testsettings['id'],$viewedassess)) {
-					echo ' onclick="return confirm(\''._('If you view this scored assignment, you will not be able to use a LatePass on it').'\');"';
-				}
-				echo '>', _('View your scored assessment'), '</a></p>';
+				echo '<p><a href="../course/gb-viewasid.php?cid='.$cid.'&asid='.$testid.'">';
+				echo _('View your scored assessment'), '</a></p>';
 			}
 		}
 		echo '</div>';
@@ -1511,7 +1468,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 		if ($exceptionduedate > 0) {
 			$timebeforedue = $exceptionduedate - time();
 			if ($timebeforedue>0 && ($testsettings['enddate'] - time()) < 0) { //past original due date
-				$duetimenote .= sprintf(_('This assignment is past the original due date of %s.'), tzdate('D m/d/Y g:i a',$testsettings['enddate']));
+				$duetimenote .= sprintf(_('This assignment is past the original due date of %s.'), tzdate('D m/d/Y g:i a',$testsettings['enddate'])).' ';
 				if ($exceptiontype>0) {
 					$duetimenote .= _('You have used a LatePass');
 				} else {
@@ -1894,15 +1851,13 @@ if (!isset($_REQUEST['embedpostback'])) {
 					}
 				}
 
-				if (($reattemptsremain == false || $regenonreattempt) && $showeachscore && $testsettings['showans']!='N') {
+				if ((!$reattemptsremain || $regenonreattempt) && $showeachscore && $testsettings['showans']!='N') {
 					//TODO i18n
 					unset($GLOBALS['nocolormark']);
 					echo "<p>" . _("This question, with your last answer");
-					if ((($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') && $reattemptsremain == false) {
-						echo _(" and correct answer");
-						$showcorrectnow = true;
-					} else if (($showansduring && $qi[$questions[$qn]]['showans']=='0' && $testsettings['showans']==$attempts[$qn]) ||
-						   ($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn])) {
+					if (($qi[$questions[$qn]]['showansafterlast'] && !$reattemptsremain) ||
+							($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn]) ||
+							($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 						echo _(" and correct answer");
 						$showcorrectnow = true;
 					} else {
@@ -2044,9 +1999,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 						} else {
 							$colors = array();
 						}
-						$qshowans = (((($showansafterlast && $qi[$questions[$next]]['showans']=='0') || $qi[$questions[$next]]['showans']=='F' || $qi[$questions[$next]]['showans']=='J') && !$reattemptsremain) ||
-							($showansduring && $qi[$questions[$next]]['showans']=='0' && $attempts[$next]>=$testsettings['showans']) ||
-							($qi[$questions[$next]]['showansduring'] && $attempts[$next]>=$qi[$questions[$next]]['showans']));
+						$qshowans = (($qi[$questions[$next]]['showansafterlast'] && !$reattemptsremain) ||
+								($qi[$questions[$next]]['showansduring'] && $attempts[$next]>=$qi[$questions[$next]]['showans']) ||
+								($qi[$questions[$next]]['showans']=='R' && $regenonreattempt));
 						if ($qshowans) {
 							displayq($next,$qi[$questions[$next]]['questionsetid'],$seeds[$next],2,false,$attempts[$next],false,false,false,$colors);
 						} else {
@@ -2331,11 +2286,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 					if ($showeachscore) {
 						//TODO i18n
 						$msg =  "<p>" . _("This question, with your last answer");
-						if (($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') {
-							$msg .= _(" and correct answer");
-							$showcorrectnow = true;
-						} else if (($showansduring && $qi[$questions[$qn]]['showans']=='0' && $testsettings['showans']==$attempts[$qn]) ||
-							($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn])) {
+						if (($qi[$questions[$qn]]['showansafterlast']) ||
+								($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']<=$attempts[$qn]) ||
+								($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 							$msg .= _(" and correct answer");
 							$showcorrectnow = true;
 						} else {
@@ -2556,11 +2509,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 			if ($showeachscore) {
 				//TODO i18n
 				$msg =  "<p>" . _("This question, with your last answer");
-				if (($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') {
-					$msg .= _(" and correct answer");
-					$showcorrectnow = true;
-				} else if (($showansduring && $qi[$questions[$qn]]['showans']=='0' && $testsettings['showans']==$attempts[$qn]) ||
-					($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn])) {
+				if (($qi[$questions[$qn]]['showansafterlast'] && !hasreattempts($qn)) ||
+						($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn]) ||
+						($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 					$msg .= _(" and correct answer");
 					$showcorrectnow = true;
 				} else {
@@ -2950,10 +2901,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 					$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
 
 				} else {
-					if (($showansafterlast && $qi[$questions[$i]]['showans']=='0') || $qi[$questions[$i]]['showans']=='F' || $qi[$questions[$i]]['showans']=='J') {
-						$showcorrectnow = true;
-					} else if (($showansduring && $qi[$questions[$i]]['showans']=='0' && $testsettings['showans']==$attempts[$i]) ||
-						  ($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']==$attempts[$qn])){
+					if (($qi[$questions[$i]]['showansafterlast']) ||
+							($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']==$attempts[$i]) ||
+							($qi[$questions[$i]]['showans']=='R' && $regenonreattempt)) {
 						$showcorrectnow = true;
 					} else {
 						$showcorrectnow = false;
@@ -3499,7 +3449,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	}
 
 	function showscores($questions,$attempts,$testsettings) {
-		global $DBH,$isdiag,$allowregen,$isreview,$noindivscores,$scores,$bestscores,$qi,$superdone,$timelimitkickout, $reviewatend;
+		global $DBH,$regenonreattempt,$isdiag,$allowregen,$isreview,$noindivscores,$scores,$bestscores,$qi,$superdone,$timelimitkickout, $reviewatend;
 
 		$total = 0;
 		$lastattempttotal = 0;
@@ -3637,7 +3587,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 
 
 		if (!$superdone) { // $total < $totpossible &&
-			if ($noindivscores) {
+			if ($noindivscores && hasreattemptsany()) {
 				echo "<p>", _('<a href="showtest.php?reattempt=all">Reattempt assessment</a> on questions allowed (note: where reattempts are allowed, all scores, correct and incorrect, will be cleared)'), "</p>";
 			} else {
 				if (canimproveany()) {
@@ -3668,14 +3618,12 @@ if (!isset($_REQUEST['embedpostback'])) {
 		}
 		if ($reviewatend) {
 			global $qi, $questions, $testtype, $scores, $saenddate, $isteacher, $istutor, $seeds, $attempts, $rawscores, $noraw;
-			global $showansafterlast, $showansduring;
 
 			for ($i=0; $i<count($questions); $i++) {
 				$showa = false;
-				if ((($showansafterlast && $qi[$questions[$i]]['showans']=='0') || $qi[$questions[$i]]['showans']=='F' || $qi[$questions[$i]]['showans']=='J') && hasreattempts($i) == false) {
-					$showa = true;
-				} else if (($showansduring && $qi[$questions[$i]]['showans']=='0' && $testsettings['showans']<=$attempts[$i]) ||
-						 ($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']<=$attempts[$i])) {
+				if (($qi[$questions[$i]]['showansafterlast'] && !hasreattempts($i)) ||
+						($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']<=$attempts[$i]) ||
+						($qi[$questions[$i]]['showans']=='R' && $regenonreattempt)) {
 					$showa = true;
 				}
 				echo '<div>';
