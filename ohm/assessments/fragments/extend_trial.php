@@ -2,8 +2,6 @@
 /**
  * This file is included from fragments/activation.php.
  */
-
-$institutionData = $studentPayment->getInstitutionData();
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, it’s time to enter your Lumen OHM activation code.</h1>
@@ -14,10 +12,10 @@ $institutionData = $studentPayment->getInstitutionData();
 <p class="blurb">
 	You need to enter an activation code to complete the Lumen OHM assessments in
 	this course. In the meantime, you can still view your other course materials.
-
-	You can purchase an activation code at your campus bookstore (ask for the
-	Lumen OHM activation code for your course) or on the bookstore
-	<a href="<?php echo $institutionData->getBookstoreUrl(); ?>">website</a>.
+</p>
+<p class="blurb">
+    Purchase a Lumen OHM course activation code
+	<?php require(__DIR__ . '/code_purchase_location.php'); ?>
 </p>
 
 <?php

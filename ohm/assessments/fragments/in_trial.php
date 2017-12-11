@@ -25,8 +25,6 @@ else if (86400 > $trialTimeRemaining) {
 else if (86400 <= $trialTimeRemaining) {
 	$formattedTimeRemaining = gmdate('d', $trialTimeRemaining) . ' days';
 }
-
-$institutionData = $studentPayment->getInstitutionData();
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you have <span class="emphasis"><?php echo $formattedTimeRemaining; ?></span> left in your Lumen OHM trial.</h1>
@@ -37,9 +35,11 @@ $institutionData = $studentPayment->getInstitutionData();
 <p class="blurb">
 	Before your trial runs out you should purchase a course activation code. Once
 	your trial has ended you will still be able to view your course materials, but
-	you will need this code to complete your Lumen OHM assessments. You can
-	purchase one at your campus bookstore (ask for the Lumen OHM activation code
-	for your course) or on the bookstore <a href="<?php echo $institutionData->getBookstoreUrl(); ?>">website</a>.
+	you will need this code to complete your Lumen OHM assessments.
+</p>
+<p class="blurb">
+    Purchase a Lumen OHM course activation code
+	<?php require(__DIR__ . '/code_purchase_location.php'); ?>
 </p>
 
 <?php

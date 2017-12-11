@@ -6,8 +6,6 @@
 $assessNameStm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id AND courseid=:courseid LIMIT 1");
 $assessNameStm->execute(array(':id'=>$assessmentId, ':courseid'=>$courseId));
 $assessmentName = $assessNameStm->fetchColumn(0);
-
-$institutionData = $studentPayment->getInstitutionData();
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, are you ready to start working on <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>?</h1>
@@ -19,9 +17,8 @@ $institutionData = $studentPayment->getInstitutionData();
 	<span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>, is
 	an assessment powered by Lumen OHM.  By starting you will begin your 2 week
 	trial for the assessments in this Lumen OHM course.  Before your trial runs
-	out you should get an OHM course activation code. You can purchase one at your
-	campus bookstore (ask for the Lumen OHM activation code for your course) or
-	on the bookstore <a href="<?php echo $institutionData->getBookstoreUrl(); ?>">website</a>.
+	out you should get an OHM course activation code
+    <?php require(__DIR__ . '/code_purchase_location.php'); ?>
 </p>
 
 <?php
