@@ -254,11 +254,6 @@
 				'filtercid' => $filtercid, 'page' => $page, 'msgid' => $msgid, 'type' => $type))
 			. "'\">"._('Mark Unread')."</button>";
 
-		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?"
-			. Sanitize::generateQueryStringFromMap(array('markunread' => 'true', 'cid' => $cid,
-				'filtercid' => $filtercid, 'page' => $page, 'msgid' => $msgid, 'type' => $type))
-			. "'\">"._('Mark Unread')."</button>";
-
 		echo " | <a href=\"msghistory.php?"
 			. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid, 'page' => $page,
 				'msgid' => $msgid, 'type' => $type))
