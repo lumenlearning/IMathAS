@@ -9,7 +9,7 @@
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
     <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
     <div class="access_code_input_wrapper">
-      <label for="access_code">Already have an access code?</label>
+      <label for="access_code">Already have your activation code?</label>
       <input type="text" name="access_code" id="access_code" placeholder="ENTER CODE"/>
       <button type="submit" id="access_code_submit">Activate</button>
     </div>

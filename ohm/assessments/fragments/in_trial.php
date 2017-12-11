@@ -27,19 +27,19 @@ else if (86400 <= $trialTimeRemaining) {
 }
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you have <span class="emphasis"><?php echo $formattedTimeRemaining; ?></span> left in your Lumen OHM trial.</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>,
+    you have <span class="emphasis"><?php echo $formattedTimeRemaining; ?></span> left in your trial.</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
-	<h2 id="subhead">Don’t forget to purchase a Lumen OHM course activation code</h2>
+	<h2 id="subhead">Don’t forget to purchase a course activation code!</h2>
 </div>
 <p class="blurb">
-	Before your trial runs out you should purchase a course activation code. Once
-	your trial has ended you will still be able to view your course materials, but
-	you will need this code to complete your Lumen OHM assessments.
+    Once your trial has ended you will still be able to view your course materials,
+    but you will need this code to complete your Lumen OHM assessments.
 </p>
-<p class="blurb">
+<p class="blurb last">
     Purchase a Lumen OHM course activation code
-	<?php require(__DIR__ . '/code_purchase_location.php'); ?>
+    <?php require(__DIR__ . '/code_purchase_location.php'); ?>
 </p>
 
 <?php

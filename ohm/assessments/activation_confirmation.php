@@ -37,13 +37,13 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 
 <div class="access-wrapper">
 <div class="access-block">
-	<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you're all set!</h1>
+	<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>,
+        you're all set!</h1>
 
 	<p class="blurb">
-		Thank you for submitting your Lumen OHM course activation code. You are now
-		able to take all Lumen OHM assessments in this course. You will receive a
-		confirmation email shortly. In the meantime, please print this screen or save
-		it as a PDF for your records.
+        Thank you for submitting your Lumen OHM course activation code. You will receive
+        a confirmation email shortly. In the meantime, please print this screen or save
+        it as a PDF for your records.
 	</p>
 
 	<h2 id="subhead">Submission Details</h2>

@@ -8,16 +8,18 @@ $assessNameStm->execute(array(':id'=>$assessmentId, ':courseid'=>$courseId));
 $assessmentName = $assessNameStm->fetchColumn(0);
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, are you ready to start working on <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>?</h1>
+<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>,
+    you are about to open
+    <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>.</h1>
 <div class="sub-wrapper">
 	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
 	<h2 id="subhead">Ready to start your 2 week trial?</h2>
 </div>
 <p class="blurb">
-	<span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>, is
-	an assessment powered by Lumen OHM.  By starting you will begin your 2 week
-	trial for the assessments in this Lumen OHM course.  Before your trial runs
-	out you should get an OHM course activation code
+    By opening
+    <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>,
+    you will start your 2 week trial for the assessments in this Lumen OHM course.
+    Before your trial runs out, purchase a Lumen OHM course activation code
     <?php require(__DIR__ . '/code_purchase_location.php'); ?>
 </p>
 

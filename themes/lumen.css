@@ -842,7 +842,6 @@ div#guides-button-container {
 }
 .access-block p {
 	font-size: 1.1em;
-	margin-bottom: 1.5em;
 }
 .access-block #confirmation-details p {
 	margin-bottom: 0;
@@ -872,6 +871,9 @@ div#guides-button-container {
 }
 .access-block .blurb {
 
+}
+.access-block .blurb.last {
+	margin-bottom: 1.5em;
 }
 .access_code_input_wrapper {
 	align-items: center;
