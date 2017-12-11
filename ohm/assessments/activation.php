@@ -29,8 +29,6 @@ $paymentStatus = $GLOBALS['studentPayStatus']->getStudentPaymentRawStatus();
 $pageDisplayed = false;
 $trialReminderPageDisplayed = false;
 
-$institutionData = $studentPayment->getInstitutionData();
-
 if (in_array($paymentStatus, $inTrial)) {
 	if (!seenTrialReminderPage($GLOBALS['assessmentId'])) {
 		$studentPayment->logActivationPageSeen();

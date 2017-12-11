@@ -7,6 +7,7 @@ $assessNameStm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id A
 $assessNameStm->execute(array(':id'=>$assessmentId, ':courseid'=>$courseId));
 $assessmentName = $assessNameStm->fetchColumn(0);
 
+$institutionData = $studentPayment->getInstitutionData();
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, are you ready to start working on <span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($assessmentName); ?></span>?</h1>

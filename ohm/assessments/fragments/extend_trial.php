@@ -3,6 +3,7 @@
  * This file is included from fragments/activation.php.
  */
 
+$institutionData = $studentPayment->getInstitutionData();
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, it’s time to enter your Lumen OHM activation code.</h1>

@@ -26,6 +26,7 @@ else if (86400 <= $trialTimeRemaining) {
 	$formattedTimeRemaining = gmdate('d', $trialTimeRemaining) . ' days';
 }
 
+$institutionData = $studentPayment->getInstitutionData();
 ?>
 
 <h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>, you have <span class="emphasis"><?php echo $formattedTimeRemaining; ?></span> left in your Lumen OHM trial.</h1>
