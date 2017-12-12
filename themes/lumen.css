@@ -806,7 +806,7 @@ div#guides-button-container {
     height: 80px;
 }
 #ohm-integration-message #text {
-
+    color: #333;
 }
 #ohm-integration-message #text h1 {
 	font-size: 2rem;

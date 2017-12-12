@@ -72,7 +72,7 @@ echo '<div id="ohm-integration-message">
 
 if(empty($errors)){
   echo '<h1>OHM Integration Successful!</h1>
-        <p>Lumen OHM has been successfully integrated.</p>';
+        <p>Please open the final content item, Complete Test, to finish this test process.</p>';
 } else {
 
   echo '<h1>It looks like we\'ve encountered some errors:</h1>';
@@ -84,7 +84,7 @@ if(empty($errors)){
 
   echo '</ul>';
   echo '<p style="margin-top: 35px;">
-            Please take a screenshot of this page and send us an email at <a href="mailto:support@lumenlearning.com">support@lumenlearning.com</a>, letting us know 
+            Please take a screenshot of this page and send us an email at <a href="mailto:support@lumenlearning.com">support@lumenlearning.com</a>, letting us know
             you\'re having trouble setting your Lumen LTI connection, and which institution you are from. Someone from
             our support team will then get in touch to help troubleshoot these problems.
         </p>';
