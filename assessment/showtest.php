@@ -3816,7 +3816,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	function getCourseOwnerGroupId($courseId) {
 		$sth = $GLOBALS['DBH']->prepare("SELECT u.groupid FROM imas_courses AS c
 											JOIN imas_users AS u ON u.id = c.ownerid
-											WHERE c.id = = :id");
+											WHERE c.id = :id");
 		$sth->execute(array(':id'=>$courseId));
 		$results = $sth->fetch(PDO::FETCH_ASSOC);
 		$groupId = $results['groupid'];
@@ -3838,7 +3838,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 	{
 		$sth = $GLOBALS['DBH']->prepare("SELECT u.groupid FROM imas_courses AS c
 											JOIN imas_users AS u ON u.id = c.ownerid
-											WHERE c.id = = :id");
+											WHERE c.id = :id");
 		$sth->execute(array(':id'=>$courseId));
 		$results = $sth->fetch(PDO::FETCH_ASSOC);
 		$groupId = $results['groupid'];
