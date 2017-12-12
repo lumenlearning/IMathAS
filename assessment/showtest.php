@@ -545,16 +545,17 @@
 	// The business decision is to allow students through to assessments if we encounter any
 	// problems checking access codes. This includes failure to interact with the payment API.
 
-	if (isStudentPayEnabled() && !haveGroupId()) {
-		// We need the student's group ID before we can check a student's access code status.
-		error_log(sprintf(
-			"User ID %d (%s) is not a member of a group. Unable to get student access code status.",
-			$GLOBALS['userid'], $GLOBALS['username']));
-	}
-
 	$courseId = $sessiondata['courseid'];
 	$courseName = $sessiondata['coursename'];
+	$courseOwnerGroupId = getCourseOwnerGroupId($courseId);
 	$assessmentId = $line['assessmentid'];
+
+	if (isStudentPayEnabled() && !courseOwnerHasGroupId($courseId)) {
+		// We need the course owner's group ID before we can check a student's access code status.
+		error_log(sprintf(
+			"Course owner is not a member of a group for course ID %d. Unable to get student access code status.",
+			$courseId));
+	}
 
 	$studentPayment = null;
 	$studentPayStatus = null;
@@ -562,10 +563,10 @@
 	if (isStudentPayEnabled()) {
 		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
 		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
-		$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
+		$studentPayment = new \OHM\StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
 	}
 
-	if (isStudentPayEnabled() && haveGroupId()) {
+	if (isStudentPayEnabled() && courseOwnerHasGroupId($courseId)) {
 		try {
 			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
 		} catch (OHM\StudentPaymentException $e) {
@@ -3807,17 +3808,46 @@ if (!isset($_REQUEST['embedpostback'])) {
 	}
 
 	/**
-	 * Determine if we have a valid group ID for a user. If not, log details and return false.
+	 * Get a course owner's group ID.
 	 *
-	 * @return boolean True if yes, False if no.
+	 * @param $courseId integer The course ID.
+	 * @return integer The course ID. If none, 0 will be returned
 	 */
-	function haveGroupId()
-	{
-		if (isset($GLOBALS['groupid']) && 1 <= $GLOBALS['groupid']) {
-			return true;
+	function getCourseOwnerGroupId($courseId) {
+		$sth = $GLOBALS['DBH']->prepare("SELECT u.groupid FROM imas_courses AS c
+											JOIN imas_users AS u ON u.id = c.ownerid
+											WHERE c.id = = :id");
+		$sth->execute(array(':id'=>$courseId));
+		$results = $sth->fetch(PDO::FETCH_ASSOC);
+		$groupId = $results['groupid'];
+
+		if (is_null($groupId)) {
+			return 0;
 		}
 
-		return false;
+		return $groupId;
+	}
+
+	/**
+	 * Determine if we have a valid group ID for a user. If not, log details and return false.
+	 *
+	 * @param $courseId integer The course ID.
+	 * @return boolean True if yes, False if no.
+	 */
+	function courseOwnerHasGroupId($courseId)
+	{
+		$sth = $GLOBALS['DBH']->prepare("SELECT u.groupid FROM imas_courses AS c
+											JOIN imas_users AS u ON u.id = c.ownerid
+											WHERE c.id = = :id");
+		$sth->execute(array(':id'=>$courseId));
+		$results = $sth->fetch(PDO::FETCH_ASSOC);
+		$groupId = $results['groupid'];
+
+		if (is_null($groupId) || 0 >= $groupId) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
