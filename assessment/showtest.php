@@ -585,13 +585,16 @@
 		}
 	}
 
-	$shouldLogEvent = array('begin_trial', 'extend_trial', 'continue_trial');
-	$logEventType = getActivationLogEventType();
-	if ($studentPayStatus->getStudentIsInTrial() && in_array($logEventType, $shouldLogEvent)) {
-		$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
-		deleteActivationLogEventTypeCookie();
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
-		exit;
+	if (!is_null($studentPayStatus) && $studentPayStatus->getStudentIsInTrial()) {
+		$shouldLogEvent = array('begin_trial', 'extend_trial', 'continue_trial');
+		$logEventType = getActivationLogEventType();
+
+		if (in_array($logEventType, $shouldLogEvent)) {
+			$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
+			deleteActivationLogEventTypeCookie();
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+			exit;
+		}
 	}
 
 	// #### End OHM-specific code #######################################################
