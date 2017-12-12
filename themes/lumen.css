@@ -841,7 +841,8 @@ div#guides-button-container {
 	width: 90%;
 }
 .access-block p {
-	font-size: 1.1em;
+	font-size: 1.3em;
+	margin-bottom: 1em;
 }
 .access-block #confirmation-details p {
 	margin-bottom: 0;
@@ -864,7 +865,7 @@ div#guides-button-container {
 	margin-right: 10px;
 }
 .access-block #subhead {
-	font-size: 1.2em;
+	font-size: 1.3em;
 	font-weight: 500;
 	margin: 0;
 	text-transform: uppercase;
