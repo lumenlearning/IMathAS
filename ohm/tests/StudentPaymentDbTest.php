@@ -168,5 +168,21 @@ final class StudentPaymentDbTest extends TestCase
 		$this->assertTrue($result);
 	}
 
+	/*
+	 * getCourseOwnerGroupId
+	 */
+
+	public function testGetCourseOwnerGroupId()
+	{
+		$dbResult = array('groupid' => 42);
+
+		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+		$this->pdoStatementMock->method('fetch')->willReturn($dbResult);
+
+		$result = $this->studentPaymentDb->getCourseOwnerGroupId();
+
+		$this->assertEquals(42, $result);
+	}
+
 }
 

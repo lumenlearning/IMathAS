@@ -231,7 +231,7 @@ class StudentPaymentDb
 	 */
 	function getCourseOwnerGroupId()
 	{
-		$sth = $GLOBALS['DBH']->prepare("SELECT u.groupid FROM imas_courses AS c
+		$sth = $this->dbh->prepare("SELECT u.groupid FROM imas_courses AS c
 											JOIN imas_users AS u ON u.id = c.ownerid
 											WHERE c.id = :id");
 		$sth->execute(array(':id' => $this->courseId));
