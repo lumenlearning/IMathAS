@@ -149,7 +149,7 @@ class StudentPayment
 		$studentHasAccessCode = $this->studentPaymentDb->getStudentHasActivationCode();
 
 		// If the database has what we want, return the data immediately.
-		if (null != $studentHasAccessCode) {
+		if (null != $studentHasAccessCode && 1 == $studentHasAccessCode) {
 			$studentPayStatus->setStudentHasValidAccessCode($studentHasAccessCode);
 			return $studentPayStatus;
 		}

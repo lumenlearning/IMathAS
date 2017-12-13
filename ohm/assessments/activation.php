@@ -63,7 +63,9 @@ if (!$trialReminderPageDisplayed && $pageDisplayed) {
 
 if (!$trialReminderPageDisplayed) {
 	// We did not receive a recognized status from the student payment API.
-	error_log(sprintf("Unknown response from student payment API: paymentStatus='%s'", $paymentStatus));
+	error_log(sprintf(
+		"ERROR: Reached end of decision tree in activation.php. Unable to determine student activation code status.",
+		$paymentStatus));
 	// Business decision: On payment API errors, do nothing and let students through to assessments.
 }
 
