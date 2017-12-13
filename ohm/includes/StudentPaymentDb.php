@@ -223,4 +223,25 @@ class StudentPaymentDb
 
 		return true;
 	}
+
+	/**
+	 * Get a course owner's group ID.
+	 *
+	 * @return integer The course ID. If none, 0 will be returned
+	 */
+	function getCourseOwnerGroupId()
+	{
+		$sth = $GLOBALS['DBH']->prepare("SELECT u.groupid FROM imas_courses AS c
+											JOIN imas_users AS u ON u.id = c.ownerid
+											WHERE c.id = :id");
+		$sth->execute(array(':id' => $this->courseId));
+		$results = $sth->fetch(\PDO::FETCH_ASSOC);
+		$groupId = $results['groupid'];
+
+		if (is_null($groupId) || 0 >= $groupId) {
+			return 0;
+		}
+
+		return $groupId;
+	}
 }

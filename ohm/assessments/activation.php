@@ -23,7 +23,7 @@ if ('' == trim($userDisplayName)) {
 	$userDisplayName = $GLOBALS['username'];
 }
 
-$studentPayment = new \OHM\StudentPayment($GLOBALS['groupid'], $GLOBALS['cid'], $GLOBALS['userid']);
+$studentPayment = new \OHM\StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
 
 $paymentStatus = $GLOBALS['studentPayStatus']->getStudentPaymentRawStatus();
 $pageDisplayed = false;
