@@ -122,12 +122,13 @@ class StudentPaymentApi
 		$this->debug("Student API URL = " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
-		$requestData = array(
+		$requestData = json_encode(array(
 			'institution_id' => "$this->groupId",
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId",
 			'code' => $activationCode
-		);
+		));
+		$this->debug("Sending content: " . $requestData);
 
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
@@ -137,7 +138,7 @@ class StudentPaymentApi
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
-		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
@@ -163,11 +164,12 @@ class StudentPaymentApi
 		$this->debug("Student API URL = " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
-		$requestData = array(
+		$requestData = json_encode(array(
 			'institution_id' => "$this->groupId",
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId"
-		);
+		));
+		$this->debug("Sending content: " . $requestData);
 
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
@@ -177,7 +179,7 @@ class StudentPaymentApi
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
-		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
@@ -241,12 +243,13 @@ class StudentPaymentApi
 		$this->debug("Student API URL = " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
-		$requestData = array(
+		$requestData = json_encode(array(
 			'event_type' => "$eventType", // Quoted to ensure the value is always sent as a string.
 			'institution_id' => "$this->groupId",
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId"
-		);
+		));
+		$this->debug("Sending content: " . $requestData);
 
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
@@ -256,7 +259,7 @@ class StudentPaymentApi
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
-		$this->curl->setOption(CURLOPT_POSTFIELDS, json_encode($requestData));
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
