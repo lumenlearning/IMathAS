@@ -37,22 +37,20 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 
 <div class="access-wrapper">
 <div class="access-block">
-	<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>,
-        you're all set!</h1>
+	<h1 class="greeting">You're all set!</h1>
 
 	<p class="blurb">
-        Thank you for submitting your Lumen OHM course activation code. You will receive
-        a confirmation email shortly. In the meantime, please print this screen or save
-        it as a PDF for your records.
+    Thank you for submitting your Lumen OHM course activation code. You will receive
+    a confirmation email shortly. Please print this screen or save it as a
+    PDF for your records.
 	</p>
 
 	<h2 id="subhead">Submission Details</h2>
-	<br/>
 	<div id="confirmation-details">
-		<p><strong>Student Name: </strong><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></span></p>
-		<p><strong>Course Name: </strong><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($courseName); ?></span></p>
-		<p><strong>Access Code Submitted: </strong><span class="emphasis" style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
-		<p><strong>Timestamp: </strong><span class="emphasis"><?php echo $timestamp_string; ?></span></p>
+		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></p>
+		<p><strong>Course Name: </strong><?php echo Sanitize::encodeStringForDisplay($courseName); ?></p>
+		<p><strong>Access Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
+		<p><strong>Timestamp: </strong><?php echo $timestamp_string; ?></p>
 	</div>
 
 	<div class="trial_button_wrapper">

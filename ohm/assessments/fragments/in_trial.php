@@ -27,30 +27,27 @@ else if (86400 <= $trialTimeRemaining) {
 }
 ?>
 
-<h1 class="greeting"><span class="emphasis"><?php echo Sanitize::encodeStringForDisplay($userDisplayName); ?></span>,
-    you have <span class="emphasis"><?php echo $formattedTimeRemaining; ?></span> left in your trial.</h1>
-<div class="sub-wrapper">
-	<img id="hourglass-icon" src="<?php echo $GLOBALS['basesiteurl'] . '/ohm/img/hourglass.png'; ?>" alt="hourglass icon" />
-	<h2 id="subhead">Don’t forget to purchase a course activation code!</h2>
-</div>
-<p class="blurb">
-    Once your trial has ended you will still be able to view your course materials,
-    but you will need this code to complete your Lumen OHM assessments.
-</p>
-<p class="blurb last">
-    Purchase a Lumen OHM course activation code
-    <?php require(__DIR__ . '/code_purchase_location.php'); ?>
-</p>
+<h1 class="greeting">You have <?php echo $formattedTimeRemaining; ?> left in your trial.</h1>
 
-<?php
-if (in_array($paymentStatus, $canEnterCode)) {
-    $validApiResponse = true;
-  require_once(__DIR__ . "/activate_code.php");
-}
-?>
-
-<div class="trial_button_wrapper">
-  <p>
-    <a href="<?php echo $GLOBALS['basesiteurl'] . '/assessment/showtest.php?activation_event=continue_trial'; ?>">Continue to assessment</a>
-  </p>
+<div class="access-sub-block">
+  <div class="access-sub-block-left">
+    <?php
+    if (in_array($paymentStatus, $canEnterCode)) {
+        $validApiResponse = true;
+      require_once(__DIR__ . "/activate_code.php");
+    }
+    ?>
+  </div>
+  <div class="access-sub-block-right">
+    <p class="emphasis">Need an activation code?</p>
+    <p>
+      Purchase your Lumen OHM course activation code, sold exclusively <?php require(__DIR__ . '/code_purchase_location.php'); ?>
+    </p>
+    <p>
+      Until then, you can continue with trial access.
+    </p>
+    <div class="trial_button_wrapper">
+      <a href="<?php echo $GLOBALS['basesiteurl'] . '/assessment/showtest.php?activation_event=continue_trial'; ?>">Continue to assessment</a>
+    </div>
+  </div>
 </div>

@@ -829,20 +829,19 @@ div#guides-button-container {
 	justify-content: center;
 }
 .access-block {
-	border: 1px solid #ddd;
-	border-radius: 8px;
-	box-shadow: 0px 0px 20px #ccc;
 	color: #222;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	margin-top: 20px;
-	max-width: 1200px;
+	max-width: 1000px;
 	padding: 40px 80px;
-	width: 90%;
+}
+.access-block h2#subhead {
+	font-size: 1.6em;
+	font-weight: bold;
 }
 .access-block p {
 	font-size: 1.3em;
-	margin-bottom: 1em;
 }
 .access-block #confirmation-details p {
 	margin-bottom: 0;
@@ -852,83 +851,94 @@ div#guides-button-container {
 	margin-bottom: 1.5em;
 }
 .access-block .emphasis {
-	color: #3999B9;
 	font-weight: bold;
+	margin-bottom: 1em;
 }
 .access-block .sub-wrapper {
 	align-items: center;
 	display: flex;
 	margin: 10px 0;
 }
-.access-block #hourglass-icon {
-	height: 23px;
-	margin-right: 10px;
+.access-sub-block {
+	display: flex;
+	flex-direction: row;
+	height: 350px;
+	padding: 1em 0;
+	width: 100%;
 }
-.access-block #subhead {
-	font-size: 1.3em;
-	font-weight: 500;
-	margin: 0;
-	text-transform: uppercase;
+.access-sub-block-left {
+	border-right: 1px solid #000;
+	padding-right: 3.5em;
+	width: 50%;
 }
-.access-block .blurb {
-
-}
-.access-block .blurb.last {
-	margin-bottom: 1.5em;
+.access-sub-block-right {
+	padding-left: 3.5em;
+	width: 50%;
 }
 .access_code_input_wrapper {
-	align-items: center;
 	display: flex;
-	justify-content: center;
-	padding: 2em 0;
+	flex-direction: column;
 }
 .access_code_input_wrapper label {
+	font-size: 1.3em;
 	font-weight: bold;
-	margin-right: 10px;
-	text-transform: uppercase;
+	padding: 0.5em 0;
+	margin-bottom: 2em;
 }
 .access-block #error-text {
 	text-align: center;
 }
 .trial_button_wrapper {
-	align-items: center;
 	display: flex;
-	justify-content: center;
 	flex-direction: column;
 	padding: 2em 0 0;
 	text-decoration: underline;
 }
 .trial_button_wrapper a {
+	color: #4388A2;
+	font-size: 1.3em;
+	font-weight: bold;
+}
+.trial_button_wrapper a:hover {
+	color: #376E7F;
 	cursor: pointer;
 }
 input#access_code {
-	border: 1px solid #ccc;
-	box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+	border: 2px solid #000;
 	font-size: 1.1em;
-	height: 36px;
+	height: 50px;
+	margin-bottom: 2em;
 	min-width: 150px;
-	text-align: center;
-	text-transform: uppercase;
+	padding-left: 1em;
 }
-button#access_code_submit,
-button#begin_trial {
-	background-color: #6d6d6d;
-	border: 1px solid #ccc;
+button#access_code_submit {
+	background-color: #4388A2;
+	border: none;
 	border-radius: 0px;
-	font-size: 1em;
-	font-weight: bold;
 	color: white;
-	height: 40px;
+	font-size: 1.2em;
+	font-weight: bold;
+	height: 60px;
+	letter-spacing: 0.05em;
 	margin: 0;
-	margin-left: -1px;
-	padding: 0 1.2em;
 }
-button#access_code_submit:hover,
-button#begin_trial:hover {
-	background-color: #006263;
+button#access_code_submit:hover {
+	background-color: #376E7F;
 	cursor: pointer;
 }
-
+button#begin_trial {
+	background-color: transparent;
+	border: none;
+	color: #4388A2;
+	font-size: 1.3em;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+	text-decoration: underline;
+}
+button#begin_trial:hover {
+	cursor: pointer;
+}
 button#student_payment_toggle {
 	background-color: #5847D6;
 	border: 1px solid #ccc;
@@ -1016,6 +1026,9 @@ button#student_payment_toggle:hover {
 		justify-content: center;
 		height: 116px;
 	}
+	#headerbarlogo {
+		margin-bottom: 0.75em;
+	}
 	div#leftcolumn,
 	div#rightcolumn {
 		float: none;
@@ -1026,6 +1039,23 @@ button#student_payment_toggle:hover {
 	}
 	#viewbuttoncont {
 		float: inherit !important;
+	}
+
+	.access-sub-block {
+		flex-direction: column;
+	}
+	.access-sub-block-left {
+		width: 100%;
+		border-right: none;
+		border-bottom: 1px solid black;
+		padding-bottom: 3.5em;
+		padding-right: 0;
+	}
+	.access-sub-block-right {
+		padding-bottom: 3.5em;
+		padding-left: 0;
+		padding-top: 2em;
+		width: 100%;
 	}
 }
 
