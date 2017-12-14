@@ -424,7 +424,30 @@
 
 			writesessiondata();
 			session_write_close();
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+
+			/*
+			 * We do this because of the HTTP 302 that happens here. We need to know, after
+			 * the redirect, that a user has clicked into this assessment from another page
+			 * so we can show them a trial reminder page if they're currently in an OHM trial
+			 * for assessments.
+			 */
+
+			$ohmQueryString = isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
+
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+
+			// OHM-specific code:
+			// The following line has "$ohmQueryString" conctenated into the Location: URL.
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php" . $ohmQueryString);
 			exit;
 		} else { //returning to test
 
@@ -511,7 +534,30 @@
 
 			writesessiondata();
 			session_write_close();
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+
+			/*
+			 * We do this because of the HTTP 302 that happens here. We need to know, after
+			 * the redirect, that a user has clicked into this assessment from another page
+			 * so we can show them a trial reminder page if they're currently in an OHM trial
+			 * for assessments.
+			 */
+
+			$ohmQueryString = isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
+
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+
+			// OHM-specific code:
+			// The following line has "$ohmQueryString" conctenated into the Location: URL.
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php" . $ohmQueryString);
 		}
 		exit;
 	}
@@ -541,6 +587,15 @@
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
+
+	/*
+	 * So I won't forget for a 6th time and have to delete an hour of nice refactoring:
+	 *
+	 * This is all in global scope because we are using core MOM's validate.php, header.php,
+	 * and footer.php files. These all depend on many things declared in global scope. Don't
+	 * remove this OHM-specific code block from global scope unless you're prepared to deal
+	 * with that.
+	 */
 
 	// The business decision is to allow students through to assessments if we encounter any
 	// problems checking access codes. This includes failure to interact with the payment API.
@@ -594,9 +649,6 @@
 
 		if (in_array($logEventType, $shouldLogEvent)) {
 			$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
-			deleteActivationLogEventTypeCookie();
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
-			exit;
 		}
 	}
 
@@ -3845,10 +3897,29 @@ if (!isset($_REQUEST['embedpostback'])) {
 		}
 	}
 
-	function deleteActivationLogEventTypeCookie()
+	/**
+	 * Determine if a user is starting an assessment.
+	 *
+	 * If the user is not clicking links from within an assessment that point to things
+	 * within the same assessment, this should return true.
+	 *
+	 * We do this by checking URL query arguments and referring URLs.
+	 */
+	function isStartingAssessment()
 	{
-		unset($_COOKIE['activation_event']);
-		setcookie('activation_event', null, -1, '/');
+		if (isset($_REQUEST['begin_ohm_assessment'])) {
+			return true;
+		}
+
+		if (!isset($_SERVER['HTTP_REFERER'])) {
+			return true;
+		}
+
+		if (isset($_SERVER['HTTP_REFERER']) && !strpos($_SERVER['HTTP_REFERER'], 'showtest.php')) {
+			return true;
+		}
+
+		return false;
 	}
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################
