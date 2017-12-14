@@ -649,6 +649,7 @@
 
 		if (in_array($logEventType, $shouldLogEvent)) {
 			$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
+			unsetActivationLogEventType();
 		}
 	}
 
@@ -3895,6 +3896,12 @@ if (!isset($_REQUEST['embedpostback'])) {
 		} else {
 			return null;
 		}
+	}
+
+	function unsetActivationLogEventType()
+	{
+		setcookie("activation_event", "", -1, '/');
+		unset($_COOKIE['activation_event']);
 	}
 
 	/**
