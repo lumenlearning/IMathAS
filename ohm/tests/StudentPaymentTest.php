@@ -146,14 +146,12 @@ final class StudentPaymentTest extends TestCase
 		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
 
 		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setApiUserMessage("API user message");
 		$studentPayApiResult->setCourseRequiresStudentPayment(true);
 		$studentPayApiResult->setStudentPaymentStatus("in_trial");
 		$studentPayApiResult->setTrialExpiresInSeconds(42);
 
 		$studentPayStatus = $this->studentPayment->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
-		$this->assertEquals("API user message", $studentPayStatus->getUserMessage());
 		$this->assertEquals("in_trial", $studentPayStatus->getStudentPaymentRawStatus());
 		$this->assertEquals(42, $studentPayStatus->getStudentTrialTimeRemainingSeconds());
 		$this->assertTrue($studentPayStatus->getCourseRequiresStudentPayment());
@@ -178,6 +176,19 @@ final class StudentPaymentTest extends TestCase
 		$this->assertTrue($studentPayStatus->getCourseRequiresStudentPayment());
 		$this->assertFalse($studentPayStatus->getStudentIsInTrial());
 		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
+	}
+
+	public function testMapApiResultToPayStatus_Errors()
+	{
+		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setApiUserMessage("API user message");
+		$studentPayApiResult->setErrors(array('first error', 'second error'));
+
+		$studentPayStatus = $this->studentPayment->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+
+		$this->assertEquals('first error second error', $studentPayStatus->getUserMessage());
 	}
 
 	/*
