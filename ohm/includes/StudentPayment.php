@@ -8,7 +8,9 @@ require_once(__DIR__ . "/../models/StudentPayStatus.php");
 require_once(__DIR__ . "/../models/StudentPayApiResult.php");
 
 /**
- * Class StudentPayment - Determine if a student has a valid access code for a course.
+ * Class StudentPayment - Determine if a student has a valid activation code for a course.
+ *
+ * This class attempts to intelligently get student payment status from the most appropriate location.
  *
  * If cached information is available in MySQL, it will be used.
  * If not, an API call will be made to the student payment API. The results will be cached in MySQL and returned.
@@ -63,14 +65,15 @@ class StudentPayment
 	 *
 	 * Current known status list:
 	 *
-	 *   "not_paid" -- Not in trial and has not paid for access.
+	 *   "not_paid" -- Not in trial and has not paid for access to assessments.
 	 *   "in_trial" -- In trial.
-	 *   "can_extend" -- End of trial but can extend by 24 hours or 1 quiz attempt.
+	 *   "can_extend" -- End of trial but can extend by 24 hours or one quiz attempt.
 	 *   "expired" -- Trial is over, cannot extend, must pay for access.
 	 *   "paid" -- Has activation code and can access freely.
 	 *
 	 * @return StudentPayStatus A StudentPayStatus object.
 	 * @see StudentPayStatus Contains student payment API status constants.
+	 * @throws StudentPaymentException Thrown if unable to get payment information.
 	 */
 	public function getCourseAndStudentPaymentInfo()
 	{
@@ -89,7 +92,7 @@ class StudentPayment
 			return $studentPayStatus;
 		}
 
-		// Get the student's "has an access code" status and return it.
+		// Get the student's "has an activation code" status and return it.
 		$studentPayStatus = $this->getStudentPayStatusCacheFirst($studentPayStatus);
 		return $studentPayStatus;
 	}
@@ -126,7 +129,7 @@ class StudentPayment
 			$studentPayStatus->setCourseRequiresStudentPayment($courseRequiresStudentPay);
 		} else {
 			// IMPORTANT NOTE -- As of 2017 Nov 28:
-			// If we have no value in the database, NULL == course does not require access code.
+			// If we have no value in the database, NULL == course does not require activation code.
 			$studentPayStatus->setCourseRequiresStudentPayment(false);
 		}
 
@@ -134,15 +137,16 @@ class StudentPayment
 	}
 
 	/**
-	 * Determine if a student has a valid access code. This will attempt to get data from MySQL
+	 * Determine if a student has a valid activation code. This will attempt to get data from MySQL
 	 * before hitting the student payment API.
 	 *
-	 * Note: A student's access code status is only stored in the database if they have a valid
-	 * access code. For "in trial" status, we always need to hit the API to get their remaining
+	 * Note: A student's activation code status is only stored in the database if they have a valid
+	 * activation code. For "in trial" status, we always need to hit the API to get their remaining
 	 * trial time.
 	 *
 	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
 	 * @return StudentPayStatus $studentPayStatus The same StudentPayStatus object with updated data.
+	 * @throws StudentPaymentException Thrown if unable to get activation status.
 	 */
 	public function getStudentPayStatusCacheFirst($studentPayStatus)
 	{
@@ -154,11 +158,11 @@ class StudentPayment
 			return $studentPayStatus;
 		}
 
-		// Get the student's access code status from the student payment API.
+		// Get the student's activation code status from the student payment API.
 		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
 		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
 
-		// If the student has a valid access code, let's store that state (in MySQL) to minimize API traffic.
+		// If the student has a valid activation code, let's store that state (in MySQL) to minimize API traffic.
 		if ($studentPayStatus->getStudentHasValidAccessCode()) {
 			$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
 		}
@@ -190,7 +194,7 @@ class StudentPayment
 			$studentPayStatus->setUserMessage($allErrors);
 		}
 
-		// Student has valid access code
+		// Student has valid activation code
 		$validHasAccessCode = array(StudentPayApiResult::IS_ACTIVATED, StudentPayApiResult::ACTIVATION_SUCCESS);
 		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validHasAccessCode)) {
 			$studentPayStatus->setStudentHasValidAccessCode(true);
@@ -208,7 +212,7 @@ class StudentPayment
 			$studentPayStatus->setStudentIsInTrial(false);
 		}
 
-		// Override API value for "course requires access code" with DB value. (API always returns false)
+		// Override API value for "course requires activation code" with DB value. (API always returns false)
 		$sadFaceOverride = $this->getCoursePayStatusFromDatabase($studentPayStatus);
 		$studentPayStatus->setCourseRequiresStudentPayment($sadFaceOverride->getCourseRequiresStudentPayment());
 
@@ -216,17 +220,17 @@ class StudentPayment
 	}
 
 	/**
-	 * Activate an access code.
+	 * Activate a code.
 	 *
-	 * This will contact the student payment API and attempt to activate the student-provided access code.
+	 * This will contact the student payment API and attempt to activate the student-provided activation code.
 	 *
-	 * @param $accessCode string The access code.
+	 * @param $activationCode string The activation code.
 	 * @return StudentPayStatus An instance of StudentPayStatus.
 	 * @throws StudentPaymentException Thrown if unable to activate a code.
 	 */
-	public function activateCode($accessCode)
+	public function activateCode($activationCode)
 	{
-		$studentPayApiResult = $this->studentPaymentApi->activateCode($accessCode);
+		$studentPayApiResult = $this->studentPaymentApi->activateCode($activationCode);
 		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
 
 		if (StudentPayApiResult::ACTIVATION_SUCCESS == $studentPayApiResult->getStudentPaymentStatus()) {

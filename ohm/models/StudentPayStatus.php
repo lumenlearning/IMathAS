@@ -3,8 +3,11 @@
 namespace OHM;
 
 /**
- * Class StudentPayInfo - A simple DTO to hold student payment status and
+ * Class StudentPayInfo Allows for simple DTOs to hold student payment status and
  * "does this course require student payment" status.
+ *
+ * This class exists to hide the details of massaging Lumenistration API responses
+ * into what we want/need.
  */
 class StudentPayStatus
 {

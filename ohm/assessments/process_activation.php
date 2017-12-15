@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is only accessed on form submission when a student enters an access code,
- * begins a trial, or extends a trial for paid assessments.
+ * begins a trial, extends a trial for paid assessments, or starts an assessment.
  *
  * The process:
  *

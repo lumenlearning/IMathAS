@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is currently included from assessment/showtest.php. (inline, near line 550)
+ * This file is currently included from assessment/showtest.php. (inline, near line 640)
  *
  * $studentPayStatus is created in showtest.php and must contain valid data.
  */

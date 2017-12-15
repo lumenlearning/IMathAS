@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is included from fragments/activation.php.
+ * This file reached directly by the user via a redirect after a successful code activation.
  */
 
 require_once(__DIR__ . '/../../init.php');

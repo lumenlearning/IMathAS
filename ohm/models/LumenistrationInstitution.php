@@ -2,6 +2,10 @@
 
 namespace OHM;
 
+/**
+ * Class LumenistrationInstitution Represents institution data returned from the Lumenistration API.
+ * @package OHM
+ */
 class LumenistrationInstitution
 {
 

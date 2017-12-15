@@ -2,6 +2,10 @@
 
 namespace OHM;
 
+/**
+ * Class StudentPayApiResult Represents a Lumenistration API response.
+ * @package OHM
+ */
 class StudentPayApiResult
 {
 

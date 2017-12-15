@@ -1,6 +1,8 @@
 # Purpose
 
-This is a simple mock of the student payment API. It returns static content.
+This is a simple mock of the student payment API.
+
+It returns static content and must be edited to change its responses.
 
 # Usage
 
