@@ -21,7 +21,7 @@ $groupId = Sanitize::onlyInt($_REQUEST['group_id']);
 $courseId = Sanitize::courseId($_REQUEST['course_id']);
 $assessmentId = Sanitize::onlyInt($_REQUEST['assessment_id']);
 
-$validActions = array('activate_code', 'begin_trial', 'extend_trial', 'decline_trial');
+$validActions = array('activate_code', 'begin_trial', 'extend_trial', 'continue_trial', 'decline_trial');
 
 if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($assessmentId)) {
 	header("Location: " . $GLOBALS['basesiteurl']);
@@ -125,6 +125,15 @@ if ("extend_trial" == $action) {
 		displayProcessErrorPage("Failed to begin trial.");
 		exit;
 	}
+}
+
+/*
+ * User is starting or returning to an assessment during a trial.
+ */
+if ("continue_trial" == $action) {
+	setcookie("activation_event", "continue_trial", 0, '/');
+	header("Location: " . $GLOBALS['assessmentUrl']);
+	exit;
 }
 
 

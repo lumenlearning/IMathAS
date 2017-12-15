@@ -47,7 +47,10 @@ else if (86400 <= $trialTimeRemaining) {
       Until then, you can continue with trial access.
     </p>
     <div class="trial_button_wrapper">
-      <a href="<?php echo $GLOBALS['basesiteurl'] . '/assessment/showtest.php?activation_event=continue_trial'; ?>">Continue to assessment</a>
+      <a href="<?php
+         printf($GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?action=%s&course_id=%d&assessment_id=%d',
+            'continue_trial', $courseId, $assessmentId);
+      ?>">Continue to assessment</a>
     </div>
   </div>
 </div>
