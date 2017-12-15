@@ -68,7 +68,9 @@ if ("activate_code" == $action) {
 
 		exit;
 	} else {
-		displayProcessErrorPage("Failed to activate access code. Please check your access code or contact support.");
+		$activationErrorMessage = !empty($studentPayStatus->getUserMessage()) ? $studentPayStatus->getUserMessage()
+			: "Failed to activate access code.";
+		displayProcessErrorPage($activationErrorMessage);
 		exit;
 	}
 }

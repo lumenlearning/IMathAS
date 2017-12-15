@@ -314,6 +314,7 @@ class StudentPaymentApi
 
 		$apiResponse = json_decode($responseBody, true);
 
+		$acceptable404 = false;
 		if (0 == $status) {
 			// curl returns 0 on http failure
 			throw new StudentPaymentException("Unable to connect to student payment API.");
@@ -323,7 +324,16 @@ class StudentPaymentApi
 			throw new StudentPaymentException("Unexpected content returned from student payment API: "
 				. $responseBody);
 		}
-		if (!in_array($status, $acceptableHttpStatusList)) {
+		if (404 == $status) {
+			// Currently, we only accept a 404 status for invalid activation code responses.
+			if (!isset($apiResponse['status']) || "invalid_code_for_section" != $apiResponse['status']) {
+				throw new StudentPaymentException(sprintf(
+					"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
+					$responseBody));
+			}
+			$acceptable404 = true;
+		}
+		if (!$acceptable404 && !in_array($status, $acceptableHttpStatusList)) {
 			throw new StudentPaymentException(sprintf(
 				"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
 				$responseBody));
