@@ -854,6 +854,9 @@ div#guides-button-container {
 	font-weight: bold;
 	margin-bottom: 1em;
 }
+.access-block .bookstore-url:hover {
+	color: #6b6b6b;
+}
 .access-block .sub-wrapper {
 	align-items: center;
 	display: flex;
@@ -900,6 +903,7 @@ div#guides-button-container {
 	font-weight: bold;
 }
 .trial_button_wrapper a:hover {
+	color: #3399cc;
 	cursor: pointer;
 }
 input#access_code {
@@ -938,6 +942,7 @@ button#begin_trial {
 	text-decoration: underline;
 }
 button#begin_trial:hover {
+	color: #3399cc;
 	cursor: pointer;
 }
 button#student_payment_toggle {

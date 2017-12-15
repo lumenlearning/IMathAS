@@ -13,7 +13,6 @@ if (empty($bookstoreUrl)) {
 	echo '.';
 } else {
 	?>
-    or on the <a href="<?php echo $bookstoreUrl; ?>">bookstore website</a>.
+    or on the <a class="bookstore-url" href="<?php echo $bookstoreUrl; ?>">bookstore website</a>.
 	<?php
 }
-
