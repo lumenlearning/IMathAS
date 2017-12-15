@@ -28,7 +28,7 @@
         <div class="trial_button_wrapper">
             <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments/process_activation.php">
                 <input type="hidden" name="action" value="extend_trial"/>
-                <input type="hidden" name="group_id" value="<?php echo $GLOBALS['groupid']; ?>"/>
+                <input type="hidden" name="group_id" value="<?php echo Sanitize::onlyInt($courseOwnerGroupId); ?>"/>
                 <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
                 <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
                 <button id="begin_trial" type="submit">Use 24 hour pass</button>
