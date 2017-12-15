@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is included from fragments/activation.php.
+ * This file is included from ohm/assessments/process_activation.php.
  */
 ?>
 
@@ -12,8 +12,8 @@
 
 <?php
 
-if (isset($GLOBALS['studentPayUserMessage'])) {
-	printf('<p class="blurb">Error message: %s</p>', $GLOBALS['studentPayUserMessage']);
+if (isset($studentPayUserMessage)) {
+	printf('<p class="blurb">Error: %s</p>', $studentPayUserMessage);
 }
 ?>
 

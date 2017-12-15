@@ -29,8 +29,6 @@ if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($as
 }
 
 $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
-$assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
-		$assessmentId, $courseId); // used by fragments/api_error.php
 
 
 $studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
