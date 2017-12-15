@@ -184,6 +184,12 @@ class StudentPayment
 		// Response from API appropriate for display to the user
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
 
+		// Currently, invalid code error messages are returned by the API in a different place.
+		if (!empty($studentPayApiResult->getErrors())) {
+			$allErrors = implode(' ', $studentPayApiResult->getErrors());
+			$studentPayStatus->setUserMessage($allErrors);
+		}
+
 		// Student has valid access code
 		$validHasAccessCode = array(StudentPayApiResult::IS_ACTIVATED, StudentPayApiResult::ACTIVATION_SUCCESS);
 		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validHasAccessCode)) {
