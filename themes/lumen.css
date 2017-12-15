@@ -895,41 +895,42 @@ div#guides-button-container {
 	text-decoration: underline;
 }
 .trial_button_wrapper a {
-	color: #4388A2;
+	color: #155192;
 	font-size: 1.3em;
 	font-weight: bold;
 }
 .trial_button_wrapper a:hover {
-	color: #376E7F;
 	cursor: pointer;
 }
 input#access_code {
-	border: 2px solid #000;
-	font-size: 1.1em;
+	border: 1px solid #aaa;
+	border-radius: 6px;
+	font-size: 16px;
 	height: 50px;
 	margin-bottom: 2em;
-	min-width: 150px;
-	padding-left: 1em;
+	padding: 0.5em 1em;
+	text-transform: uppercase;
+}
+input#access_code::placeholder {
+	text-transform: none;
 }
 button#access_code_submit {
-	background-color: #4388A2;
-	border: none;
-	border-radius: 0px;
-	color: white;
-	font-size: 1.2em;
-	font-weight: bold;
+	background-color: #155192;
 	height: 60px;
-	letter-spacing: 0.05em;
-	margin: 0;
+	color: #fff;
+	font-size: 16px;
+	font-weight: bold;
+	border: 1px solid #104074;
 }
 button#access_code_submit:hover {
-	background-color: #376E7F;
+	background-color: #FFD600;
+	color: #000;
 	cursor: pointer;
 }
 button#begin_trial {
 	background-color: transparent;
 	border: none;
-	color: #4388A2;
+	color: #155192;
 	font-size: 1.3em;
 	font-weight: bold;
 	margin: 0;
