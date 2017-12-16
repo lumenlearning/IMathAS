@@ -7,7 +7,10 @@
  *
  * 1. Attempt to reach the desired state via the student payment API.
  * 2. On success: Redirect the user back to the assessment.
- * 3. On failure: Display a useful message to the user with a link back to the assessment.
+ * 3. On failures:
+ *        Known failure cases: Return a useful message suitable for display to the user in JSON format.
+ *        Unknown failure cases: Allow the user to proceed to assessments.
+ *
  */
 
 require_once(__DIR__ . "/../../init.php");
@@ -33,45 +36,40 @@ $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 
 $studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 
-/*
- * User is attempting to activate an access code.
- */
+
 if ("activate_code" == $action) {
 	$accessCode = trim($_POST['access_code']);
 
 	$validationError = \OHM\StudentPaymentApi::validateAccessCodeStructure($accessCode);
-	if (null != $validationError) {
-		displayProcessErrorPage($validationError);
-		exit;
+	if (!is_null($validationError)) {
+		response(400, $validationError);
 	}
 
 	$studentPayStatus = null;
 	try {
 		$studentPayStatus = $studentPayment->activateCode($accessCode);
 	} catch (\OHM\StudentPaymentException $e) {
-		// We have no global application process for catching exceptions and displaying pretty error pages.
+		// All unknown / uncaught errors should allow the user through to assessments.
 		error_log(sprintf("Exception while attempting to activate student access code. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		displayProcessErrorPage("Error while attempting to activate access code."
-			. " Please check your access code or contact support.");
-		exit;
 	}
 
 	if ($studentPayStatus->getStudentHasValidAccessCode()) {
 		header("Location: " . $GLOBALS['basesiteurl'] . "/ohm/assessments/activation_confirmation.php?" . Sanitize::generateQueryStringFromMap(array(
-			'courseId' => $courseId,
-			'assessmentId' => $assessmentId
-		)));
-
+				'courseId' => $courseId,
+				'assessmentId' => $assessmentId
+			)));
 		setcookie('stupayasscode', $accessCode, 0, $GLOBALS['basesiteurl'] . '/ohm/assessments');
 		setcookie('stupayasscodetimestamp', time(), 0, $GLOBALS['basesiteurl'] . '/ohm/assessments');
-
 		exit;
 	} else {
-		$activationErrorMessage = !empty($studentPayStatus->getUserMessage()) ? $studentPayStatus->getUserMessage()
-			: "Failed to activate access code.";
-		displayProcessErrorPage($activationErrorMessage);
-		exit;
+		if (!empty($studentPayStatus->getUserMessage())) {
+			response(500, $studentPayStatus->getUserMessage());
+		};
+		// API did rejected or did not like the activation code.
+		// All unknown / uncaught errors should allow the user through to assessments.
+		error_log("An unexpected error occurred in process_activation.php->activate_code."
+			. "This should be fixed. Allowing the student through to assessments anyway.");
 	}
 }
 
@@ -83,12 +81,9 @@ if ("begin_trial" == $action) {
 	try {
 		$studentPayStatus = $studentPayment->beginTrial();
 	} catch (\OHM\StudentPaymentException $e) {
-		// We have no global application process for catching exceptions and displaying pretty error pages.
+		// All unknown / uncaught errors should allow the user through to assessments.
 		error_log(sprintf("Exception while attempting to begin student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		displayProcessErrorPage("Error while attempting to begin trial."
-			. " Please check your access code or contact support.");
-		exit;
 	}
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
@@ -96,8 +91,13 @@ if ("begin_trial" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		displayProcessErrorPage("Failed to begin trial.");
-		exit;
+		if ($studentPayStatus->getUserMessage()) {
+			response(500, $studentPayStatus->getUserMessage());
+		}
+		// Failed to begin trial.
+		// All unknown / unexpected errors should allow the user through to assessments.
+		error_log("An unexpected error occurred in process_activation.php->begin_trial."
+			. "This should be fixed. Allowing the student through to assessments anyway.");
 	}
 }
 
@@ -109,12 +109,9 @@ if ("extend_trial" == $action) {
 	try {
 		$studentPayStatus = $studentPayment->extendTrial();
 	} catch (\OHM\StudentPaymentException $e) {
-		// We have no global application process for catching exceptions and displaying pretty error pages.
+		// All unknown / uncaught errors should allow the user through to assessments.
 		error_log(sprintf("Exception while attempting to extend student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
-		displayProcessErrorPage("Error while attempting to begin trial."
-			. " Please check your access code or contact support.");
-		exit;
 	}
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
@@ -122,8 +119,13 @@ if ("extend_trial" == $action) {
 		header("Location: " . $GLOBALS['assessmentUrl']);
 		exit;
 	} else {
-		displayProcessErrorPage("Failed to begin trial.");
-		exit;
+		if ($studentPayStatus->getUserMessage()) {
+			response(500, $studentPayStatus->getUserMessage());
+		}
+		// Failed to extend trial.
+		// All unknown / unexpected errors should allow the user through to assessments.
+		error_log("An unexpected error occurred in process_activation.php->extend_trial."
+			. "This should be fixed. Allowing the student through to assessments anyway.");
 	}
 }
 
@@ -138,27 +140,25 @@ if ("continue_trial" == $action) {
 
 
 /**
- * Display an error page after a failure to interact with the student payments API.
+ * Return a response to the client.
  *
- * @param $message string The message to display on the error page.
+ * @param $status integer The HTTP status to return.
+ * @param $msg string The human-readable message to return.
  */
-function displayProcessErrorPage($message)
+function response($status, $msg)
 {
-	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
+	http_response_code($status);
+	header('Content-Type: application/json');
 
-	$placeinhead = '<script src="' . $GLOBALS['basesiteurl'] . '/ohm/js/common/goBack.js" type="text/javascript"></script>';
-	require_once(__DIR__ . "/../../header.php");
-
-	echo '<div class="access-wrapper">';
-	echo '<div class="access-block">';
-
-	$studentPayUserMessage = $message; // Used by fragments/api_error.php
-	require_once(__DIR__ . "/fragments/api_error.php");
-
-	echo '</div><!-- end .access-block -->';
-	echo '</div><!-- end .access-wrapper -->';
-
-	require_once(__DIR__ . "/../../footer.php");
+	echo json_encode(array(
+		'message' => $msg
+	));
 
 	exit;
 }
+
+
+// All unknown / unexpected errors should allow the user through to assessments.
+error_log("An unexpected error occurred in process_activation.php. This needs to be fixed."
+	. "Allowing the student through to assessments anyway.");
+
