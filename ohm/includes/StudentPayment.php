@@ -318,5 +318,16 @@ class StudentPayment
 	{
 		return $this->studentPaymentApi->getInstitutionData();
 	}
+
+	/**
+	 * Determine if an access code is well formed.
+	 *
+	 * @param $code string A valid assessment access code.
+	 * @return string Null on validation success. Error message on validation failure.
+	 */
+	public function validateAccessCodeStructure($code)
+	{
+		return $this->studentPaymentApi->validateAccessCodeStructure($code);
+	}
 }
 

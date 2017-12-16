@@ -3,7 +3,7 @@
  * This file is responsible for changing settings related to student payments.
  *
  * It is expected consumers of this file will be AJAX clients.
- * Responses are in JSON format.
+ * All responses are in JSON format.
  */
 
 namespace OHM;
