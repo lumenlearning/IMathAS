@@ -11,7 +11,7 @@
     <div class="access_code_input_wrapper">
       <label for="access_code">Enter an activation code:</label>
       <input type="text" name="access_code" id="access_code" placeholder="Enter code"/>
-      <div id="activationUserMessage"></div>
+      <div id="access_code_error_text"></div>
       <button type="submit" id="access_code_submit">Access Assessments</button>
     </div>
 </form>
@@ -21,7 +21,7 @@
     $('#ohmActivateCodeForm').submit(function (event) {
         event.preventDefault();
 
-        $('#activationUserMessage').text('Activating your code...');
+        $('#access_code_error_text').text('Activating your code...');
 
         var activationCodeForm = $('#ohmActivateCodeForm');
         var groupId = activationCodeForm.find('input[name="group_id"]').val();
@@ -44,7 +44,7 @@
             },
             error: function (data) {
                 results = JSON.parse(data.responseText);
-                $('#activationUserMessage').text(results.message);
+                $('#access_code_error_text').text(results.message);
             }
         });
     });
