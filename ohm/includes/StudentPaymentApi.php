@@ -25,6 +25,9 @@ require_once(__DIR__ . "/CurlRequest.php");
 class StudentPaymentApi
 {
 
+	const INVALID_ACTIVATION_CODE_MESSAGE = 'Please enter a valid activation code. Activation codes can only'
+		. ' numbers and letters, and should be %d-%d characters long.';
+
 	private $curl;
 	private $studentPaymentDb;
 
@@ -440,8 +443,7 @@ class StudentPaymentApi
 		}
 
 		if ($accessCodeMinLength > strlen($sanitizedCode) || $accessCodeMaxLength < strlen($sanitizedCode)) {
-			return sprintf("Access code must be between %d and %d characters.", $accessCodeMinLength,
-				$accessCodeMaxLength);
+			return sprintf(self::INVALID_ACTIVATION_CODE_MESSAGE, $accessCodeMinLength, $accessCodeMaxLength);
 		}
 
 		return null;
