@@ -410,7 +410,8 @@
 	}
 	
 	//TEMP: Hide course browser from non-admins
-	if ($myrights<100) {
+	// OHM-specific change: Allow all teachers (level 20). Original before change was level 100.
+	if ($myrights<20) {
 		unset($CFG['coursebrowser']);
 	}
 
