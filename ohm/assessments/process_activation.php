@@ -33,6 +33,8 @@ if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($as
 
 $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 
+$assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
+		$assessmentId, $courseId); // used by fragments/api_error.php
 
 $studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 
@@ -88,7 +90,7 @@ if ("begin_trial" == $action) {
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
 		setcookie("activation_event", "begin_trial", 0, '/');
-		header("Location: " . $GLOBALS['assessmentUrl']);
+		header("Location: " . $assessmentUrl);
 		exit;
 	} else {
 		if ($studentPayStatus->getUserMessage()) {
@@ -116,7 +118,7 @@ if ("extend_trial" == $action) {
 
 	if ($studentPayStatus->getStudentIsInTrial()) {
 		setcookie("activation_event", "extend_trial", 0, '/');
-		header("Location: " . $GLOBALS['assessmentUrl']);
+		header("Location: " . $assessmentUrl);
 		exit;
 	} else {
 		if ($studentPayStatus->getUserMessage()) {
@@ -134,7 +136,7 @@ if ("extend_trial" == $action) {
  */
 if ("continue_trial" == $action) {
 	setcookie("activation_event", "continue_trial", 0, '/');
-	header("Location: " . $GLOBALS['assessmentUrl']);
+	header("Location: " . $assessmentUrl);
 	exit;
 }
 
