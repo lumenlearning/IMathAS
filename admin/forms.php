@@ -573,10 +573,34 @@ switch($_GET['action']) {
 				}
 			</script>';
 
-			echo '<span class="form">'._('Promote Course').'</span>';
-			echo '<span class=formright><label><input type=checkbox name=promote value=1 onchange="changepromote()" ';
-			if (($istemplate&16)==16) {echo 'checked="checked"';};
-			echo ' /> '._('Promote in Course Browser').'</label></span><br class="form">';
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			if (100 <= $myrights) {
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				echo '<span class="form">' . _('Promote Course') . '</span>';
+				echo '<span class=formright><label><input type=checkbox name=promote value=1 onchange="changepromote()" ';
+				if (($istemplate & 16) == 16) {
+					echo 'checked="checked"';
+				};
+				echo ' /> ' . _('Promote in Course Browser') . '</label></span><br class="form">';
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+			}
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
 			echo '<fieldset id=promotediv '.((($istemplate&16)==16)?'':'style="display:none"').'>';
 			echo '<legend>'._('Course Browser Settings').'</legend>';
 			echo '<p class="noticetext">'._('Before sharing your course, check to ensure that it only contains materials you created or have the rights to share.');
