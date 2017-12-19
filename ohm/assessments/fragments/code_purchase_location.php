@@ -9,7 +9,7 @@
 $institutionData = $studentPayment->getInstitutionData();
 $bookstoreUrl = $institutionData->getBookstoreUrl();
 
-if (empty($bookstoreUrl)) {
+if (is_null($institutionData) || empty($bookstoreUrl)) {
 	echo '.';
 } else {
 	?>

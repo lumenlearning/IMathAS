@@ -312,11 +312,21 @@ class StudentPayment
 	 * Get institution data for the group by its ID. (ID specified in class constructor)
 	 *
 	 * @return LumenistrationInstitution An instance of LumenistrationInstitution.
-	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
 	public function getInstitutionData()
 	{
-		return $this->studentPaymentApi->getInstitutionData();
+		$lumenistrationInstitution = null;
+		try {
+			$lumenistrationInstitution = $this->studentPaymentApi->getInstitutionData();
+		} catch (StudentPaymentException $e) {
+			// Don't allow metrics logging failures to halt the experience!
+			error_log(
+				sprintf("Exception while getting institution details from Lumenistration API for group ID %d. %s",
+					$this->groupId, $e->getMessage()));
+			error_log($e->getTraceAsString());
+		}
+
+		return $lumenistrationInstitution;
 	}
 
 	/**
