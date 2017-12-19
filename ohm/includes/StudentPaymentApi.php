@@ -439,7 +439,7 @@ class StudentPaymentApi
 
 		$sanitizedCode = preg_replace("/[^234679acdefghjkmnpqrtwxyz]/i", "", $code);
 		if ($sanitizedCode != $code) {
-			return "Invalid characters found in access code. Please check your access code and try again.";
+			return sprintf(self::INVALID_ACTIVATION_CODE_MESSAGE, $accessCodeMinLength, $accessCodeMaxLength);
 		}
 
 		if ($accessCodeMinLength > strlen($sanitizedCode) || $accessCodeMaxLength < strlen($sanitizedCode)) {
