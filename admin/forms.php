@@ -3,7 +3,23 @@
 //(c) 2006 David Lippman
 require("../init.php");
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+$placeinhead .= '<script type="text/javascript" src="' . $imasroot . '/ohm/js/student_pay/studentPayAjax.js"></script>';
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 require("../header.php");
+require("../includes/htmlutil.php");
 
 $from = 'admin2';
 $backloc = 'admin2.php';
@@ -279,6 +295,12 @@ switch($_GET['action']) {
 			$istemplate = $line['istemplate'];
 			$deflatepass = $line['deflatepass'];
 			$deftime = $line['deftime'];
+			$jsondata = json_decode($line['jsondata'], true);
+			if ($jsondata===null || !isset($jsondata['browser'])) {
+				$browser = array();
+			} else {
+				$browser = $jsondata['browser'];
+			}
 		} else {
 			$courseid = _("Will be assigned when the course is created");
 			$hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
@@ -300,6 +322,7 @@ switch($_GET['action']) {
 			$deftime = isset($CFG['CPS']['deftime'])?$CFG['CPS']['deftime'][0]:600;
 			$deflatepass = isset($CFG['CPS']['deflatepass'])?$CFG['CPS']['deflatepass'][0]:0;
 			$ltisecret = "";
+			$browser = array();
 		}
 		$defetime = $deftime%10000;
 		$hr = floor($defetime/60)%12;
@@ -333,7 +356,36 @@ switch($_GET['action']) {
 		}
 		if ($_GET['action']=="modify") { echo "&id=".Sanitize::encodeUrlParam($_GET['id']); }
 		echo "\">\n";
-		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" required/>';
+		echo '<script type="text/javascript">
+		$(function() {
+			$("form").on("submit",function(e) {
+				var needsgrp = $("input[name=isgrptemplate]:checked").length;
+				var needsall = $("input[name=istemplate]:checked,input[name=isselfenroll]:checked").length;
+
+				var copyrights = $("input[name=copyrights]:checked").val();
+				var ok = true;
+				if (copyrights<2 && $("input[name=promote]:checked").length>0) {
+					alert(_("Promoting a course requires setting the copy permissions to: no key required for anyone"));
+					ok = false;
+				}
+				if (copyrights<2 && needsall>0) {
+					alert(_("Setting a course as a template or self enroll requires setting the copy permissions to: no key required for anyone"));
+					ok = false;
+				}
+				if (copyrights<1 && needsgrp) {
+					alert(_("Setting a course as a group template requires setting the copy permissions to: no key required for group (or no key required for anyone)"));
+					ok = false;
+				}
+				if (!ok) {
+					setTimeout(function() {
+						$("form").removeClass("submitted").removeClass("submitted2");
+					}, 500);
+					return false;
+				}
+			});
+		})
+		</script>';
+		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" />';
 		echo "<span class=form>Course ID:</span><span class=formright>".Sanitize::encodeStringForDisplay($courseid)."</span><br class=form>\n";
 		if ($isadminview) {
 			echo '<span class="form">Owner:</span><span class="formright">';
@@ -346,6 +398,24 @@ switch($_GET['action']) {
 		echo '<input type="checkbox" name="stuavail" value="1" ';
 		if (($avail&1)==0) { echo 'checked="checked"';}
 		echo '/>Available to students</span><br class="form" />';
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $_GET['id'], null);
+			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
+			echo '<span class=form>Assessments require activation?</span><span class=formright>';
+			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
+			echo '<label for="studentpay">Students must provide an access code for assessments</label></span><br class="form"/>';
+		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		if ($_GET['action']=="modify") {
 			echo '<span class=form>Lock for assessment:</span><span class=formright><select name="lockaid">';
 			echo '<option value="0" ';
@@ -492,6 +562,7 @@ switch($_GET['action']) {
 			}
 			echo '</span></span><br class="form" />';
 		}
+
 		if (($myspecialrights&1)==1 || ($myspecialrights&2)==2 || $myrights==100) {
 			echo '<span class="form">Mark course as template?</span>';
 			echo '<span class="formright">';
@@ -518,77 +589,239 @@ switch($_GET['action']) {
 			echo '</span><br class="form" />';
 		}
 
+		if ($_GET['action']=='modify' && isset($CFG['coursebrowser'])) {
+			$browserprops = json_decode(file_get_contents(__DIR__.'/../javascript/'.$CFG['coursebrowser'], false, null, 25), true);
+			echo '<script type="text/javascript">
+				function changepromote() {
+					$("#promotediv").toggle($("input[name=promote]").prop("checked"));
+					//TODO: Add required to name and descrip field on show
+				}
+				function chgother(el) {
+					var id = el.id;
+					if (el.value != "other") {
+						$("#"+id+"otherwrap").hide();
+					} else {
+						$("#"+id+"otherwrap").show();
+					}
+				}
+			</script>';
+
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			#### Begin OHM-specific code #####################################################################
+			if (100 <= $myrights) {
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				echo '<span class="form">' . _('Promote Course') . '</span>';
+				echo '<span class=formright><label><input type=checkbox name=promote value=1 onchange="changepromote()" ';
+				if (($istemplate & 16) == 16) {
+					echo 'checked="checked"';
+				};
+				echo ' /> ' . _('Promote in Course Browser') . '</label></span><br class="form">';
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+			}
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			#### End OHM-specific code #####################################################################
+			echo '<fieldset id=promotediv '.((($istemplate&16)==16)?'':'style="display:none"').'>';
+			echo '<legend>'._('Course Browser Settings').'</legend>';
+			echo '<p class="noticetext">'._('Before sharing your course, check to ensure that it only contains materials you created or have the rights to share.');
+			echo ' '._('Your course should contain no commercial, copyrighted content, including textbook pages, activites, test bank items, etc.');
+			echo ' '._('Openly licensed material, clearly marked with an open license, is fine to include.');
+			echo ' '._('If sharing your own materials (textbook, activities, paper assessments), please mark the materials with an open license, or include a blanket license statement somewhere in the course.');
+			echo '</p><p>';
+			
+			if (empty($browser['name'])) {
+				$browser['name'] = trim($name);
+			}
+			if (empty($browser['owner'])) {
+				$stm = $DBH->prepare("SELECT iu.FirstName, iu.LastName, ig.name FROM imas_users AS iu JOIN imas_groups AS ig ON ig.id=iu.groupid WHERE iu.id=:id");
+				$stm->execute(array(':id'=>$userid));
+				$uinf = $stm->fetch(PDO::FETCH_ASSOC);
+				$browser['owner'] = $uinf['FirstName'].' '.$uinf['LastName'].' ('.$uinf['name'].')'; 
+			}
+
+			foreach ($browserprops as $propname=>$propvals) {
+				if (!empty($propvals['fixed'])) { continue; }
+				echo '<span class=form>'.$propvals['name'];
+				if (!empty($propvals['subname'])) {
+					echo '<br/><span class=small>'.$propvals['subname'].'</span>';
+				}
+				echo '</span>';
+				echo '<span class=formright>';
+				if (isset($propvals['options'])) {  //is select
+					if (!empty($propvals['multi'])) { //checkboxes
+						if (isset($browser[$propname]) && !is_array($browser[$propname])) {
+							$browser[$propname] = array($browser[$propname]);
+						}
+						foreach ($propvals['options'] as $k=>$v) {
+							echo '<label><input type=checkbox name="browser'.$propname.'[]" value="'. Sanitize::encodeStringForDisplay($k).'" ';
+							echo ((isset($browser[$propname]) && in_array($k,$browser[$propname]))?'checked':'').' /> '.Sanitize::encodeStringForDisplay($v).'</label><br/>';
+						}
+					} else { //single select
+						$ingroup = false;
+						echo '<select name="browser'.$propname.'" id="browser'.$propname.'"';
+						if (isset($propvals['options']['other'])) {
+							echo ' onchange="chgother(this)"';
+						}
+						echo '>';
+						
+						foreach ($propvals['options'] as $k=>$v) {
+							if (substr($k,0,5)=='group') {
+								if ($ingroup) {
+									echo '</optgroup>';
+								}
+								echo '<optgroup label="'.Sanitize::encodeStringForDisplay($v).'">';
+								$ingroup = true;
+							} else {
+								echo '<option value="'.Sanitize::encodeStringForDisplay($k).'"';
+								if ($k==$browser[$propname]) { echo ' selected';}
+								echo '>';
+								echo Sanitize::encodeStringForDisplay($v).'</option>';
+							}
+						}
+						if ($ingroup) {
+							echo '</optgroup>';
+						}
+						echo '</select>';
+						
+						if (isset($propvals['options']['other'])) {
+							echo '<span id="browser'.$propname.'otherwrap" '.($browser[$propname]!='other'?'style="display:none"':'').'>';
+							echo '<br/>Other: <input type=text size=40 name="browser'.$propname.'other" value="'.($browser[$propname]=='other'?Sanitize::encodeStringForDisplay($browser[$propname.'other']):'').'"></span>';
+						}
+					}
+				} else if ($propvals['type']=='string') {
+					echo '<input type=text name="browser'.$propname.'" size=50 value="'.Sanitize::encodeStringForDisplay($browser[$propname]).'" />';
+				} else if ($propvals['type']=='textarea') {
+					echo '<textarea rows=6 cols=70 name=browser'.$propname.'>'.Sanitize::encodeStringForDisplay($browser[$propname]).'</textarea>';
+				}
+				echo '</span><br class="form">';
+			}
+			echo '</p></fieldset>';
+		}
+
 		if (isset($CFG['CPS']['templateoncreate']) && $_GET['action']=='addcourse' ) {
-			echo '<span class="form">Use content from a template course:</span>';
-			echo '<span class="formright"><select name="usetemplate" onchange="templatepreviewupdate(this)">';
-			echo '<option value="0" selected="selected">Start with blank course</option>';
-			//$query = "SELECT ic.id,ic.name,ic.copyrights FROM imas_courses AS ic,imas_teachers WHERE imas_teachers.courseid=ic.id AND imas_teachers.userid='$templateuser' ORDER BY ic.name";
-			$globalcourse = array();
-			$groupcourse = array();
-			$terms = array();
-			//DB $query = "SELECT id,name,copyrights,istemplate,termsurl FROM imas_courses WHERE (istemplate&1)=1 AND available<4 AND copyrights=2 ORDER BY name";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
-			$stm = $DBH->query("SELECT id,name,copyrights,istemplate,termsurl FROM imas_courses WHERE (istemplate&1)=1 AND available<4 AND copyrights=2 ORDER BY name");
-			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				$globalcourse[$row[0]] = $row[1];
-				if ($row[4]!='') {
-					$terms[$row[0]] = $row[4];
+			if (isset($CFG['coursebrowser'])) {
+				//use the course browser
+				if (isset($CFG['coursebrowsermsg'])) {
+					echo '<span class="form">'.$CFG['coursebrowsermsg'].'</span>';
+				} else {
+					echo '<span class="form">'._('Copy a template or promoted course').'</span>';
 				}
-			}
-			//DB $query = "SELECT ic.id,ic.name,ic.copyrights,ic.termsurl FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ";
-			//DB $query .= "iu.groupid='$groupid' AND (ic.istemplate&2)=2 AND ic.copyrights>0 AND ic.available<4 ORDER BY ic.name";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
-			$query = "SELECT ic.id,ic.name,ic.copyrights,ic.termsurl FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ";
-			$query .= "iu.groupid=:groupid AND (ic.istemplate&2)=2 AND ic.copyrights>0 AND ic.available<4 ORDER BY ic.name";
-			$stm = $DBH->prepare($query);
-			$stm->execute(array(':groupid'=>$groupid));
-			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				$groupcourse[$row[0]] = $row[1];
-				if ($row[3]!='') {
-					$terms[$row[0]] = $row[3];
+				echo '<span class="formright" id="browsertocopy"><input type="hidden" id="usetemplate" name="usetemplate" ';
+				if (isset($_GET['tocopyid']) && isset($_GET['tocopyname'])) {
+					echo 'value="'.Sanitize::onlyInt($_GET['tocopyid']).'">';
+					echo '<span id="templatename">'.Sanitize::encodeStringForDisplay($_GET['tocopyname']).'</span>';
+				} else {
+					echo 'value="0">';
+					echo '<span id="templatename">'._('Start with a blank course').'</span>';
 				}
-			}
-			if (count($groupcourse)>0) {
-				echo '<optgroup label="Group Templates">';
-				foreach ($groupcourse as $id=>$name) {
-					printf('<option value="%d"', $id);
-					if (isset($terms[$id])) {
-						printf(' data-termsurl="%s"', Sanitize::encodeStringForDisplay($terms[$id]));
+				echo '<br/><button type="button" onclick="showCourseBrowser()">'._('Browse Courses').'</button>';
+				echo '<span id="termsbox" style="display:none;"><br/>';
+				echo 'This course has additional <a target="_blank" href="" id="termsurl">Terms of Use</a> you must agree to before copying the course.<br/>';
+				echo '<input type="checkbox" name="termsagree" /> I agree to the Terms of Use specified in the link above.</span>';
+				echo '</span><br class="form" />';
+				
+				echo '<script type="text/javascript">
+					function showCourseBrowser() {
+						GB_show("Course Browser","coursebrowser.php?embedded=true",800,"auto");
 					}
-					printf('>%s</option>', Sanitize::encodeStringForDisplay($name));
-				}
-				echo '</optgroup>';
-			}
-			if (count($globalcourse)>0) {
-				if (count($groupcourse)>0) {
-					echo '<optgroup label="System-wide Templates">';
-				}
-				foreach ($globalcourse as $id=>$name) {
-					printf('<option value="%d"', $id);
-					if (isset($terms[$id])) {
-						printf(' data-termsurl="%s"', Sanitize::encodeStringForDisplay($terms[$id]));
+					function setCourse(course) {
+						$("#usetemplate").val(course.id);
+						$("#templatename").text(course.name);
+						if (course.termsurl && course.termsurl != "") {
+							$("#termsbox").show(); $("#termsurl").attr("href",course.termsurl);
+						} else {
+							$("#termsbox").hide();
+						}
+						GB_hide();
 					}
-					printf('>%s</option>', Sanitize::encodeStringForDisplay($name));
+					</script>';
+				
+			} else {
+				//select a template course from a pulldown
+				echo '<span class="form">Use content from a template course:</span>';
+				echo '<span class="formright"><select name="usetemplate" onchange="templatepreviewupdate(this)">';
+				echo '<option value="0" selected="selected">Start with blank course</option>';
+				//$query = "SELECT ic.id,ic.name,ic.copyrights FROM imas_courses AS ic,imas_teachers WHERE imas_teachers.courseid=ic.id AND imas_teachers.userid='$templateuser' ORDER BY ic.name";
+				$globalcourse = array();
+				$groupcourse = array();
+				$terms = array();
+				//DB $query = "SELECT id,name,copyrights,istemplate,termsurl FROM imas_courses WHERE (istemplate&1)=1 AND available<4 AND copyrights=2 ORDER BY name";
+				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+				//DB while ($row = mysql_fetch_row($result)) {
+				$stm = $DBH->query("SELECT id,name,copyrights,istemplate,termsurl FROM imas_courses WHERE (istemplate&1)=1 AND available<4 AND copyrights=2 ORDER BY name");
+				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+					$globalcourse[$row[0]] = $row[1];
+					if ($row[4]!='') {
+						$terms[$row[0]] = $row[4];
+					}
+				}
+				//DB $query = "SELECT ic.id,ic.name,ic.copyrights,ic.termsurl FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ";
+				//DB $query .= "iu.groupid='$groupid' AND (ic.istemplate&2)=2 AND ic.copyrights>0 AND ic.available<4 ORDER BY ic.name";
+				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+				//DB while ($row = mysql_fetch_row($result)) {
+				$query = "SELECT ic.id,ic.name,ic.copyrights,ic.termsurl FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ";
+				$query .= "iu.groupid=:groupid AND (ic.istemplate&2)=2 AND ic.copyrights>0 AND ic.available<4 ORDER BY ic.name";
+				$stm = $DBH->prepare($query);
+				$stm->execute(array(':groupid'=>$groupid));
+				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+					$groupcourse[$row[0]] = $row[1];
+					if ($row[3]!='') {
+						$terms[$row[0]] = $row[3];
+					}
 				}
 				if (count($groupcourse)>0) {
+					echo '<optgroup label="Group Templates">';
+					foreach ($groupcourse as $id=>$name) {
+						printf('<option value="%d"', $id);
+						if (isset($terms[$id])) {
+							printf(' data-termsurl="%s"', Sanitize::encodeStringForDisplay($terms[$id]));
+						}
+						printf('>%s</option>', Sanitize::encodeStringForDisplay($name));
+					}
 					echo '</optgroup>';
 				}
+				if (count($globalcourse)>0) {
+					if (count($groupcourse)>0) {
+						echo '<optgroup label="System-wide Templates">';
+					}
+					foreach ($globalcourse as $id=>$name) {
+						printf('<option value="%d"', $id);
+						if (isset($terms[$id])) {
+							printf(' data-termsurl="%s"', Sanitize::encodeStringForDisplay($terms[$id]));
+						}
+						printf('>%s</option>', Sanitize::encodeStringForDisplay($name));
+					}
+					if (count($groupcourse)>0) {
+						echo '</optgroup>';
+					}
+				}
+				echo '</select><span id="templatepreview"></span>';
+				echo '<span id="termsbox" style="display:none;"><br/>';
+				echo 'This course has additional <a target="_blank" href="" id="termsurl">Terms of Use</a> you must agree to before copying the course.<br/>';
+				echo '<input type="checkbox" name="termsagree" /> I agree to the Terms of Use specified in the link above.</span>';
+				echo '</span><br class="form" />';
+				echo '<script type="text/javascript"> function templatepreviewupdate(el) {';
+				echo '  var outel = document.getElementById("templatepreview");';
+				echo '  if (el.value>0) {';
+				echo '    outel.innerHTML = "<a href=\"'.$imasroot.'/course/course.php?cid="+el.value+"\" target=\"preview\">Preview</a>";';
+				echo '    if ($(el).find(":selected").data("termsurl")) { $("#termsbox").show(); $("#termsurl").attr("href",$(el).find(":selected").data("termsurl")); }';
+				echo '      else { $("#termsbox").hide(); }';
+				echo '  } else {outel.innerHTML = "";}';
+				echo '}</script>';
 			}
-			echo '</select><span id="templatepreview"></span>';
-			echo '<span id="termsbox" style="display:none;"><br/>';
-			echo 'This course has additional <a target="_blank" href="" id="termsurl">Terms of Use</a> you must agree to before copying the course.<br/>';
-			echo '<input type="checkbox" name="termsagree" /> I agree to the Terms of Use specified in the link above.</span>';
-			echo '</span><br class="form" />';
-			echo '<script type="text/javascript"> function templatepreviewupdate(el) {';
-			echo '  var outel = document.getElementById("templatepreview");';
-			echo '  if (el.value>0) {';
-			echo '    outel.innerHTML = "<a href=\"'.$imasroot.'/course/course.php?cid="+el.value+"\" target=\"preview\">Preview</a>";';
-			echo '    if ($(el).find(":selected").data("termsurl")) { $("#termsbox").show(); $("#termsurl").attr("href",$(el).find(":selected").data("termsurl")); }';
-			echo '      else { $("#termsbox").hide(); }';
-			echo '  } else {outel.innerHTML = "";}';
-			echo '}</script>';
 		}
 
 
@@ -667,8 +900,10 @@ switch($_GET['action']) {
 				echo '</tr>';
 			}
 		}
-		echo "</table></form>\n";
-		echo "<p><input type=button value=\"Done\" onclick=\"window.location='".Sanitize::encodeStringForJavascript($backloc)."'\" /></p>\n";
+		echo "</table>\n";
+		echo '<p>With Selected: <button type="submit" name="addandclose" value="close">Add as Teacher and Close</button> ';
+		echo "<input type=button class=\"secondarybtn\" value=\"Nevermind\" onclick=\"window.location='".Sanitize::encodeStringForJavascript($backloc)."'\" />";
+		echo '</p></form>';
 		break;
 	case "importmacros":
 		echo "<h3>Install Macro File</h3>\n";
@@ -995,6 +1230,34 @@ switch($_GET['action']) {
 		echo '<input type="checkbox" id="iscust" name="iscust" ';
 		if ($grptype==1) { echo 'checked';}
 		echo '> <label for="istcust">'._('Lumen Customer').'</label><br/>';
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+			$studentPaymentDb = new \OHM\StudentPaymentDb($_GET['id'], null, null);
+
+			if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
+				$toggleDisableStudentPaymentsButtonText = "Disable";
+				$ajaxSetStudentPayment = "false";
+			} else {
+				$toggleDisableStudentPaymentsButtonText = "Enable";
+				$ajaxSetStudentPayment = "true";
+			}
+
+			printf('<br/><button id="student_payment_toggle" type="button"'
+				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button>',
+				$ajaxSetStudentPayment, $_GET['id'], $toggleDisableStudentPaymentsButtonText);
+
+			echo '<span id="student_payment_toggle_message"></span><br/><br/>';
+		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		echo "<input type=submit value=\"Update Group\">\n";
 		echo "</form>\n";
 		break;

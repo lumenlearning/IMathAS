@@ -424,7 +424,30 @@
 
 			writesessiondata();
 			session_write_close();
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+
+			/*
+			 * We do this because of the HTTP 302 that happens here. We need to know, after
+			 * the redirect, that a user has clicked into this assessment from another page
+			 * so we can show them a trial reminder page if they're currently in an OHM trial
+			 * for assessments.
+			 */
+
+			$ohmQueryString = isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
+
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+
+			// OHM-specific code:
+			// The following line has "$ohmQueryString" conctenated into the Location: URL.
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php" . $ohmQueryString);
 			exit;
 		} else { //returning to test
 
@@ -511,7 +534,30 @@
 
 			writesessiondata();
 			session_write_close();
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+
+			/*
+			 * We do this because of the HTTP 302 that happens here. We need to know, after
+			 * the redirect, that a user has clicked into this assessment from another page
+			 * so we can show them a trial reminder page if they're currently in an OHM trial
+			 * for assessments.
+			 */
+
+			$ohmQueryString = isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
+
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+
+			// OHM-specific code:
+			// The following line has "$ohmQueryString" conctenated into the Location: URL.
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php" . $ohmQueryString);
 		}
 		exit;
 	}
@@ -534,6 +580,86 @@
 	$stm = $DBH->prepare("SELECT * FROM imas_assessment_sessions WHERE id=:id");
 	$stm->execute(array(':id'=>$testid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
+
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+
+	/*
+	 * So I won't forget for a 6th time and have to delete an hour of nice refactoring:
+	 *
+	 * This is all in global scope because we are using core MOM's validate.php, header.php,
+	 * and footer.php files. These all depend on many things declared in global scope. Don't
+	 * remove this OHM-specific code block from global scope unless you're prepared to deal
+	 * with that.
+	 */
+
+	// The business decision is to allow students through to assessments if we encounter any
+	// problems checking access codes. This includes failure to interact with the payment API.
+
+	$courseId = $sessiondata['courseid'];
+	$courseName = $sessiondata['coursename'];
+	$assessmentId = $line['assessmentid'];
+
+	$courseOwnerGroupId = null;
+	if (isStudentPayEnabled()) {
+		require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+		$studentPaymentDb = new \OHM\StudentPaymentDb(null, $courseId, null);
+		$courseOwnerGroupId = $studentPaymentDb->getCourseOwnerGroupId();
+
+		// We need the course owner's group ID before we can check a student's access code status.
+		if (!isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
+			error_log(sprintf(
+				"Course owner is not a member of a group for course ID %d. Unable to get student access code status.",
+				$courseId));
+		}
+	}
+
+	$studentPayment = null;
+	$studentPayStatus = null;
+	if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
+		require_once(__DIR__ . "/../ohm/includes/StudentPayment.php");
+		require_once(__DIR__ . "/../ohm/models/StudentPayStatus.php");
+		$studentPayment = new \OHM\StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
+
+		try {
+			$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
+		} catch (OHM\StudentPaymentException $e) {
+			// See notes above re: business decisions
+			error_log("Student payment API error: " . $e->getMessage());
+			error_log("Stack trace: " . $e->getTraceAsString());
+		}
+
+		if (!is_null($studentPayStatus)) {
+			$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
+			$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
+
+			if ($courseRequiresPayment && !$studentHasAccessCode) {
+				require_once(__DIR__ . "/../ohm/assessments/activation.php");
+			}
+		}
+	}
+
+	if (!is_null($studentPayStatus) && $studentPayStatus->getStudentIsInTrial()) {
+		$shouldLogEvent = array('begin_trial', 'extend_trial', 'continue_trial');
+		$logEventType = getActivationLogEventType();
+
+		if (in_array($logEventType, $shouldLogEvent)) {
+			$studentPayment->logTakeAssessmentDuringTrial($assessmentId);
+			unsetActivationLogEventType();
+		}
+	}
+
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+
+
 	$GLOBALS['assessver'] = $line['ver'];
 	if (strpos($line['questions'],';')===false) {
 		$questions = explode(",",$line['questions']);
@@ -3719,4 +3845,92 @@ if (!isset($_REQUEST['embedpostback'])) {
 			echo "<a href=\"../course/course.php?cid={$testsettings['courseid']}\">", _('Return to Course Page'), "</a></p>\n";
 		}
 	}
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	/**
+	 * Determine if student payment status should be checked for assessments.
+	 *
+	 * @return boolean True if yes, False if no.
+	 */
+	function isStudentPayEnabled()
+	{
+		// 20 = student
+		if (20 > $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine if a group ID is valid for student payments.
+	 *
+	 * @param $groupId integer The group ID.
+	 * @return bool True if yes, False if no.
+	 */
+	function isValidGroupIdForStudentPayments($groupId) {
+		if (is_null($groupId) || 0 >= $groupId) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Return the student payments type of event we want to log.
+	 *
+	 * This information is obtained from a session cookie or a query string value.
+	 *
+	 * @return null
+	 */
+	function getActivationLogEventType()
+	{
+		if (isset($_COOKIE['activation_event'])) {
+			return $_COOKIE['activation_event'];
+		} else if (!is_null($_REQUEST['activation_event'])) {
+			return $_REQUEST['activation_event'];
+		} else {
+			return null;
+		}
+	}
+
+	function unsetActivationLogEventType()
+	{
+		setcookie("activation_event", "", -1, '/');
+		unset($_COOKIE['activation_event']);
+	}
+
+	/**
+	 * Determine if a user is starting an assessment.
+	 *
+	 * If the user is not clicking links from within an assessment that point to things
+	 * within the same assessment, this should return true.
+	 *
+	 * We do this by checking URL query arguments and referring URLs.
+	 */
+	function isStartingAssessment()
+	{
+		if (isset($_REQUEST['begin_ohm_assessment'])) {
+			return true;
+		}
+
+		if (!isset($_SERVER['HTTP_REFERER'])) {
+			return true;
+		}
+
+		if (isset($_SERVER['HTTP_REFERER']) && !strpos($_SERVER['HTTP_REFERER'], 'showtest.php')) {
+			return true;
+		}
+
+		return false;
+	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 ?>

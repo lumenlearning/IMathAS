@@ -6,6 +6,7 @@
 *.js~
 
 # Runtime
+/vendor/
 config/local.php
 
 # Elastic Beanstalk Files

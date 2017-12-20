@@ -29,7 +29,24 @@ if (!(isset($teacherid))) {
 	$cid = Sanitize::courseId($_GET['cid']);
 	$oktocopy = 1;
 
-	if (isset($_GET['action'])) {
+	if (isset($_POST['cidlookup'])) {
+		$query = "SELECT ic.id,ic.name,ic.enrollkey,ic.copyrights,ic.termsurl,iu.groupid,iu.LastName,iu.FirstName FROM imas_courses AS ic ";
+		$query .= "JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ic.id=:id";
+		$stm = $DBH->prepare($query);
+		$stm->execute(array(':id'=>$_POST['cidlookup']));
+		if ($stm->rowCount()==0) {
+			echo '{}';
+		} else {
+			$row = $stm->fetch(PDO::FETCH_ASSOC);
+			$out = array(
+				"id"=>Sanitize::onlyInt($row['id']), 
+				"name"=>Sanitize::encodeStringForDisplay($row['name'] . ' ('.$row['LastName'].', '.$row['FirstName'].')'),
+				"termsurl"=>Sanitize::url($row['termsurl']));
+			$out['needkey'] = !($row['copyrights'] == 2 || ($row['copyrights'] == 1 && $row['groupid']==$groupid));
+			echo json_encode($out);
+		}
+		exit;
+	} else if (isset($_GET['action'])) {
 		//DB $query = "SELECT imas_courses.id FROM imas_courses,imas_teachers WHERE imas_courses.id=imas_teachers.courseid";
 		//DB $query .= " AND imas_teachers.userid='$userid' AND imas_courses.id='{$_POST['ctc']}'";
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -488,12 +505,13 @@ if (!(isset($teacherid))) {
 		} elseif (isset($_GET['action']) && $_GET['action']=="select") { //DATA MANIPULATION FOR second option
 			$items = false;
 
-			$stm = $DBH->prepare("SELECT id,itemorder,picicons FROM imas_courses WHERE id IN (?,?)");
+			$stm = $DBH->prepare("SELECT id,itemorder,picicons,name FROM imas_courses WHERE id IN (?,?)");
 			$stm->execute(array($_POST['ctc'], $cid));
 			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 				if ($row['id']==$_POST['ctc']) {
 					$items = unserialize($row['itemorder']);
 					$picicons = $row['picicons'];
+					$ctcname = $row['name'];
 				}
 				if ($row['id']==$cid) {
 					$existblocks = array();
@@ -504,7 +522,7 @@ if (!(isset($teacherid))) {
 				echo 'Error with course to copy';
 				exit;
 			}
-
+			
 			$ids = array();
 			$types = array();
 			$names = array();
@@ -664,6 +682,9 @@ $placeinhead .= '<script type="text/javascript">
 	}
 	$(function() {
 		$("input:radio").change(function() {
+			if ($(this).attr("id")!="coursebrowserctc") {
+				$("#coursebrowserout").hide();
+			}
 			if ($(this).hasClass("copyr")) {
 				$("#ekeybox").show();
 			} else {
@@ -678,6 +699,61 @@ $placeinhead .= '<script type="text/javascript">
 			}
 		});
 	});
+	function showCourseBrowser() {
+		GB_show("Course Browser","../admin/coursebrowser.php?embedded=true",800,"auto");
+	}
+	function setCourse(course) {
+		$("#coursebrowserctc").val(course.id).prop("checked",true);
+		$("#templatename").text(course.name);
+		$("#coursebrowserout").show();
+		if (course.termsurl && course.termsurl != "") {
+			$("#termsbox").show(); $("#termsurl").attr("href",course.termsurl);
+		} else {
+			$("#termsbox").hide();
+			$("form").submit();
+		}
+		GB_hide();
+	}
+	function lookupcid() {
+		$("#cidlookuperr").text("");
+		var cidtolookup = $("#cidlookup").val();
+		$.ajax({
+			type: "POST",
+			url: "copyitems.php?cid="+cid,
+			data: { cidlookup: cidtolookup},
+			dataType: "json"
+		}).done(function(res) {
+			if ($.isEmptyObject(res)) {
+				$("#cidlookuperr").text("Course ID not found");
+				$("#cidlookupout").hide();
+			} else {
+				$("#cidlookupctc").val(res.id);
+				if (res.needkey) {
+					res.name += " &copy;";
+				} else {
+					res.name +=  " <a href=\"course.php?cid="+res.id+"\" target=\"_blank\" class=\"small\">Preview</a>";
+				}
+				$("#cidlookupname").html(res.name);
+				if (res.termsurl != "") {
+					$("#cidlookupctc").addClass("termsurl");
+					$("#cidlookupctc").attr("data-termsurl",res.termsurl);
+				} else {
+					$("#cidlookupctc").removeClass("termsurl");
+					$("#cidlookupctc").removeAttr("data-termsurl");
+				}
+				if (res.needkey) {
+					$("#cidlookupctc").addClass("copyr");
+				} else {
+					$("#cidlookupctc").removeClass("copyr");
+				}
+				$("#cidlookupctc").prop("checked",true).trigger("change");
+				$("#cidlookupout").show();
+			}
+		}).fail(function() {
+			$("#cidlookuperr").text("Lookup error");
+			$("#cidlookupout").hide();
+		});
+	}
 		</script>';
 require("../header.php");
 }
@@ -745,7 +821,8 @@ if ($overwriteBody==1) {
 	  }
 	}
 	</script>
-
+	<p>Copying course: <b><?php echo Sanitize::encodeStringForDisplay($ctcname);?></b></p>
+	
 	<form id="qform" method=post action="copyitems.php?cid=<?php echo $cid ?>&action=copy" onsubmit="return copyitemsonsubmit();">
 	<input type=hidden name=ekey id=ekey value="<?php echo Sanitize::encodeStringForDisplay($_POST['ekey']); ?>">
 	<input type=hidden name=ctc id=ctc value="<?php echo Sanitize::encodeStringForDisplay($_POST['ctc']); ?>">
@@ -972,7 +1049,26 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 	<h4>Select a course to copy items from</h4>
 
 	<form method=post action="copyitems.php?cid=<?php echo $cid ?>&action=select">
-		Course List
+<?php
+	if (isset($CFG['coursebrowser'])) {
+		//use the course browser
+		echo '<p>';
+		if (isset($CFG['coursebrowsermsg'])) {
+			echo $CFG['coursebrowsermsg'];
+		} else {
+			echo _('Copy a template or promoted course');
+		}
+		echo ' <button type="button" onclick="showCourseBrowser()">'._('Browse Courses').'</button>';
+		echo '<span id="coursebrowserout" style="display:none"><br/>';
+		echo '<input type=radio name=ctc value=0 id=coursebrowserctc /> ';
+		echo '<span id=templatename></span>';
+		echo '</span>';
+		echo '</p>';
+		echo '<p>'._('Or, select from the course list below').'</p>';		
+	} else {
+		echo '<p>'._('Course List').'</p>';
+	}
+?>	
 		<ul class=base>
 			<li><span class=dd>-</span>
 				<input type=radio name=ctc value="<?php echo $cid ?>" checked=1>This Course</li>
@@ -1065,7 +1161,7 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 
 //template courses
 		//DB if (mysql_num_rows($courseTemplateResults)>0) {
-		if ($courseTemplateResults->rowCount()>0) {
+		if ($courseTemplateResults->rowCount()>0 && !isset($CFG['coursebrowser'])) {
 ?>
 		<li class=lihdr>
 			<span class=dd>-</span>
@@ -1093,7 +1189,7 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 			echo "			</ul>\n		</li>\n";
 		}
 		//DB if (mysql_num_rows($groupTemplateResults)>0) {
-		if ($groupTemplateResults->rowCount()>0) {
+		if ($groupTemplateResults->rowCount()>0 && !isset($CFG['coursebrowser'])) {
 ?>
 		<li class=lihdr>
 			<span class=dd>-</span>
@@ -1122,6 +1218,16 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 		}
 ?>
 		</ul>
+		
+		<p>Or, lookup using course ID: 
+			<input type="text" size="7" id="cidlookup" />
+			<button type="button" onclick="lookupcid()">Look up course</button>
+			<span id="cidlookupout" style="display:none;"><br/>
+				<input type=radio name=ctc value=0 id=cidlookupctc />
+				<span id="cidlookupname"></span>
+			</span>
+			<span id="cidlookuperr"></span>
+		</p>
 
 		<p id="ekeybox" style="display:none;">
 		For courses marked with &copy;, you must supply the course enrollment key to show permission to copy the course.<br/>

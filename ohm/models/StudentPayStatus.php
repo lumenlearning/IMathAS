@@ -1,0 +1,126 @@
+<?php
+
+namespace OHM;
+
+/**
+ * Class StudentPayInfo Allows for simple DTOs to hold student payment status and
+ * "does this course require student payment" status.
+ *
+ * This class exists to hide the details of massaging Lumenistration API responses
+ * into what we want/need.
+ */
+class StudentPayStatus
+{
+
+	private $courseRequiresStudentPayment; // boolean
+	private $studentHasValidAccessCode; // boolean
+	private $studentIsInTrial; // boolean
+	private $studentTrialTimeRemainingSeconds; // integer
+	private $studentPaymentRawStatus; // string
+	private $userMessage; // string
+
+	/**
+	 * @return boolean
+	 */
+	public function getCourseRequiresStudentPayment()
+	{
+		return $this->courseRequiresStudentPayment;
+	}
+
+	/**
+	 * @param boolean $courseRequiresStudentPayment
+	 */
+	public function setCourseRequiresStudentPayment($courseRequiresStudentPayment)
+	{
+		$this->courseRequiresStudentPayment = $courseRequiresStudentPayment;
+	}
+
+	/**
+	 * The student has a valid access code for assessments.
+	 *
+	 * @return boolean
+	 */
+	public function getStudentHasValidAccessCode()
+	{
+		return $this->studentHasValidAccessCode;
+	}
+
+	/**
+	 * @param boolean $studentHasValidAccessCode
+	 */
+	public function setStudentHasValidAccessCode($studentHasValidAccessCode)
+	{
+		$this->studentHasValidAccessCode = $studentHasValidAccessCode;
+	}
+
+	/**
+	 * The student is currently in a trial for assessments.
+	 *
+	 * @return boolean
+	 */
+	public function getStudentIsInTrial()
+	{
+		return $this->studentIsInTrial;
+	}
+
+	/**
+	 * @param boolean $studentIsInTrial
+	 */
+	public function setStudentIsInTrial($studentIsInTrial)
+	{
+		$this->studentIsInTrial = $studentIsInTrial;
+	}
+
+	/**
+	 * @return integer
+	 */
+	public function getStudentTrialTimeRemainingSeconds()
+	{
+		return $this->studentTrialTimeRemainingSeconds;
+	}
+
+	/**
+	 * @param integer $studentTrialTimeRemainingSeconds If the student is currently in a trial.
+	 */
+	public function setStudentTrialTimeRemainingSeconds($studentTrialTimeRemainingSeconds)
+	{
+		$this->studentTrialTimeRemainingSeconds = $studentTrialTimeRemainingSeconds;
+	}
+
+	/**
+	 * The student's payment status as returned by the student payment API.
+	 *
+	 * @return string
+	 */
+	public function getStudentPaymentRawStatus()
+	{
+		return $this->studentPaymentRawStatus;
+	}
+
+	/**
+	 * @param string $studentPaymentRawStatus
+	 */
+	public function setStudentPaymentRawStatus($studentPaymentRawStatus)
+	{
+		$this->studentPaymentRawStatus = $studentPaymentRawStatus;
+	}
+
+	/**
+	 * A message to be displayed to the user, as returned from the student payment API.
+	 *
+	 * @return string
+	 */
+	public function getUserMessage()
+	{
+		return $this->userMessage;
+	}
+
+	/**
+	 * @param string $userMessage
+	 */
+	public function setUserMessage($userMessage)
+	{
+		$this->userMessage = $userMessage;
+	}
+
+}
