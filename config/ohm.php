@@ -40,6 +40,18 @@ $allownongrouplibs = false;
 //allow course import of questions?
 $allowcourseimport = false;
 
+// Lumen student payment authorization API
+$GLOBALS['student_pay_api']['enabled'] = "true" == strtolower(getenv('STUPAY_ENABLED')) ? true : false;
+$GLOBALS['student_pay_api']['base_url'] = getenv('STUPAY_API_BASE_URL');
+$GLOBALS['student_pay_api']['timeout'] = getenv('STUPAY_API_TIMEOUT_SECS');
+$GLOBALS['student_pay_api']['jwt_secret'] = getenv('STUPAY_API_JWT_SECRET');
+$GLOBALS['student_pay_api']['trial_period_human'] = "14 days";
+$GLOBALS['student_pay_api']['trial_extension_period_human'] = "48 hours";
+$GLOBALS['student_pay_api']['access_code_min_length'] = 7;
+$GLOBALS['student_pay_api']['access_code_max_length'] = 10;
+$GLOBALS['student_pay_api']['trial_min_reminder_time_secs'] = 60 * 60 * 24; // 24 hour
+$GLOBALS['student_pay_api']['debug'] = false;
+
 //userid for instructor on student self-enroll courses
 $CFG['GEN']['selfenrolluser'] = 13;
 

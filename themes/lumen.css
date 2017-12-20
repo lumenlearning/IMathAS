@@ -818,7 +818,156 @@ div#guides-button-container {
 	font-size: 1.1rem;
 }
 #ohm-integration-message #text li {
-    margin-bottom: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+/* ACCESS CODE TEMPLATES */
+.access-wrapper {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.access-block {
+	color: #222;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	margin-top: 20px;
+	max-width: 1000px;
+	padding: 40px 80px;
+}
+.access-block h2#subhead {
+	font-size: 1.6em;
+	font-weight: bold;
+}
+.access-block p {
+	font-size: 1.3em;
+}
+.access-block #confirmation-details p {
+	margin-bottom: 0;
+}
+.access-block .greeting {
+	font-weight: 500;
+	margin-bottom: 1.5em;
+}
+.access-block .emphasis {
+	font-weight: bold;
+	margin-bottom: 1em;
+}
+.access-block .bookstore-url:hover {
+	color: #6b6b6b;
+}
+.access-block .sub-wrapper {
+	align-items: center;
+	display: flex;
+	margin: 10px 0;
+}
+.access-sub-block {
+	display: flex;
+	flex-direction: row;
+	height: 350px;
+	padding: 1em 0;
+	width: 100%;
+}
+.access-sub-block-left {
+	border-right: 1px solid #000;
+	padding-right: 3.5em;
+	width: 50%;
+}
+.access-sub-block-right {
+	padding-left: 3.5em;
+	width: 50%;
+}
+.access_code_input_wrapper {
+	display: flex;
+	flex-direction: column;
+}
+.access_code_input_wrapper label {
+	font-size: 1.3em;
+	font-weight: bold;
+	padding: 0.5em 0;
+	margin-bottom: 2em;
+}
+#access_code_error_text {
+	color: #ff4444;
+}
+.access-block #error-text {
+	text-align: center;
+}
+.trial_button_wrapper {
+	display: flex;
+	flex-direction: column;
+	padding: 2em 0 0;
+	text-decoration: underline;
+}
+.trial_button_wrapper a {
+	color: #155192;
+	font-size: 1.3em;
+	font-weight: bold;
+}
+.trial_button_wrapper a:hover {
+	color: #3399cc;
+	cursor: pointer;
+}
+input#access_code {
+	border: 1px solid #aaa;
+	border-radius: 6px;
+	font-size: 16px;
+	height: 50px;
+	margin-bottom: 1em;
+	padding: 0.5em 1em;
+	text-transform: uppercase;
+}
+input#access_code::placeholder {
+	text-transform: none;
+}
+button#access_code_submit {
+	background-color: #155192;
+	height: 60px;
+	color: #fff;
+	font-size: 16px;
+	font-weight: bold;
+	border: 1px solid #104074;
+    margin-top: 1em;
+}
+button#access_code_submit:hover {
+	background-color: #FFD600;
+	color: #000;
+	cursor: pointer;
+}
+button#begin_trial {
+	background-color: transparent;
+	border: none;
+	color: #155192;
+	font-size: 1.3em;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+	text-decoration: underline;
+}
+button#begin_trial:hover {
+	color: #3399cc;
+	cursor: pointer;
+}
+button#student_payment_toggle {
+	background-color: #5847D6;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 1em;
+	color: white;
+	height: 35px;
+	margin: 0;
+	margin-left: -1px;
+	padding: 0 1.2em;
+}
+
+span#student_payment_toggle_message {
+	margin: 10px;
+}
+
+button#student_payment_toggle:hover {
+	background-color: #7B6DDF;
+	cursor: pointer;
 }
 
 /* MEDIA QUERIES */
@@ -887,6 +1036,9 @@ div#guides-button-container {
 		justify-content: center;
 		height: 116px;
 	}
+	#headerbarlogo {
+		margin-bottom: 0.75em;
+	}
 	div#leftcolumn,
 	div#rightcolumn {
 		float: none;
@@ -897,6 +1049,23 @@ div#guides-button-container {
 	}
 	#viewbuttoncont {
 		float: inherit !important;
+	}
+
+	.access-sub-block {
+		flex-direction: column;
+	}
+	.access-sub-block-left {
+		width: 100%;
+		border-right: none;
+		border-bottom: 1px solid black;
+		padding-bottom: 3.5em;
+		padding-right: 0;
+	}
+	.access-sub-block-right {
+		padding-bottom: 3.5em;
+		padding-left: 0;
+		padding-top: 2em;
+		width: 100%;
 	}
 }
 

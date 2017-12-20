@@ -519,11 +519,37 @@ switch($_POST['action']) {
 			if (($istemplate&16)==16) {
 				$query .= "jsondata=:jsondata,";
 			}
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+				$query .= "student_pay_required=:studentpay,";
+			}
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
 			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass WHERE id=:id";
 			$qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
 				':picicons'=>$picicons, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
 				':toolset'=>$toolset, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
 				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':id'=>$_GET['id']);
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+				$qarr[':studentpay'] = $_POST['studentpay'] ? 1 : 0;
+			}
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
 			if ($myrights<75) {
 				$query .= " AND ownerid=:ownerid";
 				$qarr[':ownerid']=$userid;
@@ -1193,6 +1219,20 @@ switch($_POST['action']) {
 		$grptype = (isset($_POST['iscust'])?1:0);
 		$stm = $DBH->prepare("UPDATE imas_groups SET name=:name,parent=:parent,grouptype=:grouptype WHERE id=:id");
 		$stm->execute(array(':name'=>$_POST['gpname'], ':parent'=>$_POST['parentid'], ':grouptype'=>$grptype, ':id'=>$_GET['id']));
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			$stm = $DBH->prepare("UPDATE imas_groups SET student_pay_enabled=:student_pay_enabled WHERE id=:id");
+			$stm->execute(array(':student_pay_enabled'=>$_POST['studentpay']?1:0, ':id'=>$_GET['id']));
+		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		break;
 	case "delgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}

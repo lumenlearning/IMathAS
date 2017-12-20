@@ -3,6 +3,21 @@
 //(c) 2006 David Lippman
 require("../init.php");
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+$placeinhead .= '<script type="text/javascript" src="' . $imasroot . '/ohm/js/student_pay/studentPayAjax.js"></script>';
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 require("../header.php");
 require("../includes/htmlutil.php");
 
@@ -383,6 +398,24 @@ switch($_GET['action']) {
 		echo '<input type="checkbox" name="stuavail" value="1" ';
 		if (($avail&1)==0) { echo 'checked="checked"';}
 		echo '/>Available to students</span><br class="form" />';
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $_GET['id'], null);
+			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
+			echo '<span class=form>Assessments require activation?</span><span class=formright>';
+			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
+			echo '<label for="studentpay">Students must provide an access code for assessments</label></span><br class="form"/>';
+		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		if ($_GET['action']=="modify") {
 			echo '<span class=form>Lock for assessment:</span><span class=formright><select name="lockaid">';
 			echo '<option value="0" ';
@@ -1197,6 +1230,34 @@ switch($_GET['action']) {
 		echo '<input type="checkbox" id="iscust" name="iscust" ';
 		if ($grptype==1) { echo 'checked';}
 		echo '> <label for="istcust">'._('Lumen Customer').'</label><br/>';
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+			$studentPaymentDb = new \OHM\StudentPaymentDb($_GET['id'], null, null);
+
+			if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
+				$toggleDisableStudentPaymentsButtonText = "Disable";
+				$ajaxSetStudentPayment = "false";
+			} else {
+				$toggleDisableStudentPaymentsButtonText = "Enable";
+				$ajaxSetStudentPayment = "true";
+			}
+
+			printf('<br/><button id="student_payment_toggle" type="button"'
+				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button>',
+				$ajaxSetStudentPayment, $_GET['id'], $toggleDisableStudentPaymentsButtonText);
+
+			echo '<span id="student_payment_toggle_message"></span><br/><br/>';
+		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		echo "<input type=submit value=\"Update Group\">\n";
 		echo "</form>\n";
 		break;

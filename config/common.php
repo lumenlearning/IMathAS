@@ -40,3 +40,4 @@ $dbpassword = getenv('DB_PASSWORD');
 if (getenv('imasroot')!==false) {
   $imasroot = getenv('imasroot');
 }
+
