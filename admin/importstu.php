@@ -38,8 +38,8 @@ function parsecsv($data) {
 			$ln = $fncol[count($fncol)-1];
 		}
 	}
-	$fn = preg_replace('/\W/','',$fn);
-	$ln = preg_replace('/\W/','',$ln);
+	$fn = preg_replace('/[^\w\'-]/','',$fn);
+	$ln = preg_replace('/[^\w\'-]/','',$ln);
 	$fn = ucfirst(strtolower($fn));
 	$ln = ucfirst(strtolower($ln));
 	if ($_POST['unusecol']==0) {
@@ -120,6 +120,7 @@ if (!(isset($teacherid)) && $myrights<100) {
 			for ($i=0;$i<count($arr);$i++) {
 				$arr[$i] = trim($arr[$i]);
 			}
+			print_r($arr);
 			//DB addslashes_deep($arr);
 			if (trim($arr[0])=='' || trim($arr[0])=='_') {
 				continue;
@@ -138,9 +139,12 @@ if (!(isset($teacherid)) && $myrights<100) {
 				echo "Email ".Sanitize::encodeStringForDisplay($arr[3])." is invalid; skipping<br/>\n";
 				continue;
 			}
-			if ((isset($CFG['acct']['passwordFormat']) && !checkFormatAgainstRegex($arr[6], $CFG['acct']['passwordFormat'])) ||
-						strlen($arr[6]) < isset($CFG['acct']['passwordMinlength'])?$CFG['acct']['passwordMinlength']:6) {
-				echo "Password for username ".Sanitize::encodeStringForDisplay($arr[0])." is invalid; skipping<br/>\n";
+			if (strlen($arr[6]) < (isset($CFG['acct']['passwordMinlength'])?$CFG['acct']['passwordMinlength']:6)) {
+				echo "Password for username ".Sanitize::encodeStringForDisplay($arr[0])." is too short; skipping<br/>\n";
+				continue;
+			}
+			if (isset($CFG['acct']['passwordFormat']) && !checkFormatAgainstRegex($arr[6], $CFG['acct']['passwordFormat'])) {
+				echo "Password for username ".Sanitize::encodeStringForDisplay($arr[0])." is invalid format; skipping<br/>\n";
 				continue;
 			}
 
