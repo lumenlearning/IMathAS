@@ -14,8 +14,6 @@ $GLOBALS['student_pay_api']['enabled'] = true;
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/student_auth/v1';
 $GLOBALS['student_pay_api']['timeout'] = 10;
 $GLOBALS['student_pay_api']['jwt_secret'] = 'phptest_secret_goes_here';
-$GLOBALS['student_pay_api']['access_code_min_length'] = 7;
-$GLOBALS['student_pay_api']['access_code_max_length'] = 10;
 $GLOBALS['student_pay_api']['debug'] = false;
 
 
@@ -396,46 +394,6 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals('https://www.lumenlearning.com/', $result->getBookstoreUrl());
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['4']);
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
-	}
-
-	/*
-	 * validateAccessCodeStructure
-	 */
-
-	function testValidateAccessCodeStructure()
-	{
-		$GLOBALS['student_pay_api']['access_code_min_length'] = 7;
-		$GLOBALS['student_pay_api']['access_code_max_length'] = 10;
-
-		$result = StudentPaymentApi::validateAccessCodeStructure("adfgadfga");
-		$this->assertNull($result);
-	}
-
-	function testValidateAccessCodeStructure_tooShort()
-	{
-		$GLOBALS['student_pay_api']['access_code_min_length'] = 7;
-		$GLOBALS['student_pay_api']['access_code_max_length'] = 10;
-
-		$result = StudentPaymentApi::validateAccessCodeStructure("adfg");
-		$this->assertNotNull($result);
-	}
-
-	function testValidateAccessCodeStructure_tooLong()
-	{
-		$GLOBALS['student_pay_api']['access_code_min_length'] = 7;
-		$GLOBALS['student_pay_api']['access_code_max_length'] = 10;
-
-		$result = StudentPaymentApi::validateAccessCodeStructure("adfgadfgadfgadfgadfgadfg");
-		$this->assertNotNull($result);
-	}
-
-	function testValidateAccessCodeStructure_invalidChars()
-	{
-		$GLOBALS['student_pay_api']['access_code_min_length'] = 2;
-		$GLOBALS['student_pay_api']['access_code_max_length'] = 30;
-
-		$result = StudentPaymentApi::validateAccessCodeStructure("adfg10bilosuv");
-		$this->assertNotNull($result);
 	}
 
 }

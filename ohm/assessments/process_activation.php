@@ -42,11 +42,6 @@ $studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']
 if ("activate_code" == $action) {
 	$accessCode = trim($_POST['access_code']);
 
-	$validationError = \OHM\StudentPaymentApi::validateAccessCodeStructure($accessCode);
-	if (!is_null($validationError)) {
-		response(400, $validationError);
-	}
-
 	$studentPayStatus = null;
 	try {
 		$studentPayStatus = $studentPayment->activateCode($accessCode);

@@ -29,11 +29,6 @@ if ("activate_code" == $action) {
 
 	$studentPayment = new StudentPayment($groupId, $courseId, $studentId);
 
-	$validationError = $studentPayment->validateAccessCodeStructure($activationCode);
-	if (!is_null($validationError)) {
-		response(400, $validationError);
-	}
-
 	$studentPaymentStatus = null;
 	try {
 		$studentPaymentStatus = $studentPayment->activateCode($activationCode);
