@@ -23,10 +23,16 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 
 
 <script>
-    $('#access_code').on('keypress', function (event) {
-        if (13 === event.charCode) {
-            ohmActivateCode();
-            return false;
+    $('#access_code').on({
+        keydown: function (event) {
+            console.log(event);
+            $('#access_code_error_text').text('');
+        },
+        keypress: function (event) {
+            if (13 === event.charCode) {
+                ohmActivateCode();
+                return false;
+            }
         }
     });
 
