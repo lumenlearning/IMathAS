@@ -439,6 +439,7 @@
 			 * As of 2017 Dec 12, the two OHM-specific files added to the array are:
 			 *   process_activation.php
 			 *   activation_confirmation.php
+			 *   activation_ajax.php
 			 *
 			 * No other OHM-specific changes have been made.
 			 *
@@ -448,7 +449,7 @@
 			 * #### Begin OHM-specific code notes #####################################################
 			 * #### Begin OHM-specific code notes #####################################################
 			 */
-			if (!in_array(basename($urlparts['path']),array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','process_activation.php','activation_confirmation.php'))) {
+			if (!in_array(basename($urlparts['path']),array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','process_activation.php','activation_confirmation.php','activation_ajax.php'))) {
 			//if (strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false && strpos(basename($_SERVER['PHP_SELF']),'printtest.php')===false && strpos(basename($_SERVER['PHP_SELF']),'msglist.php')===false && strpos(basename($_SERVER['PHP_SELF']),'sentlist.php')===false && strpos(basename($_SERVER['PHP_SELF']),'viewmsg.php')===false ) {
 				//DB $query = "SELECT courseid FROM imas_assessments WHERE id='{$sessiondata['ltiitemid']}'";
 				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
