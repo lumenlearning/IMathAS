@@ -1955,7 +1955,11 @@ span.instronly {
 	}
 		
 	$migrator = new Migrator($DBH, (isset($dbsetup) && $dbsetup==true));
-	$migrator->migrateAll();
+	$lastMigrationApplied = $migrator->migrateAll();
+
+	if (is_null($lastMigrationApplied) && php_sapi_name() == 'cli') {
+		exit(1);
+	}
 
 	echo "Migrations complete";
 	
