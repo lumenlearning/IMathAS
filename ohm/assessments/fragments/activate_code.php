@@ -23,7 +23,7 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 
 
 <script>
-    $('#ohmActivateCodeForm').submit(function (event) {
+    $('#ohmActivateCodeForm').on('submit', function (event) {
         event.preventDefault();
 
         $('#access_code_error_text').text('Activating your code...');
