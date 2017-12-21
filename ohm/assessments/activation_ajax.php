@@ -29,11 +29,6 @@ if ("activate_code" == $action) {
 
 	$studentPayment = new StudentPayment($groupId, $courseId, $studentId);
 
-	$validationError = $studentPayment->validateAccessCodeStructure($activationCode);
-	if (!is_null($validationError)) {
-		response(400, $validationError);
-	}
-
 	$studentPaymentStatus = null;
 	try {
 		$studentPaymentStatus = $studentPayment->activateCode($activationCode);
@@ -41,13 +36,13 @@ if ("activate_code" == $action) {
 		error_log(sprintf("Exception while attempting to activate code \"%s\" for student ID %d. %s",
 			$activationCode, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
-		response(200, 'Activation code service exception. Temporarily allowing access.');
+		response(503, 'Activation code service exception. Temporarily allowing access.');
 	}
 
 	if (is_null($studentPaymentStatus)) {
 		error_log("Something went wrong while attempting to activate a code for assessment."
 			. " Allowing the user through to assessment anyway.");
-		response(200, 'Activation code service exception. Temporarily allowing access.');
+		response(503, 'Activation code service exception. Temporarily allowing access.');
 	}
 
 	if (!is_null($studentPayment) && !$studentPaymentStatus->getStudentHasValidAccessCode()) {
