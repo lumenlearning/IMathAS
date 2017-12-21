@@ -25,8 +25,10 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 <script>
     $('#access_code').on({
         keydown: function (event) {
-            console.log(event);
-            $('#access_code_error_text').text('');
+            if (13 !== event.charCode) {
+                console.log(event);
+                $('#access_code_error_text').text('');
+            }
         },
         keypress: function (event) {
             if (13 === event.charCode) {
@@ -41,8 +43,6 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
     });
 
     function ohmActivateCode() {
-        $('#access_code_error_text').text('Activating your code...');
-
         var activationCodeForm = $('#ohmActivateCodeForm');
         var groupId = activationCodeForm.find('input[name="group_id"]').val();
         var courseId = activationCodeForm.find('input[name="course_id"]').val();
