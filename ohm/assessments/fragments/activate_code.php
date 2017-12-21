@@ -54,9 +54,13 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
                 'activationCode': activationCode
             },
             success: function (data) {
-                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php';
+                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php?courseId=' + courseId;
             },
             error: function (data) {
+                if (503 === data.status) {
+                    window.location.reload();
+                    return true;
+                }
                 results = JSON.parse(data.responseText);
                 $('#access_code_error_text').text(results.message);
             }
