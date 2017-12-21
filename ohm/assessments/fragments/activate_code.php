@@ -17,15 +17,24 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
       <label for="access_code">Enter an activation code:</label>
       <input type="text" name="access_code" id="access_code" placeholder="Enter code"/>
       <div id="access_code_error_text"></div>
-      <button type="submit" id="access_code_submit">Access Assessments</button>
+      <button type="button" id="access_code_submit">Access Assessments</button>
     </div>
 </form>
 
 
 <script>
-    $('#ohmActivateCodeForm').submit(function (event) {
-        event.preventDefault();
+    $('#access_code').on('keypress', function (event) {
+        if (13 === event.charCode) {
+            ohmActivateCode();
+            return false;
+        }
+    });
 
+    $('#access_code_submit').on('click', function (event) {
+        ohmActivateCode();
+    });
+
+    function ohmActivateCode() {
         $('#access_code_error_text').text('Activating your code...');
 
         var activationCodeForm = $('#ohmActivateCodeForm');
@@ -45,13 +54,17 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
                 'activationCode': activationCode
             },
             success: function (data) {
-                window.location.reload();
+                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php?courseId=' + courseId;
             },
             error: function (data) {
+                if (503 === data.status) {
+                    window.location.reload();
+                    return true;
+                }
                 results = JSON.parse(data.responseText);
                 $('#access_code_error_text').text(results.message);
             }
         });
-    });
+    }
 </script>
 
