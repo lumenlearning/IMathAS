@@ -2,7 +2,12 @@
 /**
  * This file is included from fragments/activation.php.
  */
+
+$studentPaymentDb = new \OHM\StudentPaymentDb($courseOwnerGroupId, $courseId, $userid);
+$enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
+
 ?>
+<!-- Enrollment ID = <?php echo $enrollmentId; ?> -->
 <form id="ohmActivateCodeForm" method="POST" action="#">
     <input type="hidden" name="action" value="activate_code"/>
     <input type="hidden" name="group_id" value="<?php echo $courseOwnerGroupId; ?>"/>
