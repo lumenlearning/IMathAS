@@ -25,9 +25,6 @@ require_once(__DIR__ . "/CurlRequest.php");
 class StudentPaymentApi
 {
 
-	const INVALID_ACTIVATION_CODE_MESSAGE = 'Please enter a valid activation code. Activation codes can only'
-		. ' numbers and letters, and should be %d-%d characters long.';
-
 	private $curl;
 	private $studentPaymentDb;
 
@@ -424,29 +421,6 @@ class StudentPaymentApi
 		$lumenistrationInstitution->setExternalIds($allExternalIds);
 
 		return $lumenistrationInstitution;
-	}
-
-	/**
-	 * Determine if an access code is well formed.
-	 *
-	 * @param $code string A valid assessment access code.
-	 * @return string Null on validation success. Error message on validation failure.
-	 */
-	public static function validateAccessCodeStructure($code)
-	{
-		$accessCodeMinLength = $GLOBALS['student_pay_api']['access_code_min_length'];
-		$accessCodeMaxLength = $GLOBALS['student_pay_api']['access_code_max_length'];
-
-		$sanitizedCode = preg_replace("/[^234679acdefghjkmnpqrtwxyz]/i", "", $code);
-		if ($sanitizedCode != $code) {
-			return sprintf(self::INVALID_ACTIVATION_CODE_MESSAGE, $accessCodeMinLength, $accessCodeMaxLength);
-		}
-
-		if ($accessCodeMinLength > strlen($sanitizedCode) || $accessCodeMaxLength < strlen($sanitizedCode)) {
-			return sprintf(self::INVALID_ACTIVATION_CODE_MESSAGE, $accessCodeMinLength, $accessCodeMaxLength);
-		}
-
-		return null;
 	}
 
 }

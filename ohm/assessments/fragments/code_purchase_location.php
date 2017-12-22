@@ -13,6 +13,6 @@ if (is_null($institutionData) || empty($bookstoreUrl)) {
 	echo '.';
 } else {
 	?>
-    or on the <a class="bookstore-url" href="<?php echo $bookstoreUrl; ?>">bookstore website</a>.
+    or on the <a class="bookstore-url" target="_blank" href="<?php echo $bookstoreUrl; ?>">bookstore website</a>.
 	<?php
 }
