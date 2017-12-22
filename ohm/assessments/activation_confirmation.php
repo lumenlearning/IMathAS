@@ -6,7 +6,7 @@
 require_once(__DIR__ . '/../../init.php');
 require_once(__DIR__ . '/../../header.php');
 
-if (!isset($_COOKIE['stupayasscode'])) {
+if (!isset($_REQUEST['courseId']) || !isset($_REQUEST['activationTime'])) {
     header("Location: " . $GLOBALS['basesiteurl']);
     exit;
 }
@@ -23,10 +23,10 @@ $courseNameStm->execute(array(':id'=>$_REQUEST['courseId']));
 $courseName = $courseNameStm->fetchColumn(0);
 
 // Access Code
-$accessCode = $_COOKIE['stupayasscode'];
+$accessCode = $_REQUEST['code'];
 
 // Timestamp
-$timestamp = $_COOKIE['stupayasscodetimestamp'];
+$timestamp = $_REQUEST['activationTime'];
 $date = new DateTime();
 
 // Output 2013-11-28 19:13:19
@@ -49,6 +49,7 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 	<div id="confirmation-details">
 		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></p>
 		<p><strong>Course Name: </strong><?php echo Sanitize::encodeStringForDisplay($courseName); ?></p>
+        <p><strong>Course ID: </strong><?php echo Sanitize::encodeStringForDisplay($_REQUEST['courseId']); ?></p>
 		<p><strong>Access Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
 		<p><strong>Timestamp: </strong><?php echo $timestamp_string; ?></p>
 	</div>

@@ -9,7 +9,6 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 ?>
 <!-- Enrollment ID = <?php echo $enrollmentId; ?> -->
 <form id="ohmActivateCodeForm" method="POST" action="#">
-    <input type="hidden" name="action" value="activate_code"/>
     <input type="hidden" name="group_id" value="<?php echo $courseOwnerGroupId; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
     <input type="hidden" name="student_id" value="<?php echo Sanitize::onlyInt($userid); ?>"/>
@@ -60,7 +59,10 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
                 'activationCode': activationCode
             },
             success: function (data) {
-                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php?courseId=' + courseId;
+                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php'
+                    + '?courseId=' + courseId
+                    + '&code=' + activationCode
+                    + '&activationTime=' + Math.round((new Date()).getTime() / 1000);
             },
             error: function (data) {
                 if (503 === data.status) {
