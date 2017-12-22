@@ -854,6 +854,26 @@ if ($stm->rowCount()==0) {
 					':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
 				$destcid = $DBH->lastInsertId();
 
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
+
+				$studentPaymentDb = new \OHM\StudentPaymentDb(null, $destcid, $userid);
+				$studentPaymentDb->setDbh($DBH);
+
+				$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+				if ($groupRequiresStudentPayment) {
+					$studentPaymentDb->setCourseRequiresStudentPayment(true);
+				}
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+
 				//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$destcid')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid) VALUES (:userid,:destcid)');
@@ -2272,6 +2292,25 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
 						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid));
 
+						// #### Begin OHM-specific code #####################################################
+						// #### Begin OHM-specific code #####################################################
+						// #### Begin OHM-specific code #####################################################
+						// #### Begin OHM-specific code #####################################################
+						// #### Begin OHM-specific code #####################################################
+						require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
+
+						$studentPaymentDb = new \OHM\StudentPaymentDb(null, $destcid, $userid);
+						$studentPaymentDb->setDbh($DBH);
+
+						$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+						if ($groupRequiresStudentPayment) {
+							$studentPaymentDb->setCourseRequiresStudentPayment(true);
+						}
+						// #### End OHM-specific code #######################################################
+						// #### End OHM-specific code #######################################################
+						// #### End OHM-specific code #######################################################
+						// #### End OHM-specific code #######################################################
+						// #### End OHM-specific code #######################################################
 					}
 					//DB $query = "INSERT INTO imas_lti_courses (org,contextid,courseid) VALUES ";
 					//DB $query .= "('{$_SESSION['ltiorg']}','{$_SESSION['lti_context_id']}',$destcid)";
