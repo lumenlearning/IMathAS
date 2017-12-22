@@ -24,7 +24,7 @@ $groupId = Sanitize::onlyInt($_REQUEST['group_id']);
 $courseId = Sanitize::courseId($_REQUEST['course_id']);
 $assessmentId = Sanitize::onlyInt($_REQUEST['assessment_id']);
 
-$validActions = array('activate_code', 'begin_trial', 'extend_trial', 'continue_trial', 'decline_trial');
+$validActions = array('begin_trial', 'extend_trial', 'continue_trial', 'decline_trial');
 
 if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($assessmentId)) {
 	header("Location: " . $GLOBALS['basesiteurl']);
@@ -38,36 +38,6 @@ $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=
 
 $studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 
-
-if ("activate_code" == $action) {
-	$accessCode = trim($_POST['access_code']);
-
-	$studentPayStatus = null;
-	try {
-		$studentPayStatus = $studentPayment->activateCode($accessCode);
-	} catch (\OHM\StudentPaymentException $e) {
-		// All unknown / uncaught errors should allow the user through to assessments.
-		error_log(sprintf("Exception while attempting to activate student access code. %s -- %s",
-			$e->getMessage(), $e->getTraceAsString()));
-	}
-
-	if ($studentPayStatus->getStudentHasValidAccessCode()) {
-		header("Location: " . $GLOBALS['basesiteurl'] . "/ohm/assessments/activation_confirmation.php?" . Sanitize::generateQueryStringFromMap(array(
-				'courseId' => $courseId,
-				'code' => $accessCode,
-				'activationTime' => time(),
-			)));
-		exit;
-	} else {
-		if (!empty($studentPayStatus->getUserMessage())) {
-			response(500, $studentPayStatus->getUserMessage());
-		};
-		// API did rejected or did not like the activation code.
-		// All unknown / uncaught errors should allow the user through to assessments.
-		error_log("An unexpected error occurred in process_activation.php->activate_code."
-			. "This should be fixed. Allowing the student through to assessments anyway.");
-	}
-}
 
 /*
  * User is attempting to begin a trial.

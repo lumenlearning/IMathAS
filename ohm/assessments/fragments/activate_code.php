@@ -9,7 +9,6 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 ?>
 <!-- Enrollment ID = <?php echo $enrollmentId; ?> -->
 <form id="ohmActivateCodeForm" method="POST" action="#">
-    <input type="hidden" name="action" value="activate_code"/>
     <input type="hidden" name="group_id" value="<?php echo $courseOwnerGroupId; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
     <input type="hidden" name="student_id" value="<?php echo Sanitize::onlyInt($userid); ?>"/>
