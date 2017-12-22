@@ -49,6 +49,7 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 	<div id="confirmation-details">
 		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></p>
 		<p><strong>Course Name: </strong><?php echo Sanitize::encodeStringForDisplay($courseName); ?></p>
+        <p><strong>Course ID: </strong><?php echo Sanitize::encodeStringForDisplay($_REQUEST['courseId']); ?></p>
 		<p><strong>Access Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
 		<p><strong>Timestamp: </strong><?php echo $timestamp_string; ?></p>
 	</div>
