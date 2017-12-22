@@ -144,6 +144,26 @@ if (isset($_POST['createcourse'])) {
 			':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 			':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
 		$cid = $DBH->lastInsertId();
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
+
+		$studentPaymentDb = new \OHM\StudentPaymentDb(null, $cid, $userid);
+		$studentPaymentDb->setDbh($DBH);
+
+		$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+		if ($groupRequiresStudentPayment) {
+			$studentPaymentDb->setCourseRequiresStudentPayment(true);
+		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+
 		//if ($myrights==40) {
 			//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$cid')";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());

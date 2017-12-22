@@ -41,7 +41,7 @@ class StudentPaymentDb
 	}
 
 	/**
-	 * Database handle setter. Used during testing.
+	 * Database handle setter. Used within MOM transactions and unit tests.
 	 * @param $dbh object The database handle object to use.
 	 */
 	public function setDbh($dbh)
