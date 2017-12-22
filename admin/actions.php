@@ -571,6 +571,17 @@ switch($_POST['action']) {
 				':itemorder'=>$itemorder, ':available'=>$avail, ':istemplate'=>$istemplate, ':deftime'=>$deftime,
 				':deflatepass'=>$deflatepass, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':blockcnt'=>$blockcnt));
 			$cid = $DBH->lastInsertId();
+			// #### Begin OHM-specific code #####################################################
+			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+
+			$studentPaymentDb = new \OHM\StudentPaymentDb(null, null, $userid);
+			$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+
+			if ($groupRequiresStudentPayment) {
+				$stm = $DBH->prepare("UPDATE imas_courses SET student_pay_required = 1 WHERE id = :courseId");
+				$stm->execute(array(':courseId'=>$cid));
+			}
+			// #### End OHM-specific code #######################################################
 			//if ($myrights==40) {
 				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
 				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
