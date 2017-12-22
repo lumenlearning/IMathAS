@@ -60,7 +60,10 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
                 'activationCode': activationCode
             },
             success: function (data) {
-                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php?courseId=' + courseId;
+                window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php'
+                    + '?courseId=' + courseId
+                    + '&code=' + activationCode
+                    + '&activationTime=' + Math.round((new Date()).getTime() / 1000);
             },
             error: function (data) {
                 if (503 === data.status) {
