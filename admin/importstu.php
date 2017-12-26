@@ -120,6 +120,7 @@ if (!(isset($teacherid)) && $myrights<100) {
 			for ($i=0;$i<count($arr);$i++) {
 				$arr[$i] = trim($arr[$i]);
 			}
+			print_r($arr);
 			//DB addslashes_deep($arr);
 			if (trim($arr[0])=='' || trim($arr[0])=='_') {
 				continue;
