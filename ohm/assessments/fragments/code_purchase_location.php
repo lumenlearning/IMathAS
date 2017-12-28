@@ -7,7 +7,7 @@
     at your campus bookstore<?php // Opening tag is here to prevent whitespace.
 
 $institutionData = $studentPayment->getInstitutionData();
-$bookstoreUrl = $institutionData->getBookstoreUrl();
+$bookstoreUrl = is_null($institutionData) ? null : $institutionData->getBookstoreUrl();
 
 if (is_null($institutionData) || empty($bookstoreUrl)) {
 	echo '.';
