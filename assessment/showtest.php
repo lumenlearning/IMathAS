@@ -1619,7 +1619,8 @@ if (!isset($_REQUEST['embedpostback'])) {
 				$intropieces[$textsegcnt] .= $introjson[$i]['text'];
 			} else {
 				$textsegcnt++;
-				$introdividers[$textsegcnt] = array(0,$introjson[$i]['displayBefore']+1, $introjson[$i]['displayUntil']+1);
+				if (!isset($introjson[$i]['forntype'])) {$introjson[$i]['forntype'] = 0;}
+				$introdividers[$textsegcnt] = array(0,$introjson[$i]['displayBefore']+1, $introjson[$i]['displayUntil']+1, $introjson[$i]['forntype']);
 				$intropieces[$textsegcnt] = $introjson[$i]['text'];
 			}
 
@@ -1745,8 +1746,20 @@ if (!isset($_REQUEST['embedpostback'])) {
 				echo "<input type=\"hidden\" name=\"isreview\" value=\"". ($isreview?1:0) ."\" />";
 				if (isset($intropieces)) {
 					foreach ($introdividers as $k=>$v) {
-						if ($v[1]==$toshow+1) {//right divider
+						/*if ($v[1]==$toshow+1) {//right divider
 							echo '<div class="intro" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							break;
+						}*/
+						if ($v[1]<=$toshow+1 && $toshow+1<=$v[2]) {//right divider
+							if ($toshow+1==$v[1] || !empty($v[3])) {
+								echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
+								echo _('Hide Question Information'), '</a></div>';
+								echo '<div class="intro" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							} else {
+								echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="false">';
+								echo _('Show Question Information'), '</a></div>';
+								echo '<div class="intro" aria-expanded="false" aria-hidden="true" style="display:none;" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							}
 							break;
 						}
 					}
@@ -1856,7 +1869,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 					unset($GLOBALS['nocolormark']);
 					echo "<p>" . _("This question, with your last answer");
 					if (($qi[$questions[$qn]]['showansafterlast'] && !$reattemptsremain) ||
-							($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn]) ||
+							($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']<=$attempts[$qn]) ||
 							($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 						echo _(" and correct answer");
 						$showcorrectnow = true;
@@ -1890,7 +1903,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 					if (isset($intropieces)) {
 						foreach ($introdividers as $k=>$v) {
 							if ($v[1]<=$next+1 && $next+1<=$v[2]) {//right divider
-								if ($next+1==$v[1]) {
+								if ($next+1==$v[1] || !empty($v[3])) {
 									echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
 									echo _('Hide Question Information'), '</a></div>';
 									echo '<div class="intro" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
@@ -1933,7 +1946,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 					if (isset($intropieces)) {
 						foreach ($introdividers as $k=>$v) {
 							if ($v[1]<=$next+1 && $next+1<=$v[2]) {//right divider
-								if ($next+1==$v[1]) {
+								if ($next+1==$v[1] || !empty($v[3])) {
 									echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
 									echo _('Hide Question Information'), '</a></div>';
 									echo '<div class="intro" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
@@ -2510,7 +2523,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 				//TODO i18n
 				$msg =  "<p>" . _("This question, with your last answer");
 				if (($qi[$questions[$qn]]['showansafterlast'] && !hasreattempts($qn)) ||
-						($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn]) ||
+						($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']<=$attempts[$qn]) ||
 						($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 					$msg .= _(" and correct answer");
 					$showcorrectnow = true;
@@ -2660,8 +2673,20 @@ if (!isset($_REQUEST['embedpostback'])) {
 				echo "<input type=\"hidden\" name=\"isreview\" value=\"". ($isreview?1:0) ."\" />";
 				if (isset($intropieces)) {
 					foreach ($introdividers as $k=>$v) {
-						if ($v[1]==$i+1) {//right divider
+						/*if ($v[1]==$i+1) {//right divider
 							echo '<div class="intro" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							break;
+						}*/
+						if ($v[1]<=$i+1 && $i+1<=$v[2]) {//right divider
+							if ($i+1==$v[1] || !empty($v[3])) {
+								echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
+								echo _('Hide Question Information'), '</a></div>';
+								echo '<div class="intro" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							} else {
+								echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="false">';
+								echo _('Show Question Information'), '</a></div>';
+								echo '<div class="intro" aria-expanded="false" aria-hidden="true" style="display:none;" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							}
 							break;
 						}
 					}
@@ -2902,7 +2927,7 @@ if (!isset($_REQUEST['embedpostback'])) {
 
 				} else {
 					if (($qi[$questions[$i]]['showansafterlast']) ||
-							($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']==$attempts[$i]) ||
+							($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']<=$attempts[$i]) ||
 							($qi[$questions[$i]]['showans']=='R' && $regenonreattempt)) {
 						$showcorrectnow = true;
 					} else {
