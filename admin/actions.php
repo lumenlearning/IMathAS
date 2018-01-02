@@ -581,9 +581,14 @@ switch($_POST['action']) {
 			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $cid, $userid);
 			$studentPaymentDb->setDbh($DBH);
 
-			$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-			if ($groupRequiresStudentPayment) {
-				$studentPaymentDb->setCourseRequiresStudentPayment(true);
+			try {
+				$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+				if ($groupRequiresStudentPayment) {
+					$studentPaymentDb->setCourseRequiresStudentPayment(true);
+				}
+			} catch (\OHM\StudentPaymentException $e) {
+				error_log($e->getMessage());
+				error_log($e->getTraceAsString());
 			}
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
