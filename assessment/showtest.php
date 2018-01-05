@@ -2024,11 +2024,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 					//TODO i18n
 					unset($GLOBALS['nocolormark']);
 					echo "<p>" . _("This question, with your last answer");
-					if ((($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') && $reattemptsremain == false) {
-						echo _(" and correct answer");
-						$showcorrectnow = true;
-					} else if (($showansduring && $qi[$questions[$qn]]['showans']=='0' && $testsettings['showans']==$attempts[$qn]) ||
-						   ($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn])) {
+					if (($qi[$questions[$qn]]['showansafterlast'] && !$reattemptsremain) ||
+							($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']<=$attempts[$qn]) ||
+							($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 						echo _(" and correct answer");
 						$showcorrectnow = true;
 					} else {
@@ -2682,11 +2680,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 			if ($showeachscore) {
 				//TODO i18n
 				$msg =  "<p>" . _("This question, with your last answer");
-				if (($showansafterlast && $qi[$questions[$qn]]['showans']=='0') || $qi[$questions[$qn]]['showans']=='F' || $qi[$questions[$qn]]['showans']=='J') {
-					$msg .= _(" and correct answer");
-					$showcorrectnow = true;
-				} else if (($showansduring && $qi[$questions[$qn]]['showans']=='0' && $testsettings['showans']==$attempts[$qn]) ||
-					($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']==$attempts[$qn])) {
+				if (($qi[$questions[$qn]]['showansafterlast'] && !hasreattempts($qn)) ||
+						($qi[$questions[$qn]]['showansduring'] && $qi[$questions[$qn]]['showans']<=$attempts[$qn]) ||
+						($qi[$questions[$qn]]['showans']=='R' && $regenonreattempt)) {
 					$msg .= _(" and correct answer");
 					$showcorrectnow = true;
 				} else {
@@ -3076,10 +3072,9 @@ if (!isset($_REQUEST['embedpostback'])) {
 					$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
 
 				} else {
-					if (($showansafterlast && $qi[$questions[$i]]['showans']=='0') || $qi[$questions[$i]]['showans']=='F' || $qi[$questions[$i]]['showans']=='J') {
-						$showcorrectnow = true;
-					} else if (($showansduring && $qi[$questions[$i]]['showans']=='0' && $testsettings['showans']==$attempts[$i]) ||
-						  ($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']==$attempts[$qn])){
+					if (($qi[$questions[$i]]['showansafterlast']) ||
+							($qi[$questions[$i]]['showansduring'] && $qi[$questions[$i]]['showans']<=$attempts[$i]) ||
+							($qi[$questions[$i]]['showans']=='R' && $regenonreattempt)) {
 						$showcorrectnow = true;
 					} else {
 						$showcorrectnow = false;
