@@ -80,10 +80,14 @@
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
+			$reqdata = array('reqmade'=>$now, 'school'=>$_POST['school'], 'phone'=>$_POST['phone'], 'url'=>$_POST['verurl']);
+			$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,0,?,?)");
+			$stm->execute(array($newuserid, $now, json_encode($reqdata)));
+			
 			$message = "<p>Your new account request has been sent, for username ".Sanitize::encodeStringForDisplay($_POST['SID']).".</p>  ";
 			$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
 			$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
-			$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
+			$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom and $accountapproval to your contacts list.";
 			$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
 			mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
 
