@@ -50,20 +50,30 @@ function copyStuData($destcid, $sourcecid = null) {
 	}
 	
 	//copy students
+	$stm = $DBH->prepare("SELECT userid FROM imas_students WHERE courseid=?");
+	$stm->execute(array($destcid));
+	$existingstu = array();
+	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+		$existingstu[] = $row['userid'];
+	}
+	
 	$stufieldlist = 'userid,section,code,gbcomment,latepass,lastaccess,gbinstrcomment,locked,timelimitmult,stutype,custominfo';
 	$stufields = explode(',', $stufieldlist);
 	$execarr = array();
 	$stm = $DBH->prepare("SELECT $stufieldlist FROM imas_students WHERE courseid=?");
 	$stm->execute(array($sourcecid));
 	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+		if (in_array($row['userid'], $existingstu)) { continue; } //don't add again
 		$execarr[] = $destcid;
 		foreach ($stufields as $field) {
 			$execarr[] = $row[$field];
 		}
 	}
-	$ph = Sanitize::generateQueryPlaceholdersGrouped($execarr, count($stufields)+1);
-	$stm = $DBH->prepare("INSERT INTO imas_students (courseid,$stufieldlist) VALUES $ph");
-	$stm->execute($execarr);
+	if (count($execarr)>0) {
+		$ph = Sanitize::generateQueryPlaceholdersGrouped($execarr, count($stufields)+1);
+		$stm = $DBH->prepare("INSERT INTO imas_students (courseid,$stufieldlist) VALUES $ph");
+		$stm->execute($execarr);
+	}
 	                          
 
 	//copy assessment sessions
@@ -97,9 +107,11 @@ function copyStuData($destcid, $sourcecid = null) {
 		}
 	}
 	//insert assessment sessions
-	$ph = Sanitize::generateQueryPlaceholdersGrouped($execarr, count($fields));
-	$stm = $DBH->prepare("INSERT INTO imas_assessment_sessions ($fieldlist) VALUES $ph");
-	$stm->execute($execarr);
+	if (count($execarr)>0) {
+		$ph = Sanitize::generateQueryPlaceholdersGrouped($execarr, count($fields));
+		$stm = $DBH->prepare("INSERT IGNORE INTO imas_assessment_sessions ($fieldlist) VALUES $ph");
+		$stm->execute($execarr);
+	}
 
 	return 1;
 }
