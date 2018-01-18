@@ -49,15 +49,16 @@
 				$stm->execute(array(':SID'=>$_POST['username'], ':password'=>$md5pw, ':rights'=>12, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':homelayout'=>$homelayout));
 				$newuserid = $DBH->lastInsertId();
 				if (isset($CFG['GEN']['enrollonnewinstructor'])) {
+					$timeNow = time();
 					$valbits = array();
 					foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
 					  $ncid = intval($ncid);
-						$valbits[] = "($newuserid,$ncid)";
+						$valbits[] = "($newuserid,$ncid,$timeNow)";
 					}
-					//DB $query = "INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits);
+					//DB $query = "INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits);
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 
-					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits)); //known INTs - safe
+					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits)); //known INTs - safe
 				}
 
 				$headers  = 'MIME-Version: 1.0' . "\r\n";

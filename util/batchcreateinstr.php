@@ -63,10 +63,10 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 			$valbits = array();
 			$valvals = array();
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-				$valbits[] = "(?,?)";
-				array_push($valvals, $newuserid,$ncid);
+				$valbits[] = "(?,?,?)";
+				array_push($valvals, $newuserid,$ncid,time());
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		}
 

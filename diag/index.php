@@ -328,8 +328,8 @@ if (isset($_POST['SID'])) {
 	if (!isset($_POST['timelimitmult'])) {
 		$_POST['timelimitmult'] = 1;
 	}
-	$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,timelimitmult) VALUES (:userid, :courseid, :section, :timelimitmult);");
-	$stm->execute(array(':userid'=>$userid, ':courseid'=>$pcid, ':section'=>$_POST['teachers'], ':timelimitmult'=>$_POST['timelimitmult']));
+	$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,timelimitmult,created_at) VALUES (:userid, :courseid, :section, :timelimitmult, :created_at);");
+	$stm->execute(array(':userid'=>$userid, ':courseid'=>$pcid, ':section'=>$_POST['teachers'], ':timelimitmult'=>$_POST['timelimitmult'], ':created_at'=>time()));
 
 	$sessiondata['mathdisp'] = $_POST['mathdisp'];//1;
 	$sessiondata['graphdisp'] = $_POST['graphdisp'];//1;

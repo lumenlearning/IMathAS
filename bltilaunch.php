@@ -1360,8 +1360,8 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
 
 					//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$userid','$cid','{$_SESSION['lti_context_label']}','$deflatepass')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
+					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass, ':created_at'=>time()));
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
@@ -2637,8 +2637,8 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 					$deflatepass = $stm->fetchColumn(0);
 					//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$userid','$cid','{$_SESSION['lti_context_label']}','$deflatepass')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
+					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass, ':created_at'=>time()));
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';

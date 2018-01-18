@@ -1,0 +1,18 @@
+<?php
+
+// Add created_at columns.
+$DBH->beginTransaction();
+
+$query = "ALTER TABLE  `imas_students` ADD `created_at` INT(10)";
+$result = $DBH->query($query);
+if (false === $result) {
+	echo "<p>Query failed: \"$query\". Reason: " . $DBH->errorInfo() . "</p>";
+	$DBH->rollBack();
+	return false;
+}
+
+$DBH->commit();
+
+echo "<p style='color: green;'>✓ Added <b>created_at</b> columns.</p>";
+
+return true;

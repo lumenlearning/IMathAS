@@ -145,10 +145,10 @@ switch($_POST['action']) {
 			$valbits = array();
 			$valvals = array();
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-				$valbits[] = "(?,?)";
-				array_push($valvals, $_GET['id'], $ncid);
+				$valbits[] = "(?,?,?)";
+				array_push($valvals, $_GET['id'], $ncid, time());
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		} else if ($oldrights>10 && $_POST['newrights']<=10 && isset($CFG['GEN']['enrollonnewinstructor'])) {
 			require_once("../includes/unenroll.php");
@@ -168,10 +168,10 @@ switch($_POST['action']) {
         $valvals = array();
         $userid = Sanitize::onlyInt($_GET['id']);
         foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-          $valbits[] = "(?,?)";
-          array_push($valvals, $userid,$ncid);
+          $valbits[] = "(?,?,?)";
+          array_push($valvals, $userid,$ncid,time());
         }
-        $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+        $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
         $stm->execute($valvals);
       }
 
@@ -333,10 +333,10 @@ switch($_POST['action']) {
 			$valbits = array();
 			$valvals = array();
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-				$valbits[] = "(?,?)";
-				array_push($valvals, $newuserid,$ncid);
+				$valbits[] = "(?,?,?)";
+				array_push($valvals, $newuserid,$ncid,time());
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		}
 		break;

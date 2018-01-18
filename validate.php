@@ -189,12 +189,13 @@
       $stm->execute(array());
     }
 		if ($stm->rowCount()>0) {
-			$query = "INSERT INTO imas_students (userid,courseid) VALUES ";
+    		$timeNow = time();
+			$query = "INSERT INTO imas_students (userid,courseid,created_at) VALUES ";
 			$i = 0;
 			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				if ($i>0) { $query .= ',';}
-				$query .= "($userid,{$row[0]})";  //INT's from DB - safe
+				$query .= "($userid,{$row[0]},$timeNow)";  //INT's from DB - safe
 				$i++;
 			}
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -556,8 +557,8 @@
 					$tutorsection = trim($line['section']);
 				} else if ($myrights==5 && isset($_GET['guestaccess']) && isset($CFG['GEN']['guesttempaccts'])) {
 					//guest user not enrolled, but trying via guestaccess; enroll	
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES (?,?)");
-					$stm->execute(array($userid, $cid));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES (?,?,?)");
+					$stm->execute(array($userid, $cid, time()));
 					$studentid = $DBH->lastInsertId();
 					$studentinfo = array('latepasses'=>0, 'timelimitmult'=>1, 'section'=>null);
 				} 

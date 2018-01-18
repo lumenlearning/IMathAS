@@ -159,13 +159,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 
 				//DB $vals = "$id,'$cid','$deflatepass'";
 				//DB $query = "INSERT INTO imas_students (userid,courseid,latepass";
-				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code) ";
-				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code)";
+				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code,created_at) ";
+				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code,:created_at)";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(":userid"=>$id,":courseid"=>$cid,":latepass"=>$deflatepass,
 					":section"=>trim($_POST['section'])!=''?trim($_POST['section']):null,
-					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null
-					));
+					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null,
+					":created_at"=>time()));
 				//DB if (trim($_POST['section'])!='') {
 				//DB 	$query .= ",section";
 					//DB $vals .= ",'".$_POST['section']."'";
@@ -231,13 +231,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				//DB }
 				//DB $query .= ") VALUES ($vals)";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code) ";
-				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code)";
+				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code,created_at) ";
+				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code,:created_at)";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(":userid"=>$newuserid,":courseid"=>$cid,":latepass"=>$deflatepass,
 					":section"=>trim($_POST['section'])!=''?trim($_POST['section']):null,
-					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null
-					));
+					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null,
+					":created_at"=>time()));
 
 				header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid");
 				exit;

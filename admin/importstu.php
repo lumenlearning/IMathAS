@@ -229,10 +229,11 @@ if (!(isset($teacherid)) && $myrights<100) {
 				//DB }
 				//DB $query .= ") VALUES ($vals)";
 
-				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section) VALUES (:userid, :courseid, :code, :section)");
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section,created_at) VALUES (:userid, :courseid, :code, :section, :created_at)");
 				$stm->execute(array(':userid'=>$id, ':courseid'=>$ncid,
 					':code'=>($_POST['codetype']==1)?$arr[4]:null,
-					':section'=>($_POST['sectype']>0)?$arr[5]:null));
+					':section'=>($_POST['sectype']>0)?$arr[5]:null,
+                    ':created_at'=>time()));
 			}
 
 		}
