@@ -51,10 +51,11 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 			$hashpw = md5($data[1]);
 		}
     echo "Importing ".Sanitize::encodeStringForDisplay($data[0])."<br/>";
-    $query = 'INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout)';
+    $query = 'INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,created_at) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :created_at)';
     $stm = $DBH->prepare($query);
     $stm->execute(array(':SID'=>$data[0], ':password'=>$hashpw, ':FirstName'=>$data[2], ':LastName'=>$data[3],
-            ':rights'=>40, ':email'=>$data[4], ':groupid'=>$_POST['groupid'], ':homelayout'=>$homelayout));
+            ':rights'=>40, ':email'=>$data[4], ':groupid'=>$_POST['groupid'], ':homelayout'=>$homelayout,
+            ':created_at'=>time()));
 
     $newuserid = $DBH->lastInsertId();
 

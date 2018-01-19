@@ -295,22 +295,22 @@ if (isset($_GET['launch'])) {
 						$rights = 40;
 					}
 					$newgroupid = intval($_SESSION['lti_keygroupid']);
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:groupid)';
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:groupid,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
 						':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
-						':msgnotify'=>$msgnot,':groupid'=>$newgroupid));
+						':msgnotify'=>$msgnot,':groupid'=>$newgroupid, ':created_at'=>time()));
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot,$newgroupid)";
 				} else {
 					$rights = 10;
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot)";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify)';
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
 						':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
-						':msgnotify'=>$msgnot));
+						':msgnotify'=>$msgnot,':created_at'=>time()));
 				}
 
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -672,21 +672,22 @@ if (isset($_GET['launch'])) {
 						$rights = 40;
 					}
 					$newgroupid = intval($_SESSION['lti_keygroupid']);
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0,'$newgroupid')";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:groupid)';
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:groupid,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':groupid'=>$newgroupid));
+						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':groupid'=>$newgroupid,
+                        ':created_at'=>time()));
 
 				} else {
 					$rights = 10;
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0)";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0)';
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email));
+						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':created_at'=>time()));
 				}
 
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -1782,19 +1783,19 @@ if (isset($_GET['launch'])) {
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot,$newgroupid)";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':groupid'=>$newgroupid));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':groupid'=>$newgroupid, ':created_at'=>time()));
 				} else {
 					$rights = 10;
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot)";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':created_at'=>time()));
 				}
 
 				//DB $userid = mysql_insert_id();
@@ -2179,19 +2180,19 @@ if (isset($_GET['launch'])) {
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0,'$newgroupid')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':groupid'=>$newgroupid));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':groupid'=>$newgroupid, ':created_at'=>time()));
 				} else {
 					$rights = 10;
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0)";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':created_at'=>time()));
 				}
 
 				//DB $userid = mysql_insert_id();

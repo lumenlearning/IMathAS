@@ -170,10 +170,10 @@
 	 	//DB $query .= "VALUES ('guestacct$guestcnt','',5,'Guest','Account','none@none.com',0,'$homelayout')";
 	 	//DB mysql_query($query) or die("Query failed : " . mysql_error());
 	 	//DB $userid = mysql_insert_id();
-	 	$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,homelayout) ";
-	 	$query .= "VALUES (:guestcnt,'',5,'Guest','Account','none@none.com',0,:homelayout)";
+	 	$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,homelayout,created_at) ";
+	 	$query .= "VALUES (:guestcnt,'',5,'Guest','Account','none@none.com',0,:homelayout,:created_at)";
 	 	$stm = $DBH->prepare($query);
-	 	$stm->execute(array(':guestcnt'=>"guestacct$guestcnt", ':homelayout'=>$homelayout));
+	 	$stm->execute(array(':guestcnt'=>"guestacct$guestcnt", ':homelayout'=>$homelayout, ':created_at'=>time()));
 	 	$userid = $DBH->lastInsertId();
 
 		//DB $query = "SELECT id FROM imas_courses WHERE (istemplate&8)=8 AND available<4";

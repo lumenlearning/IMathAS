@@ -113,8 +113,8 @@ require_once("includes/sanitize.php");
 		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $newuserid = mysql_insert_id();
 
-		$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout) ";
-		$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout)";
+		$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout, created_at) ";
+		$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout, :created_at)";
 
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(
@@ -125,7 +125,8 @@ require_once("includes/sanitize.php");
 			':LastName'=>$_POST['lastname'],
 			':email'=>$_POST['email'],
 			':msgnotify'=>$msgnot,
-			':homelayout'=>$homelayout));
+			':homelayout'=>$homelayout,
+			':created_at'=>time()));
 		$newuserid = $DBH->lastInsertId();
 
 		if ($emailconfirmation) {

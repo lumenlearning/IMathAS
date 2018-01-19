@@ -204,11 +204,11 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				//DB $query .= "VALUES ('{$_POST['SID']}','$md5pw',10,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',0);";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB $newuserid = mysql_insert_id();
-				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify) ";
-				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify);";
+				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, created_at) ";
+				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at);";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>10,
-					':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>0));
+					':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>0, ':created_at'=>time()));
 				$newuserid = $DBH->lastInsertId();
 				//$query = "INSERT INTO imas_students (userid,courseid) VALUES ($newuserid,'$cid')";
 				//DB $query = "SELECT deflatepass FROM imas_courses WHERE id='$cid'";

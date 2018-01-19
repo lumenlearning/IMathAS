@@ -315,13 +315,13 @@ if (isset($_POST['SID'])) {
 	//DB $query .= "VALUES ('$diagSID','{$_POST['passwd']}',10,'{$_POST['firstname']}','{$_POST['lastname']}','$eclass',$now);";
 	//DB mysql_query($query) or die("Query failed : " . mysql_error());
 	//DB $userid = mysql_insert_id();
-	$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, lastaccess) ";
-	$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :lastaccess);";
+	$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, lastaccess, created_at) ";
+	$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :lastaccess, :created_at);";
 	$stm = $DBH->prepare($query);
 	if (!isset($_POST['passwd'])) {
 		$_POST['passwd'] = "none";
 	}
-	$stm->execute(array(':SID'=>$diagSID, ':password'=>$_POST['passwd'], ':rights'=>10, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$eclass, ':lastaccess'=>$now));
+	$stm->execute(array(':SID'=>$diagSID, ':password'=>$_POST['passwd'], ':rights'=>10, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$eclass, ':lastaccess'=>$now, ':created_at'=>time()));
 	$userid = $DBH->lastInsertId();
 	//DB $query = "INSERT INTO imas_students (userid,courseid,section) VALUES ('$userid','$pcid','{$_POST['teachers']}');";
 	//DB mysql_query($query) or die("Query failed : " . mysql_error());
