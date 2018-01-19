@@ -2605,8 +2605,8 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 			if ($stm->rowCount() == 0) {
 				//DB $query = "INSERT INTO imas_tutors (userid,courseid,section) VALUES ('$userid','$cid','{$_SESSION['lti_context_label']}')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("INSERT INTO imas_tutors (userid,courseid,section) VALUES (:userid, :courseid, :section)");
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label']));
+				$stm = $DBH->prepare("INSERT INTO imas_tutors (userid,courseid,section,created_at) VALUES (:userid, :courseid, :section, :created_at)");
+				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':created_at'=>time()));
 			}
 		}
 		$timelimitmult = 1;
