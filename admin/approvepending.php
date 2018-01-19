@@ -31,8 +31,8 @@ if (isset($_GET['go'])) {
 			//DB $query = "INSERT INTO imas_groups (name) VALUES ('{$_POST['newgroup']}')";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			//DB $group = mysql_insert_id();
-			$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
-			$stm->execute(array(':name'=>$_POST['newgroup']));
+			$stm = $DBH->prepare("INSERT INTO imas_groups (name,created_at) VALUES (:name,:created_at)");
+			$stm->execute(array(':name'=>$_POST['newgroup'],':created_at'=>time()));
 			$group = $DBH->lastInsertId();
 		} else {
 			$group = 0;

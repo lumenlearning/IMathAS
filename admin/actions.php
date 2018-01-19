@@ -1229,8 +1229,8 @@ switch($_POST['action']) {
 			echo "<html><body>Group name already exists.  <a href=\"forms.php?action=listgroups\">Try again</a></body></html>\n";
 			exit;
 		}
-		$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
-		$stm->execute(array(':name'=>$_POST['gpname']));
+		$stm = $DBH->prepare("INSERT INTO imas_groups (name,created_at) VALUES (:name,:created_at)");
+		$stm->execute(array(':name'=>$_POST['gpname'],':created_at'=>time()));
 		break;
 	case "modgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
