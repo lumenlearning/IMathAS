@@ -167,8 +167,8 @@ if (isset($_POST['createcourse'])) {
 		//if ($myrights==40) {
 			//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$cid')";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
-			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
 		//}
 		$useweights = intval(isset($CFG['GBS']['useweights'])?$CFG['GBS']['useweights']:0);
 		$orderby = intval(isset($CFG['GBS']['orderby'])?$CFG['GBS']['orderby']:0);

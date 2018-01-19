@@ -883,8 +883,8 @@ if ($stm->rowCount()==0) {
 
 				//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$destcid')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid) VALUES (:userid,:destcid)');
-				$stm->execute(array(':userid'=>$userid, ':destcid'=>$destcid));
+				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid,:destcid,:created_at)');
+				$stm->execute(array(':userid'=>$userid, ':destcid'=>$destcid, ':created_at'=>time()));
 
 				//DO full course copy
 				$sourcecid = $aidsourcecid;
@@ -1327,8 +1327,8 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
 			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 			if ($stm->rowCount() == 0) {
 				//reporterror("error - you are not an instructor or tutor on the $installname course this link is associated with.  If you are team-teaching this course, have the other instructor add you as a teacher or tutor on $installname then try again.");
-				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
 			}
 		}
 		$timelimitmult = 1;
@@ -2326,8 +2326,8 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						$destcid  = $DBH->lastInsertId();
 						//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$destcid')";
 						//DB mysql_query($query) or die("Query failed : " . mysql_error());
-						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid));
+						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid, ':created_at'=>time()));
 
 						// #### Begin OHM-specific code #####################################################
 						// #### Begin OHM-specific code #####################################################

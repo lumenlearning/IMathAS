@@ -118,8 +118,8 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 
 
       //if ($myrights==40) {
-        $stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-        $stm->execute(array(':userid'=>$uid, ':courseid'=>$cid));
+        $stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+        $stm->execute(array(':userid'=>$uid, ':courseid'=>$cid, ':created_at'=>time()));
       //}
 
       $query = "INSERT INTO imas_gbscheme (courseid,useweights,orderby,defaultcat,defgbmode,stugbmode,usersort) ";

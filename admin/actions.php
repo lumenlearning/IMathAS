@@ -596,8 +596,8 @@ switch($_POST['action']) {
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
 			//if ($myrights==40) {
-				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
 			//}
 			$useweights = intval(isset($CFG['GBS']['useweights'])?$CFG['GBS']['useweights']:0);
 			$orderby = intval(isset($CFG['GBS']['orderby'])?$CFG['GBS']['orderby']:0);
@@ -1009,11 +1009,11 @@ switch($_POST['action']) {
 		$ins = array();
 		$insval = array();
 		foreach ($tids as $tid) {
-			$ins[] = "(?,?)";
-			array_push($insval, $tid, $_GET['cid']);
+			$ins[] = "(?,?,?)";
+			array_push($insval, $tid, $_GET['cid'], time());
 		}
 		if (count($ins)>0) {
-			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES ".implode(',',$ins));
+			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES ".implode(',',$ins));
 			$stm->execute($insval);
 		}
 		if (!isset($_POST['addandclose'])) {
@@ -1180,8 +1180,8 @@ switch($_POST['action']) {
 			$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 			$stm->execute(array(':courseid'=>$_GET['id'], ':userid'=>$_POST['newowner']));
 			if ($stm->rowCount()==0) {
-				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-				$stm->execute(array(':userid'=>$_POST['newowner'], ':courseid'=>$_GET['id']));
+				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+				$stm->execute(array(':userid'=>$_POST['newowner'], ':courseid'=>$_GET['id'], ':created_at'=>time()));
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 			$stm->execute(array(':courseid'=>$_GET['id'], ':userid'=>$userid));
