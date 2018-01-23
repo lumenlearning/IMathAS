@@ -19,7 +19,7 @@ $dbname = 'myopenmathdb';
 //login prompts
 $loginprompt = "Username";
 $longloginprompt = "Enter a username.  Use only numbers, letters, or the _ character.";
-$loginformat = '/^[\w\-]+$/';
+$loginformat = '/^[\w\.@\-]+$/';
 
 //require email confirmation of new users?
 $emailconfirmation = false;

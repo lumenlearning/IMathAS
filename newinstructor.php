@@ -36,8 +36,8 @@
 					$homelayout = '|0,1,2||0,1';
 				}
 
-				require_once("includes/password.php");
-				$md5pw = password_hash($_POST['password'], PASSWORD_DEFAULT);
+			require_once("includes/password.php");
+			$md5pw = password_hash($_POST['pw1'], PASSWORD_DEFAULT);
 
 				//DB $query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
 				//DB $query .= "VALUES ('{$_POST['username']}','$md5pw',0,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}','$homelayout');";
@@ -80,12 +80,12 @@
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
-				$message = "<p>Your new account request has been sent, for username ".Sanitize::encodeStringForDisplay($_POST['username']).".</p>  ";
-				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
-				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
-				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
-				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
+			$message = "<p>Your new account request has been sent, for username ".Sanitize::encodeStringForDisplay($_POST['SID']).".</p>  ";
+			$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
+			$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
+			$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
+			$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
+			mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
 
 				echo $message;
 				require("footer.php");
@@ -105,10 +105,10 @@
 	echo '<p>Note: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges. ';
 	echo 'MyOpenMath does not currently provide instructor accounts to parents, home-schools, or tutors. MyOpenMath is only intended for use with children and adults over ';
 	echo 'the age of 13.</p>';
-	echo "<form method=post action=\"newinstructor.php\" onsubmit=\"return passwordchk();\">\n";
-	echo "<span class=form>First Name</span><span class=formright><input type=text name=firstname value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40></span><br class=form />\n";
-	echo "<span class=form>Last Name</span><span class=formright><input type=text name=lastname value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40></span><br class=form />\n";
-	echo "<span class=form>Email Address</span><span class=formright><input type=text name=email value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40></span><br class=form />\n";
+	echo "<form method=post id=newinstrform class=limitaftervalidate action=\"newinstructor.php\" >\n";
+	echo "<span class=form>First Name</span><span class=formright><input type=text name=firstname id=firstname value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40></span><br class=form />\n";
+	echo "<span class=form>Last Name</span><span class=formright><input type=text name=lastname id=lastname value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40></span><br class=form />\n";
+	echo "<span class=form>Email Address</span><span class=formright><input type=text name=email id=email value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40></span><br class=form />\n";
 	echo '<span class=form></span><span class="formright small">For fastest approval, use your .edu address. You can change it later.</span><br class=form />';
 	echo "<span class=form>Phone Number</span><span class=formright><input type=text name=phone value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40></span><br class=form />\n";
 	echo "<span class=form>School &amp; District / College</span><span class=formright><input type=text name=school value=\"".Sanitize::encodeStringForDisplay($school)."\" size=40></span><br class=form />\n";
@@ -118,9 +118,9 @@
 	echo 'If you just type something like "see school directory" or provide a link to the college\'s home page, ';
 	echo 'our volunteers will probably decide your request is too much work and delay approving it. Don\'t say "call ____"; we won\'t. ';
 	echo 'If you are not listed on a website, you can have your supervisor (someone who can be verified) email admin@myopenmath.com, and enter here "see email from ___".</span><br class=form />';
-	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=formright><input type=text name=username value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40></span><br class=form />\n";
-	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=password id=\"password\" size=40></span><br class=form />\n";
-	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=password2 id=\"password2\" size=40></span><br class=form />\n";
+	echo "<span class=form>Requested Username (use only letters, numbers, and the _ character)</span><span class=formright><input type=text name=SID id=SID value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40></span><br class=form />\n";
+	echo "<span class=form>Requested Password</span><span class=formright><input type=password name=pw1 id=pw1 size=40></span><br class=form />\n";
+	echo "<span class=form>Retype Password</span><span class=formright><input type=password name=pw2 id=pw2 size=40></span><br class=form />\n";
 	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
 	if (isset($CFG['GEN']['TOSpage'])) {
 		echo "<span class=form><label for=\"agree\">I have read and agree to the <a href=\"#\" onclick=\"GB_show('Terms of Use','".$CFG['GEN']['TOSpage']."',700,500);return false;\">Terms of Use</a></label></span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
