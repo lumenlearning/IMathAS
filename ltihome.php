@@ -137,12 +137,12 @@ if (isset($_POST['createcourse'])) {
 		//DB mysql_query("START TRANSACTION") or die("Query failed :$query " . mysql_error());
 		$DBH->beginTransaction();
 
-		$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt) VALUES ";
-		$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt);";
+		$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
+		$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt, :created_at);";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':name'=>$sessiondata['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 			':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
-			':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
+			':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 		$cid = $DBH->lastInsertId();
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
@@ -167,8 +167,8 @@ if (isset($_POST['createcourse'])) {
 		//if ($myrights==40) {
 			//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$cid')";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
-			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
 		//}
 		$useweights = intval(isset($CFG['GBS']['useweights'])?$CFG['GBS']['useweights']:0);
 		$orderby = intval(isset($CFG['GBS']['orderby'])?$CFG['GBS']['orderby']:0);

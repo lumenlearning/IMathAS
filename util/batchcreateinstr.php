@@ -51,10 +51,11 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 			$hashpw = md5($data[1]);
 		}
     echo "Importing ".Sanitize::encodeStringForDisplay($data[0])."<br/>";
-    $query = 'INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout)';
+    $query = 'INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,created_at) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :created_at)';
     $stm = $DBH->prepare($query);
     $stm->execute(array(':SID'=>$data[0], ':password'=>$hashpw, ':FirstName'=>$data[2], ':LastName'=>$data[3],
-            ':rights'=>40, ':email'=>$data[4], ':groupid'=>$_POST['groupid'], ':homelayout'=>$homelayout));
+            ':rights'=>40, ':email'=>$data[4], ':groupid'=>$_POST['groupid'], ':homelayout'=>$homelayout,
+            ':created_at'=>time()));
 
     $newuserid = $DBH->lastInsertId();
 
@@ -63,10 +64,10 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 			$valbits = array();
 			$valvals = array();
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-				$valbits[] = "(?,?)";
-				array_push($valvals, $newuserid,$ncid);
+				$valbits[] = "(?,?,?)";
+				array_push($valvals, $newuserid,$ncid,time());
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		}
 
@@ -94,8 +95,8 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
       $blockcnt = 1;
       $itemorder = serialize(array());
       $DBH->beginTransaction();
-      $query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt) ";
-      $query .= "SELECT name,:ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,:itemorder,available,0,deftime,deflatepass,theme,'',1 ";
+      $query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt,created_at) ";
+      $query .= "SELECT name,:ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,:itemorder,available,0,deftime,deflatepass,theme,'',1,created_at ";
       $query .= "FROM imas_courses WHERE id=:sourceid";
       $stm = $DBH->prepare($query);
       $stm->execute(array(':ownerid'=>$uid, ':itemorder'=>$itemorder, ':sourceid'=>$sourcecid));
@@ -118,8 +119,8 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 
 
       //if ($myrights==40) {
-        $stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-        $stm->execute(array(':userid'=>$uid, ':courseid'=>$cid));
+        $stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+        $stm->execute(array(':userid'=>$uid, ':courseid'=>$cid, ':created_at'=>time()));
       //}
 
       $query = "INSERT INTO imas_gbscheme (courseid,useweights,orderby,defaultcat,defgbmode,stugbmode,usersort) ";

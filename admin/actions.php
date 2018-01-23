@@ -145,10 +145,10 @@ switch($_POST['action']) {
 			$valbits = array();
 			$valvals = array();
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-				$valbits[] = "(?,?)";
-				array_push($valvals, $_GET['id'], $ncid);
+				$valbits[] = "(?,?,?)";
+				array_push($valvals, $_GET['id'], $ncid, time());
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		} else if ($oldrights>10 && $_POST['newrights']<=10 && isset($CFG['GEN']['enrollonnewinstructor'])) {
 			require_once("../includes/unenroll.php");
@@ -168,10 +168,10 @@ switch($_POST['action']) {
         $valvals = array();
         $userid = Sanitize::onlyInt($_GET['id']);
         foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-          $valbits[] = "(?,?)";
-          array_push($valvals, $userid,$ncid);
+          $valbits[] = "(?,?,?)";
+          array_push($valvals, $userid,$ncid,time());
         }
-        $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+        $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
         $stm->execute($valvals);
       }
 
@@ -326,17 +326,17 @@ switch($_POST['action']) {
 		if (isset($_POST['specialrights64']) && $myrights==100) {
 			$specialrights += 64;
 		}
-		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights);");
-		$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':rights'=>$_POST['newrights'], ':email'=>$_POST['email'], ':groupid'=>$newgroup, ':homelayout'=>$homelayout, ':specialrights'=>$specialrights));
+		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights,created_at) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :created_at);");
+		$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':rights'=>$_POST['newrights'], ':email'=>$_POST['email'], ':groupid'=>$newgroup, ':homelayout'=>$homelayout, ':specialrights'=>$specialrights, ':created_at'=>time()));
 		$newuserid = $DBH->lastInsertId();
 		if (isset($CFG['GEN']['enrollonnewinstructor']) && $_POST['newrights']>=20) {
 			$valbits = array();
 			$valvals = array();
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-				$valbits[] = "(?,?)";
-				array_push($valvals, $newuserid,$ncid);
+				$valbits[] = "(?,?,?)";
+				array_push($valvals, $newuserid,$ncid,time());
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits));
+			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		}
 		break;
@@ -563,13 +563,14 @@ switch($_POST['action']) {
 			$blockcnt = 1;
 			$itemorder = serialize(array());
 			$DBH->beginTransaction();
-			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt) VALUES ";
-			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :istemplate, :deftime, :deflatepass, :theme, :ltisecret, :blockcnt);";
+			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt,created_at) VALUES ";
+			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :istemplate, :deftime, :deflatepass, :theme, :ltisecret, :blockcnt, :created_at);";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':name'=>$_POST['coursename'], ':ownerid'=>$userid, ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 				':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':toolset'=>$toolset, ':showlatepass'=>$showlatepass,
 				':itemorder'=>$itemorder, ':available'=>$avail, ':istemplate'=>$istemplate, ':deftime'=>$deftime,
-				':deflatepass'=>$deflatepass, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':blockcnt'=>$blockcnt));
+				':deflatepass'=>$deflatepass, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':blockcnt'=>$blockcnt,
+				':created_at'=>time()));
 			$cid = $DBH->lastInsertId();
 			// #### Begin OHM-specific code #####################################################
 			// #### Begin OHM-specific code #####################################################
@@ -596,8 +597,8 @@ switch($_POST['action']) {
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
 			//if ($myrights==40) {
-				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
 			//}
 			$useweights = intval(isset($CFG['GBS']['useweights'])?$CFG['GBS']['useweights']:0);
 			$orderby = intval(isset($CFG['GBS']['orderby'])?$CFG['GBS']['orderby']:0);
@@ -1009,11 +1010,11 @@ switch($_POST['action']) {
 		$ins = array();
 		$insval = array();
 		foreach ($tids as $tid) {
-			$ins[] = "(?,?)";
-			array_push($insval, $tid, $_GET['cid']);
+			$ins[] = "(?,?,?)";
+			array_push($insval, $tid, $_GET['cid'], time());
 		}
 		if (count($ins)>0) {
-			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES ".implode(',',$ins));
+			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES ".implode(',',$ins));
 			$stm->execute($insval);
 		}
 		if (!isset($_POST['addandclose'])) {
@@ -1180,8 +1181,8 @@ switch($_POST['action']) {
 			$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 			$stm->execute(array(':courseid'=>$_GET['id'], ':userid'=>$_POST['newowner']));
 			if ($stm->rowCount()==0) {
-				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-				$stm->execute(array(':userid'=>$_POST['newowner'], ':courseid'=>$_GET['id']));
+				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+				$stm->execute(array(':userid'=>$_POST['newowner'], ':courseid'=>$_GET['id'], ':created_at'=>time()));
 			}
 			$stm = $DBH->prepare("DELETE FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 			$stm->execute(array(':courseid'=>$_GET['id'], ':userid'=>$userid));
@@ -1229,8 +1230,8 @@ switch($_POST['action']) {
 			echo "<html><body>Group name already exists.  <a href=\"forms.php?action=listgroups\">Try again</a></body></html>\n";
 			exit;
 		}
-		$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
-		$stm->execute(array(':name'=>$_POST['gpname']));
+		$stm = $DBH->prepare("INSERT INTO imas_groups (name,created_at) VALUES (:name,:created_at)");
+		$stm->execute(array(':name'=>$_POST['gpname'],':created_at'=>time()));
 		break;
 	case "modgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
@@ -1270,11 +1271,12 @@ switch($_POST['action']) {
 	case "modltidomaincred":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
 		if ($_GET['id']=='new') {
-			$query = "INSERT INTO imas_users (email,FirstName,LastName,SID,password,rights,groupid) VALUES ";
-			$query .= "(:email, :FirstName, :LastName, :SID, :password, :rights, :groupid)";
+			$query = "INSERT INTO imas_users (email,FirstName,LastName,SID,password,rights,groupid,created_at) VALUES ";
+			$query .= "(:email, :FirstName, :LastName, :SID, :password, :rights, :groupid, :created_at)";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':email'=>$_POST['ltidomain'], ':FirstName'=>$_POST['ltidomain'], ':LastName'=>'LTIcredential',
-				':SID'=>$_POST['ltikey'], ':password'=>$_POST['ltisecret'], ':rights'=>$_POST['createinstr'], ':groupid'=>$_POST['groupid']));
+				':SID'=>$_POST['ltikey'], ':password'=>$_POST['ltisecret'], ':rights'=>$_POST['createinstr'], ':groupid'=>$_POST['groupid'],
+				':created_at'=>time()));
 		} else {
 			$query = "UPDATE imas_users SET email=:email,FirstName=:FirstName,LastName='LTIcredential',";
 			$query .= "SID=:SID,password=:password,rights=:rights,groupid=:groupid WHERE id=:id";

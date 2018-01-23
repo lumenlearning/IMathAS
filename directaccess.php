@@ -75,21 +75,21 @@
 			//DB $query .= "VALUES ('{$_POST['SID']}','$md5pw',$initialrights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot,'$homelayout');";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			//DB $newuserid = mysql_insert_id();
-			$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout) ";
-			$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout)";
+			$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout, created_at) ";
+			$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout, :created_at)";
 			$stm = $DBH->prepare($query);
-			$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$initialrights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':homelayout'=>$homelayout));
+			$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$initialrights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':homelayout'=>$homelayout, ':created_at'=>time()));
 			$newuserid = $DBH->lastInsertId();
 			if (strlen($enrollkey)>0 && count($keylist)>1) {
 				//DB $query = "INSERT INTO imas_students (userid,courseid,section,gbcomment,latepass) VALUES ('$userid','$cid','{$_POST['ekey2']}','$code','$deflatepass');";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,gbcomment,latepass) VALUES (:userid, :courseid, :section, :gbcomment, :latepass)");
-				$stm->execute(array(':userid'=>$newuserid, ':courseid'=>$_GET['cid'], ':section'=>$_POST['ekey2'], ':gbcomment'=>$code, ':latepass'=>$deflatepass));
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,gbcomment,latepass,created_at) VALUES (:userid, :courseid, :section, :gbcomment, :latepass, :created_at)");
+				$stm->execute(array(':userid'=>$newuserid, ':courseid'=>$_GET['cid'], ':section'=>$_POST['ekey2'], ':gbcomment'=>$code, ':latepass'=>$deflatepass, ':created_at'=>time()));
 			} else {
 				//DB $query = "INSERT INTO imas_students (userid,courseid,gbcomment,latepass) VALUES ('$newuserid','$cid','$code','$deflatepass');";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,gbcomment,latepass) VALUES (:userid, :courseid, :gbcomment, :latepass)");
-				$stm->execute(array(':userid'=>$newuserid, ':courseid'=>$_GET['cid'], ':gbcomment'=>$code, ':latepass'=>$deflatepass));
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,gbcomment,latepass,created_at) VALUES (:userid, :courseid, :gbcomment, :latepass, :created_at)");
+				$stm->execute(array(':userid'=>$newuserid, ':courseid'=>$_GET['cid'], ':gbcomment'=>$code, ':latepass'=>$deflatepass, ':created_at'=>time()));
 			}
 
 			if ($emailconfirmation) {
@@ -133,15 +133,15 @@
 			$keylist = array_map('trim',explode(';',$enrollkey));
 			if (strlen($enrollkey)==0 || (isset($_REQUEST['ekey']) && in_array($_REQUEST['ekey'], $keylist))) {
 				if (count($keylist)>1) {
-					//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$userid','$cid','{$_REQUEST['ekey']}','$deflatepass')";
+					//DB $query = "INSERT INFO imas_students (userid,courseid,section,latepass) VALUES ('$userid','$cid','{$_REQUEST['ekey']}','$deflatepass')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$_GET['cid'], ':section'=>$_REQUEST['ekey'], ':latepass'=>$deflatepass));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
+					$stm->execute(array(':userid'=>$userid, ':courseid'=>$_GET['cid'], ':section'=>$_REQUEST['ekey'], ':latepass'=>$deflatepass, ':created_at'=>time()));
 				} else {
 					//DB $query = "INSERT INTO imas_students (userid,courseid,latepass) VALUES ('$userid','$cid','$deflatepass')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,latepass) VALUES (:userid, :courseid, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$_GET['cid'], ':latepass'=>$deflatepass));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,latepass,created_at) VALUES (:userid, :courseid, :latepass, :created_at)");
+					$stm->execute(array(':userid'=>$userid, ':courseid'=>$_GET['cid'], ':latepass'=>$deflatepass, ':created_at'=>time()));
 				}
 
 				header('Location: ' . $GLOBALS['basesiteurl'] . '/course/course.php?cid='. $cid);

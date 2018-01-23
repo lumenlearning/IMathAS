@@ -43,21 +43,22 @@
 				//DB $query .= "VALUES ('{$_POST['username']}','$md5pw',0,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}','$homelayout');";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB $newuserid = mysql_insert_id();
-				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout) ";
-				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :homelayout);";
+				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, homelayout, created_at) ";
+				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :homelayout, :created_at);";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':SID'=>$_POST['username'], ':password'=>$md5pw, ':rights'=>12, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':homelayout'=>$homelayout));
+				$stm->execute(array(':SID'=>$_POST['username'], ':password'=>$md5pw, ':rights'=>12, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':homelayout'=>$homelayout, ':created_at'=>time()));
 				$newuserid = $DBH->lastInsertId();
 				if (isset($CFG['GEN']['enrollonnewinstructor'])) {
+					$timeNow = time();
 					$valbits = array();
 					foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
 					  $ncid = intval($ncid);
-						$valbits[] = "($newuserid,$ncid)";
+						$valbits[] = "($newuserid,$ncid,$timeNow)";
 					}
 					//DB $query = "INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits);
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 
-					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid) VALUES ".implode(',',$valbits)); //known INTs - safe
+					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits)); //known INTs - safe
 				}
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
