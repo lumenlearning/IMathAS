@@ -16,16 +16,21 @@ if($_GET['cid'] && $_GET['ekey']  ){
   $_POST['ekey']      = $_GET['ekey'] ;
 }
 if($_POST['courseid'] && $_POST['ekey']){
-  $stm = $DBH->prepare("SELECT name,enrollkey,allowunenroll,deflatepass,msgset,id FROM imas_courses WHERE id = :cid AND enrollkey = :ekey AND (available=0 OR available=2)");
-  $stm->execute(array(':cid'=>$_POST['courseid'],':ekey'=>$_POST['ekey']));
+  $stm = $DBH->prepare("SELECT name,enrollkey,allowunenroll,deflatepass,msgset,id FROM imas_courses WHERE id = :cid AND (available=0 OR available=2)");
+  $stm->execute(array(':cid'=>$_POST['courseid']));
   $line = $stm->fetch(PDO::FETCH_ASSOC);
-  if ($line === false) {
+
+  $keylist = array_map('strtolower',array_map('trim',explode(';',$line['enrollkey'])));
+
+  if (null==$line) {
+   $message = 'Course not found';
+  } else if (!in_array(strtolower($_POST['ekey']), $keylist)) {
    $message = "A course with that Course Id or Enrollment key Does not exist";
   } else if (($line['allowunenroll']&2)==2) {
    $message = "Course is closed for self enrollment.  Contact your instructor for access.\n";
   }else{
      $cid = Sanitize::courseId($_POST['courseid']);
-     $ekey = Sanitize::encodeStringForDisplay($line['enrollkey']);
+     $ekey = Sanitize::encodeStringForDisplay($_POST['ekey']);
      $coursename= Sanitize::encodeStringForDisplay($line['name']);
      $stm = $DBH->prepare(" SELECT FirstName,LastName FROM imas_users JOIN imas_teachers ON imas_teachers.userid = imas_users.id WHERE imas_teachers.courseid = :cid;");
      $stm->execute(array(':cid'=>$cid));
