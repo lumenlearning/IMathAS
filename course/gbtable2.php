@@ -631,6 +631,7 @@ function gbtable() {
 	$cattotcur = array();
 	$cattotcurec = array();
 	$cattotattempted = array();
+	$cattotattemptedec = array();
 	$cattotfuture = array();
 	$cattotfutureec = array();
 	$itemorder = array();
