@@ -3,6 +3,12 @@
 //(c) 2007 David Lippman
 
 require_once("../includes/exceptionfuncs.php");
+if ($canviewall) {
+	$exceptionfuncs = new ExceptionFuncs($userid, $cid, false);
+} else {
+	$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $studentinfo['latepasses'], $latepasshrs);
+}
+
 require_once("../includes/sanitize.php");
 
 //used by gbtable
@@ -159,7 +165,7 @@ function flattenitems($items,&$addto) {
 function gbtable() {
 	global $DBH,$cid,$isteacher,$istutor,$tutorid,$userid,$catfilter,$secfilter,$timefilter,$lnfilter,$isdiag;
 	global $sel1name,$sel2name,$canviewall,$lastlogin,$logincnt,$hidelocked,$latepasshrs,$includeendmsg;
-	global $hidesection,$hidecode;
+	global $hidesection,$hidecode,$exceptionfuncs;
 
 	if (!isset($hidesection)) {$hidesection = false;}
 	if (!isset($hidecode)) {$hidecode= false;}
@@ -954,7 +960,7 @@ function gbtable() {
 			}
 			$exceptions[$r['typeid']][$r['userid']] = array($r['exceptionstartdate'],$r['exceptionenddate'],$r['islatepass']);
 			if ($limuser>0) {
-				$useexception = getCanUseAssessException($exceptions[$r['typeid']][$r['userid']], $r, true);
+				$useexception = $exceptionfuncs->getCanUseAssessException($exceptions[$r['typeid']][$r['userid']], $r, true);
 				if ($useexception) {
 					$gb[0][1][$assesscol[$r['typeid']]][11] = $r['exceptionenddate']; //override due date header if one stu display
 					//change $avail past/cur/future based on exception
@@ -963,7 +969,7 @@ function gbtable() {
 					} else {
 						$avail[$assessidx[$r['typeid']]] = 0;
 					}
-
+					$gb[0][1][$assesscol[$r['typeid']]][3] = $avail[$assessidx[$r['typeid']]];
 				}
 			}
 			$gb[$sturow[$r['userid']]][1][$assesscol[$r['typeid']]][6] = ($r['islatepass']>0)?(1+$r['islatepass']):1;
@@ -1047,9 +1053,9 @@ function gbtable() {
 		*/
 		$useexception = false; $canuselatepass = false;
 		if (isset($exceptions[$l['assessmentid']][$l['userid']])) {
-			list($useexception, $canundolatepass, $canuselatepass) = getCanUseAssessException($exceptions[$l['assessmentid']][$l['userid']], array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
+			list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptions[$l['assessmentid']][$l['userid']], array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
 		} else {
-			$canuselatepass = getCanUseAssessLatePass(array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
+			$canuselatepass = $exceptionfuncs->getCanUseAssessLatePass(array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
 		}
 		//if (isset($exceptions[$l['assessmentid']][$l['userid']])) {// && $now>$enddate[$i] && $now<$exceptions[$l['assessmentid']][$l['userid']]) {
 
@@ -1066,6 +1072,7 @@ function gbtable() {
 					} else {
 						$avail[$assessidx[$l['assessmentid']]] = 0;
 					}
+					$gb[0][1][$col][3] = $avail[$assessidx[$l['assessmentid']]];
 				}
 			}
 			if ($limuser>0) { //override due date header if one stu display

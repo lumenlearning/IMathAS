@@ -566,7 +566,8 @@ if (isset($studentid) || $stu!=0) { //show student view
 }
 
 function gbstudisp($stu) {
-	global $DBH,$hidenc,$cid,$gbmode,$availshow,$isteacher,$istutor,$catfilter,$imasroot,$canviewall,$urlmode,$includeduedate, $includelastchange,$latepasshrs,$latepasses,$viewedassess,$hidelocked;
+	global $DBH,$hidenc,$cid,$gbmode,$availshow,$isteacher,$istutor,$catfilter,$imasroot,$canviewall,$urlmode;
+	global $includeduedate, $includelastchange,$latepasshrs,$latepasses,$hidelocked,$exceptionfuncs;
 	if ($availshow==4) {
 		$availshow=1;
 		$hidepast = true;
@@ -601,18 +602,6 @@ function gbstudisp($stu) {
 		}
 		//DB list($gbcomment,$stuemail,$latepasses,$stusection,$lastaccess) = mysql_fetch_row($result);
 		list($gbcomment,$stuemail,$latepasses,$stusection,$lastaccess) = $stm->fetch(PDO::FETCH_NUM);
-
-		$viewedassess = array();
-		if (!$isteacher && !$istutor) {
-			//DB $query = "SELECT typeid FROM imas_content_track WHERE courseid='$cid' AND userid='$stu' AND type='gbviewasid'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
-			$stm = $DBH->prepare("SELECT typeid FROM imas_content_track WHERE courseid=:courseid AND userid=:userid AND type='gbviewasid'");
-			$stm->execute(array(':courseid'=>$cid, ':userid'=>$stu));
-			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				$viewedassess[] = $row[0];
-			}
-		}
 	}
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	$gbt = gbtable($stu);
@@ -785,54 +774,19 @@ function gbstudisp($stu) {
 					echo '<td></td>';
 				}
 			}
+
 			echo '<td class="cat'.Sanitize::onlyInt($gbt[0][1][$i][1]).'">';
-			
-			$showlink = false;
-			if ($gbt[0][1][$i][6]==0 && $gbt[0][1][$i][3]==1 && $gbt[1][1][$i][13]==1 && !$isteacher && !$istutor) {
-				$showlink = true;
-				echo '<a href="../assessment/showtest.php?cid='.$cid.'&id='.$gbt[0][1][$i][7].'"';
-				if (abs($gbt[1][1][$i][12])>0) {
-					$tlwrds = '';
-					$timelimit = abs($gbt[1][1][$i][12]);
-					if ($timelimit>3600) {
-						$tlhrs = floor($timelimit/3600);
-						$tlrem = $timelimit % 3600;
-						$tlmin = floor($tlrem/60);
-						$tlsec = $tlrem % 60;
-						$tlwrds = "$tlhrs " . _('hour');
-						if ($tlhrs > 1) { $tlwrds .= "s";}
-						if ($tlmin > 0) { $tlwrds .= ", $tlmin " . _('minute');}
-						if ($tlmin > 1) { $tlwrds .= "s";}
-						if ($tlsec > 0) { $tlwrds .= ", $tlsec " . _('second');}
-						if ($tlsec > 1) { $tlwrds .= "s";}
-					} else if ($timelimit>60) {
-						$tlmin = floor($timelimit/60);
-						$tlsec = $timelimit % 60;
-						$tlwrds = "$tlmin " . _('minute');
-						if ($tlmin > 1) { $tlwrds .= "s";}
-						if ($tlsec > 0) { $tlwrds .= ", $tlsec " . _('second');}
-						if ($tlsec > 1) { $tlwrds .= "s";}
-					} else {
-						$tlwrds = $timelimit . _(' second(s)');
-					}
-					if ($timelimit > $gbt[0][1][$i][11] - $now) {
-						echo " onclick='return confirm(\"", sprintf(_('This assessment has a time limit of %s, but that will be restricted by the upcoming due date. Click OK to start or continue working on the assessment.'), $tlwrds), "\")' ";
-					} else {
-						echo " onclick='return confirm(\"", sprintf(_('This assessment has a time limit of %s.  Click OK to start or continue working on the assessment.'), $tlwrds), "\")' ";
-					}
-				}
-				echo '>';
+			if ($gbt[0][1][$i][6]==0 && $gbt[0][1][$i][3]==1) {
+				echo '<a href="../assessment/showtest.php?cid='.$cid.'&id='.$gbt[0][1][$i][7].'">';
 			}
 			echo Sanitize::encodeStringForDisplay($gbt[0][1][$i][0]);
-			if ($showlink) {
+			if ($gbt[0][1][$i][6]==0 && $gbt[0][1][$i][3]==1) {
 				echo '</a>';
 			}
 			$afterduelatepass = false;
 			if (!$isteacher && !$istutor && $latepasses>0 && !isset($gbt[1][1][$i][10])) {
 				//not started, so no canuselatepass record
-				require_once("../includes/exceptionfuncs.php");
-				$gbt[1][1][$i][10] = getCanUseAssessLatePass(array('enddate'=>$gbt[0][1][$i][11], 'allowlate'=>$gbt[0][1][$i][12]));
-
+				$gbt[1][1][$i][10] = $exceptionfuncs->getCanUseAssessLatePass(array('enddate'=>$gbt[0][1][$i][11], 'allowlate'=>$gbt[0][1][$i][12]));
 			}
 			/*if (!$isteacher && !$istutor && $latepasses>0  &&	(
 				(isset($gbt[1][1][$i][10]) && $gbt[1][1][$i][10]>0 && !in_array($gbt[0][1][$i][7],$viewedassess)) ||  //started, and already figured it's ok
@@ -840,7 +794,7 @@ function gbstudisp($stu) {
 				(!isset($gbt[1][1][$i][10]) && $gbt[0][1][$i][12]>10 && $now-$gbt[0][1][$i][11]<$latepasshrs*3600 && !in_array($gbt[0][1][$i][7],$viewedassess)) //not started, within one latepass
 			    )) {*/
 			if (!$isteacher && !$istutor && $latepasses>0 && $gbt[1][1][$i][10]==true) { //if canuselatepass
-				echo ' <span class="small"><a href="redeemlatepass.php?cid='.$cid.'&aid='.$gbt[0][1][$i][7].'">[';
+				echo ' <span class="small"><a href="redeemlatepass.php?cid='.$cid.'&aid='.$gbt[0][1][$i][7].'&from=gb">[';
 				echo _('Use LatePass').']</a></span>';
 				if ($now>$gbt[0][1][$i][11]) {
 					$afterduelatepass = true;

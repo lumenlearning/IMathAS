@@ -589,7 +589,10 @@ switch($_GET['action']) {
 			echo '</span><br class="form" />';
 		}
 
-		if ($_GET['action']=='modify' && isset($CFG['coursebrowser'])) {
+		if (!isset($CFG['coursebrowserRightsToPromote'])) {
+			$CFG['coursebrowserRightsToPromote'] = 40;
+		}
+		if ($_GET['action']=='modify' && isset($CFG['coursebrowser']) && $CFG['coursebrowserRightsToPromote']<=$myrights) {
 			$browserprops = json_decode(file_get_contents(__DIR__.'/../javascript/'.$CFG['coursebrowser'], false, null, 25), true);
 			echo '<script type="text/javascript">
 				function changepromote() {
@@ -605,7 +608,6 @@ switch($_GET['action']) {
 					}
 				}
 			</script>';
-
 			#### Begin OHM-specific code #####################################################################
 			#### Begin OHM-specific code #####################################################################
 			#### Begin OHM-specific code #####################################################################
@@ -634,6 +636,11 @@ switch($_GET['action']) {
 			#### End OHM-specific code #####################################################################
 			#### End OHM-specific code #####################################################################
 			#### End OHM-specific code #####################################################################
+
+			echo '<span class="form">'._('Promote Course').'</span>';
+			echo '<span class=formright><label><input type=checkbox name=promote value=1 onchange="changepromote()" ';
+			if (($istemplate&16)==16) {echo 'checked="checked"';};
+			echo ' /> '._('Promote in Course Browser').'</label></span><br class="form">';
 			echo '<fieldset id=promotediv '.((($istemplate&16)==16)?'':'style="display:none"').'>';
 			echo '<legend>'._('Course Browser Settings').'</legend>';
 			echo '<p class="noticetext">'._('Before sharing your course, check to ensure that it only contains materials you created or have the rights to share.');
@@ -641,15 +648,17 @@ switch($_GET['action']) {
 			echo ' '._('Openly licensed material, clearly marked with an open license, is fine to include.');
 			echo ' '._('If sharing your own materials (textbook, activities, paper assessments), please mark the materials with an open license, or include a blanket license statement somewhere in the course.');
 			echo '</p><p>';
-			
+
 			if (empty($browser['name'])) {
 				$browser['name'] = trim($name);
 			}
 			if (empty($browser['owner'])) {
-				$stm = $DBH->prepare("SELECT iu.FirstName, iu.LastName, ig.name FROM imas_users AS iu JOIN imas_groups AS ig ON ig.id=iu.groupid WHERE iu.id=:id");
-				$stm->execute(array(':id'=>$userid));
-				$uinf = $stm->fetch(PDO::FETCH_ASSOC);
-				$browser['owner'] = $uinf['FirstName'].' '.$uinf['LastName'].' ('.$uinf['name'].')'; 
+				if (!isset($udat)) {
+					$stm = $DBH->prepare("SELECT iu.FirstName, iu.LastName, ig.name FROM imas_users AS iu JOIN imas_groups AS ig ON ig.id=iu.groupid WHERE iu.id=:id");
+					$stm->execute(array(':id'=>$userid));
+					$udat = $stm->fetch(PDO::FETCH_ASSOC);
+				}
+				$browser['owner'] = $udat['FirstName'].' '.$udat['LastName'].' ('.$udat['name'].')';
 			}
 
 			foreach ($browserprops as $propname=>$propvals) {
@@ -676,7 +685,7 @@ switch($_GET['action']) {
 							echo ' onchange="chgother(this)"';
 						}
 						echo '>';
-						
+
 						foreach ($propvals['options'] as $k=>$v) {
 							if (substr($k,0,5)=='group') {
 								if ($ingroup) {
@@ -695,7 +704,7 @@ switch($_GET['action']) {
 							echo '</optgroup>';
 						}
 						echo '</select>';
-						
+
 						if (isset($propvals['options']['other'])) {
 							echo '<span id="browser'.$propname.'otherwrap" '.($browser[$propname]!='other'?'style="display:none"':'').'>';
 							echo '<br/>Other: <input type=text size=40 name="browser'.$propname.'other" value="'.($browser[$propname]=='other'?Sanitize::encodeStringForDisplay($browser[$propname.'other']):'').'"></span>';
@@ -732,7 +741,7 @@ switch($_GET['action']) {
 				echo 'This course has additional <a target="_blank" href="" id="termsurl">Terms of Use</a> you must agree to before copying the course.<br/>';
 				echo '<input type="checkbox" name="termsagree" /> I agree to the Terms of Use specified in the link above.</span>';
 				echo '</span><br class="form" />';
-				
+
 				echo '<script type="text/javascript">
 					function showCourseBrowser() {
 						GB_show("Course Browser","coursebrowser.php?embedded=true",800,"auto");
@@ -748,7 +757,7 @@ switch($_GET['action']) {
 						GB_hide();
 					}
 					</script>';
-				
+
 			} else {
 				//select a template course from a pulldown
 				echo '<span class="form">Use content from a template course:</span>';
