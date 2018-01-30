@@ -197,8 +197,8 @@ if (!(isset($teacherid)) && $myrights<100) {
 				//DB $query = "INSERT INTO imas_users (SID,FirstName,LastName,email,rights,password) VALUES ('$arr[0]','$arr[1]','$arr[2]','$arr[3]',10,'$pw')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB $id = mysql_insert_id();
-				$stm = $DBH->prepare("INSERT INTO imas_users (SID,FirstName,LastName,email,rights,password) VALUES (:SID, :FirstName, :LastName, :email, :rights, :password)");
-				$stm->execute(array(':SID'=>$arr[0], ':FirstName'=>$arr[1], ':LastName'=>$arr[2], ':email'=>$arr[3], ':rights'=>10, ':password'=>$pw));
+				$stm = $DBH->prepare("INSERT INTO imas_users (SID,FirstName,LastName,email,rights,password,created_at) VALUES (:SID, :FirstName, :LastName, :email, :rights, :password, :created_at)");
+				$stm->execute(array(':SID'=>$arr[0], ':FirstName'=>$arr[1], ':LastName'=>$arr[2], ':email'=>$arr[3], ':rights'=>10, ':password'=>$pw, ':created_at'=>time()));
 				$id = $DBH->lastInsertId();
 			}
 			if ($_POST['enrollcid']!=0 || !$isadmin) {
@@ -229,10 +229,11 @@ if (!(isset($teacherid)) && $myrights<100) {
 				//DB }
 				//DB $query .= ") VALUES ($vals)";
 
-				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section) VALUES (:userid, :courseid, :code, :section)");
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section,created_at) VALUES (:userid, :courseid, :code, :section, :created_at)");
 				$stm->execute(array(':userid'=>$id, ':courseid'=>$ncid,
 					':code'=>($_POST['codetype']==1)?$arr[4]:null,
-					':section'=>($_POST['sectype']>0)?$arr[5]:null));
+					':section'=>($_POST['sectype']>0)?$arr[5]:null,
+                    ':created_at'=>time()));
 			}
 
 		}

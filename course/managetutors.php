@@ -78,15 +78,15 @@
 				if ($stm->rowCount()>0) {
 					while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 						//DB $inspt[] = "('{$row[0]}','$cid','')";
-						$inspt[] = "(?,?,'')";
-						array_push($insvals, $row[0], $cid);
+						$inspt[] = "(?,?,'',?)";
+						array_push($insvals, $row[0], $cid, time());
 						$foundsid[] = $row[1];
 					}
 					$ins = implode(',',$inspt);
 					//insert them
 					//DB $query = "INSERT INTO imas_tutors (userid,courseid,section) VALUES $ins";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_tutors (userid,courseid,section) VALUES $ins");
+					$stm = $DBH->prepare("INSERT INTO imas_tutors (userid,courseid,section,created_at) VALUES $ins");
 					$stm->execute($insvals);
 					$notfound = array_diff($sids,$foundsid);
 					if (count($notfound)>0) {

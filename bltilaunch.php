@@ -295,22 +295,22 @@ if (isset($_GET['launch'])) {
 						$rights = 40;
 					}
 					$newgroupid = intval($_SESSION['lti_keygroupid']);
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:groupid)';
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:groupid,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
 						':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
-						':msgnotify'=>$msgnot,':groupid'=>$newgroupid));
+						':msgnotify'=>$msgnot,':groupid'=>$newgroupid, ':created_at'=>time()));
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot,$newgroupid)";
 				} else {
 					$rights = 10;
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot)";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify)';
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
 						':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
-						':msgnotify'=>$msgnot));
+						':msgnotify'=>$msgnot,':created_at'=>time()));
 				}
 
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -672,21 +672,22 @@ if (isset($_GET['launch'])) {
 						$rights = 40;
 					}
 					$newgroupid = intval($_SESSION['lti_keygroupid']);
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0,'$newgroupid')";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:groupid)';
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:groupid,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':groupid'=>$newgroupid));
+						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':groupid'=>$newgroupid,
+                        ':created_at'=>time()));
 
 				} else {
 					$rights = 10;
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0)";
-					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0)';
+					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:created_at)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email));
+						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':created_at'=>time()));
 				}
 
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -853,12 +854,12 @@ if ($stm->rowCount()==0) {
 				//DB mysql_query("START TRANSACTION") or die("Query failed :$query " . mysql_error());
 				$DBH->beginTransaction();
 
-				$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt) VALUES ";
-				$query .= "(:name,:ownerid,:enrollkey,:hideicons,:picicons,:allowunenroll,:copyrights,:msgset,:showlatepass,:itemorder,:available,:theme,:ltisecret,:blockcnt)";
+				$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
+				$query .= "(:name,:ownerid,:enrollkey,:hideicons,:picicons,:allowunenroll,:copyrights,:msgset,:showlatepass,:itemorder,:available,:theme,:ltisecret,:blockcnt,:created_at)";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 					':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
-					':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
+					':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 				$destcid = $DBH->lastInsertId();
 
 				// #### Begin OHM-specific code #####################################################
@@ -883,8 +884,8 @@ if ($stm->rowCount()==0) {
 
 				//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$destcid')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid) VALUES (:userid,:destcid)');
-				$stm->execute(array(':userid'=>$userid, ':destcid'=>$destcid));
+				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid,:destcid,:created_at)');
+				$stm->execute(array(':userid'=>$userid, ':destcid'=>$destcid, ':created_at'=>time()));
 
 				//DO full course copy
 				$sourcecid = $aidsourcecid;
@@ -1327,8 +1328,8 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
 			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 			if ($stm->rowCount() == 0) {
 				//reporterror("error - you are not an instructor or tutor on the $installname course this link is associated with.  If you are team-teaching this course, have the other instructor add you as a teacher or tutor on $installname then try again.");
-				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
 			}
 		}
 		$timelimitmult = 1;
@@ -1360,8 +1361,8 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
 
 					//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$userid','$cid','{$_SESSION['lti_context_label']}','$deflatepass')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
+					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass, ':created_at'=>time()));
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
@@ -1782,19 +1783,19 @@ if (isset($_GET['launch'])) {
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot,$newgroupid)";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':groupid'=>$newgroupid));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':groupid'=>$newgroupid, ':created_at'=>time()));
 				} else {
 					$rights = 10;
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',$msgnot)";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':created_at'=>time()));
 				}
 
 				//DB $userid = mysql_insert_id();
@@ -2179,19 +2180,19 @@ if (isset($_GET['launch'])) {
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0,'$newgroupid')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':groupid'=>$newgroupid));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':groupid'=>$newgroupid, ':created_at'=>time()));
 				} else {
 					$rights = 10;
 					//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
 					//DB $query .= "('{$_POST['SID']}','$md5pw',$rights,'$firstname','$lastname','$email',0)";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
-					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify)";
+					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
+					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':created_at'=>time()));
 				}
 
 				//DB $userid = mysql_insert_id();
@@ -2317,17 +2318,17 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 
 						$avail = 0;
 						$lockaid = 0;
-						$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt) VALUES ";
-						$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt);";
+						$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
+						$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt, :created_at);";
 						$stm = $DBH->prepare($query);
 						$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 							':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
-							':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
+							':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 						$destcid  = $DBH->lastInsertId();
 						//DB $query = "INSERT INTO imas_teachers (userid,courseid) VALUES ('$userid','$destcid')";
 						//DB mysql_query($query) or die("Query failed : " . mysql_error());
-						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid) VALUES (:userid, :courseid)");
-						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid));
+						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid, ':created_at'=>time()));
 
 						// #### Begin OHM-specific code #####################################################
 						// #### Begin OHM-specific code #####################################################
@@ -2605,8 +2606,8 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 			if ($stm->rowCount() == 0) {
 				//DB $query = "INSERT INTO imas_tutors (userid,courseid,section) VALUES ('$userid','$cid','{$_SESSION['lti_context_label']}')";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("INSERT INTO imas_tutors (userid,courseid,section) VALUES (:userid, :courseid, :section)");
-				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label']));
+				$stm = $DBH->prepare("INSERT INTO imas_tutors (userid,courseid,section,created_at) VALUES (:userid, :courseid, :section, :created_at)");
+				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':created_at'=>time()));
 			}
 		}
 		$timelimitmult = 1;
@@ -2637,8 +2638,8 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 					$deflatepass = $stm->fetchColumn(0);
 					//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$userid','$cid','{$_SESSION['lti_context_label']}','$deflatepass')";
 					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
+					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass, ':created_at'=>time()));
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';

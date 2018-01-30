@@ -159,13 +159,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 
 				//DB $vals = "$id,'$cid','$deflatepass'";
 				//DB $query = "INSERT INTO imas_students (userid,courseid,latepass";
-				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code) ";
-				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code)";
+				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code,created_at) ";
+				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code,:created_at)";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(":userid"=>$id,":courseid"=>$cid,":latepass"=>$deflatepass,
 					":section"=>trim($_POST['section'])!=''?trim($_POST['section']):null,
-					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null
-					));
+					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null,
+					":created_at"=>time()));
 				//DB if (trim($_POST['section'])!='') {
 				//DB 	$query .= ",section";
 					//DB $vals .= ",'".$_POST['section']."'";
@@ -204,11 +204,11 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				//DB $query .= "VALUES ('{$_POST['SID']}','$md5pw',10,'{$_POST['firstname']}','{$_POST['lastname']}','{$_POST['email']}',0);";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				//DB $newuserid = mysql_insert_id();
-				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify) ";
-				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify);";
+				$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, created_at) ";
+				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at);";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>10,
-					':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>0));
+					':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>0, ':created_at'=>time()));
 				$newuserid = $DBH->lastInsertId();
 				//$query = "INSERT INTO imas_students (userid,courseid) VALUES ($newuserid,'$cid')";
 				//DB $query = "SELECT deflatepass FROM imas_courses WHERE id='$cid'";
@@ -231,13 +231,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				//DB }
 				//DB $query .= ") VALUES ($vals)";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code) ";
-				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code)";
+				$query = "INSERT INTO imas_students (userid,courseid,latepass,section,code,created_at) ";
+				$query .= "VALUES (:userid,:courseid,:latepass,:section,:code,:created_at)";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(":userid"=>$newuserid,":courseid"=>$cid,":latepass"=>$deflatepass,
 					":section"=>trim($_POST['section'])!=''?trim($_POST['section']):null,
-					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null
-					));
+					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null,
+					":created_at"=>time()));
 
 				header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid");
 				exit;
@@ -386,18 +386,18 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			if (is_uploaded_file($_FILES['stupic']['tmp_name'])) {
 				processImage($_FILES['stupic'],Sanitize::onlyInt($_GET['uid']),200,200);
 				processImage($_FILES['stupic'],'sm'.Sanitize::onlyInt($_GET['uid']),40,40);
-				$chguserimg = "hasuserimg=1";
+				$chguserimg = 1;
 			} else if (isset($_POST['removepic'])) {
 				deletecoursefile('userimg_'.Sanitize::onlyInt($_GET['uid']).'.jpg');
 				deletecoursefile('userimg_sm'.Sanitize::onlyInt($_GET['uid']).'.jpg');
-				$chguserimg = "hasuserimg=0";
+				$chguserimg = 0;
 			} else {
-				$chguserimg = '';
+				$chguserimg = -1;
 			}
-			if ($chguserimg != '') {
+			if ($chguserimg != -1) {
 				//DB $query = "UPDATE imas_users SET $chguserimg WHERE id='{$_GET['uid']}'";
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare("UPDATE imas_users SET :chguserimg WHERE id=:id");
+				$stm = $DBH->prepare("UPDATE imas_users SET hasuserimg=:chguserimg WHERE id=:id");
 				$stm->execute(array(':id'=>$_GET['uid'], ':chguserimg'=>$chguserimg));
 			}
 

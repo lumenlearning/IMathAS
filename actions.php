@@ -113,8 +113,8 @@ require_once("includes/sanitize.php");
 		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $newuserid = mysql_insert_id();
 
-		$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout) ";
-		$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout)";
+		$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout, created_at) ";
+		$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout, :created_at)";
 
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(
@@ -125,7 +125,8 @@ require_once("includes/sanitize.php");
 			':LastName'=>$_POST['lastname'],
 			':email'=>$_POST['email'],
 			':msgnotify'=>$msgnot,
-			':homelayout'=>$homelayout));
+			':homelayout'=>$homelayout,
+			':created_at'=>time()));
 		$newuserid = $DBH->lastInsertId();
 
 		if ($emailconfirmation) {
@@ -185,17 +186,18 @@ require_once("includes/sanitize.php");
 						} else {
 							if (count($keylist)>1) {
 								//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$newuserid','{$_POST['courseid']}','{$_POST['ekey']}','{$line['deflatepass']}');";
-								$query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:uid,:cid,:section,:latepass);";
+								$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
 								$array = array(
 									':uid'=>$newuserid,
 									':cid'=>$_POST['courseid'],
 									':section'=>$_POST['ekey'],
-									':latepass'=>$line['deflatepass']
+									':latepass'=>$line['deflatepass'],
+									':created_at'=>time()
 								);
 							} else {
 								//DB $query = "INSERT INTO imas_students (userid,courseid,latepass) VALUES ('$newuserid','{$_POST['courseid']}','{$line['deflatepass']}');";
-								$query = "INSERT INTO imas_students (userid,courseid,latepass) VALUES (:uid,:cid,:latepass);";
-								$array = array(':uid'=>$newuserid, ':cid'=>$_POST['courseid'], ':latepass'=>$line['deflatepass']);
+								$query = "INSERT INTO imas_students (userid,courseid,latepass,created_at) VALUES (:uid,:cid,:latepass,:created_at);";
+								$array = array(':uid'=>$newuserid, ':cid'=>$_POST['courseid'], ':latepass'=>$line['deflatepass'], ':created_at'=>time());
 							}
 							$stm = $DBH->prepare($query);
 							$stm->execute($array);
@@ -551,12 +553,12 @@ require_once("includes/sanitize.php");
 				} else {
 					if (count($keylist)>1) {
 						//DB $query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES ('$userid','{$_POST['cid']}','{$_POST['ekey']}','{$line['deflatepass']}');";
-						$query = "INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:uid,:cid,:section,:latepass);";
-						$array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':section'=>$_POST['ekey'],':latepass'=>$line['deflatepass']);
+						$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
+						$array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':section'=>$_POST['ekey'],':latepass'=>$line['deflatepass'], ':created_at'=>time());
 					} else {
 						//DB $query = "INSERT INTO imas_students (userid,courseid,latepass) VALUES ('$userid','{$_POST['cid']}','{$line['deflatepass']}');";
-						$query = "INSERT INTO imas_students (userid,courseid,latepass) VALUES (:uid,:cid,:latepass);";
-						$array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':latepass'=>$line['deflatepass']);
+						$query = "INSERT INTO imas_students (userid,courseid,latepass,created_at) VALUES (:uid,:cid,:latepass,:created_at);";
+						$array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':latepass'=>$line['deflatepass'], ':created_at'=>time());
 					}
 					$stm = $DBH->prepare($query);
 					$stm->execute($array);

@@ -46,8 +46,8 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			foreach ($todo as $stu) {
 				if (in_array($stu,$dontdo)) {continue;}
 				//DB $vals[] = "($stu,'$cid'$section)";
-				$vals[] = "(?,?,?,?)";
-				array_push($qarr, $stu, $cid, ($_POST['section']!='')?$_POST['section']:null, $deflatepass);
+				$vals[] = "(?,?,?,?,?)";
+				array_push($qarr, $stu, $cid, ($_POST['section']!='')?$_POST['section']:null, $deflatepass, time());
 			}
 			if (count($vals)>0) {
 				//DB $query = 'INSERT INTO imas_students (userid,courseid';
@@ -56,7 +56,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				//DB }
 				//DB $query .= ') VALUES '.implode(',',$vals);
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
-				$stm = $DBH->prepare('INSERT INTO imas_students (userid,courseid,section,latepass) VALUES '.implode(',', $vals));
+				$stm = $DBH->prepare('INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES '.implode(',', $vals));
 				$stm->execute($qarr);
 			}
 		}
