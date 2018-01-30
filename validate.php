@@ -278,13 +278,22 @@
 		 	 $stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 		 }
 
-
+	// ####### Begin OHM-specific changes ##################################################################
+	// ####### Begin OHM-specific changes ##################################################################
+	// ####### Begin OHM-specific changes ##################################################################
+	// ####### Begin OHM-specific changes ##################################################################
+	// ####### Begin OHM-specific changes ##################################################################
+	//
 // If the post of ekey and courseid then look to see if already enrolled
-
     if ($_POST['enrollandlogin']) {
       header("Location:" . $GLOBALS['basesiteurl'] . "/actions.php?" . Sanitize::fullQueryString("action=enroll&cid=" . $_POST['cid'] . "&ekey=" . $_POST['ekey'] . "&enrollandlogin=1")); /* Redirect browser */
       exit;
     }
+	// ####### End OHM-specific changes ####################################################################
+	// ####### End OHM-specific changes ####################################################################
+	// ####### End OHM-specific changes ####################################################################
+	// ####### End OHM-specific changes ####################################################################
+	// ####### End OHM-specific changes ####################################################################
 
 		 if (!empty($_SERVER['QUERY_STRING'])) {
        $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']) . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
@@ -338,7 +347,7 @@
 	//$username = $_COOKIE['username'];
 	$query = "SELECT SID,rights,groupid,LastName,FirstName,deflib";
 	if (strpos(basename($_SERVER['PHP_SELF']),'upgrade.php')===false) {
-		$query .= ',listperpage,hasuserimg,theme,specialrights,FCMtoken';
+		$query .= ',listperpage,hasuserimg,theme,specialrights,FCMtoken,forcepwreset';
 	}
 	//DB $query .= " FROM imas_users WHERE id='$userid'";
 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -370,6 +379,11 @@
 	}
 	if (isset($sessiondata['userprefs']['usertheme']) && strcmp($sessiondata['userprefs']['usertheme'],'0')!=0) {
 		$coursetheme = $sessiondata['userprefs']['usertheme'];
+	}
+	
+	if (!empty($line['forcepwreset']) && (empty($_GET['action']) || $_GET['action']!='forcechgpwd') && (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltirole']!='learner')) {
+		 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd');
+		 exit;
 	}
 
 	$basephysicaldir = rtrim(dirname(__FILE__), '/\\');
