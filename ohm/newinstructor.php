@@ -64,7 +64,7 @@
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 				$headers .= "From: $installname <$sendfrom>\r\n";
-				$subject = "New Instructor Account Request";
+				$subject = "Lumen OHM Instructor Account Request";
 
 
 				$now = time();
@@ -75,14 +75,106 @@
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
-				$message = "<p>Your new account request has been sent, for username ".Sanitize::encodeStringForDisplay($_POST['username']).".</p>  ";
-				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
-				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
-				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
-				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
+				$sanitizedFirstName = Sanitize::encodeStringForDisplay($_POST['firstname']);
+				$sanitizedUsername = Sanitize::encodeStringForDisplay($_POST['firstname']);
 
-				echo $message;
+				$emailMessage = "
+<p>
+Dear ${sanitizedFirstName},
+</p>
+
+<p>
+Your instructor account request for username ${sanitizedUsername} is under review.
+</p>
+
+<p>
+This request is manually verified, so it may take 1-2 business days to process.
+In the meantime, you are welcome to log in and explore these resources designed
+to orient you to OHM: 
+</p>
+
+<ul>
+	<li>
+		<b>OHM Orientation Course:</b> Documentation and videos to guide you
+		through building courses and using OHM.
+	</li>
+	<li>
+		<b>OHM Community Course:</b> A course in which all faculty users can
+		connect! Searchable discussion forums to find answers to common
+		questions, learn practical tips and tricks, and connect you with other
+		OHM faculty users.
+	</li>
+</ul>
+
+<p>
+Once your account is approved, you will have full trial access to all instructor
+account features. Your no-cost trial covers a total of 200 student enrollments.
+As you explore OHM during the trial period, we’ll reach out to ask for feedback
+and confirm your plans to continue using OHM. Information about our low-cost
+pricing is available
+<a target=\"_blank\" href=\"http://lumenlearning.com/how/payment-options/\">here</a>,
+and we’ll work with you at the appropriate point to transition smoothly to paid
+support. 
+</p>
+
+<p>
+Thank you for your interest in OHM!
+</p>
+
+<p>
+Lumen OHM administrator
+</p>
+";
+
+				$browserMessage = "
+<p>
+Your new instructor account request for username ${sanitizedUsername} is under
+review.
+</p>
+
+<p>
+This request is manually verified, so it may take 1-2 business days to process.
+In the meantime, you are welcome to log in and explore these resources designed
+to orient you to OHM: 
+</p>
+
+<ul>
+	<li>
+		<b>OHM Orientation Course:</b> Documentation and videos to guide you
+		through building courses and using OHM.   
+	</li>
+	<li>
+		<b>OHM Community Course:</b> A course in which all faculty users can
+		connect! Searchable discussion forums to find answers to common
+		questions, learn practical tips and tricks, and connect you with other
+		OHM faculty users.
+	</li>
+</ul>
+
+<p>
+Once your account is approved, you will have full trial access to all
+instructor account features. Your no-cost trial covers a total of 200
+student enrollments.  As you explore OHM during the trial period, we’ll
+reach out to ask for feedback and confirm your plans to continue using OHM.
+Information about our low-cost pricing is available
+<a target=\"_blank\" href=\"http://lumenlearning.com/how/payment-options/\">here</a>,
+and we’ll work with you at the appropriate point to transition smoothly to
+paid support. 
+</p>
+
+<p>
+Thank you for your interest in OHM!
+</p>
+
+<p>
+Note: Sometimes our account approval notification emails get caught in spam
+filters, so be sure to check your spam folder if you don’t see a message in
+your inbox. 
+</p>
+";
+				mail(Sanitize::emailAddress($_POST['email']),$subject,$emailMessage,$headers);
+
+				echo $browserMessage;
 				require("../footer.php");
 				exit;
 			}
