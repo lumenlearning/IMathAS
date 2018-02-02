@@ -33,13 +33,61 @@ if (isset($_POST['newstatus'])) {
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 		$headers .= "From: $accountapproval\r\n";
-		$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row[0]).'</p>';
-		$message .= '<p>You recently requested an instructor account on '.$installname.' with the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b>. ';
-		$message .= 'Unfortunately, the information you provided was not sufficient for us to verify your instructor status, ';
-		$message .= 'so your account has been converted to a student account. If you believe you should have an instructor account, ';
-		$message .= 'you are welcome to reply to this email with additional verification information.</p>';
-		$message .= '<p>'.$installname.' Account Approval Volunteers</p>';
-		
+
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+
+        $sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
+        $sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
+
+        $message = "
+<p>
+Dear ${sanitizedName},
+</p>
+
+<p>
+Thank you for your interest in Lumen OHM. We are unable to verify your
+instructor status, either because you used a non-institutional email, or
+because the URL provided did not include information we could use to verify
+your status as an instructor.  
+</p>
+
+<p>
+If you still want an OHM instructor account, please respond to this message
+<u>from your institutional email address</u> and include:
+</p>
+
+<ul>
+    <li>
+        Your requested username ${sanitizedUsername}
+    </li>
+    <li>
+        A web page address or other documentation that clearly shows your
+        instructor status. If this is unavailable, please send the name and
+        email address for a supervisor or departmental colleague who can
+        confirm your instructor status.  
+    </li>
+</ul>
+
+<p>
+If you did not request an account, no action is required.  
+</p>
+
+<p>
+Thank you,<br/>
+Lumen OHM Administrator
+</p>
+";
+
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+
 		if (isset($CFG['GEN']['useSESmail'])) {
 			SESmail($row[2], $accountapproval, $installname . ' Account Status', $message);
 		} else {
@@ -67,27 +115,79 @@ if (isset($_POST['newstatus'])) {
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 		$headers .= "From: $accountapproval\r\n";
-		$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row[0]).'</p>';
-		$message .= '<p>Welcome to '.$installname.'.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-		if ($installname == "MyOpenMath") {
-			$message .= '<p>Welcome to MyOpenMath.  Your account has been activated, and you\'re all set to log in at <a href="https://www.myopenmath.com">MyOpenMath.com</a> as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.myopenmath.com/docs/docs.php">Getting Started Guide</a> helpful</p>';
-			$message .= '<p>I\'ve added you to the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
-			$message .= '<p>I\'ve also added you to the MyOpenMath Training Course.  This course has video tutorials and assignments that will walk you through learning how to use MyOpenMath in your classes.</p>';
-			$message .= '<p>These will be your primary source of support; MyOpenMath does not provide individual email or phone support. We encourage you to form a learning community at your college to support each other in learning and using the system.</p>';
-			$message .= '<p>Please keep in mind that MyOpenMath is run and supported by volunteers from the user community. Likewise, all courses and questions were created by your colleagues, and shared out of the kindness of their hearts. ';
-			$message .= 'There is no big company or grant-funded nonprofit keeping this thing going. No one is paid by MyOpenMath to create or maintain content or provide support, ';
-			$message .= 'so please be respectful of the volunteers you interact with, and consider contributing back in the future.</p>'; 
-			$message .= '<p>We hope you enjoy both the cost savings and freedoms using open resources provide.</p>';
-		} else if ($installname=='WAMAP') {
-			$message .= 'Welcome to WAMAP.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.wamap.org/docs/docs.php">Getting Started Guide</a> helpful</p>';
-			$message .= '<p>I\'ve added you to  the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
-			$message .= '<p>I\'ve also added you to the WAMAP Training Course.  This course has video tutorials and assignments that will walk you through learning how to use WAMAP in your classes.</p>';
-			$message .= '<p>If you are from outside Washington State, please be aware that WAMAP.org is only intended for regular use by Washington State faculty.  You are welcome to use this site for trial purposes.  If you wish to continue using it, we ask you set up your own installation of the IMathAS software, or use MyOpenMath.com if using content built around an open textbook.</p>';
-		}
-		$message .= '<p>'.$installname.' Account Approval Volunteers</p>';
-		
+
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+
+		$sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
+		$sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
+
+		$message = "
+<p>
+Dear ${sanitizedName}, 
+</p>
+
+<p>
+Welcome to Lumen OHM! Your account has been activated, and you're all set
+to log in at
+<a target='_blank' href='https://ohm.lumenlearning.com/'>ohm.lumenlearning.com</a>
+as an instructor using the username ${sanitizedUsername} and the password
+you provided.
+</p>
+
+<p>
+You have full trial access to all instructor account features. Your no-cost
+trial covers a total of 200 student enrollments.  
+</p>
+
+<p>
+We have enrolled you as a student in the OHM Orientation Course and OHM
+Community Course to help you get started exploring and creating courses.
+</p>
+
+<ul>
+    <li>
+        <b>OHM Training Course:</b> Documentation and videos to guide you
+        through building courses and using OHM.   
+    </li>
+    <li>
+        <b>OHM Community Course:</b> A course in which all faculty users
+        can connect! Searchable discussion forums to find answers to common
+        questions, learn practical tips and tricks, and connect you with
+        other OHM faculty users.
+    </li>
+</ul>
+
+<p>
+For help, Lumen OHM customers may also submit requests through
+<a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/requests/new'>https://lumenlearning.zendesk.com/hc/en-us/requests/new</a>.
+</p>
+
+<p>
+As you explore OHM during the trial period, we’ll reach out to ask for
+feedback and confirm your plans to continue using OHM. Information about
+our low-cost pricing is available
+<a target='_blank' href='http://lumenlearning.com/how/payment-options/'>here</a>,
+and we’ll work with you at the appropriate point to transition smoothly to
+paid support. We’re excited for you and your students to enjoy the benefits
+of learning and teaching with open educational resources (OER) in Lumen OHM. 
+</p>
+
+<p>
+Thank you,<br/>
+Lumen OHM administrator
+</p>
+";
+
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+
 		if (isset($CFG['GEN']['useSESmail'])) {
 			SESmail($row[2], $accountapproval, $installname . ' Account Approval', $message);
 		} else {
