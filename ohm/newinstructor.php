@@ -4,10 +4,11 @@
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/themes/lumen.css\" type=\"text/css\">\n";
 	$placeinhead .= '<style type="text/css">div { margin: 0px; padding: 0px;}</style>';
-
 	$nologo = true;
 	require("../header.php");
 	$pagetitle = "Instructor Account Request";
+	require("infoheader.php");
+
 
 	if (isset($_POST['firstname'])) {
 		if (!isset($_POST['agree'])) {
@@ -60,12 +61,18 @@
 
 					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits)); //known INTs - safe
 				}
-
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 				$headers .= "From: $installname <$sendfrom>\r\n";
 				$subject = "New Instructor Account Request";
-
+				// trim() removes newlines, which prevents SMTP command injection.
+				$message = sprintf("Name: %s %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['firstname']),
+					Sanitize::encodeStringForDisplay($_POST['lastname']));
+				$message .= sprintf("Email: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['email']));
+				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
+				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));
+				$message .= sprintf("Username: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['username']));
+				mail($accountapproval,$subject,$message,$headers);
 
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
@@ -75,43 +82,139 @@
 				$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:time, :log)");
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
-				$message = "<p>Your new account request has been sent, for username ".Sanitize::encodeStringForDisplay($_POST['username']).".</p>  ";
-				$message .= "<p>This request is processed by hand, so please be patient.  In the meantime, you are welcome to ";
-				$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
-				$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom to your contacts list.";
-				$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-				mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
+				$reqdata = array('reqmade'=>$now, 'school'=>$_POST['school'], 'phone'=>$_POST['phone'], 'url'=>$_POST['verurl']);
+				$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,0,?,?)");
+				$stm->execute(array($newuserid, $now, json_encode($reqdata)));
 
-				echo $message;
+				$sanitizedFirstName = Sanitize::encodeStringForDisplay($_POST['firstname']);
+				$sanitizedUsername = Sanitize::encodeStringForDisplay($_POST['username']);
+
+				$emailMessage = "
+<p>
+Dear ${sanitizedFirstName},
+</p>
+
+<p>
+Your instructor account request for username ${sanitizedUsername} is under review.
+</p>
+
+<p>
+This request is manually verified, so it may take 1-2 business days to process.
+In the meantime, you are welcome to log in and explore these resources designed
+to orient you to OHM: 
+</p>
+
+<ul>
+	<li>
+		<b>OHM Orientation Course:</b> Documentation and videos to guide you
+		through building courses and using OHM.
+	</li>
+	<li>
+		<b>OHM Community Course:</b> A course in which all faculty users can
+		connect! Searchable discussion forums to find answers to common
+		questions, learn practical tips and tricks, and connect you with other
+		OHM faculty users.
+	</li>
+</ul>
+
+<p>
+Once your account is approved, you will have full trial access to all instructor
+account features. Your no-cost trial covers a total of 200 student enrollments.
+As you explore OHM during the trial period, we’ll reach out to ask for feedback
+and confirm your plans to continue using OHM. Information about our low-cost
+pricing is available
+<a target=\"_blank\" href=\"http://lumenlearning.com/how/payment-options/\">here</a>,
+and we’ll work with you at the appropriate point to transition smoothly to paid
+support. 
+</p>
+
+<p>
+Thank you for your interest in OHM!
+</p>
+
+<p>
+Lumen OHM administrator
+</p>
+";
+
+				$browserMessage = "
+<p>
+Your new instructor account request for username ${sanitizedUsername} is under
+review.
+</p>
+
+<p>
+This request is manually verified, so it may take 1-2 business days to process.
+In the meantime, you are welcome to log in and explore these resources designed
+to orient you to OHM: 
+</p>
+
+<ul>
+	<li>
+		<b>OHM Orientation Course:</b> Documentation and videos to guide you
+		through building courses and using OHM.   
+	</li>
+	<li>
+		<b>OHM Community Course:</b> A course in which all faculty users can
+		connect! Searchable discussion forums to find answers to common
+		questions, learn practical tips and tricks, and connect you with other
+		OHM faculty users.
+	</li>
+</ul>
+
+<p>
+Once your account is approved, you will have full trial access to all
+instructor account features. Your no-cost trial covers a total of 200
+student enrollments.  As you explore OHM during the trial period, we’ll
+reach out to ask for feedback and confirm your plans to continue using OHM.
+Information about our low-cost pricing is available
+<a target=\"_blank\" href=\"http://lumenlearning.com/how/payment-options/\">here</a>,
+and we’ll work with you at the appropriate point to transition smoothly to
+paid support. 
+</p>
+
+<p>
+Thank you for your interest in OHM!
+</p>
+
+<p>
+Note: Sometimes our account approval notification emails get caught in spam
+filters, so be sure to check your spam folder if you don’t see a message in
+your inbox. 
+</p>
+";
+				mail(Sanitize::emailAddress($_POST['email']),$subject,$emailMessage,$headers);
+
+				echo $browserMessage;
 				require("../footer.php");
 				exit;
 			}
 		}
 	}
-	if (isset($_POST['firstname'])) {$firstname=Sanitize::encodeStringForDisplay($_POST['firstname']);} else {$firstname='';}
-	if (isset($_POST['lastname'])) {$lasname=Sanitize::encodeStringForDisplay($_POST['lastname']);} else {$lastname='';}
-	if (isset($_POST['email'])) {$email=Sanitize::encodeStringForDisplay($_POST['email']);} else {$email='';}
-	if (isset($_POST['phone'])) {$phone=Sanitize::encodeStringForDisplay($_POST['phone']);} else {$phone='';}
-	if (isset($_POST['school'])) {$school=Sanitize::encodeStringForDisplay($_POST['school']);} else {$school='';}
-	if (isset($_POST['verurl'])) {$verurl=Sanitize::encodeStringForDisplay($_POST['verurl']);} else {$verurl='';}
-	if (isset($_POST['username'])) {$username=Sanitize::encodeStringForDisplay($_POST['username']);} else {$username='';}
+	if (isset($_POST['firstname'])) {$firstname=$_POST['firstname'];} else {$firstname='';}
+	if (isset($_POST['lastname'])) {$lastname=$_POST['lastname'];} else {$lastname='';}
+	if (isset($_POST['email'])) {$email=$_POST['email'];} else {$email='';}
+	if (isset($_POST['phone'])) {$phone=$_POST['phone'];} else {$phone='';}
+	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
+	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
+	if (isset($_POST['username'])) {$username=$_POST['username'];} else {$username='';}
 	echo "<div class=lumensignupforms>";
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
 	echo '<dl>';
 	echo '<dt><b>Note</b>: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges.</dt>';
 	echo '<dd>Lumen OHM does not currently provide instructor accounts to parents, home-schools, or tutors.</dd>';
 	echo '<dd>Lumen OHM is only intended for use with children and adults over the age of 13. </dd></dl><br/>';
-	echo "<form method=\"post\" action=\"newinstructor.php\" onsubmit=\"return passwordchk();\">\n";
-	echo "<input class='lumenform form' type=text name=firstname placeholder='First Name' value=\"$firstname\" size=40 aria-label='First Name' required>";
-	echo "<input class='lumenform form' type=text name=lastname  placeholder='Last Name' value=\"$lastname\" size=40 aria-label='Last Name' required></span>";
-	echo "<input class='lumenform form' type=text name=email     placeholder='Email' value=\"$email\" size=40 aria-label='Email' required>";
-	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"$phone\" size=40 aria-label='Phone Number' required>";
-	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"$school\" size=40 aria-label='School & District / College' required>";
-	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"$verurl\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
+	echo "<form method=post id=newinstrform class=limitaftervalidate action=\"newinstructor.php\" >\n";
+	echo "<input class='lumenform form' type=text name=firstname id=firstname placeholder='First Name' value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40 aria-label='First Name' required>";
+	echo "<input class='lumenform form' type=text name=lastname id=lastname placeholder='Last Name' value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40 aria-label='Last Name' required></span>";
+	echo "<input class='lumenform form' type=text name=email id=email placeholder='Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
+	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40 aria-label='Phone Number' required>";
+	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"".Sanitize::encodeStringForDisplay($school)."\" size=40 aria-label='School & District / College' required>";
+	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
 	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
-	echo "<input  class='lumenform form' type=text name=username placeholder='Requested Username (letters,numbers, \"_\")' value=\"$username\" size=40>";
-	echo "<input  class='lumenform form' placeholder='Requested Password' type=password name=password id=\"password\" size=40 aria-label='Password' required>";
-	echo "<input  class='lumenform form' placeholder='Retype Password' type=password name=password2 id=\"password2\" size=40 aria-label='Retype Password' required>";
+	echo "<input class='lumenform form' type=text name=username id=username placeholder='Requested Username (letters,numbers, \"_\")' value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40>";
+	echo "<input class='lumenform form' placeholder='Requested Password' type=password name=password id=pw1 size=40 aria-label='Password' required>";
+	echo "<input class='lumenform form' placeholder='Retype Password' type=password name=password2 id=pw2 size=40 aria-label='Retype Password' required>";
 	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
 	if (isset($CFG['GEN']['TOSpage'])) {
 		echo "</br>
