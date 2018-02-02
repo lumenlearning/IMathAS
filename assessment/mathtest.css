@@ -81,6 +81,9 @@ div.prequestion {
 div.embedqwrapper, #playerwrapper {
 	position: relative;
 }
+div.questparts {
+	padding-left: 10px;
+}
 img.embedicon {
 	position: absolute;
 	left: -18px;

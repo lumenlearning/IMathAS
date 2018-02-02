@@ -275,6 +275,9 @@ foreach ($qids as $i=>$qid) {
 	displayq($i,$qid,$seeds[$i],($showanstype==2),$showhints,$attempts[$i]);
 	$quesout .= ob_get_clean();
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
+	if (isset($_GET['show_question_numbers'])) {
+		echo '<div class="questparts"> Part '. $i .'</div>';
+	}
 	echo $quesout;
 	echo '<input type="hidden" id="verattempts'.$i.'" value="'.$attempts[$i].'"/>';
 	echo '</div>';
