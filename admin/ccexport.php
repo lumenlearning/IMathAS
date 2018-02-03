@@ -226,9 +226,9 @@ if (isset($_GET['delete'])) {
 					$out .= $ind.'</item>'."\n";
 					$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 					$canvout .= '<content_type>WikiPage</content_type>';
+					$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 					$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>';
 					$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
-					$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 					$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 					$ccnt++;
 
@@ -238,6 +238,7 @@ if (isset($_GET['delete'])) {
 					fwrite($fp,'<meta name="identifier" content="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'"/>');
 					if ($linktype=="canvas") {
 						fwrite($fp,'<meta name="editing_roles" content="teachers"/>');
+						fwrite($fp,'<meta name="workflow_state" content="'.($row[3]==0?'unpublished':'active').'"/>');
 					}
 					fwrite($fp,"</head><body>");
 					fwrite($fp,filtercapture($row[1],$res));
@@ -284,10 +285,10 @@ if (isset($_GET['delete'])) {
 						$out .= $ind.'</item>'."\n";
 						$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 						$canvout .= '<content_type>ExternalUrl</content_type>';
+						$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>';
 						$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
 						$canvout .= '<url>'.htmlentities($alink,ENT_XML1,'UTF-8',false).'</url>';
-						$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 						$ccnt++;
 						$resitem =  '<resource identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" type="imswl_xmlv1p1">'."\n";
@@ -304,9 +305,9 @@ if (isset($_GET['delete'])) {
 						$out .= $ind.'</item>'."\n";
 						$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 						$canvout .= '<content_type>Attachment</content_type>';
+						$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>';
 						$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
-						$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 						$ccnt++;
 						$resitem =  '<resource href="'.$filedir.basename($filename).'" identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" type="webcontent">'."\n";
@@ -319,9 +320,9 @@ if (isset($_GET['delete'])) {
 						$out .= $ind.'</item>'."\n";
 						$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 						$canvout .= '<content_type>WikiPage</content_type>';
+						$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>';
 						$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
-						$canvout .= '<workflow_state>'.($row[3]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 						$ccnt++;
 						$fp = fopen($newdir.'/'.$htmldir.'linkedtext'.$iteminfo[$item][1].'.html','w');
@@ -330,6 +331,7 @@ if (isset($_GET['delete'])) {
 						fwrite($fp,'<meta name="identifier" content="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'"/>');
 						if ($linktype=="canvas") {
 							fwrite($fp,'<meta name="editing_roles" content="teachers"/>');
+							fwrite($fp,'<meta name="workflow_state" content="'.($row[3]==0?'unpublished':'active').'"/>');
 						}
 						fwrite($fp,"</head><body>");
 						fwrite($fp,filtercapture($row[1],$res));
@@ -352,9 +354,9 @@ if (isset($_GET['delete'])) {
 					$out .= $ind.'</item>'."\n";
 					$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 					$canvout .= '<content_type>DiscussionTopic</content_type>';
+					$canvout .= '<workflow_state>'.($row[2]==0?'unpublished':'active').'</workflow_state>'."\n";
 					$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>';
 					$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
-					$canvout .= '<workflow_state>'.($row[2]==0?'unpublished':'active').'</workflow_state>'."\n";
 					$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 					$ccnt++;
 					$fp = fopen($newdir.'/forum'.$iteminfo[$item][1].'.xml','w');
@@ -371,6 +373,7 @@ if (isset($_GET['delete'])) {
 							  <topic_id>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</topic_id>
 							  <title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>
 							  <type>topic</type>
+							  <workflow_state>'.($row[2]==0?'unpublished':'active').'</workflow_state>
 							</topicMeta>');
 						fclose($fp);
 						$resitem =  '<resource identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'meta" type="associatedcontent/imscc_xmlv1p1/learning-application-resource" href="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'meta.xml">'."\n";
@@ -402,9 +405,9 @@ if (isset($_GET['delete'])) {
 					if ($linktype=='canvas') {
 						$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 						$canvout .= '<content_type>Assignment</content_type>'."\n";
+						$canvout .= '<workflow_state>'.($row[6]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>'."\n";
 						$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
-						$canvout .= '<workflow_state>'.($row[6]==0?'unpublished':'active').'</workflow_state>'."\n";
 						$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 						$ccnt++;
 						$aitems = explode(',',$row[3]);
@@ -501,9 +504,9 @@ if (isset($_GET['delete'])) {
 					$out .= $ind.'</item>'."\n";
 					$canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
 					$canvout .= '<content_type>WikiPage</content_type>';
+					$canvout .= '<workflow_state>'.($row[1]==0?'unpublished':'active').'</workflow_state>'."\n";
 					$canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>';
 					$canvout .= '<title>'.htmlentities($row[0],ENT_XML1,'UTF-8',false).'</title>'."\n";
-					$canvout .= '<workflow_state>'.($row[1]==0?'unpublished':'active').'</workflow_state>'."\n";
 					$canvout .= "<position>$ccnt</position> <indent>".max(strlen($ind)/2 - 2, 0)."</indent> </item>";
 					$ccnt++;
 
@@ -513,6 +516,7 @@ if (isset($_GET['delete'])) {
 					fwrite($fp,'<meta name="identifier" content="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'"/>');
 					if ($linktype=="canvas") {
 						fwrite($fp,'<meta name="editing_roles" content="teachers"/>');
+						fwrite($fp,'<meta name="workflow_state" content="'.($row[1]==0?'unpublished':'active').'"/>');
 					}
 					fwrite($fp,"</head><body>");
 
