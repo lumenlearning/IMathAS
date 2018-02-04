@@ -115,7 +115,7 @@ switch($_POST['action']) {
 				if (trim($_POST['newgroupname'])!='') {
 					//check for existing with same name
 					$stm = $DBH->prepare("SELECT id FROM imas_groups WHERE name REGEXP ?");
-					$stm->execute(array('^[[:space:]]*'.preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroupname'])).'[[:space:]]*$'));
+					$stm->execute(array('^[[:space:]]*'.str_replace('.','[.]',preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroupname']))).'[[:space:]]*$'));
 					$newgroup = $stm->fetchColumn(0);
 					if ($newgroup === false) {
 						$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
@@ -290,7 +290,7 @@ switch($_POST['action']) {
 				if (trim($_POST['newgroupname'])!='') {
 					//check for existing with same name
 					$stm = $DBH->prepare("SELECT id FROM imas_groups WHERE name REGEXP ?");
-					$stm->execute(array('^[[:space:]]*'.preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroupname'])).'[[:space:]]*$'));
+					$stm->execute(array('^[[:space:]]*'.str_replace('.','[.]',preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroupname']))).'[[:space:]]*$'));
 					$newgroup = $stm->fetchColumn(0);
 					if ($newgroup === false) {
 						$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
