@@ -104,7 +104,7 @@ Lumen OHM Administrator
 			$group = intval($_POST['group']);
 		} else if (trim($_POST['newgroup'])!='') {
 			$stm = $DBH->prepare("SELECT id FROM imas_groups WHERE name REGEXP ?");
-			$stm->execute(array('^[[:space:]]*'.preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroup'])).'[[:space:]]*$'));
+			$stm->execute(array('^[[:space:]]*'.str_replace('.','[.]',preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroup']))).'[[:space:]]*$'));
 			$group = $stm->fetchColumn(0);
 			if ($group === false) {
 				$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
