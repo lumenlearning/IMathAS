@@ -276,7 +276,8 @@ foreach ($qids as $i=>$qid) {
 	$quesout .= ob_get_clean();
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
 	if (isset($_GET['show_question_numbers'])) {
-		echo '<div class="questparts"> Part '. $i .'</div>';
+		echo '<div style="padding-left:10px;
+		text-decoration:underline;"> Question '. ($i + 1) .'</div>';
 	}
 	echo $quesout;
 	echo '<input type="hidden" id="verattempts'.$i.'" value="'.$attempts[$i].'"/>';
