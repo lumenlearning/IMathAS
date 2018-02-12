@@ -9,6 +9,23 @@ if (isset($sessiondata['emulateuseroriginaluser']) && isset($_GET['unemulateuser
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
 	exit;
 }
+
+if ($myrights >= 75 && isset($_GET['emulateuser'])) {
+	if ($myrights<100) {
+		$stm = $DBH->prepare("SELECT groupid FROM imas_users WHERE id=?");
+		$stm->execute(array($_GET['emulateuser']));
+		if ($stm->fetchColumn(0) != $groupid) {
+			echo "You can only emulate teachers from your own group";
+			exit;
+		}
+	}
+	$sessiondata['emulateuseroriginaluser'] = $userid;
+	writesessiondata();
+	$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
+	$stm->execute(array(':userid'=>$_GET['emulateuser'], ':sessionid'=>$sessionid));
+	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
+	exit;
+}
 if ($myrights<100) {
 	echo "You are not authorized to view this page";
 	exit;
@@ -22,14 +39,6 @@ if (isset($_GET['removelti'])) {
 	//DB mysql_query($query) or die("Query failed : " . mysql_error());
 	$stm = $DBH->prepare("DELETE FROM imas_ltiusers WHERE id=:id");
 	$stm->execute(array(':id'=>$id));
-}
-if (isset($_GET['emulateuser'])) {
-	$sessiondata['emulateuseroriginaluser'] = $userid;
-	writesessiondata();
-	$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
-	$stm->execute(array(':userid'=>$_GET['emulateuser'], ':sessionid'=>$sessionid));
-	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
-	exit;
 }
 if (isset($_GET['removecourselti'])) {
 	$id = intval($_GET['removecourselti']);
@@ -49,6 +58,11 @@ if (isset($_GET['fixorphanqs'])) {
 if (isset($_POST['action']) && $_POST['action']=='jumptoitem') {
 	if (!empty($_POST['cid'])) {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_POST['cid']));
+	} else if (!empty($_POST['aid'])) {
+		$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=?");
+		$stm->execute(array($_POST['aid']));
+		$destcid = $stm->fetchColumn(0);
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/addassessment.php?cid=".Sanitize::onlyInt($destcid)."&id=".Sanitize::onlyInt($_POST['aid']));
 	} else if (!empty($_POST['pqid'])) {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/testquestion.php?qsetid=".Sanitize::onlyInt($_POST['pqid']));
 	} else if (!empty($_POST['eqid'])) {
@@ -75,6 +89,7 @@ if (isset($_GET['form'])) {
 		echo '<input type=hidden name=action value="jumptoitem" />';
 		echo '<p>Jump to:<br/>';
 		echo 'Course ID: <input type="text" size="8" name="cid"/><br/>';
+		echo 'Assessment ID: <input type="text" size="8" name="aid"/><br/>';
 		echo 'Preview Question ID: <input type="text" size="8" name="pqid"/><br/>';
 		echo 'Edit Question ID: <input type="text" size="8" name="eqid"/><br/>';
 		echo '<input type="submit" value="Go"/>';
@@ -243,7 +258,8 @@ if (isset($_GET['form'])) {
 		echo '<p>Debug Mode Enabled - Error reporting is now turned on.</p>';
 	}
 	echo '<a href="utils.php?form=lookup">User lookup</a><br/>';
-	echo '<a href="'.$imasroot.'/admin/approvepending.php">Approve Pending Instructor Accounts</a><br/>';
+	echo '<a href="'.$imasroot.'/admin/approvepending2.php">Approve Pending Instructor Accounts</a><br/>';
+	echo '<a href="'.$imasroot.'/admin/approvepending.php">Approve Pending Instructor Accounts (old version)</a><br/>';
 	echo '<a href="utils.php?form=jumptoitem">Jump to Item</a><br/>';
 	echo '<a href="batchcreateinstr.php">Batch create Instructor Accounts</a><br/>';
 	echo '<a href="getstucnt.php">Get Student Count</a><br/>';

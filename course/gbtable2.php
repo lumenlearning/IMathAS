@@ -3,6 +3,12 @@
 //(c) 2007 David Lippman
 
 require_once("../includes/exceptionfuncs.php");
+if ($GLOBALS['canviewall']) {
+	$GLOBALS['exceptionfuncs'] = new ExceptionFuncs($userid, $cid, false);
+} else {
+	$GLOBALS['exceptionfuncs'] = new ExceptionFuncs($userid, $cid, true, $studentinfo['latepasses'], $latepasshrs);
+}
+
 require_once("../includes/sanitize.php");
 
 //used by gbtable
@@ -57,7 +63,7 @@ row[0][0][1] = "SID"
 row[0][1] scores
 row[0][1][0] first score
 row[0][1][0][0] = "Assessment name"
-row[0][1][0][1] = category color #
+row[0][1][0][1] = category color #  (or gbcat ID if $includecategoryID is set)
 row[0][1][0][2] = points possible
 row[0][1][0][3] = 0 past, 1 current, 2 future
 row[0][1][0][4] = 0 no count and hide, 1 count, 2 EC, 3 no count
@@ -97,7 +103,7 @@ row[1][1] scores (all types - type is determined from header row)
 row[1][1][0] first score - assessment
 row[1][1][0][0] = score
 row[1][1][0][1] = 0 no comment, 1 has comment - is comment in stu view
-row[1][1][0][2] = show link: 0 no, 1 yes
+row[1][1][0][2] = show gbviewasid link: 0 no, 1 yes,
 row[1][1][0][3] = other info: 0 none, 1 NC, 2 IP, 3 OT, 4 PT  + 10 if still active
 row[1][1][0][4] = asid, or 'new'
 row[1][1][0][5] = bitwise for dropped: 1 in past & 2 in cur & 4 in future & 8 attempted
@@ -159,7 +165,7 @@ function flattenitems($items,&$addto) {
 function gbtable() {
 	global $DBH,$cid,$isteacher,$istutor,$tutorid,$userid,$catfilter,$secfilter,$timefilter,$lnfilter,$isdiag;
 	global $sel1name,$sel2name,$canviewall,$lastlogin,$logincnt,$hidelocked,$latepasshrs,$includeendmsg;
-	global $hidesection,$hidecode;
+	global $hidesection,$hidecode,$exceptionfuncs;
 
 	if (!isset($hidesection)) {$hidesection = false;}
 	if (!isset($hidecode)) {$hidecode= false;}
@@ -372,7 +378,7 @@ function gbtable() {
 			$endmsgs[$kcnt] = unserialize($line['endmsg']);
 		}
 		if ($limuser>0) {
-			$reqscores[$kcnt] = array('aid'=>$line['reqscoreaid'], 'score'=>$line['reqscore']);
+			$reqscores[$kcnt] = array('aid'=>$line['reqscoreaid'], 'score'=>abs($line['reqscore']));
 		}
 		$k = 0;
 		$atofind = array();
@@ -714,7 +720,11 @@ function gbtable() {
 			if (($orderby&1)==1) {  //display item header if displaying by category
 				//$cathdr[$pos] = $cats[$cat][6];
 				$gb[0][1][$pos][0] = $name[$k]; //item name
-				$gb[0][1][$pos][1] = $cats[$cat][8]; //item category number
+				if (!empty($GLOBALS['includecategoryID'])) {
+					$gb[0][1][$pos][1] = $cat;
+				} else {
+					$gb[0][1][$pos][1] = $cats[$cat][8]; //item category number
+				}
 				$gb[0][1][$pos][2] = $possible[$k]; //points possible
 				$gb[0][1][$pos][3] = $avail[$k]; //0 past, 1 current, 2 future
 				$gb[0][1][$pos][4] = $cntingb[$k]; //0 no count and hide, 1 count, 2 EC, 3 no count
@@ -793,7 +803,11 @@ function gbtable() {
 
 		foreach ($itemorder as $k) {
 			$gb[0][1][$pos][0] = $name[$k]; //item name
-			$gb[0][1][$pos][1] = $cats[$category[$k]][8]; //item category name
+			if (!empty($GLOBALS['includecategoryID'])) {
+				$gb[0][1][$pos][1] = $category[$k];
+			} else {
+				$gb[0][1][$pos][1] = $cats[$category[$k]][8]; //item category color #
+			}
 			$gb[0][1][$pos][2] = $possible[$k]; //points possible
 			$gb[0][1][$pos][3] = $avail[$k]; //0 past, 1 current, 2 future
 			$gb[0][1][$pos][4] = $cntingb[$k]; //0 no count and hide, 1 count, 2 EC, 3 no count
@@ -954,7 +968,7 @@ function gbtable() {
 			}
 			$exceptions[$r['typeid']][$r['userid']] = array($r['exceptionstartdate'],$r['exceptionenddate'],$r['islatepass']);
 			if ($limuser>0) {
-				$useexception = getCanUseAssessException($exceptions[$r['typeid']][$r['userid']], $r, true);
+				$useexception = $exceptionfuncs->getCanUseAssessException($exceptions[$r['typeid']][$r['userid']], $r, true);
 				if ($useexception) {
 					$gb[0][1][$assesscol[$r['typeid']]][11] = $r['exceptionenddate']; //override due date header if one stu display
 					//change $avail past/cur/future based on exception
@@ -963,7 +977,7 @@ function gbtable() {
 					} else {
 						$avail[$assessidx[$r['typeid']]] = 0;
 					}
-
+					$gb[0][1][$assesscol[$r['typeid']]][3] = $avail[$assessidx[$r['typeid']]];
 				}
 			}
 			$gb[$sturow[$r['userid']]][1][$assesscol[$r['typeid']]][6] = ($r['islatepass']>0)?(1+$r['islatepass']):1;
@@ -1047,9 +1061,9 @@ function gbtable() {
 		*/
 		$useexception = false; $canuselatepass = false;
 		if (isset($exceptions[$l['assessmentid']][$l['userid']])) {
-			list($useexception, $canundolatepass, $canuselatepass) = getCanUseAssessException($exceptions[$l['assessmentid']][$l['userid']], array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
+			list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptions[$l['assessmentid']][$l['userid']], array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
 		} else {
-			$canuselatepass = getCanUseAssessLatePass(array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
+			$canuselatepass = $exceptionfuncs->getCanUseAssessLatePass(array('startdate'=>$startdate[$i], 'enddate'=>$enddate[$i], 'allowlate'=>$allowlate[$i], 'id'=>$l['assessmentid']));
 		}
 		//if (isset($exceptions[$l['assessmentid']][$l['userid']])) {// && $now>$enddate[$i] && $now<$exceptions[$l['assessmentid']][$l['userid']]) {
 
@@ -1066,6 +1080,7 @@ function gbtable() {
 					} else {
 						$avail[$assessidx[$l['assessmentid']]] = 0;
 					}
+					$gb[0][1][$col][3] = $avail[$assessidx[$l['assessmentid']]];
 				}
 			}
 			if ($limuser>0) { //override due date header if one stu display
@@ -1077,7 +1092,9 @@ function gbtable() {
 			$inexception = false;
 		}
 		$gb[$row][1][$col][10] = $canuselatepass;
-
+		if (!empty($GLOBALS['includetimelimit'])) {
+			$gb[$row][1][$col][12] = $timelimits[$i]*$timelimitmult[$l['userid']];
+		}
 		if ($canviewall || $sa[$i]=="I" || ($sa[$i]!="N" && $now>$thised)) { //|| $assessmenttype[$i]=="Practice"
 			$gb[$row][1][$col][2] = 1; //show link
 		} /*else if ($l['timelimit']<0 && (($now - $l['starttime'])>abs($l['timelimit'])) && $sa[$i]!='N' && ($assessmenttype[$k]=='EachAtEnd' || $assessmenttype[$k]=='EndReview' || $assessmenttype[$k]=='AsGo' || $assessmenttype[$k]=='Homework'))  ) {
@@ -1101,7 +1118,7 @@ function gbtable() {
 				$gb[$row][1][$col][3] = 1;  //no credit
 				$pts = 0;
 			}
-		} else 	if ($IP==1 && $thised>$now && (($timelimits[$i]==0) || ($timeused < $timelimits[$i]*$timelimitmult[$l['userid']]))) {
+		} else 	if ($IP==1 && ($thised>$now || !empty($GLOBALS['alwaysshowIP'])) && (($timelimits[$i]==0) || ($timeused < $timelimits[$i]*$timelimitmult[$l['userid']]))) {
 			$gb[$row][1][$col][0] = $pts; //the score
 			$gb[$row][1][$col][3] = 2;  //in progress
 			$countthisone =true;

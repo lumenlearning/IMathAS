@@ -111,14 +111,25 @@ switch($_POST['action']) {
 		}
 
 		if ($myrights == 100 || ($myspecialrights&32)==32) { //update library groupids
-			$arr[':groupid'] = $_POST['group'];
+			if ($_POST['group']==-1) {
+				if (trim($_POST['newgroupname'])!='') {
+					$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
+					$stm->execute(array(':name'=>$_POST['newgroupname']));
+					$newgroup = $DBH->lastInsertId();
+				} else {
+					$newgroup = 0;
+				}
+			} else {
+				$newgroup = Sanitize::onlyInt($_POST['group']);
+			}
+			$arr[':groupid'] = $newgroup;
 
 			$query = "UPDATE imas_users SET rights=:rights,specialrights=:specialrights,groupid=:groupid,FirstName=:FirstName,LastName=:LastName,email=:email";
 			if ($chgSID) {
 				$query .= ',SID=:SID';
 			}
 			if (isset($_POST['doresetpw'])) {
-				$query .= ',password=:password';
+				$query .= ',password=:password,forcepwreset=1';
 			}
 			$query .= " WHERE id=:id";
 			$stm = $DBH->prepare($query);
@@ -126,6 +137,7 @@ switch($_POST['action']) {
 			$stm = $DBH->prepare("UPDATE imas_libraries SET groupid=:groupid WHERE ownerid=:ownerid");
 			$stm->execute(array(':groupid'=>$_POST['group'], ':ownerid'=>$_GET['id']));
 		} else {
+			$newgroup = $groupid;
 			$arr[':groupid'] = $groupid;
 
 			$query = "UPDATE imas_users SET rights=:rights,specialrights=:specialrights,FirstName=:FirstName,LastName=:LastName,email=:email";
@@ -150,6 +162,31 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
+			
+			
+			//log new account
+			$now = time();
+			$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:now, :log)");
+			$stm->execute(array(':now'=>$now, ':log'=>"New Instructor Request: $userid:: Group: $newgroup, upgraded by $userid"));
+			
+			$stm = $DBH->prepare("SELECT reqdata FROM imas_instr_acct_reqs WHERE userid=?");
+			$stm->execute(array($_GET['id']));
+			$reqdata = $stm->fetchColumn(0);
+
+			if ($reqdata === false) {
+				$reqdata = array('upgraded'=>$now, 'actions'=>array(array('on'=>$now, 'by'=>$userid, 'status'=>11, 'via'=>'chgrights')));
+				$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,11,?,?)");
+				$stm->execute(array($_GET['id'], $now, json_encode($reqdata)));
+			} else {
+				$reqdata = json_decode($reqdata, true);
+				if (!isset($reqdata['actions'])) {
+					$reqdata['actions'] = array();
+				}
+				$reqdata['actions'][] = array('on'=>$now, 'by'=>$userid, 'status'=>11, 'via'=>'chgrights');
+				$stm = $DBH->prepare("UPDATE imas_instr_acct_reqs SET reqdata=? where userid=?");
+				$stm->execute(array(json_encode($reqdata), $_GET['id']));
+			}
+				
 		} else if ($oldrights>10 && $_POST['newrights']<=10 && isset($CFG['GEN']['enrollonnewinstructor'])) {
 			require_once("../includes/unenroll.php");
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
@@ -161,40 +198,8 @@ switch($_POST['action']) {
 			echo "Username in use - left unchanged";
 			exit;
 		}
-		if($_POST['oldrole'] == 10 && $_POST['oldrole'] < $_POST['newrights'] ){
-    //  If they are a student being given more right they will be inrolled in
-      if (isset($CFG['GEN']['enrollonnewinstructor'])) {
-        $valbits = array();
-        $valvals = array();
-        $userid = Sanitize::onlyInt($_GET['id']);
-        foreach ($CFG['GEN']['enrollonnewinstructor'] as $ncid) {
-          $valbits[] = "(?,?,?)";
-          array_push($valvals, $userid,$ncid,time());
-        }
-        $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
-        $stm->execute($valvals);
-      }
 
-		}
-    if($_POST['oldrole'] != $_POST['newrights']){
-
-      $headers  = 'MIME-Version: 1.0' . "\r\n";
-      $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-      $headers .= "From: $accountapproval\r\n";
-      $message  = "<p>Dear ".Sanitize::encodeStringForDisplay($_POST['firstname']).", </p>";
-      $message .= "<p>This is a notification from Lumen OHM. Your account with the username, ". Sanitize::encodeStringForDisplay($_POST['username']).", has been changed from ".returnrole($_POST['oldrole'])." to ".returnrole($_POST['newrights']).".</p>";
-      //<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
-      $message .= "<p>If you have any questions or concerns, please contact us through https://lumenlearning.zendesk.com/hc/en-us/requests/new. </br>Please do not reply to this email as it is not monitored.</p>";
-      $message .= "<p>Thanks,</p><p>Lumen OHM Administrator</p>";
-      //<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
-      if (isset($CFG['GEN']['useSESmail'])) {
-        SESmail($_POST['email'],$accountapproval, $installname . ' Role Change', $message);
-      } else {
-        mail($row[2],$installname . ' Role Change',$message,$headers);
-      }
-
-    }
-    break;
+		break;
 	case "resetpwd":
 		if ($myrights < 75) { echo "You don't have the authority for this action"; break;}
 		if (isset($_POST['newpw'])) {
@@ -255,26 +260,6 @@ switch($_POST['action']) {
 		deletealluserfiles($_GET['id']);
 		//todo: delete courses if any
 		break;
-	case "chgpwd":
-		$stm = $DBH->prepare("SELECT password FROM imas_users WHERE id=:id");
-		$stm->execute(array(':id'=>$userid));
-		$line = $stm->fetch(PDO::FETCH_ASSOC);
-
-		if ((md5($_POST['oldpw'])==$line['password'] || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['oldpw'], $line['password'])) ) && ($_POST['newpw1'] == $_POST['newpw2'])) {
-			$md5pw =md5($_POST['newpw1']);
-			if (isset($CFG['GEN']['newpasswords'])) {
-				$md5pw = password_hash($_POST['newpw1'], PASSWORD_DEFAULT);
-		} else {
-				$md5pw = md5($_POST['newpw1']);
-			}
-			$stm = $DBH->prepare("UPDATE imas_users SET password=:password WHERE id=:id");
-			$stm->execute(array(':password'=>$md5pw, ':id'=>$userid));
-		} else {
-			echo "<HTML><body>Password change failed.  <A HREF=\"forms.php?action=chgpwd\">Try Again</a>\n";
-			echo "</body></html>\n";
-			exit;
-		}
-		break;
 	case "newadmin":
 		if ($myrights < 75 && ($myspecialrights&16)!=16 && ($myspecialrights&32)!=32) { echo "You don't have the authority for this action"; break;}
 		if ($_POST['newrights']>$myrights) {
@@ -295,7 +280,17 @@ switch($_POST['action']) {
 			$md5pw =md5($_POST['pw1']);
 		}
 		if ($myrights == 100 || ($myspecialrights&32)==32) {
-			$newgroup = Sanitize::onlyInt($_POST['group']);
+			if ($_POST['group']==-1) {
+				if (trim($_POST['newgroupname'])!='') {
+					$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
+					$stm->execute(array(':name'=>$_POST['newgroupname']));
+					$newgroup = $DBH->lastInsertId();
+				} else {
+					$newgroup = 0;
+				}
+			} else {
+				$newgroup = Sanitize::onlyInt($_POST['group']);
+			}
 		} else {
 			$newgroup = $groupid;
 		}
@@ -339,6 +334,16 @@ switch($_POST['action']) {
 			$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
 			$stm->execute($valvals);
 		}
+		if ($_POST['newrights']>=20) {
+			//log new account
+			$now = time();
+			$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:now, :log)");
+			$stm->execute(array(':now'=>$now, ':log'=>"New Instructor Request: $newuserid:: Group: $newgroup, manually added by $userid"));
+
+			$reqdata = array('added'=>$now, 'actions'=>array(array('by'=>$userid, 'on'=>$now, 'status'=>11, 'via'=>'addadmin')));
+			$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,11,?,?)");
+			$stm->execute(array($newuserid, $now, json_encode($reqdata)));
+		}
 		break;
 	case "logout":
 		$sessionid = session_id();
@@ -372,6 +377,13 @@ switch($_POST['action']) {
 					$stm->execute(array(':time'=>$now, ':log'=>"User $userid agreed to terms of use on course $coursetocheck"));
 				}
 			}
+		}
+		if (isset($_GET['id'])) {
+			$stm = $DBH->prepare("SELECT istemplate,jsondata FROM imas_courses WHERE id=:id");
+			$stm->execute(array(':id'=>$_GET['id']));
+			list($old_istemplate, $old_jsondata) = $stm->fetch(PDO::FETCH_NUM);
+		} else {
+			$old_istemplate = 0;
 		}
 		if (isset($CFG['CPS']['theme']) && $CFG['CPS']['theme'][1]==0) {
 			$theme = $CFG['CPS']['theme'][0];
@@ -458,20 +470,67 @@ switch($_POST['action']) {
 		$istemplate = 0;
 		if (($myspecialrights&1)==1 || $myrights==100) {
 			if (isset($_POST['isgrptemplate'])) {
-				$istemplate += 2;
+				$istemplate |= 2;
 			}
+		} else if (($old_istemplate&2)==2) {
+			$istemplate |= 2;
 		}
 		if (($myspecialrights&2)==2 || $myrights==100) {
 			if (isset($_POST['istemplate'])) {
-				$istemplate += 1;
+				$istemplate |= 1;
 			}
+		} else if (($old_istemplate&1)==1) {
+			$istemplate |= 1;
 		}
 		if ($myrights==100) {
 			if (isset($_POST['isselfenroll'])) {
-				$istemplate += 4;
+				$istemplate |= 4;
 			}
 			if (isset($_POST['isguest'])) {
-				$istemplate += 8;
+				$istemplate |= 8;
+			}
+		}
+		if (!isset($CFG['coursebrowserRightsToPromote'])) {
+			$CFG['coursebrowserRightsToPromote'] = 40;
+		}
+		$updateJsonData = false;
+		if ($CFG['coursebrowserRightsToPromote']>$myrights && ($old_istemplate&16)==16) {
+			$istemplate |= 16;
+		} else if (isset($_POST['promote']) && isset($_GET['id']) && $CFG['coursebrowserRightsToPromote']<=$myrights) {
+			$browserprops = json_decode(file_get_contents(__DIR__.'/../javascript/'.$CFG['coursebrowser'], false, null, 25), true);
+
+			$isok = ($copyrights>1);
+
+			$jsondata = json_decode($old_jsondata, true);
+			if ($jsondata===null) {
+				$jsondata = array();
+			}
+
+			$browserdata = array();
+			foreach ($browserprops as $propname=>$propvals) {
+				if (!empty($propvals['required']) && trim($_POST['browser'.$propname]) == '' &&
+					!($propvals['required']==2 && ($istemplate&3)>0)) {
+					$isok = false;
+					break;
+				}
+				if (!empty($propvals['multi'])) { //multiple values
+					if (isset($_POST['browser'.$propname])) {
+						$browserdata[$propname] = array_map('Sanitize::simpleString', $_POST['browser'.$propname]);
+					} else {
+						$browserdata[$propname] = array();
+					}
+				} else { //single val
+					$browserdata[$propname] = Sanitize::stripHtmlTags($_POST['browser'.$propname]);
+				}
+				if ($_POST['browser'.$propname]=='other') {
+					$browserdata[$propname.'other'] = Sanitize::stripHtmlTags($_POST['browser'.$propname.'other']);
+				}
+			}
+
+			if ($isok) {
+				$istemplate |= 16;
+				$jsondata['browser'] = $browserdata;
+				$updateJsonData = true;
 			}
 		}
 
@@ -516,7 +575,7 @@ switch($_POST['action']) {
 
 		if ($_POST['action']=='modify') {
 			$query = "UPDATE imas_courses SET name=:name,enrollkey=:enrollkey,hideicons=:hideicons,available=:available,lockaid=:lockaid,picicons=:picicons,showlatepass=:showlatepass,";
-			if (($istemplate&16)==16) {
+			if ($updateJsonData) {
 				$query .= "jsondata=:jsondata,";
 			}
 			// #### Begin OHM-specific code #####################################################
@@ -554,7 +613,7 @@ switch($_POST['action']) {
 				$query .= " AND ownerid=:ownerid";
 				$qarr[':ownerid']=$userid;
 			}
-			if (($istemplate&16)==16) {
+			if ($updateJsonData) {
 				$qarr[':jsondata'] = json_encode($jsondata);
 			}
 			$stm = $DBH->prepare($query);

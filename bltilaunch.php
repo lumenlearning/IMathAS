@@ -315,6 +315,16 @@ if (isset($_GET['launch'])) {
 
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$userid = $DBH->lastInsertId(); //DB mysql_insert_id();
+				
+				if ($rights>=20) {
+					//log new account
+					$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:now, :log)");
+					$stm->execute(array(':now'=>$now, ':log'=>"New Instructor Request: $userid:: Group: $newgroupid, added via LTI"));
+					
+					$reqdata = array('added'=>$now, 'actions'=>array(array('on'=>$now, 'status'=>11, 'via'=>'LTI')));
+					$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,11,?,?)");
+					$stm->execute(array($newuserid, $now, json_encode($reqdata)));	
+				}
 			}
 			//DB $query = "UPDATE imas_ltiusers SET userid='$userid' WHERE id='$localltiuser'";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -328,7 +338,7 @@ if (isset($_GET['launch'])) {
 		//ask for student info
 		$flexwidth = true;
 		$nologo = true;
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 		require("header.php");
 		if (isset($infoerr)) {
 			echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
@@ -692,6 +702,15 @@ if (isset($_GET['launch'])) {
 
 				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$userid = $DBH->lastInsertId(); //DB $userid = mysql_insert_id();
+				if ($rights>=20) {
+					//log new account
+					$stm = $DBH->prepare("INSERT INTO imas_log (time, log) VALUES (:now, :log)");
+					$stm->execute(array(':now'=>$now, ':log'=>"New Instructor Request: $userid:: Group: $newgroupid, added via LTI"));
+					
+					$reqdata = array('added'=>$now, 'actions'=>array(array('on'=>$now, 'status'=>11, 'via'=>'LTI')));
+					$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,11,?,?)");
+					$stm->execute(array($newuserid, $now, json_encode($reqdata)));	
+				}
 			}
 			//DB $query = "UPDATE imas_ltiusers SET userid='$userid' WHERE id='$localltiuser'";
 			//DB mysql_query($query) or die("Query failed : " . mysql_error());
@@ -1246,7 +1265,8 @@ if ($linkparts[0]=='cid') {
 		$useexception = false;
 		if ($exceptionrow!=null) {
 			require_once("./includes/exceptionfuncs.php");
-			$useexception = getCanUseAssessException($exceptionrow, $line, true);
+			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
+			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
 		}
 		if ($exceptionrow!=null && $useexception) {
 			if ($now<$exceptionrow[0] || $exceptionrow[1]<$now) { //outside exception dates
@@ -1458,8 +1478,8 @@ if ($linkparts[0]=='aid') {
 		$stm->execute(array(':id'=>$cid));
 		$latepasshrs = $stm->fetchColumn(0);
 		require_once("./includes/exceptionfuncs.php");
-		$viewedassess = getViewedAssess($cid, $userid);
-		list($useexception, $canundolatepass, $canuselatepass) = getCanUseAssessException($exceptionrow, $line);
+		$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
+		list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
 		$sessiondata['lticanuselatepass'] = $canuselatepass;
 	}
 
@@ -1813,7 +1833,7 @@ if (isset($_GET['launch'])) {
 		//ask for student info
 		$nologo = true;
 		$flexwidth = true;
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 		require("header.php");
 		if (isset($infoerr)) {
 			echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
@@ -2507,7 +2527,8 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey' || 
 		$useexception = false;
 		if ($row!=null) {
 			require_once("./includes/exceptionfuncs.php");
-			$useexception = getCanUseAssessException($row, $line, true);
+			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
+			$useexception = $exceptionfuncs->getCanUseAssessException($row, $line, true);
 		}
 		if ($row!=null && $useexception) {
 			if ($now<$row[0] || $row[1]<$now) { //outside exception dates

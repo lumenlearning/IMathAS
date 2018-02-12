@@ -35,12 +35,14 @@ if ($myrights < 75) {
     $curBreadcrumb = $curBreadcrumb  . _('Admin');
     $showgroup = $groupid;
 
-  } else if (!empty($_GET['groupdetails'])) {
+  } else if (isset($_GET['groupdetails'])) {
     //show the list of group users page
     $showgroup = Sanitize::onlyInt($_GET['groupdetails']);
     if ($showgroup==-1) {
       $groupname = _('Pending Users');
-    }  else {
+    } else if ($showgroup==0) {
+      $groupname = _('Default Group');    
+    } else {
       $stm = $DBH->prepare("SELECT name FROM imas_groups WHERE id=:id");
       $stm->execute(array(':id'=>$showgroup));
       $groupname = $stm->fetchColumn(0);
@@ -234,9 +236,12 @@ if ($overwriteBody==1) {
       echo '<a href="exportlib.php?cid=admin">',_('Export Libraries'),'</a><br/>';
       echo '<a href="listdiag.php">',_('Diagnostics'),'</a> ';
       echo '</span>';
-
+      
       echo '<span class="column">';
       echo '<a href="forms.php?from=admin2&action=newadmin&group='.Sanitize::encodeUrlParam($showgroup).'">'._('Add New User').'</a>';
+      if (($myspecialrights&16)==16 || ($myspecialrights&32)==32) {
+      	      echo '<br/><a href="../util/batchcreateinstr.php?from=admin">'._('Batch Add Instructors').'</a>';    
+      }
       echo '</span>';
 
       echo '<div class=clear></div></div>';

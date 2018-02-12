@@ -4,8 +4,8 @@
 
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r");
-array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r","replacealttext");
+array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber");
 function mergearrays() {
 	$args = func_get_args();
 	foreach ($args as $k=>$arg) {
@@ -381,7 +381,13 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 				}
 			} else if ($py>$yymax || $py<$yymin) { //coming or staying in bounds?
 				if ($y <= $yymax && $y >= $yymin) { //coming in
-					if ($yymax-$y < .5*($yymax-$yymin)) { //closer to top
+					//need to determine which direction.  Let's calculate an extra value
+					if ($isparametric) {
+						$tempy = round($evalyfunc($t-$dx/10),$yrnd);
+					} else {
+						$tempy = round($evalfunc($x-$dx/10),$yrnd);
+					}
+					if ($tempy>$y) { //seems to be coming down
 						$iy = $yymax;
 						if ($py<$yymin) { $py = $yymax+.5*($ymax-$ymin);}
 					} else { //coming from bottom
@@ -511,6 +517,19 @@ function addplotborder($plot,$left,$bottom=5,$right=5,$top=5) {
 
 }
 
+function replacealttext($plot, $alttext) {
+	if ($GLOBALS['sessiondata']['graphdisp']==0) {
+		return $alttext;
+	} else {
+		if (strpos($plot, 'alt="')!==false) { //replace
+			$plot = preg_replace('/alt="[^"]*"/', 'alt="'.Sanitize::encodeStringForDisplay($alttext).'"', $plot);
+		} else { //add
+			$plot = preg_replace('/(\/?>)/', ' alt="'.Sanitize::encodeStringForDisplay($alttext).'" $1', $plot);
+		}
+		return $plot;
+	}
+}
+
 function addlabel($plot,$x,$y,$lbl) {
 	if (func_num_args()>4) {
 		$color = func_get_arg(4);
@@ -557,6 +576,24 @@ function addlabelabs($plot,$x,$y,$lbl) {
 function adddrawcommand($plot,$cmd) {
 	$cmd = str_replace("'",'"',$cmd);
 	return str_replace("' />",$cmd."' />",$plot);
+}
+
+function mergeplots($plota) {
+	$n = func_num_args();
+	if ($n==1) {
+		return $plota;
+	}
+	for ($i=1;$i<$n;$i++) {
+		$plotb = func_get_arg($i);
+		if ($GLOBALS['sessiondata']['graphdisp']==0) {
+			$newtext = preg_replace('/^Graphs.*?y:.*?to.*?\.\s/', '', $plotb);
+			$plota .= $newtext;
+		} else {
+			$newcmds = preg_replace('/^.*?initPicture\(.*?\);\s*(axes\(.*?\);)?(.*?)\'\s*\/>.*$/', '$2', $plotb);
+			$plota = str_replace("' />", $newcmds."' />", $plota);
+		}
+	}
+	return $plota;
 }
 
 function addfractionaxislabels($plot,$step) {
@@ -630,15 +667,17 @@ function connectthedots($xarray,$yarray,$color='black',$thick=1,$startdot='',$en
 	return $outarr;
 }
 
-function showasciisvg($script) {
-	if (func_num_args()>2) {
-		$width = func_get_arg(1);
-		$height = func_get_arg(2);
+function showasciisvg($script, $width=200, $height=200, $alt="") {
+	if ($GLOBALS['sessiondata']['graphdisp']==0) {
+		if ($alt != '') {
+			return $alt;
+		} else {
+			return "[Graphs generated by this script: $script]";
+		}
 	} else {
-		$width = 200; $height = 200;
+		$script = str_replace("'",'"',$script);
+		return "<embed type='image/svg+xml' align='middle' width='$width' height='$height' script='$script' />\n";
 	}
-	$script = str_replace("'",'"',$script);
-	return "<embed type='image/svg+xml' align='middle' width='$width' height='$height' script='$script' />\n";
 }
 
 
@@ -1008,8 +1047,10 @@ function rrand($min,$max,$p=0) {
 	$rn = 0;
 	if (($s = strpos( (string) $p,'.'))!==false) { $rn = max($rn, strlen((string) $p) - $s - 1); }
 	if (($q = strpos((string) $min,'.'))!==false) { $rn = max($rn, strlen((string) $min) - $q - 1); }
-
-	return( round($min + $p*$GLOBALS['RND']->rand(0,floor(($max-$min)/$p)), $rn));
+	
+	$out = round($min + $p*$GLOBALS['RND']->rand(0,floor(($max-$min)/$p)), $rn);
+	if ($rn==0) { $out = (int) $out;}
+	return( $out );
 }
 
 
@@ -1042,6 +1083,7 @@ function rrands($min,$max,$p=0,$n=0) {
 
 	for ($i = 0; $i < $n; $i++) {
 		$r[$i] = round($min + $p*$GLOBALS['RND']->rand(0,floor(($max-$min)/$p)), $rn);
+		if ($rn==0) { $r[$i] = (int) $r[$i];}
 	}
 	return $r;
 }
@@ -1128,6 +1170,7 @@ function nonzerorrand($min,$max,$p=0) {
 	do {
 		$ret = round($min + $p*$GLOBALS['RND']->rand(0,floor(($max-$min)/$p)), $rn);
 	} while (abs($ret)< 1e-14);
+	if ($rn==0) { $ret = (int) $ret;}
 	return $ret;
 }
 
@@ -1174,6 +1217,7 @@ function nonzerorrands($min,$max,$p=0,$n=0) {
 	for ($i = 0; $i < $n; $i++) {
 		do {
 			$r[$i] = round($min + $p*$GLOBALS['RND']->rand(0,($max-$min)/$p), $rn);
+			if ($rn==0) { $r[$i] = (int) $r[$i];}
 		} while (abs($r[$i]) <1e-14);
 	}
 	return $r;
@@ -1235,6 +1279,7 @@ function diffrrands($min,$max,$p=0,$n=0, $nonzero=false) {
 
 		while (count($out)<$n) {
 			$x = round($min + $p*$GLOBALS['RND']->rand(0,$maxi), $rn);
+			if ($rn==0) { $x = (int) $x;}
 			if (!in_array($x,$out) && (!$nonzero || abs($x)>1e-14)) {
 				$out[] = $x;
 			}
@@ -1254,6 +1299,7 @@ function diffrrands($min,$max,$p=0,$n=0, $nonzero=false) {
 		$r = array_slice($r,0,$n);
 		for ($i=0;$i<$n;$i++) {
 			$r[$i] = round($min+$p*$r[$i], $rn);
+			if ($rn==0) { $r[$i] = (int) $r[$i];}
 		}
 		return $r;
 	}
@@ -3532,6 +3578,52 @@ function sign($a,$str=false) {
 
 function lensort($a,$b) {
 	return strlen($b)-strlen($a);
+}
+
+function checksigfigs($givenans, $anans, $reqsigfigs, $exactsigfig, $reqsigfigoffset, $sigfigscoretype) {
+	if ($givenans*$anans < 0) { return false;} //move on if opposite signs
+	if ($anans!=0) {
+		$v = -1*floor(-log10(abs($anans))-1e-12) - $reqsigfigs;
+	}
+	$epsilon = (($anans==0||abs($anans)>1)?1E-12:(abs($anans)*1E-12));
+	if ($sigfigscoretype[0]=='abs' && $sigfigscoretype[1]==0) {
+		$sigfigscoretype[1] = pow(10,$v)/2;
+	}
+	if (strpos($givenans,'E')!==false) {  //handle computer-style scientific notation
+		preg_match('/^-?[1-9]\.?(\d*)E/', $givenans, $matches);
+		$gasigfig = 1+strlen($matches[1]);
+		if ($exactsigfig) {
+			if ($gasigfig != $reqsigfigs) {return false;}
+		} else {
+			if ($gasigfig < $reqsigfigs) {return false;}
+			if ($reqsigfigoffset>0 && $gasigfig-$reqsigfigs>$reqsigfigoffset) {return false;}
+		}
+	} else {
+		if (!$exactsigfig) {
+			$gadploc = strpos($givenans,'.');
+			if ($gadploc===false) {$gadploc = strlen($givenans);}
+			if ($anans != 0 && $v < 0 && strlen($givenans) - $gadploc-1 + $v < 0) { return false; } //not enough decimal places
+			if ($anans != 0 && $reqsigfigoffset>0 && $v<0 && strlen($givenans) - $gadploc-1 + $v>$reqsigfigoffset) {return false;} //too many sigfigs
+		} else {
+			$gadploc = strpos($givenans,'.');
+			if ($gadploc===false) { //no decimal place
+				if (strlen(rtrim($givenans,'0')) != $reqsigfigs) { return false;}
+			} else {
+				if (strlen(ltrim($givenans,'0'))-1 != $reqsigfigs) { return false;}
+			}
+		}
+	}
+	//checked format, now check value
+	if ($sigfigscoretype[0]=='abs') {
+		if (abs($anans-$givenans)< $sigfigscoretype[1]+$epsilon) {return true;}
+	} else if ($sigfigscoretype[0]=='rel') {
+		if ($anans==0) {
+			if (abs($anans - $givenans) < $sigfigscoretype[1]+$epsilon) {return true;}
+		} else {
+			if (abs($anans - $givenans)/(abs($anans)+$epsilon) < $sigfigscoretype[1]/100+$epsilon) {return true;}
+		}
+	}
+	return false;
 }
 
 class Rand {

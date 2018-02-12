@@ -280,7 +280,7 @@ require_once("includes/sanitize.php");
 
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-				$headers .= "From:".Sanitize::emailAddress($sendfrom)."\r\n";
+				$headers .= "From:".$sendfrom."\r\n";
 				$message  = "<h4>This is an automated message from $installname.  Do not respond to this email</h4>\r\n";
 				$message .= "<p>Your username was entered in the Reset Password page.  If you did not do this, you may ignore and delete this message. ";
 				$message .= "If you did request a password reset, click the link below, or copy and paste it into your browser's address bar.  You ";
@@ -297,7 +297,7 @@ require_once("includes/sanitize.php");
 				require("header.php");
 				echo '<p>An email with a password reset link has been sent your email address on record: <b>'.Sanitize::emailAddress($email).'.</b><br/> ';
 				echo 'If you do not see it in a few minutes, check your spam or junk box to see if the email ended up there.<br/>';
-				echo 'It may help to add <b>'.Sanitize::emailAddress($sendfrom).'</b> to your contacts list.</p>';
+				echo 'It may help to add <b>'.Sanitize::encodeStringForDisplay($sendfrom).'</b> to your contacts list.</p>';
 				echo '<p>If you still have trouble or the wrong email address is on file, contact your instructor - they can reset your password for you.</p>';
 				if ($rights>10) {
 					echo '<p>If you still have trouble and are an instructor, please contact dlippman@lumenlearning.com for a manual reset.</p>';
@@ -428,7 +428,7 @@ require_once("includes/sanitize.php");
 			setcookie(session_name(), '', time()-42000, '/');
 		}
 		session_destroy();
-	} else if ($_GET['action']=="chgpwd") {
+	} else if ($_GET['action']=="chgpwd" || $_GET['action']=="forcechgpwd") {
 		//DB $query = "SELECT password FROM imas_users WHERE id = '$userid'";
 		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
@@ -441,12 +441,10 @@ require_once("includes/sanitize.php");
 			} else {
 				$newpw =md5($_POST['pw1']);
 			}
-			//DB $query = "UPDATE imas_users SET password='$md5pw' WHERE id='$userid'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
-			$stm = $DBH->prepare("UPDATE imas_users SET password=:newpw WHERE id=:uid LIMIT 1");
+			$stm = $DBH->prepare("UPDATE imas_users SET password=:newpw,forcepwreset=0 WHERE id=:uid LIMIT 1");
 			$stm->execute(array(':uid'=>$userid, ':newpw'=>$newpw));
 		} else {
-			echo "<html><body>Password change failed.  <A HREF=\"forms.php?action=chgpwd$gb\">Try Again</a>\n";
+			echo "<html><body>Password change failed.  <a href=\"forms.php?action=".Sanitize::simpleString($_GET['action']).$gb."\">Try Again</a>\n";
 			echo "</body></html>\n";
 			exit;
 		}
