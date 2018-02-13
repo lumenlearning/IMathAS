@@ -183,7 +183,11 @@ filters, so be sure to check your spam folder if you don’t see a message in
 your inbox. 
 </p>
 ";
-				mail(Sanitize::emailAddress($_POST['email']),$subject,$emailMessage,$headers);
+				if (isset($CFG['GEN']['useSESmail'])) {
+					SESmail(Sanitize::emailAddress($_POST['email']), $accountapproval, $subject, $emailMessage);
+				} else {
+					mail(Sanitize::emailAddress($_POST['email']),$subject,$emailMessage,$headers);
+				}
 
 				echo $browserMessage;
 				require("../footer.php");
