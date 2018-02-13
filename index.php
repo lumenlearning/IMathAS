@@ -406,7 +406,7 @@ if (!isset($CFG['GEN']['homelinkbox'])) {
 		echo ' <a href="msgs/newmsglist.php?cid=0" class="noticetext">', sprintf(_('New (%d)'), Sanitize::onlyFloat($msgtotal)), '</a>';
 	}
 	if ($myrights > 10) {
-		echo " | <a href=\"docs/docs.php\">", _('Documentation'), "</a>\n";
+		echo " | <a href=\"ohm/docs/docs.php\">", _('Documentation'), "</a>\n";
 	} else if ($myrights > 9) {
 		echo " | <a href=\"help.php?section=usingimas\">", _('Help'), "</a>\n";
 	}
