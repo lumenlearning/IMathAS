@@ -122,6 +122,12 @@ a.abutton:hover {
 	color: #000;
 }
 
+/* Remove new tab symbol from links (specifically from buttons in help modal) */
+#community-button-container a[target=_blank]:after,
+#guides-button-container a[target=_blank]:after {
+	display: none;
+}
+
 /*Container for course items*/
 div.item {
 	/*border: 1px solid #000;*/
