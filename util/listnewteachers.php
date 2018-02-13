@@ -42,9 +42,11 @@ if (count($reqdates)==0) {
 } else {
 	$ph = Sanitize::generateQueryPlaceholders($reqdates);
 
-	$query = "SELECT u.id,u.rights,g.name,u.LastName,u.FirstName,u.SID,u.email,COUNT(DISTINCT s.id) AS scnt FROM imas_students AS s JOIN imas_courses AS t ";
-	$query .= "ON s.courseid=t.id JOIN imas_users as u ON u.id=t.ownerid ";
-	$query .= "JOIN imas_groups AS g ON g.id=u.groupid WHERE u.id IN ($ph) GROUP BY u.id ORDER BY g.name,u.LastName";
+	$query = "SELECT u.id,u.rights,g.name,u.LastName,u.FirstName,u.SID,u.email,COUNT(DISTINCT s.id) AS scnt FROM imas_users as u ";
+	$query .= "LEFT JOIN imas_groups AS g ON g.id=u.groupid ";
+	$query .= "LEFT JOIN imas_courses AS t ON u.id=t.ownerid ";
+	$query .= "LEFT JOIN imas_students AS s ON s.courseid=t.id ";
+	$query .= "WHERE u.id IN ($ph) GROUP BY u.id ORDER BY g.name,u.LastName";
 	$stm = $DBH->prepare($query);
 	$stm->execute(array_keys($reqdates));
 
@@ -92,31 +94,28 @@ function outputHtml($stm, $reqdates)
         </thead>
         <tbody>
 	<?php
-	$alt = 0;
-	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-		if ($alt == 0) {
-			echo "<tr class=even>";
-			$alt = 1;
-		} else {
-			echo "<tr class=odd>";
-			$alt = 0;
-		}
-		echo '<td>' . $row['name'] . '</td>';
-		echo '<td>';
-		echo '<a href="../admin/userdetails.php?id=' . $row['id'] . '" target="_blank">';
-		echo $row['LastName'] . ', ' . $row['FirstName'] . '</a></td>';
-		echo '<td>' . $row['SID'] . '</td>';
-		echo '<td>' . $row['email'] . '</td>';
-		echo '<td>' . tzdate('n/j/y', $reqdates[$row['id']]) . '</td>';
-		if ($row['rights'] == 0 || $row['rights'] == 12) {
-			echo '<td>Pending</td>';
-		} else if ($row['rights'] < 20) {
-			echo '<td>Student</td>';
-		} else {
-			echo '<td>Active</td>';
-		}
-		echo '<td>' . $row['scnt'] . '</td>';
-		echo '</tr>';
+		$alt = 0;
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			if ($row['name']===null) {
+				$row['name'] = _('Default');
+			}
+			if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
+			echo '<td>'.$row['name'].'</td>';
+			echo '<td>';
+			echo '<a href="../admin/userdetails.php?id='.$row['id'].'" target="_blank">';
+			echo $row['LastName'].', '.$row['FirstName'].'</a></td>';
+			echo '<td>'.$row['SID'].'</td>';
+			echo '<td>'.$row['email'].'</td>';
+			echo '<td>'.tzdate('n/j/y', $reqdates[$row['id']]).'</td>';
+			if ($row['rights']==0 || $row['rights']==12) {
+				echo '<td>Pending</td>';
+			} else if ($row['rights']<20) {
+				echo '<td>Student</td>';
+			} else {
+				echo '<td>Active</td>';
+			}
+			echo '<td>'.$row['scnt'].'</td>';
+			echo '</tr>';
 	}
 	echo '</tbody></table>';
 	echo '<script type="text/javascript">
