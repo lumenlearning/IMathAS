@@ -48,10 +48,10 @@
         <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
         <select name="z_priority" id="z_priority" required>
           <option value="" disabled selected>priority</option>
-          <option value="low">Low - First reply within 1 business days. Request solved in 10 business days.</option>
-          <option value="normal">Normal - First reply within 1 business days. Request solved in 5 business days.</option>
-          <option value="high">High - First reply within 3 hours. Request solved in 2 business days.</option>
-          <option value="urgent">Urgent/Service Outage - Call (971)303-8980</option>
+          <option value="low">Low</option>
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
         </select>
         <div id="lumen-button-container">
           <button id="lumen-button" type="submit">Submit</button>
