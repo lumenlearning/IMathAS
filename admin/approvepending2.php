@@ -40,8 +40,13 @@ if (isset($_POST['newstatus'])) {
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 
+		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$_POST['userid']));
+		$row = $stm->fetch(PDO::FETCH_NUM);
+
         $sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
         $sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
+		$sanitizedEmail = Sanitize::emailAddress($row[2]);
 
         $message = "
 <p>
@@ -89,9 +94,9 @@ Lumen OHM Administrator
 		#### End OHM-specific changes ############################################################
 
 		if (isset($CFG['GEN']['useSESmail'])) {
-			SESmail($row[2], $accountapproval, $installname . ' Account Status', $message);
+			SESmail($sanitizedEmail, $accountapproval, $installname . ' Account Status', $message);
 		} else {
-			mail($row[2],$installname . ' Account Status',$message,$headers);
+			mail($sanitizedEmail,$installname . ' Account Status',$message,$headers);
 		}
 		
 	} else if ($_POST['newstatus']==11) { //approve
