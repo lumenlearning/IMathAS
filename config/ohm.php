@@ -140,6 +140,10 @@ $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
 $CFG['coursebrowser'] = 'coursebrowserprops.js';
 $CFG['coursebrowsermsg'] = 'Start with a template course';
 
+// For OEA embedded OHM questions, show the answer & feedback (if existing)
+// when questions are embedded in text.
+$CFG['multiembed-showans'] = 2;
+
 $CFG['GEN']['favicon'] = $imasroot . '/ohm/img/favicon.ico';
 
 $CFG['GEN']['communityforumlink'] = getenv('COMMUNITY_FORUM_URL');
