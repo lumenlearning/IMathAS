@@ -268,6 +268,10 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 }
 
 foreach ($qids as $i=>$qid) {
+	if (isset($_GET['show_question_numbers'])) {
+		echo '<div style="padding-left:10px;background-color:#ddd;
+		text-decoration:underline;"> Question '. ($i + 1) .'</div>';
+	}
 	echo '<div id="embedqwrapper'.$i.'" class="embedqwrapper">';
 	$quesout = '';
 	ob_start();
@@ -275,10 +279,6 @@ foreach ($qids as $i=>$qid) {
 	displayq($i,$qid,$seeds[$i],($showanstype==2),$showhints,$attempts[$i]);
 	$quesout .= ob_get_clean();
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
-	if (isset($_GET['show_question_numbers'])) {
-		echo '<div style="padding-left:10px;
-		text-decoration:underline;"> Question '. ($i + 1) .'</div>';
-	}
 	echo $quesout;
 	echo '<input type="hidden" id="verattempts'.$i.'" value="'.$attempts[$i].'"/>';
 	echo '</div>';
