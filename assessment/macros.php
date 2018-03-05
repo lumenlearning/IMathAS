@@ -3614,13 +3614,14 @@ function checksigfigs($givenans, $anans, $reqsigfigs, $exactsigfig, $reqsigfigof
 			if ($anans != 0 && $reqsigfigoffset>0 && $v<0 && strlen($givenans) - $gadploc-1 + $v>$reqsigfigoffset) {return false;} //too many sigfigs
 		} else {
 			$gadploc = strpos($givenans,'.');
+			$absgivenans = str_replace('-','',$givenans);
 			if ($gadploc===false) { //no decimal place
-				if (strlen(rtrim($givenans,'0')) != $reqsigfigs) { return false;}
+				if (strlen(rtrim($absgivenans,'0')) != $reqsigfigs) { return false;}
 			} else {
 				if (abs($givenans)<1) {
-					if (strlen(ltrim(substr($givenans,$gadploc+1),'0')) != $reqsigfigs) { return false;}
+					if (strlen(ltrim(substr($absgivenans,$gadploc+1),'0')) != $reqsigfigs) { return false;}
 				} else {
-					if (strlen(ltrim($givenans,'0'))-1 != $reqsigfigs) { return false;}
+					if (strlen(ltrim($absgivenans,'0'))-1 != $reqsigfigs) { return false;}
 				}
 			}
 		}
