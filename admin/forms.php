@@ -1270,6 +1270,13 @@ switch($_GET['action']) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights']) {
+			$stm = $DBH->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :groupId");
+			$stm->execute(array(':groupId' => $_GET['id']));
+			$lumenGuid = $stm->fetchColumn(0);
+			printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/>', $lumenGuid);
+		}
+
 		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
 			$studentPaymentDb = new \OHM\StudentPaymentDb($_GET['id'], null, null);
