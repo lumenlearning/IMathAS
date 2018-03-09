@@ -1320,6 +1320,11 @@ switch($_POST['action']) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
+		if (100 <= $GLOBALS['myrights']) {
+			$stm = $DBH->prepare("UPDATE imas_groups SET lumen_guid = :lumenGuid WHERE id = :groupId");
+			$stm->execute(array(':lumenGuid' => $_POST['lumen_guid'], ':groupId' => $_GET['id']));
+		}
+
 		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
 			$stm = $DBH->prepare("UPDATE imas_groups SET student_pay_enabled=:student_pay_enabled WHERE id=:id");
 			$stm->execute(array(':student_pay_enabled'=>$_POST['studentpay']?1:0, ':id'=>$_GET['id']));
