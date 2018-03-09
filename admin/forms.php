@@ -1274,7 +1274,7 @@ switch($_GET['action']) {
 			$stm = $DBH->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :groupId");
 			$stm->execute(array(':groupId' => $_GET['id']));
 			$lumenGuid = $stm->fetchColumn(0);
-			printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/>', $lumenGuid);
+			printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/><br/>', $lumenGuid);
 		}
 
 		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
