@@ -263,7 +263,7 @@ function gbtable() {
 	//pre-pull questions data
 	$questionpointdata = array();
 	$query = "SELECT iq.points,iq.id FROM imas_questions AS iq JOIN imas_assessments AS ia ON iq.assessmentid=ia.id ";
-	$query .= "WHERE ia.courseid=:courseid AND iq.points<9999 AND ia.avail>0 ";
+	$query .= "WHERE ia.courseid=:courseid AND iq.points<9999 AND ia.avail>0 AND ia.date_by_lti<>1 ";
 	if (!$canviewall) {
 		$query .= "AND ia.cntingb>0 ";
 	}
@@ -294,7 +294,7 @@ function gbtable() {
 	if (isset($includeendmsg) && $includeendmsg) {
 		$query .= ',endmsg';
 	}
-	$query .= " FROM imas_assessments WHERE courseid=:courseid AND avail>0 ";
+	$query .= " FROM imas_assessments WHERE courseid=:courseid AND avail>0 AND date_by_lti<>1 ";
 
 	if (!$canviewall) {
 		$query .= "AND cntingb>0 ";
