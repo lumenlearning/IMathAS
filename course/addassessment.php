@@ -900,6 +900,9 @@ if ($overwriteBody==1) {
 			<input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($enddate,"2000000000",0); ?>/>
 			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 			 Always open after Start Date<br/>
+			 <?php if ($courseenddate<2000000000) {
+			 	 echo 'until the course end date, '.tzdate("n/j/Y", $courseenddate);
+			 }?><br/>
 			<input type=radio name="edatetype" value="edate"  <?php writeHtmlChecked($enddate,"2000000000",1); ?>/>
 			<input type=text size=10 name="edate" value="<?php echo $edate;?>">
 			<a href="#" onClick="displayDatePicker('edate', this, 'sdate', 'start date'); return false">
