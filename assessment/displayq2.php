@@ -4,7 +4,7 @@
 //(c) 2006 David Lippman
 //quadratic inequalities contributed by Cam Joyce
 $GLOBALS['noformatfeedback'] = true;
-$mathfuncs = array("sin","cos","tan","sinh","cosh","tanh","arcsin","arccos","arctan","arcsinh","arccosh","sqrt","ceil","floor","round","log","ln","abs","max","min","count");
+$mathfuncs = array("sin","cos","tan","sinh","cosh","tanh","arcsin","arccos","arctan","arcsinh","arccosh","arctanh","sqrt","ceil","floor","round","log","ln","abs","max","min","count");
 $allowedmacros = $mathfuncs;
 //require_once("mathphp.php");
 require_once("mathphp2.php");
@@ -453,9 +453,9 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	eval("\$evaledsoln = \"$toevalsoln\";");
 
 	if ($returnqtxt===2) {
-		return '<div id="writtenexample" class="review">'.$evaledsoln.'</div>';
+		return '<div id="writtenexample" class="review" role=region aria-label="'._('Written Example').'">'.$evaledsoln.'</div>';
 	} else if ($returnqtxt===3) {
-		return '<div class="question">'.$evaledqtext.'</div><div id="writtenexample" class="review">'.$evaledsoln.'</div>';
+		return '<div class="question" role=region aria-label="'._('Question').'">'.$evaledqtext.'</div><div id="writtenexample" class="review" role=region aria-label="'._('Written Example').'">'.$evaledsoln.'</div>';
 	}
 	if (($qdata['solutionopts']&1)==0) {
 		$evaledsoln = '<i>'._('This solution is for a similar problem, not your specific version').'</i><br/>'.$evaledsoln;
@@ -492,10 +492,10 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	if ($returnqtxt) {
 		$returntxt = $evaledqtext;
 	} else if ($seqinactive) {
-		echo "<div class=inactive>";
+		echo "<div class=inactive role=region aria-label=\""._('Inactive Question')."\">";
 		echo filter($evaledqtext);
 	} else {
-		echo "<div class=\"question\"><div>\n";
+		echo "<div class=\"question\" role=region aria-label=\""._('Question')."\"><div>\n";
 		echo filter($evaledqtext);
 		echo "</div>\n";
 	}
@@ -1263,11 +1263,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				}
 				$out .= "<li><input type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
-				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}<label></li> \n";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label></li> \n";
 			} else {
 				$out .= "<li><input class=\"unind\" type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
-				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}<label></li> \n";
+				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label></li> \n";
 			}
 		}
 		if ($displayformat == "horiz") {
@@ -1878,23 +1878,37 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 
 		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
-		if (count($variables)>1 && count($fromto)>2) {
-			uasort($variables,'lensort');
-			$newdomain = array();
-			foreach($variables as $i=>$v) {
-				if (isset($fromto[$i*2+1])) {
-					$newdomain[] = $fromto[2*$i];
-					$newdomain[] = $fromto[2*$i+1];
-				} else {
-					$newdomain[] = $fromto[0];
-					$newdomain[] = $fromto[1];
-				}
+		$domaingroups = array();
+		$i=0;
+		while ($i<count($fromto)) {
+			if (isset($fromto[$i+2]) && $fromto[$i+2]=='integers') {
+				$domaingroups[] = array($fromto[$i], $fromto[$i+1], true);
+				$i += 3;
+			} else if (isset($fromto[$i+1])) {
+				$domaingroups[] = array($fromto[$i], $fromto[$i+1], false);
+				$i += 2;
+			} else {
+				break;
 			}
-			$fromto = $newdomain;
-			$variables = array_values($variables);
-		} else {
-		usort($variables,'lensort');
 		}
+		
+		uasort($variables,'lensort');
+		$newdomain = array();
+		$restrictvartoint = array();
+		foreach($variables as $i=>$v) {
+			if (isset($domaingroups[$i])) {
+				$touse = $i;
+			} else {
+				$touse = 0;
+			}
+			$newdomain[] = $domaingroups[$touse][0];
+			$newdomain[] = $domaingroups[$touse][1];
+			$restrictvartoint[] = $domaingroups[$touse][2];
+		}
+		$fromto = $newdomain;
+		$variables = array_values($variables);
+		
+		
 		usort($ofunc,'lensort');
 		$vlist = implode("|",$variables);
 		$flist = implode('|',$ofunc);
@@ -1902,24 +1916,17 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 
 		for ($i = 0; $i < 20; $i++) {
 			for($j=0; $j < count($variables); $j++) {
-				if (isset($fromto[2]) && $fromto[2]=="integers") {
-					$tp[$j] = $RND->rand($fromto[0],$fromto[1]);
-				} else if (isset($fromto[2*$j+1])) {
-					if ($fromto[2*$j+1]==$fromto[2*$j]) {
-						$tp[$j] = $fromto[2*$j];
-					} else {
-						$tp[$j] = $fromto[2*$j] + ($fromto[2*$j+1]-$fromto[2*$j])*$RND->rand(0,499)/500.0 + 0.001;
-					}
+				if ($fromto[2*$j+1]==$fromto[2*$j]) {
+					$tp[$j] = $fromto[2*$j];
+				} else if ($restrictvartoint[$j]) {
+					$tp[$j] = $RND->rand($fromto[2*$j],$fromto[2*$j+1]);
 				} else {
-					if ($fromto[1]==$fromto[0]) {
-						$tp[$j] = $fromto[0];
-					} else {
-						$tp[$j] = $fromto[0] + ($fromto[1]-$fromto[0])*$RND->rand(0,499)/500.0 + 0.001;
-					}
+					$tp[$j] = $fromto[2*$j] + ($fromto[2*$j+1]-$fromto[2*$j])*$RND->rand(0,499)/500.0 + 0.001;
 				}
 			}
 			$pts[$i] = implode("~",$tp);
 		}
+
 		$points = implode(",",$pts);
 		$out .= "<script type=\"text/javascript\">pts[$qn]=\"$points\";</script>\n";
 		if (in_array('equation',$ansformats)) {
@@ -1931,7 +1938,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
 			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
 		}
-		if (isset($answer)) {
+		if (isset($answer) && !is_array($answer)) {
 			if ($GLOBALS['myrights']>10 && strpos($answer,'|')!==false) {
 				echo 'Warning: use abs(x) not |x| in $answer';
 			}
@@ -2017,6 +2024,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		if (isset($answer)) {
 			$sa = $answer;
+			if ($displayformat == 'vectorlist' || $displayformat == 'vector') {
+				$sa = str_replace(array('<','>'),array('(:',':)'),$sa);
+			}
+			$sa = '`'.$sa.'`';
 		}
 	} else if ($anstype == "calcntuple") {
 		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
@@ -2133,6 +2144,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		$out .= getcolormark($colorbox);
 		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
 			list($out,$answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+			$answer = str_replace('"','',$answer);
 		}
 		if (isset($answer)) {
 			$sa = makepretty($answer);
@@ -3221,7 +3233,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						$out .= " <br/><div><img id=\"img$qn\" style=\"display:none;max-width:80%;\" aria-hidden=\"true\" onclick=\"rotateimg(this)\" src=\"$url\" alt=\"Student uploaded image\"/></div>";
 					} else if (in_array(strtolower($extension),array('doc','docx','pdf','xls','xlsx','ppt','pptx'))) {
 						$out .= " <span aria-expanded=\"false\" aria-controls=\"fileprev$qn\" class=\"clickable\" id=\"filetog$qn\" onclick=\"toggleinlinebtn('fileprev$qn','filetog$qn');\">[+]</span>";
-						$out .= " <br/><iframe id=\"fileprev$qn\" style=\"display:none;\" aria-hidden=\"true\" src=\"https://docs.google.com/viewer?url=".Sanitize::encodeUrlParam($url)."&embedded=true\" width=\"80%\" height=\"600px\"></iframe>";
+						$out .= " <br/><iframe id=\"fileprev$qn\" style=\"display:none;\" aria-hidden=\"true\" src=\"https://docs.google.com/viewer?url=".rawurlencode($url)."&embedded=true\" width=\"80%\" height=\"600px\"></iframe>";
 					}
 
 				}
@@ -3846,6 +3858,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$givenans = normalizemathunicode($givenans);
+
 		$ansformats = array_map('trim',explode(',',$answerformat));
 		$answer = str_replace(' ','',$answer);
 
@@ -4445,24 +4458,35 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$answer = str_replace('E','varE',$answer);
 		}
 		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
-
-		if (count($variables)>1 && count($fromto)>2) {
-			uasort($variables,'lensort');
-			$newdomain = array();
-			foreach($variables as $i=>$v) {
-				if (isset($fromto[$i*2+1])) {
-					$newdomain[] = $fromto[2*$i];
-					$newdomain[] = $fromto[2*$i+1];
-				} else {
-					$newdomain[] = $fromto[0];
-					$newdomain[] = $fromto[1];
-				}
+		$domaingroups = array();
+		$i=0;
+		while ($i<count($fromto)) {
+			if (isset($fromto[$i+2]) && $fromto[$i+2]=='integers') {
+				$domaingroups[] = array($fromto[$i], $fromto[$i+1], true);
+				$i += 3;
+			} else if (isset($fromto[$i+1])) {
+				$domaingroups[] = array($fromto[$i], $fromto[$i+1], false);
+				$i += 2;
+			} else {
+				break;
 			}
-			$fromto = $newdomain;
-			$variables = array_values($variables);
-		} else {
-		usort($variables,'lensort');
 		}
+		
+		uasort($variables,'lensort');
+		$newdomain = array();
+		$restrictvartoint = array();
+		foreach($variables as $i=>$v) {
+			if (isset($domaingroups[$i])) {
+				$touse = $i;
+			} else {
+				$touse = 0;
+			}
+			$newdomain[] = $domaingroups[$touse][0];
+			$newdomain[] = $domaingroups[$touse][1];
+			$restrictvartoint[] = $domaingroups[$touse][2];
+		}
+		$fromto = $newdomain;
+		$variables = array_values($variables);
 
 		if (count($ofunc)>0) {
 			usort($ofunc,'lensort');
@@ -4474,12 +4498,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 
 		for ($i = 0; $i < 20; $i++) {
 			for($j=0; $j < count($variables); $j++) {
-				if (isset($fromto[2]) && $fromto[2]=="integers") {
-					$tps[$i][$j] = $RND->rand($fromto[0],$fromto[1]);
-				} else if (isset($fromto[2*$j+1])) {
-					$tps[$i][$j] = $fromto[2*$j] + ($fromto[2*$j+1]-$fromto[2*$j])*$RND->rand(0,499)/500.0 + 0.001;
+				if ($fromto[2*$j+1]==$fromto[2*$j]) {
+					$tps[$i][$j] = $fromto[2*$j];
+				} else if ($restrictvartoint[$j]) {
+					$tps[$i][$j] = $RND->rand($fromto[2*$j],$fromto[2*$j+1]);
 				} else {
-					$tps[$i][$j] = $fromto[0] + ($fromto[1]-$fromto[0])*$RND->rand(0,499)/500.0 + 0.001;
+					$tps[$i][$j] = $fromto[2*$j] + ($fromto[2*$j+1]-$fromto[2*$j])*$RND->rand(0,499)/500.0 + 0.001;
 				}
 			}
 		}
@@ -6922,9 +6946,12 @@ function checkreqtimes($tocheck,$rtimes) {
 		return 1;
 	}
 	$cleanans = preg_replace('/[^\w\*\/\+\-\(\)\[\],\.\^=]+/','',$tocheck);
+
 	//if entry used pow or exp, we want to replace them with their asciimath symbols for requiretimes purposes
 	$cleanans = str_replace("pow","^",$cleanans);
 	$cleanans = str_replace("exp","e",$cleanans);
+	$cleanans = preg_replace('/\^\((-?[\d\.]+)\)([^\d]|$)/','^$1$2', $cleanans);
+
 	if (is_numeric($cleanans) && $cleanans>0 && $cleanans<1) {
 		$cleanans = ltrim($cleanans,'0');
 	}
@@ -6937,39 +6964,55 @@ function checkreqtimes($tocheck,$rtimes) {
 			if ($list[$i]=='ignore_case') {
 				$ignore_case = ($list[$i+1]==='1' || $list[$i+1]==='true' || $list[$i+1]==='=1');
 				continue;
+			} else if ($list[$i]=='ignore_commas' && ($list[$i+1]==='1' || $list[$i+1]==='true' || $list[$i+1]==='=1')) {
+				$cleanans = str_replace(',','',$cleanans);
+				continue;
+			} else if ($list[$i]=='ignore_symbol') {
+				$cleanans = str_replace($list[$i+1],'',$cleanans);
+				continue;
 			}
 			$comp = substr($list[$i+1],0,1);
 			$num = intval(substr($list[$i+1],1));
-
-			if ($list[$i]=='#') {
-				$nummatch = preg_match_all('/[\d\.]+/',$cleanans,$m);
-			} else if (strlen($list[$i])>6 && substr($list[$i],0,6)=='regex:') {
-				$regex = str_replace('/','\\/',substr($list[$i],6));
-				$nummatch = preg_match_all('/'.$regex.'/'.($ignore_case?'i':''),$cleanans,$m);
-			} else {
-				if ($ignore_case || in_array($list[$i], $mathfuncs)) {
-					$nummatch = substr_count(strtolower($cleanans),strtolower($list[$i]));
+			$grouptocheck = array_map('trim', explode('||',$list[$i]));
+			$okingroup = false;
+			foreach ($grouptocheck as $lookfor) {
+				if ($lookfor=='#') {
+					$nummatch = preg_match_all('/[\d\.]+/',$cleanans,$m);
+				} else if (strlen($lookfor)>6 && substr($lookfor,0,6)=='regex:') {
+					$regex = str_replace('/','\\/',substr($lookfor,6));
+					$nummatch = preg_match_all('/'.$regex.'/'.($ignore_case?'i':''),$cleanans,$m);
 				} else {
-					$nummatch = substr_count($cleanans,$list[$i]);
+					if ($ignore_case || in_array($lookfor, $mathfuncs)) {
+						$nummatch = substr_count(strtolower($cleanans),strtolower($lookfor));
+					} else {
+						$nummatch = substr_count($cleanans,$lookfor);
+					}
+				}
+	
+				if ($comp == "=") {
+					if ($nummatch==$num) {
+						$okingroup = true;
+						break;
+					}
+				} else if ($comp == "<") {
+					if ($nummatch<$num) {
+						$okingroup = true;
+						break;
+					}
+				} else if ($comp == ">") {
+					if ($nummatch>$num) {
+						$okingroup = true;
+						break;
+					}
+				} else if ($comp == "!") {
+					if ($nummatch!=$num) {
+						$okingroup = true;
+						break;
+					}
 				}
 			}
-
-			if ($comp == "=") {
-				if ($nummatch!=$num) {
-					return 0;
-				}
-			} else if ($comp == "<") {
-				if ($nummatch>=$num) {
-					return 0;
-				}
-			} else if ($comp == ">") {
-				if ($nummatch<=$num) {
-					return 0;
-				}
-			} else if ($comp == "!") {
-				if ($nummatch==$num) {
-					return 0;
-				}
+			if (!$okingroup) {
+				return 0;
 			}
 		}
 	}
@@ -7382,6 +7425,8 @@ function normalizemathunicode($str) {
 	$str = str_replace(array('‒','–','—','―','−'),'-',$str);
 	$str = str_replace(array('⁄','∕','⁄ ','÷'),'/',$str);
 	$str = str_replace(array('（','）','∞','∪','≤','≥','⋅'), array('(',')','oo','U','<=','>=','*'), $str);
+	//these are the slim vector unicodes: u2329 and u232a
+	$str = str_replace(array('⟨','⟩'), array('<','>'), $str);
 	$str = str_replace(array('²','³','₀','₁','₂','₃'), array('^2','^3','_0','_1','_2','_3'), $str);
 	$str = preg_replace('/\bOO\b/i','oo', $str);
 	return $str;

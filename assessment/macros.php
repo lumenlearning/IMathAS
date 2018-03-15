@@ -5,7 +5,7 @@
 
 
 array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r","replacealttext");
-array_push($allowedmacros,"numtowords","randname","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber");
+array_push($allowedmacros,"numtowords","randname","randnamewpronouns","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber");
 function mergearrays() {
 	$args = func_get_args();
 	foreach ($args as $k=>$arg) {
@@ -1572,7 +1572,7 @@ function multicalconarray() {
 	for ($i=0;$i<count($vars);$i++) {
 		$todo = str_replace('('.$vars[$i].')','($'.$vars[$i].')',$todo);
 	}
-
+	$todo = str_replace("'","\'",$todo);
 	$varlist = '$'.implode(',$',$vars);
 	$evalstr = "return(array_map(create_function('$varlist','return($todo);')";
 	$cnt = count($args[0]);
@@ -1997,6 +1997,15 @@ function randfemalenames($n=1) {
 }
 function randname() {
 	return randnames(1,2);
+}
+function randnamewpronouns() {
+	$gender = $GLOBALS['RND']->rand(0,1);	
+	$name = randnames(1,$gender);
+	if ($gender==0) { //male
+		array(randnames(1,0), _('he'), _('him'), _('his'), _('his'));
+	} else {
+		array(randnames(1,1), _('she'), _('her'), _('her'), _('hers'));
+	}
 }
 function randmalename() {
 	return randnames(1,0);
@@ -3427,11 +3436,11 @@ function getsnapwidthheight($xmin,$xmax,$ymin,$ymax,$width,$height,$snaptogrid) 
 function getscorenonzero() {
 	global $scores;
 	$out = array();
-	for ($i=0;$i<count($scores);$i++) {
-		if (strpos($scores[$i],'~')===false) {
-			$out[$i+1] = ($scores[$i]<0)?-1:(($scores[$i]>0)?1:0);
+	foreach ($scores as $i=>$v) {
+		if (strpos($v,'~')===false) {
+			$out[$i+1] = ($v<0)?-1:(($v>0)?1:0);
 		} else {
-			$sp = explode('~',$scores[$i]);
+			$sp = explode('~',$v);
 			$out[$i+1] = array();
 			for ($j=0;$j<count($sp);$j++) {
 				$out[$i+1][$j] = ($sp[$j]>0)?1:0;
@@ -3444,11 +3453,11 @@ function getscorenonzero() {
 function getiscorrect() {
 	global $rawscores;
 	$out = array();
-	for ($i=0;$i<count($rawscores);$i++) {
-		if (strpos($rawscores[$i],'~')===false) {
-			$out[$i+1] = ($rawscores[$i]<0)?-1:(($rawscores[$i]==1)?1:0);
+	foreach ($rawscores as $i=>$v) {
+		if (strpos($v,'~')===false) {
+			$out[$i+1] = ($v<0)?-1:(($v==1)?1:0);
 		} else {
-			$sp = explode('~',$rawscores[$i]);
+			$sp = explode('~',$v);
 			$out[$i+1] = array();
 			for ($j=0;$j<count($sp);$j++) {
 				$out[$i+1][$j] = ($sp[$j]==1)?1:0;

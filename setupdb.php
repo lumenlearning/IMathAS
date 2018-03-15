@@ -16,17 +16,7 @@ Because of this, this file does NOT contain the full up-to-date database schema.
 ***************/
 
 $dbsetup = true;
-$use_local_sessions = true;
 include("init_without_validate.php");
-
-if (getenv('CLI')) {
-    require_once('dotenv.php');
-    $_POST['username'] = getenv['USERNAME'];
-    $_POST['password'] = getenv['PASSWORD'];
-    $_POST['firstname'] = getenv['FIRSTNAME'];
-    $_POST['lastname'] = getenv['LASTNAME'];
-    $_POST['email'] = getenv['EMAIL'];
-}
 
 //DB $query = "SELECT ver FROM imas_dbschema WHERE id=1";
 //DB $result = mysql_query($query);

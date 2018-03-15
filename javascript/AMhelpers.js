@@ -162,6 +162,7 @@ function normalizemathunicode(str) {
 	str = str.replace(/±/g,"+-").replace(/÷/g,"/").replace(/·|✕|×|⋅/g,"*");
 	str = str.replace(/√/g,"sqrt").replace(/∛/g,"root(3)");
 	str = str.replace(/²/g,"^2").replace(/³/g,"^3");
+	str = str.replace(/\u2329/g, "<").replace(/\u232a/g, ">");
 	str = str.replace(/₀/g,"_0").replace(/₁/g,"_1").replace(/₂/g,"_2").replace(/₃/g,"_3");
 	str = str.replace(/\bOO\b/i,"oo");
 	str = str.replace(/θ/,"theta").replace(/φ/,"phi").replace(/π/,"pi").replace(/σ/,"sigma").replace(/μ/,"mu")
@@ -1165,6 +1166,7 @@ function doonsubmit(form,type2,skipconfirm) {
 				return false;
 			}
 		}
+		
 	}
 	imathasDraw.encodea11ydraw();
 
@@ -1397,6 +1399,50 @@ function toggleinlinebtn(n,p){ //n: target, p: click el
 	btn.innerHTML = k.match(/\[\+\]/)?k.replace(/\[\+\]/,'[-]'):k.replace(/\[\-\]/,'[+]');
 
 }
+//triggered by blur, this saves the one question without scoring
+function assessbackgsave() {
+	var m = $(this).attr("name").match(/^(qs|qn|tc)(\d+)/);
+	if (m !== null && !!window.FormData) {
+		var qn = m[2]*1;
+		if (qn>1000) {
+			qn = Math.floor(qn/1000 + .001)-1;
+		}
+		if (typeof tinyMCE != "undefined") {tinyMCE.triggerSave();}
+		doonsubmit();
+		var tosubFormData = new FormData();
+		var regex = new RegExp("^(qn|tc|qs)("+qn+"\\b|"+(qn+1)+"\\d{3})");
+		$("input,select,textarea").each(function(i,el) {
+			if (el.name.match(regex)) {
+				if ((el.type!='radio' && el.type!='checkbox') || el.checked) {
+					if (el.type=='file') {
+						tosubFormData.append(el.name, el.files[0]);
+					} else {
+						tosubFormData.append(el.name, el.value);
+					}
+				}
+			}
+		});
+		tosubFormData.append("backgroundsaveforlater",1);
+		tosubFormData.append("tosaveqn",qn);
+		tosubFormData.append("asidverify", document.getElementById("asidverify").value);
+		tosubFormData.append("disptime", document.getElementById("disptime").value);
+		tosubFormData.append("isreview", document.getElementById("isreview").value);
+		$.ajax({
+			type:"POST", 
+			url: window.location.origin+window.location.pathname, 
+			data: tosubFormData, 
+			contentType: false, 
+			processData: false,
+			qn: qn
+		}).done(function(msg){
+			if (assessFormIsDirty.indexOf(this.qn*1)!=-1) {
+		    	    assessFormIsDirty.splice(assessFormIsDirty.indexOf(this.qn*1),1);
+		    	}
+			//console.log(msg);
+		});
+	}
+}
+//this submits one question for grading, in Embedded display
 function assessbackgsubmit(qn,noticetgt) {
 	if (!confirmSubmit($("#embedqwrapper"+qn)[0])) {
 		return false;	
@@ -1514,6 +1560,7 @@ function assessbackgsubmit(qn,noticetgt) {
 		    if (usingTinymceEditor) {
 			    initeditor("textareas","mceEditor");
 		    }
+		   
 		    // Loop through every script collected and eval it
 		    initstack.length = 0;
 		    for(var i=0; i<scripts.length; i++) {
@@ -1546,7 +1593,11 @@ function assessbackgsubmit(qn,noticetgt) {
 		    }
 				*/
 		    $(window).trigger("ImathasEmbedReload", [qn]);
-
+		    if (assessFormIsDirty.indexOf(qn*1)!=-1) {
+		    	    assessFormIsDirty.splice(assessFormIsDirty.indexOf(qn*1),1);
+		    }
+		    $("#embedqwrapper"+qn).find("input,textarea").on("change", trackDirty);
+		    
 		    var pagescroll = 0;
 		    if(typeof window.pageYOffset!= 'undefined'){
 			//most browsers
@@ -2145,3 +2196,27 @@ function prepWithMath(str) {
 	str = str.replace(/\((E|PI)\)/g,'(Math.$1)');
 	return str;
 }
+
+var assessFormIsDirty = [];
+function trackDirty() {
+	var name = $(this).attr("name");
+	var m = name.match(/^(qs|qn|tc)(\d+)/);
+	if (m !== null) {
+		var qn = m[2]*1;
+		if (qn>1000) {
+			qn = Math.floor(qn/1000 + .001)-1;
+		}
+		if (assessFormIsDirty.indexOf(qn)==-1) {
+			assessFormIsDirty.push(qn);
+		}
+	}
+}
+$(function() {
+	$("input,select,textarea").on("change", trackDirty);
+	$(window).on("beforeunload",function() {
+		if ($("form.submitted,form.submitted2").length==0 && assessFormIsDirty.length>0) {
+			return _('Are you sure you want to leave this assessment? You may have unsubmitted work');
+		}
+	});
+});
+
