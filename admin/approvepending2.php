@@ -100,11 +100,34 @@ The Lumen Team
 		}
 		
 	} else if ($_POST['newstatus']==11) { //approve
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		#### Begin OHM-specific changes ##########################################################
+		$isLumenCustomer = false;
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
 		if ($_POST['group']>-1) {
 			$group = intval($_POST['group']);
 		} else if (trim($_POST['newgroup'])!='') {
-			$stm = $DBH->prepare("SELECT id FROM imas_groups WHERE name REGEXP ?");
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			$stm = $DBH->prepare("SELECT id,grouptype FROM imas_groups WHERE name REGEXP ?");
 			$stm->execute(array('^[[:space:]]*'.str_replace('.','[.]',preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroup']))).'[[:space:]]*$'));
+			$groupType = $stm->fetchColumn(1);
+			$isLumenCustomer = $groupType ? true : false;
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
 			$group = $stm->fetchColumn(0);
 			if ($group === false) {
 				$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
@@ -135,39 +158,48 @@ The Lumen Team
 		$sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
 		$sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
 
-		$message = "
+		$messageIsNotLumenCustomer = "
 <p>
-Dear ${sanitizedName}, 
+Dear ${sanitizedName},
 </p>
 
 <p>
 Welcome to Lumen OHM! Your account has been activated, and you're all set
 to log in at
-<a target='_blank' href='https://ohm.lumenlearning.com/'>ohm.lumenlearning.com</a>
+<a href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
 as an instructor using the username ${sanitizedUsername} and the password
 you provided.
 </p>
 
 <p>
-You have full trial access to all instructor account features. Your no-cost
+You have full access to all instructor account features. Your no-cost
 trial covers a total of 200 student enrollments.  
 </p>
 
 <p>
-We have enrolled you as a student in the OHM Orientation Course and OHM
-Community Course to help you get started exploring and creating courses.
+Here are some great resources to help you get started exploring OHM,
+creating and teaching courses:
 </p>
 
 <ul>
     <li>
-        <b>OHM Training Course:</b> Documentation and videos to guide you
-        through building courses and using OHM.   
+        <a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>OHM Course-building Startup Guide</a>:
+        A quick-start guide to walk you step-by-step through setting up
+        and customizing a new OHM course.  
     </li>
     <li>
-        <b>OHM Community Course:</b> A course in which all faculty users
-        can connect! Searchable discussion forums to find answers to common
-        questions, learn practical tips and tricks, and connect you with
-        other OHM faculty users.
+        <a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115015412808-Lumen-OHM-Training-Videos'>OHM Training Videos</a>:
+        Short videos about setting up and customizing OHM courses. 
+    </li>
+    <li>
+        <a target='_blank' href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Orientation Course</a>:
+        Documentation and videos to guide you through building courses and using OHM.
+    </li>
+    <li>
+        <a target='_blank' href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=1'>OHM Community Course</a>:
+        A course in which all faculty users can connect! Provides searchable
+        discussion forums to find answers to common questions, learn practical
+        tips and tricks, and connect you with other OHM faculty users.
     </li>
 </ul>
 
@@ -181,16 +213,78 @@ As you explore OHM during the trial period, we’ll reach out to ask for
 feedback and confirm your plans to continue using OHM. Information about
 our low-cost pricing is available
 <a target='_blank' href='http://lumenlearning.com/how/payment-options/'>here</a>,
-and we’ll work with you at the appropriate point to transition smoothly to
-paid support. We’re excited for you and your students to enjoy the benefits
-of learning and teaching with open educational resources (OER) in Lumen OHM. 
+and we’ll work with you at an appropriate point to transition smoothly
+to paid support. 
+</p>
+
+<p>
+We’re excited for you and your students to enjoy the benefits of learning
+and teaching with open educational resources (OER) in Lumen OHM. 
 </p>
 
 <p>
 Thank you,<br/>
-Lumen OHM administrator
+The Lumen Team
 </p>
 ";
+
+		$messageIsLumenCustomer = "
+<p>
+Dear ${sanitizedName}, 
+</p>
+
+<p>
+Welcome to Lumen OHM! Your account has been activated, and you're all set
+to log in at
+<a target='_blank' href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
+as an instructor using the username ${sanitizedUsername} and the password
+you provided.
+</p>
+
+<p>
+Here are some great resources to help you get started exploring OHM, creating
+and teaching courses:
+</p>
+
+<ul>
+    <li>
+        <a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>OHM Course-building Startup Guide</a>:
+        A quick-start guide to walk you step-by-step through setting up and
+        customizing a new OHM course.  
+    </li>
+    <li>
+        <a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115015412808-Lumen-OHM-Training-Videos'>OHM Training Videos</a>:
+        Short videos about setting up and customizing OHM courses. 
+    </li>
+    <li>
+        <a target='_blank' href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Training Course:</b>
+        Documentation and videos to guide you through building courses and using OHM.   
+    </li>
+    <li>
+        <a target='_blank' href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=1'>OHM Community Course</a>:
+        A course in which all faculty users can connect! Provides searchable
+        discussion forums to find answers to common questions, learn practical
+        tips and tricks, and connect you with other OHM faculty users.
+    </li>
+</ul>
+
+<p>
+For help, Lumen OHM customers may also submit requests through
+<a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/requests/new'>https://lumenlearning.zendesk.com/hc/en-us/requests/new</a>.
+</p>
+
+<p>
+We’re excited for you and your students to enjoy the benefits of learning and
+teaching with open educational resources (OER) in Lumen OHM. 
+</p>
+
+<p>
+Thank you,<br/>
+The Lumen Team
+</p>
+";
+
+		$message = $isLumenCustomer ? $messageIsLumenCustomer : $messageIsNotLumenCustomer;
 
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
