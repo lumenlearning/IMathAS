@@ -145,13 +145,13 @@ to orient you to OHM:
 <ul>
 	<li>
 		<a target='_blank' style='font-weight: bold;'
-			href='/course/course.php?folder=0&cid=11'>OHM Orientation Course<a/>:
+			href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Orientation Course<a/>:
 		Documentation and videos to guide you through building courses and using
 		OHM.
 	</li>
 	<li>
 		<a target='_blank' style='font-weight: bold;'
-			href='/course/course.php?folder=0&cid=1'>OHM Community Course</a>:
+			href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=1'>OHM Community Course</a>:
 		A course in which all faculty users can connect! Provides searchable
 		discussion forums to find answers to common questions, learn practical
 		tips and tricks, and connect you with other OHM faculty users.
