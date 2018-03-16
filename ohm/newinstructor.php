@@ -111,36 +111,29 @@ to orient you to OHM:
 	</li>
 	<li>
 		<b>OHM Community Course:</b> A course in which all faculty users can
-		connect! Searchable discussion forums to find answers to common
-		questions, learn practical tips and tricks, and connect you with other
-		OHM faculty users.
+		connect! Provides searchable discussion forums to find answers to
+		common questions, learn practical tips and tricks, and connect you
+		with other OHM faculty users.
 	</li>
 </ul>
 
 <p>
-Once your account is approved, you will have full trial access to all instructor
-account features. Your no-cost trial covers a total of 200 student enrollments.
-As you explore OHM during the trial period, we’ll reach out to ask for feedback
-and confirm your plans to continue using OHM. Information about our low-cost
-pricing is available
-<a target=\"_blank\" href=\"http://lumenlearning.com/how/payment-options/\">here</a>,
-and we’ll work with you at the appropriate point to transition smoothly to paid
-support. 
+Once your account is approved, you will have full access to all instructor account features. 
 </p>
 
 <p>
-Thank you for your interest in OHM!
-</p>
-
-<p>
-Lumen OHM administrator
+Thank you for your interest in OHM!<br/>
+The Lumen Team
 </p>
 ";
 
 				$browserMessage = "
 <p>
-Your new instructor account request for username ${sanitizedUsername} is under
-review.
+Dear ${sanitizedFirstName},
+</p>
+
+<p>
+Your instructor account request for username ${sanitizedUsername} is under review.
 </p>
 
 <p>
@@ -151,26 +144,23 @@ to orient you to OHM:
 
 <ul>
 	<li>
-		<b>OHM Orientation Course:</b> Documentation and videos to guide you
-		through building courses and using OHM.   
+		<a target='_blank' style='font-weight: bold;'
+			href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Orientation Course<a/>:
+		Documentation and videos to guide you through building courses and using
+		OHM.
 	</li>
 	<li>
-		<b>OHM Community Course:</b> A course in which all faculty users can
-		connect! Searchable discussion forums to find answers to common
-		questions, learn practical tips and tricks, and connect you with other
-		OHM faculty users.
+		<a target='_blank' style='font-weight: bold;'
+			href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=1'>OHM Community Course</a>:
+		A course in which all faculty users can connect! Provides searchable
+		discussion forums to find answers to common questions, learn practical
+		tips and tricks, and connect you with other OHM faculty users.
 	</li>
 </ul>
 
 <p>
-Once your account is approved, you will have full trial access to all
-instructor account features. Your no-cost trial covers a total of 200
-student enrollments.  As you explore OHM during the trial period, we’ll
-reach out to ask for feedback and confirm your plans to continue using OHM.
-Information about our low-cost pricing is available
-<a target=\"_blank\" href=\"http://lumenlearning.com/how/payment-options/\">here</a>,
-and we’ll work with you at the appropriate point to transition smoothly to
-paid support. 
+Once your account is approved, you will have full access to all instructor
+account features. 
 </p>
 
 <p>
