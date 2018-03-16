@@ -1157,7 +1157,7 @@ switch($_GET['action']) {
 		echo '</select><br/>';
 		echo '<input type="checkbox" id="iscust" name="iscust" ';
 		if ($grptype==1) { echo 'checked';}
-		echo '> <label for="istcust">'._('Lumen Customer').'</label><br/>';
+		echo '> <label for="iscust">'._('Lumen Customer').'</label><br/>';
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
