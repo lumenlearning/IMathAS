@@ -67,7 +67,7 @@ If you still want an OHM instructor account, please respond to this message
 
 <ul>
     <li>
-        Your requested username ${sanitizedUsername}
+        Your requested username: ${sanitizedUsername}
     </li>
     <li>
         A web page address or other documentation that clearly shows your
@@ -83,7 +83,7 @@ If you did not request an account, no action is required.
 
 <p>
 Thank you,<br/>
-Lumen OHM Administrator
+The Lumen Team
 </p>
 ";
 
