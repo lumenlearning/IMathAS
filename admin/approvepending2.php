@@ -172,8 +172,11 @@ you provided.
 </p>
 
 <p>
-You have full access to all instructor account features. Your no-cost
-trial covers a total of 200 student enrollments.  
+You have full access to all instructor account features, and you can get
+started building courses immediately. When you’re ready to enroll students,
+we’ll need to confirm which
+<a target='_blank' href='https://lumenlearning.com/how/payment-options/'>payment option</a>
+will work best. (Standard pricing is a low-cost $25 per enrolled student.) 
 </p>
 
 <p>
@@ -209,17 +212,10 @@ For help, Lumen OHM customers may also submit requests through
 </p>
 
 <p>
-As you explore OHM during the trial period, we’ll reach out to ask for
-feedback and confirm your plans to continue using OHM. Information about
-our low-cost pricing is available
-<a target='_blank' href='http://lumenlearning.com/how/payment-options/'>here</a>,
-and we’ll work with you at an appropriate point to transition smoothly
-to paid support. 
-</p>
-
-<p>
-We’re excited for you and your students to enjoy the benefits of learning
-and teaching with open educational resources (OER) in Lumen OHM. 
+As you explore OHM, we’ll reach out to ask for feedback and confirm your
+plans to continue using OHM. We’re excited for you and your students to
+enjoy the benefits of learning and teaching with open educational resources
+(OER) in Lumen OHM.
 </p>
 
 <p>
@@ -284,19 +280,29 @@ The Lumen Team
 </p>
 ";
 
-		$message = $isLumenCustomer ? $messageIsLumenCustomer : $messageIsNotLumenCustomer;
+		if ($isLumenCustomer) {
+		    $message = $messageIsLumenCustomer;
+		    $bccList = array();
+        } else {
+		    $message = $messageIsNotLumenCustomer;
+		    $bccList = $CFG['OHM']['new_instructor_approval_non_customer_bcc_list'];
+        }
 
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
 
 		if (isset($CFG['GEN']['useSESmail'])) {
-			SESmail($row[2], $accountapproval, $installname . ' Account Approval', $message);
+			$replyTo = $CFG['OHM']['new_instructor_approval_reply_to'];
+
+			ohmSESmail($row[2], $accountapproval, $installname . ' Account Approval', $message,
+                $replyTo, $bccList);
 		} else {
 			mail($row[2],$installname . ' Account Approval',$message,$headers);
 		}
+
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
 	}
 	echo "OK";
 	exit;
