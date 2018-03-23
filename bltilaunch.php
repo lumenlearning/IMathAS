@@ -31,6 +31,8 @@ $init_skip_csrfp = true;
 include("init_without_validate.php");
 unset($init_skip_csrfp);
 
+require_once(__DIR__ . '/includes/ltiroles.php');
+
 $curdir = rtrim(dirname(__FILE__), '/\\');
 //DB if (!get_magic_quotes_gpc()) {
 //DB 	$_REQUEST = array_map('addslashes_deep', $_REQUEST);
@@ -2845,93 +2847,4 @@ if ($_SESSION['lti_keytype']=='cc-vf' || (!$promptforsettings && !$createnewsess
 /*end using old behavior for other requests */
 }
 
-/**
- * Take a string of roles received via LTI and split it into an array.
- *
- * @param $roles string An unmodified string of roles received via LTI.
- * @return mixed An array of LTI roles, all in lowercase.
- */
-function ltiRolesToArray($roles) {
-    $arrayCased = explode(',', $roles);
-    return array_map('strtolower', $arrayCased);
-}
-
-/**
- * @param $roles mixed An array of LTI roles, all in lowercase.
- * @return bool
- * @see ltiRolesToArray()
- */
-function isInstitutionAdmin($roles) {
-	$validRoles = array(
-        'urn:lti:instrole:ims/lis/administrator'
-    );
-    return in_array($validRoles, $roles);
-}
-
-/**
- * @param $roles mixed An array of LTI roles, all in lowercase.
- * @return bool
- * @see ltiRolesToArray()
- */
-function isContextStudent($roles) {
-    // 'Student' isn't in the LTI docs as a standard context role, but some TCs send it.
-    $validRoles = array(
-        'learner',
-        'urn:lti:role:ims/lis/learner',
-        'student'
-    );
-	return in_array($validRoles, $roles);
-}
-
-/**
- * @param $roles mixed An array of LTI roles, all in lowercase.
- * @return bool
- * @see ltiRolesToArray()
- */
-function isContextInstructor($roles) {
-	$validRoles = array(
-		'instructor',
-		'urn:lti:role:ims/lis/instructor'
-	);
-	return in_array($validRoles, $roles);
-}
-
-/**
- * @param $roles mixed An array of LTI roles, all in lowercase.
- * @return bool
- * @see ltiRolesToArray()
- */
-function isContextContentDeveloper($roles) {
-	$validRoles = array(
-		'contentdeveloper',
-		'urn:lti:role:ims/lis/contentdeveloper'
-	);
-	return in_array($validRoles, $roles);
-}
-
-/**
- * @param $roles mixed An array of LTI roles, all in lowercase.
- * @return bool
- * @see ltiRolesToArray()
- */
-function isContextAdmin($roles) {
-	$validRoles = array(
-		'administrator',
-		'urn:lti:role:ims/lis/administrator'
-	);
-	return in_array($validRoles, $roles);
-}
-
-/**
- * @param $roles mixed An array of LTI roles, all in lowercase.
- * @return bool
- * @see ltiRolesToArray()
- */
-function isTeachingAssistant($roles) {
-	$validRoles = array(
-		'teachingassistant',
-		'urn:lti:role:ims/lis/teachingassistant'
-	);
-	return in_array($validRoles, $roles);
-}
-
+?>
