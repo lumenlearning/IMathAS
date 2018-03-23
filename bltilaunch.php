@@ -600,7 +600,8 @@ if (isset($_GET['launch'])) {
 	$_SESSION['ltiuserid'] = $ltiuserid;
 	$_SESSION['ltiorg'] = $ltiorg;
 	$ltiroles = new LTIRoles($_REQUEST['roles']);
-	if ($ltiroles->isContextInstructor() || $ltiroles->isContextAdmin() || $ltiroles->isContextContentDeveloper()) {
+	if ($ltiroles->isContextInstructor() || $ltiroles->isContextAdmin()
+        || $ltiroles->isContextContentDeveloper() || $ltiroles->isInstitutionAdmin()) {
 		$ltirole = 'instructor';
 	} else {
 		$ltirole = 'learner';
@@ -2114,7 +2115,8 @@ if (isset($_GET['launch'])) {
 	$_SESSION['ltiuserid'] = $ltiuserid;
 	$_SESSION['ltiorg'] = $ltiorg;
 	$ltiroles = new LTIRoles($_REQUEST['roles']);
-	if ($ltiroles->isContextInstructor() || $ltiroles->isContextAdmin() || $ltiroles->isContextContentDeveloper()) {
+	if ($ltiroles->isContextInstructor() || $ltiroles->isContextAdmin()
+		|| $ltiroles->isContextContentDeveloper() || $ltiroles->isInstitutionAdmin()) {
 		$ltirole = 'instructor';
 	} else {
 		$ltirole = 'learner';
