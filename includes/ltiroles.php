@@ -48,6 +48,22 @@ class LTIRoles
 	}
 
 	/**
+	 * Determine if a user, based on their LTI roles, should effectively be
+	 * treated as a course instructor.
+	 *
+	 * @return bool
+	 */
+	function isInstructorForOurPurposes()
+	{
+		if ($this->isContextInstructor() || $this->isContextAdmin()
+			|| $this->isContextContentDeveloper() || $this->isInstitutionAdmin()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * @return bool
 	 */
 	function isInstitutionAdmin()

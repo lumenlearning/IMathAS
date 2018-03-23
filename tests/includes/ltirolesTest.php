@@ -57,6 +57,40 @@ final class LTIRolesTest extends TestCase
 	}
 
 	/*
+	 * isInstructorForOurPurposes
+	 */
+
+	public function testIsInstructorForOurPurposes1()
+	{
+		$ltiRoles = new LTIRoles('urn:lti:role:ims/lis/Instructor');
+		$this->assertTrue($ltiRoles->isInstructorForOurPurposes());
+	}
+
+	public function testIsInstructorForOurPurposes2()
+	{
+		$ltiRoles = new LTIRoles('urn:lti:role:ims/lis/ContentDeveloper');
+		$this->assertTrue($ltiRoles->isInstructorForOurPurposes());
+	}
+
+	public function testIsInstructorForOurPurposes3()
+	{
+		$ltiRoles = new LTIRoles('urn:lti:role:ims/lis/Administrator');
+		$this->assertTrue($ltiRoles->isInstructorForOurPurposes());
+	}
+
+	public function testIsInstructorForOurPurposes4()
+	{
+		$ltiRoles = new LTIRoles('urn:lti:instrole:ims/lis/Administrator');
+		$this->assertTrue($ltiRoles->isInstructorForOurPurposes());
+	}
+
+	public function testIsInstructorForOurPurposesFalse()
+	{
+		$ltiRoles = new LTIRoles('asdf');
+		$this->assertFalse($ltiRoles->isInstructorForOurPurposes());
+	}
+
+	/*
 	 * isInstitutionAdmin
 	 */
 
