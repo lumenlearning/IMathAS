@@ -599,8 +599,8 @@ if (isset($_GET['launch'])) {
 	//if we got this far, secret has already been verified
 	$_SESSION['ltiuserid'] = $ltiuserid;
 	$_SESSION['ltiorg'] = $ltiorg;
-	$ltirole = strtolower($_REQUEST['roles']);
-	if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false || strpos($ltirole,'contentdeveloper')!== false) {
+	$ltiroles = new LTIRoles($_REQUEST['roles']);
+	if ($ltiroles->isContextInstructor() || $ltiroles->isContextAdmin() || $ltiroles->isContextContentDeveloper()) {
 		$ltirole = 'instructor';
 	} else {
 		$ltirole = 'learner';
@@ -2113,8 +2113,8 @@ if (isset($_GET['launch'])) {
 	//if we got this far, secret has already been verified
 	$_SESSION['ltiuserid'] = $ltiuserid;
 	$_SESSION['ltiorg'] = $ltiorg;
-	$ltirole = strtolower($_REQUEST['roles']);
-	if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false || strpos($ltirole,'contentdeveloper')!== false) {
+	$ltiroles = new LTIRoles($_REQUEST['roles']);
+	if ($ltiroles->isContextInstructor() || $ltiroles->isContextAdmin() || $ltiroles->isContextContentDeveloper()) {
 		$ltirole = 'instructor';
 	} else {
 		$ltirole = 'learner';
