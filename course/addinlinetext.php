@@ -542,7 +542,7 @@ $(function() { chghidetitle(); });
 		<span class=formright>
 			<input type=radio name="sdatetype" value="0" <?php writeHtmlChecked($startdate,'0',0) ?>/>
 			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
-			 Always avalible until End Date<br/>
+			 Always available until End Date<br/>
 			<input type=radio name="sdatetype" value="sdate" <?php writeHtmlChecked($startdate,'0',1) ?>/>
 			<input type=text size=10 name=sdate value="<?php echo $sdate;?>">
 			<a href="#" onClick="displayDatePicker('sdate', this); return false">
@@ -554,7 +554,7 @@ $(function() { chghidetitle(); });
 		<span class=formright>
 			<input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($enddate,'2000000000',0) ?>/>
 			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
-			Always avalible after Start Date<br/>
+			Always available after Start Date<br/>
 			<input type=radio name="edatetype" value="edate" <?php writeHtmlChecked($enddate,'2000000000',1) ?>/>
 			<input type=text size=10 name=edate value="<?php echo $edate;?>">
 			<a href="#" onClick="displayDatePicker('edate', this, 'sdate', 'start date'); return false">
