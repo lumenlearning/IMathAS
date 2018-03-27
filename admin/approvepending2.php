@@ -113,21 +113,23 @@ The Lumen Team
 		#### End OHM-specific changes ############################################################
 		if ($_POST['group']>-1) {
 			$group = intval($_POST['group']);
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			#### Begin OHM-specific changes ##########################################################
+			$stm = $DBH->prepare("SELECT grouptype FROM imas_groups WHERE id = :id");
+			$stm->execute(array(':id' => $_POST['group']));
+			$groupType = $stm->fetchColumn(0);
+			$isLumenCustomer = (1 == $groupType) ? true : false;
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
+			#### End OHM-specific changes ############################################################
 		} else if (trim($_POST['newgroup'])!='') {
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			$stm = $DBH->prepare("SELECT id,grouptype FROM imas_groups WHERE name REGEXP ?");
+			$stm = $DBH->prepare("SELECT id FROM imas_groups WHERE name REGEXP ?");
 			$stm->execute(array('^[[:space:]]*'.str_replace('.','[.]',preg_replace('/\s+/', '[[:space:]]+', trim($_POST['newgroup']))).'[[:space:]]*$'));
-			$groupType = $stm->fetchColumn(1);
-			$isLumenCustomer = $groupType ? true : false;
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
 			$group = $stm->fetchColumn(0);
 			if ($group === false) {
 				$stm = $DBH->prepare("INSERT INTO imas_groups (name) VALUES (:name)");
