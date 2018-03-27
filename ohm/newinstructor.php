@@ -145,7 +145,7 @@ to orient you to OHM:
 <ul>
 	<li>
 		<a target='_blank' style='font-weight: bold;'
-			href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Orientation Course<a/>:
+			href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Orientation Course</a>:
 		Documentation and videos to guide you through building courses and using
 		OHM.
 	</li>
