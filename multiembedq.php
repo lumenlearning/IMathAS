@@ -250,7 +250,21 @@ echo '<script type="text/javascript">var assesspostbackurl="' .$urlmode. Sanitiz
 echo '<input type="hidden" id="asidverify" value="'.$jwtstring.'"/>';
 echo '<input type="hidden" id="disptime" value="'.time().'"/>';
 echo '<input type="hidden" id="isreview" value="0"/>';
-echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.'">';
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+$showQuestionNumbers = '';
+if (isset($_REQUEST['show_question_numbers'])) {
+	$showQuestionNumbers = '&amp;show_question_numbers';
+}
+echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.$showQuestionNumbers.'">';
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
 if (count($qids)>1) {
 	echo _('Try Another Version of These Questions').'</a></p>';
 } else {
