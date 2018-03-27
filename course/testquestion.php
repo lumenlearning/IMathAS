@@ -51,17 +51,22 @@ if ($myrights<20) {
 		}
 	}
 
-	$lastanswers = array('');
+	
+	$lastanswers = array();
+	$scores = array();
+	$rawscores = array();
+	$qn = 27;  //question number to use during testing
+	$lastanswers[$qn] = '';
+	$rawscores[$qn] = -1;
+	$scores[$qn] = -1;
 
 	if (isset($_POST['seed'])) {
-		list($score,$rawscores[0]) = scoreq(0,$_GET['qsetid'],$_POST['seed'],$_POST['qn0'],$attempt-1);
-		$scores[0] = $score;
+		list($score,$rawscores[$qn]) = scoreq($qn,$_GET['qsetid'],$_POST['seed'],$_POST['qn'.$qn],$attempt-1);
+		$scores[$qn] = $score;
 		//DB $lastanswers[0] = stripslashes($lastanswers[0]);
 		$page_scoreMsg =  "<p>Score on last answer: ".Sanitize::encodeStringForDisplay($score)."/1</p>\n";
 	} else {
 		$page_scoreMsg = "";
-		$scores = array(-1);
-		$rawscores = array(-1);
 		$_SESSION['choicemap'] = array();
 	}
   $cid = Sanitize::courseId($_GET['cid']);
@@ -246,15 +251,15 @@ if ($overwriteBody==1) {
 	echo $page_scoreMsg;
 	echo '<script type="text/javascript"> function whiteout() { e=document.getElementsByTagName("div");';
 	echo 'for (i=0;i<e.length;i++) { if (e[i].className=="question") {e[i].style.backgroundColor="#fff";}}}</script>';
-	echo "<form method=post enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"doonsubmit()\">\n";
+	echo "<form method=post enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"doonsubmit(this,true,true)\">\n";
 	echo "<input type=hidden name=seed value=\"$seed\">\n";
 	echo "<input type=hidden name=attempt value=\"$attempt\">\n";
 
 	if (isset($rawscores)) {
-		if (strpos($rawscores[0],'~')!==false) {
-			$colors = explode('~',$rawscores[0]);
+		if (strpos($rawscores[$qn],'~')!==false) {
+			$colors = explode('~',$rawscores[$qn]);
 		} else {
-			$colors = array($rawscores[0]); //scorestocolors($rawscores,1,0,false);
+			$colors = array($rawscores[$qn]); //scorestocolors($rawscores,1,0,false);
 		}
 	} else {
 		$colors = array();
@@ -262,14 +267,14 @@ if ($overwriteBody==1) {
 	if ($_GET['cid']=="admin") { //trigger debug messages
 		$teacherid = "admin";
 	}
-	displayq(0,$_GET['qsetid'],$seed,true,true,$attempt,false,false,false,$colors);
+	displayq($qn,$_GET['qsetid'],$seed,true,true,$attempt,false,false,false,$colors);
 	echo "<input type=submit value=\"Submit\"><input type=submit name=\"regen\" value=\"Submit and Regen\">\n";
 	echo "<input type=button value=\"White Background\" onClick=\"whiteout()\"/>";
 	echo "<input type=button value=\"Show HTML\" onClick=\"document.getElementById('qhtml').style.display='';\"/>";
 	echo "</form>\n";
 
 	echo '<code id="qhtml" style="display:none">';
-	$message = displayq(0,$_GET['qsetid'],$seed,false,false,0,true);
+	$message = displayq($qn,$_GET['qsetid'],$seed,false,false,0,true);
 	$message = printfilter(forcefiltergraph($message));
 	$message = preg_replace('/(`[^`]*`)/',"<span class=\"AM\">$1</span>",$message);
 	$message = str_replacE('`','\`',$message);

@@ -645,6 +645,7 @@ input[type=submit],input[type=button], button, a.abutton {
 	border: 1px solid #ccc;
 	font: inherit;
 	height:1.5em;
+	line-height: 1.5em;
 	padding: 0 8px;
 	margin: 2px 3px;
 }
@@ -756,6 +757,7 @@ a[target=_blank]:after {
 .mce-content-body a[target=_blank]:after {
 	display: none;
 }
+.mce-content-body span.AMedit {border: 1px solid #ff0000;} 
 div.forumgrp img {
 	max-width: 90%;
 	height: auto;
@@ -879,6 +881,8 @@ pre {
 	left: 0;
 	background: transparent url("img/cc.png") no-repeat right bottom;
 }
+
+
 /*dropdown CSS from bootstrap */
 .dropup,
 .dropdown {

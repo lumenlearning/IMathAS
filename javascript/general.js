@@ -545,6 +545,9 @@ function togglevideoembed() {
 				var vidid = href.split('list=')[1].split(/[#&]/)[0];
 				var vidsrc = 'www.youtube.com/embed/videoseries?list=';
 				qsconn = '&'
+			} else if (href.match(/\/embed\//)) {
+				var vidid = href.split("/embed/")[1].split(/[#&\?]/)[0];
+				var vidsrc = 'www.youtube.com/embed/';
 			} else {
 				var vidid = href.split('v=')[1].split(/[#&]/)[0];
 				var vidsrc = 'www.youtube.com/embed/';
@@ -632,6 +635,22 @@ function hidefromcourselist(el,cid,type) {
 			if (msg=='OK') {
 				jQuery(el).closest("ul.courselist > li").slideUp();
 				jQuery('#unhidelink'+type).show();
+			}
+		});
+	}
+	return false;
+}
+function removeSelfAsCoteacher(el,cid,selector,uid) {
+	selector = selector || "ul.courselist > li";
+	uid = uid || null;
+	if (confirm("Are you SURE you want to remove yourself as a co-teacher on this course?")) {
+		jQuery.ajax({
+			type: "POST",
+			url: imasroot+'/admin/actions.php',
+			data: {action: "removeself", id: cid, uid: uid}
+		}).done(function(msg) {
+			if (msg=='OK') {
+				jQuery(el).closest(selector).slideUp();
 			}
 		});
 	}
@@ -863,7 +882,7 @@ function initSageCell(base) {
 		var $this = jQuery(this);
 		if ($this.is("pre")) {
 			ta = this;
-			code = jQuery(ta).html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'').replace(/\n\n/g,"\n");
+			code = jQuery(ta).html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'');
 		} else {
 			ta = $this.find("textarea");
 			if (ta.length==0 || jQuery(ta[0]).val()=="") {
