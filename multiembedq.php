@@ -268,6 +268,10 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 }
 
 foreach ($qids as $i=>$qid) {
+	if (isset($_GET['show_question_numbers'])) {
+		echo '<div style="padding-left:10px;background-color:#ddd;
+		text-decoration:underline;"> Question '. ($i + 1) .'</div>';
+	}
 	echo '<div id="embedqwrapper'.$i.'" class="embedqwrapper">';
 	$quesout = '';
 	ob_start();
