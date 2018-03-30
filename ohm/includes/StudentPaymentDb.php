@@ -143,7 +143,6 @@ class StudentPaymentDb
 	 * Set the "is student payment required" setting on a course.
 	 *
 	 * @param bool $studentPaymentRequired True if payment is required. False if not.
-	 * @return bool True if student payment is required. False if not. Null if unknown.
 	 * @throws StudentPaymentException Thrown if a non-boolean argument is given.
 	 */
 	public function setCourseRequiresStudentPayment($studentPaymentRequired)
@@ -243,5 +242,28 @@ class StudentPaymentDb
 		}
 
 		return $groupId;
+	}
+
+	/**
+	 * Get the group's Lumen GUID. If none found, null is returned.
+	 *
+	 * @return string|null The group's Lumen GUID. Null if not found.
+	 * @throws StudentPaymentException Thrown if this class is instantiated
+	 * without a group ID.
+	 */
+	function getLumenGuid()
+	{
+		if (is_null($this->groupId)) {
+			throw new StudentPaymentException("Group ID is undefined."
+				. " Please provide a group ID when instantiating this class.");
+		}
+
+		$sth = $this->dbh->prepare("SELECT g.lumen_guid FROM imas_groups AS g
+											WHERE g.id = :id");
+		$sth->execute(array(':id' => $this->courseId));
+		$results = $sth->fetch(\PDO::FETCH_ASSOC);
+		$lumenGuid = $results['lumen_guid'];
+
+		return $lumenGuid;
 	}
 }
