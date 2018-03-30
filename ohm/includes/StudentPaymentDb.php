@@ -260,7 +260,7 @@ class StudentPaymentDb
 
 		$sth = $this->dbh->prepare("SELECT g.lumen_guid FROM imas_groups AS g
 											WHERE g.id = :id");
-		$sth->execute(array(':id' => $this->courseId));
+		$sth->execute(array(':id' => $this->groupId));
 		$results = $sth->fetch(\PDO::FETCH_ASSOC);
 		$lumenGuid = $results['lumen_guid'];
 
