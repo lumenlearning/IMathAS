@@ -30,6 +30,10 @@ final class StudentPaymentApiTest extends TestCase
 	private $pdoMock;
 	private $pdoStatementMock;
 
+	private $groupId = 128;
+	private $courseID = 42;
+	private $studentId = 3072;
+
 	// Responses for course/student status.
 	const ACTIVATION_SUCCESS_RESPONSE = '{"message":"You have successfully submitted your code.","status":"'
 	. StudentPayApiResult::ACTIVATION_SUCCESS . '"}';
@@ -57,8 +61,8 @@ final class StudentPaymentApiTest extends TestCase
 		$this->pdoMock = $this->createMock(PDOMock::class);
 		$this->pdoStatementMock = $this->createMock(PDOStatementMock::class);
 
-		$this->studentPaymentApi = new StudentPaymentApi(128, 42, 3072, $this->curlMock,
-			$this->studentPaymentDbMock);
+		$this->studentPaymentApi = new StudentPaymentApi($this->groupId, $this->courseID,
+			$this->studentId, $this->curlMock, $this->studentPaymentDbMock);
 	}
 
 	/**
@@ -394,6 +398,38 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals('https://www.lumenlearning.com/', $result->getBookstoreUrl());
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['4']);
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
+	}
+
+	/*
+	 * getInstitutionId
+	 */
+
+	function testGetInstitutionIdForApi()
+	{
+		$lumenGuid = '2826e8e4-8d79-4c45-a8d6-0ef862496bc1';
+		$this->studentPaymentDbMock->method('getLumenGuid')->willReturn($lumenGuid);
+
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'getInstitutionIdForApi');
+
+		$this->assertEquals($lumenGuid, $result);
+	}
+
+	function testGetInstitutionIdForApi_NullGuid()
+	{
+		$this->studentPaymentDbMock->method('getLumenGuid')->willReturn(null);
+
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'getInstitutionIdForApi');
+
+		$this->assertEquals($this->groupId, $result);
+	}
+
+	function testGetInstitutionIdForApi_EmptyGuid()
+	{
+		$this->studentPaymentDbMock->method('getLumenGuid')->willReturn('');
+
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'getInstitutionIdForApi');
+
+		$this->assertEquals($this->groupId, $result);
 	}
 
 }

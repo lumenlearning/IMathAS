@@ -27,6 +27,7 @@ class StudentPaymentApi
 
 	private $curl;
 	private $studentPaymentDb;
+	private $institutionIdForApi = null;
 
 	private $groupId;
 	private $courseId;
@@ -82,7 +83,7 @@ class StudentPaymentApi
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
 			\Sanitize::generateQueryStringFromMap(array(
-				'institution_id' => "$this->groupId",
+				'institution_id' => (string)$this->getInstitutionIdForApi(),
 				'section_id' => "$this->courseId",
 				'enrollment_id' => "$enrollmentId"
 			));
@@ -123,7 +124,7 @@ class StudentPaymentApi
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
-			'institution_id' => "$this->groupId",
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId",
 			'code' => $activationCode
@@ -165,7 +166,7 @@ class StudentPaymentApi
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
-			'institution_id' => "$this->groupId",
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId"
 		));
@@ -245,7 +246,7 @@ class StudentPaymentApi
 
 		$requestData = json_encode(array(
 			'event_type' => "$eventType", // Quoted to ensure the value is always sent as a string.
-			'institution_id' => "$this->groupId",
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId"
 		));
@@ -279,7 +280,8 @@ class StudentPaymentApi
 	{
 		$this->curl->reset();
 
-		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/institutions/' . $this->groupId;
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/institutions/'
+			. $this->getInstitutionIdForApi();
 		$this->debug("Lumenistration API URL = " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
@@ -423,4 +425,23 @@ class StudentPaymentApi
 		return $lumenistrationInstitution;
 	}
 
+	/**
+	 * Replace the instance group ID with a Lumen GUID, if available.
+	 *
+	 * @returns string An institution ID for feeding to the student payment API.
+	 * @throws StudentPaymentException Thrown if a group ID was not provided
+	 * when instantiating this class.
+	 */
+	private function getInstitutionIdForApi()
+	{
+		if (!is_null($this->institutionIdForApi)) {
+			return $this->institutionIdForApi;
+		}
+
+		$lumenGuid = $this->studentPaymentDb->getLumenGuid();
+		$this->institutionIdForApi = is_null($lumenGuid) || empty($lumenGuid)
+			? $this->groupId : $lumenGuid;
+
+		return $this->institutionIdForApi;
+	}
 }
