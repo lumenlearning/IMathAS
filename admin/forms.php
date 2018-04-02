@@ -1331,7 +1331,7 @@ function getGroupAssessmentAccessType($groupId) {
 	$groupId = Sanitize::onlyInt($groupId);
 	$studentPaymentDb = new \OHM\StudentPaymentDb($groupId, null, null);
 
-	$currentAccessType = "none";
+	$currentAccessType = null;
 	try {
 		if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentApi.php");
@@ -1343,7 +1343,6 @@ function getGroupAssessmentAccessType($groupId) {
 		error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
 			Sanitize::onlyInt($_GET['id']), $e->getMessage()));
 		error_log($e->getTraceAsString());
-		$currentAccessType = null;
 	}
 
 	return $currentAccessType;
