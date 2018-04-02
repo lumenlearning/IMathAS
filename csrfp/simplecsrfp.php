@@ -284,7 +284,8 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			$log['timestamp'] = time();
 			$log['HOST'] = $_SERVER['HTTP_HOST'];
 			$log['REQUEST_URI'] = $_SERVER['REQUEST_URI'];
-
+			$log['APACHE_HEADERS'] = apache_request_headers();
+			$log['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 			$log['query'] = $_POST;
 
 			if (!isset($_SESSION[CSRFP_TOKEN])) {
