@@ -19,6 +19,7 @@ require_once(__DIR__ . "/CurlRequest.php");
  * Note: IDs are currently sent in API requests as strings, as required by the API.
  *
  * @see StudentPayment For a higher level abstraction with database caching / persistence.
+ * @see https://github.com/lumenlearning/lumenistration/blob/master/docs/API.md
  *
  * @package OHM
  */
@@ -301,6 +302,51 @@ class StudentPaymentApi
 		return $lumenistrationInstitution;
 	}
 
+
+	/**
+	 * Create student payment settings in the student payment API.
+	 *
+	 * @param $accessType string Currently one of: "not_required",
+	 *        "activation_code", "direct_pay"
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function createPaymentSettings($accessType)
+	{
+		if (empty($accessType)) {
+			throw new StudentPaymentException("No access type was specified.");
+		}
+
+		$this->curl->reset();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
+		$this->debug("Lumenistration API URL = " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$requestData = json_encode(array(
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
+			'section_id' => "$this->courseId",
+			'access_type' => "$accessType"
+		));
+		$this->debug("Sending content: " . $requestData);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
 	/**
 	 * Parse an API response containing course and/or student data.
 	 *
@@ -434,6 +480,19 @@ class StudentPaymentApi
 	 */
 	private function getInstitutionIdForApi()
 	{
+		/*
+		 * This is for local dev testing until Lumenistration is updated to
+		 * look up institutions by Lumen GUIDs. (2018 Mar 30)
+		 *
+		 * If this makes it into a commit, please remove.
+		 * This is totally safe to delete. Promise. Really.
+		 */
+		if (isset($GLOBALS['student_pay_api']['deleteme_use_ohm_group_ids'])
+			&& $GLOBALS['student_pay_api']['deleteme_use_ohm_group_ids']) {
+			return $this->groupId;
+		}
+		// End local dev testing stuff.
+
 		if (!is_null($this->institutionIdForApi)) {
 			return $this->institutionIdForApi;
 		}

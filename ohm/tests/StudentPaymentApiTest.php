@@ -240,6 +240,34 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
 	}
 
+	/*
+ 	 * createPaymentSettings
+ 	 */
+
+	function testCreatePaymentSettings()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::EVENT_LOGGED_OK_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$studentPayApiResult = $this->studentPaymentApi->createPaymentSettings('not_required');
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testCreatePaymentSettings_Null()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->studentPaymentApi->createPaymentSettings(null);
+	}
+
+	function testCreatePaymentSettings_EmptyString()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->studentPaymentApi->createPaymentSettings('');
+	}
 
 	/*
 	 * parseApiResponse
