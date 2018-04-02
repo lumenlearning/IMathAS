@@ -1210,9 +1210,10 @@ switch($_GET['action']) {
 
 				renderAcessTypesSelector($currentAccessType);
 
+				printf('<br/><button id="update_student_payment_type" type="button"'
+					. ' onClick="updateStudentPaymentType(%d);">Update student payment type</button>',
+					Sanitize::onlyInt($_GET['id']));
 				echo '<span id="student_payment_update_message"></span>';
-				echo '<br/><button id="update_student_payment_type" type="button"'
-					. ' onClick="updateStudentPaymentType();">Update student payment type</button>';
 
 				echo "</div>";
 			}
@@ -1361,7 +1362,7 @@ function renderAcessTypesSelector($currentAccessType) {
 	);
 
 	echo "<label for='student_payment_type'>Student payments:</label>";
-	echo "<select name='student_payment_type'>";
+	echo "<select id='student_payment_type' name='student_payment_type'>";
 	foreach ($validAccessTypes as $key => $value) {
 		$selected = $currentAccessType == $key ? " selected='selected'" : "";
 		printf("<option value='%s'%s>%s</option>", $key, $selected, $value);

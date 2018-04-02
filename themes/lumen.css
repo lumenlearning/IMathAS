@@ -976,6 +976,10 @@ button#update_student_payment_type:hover {
 	cursor: pointer;
 }
 
+span#student_payment_update_message {
+    margin-top: 1em;
+}
+
 div#ohmEditGroup {
 	border: 1px solid #ccc;
 	border-radius: 5px;
