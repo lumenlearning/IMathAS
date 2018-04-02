@@ -23,18 +23,8 @@ if (!in_array($action, $validActions)) {
 }
 
 if ("setGroupPaymentType" == $action) {
-	$paymentType = isset($_REQUEST['paymentType']) ? $_REQUEST['paymentType'] : NULL;
-	$paymentType = \Sanitize::simpleString($paymentType);
-
-	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
-	$groupId = \Sanitize::onlyInt($groupId);
-
-	if (is_null($groupId) || 1 > $groupId) {
-		response(400, "Invalid group ID provided: " . $_REQUEST['groupId']);
-	}
-	if (is_null($paymentType) || empty($paymentType)) {
-		response(400, "No payment type provided.");
-	}
+	$paymentType = validParamsPaymentType();
+	$groupId = validParamsGroupId();
 
 	if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED != $paymentType) {
 		setStudentPaymentEnabled($groupId, true);
@@ -69,6 +59,44 @@ function response($status, $msg)
 	));
 
 	exit;
+}
+
+
+/**
+ * Get and validate the group ID. If validation fails, we immediately return
+ * HTTP status 400 with an explanation.
+ *
+ * @return integer The group ID.
+ */
+function validParamsGroupId()
+{
+	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
+	$groupId = \Sanitize::onlyInt($groupId);
+
+	if (is_null($groupId) || 1 > $groupId) {
+		response(400, "Invalid group ID provided: " . $_REQUEST['groupId']);
+	}
+
+	return $groupId;
+}
+
+
+/**
+ * Get and validate the student payment / access type. If validation fails, we
+ * immediately return HTTP status 400 with an explanation.
+ *
+ * @return string The student payment / access type.
+ */
+function validParamsPaymentType()
+{
+	$paymentType = isset($_REQUEST['paymentType']) ? $_REQUEST['paymentType'] : NULL;
+	$paymentType = \Sanitize::simpleString($paymentType);
+
+	if (is_null($paymentType) || empty($paymentType)) {
+		response(400, "No payment type provided.");
+	}
+
+	return $paymentType;
 }
 
 
