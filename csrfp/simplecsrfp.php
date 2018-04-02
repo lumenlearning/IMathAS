@@ -42,8 +42,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			// Authorise the incoming request
 			self::authorizePost();
 			
-			if (!isset($_SESSION[CSRFP_TOKEN])
-				|| !isset($_COOKIE[CSRFP_TOKEN])) 
+			if (!isset($_SESSION[CSRFP_TOKEN]))
 			{
 				self::refreshToken();
 			}
@@ -162,8 +161,6 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			$token = self::generateAuthToken();
 
 			$_SESSION[CSRFP_TOKEN] = $token;
-			
-			setcookie(CSRFP_TOKEN, $token);
 		}
 		/*
 		 * Function: generateAuthToken
@@ -203,6 +200,37 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			}
 			return substr($token, 0, $tokenLength);
 		}
+		
+		/*
+		* Function: get_csrf_input_tag
+		*
+		* Return:
+		* string, of HTML input tag containing CSRFP token
+		*/
+		private static function get_csrf_input_tag()
+		{
+			$out = '<input type="hidden" name="'.CSRFP_TOKEN.'" ';
+			$out .= 'class="'.CSRFP_TOKEN.'" value="'.$_SESSION[CSRFP_TOKEN].'" />';
+			return $out;
+		}
+
+		/*
+		 * Function: output_header_code
+		 * outputs the token information and script tag 
+		 * for placement into the <head>
+		 *
+		 * Return:
+		 * string, for inclusion in <head>
+		 */
+		public static function output_header_code()
+		{
+			$out = '<script type="text/javascript" src="' . self::$config['jsUrl'] . '"></script>';
+			$out .= '<script type="text/javascript">';
+			$out .= 'CSRFP.setToken("'.$_SESSION[CSRFP_TOKEN].'");</script>';
+
+			return $out;
+		}
+		
 
 		/*
 		 * Function: ob_handler
@@ -229,17 +257,9 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		        }
 		    }
 
-		    $hiddenInput = '<input type="hidden" name="' . CSRFP_TOKEN . '" 
-		    			class="' . CSRFP_TOKEN . '" 
-		    			value="' . $_SESSION[CSRFP_TOKEN] .'">' .PHP_EOL;
-
 		    //implant hidden fields with token info into forms
-	        $buffer = str_ireplace('</form>', $hiddenInput . '</form>', $buffer);
+	        $buffer = str_ireplace('</form>', self::get_csrf_input_tag() . '</form>', $buffer);
 
-	        //implant the CSRFGuard js file to outgoing script
-		    $script = '<script type="text/javascript" src="' . self::$config['jsUrl'] . '"></script>' . PHP_EOL;
-		    $buffer = str_ireplace('</head>', $script . '</head>', $buffer, $count);
-		    
 		    return $buffer;
 		}
 
@@ -267,7 +287,11 @@ if (!defined('__CSRF_PROTECTOR__')) {
 
 			$log['query'] = $_POST;
 
-			$log['cookie'] = $_COOKIE;
+			if (!isset($_SESSION[CSRFP_TOKEN])) {
+				$log['csrfp_token'] = "not set";
+			} else {
+				$log['csrfp_token'] = $_SESSION[CSRFP_TOKEN];
+			}
 
 			//remove password from query
 			if (isset($log['query']['password'])) {
@@ -293,7 +317,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
 
 				//throw exception if above fopen fails
 				if (!$logFile)
-					throw new logFileWriteError("OWASP CSRFProtector: Unable to write to the log file");
+					throw new logFileWriteError("CSRFProtector: Unable to write to the log file");
 
 				//append log to the file
 				fwrite($logFile, $log);

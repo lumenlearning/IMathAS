@@ -4,7 +4,7 @@
  * Adapted from OWASP Foundation's CSRFP Protector 
   * Licensed under the Apache License, Version 2.0
 
- * Task it does: Fetch csrftoken from cookie, and attach it to every
+ * Task it does: Fetch csrftoken from head, and attach it to every
  *			-- XHR
  *			-- dynamic forms
  * =================================================================
@@ -12,25 +12,30 @@
 
 var CSRFP = {
 	CSRFP_TOKEN: 'csrfp_token',
+	CSRFP_TOKEN_VALUE: 0,
 	/**
-	 * function to get Auth key from cookie Andreturn it to requesting function
+	 * function to set CSRFP token from head
+	 *
+	 * @param: string, token value
+	 *
+	 * @return: void
+	 */
+	setToken: function(token) {
+		CSRFP.CSRFP_TOKEN_VALUE = token;
+	},
+	/**
+	 * function to get Auth key and return it to requesting function
 	 *
 	 * @param: void
 	 *
-	 * @return: string, csrftoken retrieved from cookie
+	 * @return: string, csrftoken
 	 */
 	_getAuthKey: function() {
-		var re = new RegExp(CSRFP.CSRFP_TOKEN +"=([^;]+)(;|$)");
-		var RegExpArray = re.exec(document.cookie);
-
-		if (RegExpArray === null) {
-			return false;
-		}
-		return RegExpArray[1];
+		return CSRFP.CSRFP_TOKEN_VALUE;
 	},
 	/**
 	 * Function to create and return a hidden input element
-	 * For stroing the CSRFP_TOKEN
+	 * For storing the CSRFP_TOKEN
 	 *
 	 * @param void
 	 *
@@ -143,18 +148,18 @@ function csrfprotector_init() {
 	/**
 	 * Add wrapper for HTMLFormElements addEventListener so that any further
 	 * addEventListens won't have trouble with CSRF token
-	 * todo - check for method
 	 */
-	HTMLFormElement.prototype.addEventListener_ = HTMLFormElement.prototype.addEventListener;
-	HTMLFormElement.prototype.addEventListener = function(eventType, fun, bubble) {
-		if (eventType === 'submit') {
-			var wrapped = CSRFP._csrfpWrap(fun, this);
-			this.addEventListener_(eventType, wrapped, bubble);
-		} else {
-			this.addEventListener_(eventType, fun, bubble);
+	 if (typeof HTMLFormElement.prototype.addEventListener !== 'undefined') {
+		HTMLFormElement.prototype.addEventListener_ = HTMLFormElement.prototype.addEventListener;
+		HTMLFormElement.prototype.addEventListener = function(eventType, fun, bubble) {
+			if (eventType === 'submit') {
+				var wrapped = CSRFP._csrfpWrap(fun, this);
+				this.addEventListener_(eventType, wrapped, bubble);
+			} else {
+				this.addEventListener_(eventType, fun, bubble);
+			}
 		}
-	}
-
+	 }
 	/**
 	 * Add wrapper for IE's attachEvent
 	 * todo - check for method
