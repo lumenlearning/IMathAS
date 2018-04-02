@@ -546,43 +546,6 @@ switch($_POST['action']) {
 			}
 		}
 
-		if (isset($_POST['promote']) && isset($_GET['id'])) {
-			$browserprops = json_decode(file_get_contents(__DIR__.'/../javascript/'.$CFG['coursebrowser'], false, null, 25), true);
-
-			$isok = ($copyrights>1);
-			$stm = $DBH->prepare("SELECT jsondata FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$_GET['id']));
-			$jsondata = json_decode($stm->fetchColumn(0), true);
-			if ($jsondata===null) {
-				$jsondata = array();
-			}
-
-			$browserdata = array();
-			foreach ($browserprops as $propname=>$propvals) {
-				if (!empty($propvals['required']) && trim($_POST['browser'.$propname]) == '') {
-					$isok = false;
-					break;
-				}
-				if (!empty($propvals['multi'])) { //multiple values
-					if (isset($_POST['browser'.$propname])) {
-						$browserdata[$propname] = array_map('Sanitize::simpleString', $_POST['browser'.$propname]);
-					} else {
-						$browserdata[$propname] = array();
-					}
-				} else { //single val
-					$browserdata[$propname] = Sanitize::stripHtmlTags($_POST['browser'.$propname]);
-				}
-				if ($_POST['browser'.$propname]=='other') {
-					$browserdata[$propname.'other'] = Sanitize::stripHtmlTags($_POST['browser'.$propname.'other']);
-				}
-			}
-
-			if ($isok) {
-				$istemplate += 16;
-				$jsondata['browser'] = $browserdata;
-			}
-		}
-
 		$_POST['ltisecret'] = trim($_POST['ltisecret']);
 
 		if ($_POST['action']=='modify') {
