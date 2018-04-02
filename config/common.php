@@ -23,6 +23,10 @@ $CFG['GEN']['newpasswords'] = "only";
 //hide Email button on Roster and GB pages
 $CFG['GEN']['noEmailButton'] = true;
 
+$CFG['use_csrfp'] = true;
+//$CFG['csrfp_action'] = 5; //log only
+//$CFG['csrfp_logtype'] = "error_log";
+
 //Amazon's load balancer acts as proxy. Put the real IP address in REMOTE_ADDR
 //for storing as user's IP address
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
