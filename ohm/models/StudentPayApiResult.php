@@ -19,9 +19,14 @@ class StudentPayApiResult
 	const EXTEND_TRIAL_SUCCESS = "extended";
 	const ACTIVATION_SUCCESS = "activation_code_claimed";
 
+	const ACCESS_TYPE_NOT_REQUIRED = "not_required";
+	const ACCESS_TYPE_ACTIVATION_CODE = "activation_code";
+	const ACCESS_TYPE_DIRECT_PAY = "direct_pay";
+
 	private $courseRequiresStudentPayment; // boolean
 	private $studentPaymentStatus; // string (not_paid, in_trial, can_extend, etc)
 	private $trialExpiresInSeconds; // integer
+	private $accessType; // string (none, direct_pay, activation_code, etc)
 	private $apiUserMessage; // string (message to be displayed to the user)
 	private $errors; // array of strings (errors returned from the API)
 
@@ -71,6 +76,22 @@ class StudentPayApiResult
 	public function setTrialExpiresInSeconds($trialExpiresInSeconds)
 	{
 		$this->trialExpiresInSeconds = $trialExpiresInSeconds;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getAccessType()
+	{
+		return $this->accessType;
+	}
+
+	/**
+	 * @param mixed $accessType
+	 */
+	public function setAccessType($accessType)
+	{
+		$this->accessType = $accessType;
 	}
 
 	/**
