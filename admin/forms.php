@@ -1199,25 +1199,23 @@ switch($_GET['action']) {
 			$stm->execute(array(':groupId' => $_GET['id']));
 			$lumenGuid = $stm->fetchColumn(0);
 			printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/><br/>', $lumenGuid);
-		}
 
-		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
-			$studentPaymentDb = new \OHM\StudentPaymentDb($_GET['id'], null, null);
+            if (isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+				echo "<div id='ohmEditGroup'>";
 
-			if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
-				$toggleDisableStudentPaymentsButtonText = "Disable";
-				$ajaxSetStudentPayment = "false";
-			} else {
-				$toggleDisableStudentPaymentsButtonText = "Enable";
-				$ajaxSetStudentPayment = "true";
+				$currentAccessType = getGroupAssessmentAccessType($_GET['id']);
+				if (is_null($currentAccessType)) {
+					echo "<div style='color: #cc0000;'>Error: Failed to get current student payment / access type from API.</div>";
+				}
+
+				renderAcessTypesSelector($currentAccessType);
+
+				echo '<span id="student_payment_update_message"></span>';
+				echo '<br/><button id="update_student_payment_type" type="button"'
+					. ' onClick="updateStudentPaymentType();">Update student payment type</button>';
+
+				echo "</div>";
 			}
-
-			printf('<br/><button id="student_payment_toggle" type="button"'
-				. ' onClick="setGroupStudentPayment(%s, %d);">%s student payments</button>',
-				$ajaxSetStudentPayment, $_GET['id'], $toggleDisableStudentPaymentsButtonText);
-
-			echo '<span id="student_payment_toggle_message"></span><br/><br/>';
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
@@ -1308,6 +1306,73 @@ switch($_GET['action']) {
 		
 		break;
 }
+
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+/**
+ * Get the current student payment / access type from the student payment API for a group.
+ *
+ * As of 2018 Apr 2, valid access types are:
+ * - "not_required"
+ * - "activation_code"
+ * - "direct_pay"
+ *
+ * @param $groupId integer The group ID to get the payment/access type for.
+ * @return string The access type. Null is returned on API communication failure.
+ */
+function getGroupAssessmentAccessType($groupId) {
+	require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+
+	$groupId = Sanitize::onlyInt($groupId);
+	$studentPaymentDb = new \OHM\StudentPaymentDb($groupId, null, null);
+
+	$currentAccessType = "none";
+	try {
+		if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
+			require_once(__DIR__ . "/../ohm/includes/StudentPaymentApi.php");
+			$studentPaymentApi = new \OHM\StudentPaymentApi($groupId, null, null);
+			$currentAccessType = $studentPaymentApi->getGroupAccessType()->getAccessType();
+		}
+	} catch (\OHM\StudentPaymentException $e) {
+		// Don't allow failed API communication to break UX.
+		error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
+			Sanitize::onlyInt($_GET['id']), $e->getMessage()));
+		error_log($e->getTraceAsString());
+		$currentAccessType = null;
+	}
+
+	return $currentAccessType;
+}
+
+/**
+ * Render the <select> portion of a form for student payment / access types.
+ *
+ * @param $currentAccessType string The groups current student payment / access type.
+ */
+function renderAcessTypesSelector($currentAccessType) {
+	$validAccessTypes = array(
+		'not_required' => 'Not required',
+		'direct_pay' => 'Student pays directly',
+		'activation_code' => 'Student provides activation code'
+	);
+
+	echo "<label for='student_payment_type'>Student payments:</label>";
+	echo "<select name='student_payment_type'>";
+	foreach ($validAccessTypes as $key => $value) {
+		$selected = $currentAccessType == $key ? " selected='selected'" : "";
+		printf("<option value='%s'%s>%s</option>", $key, $selected, $value);
+	}
+	echo "</select>";
+}
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 
 require("../footer.php");
 ?>
