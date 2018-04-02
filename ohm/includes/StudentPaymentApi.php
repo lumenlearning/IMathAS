@@ -325,7 +325,6 @@ class StudentPaymentApi
 
 		$requestData = json_encode(array(
 			'institution_id' => (string)$this->getInstitutionIdForApi(),
-			'section_id' => "$this->courseId",
 			'access_type' => "$accessType"
 		));
 		$this->debug("Sending content: " . $requestData);

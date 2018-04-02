@@ -10,6 +10,7 @@ namespace OHM;
 
 require_once(__DIR__ . '/../../init.php');
 require_once(__DIR__ . "/../includes/StudentPaymentDb.php");
+require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
 require_once(__DIR__ . "/../models/StudentPayApiResult.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 
@@ -128,10 +129,10 @@ function setStudentPaymentEnabled($groupId, $isEnabled)
  */
 function dbException($exception, $groupId)
 {
-	error_log(sprintf("Failed to change student payment setting on group ID %d. Exception: %s",
+	error_log(sprintf("Failed to change student payment setting (in OHM database) for group ID %d. Exception: %s",
 		$groupId, $exception->getMessage()));
 	error_log($exception->getTraceAsString());
-	response(500, 'Failed to change student payment setting on group ID ' . $groupId);
+	response(500, 'Failed to change student payment setting for group ID ' . $groupId);
 }
 
 
@@ -148,5 +149,14 @@ function dbException($exception, $groupId)
  */
 function setStudentPaymentType($groupId, $paymentType)
 {
+	$studentPaymentApi = new StudentPaymentApi($groupId, null, null);
 
+	try {
+		$studentPaymentApi->createPaymentSettings($paymentType);
+	} catch (StudentPaymentException $e) {
+		error_log(sprintf("Failed to change student payment setting (in student payment API) for group ID %d. Exception: %s",
+			$groupId, $e->getMessage()));
+		error_log($e->getTraceAsString());
+		response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+	}
 }
