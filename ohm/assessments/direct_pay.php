@@ -1,0 +1,17 @@
+<?php
+require_once(__DIR__ . "/../../init.php");
+require_once(__DIR__ . "/../../header.php");
+?>
+
+<div id="directPay"></div>
+
+<script src="https://fb.me/react-0.13.3.js"></script>
+<script src="../../../lumen-components/build/vanilla/render_direct_pay_component.js"></script>
+<script>
+  renderDirectPayComponent.renderDirectPayComponent('directPay');
+</script>
+
+<?php
+require_once(__DIR__ . "/../../footer.php");
+exit;
+
