@@ -689,7 +689,7 @@
 
 				if (\OHM\StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE == $paymentTypeRequired) {
 					require_once(__DIR__ . "/../ohm/assessments/activation.php");
-				} else {
+				} elseif (\OHM\StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY == $paymentTypeRequired) {
 					require_once(__DIR__ . "/../ohm/assessments/direct_pay.php");
 				}
 			}
