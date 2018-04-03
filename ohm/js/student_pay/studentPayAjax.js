@@ -7,6 +7,8 @@ function updateStudentPaymentType(groupId) {
     var newPaymentType = $('#student_payment_type option:selected').val();
     var newPaymentTypeDesc = $('#student_payment_type option:selected').text();
 
+    $("span#student_payment_update_message").text("").removeAttr('style');
+
     var userInput = confirm(`You are about to change the student payment type for ALL of the courses for this group!
 \nNew payment type: ${newPaymentTypeDesc}`);
 
