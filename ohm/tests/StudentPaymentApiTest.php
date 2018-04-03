@@ -50,7 +50,7 @@ final class StudentPaymentApiTest extends TestCase
 	const INSTITUTION_RESPONSE = '{"id":"957c5216-7857-4b5a-9cb8-17c0c32bb608","name":"Hogwarts School of Witchcraft and Wizardry","external_ids":{"4":"43627281-b00b-4142-8e4c-1e435fe4f1c1","2204":"43627281-b00b-4142-8e4c-1e435fe4f1c1"},"bookstore_information":"Hello, world!","bookstore_url":"https://www.lumenlearning.com/"}';
 
 	const CREATE_PAYMENT_SETTINGS_RESPONSE = '{"status": "ok"}';
-	const ACCESS_TYPE_DIRECT_PAY = '{"status":"ok","access_type":"' . StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY . '"}';
+	const ACCESS_TYPE_DIRECT_PAY_RESPONSE = '{"status":"ok","access_type":"' . StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY . '"}';
 
 	const UNEXPECTED_RESPONSE = 'unexpected response text';
 	const INVALID_CODE_RESPONSE = '{"message":"Code is not valid for this course section","status":"invalid_code_for_section"}';
@@ -76,6 +76,7 @@ final class StudentPaymentApiTest extends TestCase
 	 * @param array $parameters Array of parameters to pass into method.
 	 *
 	 * @return mixed Method return.
+	 * @throws \ReflectionException
 	 */
 	public function invokePrivateMethod(&$object, $methodName, array $parameters = array())
 	{
@@ -279,7 +280,7 @@ final class StudentPaymentApiTest extends TestCase
 	function testGetGroupAccessType()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::ACCESS_TYPE_DIRECT_PAY);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::ACCESS_TYPE_DIRECT_PAY_RESPONSE);
 		$this->curlMock->expects($this->once())->method('reset');
 
 		$studentPayApiResult = $this->studentPaymentApi->getGroupAccessType();
