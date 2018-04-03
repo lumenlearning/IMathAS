@@ -152,7 +152,10 @@ function setStudentPaymentType($groupId, $paymentType)
 	$studentPaymentApi = new StudentPaymentApi($groupId, null, null);
 
 	try {
-		$studentPaymentApi->createPaymentSettings($paymentType);
+		$apiResult = $studentPaymentApi->createPaymentSettings($paymentType);
+		if ($apiResult->getErrors()) {
+			response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+		}
 	} catch (StudentPaymentException $e) {
 		error_log(sprintf("Failed to change student payment setting (in student payment API) for group ID %d. Exception: %s",
 			$groupId, $e->getMessage()));
