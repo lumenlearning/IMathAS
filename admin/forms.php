@@ -1361,7 +1361,7 @@ function renderAcessTypesSelector($currentAccessType) {
 	);
 
 	echo "<label for='student_payment_type'>Student payments:</label>";
-	echo "<select id='student_payment_type' name='student_payment_type'>";
+	echo "<select id='student_payment_type' name='student_payment_type' aria-label='Student payments'>";
 	foreach ($validAccessTypes as $key => $value) {
 		$selected = $currentAccessType == $key ? " selected='selected'" : "";
 		printf("<option value='%s'%s>%s</option>", $key, $selected, $value);
