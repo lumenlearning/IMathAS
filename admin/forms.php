@@ -1205,15 +1205,15 @@ switch($_GET['action']) {
 
 				$currentAccessType = getGroupAssessmentAccessType($_GET['id']);
 				if (is_null($currentAccessType)) {
-					echo "<div style='color: #cc0000;'>Error: Failed to get current student payment / access type from API.</div>";
+					echo "<div id='student_payment_api_failure'>Error: Failed to get current student payment / access type from API.</div>";
 				}
 
 				renderAcessTypesSelector($currentAccessType);
 
+				echo '<span id="student_payment_update_message"></span>';
 				printf('<br/><button id="update_student_payment_type" type="button"'
 					. ' onClick="updateStudentPaymentType(%d);">Update student payment type</button>',
 					Sanitize::onlyInt($_GET['id']));
-				echo '<span id="student_payment_update_message"></span>';
 
 				echo "</div>";
 			}

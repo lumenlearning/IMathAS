@@ -20,14 +20,26 @@ function updateStudentPaymentType(groupId) {
                 'action': 'setGroupPaymentType'
             },
             success: function (res) {
-                $("span#student_payment_update_message").text("Saved!")
-                    .css({'color': 'green', 'font-weight': 'normal', 'display': 'inline'})
-                    .fadeOut(10000);
+                $("span#student_payment_update_message").text("✓ Payment setting saved!")
+                    .css({
+                      'background-color': 'green',
+                      'color': 'white',
+                      'display': 'inline',
+                      'margin-top': '1em',
+                      'padding': '0.5em',
+                      'border-radius': '5px',
+                    });
             },
             error: function (err) {
-                $("span#student_payment_update_message").text("Failed to save new payment setting!")
-                    .css({'color': 'red', 'font-weight': 'bold', 'display': 'inline'})
-                    .fadeOut(60000);
+                $("span#student_payment_update_message").text("✗ Failed to save new payment setting!")
+                    .css({
+                      'background-color': '#d61616',
+                      'color': 'white',
+                      'display': 'inline',
+                      'margin-top': '1em',
+                      'padding': '0.5em',
+                      'border-radius': '5px',
+                    });
             }
         });
     }

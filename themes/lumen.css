@@ -976,8 +976,11 @@ button#update_student_payment_type:hover {
 	cursor: pointer;
 }
 
-span#student_payment_update_message {
-    margin-top: 1em;
+div#student_payment_api_failure {
+	background-color: #d61616;
+	color: #fff;
+	padding: 0.5em;
+	border-radius: 5px;
 }
 
 div#ohmEditGroup {
