@@ -1208,7 +1208,7 @@ switch($_GET['action']) {
 					echo "<div id='student_payment_api_failure'>Error: Failed to get current student payment / access type from API.</div>";
 				}
 
-				renderAcessTypesSelector($currentAccessType);
+				renderAccessTypeSelector($currentAccessType);
 
 				echo '<span id="student_payment_update_message"></span>';
 				printf('<br/><button id="update_student_payment_type" type="button"'
@@ -1317,6 +1317,9 @@ switch($_GET['action']) {
 /**
  * Get the current student payment / access type from the student payment API for a group.
  *
+ * If our cache (OHM db) says student payments are disabled for a group, we
+ * immediately return "not_required".
+ *
  * As of 2018 Apr 2, valid access types are:
  * - "not_required"
  * - "activation_code"
@@ -1327,6 +1330,7 @@ switch($_GET['action']) {
  */
 function getGroupAssessmentAccessType($groupId) {
 	require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
+	require_once(__DIR__ . "/../ohm/models/StudentPayApiResult.php");
 
 	$groupId = Sanitize::onlyInt($groupId);
 	$studentPaymentDb = new \OHM\StudentPaymentDb($groupId, null, null);
@@ -1337,6 +1341,8 @@ function getGroupAssessmentAccessType($groupId) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentApi.php");
 			$studentPaymentApi = new \OHM\StudentPaymentApi($groupId, null, null);
 			$currentAccessType = $studentPaymentApi->getGroupAccessType()->getAccessType();
+		} else {
+			$currentAccessType = \OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
 	} catch (\OHM\StudentPaymentException $e) {
 		// Don't allow failed API communication to break UX.
@@ -1353,7 +1359,7 @@ function getGroupAssessmentAccessType($groupId) {
  *
  * @param $currentAccessType string The groups current student payment / access type.
  */
-function renderAcessTypesSelector($currentAccessType) {
+function renderAccessTypeSelector($currentAccessType) {
 	$validAccessTypes = array(
 		'not_required' => 'Not required',
 		'direct_pay' => 'Student pays directly',
