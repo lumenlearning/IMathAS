@@ -185,6 +185,9 @@ class StudentPayment
 		// Course requires payment
 		$studentPayStatus->setCourseRequiresStudentPayment($studentPayApiResult->getCourseRequiresStudentPayment());
 
+		// Student payment type required
+		$studentPayStatus->setStudentPaymentTypeRequired($studentPayApiResult->getAccessType());
+
 		// Response from API appropriate for display to the user
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
 

@@ -13,6 +13,7 @@ class StudentPayStatus
 {
 
 	private $courseRequiresStudentPayment; // boolean
+	private $studentPaymentTypeRequired; // string
 	private $studentHasValidAccessCode; // boolean
 	private $studentIsInTrial; // boolean
 	private $studentTrialTimeRemainingSeconds; // integer
@@ -33,6 +34,22 @@ class StudentPayStatus
 	public function setCourseRequiresStudentPayment($courseRequiresStudentPayment)
 	{
 		$this->courseRequiresStudentPayment = $courseRequiresStudentPayment;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getStudentPaymentTypeRequired()
+	{
+		return $this->studentPaymentTypeRequired;
+	}
+
+	/**
+	 * @param mixed $studentPaymentTypeRequired
+	 */
+	public function setStudentPaymentTypeRequired($studentPaymentTypeRequired)
+	{
+		$this->studentPaymentTypeRequired = $studentPaymentTypeRequired;
 	}
 
 	/**
