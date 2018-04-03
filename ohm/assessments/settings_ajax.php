@@ -27,13 +27,10 @@ if ("setGroupPaymentType" == $action) {
 	$paymentType = validParamsPaymentType();
 	$groupId = validParamsGroupId();
 
-	if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED != $paymentType) {
-		setStudentPaymentEnabled($groupId, true);
-	} else {
-		setStudentPaymentEnabled($groupId, false);
-	}
-
 	setStudentPaymentType($groupId, $paymentType);
+
+	$newDbState = StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType ? false : true;
+	setStudentPaymentEnabled($groupId, $newDbState);
 
 	response(200, 'OK');
 
