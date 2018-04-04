@@ -88,7 +88,7 @@ class StudentPaymentApi
 				'section_id' => "$this->courseId",
 				'enrollment_id' => "$enrollmentId"
 			));
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->getActivationStatusFromApi : GET " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$headers = array(
@@ -121,7 +121,7 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->activateCode : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
@@ -163,7 +163,7 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay/trials';
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->beginTrial : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
@@ -242,7 +242,7 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/enrollment_events';
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->logEvent : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
@@ -283,7 +283,7 @@ class StudentPaymentApi
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/institutions/'
 			. $this->getInstitutionIdForApi();
-		$this->debug("Lumenistration API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->getInstitutionData : GET " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$headers = array(
@@ -319,7 +319,7 @@ class StudentPaymentApi
 		$this->curl->reset();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
-		$this->debug("Lumenistration API URL = POST " . $requestUrl);
+		$this->debug("StudentPaymentApi->createGroupPaymentSettings : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
@@ -356,7 +356,7 @@ class StudentPaymentApi
 		$this->curl->reset();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
-		$this->debug("Lumenistration API URL = DELETE " . $requestUrl);
+		$this->debug("StudentPaymentApi->deleteGroupPaymentSettings : DELETE " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
@@ -397,7 +397,7 @@ class StudentPaymentApi
 			\Sanitize::generateQueryStringFromMap(array(
 				'institution_id' => (string)$this->getInstitutionIdForApi(),
 			));
-		$this->debug("Student API URL = GET " . $requestUrl);
+		$this->debug("StudentPaymentApi->getGroupAccessType : GET " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$headers = array(
