@@ -149,7 +149,13 @@ function setStudentPaymentType($groupId, $paymentType)
 	$studentPaymentApi = new StudentPaymentApi($groupId, null, null);
 
 	try {
-		$apiResult = $studentPaymentApi->createPaymentSettings($paymentType);
+		$apiResult = null;
+		if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType) {
+			$apiResult = $studentPaymentApi->deleteGroupPaymentSettings();
+		} else {
+			$apiResult = $studentPaymentApi->createGroupPaymentSettings($paymentType);
+		}
+
 		if ($apiResult->getErrors()) {
 			response(500, 'Failed to change student payment setting for group ID ' . $groupId);
 		}
