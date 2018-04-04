@@ -357,7 +357,7 @@ class StudentPaymentApi
 	{
 		$this->curl->reset();
 
-		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings?' .
 			\Sanitize::generateQueryStringFromMap(array(
 				'institution_id' => (string)$this->getInstitutionIdForApi(),
 			));
@@ -374,7 +374,7 @@ class StudentPaymentApi
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		$studentPayApiResult = $this->parseApiResponse($status, $result, [200]);
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 404]);
 		$this->curl->close();
 
 		return $studentPayApiResult;

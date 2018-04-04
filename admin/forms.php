@@ -1340,7 +1340,13 @@ function getGroupAssessmentAccessType($groupId) {
 		if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentApi.php");
 			$studentPaymentApi = new \OHM\StudentPaymentApi($groupId, null, null);
-			$currentAccessType = $studentPaymentApi->getGroupAccessType()->getAccessType();
+			$apiResult = $studentPaymentApi->getGroupAccessType();
+
+			// If the student payment API doesn't know about this group, then
+			// there is no required access type. AKA: free assessments!
+			$currentAccessType = is_null($apiResult->getAccessType()) ?
+				\OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
+				$apiResult->getAccessType();
 		} else {
 			$currentAccessType = \OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
