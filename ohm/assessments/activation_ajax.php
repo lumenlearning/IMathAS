@@ -45,7 +45,7 @@ if ("activate_code" == $action) {
 		response(503, 'Activation code service exception. Temporarily allowing access.');
 	}
 
-	if (!is_null($studentPayment) && !$studentPaymentStatus->getStudentHasValidAccessCode()) {
+	if (!is_null($studentPaymentStatus) && !$studentPaymentStatus->getStudentHasValidAccessCode()) {
 		if ($studentPaymentStatus->getUserMessage()) {
 			response(400, $studentPaymentStatus->getUserMessage());
 		}
