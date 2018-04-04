@@ -274,6 +274,22 @@ final class StudentPaymentApiTest extends TestCase
 	}
 
 	/*
+	 * deleteGroupPaymentSettings
+	 */
+
+	function testDeleteGroupPaymentSettings() {
+		$this->curlMock->method('getInfo')->willReturn(204);
+		$this->curlMock->method('execute')->willReturn('');
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$studentPayApiResult = $this->studentPaymentApi->deleteGroupPaymentSettings('not_required');
+
+		// Don't really care what gets returned, as long as no exceptions are thrown.
+		// (the API returns an HTTP 204 response)
+		$this->assertNotNull($studentPayApiResult);
+	}
+
+	/*
 	 * getGroupAccessType
 	 */
 
