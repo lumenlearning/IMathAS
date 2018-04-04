@@ -380,25 +380,6 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
 	}
 
-	function testParseApiResponse_invalidAccessCode()
-	{
-		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(404, StudentPaymentApiTest::INVALID_CODE_RESPONSE, array('200')));
-
-		$this->assertEquals("Code is not valid for this course section",
-			$studentPayApiResult->getApiUserMessage());
-	}
-
-	function testParseApiResponse_invalidAccessCodeCharacters()
-	{
-		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(400, StudentPaymentApiTest::INVALID_CODE_CHARACTERS_RESPONSE, array('200')));
-
-		$this->assertEquals("Only numbers and letters are used in access codes."
-			. " We also don't use confusing letters or numbers like l 1 0 o, etc.",
-			$studentPayApiResult->getErrors()[0]);
-	}
-
 	/*
 	 * parseInstitutionResponse
 	 */
