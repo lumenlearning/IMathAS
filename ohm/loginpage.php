@@ -77,7 +77,7 @@
 
 	<footer class="footer">
 		<p><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2017 David Lippman |
-		<a href="<?php echo $imasroot;?>/ohm/privacy.php">Privacy Policy</a></p>
+		<a href="<?php echo $CFG['GET']['privacyPolicyPage']; ?>">Privacy Policy</a></p>
 	</footer>
 </div>
 <?php 
