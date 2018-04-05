@@ -37,12 +37,17 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		
 		public static function init($length = null, $action = null)
 		{
+			global $userid, $sessiondata;
+			if (empty($userid)) { //only run if $userid is set
+				return;
+			}
+			
 			self::$config['jsUrl'] = $GLOBALS['basesiteurl'] . "/csrfp/js/simplecsrfprotector.js";
 			
 			// Authorise the incoming request
 			self::authorizePost();
 			
-			if (!isset($_SESSION[CSRFP_TOKEN]))
+			if (!isset($sessiondata[CSRFP_TOKEN]))
 			{
 				self::refreshToken();
 			}
@@ -53,13 +58,14 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		}
 		public static function authorizePost()
 		{
+			global $sessiondata;
 			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 				// look for token in payload else from header
 				$token = self::getTokenFromRequest();
 
 				//currently for same origin only
-				if (!($token && isset($_SESSION[CSRFP_TOKEN])
+				if (!($token && isset($sessiondata[CSRFP_TOKEN])
 					&& (self::isValidToken($token)))) {
 
 					//action in case of failed validation
@@ -105,8 +111,9 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		 * bool - true if its valid else false
 		 */
 		private static function isValidToken($token) {
-			if (!isset($_SESSION[CSRFP_TOKEN])) return false;
-			return ($_SESSION[CSRFP_TOKEN] == $token);
+			global $sessiondata;
+			if (!isset($sessiondata[CSRFP_TOKEN])) return false;
+			return ($sessiondata[CSRFP_TOKEN] == $token);
 		}
 
 		/*
@@ -158,9 +165,11 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		 */
 		public static function refreshToken()
 		{
+			global $sessiondata;
 			$token = self::generateAuthToken();
 
-			$_SESSION[CSRFP_TOKEN] = $token;
+			$sessiondata[CSRFP_TOKEN] = $token;
+			writesessiondata();
 		}
 		/*
 		 * Function: generateAuthToken
@@ -209,8 +218,9 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		*/
 		private static function get_csrf_input_tag()
 		{
+			global $sessiondata;
 			$out = '<input type="hidden" name="'.CSRFP_TOKEN.'" ';
-			$out .= 'class="'.CSRFP_TOKEN.'" value="'.$_SESSION[CSRFP_TOKEN].'" />';
+			$out .= 'class="'.CSRFP_TOKEN.'" value="'.$sessiondata[CSRFP_TOKEN].'" />';
 			return $out;
 		}
 
@@ -224,9 +234,10 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		 */
 		public static function output_header_code()
 		{
+			global $sessiondata;
 			$out = '<script type="text/javascript" src="' . self::$config['jsUrl'] . '"></script>';
 			$out .= '<script type="text/javascript">';
-			$out .= 'CSRFP.setToken("'.$_SESSION[CSRFP_TOKEN].'");</script>';
+			$out .= 'CSRFP.setToken("'.$sessiondata[CSRFP_TOKEN].'");</script>';
 
 			return $out;
 		}
@@ -278,7 +289,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		 */
 		protected static function logCSRFattack()
 		{
-
+			global $sessiondata;
 			//miniature version of the log
 			$log = array();
 			$log['timestamp'] = time();
@@ -291,7 +302,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			if (!isset($_SESSION[CSRFP_TOKEN])) {
 				$log['csrfp_token'] = "not set";
 			} else {
-				$log['csrfp_token'] = $_SESSION[CSRFP_TOKEN];
+				$log['csrfp_token'] = $sessiondata[CSRFP_TOKEN];
 			}
 
 			//remove password from query
