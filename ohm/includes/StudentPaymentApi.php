@@ -192,6 +192,51 @@ class StudentPaymentApi
 	}
 
 	/**
+	 * Pass a JSON object directly to the student payment API.
+	 *
+	 * @param $data array The data to pass to the student payment API.
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function paymentProxy($data)
+	{
+		$this->curl->reset();
+
+		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
+		$this->debug("StudentPaymentApi->paymentProxy : POST " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$requestData = json_encode(array_merge(
+			array(
+				'institution_id' => (string)$this->getInstitutionIdForApi(),
+				'section_id' => "$this->courseId",
+				'enrollment_id' => "$enrollmentId",
+			),
+			$data
+		));
+		$this->debug("Sending content: " . $requestData);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
+			'Content-Type: application/json',
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
+	/**
 	 * Notify the student payment API that a student is taking an assessment while under trial, for metrics.
 	 *
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.

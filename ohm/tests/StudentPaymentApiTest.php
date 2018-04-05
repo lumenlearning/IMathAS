@@ -52,6 +52,8 @@ final class StudentPaymentApiTest extends TestCase
 	const CREATE_PAYMENT_SETTINGS_RESPONSE = '{"status": "ok"}';
 	const ACCESS_TYPE_DIRECT_PAY_RESPONSE = '{"status":"ok","access_type":"' . StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY . '"}';
 
+	const PAYMENT_PROXY_SUCCESS_RESPONSE = '{"status": "ok"}';
+
 	const UNEXPECTED_RESPONSE = 'unexpected response text';
 	const INVALID_CODE_RESPONSE = '{"message":"Code is not valid for this course section","status":"invalid_code_for_section"}';
 	const INVALID_CODE_CHARACTERS_RESPONSE = '{"status":"invalid_code","errors":["Only numbers and letters are used in access codes. We also don\'t use confusing letters or numbers like l 1 0 o, etc."]}';
@@ -190,6 +192,23 @@ final class StudentPaymentApiTest extends TestCase
 	}
 
 	/*
+	 * paymentProxy
+	 */
+
+	function testPaymentProxy()
+	{
+		$this->curlMock->method('getInfo')->willReturn(201);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAYMENT_PROXY_SUCCESS_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$dataToSend = array('one' => 1, 'two' => 2);
+
+		$studentPayApiResult = $this->studentPaymentApi->paymentProxy($dataToSend);
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	/*
 	 * logEvent
 	 */
 
@@ -277,7 +296,8 @@ final class StudentPaymentApiTest extends TestCase
 	 * deleteGroupPaymentSettings
 	 */
 
-	function testDeleteGroupPaymentSettings() {
+	function testDeleteGroupPaymentSettings()
+	{
 		$this->curlMock->method('getInfo')->willReturn(204);
 		$this->curlMock->method('execute')->willReturn('');
 		$this->curlMock->expects($this->once())->method('reset');

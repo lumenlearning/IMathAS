@@ -10,9 +10,10 @@ namespace OHM;
 
 require_once(__DIR__ . '/../../init.php');
 require_once(__DIR__ . "/../includes/StudentPayment.php");
+require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 
-$validActions = array('activate_code');
+$validActions = array('activate_code', 'payment_proxy');
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : NULL;
 
@@ -21,6 +22,10 @@ if (!in_array($action, $validActions)) {
 	response(400, 'No valid activation action specified.');
 }
 
+/**
+ * This is called when a student enters an activation code when attempting
+ * to access an assessment that requires it.
+ */
 if ("activate_code" == $action) {
 	$activationCode = isset($_REQUEST['activationCode']) ? $_REQUEST['activationCode'] : NULL;
 	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
@@ -54,6 +59,30 @@ if ("activate_code" == $action) {
 	response(200, $studentPaymentStatus->getUserMessage());
 
 	exit;
+}
+
+/**
+ * This is called by the Stripe / direct pay component upon successful payment.
+ */
+if ("payment_proxy" == $action) {
+	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
+	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
+	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
+
+	$postData = fopen("php://input", 'r');
+	$data = json_decode($postData);
+
+	$studentPaymentApi = new StudentPaymentApi($_REQUEST['groupId'],
+		$_REQUEST['courseId'], $_REQUEST['studentId']);
+	try {
+		$studentPaymentApi->paymentProxy($data);
+	} catch (StudentPaymentException $e) {
+		error_log(sprintf("Exception while attempting to proxy Stripe response to Lumenistration."
+			. "groupId:%d, courseId:%d, studentId:%d, error: %s",
+			$groupId, $courseId, $studentId, $e->getMessage()));
+		error_log($e->getTraceAsString());
+		response(503, 'Activation code service exception. Temporarily allowing access.');
+	}
 }
 
 // If we get here, something went wrong. Send error response.
