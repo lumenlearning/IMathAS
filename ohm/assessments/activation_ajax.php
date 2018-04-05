@@ -69,6 +69,10 @@ if ("payment_proxy" == $action) {
 	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 
+	studentPaymentDebug(sprintf(
+		'Proxy: Stripe -> Lumenistration for groupId:%d, courseId:%d, studentId:%d',
+		$groupId, $courseId, $studentId));
+
 	$postData = fopen("php://input", 'r');
 	$data = json_decode($postData);
 
@@ -106,5 +110,16 @@ function response($status, $msg)
 	));
 
 	exit;
+}
+
+/**
+ * Log a debugging message, if debugging for student payments is enabled.
+ * @param $message string The debug message to log.
+ */
+function studentPaymentDebug($message)
+{
+	if ($GLOBALS['student_pay_api']['debug']) {
+		error_log($message);
+	}
 }
 
