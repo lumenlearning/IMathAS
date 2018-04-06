@@ -18,7 +18,7 @@ $redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
   directPayComponents.renderDirectPayLandingPage('directPay', {
     'endpoint': '<?php echo $endpoint; ?>',
     'stripeKey': '<?php echo $apiKey; ?>',
-    'amount': '<?php echo $amount; ?>',
+    'chargeAmount': '<?php echo $amount; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
   });
 </script>
