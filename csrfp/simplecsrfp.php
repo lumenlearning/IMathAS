@@ -299,7 +299,7 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			$log['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 			$log['query'] = $_POST;
 
-			if (!isset($_SESSION[CSRFP_TOKEN])) {
+			if (!isset($sessiondata[CSRFP_TOKEN])) {
 				$log['csrfp_token'] = "not set";
 			} else {
 				$log['csrfp_token'] = $sessiondata[CSRFP_TOKEN];
