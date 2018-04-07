@@ -3,7 +3,7 @@ require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
 
 $endpoint = $GLOBALS["basesiteurl"]
-    . '/ohm/assessments/direct_pay.php?action=payment_proxy';
+    . '/ohm/assessments/activation_ajax.php?action=payment_proxy';
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 // FIXME: How are we pricing things? Where is this value coming from??
 $amount = '3000'; // must be a string
