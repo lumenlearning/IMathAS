@@ -30,6 +30,7 @@ $userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'courseTitle': '<?php echo $courseName; ?>',
     'userEmail': '<?php echo $userEmail; ?>',
+    'chargeDescription': '<?php echo 'Lumen OHM - ' . $courseName ?>',
   });
 </script>
 
