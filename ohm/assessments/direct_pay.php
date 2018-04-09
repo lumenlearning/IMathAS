@@ -2,6 +2,8 @@
 require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
 
+global $trialTimeRemaining;
+
 $endpoint = $GLOBALS["basesiteurl"]
     . '/ohm/assessments/activation_ajax.php?action=payment_proxy';
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
@@ -20,6 +22,7 @@ $redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
     'stripeKey': '<?php echo $apiKey; ?>',
     'chargeAmount': '<?php echo $amount; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
+    'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
   });
 </script>
 
