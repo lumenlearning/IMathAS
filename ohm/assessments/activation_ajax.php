@@ -87,6 +87,9 @@ if ("payment_proxy" == $action) {
 		error_log($e->getTraceAsString());
 		response(503, 'Activation code service exception. Temporarily allowing access.');
 	}
+
+	response(200, 'Success.');
+	exit;
 }
 
 // If we get here, something went wrong. Send error response.
