@@ -26,6 +26,7 @@ $userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
     'stripeKey': '<?php echo $apiKey; ?>',
     'chargeAmount': '<?php echo $amount; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
+    'paymentStatus': '<?php echo $paymentStatus; ?>',
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'courseTitle': '<?php echo $courseName; ?>',
     'userEmail': '<?php echo $userEmail; ?>',
