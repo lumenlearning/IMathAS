@@ -14,6 +14,29 @@ $redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
 $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
 $stm->execute(array(':id' => $userid));
 $userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
+
+$redirectTo = null;
+if ('trial_not_started' == $paymentStatus) {
+	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
+		. sprintf('action=begin_trial&group_id=%d&course_id=%d&assessment_id=%d',
+			$courseOwnerGroupId, $courseId, $assessmentId);
+}
+if ('in_trial' == $paymentStatus) {
+	$redirectTo = $GLOBALS['basesiteurl']
+		. sprintf('/ohm/assessments/process_activation.php?action=%s&course_id=%d&assessment_id=%d',
+			'continue_trial', $courseId, $assessmentId);
+}
+if ('can_extend' == $paymentStatus) {
+	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
+		. sprintf('action=extend_trial&group_id=%d&course_id=%d&assessment_id=%d',
+			$courseOwnerGroupId, $courseId, $assessmentId);
+}
+if ('expired' == $paymentStatus) {
+	http://ludev1.example.com/ohm/course/course.php?folder=0&cid=1
+	$redirectTo = $GLOBALS['basesiteurl'] . sprintf('/ohm/course/course.php?cid=%d',
+			$courseId);
+}
+
 ?>
 
 <div id="directPay"></div>
