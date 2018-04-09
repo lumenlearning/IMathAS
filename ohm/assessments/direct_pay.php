@@ -10,6 +10,10 @@ $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 // FIXME: How are we pricing things? Where is this value coming from??
 $amount = '3000'; // must be a string
 $redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
+
+$stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
+$stm->execute(array(':id' => $userid));
+$userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
 ?>
 
 <div id="directPay"></div>
@@ -23,6 +27,8 @@ $redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
     'chargeAmount': '<?php echo $amount; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
+    'courseTitle': '<?php echo $courseName; ?>',
+    'userEmail': '<?php echo $userEmail; ?>',
   });
 </script>
 
