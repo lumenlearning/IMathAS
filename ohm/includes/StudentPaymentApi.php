@@ -213,6 +213,7 @@ class StudentPaymentApi
 				'institution_id' => (string)$this->getInstitutionIdForApi(),
 				'section_id' => "$this->courseId",
 				'enrollment_id' => "$enrollmentId",
+				'token' => $data['stripeToken'],
 			),
 			$data
 		));
