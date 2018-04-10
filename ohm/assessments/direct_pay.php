@@ -4,7 +4,7 @@ require_once(__DIR__ . "/../../header.php");
 
 global $trialTimeRemaining;
 
-$endpoint = $GLOBALS["basesiteurl"]
+$endpointUrl = $GLOBALS["basesiteurl"]
     . '/ohm/assessments/activation_ajax.php?action=payment_proxy';
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 // FIXME: How are we pricing things? Where is this value coming from??
@@ -45,15 +45,19 @@ if ('expired' == $paymentStatus) {
 <script src="../../../lumen-components/build/vanilla_js/direct_pay_components.js"></script>
 <script>
   directPayComponents.renderDirectPayLandingPage('directPay', {
-    'endpoint': '<?php echo $endpoint; ?>',
     'stripeKey': '<?php echo $apiKey; ?>',
-    'chargeAmount': '<?php echo $amount; ?>',
-    'redirectTo': '<?php echo $redirectTo; ?>',
-    'paymentStatus': '<?php echo $paymentStatus; ?>',
-    'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'courseTitle': '<?php echo $courseName; ?>',
     'userEmail': '<?php echo $userEmail; ?>',
-    'chargeDescription': '<?php echo 'Lumen OHM - ' . $courseName ?>',
+    'chargeAmount': '<?php echo $amount; ?>',
+    'institutionName': '<?php echo $groupName; ?>', // FIXME: Provide group name here
+    'chargeDescription': '<?php echo 'Lumen OHM - ' . $courseName ?>', // FIXME: Confirm with Julie or Kate
+    'stripeModalLogoUrl': null, // FIXME: Pass Stripe modal logo URL from Lumenistration
+    'endpointUrl': '<?php echo $endpointUrl; ?>',
+    'redirectTo': '<?php echo $redirectTo; ?>',
+    'schoolLogoUrl': null, // FIXME: Pass school image URL from Lumenistration
+    'lumenLogoUrl': null, // FIXME: Pass Lumen image URL from Lumenistration
+    'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
+    'paymentStatus': '<?php echo $paymentStatus; ?>',
   });
 </script>
 
