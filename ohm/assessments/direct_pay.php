@@ -47,7 +47,7 @@ if ('expired' == $paymentStatus) {
 <div id="directPay"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
-<script src="../../../lumen-components/build/vanilla_js/direct_pay_components.js"></script>
+<script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
 <script>
   directPayComponents.renderDirectPayLandingPage('directPay', {
     'stripeKey': '<?php echo $apiKey; ?>',
