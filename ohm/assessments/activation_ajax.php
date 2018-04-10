@@ -70,22 +70,19 @@ if ("payment_proxy" == $action) {
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 
 	studentPaymentDebug(sprintf(
-		'Proxy: Stripe -> Lumenistration for groupId:%d, courseId:%d, studentId:%d',
+		'Relaying Stripe data to Lumenistration. groupId=%d, courseId=%d, studentId=%d',
 		$groupId, $courseId, $studentId));
 
-	$postData = fopen("php://input", 'r');
-	$data = json_decode($postData);
-
-	$studentPaymentApi = new StudentPaymentApi($_REQUEST['groupId'],
-		$_REQUEST['courseId'], $_REQUEST['studentId']);
+	$studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
 	try {
-		$studentPaymentApi->paymentProxy($data);
+		$formData = $_POST;
+		$studentPaymentApi->paymentProxy($formData);
 	} catch (StudentPaymentException $e) {
-		error_log(sprintf("Exception while attempting to proxy Stripe response to Lumenistration."
-			. "groupId:%d, courseId:%d, studentId:%d, error: %s",
+		error_log(sprintf("Exception while attempting to proxy Stripe data to Lumenistration."
+			. " groupId=%d, courseId=%d, studentId=%d, error: %s",
 			$groupId, $courseId, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
-		response(503, 'Activation code service exception. Temporarily allowing access.');
+		response(503, 'Exception while interacting with Lumenistration. Temporarily allowing access.');
 	}
 
 	response(200, 'Success.');

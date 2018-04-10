@@ -5,7 +5,8 @@ require_once(__DIR__ . "/../../header.php");
 global $trialTimeRemaining;
 
 $endpointUrl = $GLOBALS["basesiteurl"]
-    . '/ohm/assessments/activation_ajax.php?action=payment_proxy';
+    . sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
+    . '&groupId=%d&courseId=%d&studentId=%d', $courseOwnerGroupId, $courseId, $userid);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 // FIXME: How are we pricing things? Where is this value coming from??
 $amount = '3000'; // must be a string
