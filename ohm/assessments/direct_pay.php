@@ -15,6 +15,10 @@ $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
 $stm->execute(array(':id' => $userid));
 $userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
 
+$stm = $DBH->prepare('SELECT name FROM imas_groups WHERE id = :id');
+$stm->execute(array(':id' => $courseOwnerGroupId));
+$groupName = $stm->fetch(PDO::FETCH_ASSOC)['name'];
+
 $redirectTo = null;
 if ('trial_not_started' == $paymentStatus) {
 	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
@@ -49,7 +53,7 @@ if ('expired' == $paymentStatus) {
     'courseTitle': '<?php echo $courseName; ?>',
     'userEmail': '<?php echo $userEmail; ?>',
     'chargeAmount': '<?php echo $amount; ?>',
-    'institutionName': '<?php echo $groupName; ?>', // FIXME: Provide group name here
+    'institutionName': '<?php echo $groupName; ?>',
     'chargeDescription': '<?php echo 'Lumen OHM - ' . $courseName ?>', // FIXME: Confirm with Julie or Kate
     'stripeModalLogoUrl': null, // FIXME: Pass Stripe modal logo URL from Lumenistration
     'endpointUrl': '<?php echo $endpointUrl; ?>',
