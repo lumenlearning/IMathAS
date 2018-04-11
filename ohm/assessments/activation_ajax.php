@@ -69,6 +69,8 @@ if ("payment_proxy" == $action) {
 	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 
+	studentPaymentDebug('Received POST data from Stripe checkout: '
+		. print_r($_POST, true));
 	studentPaymentDebug(sprintf(
 		'Relaying Stripe data to Lumenistration. groupId=%d, courseId=%d, studentId=%d',
 		$groupId, $courseId, $studentId));
@@ -82,10 +84,11 @@ if ("payment_proxy" == $action) {
 			. " groupId=%d, courseId=%d, studentId=%d, error: %s",
 			$groupId, $courseId, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
-		response(503, 'Exception while interacting with Lumenistration. Temporarily allowing access.');
+		header('Location: ' . $GLOBALS["basesiteurl"] . '/assessment/showtest.php', true);
+		exit;
 	}
 
-	response(200, 'Success.');
+	redirect_to_payment_confirmation($courseId);
 	exit;
 }
 
@@ -108,6 +111,25 @@ function response($status, $msg)
 	echo json_encode(array(
 		'message' => $msg
 	));
+
+	exit;
+}
+
+/**
+ * Redirect a user to the direct payment confirmation page.
+ *
+ * @param integer $courseId The course ID for this payment confirmation.
+ */
+function redirect_to_payment_confirmation($courseId)
+{
+	$cookieData = array(
+		'confirmationNum' => $_POST['chargeId'],
+		'courseId' => $courseId
+	);
+	setcookie('ohm_payment_confirmation', json_encode($cookieData), 0);
+
+	$confirmationUrl = $GLOBALS["basesiteurl"] . '/ohm/assessments/payment_confirmation.php';
+	header('Location: ' . $confirmationUrl, true);
 
 	exit;
 }
