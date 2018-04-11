@@ -201,7 +201,15 @@ final class StudentPaymentApiTest extends TestCase
 		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAYMENT_PROXY_SUCCESS_RESPONSE);
 		$this->curlMock->expects($this->once())->method('reset');
 
-		$dataToSend = array('one' => 1, 'two' => 2);
+		$dataToSend = array(
+			"institution_id" => "957c5216-7857-4b5a-9cb8-17c0c32bb608",
+			"section_id" => "1",
+			"enrollment_id" => "108",
+			"stripeToken" => "tok_1bFdanLB3uSPM4hEP1vM2i9N",
+			"stripeTokenType" => "card",
+			"stripeEmail" => "michael@lumenlearning.com",
+			"csrfp_token" => "5072b4d3ea"
+		);
 
 		$studentPayApiResult = $this->studentPaymentApi->paymentProxy($dataToSend);
 
