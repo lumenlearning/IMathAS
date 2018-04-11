@@ -9,10 +9,6 @@ require_once(__DIR__ . "/../../header.php");
 
 $cookieData = json_decode($_COOKIE['ohm_payment_confirmation'], true);
 
-echo '<pre>';
-print_r($cookieData);
-echo '</pre>';
-
 $confirmationNum = $cookieData['confirmationNum'];
 $courseId = $cookieData['courseId'];
 
