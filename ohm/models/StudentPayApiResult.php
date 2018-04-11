@@ -28,6 +28,7 @@ class StudentPayApiResult
 	private $trialExpiresInSeconds; // integer
 	private $accessType; // string (none, direct_pay, activation_code, etc)
 	private $apiUserMessage; // string (message to be displayed to the user)
+	private $paymentInfo; // array/map (raw data received after successful Stripe payment)
 	private $errors; // array of strings (errors returned from the API)
 
 	/**
@@ -108,6 +109,22 @@ class StudentPayApiResult
 	public function setApiUserMessage($apiUserMessage)
 	{
 		$this->apiUserMessage = $apiUserMessage;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getPaymentInfo()
+	{
+		return $this->paymentInfo;
+	}
+
+	/**
+	 * @param mixed $paymentInfo
+	 */
+	public function setPaymentInfo($paymentInfo)
+	{
+		$this->paymentInfo = $paymentInfo;
 	}
 
 	/**

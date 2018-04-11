@@ -52,7 +52,7 @@ final class StudentPaymentApiTest extends TestCase
 	const CREATE_PAYMENT_SETTINGS_RESPONSE = '{"status": "ok"}';
 	const ACCESS_TYPE_DIRECT_PAY_RESPONSE = '{"status":"ok","access_type":"' . StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY . '"}';
 
-	const PAYMENT_PROXY_SUCCESS_RESPONSE = '{"status": "ok"}';
+	const PAYMENT_PROXY_SUCCESS_RESPONSE = '{"status":"ok","payment_info":{"id":6,"email":"michael@lumenlearning.com","charge_token":"ch_1CFWufLB7uSPM4hbXJx61Zqw","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"957c5216-7857-4b5a-9cb8-17c0c32bb608","created_at":"2018-04-11T00:34:13.986Z","updated_at":"2018-04-11T00:34:13.986Z","enrollment_id":"108"}}';
 
 	const UNEXPECTED_RESPONSE = 'unexpected response text';
 	const INVALID_CODE_RESPONSE = '{"message":"Code is not valid for this course section","status":"invalid_code_for_section"}';
@@ -214,6 +214,9 @@ final class StudentPaymentApiTest extends TestCase
 		$studentPayApiResult = $this->studentPaymentApi->paymentProxy($dataToSend);
 
 		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(6, $studentPayApiResult->getPaymentInfo()['id']);
+		$this->assertEquals('4242', $studentPayApiResult->getPaymentInfo()['last_four']);
+		$this->assertEquals('9781640871632', $studentPayApiResult->getPaymentInfo()['isbn']);
 	}
 
 	/*
@@ -422,6 +425,17 @@ final class StudentPaymentApiTest extends TestCase
 			array(200, StudentPaymentApiTest::EVENT_LOGGED_OK_RESPONSE, array('200')));
 
 		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testParseApiResponse_stripePaymentProxy()
+	{
+		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, StudentPaymentApiTest::PAYMENT_PROXY_SUCCESS_RESPONSE, array('200')));
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(6, $studentPayApiResult->getPaymentInfo()['id']);
+		$this->assertEquals('4242', $studentPayApiResult->getPaymentInfo()['last_four']);
+		$this->assertEquals('9781640871632', $studentPayApiResult->getPaymentInfo()['isbn']);
 	}
 
 	/*

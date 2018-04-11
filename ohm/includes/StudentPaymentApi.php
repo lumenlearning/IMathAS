@@ -508,6 +508,9 @@ class StudentPaymentApi
 		if (isset($apiResponse['section_requires_student_payment'])) {
 			$studentPayApiResult->setCourseRequiresStudentPayment($apiResponse['section_requires_student_payment']);
 		}
+		if (isset($apiResponse['payment_info'])) {
+			$studentPayApiResult->setPaymentInfo($apiResponse['payment_info']);
+		}
 		if (isset($apiResponse['errors'])) {
 			$studentPayApiResult->setErrors($apiResponse['errors']);
 		}

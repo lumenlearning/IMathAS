@@ -76,9 +76,10 @@ if ("payment_proxy" == $action) {
 		$groupId, $courseId, $studentId));
 
 	$studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
+	$apiResponse = null;
 	try {
 		$formData = $_POST;
-		$studentPaymentApi->paymentProxy($formData);
+		$apiResponse = $studentPaymentApi->paymentProxy($formData);
 	} catch (StudentPaymentException $e) {
 		error_log(sprintf("Exception while attempting to proxy Stripe data to Lumenistration."
 			. " groupId=%d, courseId=%d, studentId=%d, error: %s",
@@ -88,7 +89,11 @@ if ("payment_proxy" == $action) {
 		exit;
 	}
 
-	redirect_to_payment_confirmation($courseId);
+	$confirmationNum = !is_null($apiResponse->getPaymentInfo()['id']) ?
+		$apiResponse->getPaymentInfo()['id'] :
+		' will be provided via email.';
+
+	redirect_to_payment_confirmation($courseId, $confirmationNum);
 	exit;
 }
 
@@ -120,10 +125,10 @@ function response($status, $msg)
  *
  * @param integer $courseId The course ID for this payment confirmation.
  */
-function redirect_to_payment_confirmation($courseId)
+function redirect_to_payment_confirmation($courseId, $confirmationNum)
 {
 	$cookieData = array(
-		'confirmationNum' => $_POST['chargeId'],
+		'confirmationNum' => $confirmationNum,
 		'courseId' => $courseId
 	);
 	setcookie('ohm_payment_confirmation', json_encode($cookieData), 0);
