@@ -511,6 +511,9 @@ class StudentPaymentApi
 		if (isset($apiResponse['payment_info'])) {
 			$studentPayApiResult->setPaymentInfo($apiResponse['payment_info']);
 		}
+		if (isset($apiResponse['amount_in_cents'])) {
+			$studentPayApiResult->setPaymentAmountInCents($apiResponse['amount_in_cents']);
+		}
 		if (isset($apiResponse['errors'])) {
 			$studentPayApiResult->setErrors($apiResponse['errors']);
 		}

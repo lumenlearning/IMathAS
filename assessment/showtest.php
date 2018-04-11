@@ -692,6 +692,7 @@
 				} elseif (\OHM\StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY == $paymentTypeRequired) {
 					$trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
 					$paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
+					$paymentAmount = $studentPayStatus->getCourseDirectPayAmountInCents();
 					require_once(__DIR__ . "/../ohm/assessments/direct_pay.php");
 				}
 			}

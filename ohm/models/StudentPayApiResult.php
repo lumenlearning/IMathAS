@@ -29,6 +29,7 @@ class StudentPayApiResult
 	private $accessType; // string (none, direct_pay, activation_code, etc)
 	private $apiUserMessage; // string (message to be displayed to the user)
 	private $paymentInfo; // array/map (raw data received after successful Stripe payment)
+	private $paymentAmountInCents; // integer (direct pay cost for a course)
 	private $errors; // array of strings (errors returned from the API)
 
 	/**
@@ -125,6 +126,22 @@ class StudentPayApiResult
 	public function setPaymentInfo($paymentInfo)
 	{
 		$this->paymentInfo = $paymentInfo;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getPaymentAmountInCents()
+	{
+		return $this->paymentAmountInCents;
+	}
+
+	/**
+	 * @param mixed $paymentAmountInCents
+	 */
+	public function setPaymentAmountInCents($paymentAmountInCents)
+	{
+		$this->paymentAmountInCents = $paymentAmountInCents;
 	}
 
 	/**

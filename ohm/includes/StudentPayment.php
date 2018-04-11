@@ -188,6 +188,9 @@ class StudentPayment
 		// Student payment type required
 		$studentPayStatus->setStudentPaymentTypeRequired($studentPayApiResult->getAccessType());
 
+		// Direct payment required for course (if direct_pay enabled)
+		$studentPayStatus->setCourseDirectPayAmountInCents($studentPayApiResult->getPaymentAmountInCents());
+
 		// Response from API appropriate for display to the user
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
 

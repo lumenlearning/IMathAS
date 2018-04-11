@@ -2,14 +2,13 @@
 require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
 
-global $trialTimeRemaining;
+global $trialTimeRemaining, $paymentAmount;
 
 $endpointUrl = $GLOBALS["basesiteurl"]
     . sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
     . '&groupId=%d&courseId=%d&studentId=%d', $courseOwnerGroupId, $courseId, $userid);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
-// FIXME: How are we pricing things? Where is this value coming from??
-$amount = '3000'; // must be a string
+$amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
 $redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
 
 $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');

@@ -18,6 +18,7 @@ class StudentPayStatus
 	private $studentIsInTrial; // boolean
 	private $studentTrialTimeRemainingSeconds; // integer
 	private $studentPaymentRawStatus; // string
+	private $courseDirectPayAmountInCents; // integer
 	private $userMessage; // string
 
 	/**
@@ -120,6 +121,22 @@ class StudentPayStatus
 	public function setStudentPaymentRawStatus($studentPaymentRawStatus)
 	{
 		$this->studentPaymentRawStatus = $studentPaymentRawStatus;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getCourseDirectPayAmountInCents()
+	{
+		return $this->courseDirectPayAmountInCents;
+	}
+
+	/**
+	 * @param mixed $courseDirectPayAmountInCents
+	 */
+	public function setCourseDirectPayAmountInCents($courseDirectPayAmountInCents)
+	{
+		$this->courseDirectPayAmountInCents = $courseDirectPayAmountInCents;
 	}
 
 	/**
