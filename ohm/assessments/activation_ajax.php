@@ -89,9 +89,10 @@ if ("payment_proxy" == $action) {
 		exit;
 	}
 
-	$confirmationNum = !is_null($apiResponse->getPaymentInfo()['id']) ?
-		$apiResponse->getPaymentInfo()['id'] :
-		' will be provided via email.';
+	$confirmationNum = ' will be provided via email.';
+	if (!is_null($apiResponse->getPaymentInfo()) && !is_null($apiResponse->getPaymentInfo()['id'])) {
+		$confirmationNum = $apiResponse->getPaymentInfo()['id'];
+	}
 
 	redirect_to_payment_confirmation($courseId, $confirmationNum);
 	exit;
