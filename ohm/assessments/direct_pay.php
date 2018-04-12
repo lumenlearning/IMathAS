@@ -53,13 +53,13 @@ if ('expired' == $paymentStatus) {
     'courseTitle': '<?php echo $courseName; ?>',
     'userEmail': '<?php echo $userEmail; ?>',
     'chargeAmount': '<?php echo $amount; ?>',
-    'institutionName': '<?php echo $groupName; ?>',
-    'chargeDescription': '<?php echo 'Lumen OHM - ' . $courseName ?>', // FIXME: Confirm with Julie or Kate
-    'stripeModalLogoUrl': null, // FIXME: Pass Stripe modal logo URL from Lumenistration
+    'institutionName': 'Lumen Learning',
+    'chargeDescription': '<?php echo $courseName; ?>', // FIXME: Confirm with Julie or Kate
+    'stripeModalLogoUrl': '/img/internet-troll.jpg', // FIXME: Pass Stripe modal logo URL from Lumenistration
     'endpointUrl': '<?php echo $endpointUrl; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
-    'schoolLogoUrl': null, // FIXME: Pass school image URL from Lumenistration
-    'lumenLogoUrl': null, // FIXME: Pass Lumen image URL from Lumenistration
+    'schoolLogoUrl': '/img/image-3.png', // FIXME: Pass school image URL from Lumenistration
+    'lumenLogoUrl': '/img/cherry-glaze.png', // FIXME: Pass Lumen image URL from Lumenistration
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'paymentStatus': '<?php echo $paymentStatus; ?>',
   });
