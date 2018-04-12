@@ -52,6 +52,7 @@ final class StudentPaymentApiTest extends TestCase
 	const CREATE_PAYMENT_SETTINGS_RESPONSE = '{"status": "ok"}';
 	const ACCESS_TYPE_DIRECT_PAY_RESPONSE = '{"status":"ok","access_type":"' . StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY . '"}';
 
+	// The response we get from Lumenistration after relaying Stripe payment information.
 	const PAYMENT_PROXY_SUCCESS_RESPONSE = '{"status":"ok","payment_info":{"id":6,"email":"michael@lumenlearning.com","charge_token":"ch_1CFWufLB7uSPM4hbXJx61Zqw","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"957c5216-7857-4b5a-9cb8-17c0c32bb608","created_at":"2018-04-11T00:34:13.986Z","updated_at":"2018-04-11T00:34:13.986Z","enrollment_id":"108"}}';
 
 	const UNEXPECTED_RESPONSE = 'unexpected response text';
@@ -339,6 +340,37 @@ final class StudentPaymentApiTest extends TestCase
 	/*
 	 * parseApiResponse
 	 */
+
+	function testParseApiResponse_AllValues()
+	{
+		$responseBody = '{'
+			. '"status":"ok",'
+			. '"message":"It\'s alllll gooooood!",'
+			. '"trial_expired_in":"42",'
+			. '"access_type":"not_required",'
+			. '"section_requires_student_payment":true,'
+			. '"payment_info":{"id":11,"email":"michael@lumenlearning.com","charge_token":"ch_1CG9jELB7uSPM4hbHSZzlalh","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"bb968cf5-c4b1-44db-8618-dd3d128feba8","created_at":"2018-04-12T18:01:01.478Z","updated_at":"2018-04-12T18:01:01.478Z","enrollment_id":"108"},'
+			. '"amount_in_cents":"3000",'
+			. '"errors":["First error","Second error"],'
+			. '"branding":{"logo_url":"https://www.google.com/image.png"}'
+			. '}';
+
+		$apiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, $responseBody, array('200')));
+
+		$this->assertEquals('ok', $apiResult->getStudentPaymentStatus());
+		$this->assertEquals('It\'s alllll gooooood!', $apiResult->getApiUserMessage());
+		$this->assertEquals('42', $apiResult->getTrialExpiresInSeconds());
+		$this->assertEquals('not_required', $apiResult->getAccessType());
+		$this->assertTrue($apiResult->getCourseRequiresStudentPayment());
+		$this->assertEquals('3000', $apiResult->getPaymentAmountInCents());
+		$this->assertEquals('First error', $apiResult->getErrors()[0]);
+		$this->assertEquals('Second error', $apiResult->getErrors()[1]);
+		$this->assertEquals('https://www.google.com/image.png', $apiResult->getSchoolLogoUrl());
+
+		$this->assertNotNull($apiResult->getPaymentInfo());
+		$this->assertEquals('ch_1CG9jELB7uSPM4hbHSZzlalh', $apiResult->getPaymentInfo()['charge_token']);
+	}
 
 	function testParseApiResponse_curlFailed()
 	{

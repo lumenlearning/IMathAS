@@ -141,6 +141,36 @@ final class StudentPaymentTest extends TestCase
 	 * mapApiResultToPayStatus
 	 */
 
+	public function testMapApiResultToPayStatus_AllValues()
+	{
+		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setCourseRequiresStudentPayment(true);
+		$studentPayApiResult->setStudentPaymentStatus("in_trial");
+		$studentPayApiResult->setTrialExpiresInSeconds(42);
+		$studentPayApiResult->setAccessType("direct_pay");
+		$studentPayApiResult->setApiUserMessage("Don't blink.");
+		$studentPayApiResult->setPaymentAmountInCents(3000);
+		$studentPayApiResult->setSchoolLogoUrl('https://www.google.com/image.png');
+		$studentPayApiResult->setErrors(array('First error.', 'Second error.'));
+		$paymentInfo = array('id' => 1234, 'charge_token' => 'ch_1CG9jELB7uSPM4hbHSZzlalh', 'last_four' => '4242');
+		$studentPayApiResult->setPaymentInfo($paymentInfo);
+
+		$studentPayStatus = $this->studentPayment->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+
+		$this->assertTrue($studentPayStatus->getCourseRequiresStudentPayment());
+		$this->assertEquals('direct_pay', $studentPayStatus->getStudentPaymentTypeRequired());
+		$this->assertFalse($studentPayStatus->getStudentHasValidAccessCode());
+		$this->assertTrue($studentPayStatus->getStudentIsInTrial());
+		$this->assertEquals(42, $studentPayStatus->getStudentTrialTimeRemainingSeconds());
+		$this->assertEquals('in_trial', $studentPayStatus->getStudentPaymentRawStatus());
+		$this->assertEquals(3000, $studentPayStatus->getCourseDirectPayAmountInCents());
+		$this->assertEquals('https://www.google.com/image.png', $studentPayStatus->getSchoolLogoUrl());
+		// If errors are returned, we surface them to the user.
+		$this->assertEquals('First error. Second error.', $studentPayStatus->getUserMessage());
+	}
+
 	public function testMapApiResultToPayStatus_InTrial()
 	{
 		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);

@@ -15,6 +15,10 @@ require_once(__DIR__ . "/../models/StudentPayApiResult.php");
  * If cached information is available in MySQL, it will be used.
  * If not, an API call will be made to the student payment API. The results will be cached in MySQL and returned.
  *
+ * Note:
+ *   If caching is not required or desired, it is okay to use the appropriate
+ *   classes directly. The appropriate classes are listed at the end of this phpdoc.
+ *
  * @package OHM
  * @see StudentPaymentApi Used for interaction with the student payments API.
  * @see StudentPaymentDb Used for OHM db interaction related to student payments.
