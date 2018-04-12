@@ -30,6 +30,7 @@ class StudentPayApiResult
 	private $apiUserMessage; // string (message to be displayed to the user)
 	private $paymentInfo; // array/map (raw data received after successful Stripe payment)
 	private $paymentAmountInCents; // integer (direct pay cost for a course)
+	private $schoolLogoUrl; // string
 	private $errors; // array of strings (errors returned from the API)
 
 	/**
@@ -142,6 +143,22 @@ class StudentPayApiResult
 	public function setPaymentAmountInCents($paymentAmountInCents)
 	{
 		$this->paymentAmountInCents = $paymentAmountInCents;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolLogoUrl()
+	{
+		return $this->schoolLogoUrl;
+	}
+
+	/**
+	 * @param mixed $schoolLogoUrl
+	 */
+	public function setSchoolLogoUrl($schoolLogoUrl)
+	{
+		$this->schoolLogoUrl = $schoolLogoUrl;
 	}
 
 	/**

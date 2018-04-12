@@ -194,6 +194,9 @@ class StudentPayment
 		// Response from API appropriate for display to the user
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
 
+		// School branding information
+		$studentPayStatus->setSchoolLogoUrl($studentPayApiResult->getSchoolLogoUrl());
+
 		// Currently, invalid code error messages are returned by the API in a different place.
 		if (!empty($studentPayApiResult->getErrors())) {
 			$allErrors = implode(' ', $studentPayApiResult->getErrors());

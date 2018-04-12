@@ -19,6 +19,7 @@ class StudentPayStatus
 	private $studentTrialTimeRemainingSeconds; // integer
 	private $studentPaymentRawStatus; // string
 	private $courseDirectPayAmountInCents; // integer
+	private $schoolLogoUrl; // string
 	private $userMessage; // string
 
 	/**
@@ -137,6 +138,22 @@ class StudentPayStatus
 	public function setCourseDirectPayAmountInCents($courseDirectPayAmountInCents)
 	{
 		$this->courseDirectPayAmountInCents = $courseDirectPayAmountInCents;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolLogoUrl()
+	{
+		return $this->schoolLogoUrl;
+	}
+
+	/**
+	 * @param mixed $schoolLogoUrl
+	 */
+	public function setSchoolLogoUrl($schoolLogoUrl)
+	{
+		$this->schoolLogoUrl = $schoolLogoUrl;
 	}
 
 	/**

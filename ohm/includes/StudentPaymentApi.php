@@ -517,6 +517,9 @@ class StudentPaymentApi
 		if (isset($apiResponse['errors'])) {
 			$studentPayApiResult->setErrors($apiResponse['errors']);
 		}
+		if (isset($apiResponse['branding'])) {
+			$studentPayApiResult->setSchoolLogoUrl($apiResponse['branding']['logo_url']);
+		}
 
 		return $studentPayApiResult;
 	}
