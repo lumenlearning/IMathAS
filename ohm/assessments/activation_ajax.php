@@ -67,6 +67,7 @@ if ("activate_code" == $action) {
 if ("payment_proxy" == $action) {
 	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
 	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
+	$courseName = getCourseNameById($courseId);
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 
 	studentPaymentDebug('Received POST data from Stripe checkout: '
@@ -78,7 +79,7 @@ if ("payment_proxy" == $action) {
 	$studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
 	$apiResponse = null;
 	try {
-		$formData = $_POST;
+		$formData = array_merge($_POST, array('section_name' => $courseName));
 		$apiResponse = $studentPaymentApi->paymentProxy($formData);
 	} catch (StudentPaymentException $e) {
 		error_log(sprintf("Exception while attempting to proxy Stripe data to Lumenistration."
@@ -138,6 +139,21 @@ function redirect_to_payment_confirmation($courseId, $confirmationNum)
 	header('Location: ' . $confirmationUrl, true);
 
 	exit;
+}
+
+/**
+ * Get a course name by course ID. (from imas_courses)
+ *
+ * @param integer $courseId The course ID.
+ * @return string The course name.
+ */
+function getCourseNameById($courseId)
+{
+	global $DBH;
+	$stm = $DBH->prepare('SELECT name FROM imas_courses WHERE id = :id');
+	$stm->execute(array(':id' => $courseId));
+	$courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
+	return $courseName;
 }
 
 /**
