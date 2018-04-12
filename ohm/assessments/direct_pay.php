@@ -2,14 +2,18 @@
 require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
 
-global $trialTimeRemaining, $paymentAmount;
+global $studentPayStatus;
+
+$trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
+$paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
+$paymentAmount = $studentPayStatus->getCourseDirectPayAmountInCents();
+$schoolLogoUrl = $studentPayStatus->getSchoolLogoUrl();
 
 $endpointUrl = $GLOBALS["basesiteurl"]
     . sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
     . '&groupId=%d&courseId=%d&studentId=%d', $courseOwnerGroupId, $courseId, $userid);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 $amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
-$redirectTo = $GLOBALS["basesiteurl"] . '/ohm/assessment/showtest.php';
 
 $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
 $stm->execute(array(':id' => $userid));
@@ -53,13 +57,13 @@ if ('expired' == $paymentStatus) {
     'courseTitle': '<?php echo $courseName; ?>',
     'userEmail': '<?php echo $userEmail; ?>',
     'chargeAmount': '<?php echo $amount; ?>',
-    'institutionName': 'Lumen Learning',
-    'chargeDescription': '<?php echo $courseName; ?>', // FIXME: Confirm with Julie or Kate
-    'stripeModalLogoUrl': '/img/internet-troll.jpg', // FIXME: Pass Stripe modal logo URL from Lumenistration
+    'institutionName': '<?php echo $groupName; ?>',
+    'chargeDescription': '<?php echo $courseName; ?>',
+    'stripeModalLogoUrl': 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/branding/LumenBlueBG-80x80.png',
     'endpointUrl': '<?php echo $endpointUrl; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
-    'schoolLogoUrl': '/img/image-3.png', // FIXME: Pass school image URL from Lumenistration
-    'lumenLogoUrl': '/img/cherry-glaze.png', // FIXME: Pass Lumen image URL from Lumenistration
+    'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
+    'lumenLogoUrl': 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'paymentStatus': '<?php echo $paymentStatus; ?>',
   });
