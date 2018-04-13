@@ -63,7 +63,7 @@ if ('expired' == $paymentStatus) {
     'endpointUrl': '<?php echo $endpointUrl; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
     'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
-    'lumenLogoUrl': 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
+    'attributionLogoUrl': 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'paymentStatus': '<?php echo $paymentStatus; ?>',
   });
