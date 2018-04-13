@@ -8,6 +8,9 @@ $trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
 $paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
 $paymentAmount = $studentPayStatus->getCourseDirectPayAmountInCents();
 $schoolLogoUrl = $studentPayStatus->getSchoolLogoUrl();
+$stripeModalLogoUrl = 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/branding/LumenBlueBG-80x80.png';
+$attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
+    ? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
 
 $endpointUrl = $GLOBALS["basesiteurl"]
     . sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
@@ -59,11 +62,11 @@ if ('expired' == $paymentStatus) {
     'chargeAmount': '<?php echo $amount; ?>',
     'institutionName': '<?php echo $groupName; ?>',
     'chargeDescription': '<?php echo $courseName; ?>',
-    'stripeModalLogoUrl': 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/branding/LumenBlueBG-80x80.png',
+    'stripeModalLogoUrl': '<?php echo $stripeModalLogoUrl; ?>',
     'endpointUrl': '<?php echo $endpointUrl; ?>',
     'redirectTo': '<?php echo $redirectTo; ?>',
     'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
-    'attributionLogoUrl': 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
+    'attributionLogoUrl': <?php echo $attributionLogoUrl; ?>,
     'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
     'paymentStatus': '<?php echo $paymentStatus; ?>',
   });
