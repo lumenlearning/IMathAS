@@ -7,13 +7,21 @@ if (!isset($_COOKIE['ohm_payment_confirmation'])) {
 require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
 
+require_once(__DIR__ . "/../models/LumenistrationInstitution.php");
+
 $cookieData = json_decode($_COOKIE['ohm_payment_confirmation'], true);
 
 $confirmationNum = $cookieData['confirmationNum'];
+$groupId = $cookieData['groupId'];
 $courseId = $cookieData['courseId'];
 
 $redirectTo = $GLOBALS["basesiteurl"] . '/assessment/showtest.php';
 $paymentStatus = 'has_access';
+
+$institution = getInstitutionData($groupId, $courseId, $userid);
+$schoolLogoUrl = $institution->getSchoolLogoUrl();
+$attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
+	? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
 
 $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
 $stm->execute(array(':id' => $userid));
@@ -35,10 +43,30 @@ $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
         'courseTitle': '<?php echo $courseName; ?>',
         'redirectTo': '<?php echo $redirectTo; ?>',
         'paymentStatus': '<?php echo $paymentStatus; ?>',
+        'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
+        'attributionLogoUrl': <?php echo $attributionLogoUrl; ?>,
       });
     </script>
 
 <?php
+function getInstitutionData($groupId, $courseId, $studentId)
+{
+	require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
+
+	$lumenistrationInstitution = null;
+	try {
+		$studentPaymentApi = new \OHM\StudentPaymentApi($groupId, $courseId, $studentId);
+		$lumenistrationInstitution = $studentPaymentApi->getInstitutionData();
+	} catch (\OHM\StudentPaymentException $e) {
+		error_log("Failed to communicate with Lumenistration. " . $e->getMessage());
+		error_log($e->getTraceAsString());
+		// Don't break the page.
+		$lumenistrationInstitution = new \OHM\LumenistrationInstitution();
+	}
+
+	return $lumenistrationInstitution;
+}
+
 require_once(__DIR__ . "/../../footer.php");
 exit;
 

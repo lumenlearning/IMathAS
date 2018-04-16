@@ -95,7 +95,7 @@ if ("payment_proxy" == $action) {
 		$confirmationNum = $apiResponse->getPaymentInfo()['id'];
 	}
 
-	redirect_to_payment_confirmation($courseId, $confirmationNum);
+	redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum);
 	exit;
 }
 
@@ -125,13 +125,16 @@ function response($status, $msg)
 /**
  * Redirect a user to the direct payment confirmation page.
  *
- * @param integer $courseId The course ID for this payment confirmation.
+ * @param integer $groupId The group ID. (from imas_groups)
+ * @param integer $courseId The course ID. (from imas_courses)
+ * @param string $confirmationNum The confirmation number, as a string.
  */
-function redirect_to_payment_confirmation($courseId, $confirmationNum)
+function redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum)
 {
 	$cookieData = array(
 		'confirmationNum' => $confirmationNum,
-		'courseId' => $courseId
+		'groupId' => $groupId,
+		'courseId' => $courseId,
 	);
 	setcookie('ohm_payment_confirmation', json_encode($cookieData), 0);
 

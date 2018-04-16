@@ -566,6 +566,10 @@ class StudentPaymentApi
 		$lumenistrationInstitution->setBookstoreInformation($apiResponse['bookstore_information']);
 		$lumenistrationInstitution->setBookstoreUrl($apiResponse['bookstore_url']);
 
+		if (isset($apiResponse['branding']['logo_url'])) {
+			$lumenistrationInstitution->setSchoolLogoUrl($apiResponse['branding']['logo_url']);
+		}
+
 		$allExternalIds = array();
 		foreach ($apiResponse['external_ids'] as $key => $value) {
 			$allExternalIds["$key"] = "$value"; // enclosed in quotes to force string type

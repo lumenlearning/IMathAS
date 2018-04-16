@@ -14,6 +14,7 @@ class LumenistrationInstitution
 	private $externalIds; // an array of strings (UUIDs)
 	private $bookstoreInformation; // string (raw message or html for the user)
 	private $bookstoreUrl; // string
+	private $schoolLogoUrl; // string
 
 	/**
 	 * @return mixed
@@ -97,6 +98,22 @@ class LumenistrationInstitution
 	public function setBookstoreUrl($bookstoreUrl)
 	{
 		$this->bookstoreUrl = $bookstoreUrl;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolLogoUrl()
+	{
+		return $this->schoolLogoUrl;
+	}
+
+	/**
+	 * @param mixed $schoolLogoUrl
+	 */
+	public function setSchoolLogoUrl($schoolLogoUrl)
+	{
+		$this->schoolLogoUrl = $schoolLogoUrl;
 	}
 
 }
