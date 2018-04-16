@@ -1,0 +1,10 @@
+paths:
+    tests: ohm/tests
+    output: ohm/tests/_output
+    data: ohm/tests/_data
+    support: ohm/tests/_support
+    envs: ohm/tests/_envs
+actor_suffix: Tester
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
