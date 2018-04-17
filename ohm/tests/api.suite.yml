@@ -1,0 +1,9 @@
+actor: ApiTester
+modules:
+    enabled:
+    - REST:
+        url: http://localhost:80/ohm/api
+        depends: PhpBrowser
+        part: Json
+    - \Helper\Api
+
