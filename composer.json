@@ -21,7 +21,8 @@
     "autoload-dev": {
         "phpunit/phpunit": "^5.7",
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "OHM\\Tests\\Api\\": "ohm/tests/api/"
         }
     },
     "config": {
