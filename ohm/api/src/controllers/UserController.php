@@ -30,7 +30,7 @@ class UserController
 	 * @param array $args
 	 * @return null
 	 */
-	public function showUser($request, $response, $args)
+	public function findAll($request, $response, $args)
 	{
 		list($pageNum, $pageSize) = $this->getPaginationArgs($request);
 
