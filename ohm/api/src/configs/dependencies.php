@@ -27,3 +27,13 @@ $container['db'] = function ($container) use ($capsule) {
 	return $capsule;
 };
 
+// PHP exception handler
+$container['errorHandler'] = function ($c) {
+	return new \OHM\Api\Handlers\ErrorHandler($c);
+};
+
+// PHP 7 exception handler
+$container['phpErrorHandler'] = function ($c) {
+	return new \OHM\Api\Handlers\PhpErrorHandler($c);
+};
+
