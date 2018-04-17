@@ -24,8 +24,8 @@
     },
     "scripts": {
         "start": "php -S localhost:8080 -t public",
-        "test": "echo 'Use targets: test1 and test2'; exit 1",
-        "test1": "phpunit",
-        "test2": "codecept run"
+        "test": "echo 'Use targets: testmom and testohm'; exit 1",
+        "testmom": "phpunit",
+        "testohm": "codecept run"
     }
 }

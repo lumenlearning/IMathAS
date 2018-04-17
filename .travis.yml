@@ -5,5 +5,5 @@ php:
 before_script:
   - composer install
 script:
-  - composer run-script test1
-  - composer run-script test2
+  - composer run-script testmom
+  - composer run-script testohm
