@@ -2,7 +2,7 @@ actor: ApiTester
 modules:
     enabled:
     - REST:
-        url: http://localhost:80/ohm/ohm/api/index.php
+        url: http://localhost:8080/ohm/api/index.php
         depends: PhpBrowser
         part: Json
     - \Helper\Api
