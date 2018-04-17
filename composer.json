@@ -15,6 +15,7 @@
     "autoload": {
         "psr-4": {
             "OHM\\": "ohm/",
+            "OHM\\Models\\": "ohm/models/",
             "OHM\\Api\\": "ohm/api/src/"
         }
     },
