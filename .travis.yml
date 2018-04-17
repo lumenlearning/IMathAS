@@ -4,6 +4,7 @@ php:
   - '5.6'
 before_script:
   - composer install
+  - cp ohm/api/src/configs/settings-example.php ohm/api/src/configs/settings.php
   - php -S 127.0.0.1:8080 -t . &
 script:
   - composer run-script testmom
