@@ -8,6 +8,10 @@ return [
 		'api' => [
 			'defaultPageSize' => 10,
 			'maxPageSize' => 100,
+			'secureUrls' => [
+				'/'
+			],
+			'nonSecureUrls' => [],
 		],
 
 		// Renderer settings
