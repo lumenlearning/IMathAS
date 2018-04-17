@@ -34,27 +34,27 @@ class UserControllerCest extends BaseCestCase
 		$I->seeResponseMatchesJsonType([
 			'id' => 'integer',
 			'SID' => 'string',
-			'rights' => 'string', // integer (as string on PHP 5)
+			'rights' => 'integer', // integer (as string on PHP 5)
 			'FirstName' => 'string',
 			'LastName' => 'string',
 			'email' => 'string',
-			'lastaccess' => 'string', // integer (as string on PHP 5)
-			'groupid' => 'string', // integer (as string on PHP 5)
-			'msgnotify' => 'string', // tinyint(1) (as string on PHP 5)
-			'qrightsdef' => 'string', // tinyint(1) (as string on PHP 5)
-			'deflib' => 'string', // integer (as string on PHP 5)
-			'usedeflib' => 'string', // tinyint(1) (as string on PHP 5)
+			'lastaccess' => 'integer', // integer (as string on PHP 5)
+			'groupid' => 'integer', // integer (as string on PHP 5)
+			'msgnotify' => 'integer', // tinyint(1) (as string on PHP 5)
+			'qrightsdef' => 'integer', // tinyint(1) (as string on PHP 5)
+			'deflib' => 'integer', // integer (as string on PHP 5)
+			'usedeflib' => 'integer', // tinyint(1) (as string on PHP 5)
 			'homelayout' => 'string',
-			'hasuserimg' => 'string', // tinyint(1) (as string on PHP 5)
+			'hasuserimg' => 'integer', // tinyint(1) (as string on PHP 5)
 			'remoteaccess' => 'string',
 			'theme' => 'string',
-			'listperpage' => 'string', // integer (as string on PHP 5)
+			'listperpage' => 'integer', // integer (as string on PHP 5)
 			'hideonpostswidget' => 'string',
-			'specialrights' => 'string', // integer (as string on PHP 5)
+			'specialrights' => 'integer', // integer (as string on PHP 5)
 			'FCMtoken' => 'string',
 			'jsondata' => 'string',
-			'created_at' => 'string|null', // integer (as string on PHP 5)
-			'forcepwreset' => 'string', // integer (as string on PHP 5)
+			'created_at' => 'integer|null', // integer (as string on PHP 5)
+			'forcepwreset' => 'integer', // integer (as string on PHP 5)
 		], '$[*]');
 	}
 }
