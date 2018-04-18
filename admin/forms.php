@@ -429,11 +429,24 @@ switch($_GET['action']) {
 		// #### Begin OHM-specific code #####################################################
 		if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
-			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $_GET['id'], null);
-			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
-			echo '<span class=form>Assessments require payment or activation?</span><span class=formright>';
-			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
-			echo '<label for="studentpay">Students must provide an access code or payment for assessments</label></span><br class="form"/>';
+
+			$courseId = intval($_GET['id']);
+
+			$stm = $DBH->prepare("SELECT u.groupid
+												FROM imas_courses AS c
+													JOIN imas_users AS u ON c.ownerid = u.id
+													WHERE c.id = :courseId");
+			$stm->execute(array(':courseId' => $courseId));
+			$userGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
+
+			$studentPaymentDb = new \OHM\StudentPaymentDb($userGroupId, $courseId, null);
+			$groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+			if ($groupRequiresPayment) {
+				$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
+				echo '<span class=form>Assessments require payment or activation?</span><span class=formright>';
+				printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
+				echo '<label for="studentpay">Students must provide an access code or payment for assessments</label></span><br class="form"/>';
+			}
 		}
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
