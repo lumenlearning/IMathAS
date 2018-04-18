@@ -437,9 +437,9 @@ switch($_GET['action']) {
 													JOIN imas_users AS u ON c.ownerid = u.id
 													WHERE c.id = :courseId");
 			$stm->execute(array(':courseId' => $courseId));
-			$userGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
+			$courseOwnerGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
 
-			$studentPaymentDb = new \OHM\StudentPaymentDb($userGroupId, $courseId, null);
+			$studentPaymentDb = new \OHM\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
 			$groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
 			if ($groupRequiresPayment) {
 				$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
