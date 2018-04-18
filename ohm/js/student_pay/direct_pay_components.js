@@ -98,7 +98,7 @@ var DirectPayButton = function (_React$Component) {
     value: function render() {
       return React.createElement(
         'div',
-        { id: 'payment-button-container', className: 'form-control', style: { paddingBottom: '13px' } },
+        { id: 'payment-button-container', className: 'form-control', style: { paddingBottom: '13px', paddingTop: '13px' } },
         React.createElement('form', { id: 'payment-button-form', action: this.props.endpointUrl, onClick: this.openCheckout, method: 'POST' })
       );
     }
@@ -118,7 +118,7 @@ var DirectPayButton = function (_React$Component) {
 
 var styles = {
   confirmationPageWrapper: {
-    fontFamily: 'Libre Franklin, sans serif',
+    fontFamily: 'Libre Franklin, sans serif !important',
     margin: '2.5em 1.75em',
     color: '#212b36'
   },
@@ -133,7 +133,6 @@ var styles = {
     color: '#212b36'
   },
   courseTitle: {
-    height: '24px',
     fontSize: '16px',
     fontWeight: 'normal',
     fontStyle: 'normal',
@@ -146,8 +145,6 @@ var styles = {
     marginTop: '17px'
   },
   termsAndPrivacy: {
-    height: '40px',
-    width: '340px',
     fontSize: '12px',
     fontWeight: 'normal',
     fontStyle: 'normal',
@@ -157,16 +154,11 @@ var styles = {
     textAlign: 'left',
     color: '#212b36'
   },
-  leftColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexBasis: '50%'
-  },
   rightColumn: {
     display: 'flex',
     flexDirection: 'column',
-    flexBasis: '50%',
-    paddingTop: '17px'
+    flexBasis: '45%',
+    paddingTop: '10px'
   },
   lumenLogo: {
     height: '41px',
@@ -179,7 +171,6 @@ var styles = {
     display: 'block'
   },
   schoolLogoWrapper: {
-    // height: '69px',
     width: '224px',
     paddingBottom: '50px'
   },
@@ -198,9 +189,37 @@ var styles = {
     fontStretch: 'normal',
     letterSpacing: 'normal',
     textAlign: 'left',
-    color: '#212b36'
+    color: '#212b36',
+    lineHeight: '1.6em'
   },
-  smallBlockText: {
+  bottomSmallBlockHeaders: {
+    width: '240px',
+    height: '16px',
+    fontSize: '12px',
+    fontWeight: '600',
+    fontStyle: 'normal',
+    fontStretch: 'normal',
+    letterSpacing: 'normal',
+    textAlign: 'left',
+    color: '#212b36',
+    lineHeight: '1.6em',
+    marginBottom: '12px'
+  },
+  topSmallBlockText: {
+    width: '267px',
+    height: '60px',
+    fontSize: '14px',
+    fontWeight: 'normal',
+    fontStyle: 'normal',
+    fontStretch: 'normal',
+    lineHeight: '1.43',
+    letterSpacing: 'normal',
+    textAlign: 'left',
+    color: '#212b36',
+    marginTop: '5px',
+    marginBottom: '32px'
+  },
+  bottomSmallBlockText: {
     width: '267px',
     height: '60px',
     fontSize: '14px',
@@ -220,7 +239,7 @@ var styles = {
     fontWeight: 'normal',
     fontStyle: 'normal',
     fontStretch: 'normal',
-    lineHeight: '1.43',
+    lineHeight: '2',
     letterSpacing: 'normal',
     textAlign: 'left',
     color: '#1e74d1',
@@ -262,6 +281,8 @@ var DirectPayCourseActivation = function (_React$Component) {
       var privacyPolicy = "https://lumenlearning.com/policies/privacy-policy/";
       var priceInDollars = (this.props.chargeAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
       var parentStyle = { display: 'flex', paddingLeft: '35px' };
+      var tabletSpecs = { display: 'flex', flexDirection: 'column', flexBasis: '50%', paddingRight: '64px', maxWidth: '360px'
+      };
       var renderSmallBlockDecision = this.renderSmallBlockDecision();
       return React.createElement(
         'div',
@@ -271,7 +292,7 @@ var DirectPayCourseActivation = function (_React$Component) {
           { style: _extends({}, parentStyle, this.getParentStyle()) },
           React.createElement(
             'div',
-            { className: 'left-column', style: styles.leftColumn },
+            { className: 'left-column', style: _extends({}, tabletSpecs, this.getTabletSpecs()) },
             React.createElement(
               'h1',
               { className: 'activation-heading', style: styles.activationHeading },
@@ -283,19 +304,28 @@ var DirectPayCourseActivation = function (_React$Component) {
                 style: styles.courseTitle },
               this.props.courseTitle + ': ' + priceInDollars
             ),
+            window.innerWidth < 900 ? React.createElement(
+              'p',
+              { className: 'top-small-block-text', style: styles.topSmallBlockText },
+              'This low-cost activation is only required for assessments. Course content is always available.'
+            ) : "",
             React.createElement(
               'p',
               { className: 'terms-and-privacy', style: styles.termsAndPrivacy },
-              'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning ',
+              'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning',
               React.createElement(
                 'a',
-                { href: termsOfServiceURL, style: { textDecoration: 'underline' } },
+                { href: termsOfServiceURL,
+                  target: "_blank",
+                  style: { textDecoration: 'underline', color: '#212b36' } },
                 'Terms of Use'
               ),
-              ' and ',
+              ' and',
               React.createElement(
                 'a',
-                { href: privacyPolicy, style: { textDecoration: 'underline' } },
+                { href: privacyPolicy,
+                  target: "_blank",
+                  style: { textDecoration: 'underline', color: '#212b36' } },
                 'Privacy Policy'
               ),
               '.'
@@ -311,7 +341,7 @@ var DirectPayCourseActivation = function (_React$Component) {
               userEmail: this.props.userEmail
             })
           ),
-          React.createElement(
+          window.innerWidth < 900 ? "" : React.createElement(
             'div',
             { className: 'right-column', style: styles.rightColumn },
             React.createElement(
@@ -330,7 +360,7 @@ var DirectPayCourseActivation = function (_React$Component) {
             ),
             React.createElement(
               'p',
-              { className: 'small-block-text', style: styles.smallBlockText },
+              { className: 'top-small-block-text', style: styles.topSmallBlockText },
               'This low-cost activation is only required for assessments. Course content is always available.'
             ),
             renderSmallBlockDecision
@@ -358,12 +388,12 @@ var DirectPayCourseActivation = function (_React$Component) {
           null,
           React.createElement(
             'p',
-            { className: 'small-block-headers', style: styles.smallBlockHeaders },
+            { className: 'bottom-small-block-headers', style: styles.bottomSmallBlockHeaders },
             renderStatusBasedText.smallHeader
           ),
           React.createElement(
             'p',
-            { className: 'small-block-text', style: styles.smallBlockText },
+            { className: 'bottom-small-block-text', style: styles.bottomSmallBlockText },
             renderStatusBasedText.smallText
           ),
           React.createElement(
@@ -450,7 +480,21 @@ var DirectPayCourseActivation = function (_React$Component) {
     value: function getParentStyle() {
       var styles$$1 = {};
       if (this.state.windowWidth < 900) {
-        styles$$1 = { flexDirection: 'column' };
+        styles$$1 = {
+          flexDirection: 'column'
+
+        };
+      }
+      return styles$$1;
+    }
+  }, {
+    key: 'getTabletSpecs',
+    value: function getTabletSpecs() {
+      var styles$$1 = {};
+      if (this.state.windowWidth < 900 && this.state.windowWidth > 414) {
+        styles$$1 = {
+          width: '340px'
+        };
       }
       return styles$$1;
     }
@@ -485,7 +529,8 @@ var styles$1 = {
   confirmationSubheading: {
     fontSize: '16px',
     fontWeight: 'normal',
-    lineHeight: '1.5'
+    lineHeight: '1.5',
+    marginTop: '17px'
   },
   confirmationText: {
     margin: '0.25em',
@@ -604,14 +649,18 @@ var styles$2 = {
     lineHeight: '1.43',
     letterSpacing: 'normal',
     textAlign: 'left',
-    color: '#212b36'
+    color: '#212b36',
+    marginLeft: '31px'
   },
   headerBox: {
     fontFamily: 'Libre Franklin, sans serif',
-    height: '67px',
     display: 'flex',
-    alignItems: 'center',
-    paddingLeft: '24px',
+    flexDirection: 'column',
+    alignItems: 'left',
+    padding: '24px',
+    marginLeft: '12px',
+    marginRight: '12px',
+    marginBottom: '24px',
     backgroundColor: 'rgba(252, 240, 205, 0.7)',
     boxShadow: '0 1px 3px 0 rgba(63, 63, 68, 0.15), 0 0 0 1px rgba(63, 63, 68, 0.05)'
   },
@@ -681,7 +730,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css = "/* http://meyerweb.com/eric/tools/css/reset/\n   v2.0 | 20110126\n   License: none (public domain)\n*/\n\nhtml, body, div, span, applet, object, iframe,\nh1, h2, h3, h4, h5, h6, p, blockquote, pre,\na, abbr, acronym, address, big, cite, code,\ndel, dfn, em, img, ins, kbd, q, s, samp,\nsmall, strike, strong, sub, sup, tt, var,\nb, u, i, center,\ndl, dt, dd, ol, ul, li,\nfieldset, form, label, legend,\ntable, caption, tbody, tfoot, thead, tr, th, td,\narticle, aside, canvas, details, embed,\nfigure, figcaption, footer, header, hgroup,\nmenu, nav, output, ruby, section, summary,\ntime, mark, audio, video {\n\tmargin: 0;\n\tpadding: 0;\n\tborder: 0;\n\tfont-size: 100%;\n\tfont: inherit;\n\tvertical-align: baseline;\n}\n/* HTML5 display-role reset for older browsers */\narticle, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {\n\tdisplay: block;\n}\nbody {\n\tline-height: 1;\n}\nol, ul {\n\tlist-style: none;\n}\nblockquote, q {\n\tquotes: none;\n}\nblockquote:before, blockquote:after,\nq:before, q:after {\n\tcontent: '';\n\tcontent: none;\n}\ntable {\n\tborder-collapse: collapse;\n\tborder-spacing: 0;\n}\n";
+var css = "/* http://meyerweb.com/eric/tools/css/reset/\n   v2.0 | 20110126\n   License: none (public domain)\n*/\n\nhtml, body, div, span, applet, object, iframe,\nh1, h2, h3, h4, h5, h6, p, blockquote, pre,\na, abbr, acronym, address, big, cite, code,\ndel, dfn, em, img, ins, kbd, q, s, samp,\nsmall, strike, strong, sub, sup, tt, var,\nb, u, i, center,\ndl, dt, dd, ol, ul, li,\nfieldset, form, label, legend,\ntable, caption, tbody, tfoot, thead, tr, th, td,\narticle, aside, canvas, details, embed,\nfigure, figcaption, footer, header, hgroup,\nmenu, nav, output, ruby, section, summary,\ntime, mark, audio, video {\n\tmargin: 0;\n\tpadding-top: 0;\n\tpadding-bottom: 0;\n\tpadding-left: 0;\n\tpadding-right: 0;\n\tborder: 0;\n\tfont-family: 'Libre Franklin, sans serif';\n\tfont-size: 100%;\n\tfont: inherit;\n\tvertical-align: baseline;\n\tbox-sizing: unset;\n}\n/* HTML5 display-role reset for older browsers */\narticle, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {\n\tdisplay: block;\n}\nbody {\n\tline-height: 1 !important;\n}\nol, ul {\n\tlist-style: none;\n}\nblockquote, q {\n\tquotes: none;\n}\nblockquote:before, blockquote:after,\nq:before, q:after {\n\tcontent: '';\n\tcontent: none;\n}\ntable {\n\tborder-collapse: collapse;\n\tborder-spacing: 0;\n}\n\nbutton {\n\tmargin-bottom: 0;\n}\n";
 styleInject(css);
 
 var css$1 = "@import url('https://fonts.googleapis.com/css?family=Libre+Franklin:400,700');\n";
@@ -702,84 +751,10 @@ var DirectPayLandingPage = function (_React$Component) {
   }
 
   createClass(DirectPayLandingPage, [{
-    key: "loadCorrectView",
-    value: function loadCorrectView() {
-      console.log('props on landing page: ', this.props);
-      if (this.props.paymentStatus === 'has_access') {
-        return React.createElement(DirectPayConfirmation, {
-          chargeAmount: this.props.chargeAmount,
-          confirmationNum: this.props.confirmationNum,
-          userEmail: this.props.userEmail,
-          courseTitle: this.props.courseTitle,
-          redirectTo: this.props.redirectTo
-        });
-      } else {
-        return React.createElement(DirectPayCourseActivation, {
-          paymentStatus: this.props.paymentStatus,
-          stripeKey: this.props.stripeKey,
-          chargeAmount: this.props.chargeAmount,
-          institutionName: this.props.institutionName,
-          chargeDescription: this.props.chargeDescription,
-          stripeModalLogoUrl: this.props.stripeModalLogoUrl,
-          courseTitle: this.props.courseTitle,
-          userEmail: this.props.userEmail,
-          schoolLogoUrl: this.props.schoolLogoUrl,
-          lumenLogoUrl: this.props.lumenLogoUrl,
-          endpointUrl: this.props.endpointUrl,
-          redirectTo: this.props.redirectTo,
-          trialTimeRemaining: this.props.trialTimeRemaining
-        });
-      }
-    }
-  }, {
-    key: "renderCorrectHeaderText",
-    value: function renderCorrectHeaderText() {
-      // PROB SHOULD BE A SEPARATE COMPONENT
-      var language = void 0;
-
-      if (this.props.paymentStatus === 'expired') {
-        language = "Your Trial Has Expired. Course content is still available. However, you need to pay to activate the assessments in this course.";
-      } else if (this.props.paymentStatus === 'can_extend') {
-        language = "Your Trial Has Expired. Activate a one-time pass to extend your trial by 24 hours. ";
-      } else {
-        return '';
-      }
-      return language;
-    }
-  }, {
-    key: "headerComponentDecision",
-    value: function headerComponentDecision() {
-      var renderCorrectHeaderText = this.renderCorrectHeaderText();
-      if (this.props.paymentStatus === 'expired' || this.props.paymentStatus === 'can_extend') {
-        return React.createElement(
-          "div",
-          { className: "header-box", style: styles$2.headerBox },
-          React.createElement("img", {
-            src: "https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-warning.svg",
-            alt: "warning icon",
-            style: { paddingRight: '3px' }
-          }),
-          React.createElement(
-            "div",
-            { className: "header-text", style: styles$2.headerText },
-            renderCorrectHeaderText,
-            this.props.paymentStatus === 'can_extend' ? React.createElement(
-              "a",
-              { href: this.props.redirectTo, style: { textDecoration: 'underline' } },
-              "Activate One-time Pass"
-            ) : ""
-          )
-        );
-      } else {
-        return "";
-      }
-    }
-  }, {
     key: "render",
     value: function render() {
       var loadCorrectView = this.loadCorrectView();
       var headerComponentDecision = this.headerComponentDecision();
-
       return React.createElement(
         "div",
         null,
@@ -800,7 +775,7 @@ var DirectPayLandingPage = function (_React$Component) {
           React.createElement(
             "div",
             null,
-            React.createElement(
+            this.props.attributionLogoUrl === null ? "" : React.createElement(
               "div",
               { className: "lumen-attribution", style: styles$2.lumenAttributionWrapper },
               React.createElement(
@@ -808,12 +783,102 @@ var DirectPayLandingPage = function (_React$Component) {
                 null,
                 "Open Courseware by "
               ),
-              React.createElement("img", { src: this.props.lumenLogoUrl, alt: "Lumen Learning logo", className: "lumen-logo",
+              React.createElement("img", { src: this.props.attributionLogoUrl, alt: "Lumen Learning logo", className: "lumen-logo",
                 style: styles$2.lumenLogo })
             )
           )
         )
       );
+    }
+
+    // HELPER METHODS
+
+  }, {
+    key: "loadCorrectView",
+    value: function loadCorrectView() {
+      if (this.props.paymentStatus === 'has_access') {
+        return React.createElement(DirectPayConfirmation, {
+          chargeAmount: this.props.chargeAmount,
+          confirmationNum: this.props.confirmationNum,
+          userEmail: this.props.userEmail,
+          courseTitle: this.props.courseTitle,
+          redirectTo: this.props.redirectTo
+        });
+      } else {
+        return React.createElement(DirectPayCourseActivation, {
+          paymentStatus: this.props.paymentStatus,
+          stripeKey: this.props.stripeKey,
+          chargeAmount: this.props.chargeAmount,
+          institutionName: this.props.institutionName,
+          chargeDescription: this.props.chargeDescription,
+          stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+          courseTitle: this.props.courseTitle,
+          userEmail: this.props.userEmail,
+          schoolLogoUrl: this.props.schoolLogoUrl,
+          attributionLogoUrl: this.props.attributionLogoUrl,
+          endpointUrl: this.props.endpointUrl,
+          redirectTo: this.props.redirectTo,
+          trialTimeRemaining: this.props.trialTimeRemaining
+        });
+      }
+    }
+  }, {
+    key: "renderCorrectHeaderText",
+    value: function renderCorrectHeaderText() {
+      // PROB SHOULD BE A SEPARATE COMPONENT
+      var language = void 0;
+
+      if (this.props.paymentStatus === 'expired') {
+        language = "Course content is still available. However, you need to pay to activate the assessments in this course.";
+      } else if (this.props.paymentStatus === 'can_extend') {
+        language = "Activate a one-time pass to extend your trial by 24 hours. ";
+      } else {
+        return '';
+      }
+      return language;
+    }
+  }, {
+    key: "headerComponentDecision",
+    value: function headerComponentDecision() {
+      var renderCorrectHeaderText = this.renderCorrectHeaderText();
+      if (this.props.paymentStatus === 'expired' || this.props.paymentStatus === 'can_extend') {
+        return React.createElement(
+          "div",
+          null,
+          React.createElement("div", { style: { height: '3px', backgroundColor: '#edc200', marginLeft: '11px', marginRight: '11px' } }),
+          React.createElement(
+            "div",
+            { className: "header-box", style: styles$2.headerBox },
+            React.createElement(
+              "div",
+              { style: { display: 'flex', flexDirection: 'row' } },
+              React.createElement("img", {
+                src: "https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-warning.svg",
+                alt: "warning icon",
+                style: { paddingRight: '5px' }
+              }),
+              React.createElement(
+                "div",
+                { style: { alignContent: 'left', lineHeight: '1.9em', marginLeft: '5px' } },
+                "Your Trial Has Expired"
+              )
+            ),
+            React.createElement(
+              "div",
+              { className: "header-text", style: styles$2.headerText },
+              renderCorrectHeaderText,
+              this.props.paymentStatus === 'can_extend' ? React.createElement(
+                "a",
+                { href: this.props.redirectTo,
+                  style: { textDecoration: 'underline' } },
+                "Activate One-time Pass"
+              ) : ""
+            )
+          )
+        );
+      } else {
+        return "";
+      }
     }
   }]);
   return DirectPayLandingPage;
