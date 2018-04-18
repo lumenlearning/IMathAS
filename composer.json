@@ -35,6 +35,6 @@
         "start": "php -S localhost:8080 -t public",
         "test": "echo 'Use targets: testmom and testohm'; exit 1",
         "testmom": "phpunit",
-        "testohm": "codecept run"
+        "testohm": "codecept run --steps"
     }
 }
