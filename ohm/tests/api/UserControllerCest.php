@@ -26,6 +26,16 @@ class UserControllerCest extends BaseCestCase
 	/**
 	 * @param ApiTester $I
 	 */
+	public function findAllWithoutAuth($I)
+	{
+		$this->userLogout($I);
+		$I->sendGet('/v1/users');
+		$I->seeResponseCodeIs(HttpCode::UNAUTHORIZED);
+	}
+
+	/**
+	 * @param ApiTester $I
+	 */
 	public function findAll($I)
 	{
 		$I->sendGet('/v1/users');

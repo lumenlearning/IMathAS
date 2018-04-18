@@ -5,5 +5,7 @@ modules:
         url: http://localhost:80/ohm/ohm/api/index.php
         depends: PhpBrowser
         part: Json
+    - PhpBrowser:
+        url: http://localhost:80/ohm/ohm/api/index.php
     - \Helper\Api
 
