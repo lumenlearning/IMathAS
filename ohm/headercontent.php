@@ -8,7 +8,7 @@
 	if (!isset($flexwidth) && $coursetheme == 'lumen.css') {
 		$smallheaderlogo = '<img src="'.$imasroot.'/img/collapse.gif"/>';
 	?>
-	<div id="headercontent">
+	<div id="headercontent" style='font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", "sans-serif"'>
 
 	<div class="headerbar-wrapper">
 		<div id="headerbarlogo">
@@ -82,6 +82,14 @@
 			});
 		});
 	</script>
+
+        <script>
+          $(document).ready(function() {
+            $('div#navlistcont').css(
+              "font-family", '"Open Sans", "Trebuchet MS", "Arial", "Helvetica", "sans-serif"'
+            );
+          });
+        </script>
 
 	<?php
 	$nologo = true;
