@@ -350,7 +350,7 @@ final class StudentPaymentApiTest extends TestCase
 			. '"access_type":"not_required",'
 			. '"section_requires_student_payment":true,'
 			. '"payment_info":{"id":11,"email":"michael@lumenlearning.com","charge_token":"ch_1CG9jELB7uSPM4hbHSZzlalh","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"bb968cf5-c4b1-44db-8618-dd3d128feba8","created_at":"2018-04-12T18:01:01.478Z","updated_at":"2018-04-12T18:01:01.478Z","enrollment_id":"108"},'
-			. '"amount_in_cents":"3000",'
+			. '"amount_cents":"3000",'
 			. '"errors":["First error","Second error"],'
 			. '"branding":{"logo_url":"https://www.google.com/image.png"}'
 			. '}';
