@@ -260,6 +260,17 @@ class StudentPaymentApi
 	}
 
 	/**
+	 * Notify the student payment API that a student has seen the activation code page, for metrics.
+	 *
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function logDirectPaymentPageSeen()
+	{
+		return $this->logEvent('saw_direct_payment_page');
+	}
+
+	/**
 	 * Notify the student payment API that a student has declined a trial, for metrics.
 	 *
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.

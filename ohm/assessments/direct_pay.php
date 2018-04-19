@@ -50,10 +50,12 @@ if ('expired' == $paymentStatus) {
 
 if ('in_trial' == $paymentStatus) {
 	if (isStartingAssessment() || 0 > $studentPayStatus->getStudentTrialTimeRemainingSeconds()) {
+		$studentPayment->logDirectPaymentPageSeen();
 		displayPaymentPage();
 		exit;
 	}
 } elseif ('paid' != $paymentStatus) {
+	$studentPayment->logDirectPaymentPageSeen();
 	displayPaymentPage();
 	exit;
 }

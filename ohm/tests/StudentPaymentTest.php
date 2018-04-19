@@ -333,5 +333,31 @@ final class StudentPaymentTest extends TestCase
 		$this->assertNull($studentPayStatus);
 	}
 
+
+	public function testLogDirectPaymentPageSeen()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("ok");
+
+		$this->studentPaymentApiMock->method('logDirectPaymentPageSeen')->willReturn($studentPayApiResult);
+
+		$studentPayStatus = $this->studentPayment->logDirectPaymentPageSeen();
+
+		$this->assertEquals("ok", $studentPayStatus->getStudentPaymentRawStatus());
+	}
+
+	public function testLogDirectPaymentSeen_Exception()
+	{
+		$studentPayApiResult = new StudentPayApiResult();
+		$studentPayApiResult->setStudentPaymentStatus("dg94hnxkgu4hkd0e");
+
+		$this->studentPaymentApiMock->method('logDirectPaymentPageSeen')
+			->will($this->throwException(new StudentPaymentException('unit_test')));
+
+		$studentPayStatus = $this->studentPayment->logDirectPaymentPageSeen();
+
+		$this->assertNull($studentPayStatus);
+	}
+
 }
 

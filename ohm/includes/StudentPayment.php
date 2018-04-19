@@ -322,6 +322,27 @@ class StudentPayment
 	}
 
 	/**
+	 * Record the fact that the user has seen the direct payment page. This is for metrics.
+	 *
+	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 */
+	public function logDirectPaymentPageSeen()
+	{
+		$studentPayStatus = null;
+		try {
+			$studentPayApiResult = $this->studentPaymentApi->logDirectPaymentPageSeen();
+			$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+		} catch (StudentPaymentException $e) {
+			// Don't allow metrics logging failures to halt the experience!
+			error_log("Exception while logging student payment event: Direct payment page seen. "
+				. $e->getMessage());
+			error_log($e->getTraceAsString());
+		}
+
+		return $studentPayStatus;
+	}
+
+	/**
 	 * Get institution data for the group by its ID. (ID specified in class constructor)
 	 *
 	 * @return LumenistrationInstitution An instance of LumenistrationInstitution.
