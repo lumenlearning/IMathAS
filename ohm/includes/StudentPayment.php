@@ -220,10 +220,10 @@ class StudentPayment
 			StudentPayApiResult::EXTEND_TRIAL_SUCCESS);
 		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validIsInTrial)) {
 			$studentPayStatus->setStudentIsInTrial(true);
-			$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 		} else {
 			$studentPayStatus->setStudentIsInTrial(false);
 		}
+		$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 
 		// Override API value for "course requires activation code" with DB value. (API always returns false)
 		$sadFaceOverride = $this->getCoursePayStatusFromDatabase($studentPayStatus);

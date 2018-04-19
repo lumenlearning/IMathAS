@@ -1,6 +1,5 @@
 <?php
 require_once(__DIR__ . "/../../init.php");
-require_once(__DIR__ . "/../../header.php");
 
 global $studentPayStatus;
 
@@ -10,11 +9,11 @@ $paymentAmount = $studentPayStatus->getCourseDirectPayAmountInCents();
 $schoolLogoUrl = $studentPayStatus->getSchoolLogoUrl();
 $stripeModalLogoUrl = 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/branding/LumenBlueBG-80x80.png';
 $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
-    ? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
+	? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
 
 $endpointUrl = $GLOBALS["basesiteurl"]
-    . sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
-    . '&groupId=%d&courseId=%d&studentId=%d', $courseOwnerGroupId, $courseId, $userid);
+	. sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
+		. '&groupId=%d&courseId=%d&studentId=%d', $courseOwnerGroupId, $courseId, $userid);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 $amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
 
@@ -48,37 +47,57 @@ if ('expired' == $paymentStatus) {
 			$courseId);
 }
 
-?>
 
-<style>
-    button {
-        height: auto;
-    }
-</style>
+if ('in_trial' == $paymentStatus) {
+	if (isStartingAssessment() || 0 > $studentPayStatus->getStudentTrialTimeRemainingSeconds()) {
+		displayPaymentPage();
+		exit;
+	}
+} elseif ('paid' != $paymentStatus) {
+	displayPaymentPage();
+	exit;
+}
 
-<div id="directPay"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
-<script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
-<script>
-  directPayComponents.renderDirectPayLandingPage('directPay', {
-    'stripeKey': '<?php echo $apiKey; ?>',
-    'courseTitle': '<?php echo $courseName; ?>',
-    'userEmail': '<?php echo $userEmail; ?>',
-    'chargeAmount': '<?php echo $amount; ?>',
-    'institutionName': '<?php echo $groupName; ?>',
-    'chargeDescription': '<?php echo $courseName; ?>',
-    'stripeModalLogoUrl': '<?php echo $stripeModalLogoUrl; ?>',
-    'endpointUrl': '<?php echo $endpointUrl; ?>',
-    'redirectTo': '<?php echo $redirectTo; ?>',
-    'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
-    'attributionLogoUrl': <?php echo $attributionLogoUrl; ?>,
-    'trialTimeRemaining': '<?php echo $trialTimeRemaining; ?>',
-    'paymentStatus': '<?php echo $paymentStatus; ?>',
-  });
-</script>
+function displayPaymentPage()
+{
+	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
-<?php
-require_once(__DIR__ . "/../../footer.php");
-exit;
+	require_once(__DIR__ . "/../../header.php");
+	?>
+
+    <style>
+        button {
+            height: auto;
+        }
+    </style>
+
+    <div id="directPay"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
+    <script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
+    <script>
+      directPayComponents.renderDirectPayLandingPage('directPay', {
+        'stripeKey': '<?php echo $GLOBALS['apiKey']; ?>',
+        'courseTitle': '<?php echo $GLOBALS['courseName']; ?>',
+        'userEmail': '<?php echo $GLOBALS['userEmail']; ?>',
+        'chargeAmount': '<?php echo $GLOBALS['amount']; ?>',
+        'institutionName': '<?php echo $GLOBALS['groupName']; ?>',
+        'chargeDescription': '<?php echo $GLOBALS['courseName']; ?>',
+        'stripeModalLogoUrl': '<?php echo $GLOBALS['stripeModalLogoUrl']; ?>',
+        'endpointUrl': '<?php echo $GLOBALS['endpointUrl']; ?>',
+        'redirectTo': '<?php echo $GLOBALS['redirectTo']; ?>',
+        'schoolLogoUrl': '<?php echo $GLOBALS['schoolLogoUrl']; ?>',
+        'attributionLogoUrl': <?php echo $GLOBALS['attributionLogoUrl']; ?>,
+        'trialTimeRemaining': '<?php echo $GLOBALS['trialTimeRemaining']; ?>',
+        'paymentStatus': '<?php echo $GLOBALS['paymentStatus']; ?>',
+      });
+    </script>
+
+	<?php
+	require_once(__DIR__ . "/../../footer.php");
+
+	exit;
+}
+
 
