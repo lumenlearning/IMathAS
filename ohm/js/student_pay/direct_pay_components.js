@@ -71,7 +71,7 @@ var DirectPayButton = function (_React$Component) {
 
     var _this = possibleConstructorReturn(this, (DirectPayButton.__proto__ || Object.getPrototypeOf(DirectPayButton)).call(this, props));
 
-    _this.openCheckout = _this.openCheckout.bind(_this);
+    _this._openCheckout = _this._openCheckout.bind(_this);
     return _this;
   }
 
@@ -99,12 +99,12 @@ var DirectPayButton = function (_React$Component) {
       return React.createElement(
         'div',
         { id: 'payment-button-container', className: 'form-control', style: { paddingBottom: '13px', paddingTop: '13px' } },
-        React.createElement('form', { id: 'payment-button-form', action: this.props.endpointUrl, onClick: this.openCheckout, method: 'POST' })
+        React.createElement('form', { id: 'payment-button-form', action: this.props.endpointUrl, onClick: this._openCheckout, method: 'POST' })
       );
     }
   }, {
-    key: 'openCheckout',
-    value: function openCheckout() {
+    key: '_openCheckout',
+    value: function _openCheckout() {
       return {
         image: this.props.image,
         name: this.props.institutionName,
@@ -117,6 +117,17 @@ var DirectPayButton = function (_React$Component) {
 }(React.Component);
 
 var styles = {
+  parentWrapper: {
+    display: 'flex',
+    paddingLeft: '35px'
+  },
+  leftColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexBasis: '50%',
+    paddingRight: '64px',
+    maxWidth: '360px'
+  },
   confirmationPageWrapper: {
     fontFamily: 'Libre Franklin, sans serif !important',
     margin: '2.5em 1.75em',
@@ -259,9 +270,7 @@ var DirectPayCourseActivation = function (_React$Component) {
       windowWidth: null
     };
 
-    _this.renderStatusBasedText = _this.renderStatusBasedText.bind(_this);
-    _this.handleWindowResize = _this.handleWindowResize.bind(_this);
-    _this.renderSmallBlockDecision = _this.renderSmallBlockDecision.bind(_this);
+    _this._handleWindowResize = _this._handleWindowResize.bind(_this);
     return _this;
   }
 
@@ -269,10 +278,10 @@ var DirectPayCourseActivation = function (_React$Component) {
     key: 'componentWillMount',
     value: function componentWillMount() {
       this.setState({
-        windowWidth: this.getWindowSize()
+        windowWidth: this._getWindowSize()
       });
 
-      window.addEventListener("resize", this.handleWindowResize);
+      window.addEventListener("resize", this._handleWindowResize);
     }
   }, {
     key: 'render',
@@ -280,19 +289,16 @@ var DirectPayCourseActivation = function (_React$Component) {
       var termsOfServiceURL = "https://lumenlearning.com/policies/terms-of-service/";
       var privacyPolicy = "https://lumenlearning.com/policies/privacy-policy/";
       var priceInDollars = (this.props.chargeAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
-      var parentStyle = { display: 'flex', paddingLeft: '35px' };
-      var tabletSpecs = { display: 'flex', flexDirection: 'column', flexBasis: '50%', paddingRight: '64px', maxWidth: '360px'
-      };
-      var renderSmallBlockDecision = this.renderSmallBlockDecision();
+
       return React.createElement(
         'div',
         null,
         React.createElement(
           'div',
-          { style: _extends({}, parentStyle, this.getParentStyle()) },
+          { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
           React.createElement(
             'div',
-            { className: 'left-column', style: _extends({}, tabletSpecs, this.getTabletSpecs()) },
+            { className: 'left-column', style: _extends({}, styles.leftColumn, this._getTabletSpecs()) },
             React.createElement(
               'h1',
               { className: 'activation-heading', style: styles.activationHeading },
@@ -312,20 +318,16 @@ var DirectPayCourseActivation = function (_React$Component) {
             React.createElement(
               'p',
               { className: 'terms-and-privacy', style: styles.termsAndPrivacy },
-              'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning',
+              'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning ',
               React.createElement(
                 'a',
-                { href: termsOfServiceURL,
-                  target: "_blank",
-                  style: { textDecoration: 'underline', color: '#212b36' } },
-                'Terms of Use'
+                { href: termsOfServiceURL, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
+                'Terms of Service'
               ),
-              ' and',
+              ' and ',
               React.createElement(
                 'a',
-                { href: privacyPolicy,
-                  target: "_blank",
-                  style: { textDecoration: 'underline', color: '#212b36' } },
+                { href: privacyPolicy, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
                 'Privacy Policy'
               ),
               '.'
@@ -341,30 +343,7 @@ var DirectPayCourseActivation = function (_React$Component) {
               userEmail: this.props.userEmail
             })
           ),
-          window.innerWidth < 900 ? "" : React.createElement(
-            'div',
-            { className: 'right-column', style: styles.rightColumn },
-            React.createElement(
-              'div',
-              { style: { display: 'flex', flexDirection: 'row' } },
-              React.createElement('img', {
-                src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-info.svg',
-                alt: 'information icon',
-                style: { width: '24', paddingRight: '5px', objectFit: 'contain' }
-              }),
-              React.createElement(
-                'p',
-                { className: 'small-block-headers', style: styles.smallBlockHeaders },
-                'GOOD TO KNOW!'
-              )
-            ),
-            React.createElement(
-              'p',
-              { className: 'top-small-block-text', style: styles.topSmallBlockText },
-              'This low-cost activation is only required for assessments. Course content is always available.'
-            ),
-            renderSmallBlockDecision
-          )
+          this._renderRightColumn()
         )
       );
     }
@@ -373,13 +352,42 @@ var DirectPayCourseActivation = function (_React$Component) {
     value: function componentWillUnmount() {
       window.removeEventListener("resize");
     }
-
-    // HELPER METHODS
-
   }, {
-    key: 'renderSmallBlockDecision',
-    value: function renderSmallBlockDecision() {
-      var renderStatusBasedText = this.renderStatusBasedText();
+    key: '_renderRightColumn',
+    value: function _renderRightColumn() {
+      if (window.innerWidth < 900) {
+        return this._renderSmallBlockDecision();
+      } else {
+        return React.createElement(
+          'div',
+          { className: 'right-column', style: styles.rightColumn },
+          React.createElement(
+            'div',
+            { style: { display: 'flex', flexDirection: 'row' } },
+            React.createElement('img', {
+              src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-info.svg',
+              alt: 'information icon',
+              style: { width: '24', paddingRight: '5px', objectFit: 'contain' }
+            }),
+            React.createElement(
+              'p',
+              { className: 'small-block-headers', style: styles.smallBlockHeaders },
+              'GOOD TO KNOW!'
+            )
+          ),
+          React.createElement(
+            'p',
+            { className: 'top-small-block-text', style: styles.topSmallBlockText },
+            'This low-cost activation is only required for assessments. Course content is always available.'
+          ),
+          this._renderSmallBlockDecision()
+        );
+      }
+    }
+  }, {
+    key: '_renderSmallBlockDecision',
+    value: function _renderSmallBlockDecision() {
+      var renderStatusBasedText = this._renderStatusBasedText();
       var redirectTo = this.props.redirectTo;
 
       if (this.props.paymentStatus === 'in_trial' || this.props.paymentStatus === 'trial_not_started') {
@@ -398,104 +406,88 @@ var DirectPayCourseActivation = function (_React$Component) {
           ),
           React.createElement(
             'a',
-            { href: redirectTo, className: 'two-week-trial-text' },
+            { href: redirectTo, className: 'two-week-trial-text', style: styles.twoWeekTrialText },
             renderStatusBasedText.smallLink
           )
         );
-      } else {
-        return '';
       }
     }
   }, {
-    key: 'renderStatusBasedText',
-    value: function renderStatusBasedText() {
-      var trialTimeRemaining = this.getTrialTimeRemainingWords();
+    key: '_renderStatusBasedText',
+    value: function _renderStatusBasedText() {
+      var trialTimeRemaining = this._getTrialTimeRemainingWords();
       if (this.props.paymentStatus === 'in_trial') {
         return {
           smallHeader: "CONTINUE TRIAL",
           smallText: "You can continue to access your assessments for " + trialTimeRemaining + " before activation is required.",
-          smallLink: React.createElement(
-            'p',
-            null,
-            React.createElement(
-              'a',
-              { href: this.props.redirectTo, style: styles.twoWeekTrialText },
-              'Continue Trial'
-            )
-          ) // NEEDS TO GO TO QUIZ
+          smallLink: "Continue Trial"
         };
       } else if (this.props.paymentStatus === 'trial_not_started') {
         return {
           smallHeader: "NOT READY TO PAY?",
           smallText: "You can access your assessments for two weeks before activation is required.",
-          smallLink: React.createElement(
-            'p',
-            null,
-            React.createElement(
-              'a',
-              { href: this.props.redirectTo, style: styles.twoWeekTrialText },
-              'Start Two-week Trial'
-            )
-          ) // NEEDS TO ACTIVATE TRIAL
+          smallLink: "Start Two-week Trial"
         };
-      } else {
-        return 'This should never happen.';
       }
     }
   }, {
-    key: 'getTrialTimeRemainingWords',
-    value: function getTrialTimeRemainingWords() {
+    key: '_getTrialTimeRemainingWords',
+    value: function _getTrialTimeRemainingWords() {
       var timeLeft = this.props.trialTimeRemaining;
       if (60 > timeLeft) {
         timeLeft = 'less than 1 minute';
       } else if (60 < timeLeft && 120 > timeLeft) {
         timeLeft = '1 minute';
       } else if (3600 >= timeLeft) {
-        timeLeft = (timeLeft / 60).toFixed() + ' minutes';
+        timeLeft = Math.floor(timeLeft / 60) + ' minutes';
       } else if (3600 <= timeLeft && 7200 > timeLeft) {
-        timeLeft = (timeLeft / 3600).toFixed() + ' hour';
+        timeLeft = Math.floor(timeLeft / 3600) + ' hour';
       } else if (86400 > timeLeft) {
-        timeLeft = (timeLeft / 3600).toFixed() + ' hours';
-      } else if (172800 > timeLeft) {
+        timeLeft = Math.floor(timeLeft / 3600) + ' hours';
+      } else if (86400 < timeLeft && 172800 > timeLeft) {
         timeLeft = '1 day';
-      } else if (172800 <= timeLeft) {
+      } else {
         timeLeft = (timeLeft / 86400).toFixed() + ' days';
-      }return timeLeft;
+      }
+      return timeLeft;
     }
   }, {
-    key: 'getWindowSize',
-    value: function getWindowSize() {
+    key: '_getWindowSize',
+    value: function _getWindowSize() {
       return window.innerWidth;
-    } //getWindowSize
-
+    }
   }, {
-    key: 'handleWindowResize',
-    value: function handleWindowResize(e) {
+    key: '_handleWindowResize',
+    value: function _handleWindowResize(e) {
       this.setState({
-        windowWidth: this.getWindowSize()
+        windowWidth: this._getWindowSize()
       });
     }
   }, {
-    key: 'getParentStyle',
-    value: function getParentStyle() {
+    key: '_getParentStyle',
+    value: function _getParentStyle() {
       var styles$$1 = {};
+
       if (this.state.windowWidth < 900) {
         styles$$1 = {
           flexDirection: 'column'
 
         };
       }
+
       return styles$$1;
     }
   }, {
-    key: 'getTabletSpecs',
-    value: function getTabletSpecs() {
+    key: '_getTabletSpecs',
+    value: function _getTabletSpecs() {
       var styles$$1 = {};
+
       if (this.state.windowWidth < 900 && this.state.windowWidth > 414) {
         styles$$1 = {
           width: '340px'
         };
       }
+
       return styles$$1;
     }
   }]);
@@ -572,7 +564,7 @@ var DirectPayConfirmation = function (_React$Component) {
 
     var _this = possibleConstructorReturn(this, (DirectPayConfirmation.__proto__ || Object.getPrototypeOf(DirectPayConfirmation)).call(this, props));
 
-    _this.handleClick = _this.handleClick.bind(_this);
+    _this._handleClick = _this._handleClick.bind(_this);
     return _this;
   }
 
@@ -617,15 +609,15 @@ var DirectPayConfirmation = function (_React$Component) {
           ),
           React.createElement(
             'button',
-            { style: styles$1.continueButton, onClick: this.handleClick },
+            { style: styles$1.continueButton, onClick: this._handleClick },
             'Continue'
           )
         )
       );
     }
   }, {
-    key: 'handleClick',
-    value: function handleClick() {
+    key: '_handleClick',
+    value: function _handleClick() {
       window.location = this.props.redirectTo;
     }
   }]);
@@ -741,24 +733,16 @@ var DirectPayLandingPage = function (_React$Component) {
 
   function DirectPayLandingPage(props) {
     classCallCheck(this, DirectPayLandingPage);
-
-    var _this = possibleConstructorReturn(this, (DirectPayLandingPage.__proto__ || Object.getPrototypeOf(DirectPayLandingPage)).call(this, props));
-
-    _this.loadCorrectView = _this.loadCorrectView.bind(_this);
-    _this.renderCorrectHeaderText = _this.renderCorrectHeaderText.bind(_this);
-    _this.headerComponentDecision = _this.headerComponentDecision.bind(_this);
-    return _this;
+    return possibleConstructorReturn(this, (DirectPayLandingPage.__proto__ || Object.getPrototypeOf(DirectPayLandingPage)).call(this, props));
   }
 
   createClass(DirectPayLandingPage, [{
     key: "render",
     value: function render() {
-      var loadCorrectView = this.loadCorrectView();
-      var headerComponentDecision = this.headerComponentDecision();
       return React.createElement(
         "div",
         null,
-        headerComponentDecision,
+        this._headerComponentDecision(),
         React.createElement(
           "div",
           { className: "landing-page-wrapper", style: styles$2.landingPageWrapper },
@@ -770,7 +754,7 @@ var DirectPayLandingPage = function (_React$Component) {
           React.createElement(
             "div",
             { style: { paddingTop: '40px' } },
-            loadCorrectView
+            this._loadCorrectView()
           ),
           React.createElement(
             "div",
@@ -783,19 +767,16 @@ var DirectPayLandingPage = function (_React$Component) {
                 null,
                 "Open Courseware by "
               ),
-              React.createElement("img", { src: this.props.attributionLogoUrl, alt: "Lumen Learning logo", className: "lumen-logo",
+              React.createElement("img", { src: "https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png", alt: "Lumen Learning logo", className: "lumen-logo",
                 style: styles$2.lumenLogo })
             )
           )
         )
       );
     }
-
-    // HELPER METHODS
-
   }, {
-    key: "loadCorrectView",
-    value: function loadCorrectView() {
+    key: "_loadCorrectView",
+    value: function _loadCorrectView() {
       if (this.props.paymentStatus === 'has_access') {
         return React.createElement(DirectPayConfirmation, {
           chargeAmount: this.props.chargeAmount,
@@ -823,9 +804,8 @@ var DirectPayLandingPage = function (_React$Component) {
       }
     }
   }, {
-    key: "renderCorrectHeaderText",
-    value: function renderCorrectHeaderText() {
-      // PROB SHOULD BE A SEPARATE COMPONENT
+    key: "_renderCorrectHeaderText",
+    value: function _renderCorrectHeaderText() {
       var language = void 0;
 
       if (this.props.paymentStatus === 'expired') {
@@ -835,12 +815,12 @@ var DirectPayLandingPage = function (_React$Component) {
       } else {
         return '';
       }
+
       return language;
     }
   }, {
-    key: "headerComponentDecision",
-    value: function headerComponentDecision() {
-      var renderCorrectHeaderText = this.renderCorrectHeaderText();
+    key: "_headerComponentDecision",
+    value: function _headerComponentDecision() {
       if (this.props.paymentStatus === 'expired' || this.props.paymentStatus === 'can_extend') {
         return React.createElement(
           "div",
@@ -866,18 +846,15 @@ var DirectPayLandingPage = function (_React$Component) {
             React.createElement(
               "div",
               { className: "header-text", style: styles$2.headerText },
-              renderCorrectHeaderText,
+              this._renderCorrectHeaderText(),
               this.props.paymentStatus === 'can_extend' ? React.createElement(
                 "a",
-                { href: this.props.redirectTo,
-                  style: { textDecoration: 'underline' } },
+                { href: this.props.redirectTo, style: { textDecoration: 'underline' } },
                 "Activate One-time Pass"
               ) : ""
             )
           )
         );
-      } else {
-        return "";
       }
     }
   }]);
