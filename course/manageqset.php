@@ -913,11 +913,11 @@ if ($myrights<20) {
 
 			$page_questionTable[$i]['checkbox'] = "<input type=checkbox name='nchecked[]' value='" . $line['id'] . "' id='qo$ln'>";
 			if ($line['userights']==0) {
-				$page_questionTable[$i]['desc'] = '<span class="noticetext">'.filter($line['description']).'</span>';
+				$page_questionTable[$i]['desc'] = '<span class="noticetext">'.filter(Sanitize::encodeStringForDisplay($line['description'])).'</span>';
 			} else if ($line['replaceby']>0 || $line['junkflag']>0) {
-				$page_questionTable[$i]['desc'] = '<span class="grey"><i>'.filter($line['description']).'</i></span>';
+				$page_questionTable[$i]['desc'] = '<span class="grey"><i>'.filter(Sanitize::encodeStringForDisplay($line['description'])).'</i></span>';
 			} else {
-				$page_questionTable[$i]['desc'] = filter($line['description']);
+				$page_questionTable[$i]['desc'] = filter(Sanitize::encodeStringForDisplay($line['description']));
 			}
 
 			if ($line['extref']!='') {
