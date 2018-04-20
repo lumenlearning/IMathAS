@@ -1366,7 +1366,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 
 	if (!$isdiag && !$isltilimited && !$sessiondata['intreereader']) {
 		if (isset($sessiondata['actas'])) {
-			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid={$testsettings['courseid']}\">{$sessiondata['coursename']}</a> ";
+			echo "<div class=breadcrumb>$breadcrumbbase <a href=\"../course/course.php?cid={$testsettings['courseid']}\">".Sanitize::encodeStringForDisplay($sessiondata['coursename'])."</a> ";
 			echo "&gt; <a href=\"../course/gb-viewasid.php?cid={$testsettings['courseid']}&amp;asid=$testid&amp;uid={$sessiondata['actas']}\">", _('Gradebook Detail'), "</a> ";
 			echo "&gt; ", _('View as student'), "</div>";
 		} else {
@@ -1387,7 +1387,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0) {
 				echo "$breadcrumbbase ", _('Assessment'), "</div>";
 			} else {
-				echo "$breadcrumbbase <a href=\"../course/course.php?cid={$testsettings['courseid']}\">{$sessiondata['coursename']}</a> ";
+				echo "$breadcrumbbase <a href=\"../course/course.php?cid={$testsettings['courseid']}\">".Sanitize::encodeStringForDisplay($sessiondata['coursename'])."</a> ";
 
 				echo "&gt; ", _('Assessment'), "</div>";
 			}
