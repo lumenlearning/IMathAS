@@ -52,7 +52,7 @@ if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupI
 		error_log("Stack trace: " . $e->getTraceAsString());
 	}
 
-	if (!is_null($studentPayStatus)) {
+	if (!is_null($studentPayStatus) && isStartingAssessment()) {
 		$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
 		$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();
