@@ -1,3 +1,5 @@
+// version 1.0.9
+
 var directPayComponents = (function (React) {
 'use strict';
 
@@ -83,10 +85,9 @@ var DirectPayButton = function (_React$Component) {
       scriptEl.setAttribute('class', 'stripe-button');
       scriptEl.setAttribute('data-key', this.props.stripeKey);
       scriptEl.setAttribute('data-amount', this.props.chargeAmount);
-      scriptEl.setAttribute('data-name', this.props.institutionName);
+      scriptEl.setAttribute('data-name', 'Lumen Learning');
       scriptEl.setAttribute('data-description', this.props.chargeDescription);
       scriptEl.setAttribute('data-image', this.props.stripeModalLogoUrl);
-      scriptEl.setAttribute('data-email', this.props.userEmail);
       scriptEl.setAttribute('data-locale', 'auto');
       scriptEl.setAttribute('data-zip-code', 'true');
       scriptEl.setAttribute('data-allow-remember-me', 'false');
@@ -585,7 +586,7 @@ var DirectPayConfirmation = function (_React$Component) {
           React.createElement(
             'h2',
             { className: 'subheading', style: styles$1.confirmationSubheading },
-            'You can now access all online assessments for ' + this.props.courseTitle
+            'You can now access all online assessments for ' + this.props.courseTitle + '.'
           ),
           React.createElement(
             'div',
@@ -598,7 +599,7 @@ var DirectPayConfirmation = function (_React$Component) {
             React.createElement(
               'p',
               { style: styles$1.confirmationText },
-              'A receipt has been sent to your email address at ' + this.props.userEmail
+              'A receipt has been sent to your email address at ' + this.props.userEmail + '.'
             ),
             React.createElement('br', null),
             React.createElement(
@@ -748,7 +749,7 @@ var DirectPayLandingPage = function (_React$Component) {
           { className: "landing-page-wrapper", style: styles$2.landingPageWrapper },
           React.createElement("img", {
             src: this.props.schoolLogoUrl,
-            alt: "Maryland Open Source Textbook initiative logo",
+            alt: this.props.institutionName + " logo",
             style: { width: '224px', height: '69px', objectFit: 'contain' }
           }),
           React.createElement(
