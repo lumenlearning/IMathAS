@@ -11,12 +11,14 @@ require_once(__DIR__ . "/../models/LumenistrationInstitution.php");
 
 $cookieData = json_decode($_COOKIE['ohm_payment_confirmation'], true);
 
-$confirmationNum = $cookieData['confirmationNum'];
-$groupId = $cookieData['groupId'];
-$courseId = $cookieData['courseId'];
+$confirmationNum = $cookieData['confNum'];
+$groupId = $cookieData['gid'];
+$courseId = $cookieData['cid'];
+$assessmentId = $cookieData['aid'];
 $userEmail = $cookieData['email'];
 
-$redirectTo = $GLOBALS["basesiteurl"] . '/assessment/showtest.php';
+$redirectTo = sprintf('%s/assessment/showtest.php?id=%d&cid=%d',
+	$GLOBALS['basesiteurl'], $assessmentId, $courseId);
 $paymentStatus = 'has_access';
 
 $institution = getInstitutionData($groupId, $courseId, $userid);

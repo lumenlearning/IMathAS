@@ -69,6 +69,7 @@ if ("payment_proxy" == $action) {
 	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
 	$courseName = getCourseNameById($courseId);
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
+	$assessmentId = isset($_REQUEST['assessmentId']) ? $_REQUEST['assessmentId'] : NULL;
 
 	studentPaymentDebug('Received POST data from Stripe checkout: '
 		. print_r($_POST, true));
@@ -101,7 +102,8 @@ if ("payment_proxy" == $action) {
 		}
 	}
 
-	redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum, $userEmail);
+	redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
+		$confirmationNum, $userEmail);
 
 	exit;
 }
@@ -134,15 +136,18 @@ function response($status, $msg)
  *
  * @param integer $groupId The group ID. (from imas_groups)
  * @param integer $courseId The course ID. (from imas_courses)
+ * @param integer $assessmentId The assessment ID.
  * @param string $confirmationNum The confirmation number, as a string.
  * @param string $email The user's email used for payment receipts
  */
-function redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum, $email)
+function redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
+										  $confirmationNum, $email)
 {
 	$cookieData = array(
-		'confirmationNum' => $confirmationNum,
-		'groupId' => $groupId,
-		'courseId' => $courseId,
+		'confNum' => $confirmationNum,
+		'gid' => $groupId,
+		'cid' => $courseId,
+		'aid' => $assessmentId,
 		'email' => $email,
 	);
 	setcookie('ohm_payment_confirmation', json_encode($cookieData), 0);

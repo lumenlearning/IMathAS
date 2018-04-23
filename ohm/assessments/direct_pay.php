@@ -13,7 +13,8 @@ $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
 
 $endpointUrl = $GLOBALS["basesiteurl"]
 	. sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
-		. '&groupId=%d&courseId=%d&studentId=%d', $courseOwnerGroupId, $courseId, $userid);
+		. '&groupId=%d&courseId=%d&studentId=%d&assessmentId=%d', $courseOwnerGroupId,
+		$courseId, $userid, $assessmentId);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 $amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
 
