@@ -19,9 +19,16 @@
 // The business decision is to allow students through to assessments if we encounter any
 // problems checking access codes. This includes failure to interact with the payment API.
 
-$courseId = $sessiondata['courseid'];
-$courseName = $sessiondata['coursename'];
+$courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $sessiondata['courseid'];
 $assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
+
+$courseName = $sessiondata['coursename'];
+if (empty($courseName)) {
+	$courseNameStm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
+	$courseNameStm->execute(array(':id' => $courseId));
+	$courseName = $courseNameStm->fetchColumn(0);
+}
+
 
 $courseOwnerGroupId = null;
 if (isStudentPayEnabled()) {
