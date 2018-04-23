@@ -85,7 +85,7 @@ function displayPaymentPage()
         'courseTitle': '<?php echo $GLOBALS['courseName']; ?>',
         'userEmail': '<?php echo $GLOBALS['userEmail']; ?>',
         'chargeAmount': '<?php echo $GLOBALS['amount']; ?>',
-        'institutionName': '<?php echo $GLOBALS['groupName']; ?>',
+        'institutionName': 'Lumen Learning',
         'chargeDescription': '<?php echo $GLOBALS['courseName']; ?>',
         'stripeModalLogoUrl': '<?php echo $GLOBALS['stripeModalLogoUrl']; ?>',
         'endpointUrl': '<?php echo $GLOBALS['endpointUrl']; ?>',
