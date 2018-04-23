@@ -14,6 +14,7 @@ $cookieData = json_decode($_COOKIE['ohm_payment_confirmation'], true);
 $confirmationNum = $cookieData['confirmationNum'];
 $groupId = $cookieData['groupId'];
 $courseId = $cookieData['courseId'];
+$userEmail = $cookieData['email'];
 
 $redirectTo = $GLOBALS["basesiteurl"] . '/assessment/showtest.php';
 $paymentStatus = 'has_access';
@@ -22,10 +23,6 @@ $institution = getInstitutionData($groupId, $courseId, $userid);
 $schoolLogoUrl = $institution->getSchoolLogoUrl();
 $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
 	? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
-
-$stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
-$stm->execute(array(':id' => $userid));
-$userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
 
 $stm = $DBH->prepare('SELECT name FROM imas_courses WHERE id = :id');
 $stm->execute(array(':id' => $courseId));

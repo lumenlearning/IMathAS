@@ -90,12 +90,19 @@ if ("payment_proxy" == $action) {
 		exit;
 	}
 
+	$userEmail = '';
 	$confirmationNum = ' will be provided via email.';
-	if (!is_null($apiResponse->getPaymentInfo()) && !is_null($apiResponse->getPaymentInfo()['id'])) {
-		$confirmationNum = $apiResponse->getPaymentInfo()['id'];
+	if (!is_null($apiResponse->getPaymentInfo())) {
+		if (!is_null($apiResponse->getPaymentInfo()['id'])) {
+			$confirmationNum = $apiResponse->getPaymentInfo()['id'];
+		}
+		if (!is_null($apiResponse->getPaymentInfo()['email'])) {
+			$userEmail = $apiResponse->getPaymentInfo()['email'];
+		}
 	}
 
-	redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum);
+	redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum, $userEmail);
+
 	exit;
 }
 
@@ -128,13 +135,15 @@ function response($status, $msg)
  * @param integer $groupId The group ID. (from imas_groups)
  * @param integer $courseId The course ID. (from imas_courses)
  * @param string $confirmationNum The confirmation number, as a string.
+ * @param string $email The user's email used for payment receipts
  */
-function redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum)
+function redirect_to_payment_confirmation($groupId, $courseId, $confirmationNum, $email)
 {
 	$cookieData = array(
 		'confirmationNum' => $confirmationNum,
 		'groupId' => $groupId,
 		'courseId' => $courseId,
+		'email' => $email,
 	);
 	setcookie('ohm_payment_confirmation', json_encode($cookieData), 0);
 
