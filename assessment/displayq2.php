@@ -1880,6 +1880,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 
 		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
+		if (count($fromto)==1) {$fromto[0]=-10; $fromto[1]=10;}
 		$domaingroups = array();
 		$i=0;
 		while ($i<count($fromto)) {
@@ -4475,6 +4476,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$answer = str_replace('E','varE',$answer);
 		}
 		if (isset($domain)) {$fromto = array_map('trim',explode(",",$domain));} else {$fromto[0]=-10; $fromto[1]=10;}
+		if (count($fromto)==1) {$fromto[0]=-10; $fromto[1]=10;}
 		$domaingroups = array();
 		$i=0;
 		while ($i<count($fromto)) {
