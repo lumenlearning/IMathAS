@@ -122,6 +122,27 @@
 				}
 			}
 		}
+
+
+
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+
+		if ($isreview && $canuselatepass && !$assessmentclosed) {
+			require(__DIR__ . '/../ohm/assessments/paywall_start.php');
+		}
+
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+
+
+
 		if ($isreview && $canuselatepass && !isset($_GET['goreview'])) {
 			//ask them if they're sure they want review mode vs latepass
 			require("header.php");
@@ -216,21 +237,6 @@
 			}
 			
 		}
-
-
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-
-		require(__DIR__ . '/../ohm/assessments/paywall_start.php');
-
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
 
 
 		//check for password
