@@ -683,7 +683,8 @@ function gbstudisp($stu) {
 		if ($stusection!='') {
 			echo ' <span class="small">Section: '.Sanitize::encodeStringForDisplay($stusection).'.</span>';
 		}
-		echo ' <span class="small">'._('Last Login: ').tzdate('D n/j/y g:ia', $lastaccess).'.</span>';
+		$logindate = ($lastaccess>0)?tzdate('D n/j/y g:ia', $lastaccess):_('Never');
+		echo ' <span class="small">'._('Last Login: ').$logindate.'.</span>';
 		echo '</div>';
 		if ($isteacher) {
 			echo '<div style="clear:both;display:inline-block" class="cpmid secondary">';
@@ -797,9 +798,9 @@ function gbstudisp($stu) {
 			if ($gbt[0][1][$i][6]==0 && $gbt[0][1][$i][3]==1 && $gbt[1][1][$i][13]==1 && !$isteacher && !$istutor) {
 				$showlink = true;
 				echo '<a href="../assessment/showtest.php?cid='.$cid.'&id='.$gbt[0][1][$i][7].'"';
-				if (abs($gbt[1][1][$i][12])>0) {
+				if (abs($gbt[0][1][$i][13])>0) {
 					$tlwrds = '';
-					$timelimit = abs($gbt[1][1][$i][12]);
+					$timelimit = abs($gbt[0][1][$i][13])*$gbt[1][4][4];
 					if ($timelimit>3600) {
 						$tlhrs = floor($timelimit/3600);
 						$tlrem = $timelimit % 3600;
