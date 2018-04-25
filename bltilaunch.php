@@ -31,6 +31,8 @@ $init_skip_csrfp = true;
 include("init_without_validate.php");
 unset($init_skip_csrfp);
 
+require_once(__DIR__ . '/includes/ltiroles.php');
+
 $curdir = rtrim(dirname(__FILE__), '/\\');
 //DB if (!get_magic_quotes_gpc()) {
 //DB 	$_REQUEST = array_map('addslashes_deep', $_REQUEST);
@@ -597,8 +599,8 @@ if (isset($_GET['launch'])) {
 	//if we got this far, secret has already been verified
 	$_SESSION['ltiuserid'] = $ltiuserid;
 	$_SESSION['ltiorg'] = $ltiorg;
-	$ltirole = strtolower($_REQUEST['roles']);
-	if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false || strpos($ltirole,'contentdeveloper')!== false) {
+	$ltiroles = new LTIRoles($_REQUEST['roles']);
+	if ($ltiroles->isInstructorForOurPurposes()) {
 		$ltirole = 'instructor';
 	} else {
 		$ltirole = 'learner';
@@ -2111,8 +2113,8 @@ if (isset($_GET['launch'])) {
 	//if we got this far, secret has already been verified
 	$_SESSION['ltiuserid'] = $ltiuserid;
 	$_SESSION['ltiorg'] = $ltiorg;
-	$ltirole = strtolower($_REQUEST['roles']);
-	if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false || strpos($ltirole,'contentdeveloper')!== false) {
+	$ltiroles = new LTIRoles($_REQUEST['roles']);
+	if ($ltiroles->isInstructorForOurPurposes()) {
 		$ltirole = 'instructor';
 	} else {
 		$ltirole = 'learner';
