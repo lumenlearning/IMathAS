@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__."/updateptsposs.php");
+
 //boost operation time
 @set_time_limit(0);
 ini_set("max_input_time", "900");
@@ -29,8 +31,8 @@ if (isset($removewithdrawn) && $removewithdrawn) {
 
 function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	global $DBH;
-	global $cid, $reqscoretrack, $categoryassessmenttrack, $assessnewid, $qrubrictrack, $frubrictrack, $copystickyposts,$userid, $exttooltrack, $outcomes, $removewithdrawn, $replacebyarr;
-	global $posttoforumtrack, $forumtrack;
+	global $cid, $sourcecid, $reqscoretrack, $categoryassessmenttrack, $assessnewid, $qrubrictrack, $frubrictrack, $copystickyposts,$userid, $exttooltrack, $outcomes, $removewithdrawn, $replacebyarr;
+	global $posttoforumtrack, $forumtrack, $datesbylti;
 	if (!isset($copystickyposts)) { $copystickyposts = false;}
 	if ($gbcats===false) {
 		$gbcats = array();
@@ -303,9 +305,12 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		//DB $query = "SELECT name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,displaymethod,defpoints,defattempts,deffeedback,defpenalty,shuffle,gbcategory,password,cntingb,showcat,showhints,showtips,allowlate,exceptionpenalty,noprint,avail,groupmax,endmsg,deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,istutorial,viddata,reqscore,reqscoreaid,ancestors,defoutcome,posttoforum FROM imas_assessments WHERE id='$typeid'";
 		//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
 		//DB $row = mysql_fetch_assoc($result);
-		$stm = $DBH->prepare("SELECT name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,displaymethod,defpoints,defattempts,deffeedback,defpenalty,shuffle,gbcategory,password,cntingb,showcat,showhints,showtips,allowlate,exceptionpenalty,noprint,avail,groupmax,isgroup,groupsetid,endmsg,deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,istutorial,viddata,reqscore,reqscoreaid,ancestors,defoutcome,posttoforum FROM imas_assessments WHERE id=:id");
+		$stm = $DBH->prepare("SELECT name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,displaymethod,defpoints,defattempts,deffeedback,defpenalty,shuffle,gbcategory,password,cntingb,showcat,showhints,showtips,allowlate,exceptionpenalty,noprint,avail,groupmax,isgroup,groupsetid,endmsg,deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,istutorial,viddata,reqscore,reqscoreaid,reqscoretype,ancestors,defoutcome,posttoforum,ptsposs FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
+		if ($row['ptsposs']==-1) {
+			$row['ptsposs'] = updatePointsPossible($typeid, $row['itemorder'], $row['defpoints']);
+		}
 		if ($sethidden) {$row['avail'] = 0;}
 		if (isset($gbcats[$row['gbcategory']])) {
 			$row['gbcategory'] = $gbcats[$row['gbcategory']];
@@ -317,10 +322,15 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		} else {
 			$row['defoutcome'] = 0;
 		}
-		if ($row['ancestors']=='') {
-			$row['ancestors'] = $typeid;
+		if (!empty($sourcecid)) {
+			$newancestor = intval($sourcecid).':'.$typeid;
 		} else {
-			$row['ancestors'] = $typeid.','.$row['ancestors'];
+			$newancestor = $typeid;
+		}
+		if ($row['ancestors']=='') {
+			$row['ancestors'] = $newancestor;
+		} else {
+			$row['ancestors'] = $newancestor.','.$row['ancestors'];
 		}
 		if ($_POST['ctc']!=$cid) {
 			$forumtopostto = $row['posttoforum'];
@@ -352,6 +362,12 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		$row['name'] .= $_POST['append'];
 
 		$row['courseid'] = $cid;
+		
+		if (isset($datesbylti) && $datesbylti==true) {
+			$row['date_by_lti'] = 1;
+		} else {
+			$row['date_by_lti'] = 0;
+		}
 
 		$fields = implode(",", array_keys($row));
 		//$vals = "'".implode("','",addslashes_deep(array_values($row)))."'";

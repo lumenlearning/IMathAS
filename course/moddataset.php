@@ -259,6 +259,7 @@
 			$stm->execute(array(':qsetid'=>$_GET['id']));
 			$imgcnt = $stm->rowCount();
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+				$_POST['imgvar-'.$row[0]] = preg_replace('/[^\w\[\]]/','', $_POST['imgvar-'.$row[0]]); 
 				if (isset($_POST['delimg-'.$row[0]])) {
 					if (substr($row[1],0,4)!='http') {
 						//DB $query = "SELECT id FROM imas_qimages WHERE filename='{$row[1]}'";
@@ -283,9 +284,9 @@
 						$stm2->execute(array(':id'=>$_GET['id']));
 					}
 				} else if ($row[2]!=$_POST['imgvar-'.$row[0]] || $row[3]!=$_POST['imgalt-'.$row[0]]) {
-					$newvar = str_replace('$','',$_POST['imgvar-'.$row[0]]);
+					$newvar = $_POST['imgvar-'.$row[0]];
 					$newalt = $_POST['imgalt-'.$row[0]];
-					$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
+					$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','laarr','shanspt','GLOBALS','laparts','anstype','kidx','iidx','tips','optionsPack','partla','partnum','score','disallowedvar','allowedmacros','wherecount','countcnt','myrights','myspecialrights');
 					if (in_array($newvar,$disallowedvar)) {
 						$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
 					} else {
@@ -356,6 +357,16 @@
 				$stm->execute(array(':qsetid'=>$_GET['templateid']));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 					if (!isset($_POST['delimg-'.$row[3]])) {
+						$_POST['imgvar-'.$row[3]] = preg_replace('/[^\w\[\]]/','', $_POST['imgvar-'.$row[3]]); 
+						if ($row[0]!=$_POST['imgvar-'.$row[3]] || $row[2]!=$_POST['imgalt-'.$row[3]]) {
+							$newvar = $_POST['imgvar-'.$row[3]];
+							$newalt = $_POST['imgalt-'.$row[3]];
+							$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','laarr','shanspt','GLOBALS','laparts','anstype','kidx','iidx','tips','optionsPack','partla','partnum','score','disallowedvar','allowedmacros','wherecount','countcnt','myrights','myspecialrights');
+							if (!in_array($newvar,$disallowedvar)) {
+								$row[0] = $newvar;
+							}
+							$row[2] = $newalt;
+						}
 						//DB $query = "INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES ('$qsetid','{$row[0]}','{$row[1]}','{$row[2]}')";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
 						$stm2 = $DBH->prepare("INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES (:qsetid, :var, :filename, :alttext)");
@@ -381,6 +392,7 @@
 		//upload image files if attached
 		if ($_FILES['imgfile']['name']!='') {
 			$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
+			$_POST['newimgvar'] = preg_replace('/[^\w\[\]]/','', $_POST['newimgvar']);
 			if (!is_uploaded_file($_FILES['imgfile']['tmp_name'])) {
 				switch($_FILES['imgfile']['error']){
 			    case 1:
@@ -418,7 +430,7 @@
 					if (($filename=storeuploadedqimage('imgfile',$filename))!==false) {
 					//if (move_uploaded_file($_FILES['imgfile']['tmp_name'], $uploadfile)) {
 						//echo "<p>File is valid, and was successfully uploaded</p>\n";
-						$_POST['newimgvar'] = str_replace('$','',$_POST['newimgvar']);
+	
 						//DB $filename = addslashes($filename);
 						//DB $query = "INSERT INTO imas_qimages (var,qsetid,filename,alttext) VALUES ('{$_POST['newimgvar']}','$qsetid','$filename','{$_POST['newimgalt']}')";
 						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
@@ -1381,7 +1393,7 @@ if (FormData){ // Only allow quicksave if FormData object exists
 				// HANDLE IMAGES
 				var imgUploaded = $("input[name='imgfile']")[0].files.length > 0 ? true : false; // Image uploaded
 				var imgDeleted = $("input[name^='delimg-']:checked").length > 0 ? true : false; // Image deleted
-				if (imgUploaded || imgDeleted) {
+				if (Object.keys(images.vars).length>0 || imgUploaded || imgDeleted) {
 					// Clear image inputs
 					var imgFile = $("input[name='imgfile']");
 					imgFile.replaceWith( imgFile = imgFile.val('').clone(true));

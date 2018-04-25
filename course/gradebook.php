@@ -286,6 +286,16 @@ if (isset($studentid) || $stu!=0) { //show student view
 	$pagetitle = _('Gradebook');
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
 	$placeinhead .= '<script type="text/javascript">
+		function showfb(id,type,uid) {
+			if (type=="all") {
+				GB_show(_("Feedback"), "showfeedbackall.php?cid="+cid+"&stu="+id, 600, 600);
+			} else if (type=="F") {
+				GB_show(_("Feedback"), "viewforumgrade.php?embed=true&cid="+cid+"&uid="+uid+"&fid="+id, 600, 600);
+			} else {
+				GB_show(_("Feedback"), "showfeedback.php?cid="+cid+"&type="+type+"&id="+id, 600, 600);
+			}
+			return false;
+		}
 		function showhidefb(el,n) {
 			el.style.display="none";
 			document.getElementById("feedbackholder"+n).style.display = "inline";
@@ -749,7 +759,10 @@ function gbstudisp($stu) {
 		$sarr = "'S','N','N','N'";
 	}
 	if ($stu>0) {
-		echo '<th>', _('Feedback'), '<br/><a href="#" class="small pointer" onclick="return showhideallfb(this);">', _('[Show Feedback]'), '</a></th>';
+		//echo '<th>', _('Feedback'), '<br/><a href="#" class="small pointer" onclick="return showhideallfb(this);">', _('[Show Feedback]'), '</a></th>';
+		echo '<th>', _('Feedback'), '<br/>';
+		echo '<a href="#" class="small feedbacksh pointer" onclick="return showfb('.Sanitize::onlyInt($stu).',\'all\')">', _('View All'), '</a>';
+		echo '</th>';
 		$sarr .= ",'N'";
 	}
 	echo '</tr></thead><tbody>';
@@ -1021,11 +1034,17 @@ function gbstudisp($stu) {
 				}
 			}
 			if ($stu>0) {
-				if ($gbt[1][1][$i][1]=='') {
+				if ($gbt[1][1][$i][1]==0) { //no feedback
 					echo '<td></td>';
-				} else {
-					echo '<td><a href="#" class="small feedbacksh pointer" onclick="return showhidefb(this,'.$i.')">', _('[Show Feedback]'), '</a><span style="display:none;" id="feedbackholder'.$i.'">'.$gbt[1][1][$i][1].'</span></td>';
-				}
+				} else if ($gbt[0][1][$i][6]==0) { //online
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][4]).',\'A\')">', _('View Feedback'), '</a></td>';
+				} else if ($gbt[0][1][$i][6]==1) { //offline
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][2]).',\'O\')">', _('View Feedback'), '</a></td>';					
+				} else if ($gbt[0][1][$i][6]==3) { //exttool
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][2]).',\'E\')">', _('View Feedback'), '</a></td>';										
+				} else if ($gbt[0][1][$i][6]==2) { //forum
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[0][1][$i][7]).',\'F\','.Sanitize::onlyInt($gbt[1][4][0]).')">', _('View Feedback'), '</a></td>';										
+				} 
 			}
 			echo '</tr>';
 		}

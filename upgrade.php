@@ -1961,7 +1961,8 @@ span.instronly {
 		exit(1);
 	}
 
-	echo "Migrations complete";
+	echo "Migrations complete.  At version ";
+	echo Sanitize::encodeStringForDisplay($migrator->getLatestVersionApplied());
 	
 
 ?>
