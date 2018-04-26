@@ -622,6 +622,25 @@ if (isset($_GET['launch'])) {
 		unset($_SESSION['selection_return']);
 	}
 	unset($_SESSION['lti_duedate']);
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+
+    // Doing it this way will make it easy to remove this OHM-specific code later. :(
+	if (!isset($_REQUEST['custom_canvas_assignment_due_at'])) {
+	    if (isset($_REQUEST['custom_assignment_due_at'])) {
+			$_REQUEST['custom_canvas_assignment_due_at'] = $_REQUEST['custom_assignment_due_at'];
+        }
+    }
+
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 	if (isset($_REQUEST['custom_canvas_assignment_due_at'])) {
 		$duedate = strtotime($_REQUEST['custom_canvas_assignment_due_at']);
 		if ($duedate !== false) {
@@ -1386,6 +1405,11 @@ if ($linkparts[0]=='cid') {
 		$stm->execute(array(':enddate'=>$_SESSION['lti_duedate'], ':datebylti'=>$newdatebylti, ':id'=>$aid));
 		$line['enddate'] = $_SESSION['lti_duedate'];
 	}
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
 	if (!isset($_SESSION['lti_duedate']) && $line['date_by_lti'] == 1) {
 		if ($_SESSION['ltirole'] == 'instructor') {
 			//assessment is set to use dates sent by LTI, but none was sent.  Give error for instructor.
@@ -1401,6 +1425,11 @@ if ($linkparts[0]=='cid') {
 		    reporterror($err);
         }
 	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 	
 	if ($_SESSION['ltirole']!='instructor') {
 		//if ($line['avail']==0 || $now>$line['enddate'] || $now<$line['startdate']) {
