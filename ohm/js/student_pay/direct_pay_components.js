@@ -1,4 +1,4 @@
-// version 1.0.10
+// version 1.0.11
 
 var directPayComponents = (function (React) {
 'use strict';
@@ -633,18 +633,6 @@ var styles$2 = {
     flexDirection: 'column',
     color: '#212b36'
   },
-  headerText: {
-    fontFamily: 'Libre Franklin, sans serif',
-    fontSize: '14px',
-    fontWeight: 'normal',
-    fontStyle: 'normal',
-    fontStretch: 'normal',
-    lineHeight: '1.43',
-    letterSpacing: 'normal',
-    textAlign: 'left',
-    color: '#212b36',
-    marginLeft: '31px'
-  },
   headerBox: {
     fontFamily: 'Libre Franklin, sans serif',
     display: 'flex',
@@ -810,9 +798,9 @@ var DirectPayLandingPage = function (_React$Component) {
       var language = void 0;
 
       if (this.props.paymentStatus === 'expired') {
-        language = "Course content is still available. However, you need to pay to activate the assessments in this course.";
+        language = " Course content is still available. However, you need to pay to activate the assessments in this course. ";
       } else if (this.props.paymentStatus === 'can_extend') {
-        language = "Activate a one-time pass to extend your trial by 24 hours. ";
+        language = " Activate a one-time pass to extend your trial by 24 hours. ";
       } else {
         return '';
       }
@@ -841,18 +829,22 @@ var DirectPayLandingPage = function (_React$Component) {
               React.createElement(
                 "div",
                 { style: { alignContent: 'left', lineHeight: '1.9em', marginLeft: '5px' } },
-                "Your Trial Has Expired"
+                React.createElement(
+                  "p",
+                  { style: { fontSize: '14px' } },
+                  "Your Trial Has Expired.",
+                  React.createElement(
+                    "span",
+                    { className: "header-text" },
+                    this._renderCorrectHeaderText(),
+                    this.props.paymentStatus === 'can_extend' ? React.createElement(
+                      "a",
+                      { href: this.props.redirectTo, style: { textDecoration: 'underline', color: '#1e74d1' } },
+                      "Activate One-time Pass"
+                    ) : ""
+                  )
+                )
               )
-            ),
-            React.createElement(
-              "div",
-              { className: "header-text", style: styles$2.headerText },
-              this._renderCorrectHeaderText(),
-              this.props.paymentStatus === 'can_extend' ? React.createElement(
-                "a",
-                { href: this.props.redirectTo, style: { textDecoration: 'underline' } },
-                "Activate One-time Pass"
-              ) : ""
             )
           )
         );
