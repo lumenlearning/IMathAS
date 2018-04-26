@@ -15,6 +15,7 @@ class LumenistrationInstitution
 	private $bookstoreInformation; // string (raw message or html for the user)
 	private $bookstoreUrl; // string
 	private $schoolLogoUrl; // string
+	private $schoolReceiptText; // string
 
 	/**
 	 * @return mixed
@@ -114,6 +115,22 @@ class LumenistrationInstitution
 	public function setSchoolLogoUrl($schoolLogoUrl)
 	{
 		$this->schoolLogoUrl = $schoolLogoUrl;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolReceiptText()
+	{
+		return $this->schoolReceiptText;
+	}
+
+	/**
+	 * @param mixed $schoolReceiptText
+	 */
+	public function setSchoolReceiptText($schoolReceiptText)
+	{
+		$this->schoolReceiptText = $schoolReceiptText;
 	}
 
 }

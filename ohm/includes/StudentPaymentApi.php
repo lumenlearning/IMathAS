@@ -531,6 +531,9 @@ class StudentPaymentApi
 		if (isset($apiResponse['branding'])) {
 			$studentPayApiResult->setSchoolLogoUrl($apiResponse['branding']['logo_url']);
 		}
+		if (isset($apiResponse['branding'])) {
+			$studentPayApiResult->setSchoolReceiptText($apiResponse['branding']['receipt_text']);
+		}
 
 		return $studentPayApiResult;
 	}
@@ -579,6 +582,10 @@ class StudentPaymentApi
 
 		if (isset($apiResponse['branding']['logo_url'])) {
 			$lumenistrationInstitution->setSchoolLogoUrl($apiResponse['branding']['logo_url']);
+		}
+
+		if (isset($apiResponse['branding']['receipt_text'])) {
+			$lumenistrationInstitution->setSchoolReceiptText($apiResponse['branding']['receipt_text']);
 		}
 
 		$allExternalIds = array();

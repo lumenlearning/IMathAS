@@ -20,6 +20,7 @@ class StudentPayStatus
 	private $studentPaymentRawStatus; // string
 	private $courseDirectPayAmountInCents; // integer
 	private $schoolLogoUrl; // string
+	private $schoolReceiptText; // string
 	private $userMessage; // string
 
 	/**
@@ -154,6 +155,22 @@ class StudentPayStatus
 	public function setSchoolLogoUrl($schoolLogoUrl)
 	{
 		$this->schoolLogoUrl = $schoolLogoUrl;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolReceiptText()
+	{
+		return $this->schoolReceiptText;
+	}
+
+	/**
+	 * @param mixed $schoolReceiptText
+	 */
+	public function setSchoolReceiptText($schoolReceiptText)
+	{
+		$this->schoolReceiptText = $schoolReceiptText;
 	}
 
 	/**
