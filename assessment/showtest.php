@@ -131,7 +131,7 @@
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 
-		if ($isreview && $canuselatepass && !$assessmentclosed) {
+		if (!$assessmentclosed) {
 			require(__DIR__ . '/../ohm/assessments/paywall_start.php');
 		}
 
