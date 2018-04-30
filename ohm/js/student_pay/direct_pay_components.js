@@ -1,4 +1,4 @@
-// version 1.0.11
+// version 1.0.12
 
 var directPayComponents = (function (React) {
 'use strict';
@@ -756,8 +756,12 @@ var DirectPayLandingPage = function (_React$Component) {
                 null,
                 "Open Courseware by "
               ),
-              React.createElement("img", { src: "https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png", alt: "Lumen Learning logo", className: "lumen-logo",
-                style: styles$2.lumenLogo })
+              React.createElement(
+                "a",
+                { href: "https://www.lumenlearning.com", target: "_blank" },
+                React.createElement("img", { src: "https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png", alt: "Lumen Learning logo", className: "lumen-logo",
+                  style: styles$2.lumenLogo })
+              )
             )
           )
         )
