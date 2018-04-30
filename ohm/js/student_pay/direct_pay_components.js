@@ -1,4 +1,4 @@
-// version 1.0.12
+// version 1.0.13
 
 var directPayComponents = (function (React) {
 'use strict';
@@ -293,7 +293,7 @@ var DirectPayCourseActivation = function (_React$Component) {
 
       return React.createElement(
         'div',
-        null,
+        { style: { flex: '1 0 auto' } },
         React.createElement(
           'div',
           { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
@@ -832,7 +832,7 @@ var DirectPayLandingPage = function (_React$Component) {
               }),
               React.createElement(
                 "div",
-                { style: { alignContent: 'left', lineHeight: '1.9em', marginLeft: '5px' } },
+                { style: { alignContent: 'left', lineHeight: '1.2em', marginLeft: '5px' } },
                 React.createElement(
                   "p",
                   { style: { fontSize: '14px' } },
