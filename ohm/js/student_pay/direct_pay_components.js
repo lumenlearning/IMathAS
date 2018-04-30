@@ -1,4 +1,4 @@
-// version 1.0.13
+// version 1.0.14
 
 var directPayComponents = (function (React) {
 'use strict';
@@ -119,15 +119,14 @@ var DirectPayButton = function (_React$Component) {
 
 var styles = {
   parentWrapper: {
-    display: 'flex',
+    display: 'block',
     paddingLeft: '35px'
   },
   leftColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexBasis: '50%',
+    display: 'inline-block',
     paddingRight: '64px',
-    maxWidth: '360px'
+    maxWidth: '360px',
+    verticalAlign: 'top'
   },
   confirmationPageWrapper: {
     fontFamily: 'Libre Franklin, sans serif !important',
@@ -167,9 +166,7 @@ var styles = {
     color: '#212b36'
   },
   rightColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexBasis: '45%',
+    display: 'inline-block',
     paddingTop: '10px'
   },
   lumenLogo: {
@@ -293,7 +290,7 @@ var DirectPayCourseActivation = function (_React$Component) {
 
       return React.createElement(
         'div',
-        { style: { flex: '1 0 auto' } },
+        null,
         React.createElement(
           'div',
           { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
