@@ -37,7 +37,7 @@ if ($from=='admin') {
 } else if (substr($_GET['from'],0,2)=='ud') {
 	$breadcrumbbase .= '<a href="admin2.php">'._('Admin').'</a> &gt; <a href="'.$backloc.'">'._('User Details').'</a> &gt; ';
 } else if (substr($_GET['from'],0,2)=='gd') {
-	echo '<a href="admin2.php">'._('Admin').'</a> &gt; <a href="'.$backloc.'">'._('Group Details').'</a> &gt; ';
+	$breadcrumbbase .= '<a href="admin2.php">'._('Admin').'</a> &gt; <a href="'.$backloc.'">'._('Group Details').'</a> &gt; ';
 }
 
 switch($_POST['action']) {
@@ -545,8 +545,23 @@ switch($_POST['action']) {
 				$updateJsonData = true;
 			}
 		}
-
+		require_once("../includes/parsedatetime.php");
+		if (trim($_POST['sdate'])=='') {
+			$startdate = 0;
+		} else {
+			$startdate = parsedatetime($_POST['sdate'],'12:01am');
+		}
+		if (trim($_POST['edate'])=='') {
+			$enddate = 2000000000;
+		} else {
+			$enddate = parsedatetime($_POST['edate'],'11:59pm');
+		}
 		$_POST['ltisecret'] = trim($_POST['ltisecret']);
+		if (isset($_POST['setdatesbylti']) && $_POST['setdatesbylti']==1) {
+			$setdatesbylti = 1;
+		} else {
+			$setdatesbylti = 0;
+		}
 
 		if ($_POST['action']=='modify') {
 			$query = "UPDATE imas_courses SET name=:name,enrollkey=:enrollkey,hideicons=:hideicons,available=:available,lockaid=:lockaid,picicons=:picicons,showlatepass=:showlatepass,";
@@ -566,11 +581,11 @@ switch($_POST['action']) {
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
-			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass WHERE id=:id";
+			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass,dates_by_lti=:ltidates,startdate=:startdate,enddate=:enddate WHERE id=:id";
 			$qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
 				':picicons'=>$picicons, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
 				':toolset'=>$toolset, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
-				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':id'=>$_GET['id']);
+				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, ':startdate'=>$startdate, ':enddate'=>$enddate, ':id'=>$_GET['id']);
 			// #### Begin OHM-specific code #####################################################
 			// #### Begin OHM-specific code #####################################################
 			// #### Begin OHM-specific code #####################################################
@@ -593,17 +608,40 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
+			if ($stm->rowCount()>0) {
+				if ($setdatesbylti==1) {
+					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
+					$stm->execute(array(':cid'=>$_GET['id']));
+				} else {
+					//undo it - doesn't restore dates
+					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=0 WHERE date_by_lti>0 AND courseid=:cid");
+					$stm->execute(array(':cid'=>$_GET['id']));
+					//remove is_lti from exceptions with latepasses
+					$query = "UPDATE imas_exceptions JOIN imas_assessments ";
+					$query .= "ON imas_exceptions.assessmentid=imas_assessments.id ";
+					$query .= "SET imas_exceptions.is_lti=0 ";
+					$query .= "WHERE imas_exceptions.is_lti>0 AND imas_exceptions.islatepass>0 AND imas_assessments.courseid=:cid";
+					$stm = $DBH->prepare($query);
+					$stm->execute(array(':cid'=>$_GET['id']));
+					//delete any other is_lti exceptions
+					$query = "DELETE imas_exceptions FROM imas_exceptions JOIN imas_assessments ";
+					$query .= "ON imas_exceptions.assessmentid=imas_assessments.id ";
+					$query .= "WHERE imas_exceptions.is_lti>0 AND imas_exceptions.islatepass=0 AND imas_assessments.courseid=:cid";
+					$stm = $DBH->prepare($query);
+					$stm->execute(array(':cid'=>$_GET['id']));
+				}
+			}
 		} else {
 			$blockcnt = 1;
 			$itemorder = serialize(array());
 			$DBH->beginTransaction();
-			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,istemplate,deftime,deflatepass,theme,ltisecret,blockcnt,created_at) VALUES ";
-			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :istemplate, :deftime, :deflatepass, :theme, :ltisecret, :blockcnt, :created_at);";
+			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,startdate,enddate,istemplate,deftime,deflatepass,theme,ltisecret,dates_by_lti,blockcnt,created_at) VALUES ";
+			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :startdate, :enddate, :istemplate, :deftime, :deflatepass, :theme, :ltisecret, :ltidates, :blockcnt, :created_at);";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':name'=>$_POST['coursename'], ':ownerid'=>$userid, ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 				':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':toolset'=>$toolset, ':showlatepass'=>$showlatepass,
-				':itemorder'=>$itemorder, ':available'=>$avail, ':istemplate'=>$istemplate, ':deftime'=>$deftime,
-				':deflatepass'=>$deflatepass, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':blockcnt'=>$blockcnt,
+				':itemorder'=>$itemorder, ':available'=>$avail, ':istemplate'=>$istemplate, ':deftime'=>$deftime, ':startdate'=>$startdate, ':enddate'=>$enddate,
+				':deflatepass'=>$deflatepass, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':ltidates'=>$setdatesbylti, ':blockcnt'=>$blockcnt,
 				':created_at'=>time()));
 			$cid = $DBH->lastInsertId();
 			// #### Begin OHM-specific code #####################################################
@@ -760,6 +798,10 @@ switch($_POST['action']) {
 				}
 				copyrubrics();
 
+			}
+			if ($setdatesbylti==1) {
+				$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
+				$stm->execute(array(':cid'=>$cid));
 			}
 			$DBH->commit();
 

@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__."/updateptsposs.php");
+
 //boost operation time
 @set_time_limit(0);
 ini_set("max_input_time", "900");
@@ -29,8 +31,8 @@ if (isset($removewithdrawn) && $removewithdrawn) {
 
 function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	global $DBH;
-	global $cid, $reqscoretrack, $categoryassessmenttrack, $assessnewid, $qrubrictrack, $frubrictrack, $copystickyposts,$userid, $exttooltrack, $outcomes, $removewithdrawn, $replacebyarr;
-	global $posttoforumtrack, $forumtrack;
+	global $cid, $sourcecid, $reqscoretrack, $categoryassessmenttrack, $assessnewid, $qrubrictrack, $frubrictrack, $copystickyposts,$userid, $exttooltrack, $outcomes, $removewithdrawn, $replacebyarr;
+	global $posttoforumtrack, $forumtrack, $datesbylti;
 	if (!isset($copystickyposts)) { $copystickyposts = false;}
 	if ($gbcats===false) {
 		$gbcats = array();
@@ -303,9 +305,13 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		//DB $query = "SELECT name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,displaymethod,defpoints,defattempts,deffeedback,defpenalty,shuffle,gbcategory,password,cntingb,showcat,showhints,showtips,allowlate,exceptionpenalty,noprint,avail,groupmax,endmsg,deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,istutorial,viddata,reqscore,reqscoreaid,ancestors,defoutcome,posttoforum FROM imas_assessments WHERE id='$typeid'";
 		//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
 		//DB $row = mysql_fetch_assoc($result);
-		$stm = $DBH->prepare("SELECT name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,displaymethod,defpoints,defattempts,deffeedback,defpenalty,shuffle,gbcategory,password,cntingb,showcat,showhints,showtips,allowlate,exceptionpenalty,noprint,avail,groupmax,isgroup,groupsetid,endmsg,deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,istutorial,viddata,reqscore,reqscoreaid,ancestors,defoutcome,posttoforum FROM imas_assessments WHERE id=:id");
+		$stm = $DBH->prepare("SELECT name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,displaymethod,defpoints,defattempts,deffeedback,defpenalty,shuffle,gbcategory,password,cntingb,showcat,showhints,showtips,allowlate,exceptionpenalty,noprint,avail,groupmax,isgroup,groupsetid,endmsg,deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,istutorial,viddata,reqscore,reqscoreaid,reqscoretype,ancestors,defoutcome,posttoforum,ptsposs FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
+		if ($row['ptsposs']==-1) {
+			$row['ptsposs'] = updatePointsPossible($typeid, $row['itemorder'], $row['defpoints']);
+		}
+		$srcdefpoints = $row['defpoints'];
 		if ($sethidden) {$row['avail'] = 0;}
 		if (isset($gbcats[$row['gbcategory']])) {
 			$row['gbcategory'] = $gbcats[$row['gbcategory']];
@@ -317,10 +323,15 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		} else {
 			$row['defoutcome'] = 0;
 		}
-		if ($row['ancestors']=='') {
-			$row['ancestors'] = $typeid;
+		if (!empty($sourcecid)) {
+			$newancestor = intval($sourcecid).':'.$typeid;
 		} else {
-			$row['ancestors'] = $typeid.','.$row['ancestors'];
+			$newancestor = $typeid;
+		}
+		if ($row['ancestors']=='') {
+			$row['ancestors'] = $newancestor;
+		} else {
+			$row['ancestors'] = $newancestor.','.$row['ancestors'];
 		}
 		if ($_POST['ctc']!=$cid) {
 			$forumtopostto = $row['posttoforum'];
@@ -352,6 +363,12 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		$row['name'] .= $_POST['append'];
 
 		$row['courseid'] = $cid;
+		
+		if (isset($datesbylti) && $datesbylti==true) {
+			$row['date_by_lti'] = 1;
+		} else {
+			$row['date_by_lti'] = 0;
+		}
 
 		$fields = implode(",", array_keys($row));
 		//$vals = "'".implode("','",addslashes_deep(array_values($row)))."'";
@@ -375,6 +392,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 		}
 		$assessnewid[$typeid] = $newtypeid;
 		$thiswithdrawn = array();
+		$needToUpdatePtsPoss = false;
 
 		//DB $query = "SELECT itemorder FROM imas_assessments WHERE id='$typeid'";
 		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
@@ -400,7 +418,11 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 			$inssph = array(); $inss = array();
 			$insorder = array();
 			//DB while ($row = mysql_fetch_assoc($result)) {
+
 			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+				if ($row['withdrawn']>0) {
+					$needToUpdatePtsPoss = true;
+				}
 				if ($row['withdrawn']>0 && $removewithdrawn) {
 					$thiswithdrawn[$row['id']] = 1;
 					continue;
@@ -483,80 +505,12 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 					}
 				}
 				$newitemorder = implode(',',$newaitems);
-				//DB $query = "UPDATE imas_assessments SET itemorder='$newitemorder' WHERE id='$newtypeid'";
-				//DB mysql_query($query) or die("Query failed : $query" . mysql_error());
 				$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder WHERE id=:id");
 				$stm->execute(array(':itemorder'=>$newitemorder, ':id'=>$newtypeid));
-			}
-
-
-			/*
-			$aitems = explode(',',$itemorder);
-			$newaitems = array();
-			foreach ($aitems as $k=>$aitem) {
-				if (strpos($aitem,'~')===FALSE) {
-					///$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category) ";
-					///$query .= "SELECT '$newtypeid',questionsetid,points,attempts,penalty,category FROM imas_questions WHERE id='$aitem'";
-					//mysql_query($query) or die("Query failed :$query " . mysql_error());
-					$query = "SELECT questionsetid,points,attempts,penalty,category,regen,showans,showhints,rubric FROM imas_questions WHERE id='$aitem'";
-					$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-					$row = mysql_fetch_row($result);
-					if (is_numeric($row[4])) {
-						if (isset($outcomes[$row[4]])) {
-							$row[4] = $outcomes[$row[4]];
-						} else {
-							$row[4] = 0;
-						}
-					}
-					$rubric = array_pop($row);
-					$row = "'".implode("','",addslashes_deep($row))."'";
-					$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans,showhints) ";
-					$query .= "VALUES ('$newtypeid',$row)";
-					mysql_query($query) or die("Query failed : $query" . mysql_error());
-					$newid = mysql_insert_id();
-					if ($rubric != 0) {
-						$qrubrictrack[$newid] = $rubric;
-					}
-					$newaitems[] = $newid;
-				} else {
-					$sub = explode('~',$aitem);
-					$newsub = array();
-					if (strpos($sub[0],'|')!==false) { //true except for bwards compat
-						$newsub[] = array_shift($sub);
-					}
-					foreach ($sub as $subi) {
-						//$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category) ";
-						//$query .= "SELECT '$newtypeid',questionsetid,points,attempts,penalty,category FROM imas_questions WHERE id='$subi'";
-						//mysql_query($query) or die("Query failed : $query" . mysql_error());
-						$query = "SELECT questionsetid,points,attempts,penalty,category,regen,showans,showhints,rubric FROM imas_questions WHERE id='$subi'";
-						$result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$row = mysql_fetch_row($result);
-						if (is_numeric($row[4])) {
-							if (isset($outcomes[$row[4]])) {
-								$row[4] = $outcomes[$row[4]];
-							} else {
-								$row[4] = 0;
-							}
-						}
-						$rubric = array_pop($row);
-						$row = "'".implode("','",addslashes_deep($row))."'";
-						$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans,showhints) ";
-						$query .= "VALUES ('$newtypeid',$row)";
-						mysql_query($query) or die("Query failed : $query" . mysql_error());
-						$newid = mysql_insert_id();
-						if ($rubric != 0) {
-							$qrubrictrack[$newid] = $rubric;
-						}
-						$newsub[] = $newid;
-					}
-					$newaitems[] = implode('~',$newsub);
+				if ($needToUpdatePtsPoss) {
+					$newptsposs = updatePointsPossible($newtypeid, $newitemorder, $srcdefpoints);
 				}
 			}
-			$newitemorder = implode(',',$newaitems);
-			$query = "UPDATE imas_assessments SET itemorder='$newitemorder' WHERE id='$newtypeid'";
-			mysql_query($query) or die("Query failed : $query" . mysql_error());
-			*/
-
 		}
 	} else if ($itemtype == "Calendar") {
 		$newtypeid = 0;

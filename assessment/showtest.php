@@ -62,25 +62,33 @@
 		//DB $query = "SELECT deffeedback,startdate,enddate,reviewdate,shuffle,itemorder,password,avail,isgroup,groupsetid,deffeedbacktext,timelimit,courseid,istutorial,name,allowlate,displaymethod FROM imas_assessments WHERE id='$aid'";
 		//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
 		//DB $adata = mysql_fetch_array($result, MYSQL_ASSOC);
-		$stm = $DBH->prepare("SELECT deffeedback,startdate,enddate,reviewdate,shuffle,itemorder,password,avail,isgroup,groupsetid,deffeedbacktext,timelimit,courseid,istutorial,name,allowlate,displaymethod,id FROM imas_assessments WHERE id=:id");
+		$stm = $DBH->prepare("SELECT deffeedback,startdate,enddate,reviewdate,shuffle,itemorder,password,avail,isgroup,groupsetid,deffeedbacktext,timelimit,courseid,istutorial,name,allowlate,displaymethod,id,reqscoreaid,reqscore,reqscoretype FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$aid));
 		$adata = $stm->fetch(PDO::FETCH_ASSOC);
 		$now = time();
 		$assessmentclosed = false;
-
+		if ($adata['enddate']==2000000000 && $courseenddate<2000000000) {
+			$adata['enddate'] = $courseenddate;
+		}
 		if ($adata['avail']==0 && !isset($teacherid) && !isset($tutorid)) {
 			$assessmentclosed = true;
 		}
 		$canuselatepass = false;
-
+		$waivereqscore = false;
 		if (!$actas) {
 			if ($isRealStudent) {
-				$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+				$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti,waivereqscore FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 				$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 				$row = $stm2->fetch(PDO::FETCH_NUM);
 				if ($row!=null) {
 					$useexception = $exceptionfuncs->getCanUseAssessException($row, $adata, true);
+					$waivereqscore = ($row[4]>0);
 				}
+			} else if (isset($_SESSION['lti_duedate']) && (isset($teacherid) || isset($tutorid)) && $_SESSION['lti_duedate']!=$adata['enddate']) {
+				//teacher launch with lti duedate that's different than default
+				//do a pseudo-exception
+				$useexception = true;
+				$row = array(0, $_SESSION['lti_duedate'], 0, 1, 0);
 			}
 			if ($row!=null && $useexception) {
 				if ($now<$row[0] || $row[1]<$now) { //outside exception dates
@@ -92,8 +100,8 @@
 						}
 					}
 				} else { //inside exception dates exception
-					if ($adata['enddate']<$now) { //exception is for past-due-date
-						$inexception = true; //only trigger if past due date for penalty
+					if ($adata['enddate']<$now && ($row[3]==0 || $row[2]>0)) { //exception is for past-due-date
+						$inexception = true; //only trigger if past due date for penalty (and not a regular lti-set exception)
 					}
 				}
 				$exceptionduedate = $row[1];
@@ -159,6 +167,54 @@
 			}
 			require("../footer.php");
 			exit;
+		}
+		//check reqscore
+		if ($isRealStudent && abs($adata['reqscore'])>0 && $adata['reqscoreaid']>0 && !$waivereqscore) {
+			$isBlocked = false;
+			
+			$query = "SELECT ias.bestscores,ia.ptsposs,ia.name FROM imas_assessments AS ia LEFT JOIN ";
+			$query .= "imas_assessment_sessions AS ias ON ias.assessmentid=ia.id AND ias.userid=:userid ";
+			$query .= "WHERE ia.id=:assessmentid";
+			$bestscores_stm = $DBH->prepare($query);
+			$bestscores_stm->execute(array(':assessmentid'=>$adata['reqscoreaid'], ':userid'=>$userid));
+			list($prereqscore,$reqscoreptsposs,$reqscorename) = $bestscores_stm->fetch(PDO::FETCH_NUM);
+			
+			if ($prereqscore === null) {
+				$isBlocked = true;
+			} else {
+				$prereqscore = explode(';', $prereqscore);
+				$prereqscore = explode(',', $prereqscore[0]);
+				$prereqscoretot = 0;
+				for ($i=0;$i<count($prereqscore);$i++) {
+					$prereqscoretot += getpts($prereqscore[$i]);
+				}
+				$isBlocked = false;
+				
+				if ($adata['reqscoretype']&2) { //using percent-based
+					if ($reqscoreptsposs==-1) {
+						require("../includes/updateptsposs.php");
+						$reqscoreptsposs = updatePointsPossible($adata['reqscoreaid']);
+					}
+					if (round(100*$prereqscoretot/$reqscoreptsposs,1)+.02<abs($adata['reqscore'])) {
+						$isBlocked = true;
+					}
+				} else if ($prereqscoretot+.02<abs($adata['reqscore'])) { //points based
+					$isBlocked = true;
+				}
+			}
+			if ($isBlocked) {
+				require("header.php");
+				echo '<h3>'._('You cannot start this assessment yet.').'</h3>';
+				echo '<p>';
+				printf(_('Access to this assessment requires a score of %d%s on %s'),
+					abs($adata['reqscore']),
+					($adata['reqscoretype']&2)?'%':_(' points'),
+					Sanitize::encodeStringForDisplay($reqscorename));
+				echo '</p>';
+				require("../footer.php");
+				exit;
+			}
+			
 		}
 
 		//check for password
@@ -795,20 +851,31 @@
 	$now = time();
 	//check for dates - kick out student if after due date
 	//if (!$isteacher) {
+	if ($testsettings['enddate']==2000000000 && $courseenddate<2000000000) {
+		$testsettings['enddate'] = $courseenddate;
+	}
 	if ($testsettings['avail']==0 && !$isteacher) {
 		echo _('Assessment is closed');
 		leavetestmsg();
 		exit;
 	}
+	$ltiexception = false;
 	if (!$actas) {
 		//DB $query = "SELECT startdate,enddate,islatepass,exceptionpenalty FROM imas_exceptions WHERE userid='$userid' AND assessmentid='{$line['assessmentid']}' AND itemtype='A'";
 		//DB $result2 = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $row = mysql_fetch_row($result2);
-		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,exceptionpenalty FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti,exceptionpenalty FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$line['assessmentid']));
 		$exceptionrow = $stm2->fetch(PDO::FETCH_NUM);
 		if ($exceptionrow != null) {
 			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $testsettings, true);
+			$ltiexception = ($row[3]>0 && $row[2]==0);
+		} else if (isset($_SESSION['lti_duedate']) && $isteacher && $_SESSION['lti_duedate']!=$testsettings['enddate']) {
+			//teacher launch with lti duedate that's different than default
+			//do a pseudo-exception
+			$useexception = true;
+			$ltiexception = true;
+			$exceptionrow = array(0, $_SESSION['lti_duedate'], 0, 1);
 		}
 		if ($exceptionrow!=null && $useexception) {
 			if ($now<$exceptionrow[0] || $exceptionrow[1]<$now) { //outside exception dates
@@ -822,11 +889,11 @@
 					}
 				}
 			} else { //in exception
-				if ($testsettings['enddate']<$now) { //exception is for past-due-date
+				if ($testsettings['enddate']<$now && ($row[3]==0 || $row[2]>0)) { //exception is for past-due-date
 					$inexception = true;
 					$exceptiontype = $exceptionrow[2];
-					if ($exceptionrow[3]!==null) {
-						$testsettings['exceptionpenalty'] = $exceptionrow[3];
+					if ($exceptionrow[4]!==null) {
+						$testsettings['exceptionpenalty'] = $exceptionrow[4];
 					}
 				}
 			}
@@ -848,7 +915,7 @@
 		//DB $query = "SELECT startdate,enddate FROM imas_exceptions WHERE userid='{$sessiondata['actas']}' AND assessmentid='{$line['assessmentid']}' AND itemtype='A'";
 		//DB $result2 = mysql_query($query) or die("Query failed : " . mysql_error());
 		//DB $row = mysql_fetch_row($result2);
-		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm2->execute(array(':userid'=>$sessiondata['actas'], ':assessmentid'=>$line['assessmentid']));
 		$row = $stm2->fetch(PDO::FETCH_NUM);
 		if ($row!=null) {
@@ -856,6 +923,7 @@
 			if ($useexception) {
 				$exceptionduedate = $row[1];
 			}
+			$ltiexception = ($row[3]>0 && $row[2]==0);
 		}
 	}
 
@@ -1593,7 +1661,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 		$duetimenote = '';
 		if ($exceptionduedate > 0) {
 			$timebeforedue = $exceptionduedate - time();
-			if ($timebeforedue>0 && ($testsettings['enddate'] - time()) < 0) { //past original due date
+			if ($timebeforedue>0 && ($testsettings['enddate'] - time()) < 0 && !$ltiexception) { //past original due date
 				$duetimenote .= sprintf(_('This assignment is past the original due date of %s.'), tzdate('D m/d/Y g:i a',$testsettings['enddate'])).' ';
 				if ($exceptiontype>0) {
 					$duetimenote .= _('You have used a LatePass');
@@ -1628,10 +1696,12 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				$duetimenote .= _('Due') . " " . tzdate('D m/d/Y g:i a',$testsettings['enddate']);
 			}
 		} else {
-			if ($testsettings['enddate']==2000000000) {
+			if ($exceptionduedate > 0) {
+				if ($exceptionduedate < 2000000000) {
+					$duetimenote .= _('Due') . " " . tzdate('D m/d/Y g:i a',$exceptionduedate);
+				}
+			} else if ($testsettings['enddate']==2000000000) {
 				$duetimenote .= '';
-			} else if ($exceptionduedate > 0) {
-				$duetimenote .= _('Due') . " " . tzdate('D m/d/Y g:i a',$exceptionduedate);
 			} else {
 				$duetimenote .= _('Due') . " " . tzdate('D m/d/Y g:i a',$testsettings['enddate']);
 			}
@@ -1898,6 +1968,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				basicshowq($toshow);
 				showqinfobar($toshow,true,true,2);
 				echo '<input type="submit" class="btn" value="', _('Continue'), '" />';
+				echo '</form>';
 			} else { //are all done
 				$shown = showscores($questions,$attempts,$testsettings);
 				endtest($testsettings);
@@ -2781,7 +2852,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			recordtestdata();
 			if ($numdisplayed > 0) {
 				echo '<br/><input type="submit" class="btn" value="', _('Submit'), '" />';
-				echo '<input type="submit" class="btn" name="saveforlater" value="', _('Save answers'), '" onclick="return confirm(\'', _('This will save your answers so you can come back later and finish, but not submit them for grading. Be sure to come back and submit your answers before the due date.'), '\');" />';
+				echo '<input type="submit" class="btn" name="saveforlater" value="', _('Save answers'), '" onclick="var c=confirm(\'', _('This will save your answers so you can come back later and finish, but not submit them for grading. Be sure to come back and submit your answers before the due date.'), '\');if (c){$(this).attr(\'data-clicked\',1);};return c;" />';
 				echo "</form>\n";
 			} else {
 				startoftestmessage($perfectscore,$hasreattempts,$allowregen,$noindivscores,$testsettings['testtype']=="NoScores");

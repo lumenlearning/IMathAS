@@ -88,7 +88,7 @@ function getCalendarEventData($cid, $userid, $stuview = false) {
 
 	if (isset($itemlist['Assessment'])) {
 		$typeids = implode(',', array_keys($itemlist['Assessment']));
-		$stm = $DBH->query("SELECT id,name,startdate,enddate,reviewdate,reqscore,reqscoreaid FROM imas_assessments WHERE avail=1 AND id IN ($typeids) AND enddate<2000000000 ORDER BY name");
+		$stm = $DBH->query("SELECT id,name,startdate,enddate,reviewdate,reqscore,reqscoreaid,reqscoretype,ptsposs FROM imas_assessments WHERE avail=1 AND date_by_lti<>1 AND id IN ($typeids) AND enddate<2000000000 ORDER BY name");
 		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			require_once("../includes/exceptionfuncs.php");
 			if (isset($exceptions[$row['id']])) {
@@ -106,22 +106,40 @@ function getCalendarEventData($cid, $userid, $stuview = false) {
 			$showgrayedout = false;
 			if (!isset($teacherid) && abs($row['reqscore'])>0 && $row['reqscoreaid']>0 && (!isset($exceptions[$row['id']]) || $exceptions[$row['id']][3]==0)) {
 				if ($bestscores_stm===null) { //only prepare once
-					$bestscores_stm = $DBH->prepare("SELECT bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid AND userid=:userid");
+					$query = "SELECT ias.bestscores,ia.ptsposs FROM imas_assessment_sessions AS ias ";
+					$query .= "JOIN imas_assessments AS ia ON ias.assessmentid=ia.id ";
+					$query .= "WHERE assessmentid=:assessmentid AND userid=:userid";
+					$bestscores_stm = $DBH->prepare($query);
 				}
 				$bestscores_stm->execute(array(':assessmentid'=>$row['reqscoreaid'], ':userid'=>$userid));
 				if ($bestscores_stm->rowCount()==0) {
-					if ($row['reqscore']<0) {
+					if ($row['reqscore']<0 || $row['reqscoretype']&1) {
 						$showgrayedout = true;
 					} else {
 						continue;
 					}
 				} else {
-					$scores = explode(';',$bestscores_stm->fetchColumn(0));
-					if (round(getpts($scores[0]),1)+.02<abs($row['reqscore'])) {
-						if ($row['reqscore']<0) {
-							$showgrayedout = true;
-						} else {
-							continue;
+					list($scores,$reqscoreptsposs) = $bestscores_stm->fetch(PDO::FETCH_NUM);
+					$scores = explode(';', $scores);
+					if ($row['reqscoretype']&2) { //using percent-based
+						if ($reqscoreptsposs==-1) {
+							require("../includes/updateptsposs.php");
+							$reqscoreptsposs = updatePointsPossible($row['reqscoreaid']);
+						}
+						if (round(100*getpts($scores[0])/$reqscoreptsposs,1)+.02<abs($row['reqscore'])) {
+							if ($row['reqscore']<0 || $row['reqscoretype']&1) {
+								$showgrayedout = true;
+							} else {
+								continue;
+							}
+						}
+					} else { //points based
+						if (round(getpts($scores[0]),1)+.02<abs($row['reqscore'])) {
+							if ($row['reqscore']<0 || $row['reqscoretype']&1) {
+								$showgrayedout = true;
+							} else {
+								continue;
+							}
 						}
 					}
 				}

@@ -146,7 +146,7 @@ function getWikiDD($i, $typeid, $parent, $itemid) {
 
 $itemshowdata = null;
 function showitems($items,$parent,$inpublic=false) {
-	   global $DBH,$teacherid,$tutorid,$studentid,$cid,$imasroot,$userid,$openblocks,$firstload,$sessiondata,$myrights;
+	   global $DBH,$teacherid,$tutorid,$studentid,$cid,$imasroot,$userid,$openblocks,$firstload,$sessiondata,$myrights,$courseenddate;
 	   global $itemicons,$exceptions,$latepasses,$ispublic,$studentinfo,$newpostcnts,$CFG,$latepasshrs,$toolset,$readlinkeditems;
 	   global $itemshowdata, $exceptionfuncs;
 
@@ -659,7 +659,9 @@ function showitems($items,$parent,$inpublic=false) {
 			   } else {
 			   	   $canuselatepass = $exceptionfuncs->getCanUseAssessLatePass($line);
 			   }
-
+			   if ($line['enddate']==2000000000 && $courseenddate<2000000000) {
+			   	   $line['enddate'] = $courseenddate;
+			   }
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
 			   } else {
@@ -678,7 +680,7 @@ function showitems($items,$parent,$inpublic=false) {
 			   $nothidden = true;  $showgreyedout = false;
 			   if (abs($line['reqscore'])>0 && $line['reqscoreaid']>0 && !$viewall && $line['enddate']>$now
 			   	   && (!isset($exceptions[$items[$i]]) || $exceptions[$items[$i]][3]==0)) {
-			   	   if ($line['reqscore']<0) {
+			   	   if ($line['reqscore']<0 || $line['reqscoretype']&1) {
 			   	   	   $showgreyedout = true;
 			   	   }
 				   //DB $query = "SELECT bestscores FROM imas_assessment_sessions WHERE assessmentid='{$line['reqscoreaid']}' AND userid='$userid'";
@@ -691,13 +693,19 @@ function showitems($items,$parent,$inpublic=false) {
 				   } else {
 					   //DB $scores = explode(';',mysql_result($result,0,0));
 					   $scores = explode(';',$stm->fetchColumn(0));
-					   if (round(getpts($scores[0]),1)+.02<abs($line['reqscore'])) {
-					   	   $nothidden = false;
+					   if ($line['reqscoretype']&2) { //using percent-based
+					   	   if (round(100*getpts($scores[0])/$line['reqscoreptsposs'],1)+.02<abs($line['reqscore'])) {
+							   $nothidden = false;
+						   }
+					   } else { //points based
+						   if (round(getpts($scores[0]),1)+.02<abs($line['reqscore'])) {
+							   $nothidden = false;
+						   }
 					   }
 				   }
 			   }
 
-			   if ($line['avail']==1 && $line['startdate']<$now && $line['enddate']>$now && $nothidden) { //regular show
+			   if ($line['avail']==1 && $line['date_by_lti']!=1 && $line['startdate']<$now && $line['enddate']>$now && $nothidden) { //regular show
 				   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
 
 				   echo '<div class="itemhdr">';
@@ -777,7 +785,7 @@ function showitems($items,$parent,$inpublic=false) {
 				   echo filter("<div class=itemsum>{$line['summary']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
 
-			   } else if ($line['avail']==1 && $line['enddate']<$now && $line['reviewdate']>$now) { //review show // && $nothidden
+			   } else if ($line['avail']==1 && $line['date_by_lti']!=1 && $line['enddate']<$now && $line['reviewdate']>$now) { //review show // && $nothidden
 				   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
 				   echo '<div class="itemhdr">';
 
@@ -810,7 +818,7 @@ function showitems($items,$parent,$inpublic=false) {
 				   echo '</div>'; //itemhdr
 				   echo filter("<div class=itemsum>{$line['summary']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
-			   } else if ($line['avail']==1 && $line['enddate']<$now && $canuselatepass) {
+			   } else if ($line['avail']==1 && $line['date_by_lti']!=1 && $line['enddate']<$now && $canuselatepass) {
 					 //not available but can use latepass - show greyed w latepass link
 					  beginitem($canedit,$items[$i]);
 						echo '<div class="itemhdr">';
@@ -825,7 +833,7 @@ function showitems($items,$parent,$inpublic=false) {
  				   	echo '</div>'; //itemhdr
  				   	echo filter("<div class=\"itemsum grey\">{$line['summary']}</div>\n");
  				 		enditem($canedit);
-				 } else if ($line['avail']==1 && $line['startdate']<$now && $line['enddate']>$now && $showgreyedout) {  //greyedout view for conditional items
+				 } else if ($line['avail']==1 && $line['date_by_lti']!=1 && $line['startdate']<$now && $line['enddate']>$now && $showgreyedout) {  //greyedout view for conditional items
 			   	   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
 			   	   echo '<div class="itemhdr">';
 
@@ -838,7 +846,9 @@ function showitems($items,$parent,$inpublic=false) {
 				   }
 
 				   echo "<div class=\"title grey\"><b><i>".Sanitize::encodeStringForDisplay($line['name'])."</i></b>";
-				   echo '<br/><span class="small">'._('The requirements for beginning this item have not been met yet').'</span>';
+				   //echo '<br/><span class="small">'._('The requirements for beginning this item have not been met yet').'</span>';
+				   echo '<br/><span class="small">'._('Prerequisite: ').abs($line['reqscore']).(($line['reqscoretype']&2)?'%':' points');
+				   echo _(' on ').Sanitize::encodeStringForDisplay($line['reqscorename']).'</span>';
 
 				   if ($line['enddate']!=2000000000) {
 					   echo "<br/> $endname $enddate \n";
@@ -853,7 +863,9 @@ function showitems($items,$parent,$inpublic=false) {
 
 			   } else if ($viewall) { //not avail to stu
 				   if ($line['avail']==0) {
-					   $show = _('Hidden');
+				   	$show = _('Hidden');
+				   } else if ($line['date_by_lti']==1) {
+				   	$show = _('Waiting for date to be set via LTI');
 				   } else {
 					   $show = sprintf(_('Available %1$s until %2$s'), $startdate, $enddate);
 					   if ($line['reviewdate']>0 && $line['enddate']!=2000000000) {

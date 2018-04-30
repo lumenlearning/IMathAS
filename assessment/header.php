@@ -43,7 +43,7 @@ initstack = new Array();
 window.onload = init;
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<link rel="stylesheet" href="<?php echo $imasroot . "/assessment/mathtest.css?ver=021518";?>" type="text/css"/>
+<link rel="stylesheet" href="<?php echo $imasroot . "/assessment/mathtest.css?ver=031218";?>" type="text/css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
@@ -167,14 +167,14 @@ div { zoom: 1; }
 <script type="text/javascript" src="<?php echo $imasroot;?>/javascript/excanvas_min.js?v=120811"></script>
 <![endif]-->
 
-<script src="<?php echo $imasroot . "/javascript/assessment_min.js?v=030118";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/assessment_min.js?v=031418";?>" type="text/javascript"></script>
 
 <?php
 /*
 <script src="<?php echo $imasroot . "/javascript/general.js?v=012618";?>" type="text/javascript"></script>
-<script src="<?php echo $imasroot . "/javascript/mathjs.js?v=072117";?>" type="text/javascript"></script>
-<script src="<?php echo $imasroot . "/javascript/AMhelpers.js?v=030118";?>" type="text/javascript"></script>
-<script src="<?php echo $imasroot . "/javascript/confirmsubmit.js?v=021418";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/mathjs.js?v=031418";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/AMhelpers.js?v=031218";?>" type="text/javascript"></script>
+<script src="<?php echo $imasroot . "/javascript/confirmsubmit.js?v=031018";?>" type="text/javascript"></script>
 <script src="<?php echo $imasroot . "/javascript/drawing.js?v=030118";?>" type="text/javascript"></script>
 <script src="<?php echo $imasroot . "/javascript/eqntips.js?v=082616";?>" type="text/javascript"></script>
 

@@ -59,8 +59,8 @@ if (($isteacher || isset($tutorid)) && isset($_POST['score'])) {
 		$postuserids[$row[0]] = $row[1];
 	}
 	foreach($_POST['score'] as $k=>$v) {
-		if (isset($_POST['feedback'][$k])) {
-			$feedback = $_POST['feedback'][$k];
+		if (isset($_POST['feedback'.$k]) && $_POST['feedback'.$k]!='<p></p>') {
+			$feedback = Sanitize::incomingHtml($_POST['feedback'.$k]);
 		} else {
 			$feedback = '';
 		}
@@ -840,7 +840,7 @@ echo "</p>";
 				printf("<td>%s</td>\n", Sanitize::encodeStringForDisplay($name));
 
 				if ($isteacher && $groupsetid>0 && !$dofilter) {
-					echo '<td class=c>'.Sanitize::onlyInt($groupnames[$line['stugroupid']]).'</td>';
+					echo '<td class=c>'.Sanitize::encodeStringForDisplay($groupnames[$line['stugroupid']]).'</td>';
 				}
 
 				echo "<td class=c>".Sanitize::encodeStringForDisplay($posts)."</td>";
