@@ -1,4 +1,4 @@
-// version 1.0.14
+// version 1.0.15
 
 var directPayComponents = (function (React) {
 'use strict';
@@ -308,7 +308,7 @@ var DirectPayCourseActivation = function (_React$Component) {
                 style: styles.courseTitle },
               this.props.courseTitle + ': ' + priceInDollars
             ),
-            window.innerWidth < 900 ? React.createElement(
+            window.innerWidth < 800 ? React.createElement(
               'p',
               { className: 'top-small-block-text', style: styles.topSmallBlockText },
               'This low-cost activation is only required for assessments. Course content is always available.'
@@ -353,7 +353,7 @@ var DirectPayCourseActivation = function (_React$Component) {
   }, {
     key: '_renderRightColumn',
     value: function _renderRightColumn() {
-      if (window.innerWidth < 900) {
+      if (window.innerWidth < 800) {
         return this._renderSmallBlockDecision();
       } else {
         return React.createElement(
@@ -466,7 +466,7 @@ var DirectPayCourseActivation = function (_React$Component) {
     value: function _getParentStyle() {
       var styles$$1 = {};
 
-      if (this.state.windowWidth < 900) {
+      if (this.state.windowWidth < 800) {
         styles$$1 = {
           flexDirection: 'column'
 
@@ -480,7 +480,7 @@ var DirectPayCourseActivation = function (_React$Component) {
     value: function _getTabletSpecs() {
       var styles$$1 = {};
 
-      if (this.state.windowWidth < 900 && this.state.windowWidth > 414) {
+      if (this.state.windowWidth < 800 && this.state.windowWidth > 414) {
         styles$$1 = {
           width: '340px'
         };
