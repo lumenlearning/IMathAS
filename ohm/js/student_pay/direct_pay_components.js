@@ -765,7 +765,7 @@ var DirectPayLandingPage = function (_React$Component) {
   }, {
     key: "_getSchoolLogoUrl",
     value: function _getSchoolLogoUrl() {
-      this.props.schoolLogoUrl || 'https://s3-us-west-2.amazonaws.com/lumen-platform-assets/images/lumen-open-courseware.png';
+      return this.props.schoolLogoUrl || 'https://s3-us-west-2.amazonaws.com/lumen-platform-assets/images/lumen-open-courseware.png';
     }
   }, {
     key: "_loadCorrectView",
