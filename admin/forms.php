@@ -428,7 +428,7 @@ switch($_GET['action']) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 
-		renderCourseRequiresStudentPayment();
+		renderCourseRequiresStudentPayment($_GET['action']);
 
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
@@ -1380,9 +1380,10 @@ function renderAccessTypeSelector($currentAccessType) {
  * Render the "Assessments require payment or activation" portion of the
  * Create/Modify Course page.
  *
+ * @param string $action One of "addcourse" or "modify"
  * @throws \OHM\StudentPaymentException
  */
-function renderCourseRequiresStudentPayment() {
+function renderCourseRequiresStudentPayment($action) {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
 	if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
@@ -1390,12 +1391,23 @@ function renderCourseRequiresStudentPayment() {
 
 		$courseId = intval($_GET['id']);
 
-		$stm = $GLOBALS['DBH']->prepare("SELECT u.groupid
+		$courseOwnerGroupId = null;
+		if ('addcourse' == $action) {
+			$stm = $GLOBALS['DBH']->prepare("SELECT g.id
+												FROM imas_users AS u
+													JOIN imas_groups AS g ON g.id = u.groupid
+													WHERE u.id = :userId");
+			$stm->execute(array(':userId' => $GLOBALS['userid']));
+			$courseOwnerGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
+		}
+		if ('modify' == $action) {
+			$stm = $GLOBALS['DBH']->prepare("SELECT u.groupid
 												FROM imas_courses AS c
 													JOIN imas_users AS u ON c.ownerid = u.id
 													WHERE c.id = :courseId");
-		$stm->execute(array(':courseId' => $courseId));
-		$courseOwnerGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
+			$stm->execute(array(':courseId' => $courseId));
+			$courseOwnerGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
+		}
 
 		if (empty($courseOwnerGroupId)) {
 			// It's possible for users to have a group ID of "0". (default group)
