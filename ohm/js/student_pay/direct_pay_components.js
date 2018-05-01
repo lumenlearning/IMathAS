@@ -1,5 +1,3 @@
-// version 1.0.15
-
 var directPayComponents = (function (React) {
 'use strict';
 
@@ -300,7 +298,7 @@ var DirectPayCourseActivation = function (_React$Component) {
             React.createElement(
               'h1',
               { className: 'activation-heading', style: styles.activationHeading },
-              'One-time Course Activation'
+              this.props.paymentPageTitle || "One-time Course Activation"
             ),
             React.createElement(
               'h3',
@@ -733,7 +731,7 @@ var DirectPayLandingPage = function (_React$Component) {
           "div",
           { className: "landing-page-wrapper", style: styles$2.landingPageWrapper },
           React.createElement("img", {
-            src: this.props.schoolLogoUrl,
+            src: this._getSchoolLogoUrl(),
             alt: this.props.institutionName + " logo",
             style: { width: '224px', height: '69px', objectFit: 'contain' }
           }),
@@ -763,6 +761,11 @@ var DirectPayLandingPage = function (_React$Component) {
           )
         )
       );
+    }
+  }, {
+    key: "_getSchoolLogoUrl",
+    value: function _getSchoolLogoUrl() {
+      this.props.schoolLogoUrl || 'https://s3-us-west-2.amazonaws.com/lumen-platform-assets/images/lumen-open-courseware.png';
     }
   }, {
     key: "_loadCorrectView",
