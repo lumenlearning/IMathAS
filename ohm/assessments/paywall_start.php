@@ -22,12 +22,9 @@
 $courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $sessiondata['courseid'];
 $assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
 
-$courseName = $sessiondata['coursename'];
-if (empty($courseName)) {
-	$courseNameStm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
-	$courseNameStm->execute(array(':id' => $courseId));
-	$courseName = $courseNameStm->fetchColumn(0);
-}
+$courseNameStm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
+$courseNameStm->execute(array(':id' => $courseId));
+$courseName = $courseNameStm->fetchColumn(0);
 
 
 $courseOwnerGroupId = null;
