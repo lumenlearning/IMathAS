@@ -11,19 +11,19 @@ if (60 > $trialTimeRemaining) {
 }
 // less than 1 hour left in trial
 else if (3600 > $trialTimeRemaining) {
-	$formattedTimeRemaining = gmdate('i', $trialTimeRemaining) . ' minutes';
+	$formattedTimeRemaining = intval(gmdate('i', $trialTimeRemaining)) . ' minutes';
 }
 // 1 hour left in trial
 else if (3600 <= $trialTimeRemaining && 7200 > $trialTimeRemaining) {
-	$formattedTimeRemaining = gmdate('H', $trialTimeRemaining) . ' hour';
+	$formattedTimeRemaining = gmdate('G', $trialTimeRemaining) . ' hour';
 }
 // less than 1 day left in trial
 else if (86400 > $trialTimeRemaining) {
-	$formattedTimeRemaining = gmdate('H', $trialTimeRemaining) . ' hours';
+	$formattedTimeRemaining = gmdate('G', $trialTimeRemaining) . ' hours';
 }
 // days remaining in trial
 else if (86400 <= $trialTimeRemaining) {
-	$formattedTimeRemaining = gmdate('d', $trialTimeRemaining) . ' days';
+	$formattedTimeRemaining = gmdate('j', $trialTimeRemaining) . ' days';
 }
 ?>
 
