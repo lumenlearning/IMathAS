@@ -13,10 +13,14 @@ class StudentPayStatus
 {
 
 	private $courseRequiresStudentPayment; // boolean
+	private $studentPaymentTypeRequired; // string
 	private $studentHasValidAccessCode; // boolean
 	private $studentIsInTrial; // boolean
 	private $studentTrialTimeRemainingSeconds; // integer
 	private $studentPaymentRawStatus; // string
+	private $courseDirectPayAmountInCents; // integer
+	private $schoolLogoUrl; // string
+	private $schoolReceiptText; // string
 	private $userMessage; // string
 
 	/**
@@ -33,6 +37,22 @@ class StudentPayStatus
 	public function setCourseRequiresStudentPayment($courseRequiresStudentPayment)
 	{
 		$this->courseRequiresStudentPayment = $courseRequiresStudentPayment;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getStudentPaymentTypeRequired()
+	{
+		return $this->studentPaymentTypeRequired;
+	}
+
+	/**
+	 * @param mixed $studentPaymentTypeRequired
+	 */
+	public function setStudentPaymentTypeRequired($studentPaymentTypeRequired)
+	{
+		$this->studentPaymentTypeRequired = $studentPaymentTypeRequired;
 	}
 
 	/**
@@ -103,6 +123,54 @@ class StudentPayStatus
 	public function setStudentPaymentRawStatus($studentPaymentRawStatus)
 	{
 		$this->studentPaymentRawStatus = $studentPaymentRawStatus;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getCourseDirectPayAmountInCents()
+	{
+		return $this->courseDirectPayAmountInCents;
+	}
+
+	/**
+	 * @param mixed $courseDirectPayAmountInCents
+	 */
+	public function setCourseDirectPayAmountInCents($courseDirectPayAmountInCents)
+	{
+		$this->courseDirectPayAmountInCents = $courseDirectPayAmountInCents;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolLogoUrl()
+	{
+		return $this->schoolLogoUrl;
+	}
+
+	/**
+	 * @param mixed $schoolLogoUrl
+	 */
+	public function setSchoolLogoUrl($schoolLogoUrl)
+	{
+		$this->schoolLogoUrl = $schoolLogoUrl;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSchoolReceiptText()
+	{
+		return $this->schoolReceiptText;
+	}
+
+	/**
+	 * @param mixed $schoolReceiptText
+	 */
+	public function setSchoolReceiptText($schoolReceiptText)
+	{
+		$this->schoolReceiptText = $schoolReceiptText;
 	}
 
 	/**

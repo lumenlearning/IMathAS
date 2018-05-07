@@ -15,6 +15,10 @@ require_once(__DIR__ . "/../models/StudentPayApiResult.php");
  * If cached information is available in MySQL, it will be used.
  * If not, an API call will be made to the student payment API. The results will be cached in MySQL and returned.
  *
+ * Note:
+ *   If caching is not required or desired, it is okay to use the appropriate
+ *   classes directly. The appropriate classes are listed at the end of this phpdoc.
+ *
  * @package OHM
  * @see StudentPaymentApi Used for interaction with the student payments API.
  * @see StudentPaymentDb Used for OHM db interaction related to student payments.
@@ -185,8 +189,17 @@ class StudentPayment
 		// Course requires payment
 		$studentPayStatus->setCourseRequiresStudentPayment($studentPayApiResult->getCourseRequiresStudentPayment());
 
+		// Student payment type required
+		$studentPayStatus->setStudentPaymentTypeRequired($studentPayApiResult->getAccessType());
+
+		// Direct payment required for course (if direct_pay enabled)
+		$studentPayStatus->setCourseDirectPayAmountInCents($studentPayApiResult->getPaymentAmountInCents());
+
 		// Response from API appropriate for display to the user
 		$studentPayStatus->setUserMessage($studentPayApiResult->getApiUserMessage());
+
+		// School branding information
+		$studentPayStatus->setSchoolLogoUrl($studentPayApiResult->getSchoolLogoUrl());
 
 		// Currently, invalid code error messages are returned by the API in a different place.
 		if (!empty($studentPayApiResult->getErrors())) {
@@ -207,10 +220,10 @@ class StudentPayment
 			StudentPayApiResult::EXTEND_TRIAL_SUCCESS);
 		if (in_array($studentPayApiResult->getStudentPaymentStatus(), $validIsInTrial)) {
 			$studentPayStatus->setStudentIsInTrial(true);
-			$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 		} else {
 			$studentPayStatus->setStudentIsInTrial(false);
 		}
+		$studentPayStatus->setStudentTrialTimeRemainingSeconds($studentPayApiResult->getTrialExpiresInSeconds());
 
 		// Override API value for "course requires activation code" with DB value. (API always returns false)
 		$sadFaceOverride = $this->getCoursePayStatusFromDatabase($studentPayStatus);
@@ -301,6 +314,27 @@ class StudentPayment
 		} catch (StudentPaymentException $e) {
 			// Don't allow metrics logging failures to halt the experience!
 			error_log("Exception while logging student payment event: Activation page seen. "
+				. $e->getMessage());
+			error_log($e->getTraceAsString());
+		}
+
+		return $studentPayStatus;
+	}
+
+	/**
+	 * Record the fact that the user has seen the direct payment page. This is for metrics.
+	 *
+	 * @return StudentPayStatus An instance of StudentPayStatus.
+	 */
+	public function logDirectPaymentPageSeen()
+	{
+		$studentPayStatus = null;
+		try {
+			$studentPayApiResult = $this->studentPaymentApi->logDirectPaymentPageSeen();
+			$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, new StudentPayStatus());
+		} catch (StudentPaymentException $e) {
+			// Don't allow metrics logging failures to halt the experience!
+			error_log("Exception while logging student payment event: Direct payment page seen. "
 				. $e->getMessage());
 			error_log($e->getTraceAsString());
 		}

@@ -10,9 +10,11 @@ namespace OHM;
 
 require_once(__DIR__ . '/../../init.php');
 require_once(__DIR__ . "/../includes/StudentPaymentDb.php");
+require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
+require_once(__DIR__ . "/../models/StudentPayApiResult.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 
-$validActions = array('setGroupPaymentStatus');
+$validActions = array('setGroupPaymentType');
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : NULL;
 
@@ -21,28 +23,14 @@ if (!in_array($action, $validActions)) {
 	response(400, 'No valid action specified.');
 }
 
-if ("setGroupPaymentStatus" == $action) {
-	$paymentStatus = isset($_REQUEST['paymentStatus']) ? $_REQUEST['paymentStatus'] : NULL;
-	$paymentStatus = parseBoolean($paymentStatus);
-	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
+if ("setGroupPaymentType" == $action) {
+	$paymentType = validParamsPaymentType();
+	$groupId = validParamsGroupId();
 
-	if (is_null($groupId) || 1 > $groupId) {
-		response(400, "Invalid group ID provided: " . $_REQUEST['groupId']);
-	}
-	if (is_null($paymentStatus)) {
-		response(400, "Invalid payment status provided: " . $_REQUEST['paymentStatus']);
-	}
+	setStudentPaymentType($groupId, $paymentType);
 
-	try {
-		$studentPaymebtDb = new StudentPaymentDb($groupId, null, null);
-		$studentPaymebtDb->setStudentPaymentAllCoursesByGroupId($groupId, $paymentStatus);
-		$studentPaymebtDb->setGroupRequiresStudentPayment($paymentStatus);
-	} catch (\PDOException $e) {
-		error_log(sprintf("Failed to change student payment setting on group ID %d. Exception: %s",
-			$groupId, $e->getMessage()));
-		error_log($e->getTraceAsString());
-		response(500, 'Failed to change student payment setting on group ID ' . $groupId);
-	}
+	$newDbState = StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType ? false : true;
+	setStudentPaymentEnabled($groupId, $newDbState);
 
 	response(200, 'OK');
 
@@ -50,7 +38,8 @@ if ("setGroupPaymentStatus" == $action) {
 }
 
 // If we get here, something went wrong. Send error response.
-response(400, 'Something went wrong.');
+response(400, "Unknown action specified.");
+
 
 /**
  * Return a response to the client.
@@ -70,22 +59,110 @@ function response($status, $msg)
 	exit;
 }
 
+
 /**
- * Convert a boolean string to an actual boolean.
+ * Get and validate the group ID. If validation fails, we immediately return
+ * HTTP status 400 with an explanation.
  *
- * Because: https://secure.php.net/manual/en/language.types.boolean.php
- *
- * @param $value string A string containing either "true" or "false".
- * @return bool|null True, false, or null. Null if the string is neither true nor false.
+ * @return integer The group ID.
  */
-function parseBoolean($value)
+function validParamsGroupId()
 {
-	if ("false" == strtolower($value) || false == $value) {
-		return false;
-	}
-	if ("true" == strtolower($value) || true == $value) {
-		return true;
+	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
+	$groupId = \Sanitize::onlyInt($groupId);
+
+	if (is_null($groupId) || 1 > $groupId) {
+		response(400, "Invalid group ID provided: " . $_REQUEST['groupId']);
 	}
 
-	return null;
+	return $groupId;
+}
+
+
+/**
+ * Get and validate the student payment / access type. If validation fails, we
+ * immediately return HTTP status 400 with an explanation.
+ *
+ * @return string The student payment / access type.
+ */
+function validParamsPaymentType()
+{
+	$paymentType = isset($_REQUEST['paymentType']) ? $_REQUEST['paymentType'] : NULL;
+	$paymentType = \Sanitize::simpleString($paymentType);
+
+	if (is_null($paymentType) || empty($paymentType)) {
+		response(400, "No payment type provided.");
+	}
+
+	return $paymentType;
+}
+
+
+/**
+ * Update the student payment setting in the OHM database.
+ *
+ * @param $groupId integer The group's ID. (imas_groups, id column)
+ * @param $isEnabled boolean True for enabled, false for disabled.
+ */
+function setStudentPaymentEnabled($groupId, $isEnabled)
+{
+	try {
+		$studentPaymebtDb = new StudentPaymentDb($groupId, null, null);
+		$studentPaymebtDb->setStudentPaymentAllCoursesByGroupId($groupId, $isEnabled);
+		$studentPaymebtDb->setGroupRequiresStudentPayment($isEnabled);
+	} catch (\PDOException $e) {
+		dbException($e, $groupId);
+	} catch (StudentPaymentException $e) {
+		dbException($e, $groupId);
+	}
+}
+
+
+/**
+ * This function is called in setStudentPaymentEnabled try/catch blocks.
+ *
+ * @param $exception \PDOException | StudentPaymentException
+ * @param $groupId integer The group ID we attempted to update.
+ */
+function dbException($exception, $groupId)
+{
+	error_log(sprintf("Failed to change student payment setting (in OHM database) for group ID %d. Exception: %s",
+		$groupId, $exception->getMessage()));
+	error_log($exception->getTraceAsString());
+	response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+}
+
+
+/**
+ * Set the payment / access type in the student payment API.
+ *
+ * As of 2018 Mar 2, valid payment types are:
+ * - "not_required"
+ * - "activation_code"
+ * - "direct_pay"
+ *
+ * @param $groupId integer The group's ID. (imas_groups, id column)
+ * @param $paymentType string The payment type.
+ */
+function setStudentPaymentType($groupId, $paymentType)
+{
+	$studentPaymentApi = new StudentPaymentApi($groupId, null, null);
+
+	try {
+		$apiResult = null;
+		if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType) {
+			$apiResult = $studentPaymentApi->deleteGroupPaymentSettings();
+		} else {
+			$apiResult = $studentPaymentApi->createGroupPaymentSettings($paymentType);
+		}
+
+		if ($apiResult->getErrors()) {
+			response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+		}
+	} catch (StudentPaymentException $e) {
+		error_log(sprintf("Failed to change student payment setting (in student payment API) for group ID %d. Exception: %s",
+			$groupId, $e->getMessage()));
+		error_log($e->getTraceAsString());
+		response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+	}
 }

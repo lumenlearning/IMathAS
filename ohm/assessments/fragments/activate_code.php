@@ -48,6 +48,11 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
         var studentId = activationCodeForm.find('input[name="student_id"]').val();
         var activationCode = $('#access_code').val();
 
+        if ('' === activationCode.trim()) {
+          $('#access_code_error_text').text('Please enter a valid activation code.');
+          return false;
+        }
+
         request = $.ajax({
             type: 'POST',
             url: imasroot + '/ohm/assessments/activation_ajax.php',

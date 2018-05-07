@@ -955,7 +955,7 @@ button#begin_trial:hover {
 	color: #3399cc;
 	cursor: pointer;
 }
-button#student_payment_toggle {
+button#update_student_payment_type {
 	background-color: #5847D6;
 	border: 1px solid #ccc;
 	border-radius: 4px;
@@ -967,13 +967,31 @@ button#student_payment_toggle {
 	padding: 0 1.2em;
 }
 
-span#student_payment_toggle_message {
+span#update_student_payment_type {
 	margin: 10px;
 }
 
-button#student_payment_toggle:hover {
+button#update_student_payment_type:hover {
 	background-color: #7B6DDF;
 	cursor: pointer;
+}
+
+div#student_payment_api_failure {
+	background-color: #d61616;
+	color: #fff;
+	padding: 0.5em;
+	border-radius: 5px;
+}
+
+div#ohmEditGroup {
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	max-width: 30em;
+	margin: 0.5em;
+	padding: 1em;
 }
 
 /* MEDIA QUERIES */

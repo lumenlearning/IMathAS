@@ -184,5 +184,21 @@ final class StudentPaymentDbTest extends TestCase
 		$this->assertEquals(42, $result);
 	}
 
+	/*
+	 * getLumenGuid
+	 */
+
+	public function testGetLumenGuid()
+	{
+		$dbResult = array('lumen_guid' => '2826e8e4-8d79-4c45-a8d6-0ef862496bc1');
+
+		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+		$this->pdoStatementMock->method('fetch')->willReturn($dbResult);
+
+		$result = $this->studentPaymentDb->getLumenGuid();
+
+		$this->assertEquals($dbResult['lumen_guid'], $result);
+	}
+
 }
 

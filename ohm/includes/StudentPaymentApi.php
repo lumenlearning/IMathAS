@@ -19,6 +19,7 @@ require_once(__DIR__ . "/CurlRequest.php");
  * Note: IDs are currently sent in API requests as strings, as required by the API.
  *
  * @see StudentPayment For a higher level abstraction with database caching / persistence.
+ * @see https://github.com/lumenlearning/lumenistration/blob/master/docs/API.md
  *
  * @package OHM
  */
@@ -27,6 +28,7 @@ class StudentPaymentApi
 
 	private $curl;
 	private $studentPaymentDb;
+	private $institutionIdForApi = null;
 
 	private $groupId;
 	private $courseId;
@@ -82,11 +84,11 @@ class StudentPaymentApi
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay?' .
 			\Sanitize::generateQueryStringFromMap(array(
-				'institution_id' => "$this->groupId",
+				'institution_id' => (string)$this->getInstitutionIdForApi(),
 				'section_id' => "$this->courseId",
 				'enrollment_id' => "$enrollmentId"
 			));
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->getActivationStatusFromApi : GET " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$headers = array(
@@ -119,14 +121,55 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->activateCode : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
-			'institution_id' => "$this->groupId",
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId",
 			'code' => $activationCode
+		));
+		$this->debug("Sending content: " . $requestData);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
+			'Content-Type: application/json',
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204, 404, 400]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
+	/**
+	 * Update an existing activation to begin a trial.
+	 *
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function beginTrial()
+	{
+		$this->curl->reset();
+
+		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay/trials';
+		$this->debug("StudentPaymentApi->beginTrial : POST " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$requestData = json_encode(array(
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
+			'section_id' => "$this->courseId",
+			'enrollment_id' => "$enrollmentId"
 		));
 		$this->debug("Sending content: " . $requestData);
 
@@ -149,25 +192,30 @@ class StudentPaymentApi
 	}
 
 	/**
-	 * Update an existing activation to begin a trial.
+	 * Pass a JSON object directly to the student payment API.
 	 *
+	 * @param $data array The data to pass to the student payment API.
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.
 	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
-	public function beginTrial()
+	public function paymentProxy($data)
 	{
 		$this->curl->reset();
 
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
-		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay/trials';
-		$this->debug("Student API URL = " . $requestUrl);
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay';
+		$this->debug("StudentPaymentApi->paymentProxy : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
-		$requestData = json_encode(array(
-			'institution_id' => "$this->groupId",
-			'section_id' => "$this->courseId",
-			'enrollment_id' => "$enrollmentId"
+		$requestData = json_encode(array_merge(
+			array(
+				'institution_id' => (string)$this->getInstitutionIdForApi(),
+				'section_id' => "$this->courseId",
+				'enrollment_id' => "$enrollmentId",
+				'token' => $data['stripeToken'],
+			),
+			$data
 		));
 		$this->debug("Sending content: " . $requestData);
 
@@ -183,7 +231,7 @@ class StudentPaymentApi
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204]);
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201]);
 		$this->curl->close();
 
 		return $studentPayApiResult;
@@ -209,6 +257,17 @@ class StudentPaymentApi
 	public function logActivationPageSeen()
 	{
 		return $this->logEvent('saw_activation_code_page');
+	}
+
+	/**
+	 * Notify the student payment API that a student has seen the activation code page, for metrics.
+	 *
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function logDirectPaymentPageSeen()
+	{
+		return $this->logEvent('saw_direct_payment_page');
 	}
 
 	/**
@@ -240,12 +299,12 @@ class StudentPaymentApi
 		$enrollmentId = $this->studentPaymentDb->getStudentEnrollmentId();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/enrollment_events';
-		$this->debug("Student API URL = " . $requestUrl);
+		$this->debug("StudentPaymentApi->logEvent : POST " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
 			'event_type' => "$eventType", // Quoted to ensure the value is always sent as a string.
-			'institution_id' => "$this->groupId",
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
 			'section_id' => "$this->courseId",
 			'enrollment_id' => "$enrollmentId"
 		));
@@ -279,8 +338,9 @@ class StudentPaymentApi
 	{
 		$this->curl->reset();
 
-		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/institutions/' . $this->groupId;
-		$this->debug("Lumenistration API URL = " . $requestUrl);
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/institutions/'
+			. $this->getInstitutionIdForApi();
+		$this->debug("StudentPaymentApi->getInstitutionData : GET " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$headers = array(
@@ -300,6 +360,120 @@ class StudentPaymentApi
 	}
 
 	/**
+	 * Create student payment settings for a group in the student payment API.
+	 *
+	 * @param $accessType string Currently one of: "not_required",
+	 *        "activation_code", "direct_pay"
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function createGroupPaymentSettings($accessType)
+	{
+		if (empty($accessType)) {
+			throw new StudentPaymentException("No access type was specified.");
+		}
+
+		$this->curl->reset();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
+		$this->debug("StudentPaymentApi->createGroupPaymentSettings : POST " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$requestData = json_encode(array(
+			'institution_id' => (string)$this->getInstitutionIdForApi(),
+			'access_type' => "$accessType"
+		));
+		$this->debug("Sending content: " . $requestData);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
+	/**
+	 * Delete student payment settings for a group in the student payment API.
+	 *
+	 * @return StudentPayApiResult An instance of StudentPayApiResult.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function deleteGroupPaymentSettings()
+	{
+		$this->curl->reset();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
+		$this->debug("StudentPaymentApi->deleteGroupPaymentSettings : DELETE " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$requestData = json_encode(array(
+			'institution_id' => (string)$this->getInstitutionIdForApi()
+		));
+		$this->debug("Sending content: " . $requestData);
+
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json',
+		);
+		$this->curl->setOption(CURLOPT_CUSTOMREQUEST, "DELETE");
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 204]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
+	/**
+	 * Get the activation type for a group.
+	 *
+	 * @return StudentPayApiResult A StudentPayApiResult object.
+	 * @throws StudentPaymentException Thrown on student payment API errors.
+	 */
+	public function getGroupAccessType()
+	{
+		$this->curl->reset();
+
+		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings?' .
+			\Sanitize::generateQueryStringFromMap(array(
+				'institution_id' => (string)$this->getInstitutionIdForApi(),
+			));
+		$this->debug("StudentPaymentApi->getGroupAccessType : GET " . $requestUrl);
+		$this->curl->setUrl($requestUrl);
+
+		$headers = array(
+			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
+			'Accept: application/json'
+		);
+		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
+		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
+		$result = $this->curl->execute();
+		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
+
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 404]);
+		$this->curl->close();
+
+		return $studentPayApiResult;
+	}
+
+	/**
 	 * Parse an API response containing course and/or student data.
 	 *
 	 * @param $status integer The HTTP status code received from the API.
@@ -314,44 +488,21 @@ class StudentPaymentApi
 
 		$apiResponse = json_decode($responseBody, true);
 
-		$acceptable4xxError = false;
 		if (0 == $status) {
 			// curl returns 0 on http failure
 			throw new StudentPaymentException("Unable to connect to student payment API.");
 		}
 		if (null == $apiResponse || '' == $apiResponse) {
 			// json_decode failed to find valid json content
-			throw new StudentPaymentException("Unexpected content returned from student payment API: "
-				. $responseBody);
-		}
-		if (404 == $status) {
-			// Currently, we only accept a 404 status for invalid activation code responses.
-			if (!isset($apiResponse['status']) || "invalid_code_for_section" != $apiResponse['status']) {
-				throw new StudentPaymentException(sprintf(
-					"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
-					$responseBody));
+			if (!in_array($status, [204, 404])) {
+				throw new StudentPaymentException("Unexpected content returned from student payment API: "
+					. $responseBody);
 			}
-			$acceptable4xxError = true;
 		}
-		if (400 == $status) {
-			// Currently, we only accept a 400 status for invalid activation code responses.
-			if (!isset($apiResponse['status']) || !isset($apiResponse['errors'])) {
-				throw new StudentPaymentException(sprintf(
-					"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
-					$responseBody));
-			}
-			$acceptable4xxError = true;
-		}
-		if (!$acceptable4xxError && !in_array($status, $acceptableHttpStatusList)) {
+		if (!in_array($status, $acceptableHttpStatusList)) {
 			throw new StudentPaymentException(sprintf(
 				"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
 				$responseBody));
-		}
-		if (!isset($apiResponse['status'])) {
-			// All endpoints should return a status in the json payload.
-			throw new StudentPaymentException(sprintf(
-				"Student payment API did not return a status in JSON payload. HTTP status: %s, Content: %s",
-				$status, $responseBody));
 		}
 
 		$studentPayApiResult = new StudentPayApiResult();
@@ -362,11 +513,26 @@ class StudentPaymentApi
 		if (isset($apiResponse['trial_expired_in'])) {
 			$studentPayApiResult->setTrialExpiresInSeconds($apiResponse['trial_expired_in']);
 		}
+		if (isset($apiResponse['access_type'])) {
+			$studentPayApiResult->setAccessType($apiResponse['access_type']);
+		}
 		if (isset($apiResponse['section_requires_student_payment'])) {
 			$studentPayApiResult->setCourseRequiresStudentPayment($apiResponse['section_requires_student_payment']);
 		}
+		if (isset($apiResponse['payment_info'])) {
+			$studentPayApiResult->setPaymentInfo($apiResponse['payment_info']);
+		}
+		if (isset($apiResponse['amount_cents'])) {
+			$studentPayApiResult->setPaymentAmountInCents($apiResponse['amount_cents']);
+		}
 		if (isset($apiResponse['errors'])) {
 			$studentPayApiResult->setErrors($apiResponse['errors']);
+		}
+		if (isset($apiResponse['branding'])) {
+			$studentPayApiResult->setSchoolLogoUrl($apiResponse['branding']['logo_url']);
+		}
+		if (isset($apiResponse['branding'])) {
+			$studentPayApiResult->setSchoolReceiptText($apiResponse['branding']['receipt_text']);
 		}
 
 		return $studentPayApiResult;
@@ -414,6 +580,14 @@ class StudentPaymentApi
 		$lumenistrationInstitution->setBookstoreInformation($apiResponse['bookstore_information']);
 		$lumenistrationInstitution->setBookstoreUrl($apiResponse['bookstore_url']);
 
+		if (isset($apiResponse['branding']['logo_url'])) {
+			$lumenistrationInstitution->setSchoolLogoUrl($apiResponse['branding']['logo_url']);
+		}
+
+		if (isset($apiResponse['branding']['receipt_text'])) {
+			$lumenistrationInstitution->setSchoolReceiptText($apiResponse['branding']['receipt_text']);
+		}
+
 		$allExternalIds = array();
 		foreach ($apiResponse['external_ids'] as $key => $value) {
 			$allExternalIds["$key"] = "$value"; // enclosed in quotes to force string type
@@ -423,4 +597,23 @@ class StudentPaymentApi
 		return $lumenistrationInstitution;
 	}
 
+	/**
+	 * Replace the instance group ID with a Lumen GUID, if available.
+	 *
+	 * @returns string An institution ID for feeding to the student payment API.
+	 * @throws StudentPaymentException Thrown if a group ID was not provided
+	 * when instantiating this class.
+	 */
+	private function getInstitutionIdForApi()
+	{
+		if (!is_null($this->institutionIdForApi)) {
+			return $this->institutionIdForApi;
+		}
+
+		$lumenGuid = $this->studentPaymentDb->getLumenGuid();
+		$this->institutionIdForApi = is_null($lumenGuid) || empty($lumenGuid)
+			? $this->groupId : $lumenGuid;
+
+		return $this->institutionIdForApi;
+	}
 }
