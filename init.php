@@ -1,5 +1,22 @@
 <?php
 
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+
+// Development dependencies
+if (file_exists(__DIR__ . '/devmode.php')) {
+    require_once(__DIR__ . "/devmode.php");
+}
+
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+
 require_once(__DIR__ . "/includes/sanitize.php");
 
 // Load site config.

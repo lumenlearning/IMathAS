@@ -8,3 +8,29 @@ actor_suffix: Tester
 extensions:
     enabled:
         - Codeception\Extension\RunFailed
+coverage:
+    enabled: true
+    c3_url: 'http://localhost:80/ohm/index.php'
+    whitelist:
+        include:
+            - admin/*
+            - assessment/*
+            - config/*
+            - course/*
+            - csrfp/*
+            - diag/*
+            - docs/*
+            - filter/*
+            - i18n/*
+            - includes/*
+            - info/*
+            - lti/*
+            - lumen/*
+            - msgs/*
+            - ohm/*
+            - util/*
+            - wamap/*
+            - wikis/*
+        exclude:
+            - ohm/tests/*
+

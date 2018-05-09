@@ -4,6 +4,9 @@
 .DS_Store
 *.php~
 *.js~
+devmode.php
+c3.php
+.env
 
 # Runtime
 /vendor/
@@ -14,4 +17,3 @@ config/local.php
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-.env
