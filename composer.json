@@ -8,8 +8,9 @@
         "ramsey/uuid": "3.7.3"
     },
     "require-dev": {
-        "phpunit/phpunit": ">=4.8 < 6.0",
+        "phpunit/phpunit": "^6.5",
         "codeception/codeception": "^2.4",
+        "codeception/c3": "^2.4",
         "flow/jsonpath": "0.4.0"
     },
     "autoload": {
@@ -35,6 +36,7 @@
         "start": "php -S localhost:8080 -t public",
         "test": "echo 'Use targets: testmom and testohm'; exit 1",
         "testmom": "phpunit",
-        "testohm": "codecept run --steps"
+        "testohm": "codecept run --coverage --coverage-html",
+        "testohmv": "codecept run --steps --coverage --coverage-html"
     }
 }
