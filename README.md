@@ -91,3 +91,32 @@ In the `imas_users` table, each user record has one of these values in the
   }
 ```
 
+# Testing
+
+Requirements:
+
+- Composer
+- Local server with this project root available at
+[http://localhost:80/ohm](http://localhost:80/ohm)
+
+## MyOpenMath (core OHM)
+
+MOM currently uses PHPUnit for testing. To run those tests:
+
+    $ composer install
+    $ composer testmom
+
+## OHM
+
+Additional requirements:
+
+- PHP 7.2
+
+PHP 7.2 is required for tests and test coverage reports.
+
+    $ composer install
+    $ composer testohm
+
+Tests will be available at
+[ohm/tests/_output/coverage/index.html](ohm/tests/_output/coverage/index.html).
+
