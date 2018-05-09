@@ -30,6 +30,10 @@ final class StudentPaymentApiTest extends TestCase
 	private $pdoMock;
 	private $pdoStatementMock;
 
+	private $groupId = 128;
+	private $courseID = 42;
+	private $studentId = 3072;
+
 	// Responses for course/student status.
 	const ACTIVATION_SUCCESS_RESPONSE = '{"message":"You have successfully submitted your code.","status":"'
 	. StudentPayApiResult::ACTIVATION_SUCCESS . '"}';
@@ -45,6 +49,12 @@ final class StudentPaymentApiTest extends TestCase
 	// Responses for institution data
 	const INSTITUTION_RESPONSE = '{"id":"957c5216-7857-4b5a-9cb8-17c0c32bb608","name":"Hogwarts School of Witchcraft and Wizardry","external_ids":{"4":"43627281-b00b-4142-8e4c-1e435fe4f1c1","2204":"43627281-b00b-4142-8e4c-1e435fe4f1c1"},"bookstore_information":"Hello, world!","bookstore_url":"https://www.lumenlearning.com/"}';
 
+	const CREATE_PAYMENT_SETTINGS_RESPONSE = '{"status": "ok"}';
+	const ACCESS_TYPE_DIRECT_PAY_RESPONSE = '{"status":"ok","access_type":"' . StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY . '"}';
+
+	// The response we get from Lumenistration after relaying Stripe payment information.
+	const PAYMENT_PROXY_SUCCESS_RESPONSE = '{"status":"ok","payment_info":{"id":6,"email":"michael@lumenlearning.com","charge_token":"ch_1CFWufLB7uSPM4hbXJx61Zqw","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"957c5216-7857-4b5a-9cb8-17c0c32bb608","created_at":"2018-04-11T00:34:13.986Z","updated_at":"2018-04-11T00:34:13.986Z","enrollment_id":"108"}}';
+
 	const UNEXPECTED_RESPONSE = 'unexpected response text';
 	const INVALID_CODE_RESPONSE = '{"message":"Code is not valid for this course section","status":"invalid_code_for_section"}';
 	const INVALID_CODE_CHARACTERS_RESPONSE = '{"status":"invalid_code","errors":["Only numbers and letters are used in access codes. We also don\'t use confusing letters or numbers like l 1 0 o, etc."]}';
@@ -57,8 +67,8 @@ final class StudentPaymentApiTest extends TestCase
 		$this->pdoMock = $this->createMock(PDOMock::class);
 		$this->pdoStatementMock = $this->createMock(PDOStatementMock::class);
 
-		$this->studentPaymentApi = new StudentPaymentApi(128, 42, 3072, $this->curlMock,
-			$this->studentPaymentDbMock);
+		$this->studentPaymentApi = new StudentPaymentApi($this->groupId, $this->courseID,
+			$this->studentId, $this->curlMock, $this->studentPaymentDbMock);
 	}
 
 	/**
@@ -69,6 +79,7 @@ final class StudentPaymentApiTest extends TestCase
 	 * @param array $parameters Array of parameters to pass into method.
 	 *
 	 * @return mixed Method return.
+	 * @throws \ReflectionException
 	 */
 	public function invokePrivateMethod(&$object, $methodName, array $parameters = array())
 	{
@@ -182,6 +193,34 @@ final class StudentPaymentApiTest extends TestCase
 	}
 
 	/*
+	 * paymentProxy
+	 */
+
+	function testPaymentProxy()
+	{
+		$this->curlMock->method('getInfo')->willReturn(201);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::PAYMENT_PROXY_SUCCESS_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$dataToSend = array(
+			"institution_id" => "957c5216-7857-4b5a-9cb8-17c0c32bb608",
+			"section_id" => "1",
+			"enrollment_id" => "108",
+			"stripeToken" => "tok_1bFdanLB3uSPM4hEP1vM2i9N",
+			"stripeTokenType" => "card",
+			"stripeEmail" => "michael@lumenlearning.com",
+			"csrfp_token" => "5072b4d3ea"
+		);
+
+		$studentPayApiResult = $this->studentPaymentApi->paymentProxy($dataToSend);
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(6, $studentPayApiResult->getPaymentInfo()['id']);
+		$this->assertEquals('4242', $studentPayApiResult->getPaymentInfo()['last_four']);
+		$this->assertEquals('9781640871632', $studentPayApiResult->getPaymentInfo()['isbn']);
+	}
+
+	/*
 	 * logEvent
 	 */
 
@@ -236,10 +275,103 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
 	}
 
+	/*
+ 	 * createGroupPaymentSettings
+ 	 */
+
+	function testCreateGroupPaymentSettings()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::CREATE_PAYMENT_SETTINGS_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$studentPayApiResult = $this->studentPaymentApi->createGroupPaymentSettings('not_required');
+
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+	}
+
+	function testCreateGroupPaymentSettings_Null()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->studentPaymentApi->createGroupPaymentSettings(null);
+	}
+
+	function testCreateGroupPaymentSettings_EmptyString()
+	{
+		$this->expectException(StudentPaymentException::class);
+
+		$this->studentPaymentApi->createGroupPaymentSettings('');
+	}
+
+	/*
+	 * deleteGroupPaymentSettings
+	 */
+
+	function testDeleteGroupPaymentSettings()
+	{
+		$this->curlMock->method('getInfo')->willReturn(204);
+		$this->curlMock->method('execute')->willReturn('');
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$studentPayApiResult = $this->studentPaymentApi->deleteGroupPaymentSettings('not_required');
+
+		// Don't really care what gets returned, as long as no exceptions are thrown.
+		// (the API returns an HTTP 204 response)
+		$this->assertNotNull($studentPayApiResult);
+	}
+
+	/*
+	 * getGroupAccessType
+	 */
+
+	function testGetGroupAccessType()
+	{
+		$this->curlMock->method('getInfo')->willReturn(200);
+		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::ACCESS_TYPE_DIRECT_PAY_RESPONSE);
+		$this->curlMock->expects($this->once())->method('reset');
+
+		$studentPayApiResult = $this->studentPaymentApi->getGroupAccessType();
+
+		$this->assertEquals(StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY,
+			$studentPayApiResult->getAccessType());
+	}
 
 	/*
 	 * parseApiResponse
 	 */
+
+	function testParseApiResponse_AllValues()
+	{
+		$responseBody = '{'
+			. '"status":"ok",'
+			. '"message":"It\'s alllll gooooood!",'
+			. '"trial_expired_in":"42",'
+			. '"access_type":"not_required",'
+			. '"section_requires_student_payment":true,'
+			. '"payment_info":{"id":11,"email":"michael@lumenlearning.com","charge_token":"ch_1CG9jELB7uSPM4hbHSZzlalh","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"bb968cf5-c4b1-44db-8618-dd3d128feba8","created_at":"2018-04-12T18:01:01.478Z","updated_at":"2018-04-12T18:01:01.478Z","enrollment_id":"108"},'
+			. '"amount_cents":"3000",'
+			. '"errors":["First error","Second error"],'
+			. '"branding":{"logo_url":"https://www.google.com/image.png", "receipt_text":"To learn more, click here"}'
+			. '}';
+
+		$apiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
+			array(200, $responseBody, array('200')));
+
+		$this->assertEquals('ok', $apiResult->getStudentPaymentStatus());
+		$this->assertEquals('It\'s alllll gooooood!', $apiResult->getApiUserMessage());
+		$this->assertEquals('42', $apiResult->getTrialExpiresInSeconds());
+		$this->assertEquals('not_required', $apiResult->getAccessType());
+		$this->assertTrue($apiResult->getCourseRequiresStudentPayment());
+		$this->assertEquals('3000', $apiResult->getPaymentAmountInCents());
+		$this->assertEquals('First error', $apiResult->getErrors()[0]);
+		$this->assertEquals('Second error', $apiResult->getErrors()[1]);
+		$this->assertEquals('https://www.google.com/image.png', $apiResult->getSchoolLogoUrl());
+		$this->assertEquals('To learn more, click here', $apiResult->getSchoolReceiptText());
+
+		$this->assertNotNull($apiResult->getPaymentInfo());
+		$this->assertEquals('ch_1CG9jELB7uSPM4hbHSZzlalh', $apiResult->getPaymentInfo()['charge_token']);
+	}
 
 	function testParseApiResponse_curlFailed()
 	{
@@ -328,23 +460,15 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
 	}
 
-	function testParseApiResponse_invalidAccessCode()
+	function testParseApiResponse_stripePaymentProxy()
 	{
 		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(404, StudentPaymentApiTest::INVALID_CODE_RESPONSE, array('200')));
+			array(200, StudentPaymentApiTest::PAYMENT_PROXY_SUCCESS_RESPONSE, array('200')));
 
-		$this->assertEquals("Code is not valid for this course section",
-			$studentPayApiResult->getApiUserMessage());
-	}
-
-	function testParseApiResponse_invalidAccessCodeCharacters()
-	{
-		$studentPayApiResult = $this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(400, StudentPaymentApiTest::INVALID_CODE_CHARACTERS_RESPONSE, array('200')));
-
-		$this->assertEquals("Only numbers and letters are used in access codes."
-			. " We also don't use confusing letters or numbers like l 1 0 o, etc.",
-			$studentPayApiResult->getErrors()[0]);
+		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
+		$this->assertEquals(6, $studentPayApiResult->getPaymentInfo()['id']);
+		$this->assertEquals('4242', $studentPayApiResult->getPaymentInfo()['last_four']);
+		$this->assertEquals('9781640871632', $studentPayApiResult->getPaymentInfo()['isbn']);
 	}
 
 	/*
@@ -394,6 +518,38 @@ final class StudentPaymentApiTest extends TestCase
 		$this->assertEquals('https://www.lumenlearning.com/', $result->getBookstoreUrl());
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['4']);
 		$this->assertEquals('43627281-b00b-4142-8e4c-1e435fe4f1c1', $result->getExternalIds()['2204']);
+	}
+
+	/*
+	 * getInstitutionId
+	 */
+
+	function testGetInstitutionIdForApi()
+	{
+		$lumenGuid = '2826e8e4-8d79-4c45-a8d6-0ef862496bc1';
+		$this->studentPaymentDbMock->method('getLumenGuid')->willReturn($lumenGuid);
+
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'getInstitutionIdForApi');
+
+		$this->assertEquals($lumenGuid, $result);
+	}
+
+	function testGetInstitutionIdForApi_NullGuid()
+	{
+		$this->studentPaymentDbMock->method('getLumenGuid')->willReturn(null);
+
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'getInstitutionIdForApi');
+
+		$this->assertEquals($this->groupId, $result);
+	}
+
+	function testGetInstitutionIdForApi_EmptyGuid()
+	{
+		$this->studentPaymentDbMock->method('getLumenGuid')->willReturn('');
+
+		$result = $this->invokePrivateMethod($this->studentPaymentApi, 'getInstitutionIdForApi');
+
+		$this->assertEquals($this->groupId, $result);
 	}
 
 }
