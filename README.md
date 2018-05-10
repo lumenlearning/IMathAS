@@ -123,7 +123,8 @@ Requirements:
 
 - Composer with all dependencies installed.
 - A local server already running with this project root available at
-[http://localhost:80/ohm](http://localhost:80/ohm)
+[http://localhost:8080/](http://localhost:8080/)
+	- `composer start` will start a local server for you.
 - The local dev server must have `xdebug` enabled.
 
 ## MyOpenMath (core OHM)
@@ -131,7 +132,7 @@ Requirements:
 MOM currently uses PHPUnit for testing. To run those tests:
 
     $ composer install
-    $ composer testmom
+    $ composer test-mom
 
 ## OHM
 
@@ -142,15 +143,14 @@ Additional requirements:
 PHP 7.2 is required for tests and test coverage reports.
 
     $ composer install
-    $ composer testohm
+    $ composer test-ohm
 
 Tests will be available at
 [ohm/tests/\_output/coverage/index.html](ohm/tests/_output/coverage/index.html).
 
 # Long-term goals / wish list
 
-- MOM/OHM should work on any port. (besides 80/440)
-- It should be possible to start OHM with `php -S localhost:80 -t .`
+- URLs are sometimes mangled when running a local server with `php -S`.
 - Correct namespacing in OHM-specific code. (PSR-4)
 	- Move/rename OHM-specific namespaced directories so they make more sense.
 
