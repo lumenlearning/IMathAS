@@ -36,7 +36,8 @@
         "start": "php -S localhost:8080 -t .",
         "test": "echo 'Use targets: testmom and testohm'; exit 1",
         "testmom": "phpunit",
-        "testohm": "codecept run --coverage --coverage-html",
-        "testohmv": "codecept run --steps --coverage --coverage-html"
+        "testohm": "codecept run",
+        "testohmv": "codecept run --steps --coverage --coverage-html",
+        "testohmr": "codecept run --coverage --coverage-html"
     }
 }
