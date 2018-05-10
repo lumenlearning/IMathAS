@@ -33,4 +33,6 @@ coverage:
             - wikis/*
         exclude:
             - ohm/tests/*
+        ssl:
+            verify_peer: false
 
