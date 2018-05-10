@@ -10,7 +10,7 @@ extensions:
         - Codeception\Extension\RunFailed
 coverage:
     enabled: true
-    c3_url: 'http://localhost:80/ohm/index.php'
+    c3_url: 'http://localhost:8080/index.php'
     whitelist:
         include:
             - admin/*

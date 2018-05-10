@@ -33,7 +33,7 @@
         "process-timeout" : 0
     },
     "scripts": {
-        "start": "php -S localhost:8080 -t public",
+        "start": "php -S localhost:8080 -t .",
         "test": "echo 'Use targets: testmom and testohm'; exit 1",
         "testmom": "phpunit",
         "testohm": "codecept run --coverage --coverage-html",
