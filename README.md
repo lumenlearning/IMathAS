@@ -91,12 +91,30 @@ In the `imas_users` table, each user record has one of these values in the
   }
 ```
 
+# Installation and setup
+
+1. Clone this repo.
+1. Run `composer install`.
+1. Create a MySQL database for OHM.
+	1. Note the credentials and database name.
+1. Go to (document root)[/install.php](/install.php)
+
+After filling and submitted a few forms, a `config.php` file will
+be created for you.
+
+# Running migrations
+
+After initial setup, this needs to be done manually any time there are
+new migrations.
+
+Go to (document_root)[/upgrade.php](/upgrade.php) in your web browser.
+
 # Testing
 
 Requirements:
 
-- Composer
-- Local server with this project root available at
+- Composer with all dependencies installed.
+- A local server already running with this project root available at
 [http://localhost:80/ohm](http://localhost:80/ohm)
 
 ## MyOpenMath (core OHM)
@@ -118,5 +136,5 @@ PHP 7.2 is required for tests and test coverage reports.
     $ composer testohm
 
 Tests will be available at
-[ohm/tests/_output/coverage/index.html](ohm/tests/_output/coverage/index.html).
+[ohm/tests/\_output/coverage/index.html](ohm/tests/_output/coverage/index.html).
 
