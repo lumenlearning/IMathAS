@@ -91,6 +91,11 @@ In the `imas_users` table, each user record has one of these values in the
   }
 ```
 
+# Additional documentation
+
+See [ohm/README.md](ohm/README.md). That should be merged with this README at
+some point.
+
 # Installation and setup
 
 1. Clone this repo.
@@ -119,6 +124,7 @@ Requirements:
 - Composer with all dependencies installed.
 - A local server already running with this project root available at
 [http://localhost:80/ohm](http://localhost:80/ohm)
+- The local dev server must have `xdebug` enabled.
 
 ## MyOpenMath (core OHM)
 
