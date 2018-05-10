@@ -13,8 +13,8 @@ before_script:
 script:
   - sleep 3
   - php ./setupdb.php
-  - composer run-script testmom
-  - composer run-script testohm
+  - composer run-script test-mom
+  - composer run-script test-ohm
 env:
   global:
     - CLI=true
