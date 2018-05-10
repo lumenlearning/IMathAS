@@ -14,7 +14,8 @@ script:
   - sleep 3
   - php ./setupdb.php
   - composer run-script test-mom
-  - composer run-script test-ohm
+  #- composer run-script test-ohm
+  - ./vendor/bin/codecept run unit
 env:
   global:
     - CLI=true
