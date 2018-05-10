@@ -147,3 +147,10 @@ PHP 7.2 is required for tests and test coverage reports.
 Tests will be available at
 [ohm/tests/\_output/coverage/index.html](ohm/tests/_output/coverage/index.html).
 
+# Long-term goals / wish list
+
+- MOM/OHM should work on any port. (besides 80/440)
+- It should be possible to start OHM with `php -S localhost:80 -t .`
+- Correct namespacing in OHM-specific code. (PSR-4)
+	- Move/rename OHM-specific namespaced directories so they make more sense.
+
