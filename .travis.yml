@@ -1,16 +1,20 @@
 language: php
 php:
   - '7.2'
+services:
+  - mysql
 before_script:
   - mysql -e 'CREATE DATABASE myopenmathdb;'
   - composer install
   - cp .env.example .env
   - cp -f config/travis.php config/ohm.php
   - cp ohm/api/src/configs/settings-example.php ohm/api/src/configs/settings.php
-  - cp -f ohm/tests/api.suite-travis.yml ohm/tests/api.suite.yml
+  - php -S 127.0.0.1:8080 -t . &
 script:
+  - sleep 3
+  - php ./setupdb.php
   - composer run-script testmom
-  - ./vendor/bin/codecept run unit
+  - composer run-script testohm
 env:
   global:
     - CLI=true
@@ -19,3 +23,4 @@ env:
     - DB_USERNAME=root
     - DB_PASSWORD=""
     - S3_MAIN_BUCKET_NAME=none
+
