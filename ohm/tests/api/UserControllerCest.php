@@ -12,7 +12,7 @@ class UserControllerCest extends BaseCestCase
 	 */
 	public function _before($I)
 	{
-		$this->userLogin($I);
+		$this->apiAuthenticated($I);
 	}
 
 	/**
@@ -20,7 +20,7 @@ class UserControllerCest extends BaseCestCase
 	 */
 	public function _after($I)
 	{
-		$this->userLogout($I);
+		$this->notApiAuthenticated($I);
 	}
 
 	/**
@@ -28,7 +28,7 @@ class UserControllerCest extends BaseCestCase
 	 */
 	public function findAllWithoutAuth($I)
 	{
-		$this->userLogout($I);
+		$this->notApiAuthenticated($I);
 		$I->sendGet('/v1/users');
 		$I->seeResponseCodeIs(HttpCode::UNAUTHORIZED);
 	}

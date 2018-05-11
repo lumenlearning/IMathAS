@@ -10,6 +10,18 @@ class BaseCestCase
 
 	private $loggedIn = false;
 
+	protected function apiAuthenticated($I)
+	{
+		// DON'T COMMIT REAL JWTs INTO THE REPO!
+		// (this one is 'jwt_secret_goes_here' signed)
+		$I->amBearerAuthenticated('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MjYwNjI1NDQsImF1ZCI6Im9obSJ9.NrRB5XdXNe8txsd4rYrfxTx4EW3vOaw4IwanV_TBK7naNRsEfEWdgJT2I_buKz5e1rj769ghabLwUAx99sBZMQ');
+	}
+
+	protected function notApiAuthenticated($I)
+	{
+		$I->amBearerAuthenticated(null);
+	}
+
 	/**
 	 * @param ApiTester $I
 	 */
