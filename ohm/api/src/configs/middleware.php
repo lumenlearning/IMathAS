@@ -9,6 +9,7 @@
 $app->add(new \OHM\Api\Middleware\ValidateUser($app->getContainer()));
 
 // JWT validation
+// Note: This middleware prevents access to the OHM user session validator.
 $jwtSettings = $app->getContainer()->get('settings')['jwt'];
 $app->add(new \Slim\Middleware\JwtAuthentication([
 //	"secure" => false,

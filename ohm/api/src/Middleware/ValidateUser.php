@@ -8,6 +8,15 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use OHM\Models\Session;
 
+/**
+ * Class ValidateUser Attempts to validate a user's OHM session.
+ *
+ * If this fails, the request will be stopped with an HTTP 401 response.
+ *
+ * Note: There is currently no code path to this class. See middleware.php.
+ *
+ * @package OHM\Api\Middleware
+ */
 class ValidateUser
 {
 	protected $container;
