@@ -13,5 +13,15 @@ $app->get('/[{name}]', function (Request $request, Response $response, array $ar
 	return $this->renderer->render($response, 'index.phtml', $args);
 });
 
-$app->get('/v1/users', \OHM\Api\Controllers\UserController::class . ':findAll');
-$app->get('/v1/groups', \OHM\Api\Controllers\GroupController::class . ':findAll');
+$app->group('/v1', function () {
+	$this->group('/users', function () {
+		$this->get('[/]', \OHM\Api\Controllers\UserController::class . ':findAll');
+	});
+
+	$this->group('/groups', function () {
+		$this->get('[/]', \OHM\Api\Controllers\GroupController::class . ':findAll');
+		$this->post('[/]', \OHM\Api\Controllers\GroupController::class . ':create');
+		$this->delete('/{id}', \OHM\Api\Controllers\GroupController::class . ':delete');
+		$this->put('[/{id}]', \OHM\Api\Controllers\GroupController::class . ':update');
+	});
+});

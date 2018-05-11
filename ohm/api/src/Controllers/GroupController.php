@@ -25,6 +25,8 @@ class GroupController
 	}
 
 	/**
+	 * Get all groups.
+	 *
 	 * @param Request $request
 	 * @param Response $response
 	 * @param array $args
@@ -39,6 +41,74 @@ class GroupController
 		$users = $users->get();
 
 		return $response->withJson($users);
+	}
+
+	/**
+	 * Create a group.
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @param array $args
+	 * @return Response
+	 */
+	public function create($request, $response, $args)
+	{
+		$newGroupData = $request->getParsedBody();
+
+		$existingGroup = Group::where('name', $newGroupData['name'])->first();
+		if (!is_null($existingGroup)) {
+			return $response->withStatus(409)
+				->withJson(['errors' => ['The specified group name already exists.']]);
+		}
+
+		$savedGroup = Group::create($newGroupData);
+
+		return $response->withStatus(201)->withJson($savedGroup);
+	}
+
+	/**
+	 * Delete a group.
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @param array $args
+	 * @return Response
+	 */
+	public function delete($request, $response, $args)
+	{
+		$groupId = $args['id'];
+
+		$group = Group::find($groupId);
+		if (is_null($group)) {
+			return $response->withStatus(204);
+		}
+
+		$group->delete();
+
+		return $response->withStatus(204);
+	}
+
+	/**
+	 * Update a group.
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @param array $args
+	 * @return Response
+	 */
+	public function update($request, $response, $args)
+	{
+		$groupId = $args['id'];
+
+		$group = Group::find($groupId);
+		if (is_null($group)) {
+			return $response->withStatus(404);
+		}
+
+		$group->fill($request->getParsedBody());
+		$group->save();
+
+		return $response->withStatus(200)->withJson($group);
 	}
 
 	/**

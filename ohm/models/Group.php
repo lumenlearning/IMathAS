@@ -10,27 +10,25 @@ class Group extends Model
 	protected $table = "imas_groups";
 
 	/**
-	 * This empty method effectively eliminates the requirement for an
-	 * updated_at column.
+	 * Disable usage of the "updated_at" column. OHM currently is lacking this.
 	 *
-	 * @param $value
+	 * @var string
 	 */
-	public function setUpdatedAtAttribute($value)
-	{
-	}
+	const UPDATED_AT = null;
 
 	/**
 	 * The attributes that are mass assignable.
 	 *
 	 * @var array
 	 */
-	protected $fillable = [];
+	protected $fillable = ['grouptype', 'name', 'parent', 'student_pay_enabled',
+		'lumen_guid'];
 
 	/**
 	 * The attributes that should be hidden for arrays.
 	 *
 	 * @var array
 	 */
-	protected $hidden = ['password'];
+	protected $hidden = [];
 
 }

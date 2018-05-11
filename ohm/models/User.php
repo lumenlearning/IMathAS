@@ -10,14 +10,11 @@ class User extends Model
 	protected $table = "imas_users";
 
 	/**
-	 * This empty method effectively eliminates the requirement for an
-	 * updated_at column.
+	 * Disable usage of the "updated_at" column. OHM currently is lacking this.
 	 *
-	 * @param $value
+	 * @var string
 	 */
-	public function setUpdatedAtAttribute($value)
-	{
-	}
+	const UPDATED_AT = null;
 
 	/**
 	 * The attributes that are mass assignable.
