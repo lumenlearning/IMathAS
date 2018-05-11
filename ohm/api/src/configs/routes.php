@@ -14,3 +14,4 @@ $app->get('/[{name}]', function (Request $request, Response $response, array $ar
 });
 
 $app->get('/v1/users', \OHM\Api\Controllers\UserController::class . ':findAll');
+$app->get('/v1/groups', \OHM\Api\Controllers\GroupController::class . ':findAll');
