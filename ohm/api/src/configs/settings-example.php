@@ -14,6 +14,17 @@ return [
 			'nonSecureUrls' => [],
 		],
 
+		// JWT settings
+		"jwt" => [
+			'secret' => getenv('OHM_API_JWT_SECRET'),
+			'issuer' => 'ohm-api',
+			'audience' => 'ohm',
+			'signingAlgorithm' => 'HS512',
+			'allowedAlgorithms' => ["HS512"],
+			'securedPaths' => ["/v1/"],
+			'ignoredPaths' => ["/v1/health"],
+		],
+
 		// Renderer settings
 		'renderer' => [
 			'template_path' => __DIR__ . '/../../templates/',
