@@ -22,8 +22,10 @@ class GroupController extends BaseApiController
 	{
 		list($pageNum, $pageSize) = $this->getPaginationArgs($request);
 
+		$nameFilter = $request->getParam('name_filter');
+
 		$groups = Group::take($pageSize)->skip($pageSize * $pageNum);
-//		 conditional sql goes here
+		if (!empty($nameFilter)) $groups = $groups->where('name', 'like', "%{$nameFilter}%");
 		$groups = $groups->get();
 
 		return $response->withJson($groups);
