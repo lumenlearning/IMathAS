@@ -8,22 +8,8 @@ use Slim\Http\Response;
 
 use OHM\Models\Group;
 
-class GroupController
+class GroupController extends BaseApiController
 {
-	private $defaultPageSize;
-	private $maxPageSize;
-
-	/**
-	 * GroupController constructor.
-	 * @param Container $container
-	 */
-	public function __construct($container)
-	{
-		$apiSettings = $container->get('settings')->get('api');
-		$this->defaultPageSize = $apiSettings['defaultPageSize'];
-		$this->maxPageSize = $apiSettings['maxPageSize'];
-	}
-
 	/**
 	 * Get all groups.
 	 *
@@ -127,26 +113,5 @@ class GroupController
 		$group->save();
 
 		return $response->withStatus(200)->withJson($group);
-	}
-
-	/**
-	 * Get pagination arguments from the request URL.
-	 *
-	 * @param Request $request
-	 * @return array Page number, page size
-	 */
-	protected function getPaginationArgs($request)
-	{
-		$pageNum = $request->getQueryParam('page', 0);
-		if ($pageNum < 0) {
-			$pageNum = 0;
-		}
-
-		$pageSize = $request->getQueryParam('per_page', $this->defaultPageSize);
-		if ($this->maxPageSize < $pageSize) {
-			$pageSize = $this->maxPageSize;
-		}
-
-		return array($pageNum, $pageSize);
 	}
 }
