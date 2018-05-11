@@ -39,10 +39,7 @@ class GroupController extends BaseApiController
 	 */
 	public function find($request, $response, $args)
 	{
-		$groupId = $args['id'];
-
-		$group = Group::find($groupId);
-//		 conditional sql goes here
+		$group = $this->findByIdOrUuid($args['id']);
 
 		return $response->withJson($group);
 	}
@@ -82,7 +79,7 @@ class GroupController extends BaseApiController
 	{
 		$groupId = $args['id'];
 
-		$group = Group::find($groupId);
+		$group = $this->findByIdOrUuid($groupId);
 		if (is_null($group)) {
 			return $response->withStatus(204);
 		}
@@ -104,7 +101,7 @@ class GroupController extends BaseApiController
 	{
 		$groupId = $args['id'];
 
-		$group = Group::find($groupId);
+		$group = $this->findByIdOrUuid($groupId);
 		if (is_null($group)) {
 			return $response->withStatus(404);
 		}
@@ -113,5 +110,22 @@ class GroupController extends BaseApiController
 		$group->save();
 
 		return $response->withStatus(200)->withJson($group);
+	}
+
+	/**
+	 * Get a Group by ID or UUID.
+	 *
+	 * @param $id
+	 * @return Group
+	 */
+	private function findByIdOrUuid($id)
+	{
+		if ((string)(int)$id == $id) {
+			$group = Group::find($id);
+		} else {
+			$group = Group::where('lumen_guid', $id)->first();
+		}
+
+		return $group;
 	}
 }
