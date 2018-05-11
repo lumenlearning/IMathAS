@@ -30,15 +30,11 @@ class ValidateUser
 	 */
 	public function __invoke($request, $response, $next)
 	{
-		$sessionId = session_id();
+		$jwt = $request->getAttribute('jwt');
 
-		$session = Session::where('sessionid', $sessionId)->first();
-		if (is_null($session)) {
+		if (!$this->isValidOhmSession($request) && empty($jwt)) {
 			return $response->withStatus(401)
-				->withJson([
-					'status' => 401,
-					'message' => 'Unauthorized',
-				]);
+				->withJson(['errors' => ['Please login or provide a valid API token.']]);
 		}
 
 //		$response->getBody()->write('BEFORE');
@@ -46,5 +42,19 @@ class ValidateUser
 //		$response->getBody()->write('AFTER');
 
 		return $response;
+	}
+
+	/**
+	 * Determine if this request is associated with a valid OHM user session.
+	 *
+	 * @param ServerRequestInterface $request
+	 * @return bool
+	 */
+	private function isValidOhmSession($request)
+	{
+		$sessionId = session_id();
+		$session = Session::where('sessionid', $sessionId)->first();
+
+		return is_null($session) ? false : true;
 	}
 }
