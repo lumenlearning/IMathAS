@@ -16,6 +16,7 @@ return [
 
 		// JWT settings
 		"jwt" => [
+			'allowInsecureHttp' => false,
 			'secret' => getenv('OHM_API_JWT_SECRET'),
 			'issuer' => 'ohm-api',
 			'audience' => 'ohm',
