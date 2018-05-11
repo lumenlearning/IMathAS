@@ -54,7 +54,7 @@ class UserController
 			$pageNum = 0;
 		}
 
-		$pageSize = $request->getQueryParam('size', $this->defaultPageSize);
+		$pageSize = $request->getQueryParam('per_page', $this->defaultPageSize);
 		if ($this->maxPageSize < $pageSize) {
 			$pageSize = $this->maxPageSize;
 		}
