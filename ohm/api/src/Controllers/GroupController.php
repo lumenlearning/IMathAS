@@ -36,11 +36,11 @@ class GroupController
 	{
 		list($pageNum, $pageSize) = $this->getPaginationArgs($request);
 
-		$users = Group::take($pageSize)->skip($pageSize * $pageNum);
+		$groups = Group::take($pageSize)->skip($pageSize * $pageNum);
 //		 conditional sql goes here
-		$users = $users->get();
+		$groups = $groups->get();
 
-		return $response->withJson($users);
+		return $response->withJson($groups);
 	}
 
 	/**
