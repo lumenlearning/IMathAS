@@ -5,7 +5,8 @@
         "slim/php-view": "2.2.0",
         "monolog/monolog": "1.23.0",
         "illuminate/database": "5.4.36",
-        "ramsey/uuid": "3.7.3"
+        "ramsey/uuid": "3.7.3",
+        "tuupola/slim-jwt-auth": "^2.4.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.5",
