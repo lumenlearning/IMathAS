@@ -44,6 +44,24 @@ class GroupController
 	}
 
 	/**
+	 * Get a single group.
+	 *
+	 * @param Request $request
+	 * @param Response $response
+	 * @param array $args
+	 * @return null
+	 */
+	public function find($request, $response, $args)
+	{
+		$groupId = $args['id'];
+
+		$group = Group::find($groupId);
+//		 conditional sql goes here
+
+		return $response->withJson($group);
+	}
+
+	/**
 	 * Create a group.
 	 *
 	 * @param Request $request

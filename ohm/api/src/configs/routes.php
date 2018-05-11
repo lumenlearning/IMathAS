@@ -20,6 +20,7 @@ $app->group('/v1', function () {
 
 	$this->group('/groups', function () {
 		$this->get('[/]', \OHM\Api\Controllers\GroupController::class . ':findAll');
+		$this->get('/{id}', \OHM\Api\Controllers\GroupController::class . ':find');
 		$this->post('[/]', \OHM\Api\Controllers\GroupController::class . ':create');
 		$this->delete('/{id}', \OHM\Api\Controllers\GroupController::class . ':delete');
 		$this->put('[/{id}]', \OHM\Api\Controllers\GroupController::class . ':update');
