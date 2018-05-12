@@ -8,4 +8,5 @@ modules:
     - PhpBrowser:
         url: http://localhost:8080/ohm/api/index.php
     - \Helper\Api
+    - Asserts
 
