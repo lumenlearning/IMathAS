@@ -26,5 +26,9 @@ require __DIR__ . '/src/configs/middleware.php';
 // Register routes
 require __DIR__ . '/src/configs/routes.php';
 
+if (file_exists(__DIR__ . '/../../devmode.php')) {
+	require_once(__DIR__ . '/../../devmode.php');
+}
+
 // Run app
 $app->run();
