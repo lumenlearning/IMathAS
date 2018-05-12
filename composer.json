@@ -35,7 +35,10 @@
     },
     "scripts": {
         "start": "php -S localhost:8080 -t .",
-        "test": "echo 'Use targets: test-mom and test-ohm'; exit 1",
+        "test": [
+            "phpunit",
+            "codecept run"
+        ],
         "test-mom": "phpunit",
         "test-ohm": "codecept run",
         "test-ohmv": "codecept run --steps --coverage --coverage-html",
