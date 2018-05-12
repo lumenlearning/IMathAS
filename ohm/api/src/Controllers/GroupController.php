@@ -43,6 +43,10 @@ class GroupController extends BaseApiController
 	{
 		$group = $this->findByIdOrUuid($args['id']);
 
+		if (empty($group)) {
+			return $response->withStatus(404);
+		}
+
 		return $response->withJson($group);
 	}
 
