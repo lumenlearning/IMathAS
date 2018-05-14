@@ -102,7 +102,7 @@ some point.
 1. Run `composer install`.
 1. Create a MySQL database for OHM.
    1. Note the credentials and database name.
-1. Copy [ohm/api/src/configs/settings-example.php](ohm/api/src/configs/settings-example.php)
+1. Copy [ohm/api/src/configs/settings-dev.php](ohm/api/src/configs/settings-dev.php)
    to `settings.php`.
    1. Update `settings.php` appropriately -- specifically, DB settings.
 1. Go to (document root)[/install.php](/install.php)

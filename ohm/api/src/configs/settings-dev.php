@@ -1,7 +1,7 @@
 <?php
 return [
 	'settings' => [
-		'displayErrorDetails' => false, // set to false in production
+		'displayErrorDetails' => true, // set to false in production
 		'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
 		// API general settings
@@ -16,7 +16,7 @@ return [
 
 		// JWT settings
 		"jwt" => [
-			'allowInsecureHttp' => false,
+			'allowInsecureHttp' => true,
 			'secret' => getenv('OHM_API_JWT_SECRET'),
 			'issuer' => 'ohm-api',
 			'audience' => 'ohm',
@@ -61,10 +61,10 @@ return [
 		'determineRouteBeforeAppMiddleware' => false,
 		'db' => [
 			'driver' => 'mysql',
-			'host' => getenv('DB_SERVER'),
+			'host' => '127.0.0.1',
 			'database' => 'myopenmathdb',
-			'username' => getenv('DB_USERNAME'),
-			'password' => getenv('DB_PASSWORD'),
+			'username' => 'ohm',
+			'password' => 'ohm',
 			'charset' => 'latin1',
 			'collation' => 'latin1_swedish_ci',
 			'prefix' => '',
