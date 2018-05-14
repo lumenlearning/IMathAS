@@ -31,4 +31,15 @@ class Group extends Model
 	 */
 	protected $hidden = [];
 
+	/**
+	 * Get all LTI users associated with this group.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+	 */
+	public function ltiusers()
+	{
+		return $this->hasManyThrough('OHM\Models\LtiUser', 'OHM\Models\User',
+			'groupid', 'userid', 'id');
+	}
+
 }
