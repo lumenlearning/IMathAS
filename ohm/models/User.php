@@ -32,4 +32,13 @@ class User extends Model
 	 */
 	protected $hidden = ['password'];
 
+	/**
+	 * Get LTI user data associated with this user.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function ltiusers()
+	{
+		return $this->hasMany('OHM\Models\LtiUser', 'userid');
+	}
 }
