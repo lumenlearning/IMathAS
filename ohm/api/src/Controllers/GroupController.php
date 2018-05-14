@@ -127,8 +127,7 @@ class GroupController extends BaseApiController
 	private function findByIdOrUuid($id)
 	{
 		if ((string)(int)$id == $id) {
-			$group = Group::where('id', $id)->with('ltiusers')
-				->get()->first();
+			$group = Group::find($id);
 		} else {
 			$group = Group::where('lumen_guid', $id)->first();
 		}
