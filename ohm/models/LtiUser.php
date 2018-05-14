@@ -24,14 +24,4 @@ class LtiUser extends Model
 	 */
 	protected $hidden = [];
 
-	/**
-	 * Get password associated with this LtiUser.
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-	 */
-	public function user()
-	{
-		return $this->belongsTo('OHM\Models\User', 'userid');
-	}
-
 }
