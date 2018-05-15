@@ -55,6 +55,36 @@ class UserSeeder extends AbstractSeed
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
+		// More users at Hogwarts
+		for ($i = 0; $i < 7; $i++) {
+			$username = $faker->unique()->userName;
+			$data[] = [
+				'SID' => $username,
+				'password' => password_hash($username, PASSWORD_BCRYPT),
+				'rights' => 10,
+				'FirstName' => $faker->firstName,
+				'LastName' => $faker->lastName,
+				'email' => $faker->email,
+				'groupid' => $groupId,
+				'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
+			];
+		}
+
+		// More users not in a group
+		for ($i = 0; $i < 40; $i++) {
+			$username = $faker->unique()->userName;
+			$data[] = [
+				'SID' => $username,
+				'password' => password_hash($username, PASSWORD_BCRYPT),
+				'rights' => 10,
+				'FirstName' => $faker->firstName,
+				'LastName' => $faker->lastName,
+				'email' => $faker->email,
+				'groupid' => 0, // "default" group
+				'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
+			];
+		}
+
 		$this->insert('imas_users', $data);
 	}
 }
