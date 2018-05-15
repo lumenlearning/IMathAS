@@ -8,6 +8,7 @@ class User extends Model
 {
 
 	protected $table = "imas_users";
+	protected $dateFormat = 'U';
 
 	/**
 	 * Disable usage of the "updated_at" column. OHM currently is lacking this.
