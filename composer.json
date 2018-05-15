@@ -44,6 +44,8 @@
         "test-mom": "phpunit",
         "test-ohm": "codecept run",
         "test-ohmv": "codecept run --steps --coverage --coverage-html",
-        "coverage-ohm": "codecept run --coverage --coverage-html"
+        "coverage-ohm": "codecept run --coverage --coverage-html",
+        "migrate-ohm": "phinx migrate",
+        "seed-ohm": "phinx seed:run"
     }
 }
