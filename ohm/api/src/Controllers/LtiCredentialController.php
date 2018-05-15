@@ -204,7 +204,7 @@ class LtiCredentialController extends BaseApiController
 		 * Only set nulls (for $this->containsNulls to find) for new
 		 * LtiCredential records, and when an actual null pw is passed in.
 		 */
-		if ($isForNew || isset($data['password'])) {
+		if ($isForNew || array_key_exists('secret', $data)) {
 			$result['password'] = isset($data['secret']) ? $data['secret'] : null;
 		}
 
