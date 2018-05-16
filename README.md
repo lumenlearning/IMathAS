@@ -19,11 +19,14 @@ Online Homework Manager, an IMathAS fork.
 
 # Rights
 
-
-	if ($role_num == 5) {return "Guest User";}
-	if ($role_num == 10) {return "Student";}
-	if ($role_num == 20) {return "Teacher";}
-	if ($role_num == 40) {return "Limited Course Creator";}
-	if ($role_num == 75) {return "Group Admin";}
-	if ($role_num == 100) {return "Full Admin";}
+  switch ($rights) {
+    case 5: return _("Guest"); break;
+    case 10: return _("Student"); break;
+    case 12: return _("Pending"); break;
+    case 15: return _("Tutor/TA/Proctor"); break;
+    case 20: return _("Teacher"); break;
+    case 40: return _("LimCourseCreator"); break;
+    case 75: return _("GroupAdmin"); break;
+    case 100: return _("Admin"); break;
+  }
 
