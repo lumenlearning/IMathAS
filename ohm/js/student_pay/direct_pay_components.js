@@ -298,7 +298,7 @@ var DirectPayCourseActivation = function (_React$Component) {
             React.createElement(
               'h1',
               { className: 'activation-heading', style: styles.activationHeading },
-              this.props.paymentPageTitle || "One-time Course Activation"
+              this._headerLanguage()
             ),
             React.createElement(
               'h3',
@@ -425,6 +425,17 @@ var DirectPayCourseActivation = function (_React$Component) {
           smallLink: "Start Two-week Trial"
         };
       }
+    }
+  }, {
+    key: '_headerLanguage',
+    value: function _headerLanguage() {
+      var language = "Course Assessment Activation";
+
+      if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '') {
+        language = "Assessment Activation";
+      }
+
+      return language;
     }
   }, {
     key: '_getTrialTimeRemainingWords',
@@ -740,25 +751,7 @@ var DirectPayLandingPage = function (_React$Component) {
             { style: { paddingTop: '40px' } },
             this._loadCorrectView()
           ),
-          React.createElement(
-            "div",
-            null,
-            this.props.attributionLogoUrl === null ? "" : React.createElement(
-              "div",
-              { className: "lumen-attribution", style: styles$2.lumenAttributionWrapper },
-              React.createElement(
-                "span",
-                null,
-                "Open Courseware by "
-              ),
-              React.createElement(
-                "a",
-                { href: "https://www.lumenlearning.com", target: "_blank" },
-                React.createElement("img", { src: "https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png", alt: "Lumen Learning logo", className: "lumen-logo",
-                  style: styles$2.lumenLogo })
-              )
-            )
-          )
+          this._renderFooterLogo()
         )
       );
     }
@@ -794,6 +787,29 @@ var DirectPayLandingPage = function (_React$Component) {
           redirectTo: this.props.redirectTo,
           trialTimeRemaining: this.props.trialTimeRemaining
         });
+      }
+    }
+  }, {
+    key: "_renderFooterLogo",
+    value: function _renderFooterLogo() {
+      if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '' && this.props.attributionLogoUrl != null && this.props.attributionLogoUrl !== '') {
+
+        return React.createElement(
+          "div",
+          { className: "lumen-attribution", style: styles$2.lumenAttributionWrapper },
+          React.createElement(
+            "span",
+            null,
+            "Open Courseware by "
+          ),
+          React.createElement(
+            "a",
+            { href: "https://www.lumenlearning.com", target: "_blank" },
+            React.createElement("img", { src: "https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png",
+              alt: "Lumen Learning logo", className: "lumen-logo",
+              style: styles$2.lumenLogo })
+          )
+        );
       }
     }
   }, {
