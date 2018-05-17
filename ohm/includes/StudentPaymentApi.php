@@ -388,6 +388,7 @@ class StudentPaymentApi
 		$headers = array(
 			'Authorization: Bearer ' . $GLOBALS['student_pay_api']['jwt_secret'],
 			'Accept: application/json',
+			'Content-Type: application/json',
 		);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
