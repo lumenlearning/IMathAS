@@ -367,7 +367,7 @@ class StudentPaymentApi
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.
 	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
-	public function createGroupPaymentSettings($accessType)
+	public function updateGroupPaymentSettings($accessType)
 	{
 		if (empty($accessType)) {
 			throw new StudentPaymentException("No access type was specified.");
@@ -376,7 +376,7 @@ class StudentPaymentApi
 		$this->curl->reset();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
-		$this->debug("StudentPaymentApi->createGroupPaymentSettings : POST " . $requestUrl);
+		$this->debug("StudentPaymentApi->createGroupPaymentSettings : PUT " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
@@ -391,6 +391,7 @@ class StudentPaymentApi
 			'Content-Type: application/json',
 		);
 		$this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
+		$this->curl->setOption(CURLOPT_CUSTOMREQUEST, "PUT");
 		$this->curl->setOption(CURLOPT_TIMEOUT, $GLOBALS['student_pay_api']['timeout']);
 		$this->curl->setOption(CURLOPT_RETURNTRANSFER, 1);
 		$this->curl->setOption(CURLOPT_POSTFIELDS, $requestData);

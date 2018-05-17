@@ -146,15 +146,16 @@ function dbException($exception, $groupId)
  */
 function setStudentPaymentType($groupId, $paymentType)
 {
+	// If we're disabling student payments, don't delete it in the student
+	// payment API. Associated data now exists that OHM doesn't know about.
+	if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType) {
+		return;
+	}
+
 	$studentPaymentApi = new StudentPaymentApi($groupId, null, null);
 
 	try {
-		$apiResult = null;
-		if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType) {
-			$apiResult = $studentPaymentApi->deleteGroupPaymentSettings();
-		} else {
-			$apiResult = $studentPaymentApi->createGroupPaymentSettings($paymentType);
-		}
+		$apiResult = $studentPaymentApi->updateGroupPaymentSettings($paymentType);
 
 		if ($apiResult->getErrors()) {
 			response(500, 'Failed to change student payment setting for group ID ' . $groupId);
