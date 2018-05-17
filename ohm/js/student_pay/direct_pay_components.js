@@ -792,8 +792,7 @@ var DirectPayLandingPage = function (_React$Component) {
   }, {
     key: "_renderFooterLogo",
     value: function _renderFooterLogo() {
-      if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '' && this.props.attributionLogoUrl != null && this.props.attributionLogoUrl !== '') {
-
+      if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '') {
         return React.createElement(
           "div",
           { className: "lumen-attribution", style: styles$2.lumenAttributionWrapper },
