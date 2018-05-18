@@ -54,24 +54,24 @@ if (isset($_GET['fixorphanqs'])) {
 	$query .= "SET ili.deleted=0 WHERE ili.libid=0 AND iq.deleted=0";
 	$stm = $DBH->query($query);
 	$n1 = $stm->rowCount();
-	
+
 	//if any still have no undeleted library items, then they must not have an unassigned entry to undelete, so add it
 	$query = "INSERT INTO imas_library_items (libid,qsetid,ownerid,junkflag,deleted,lastmoddate) ";
 	$query .= "(SELECT 0,ili.qsetid,iq.ownerid,0,0,iq.lastmoddate FROM imas_library_items AS ili JOIN imas_questionset AS iq ON iq.id=ili.qsetid WHERE iq.deleted=0 GROUP BY ili.qsetid HAVING min(ili.deleted)=1)";
 	$stm = $DBH->query($query);
 	$n2 = $stm->rowCount();
-	
+
 	//if there are any questions with NO library items, add an unassigned one
 	$query = "INSERT INTO imas_library_items (libid,qsetid,ownerid,junkflag,deleted,lastmoddate) ";
 	$query .= "(SELECT 0,iq.id,iq.ownerid,0,iq.deleted,iq.lastmoddate FROM imas_questionset AS iq LEFT JOIN imas_library_items AS ili ON iq.id=ili.qsetid WHERE ili.id IS NULL)";
 	$stm = $DBH->query($query);
 	$n3 = $stm->rowCount();
-	
+
 	//make unassigned deleted if there's also an undeleted other library
 	$query = "UPDATE imas_library_items AS A JOIN imas_library_items AS B ON A.qsetid=B.qsetid AND A.deleted=0 AND B.deleted=0 ";
 	$query .= "SET A.deleted=1 WHERE A.libid=0 AND B.libid>0";
 	$stm = $DBH->query($query);
-	
+
 	echo '<p>'.($n1+$n2+$n3). ' questions with no libraries fixed</p>';
 	echo '<p><a href="utils.php">Utils</a></p>';
 	exit;
@@ -357,7 +357,18 @@ if (isset($_GET['form'])) {
 	echo '<a href="listwronglibs.php">List WrongLibFlags</a><br/>';
 	echo '<a href="updatewronglibs.php">Update WrongLibFlags</a><br/>';
 	echo '<a href="blocksearch.php">Search Block titles</a><br/>';
-	echo '<a href="itemsearch.php">Search inline/linked items</a>';
+	######### Begin OHM-specific code #########################################
+	######### Begin OHM-specific code #########################################
+	######### Begin OHM-specific code #########################################
+	######### Begin OHM-specific code #########################################
+	######### Begin OHM-specific code #########################################
+	echo '<a href="itemsearch.php">Search inline/linked items</a><br/>';
+	echo '<a href="ohm_api_consumers.php">Manage API consumers</a>';
+	######### End OHM-specific code ###########################################
+	######### End OHM-specific code ###########################################
+	######### End OHM-specific code ###########################################
+	######### End OHM-specific code ###########################################
+	######### End OHM-specific code ###########################################
 	require("../footer.php");
 }
 ?>
