@@ -336,6 +336,17 @@ class Sanitize
 	}
 
 	/**
+	 * Same as $this->simpleString(), but spaces are allowed.
+	 *
+	 * @param $data mixed A variable containing a number.
+	 * @return string A sanitized variable containing simple characters.
+	 */
+	public static function simpleStringWithSpaces($data)
+	{
+		return preg_replace('/[^\w\s\-]/','',$data);
+	}
+
+	/**
 	 * Sanitize data so it only contains ASCII 32-127.
 	 * Also strips HTML tags
 	 *
