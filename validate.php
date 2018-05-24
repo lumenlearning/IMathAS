@@ -6,20 +6,20 @@
 
  $curdir = rtrim(dirname(__FILE__), '/\\');
  require("i18n/i18n.php");
- if (isset($sessionpath) && $sessionpath!='') { session_save_path($sessionpath);}
- ini_set('session.gc_maxlifetime',86400);
- ini_set('auto_detect_line_endings',true);
 
- $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
- if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
- 	 session_set_cookie_params(0, '/', '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
- }
  if (isset($CFG['GEN']['randfunc'])) {
  	 $randf = $CFG['GEN']['randfunc'];
  } else {
  	 $randf = 'rand';
  }
 
+ if (isset($sessionpath) && $sessionpath!='') { session_save_path($sessionpath);}
+ ini_set('session.gc_maxlifetime',86400);
+ ini_set('auto_detect_line_endings',true);
+ $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
+ if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
+	session_set_cookie_params(0, '/', '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
+ }
  session_start();
  $sessionid = session_id();
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
@@ -296,25 +296,33 @@
 	// ####### End OHM-specific changes ####################################################################
 
 		 if (!empty($_SERVER['QUERY_STRING'])) {
-       $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']) . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
+		 	 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']) . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 } else {
 			 $querys = (!empty($addtoquerystring) ? '?' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 }
-		 //$now = time();
-		 //DB //$query = "INSERT INTO imas_log (time,log) VALUES ($now,'$userid from IP: {$_SERVER['REMOTE_ADDR']}')";
-		 //DB //mysql_query($query) or die("Query failed : " . mysql_error());
 
-		 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys);
-   } else {
-     if (empty($_SESSION['challenge'])) {
-       $badsession = true;
-     } else {
-       if ($_POST['cid'] && $_POST['ekey']) {
-         header("Location:" . $GLOBALS['basesiteurl'] . "/ohm/registerorsignin.php?" . Sanitize::fullQueryString("cid=" . $_POST['cid'] . "&ekey=" . $_POST['ekey'] . "&relogin=true")); /* Redirect browser */
-         exit;
-       }
-       $badsession = false;
-     }
+		 $needToForcePasswordReset = false;
+		 if (isset($CFG['acct']['passwordMinlength']) && strlen($_POST['password'])<$CFG['acct']['passwordMinlength']) {
+		 	 $needToForcePasswordReset = true;
+		 } else if (isset($CFG['acct']['passwordFormat'])) {
+		 	 require_once("includes/newusercommon.php");
+		 	 if (!checkFormatAgainstRegex($_POST['password'], $CFG['acct']['passwordFormat'])) {
+		 	 	 $needToForcePasswordReset = true;
+		 	 }
+		 } 
+		 
+		 if ($needToForcePasswordReset) {
+		 	 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd');
+		 } else {
+		 	 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys);
+		 }
+		 exit;
+	 } else {
+		 if (empty($_SESSION['challenge'])) {
+			 $badsession = true;
+		 } else {
+		 	 $badsession = false;
+		 }
 		 /*  For login error tracking - requires add'l table
 		 if ($line==null) {
 			 $err = "Bad SID";

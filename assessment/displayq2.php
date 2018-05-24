@@ -548,7 +548,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 				if ($extrefpt[0]=='video' || strpos($extrefpt[1],'youtube.com/watch')!==false) {
 					$extrefpt[1] = $GLOBALS['basesiteurl'] . "/assessment/watchvid.php?url=" . Sanitize::encodeUrlParam($extrefpt[1]);
 					if ($extrefpt[0]=='video') {$extrefpt[0]='Video';}
-					echo formpopup($extrefpt[0],$extrefpt[1],660,530,"button",true,"video",$qref);
+					echo formpopup($extrefpt[0],$extrefpt[1],873,500,"button",true,"video",$qref);
 				} else if ($extrefpt[0]=='read') {
 					echo formpopup("Read",$extrefpt[1],730,500,"button",true,"text",$qref);
 				} else {
@@ -1141,7 +1141,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($answer)) {
 			if (in_array('parenneg',$ansformats) && $answer < 0) {
 				$sa = '('.(-1*$answer).')';
-			} else if (is_numeric($answer) && $answer!=0 && abs($answer)<.001) {
+			} else if (is_numeric($answer) && $answer!=0 && abs($answer)<.001 && abs($answer)>1e-9) {
 				$sa = prettysmallnumber($answer);
 			} else {
 				$sa = $answer;
@@ -3127,27 +3127,16 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 							$func = mathphp($func,'x');
 							$func = str_replace("(x)",'($x)',$func);
 							$func = create_function('$x', 'return ('.$func.');');
-							$x1 = 1/4*$settings[1] + 3/4*$settings[0];
-							$x2 = 1/2*$settings[1] + 1/2*$settings[0];
-							$x3 = 3/4*$settings[1] + 1/4*$settings[0];
-
-							$y1 = @$func($x1);
-							$y2 = @$func($x2);
-							$y3 = @$func($x3);
-
-							if ($y1===false) {
-								$x1 = $x1+.2*($x2-$x1);
-								$y1 = @$func($x1);
-								$y1p = $settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
-							} else if ($y2===false) {
-								$x2 = $x2+.2*($x2-$x1);
-								$y2 = @$func($x2);
-								$y2p = $settings[7] - ($y2-$settings[2])*$pixelspery - $imgborder;
-							} else if ($y3===false) {
-								$x3 = $x3-.2*($x2-$x1);
-								$y3 = @$func($x3);
-								$y3p = $settings[7] - ($y3-$settings[2])*$pixelspery - $imgborder;
-							}
+							
+							$epsilon = ($settings[1]-$settings[0])/97;
+							$x1 = 1/4*$settings[1] + 3/4*$settings[0] + $epsilon;
+							$x2 = 1/2*$settings[1] + 1/2*$settings[0] + $epsilon;
+							$x3 = 3/4*$settings[1] + 1/4*$settings[0] + $epsilon;
+							
+							$y1 = $func($x1);
+							$y2 = $func($x2);
+							$y3 = $func($x3);
+	
 							$va = ($x1*$x2*$y1-$x1*$x2*$y2-$x1*$x3*$y1+$x1*$x3*$y3+$x2*$x3*$y2-$x2*$x3*$y3)/(-$x1*$y2+$x1*$y3+$x2*$y1-$x2*$y3-$x3*$y1+$x3*$y2);
 							$ha = (($x1*$y1-$x2*$y2)-$va*($y1-$y2))/($x1-$x2);
 
@@ -3426,7 +3415,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			} else if (preg_match('/\d\s*(x|y|z|r|t|i|X|Y|Z|I)([^a-zA-Z]|$)/', $gaarr[$k])) {
 				//has a variable - don't strip
 			} else {
-				$gaarr[$k] = preg_replace('/^((-|\+)?\d*\.?\d*E?\-?\d*)[^+\-]*$/','$1',$gaarr[$k]); //strip out units
+				$gaarr[$k] = preg_replace('/^((-|\+)?\d*\.?\d*[Ee]?[+\-]?\d*)[^+\-]*$/','$1',$gaarr[$k]); //strip out units
 			}
 		}
 
@@ -3451,7 +3440,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							if ($matches[3]=='oo') {$matches[3] = 1e99;}
 							if (($matches[1]=="(" && $givenans>$matches[2]) || ($matches[1]=="[" && $givenans>=$matches[2])) {
 								if (($matches[4]==")" && $givenans<$matches[3]) || ($matches[4]=="]" && $givenans<=$matches[3])) {
-									echo "here 3";
 									$correct += 1;
 									$foundloc = $j;
 									break 2;
@@ -4226,9 +4214,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						}
 						return 0;
 					}
-					if (preg_match('/(\(|\[)([\d\.]+)\,([\d\.]+)(\)|\])/',$anans,$matches)) {
-						$aarr[$j] = $matches;
-					} else if (!is_numeric($anans) && $anans!='DNE' && $anans!='oo' && $anans!='+oo' && $anans!='-oo') {
+					if (!is_numeric($anans) && $anans!='DNE' && $anans!='oo' && $anans!='+oo' && $anans!='-oo') {
 						if ((in_array("mixednumber",$ansformats) || in_array("sloppymixednumber",$ansformats) || in_array("mixednumberorimproper",$ansformats) || in_array("allowmixed",$ansformats)) && preg_match('/^\s*(\-?\s*\d+)\s*(_|\s)\s*(\d+)\s*\/\s*(\d+)\s*$/',$anans,$mnmatches)) {
 							$aarr[$j] = $mnmatches[1] + (($mnmatches[1]<0)?-1:1)*($mnmatches[3]/$mnmatches[4]);
 						} else {
@@ -4247,7 +4233,15 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					}
 					return 0;
 				}
-				if (preg_match('/(\(|\[)([\d\.]+)\,([\d\.]+)(\)|\])/',$anans,$matches)) {
+				if (preg_match('/(\(|\[)(.+?)\,(.+?)(\)|\])/',$anans,$matches)) {
+					if ($matches[2]=='-oo') {$matches[2] = -1e99;}
+					if ($matches[3]=='oo') {$matches[3] = 1e99;}
+					if (!is_numeric($matches[2])) {
+						$matches[2] = evalMathPHP($matches[2],null);
+					}
+					if (!is_numeric($matches[3])) {
+						$matches[3] = evalMathPHP($matches[3],null);
+					}
 					$aarr[$j] = $matches;
 				} else if (!is_numeric($anans) && $anans!='DNE' && $anans!='oo' && $anans!='+oo' && $anans!='-oo') {
 					if ((in_array("mixednumber",$ansformats) || in_array("sloppymixednumber",$ansformats) || in_array("mixednumberorimproper",$ansformats) || in_array("allowmixed",$ansformats)) && preg_match('/^\s*(\-?\s*\d+)\s*(_|\s)\s*(\d+)\s*\/\s*(\d+)\s*$/',$anans,$mnmatches)) {
@@ -4731,6 +4725,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if ($answerformat=='list') {
 			$gaarr = array_map('trim',explode(',',$givenans));
 			$anarr = array_map('trim',explode(',',$answer));
+			$gaarrcnt = count($gaarr);
 		} else {
 			$gaarr = array($givenans);
 			$anarr = array($answer);
@@ -4863,7 +4858,11 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				}
 			}
 		}
-		$score = $correct/count($anarr);
+		if ($gaarrcnt <= count($anarr)) {
+			$score = $correct/count($anarr);
+		} else {
+			$score = $correct/count($anarr) - ($gaarrcnt-count($anarr))/($gaarrcnt+count($anarr));
+		}
 		if ($score<0) { $score = 0; }
 		return ($score);
 		//return $correct;
@@ -5267,11 +5266,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$ansrats = array();
 			$ansellipses = array();
 			$anshyperbolas = array();
-			$x0 = $settings[0];
-			$x1 = 1/4*$settings[1] + 3/4*$settings[0];
-			$x2 = 1/2*$settings[1] + 1/2*$settings[0];
-			$x3 = 3/4*$settings[1] + 1/4*$settings[0];
-			$x4 = $settings[1];
+			$epsilon = ($settings[1]-$settings[0])/499;
+			$x0 = $settings[0] - 3*$epsilon;
+			$x1 = 1/4*$settings[1] + 3/4*$settings[0] - $epsilon;
+			$x2 = 1/2*$settings[1] + 1/2*$settings[0] + $epsilon;
+			$x3 = 3/4*$settings[1] + 1/4*$settings[0] + 3*$epsilon;
+			$x4 = $settings[1] + 5*$epsilon;
 			$x0p = $imgborder;
 			$x1p = $xtopix($x1); //($x1 - $settings[0])*$pixelsperx + $imgborder;
 			$x2p = $xtopix($x2); //($x2 - $settings[0])*$pixelsperx + $imgborder;
@@ -5509,19 +5509,6 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						$ansexps[$key] = array($str,$base);
 
 					} else if (strpos($function[0],'/x')!==false || preg_match('|/\([^\)]*x|', $function[0])) {
-						if ($y1===false) {
-							$x1 = $x1+.2*($x2-$x1);
-							$y1 = @$func($x1);
-							$y1p = $settings[7] - ($y1-$settings[2])*$pixelspery - $imgborder;
-						} else if ($y2===false) {
-							$x2 = $x2+.2*($x2-$x1);
-							$y2 = @$func($x2);
-							$y2p = $settings[7] - ($y2-$settings[2])*$pixelspery - $imgborder;
-						} else if ($y3===false) {
-							$x3 = $x3-.2*($x2-$x1);
-							$y3 = @$func($x3);
-							$y3p = $settings[7] - ($y3-$settings[2])*$pixelspery - $imgborder;
-						}
 						$h = ($x1*$x2*$y1-$x1*$x2*$y2-$x1*$x3*$y1+$x1*$x3*$y3+$x2*$x3*$y2-$x2*$x3*$y3)/(-$x1*$y2+$x1*$y3+$x2*$y1-$x2*$y3-$x3*$y1+$x3*$y2);
 						$k = (($x1*$y1-$x2*$y2)-$h*($y1-$y2))/($x1-$x2);
 						$c = ($y1-$k)*($x1-$h);
@@ -5747,6 +5734,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 			$deftol = .1;
 			$defpttol = 5;
+
 			foreach ($anslines as $key=>$ansline) {
 				$scores[$key] = 0;
 				for ($i=0; $i<count($lines); $i++) {
@@ -6099,9 +6087,11 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$x2p = ($x2 - $settings[0])*$pixelsperx + $imgborder;
 			$ymid = ($settings[2]+$settings[3])/2;
 			$ymidp = $settings[7] - ($ymid-$settings[2])*$pixelspery - $imgborder;*/
-			$x1 = 1/4*$settings[1] + 3/4*$settings[0];
-			$x2 = 1/2*$settings[1] + 1/2*$settings[0];
-			$x3 = 3/4*$settings[1] + 1/4*$settings[0];
+			$epsilon = ($settings[1]-$settings[0])/97;
+			$x1 = 1/4*$settings[1] + 3/4*$settings[0] + $epsilon;
+			$x2 = 1/2*$settings[1] + 1/2*$settings[0] + $epsilon;
+			$x3 = 3/4*$settings[1] + 1/4*$settings[0] + $epsilon;
+			
 			$x1p = ($x1 - $settings[0])*$pixelsperx + $imgborder;
 			$x2p = ($x2 - $settings[0])*$pixelsperx + $imgborder;
 			$x3p = ($x3 - $settings[0])*$pixelsperx + $imgborder;
@@ -7005,6 +6995,12 @@ function checkreqtimes($tocheck,$rtimes) {
 			foreach ($grouptocheck as $lookfor) {
 				if ($lookfor=='#') {
 					$nummatch = preg_match_all('/[\d\.]+/',$cleanans,$m);
+				} else if ($lookfor[0]=='#') {
+					if (!isset($all_numbers)) {
+						preg_match_all('/[\d\.]+/',$cleanans,$matches);
+						$all_numbers = $matches[0];
+					}
+					$nummatch = count(array_keys($all_numbers,str_replace(array('-', ' '),'',substr($lookfor,1))));
 				} else if (strlen($lookfor)>6 && substr($lookfor,0,6)=='regex:') {
 					$regex = str_replace('/','\\/',substr($lookfor,6));
 					$nummatch = preg_match_all('/'.$regex.'/'.($ignore_case?'i':''),$cleanans,$m);
@@ -7216,32 +7212,31 @@ function checkanswerformat($tocheck,$ansformats) {
 	}
 
 	if (in_array("mixednumber",$ansformats) || in_array("sloppymixednumber",$ansformats) || in_array("mixednumberorimproper",$ansformats)) {
-		if (!preg_match('/^\s*\-?\s*\d+\s*(_|\s)\s*(\d+)\s*\/\s*(\d+)\s*$/',$tocheck,$mnmatches) && !preg_match('/^\s*?\-?\s*\d+\s*$/',$tocheck) && !preg_match('/^\s*\-?\s*\d+\s*\/\s*\-?\s*\d+\s*$/',$tocheck)) {
-			//if doesn't match any format, exit
-			return false;
-		} else {
-			if (preg_match('/^\s*\-?\s*\d+\s*\/\s*\-?\d+\s*$/',$tocheck)) {   //if a fraction
-				$tmpa = explode("/",str_replace(' ','',$tocheck));
-				if (in_array("mixednumber",$ansformats)) {
-					if ((gcd(abs($tmpa[0]),abs($tmpa[1]))!=1) || abs($tmpa[0])>=abs($tmpa[1])) {
-						return false;
-					}
-				} else if (in_array("mixednumberorimproper",$ansformats)) {
-					if ((gcd(abs($tmpa[0]),abs($tmpa[1]))!=1)) {
-						return false;
-					}
+		if (preg_match('/^\(?\-?\s*\(?\d+\)?\/\(?\d+\)?$/',$tocheck) || preg_match('/^\(?\d+\)?\/\(?\-?\d+\)?$/',$tocheck)) { //fraction
+			$tmpa = explode("/",str_replace(array(' ','(',')'),'',$tocheck));
+			if (in_array("mixednumber",$ansformats)) {
+				if (!in_array("allowunreduced",$ansformats) && ((gcd(abs($tmpa[0]),abs($tmpa[1]))!=1) || abs($tmpa[0])>=abs($tmpa[1]))) {
+					return false;
 				}
-			} else	if (!preg_match('/^\s*\-?\s*\d+\s*$/',$tocheck)) {  //is in mixed number format
-				if (in_array("mixednumber",$ansformats)) {
-					if ($mnmatches[2]>=$mnmatches[3] || gcd($mnmatches[2],$mnmatches[3])!=1) {
-						return false;
-					}
-				} else if (in_array("mixednumberorimproper",$ansformats)) {
-					if (gcd($mnmatches[2],$mnmatches[3])!=1) {
-						return false;
-					}
+			} else if (in_array("mixednumberorimproper",$ansformats)) {
+				if (!in_array("allowunreduced",$ansformats) && ((gcd(abs($tmpa[0]),abs($tmpa[1]))!=1))) {
+					return false;
 				}
 			}
+		} else if (preg_match('/^\s*\-?\s*\d+\s*(_|\s)\s*\(?(\d+)\)?\s*\/\s*\(?(\d+)\)?\s*$/',$tocheck,$mnmatches)) { //mixed number
+			if (in_array("mixednumber",$ansformats)) {
+				if ($mnmatches[2]>=$mnmatches[3] || (!in_array("allowunreduced",$ansformats) && gcd($mnmatches[2],$mnmatches[3])!=1)) {
+					return false;
+				}
+			} else if (in_array("mixednumberorimproper",$ansformats)) {
+				if ((!in_array("allowunreduced",$ansformats) && gcd($mnmatches[2],$mnmatches[3])!=1) || $mnmatches[2]>=$mnmatches[3])  {
+					return false;
+				}
+			}
+		} else if (preg_match('/^\s*\-?\s*\d+\s*$/',$tocheck)) { //integer
+			
+		} else { //not a valid format
+			return false;	
 		}
 	}
 
@@ -7279,14 +7274,28 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 			$shorttip = $islist?sprintf(_('Enter a %s of reduced fractions or integers'), $listtype):_('Enter a reduced fraction or integer');
 		}
 	} else if (in_array('mixednumber',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a reduced mixed number or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+		if (in_array("allowunreduced",$ansformats)) {
+			$tip .= sprintf(_('Enter %s as a mixed number or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+		} else {
+			$tip .= sprintf(_('Enter %s as a reduced mixed number or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+		}
 		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or integers'), $listtype):_('Enter a mixed number or integer');
 	} else if (in_array('mixednumberorimproper',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a reduced mixed number, reduced proper or improper fraction, or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
-		$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers or integers'), $listtype):_('Enter a reduced mixed number, proper or improper fraction, or integer');
+		if (in_array("allowunreduced",$ansformats)) {
+			$tip .= sprintf(_('Enter %s as a mixed number, proper or improper fraction, or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+			$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers, fractions, or integers'), $listtype):_('Enter a mixed number, proper or improper fraction, or integer');
+		} else {
+			$tip .= sprintf(_('Enter %s as a reduced mixed number, reduced proper or improper fraction, or as an integer.  Example: 2 1/2 = 2 &frac12;'), $eword);
+			$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers, fractions, or integers'), $listtype):_('Enter a reduced mixed number, proper or improper fraction, or integer');
+		}
 	} else if (in_array('fracordec',$ansformats)) {
-		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4), an integer (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
-		$shorttip = $islist?sprintf(_('Enter a %s of fractions or exact decimals'), $listtype):_('Enter a fraction or exact decimal');
+		if (in_array("allowmixed",$ansformats)) {
+			$tip .= sprintf(_('Enter %s as a mixed number (like 2 1/2), fraction (like 3/5), an integer (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
+			$shorttip = $islist?sprintf(_('Enter a %s of mixed numbers, fractions, or exact decimals'), $listtype):_('Enter a mixed number, fraction, or exact decimal');
+		} else {
+			$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4), an integer (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
+			$shorttip = $islist?sprintf(_('Enter a %s of fractions or exact decimals'), $listtype):_('Enter a fraction or exact decimal');
+		}
 	} else if (in_array('scinot',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of numbers using scientific notation'), $listtype):_('Enter a number using scientific notation');
