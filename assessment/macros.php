@@ -3057,6 +3057,9 @@ function stringtopolyterms($str) {
 
 function getfeedbackbasic($correct,$wrong,$thisq,$partn=null) {
 	global $rawscores,$imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	$qn = $thisq-1;
 	if (strpos($rawscores[$qn],'~')===false) {
 		$res = ($rawscores[$qn]<0)?-1:(($rawscores[$qn]==1)?1:0);
@@ -3085,6 +3088,9 @@ function getfeedbackbasic($correct,$wrong,$thisq,$partn=null) {
 
 function getfeedbacktxt($stu,$fbtxt,$ans) {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null) {
 		return " ";
 	} else if ($stu==='NA') {
@@ -3105,6 +3111,9 @@ function getfeedbacktxt($stu,$fbtxt,$ans) {
 }
 
 function getfeedbacktxtessay($stu,$fbtxt) {
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu==null || trim($stu)=='') {
 		return '';
 	} else {
@@ -3114,6 +3123,9 @@ function getfeedbacktxtessay($stu,$fbtxt) {
 
 function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.001) {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null) {
 		return " ";
 	} else if (!is_numeric($stu)) {
@@ -3151,6 +3163,9 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.
 
 function getfeedbacktxtcalculated($stu, $stunum, $partial, $fbtxt, $deffb='Incorrect', $answerformat = '', $requiretimes = '', $tol=.001) {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null) {
 		return " ";
 	} else {
@@ -3214,6 +3229,9 @@ function getfeedbacktxtcalculated($stu, $stunum, $partial, $fbtxt, $deffb='Incor
 //$partial = array(answer,partialcreditval,answer,partialcreditval,...)
 function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars='x', $requiretimes = '', $tol='.001',$domain='-10,10') {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null || trim($stu)==='') {
 		return " ";
 	} else {
