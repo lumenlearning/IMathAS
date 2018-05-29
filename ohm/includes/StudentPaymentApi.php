@@ -360,7 +360,7 @@ class StudentPaymentApi
 	}
 
 	/**
-	 * Create student payment settings for a group in the student payment API.
+	 * Update student payment settings for a group in the student payment API.
 	 *
 	 * @param $accessType string Currently one of: "not_required",
 	 *        "activation_code", "direct_pay"
@@ -376,7 +376,7 @@ class StudentPaymentApi
 		$this->curl->reset();
 
 		$requestUrl = $GLOBALS['student_pay_api']['base_url'] . '/student_pay_settings';
-		$this->debug("StudentPaymentApi->createGroupPaymentSettings : PUT " . $requestUrl);
+		$this->debug("StudentPaymentApi->updateGroupPaymentSettings : PUT " . $requestUrl);
 		$this->curl->setUrl($requestUrl);
 
 		$requestData = json_encode(array(
