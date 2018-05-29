@@ -276,32 +276,32 @@ final class StudentPaymentApiTest extends TestCase
 	}
 
 	/*
- 	 * createGroupPaymentSettings
+ 	 * updateGroupPaymentSettings
  	 */
 
-	function testCreateGroupPaymentSettings()
+	function testUpdateGroupPaymentSettings()
 	{
 		$this->curlMock->method('getInfo')->willReturn(200);
 		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::CREATE_PAYMENT_SETTINGS_RESPONSE);
 		$this->curlMock->expects($this->once())->method('reset');
 
-		$studentPayApiResult = $this->studentPaymentApi->createGroupPaymentSettings('not_required');
+		$studentPayApiResult = $this->studentPaymentApi->updateGroupPaymentSettings('direct_pay');
 
 		$this->assertEquals("ok", $studentPayApiResult->getStudentPaymentStatus());
 	}
 
-	function testCreateGroupPaymentSettings_Null()
+	function testUpdateGroupPaymentSettings_Null()
 	{
 		$this->expectException(StudentPaymentException::class);
 
-		$this->studentPaymentApi->createGroupPaymentSettings(null);
+		$this->studentPaymentApi->updateGroupPaymentSettings(null);
 	}
 
-	function testCreateGroupPaymentSettings_EmptyString()
+	function testUpdateGroupPaymentSettings_EmptyString()
 	{
 		$this->expectException(StudentPaymentException::class);
 
-		$this->studentPaymentApi->createGroupPaymentSettings('');
+		$this->studentPaymentApi->updateGroupPaymentSettings('');
 	}
 
 	/*
