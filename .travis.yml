@@ -8,8 +8,7 @@ before_script:
   - composer install
   - cp .env.example .env
   - cp -f config/travis.php config/ohm.php
-  - cp ohm/api/src/configs/settings-travis.php ohm/api/src/configs/settings.php
-  - cp phinx-example.php phinx.php
+  - cp ohm/api/src/configs/settings-prod.php ohm/api/src/configs/settings.php
   - php -S 127.0.0.1:8080 -t . &
 script:
   - sleep 3

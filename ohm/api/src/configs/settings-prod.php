@@ -1,7 +1,12 @@
 <?php
+
+$CONFIG_ENV = getenv('CONFIG_ENV') ? getenv('CONFIG_ENV') : 'development';
+$LOG_PATH = in_array($CONFIG_ENV, ['production', 'staging']) ?
+	'/var/app/support/logs' : __DIR__ . '/../../logs';
+
 return [
 	'settings' => [
-		'displayErrorDetails' => false, // set to false in production
+		'displayErrorDetails' => false, // set to true in development
 		'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
 		// API general settings
@@ -18,7 +23,8 @@ return [
 		"jwt" => [
 			// Requests after AWS load balancers are HTTP only
 			'allowInsecureHttp' => true,
-			'secret' => getenv('OHM_API_JWT_SECRET'),
+			'secret' => getenv('OHM_API_JWT_SECRET') ?
+				getenv('OHM_API_JWT_SECRET') : 'development_jwt_secret',
 			'issuer' => 'ohm-api',
 			'audience' => 'ohm',
 			'signingAlgorithm' => 'HS512',
@@ -35,7 +41,7 @@ return [
 		// Monolog settings
 		'logger' => [
 			'name' => 'slim-app',
-			'path' => '/var/app/support/logs/ohm-api-app.log',
+			'path' => $LOG_PATH . '/ohm-api.log',
 			'level' => \Monolog\Logger::DEBUG,
 			'maxFiles' => 10,
 			'bubbleErrors' => true,
@@ -43,7 +49,7 @@ return [
 		],
 		'securityLogger' => [
 			'name' => 'slim-app',
-			'path' => '/var/app/support/logs/ohm-api-security.log',
+			'path' => $LOG_PATH . '/ohm-api-security.log',
 			'level' => \Monolog\Logger::DEBUG,
 			'maxFiles' => 10,
 			'bubbleErrors' => true,
@@ -51,7 +57,7 @@ return [
 		],
 		'errorLogger' => [
 			'name' => 'slim-app',
-			'path' => '/var/app/support/logs/ohm-api-errors.log',
+			'path' => $LOG_PATH . '/ohm-api-errors.log',
 			'level' => \Monolog\Logger::DEBUG,
 			'maxFiles' => 10,
 			'bubbleErrors' => true,
@@ -63,7 +69,7 @@ return [
 		'db' => [
 			'driver' => 'mysql',
 			'host' => getenv('DB_SERVER'),
-			'database' => 'myopenmathdb',
+			'database' => getenv('DB_NAME'),
 			'username' => getenv('DB_USERNAME'),
 			'password' => getenv('DB_PASSWORD'),
 			'charset' => 'latin1',

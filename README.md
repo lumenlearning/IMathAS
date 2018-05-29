@@ -102,10 +102,9 @@ some point.
 1. Run `composer install`.
 1. Create a MySQL database for OHM.
    1. Note the credentials and database name.
-1. Copy [ohm/api/src/configs/settings-dev.php](ohm/api/src/configs/settings-dev.php)
+1. Copy [ohm/api/src/configs/settings-prod.php](ohm/api/src/configs/settings-prod.php)
    to `settings.php`.
-   1. Update `settings.php` appropriately -- specifically, DB settings.
-1. Copy `phinx-example.php` to `phinx.php`.
+   1. Update `settings.php` appropriately -- specifically, DB settings and `displayErrorDetails`.
 1. Go to (document root)[/install.php](/install.php)
 
 After filling and submitted a few forms, a `config.php` file will
