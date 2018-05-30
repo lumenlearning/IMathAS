@@ -14,7 +14,7 @@ class BaseCestCase
 	{
 		// DON'T COMMIT REAL JWTs INTO THE REPO!
 		// (this one is 'jwt_secret_goes_here' signed)
-		$I->amBearerAuthenticated('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1MjYwNjI1NDQsImF1ZCI6Im9obSJ9.NrRB5XdXNe8txsd4rYrfxTx4EW3vOaw4IwanV_TBK7naNRsEfEWdgJT2I_buKz5e1rj769ghabLwUAx99sBZMQ');
+		$I->amBearerAuthenticated('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJvaG0tYXBpIiwiYXVkIjoibG9jYWwgZGV2IHRlc3RpbmciLCJpYXQiOjE1Mjc2NDE1MzR9.1IUZD7I2svvldltJ_uKf_ZVQdLjNQWuci9GqmvX0Ngrn7Nz-rq8rEM0OVc9jVi2IUf21DsVM_4IbFxGanP0OUA');
 	}
 
 	protected function notApiAuthenticated($I)
