@@ -5,6 +5,7 @@ require_once("../header.php");
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Ramsey\Uuid\Uuid;
+use Firebase\JWT\JWT;
 
 ?>
     <div class="breadcrumb">
@@ -24,6 +25,9 @@ switch ($_REQUEST['action']) {
 		break;
 	case "modify":
 		modify();
+		break;
+	case "generate_api_token":
+		generate_api_token();
 		break;
 	case "delete":
 		delete();
@@ -47,7 +51,7 @@ function list_groups()
 	global $DBH;
 
 	?>
-    <h1>API Consumers</h1>
+    <h1>OHM API Consumers</h1>
 
     <p>
         <a href="?action=create_form">Create new API consumer</a>
@@ -58,8 +62,7 @@ function list_groups()
     <tr>
         <th>Consumer Name</th>
         <th>Description</th>
-        <th>Modify</th>
-        <th>Delete</th>
+        <th colspan="3">Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -81,6 +84,8 @@ function list_groups()
 		$confirmJs = sprintf('onClick="return confirm(\'Are you sure you want to delete %s?\')"',
 			Sanitize::encodeStringForDisplay($row['name']));
 
+		$generateTokenLink = sprintf('<a href="?action=generate_api_token&id=%s">Create API Token</a>',
+			$row['id']);
 		$modifyLink = sprintf('<a href="?action=modify_form&id=%s">Modify</a>', $row['id']);
 		$deleteLink = sprintf(
 			'<a href="?action=delete&id=%s" %s>Delete</a>',
@@ -88,9 +93,10 @@ function list_groups()
 			$confirmJs
 		);
 
-		printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
+		printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
 			Sanitize::encodeStringForDisplay($row['name']),
 			Sanitize::encodeStringForDisplay($row['description']),
+			$generateTokenLink,
 			$modifyLink,
 			$deleteLink
 		);
@@ -115,6 +121,39 @@ function modify()
     <h1>Modify API consumer: <?php echo $name; ?></h1>
 
     <p>Done!</p>
+
+    <p>
+        <a href="?">&lt;&lt; Return to API consumer listing</a>
+    </p>
+	<?php
+}
+
+function generate_api_token()
+{
+	global $DBH;
+
+	$id = Sanitize::simpleString($_REQUEST['id']);
+
+	$stm = $DBH->prepare(
+		'SELECT name FROM ohm_api_consumers WHERE id = :id'
+	);
+	$stm->execute([':id' => $id]);
+	$row = $stm->fetch(PDO::FETCH_ASSOC);
+
+	$name = Sanitize::encodeStringForDisplay($row['name']);
+
+	$jwtSecret = getenv('OHM_API_JWT_SECRET') ?
+		getenv('OHM_API_JWT_SECRET') : 'development_jwt_secret';
+	$jwt = JWT::encode([
+		"iss" => "ohm-api",
+		"aud" => $id,
+		"iat" => time()
+	], $jwtSecret, 'HS512');
+
+	?>
+    <h1>Generate API token for: <?php echo $name; ?></h1>
+
+    <textarea cols="100" rows="10"><?php echo $jwt; ?></textarea>
 
     <p>
         <a href="?">&lt;&lt; Return to API consumer listing</a>
