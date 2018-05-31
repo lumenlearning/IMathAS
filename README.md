@@ -75,6 +75,9 @@ Please see details [here](docs/ohm_deployment.md) before deploying to PROD.
 
 ## User rights
 
+In the `imas_users` table, each user record has one of these values in the
+`rights` column to define their role and access level within OHM.
+
 ```
   switch ($rights) {
     case 5: return _("Guest"); break;

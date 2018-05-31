@@ -46,6 +46,19 @@ Ideally:
 1. Merge back into master with `--no-ff`
 1. Follow the basic deployment instructions above
 
+Example:
+
+    $ git checkout master
+    $ git checkout -b hotfix_omg_itbroke
+    ...fix the thing and commit...
+    $ git checkout master
+    $ git merge --no-ff hotfix_omg_itbroke
+    $ eb status
+    $ eb deploy
+
 Once the dust settles, merge those same hot-fixes or changes into the `dev` branch.
 Any existing branches based off `dev` will need to be rebased.
+
+    $ git checkout dev
+    $ git merge master  (no need for --no-ff here)
 

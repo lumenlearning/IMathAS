@@ -29,7 +29,7 @@ time between deploys.
 ### OHM-specific features or changes
 
 If you are working on an OHM feature or change, just branch off `dev` and PR
-back into `dev` unless you are given a specific integration branch to work from.
+back into `dev` unless you are working from a different integration branch.
 
 ### Branch tracking
 
@@ -39,9 +39,9 @@ back into `dev` unless you are given a specific integration branch to work from.
 
 Typically, code flows from:
 
-- OHM feature branch ➤ `dev`
-- MOM changes ➤ `mom_YYYY-MM-DD` (see [MOM to OHM merges](ohm_mom_merges.md))
-- MOM changes + bug fixes ➤ `mom_YYYY-MM-DD_bugfixes`
+- OHM feature branch merged into ➤ `dev`
+- MOM changes cherry picked into ➤ `mom_YYYY-MM-DD` (see [MOM to OHM merges](ohm_mom_merges.md))
+- MOM changes + bug fixes cherry picked into ➤ `mom_YYYY-MM-DD_bugfixes`
 
 New RC branches (`rc-for-YYYY-MM-DD`) are created as needed, when the above
 branches change, and are deployed to staging either directly from the RC branch
