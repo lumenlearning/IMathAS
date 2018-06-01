@@ -26,5 +26,5 @@ env:
     - DB_USERNAME=root
     - DB_PASSWORD=""
     - S3_MAIN_BUCKET_NAME=none
-	- OHM_API_JWT_SECRET=jwt_secret_goes_here
+	- OHM_API_JWT_SECRET=development_jwt_secret
 
