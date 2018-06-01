@@ -4,7 +4,6 @@
 .DS_Store
 *.php~
 *.js~
-devmode.php
 c3.php
 .env
 
