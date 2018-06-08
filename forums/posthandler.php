@@ -151,8 +151,8 @@ if (isset($_GET['modify'])) { //adding or modifying post
 
 				$sendemail = false;
 				require("../header.php");
-				echo '<h2>Error:</h2><p>It looks like the post you were replying to was deleted.  Your post is below in case you ';
-				echo 'want to copy-and-paste it somewhere. <a href="'.Sanitize::fullUrl($returnurl).'">Continue</a></p>';
+				echo '<h1>Error:</h1><p>It looks like the post you were replying to was deleted.  Your post is below in case you ';
+				echo 'want to copy-and-paste it somewhere. <a href="'.Sanitize::url($returnurl).'">Continue</a></p>';
 				echo '<hr>';
 				//DB echo '<p>Message:</p><div class="editor">'.filter(stripslashes($_POST['message'])).'</div>';
 				echo '<p>Message:</p><div class="editor">'.filter($_POST['message']).'</div>';
@@ -300,7 +300,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				$headers  = 'MIME-Version: 1.0' . "\r\n";
 				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 				$headers .= "From: $sendfrom\r\n";
-				$message  = "<h4>This is an automated message.  Do not respond to this email</h4>\r\n";
+				$message  = "<h3>This is an automated message.  Do not respond to this email</h3>\r\n";
 				$message .= "<p>A new post has been made in forum $forumname in course ".Sanitize::encodeStringForDisplay($coursename)."</p>\r\n";
 				//DB $message .= "<p>Subject:".stripslashes($_POST['subject'])."</p>";
 				$message .= "<p>Subject:".Sanitize::encodeStringForDisplay($_POST['subject'])."</p>";
@@ -398,7 +398,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				$stm->execute(array(':id'=>$line['threadid']));
 				$curstugroupid = $stm->fetchColumn(0);
 			}
-			echo '<div id="headerposthandler" class="pagetitle"><h2>Modify Post</h2></div>';
+			echo '<div id="headerposthandler" class="pagetitle"><h1>Modify Post</h1></div>';
 		} else {
 			if ($_GET['modify']=='reply') {
 				
@@ -426,7 +426,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 					$stm->execute(array(':id'=>$forumid));
 					$haspoints = ($stm->fetchColumn(0)>0);
 				}
-				echo '<div id="headerposthandler" class="pagetitle"><h2>Post Reply</h2></div>';
+				echo '<div id="headerposthandler" class="pagetitle"><h1>Post Reply</h1></div>';
 			} else if ($_GET['modify']=='new') {
 				if (isset($studentid)) {
 					if (time()>$postby) {
@@ -441,7 +441,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				$line['tag'] = '';
 				$curstugroupid = 0;
 				$replyby = null;
-				echo "<h2>Add Thread - \n";
+				echo "<h1>Add Thread - \n";
 				if (isset($_GET['quoteq'])) {
 					require_once("../assessment/displayq2.php");
 					$showa = false;
@@ -569,7 +569,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 		$forumsettings = $stm->fetch(PDO::FETCH_ASSOC);
 		$allowanon = $forumsettings['settings']%2;
 		if ($_GET['modify']=='new') {
-			echo Sanitize::encodeStringForDisplay($forumsettings['name']).'</h2>';
+			echo Sanitize::encodeStringForDisplay($forumsettings['name']).'</h1>';
 		}
 		$forumtype = $forumsettings['forumtype'];
 		$taglist = $forumsettings['taglist'];
@@ -581,11 +581,11 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			$replybytime = tzdate("g:i a",time()+7*24*60*60);
 		}
 		if ($forumsettings['postinstr'] != '' && $_GET['modify']=="new") {
-			echo '<h4>'._('Posting Instructions').'</h4>';
+			echo '<h3>'._('Posting Instructions').'</h3>';
 			// $forumsettings['postinstr'] contains HTML.
 			echo '<div class="intro">'.$forumsettings['postinstr'].'</div><br/>';
 		} else if ($forumsettings['replyinstr'] != '' && $_GET['modify']=="reply") {
-			echo '<h4>'._('Reply Instructions').'</h4>';
+			echo '<h3>'._('Reply Instructions').'</h3>';
 			// $forumsettings['replyinstr'] contains HTML.
 			echo '<div class="intro">'.$forumsettings['replyinstr'].'</div><br/>';
 		}
@@ -912,7 +912,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			echo "&gt; <a href=\"$returnurl\">$returnname</a> &gt; Remove Post</div>";
 		}
 
-		echo "<h3>Remove Post</h3>\n";
+		echo "<h2>Remove Post</h2>\n";
 		if ($parent==0) {
 			echo "<p>Are you SURE you want to remove this thread and all replies?</p>\n";
 		} else {
@@ -1051,10 +1051,10 @@ if (isset($_GET['modify'])) { //adding or modifying post
 		$stm->execute(array(':id'=>$_GET['move']));
 		if ($stm->fetchColumn(0)==0) {
 			$ishead = true;
-			echo "<h3>Move Thread</h3>\n";
+			echo "<h2>Move Thread</h2>\n";
 		} else {
 			$ishead = false;
-			echo "<h3>Move Post</h3>\n";
+			echo "<h2>Move Post</h2>\n";
 		}
 
 		echo "<form method=post action=\"$returnurl&move=".Sanitize::encodeUrlParam($_GET['move'])."\">";
