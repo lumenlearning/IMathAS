@@ -122,10 +122,12 @@ Go to (document_root)[/upgrade.php](/upgrade.php) in your web browser.
 Requirements:
 
 - Composer with all dependencies installed.
+    - `$ brew install composer` or [getcomposer.org](https://getcomposer.org/)
+    - `$ composer install`
 - A local server already running with this project root available at
 [http://localhost:8080/](http://localhost:8080/)
 	- `composer start` will start a local server for you.
-- The local dev server must have `xdebug` enabled.
+- PHP must have `xdebug` enabled.
 
 ## MyOpenMath (core OHM)
 
