@@ -100,6 +100,7 @@ some point.
 
 1. Clone this repo.
 1. Run `composer install`.
+   - `$ brew install composer` or [getcomposer.org](https://getcomposer.org/)
 1. Create a MySQL database for OHM.
    1. Note the credentials and database name.
 1. Copy [ohm/api/src/configs/settings-prod.php](ohm/api/src/configs/settings-prod.php)
