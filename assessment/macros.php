@@ -4,8 +4,8 @@
 
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r","replacealttext");
-array_push($allowedmacros,"numtowords","randname","randnamewpronouns","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r","replacealttext","randpythag");
+array_push($allowedmacros,"numtowords","randname","randnamewpronouns","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","gettwopointdata","getlinesdata","adddrawcommand","mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber","makeprettynegative");
 function mergearrays() {
 	$args = func_get_args();
 	foreach ($args as $k=>$arg) {
@@ -1024,6 +1024,22 @@ function polymakepretty($exp) {
 	return $exp;
 }
 
+function makeprettynegative($exp) {
+	//3--4 to 3-(-4).  3+-4 to 3+(-4).  3-+4 to 3-4
+	$exp = preg_replace('/(\+|\-)\s+(\+|\-)/',"$1$2",$exp);
+	$exp = str_replace("-+","-",$exp);
+	$exp = preg_replace('/--([\d\.]+)/', '-(-$1)', $exp);
+	$exp = preg_replace('/\+-([\d\.]+)/', '+(-$1)', $exp);
+	return $exp;
+}
+
+function randpythag($min=1,$max=100) {
+	$m = $GLOBALS['RND']->rand(ceil(sqrt($min+1)), floor(sqrt($max-1)));
+	$n = $GLOBALS['RND']->rand(1, floor(min($m-1, sqrt($m*$m-$min), sqrt($max-$m*$m))));
+	$v = array($m*$m-$n*$n, 2*$m*$n, $m*$m+$n*$n);
+	sort($v);
+	return $v;
+}
 
 
 function makeprettydisp($exp) {
@@ -3042,6 +3058,9 @@ function stringtopolyterms($str) {
 
 function getfeedbackbasic($correct,$wrong,$thisq,$partn=null) {
 	global $rawscores,$imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	$qn = $thisq-1;
 	if (strpos($rawscores[$qn],'~')===false) {
 		$res = ($rawscores[$qn]<0)?-1:(($rawscores[$qn]==1)?1:0);
@@ -3070,6 +3089,9 @@ function getfeedbackbasic($correct,$wrong,$thisq,$partn=null) {
 
 function getfeedbacktxt($stu,$fbtxt,$ans) {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null) {
 		return " ";
 	} else if ($stu==='NA') {
@@ -3090,6 +3112,9 @@ function getfeedbacktxt($stu,$fbtxt,$ans) {
 }
 
 function getfeedbacktxtessay($stu,$fbtxt) {
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu==null || trim($stu)=='') {
 		return '';
 	} else {
@@ -3099,6 +3124,9 @@ function getfeedbacktxtessay($stu,$fbtxt) {
 
 function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.001) {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null) {
 		return " ";
 	} else if (!is_numeric($stu)) {
@@ -3136,6 +3164,9 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.
 
 function getfeedbacktxtcalculated($stu, $stunum, $partial, $fbtxt, $deffb='Incorrect', $answerformat = '', $requiretimes = '', $tol=.001) {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null) {
 		return " ";
 	} else {
@@ -3199,6 +3230,9 @@ function getfeedbacktxtcalculated($stu, $stunum, $partial, $fbtxt, $deffb='Incor
 //$partial = array(answer,partialcreditval,answer,partialcreditval,...)
 function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars='x', $requiretimes = '', $tol='.001',$domain='-10,10') {
 	global $imasroot;
+	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
 	if ($stu===null || trim($stu)==='') {
 		return " ";
 	} else {

@@ -47,3 +47,5 @@ if (!isset($init_skip_validate) || (isset($init_skip_validate) && false == $init
 		csrfProtector::init();
 	}
 }
+
+

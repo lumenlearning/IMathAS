@@ -9,7 +9,7 @@ require("../infoheader.php");
 
 <div class="content">
 <h2>Privacy Policy</h2>
-<p>MyOpenMath is provided by <a href="http://www.lumenlearning.com">Lumen Learning</a> and is committed to the privacy of our users. &nbsp;This privacy policy provides an overview of how your personal information is used.</p>
+<p>MyOpenMath is committed to the privacy of our users. &nbsp;This privacy policy provides an overview of how your personal information is used.</p>
 <p><strong>What information do we collect?</strong></p>
 <p>We collect information from you when you register on our site or fill out a form.</p>
 <p>When registering on our site, you may be asked to enter your: name, e-mail address or phone number. You may, however, visit our site anonymously.</p>
@@ -38,6 +38,7 @@ require("../infoheader.php");
 <li>To send periodic emails</li>
 <ul>
 <li>The email address you provide may be used to send you information, respond to inquiries, and/or other requests or questions.</li>
+<li>Instructors may occasionally receive emails from trusted marketing partners.</li>
 </ul>
 </ul>
 <p><strong>How do we protect your information?</strong></p>
@@ -46,7 +47,15 @@ require("../infoheader.php");
 <p>Yes (Cookies are small files that a site or its service provider transfers to your computers hard drive through your Web browser (if you allow) that enables the sites or service providers systems to recognize your browser and capture and remember certain information)</p>
 <p>We use cookies to understand and save your preferences for future visits.</p>
 <p><strong>Do we disclose any information to outside parties?</strong></p>
-<p>We do not sell, trade, or otherwise transfer to outside parties your personally identifiable information. This does not include trusted third parties who assist us in operating our website, conducting our business, or servicing you, so long as those parties agree to keep this information confidential. Upon request, we may release course and student records to the institution that is providing the course. We may also release your information when we believe release is appropriate to comply with the law, enforce our site policies, or protect ours or others rights, property, or safety. However, non-personally identifiable visitor information may be provided to other parties for grant reporting, marketing, or other uses.</p>
+<p>We do not sell, trade, or otherwise transfer to outside parties your personally identifiable information. 
+This does not include trusted third parties who assist us in operating our website, conducting our business, 
+or servicing you, so long as those parties agree to keep this information confidential. 
+For instructors only, we may share your contact information with trusted marketing partners. 
+Upon request, we may release course and student records to the institution that is providing the course. 
+We may also release your information when we believe release is appropriate to comply with the law, enforce our 
+site policies, or protect ours or others rights, property, or safety. 
+However, non-personally identifiable visitor information may be provided to other parties for grant reporting, 
+marketing, or other uses.</p>
 <p><strong>California Online Privacy Protection Act Compliance</strong></p>
 <p>Because we value your privacy we have taken the necessary precautions to be in compliance with the California Online Privacy Protection Act. We therefore will not distribute your personal information to outside parties without your consent.</p>
 <p>As part of the California Online Privacy Protection Act, all users of our site may make any changes to their information at anytime by visiting the Account Settings page.</p>

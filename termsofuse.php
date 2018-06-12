@@ -6,7 +6,7 @@ require("header.php");
 <h1>Terms of Use</h1>
 <p><strong>Intro</strong></p>
 <p>MyOpenMath provides algorithmically generated online math homework. &nbsp;By using the MyOpenMath site, you are agreeing to these terms of use. &nbsp;MyOpenMath may update the Terms of Service at any time and without prior notice by posting a new version at <a href="http://www.myopenmath.com/">http://www.myopenmath.com</a>.</p>
-<p>MyOpenMath is hosted and provided by<a href="http://www.lumenlearning.com"> Lumen Learning</a>. The free and open version of the system is provided under these terms of service. Additional services and support can be contracted at <a href="http://www.lumenlearning.com">www.lumenlearning.com</a>.</p>
+<p>MyOpenMath is provided under these terms of service.</p>
 <p><strong>The Short Version</strong></p>
 <p>MyOpenMath is provided without warranty. &nbsp;There is no student support, and instructor support is limited. &nbsp;Do not post copywrighted materials without permission.</p>
 <p><strong>The Long and Official Version</strong></p>
@@ -14,7 +14,7 @@ require("header.php");
 <p>The MyOpenMath site is only intended for persons age 13 or over. &nbsp;</p>
 <p><strong>Support</strong></p>
 <p>No direct student support is provided.</p>
-<p>For the free and open use of the system, instructor technical support is provided by volunteers and the user community, and is thus limited and not guaranteed. To create an institutional service agreement with guaranteed support and response times please make a request at <a href="http://www.lumenlearning.com/contact">http://www.lumenlearning.com/contact</a>.</p>
+<p>Instructor technical support is provided by volunteers and the user community, and is thus limited and not guaranteed. If you need supported service, consider contacting <a href="http://www.lumenlearning.com">Lumen Learning</a> about their OHM system.</p>
 <p><strong>Content Usage Rights</strong></p>
 <p>Copyrighted materials should not be posted or used in questions without the permission of the copyright owner, or under allowed use following a Creative Commons or similar open license. You shall be solely responsible for your own user created content and the consequences of posting or publishing them. MyOpenMath expressly disclaims any and all liability in connection with user created content.</p>
 <p>Any content you upload remains yours. &nbsp;However, if you create questions, assignments, or courses and set them to be available for use by other instructors, through that action you are granting explicit rights for others to use, copy, and redistribute modifications of your items, including redistribution to other non-commercial installations of the IMathAS software. 

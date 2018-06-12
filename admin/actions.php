@@ -229,6 +229,21 @@ switch($_POST['action']) {
 			$stm->execute(array(':password'=>$md5pw, ':id'=>$_GET['id']));
 		}
 		break;
+	case "anonuser":
+		if ($myrights < 100) { echo "You don't have the authority for this action"; break;}
+		$deluid = Sanitize::onlyInt($_GET['id']);
+		$v = uniqid('anon');
+		$newemail = Sanitize::emailAddress($_POST['anonemail']);
+		if ($_POST['anontype']=='full') {
+			$query = "UPDATE imas_users SET FirstName=?,LastName=?,email=?,SID=?,password=?,msgnotify=0 WHERE id=?"; 
+			$qarr = array($v, $v, $newemail, $v, $v, $deluid);
+		} else {
+			$query = "UPDATE imas_users SET email=?,SID=?,password=?,msgnotify=0 WHERE id=?"; 
+			$qarr = array($newemail, $v, $v, $deluid);
+		}
+		$stm = $DBH->prepare($query);
+		$stm->execute($qarr);
+		break;
 	case "deladmin":
 		if ($myrights < 75) { echo "You don't have the authority for this action"; break;}
 		$deluid = Sanitize::onlyInt($_GET['id']);
@@ -848,7 +863,7 @@ switch($_POST['action']) {
 
 			require("../header.php");
 			echo '<div class="breadcrumb">'.$breadcrumbbase.' Course Creation Confirmation</div>';
-			echo '<h2>Your course has been created!</h2>';
+			echo '<h1>Your course has been created!</h1>';
 			echo '<p>For students to enroll in this course, you will need to provide them two things:<ol>';
 			echo '<li>The course ID: <b>'.$cid.'</b></li>';
 			if (trim($_POST['ekey'])=='') {
@@ -1098,7 +1113,7 @@ switch($_POST['action']) {
 						} else if (strpos($buffer,"function")===0) {
 							$func = substr($buffer,9,strpos($buffer,"(")-9);
 							if ($comments!='') {
-								$outlines .= "<h3><a name=\"$func\">$func</a></h3>\n";
+								$outlines .= "<h2><a name=\"$func\">$func</a></h2>\n";
 								$funcs[] = $func;
 								$outlines .= $comments;
 								$comments = '';

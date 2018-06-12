@@ -30,9 +30,10 @@ if (!defined('__CSRF_PROTECTOR__')) {
 		private static $isValidHTML = false;
 
 		public static $config = array(
-			'failedAuthAction' => 2,
+			'failedAuthAction' => 'block',
 			'tokenLength' => 10,
-			'logDirectory' => "log"
+			'logDirectory' => "log", 
+			'jsUrl' => ''  //set in init, after basesiteurl is defined
 		);
 		
 		public static function init($length = null, $action = null)
@@ -40,6 +41,10 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			global $userid, $sessiondata;
 			if (empty($userid)) { //only run if $userid is set
 				return;
+			}
+			
+			if ($GLOBALS['CFG']['use_csrfp']==='log') {
+				self::$config['failedAuthAction'] = 'log';
 			}
 			
 			self::$config['jsUrl'] = $GLOBALS['basesiteurl'] . "/csrfp/js/simplecsrfprotector.js";
@@ -135,21 +140,17 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			//call the logging function
 			static::logCSRFattack();
 
-			//#todo: ask mentors if $failedAuthAction is better as an int or string
-			//default case is case 0
-			switch (self::$config['failedAuthAction']) {
-				case 1:
-					//send custom error message
-					exit(self::$config['customErrorMessage']);
-					break;
-				case 2:
-					//just log - no action
-					break;
-				default:
-					//send 403 header
-					header('HTTP/1.0 403 Forbidden');
-					exit("<h2>403 Access Forbidden by CSRFProtector!</h2>");
-					break;
+			if (self::$config['failedAuthAction']==='log') {
+				//just log - no action	
+			} else {
+				if (isset($GLOBALS['CFG']['csrfp_error_message'])) {
+					exit($GLOBALS['CFG']['csrfp_error_message']);
+				} else {
+					$err = 'Your submission has been blocked because we were unable to verify it came from a valid source. ';
+					$err .= 'This can happen if you have two browser windows open and logged in within one while the other was open, ';
+					$err .= 'or for some other reason your browing session reset.';
+					exit($err);
+				}
 			}
 		}
 
@@ -304,6 +305,10 @@ if (!defined('__CSRF_PROTECTOR__')) {
 			} else {
 				$log['csrfp_token'] = $sessiondata[CSRFP_TOKEN];
 			}
+			global $DBH;
+			$stm = $DBH->prepare("SELECT time FROM imas_sessions WHERE sessionid=?");
+			$stm->execute(array(session_id()));
+			$log['session_time'] = $stm->fetchColumn(0);
 
 			//remove password from query
 			if (isset($log['query']['password'])) {
@@ -341,4 +346,3 @@ if (!defined('__CSRF_PROTECTOR__')) {
 	};
 }
 
-			

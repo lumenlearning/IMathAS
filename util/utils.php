@@ -332,7 +332,7 @@ if (isset($_GET['form'])) {
 	//listing of utilities
 	require("../header.php");
 	echo '<div class="breadcrumb">'.$curBreadcrumb.' &gt; Utilities</div>';
-	echo '<h3>Admin Utilities </h3>';
+	echo '<h2>Admin Utilities </h2>';
 	if (isset($_GET['debug'])) {
 		echo '<p>Debug Mode Enabled - Error reporting is now turned on.</p>';
 	}
@@ -340,7 +340,8 @@ if (isset($_GET['form'])) {
 	echo '<a href="'.$imasroot.'/admin/approvepending2.php">Approve Pending Instructor Accounts</a><br/>';
 	echo '<a href="'.$imasroot.'/admin/approvepending.php">Approve Pending Instructor Accounts (old version)</a><br/>';
 	echo '<a href="utils.php?form=jumptoitem">Jump to Item</a><br/>';
-	echo '<a href="batchcreateinstr.php">Batch create Instructor Accounts</a><br/>';
+	echo '<a href="batchcreateinstr.php">Batch Create Instructor Accounts</a><br/>';
+	echo '<a href="batchanon.php">Batch Anonymize Old Accounts</a><br/>';
 	echo '<a href="getstucnt.php">Get Student Count</a><br/>';
 	echo '<a href="getstucntdet.php">Get Detailed Student Count</a><br/>';
 	echo '<a href="utils.php?debug=true">Enable Debug Mode</a><br/>';
