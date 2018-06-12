@@ -22,7 +22,8 @@ env:
   global:
     - CLI=true
     - CONFIG_ENV=travis
-    - DB_SERVER=localhost
+    - DB_SERVER=127.0.0.1
+    - DB_NAME=myopenmathdb
     - DB_USERNAME=root
     - DB_PASSWORD=""
     - S3_MAIN_BUCKET_NAME=none
