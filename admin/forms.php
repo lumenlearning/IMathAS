@@ -1375,7 +1375,7 @@ function getGroupAssessmentAccessType($groupId) {
 	try {
 		if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentApi.php");
-			$studentPaymentApi = new \OHM\StudentPaymentApi($groupId, null, null);
+			$studentPaymentApi = new \OHM\Includes\StudentPaymentApi($groupId, null, null);
 			$apiResult = $studentPaymentApi->getGroupAccessType();
 
 			// If the student payment API doesn't know about this group, then

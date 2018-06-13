@@ -59,7 +59,7 @@ function getInstitutionData($groupId, $courseId, $studentId)
 
 	$lumenistrationInstitution = null;
 	try {
-		$studentPaymentApi = new \OHM\StudentPaymentApi($groupId, $courseId, $studentId);
+		$studentPaymentApi = new \OHM\Includes\StudentPaymentApi($groupId, $courseId, $studentId);
 		$lumenistrationInstitution = $studentPaymentApi->getInstitutionData();
 	} catch (StudentPaymentException $e) {
 		error_log("Failed to communicate with Lumenistration. " . $e->getMessage());

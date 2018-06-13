@@ -10,6 +10,7 @@ require_once(__DIR__ . "/../models/StudentPayApiResult.php");
 use OHM\Models\StudentPayApiResult;
 use OHM\Models\StudentPayStatus;
 use OHM\Includes\StudentPaymentDb;
+use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 
 /**

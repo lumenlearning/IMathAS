@@ -1,10 +1,9 @@
 <?php
 
-namespace OHM;
+namespace OHM\Includes;
 
 use OHM\Models\LumenistrationInstitution;
 use OHM\Models\StudentPayApiResult;
-use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
 
 require_once(__DIR__ . "/../../includes/sanitize.php");

@@ -13,6 +13,7 @@ require_once(__DIR__ . "/../includes/StudentPayment.php");
 require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 
+use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 
 $validActions = array('activate_code', 'payment_proxy');

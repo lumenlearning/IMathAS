@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 use OHM\Models\StudentPayApiResult;
 use OHM\Includes\StudentPaymentDb;
+use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 
 $GLOBALS['student_pay_api']['enabled'] = true;
