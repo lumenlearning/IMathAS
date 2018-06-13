@@ -14,6 +14,8 @@ require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
 require_once(__DIR__ . "/../models/StudentPayApiResult.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 
+use OHM\Models\StudentPayApiResult;
+
 $validActions = array('setGroupPaymentType');
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : NULL;

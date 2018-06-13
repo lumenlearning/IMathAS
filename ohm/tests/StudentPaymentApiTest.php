@@ -10,6 +10,8 @@ require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
 
 use PHPUnit\Framework\TestCase;
 
+use OHM\Models\StudentPayApiResult;
+
 $GLOBALS['student_pay_api']['enabled'] = true;
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/student_auth/v1';
 $GLOBALS['student_pay_api']['timeout'] = 10;

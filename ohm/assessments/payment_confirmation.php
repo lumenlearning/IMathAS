@@ -60,7 +60,7 @@ function getInstitutionData($groupId, $courseId, $studentId)
 		error_log("Failed to communicate with Lumenistration. " . $e->getMessage());
 		error_log($e->getTraceAsString());
 		// Don't break the page.
-		$lumenistrationInstitution = new \OHM\LumenistrationInstitution();
+		$lumenistrationInstitution = new \OHM\Models\LumenistrationInstitution();
 	}
 
 	return $lumenistrationInstitution;

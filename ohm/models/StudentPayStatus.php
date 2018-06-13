@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Models;
 
 /**
  * Class StudentPayInfo Allows for simple DTOs to hold student payment status and

@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Models;
 
 /**
  * Class StudentPayApiResult Represents a Lumenistration API response.

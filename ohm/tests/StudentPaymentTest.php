@@ -8,6 +8,9 @@ require_once(__DIR__ . '/../includes/StudentPayment.php');
 
 use PHPUnit\Framework\TestCase;
 
+use OHM\Models\StudentPayApiResult;
+use OHM\Models\StudentPayStatus;
+
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/student_auth/v1';
 $GLOBALS['student_pay_api']['timeout'] = 10;
 $GLOBALS['student_pay_api']['jwt_secret'] = 'phptest_secret_goes_here';

@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Models;
 
 /**
  * Class LumenistrationInstitution Represents institution data returned from the Lumenistration API.

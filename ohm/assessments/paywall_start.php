@@ -61,14 +61,14 @@ if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupI
 		$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();
 
-		if (\OHM\StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
+		if (\OHM\Models\StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/activation.php");
 			}
 		}
 
-		if (\OHM\StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY ==
+		if (\OHM\Models\StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY ==
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/direct_pay.php");
