@@ -4,6 +4,7 @@ namespace OHM;
 
 use OHM\Models\LumenistrationInstitution;
 use OHM\Models\StudentPayApiResult;
+use OHM\Exceptions\StudentPaymentException;
 
 require_once(__DIR__ . "/../../includes/sanitize.php");
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");

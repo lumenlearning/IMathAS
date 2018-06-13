@@ -1386,7 +1386,7 @@ function getGroupAssessmentAccessType($groupId) {
 		} else {
 			$currentAccessType = \OHM\Models\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
-	} catch (\OHM\StudentPaymentException $e) {
+	} catch (\OHM\Exceptions\StudentPaymentException $e) {
 		// Don't allow failed API communication to break UX.
 		error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
 			Sanitize::onlyInt($_GET['id']), $e->getMessage()));
@@ -1422,7 +1422,7 @@ function renderAccessTypeSelector($currentAccessType) {
  * Create/Modify Course page.
  *
  * @param string $action One of "addcourse" or "modify"
- * @throws \OHM\StudentPaymentException
+ * @throws \OHM\Exceptions\StudentPaymentException
  */
 function renderCourseRequiresStudentPayment($action) {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(

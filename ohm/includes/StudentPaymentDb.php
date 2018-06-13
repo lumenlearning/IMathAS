@@ -4,6 +4,8 @@ namespace OHM;
 
 require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
 
+use OHM\Exceptions\StudentPaymentException;
+
 /**
  * Class StudentPaymentDb - Database operations related to student payment for assessments.
  *

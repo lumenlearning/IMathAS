@@ -7,6 +7,10 @@
  * to be displayed to the student.
  */
 
+require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
+
+use OHM\Exceptions\StudentPaymentException;
+
 /*
  * So I won't forget for a 6th time and have to delete an hour of nice refactoring:
  *
@@ -50,7 +54,7 @@ if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupI
 
 	try {
 		$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();
-	} catch (OHM\StudentPaymentException $e) {
+	} catch (StudentPaymentException $e) {
 		// See notes above re: business decisions
 		error_log("Student payment API error: " . $e->getMessage());
 		error_log("Stack trace: " . $e->getTraceAsString());

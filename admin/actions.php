@@ -689,7 +689,7 @@ switch($_POST['action']) {
 				if ($groupRequiresStudentPayment) {
 					$studentPaymentDb->setCourseRequiresStudentPayment(true);
 				}
-			} catch (\OHM\StudentPaymentException $e) {
+			} catch (\OHM\Exceptions\StudentPaymentException $e) {
 				error_log($e->getMessage());
 				error_log($e->getTraceAsString());
 			}
