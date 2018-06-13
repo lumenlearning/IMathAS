@@ -2,6 +2,20 @@
     "require-dev": {
         "phpunit/phpunit": "^5.7"
     },
+    "autoload": {
+        "psr-4": {
+            "OHM\\": "ohm/",
+            "OHM\\Includes\\": "ohm/includes/",
+            "OHM\\Models\\": "ohm/models/",
+            "OHM\\Exceptions\\": "ohm/exceptions/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OHM\\Tests\\": "tests/",
+            "OHM\\Mocks\\": "ohm/mocks/"
+        }
+    },
     "scripts": {
         "test": "phpunit"
     }
