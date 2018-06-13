@@ -6,7 +6,7 @@
  * All responses are in JSON format.
  */
 
-namespace OHM;
+namespace OHM\Assessments;
 
 require_once(__DIR__ . '/../../init.php');
 
