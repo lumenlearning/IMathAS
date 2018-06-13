@@ -15,6 +15,7 @@ use OHM\Mocks\PDOStatementMock;
 
 use OHM\Models\StudentPayApiResult;
 use OHM\Includes\StudentPaymentDb;
+use OHM\Includes\HttpRequest;
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 

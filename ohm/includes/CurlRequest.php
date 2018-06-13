@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Includes;
 
 require_once(__DIR__ . "/HttpRequest.php");
 
