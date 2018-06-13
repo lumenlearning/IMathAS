@@ -977,7 +977,7 @@ if ($stm->rowCount()==0) {
 				// #### Begin OHM-specific code #####################################################
 				require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
 
-				$studentPaymentDb = new \OHM\StudentPaymentDb(null, $destcid, $userid);
+				$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $destcid, $userid);
 				$studentPaymentDb->setDbh($DBH);
 
 				$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
@@ -2562,7 +2562,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						// #### Begin OHM-specific code #####################################################
 						require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
 
-						$studentPaymentDb = new \OHM\StudentPaymentDb(null, $destcid, $userid);
+						$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $destcid, $userid);
 						$studentPaymentDb->setDbh($DBH);
 
 						$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();

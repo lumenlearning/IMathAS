@@ -94,7 +94,7 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 	// #### Begin OHM-specific code #####################################################
 	require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
 
-	$studentPaymentDb = new \OHM\StudentPaymentDb(null, null, $newuserid);
+	$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, null, $newuserid);
 	$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################

@@ -8,6 +8,7 @@ require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
 
 use PHPUnit\Framework\TestCase;
 
+use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
 
 

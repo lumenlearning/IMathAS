@@ -681,7 +681,7 @@ switch($_POST['action']) {
 			// #### Begin OHM-specific code #####################################################
 			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
 
-			$studentPaymentDb = new \OHM\StudentPaymentDb(null, $cid, $userid);
+			$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $cid, $userid);
 			$studentPaymentDb->setDbh($DBH);
 
 			try {

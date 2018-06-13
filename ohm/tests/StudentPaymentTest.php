@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 use OHM\Models\StudentPayApiResult;
 use OHM\Models\StudentPayStatus;
+use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
 
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/student_auth/v1';

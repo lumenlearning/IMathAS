@@ -11,6 +11,7 @@ require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
 use PHPUnit\Framework\TestCase;
 
 use OHM\Models\StudentPayApiResult;
+use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
 
 $GLOBALS['student_pay_api']['enabled'] = true;

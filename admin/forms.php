@@ -1369,7 +1369,7 @@ function getGroupAssessmentAccessType($groupId) {
 	require_once(__DIR__ . "/../ohm/models/StudentPayApiResult.php");
 
 	$groupId = Sanitize::onlyInt($groupId);
-	$studentPaymentDb = new \OHM\StudentPaymentDb($groupId, null, null);
+	$studentPaymentDb = new \OHM\Includes\StudentPaymentDb($groupId, null, null);
 
 	$currentAccessType = null;
 	try {
@@ -1456,7 +1456,7 @@ function renderCourseRequiresStudentPayment($action) {
 			return;
 		}
 
-		$studentPaymentDb = new \OHM\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
+		$studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
 		$groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
 		if ($groupRequiresPayment) {
 			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
