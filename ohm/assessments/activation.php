@@ -5,10 +5,7 @@
  * $studentPayStatus is created in showtest.php and must contain valid data.
  */
 
-require_once(__DIR__ . "/../models/StudentPayStatus.php");
-require_once(__DIR__ . "/../models/StudentPayApiResult.php");
-require_once(__DIR__ . "/../includes/StudentPayment.php");
-
+use OHM\Includes\StudentPayment;
 use OHM\Models\StudentPayApiResult;
 
 // Constants representing student access code state.
@@ -26,7 +23,7 @@ if ('' == trim($userDisplayName)) {
 	$userDisplayName = $GLOBALS['username'];
 }
 
-$studentPayment = new \OHM\StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
+$studentPayment = new StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
 
 $paymentStatus = $GLOBALS['studentPayStatus']->getStudentPaymentRawStatus();
 $pageDisplayed = false;

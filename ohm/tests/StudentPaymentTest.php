@@ -2,10 +2,6 @@
 
 namespace OHM\Tests;
 
-require_once(__DIR__ . '/../models/StudentPayStatus.php');
-require_once(__DIR__ . '/../models/StudentPayApiResult.php');
-require_once(__DIR__ . '/../includes/StudentPayment.php');
-
 use PHPUnit\Framework\TestCase;
 
 use OHM\Models\StudentPayApiResult;

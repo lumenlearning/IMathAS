@@ -15,10 +15,7 @@
 
 require_once(__DIR__ . "/../../init.php");
 
-require_once(__DIR__ . "/../includes/StudentPayment.php");
-require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
-require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
-
+use OHM\Includes\StudentPayment;
 use OHM\Exceptions\StudentPaymentException;
 
 
@@ -39,7 +36,7 @@ $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
 		$assessmentId, $courseId); // used by fragments/api_error.php
 
-$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
+$studentPayment = new StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 
 
 /*

@@ -8,9 +8,7 @@ if (!isset($_COOKIE['ohm_payment_confirmation'])) {
 require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
 
-require_once(__DIR__ . "/../models/LumenistrationInstitution.php");
-require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
-
+use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 
 
@@ -55,11 +53,9 @@ $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
 <?php
 function getInstitutionData($groupId, $courseId, $studentId)
 {
-	require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
-
 	$lumenistrationInstitution = null;
 	try {
-		$studentPaymentApi = new \OHM\Includes\StudentPaymentApi($groupId, $courseId, $studentId);
+		$studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
 		$lumenistrationInstitution = $studentPaymentApi->getInstitutionData();
 	} catch (StudentPaymentException $e) {
 		error_log("Failed to communicate with Lumenistration. " . $e->getMessage());

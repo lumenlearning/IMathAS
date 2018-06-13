@@ -13,6 +13,20 @@ if (!file_exists(__DIR__ . "/config.php")) {
 
 require_once(__DIR__ . "/config.php");
 
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+######### Begin OHM-specific changes #######################################
+
+require_once(__DIR__ . '/vendor/autoload.php');
+
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+######### End OHM-specific changes #########################################
+
 // Store PHP sessions in the database.
 require_once(__DIR__ . "/includes/session.php");
 if (!isset($use_local_sessions)) {

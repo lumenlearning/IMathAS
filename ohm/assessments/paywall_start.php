@@ -7,8 +7,8 @@
  * to be displayed to the student.
  */
 
-require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
-
+use OHM\Includes\StudentPayment;
+use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
 
 /*
@@ -33,8 +33,7 @@ $courseName = $courseNameStm->fetchColumn(0);
 
 $courseOwnerGroupId = null;
 if (isStudentPayEnabled()) {
-	require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
-	$studentPaymentDb = new \OHM\StudentPaymentDb(null, $courseId, null);
+	$studentPaymentDb = new StudentPaymentDb(null, $courseId, null);
 	$courseOwnerGroupId = $studentPaymentDb->getCourseOwnerGroupId();
 
 	// We need the course owner's group ID before we can check a student's access code status.
@@ -48,9 +47,7 @@ if (isStudentPayEnabled()) {
 $studentPayment = null;
 $studentPayStatus = null;
 if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
-	require_once(__DIR__ . "/../../ohm/includes/StudentPayment.php");
-	require_once(__DIR__ . "/../../ohm/models/StudentPayStatus.php");
-	$studentPayment = new \OHM\StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
+	$studentPayment = new StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
 
 	try {
 		$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();

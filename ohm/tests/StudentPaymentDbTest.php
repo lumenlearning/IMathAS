@@ -2,10 +2,6 @@
 
 namespace OHM\Tests;
 
-require_once(__DIR__ . '/../includes/StudentPaymentDb.php');
-require_once(__DIR__ . "/../../ohm/mocks/PDOMock.php");
-require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
-
 use PHPUnit\Framework\TestCase;
 
 use OHM\Mocks\PDOMock;

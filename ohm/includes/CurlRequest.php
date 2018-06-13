@@ -2,8 +2,6 @@
 
 namespace OHM\Includes;
 
-require_once(__DIR__ . "/HttpRequest.php");
-
 class CurlRequest implements HttpRequest
 {
 	private $handle = null;
