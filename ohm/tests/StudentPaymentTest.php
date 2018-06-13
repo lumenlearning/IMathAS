@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 use OHM\Models\StudentPayApiResult;
 use OHM\Models\StudentPayStatus;
+use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentDb;
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
