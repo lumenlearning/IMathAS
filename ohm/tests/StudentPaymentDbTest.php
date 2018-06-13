@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Tests;
 
 require_once(__DIR__ . '/../includes/StudentPaymentDb.php');
 require_once(__DIR__ . "/../../ohm/mocks/PDOMock.php");

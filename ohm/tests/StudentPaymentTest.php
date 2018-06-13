@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Tests;
 
 require_once(__DIR__ . '/../models/StudentPayStatus.php');
 require_once(__DIR__ . '/../models/StudentPayApiResult.php');
