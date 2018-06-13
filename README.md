@@ -130,6 +130,11 @@ Requirements:
 	- `composer start` will start a local server for you.
 - PHP must have `xdebug` enabled.
 
+Important: After all the above requirements are met, you must still follow
+all instructions listed under `Installation and setup` above. Specifically,
+you must have gone through `install.php` all the way through setting up the
+OHM db schema.
+
 ## MyOpenMath (core OHM)
 
 MOM currently uses PHPUnit for testing. To run those tests:
@@ -146,6 +151,8 @@ Additional requirements:
 PHP 7.2 is required for tests and test coverage reports.
 
     $ composer install
+    $ composer migrate-ohm
+    $ composer seed-ohm
     $ composer test-ohm
 
 Tests will be available at
