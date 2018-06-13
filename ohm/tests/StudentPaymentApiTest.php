@@ -10,6 +10,9 @@ require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
 
 use PHPUnit\Framework\TestCase;
 
+use OHM\Mocks\PDOMock;
+use OHM\Mocks\PDOStatementMock;
+
 use OHM\Models\StudentPayApiResult;
 use OHM\Includes\StudentPaymentDb;
 use OHM\Includes\StudentPaymentApi;
