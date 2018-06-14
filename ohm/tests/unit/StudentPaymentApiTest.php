@@ -2,6 +2,8 @@
 
 namespace OHM\Tests;
 
+require_once(__DIR__ . '/../../../includes/sanitize.php');
+
 use PHPUnit\Framework\TestCase;
 
 use OHM\Mocks\PDOMock;
