@@ -52,7 +52,7 @@ $GLOBALS['student_pay_api']['access_code_max_length'] = 10;
 $GLOBALS['student_pay_api']['trial_min_reminder_time_secs'] = 60 * 60 * 24; // 24 hour
 $GLOBALS['student_pay_api']['direct_pay_component_url'] = getenv('DIRECT_PAY_COMPONENT_URL');
 $GLOBALS['student_pay_api']['stripe_api_key'] = getenv('STRIPE_API_KEY');
-$GLOBALS['student_pay_api']['debug'] = false;
+$GLOBALS['student_pay_api']['debug'] = true;
 
 //userid for instructor on student self-enroll courses
 $CFG['GEN']['selfenrolluser'] = 13;

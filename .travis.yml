@@ -7,7 +7,6 @@ before_script:
   - mysql -e 'CREATE DATABASE myopenmathdb;'
   - composer install
   - cp .env.example .env
-  - cp -f config/travis.php config/ohm.php
   - cp ohm/api/src/configs/settings-prod.php ohm/api/src/configs/settings.php
   - php -S 127.0.0.1:8080 -t . &
 script:
