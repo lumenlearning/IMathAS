@@ -13,9 +13,7 @@ return [
 		'api' => [
 			'defaultPageSize' => 10,
 			'maxPageSize' => 100,
-			'secureUrls' => [
-				'/'
-			],
+			'secureUrls' => ['/'],
 			'nonSecureUrls' => [],
 		],
 
@@ -26,7 +24,6 @@ return [
 			'secret' => getenv('OHM_API_JWT_SECRET') ?
 				getenv('OHM_API_JWT_SECRET') : 'development_jwt_secret',
 			'issuer' => 'ohm-api',
-			'audience' => 'ohm',
 			'signingAlgorithm' => 'HS512',
 			'allowedAlgorithms' => ["HS512"],
 			'securedPaths' => ["/v1/"],
@@ -40,7 +37,7 @@ return [
 
 		// Monolog settings
 		'logger' => [
-			'name' => 'slim-app',
+			'name' => 'ohm-api',
 			'path' => $LOG_PATH . '/ohm-api.log',
 			'level' => \Monolog\Logger::DEBUG,
 			'maxFiles' => 10,
@@ -48,7 +45,7 @@ return [
 			'filePermission' => 0600,
 		],
 		'securityLogger' => [
-			'name' => 'slim-app',
+			'name' => 'ohm-api',
 			'path' => $LOG_PATH . '/ohm-api-security.log',
 			'level' => \Monolog\Logger::DEBUG,
 			'maxFiles' => 10,
@@ -56,7 +53,7 @@ return [
 			'filePermission' => 0600,
 		],
 		'errorLogger' => [
-			'name' => 'slim-app',
+			'name' => 'ohm-api',
 			'path' => $LOG_PATH . '/ohm-api-errors.log',
 			'level' => \Monolog\Logger::DEBUG,
 			'maxFiles' => 10,
