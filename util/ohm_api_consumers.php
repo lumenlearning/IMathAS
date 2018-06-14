@@ -153,6 +153,11 @@ function generate_api_token()
 	?>
     <h1>Generate API token for: <?php echo $name; ?></h1>
 
+    <p>
+        This token may be provided by an API consumer in an HTTP
+        <code>Authentication</code> header when using the OHM API.
+    </p>
+
     <textarea cols="100" rows="10"><?php echo $jwt; ?></textarea>
 
     <p>
