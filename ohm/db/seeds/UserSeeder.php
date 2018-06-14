@@ -32,6 +32,8 @@ class UserSeeder extends AbstractSeed
 			'LastName' => 'Snape',
 			'email' => 'ssnape@example.com',
 			'groupid' => $groupId,
+			'jsondata' => '',
+			'hideonpostswidget' => '',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -42,6 +44,8 @@ class UserSeeder extends AbstractSeed
 			'LastName' => 'Malfoy',
 			'email' => 'dmalfoy@example.com',
 			'groupid' => $groupId,
+			'jsondata' => '',
+			'hideonpostswidget' => '',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -52,6 +56,8 @@ class UserSeeder extends AbstractSeed
 			'LastName' => 'Filch',
 			'email' => 'afilch@example.com',
 			'groupid' => $groupId,
+			'jsondata' => '',
+			'hideonpostswidget' => '',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
@@ -66,6 +72,8 @@ class UserSeeder extends AbstractSeed
 				'LastName' => $faker->lastName,
 				'email' => $faker->email,
 				'groupid' => $groupId,
+				'jsondata' => '',
+				'hideonpostswidget' => '',
 				'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 			];
 		}
@@ -81,6 +89,8 @@ class UserSeeder extends AbstractSeed
 				'LastName' => $faker->lastName,
 				'email' => $faker->email,
 				'groupid' => 0, // "default" group
+				'jsondata' => '',
+				'hideonpostswidget' => '',
 				'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 			];
 		}

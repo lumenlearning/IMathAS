@@ -32,6 +32,8 @@ class LtiCredentialSeeder extends AbstractSeed
 			'LastName' => 'LTIcredential',
 			'email' => 'one@example.com',
 			'groupid' => $groupId,
+			'jsondata' => '',
+			'hideonpostswidget' => '',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -42,6 +44,8 @@ class LtiCredentialSeeder extends AbstractSeed
 			'LastName' => 'LTIcredential',
 			'email' => 'two@example.com',
 			'groupid' => $groupId,
+			'jsondata' => '',
+			'hideonpostswidget' => '',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -52,6 +56,8 @@ class LtiCredentialSeeder extends AbstractSeed
 			'LastName' => 'LTIcredential',
 			'email' => 'three@example.com',
 			'groupid' => $groupId,
+			'jsondata' => '',
+			'hideonpostswidget' => '',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
