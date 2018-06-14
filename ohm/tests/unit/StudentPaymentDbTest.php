@@ -1,12 +1,14 @@
 <?php
 
-namespace OHM;
-
-require_once(__DIR__ . '/../../includes/StudentPaymentDb.php');
-require_once(__DIR__ . "/../../../ohm/mocks/PDOMock.php");
-require_once(__DIR__ . "/../../../ohm/mocks/PDOStatementMock.php");
+namespace OHM\Tests;
 
 use PHPUnit\Framework\TestCase;
+
+use OHM\Mocks\PDOMock;
+use OHM\Mocks\PDOStatementMock;
+
+use OHM\Includes\StudentPaymentDb;
+use OHM\Exceptions\StudentPaymentException;
 
 
 /**

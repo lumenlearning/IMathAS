@@ -1,11 +1,10 @@
 <?php
 
-namespace OHM;
+namespace OHM\Includes;
 
-require_once(__DIR__ . "/StudentPaymentApi.php");
-require_once(__DIR__ . "/StudentPaymentDb.php");
-require_once(__DIR__ . "/../models/StudentPayStatus.php");
-require_once(__DIR__ . "/../models/StudentPayApiResult.php");
+use OHM\Models\StudentPayApiResult;
+use OHM\Models\StudentPayStatus;
+use OHM\Exceptions\StudentPaymentException;
 
 /**
  * Class StudentPayment - Determine if a student has a valid activation code for a course.

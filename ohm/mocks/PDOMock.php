@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM;
+namespace OHM\Mocks;
 
 class PDOMock extends \PDO
 {

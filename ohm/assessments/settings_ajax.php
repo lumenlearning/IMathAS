@@ -6,13 +6,14 @@
  * All responses are in JSON format.
  */
 
-namespace OHM;
+namespace OHM\Assessments;
 
 require_once(__DIR__ . '/../../init.php');
-require_once(__DIR__ . "/../includes/StudentPaymentDb.php");
-require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
-require_once(__DIR__ . "/../models/StudentPayApiResult.php");
-require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
+
+use OHM\Models\StudentPayApiResult;
+use OHM\Includes\StudentPaymentDb;
+use OHM\Includes\StudentPaymentApi;
+use OHM\Exceptions\StudentPaymentException;
 
 $validActions = array('setGroupPaymentType');
 

@@ -1,13 +1,10 @@
 <?php
 
-namespace OHM;
+namespace OHM\Includes;
 
-require_once(__DIR__ . "/../../includes/sanitize.php");
-require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
-require_once(__DIR__ . "/../models/StudentPayApiResult.php");
-require_once(__DIR__ . "/../models/LumenistrationInstitution.php");
-require_once(__DIR__ . "/StudentPaymentDb.php");
-require_once(__DIR__ . "/CurlRequest.php");
+use OHM\Models\LumenistrationInstitution;
+use OHM\Models\StudentPayApiResult;
+use OHM\Exceptions\StudentPaymentException;
 
 /**
  * Class StudentPaymentApi - Handle all direct interaction with the student payment API.

@@ -6,12 +6,12 @@
  * All responses are in JSON format.
  */
 
-namespace OHM;
+namespace OHM\Assessments;
 
 require_once(__DIR__ . '/../../init.php');
-require_once(__DIR__ . "/../includes/StudentPayment.php");
-require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
-require_once(__DIR__ . "/../exceptions/StudentPaymentException.php");
+
+use OHM\Includes\StudentPaymentApi;
+use OHM\Exceptions\StudentPaymentException;
 
 $validActions = array('activate_code', 'payment_proxy');
 

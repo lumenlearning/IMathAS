@@ -15,8 +15,8 @@
 
 require_once(__DIR__ . "/../../init.php");
 
-require_once(__DIR__ . "/../includes/StudentPayment.php");
-require_once(__DIR__ . "/../includes/StudentPaymentApi.php");
+use OHM\Includes\StudentPayment;
+use OHM\Exceptions\StudentPaymentException;
 
 
 $action = Sanitize::simpleString($_REQUEST['action']);
@@ -36,7 +36,7 @@ $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 $assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
 		$assessmentId, $courseId); // used by fragments/api_error.php
 
-$studentPayment = new OHM\StudentPayment($groupId, $courseId, $GLOBALS['userid']);
+$studentPayment = new StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 
 
 /*
@@ -46,7 +46,7 @@ if ("begin_trial" == $action) {
 	$studentPayStatus = null;
 	try {
 		$studentPayStatus = $studentPayment->beginTrial();
-	} catch (\OHM\StudentPaymentException $e) {
+	} catch (StudentPaymentException $e) {
 		// All unknown / uncaught errors should allow the user through to assessments.
 		error_log(sprintf("Exception while attempting to begin student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));
@@ -74,7 +74,7 @@ if ("extend_trial" == $action) {
 	$studentPayStatus = null;
 	try {
 		$studentPayStatus = $studentPayment->extendTrial();
-	} catch (\OHM\StudentPaymentException $e) {
+	} catch (StudentPaymentException $e) {
 		// All unknown / uncaught errors should allow the user through to assessments.
 		error_log(sprintf("Exception while attempting to extend student assessments trial. %s -- %s",
 			$e->getMessage(), $e->getTraceAsString()));

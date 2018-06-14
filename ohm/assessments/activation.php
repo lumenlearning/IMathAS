@@ -5,16 +5,16 @@
  * $studentPayStatus is created in showtest.php and must contain valid data.
  */
 
-require_once(__DIR__ . "/../models/StudentPayStatus.php");
-require_once(__DIR__ . "/../includes/StudentPayment.php");
+use OHM\Includes\StudentPayment;
+use OHM\Models\StudentPayApiResult;
 
 // Constants representing student access code state.
-$canEnterCode = array(\OHM\StudentPayApiResult::NO_TRIAL_NO_ACTIVATION, \OHM\StudentPayApiResult::IN_TRIAL,
-	\OHM\StudentPayApiResult::CAN_EXTEND, \OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
-$notPaid = array(\OHM\StudentPayApiResult::NO_TRIAL_NO_ACTIVATION);
-$inTrial = array(\OHM\StudentPayApiResult::IN_TRIAL);
-$extendTrial = array(\OHM\StudentPayApiResult::CAN_EXTEND);
-$trialsExpired = array(\OHM\StudentPayApiResult::ALL_TRIALS_EXPIRED);
+$canEnterCode = array(StudentPayApiResult::NO_TRIAL_NO_ACTIVATION, StudentPayApiResult::IN_TRIAL,
+	StudentPayApiResult::CAN_EXTEND, StudentPayApiResult::ALL_TRIALS_EXPIRED);
+$notPaid = array(StudentPayApiResult::NO_TRIAL_NO_ACTIVATION);
+$inTrial = array(StudentPayApiResult::IN_TRIAL);
+$extendTrial = array(StudentPayApiResult::CAN_EXTEND);
+$trialsExpired = array(StudentPayApiResult::ALL_TRIALS_EXPIRED);
 
 
 // Used inside page fragments.
@@ -23,7 +23,7 @@ if ('' == trim($userDisplayName)) {
 	$userDisplayName = $GLOBALS['username'];
 }
 
-$studentPayment = new \OHM\StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
+$studentPayment = new StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
 
 $paymentStatus = $GLOBALS['studentPayStatus']->getStudentPaymentRawStatus();
 $pageDisplayed = false;

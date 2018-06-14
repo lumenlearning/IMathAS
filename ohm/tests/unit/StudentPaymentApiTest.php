@@ -1,14 +1,17 @@
 <?php
 
-namespace OHM;
-
-require_once(__DIR__ . '/../../includes/StudentPaymentApi.php');
-require_once(__DIR__ . '/../../models/StudentPayStatus.php');
-require_once(__DIR__ . '/../../models/StudentPayApiResult.php');
-require_once(__DIR__ . "/../../../ohm/mocks/PDOMock.php");
-require_once(__DIR__ . "/../../../ohm/mocks/PDOStatementMock.php");
+namespace OHM\Tests;
 
 use PHPUnit\Framework\TestCase;
+
+use OHM\Mocks\PDOMock;
+use OHM\Mocks\PDOStatementMock;
+
+use OHM\Models\StudentPayApiResult;
+use OHM\Includes\StudentPaymentDb;
+use OHM\Includes\HttpRequest;
+use OHM\Includes\StudentPaymentApi;
+use OHM\Exceptions\StudentPaymentException;
 
 $GLOBALS['student_pay_api']['enabled'] = true;
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/student_auth/v1';
