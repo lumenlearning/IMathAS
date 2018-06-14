@@ -2,11 +2,11 @@
 
 namespace OHM;
 
-require_once(__DIR__ . '/../includes/StudentPaymentApi.php');
-require_once(__DIR__ . '/../models/StudentPayStatus.php');
-require_once(__DIR__ . '/../models/StudentPayApiResult.php');
-require_once(__DIR__ . "/../../ohm/mocks/PDOMock.php");
-require_once(__DIR__ . "/../../ohm/mocks/PDOStatementMock.php");
+require_once(__DIR__ . '/../../includes/StudentPaymentApi.php');
+require_once(__DIR__ . '/../../models/StudentPayStatus.php');
+require_once(__DIR__ . '/../../models/StudentPayApiResult.php');
+require_once(__DIR__ . "/../../../ohm/mocks/PDOMock.php");
+require_once(__DIR__ . "/../../../ohm/mocks/PDOStatementMock.php");
 
 use PHPUnit\Framework\TestCase;
 

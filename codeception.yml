@@ -1,0 +1,38 @@
+paths:
+    tests: ohm/tests
+    output: ohm/tests/_output
+    data: ohm/tests/_data
+    support: ohm/tests/_support
+    envs: ohm/tests/_envs
+actor_suffix: Tester
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
+coverage:
+    enabled: true
+    c3_url: 'http://localhost:8080/index.php'
+    whitelist:
+        include:
+            - admin/*
+            - assessment/*
+            - config/*
+            - course/*
+            - csrfp/*
+            - diag/*
+            - docs/*
+            - filter/*
+            - i18n/*
+            - includes/*
+            - info/*
+            - lti/*
+            - lumen/*
+            - msgs/*
+            - ohm/*
+            - util/*
+            - wamap/*
+            - wikis/*
+        exclude:
+            - ohm/tests/*
+        ssl:
+            verify_peer: false
+

@@ -1,8 +1,30 @@
 language: php
 php:
-  - '7.0'
-  - '5.6'
+  - '7.2'
+services:
+  - mysql
 before_script:
+  - mysql -e 'CREATE DATABASE myopenmathdb;'
   - composer install
+  - cp .env.example .env
+  - cp ohm/api/src/configs/settings-prod.php ohm/api/src/configs/settings.php
+  - php -S 127.0.0.1:8080 -t . &
 script:
-  - composer run-script test
+  - sleep 3
+  - php ./setupdb.php
+  - composer migrate-ohm
+  - composer seed-ohm
+  - composer run-script test-mom
+  #- composer run-script test-ohm
+  - ./vendor/bin/codecept run unit
+env:
+  global:
+    - CLI=true
+    - CONFIG_ENV=travis
+    - DB_SERVER=127.0.0.1
+    - DB_NAME=myopenmathdb
+    - DB_USERNAME=root
+    - DB_PASSWORD=""
+    - S3_MAIN_BUCKET_NAME=none
+    - OHM_API_JWT_SECRET=development_jwt_secret
+

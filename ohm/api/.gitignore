@@ -1,0 +1,6 @@
+# Slim runtime
+/vendor/
+/logs/*
+!/logs/README.md
+/src/configs/settings.php
+
