@@ -10,6 +10,15 @@ use OHM\Models\Group;
 
 class GroupController extends BaseApiController
 {
+	private $logger;
+
+	public function __construct(Container $container)
+	{
+		parent::__construct($container);
+
+		$this->logger = $container->get('logger');
+	}
+
 	/**
 	 * Get all groups.
 	 *
@@ -70,6 +79,12 @@ class GroupController extends BaseApiController
 
 		$savedGroup = Group::create($newGroupData);
 
+		$this->logger->info('Created new group.', [
+			'groupId' => $savedGroup->id,
+			'groupName' => $savedGroup->name,
+			'lumenGuid' => $savedGroup->lumen_guid
+		]);
+
 		return $response->withStatus(201)->withJson($savedGroup);
 	}
 
@@ -89,6 +104,12 @@ class GroupController extends BaseApiController
 		if (is_null($group)) {
 			return $response->withStatus(204);
 		}
+
+		$this->logger->info('Deleting a group.', [
+			'groupId' => $group->id,
+			'groupName' => $group->name,
+			'lumenGuid' => $group->lumen_guid
+		]);
 
 		$group->delete();
 

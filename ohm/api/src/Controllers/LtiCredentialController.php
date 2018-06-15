@@ -16,6 +16,15 @@ use OHM\Models\LtiCredential;
  */
 class LtiCredentialController extends BaseApiController
 {
+	private $logger;
+
+	public function __construct(Container $container)
+	{
+		parent::__construct($container);
+
+		$this->logger = $container->get('logger');
+	}
+
 	/**
 	 * Get all LTI credentials.
 	 *
@@ -86,6 +95,11 @@ class LtiCredentialController extends BaseApiController
 				->withJson(['errors' => ['The specified LTI key already exists.']]);
 		}
 
+		$logCredData = $newCredData;
+		unset($logCredData['password']);
+		$this->logger->info('Creating LTI credential for group ID: ' . $groupId,
+			$logCredData);
+
 		$savedCred = LtiCredential::create($newCredData);
 
 		$publicCred = $this->mapOhmSchema2Public($savedCred);
@@ -106,6 +120,12 @@ class LtiCredentialController extends BaseApiController
 		if (is_null($cred)) {
 			return $response->withStatus(204);
 		}
+
+		$this->logger->info('Deleting LTI credential.', [
+			'key' => $cred->SID,
+			'domain' => $cred->email,
+			'group_id' => $cred->groupid
+		]);
 
 		$cred->delete();
 
