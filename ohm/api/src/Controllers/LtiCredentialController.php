@@ -2,6 +2,7 @@
 
 namespace OHM\Api\Controllers;
 
+use OHM\Models\Group;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -26,10 +27,11 @@ class LtiCredentialController extends BaseApiController
 	public function findAll($request, $response, $args)
 	{
 		list($pageNum, $pageSize) = $this->getPaginationArgs($request);
-
+		$groupId = $this->getGroupId($args['groupId']);
 		$domainFilter = $request->getParam('domain_filter');
 
-		$creds = LtiCredential::take($pageSize)->skip($pageSize * $pageNum);
+		$creds = LtiCredential::take($pageSize)->where('groupid', $groupId)
+			->skip($pageSize * $pageNum);
 		if (!empty($domainFilter)) $creds = $creds->where('email', 'like', "%{$domainFilter}%");
 		$creds = $creds->get();
 
@@ -67,8 +69,11 @@ class LtiCredentialController extends BaseApiController
 	 */
 	public function create($request, $response, $args)
 	{
+		$groupId = $this->getGroupId($args['groupId']);
 		$rawCredData = $request->getParsedBody();
+
 		$newCredData = $this->mapPublic2ohmSchema($rawCredData, true);
+		$newCredData['groupid'] = $groupId;
 
 		if ($this->containsNulls($newCredData)) {
 			return $response->withStatus(400)
@@ -225,5 +230,23 @@ class LtiCredentialController extends BaseApiController
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get a Group by its ID(int) or Lumen GUID.
+	 *
+	 * If the specified ID is an integer, it will be returned as-is.
+	 * If the specified ID is a Lumen GUID, the group's ID is returned.
+	 *
+	 * @param int|string $id The group ID or Lumen GUID.
+	 * @return int|null The Group for the specified Lumen GUID.
+	 */
+	private function getGroupId($id)
+	{
+		if ((string)(int)$id == $id) return $id;
+
+		$group = Group::where('lumen_guid', $id)->first();
+
+		return $group ? $group->id : null;
 	}
 }
