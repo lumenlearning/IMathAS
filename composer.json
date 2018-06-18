@@ -1,8 +1,51 @@
 {
+    "require": {
+        "php": ">=5.5.0",
+        "slim/slim": "3.9.2",
+        "slim/php-view": "2.2.0",
+        "monolog/monolog": "1.23.0",
+        "illuminate/database": "5.4.36",
+        "ramsey/uuid": "3.7.3",
+        "tuupola/slim-jwt-auth": "^2.4.0"
+    },
     "require-dev": {
-        "phpunit/phpunit": "^5.7"
+        "robmorgan/phinx": "^0.9.2",
+        "phpunit/phpunit": "^6.5",
+        "codeception/codeception": "^2.4",
+        "codeception/c3": "^2.4",
+        "flow/jsonpath": "0.4.0",
+        "fzaninotto/faker": "^1.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "OHM\\": "ohm/",
+            "OHM\\Models\\": "ohm/models/",
+            "OHM\\Api\\": "ohm/api/src/"
+        }
+    },
+    "autoload-dev": {
+        "phpunit/phpunit": "^5.7",
+        "psr-4": {
+            "Tests\\": "tests/",
+            "OHM\\Tests\\Api\\": "ohm/tests/api/",
+            "OHM\\Tests\\Functional\\": "ohm/tests/functional/",
+            "OHM\\Tests\\Unit\\": "ohm/tests/unit/"
+        }
+    },
+    "config": {
+        "process-timeout" : 0
     },
     "scripts": {
-        "test": "phpunit"
+        "start": "php -S localhost:8080 -t .",
+        "test": [
+            "phpunit",
+            "codecept run"
+        ],
+        "test-mom": "phpunit",
+        "test-ohm": "codecept run",
+        "test-ohmv": "codecept run --steps --coverage --coverage-html",
+        "coverage-ohm": "codecept run --coverage --coverage-html",
+        "migrate-ohm": "phinx migrate",
+        "seed-ohm": "phinx seed:run"
     }
 }

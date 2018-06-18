@@ -270,6 +270,38 @@ final class SanitizeTest extends TestCase
 	}
 
 	/*
+	 * simpleString
+	 */
+
+	public function testSimpleString()
+	{
+		$result = Sanitize::simpleString('aA0-9');
+		$this->assertEquals('aA0-9', $result);
+	}
+
+	public function testSimpleString_WithBadCharactrers()
+	{
+		$result = Sanitize::simpleString('aA@$%^ @!<#$@^}>/0-9');
+		$this->assertEquals('aA0-9', $result);
+	}
+
+	/*
+	 * simpleStringWithSpaces
+	 */
+
+	public function simpleStringWithSpaces()
+	{
+		$result = Sanitize::simpleString('aA 0-9');
+		$this->assertEquals('aA 0-9', $result);
+	}
+
+	public function simpleStringWithSpaces_WithBadCharactrers()
+	{
+		$result = Sanitize::simpleString('aA @$%^@!<#$@^}>/0-9');
+		$this->assertEquals('aA 0-9', $result);
+	}
+
+	/*
 	 * domainNameWithoutPort
 	 */
 

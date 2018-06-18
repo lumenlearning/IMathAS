@@ -2,9 +2,9 @@
 
 namespace OHM;
 
-require_once(__DIR__ . '/../models/StudentPayStatus.php');
-require_once(__DIR__ . '/../models/StudentPayApiResult.php');
-require_once(__DIR__ . '/../includes/StudentPayment.php');
+require_once(__DIR__ . '/../../models/StudentPayStatus.php');
+require_once(__DIR__ . '/../../models/StudentPayApiResult.php');
+require_once(__DIR__ . '/../../includes/StudentPayment.php');
 
 use PHPUnit\Framework\TestCase;
 
