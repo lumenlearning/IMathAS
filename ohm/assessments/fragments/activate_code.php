@@ -3,7 +3,7 @@
  * This file is included from fragments/activation.php.
  */
 
-$studentPaymentDb = new \OHM\StudentPaymentDb($courseOwnerGroupId, $courseId, $userid);
+$studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, $userid);
 $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 
 ?>
