@@ -13,3 +13,7 @@ config/local.php
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
+/vendor
+/tests/_support/_generated
+/tests/_output/
+/c3.php
