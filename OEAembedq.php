@@ -229,6 +229,10 @@ if (isset($QS['showscored'])) {
 		$params["auth"] = $_POST['auth'];
 	}
 
+  if($scoredonsubmit){
+    $params["showscored"] = $params['redisplay'];
+  }
+
 	$signed = JWT::encode($params, $key);
 
 	echo '<script type="text/javascript">
