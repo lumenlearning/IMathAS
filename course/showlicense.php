@@ -40,13 +40,12 @@ function getquestionlicense($row) {
 	return $license;
 }
 
-$ids = explode('-',$_GET['id']);
-$idlist = implode(',',array_map('intval', $ids));
+$ids = array_map('Sanitize::onlyInt', explode('-',$_GET['id']));
 
-//DB $query = "SELECT id,uniqueid,author,ancestorauthors,license,otherattribution FROM imas_questionset WHERE id IN ($idlist)";
-//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
-//DB while ($row = mysql_fetch_assoc($result)) {
-$stm = $DBH->query("SELECT id,uniqueid,author,ancestorauthors,license,otherattribution FROM imas_questionset WHERE id IN ($idlist)");
+$idlist_query_placeholders = Sanitize::generateQueryPlaceholders($ids);
+
+$stm = $DBH->prepare("SELECT id,uniqueid,author,ancestorauthors,license,otherattribution FROM imas_questionset WHERE id IN ($idlist_query_placeholders)");
+$stm->execute($ids);
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	echo "<p>Question ID ".Sanitize::onlyInt($row['id']).' (Universal ID '.Sanitize::onlyInt($row['uniqueid']).')</p>';
 	echo '<p style="margin-left:20px">';

@@ -37,6 +37,7 @@ require_once("includes/sanitize.php");
 		$_POST['email'] = Sanitize::emailAddress(trim($_POST['email']));
 		$_POST['firstname'] = Sanitize::stripHtmlTags(trim($_POST['firstname']));
 		$_POST['lastname'] = Sanitize::stripHtmlTags(trim($_POST['lastname']));
+		$_POST['courseid'] = Sanitize::courseId(trim($_POST['courseid']));
 
 		$error .= checkNewUserValidation();
 
@@ -76,7 +77,7 @@ require_once("includes/sanitize.php");
 			$homelayout = '|0,1,2||0,1';
 		}
 		if (isset($_POST['courseselect']) && $_POST['courseselect']>0) {
-			$_POST['courseid'] = $_POST['courseselect'];
+			$_POST['courseid'] = Sanitize::courseId(trim($_POST['courseselect']));
 			$_POST['ekey'] = '';
 		}
 		if (!isset($_GET['confirmed'])) {
@@ -237,7 +238,7 @@ require_once("includes/sanitize.php");
 
 		$query = "UPDATE imas_users SET rights=10 WHERE id=:id AND rights=0";
 		$stm = $DBH->prepare($query);
-		$stm->execute(array(':id'=>$_GET['id']));
+		$stm->execute(array(':id'=>Sanitize::onlyInt($_GET['id'])));
 
 		if ($stm->rowCount()>0) {
 			require("header.php");
@@ -306,7 +307,7 @@ require_once("includes/sanitize.php");
 				echo "Invalid Username.  <a href=\"index.php$gb\">Try again</a>";
 				exit;
 			}
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" . Sanitize::randomQueryStringParam());
 		} else if (isset($_POST['pw1'])) {
 			if ($_POST['pw1']!=$_POST['pw2']) {
 				echo 'Passwords do not match.  <a href="forms.php?action=resetpw&code='.Sanitize::encodeUrlParam($_POST['code'])
@@ -346,7 +347,7 @@ require_once("includes/sanitize.php");
 			exit;
 		} else if (isset($_GET['code'])) {
 			//moved to forms.php - keep redirect for to keep old links working for now.
-			header('Location: ' . $GLOBALS['basesiteurl'] . '/action=resetpw&id='.Sanitize::onlyInt($_GET['id']).'&code='.Sanitize::encodeUrlParam($code));
+			header('Location: ' . $GLOBALS['basesiteurl'] . '/action=resetpw&id='.Sanitize::onlyInt($_GET['id']).'&code='.Sanitize::encodeUrlParam($code) . "&r=" . Sanitize::randomQueryStringParam());
 		}
 	} else if ($_GET['action']=="lookupusername") {
 		require_once("init_without_validate.php");
@@ -423,7 +424,7 @@ require_once("includes/sanitize.php");
 		$stm->execute(array($sessionid));
 		$_SESSION = array();
 		if (isset($_COOKIE[session_name()])) {
-			setcookie(session_name(), '', time()-42000, '/');
+			setcookie(session_name(), '', time()-42000, '/', null, false, true);
 		}
 		session_destroy();
 	} else if ($_GET['action']=="chgpwd" || $_GET['action']=="forcechgpwd") {
@@ -591,7 +592,7 @@ require_once("includes/sanitize.php");
 		}
 	} else if ($_POST['action']=="unenroll") {
 		if ($myrights < 6) {
-			echo "<html><body>\nError: Guests can't unenroll from courses</body></html";
+			echo "<html><body>\nError: Guests can't unenroll from courses</body></html>";
 			exit;
 		}
 		if (!isset($_GET['cid'])) {
@@ -811,7 +812,7 @@ require_once("includes/sanitize.php");
 	if ($isgb) {
 		echo '<html><body>Changes Recorded.  <input type="button" onclick="parent.GB_hide()" value="Done" /></body></html>';
 	} else {
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" . Sanitize::randomQueryStringParam());
 	}
 
 
