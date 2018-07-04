@@ -45,9 +45,6 @@ if (isset($CFG['GEN']['footerscriptinclude'])) {
 </body>
 </html>
 <?php
-//DB if (isset($link)) {
-//DB 	mysql_close($link);
-//DB }
 if (isset($DBH)) {
 	$DBH = null;
 }
