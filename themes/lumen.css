@@ -25,7 +25,8 @@ h4, h5, h6 {
 }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-weight: 400;
+  font-weight: bold;
+  padding: 0;
 }
 .h1 {
   font-size: 1.5em;
@@ -557,12 +558,10 @@ ul#navlist li a {
 }
 .buttonactive {
 	background-color: #094685 !important;
-	padding: 8px !important;
 	text-decoration: none !important;
 }
 .buttoninactive {
 	background-color: #115EAF !important;
-	padding: 8px !important;
 	text-decoration: none !important;
 }
 #myname {

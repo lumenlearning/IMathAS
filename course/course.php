@@ -610,7 +610,7 @@ if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migra
 
    makeTopMenu();
 
-   echo "<div id=\"headercourse\" class=\"pagetitle\"><h2>".Sanitize::encodeStringForDisplay($curname)."</h2></div>\n";
+   echo "<div id=\"headercourse\" class=\"pagetitle\"><h1>".Sanitize::encodeStringForDisplay($curname)."</h1></div>\n";
    
    if (count($items)>0) {
 	   
