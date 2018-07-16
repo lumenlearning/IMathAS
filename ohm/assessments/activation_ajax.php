@@ -10,6 +10,7 @@ namespace OHM\Assessments;
 
 require_once(__DIR__ . '/../../init.php');
 
+use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 
