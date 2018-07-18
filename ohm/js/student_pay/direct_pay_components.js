@@ -1,120 +1,6 @@
 var directPayComponents = (function (React) {
 'use strict';
 
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-var DirectPayButton = function (_React$Component) {
-  inherits(DirectPayButton, _React$Component);
-
-  function DirectPayButton(props) {
-    classCallCheck(this, DirectPayButton);
-
-    var _this = possibleConstructorReturn(this, (DirectPayButton.__proto__ || Object.getPrototypeOf(DirectPayButton)).call(this, props));
-
-    _this._openCheckout = _this._openCheckout.bind(_this);
-    return _this;
-  }
-
-  createClass(DirectPayButton, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var scriptEl = document.createElement('script');
-      scriptEl.setAttribute('src', 'https://checkout.stripe.com/checkout.js');
-      scriptEl.setAttribute('class', 'stripe-button');
-      scriptEl.setAttribute('data-key', this.props.stripeKey);
-      scriptEl.setAttribute('data-amount', this.props.chargeAmount);
-      scriptEl.setAttribute('data-name', 'Lumen Learning');
-      scriptEl.setAttribute('data-description', this.props.chargeDescription);
-      scriptEl.setAttribute('data-image', this.props.stripeModalLogoUrl);
-      scriptEl.setAttribute('data-locale', 'auto');
-      scriptEl.setAttribute('data-zip-code', 'true');
-      scriptEl.setAttribute('data-allow-remember-me', 'false');
-      scriptEl.setAttribute('data-label', 'Pay Now');
-      document.getElementById('payment-button-form').appendChild(scriptEl);
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return React.createElement(
-        'div',
-        { id: 'payment-button-container', className: 'form-control', style: { paddingBottom: '13px', paddingTop: '13px' } },
-        React.createElement('form', { id: 'payment-button-form', action: this.props.endpointUrl, onClick: this._openCheckout, method: 'POST' })
-      );
-    }
-  }, {
-    key: '_openCheckout',
-    value: function _openCheckout() {
-      return {
-        image: this.props.image,
-        name: this.props.institutionName,
-        description: this.props.chargeDescription,
-        amount: this.props.chargeAmount
-      };
-    }
-  }]);
-  return DirectPayButton;
-}(React.Component);
-
 var styles = {
   parentWrapper: {
     display: 'block',
@@ -251,8 +137,427 @@ var styles = {
     textAlign: 'left',
     color: '#1e74d1',
     textDecoration: 'underline'
+  },
+  payNowButton: {
+    fontSize: '14px',
+    width: '90px',
+    height: '36px',
+    color: '#fff',
+    backgroundColor: '#1e74d1',
+    border: '1px solid #1064c0',
+    borderRadius: '3px',
+    margin: '13px 0',
+    cursor: 'pointer',
+    padding: 0
   }
 };
+
+var styles$1 = {
+  taxPageWrapper: {
+    maxWidth: '278px',
+    marginLeft: '40px'
+  },
+  heading: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    lineHeight: 1.23,
+    color: '#212b36',
+    marginBottom: '40px'
+  },
+  subHeading: {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: '#212b36',
+    marginBottom: '14px'
+  },
+  zipcodeLabel: {
+    display: 'block',
+    marginBottom: '6px',
+    fontSize: '14px'
+  },
+  zipcode: {
+    display: 'block',
+    width: '262px',
+    height: '36px',
+    borderRadius: '3px',
+    backgroundColor: '#fff',
+    border: 'solid 1px #c4cdd5',
+    fontSize: '16px',
+    padding: '0 6px',
+    marginBottom: '40px'
+  },
+  table: {
+    maxWidth: '278px',
+    marginBottom: '47px'
+  },
+  tableHead: {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    borderBottom: 'solid 1px #ebecf0',
+    paddingBottom: '10px',
+    marginBottom: '10px'
+  },
+  columnOne: {
+    display: 'table',
+    fontSize: '14px',
+    width: '278px',
+    marginBottom: '12px'
+  },
+  assessmentActivation: {
+    display: 'table-cell',
+    textAlign: 'left'
+  },
+  preTaxValue: {
+    display: 'table-cell',
+    textAlign: 'right'
+  },
+  columnTwo: {
+    display: 'table',
+    fontSize: '14px',
+    width: '278px',
+    borderBottom: 'solid 1px #ebecf0',
+    paddingBottom: '10px',
+    marginBottom: '10px'
+  },
+  taxes: {
+    display: 'table-cell',
+    textAlign: 'left'
+  },
+  taxValueToCollect: {
+    display: 'table-cell',
+    textAlign: 'right'
+  },
+  columnThree: {
+    display: 'table',
+    fontSize: '14px',
+    width: '278px'
+  },
+  total: {
+    display: 'table-cell',
+    textAlign: 'left'
+  },
+  totalValueToCollect: {
+    display: 'table-cell',
+    textAlign: 'right'
+  },
+  payNow: {
+    fontSize: '14px',
+    float: 'right',
+    color: '#fff',
+    width: '90px',
+    height: '36px',
+    borderRadius: '3px',
+    backgroundColor: '#8eb9e7',
+    border: 'solid 1px #7ba6d6',
+    cursor: 'pointer'
+  }
+};
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+};
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+var DirectPayButton = function (_React$Component) {
+  inherits(DirectPayButton, _React$Component);
+
+  function DirectPayButton(props) {
+    classCallCheck(this, DirectPayButton);
+
+    var _this = possibleConstructorReturn(this, (DirectPayButton.__proto__ || Object.getPrototypeOf(DirectPayButton)).call(this, props));
+
+    _this._openCheckout = _this._openCheckout.bind(_this);
+    return _this;
+  }
+
+  createClass(DirectPayButton, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var scriptEl = document.createElement('script');
+      scriptEl.setAttribute('src', 'https://checkout.stripe.com/checkout.js');
+      scriptEl.setAttribute('class', 'stripe-button');
+      scriptEl.setAttribute('id', 'strip-button');
+      scriptEl.setAttribute('data-key', this.props.stripeKey);
+      scriptEl.setAttribute('data-amount', this.props.chargeAmount);
+      scriptEl.setAttribute('data-name', 'Lumen Learning');
+      scriptEl.setAttribute('data-description', this.props.chargeDescription);
+      scriptEl.setAttribute('data-image', this.props.stripeModalLogoUrl);
+      scriptEl.setAttribute('data-locale', 'auto');
+      scriptEl.setAttribute('data-allow-remember-me', 'false');
+      scriptEl.setAttribute('data-label', 'Pay Now');
+      document.getElementById('payment-button-form').appendChild(scriptEl);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return React.createElement(
+        'div',
+        { id: 'payment-button-container', className: 'form-control', style: { paddingBottom: '13px', paddingTop: '13px' } },
+        React.createElement(
+          'form',
+          { id: 'payment-button-form', action: this.props.endpointUrl, onClick: this._openCheckout, method: 'POST' },
+          React.createElement('input', { type: 'hidden', id: 'zipcode', name: 'zipcode', value: this.props.zipcode })
+        )
+      );
+    }
+  }, {
+    key: '_openCheckout',
+    value: function _openCheckout() {
+      return {
+        image: this.props.image,
+        name: this.props.institutionName,
+        description: this.props.chargeDescription,
+        amount: this.props.chargeAmount
+      };
+    }
+  }]);
+  return DirectPayButton;
+}(React.Component);
+
+var CheckoutTaxPage = function (_React$Component) {
+  inherits(CheckoutTaxPage, _React$Component);
+
+  function CheckoutTaxPage(props) {
+    classCallCheck(this, CheckoutTaxPage);
+
+    var _this = possibleConstructorReturn(this, (CheckoutTaxPage.__proto__ || Object.getPrototypeOf(CheckoutTaxPage)).call(this, props));
+
+    _this.state = {
+      zipcode: '',
+      taxAmount: '-',
+      total: '-'
+    };
+
+    _this._setZipCode = _this._setZipCode.bind(_this);
+    _this._handleKeyUp = _this._handleKeyUp.bind(_this);
+    return _this;
+  }
+
+  createClass(CheckoutTaxPage, [{
+    key: 'render',
+    value: function render() {
+      return React.createElement(
+        'div',
+        { style: styles$1.taxPageWrapper },
+        React.createElement(
+          'h1',
+          { style: styles$1.heading },
+          'Checkout'
+        ),
+        React.createElement(
+          'h2',
+          { style: styles$1.subHeading },
+          'Calculate Taxes'
+        ),
+        React.createElement(
+          'label',
+          { htmlFor: 'zipcode', style: styles$1.zipcodeLabel },
+          'Enter your 5-digit zip code'
+        ),
+        React.createElement('input', {
+          type: 'text',
+          id: 'zipcode',
+          name: 'zipcode',
+          style: styles$1.zipcode,
+          onChange: this._setZipCode,
+          onKeyUp: this._handleKeyUp,
+          maxLength: '5'
+        }),
+        React.createElement(
+          'div',
+          { style: styles$1.table },
+          React.createElement(
+            'div',
+            { style: styles$1.tableHead },
+            'Cost Summary'
+          ),
+          React.createElement(
+            'div',
+            { style: styles$1.columnOne },
+            React.createElement(
+              'div',
+              { style: styles$1.assessmentActivation },
+              'Assesment Activation'
+            ),
+            React.createElement(
+              'div',
+              { style: styles$1.preTaxValue },
+              this._convertToDollars(this.props.amount_in_cents)
+            )
+          ),
+          React.createElement(
+            'div',
+            { style: styles$1.columnTwo },
+            React.createElement(
+              'div',
+              { style: styles$1.taxes },
+              'Taxes'
+            ),
+            React.createElement(
+              'div',
+              { style: styles$1.taxValueToCollect },
+              this._convertToDollars(this.state.taxAmount)
+            )
+          ),
+          React.createElement(
+            'div',
+            { style: styles$1.columnThree },
+            React.createElement(
+              'div',
+              { style: styles$1.total },
+              'Total'
+            ),
+            React.createElement(
+              'div',
+              { style: styles$1.totalValueToCollect },
+              this._convertToDollars(this.state.total)
+            )
+          )
+        ),
+        React.createElement(DirectPayButton, defineProperty({
+          paymentStatus: this.props.paymentStatus,
+          stripeKey: this.props.stripeKey,
+          chargeAmount: this.state.total,
+          institutionName: this.props.institutionName,
+          chargeDescription: this.props.chargeDescription,
+          stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+          endpointUrl: this.props.endpointUrl,
+          userEmail: this.props.userEmail,
+          zipcode: this.state.zipcode
+        }, 'chargeAmount', this.state.total))
+      );
+    }
+  }, {
+    key: '_setZipCode',
+    value: function _setZipCode(e) {
+      if (e.target.value.length === 5) {
+        this.setState({
+          zipcode: e.target.value
+        });
+      }
+    }
+  }, {
+    key: '_convertToDollars',
+    value: function _convertToDollars(amount_in_cents) {
+      if (amount_in_cents === '-') {
+        return '-';
+      } else {
+        return (amount_in_cents / 100).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 2
+        });
+      }
+    }
+  }, {
+    key: '_handleKeyUp',
+    value: function _handleKeyUp(e) {
+      if (e.target.value.length === 5) {
+        this._getTaxAmount();
+      }
+    }
+  }, {
+    key: '_getTaxAmount',
+    value: function _getTaxAmount() {
+      var _this2 = this;
+
+      var data = {
+        amount_in_cents: this.props.amount_in_cents,
+        zipcode: this.state.zipcode
+      };
+
+      fetch("https://admin.ludev.team/api/student_pay/tax", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }).then(function (res) {
+        var promise = res.json();
+
+        promise.then(function (value) {
+          _this2.setState({
+            taxAmount: value.tax_amount_in_cents,
+            total: value.tax_amount_in_cents + _this2.props.amount_in_cents
+          });
+        });
+      });
+    }
+  }]);
+  return CheckoutTaxPage;
+}(React.Component);
 
 var DirectPayCourseActivation = function (_React$Component) {
   inherits(DirectPayCourseActivation, _React$Component);
@@ -263,10 +568,12 @@ var DirectPayCourseActivation = function (_React$Component) {
     var _this = possibleConstructorReturn(this, (DirectPayCourseActivation.__proto__ || Object.getPrototypeOf(DirectPayCourseActivation)).call(this, props));
 
     _this.state = {
-      windowWidth: null
+      windowWidth: null,
+      showCheckout: false
     };
 
     _this._handleWindowResize = _this._handleWindowResize.bind(_this);
+    _this._toggleCheckout = _this._toggleCheckout.bind(_this);
     return _this;
   }
 
@@ -282,71 +589,89 @@ var DirectPayCourseActivation = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var termsOfServiceURL = "https://lumenlearning.com/policies/terms-of-service/";
-      var privacyPolicy = "https://lumenlearning.com/policies/privacy-policy/";
-      var priceInDollars = (this.props.chargeAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+      if (this.state.showCheckout) {
+        return React.createElement(CheckoutTaxPage, {
+          amount_in_cents: 2500,
+          zipcode: 37129,
+          stripeKey: this.props.stripeKey,
+          paymentStatus: this.props.paymentStatus,
+          institutionName: this.props.institutionName,
+          chargeDescription: this.props.chargeDescription,
+          stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+          endpointUrl: this.props.endpointUrl,
+          userEmail: this.props.userEmail
+        });
+      } else {
+        var termsOfServiceURL = "https://lumenlearning.com/policies/terms-of-service/";
+        var privacyPolicy = "https://lumenlearning.com/policies/privacy-policy/";
+        var priceInDollars = (this.props.chargeAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 
-      return React.createElement(
-        'div',
-        null,
-        React.createElement(
+        return React.createElement(
           'div',
-          { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
+          null,
           React.createElement(
             'div',
-            { className: 'left-column', style: _extends({}, styles.leftColumn, this._getTabletSpecs()) },
+            { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
             React.createElement(
-              'h1',
-              { className: 'activation-heading', style: styles.activationHeading },
-              this._headerLanguage()
-            ),
-            React.createElement(
-              'h3',
-              { className: 'course-title',
-                style: styles.courseTitle },
-              this.props.courseTitle + ': ' + priceInDollars
-            ),
-            window.innerWidth < 800 ? React.createElement(
-              'p',
-              { className: 'top-small-block-text', style: styles.topSmallBlockText },
-              'This low-cost activation is only required for assessments. Course content is always available.'
-            ) : "",
-            React.createElement(
-              'p',
-              { className: 'terms-and-privacy', style: styles.termsAndPrivacy },
-              'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning ',
+              'div',
+              { className: 'left-column', style: _extends({}, styles.leftColumn, this._getTabletSpecs()) },
               React.createElement(
-                'a',
-                { href: termsOfServiceURL, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
-                'Terms of Service'
+                'h1',
+                { className: 'activation-heading', style: styles.activationHeading },
+                this._headerLanguage()
               ),
-              ' and ',
               React.createElement(
-                'a',
-                { href: privacyPolicy, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
-                'Privacy Policy'
+                'h3',
+                { className: 'course-title',
+                  style: styles.courseTitle },
+                this.props.courseTitle + ': ' + priceInDollars
               ),
-              '.'
+              window.innerWidth < 800 ? React.createElement(
+                'p',
+                { className: 'top-small-block-text', style: styles.topSmallBlockText },
+                'This low-cost activation is only required for assessments. Course content is always available.'
+              ) : "",
+              React.createElement(
+                'p',
+                { className: 'terms-and-privacy', style: styles.termsAndPrivacy },
+                'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning ',
+                React.createElement(
+                  'a',
+                  { href: termsOfServiceURL, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
+                  'Terms of Service'
+                ),
+                ' and ',
+                React.createElement(
+                  'a',
+                  { href: privacyPolicy, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
+                  'Privacy Policy'
+                ),
+                '.'
+              ),
+              React.createElement(
+                'button',
+                { style: styles.payNowButton, onClick: this._toggleCheckout },
+                'Pay Now'
+              )
             ),
-            React.createElement(DirectPayButton, {
-              paymentStatus: this.props.paymentStatus,
-              stripeKey: this.props.stripeKey,
-              chargeAmount: this.props.chargeAmount,
-              institutionName: this.props.institutionName,
-              chargeDescription: this.props.chargeDescription,
-              stripeModalLogoUrl: this.props.stripeModalLogoUrl,
-              endpointUrl: this.props.endpointUrl,
-              userEmail: this.props.userEmail
-            })
-          ),
-          this._renderRightColumn()
-        )
-      );
+            this._renderRightColumn()
+          )
+        );
+      }
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
       window.removeEventListener("resize");
+    }
+  }, {
+    key: '_toggleCheckout',
+    value: function _toggleCheckout() {
+      var showCheckout = this.state.showCheckout;
+
+      this.setState({
+        showCheckout: !showCheckout
+      });
     }
   }, {
     key: '_renderRightColumn',
@@ -411,19 +736,37 @@ var DirectPayCourseActivation = function (_React$Component) {
   }, {
     key: '_renderStatusBasedText',
     value: function _renderStatusBasedText() {
-      var trialTimeRemaining = this._getTrialTimeRemainingWords();
       if (this.props.paymentStatus === 'in_trial') {
         return {
           smallHeader: "CONTINUE TRIAL",
-          smallText: "You can continue to access your assessments for " + trialTimeRemaining + " before activation is required.",
-          smallLink: "Continue Trial"
+          smallText: this._trialContinueLanguage(),
+          smallLink: this.props.trialType === "quiz_count" ? "Use Pass" : "Continue Trial"
         };
       } else if (this.props.paymentStatus === 'trial_not_started') {
         return {
           smallHeader: "NOT READY TO PAY?",
-          smallText: "You can access your assessments for two weeks before activation is required.",
-          smallLink: "Start Two-week Trial"
+          smallText: this._trialStartLanguage(),
+          smallLink: this.props.trialType === "quiz_count" ? "Use Pass" : "Start Trial"
         };
+      }
+    }
+  }, {
+    key: '_trialStartLanguage',
+    value: function _trialStartLanguage() {
+      if (this.props.trialType === "quiz_count") {
+        return "You can access up to two assessments before activation is required. 2 of 2 passes available.";
+      }
+      return "You can access your assessments for two weeks before activation is required.";
+    }
+  }, {
+    key: '_trialContinueLanguage',
+    value: function _trialContinueLanguage() {
+      if (this.props.trialType === "quiz_count") {
+        var trialPassesRemaining = this.props.trialPassesRemaining;
+        return "You can access up to two assessments before activation is required. " + trialPassesRemaining + " of 2 passes available.";
+      } else {
+        var trialTimeRemaining = this._getTrialTimeRemainingWords();
+        return "You can continue to access your assessments for " + trialTimeRemaining + " before activation is required.";
       }
     }
   }, {
@@ -501,7 +844,7 @@ var DirectPayCourseActivation = function (_React$Component) {
   return DirectPayCourseActivation;
 }(React.Component);
 
-var styles$1 = {
+var styles$2 = {
   confirmationPageWrapper: {
     fontFamily: 'Libre Franklin, sans serif',
     color: '#212b36'
@@ -580,43 +923,43 @@ var DirectPayConfirmation = function (_React$Component) {
     value: function render() {
       return React.createElement(
         'div',
-        { style: styles$1.confirmationPageWrapper },
+        { style: styles$2.confirmationPageWrapper },
         React.createElement(
           'div',
-          { className: 'confirmation-wrapper', style: styles$1.confirmationWrapper },
+          { className: 'confirmation-wrapper', style: styles$2.confirmationWrapper },
           React.createElement(
             'h1',
-            { className: 'heading', style: styles$1.confirmationHeading },
+            { className: 'heading', style: styles$2.confirmationHeading },
             'Thank You!'
           ),
           React.createElement(
             'h2',
-            { className: 'subheading', style: styles$1.confirmationSubheading },
+            { className: 'subheading', style: styles$2.confirmationSubheading },
             'You can now access all online assessments for ' + this.props.courseTitle + '.'
           ),
           React.createElement(
             'div',
-            { className: 'confirmation-text-wrapper', style: styles$1.confirmationTextWrapper },
+            { className: 'confirmation-text-wrapper', style: styles$2.confirmationTextWrapper },
             React.createElement(
               'p',
-              { style: styles$1.confirmationText },
+              { style: styles$2.confirmationText },
               'Confirmation #' + this.props.confirmationNum
             ),
             React.createElement(
               'p',
-              { style: styles$1.confirmationText },
+              { style: styles$2.confirmationText },
               'A receipt has been sent to your email address at ' + this.props.userEmail + '.'
             ),
             React.createElement('br', null),
             React.createElement(
               'p',
-              { style: styles$1.confirmationText },
+              { style: styles$2.confirmationText },
               'The purchase will show up as Lumen Learning on your debit or credit card statement.'
             )
           ),
           React.createElement(
             'button',
-            { style: styles$1.continueButton, onClick: this._handleClick },
+            { style: styles$2.continueButton, onClick: this._handleClick },
             'Continue'
           )
         )
@@ -631,7 +974,7 @@ var DirectPayConfirmation = function (_React$Component) {
   return DirectPayConfirmation;
 }(React.Component);
 
-var styles$2 = {
+var styles$3 = {
   landingPageWrapper: {
     fontFamily: 'Libre Franklin, sans serif',
     margin: '2.5em 1.75em',
@@ -740,7 +1083,7 @@ var DirectPayLandingPage = function (_React$Component) {
         this._headerComponentDecision(),
         React.createElement(
           "div",
-          { className: "landing-page-wrapper", style: styles$2.landingPageWrapper },
+          { className: "landing-page-wrapper", style: styles$3.landingPageWrapper },
           React.createElement("img", {
             src: this._getSchoolLogoUrl(),
             alt: this.props.institutionName + " logo",
@@ -785,7 +1128,9 @@ var DirectPayLandingPage = function (_React$Component) {
           attributionLogoUrl: this.props.attributionLogoUrl,
           endpointUrl: this.props.endpointUrl,
           redirectTo: this.props.redirectTo,
-          trialTimeRemaining: this.props.trialTimeRemaining
+          trialTimeRemaining: this.props.trialTimeRemaining,
+          trialPassesRemaining: this.props.trialPassesRemaining,
+          trialType: this.props.trialType
         });
       }
     }
@@ -795,7 +1140,7 @@ var DirectPayLandingPage = function (_React$Component) {
       if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '') {
         return React.createElement(
           "div",
-          { className: "lumen-attribution", style: styles$2.lumenAttributionWrapper },
+          { className: "lumen-attribution", style: styles$3.lumenAttributionWrapper },
           React.createElement(
             "span",
             null,
@@ -806,7 +1151,7 @@ var DirectPayLandingPage = function (_React$Component) {
             { href: "https://www.lumenlearning.com", target: "_blank" },
             React.createElement("img", { src: "https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png",
               alt: "Lumen Learning logo", className: "lumen-logo",
-              style: styles$2.lumenLogo })
+              style: styles$3.lumenLogo })
           )
         );
       }
@@ -819,12 +1164,26 @@ var DirectPayLandingPage = function (_React$Component) {
       if (this.props.paymentStatus === 'expired') {
         language = " Course content is still available. However, you need to pay to activate the assessments in this course. ";
       } else if (this.props.paymentStatus === 'can_extend') {
-        language = " Activate a one-time pass to extend your trial by 24 hours. ";
+        language = this._extendLanguage();
       } else {
         return '';
       }
 
       return language;
+    }
+  }, {
+    key: "_extendLanguage",
+    value: function _extendLanguage() {
+      if (this.props.trialType === "quiz_count") {
+        return " Use a final one-time pass to access this assessment. ";
+      } else {
+        return " Activate a one-time pass to extend your trial by 24 hours. ";
+      }
+    }
+  }, {
+    key: "_renderLinkText",
+    value: function _renderLinkText() {
+      return this.props.trialType === "quiz_count" ? "Use Assessment Pass" : "Activate One-time Pass";
     }
   }, {
     key: "_headerComponentDecision",
@@ -836,7 +1195,7 @@ var DirectPayLandingPage = function (_React$Component) {
           React.createElement("div", { style: { height: '3px', backgroundColor: '#edc200', marginLeft: '11px', marginRight: '11px' } }),
           React.createElement(
             "div",
-            { className: "header-box", style: styles$2.headerBox },
+            { className: "header-box", style: styles$3.headerBox },
             React.createElement(
               "div",
               { style: { display: 'flex', flexDirection: 'row' } },
@@ -851,7 +1210,7 @@ var DirectPayLandingPage = function (_React$Component) {
                 React.createElement(
                   "p",
                   { style: { fontSize: '14px' } },
-                  "Your Trial Has Expired.",
+                  this.props.trialType === "quiz_count" ? "You've run out of activation passes." : "Your Trial Has Expired.",
                   React.createElement(
                     "span",
                     { className: "header-text" },
@@ -859,7 +1218,7 @@ var DirectPayLandingPage = function (_React$Component) {
                     this.props.paymentStatus === 'can_extend' ? React.createElement(
                       "a",
                       { href: this.props.redirectTo, style: { textDecoration: 'underline', color: '#1e74d1' } },
-                      "Activate One-time Pass"
+                      this._renderLinkText()
                     ) : ""
                   )
                 )
@@ -925,6 +1284,9 @@ var direct_pay_components = {
   },
   renderDirectPayHeaderAlert: function renderDirectPayHeaderAlert(elementId, props) {
     React.render(React.createElement(DirectPayAlertHeader, props), document.getElementById(elementId));
+  },
+  renderCheckoutTaxPage: function renderCheckoutTaxPage(elementId, props) {
+    React.render(React.createElement(CheckoutTaxPage, props), document.getElementById(elementId));
   }
 };
 
