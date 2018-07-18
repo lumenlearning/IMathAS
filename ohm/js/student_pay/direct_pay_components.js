@@ -538,7 +538,7 @@ var CheckoutTaxPage = function (_React$Component) {
         zipcode: this.state.zipcode
       };
 
-      fetch("https://admin.ludev.team/api/student_pay/tax", {
+      fetch(this._getTaxApiUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -554,6 +554,15 @@ var CheckoutTaxPage = function (_React$Component) {
           });
         });
       });
+    }
+  }, {
+    key: '_getTaxApiUrl',
+    value: function _getTaxApiUrl() {
+      if (window.location.host.indexOf('ludev.team') !== -1) {
+        return 'https://admin.ludev.team/api/student_pay/tax';
+      } else {
+        return 'https://admin.lumenlearning.com/api/student_pay/tax';
+      }
     }
   }]);
   return CheckoutTaxPage;
