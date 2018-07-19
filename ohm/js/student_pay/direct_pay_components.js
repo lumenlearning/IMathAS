@@ -534,7 +534,7 @@ var CheckoutTaxPage = function (_React$Component) {
       var _this2 = this;
 
       var data = {
-        amount_in_cents: this.props.amount_in_cents,
+        amount_in_cents: this.props.amount_in_cents.parseInt(),
         zipcode: this.state.zipcode
       };
 
@@ -550,7 +550,7 @@ var CheckoutTaxPage = function (_React$Component) {
         promise.then(function (value) {
           _this2.setState({
             taxAmount: value.tax_amount_in_cents,
-            total: value.tax_amount_in_cents + _this2.props.amount_in_cents
+            total: value.tax_amount_in_cents + _this2.props.amount_in_cents.parseInt()
           });
         });
       });
