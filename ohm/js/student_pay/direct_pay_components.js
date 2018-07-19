@@ -600,8 +600,7 @@ var DirectPayCourseActivation = function (_React$Component) {
     value: function render() {
       if (this.state.showCheckout) {
         return React.createElement(CheckoutTaxPage, {
-          amount_in_cents: 2500,
-          zipcode: 37129,
+          amount_in_cents: this.props.chargeAmount,
           stripeKey: this.props.stripeKey,
           paymentStatus: this.props.paymentStatus,
           institutionName: this.props.institutionName,
@@ -1278,6 +1277,763 @@ var DirectPayAlertHeader = function (_React$Component) {
   return DirectPayAlertHeader;
 }(React.Component);
 
+var styles$4 = {
+    pageWrapper: {
+        lineHeight: '24px'
+    },
+    pageWrapperInner: {
+        fontFamily: 'Libre Franklin, sans serif',
+        margin: '2.5em 2em',
+        display: 'flex',
+        flexDirection: 'column',
+        color: '#212b36'
+    },
+    logoImg: {
+        width: '224px',
+        height: '69px',
+        objectFit: 'contain',
+        marginBottom: '1.75em'
+    }
+};
+
+var styles$5 = {
+    bannerTop: {
+        height: '3px',
+        backgroundColor: '#edc200',
+        marginLeft: '11px',
+        marginRight: '11px'
+    },
+    bannerBox: {
+        fontFamily: 'Libre Franklin, sans serif',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'left',
+        padding: '24px',
+        marginLeft: '12px',
+        marginRight: '12px',
+        marginBottom: '24px',
+        backgroundColor: 'rgba(252, 240, 205, 0.7)',
+        boxShadow: '0 1px 3px 0 rgba(63, 63, 68, 0.15), 0 0 0 1px rgba(63, 63, 68, 0.05)'
+    },
+    bannerBoxInner: {
+        display: 'flex',
+        flexDirection: 'row'
+    },
+    bannerIcon: {
+        paddingRight: '5px'
+    },
+    bannerTextGroup: {
+        alignContent: 'left',
+        lineHeight: '1.2em',
+        marginLeft: '5px'
+    },
+    bannerText: {
+        fontSize: '14px'
+    },
+    usePassLink: {
+        marginLeft: '1.75em'
+    }
+};
+
+var Banner = function (_React$Component) {
+    inherits(Banner, _React$Component);
+
+    function Banner(props) {
+        classCallCheck(this, Banner);
+        return possibleConstructorReturn(this, (Banner.__proto__ || Object.getPrototypeOf(Banner)).call(this, props));
+    }
+
+    createClass(Banner, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                null,
+                React.createElement('div', { style: styles$5.bannerTop }),
+                React.createElement(
+                    'div',
+                    { className: 'banner-box', style: styles$5.bannerBox },
+                    React.createElement(
+                        'div',
+                        { style: styles$5.bannerBoxInner },
+                        React.createElement('img', {
+                            src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-warning.svg',
+                            alt: 'warning icon',
+                            style: styles$5.bannerIcon
+                        }),
+                        React.createElement(
+                            'div',
+                            { style: styles$5.bannerTextGroup },
+                            React.createElement(
+                                'p',
+                                { style: styles$5.bannerText },
+                                this._renderBannerContent()
+                            )
+                        )
+                    )
+                )
+            );
+        }
+    }, {
+        key: '_renderBannerContent',
+        value: function _renderBannerContent() {
+            if ('quiz_count' === this.props.trialType) {
+                return React.createElement(
+                    'p',
+                    { style: styles$5.bannerText },
+                    'You have run out of activation passes. Use a final one-time pass to access this assessment',
+                    React.createElement(
+                        'a',
+                        { href: '', style: styles$5.usePassLink },
+                        'Use Pass'
+                    )
+                );
+            } else {
+                return React.createElement(
+                    'p',
+                    { style: styles$5.bannerText },
+                    'Your Trial Has Expired. Activate a one-time pass to extend your trial by 24 hours.',
+                    React.createElement(
+                        'a',
+                        { href: '', style: styles$5.usePassLink },
+                        'Activate One-time Pass'
+                    )
+                );
+            }
+        }
+    }]);
+    return Banner;
+}(React.Component);
+
+var styles$6 = {
+    bodyWrapper: {
+        marginLeft: '16px'
+    },
+    heading: {
+        fontSize: '26px',
+        fontWeight: 'bold',
+        fontStyle: 'normal',
+        fontStretch: 'normal',
+        lineHeight: '1.23',
+        letterSpacing: 'normal',
+        textAlign: 'left',
+        color: '#212b36',
+        marginBottom: '12px'
+    },
+    footerBorder: {
+        marginBottom: '16px',
+        height: '0',
+        borderBottom: '1px solid #ebecf0',
+        maxWidth: '639px'
+    },
+    footerText: {
+        fontSize: '12px'
+    },
+    footerLinks: {
+        color: '#000'
+    }
+};
+
+var styles$7 = {
+    optionsWrapper: {
+        padding: '20px 0'
+    },
+    optionItem: {
+        backgroundColor: '#f4f6f8',
+        border: 'solid 1px #dfe3e8',
+        borderRadius: '3px',
+        display: 'block',
+        padding: '14px',
+        marginBottom: '8px',
+        minHeight: '36px',
+        width: '531px'
+    },
+    optionItemContentLeft: {
+        display: 'inline-block',
+        width: '80%',
+        verticalAlign: 'middle'
+    },
+    optionItemContentRight: {
+        display: 'inline-block',
+        width: '20%',
+        verticalAlign: 'middle'
+    },
+    optionItemIconWrapper: {
+        display: 'inline-block',
+        verticalAlign: 'middle'
+    },
+    optionItemIcon: {
+        height: '24px',
+        width: '24px'
+    },
+    optionItemInfoIconWrapper: {
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        marginLeft: '8px'
+    },
+    optionItemInfoIcon: {
+        height: '16px',
+        width: '16px',
+        cursor: 'help'
+    },
+    optionItemContentLeftWrapper: {
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        marginLeft: '20px'
+    },
+    optionItemContentLabel: {
+        fontSize: '16px',
+        fontWeight: 600,
+        verticalAlign: 'middle'
+    },
+    optionItemContentSubLabel: {
+        fontSize: '14px'
+    },
+    optionItemContentButton: {
+        backgroundColor: '#1e74d1',
+        border: '1px solid #004c9f',
+        borderRadius: '3px',
+        color: '#fff',
+        fontSize: '14px',
+        height: '36px',
+        width: '106px',
+        cursor: 'pointer'
+    },
+    optionItemContentButtonDisabled: {
+        backgroundColor: '#8eb9e7',
+        border: '1px solid #7ba6d6',
+        borderRadius: '3px',
+        color: '#fff',
+        fontSize: '14px',
+        height: '36px',
+        width: '106px',
+        cursor: 'not-allowed'
+    },
+    activationCodeInputGroup: {
+        display: 'block'
+    },
+    activationCodeInput: {
+        width: '320px',
+        height: '36px',
+        fontSize: '14px',
+        paddingLeft: '13px'
+    },
+    activationCodeError: {
+        fontSize: '14px',
+        color: '#bf0711',
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        marginLeft: '4px'
+    },
+    errorMessageWrapper: {
+        display: 'block',
+        marginTop: '4px'
+    },
+    errorIcon: {
+        width: '20px',
+        height: '20px',
+        display: 'inline-block',
+        verticalAlign: 'middle'
+    },
+    activationCodeButton: {
+        backgroundColor: '#1e74d1',
+        border: '1px solid #004c9f',
+        borderRadius: '3px',
+        color: '#fff',
+        display: 'block',
+        fontSize: '14px',
+        height: '36px',
+        width: '193px',
+        cursor: 'pointer',
+        marginTop: '12px'
+    },
+    popOver: {
+        width: '237px',
+        height: '102px',
+        backgroundColor: '#fff',
+        borderRadius: '2px',
+        boxShadow: '0 2px 16px 0 rgba(33, 43, 54, 0.08), 0 0 0 1px rgba(6, 44, 82, 0.1)',
+        padding: '16px',
+        fontSize: '12px',
+        zIndex: 1,
+        position: 'absolute',
+        top: '365px',
+        left: '42px'
+    }
+};
+
+var OptionItemDropdown = function (_React$Component) {
+    inherits(OptionItemDropdown, _React$Component);
+
+    function OptionItemDropdown(props) {
+        classCallCheck(this, OptionItemDropdown);
+
+        var _this = possibleConstructorReturn(this, (OptionItemDropdown.__proto__ || Object.getPrototypeOf(OptionItemDropdown)).call(this, props));
+
+        _this.state = {
+            showError: false
+        };
+
+        _this._handleChange = _this._handleChange.bind(_this);
+        return _this;
+    }
+
+    createClass(OptionItemDropdown, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                null,
+                this._renderOptionItemDropdown()
+            );
+        }
+    }, {
+        key: '_renderOptionItemDropdown',
+        value: function _renderOptionItemDropdown() {
+            switch (this.props.item) {
+                case 1:
+                    return React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                            'div',
+                            { style: styles$7.activationCodeInputGroup },
+                            React.createElement('input', {
+                                style: styles$7.activationCodeInput,
+                                type: 'text',
+                                placeholder: 'Activation Code',
+                                onChange: this._handleChange
+                            }),
+                            this._renderErrorMessage()
+                        ),
+                        React.createElement(
+                            'button',
+                            { style: styles$7.activationCodeButton },
+                            'Continue to Assessment'
+                        )
+                    );
+                case 2:
+                    return;
+                case 3:
+                    return;
+            }
+        }
+    }, {
+        key: '_renderErrorMessage',
+        value: function _renderErrorMessage() {
+            if (this.state.showError) {
+                return React.createElement(
+                    'div',
+                    { style: styles$7.errorMessageWrapper },
+                    React.createElement('img', { style: styles$7.errorIcon, src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-polaris-warning.png', alt: 'warning icon' }),
+                    React.createElement(
+                        'p',
+                        { style: styles$7.activationCodeError },
+                        'Access codes are limited to 8-9 characters'
+                    )
+                );
+            }
+        }
+    }, {
+        key: '_handleChange',
+        value: function _handleChange(e) {
+            if (e.target.value.length > 9) {
+                this.setState({
+                    showError: true
+                });
+            } else {
+                this.setState({
+                    showError: false
+                });
+            }
+        }
+    }]);
+    return OptionItemDropdown;
+}(React.Component);
+
+var OptionItem = function (_React$Component) {
+    inherits(OptionItem, _React$Component);
+
+    function OptionItem(props) {
+        classCallCheck(this, OptionItem);
+
+        var _this = possibleConstructorReturn(this, (OptionItem.__proto__ || Object.getPrototypeOf(OptionItem)).call(this, props));
+
+        _this.state = {
+            showDropdown: false,
+            showItemButton: true,
+            hoveringInfo: false
+        };
+
+        _this._handleClick = _this._handleClick.bind(_this);
+        _this._handleMouseOver = _this._handleMouseOver.bind(_this);
+        _this._handleMouseLeave = _this._handleMouseLeave.bind(_this);
+        return _this;
+    }
+
+    createClass(OptionItem, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { style: styles$7.optionItem },
+                React.createElement(
+                    'div',
+                    { style: styles$7.optionItemContentLeft },
+                    React.createElement(
+                        'div',
+                        { style: styles$7.optionItemIconWrapper },
+                        React.createElement('img', { style: styles$7.optionItemIcon, src: this.props.icon, alt: this.props.iconAlt })
+                    ),
+                    React.createElement(
+                        'div',
+                        { style: styles$7.optionItemContentLeftWrapper },
+                        React.createElement(
+                            'p',
+                            { style: styles$7.optionItemContentLabel },
+                            this.props.label
+                        ),
+                        React.createElement(
+                            'p',
+                            { style: styles$7.optionItemContentSubLabel },
+                            this.props.subLabel
+                        )
+                    ),
+                    React.createElement(
+                        'div',
+                        { style: styles$7.optionItemInfoIconWrapper },
+                        React.createElement('img', {
+                            style: styles$7.optionItemInfoIcon,
+                            src: this.props.infoIcon,
+                            alt: this.props.infoIconAlt,
+                            onMouseEnter: this._handleMouseOver,
+                            onMouseLeave: this._handleMouseLeave
+                        }),
+                        this._renderPopOver()
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { style: styles$7.optionItemContentRight },
+                    this._renderItemButton()
+                ),
+                this._renderDropdown()
+            );
+        }
+    }, {
+        key: '_renderPopOver',
+        value: function _renderPopOver() {
+            if (1 === this.props.item && this.state.hoveringInfo) {
+                return React.createElement(
+                    'span',
+                    { style: styles$7.popOver },
+                    'Activation codes are often availabe from a campus bookstore. If you have questions on obtaining an activation code please ask your instructor.'
+                );
+            }
+        }
+    }, {
+        key: '_renderDropdown',
+        value: function _renderDropdown() {
+            return this.state.showDropdown ? React.createElement(OptionItemDropdown, { item: this.props.item }) : null;
+        }
+    }, {
+        key: '_renderItemButton',
+        value: function _renderItemButton() {
+            if (this.state.showItemButton) {
+                return React.createElement(
+                    'button',
+                    {
+                        style: this._getItemButtonStyles(),
+                        onClick: this._handleClick,
+                        disabled: this._setButtonDisabled()
+                    },
+                    this.props.buttonText
+                );
+            }
+        }
+    }, {
+        key: '_setButtonDisabled',
+        value: function _setButtonDisabled() {
+            if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
+                return 'disabled';
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: '_getItemButtonStyles',
+        value: function _getItemButtonStyles() {
+            if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
+                return styles$7.optionItemContentButtonDisabled;
+            } else {
+                return styles$7.optionItemContentButton;
+            }
+        }
+    }, {
+        key: '_handleClick',
+        value: function _handleClick(e) {
+            var showDropdown = !this.state.showDropdown;
+
+            if (1 === this.props.item) {
+                this.setState({
+                    showDropdown: showDropdown,
+                    showItemButton: false
+                });
+            } else {
+                this.setState({
+                    showDropdown: showDropdown
+                });
+            }
+        }
+    }, {
+        key: '_handleMouseOver',
+        value: function _handleMouseOver(e) {
+            this.setState({
+                hoveringInfo: true
+            });
+        }
+    }, {
+        key: '_handleMouseLeave',
+        value: function _handleMouseLeave(e) {
+            this.setState({
+                hoveringInfo: false
+            });
+        }
+    }]);
+    return OptionItem;
+}(React.Component);
+
+var MultiPayAccessOptions = function (_React$Component) {
+    inherits(MultiPayAccessOptions, _React$Component);
+
+    function MultiPayAccessOptions(props) {
+        classCallCheck(this, MultiPayAccessOptions);
+        return possibleConstructorReturn(this, (MultiPayAccessOptions.__proto__ || Object.getPrototypeOf(MultiPayAccessOptions)).call(this, props));
+    }
+
+    createClass(MultiPayAccessOptions, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { style: styles$7.optionsWrapper },
+                React.createElement(OptionItem, {
+                    item: 1,
+                    icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-store.png',
+                    iconAlt: 'an icon of a store',
+                    infoIcon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-material-info.png',
+                    infoIconAlt: 'info icon',
+                    label: 'Enter Activation Code',
+                    subLabel: '',
+                    buttonText: 'Enter Code'
+                }),
+                React.createElement(OptionItem, {
+                    item: 2,
+                    icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-credit-card.png',
+                    iconAlt: 'an icon of a credit card',
+                    infoIcon: '',
+                    infoIconAlt: '',
+                    label: 'Pay $' + this._calculateAmount() + ' Activation Fee Online',
+                    subLabel: '',
+                    buttonText: 'Pay Now'
+                }),
+                React.createElement(OptionItem, {
+                    item: 3,
+                    icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-clock.png',
+                    iconAlt: 'an icon of a clock',
+                    infoIcon: '',
+                    infoIconAlt: '',
+                    label: this._getLabelText(),
+                    subLabel: 'quiz_count' === this.props.trialType ? this.props.trialPassesRemaining + ' of 2 Passes Available' : '',
+                    buttonText: this._getButtonText(),
+                    trialPassesRemaining: this.props.trialPassesRemaining,
+                    trialTimeRemaining: this.props.trialTimeRemaining,
+                    trialType: this.props.trialType,
+                    paymentStatus: this.props.paymentStatus
+                })
+            );
+        }
+    }, {
+        key: '_calculateAmount',
+        value: function _calculateAmount() {
+            return this.props.chargeAmount / 100;
+        }
+    }, {
+        key: '_getLabelText',
+        value: function _getLabelText() {
+            if ('quiz_count' === this.props.trialType) {
+                return 'Use a Free Pass to Access Assessment';
+            }
+
+            if ('trial_not_started' === this.props.paymentStatus) {
+                return 'Need More Time? Start a Two-week Trial';
+            }
+
+            if ('in_trial' === this.props.paymentStatus) {
+                return 'Continue Trial, ' + this._getTimeRemaining() + ' Remaining';
+            }
+
+            if (0 === this.props.trialTimeRemaining && ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus)) {
+                return 'Trial Expired';
+            }
+        }
+    }, {
+        key: '_getTimeRemaining',
+        value: function _getTimeRemaining() {
+            var timeRemaining = this.props.trialTimeRemaining / 60 / 60 / 24;
+
+            if (1 >= timeRemaining) {
+                return timeRemaining + ' Day';
+            } else {
+                return timeRemaining + ' Days';
+            }
+        }
+    }, {
+        key: '_getButtonText',
+        value: function _getButtonText() {
+            if ('quiz_count' === this.props.trialType) {
+                return 'Use Pass';
+            }
+
+            if ('trial_not_started' === this.props.paymentStatus) {
+                return 'Start Trial';
+            }
+
+            if ('in_trial' === this.props.paymentStatus && 0 !== this.props.trialTimeRemaining) {
+                return 'Continue Trial';
+            }
+
+            if (0 === this.props.trialTimeRemaining && ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus)) {
+                return 'Continue Trial';
+            }
+        }
+    }]);
+    return MultiPayAccessOptions;
+}(React.Component);
+
+var MultiPayCourseAssessmentActivation = function (_React$Component) {
+    inherits(MultiPayCourseAssessmentActivation, _React$Component);
+
+    function MultiPayCourseAssessmentActivation(props) {
+        classCallCheck(this, MultiPayCourseAssessmentActivation);
+        return possibleConstructorReturn(this, (MultiPayCourseAssessmentActivation.__proto__ || Object.getPrototypeOf(MultiPayCourseAssessmentActivation)).call(this, props));
+    }
+
+    createClass(MultiPayCourseAssessmentActivation, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { style: styles$6.bodyWrapper },
+                React.createElement(
+                    'h1',
+                    { className: 'activation-heading', style: styles$6.heading },
+                    'Course Assessment Activation'
+                ),
+                React.createElement(
+                    'p',
+                    null,
+                    'To access this and future assessments for this course, select an option below.'
+                ),
+                React.createElement(
+                    'p',
+                    null,
+                    'Course content is always available and free.'
+                ),
+                React.createElement(MultiPayAccessOptions, {
+                    trialType: this.props.trialType,
+                    trialPassesRemaining: this.props.trialPassesRemaining,
+                    trialTimeRemaining: this.props.trialTimeRemaining,
+                    paymentStatus: this.props.paymentStatus,
+                    chargeAmount: this.props.chargeAmount
+                }),
+                React.createElement('div', { style: styles$6.footerBorder }),
+                React.createElement(
+                    'p',
+                    { style: styles$6.footerText },
+                    'By clicking on Enter Code, Pay Now, or Use Pass you agree to the Lumen Learning ',
+                    React.createElement(
+                        'a',
+                        { target: '_blank', href: 'https://lumenlearning.com/policies/terms-of-service', style: styles$6.footerLinks },
+                        'Terms of Use'
+                    ),
+                    ' and ',
+                    React.createElement(
+                        'a',
+                        { target: '_blank', href: 'https://lumenlearning.com/policies/privacy-policy', style: styles$6.footerLinks },
+                        'Privacy Policy'
+                    ),
+                    '.'
+                )
+            );
+        }
+    }]);
+    return MultiPayCourseAssessmentActivation;
+}(React.Component);
+
+var MultiPayPage = function (_React$Component) {
+    inherits(MultiPayPage, _React$Component);
+
+    function MultiPayPage(props) {
+        classCallCheck(this, MultiPayPage);
+        return possibleConstructorReturn(this, (MultiPayPage.__proto__ || Object.getPrototypeOf(MultiPayPage)).call(this, props));
+    }
+
+    createClass(MultiPayPage, [{
+        key: 'render',
+        value: function render() {
+            return React.createElement(
+                'div',
+                { style: styles$4.pageWrapper },
+                this._renderBanner(),
+                React.createElement(
+                    'div',
+                    { className: 'multipay-page-wrapper', style: styles$4.pageWrapperInner },
+                    React.createElement('img', {
+                        src: this._getLogoUrl(),
+                        alt: this._getLogoAltText(),
+                        style: styles$4.logoImg
+                    }),
+                    React.createElement(
+                        'div',
+                        null,
+                        this._getPageBody()
+                    )
+                )
+            );
+        }
+    }, {
+        key: '_renderBanner',
+        value: function _renderBanner() {
+            if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
+                return React.createElement(Banner, { trialType: this.props.trialType });
+            }
+        }
+    }, {
+        key: '_getLogoUrl',
+        value: function _getLogoUrl() {
+            return this.props.schoolLogoUrl || 'https://s3-us-west-2.amazonaws.com/lumen-platform-assets/images/lumen-open-courseware.png';
+        }
+    }, {
+        key: '_getLogoAltText',
+        value: function _getLogoAltText() {
+            return this.props.institutionName ? this.props.institutionName + ' logo' : 'Lumen Open Courseware logo';
+        }
+    }, {
+        key: '_getPageBody',
+        value: function _getPageBody() {
+            return React.createElement(MultiPayCourseAssessmentActivation, {
+                trialType: this.props.trialType,
+                trialPassesRemaining: this.props.trialPassesRemaining,
+                trialTimeRemaining: this.props.trialTimeRemaining,
+                paymentStatus: this.props.paymentStatus,
+                chargeAmount: this.props.chargeAmount
+            });
+        }
+    }]);
+    return MultiPayPage;
+}(React.Component);
+
 var direct_pay_components = {
   renderDirectPayLandingPage: function renderDirectPayLandingPage(elementId, props) {
     React.render(React.createElement(DirectPayLandingPage, props), document.getElementById(elementId));
@@ -1296,6 +2052,10 @@ var direct_pay_components = {
   },
   renderCheckoutTaxPage: function renderCheckoutTaxPage(elementId, props) {
     React.render(React.createElement(CheckoutTaxPage, props), document.getElementById(elementId));
+  },
+  // Multi Pay
+  renderMultiPayPage: function renderMultiPayPage(elementId, props) {
+    React.render(React.createElement(MultiPayPage, props), document.getElementById(elementId));
   }
 };
 
