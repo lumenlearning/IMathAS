@@ -3,7 +3,7 @@
  * Enforce all applicable Lumen OHM student payment rules.
  * (activation codes, direct payments, trials, etc)
  *
- * This function should be used in places where an assessment is about
+ * This file should be require()'d in places where an assessment is about
  * to be displayed to the student.
  */
 
