@@ -509,8 +509,8 @@ class StudentPaymentApi
 		if (isset($apiResponse['message'])) {
 			$studentPayApiResult->setApiUserMessage($apiResponse['message']);
 		}
-		if (isset($apiResponse['trial_expired_in'])) {
-			$studentPayApiResult->setTrialExpiresInSeconds($apiResponse['trial_expired_in']);
+		if (isset($apiResponse['trial'])) {
+			$studentPayApiResult->setTrialExpiresInSeconds($apiResponse['trial']['expires_in']);
 		}
 		if (isset($apiResponse['access_type'])) {
 			$studentPayApiResult->setAccessType($apiResponse['access_type']);

@@ -22,6 +22,7 @@ class StudentPayApiResult
 	const ACCESS_TYPE_NOT_REQUIRED = "not_required";
 	const ACCESS_TYPE_ACTIVATION_CODE = "activation_code";
 	const ACCESS_TYPE_DIRECT_PAY = "direct_pay";
+	const ACCESS_TYPE_MULTI_PAY = "multipay";
 
 	private $courseRequiresStudentPayment; // boolean
 	private $studentPaymentStatus; // string (not_paid, in_trial, can_extend, etc)

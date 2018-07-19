@@ -1,8 +1,12 @@
 <?php
+
+use OHM\Models\StudentPayApiResult;
+
 require_once(__DIR__ . "/../../init.php");
 
 global $studentPayStatus;
 
+$paymentType = $studentPayStatus->getStudentPaymentTypeRequired();
 $trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
 $paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
 $paymentAmount = $studentPayStatus->getCourseDirectPayAmountInCents();
@@ -75,12 +79,20 @@ function displayPaymentPage()
         }
     </style>
 
-    <div id="directPay"></div>
+    <div id="paymentComponent"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
     <script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
     <script>
-      directPayComponents.renderDirectPayLandingPage('directPay', {
+      // renderMultiPayPage?
+      // Uncaught TypeError: directPayComponents.renderMultiPayPage is not a function
+	<?php
+      if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY) {
+	?> directPayComponents.renderDirectPayLandingPage('paymentComponent', { <?php
+      } else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_MULTI_PAY) {
+	?> directPayComponents.renderMultiPayPage('paymentComponent', { <?php
+	  }
+	?>
         'stripeKey': '<?php echo $GLOBALS['apiKey']; ?>',
         'courseTitle': '<?php echo $GLOBALS['courseName']; ?>',
         'userEmail': '<?php echo $GLOBALS['userEmail']; ?>',

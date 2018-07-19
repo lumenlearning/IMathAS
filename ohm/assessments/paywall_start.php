@@ -10,6 +10,7 @@
 use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
+use OHM\Models\StudentPayApiResult;
 
 /*
  * So I won't forget for a 6th time and have to delete an hour of nice refactoring:
@@ -62,14 +63,14 @@ if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupI
 		$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();
 
-		if (\OHM\Models\StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
+		if (StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/activation.php");
 			}
 		}
 
-		if (\OHM\Models\StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY ==
+		if (needsLumenComponents($paymentTypeRequired) &&
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/direct_pay.php");
@@ -118,6 +119,19 @@ function isValidGroupIdForStudentPayments($groupId)
 	}
 
 	return true;
+}
+
+/**
+ * Determine if Lumen Components should be used to handle student payments.
+ *
+ * @param $paymentTypeRequired
+ * @return bool
+ */
+function needsLumenComponents($paymentTypeRequired) {
+	return in_array($paymentTypeRequired, array(
+		StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY,
+		StudentPayApiResult::ACCESS_TYPE_MULTI_PAY
+	));
 }
 
 /**
