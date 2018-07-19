@@ -48,7 +48,7 @@ final class StudentPaymentApiTest extends TestCase
 		'{"section_requires_student_payment": true, "status": "' . StudentPayApiResult::NO_TRIAL_NO_ACTIVATION . '"}';
 	const TRIAL_STARTED_RESPONSE = '{"status":"' . StudentPayApiResult::START_TRIAL_SUCCESS . '"}';
 	const IN_TRIAL_RESPONSE = '{"status":"' . StudentPayApiResult::IN_TRIAL
-	. '","section_requires_student_payment":true,"trial_expired_in":1234}';
+	. '","section_requires_student_payment":true,"trial":{"expires_in":1234}}';
 	const EVENT_LOGGED_OK_RESPONSE = '{"status": "ok"}';
 
 	// Responses for institution data
@@ -351,7 +351,7 @@ final class StudentPaymentApiTest extends TestCase
 		$responseBody = '{'
 			. '"status":"ok",'
 			. '"message":"It\'s alllll gooooood!",'
-			. '"trial_expired_in":"42",'
+			. '"trial": {"expires_in": "42"},'
 			. '"access_type":"not_required",'
 			. '"section_requires_student_payment":true,'
 			. '"payment_info":{"id":11,"email":"michael@lumenlearning.com","charge_token":"ch_1CG9jELB7uSPM4hbHSZzlalh","isbn":"9781640871632","last_four":"4242","section_id":null,"service_id":"43627281-b00b-4142-8e4c-1e435fe4f1c1","institution_id":"bb968cf5-c4b1-44db-8618-dd3d128feba8","created_at":"2018-04-12T18:01:01.478Z","updated_at":"2018-04-12T18:01:01.478Z","enrollment_id":"108"},'
