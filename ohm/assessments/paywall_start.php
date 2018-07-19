@@ -73,7 +73,7 @@ if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupI
 		if (needsLumenComponents($paymentTypeRequired) &&
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
-				require_once(__DIR__ . "/../../ohm/assessments/direct_pay.php");
+				require_once(__DIR__ . "/../../ohm/assessments/direct_or_multi_pay.php");
 			}
 		}
 
