@@ -1557,8 +1557,7 @@ var styles$7 = {
         fontSize: '12px',
         zIndex: 1,
         position: 'absolute',
-        top: '365px',
-        left: '42px'
+        margin: '15px 0 0 5px'
     }
 };
 
@@ -1727,7 +1726,7 @@ var OptionItem = function (_React$Component) {
                 return React.createElement(
                     'span',
                     { style: styles$7.popOver },
-                    'Activation codes are often availabe from a campus bookstore. If you have questions on obtaining an activation code please ask your instructor.'
+                    'Activation codes are often available from a campus bookstore. If you have questions on obtaining an activation code please ask your instructor.'
                 );
             }
         }
@@ -1772,17 +1771,13 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_handleClick',
         value: function _handleClick(e) {
-            var showDropdown = !this.state.showDropdown;
-
             if (1 === this.props.item) {
                 this.setState({
-                    showDropdown: showDropdown,
+                    showDropdown: !this.state.showDropdown,
                     showItemButton: false
                 });
-            } else {
-                this.setState({
-                    showDropdown: showDropdown
-                });
+            } else if (2 === this.props.item) {
+                this.props.showCheckout();
             }
         }
     }, {
@@ -1835,7 +1830,8 @@ var MultiPayAccessOptions = function (_React$Component) {
                     infoIconAlt: '',
                     label: 'Pay $' + this._calculateAmount() + ' Activation Fee Online',
                     subLabel: '',
-                    buttonText: 'Pay Now'
+                    buttonText: 'Pay Now',
+                    showCheckout: this.props.showCheckout
                 }),
                 React.createElement(OptionItem, {
                     item: 3,
@@ -1945,7 +1941,8 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                     trialPassesRemaining: this.props.trialPassesRemaining,
                     trialTimeRemaining: this.props.trialTimeRemaining,
                     paymentStatus: this.props.paymentStatus,
-                    chargeAmount: this.props.chargeAmount
+                    chargeAmount: this.props.chargeAmount,
+                    showCheckout: this.props.showCheckout
                 }),
                 React.createElement('div', { style: styles$6.footerBorder }),
                 React.createElement(
@@ -1976,7 +1973,15 @@ var MultiPayPage = function (_React$Component) {
 
     function MultiPayPage(props) {
         classCallCheck(this, MultiPayPage);
-        return possibleConstructorReturn(this, (MultiPayPage.__proto__ || Object.getPrototypeOf(MultiPayPage)).call(this, props));
+
+        var _this = possibleConstructorReturn(this, (MultiPayPage.__proto__ || Object.getPrototypeOf(MultiPayPage)).call(this, props));
+
+        _this.state = {
+            showCheckout: false
+        };
+
+        _this._showCheckout = _this._showCheckout.bind(_this);
+        return _this;
     }
 
     createClass(MultiPayPage, [{
@@ -2010,6 +2015,15 @@ var MultiPayPage = function (_React$Component) {
             }
         }
     }, {
+        key: '_showCheckout',
+        value: function _showCheckout() {
+            var showCheckout = !this.state.showCheckout;
+
+            this.setState({
+                showCheckout: showCheckout
+            });
+        }
+    }, {
         key: '_getLogoUrl',
         value: function _getLogoUrl() {
             return this.props.schoolLogoUrl || 'https://s3-us-west-2.amazonaws.com/lumen-platform-assets/images/lumen-open-courseware.png';
@@ -2022,13 +2036,27 @@ var MultiPayPage = function (_React$Component) {
     }, {
         key: '_getPageBody',
         value: function _getPageBody() {
-            return React.createElement(MultiPayCourseAssessmentActivation, {
-                trialType: this.props.trialType,
-                trialPassesRemaining: this.props.trialPassesRemaining,
-                trialTimeRemaining: this.props.trialTimeRemaining,
-                paymentStatus: this.props.paymentStatus,
-                chargeAmount: this.props.chargeAmount
-            });
+            if (this.state.showCheckout) {
+                return React.createElement(CheckoutTaxPage, {
+                    amount_in_cents: this.props.chargeAmount,
+                    stripeKey: this.props.stripeKey,
+                    paymentStatus: this.props.paymentStatus,
+                    institutionName: this.props.institutionName,
+                    chargeDescription: this.props.chargeDescription,
+                    stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+                    endpointUrl: this.props.endpointUrl,
+                    userEmail: this.props.userEmail
+                });
+            } else {
+                return React.createElement(MultiPayCourseAssessmentActivation, {
+                    trialType: this.props.trialType,
+                    trialPassesRemaining: this.props.trialPassesRemaining,
+                    trialTimeRemaining: this.props.trialTimeRemaining,
+                    paymentStatus: this.props.paymentStatus,
+                    chargeAmount: this.props.chargeAmount,
+                    showCheckout: this._showCheckout
+                });
+            }
         }
     }]);
     return MultiPayPage;
