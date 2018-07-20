@@ -33,9 +33,13 @@ $courseName = $courseNameStm->fetchColumn(0);
 
 
 $courseOwnerGroupId = null;
+$courseOwnerGroupGuid = null;
+$enrollmentId = null;
 if (isStudentPayEnabled()) {
-	$studentPaymentDb = new StudentPaymentDb(null, $courseId, null);
+	$studentPaymentDb = new StudentPaymentDb(null, $courseId, $userid);
 	$courseOwnerGroupId = $studentPaymentDb->getCourseOwnerGroupId();
+	$courseOwnerGroupGuid = $studentPaymentDb->getGroupGuid($courseOwnerGroupId);
+	$enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 
 	// We need the course owner's group ID before we can check a student's access code status.
 	if (!isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
