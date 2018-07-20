@@ -245,6 +245,20 @@ class StudentPaymentDb
 	}
 
 	/**
+	 * Get the Lumen GUID for a group ID.
+	 *
+	 * @return string The group's Lumen GUID.
+	 */
+	function getGroupGuid($groupId)
+	{
+		$sth = $this->dbh->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :id");
+		$sth->execute(array(':id' => $groupId));
+		$results = $sth->fetch(\PDO::FETCH_ASSOC);
+
+		return $results['lumen_guid'];
+	}
+
+	/**
 	 * Get the group's Lumen GUID. If none found, null is returned.
 	 *
 	 * @return string|null The group's Lumen GUID. Null if not found.
