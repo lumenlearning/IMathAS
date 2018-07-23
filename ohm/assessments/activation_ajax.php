@@ -13,6 +13,7 @@ require_once(__DIR__ . '/../../init.php');
 use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
+use Sanitize;
 
 $validActions = array('activate_code', 'payment_proxy');
 
@@ -71,6 +72,7 @@ if ("payment_proxy" == $action) {
 	$courseName = getCourseNameById($courseId);
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 	$assessmentId = isset($_REQUEST['assessmentId']) ? $_REQUEST['assessmentId'] : NULL;
+	$assessmentUrl = isset($_REQUEST['assessmentUrl']) ? $_REQUEST['assessmentUrl'] : NULL;
 
 	studentPaymentDebug('Received POST data from Stripe checkout: '
 		. print_r($_POST, true));
@@ -89,6 +91,17 @@ if ("payment_proxy" == $action) {
 			$groupId, $courseId, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
 		header('Location: ' . $GLOBALS["basesiteurl"] . '/assessment/showtest.php', true);
+		exit;
+	}
+
+	if (!empty($apiResponse->getErrors())) {
+		$errorMessage = implode(' ', $apiResponse->getErrors());
+
+		$glue = str_contains($assessmentUrl, '?') ? '&' : '?';
+		$redirectUrl = $assessmentUrl . $glue . 'activationCodeErrors=' .
+			Sanitize::encodeUrlParam($errorMessage);
+
+		header('Location: ' . $redirectUrl, true);
 		exit;
 	}
 
