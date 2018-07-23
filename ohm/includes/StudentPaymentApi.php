@@ -228,7 +228,7 @@ class StudentPaymentApi
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201]);
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201, 400, 404]);
 		$this->curl->close();
 
 		return $studentPayApiResult;
