@@ -250,6 +250,17 @@ var styles$1 = {
     backgroundColor: '#8eb9e7',
     border: 'solid 1px #7ba6d6',
     cursor: 'pointer'
+  },
+  payNowDisabled: {
+    color: '#fff',
+    width: '90px',
+    height: '36px',
+    background: 'linear-gradient(#a0d4f3,#44abe7 85%,#64b9eb)',
+    borderRadius: '5px',
+    fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'not-allowed',
+    margin: '13px 0'
   }
 };
 
@@ -486,7 +497,14 @@ var CheckoutTaxPage = function (_React$Component) {
             )
           )
         ),
-        React.createElement(DirectPayButton, defineProperty({
+        this._renderPayButton()
+      );
+    }
+  }, {
+    key: '_renderPayButton',
+    value: function _renderPayButton() {
+      if (5 === this.state.zipcode.length) {
+        return React.createElement(DirectPayButton, defineProperty({
           paymentStatus: this.props.paymentStatus,
           stripeKey: this.props.stripeKey,
           chargeAmount: this.state.total,
@@ -496,8 +514,14 @@ var CheckoutTaxPage = function (_React$Component) {
           endpointUrl: this.props.endpointUrl,
           userEmail: this.props.userEmail,
           zipcode: this.state.zipcode
-        }, 'chargeAmount', this.state.total))
-      );
+        }, 'chargeAmount', this.state.total));
+      } else {
+        return React.createElement(
+          'button',
+          { style: styles$1.payNowDisabled, disabled: 'true' },
+          'Pay Now'
+        );
+      }
     }
   }, {
     key: '_setZipCode',
@@ -1384,7 +1408,7 @@ var Banner = function (_React$Component) {
                     'You have run out of activation passes. Use a final one-time pass to access this assessment',
                     React.createElement(
                         'a',
-                        { href: '', style: styles$5.usePassLink },
+                        { href: this.props.redirectTo, style: styles$5.usePassLink },
                         'Use Pass'
                     )
                 );
@@ -1395,7 +1419,7 @@ var Banner = function (_React$Component) {
                     'Your Trial Has Expired. Activate a one-time pass to extend your trial by 24 hours.',
                     React.createElement(
                         'a',
-                        { href: '', style: styles$5.usePassLink },
+                        { href: this.props.redirectTo, style: styles$5.usePassLink },
                         'Activate One-time Pass'
                     )
                 );
@@ -1573,10 +1597,8 @@ var OptionItemDropdown = function (_React$Component) {
         var _this = possibleConstructorReturn(this, (OptionItemDropdown.__proto__ || Object.getPrototypeOf(OptionItemDropdown)).call(this, props));
 
         _this.state = {
-            showError: false
+            showError: _this.props.errors != undefined && _this.props.errors.length > 0
         };
-
-        _this._handleChange = _this._handleChange.bind(_this);
         return _this;
     }
 
@@ -1601,16 +1623,22 @@ var OptionItemDropdown = function (_React$Component) {
                             'div',
                             { style: styles$7.activationCodeInputGroup },
                             React.createElement('input', {
+                                name: 'code',
                                 style: styles$7.activationCodeInput,
                                 type: 'text',
-                                placeholder: 'Activation Code',
-                                onChange: this._handleChange
+                                placeholder: 'Activation Code'
                             }),
-                            this._renderErrorMessage()
+                            this._renderErrorMessage(),
+                            React.createElement('input', {
+                                type: 'hidden',
+                                name: 'assessmentUrl',
+                                value: this.props.assessmentUrl })
                         ),
                         React.createElement(
                             'button',
-                            { style: styles$7.activationCodeButton },
+                            {
+                                style: styles$7.activationCodeButton
+                            },
                             'Continue to Assessment'
                         )
                     );
@@ -1631,22 +1659,9 @@ var OptionItemDropdown = function (_React$Component) {
                     React.createElement(
                         'p',
                         { style: styles$7.activationCodeError },
-                        'Access codes are limited to 8-9 characters'
+                        this.props.errors
                     )
                 );
-            }
-        }
-    }, {
-        key: '_handleChange',
-        value: function _handleChange(e) {
-            if (e.target.value.length > 9) {
-                this.setState({
-                    showError: true
-                });
-            } else {
-                this.setState({
-                    showError: false
-                });
             }
         }
     }]);
@@ -1662,7 +1677,7 @@ var OptionItem = function (_React$Component) {
         var _this = possibleConstructorReturn(this, (OptionItem.__proto__ || Object.getPrototypeOf(OptionItem)).call(this, props));
 
         _this.state = {
-            showDropdown: false,
+            showDropdown: _this.props.activationCodeErrors != undefined && _this.props.activationCodeErrors.length > 0,
             showItemButton: true,
             hoveringInfo: false
         };
@@ -1736,7 +1751,11 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_renderDropdown',
         value: function _renderDropdown() {
-            return this.state.showDropdown ? React.createElement(OptionItemDropdown, { item: this.props.item }) : null;
+            return this.state.showDropdown ? React.createElement(OptionItemDropdown, {
+                item: this.props.item,
+                assessmentUrl: this.props.assessmentUrl,
+                errors: this.props.activationCodeErrors
+            }) : null;
         }
     }, {
         key: '_renderItemButton',
@@ -1781,6 +1800,8 @@ var OptionItem = function (_React$Component) {
                 });
             } else if (2 === this.props.item) {
                 this.props.showCheckout();
+            } else if (3 === this.props.item) {
+                window.location = this.props.redirectTo;
             }
         }
     }, {
@@ -1815,16 +1836,22 @@ var MultiPayAccessOptions = function (_React$Component) {
             return React.createElement(
                 'div',
                 { style: styles$7.optionsWrapper },
-                React.createElement(OptionItem, {
-                    item: 1,
-                    icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-store.png',
-                    iconAlt: 'an icon of a store',
-                    infoIcon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-material-info.png',
-                    infoIconAlt: 'info icon',
-                    label: 'Enter Activation Code',
-                    subLabel: '',
-                    buttonText: 'Enter Code'
-                }),
+                React.createElement(
+                    'form',
+                    { method: 'POST', action: this.props.endpointUrl },
+                    React.createElement(OptionItem, {
+                        item: 1,
+                        icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-store.png',
+                        iconAlt: 'an icon of a store',
+                        infoIcon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-material-info.png',
+                        infoIconAlt: 'info icon',
+                        label: 'Enter Activation Code',
+                        subLabel: '',
+                        buttonText: 'Enter Code',
+                        assessmentUrl: this.props.assessmentUrl,
+                        activationCodeErrors: this.props.activationCodeErrors
+                    })
+                ),
                 React.createElement(OptionItem, {
                     item: 2,
                     icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-credit-card.png',
@@ -1834,7 +1861,8 @@ var MultiPayAccessOptions = function (_React$Component) {
                     label: 'Pay $' + this._calculateAmount() + ' Activation Fee Online',
                     subLabel: '',
                     buttonText: 'Pay Now',
-                    showCheckout: this.props.showCheckout
+                    showCheckout: this.props.showCheckout,
+                    activationCodeErrors: this.props.activationCodeErrors
                 }),
                 React.createElement(OptionItem, {
                     item: 3,
@@ -1848,7 +1876,9 @@ var MultiPayAccessOptions = function (_React$Component) {
                     trialPassesRemaining: this.props.trialPassesRemaining,
                     trialTimeRemaining: this.props.trialTimeRemaining,
                     trialType: this.props.trialType,
-                    paymentStatus: this.props.paymentStatus
+                    paymentStatus: this.props.paymentStatus,
+                    redirectTo: this.props.redirectTo,
+                    activationCodeErrors: this.props.activationCodeErrors
                 })
             );
         }
@@ -1872,20 +1902,32 @@ var MultiPayAccessOptions = function (_React$Component) {
                 return 'Continue Trial, ' + this._getTimeRemaining() + ' Remaining';
             }
 
-            if (0 === this.props.trialTimeRemaining && ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus)) {
+            if ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) {
                 return 'Trial Expired';
             }
         }
     }, {
         key: '_getTimeRemaining',
         value: function _getTimeRemaining() {
-            var timeRemaining = this.props.trialTimeRemaining / 60 / 60 / 24;
+            var timeLeft = this.props.trialTimeRemaining;
 
-            if (1 >= timeRemaining) {
-                return timeRemaining + ' Day';
+            if (60 > timeLeft) {
+                timeLeft = 'less than 1 Minute';
+            } else if (60 < timeLeft && 120 > timeLeft) {
+                timeLeft = '1 minute';
+            } else if (3600 >= timeLeft) {
+                timeLeft = Math.floor(timeLeft / 60) + ' Minutes';
+            } else if (3600 <= timeLeft && 7200 > timeLeft) {
+                timeLeft = Math.floor(timeLeft / 3600) + ' Hour';
+            } else if (86400 > timeLeft) {
+                timeLeft = Math.floor(timeLeft / 3600) + ' Hours';
+            } else if (86400 < timeLeft && 172800 > timeLeft) {
+                timeLeft = '1 day';
             } else {
-                return timeRemaining + ' Days';
+                timeLeft = (timeLeft / 86400).toFixed() + ' Days';
             }
+
+            return timeLeft;
         }
     }, {
         key: '_getButtonText',
@@ -1898,11 +1940,7 @@ var MultiPayAccessOptions = function (_React$Component) {
                 return 'Start Trial';
             }
 
-            if ('in_trial' === this.props.paymentStatus && 0 !== this.props.trialTimeRemaining) {
-                return 'Continue Trial';
-            }
-
-            if (0 === this.props.trialTimeRemaining && ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus)) {
+            if ('in_trial' === this.props.paymentStatus || 'can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) {
                 return 'Continue Trial';
             }
         }
@@ -1945,7 +1983,11 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                     trialTimeRemaining: this.props.trialTimeRemaining,
                     paymentStatus: this.props.paymentStatus,
                     chargeAmount: this.props.chargeAmount,
-                    showCheckout: this.props.showCheckout
+                    showCheckout: this.props.showCheckout,
+                    redirectTo: this.props.redirectTo,
+                    activationCodeErrors: this.props.activationCodeErrors,
+                    endpointUrl: this.props.endpointUrl,
+                    assessmentUrl: this.props.assessmentUrl
                 }),
                 React.createElement('div', { style: styles$6.footerBorder }),
                 React.createElement(
@@ -2014,7 +2056,7 @@ var MultiPayPage = function (_React$Component) {
         key: '_renderBanner',
         value: function _renderBanner() {
             if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
-                return React.createElement(Banner, { trialType: this.props.trialType });
+                return React.createElement(Banner, { trialType: this.props.trialType, redirectTo: this.props.redirectTo });
             }
         }
     }, {
@@ -2057,7 +2099,11 @@ var MultiPayPage = function (_React$Component) {
                     trialTimeRemaining: this.props.trialTimeRemaining,
                     paymentStatus: this.props.paymentStatus,
                     chargeAmount: this.props.chargeAmount,
-                    showCheckout: this._showCheckout
+                    showCheckout: this._showCheckout,
+                    redirectTo: this.props.redirectTo,
+                    activationCodeErrors: this.props.activationCodeErrors || [],
+                    endpointUrl: this.props.endpointUrl,
+                    assessmentUrl: this.props.assessmentUrl
                 });
             }
         }
