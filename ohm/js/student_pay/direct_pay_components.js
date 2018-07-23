@@ -1497,6 +1497,7 @@ var styles$7 = {
         fontSize: '14px',
         height: '36px',
         width: '106px',
+        padding: 0,
         cursor: 'pointer'
     },
     optionItemContentButtonDisabled: {
@@ -1507,6 +1508,7 @@ var styles$7 = {
         fontSize: '14px',
         height: '36px',
         width: '106px',
+        padding: 0,
         cursor: 'not-allowed'
     },
     activationCodeInputGroup: {
@@ -1544,6 +1546,7 @@ var styles$7 = {
         fontSize: '14px',
         height: '36px',
         width: '193px',
+        padding: 0,
         cursor: 'pointer',
         marginTop: '12px'
     },
