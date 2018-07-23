@@ -521,12 +521,7 @@
 			exit;
 		}
 		$line=$stm->fetch(PDO::FETCH_ASSOC);
-		if ($line['ver']==1 && $line['endtime']<1483117200) { //hack fix: Use 32-bit equivalent randomizers for assignments completed before rehost
-			$GLOBALS['assessver'] = 2;
-		} else {
-			$GLOBALS['assessver'] = $line['ver'];
-		}
-		
+		$GLOBALS['assessver'] = $line['ver'];
 
 		if (!$isteacher && !$istutor) {
 			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
@@ -846,6 +841,7 @@
 		echo ' <button type="button" id="showanstoggle" onclick="showallans()">'._('Show All Answers').'</button>';
 		echo ' <button type="button" id="prevtoggle" onclick="previewall()">'._('Preview All').'</button></p>';
 		$total = 0;
+		$GLOBALS['capturedrawinit'] = true;
 
 		for ($i=0; $i<count($questions);$i++) {
 			echo "<div ";
@@ -985,60 +981,37 @@
 								$url = getasidfileurl($match[1]);
 								echo "<a href=\"$url\" target=\"_new\">".basename($match[1])."</a>";
 							} else {
-								if (strpos($laarr[$k],'$f$')) {
-									if (strpos($laarr[$k],'&')) { //is multipart q
-										$laparr = explode('&',$laarr[$k]);
-										foreach ($laparr as $lk=>$v) {
-											if (strpos($v,'$f$')) {
-												$tmp = explode('$f$',$v);
-												$laparr[$lk] = $tmp[0];
-											}
-										}
-										$laarr[$k] = implode('&',$laparr);
+								//remove any $f$ wrong format markers
+								$laarr[$k] = preg_replace('/\$f\$.*?(&|$)/','$1', $laarr[$k]);
+
+								//remove any $#$ numeric value bits
+								$laarr[$k] = preg_replace('/\$#\$.*?(&|$)/','$1', $laarr[$k]);
+
+								$laparr = explode('&',$laarr[$k]); //handle multipart
+								foreach ($laparr as $lk=>$v) {
+									if (count($laparr)>1) {
+										$qn = ($i+1)*1000+$lk;
 									} else {
-										$tmp = explode('$f$',$laarr[$k]);
-										$laarr[$k] = $tmp[0];
+										$qn = $i;
+									}
+									if (strpos($v,'$!$')!==false) { //choices
+										$tmp = explode('$!$',$v);
+										if ($qn==$i && !isset($choicesdata[$qn])) { //handle single-part multipart
+											$choicesdata[$qn] = $choicesdata[($i+1)*1000];
+										}
+										$laparr[$lk] = prepchoicedisp($choicesdata[$qn][0]=='matching'?$tmp[0]:$tmp[1], $choicesdata[$qn]);
+									} else if (strpos($v,';;')!==false) { //drawing
+										if ($qn==$i && !isset($GLOBALS['drawinitdata'][$qn])) { //handle single-part multipart
+											$GLOBALS['drawinitdata'][$qn] = $GLOBALS['drawinitdata'][($i+1)*1000];
+										}
+										$laparr[$lk] = '<span onmouseover="showgraphtip(this,\''.Sanitize::encodeStringForJavascript($v).'\',\''.Sanitize::encodeStringForJavascript($GLOBALS['drawinitdata'][$qn]).'\')" onmouseout="tipout()">[view]</span>';
+									} else {
+										$laparr[$lk] = Sanitize::encodeStringForDisplay(str_replace(array('%nbsp;','%%'),array('&nbsp;','&'),$v));
 									}
 								}
-								if (strpos($laarr[$k],'$!$')) {
-									if (strpos($laarr[$k],'&')) { //is multipart q
-										$laparr = explode('&',$laarr[$k]);
-										foreach ($laparr as $lk=>$v) {
-											if (strpos($v,'$!$')) {
-												$qn = ($i+1)*1000+$lk;
-												$tmp = explode('$!$',$v);
-												//$laparr[$lk] = $tmp[0];
-												$laparr[$lk] = prepchoicedisp($choicesdata[$qn][0]=='matching'?$tmp[0]:$tmp[1], $choicesdata[$qn]);
-											}
-										}
-										$laarr[$k] = implode('&',$laparr);
-									} else {
-										$tmp = explode('$!$',$laarr[$k]);
-										//$laarr[$k] = $tmp[0];
-										$laarr[$k] = prepchoicedisp($choicesdata[$i][0]=='matching'?$tmp[0]:$tmp[1], $choicesdata[$i]);
-									}
-								} else {
-									$laarr[$k] = strip_tags($laarr[$k]);
-								}
+								$laarr[$k] = implode('; ',$laparr);
 
-
-								if (strpos($laarr[$k],'$#$')) {
-									if (strpos($laarr[$k],'&')) { //is multipart q
-										$laparr = explode('&',$laarr[$k]);
-										foreach ($laparr as $lk=>$v) {
-											if (strpos($v,'$#$')) {
-												$tmp = explode('$#$',$v);
-												$laparr[$lk] = $tmp[0];
-											}
-										}
-										$laarr[$k] = implode('&',$laparr);
-									} else {
-										$tmp = explode('$#$',$laarr[$k]);
-										$laarr[$k] = $tmp[0];
-									}
-								}
-
-								echo str_replace(array('&','%nbsp;','%%'),array('; ','&nbsp;','&'), $laarr[$k]);
+								echo $laarr[$k];
 							}
 							$cnt++;
 						}
@@ -1194,11 +1167,7 @@
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$asid));
 		$line=$stm->fetch(PDO::FETCH_ASSOC);
-		if ($line['ver']==1 && $line['endtime']<1483117200) { //hack fix: Use 32-bit equivalent randomizers for assignments completed before rehost
-			$GLOBALS['assessver'] = 2;
-		} else {
-			$GLOBALS['assessver'] = $line['ver'];
-		}
+		$GLOBALS['assessver'] = $line['ver'];
 
 		if (!$isteacher && !$istutor) {
 			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
@@ -1514,7 +1483,6 @@ function scorestocolors($sc,$pts,$answ,$noraw) {
 function prepchoicedisp($v,$choicesdata) {
 	if ($v=='') {return '';}
 	foreach ($choicesdata[1] as $k=>$c) {
-		$c = str_replace('&','%%',$c);
 		$sh = strip_tags($c);
 		if (trim($sh)=='' || strpos($c,'<table')!==false) {
 			$sh = "[view]";
@@ -1522,7 +1490,7 @@ function prepchoicedisp($v,$choicesdata) {
 			$sh = substr($sh,0,15).'...';
 		}
 		if ($sh!=$c) {
-			$choicesdata[1][$k] = '<span onmouseover="tipshow(this,\''.trim(str_replace('&','%%',htmlentities($c,ENT_QUOTES|ENT_HTML401))).'\')" onmouseout="tipout()">'.$sh.'</span>';
+			$choicesdata[1][$k] = '<span onmouseover="tipshow(this,\''.Sanitize::encodeStringForDisplay(trim(str_replace("\n",' ',$c))).'\')" onmouseout="tipout()">'.Sanitize::encodeStringForDisplay($sh).'</span>';
 		}
 	}
 	if ($choicesdata[0]=='choices') {
