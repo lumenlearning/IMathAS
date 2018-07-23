@@ -14,7 +14,7 @@ $schoolLogoUrl = $studentPayStatus->getSchoolLogoUrl();
 $stripeModalLogoUrl = 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/branding/LumenBlueBG-80x80.png';
 $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
 	? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
-
+$assessmentUrl = $_SERVER['REQUEST_URI'];
 $endpointUrl = $GLOBALS["basesiteurl"]
 	. sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
 		. '&groupId=%d&courseId=%d&studentId=%d&assessmentId=%d', $courseOwnerGroupId,
@@ -106,6 +106,7 @@ function displayPaymentPage()
         'stripeModalLogoUrl': '<?php echo $GLOBALS['stripeModalLogoUrl']; ?>',
         'endpointUrl': '<?php echo $GLOBALS['endpointUrl']; ?>',
         'redirectTo': '<?php echo $GLOBALS['redirectTo']; ?>',
+        'assessmentUrl': '<?php echo $GLOBALS['assessmentUrl'] ?>',
         'schoolLogoUrl': '<?php echo $GLOBALS['schoolLogoUrl']; ?>',
         'attributionLogoUrl': <?php echo $GLOBALS['attributionLogoUrl']; ?>,
         'trialTimeRemaining': '<?php echo $GLOBALS['trialTimeRemaining']; ?>',
