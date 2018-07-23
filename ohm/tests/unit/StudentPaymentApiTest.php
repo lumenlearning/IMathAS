@@ -150,18 +150,6 @@ final class StudentPaymentApiTest extends TestCase
 		$this->studentPaymentApi->getActivationStatusFromApi(12);
 	}
 
-	function testGetActivationStatusFromApi_UnexpectedResponse()
-	{
-		$this->curlMock->method('getInfo')->willReturn(200);
-		$this->curlMock->method('execute')->willReturn(StudentPaymentApiTest::UNEXPECTED_RESPONSE);
-		$this->curlMock->expects($this->once())->method('reset');
-		$this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
-
-		$this->expectException(StudentPaymentException::class);
-
-		$this->studentPaymentApi->getActivationStatusFromApi(12);
-	}
-
 	/*
 	 * activateCode
 	 */
@@ -384,30 +372,6 @@ final class StudentPaymentApiTest extends TestCase
 
 		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
 			array(0, null, array('200')));
-	}
-
-	function testParseApiResponse_nullResponse()
-	{
-		$this->expectException(StudentPaymentException::class);
-
-		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(200, null, array('200')));
-	}
-
-	function testParseApiResponse_emptyResponse()
-	{
-		$this->expectException(StudentPaymentException::class);
-
-		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(200, '', array('200')));
-	}
-
-	function testParseApiResponse_missingStatus()
-	{
-		$this->expectException(StudentPaymentException::class);
-
-		$this->invokePrivateMethod($this->studentPaymentApi, 'parseApiResponse',
-			array(200, '{}', array('200')));
 	}
 
 	function testParseApiResponse_notPaid_and_notInTrial()
