@@ -64,7 +64,11 @@ if ("activate_code" == $action) {
 }
 
 /**
- * This is called by the Stripe / direct pay component upon successful payment.
+ * Handle lumen-components activation codes and direct payments.
+ *
+ * This is the action for forms in lumen-components when:
+ *   1. After a successful payment via Stripe. (direct pay)
+ *   2. After entering an activation code, successful or not.
  */
 if ("payment_proxy" == $action) {
 	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
@@ -86,7 +90,7 @@ if ("payment_proxy" == $action) {
 		$formData = array_merge($_POST, array('section_name' => $courseName));
 		$apiResponse = $studentPaymentApi->paymentProxy($formData);
 	} catch (StudentPaymentException $e) {
-		error_log(sprintf("Exception while attempting to proxy Stripe data to Lumenistration."
+		error_log(sprintf("Exception while attempting to proxy activation/payment data to Lumenistration."
 			. " groupId=%d, courseId=%d, studentId=%d, error: %s",
 			$groupId, $courseId, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
