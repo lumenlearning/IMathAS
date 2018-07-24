@@ -97,15 +97,15 @@ function displayPaymentPage()
 	  }
 	?>
         'stripeKey': '<?php echo $GLOBALS['apiKey']; ?>',
-        'courseTitle': '<?php echo $GLOBALS['courseName']; ?>',
-        'userEmail': '<?php echo $GLOBALS['userEmail']; ?>',
+        'courseTitle': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['courseName']); ?>',
+        'userEmail': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userEmail']); ?>',
         'chargeAmount': '<?php echo $GLOBALS['amount']; ?>',
         'institutionOhmId': '<?php echo $GLOBALS['courseOwnerGroupId']; ?>',
         'institutionGuid': '<?php echo $GLOBALS['courseOwnerGroupGuid']; ?>',
         'institutionName': 'Lumen Learning',
         'sectionId': '<?php echo $GLOBALS['courseId']; ?>',
         'enrollmentId': '<?php echo $GLOBALS['enrollmentId']; ?>',
-        'chargeDescription': '<?php echo $GLOBALS['courseName']; ?>',
+        'chargeDescription': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['courseName']); ?>',
         'stripeModalLogoUrl': '<?php echo $GLOBALS['stripeModalLogoUrl']; ?>',
         'endpointUrl': '<?php echo $GLOBALS['endpointUrl']; ?>',
         'redirectTo': '<?php echo $GLOBALS['redirectTo']; ?>',
