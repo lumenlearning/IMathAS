@@ -22,6 +22,9 @@ $endpointUrl = $GLOBALS["basesiteurl"]
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 $amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
 
+$activationCodeErrors = isset($_REQUEST['activationCodeErrors']) ?
+	$_REQUEST['activationCodeErrors'] : null;
+
 $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
 $stm->execute(array(':id' => $userid));
 $userEmail = $stm->fetch(PDO::FETCH_ASSOC)['email'];
@@ -111,6 +114,7 @@ function displayPaymentPage()
         'attributionLogoUrl': <?php echo $GLOBALS['attributionLogoUrl']; ?>,
         'trialTimeRemaining': '<?php echo $GLOBALS['trialTimeRemaining']; ?>',
         'paymentStatus': '<?php echo $GLOBALS['paymentStatus']; ?>',
+        'activationCodeErrors': '<?php echo $GLOBALS['activationCodeErrors']; ?>',
       });
     </script>
 
