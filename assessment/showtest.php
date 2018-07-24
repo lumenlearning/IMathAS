@@ -3893,6 +3893,10 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			return true;
 		}
 
+		if (isset($_REQUEST['activationCodeErrors'])) {
+			return true;
+		}
+
 		if (!isset($_SERVER['HTTP_REFERER'])) {
 			return true;
 		}
