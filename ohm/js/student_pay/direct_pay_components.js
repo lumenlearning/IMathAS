@@ -260,7 +260,8 @@ var styles$1 = {
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'not-allowed',
-    margin: '13px 0'
+    margin: '13px 0',
+    padding: 0
   }
 };
 
@@ -460,7 +461,7 @@ var CheckoutTaxPage = function (_React$Component) {
             React.createElement(
               'div',
               { style: styles$1.assessmentActivation },
-              'Assesment Activation'
+              'Assessment Activation'
             ),
             React.createElement(
               'div',
