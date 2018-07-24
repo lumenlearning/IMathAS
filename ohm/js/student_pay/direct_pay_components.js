@@ -1679,7 +1679,7 @@ var OptionItem = function (_React$Component) {
 
         _this.state = {
             showDropdown: _this.props.activationCodeErrors != undefined && _this.props.activationCodeErrors.length > 0,
-            showItemButton: _this.props.activationCodeErrors != undefined && _this.props.activationCodeErrors.length > 0 ? false : true,
+            showItemButton: true,
             hoveringInfo: false
         };
 
@@ -1761,7 +1761,9 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_renderItemButton',
         value: function _renderItemButton() {
-            if (this.state.showItemButton) {
+            if (1 === this.props.item && this.state.showDropdown) {
+                return;
+            } else if (this.state.showItemButton) {
                 return React.createElement(
                     'button',
                     {
