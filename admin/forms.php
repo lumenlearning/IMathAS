@@ -1412,7 +1412,7 @@ function getGroupAssessmentAccessType($groupId) {
 				\OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
 				$apiResult->getAccessType();
 		} else {
-			$currentAccessType = \OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
+			$currentAccessType = \OHM\Models\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
 	} catch (\OHM\StudentPaymentException $e) {
 		// Don't allow failed API communication to break UX.
