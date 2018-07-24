@@ -1679,7 +1679,7 @@ var OptionItem = function (_React$Component) {
 
         _this.state = {
             showDropdown: _this.props.activationCodeErrors != undefined && _this.props.activationCodeErrors.length > 0,
-            showItemButton: true,
+            showItemButton: _this.props.activationCodeErrors != undefined && _this.props.activationCodeErrors.length > 0 ? false : true,
             hoveringInfo: false
         };
 
