@@ -23,7 +23,6 @@ $userEmail = $cookieData['email'];
 
 $redirectTo = sprintf('%s/assessment/showtest.php?id=%d&cid=%d',
 	$GLOBALS['basesiteurl'], $assessmentId, $courseId);
-$paymentStatus = 'has_access';
 
 $institution = getInstitutionData($groupId, $courseId, $userid);
 $schoolLogoUrl = $institution->getSchoolLogoUrl();
@@ -33,6 +32,7 @@ $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
 $stm = $DBH->prepare('SELECT name FROM imas_courses WHERE id = :id');
 $stm->execute(array(':id' => $courseId));
 $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
+
 ?>
 
     <div id="paymentComponent"></div>
@@ -40,18 +40,11 @@ $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
     <script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
     <script>
-	<?php
-	if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY) {
-	?> directPayComponents.renderDirectPayLandingPage('paymentComponent', { <?php
-		} else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_MULTI_PAY) {
-	?> directPayComponents.renderMultiPayPage('paymentComponent', { <?php
-		}
-	?>
-        'confirmationNum': '<?php echo $confirmationNum; ?>',
+	  directPayComponents.renderDirectPayLandingPage('paymentComponent', {
         'userEmail': '<?php echo $userEmail; ?>',
         'courseTitle': '<?php echo $courseName; ?>',
         'redirectTo': '<?php echo $redirectTo; ?>',
-        'paymentStatus': '<?php echo $paymentStatus; ?>',
+        'paymentStatus': 'has_access',
         'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
         'attributionLogoUrl': <?php echo $attributionLogoUrl; ?>,
       });
