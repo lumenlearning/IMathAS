@@ -40,9 +40,7 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 	<h1 class="greeting">You're all set!</h1>
 
 	<p class="blurb">
-    Thank you for submitting your Lumen OHM course activation code. You will receive
-    a confirmation email shortly. Please print this screen or save it as a
-    PDF for your records.
+    Thank you for submitting your Lumen OHM course activation code. Please print this screen or save it as a PDF for your records.
 	</p>
 
 	<h2 id="subhead">Submission Details</h2>
@@ -50,7 +48,7 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></p>
 		<p><strong>Course Name: </strong><?php echo Sanitize::encodeStringForDisplay($courseName); ?></p>
         <p><strong>Course ID: </strong><?php echo Sanitize::encodeStringForDisplay($_REQUEST['courseId']); ?></p>
-		<p><strong>Access Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
+		<p><strong>Activation Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
 		<p><strong>Timestamp: </strong><?php echo $timestamp_string; ?></p>
 	</div>
 
