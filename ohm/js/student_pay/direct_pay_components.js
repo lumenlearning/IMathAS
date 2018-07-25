@@ -504,7 +504,7 @@ var CheckoutTaxPage = function (_React$Component) {
   }, {
     key: '_renderPayButton',
     value: function _renderPayButton() {
-      if (5 === this.state.zipcode.length) {
+      if ('-' != this.state.total) {
         return React.createElement(DirectPayButton, defineProperty({
           paymentStatus: this.props.paymentStatus,
           stripeKey: this.props.stripeKey,
