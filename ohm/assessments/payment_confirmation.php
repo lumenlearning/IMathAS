@@ -10,6 +10,7 @@ require_once(__DIR__ . "/../../header.php");
 
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
+use OHM\Models\StudentPayApiResult;
 
 
 $cookieData = json_decode($_COOKIE['ohm_payment_confirmation'], true);
@@ -34,12 +35,18 @@ $stm->execute(array(':id' => $courseId));
 $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
 ?>
 
-    <div id="directPay"></div>
+    <div id="paymentComponent"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
     <script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
     <script>
-      directPayComponents.renderDirectPayLandingPage('directPay', {
+	<?php
+	if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY) {
+	?> directPayComponents.renderDirectPayLandingPage('paymentComponent', { <?php
+		} else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_MULTI_PAY) {
+	?> directPayComponents.renderMultiPayPage('paymentComponent', { <?php
+		}
+	?>
         'confirmationNum': '<?php echo $confirmationNum; ?>',
         'userEmail': '<?php echo $userEmail; ?>',
         'courseTitle': '<?php echo $courseName; ?>',
