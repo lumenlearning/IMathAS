@@ -153,7 +153,8 @@ function response($status, $msg)
 /**
  * Redirect a user to the direct payment confirmation page.
  *
- * @param string $activationType "activation_code_claimed" or "paid".
+ * @param string $paymentStatus "activation_code_claimed" for access codes
+ *                              or "ok" for direct pay.
  * @param string $assessmentUrl The assessment's URL.
  * @param integer $groupId The group ID. (from imas_groups)
  * @param integer $courseId The course ID. (from imas_courses)
@@ -161,7 +162,7 @@ function response($status, $msg)
  * @param string $confirmationNum The confirmation number, as a string.
  * @param string $email The user's email used for payment receipts
  */
-function redirect_to_payment_confirmation($activationType, $assessmentUrl,
+function redirect_to_payment_confirmation($paymentStatus, $assessmentUrl,
 										  $groupId, $courseId, $assessmentId,
 										  $confirmationNum, $email)
 {
@@ -175,9 +176,12 @@ function redirect_to_payment_confirmation($activationType, $assessmentUrl,
 	setcookie('ohm_payment_confirmation', json_encode($cookieData), 0);
 
 	$confirmationUrl = null;
-	if ('paid' == $activationType) {
+	if ('ok' == $paymentStatus) {
+		// "ok" is the status returned for successful direct payment.
 		$confirmationUrl = $GLOBALS["basesiteurl"] . '/ohm/assessments/payment_confirmation.php';
-	} elseif ('activation_code_claimed' == $activationType) {
+	} elseif ('activation_code_claimed' == $paymentStatus) {
+		// "activation_code_claimed" is the status returned for successful
+		// access code activation.
 		$confirmationUrl = $assessmentUrl;
 	}
 	header('Location: ' . $confirmationUrl, true);
