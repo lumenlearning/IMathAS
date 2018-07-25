@@ -1963,14 +1963,14 @@ var MultiPayAccessOptions = function (_React$Component) {
         value: function _getButtonText() {
             if ('quiz_count' === this.props.trialType) {
                 return 'Use Pass';
-            }
+            } else {
+                if ('trial_not_started' === this.props.paymentStatus) {
+                    return 'Start Trial';
+                }
 
-            if ('trial_not_started' === this.props.paymentStatus) {
-                return 'Start Trial';
-            }
-
-            if ('in_trial' === this.props.paymentStatus || 'can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) {
-                return 'Continue Trial';
+                if ('in_trial' === this.props.paymentStatus || 'can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) {
+                    return 'Continue Trial';
+                }
             }
         }
     }]);
@@ -2022,7 +2022,9 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                 React.createElement(
                     'p',
                     { style: styles$6.footerText },
-                    'By clicking on Enter Code, Pay Now, or Use Pass you agree to the Lumen Learning ',
+                    '`By clicking on Enter Code, Pay Now, or ',
+                    this._renderTrialContinueText(),
+                    ' you agree to the Lumen Learning` ',
                     React.createElement(
                         'a',
                         { target: '_blank', href: 'https://lumenlearning.com/policies/terms-of-service', style: styles$6.footerLinks },
@@ -2037,6 +2039,15 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                     '.'
                 )
             );
+        }
+    }, {
+        key: '_renderTrialContinueText',
+        value: function _renderTrialContinueText() {
+            if (this.props.trialType === "quiz_count") {
+                return "Use Pass";
+            } else {
+                return "Continue Trial";
+            }
         }
     }]);
     return MultiPayCourseAssessmentActivation;
