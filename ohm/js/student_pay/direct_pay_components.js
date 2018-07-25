@@ -954,49 +954,75 @@ var DirectPayConfirmation = function (_React$Component) {
   createClass(DirectPayConfirmation, [{
     key: 'render',
     value: function render() {
-      return React.createElement(
-        'div',
-        { style: styles$2.confirmationPageWrapper },
-        React.createElement(
+      if (this.props.confirmationNum != undefined) {
+        return React.createElement(
           'div',
-          { className: 'confirmation-wrapper', style: styles$2.confirmationWrapper },
-          React.createElement(
-            'h1',
-            { className: 'heading', style: styles$2.confirmationHeading },
-            'Thank You!'
-          ),
-          React.createElement(
-            'h2',
-            { className: 'subheading', style: styles$2.confirmationSubheading },
-            'You can now access all online assessments for ' + this.props.courseTitle + '.'
-          ),
+          { style: styles$2.confirmationPageWrapper },
           React.createElement(
             'div',
-            { className: 'confirmation-text-wrapper', style: styles$2.confirmationTextWrapper },
+            { className: 'confirmation-wrapper', style: styles$2.confirmationWrapper },
             React.createElement(
-              'p',
-              { style: styles$2.confirmationText },
-              'Confirmation #' + this.props.confirmationNum
+              'h1',
+              { className: 'heading', style: styles$2.confirmationHeading },
+              'Thank You!'
             ),
             React.createElement(
-              'p',
-              { style: styles$2.confirmationText },
-              'A receipt has been sent to your email address at ' + this.props.userEmail + '.'
+              'h2',
+              { className: 'subheading', style: styles$2.confirmationSubheading },
+              'You can now access all online assessments for ' + this.props.courseTitle + '.'
             ),
-            React.createElement('br', null),
             React.createElement(
-              'p',
-              { style: styles$2.confirmationText },
-              'The purchase will show up as Lumen Learning on your debit or credit card statement.'
+              'div',
+              { className: 'confirmation-text-wrapper', style: styles$2.confirmationTextWrapper },
+              React.createElement(
+                'p',
+                { style: styles$2.confirmationText },
+                'Confirmation #' + this.props.confirmationNum
+              ),
+              React.createElement(
+                'p',
+                { style: styles$2.confirmationText },
+                'A receipt has been sent to your email address at ' + this.props.userEmail + '.'
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'p',
+                { style: styles$2.confirmationText },
+                'The purchase will show up as Lumen Learning on your debit or credit card statement.'
+              )
+            ),
+            React.createElement(
+              'button',
+              { style: styles$2.continueButton, onClick: this._handleClick },
+              'Continue'
             )
-          ),
-          React.createElement(
-            'button',
-            { style: styles$2.continueButton, onClick: this._handleClick },
-            'Continue'
           )
-        )
-      );
+        );
+      } else {
+        return React.createElement(
+          'div',
+          { style: styles$2.confirmationPageWrapper },
+          React.createElement(
+            'div',
+            { className: 'confirmation-wrapper', style: styles$2.confirmationWrapper },
+            React.createElement(
+              'h1',
+              { className: 'heading', style: styles$2.confirmationHeading },
+              'Thank You!'
+            ),
+            React.createElement(
+              'h2',
+              { className: 'subheading', style: styles$2.confirmationSubheading },
+              'You can now access all online assessments for your course.'
+            ),
+            React.createElement(
+              'button',
+              { style: styles$2.continueButton, onClick: this._handleClick },
+              'Continue'
+            )
+          )
+        );
+      }
     }
   }, {
     key: '_handleClick',
