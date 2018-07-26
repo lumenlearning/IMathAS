@@ -896,6 +896,14 @@ var styles$2 = {
     fontWeight: 'normal',
     padding: '0px'
   },
+  confirmationDetailKey: {
+    fontSize: '1.2em',
+    fontWeight: 'bold'
+  },
+  confirmationDetailValue: {
+    fontSize: '1.2em',
+    marginBottom: '0.2em'
+  },
   confirmationHeading: {
     fontSize: '26px',
     fontWeight: 'bold',
@@ -1011,56 +1019,59 @@ var DirectPayConfirmation = function (_React$Component) {
             React.createElement(
               'h1',
               { className: 'heading', style: styles$2.confirmationHeading },
-              'Thank You!'
-            ),
-            React.createElement(
-              'h2',
-              { className: 'subheading', style: styles$2.confirmationSubheading },
               'You\'re all set!'
             ),
             React.createElement(
-              'p',
-              null,
+              'div',
+              { className: 'confirmation-text-wrapper', style: styles$2.confirmationTextWrapper },
               React.createElement(
-                'strong',
-                null,
-                'Student Name: '
+                'p',
+                { style: styles$2.confirmationDetailValue },
+                React.createElement(
+                  'span',
+                  { style: styles$2.confirmationDetailKey },
+                  'Student Name: '
+                ),
+                ' ',
+                this.props.studentName,
+                ' '
               ),
-              ' ',
-              this.props.studentName
-            ),
-            React.createElement(
-              'p',
-              null,
               React.createElement(
-                'strong',
-                null,
-                'Course Name: '
+                'p',
+                { style: styles$2.confirmationDetailValue },
+                React.createElement(
+                  'span',
+                  { style: styles$2.confirmationDetailKey },
+                  'Course Name: '
+                ),
+                ' ',
+                this.props.courseTitle,
+                ' '
               ),
-              ' ',
-              this.props.courseTitle
-            ),
-            React.createElement(
-              'p',
-              null,
               React.createElement(
-                'strong',
-                null,
-                'Activation Code Used: '
+                'p',
+                { style: styles$2.confirmationDetailValue },
+                React.createElement(
+                  'span',
+                  { style: styles$2.confirmationDetailKey },
+                  'Activation Code Used: '
+                ),
+                ' ',
+                this.props.activationCode.toUpperCase(),
+                ' '
               ),
-              ' ',
-              this.props.activationCode
-            ),
-            React.createElement(
-              'p',
-              null,
               React.createElement(
-                'strong',
-                null,
-                'Timestamp: '
-              ),
-              ' ',
-              timestamp
+                'p',
+                { style: styles$2.confirmationDetailValue },
+                React.createElement(
+                  'span',
+                  { style: styles$2.confirmationDetailKey },
+                  'Timestamp: '
+                ),
+                ' ',
+                timestamp,
+                ' '
+              )
             ),
             React.createElement(
               'button',
