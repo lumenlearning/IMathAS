@@ -954,6 +954,9 @@ var DirectPayConfirmation = function (_React$Component) {
   createClass(DirectPayConfirmation, [{
     key: 'render',
     value: function render() {
+      var date = new Date();
+      var timestamp = date.toLocaleString();
+
       if (this.props.confirmationNum != undefined) {
         return React.createElement(
           'div',
@@ -1035,7 +1038,7 @@ var DirectPayConfirmation = function (_React$Component) {
                 'Course Name: '
               ),
               ' ',
-              this.props.courseName
+              this.props.courseTitle
             ),
             React.createElement(
               'p',
@@ -1057,7 +1060,7 @@ var DirectPayConfirmation = function (_React$Component) {
                 'Timestamp: '
               ),
               ' ',
-              new Date()
+              timestamp
             ),
             React.createElement(
               'button',
@@ -1217,8 +1220,8 @@ var DirectPayLandingPage = function (_React$Component) {
           courseTitle: this.props.courseTitle,
           redirectTo: this.props.redirectTo,
           studentName: this.props.studentName,
-          courseName: this.props.courseName,
-          activationCode: this.props.activationCode
+          activationCode: this.props.activationCode,
+          timestamp: this.props.timestamp
         });
       } else {
         return React.createElement(DirectPayCourseActivation, {
@@ -1476,16 +1479,24 @@ var Banner = function (_React$Component) {
         key: '_renderBannerContent',
         value: function _renderBannerContent() {
             if ('quiz_count' === this.props.trialType) {
-                return React.createElement(
-                    'p',
-                    { style: styles$5.bannerText },
-                    'You have run out of activation passes. Use a final one-time pass to access this assessment',
-                    React.createElement(
-                        'a',
-                        { href: this.props.redirectTo, style: styles$5.usePassLink },
-                        'Use Pass'
-                    )
-                );
+                if ('expired' === this.props.paymentStatus) {
+                    return React.createElement(
+                        'p',
+                        { style: styles$5.bannerText },
+                        'You\u2019ve run out of activation passes. Course content is still available. However, you need to pay to activate the assessments in this course.'
+                    );
+                } else if ('can_extend' === this.props.paymentStatus) {
+                    return React.createElement(
+                        'p',
+                        { style: styles$5.bannerText },
+                        'You have run out of activation passes. Use a final one-time pass to access this assessment',
+                        React.createElement(
+                            'a',
+                            { href: this.props.redirectTo, style: styles$5.usePassLink },
+                            'Use Pass'
+                        )
+                    );
+                }
             } else {
                 return React.createElement(
                     'p',
@@ -2143,7 +2154,7 @@ var MultiPayPage = function (_React$Component) {
         key: '_renderBanner',
         value: function _renderBanner() {
             if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
-                return React.createElement(Banner, { trialType: this.props.trialType, redirectTo: this.props.redirectTo });
+                return React.createElement(Banner, { trialType: this.props.trialType, paymentStatus: this.props.paymentStatus, redirectTo: this.props.redirectTo });
             }
         }
     }, {

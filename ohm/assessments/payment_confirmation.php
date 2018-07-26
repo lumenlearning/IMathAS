@@ -16,6 +16,7 @@ use OHM\Models\StudentPayApiResult;
 $cookieData = json_decode($_COOKIE['ohm_payment_confirmation'], true);
 
 $confirmationNum = $cookieData['confNum'];
+$activationCode = $cookieData['code'];
 $groupId = $cookieData['gid'];
 $courseId = $cookieData['cid'];
 $assessmentId = $cookieData['aid'];
@@ -42,7 +43,9 @@ $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
     <script>
 	  directPayComponents.renderDirectPayLandingPage('paymentComponent', {
         'userEmail': '<?php echo $userEmail; ?>',
+        'studentName': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userfullname']) ?>',
         'courseTitle': '<?php echo $courseName; ?>',
+        'activationCode': '<?php echo $activationCode ?>',
         'redirectTo': '<?php echo $redirectTo; ?>',
         'paymentStatus': 'has_access',
         'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
