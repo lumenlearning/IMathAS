@@ -1013,7 +1013,51 @@ var DirectPayConfirmation = function (_React$Component) {
             React.createElement(
               'h2',
               { className: 'subheading', style: styles$2.confirmationSubheading },
-              'You can now access all online assessments for your course.'
+              'You\'re all set!'
+            ),
+            React.createElement(
+              'p',
+              null,
+              React.createElement(
+                'strong',
+                null,
+                'Student Name: '
+              ),
+              ' ',
+              this.props.studentName
+            ),
+            React.createElement(
+              'p',
+              null,
+              React.createElement(
+                'strong',
+                null,
+                'Course Name: '
+              ),
+              ' ',
+              this.props.courseName
+            ),
+            React.createElement(
+              'p',
+              null,
+              React.createElement(
+                'strong',
+                null,
+                'Activation Code Used: '
+              ),
+              ' ',
+              this.props.activationCode
+            ),
+            React.createElement(
+              'p',
+              null,
+              React.createElement(
+                'strong',
+                null,
+                'Timestamp: '
+              ),
+              ' ',
+              new Date()
             ),
             React.createElement(
               'button',
@@ -1171,7 +1215,10 @@ var DirectPayLandingPage = function (_React$Component) {
           confirmationNum: this.props.confirmationNum,
           userEmail: this.props.userEmail,
           courseTitle: this.props.courseTitle,
-          redirectTo: this.props.redirectTo
+          redirectTo: this.props.redirectTo,
+          studentName: this.props.studentName,
+          courseName: this.props.courseName,
+          activationCode: this.props.activationCode
         });
       } else {
         return React.createElement(DirectPayCourseActivation, {
@@ -2022,9 +2069,9 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                 React.createElement(
                     'p',
                     { style: styles$6.footerText },
-                    '`By clicking on Enter Code, Pay Now, or ',
+                    'By clicking on Enter Code, Pay Now, or ',
                     this._renderTrialContinueText(),
-                    ' you agree to the Lumen Learning` ',
+                    ' you agree to Lumen Learning\'s ',
                     React.createElement(
                         'a',
                         { target: '_blank', href: 'https://lumenlearning.com/policies/terms-of-service', style: styles$6.footerLinks },
