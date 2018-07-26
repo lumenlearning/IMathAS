@@ -87,17 +87,17 @@ class Sanitize
 	/**
 	 * Encode a string for display in a web browser. Use for page text and HTML attributes only!
 	 *
-	 * This method will not double-encode existing HTML entities.
-	 *
 	 * @see encodeStringForJavascript
 	 * @see encodeStringForCSS
 	 *
 	 * @param $string string The string to encode.
+	 * @param $doubleencode boolean whether or not to double-encode existing
+	 *                              entities. Optional, default: false
 	 * @return string the encoded string.
 	 */
-	public static function encodeStringForDisplay($string)
+	public static function encodeStringForDisplay($string, $doubleencode = false)
 	{
-		return htmlspecialchars($string, ENT_QUOTES | ENT_HTML401, ini_get("default_charset"), false);
+		return htmlspecialchars($string, ENT_QUOTES | ENT_HTML401, ini_get("default_charset"), $doubleencode);
 	}
 
 	/**
@@ -170,6 +170,21 @@ class Sanitize
 		return implode("/", array_map("rawurlencode", explode("/", $string)));
 	}
 
+	/**
+	* Simple sanitization and escaping of a URL for inclusion in an href
+	* Not as in-depth as the url method, but sufficient
+	* to ensure basic encoding of quotes and such has been done
+	* and basic allowed characters have been checked
+	*
+	* @param $url the url to sanitize
+	* @return string the sanitized url, for inclusion in an href
+	*/
+	public static function encodeUrlForHref($url) 
+	{
+		$url = filter_var($url, FILTER_SANITIZE_URL);
+		return htmlspecialchars($url, ENT_QUOTES | ENT_HTML401, ini_get("default_charset"), false);
+	}
+	
 	/**
 	 * An alias for Sanitize::url().
 	 * TODO: Remove this after merges between all repos are complete and all references to fullUrl() are removed.
@@ -327,7 +342,7 @@ class Sanitize
 	/**
 	 * Sanitize data so it only contains simple characters: a-zA-Z0-9_-
 	 *
-	 * @param $data mixed A variable containing a number.
+	 * @param $data mixed A variable containing a string.
 	 * @return string A sanitized variable containing simple characters.
 	 */
 	public static function simpleString($data)
@@ -350,7 +365,7 @@ class Sanitize
 	 * Sanitize data so it only contains ASCII 32-127.
 	 * Also strips HTML tags
 	 *
-	 * @param $data mixed A variable containing a number.
+	 * @param $data mixed A variable containing a string.
 	 * @return string A sanitized variable containing ASCII 32-127.
 	 */
 	public static function simpleASCII($data)
@@ -506,6 +521,27 @@ class Sanitize
 	 */
 	public static function incomingHtml($unsafeContent) {
 		return myhtmLawed($unsafeContent);
+	}
+	
+	/**
+	 * Generate a random string for the query string 
+	 *
+	 * @return string The sanitized content.
+	 */
+	public static function randomQueryStringParam() {
+		return uniqid();
+	}
+	
+	/**
+	 * A function for exporting text within a .imas
+	 * export file. Since this format is intended to
+	 * be a raw copy of the database data, this
+	 * function does nothing.
+	 *
+	 * @return string The "sanitized" content.
+	 */
+	public static function forRawExport($str) {
+		return $str;
 	}
 
 }

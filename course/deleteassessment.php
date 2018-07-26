@@ -23,50 +23,29 @@ if (!(isset($teacherid))) {
 } elseif (isset($_REQUEST['remove'])) { // a valid delete request loaded the page
 	$cid = Sanitize::courseId($_GET['cid']);
 	$block = Sanitize::stripHtmlTags($_GET['block']);
-
+	$aid = Sanitize::onlyInt($_GET['id']);
+	
 	if ($_POST['remove']=="really") {
-		$aid = Sanitize::onlyInt($_GET['id']);
 		$DBH->beginTransaction();
-		//DB $query = "DELETE FROM imas_assessments WHERE id='$aid' AND courseid=$cid";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("DELETE FROM imas_assessments WHERE id=:id AND courseid=:courseid");
 		$stm->execute(array(':id'=>$aid, ':courseid'=>$cid));
 		if ($stm->rowCount()>0) {
 			require_once('../includes/filehandler.php');
 			deleteallaidfiles($aid);
-
-			//DB $query = "DELETE FROM imas_assessment_sessions WHERE assessmentid='$aid'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
 			$stm->execute(array(':assessmentid'=>$aid));
 
 			$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE assessmentid=:assessmentid AND itemtype='A'");
 			$stm->execute(array(':assessmentid'=>$aid));
-
-			//DB $query = "DELETE FROM imas_questions WHERE assessmentid='$aid'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("DELETE FROM imas_questions WHERE assessmentid=:assessmentid");
 			$stm->execute(array(':assessmentid'=>$aid));
-
-			//DB $query = "SELECT id FROM imas_items WHERE typeid='$aid' AND itemtype='Assessment'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $itemid = mysql_result($result,0,0);
 			$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype='Assessment'");
 			$stm->execute(array(':typeid'=>$aid));
 			$itemid = $stm->fetchColumn(0);
-			//DB $query = "DELETE FROM imas_items WHERE id='$itemid'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("DELETE FROM imas_items WHERE id=:id");
 			$stm->execute(array(':id'=>$itemid));
-
-			//DB $query = "DELETE FROM imas_livepoll_status WHERE assessmentid='$aid'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
 			$stm->execute(array(':assessmentid'=>$aid));
-
-			//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $items = unserialize(mysql_result($result,0,0));
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$cid));
 			$items = unserialize($stm->fetchColumn(0));
@@ -79,10 +58,7 @@ if (!(isset($teacherid))) {
 			$key = array_search($itemid,$sub);
 			if ($key!==false) {
 				array_splice($sub,$key,1);
-				//DB $itemorder = addslashes(serialize($items));
 				$itemorder = serialize($items);
-				//DB $query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='$cid'";
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 				$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
 			}
@@ -91,15 +67,12 @@ if (!(isset($teacherid))) {
 			$stm->execute(array(':assessmentid'=>$aid, ':courseid'=>$cid));
 		}
 		$DBH->commit();
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']));
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
 
 		exit;
 	} else {
-		//DB $query = "SELECT name FROM imas_assessments WHERE id='{$_GET['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $itemname = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
-		$stm->execute(array(':id'=>$_GET['id']));
+		$stm->execute(array(':id'=>$aid));
 		$itemname = $stm->fetchColumn(0);
 	}
 }

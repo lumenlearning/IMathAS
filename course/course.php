@@ -26,8 +26,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		require_once("../includes/filehandler.php");
 		//deleteasidfilesbyquery(array('id'=>$sessiondata['sessiontestid']),1);
 		deleteasidfilesbyquery2('id',$sessiondata['sessiontestid'],null,1);
-		//DB $query = "DELETE FROM imas_assessment_sessions WHERE id='{$sessiondata['sessiontestid']}' LIMIT 1";
-		//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
 		$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE id=:id LIMIT 1");
 		$stm->execute(array(':id'=>$sessiondata['sessiontestid']));
 	}
@@ -36,11 +34,8 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$from = $_GET['from'];
 		$to = $_GET['to'];
 		$block = $_GET['block'];
-		//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $items = unserialize(mysql_result($result,0,0));
 		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-		$stm->execute(array(':id'=>$_GET['cid']));
+		$stm->execute(array(':id'=>$cid));
 		$items = unserialize($stm->fetchColumn(0));
 		$blocktree = explode('-',$block);
 		$sub =& $items;
@@ -83,13 +78,10 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 				array_splice($curblock,$to-1,0,$itemtomove);
 			}
 		}
-		//DB $itemlist = addslashes(serialize($items));
 		$itemlist = serialize($items);
-		//DB $query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='{$_GET['cid']}'";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$_GET['cid']));
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']));
+		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
 	}
 		
 	$stm = $DBH->prepare("SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,latepasshrs FROM imas_courses WHERE id=:id");
@@ -122,10 +114,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		} else {
 			$sub['newflag']=0;
 		}
-		//DB $itemlist = addslashes(serialize($items));
 		$itemlist = serialize($items);
-		//DB $query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='$cid'";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
 	}
@@ -177,7 +166,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		
 	if ($_GET['folder']!='0') {
 		$now = time();
-		$blocktree = explode('-',$_GET['folder']);
+		$blocktree = array_map('intval', explode('-',$_GET['folder']));
 		$backtrack = array();
 		for ($i=1;$i<count($blocktree);$i++) {
 			$backtrack[] = array($items[$blocktree[$i]-1]['name'],implode('-',array_slice($blocktree,0,$i+1)));
@@ -193,14 +182,20 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 					echo 'Not authorized';
 					exit;
 				}
-			}  
+			}
+			if (strlen($items[$blocktree[$i]-1]['SH'])>2) {
+				$contentbehavior = $items[$blocktree[$i]-1]['SH'][2];
+			} else {
+				$contentbehavior = 0;
+			}
 			$items = $items[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
 		}
 	}
 	//DEFAULT DISPLAY PROCESSING
-	$jsAddress1 = $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']);
-	$jsAddress2 = $GLOBALS['basesiteurl'] . "/course";
-	
+	//$jsAddress1 = $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']);
+	$jsAddress2 = $GLOBALS['basesiteurl'] . "/course/";
+	//$jsAddress2 = $GLOBALS['basesiteurl'] . "/course";
+
 	$openblocks = Array(0);
 	$prevloadedblocks = array(0);
 	if (isset($_COOKIE['openblocks-'.$cid]) && $_COOKIE['openblocks-'.$cid]!='') {$openblocks = explode(',',$_COOKIE['openblocks-'.$cid]); $firstload=false;} else {$firstload=true;}
@@ -222,9 +217,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 				if ($i!=count($backtrack)-1) {
 					$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder=" . Sanitize::encodeUrlParam($backtrack[$i][1]) . "\">";
 				}
-				//DB $sendcrumb .= "<a href=\"course.php?cid=$cid&folder={$backtrack[$i][1]}\">".stripslashes($backtrack[$i][0]).'</a>';
 				$sendcrumb .= "<a href=\"course.php?cid=$cid&folder=" . Sanitize::encodeUrlParam($backtrack[$i][1]) . "\">".Sanitize::encodeStringForDisplay($backtrack[$i][0]).'</a>';
-				//DB $curBreadcrumb .= stripslashes($backtrack[$i][0]);
 				$curBreadcrumb .= Sanitize::encodeStringForDisplay($backtrack[$i][0]);
 				if ($i!=count($backtrack)-1) {
 					$curBreadcrumb .= "</a>";
@@ -243,7 +236,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 			if ($i!=count($backtrack)-1) {
 				$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder=" . Sanitize::encodeUrlParam($backtrack[$i][1]) . "\">";
 			}
-				//DB $curBreadcrumb .= stripslashes($backtrack[$i][0]);
 				$curBreadcrumb .= Sanitize::encodeStringForDisplay($backtrack[$i][0]);
 			if ($i!=count($backtrack)-1) {
 				$curBreadcrumb .= "</a>";
@@ -263,9 +255,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	
 	
 	if ($msgset<4) {
-	   //DB $query = "SELECT COUNT(id) FROM imas_msgs WHERE msgto='$userid' AND courseid='$cid' AND (isread=0 OR isread=4)";
-	   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	   //DB $msgcnt = mysql_result($result,0,0);
 	   $stm = $DBH->prepare("SELECT COUNT(id) FROM imas_msgs WHERE msgto=:msgto AND courseid=:courseid AND (isread=0 OR isread=4)");
 	   $stm->execute(array(':msgto'=>$userid, ':courseid'=>$cid));
 	   $msgcnt = $stm->fetchColumn(0);
@@ -290,17 +279,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$query .= "AND (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL))) AS newitems ";
 	*/
 	$now = time();
-	//DB $query = "SELECT imas_forum_threads.forumid, COUNT(imas_forum_threads.id) FROM imas_forum_threads ";
-	//DB $query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid='$cid' ";
-	//DB if (!isset($teacherid)) {
-		//DB $query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now && imas_forums.enddate>$now)) ";
-	//DB }
-	//DB $query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid='$userid' ";
-	//DB $query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
-	//DB if (!isset($teacherid)) {
-		//DB $query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid='$userid')) ";
-	//DB }
-	//DB $query .= "GROUP BY imas_forum_threads.forumid";
 	$query = "SELECT imas_forum_threads.forumid, COUNT(imas_forum_threads.id) FROM imas_forum_threads ";
 	$query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid=:courseid ";
 	if (!isset($teacherid)) {
@@ -327,9 +305,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
 	$query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid='$userid')) ";
 	*/
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$newpostcnts = array();
-	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$newpostcnts[$row[0]] = $row[1];
 	}
@@ -357,9 +333,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	//get read linked items
 	$readlinkeditems = array();
 	if ($coursetheme=='otbsreader.css' && isset($studentid)) {
-		//DB $query = "SELECT DISTINCT typeid FROM imas_content_track WHERE userid='$userid' AND type='linkedlink' AND courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT DISTINCT typeid FROM imas_content_track WHERE userid=:userid AND type='linkedlink' AND courseid=:courseid");
 		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -378,7 +351,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	}
 }
 
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=072917\"></script>";
+$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=070218\"></script>";
 if (isset($tutorid) && isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
 	$placeinhead .= '<script type="text/javascript">$(function(){$(".instrdates").hide();});</script>';
 }
@@ -398,14 +371,14 @@ if ($overwriteBody==1) {
 	if (isset($teacherid)) {
  ?>  
 	<script type="text/javascript">
-		/*function moveitem(from,blk) {
-			var to = document.getElementById(blk+'-'+from).value;
-			
-			if (to != from) {
-				var toopen = '<?php echo $jsAddress1 ?>&block=' + blk + '&from=' + from + '&to=' + to;
-				window.location = toopen;
-			}
-		}*/
+		//function moveitem(from,blk) {
+		//	var to = document.getElementById(blk+'-'+from).value;
+        //
+		//	if (to != from) {
+		//		var toopen = '<?php //echo $jsAddress1 ?>//&block=' + blk + '&from=' + from + '&to=' + to;
+		//		window.location = toopen;
+		//	}
+		//}
 		function moveDialog(block,item) {
 			GB_show(_("Move Item"), imasroot+"/course/moveitem.php?cid="+cid+"&item="+item+"&block="+block, 600, "auto");
 			return false;
@@ -414,7 +387,7 @@ if ($overwriteBody==1) {
 			var type = document.getElementById('addtype'+blk+'-'+tb).value;
 			if (tb=='BB' || tb=='LB') { tb = 'b';}
 			if (type!='') {
-				var toopen = '<?php echo $jsAddress2 ?>/add' + type + '.php?block='+blk+'&tb='+tb+'&cid=<?php echo Sanitize::courseId($_GET['cid']); ?>';
+				var toopen = '<?php echo $jsAddress2 ?>add' + type + '.php?block='+blk+'&tb='+tb+'&cid=<?php echo $cid; ?>';
 				window.location = toopen;
 			}
 		}
@@ -631,7 +604,7 @@ if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migra
 		   echo '</ul>';
 		   echo '<p>&nbsp;</p>';
 	   } else {
-		   showitems($items,$_GET['folder']);
+		   showitems($items,$_GET['folder'],false,$contentbehavior);
 	   }
 
    } else {
@@ -641,7 +614,6 @@ if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migra
 	   	echo '<p>To start by copying from another course, use the <a href="copyitems.php?cid='.$cid.'">Course Items: Copy</a> ';
 	   	echo 'link along the left side of the screen.</p><p>If you want to build from scratch, use the "Add An Item" pulldown below to get started.</p><p>&nbsp;</p>';
 	   	   }
-	   	// $_GET['folder'] is sanitized in generateadditem()
 	   	echo generateadditem($_GET['folder'],'t');
 	   }
    }

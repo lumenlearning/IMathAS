@@ -90,6 +90,9 @@ function setupLivePreview(qn) {
 			  		if (format.indexOf('list')==-1 && format.indexOf('set')==-1) {
 			  			text = text.replace(/(\d)\s*,\s*(?=\d{3}\b)/g,"$1");
 			  		}
+			  		if (format.indexOf('scinot')!=-1) {
+			  			text = text.replace(/(x|X|\u00D7)/,"xx");
+			  		}
 			  	}
 			  	return text;
 			  },
@@ -165,7 +168,7 @@ function normalizemathunicode(str) {
 	str = str.replace(/\u2329/g, "<").replace(/\u232a/g, ">");
 	str = str.replace(/₀/g,"_0").replace(/₁/g,"_1").replace(/₂/g,"_2").replace(/₃/g,"_3");
 	str = str.replace(/\bOO\b/i,"oo");
-	str = str.replace(/θ/,"theta").replace(/φ/,"phi").replace(/π/,"pi").replace(/σ/,"sigma").replace(/μ/,"mu")
+	str = str.replace(/θ/,"theta").replace(/ϕ/,"phi").replace(/φ/,"phi").replace(/π/,"pi").replace(/σ/,"sigma").replace(/μ/,"mu")
 	str = str.replace(/α/,"alpha").replace(/β/,"beta").replace(/γ/,"gamma").replace(/δ/,"delta").replace(/ε/,"epsilon").replace(/κ/,"kappa");
 	str = str.replace(/λ/,"lambda").replace(/ρ/,"rho").replace(/τ/,"tau").replace(/χ/,"chi").replace(/ω/,"omega");
 	str = str.replace(/Ω/,"Omega").replace(/Γ/,"Gamma").replace(/Φ/,"Phi").replace(/Δ/,"Delta").replace(/Σ/,"Sigma");
@@ -231,7 +234,7 @@ function calculate(inputId,outputId,format) {
 		  	  res = NaN;
 		  }
 		  if (!isNaN(res) && res!="Infinity") {
-			  if (format.indexOf('fraction')!=-1 || format.indexOf('reducedfraction')!=-1 || format.indexOf('mixednumber')!=-1 || format.indexOf('scinot')!=-1 || format.indexOf('noval')!=-1) {
+			  if (format.indexOf('showval')==-1) {
 				  str = "`"+str+"` " + wrapAMnotice(err);
 			  } else {
 				  str = "`"+str+" =` "+(Math.abs(res)<1e-15?0:res)+". "+wrapAMnotice(err);
@@ -429,14 +432,14 @@ function intcalculate(inputId,outputId,format) {
 				 origstr = origstr.replace(/>=/g,'ge');
 				 origstr = origstr.replace(/</g,'lt');
 				 origstr = origstr.replace(/>/g,'gt');
-				 if (format.indexOf('fraction')!=-1 || format.indexOf('reducedfraction')!=-1 || format.indexOf('mixednumber')!=-1 || format.indexOf('scinot')!=-1 || format.indexOf('noval')!=-1) {
+				 if (format.indexOf('showval')==-1) {
 				 	 fullstr = '`'+origstr + '`'+". "+wrapAMnotice(fullerr);
 				 } else {
 				 	 fullstr = '`'+origstr + '= ' + calcstrarr.join(' \\ "or" \\ ')+'`'+". "+wrapAMnotice(fullerr);
 				 }
 			 }
 		 } else {
-		 	 if (format.indexOf('fraction')!=-1 || format.indexOf('reducedfraction')!=-1 || format.indexOf('mixednumber')!=-1 || format.indexOf('scinot')!=-1 || format.indexOf('noval')!=-1) {
+		 	 if (format.indexOf('showval')==-1) {
 				  fullstr = '`'+strarr.join('uu') + '`'+". "+wrapAMnotice(fullerr);
 			 } else {
 			 	 if (format.indexOf('list')!=-1) {
@@ -533,7 +536,7 @@ function ntuplecalc(inputId,outputId,format) {
 			err += _("Invalid notation")+". ";
 		}
 		//outstr = '`'+fullstr+'` = '+outcalced;
-		if (format.indexOf('fraction')!=-1 || format.indexOf('reducedfraction')!=-1 || format.indexOf('mixednumber')!=-1 || format.indexOf('scinot')!=-1 || format.indexOf('noval')!=-1 || notationok==false) {
+		if (format.indexOf('showval')==-1 || notationok==false) {
 			 outstr = '`'+fullstr+'`'+". " + wrapAMnotice(err);
 		} else {
 			 outstr = '`'+fullstr+'` = '+outcalced +". " + wrapAMnotice(err);
@@ -613,7 +616,7 @@ function complexcalc(inputId,outputId,format) {
 				break;
 			}
 		}
-		if (format.indexOf('fraction')!=-1 || format.indexOf('reducedfraction')!=-1 || format.indexOf('mixednumber')!=-1 || format.indexOf('scinot')!=-1 || format.indexOf('noval')!=-1) {
+		if (format.indexOf('showval')==-1) {
 			outstr = '`'+fullstr+'`'+". "+wrapAMnotice(err);
 		} else {
 			outstr = '`'+fullstr+'` = '+outcalced+". "+wrapAMnotice(err);
@@ -1140,7 +1143,7 @@ function syntaxcheckexpr(str,format,vl) {
 	  return err;
 }
 
-var greekletters = ['alpha','beta','chi','delta','epsilon','gamma','phi','psi','sigma','rho','theta','lambda','mu','nu','omega','tau'];
+var greekletters = ['alpha','beta','chi','delta','epsilon','gamma','varphi','phi','psi','sigma','rho','theta','lambda','mu','nu','omega','tau'];
 var calctoproc = {};
 var intcalctoproc = {};
 var calcformat = {};

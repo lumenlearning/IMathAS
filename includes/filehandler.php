@@ -151,7 +151,7 @@ function storeuploadedfile($id,$key,$sec="private") {
 			downsizeimage($_FILES[$id]);
 			$s3 = new S3($GLOBALS['AWSkey'],$GLOBALS['AWSsecret']);
 			// $_FILES[]['tmp_name'] is not user provided. This is safe.
-			if ($s3->putObjectFile($_FILES[$id]['tmp_name'],$GLOBALS['AWSbucket'],$key,$sec)) {
+			if ($s3->putObjectFile(realpath($_FILES[$id]['tmp_name']),$GLOBALS['AWSbucket'],$key,$sec)) {
 				return true;
 			} else {
 				return false;
@@ -242,7 +242,7 @@ function storeuploadedcoursefile($id,$key,$sec="public-read") {
 				$t++;
 			}
 			// $_FILES[]['tmp_name'] is not user provided. This is safe.
-			if ($s3->putObjectFile($_FILES[$id]['tmp_name'],$GLOBALS['AWSbucket'],'cfiles/'.$key,$sec)) {
+			if ($s3->putObjectFile(realpath($_FILES[$id]['tmp_name']),$GLOBALS['AWSbucket'],'cfiles/'.$key,$sec)) {
 				return $key;
 			} else {
 				return false;
@@ -291,7 +291,7 @@ function storeuploadedqimage($id,$key,$sec="public-read") {
 				$t++;
 			}
 			// $_FILES[]['tmp_name'] is not user provided. This is safe.
-			if ($s3->putObjectFile($_FILES[$id]['tmp_name'],$GLOBALS['AWSbucket'],'qimages/'.$key,$sec)) {
+			if ($s3->putObjectFile(realpath($_FILES[$id]['tmp_name']),$GLOBALS['AWSbucket'],'qimages/'.$key,$sec)) {
 				return $key;
 			} else {
 				return false;
@@ -371,17 +371,14 @@ function deleteasidfilesfromstring2($str,$tosearchby,$val,$aid=null) {
 	global $DBH;
 	if ($tosearchby!='id' && $tosearchby!='agroupid') {return 0;}
 	if (is_array($val)) {
-		//DB $keylist = "'".implode("','",$val)."'";
 		$keylist = implode(',', array_map('intval', $val));
 		$searchnot = "$tosearchby NOT IN ($keylist)";
 	} else {
-		//DB $val = addslashes($val);
 		$val = intval($val);
 		$searchnot = "$tosearchby<>$val";
 	}
 	if ($aid != null) {
 		if (is_array($aid)) {
-			//DB $keylist = "'".implode("','",$aid)."'";
 			$keylist = implode(',', array_map('intval', $aid));
 			$searchnot .= " AND assessmentid IN ($keylist)";
 		} else {
@@ -396,19 +393,14 @@ function deleteasidfilesfromstring2($str,$tosearchby,$val,$aid=null) {
 	$valarr = array();
 	$lookforph = array();
 	foreach ($matches[1] as $file) {
-		//DB $file = addslashes($file);
-		//DB $lookfor[] = "lastanswers LIKE '%$file%' OR bestlastanswers LIKE '%$file%' OR reviewlastanswers LIKE '%$file%'";
 		$lookforph[] = "lastanswers LIKE ? OR bestlastanswers LIKE ? OR reviewlastanswers LIKE ?";
 		array_push($valarr, "%$file%", "%$file%", "%$file%");
 	}
 	$lookforstr = implode(' OR ',$lookforph);
-	//DB $query = "SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	//$searchnot santized above
 	$stm = $DBH->prepare("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)");
 	$stm->execute($valarr);
 	$skip = array();
-	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$exmatch);
 		//remove from todel list all files found in other sessions
@@ -445,19 +437,16 @@ function deleteasidfilesbyquery2($tosearchby,$val,$aid=null,$lim=0) {
 	$lim = intval($lim);
 
 	if (is_array($val)) {
-		//DB $keylist = "'".implode("','",$val)."'";
 		$keylist = implode(',', array_map('intval', $val));
 		$searchwhere = "$tosearchby IN ($keylist)";
 		$searchnot = "$tosearchby NOT IN ($keylist)";
 	} else {
-		//DB $val = addslashes($val);
 		$val = intval($val);
 		$searchwhere = "$tosearchby=$val";
 		$searchnot = "$tosearchby<>$val";
 	}
 	if ($aid != null) {
 		if (is_array($aid)) {
-			//DB $keylist = "'".implode("','",$aid)."'";
 			$keylist = implode(',', array_map('intval', $aid));
 			$searchwhere .= " AND assessmentid IN ($keylist)";
 			$searchnot .= " AND assessmentid IN ($keylist)";
@@ -470,14 +459,10 @@ function deleteasidfilesbyquery2($tosearchby,$val,$aid=null,$lim=0) {
 	if ($lim>0) {
 		$searchwhere .= " LIMIT $lim";
 	}
-	//DB $query = "SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchwhere";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	//DB if (mysql_num_rows($result)==0) {return 0;}
 	//searchwhere is sanitized above
 	$stm = $DBH->query("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchwhere");
 	if ($stm->rowCount()==0) {return 0;}
 	$todel = array();
-	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$matches);
 		foreach ($matches[1] as $file) {
@@ -487,22 +472,16 @@ function deleteasidfilesbyquery2($tosearchby,$val,$aid=null,$lim=0) {
 		}
 	}
 	if (count($todel)==0) {return 0;}
-	//DB $lookfor = array();
 	$valarr = array();
 	$lookforph = array();
 	foreach ($todel as $file) {
-		//DB $file = addslashes($file);
-		//DB $lookfor[] = "lastanswers LIKE '%$file%' OR bestlastanswers LIKE '%$file%' OR reviewlastanswers LIKE '%$file%'";
 		$lookforph[] = "lastanswers LIKE ? OR bestlastanswers LIKE ? OR reviewlastanswers LIKE ?";
 		array_push($valarr, "%$file%", "%$file%", "%$file%");
 	}
 	$lookforstr = implode(' OR ',$lookforph);
-	//DB $query = "SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->prepare("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)");
 	$stm->execute($valarr);
 	$skip = array();
-	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$exmatch);
 		//remove from todel list all files found in other sessions
@@ -523,9 +502,9 @@ function deleteasidfilesbyquery2($tosearchby,$val,$aid=null,$lim=0) {
 		$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/filestore';
 		foreach($todel as $file) {
 			if (in_array($file,$deled)) { continue;}
-			if (unlink($base.'/adata/'.$file)) {
+			if (unlink(realpath($base.'/adata/'.$file))) {
 				$deled[] = $file;
-				recursiveRmdir(dirname($base.'/adata/'.$file));
+				recursiveRmdir(realpath(dirname($base.'/adata/'.$file)));
 			}
 		}
 	}

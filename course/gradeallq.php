@@ -18,9 +18,6 @@
 	} else if (isset($sessiondata[$cid.'gbmode'])) {
 		$gbmode =  $sessiondata[$cid.'gbmode'];
 	} else {
-		//DB $query = "SELECT defgbmode FROM imas_gbscheme WHERE courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $gbmode = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT defgbmode FROM imas_gbscheme WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		$gbmode = $stm->fetchColumn(0);
@@ -82,14 +79,6 @@
 		} else {
 			$onepergroup = false;
 		}
-
-		//DB $query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_sessions.* FROM imas_users,imas_assessment_sessions ";
-		//DB $query .= "WHERE imas_assessment_sessions.userid=imas_users.id AND imas_assessment_sessions.assessmentid='$aid' ";
-		//DB $query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
-		//DB if ($page != -1 && isset($_GET['userid'])) {
-			//DB $query .= " AND userid='{$_POST['userid']}'";
-		//DB }
-		//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
 		$query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_sessions.* FROM imas_users,imas_assessment_sessions ";
 		$query .= "WHERE imas_assessment_sessions.userid=imas_users.id AND imas_assessment_sessions.assessmentid=:assessmentid ";
 		$query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
@@ -103,8 +92,6 @@
 			$stm->execute(array(':assessmentid'=>$aid));
 		}
 		$cnt = 0;
-
-		//DB while($line=mysql_fetch_array($result, MYSQL_ASSOC)) {
 		$updatedata = array();
 		while($line=$stm->fetch(PDO::FETCH_ASSOC)) {
 			$GLOBALS['assessver'] = $line['ver'];
@@ -185,12 +172,12 @@
 		} else if ($page == -1) {
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/gb-itemanalysis.php?"
 				. Sanitize::generateQueryStringFromMap(array('stu' => $stu, 'cid' => $cid, 'aid' => $aid,
-                    'asid' => 'average',)));
+                    'asid' => 'average', 'r' => Sanitize::randomQueryStringParam(),)));
 		} else {
 			$page++;
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/gradeallq.php?"
 				. Sanitize::generateQueryStringFromMap(array('stu' => $stu, 'cid' => $cid, 'aid' => $aid,
-					'qid' => $qid, 'page' => $page,)));
+					'qid' => $qid, 'page' => $page, 'r' => Sanitize::randomQueryStringParam(),)));
 		}
 		exit;
 	}
@@ -231,7 +218,7 @@
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':id'=>$qid));
 	$qdatafordisplayq = $stm->fetch(PDO::FETCH_ASSOC);
-	$points = $qdatafordisplayq['points'];
+	$points = Sanitize::onlyFloat($qdatafordisplayq['points']);
 	$rubric = $qdatafordisplayq['rubric'];
 	$qsetid = $qdatafordisplayq['id'];
 	$qtype = $qdatafordisplayq['qtype'];
@@ -275,12 +262,6 @@
 	}
 	echo '</div>';
 	echo "<p>Note: Feedback is for whole assessment, not the individual question.</p>";
-
-	//DB $query = "SELECT imas_rubrics.id,imas_rubrics.rubrictype,imas_rubrics.rubric FROM imas_rubrics JOIN imas_questions ";
-	//DB $query .= "ON imas_rubrics.id=imas_questions.rubric WHERE imas_questions.id='$qid'";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	//DB if (mysql_num_rows($result)>0) {
-		//DB echo printrubrics(array(mysql_fetch_row($result)));
 	$query = "SELECT imas_rubrics.id,imas_rubrics.rubrictype,imas_rubrics.rubric FROM imas_rubrics JOIN imas_questions ";
 	$query .= "ON imas_rubrics.id=imas_questions.rubric WHERE imas_questions.id=:id";
 	$stm = $DBH->prepare($query);
@@ -325,11 +306,6 @@
 
 	if ($page!=-1) {
 		$stulist = array();
-		//DB $query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_sessions.* FROM imas_users,imas_assessment_sessions,imas_students ";
-		//DB $query .= "WHERE imas_assessment_sessions.userid=imas_users.id AND imas_students.userid=imas_users.id AND imas_students.courseid='$cid' AND imas_assessment_sessions.assessmentid='$aid' ";
-		//DB $query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
-		//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_sessions.* FROM imas_users,imas_assessment_sessions,imas_students ";
 		$query .= "WHERE imas_assessment_sessions.userid=imas_users.id AND imas_students.userid=imas_users.id AND imas_students.courseid=:courseid AND imas_assessment_sessions.assessmentid=:assessmentid ";
 		if ($hidelocked) {
@@ -342,10 +318,6 @@
 			$stulist[] = $row[0].', '.$row[1];
 		}
 	}
-
-	//DB $query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_sessions.* FROM imas_users,imas_assessment_sessions,imas_students ";
-	//DB $query .= "WHERE imas_assessment_sessions.userid=imas_users.id AND imas_students.userid=imas_users.id AND imas_students.courseid='$cid' AND imas_assessment_sessions.assessmentid='$aid' ";
-	//DB $query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
 	$query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_sessions.* FROM imas_users,imas_assessment_sessions,imas_students ";
 	$query .= "WHERE imas_assessment_sessions.userid=imas_users.id AND imas_students.userid=imas_users.id AND imas_students.courseid=:courseid AND imas_assessment_sessions.assessmentid=:assessmentid ";
 	if ($hidelocked) {
@@ -358,14 +330,10 @@
 	}
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':courseid'=>$cid, ':assessmentid'=>$aid));
-	//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
 	$cnt = 0;
 	$onepergroup = array();
 	require_once("../includes/filehandler.php");
-	//DB if (mysql_num_rows($result)>0) {
 	if ($stm->rowCount()>0) {
-
-	//DB while($line=mysql_fetch_array($result, MYSQL_ASSOC)) {
 	while($line=$stm->fetch(PDO::FETCH_ASSOC)) {
 		$GLOBALS['assessver'] = $line['ver'];
 		$feedback = json_decode($line['feedback'], true);
@@ -517,7 +485,7 @@
 				}
 
 			}
-			printf(" out of %d ", $points);
+			printf(" out of %d ", Sanitize::onlyInt($points));
 
 			if ($parts!='') {
 				$answeights = implode(', ',$answeights);
@@ -528,7 +496,7 @@
 				$togr = array();
 				foreach ($qtypes as $k=>$t) {
 					if ($t=='essay' || $t=='file') {
-						$togr[] = $k;
+					  $togr[] = Sanitize::onlyInt($k);
 					}
 				}
 				echo '<br/>Quick grade: <a href="#" class="fullcredlink" onclick="quickgrade('.$cnt.',0,\'scorebox\','.count($prts).',['.$answeights.']);return false;">Full credit all parts</a>';
@@ -550,7 +518,7 @@
 						echo "  <b>$cntb:</b> " ;
 						if (preg_match('/@FILE:(.+?)@/',$laarr[$k],$match)) {
 							$url = getasidfileurl($match[1]);
-							echo "<a href=\"$url\" target=\"_new\">".basename($match[1])."</a>";
+							echo "<a href=\"" . Sanitize::encodeUrlForHref($url) . "\" target=\"_new\">".Sanitize::encodeStringForDisplay(basename($match[1]))."</a>";
 						} else {
 							if (strpos($laarr[$k],'$f$')) {
 								if (strpos($laarr[$k],'&')) { //is multipart q
@@ -610,7 +578,7 @@
 			//<textarea cols=50 rows=".($page==-1?1:3)." id=\"feedback-".Sanitize::onlyInt($line['id'])."\" name=\"feedback-".Sanitize::onlyInt($line['id'])."\">".Sanitize::encodeStringForDisplay($line['feedback'])."</textarea>";
 			if ($sessiondata['useed']==0) {
 				echo '<br/><textarea cols="60" rows="2" class="fbbox" id="fb-'.$loc.'-'.Sanitize::onlyInt($line['id']).'" name="fb-'.$loc.'-'.Sanitize::onlyInt($line['id']).'">';
-				echo Sanitize::encodeStringForDisplay($feedback["Q$loc"]);
+				echo Sanitize::encodeStringForDisplay($feedback["Q$loc"], true);
 				echo '</textarea>';
 			} else {
 				echo '<div class="fbbox" id="fb-'.$loc.'-'.Sanitize::onlyInt($line['id']).'">';

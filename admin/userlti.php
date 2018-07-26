@@ -12,8 +12,6 @@ if ($myrights < 100) {
 	$body = "You don't have authority to view this page.";
 } else if (isset($_POST['removeuserlti'])) {
   $id = intval($_POST['removeuserlti']);
-  //DB $query = "DELETE FROM imas_ltiusers WHERE id=$id";
-  //DB mysql_query($query) or die("Query failed : " . mysql_error());
   $stm = $DBH->prepare("DELETE FROM imas_ltiusers WHERE id=:id");
   $stm->execute(array(':id'=>$id));
   if ($stm->rowCount()>0) {
@@ -23,7 +21,7 @@ if ($myrights < 100) {
   }
   exit;
 } else if (isset($_POST['removecourselti'])) {
-  $id = intval($_POST['removecourselti']);
+  $id = Sanitize::onlyInt($_POST['removecourselti']);
   $stm = $DBH->prepare("SELECT org,contextid FROM imas_lti_courses WHERE id=:id");
   $stm->execute(array(':id'=>$id));
   $row = $stm->fetch(PDO::FETCH_ASSOC);
@@ -40,8 +38,6 @@ if ($myrights < 100) {
   exit;
 } else if (isset($_POST['removeplacementlti'])) {
   $id = intval($_POST['removeplacementlti']);
-  //DB $query = "DELETE FROM imas_ltiusers WHERE id=$id";
-  //DB mysql_query($query) or die("Query failed : " . mysql_error());
   $stm = $DBH->prepare("DELETE FROM imas_lti_placements WHERE id=:id");
   $stm->execute(array(':id'=>$id));
   if ($stm->rowCount()>0) {
@@ -60,7 +56,7 @@ if ($myrights < 100) {
   $query .= "WHERE ilp.contextid=?";
   $stm = $DBH->prepare($query);
   $stm->execute(array($contextid, $contextid));
-  echo json_encode($stm->fetchAll(PDO::FETCH_ASSOC));
+  echo json_encode($stm->fetchAll(PDO::FETCH_ASSOC), JSON_HEX_TAG);
   exit;
 
 } else if (empty($_GET['id'])) {
