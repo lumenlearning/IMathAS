@@ -99,6 +99,7 @@ function displayPaymentPage()
 	?>
         'stripeKey': '<?php echo $GLOBALS['apiKey']; ?>',
         'courseTitle': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['courseName']); ?>',
+        'studentName': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userfullname']) ?>',
         'userEmail': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userEmail']); ?>',
         'chargeAmount': '<?php echo $GLOBALS['amount']; ?>',
         'institutionOhmId': '<?php echo $GLOBALS['courseOwnerGroupId']; ?>',
