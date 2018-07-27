@@ -1695,6 +1695,8 @@ var OptionItemDropdown = function (_React$Component) {
         _this.state = {
             showError: _this.props.errors != undefined && _this.props.errors.length > 0
         };
+
+        _this._onCodeInputChange = _this._onCodeInputChange.bind(_this);
         return _this;
     }
 
@@ -1722,7 +1724,8 @@ var OptionItemDropdown = function (_React$Component) {
                                 name: 'code',
                                 style: styles$7.activationCodeInput,
                                 type: 'text',
-                                placeholder: 'Activation Code'
+                                placeholder: 'Activation Code',
+                                onChange: this._onCodeInputChange
                             }),
                             this._renderErrorMessage(),
                             React.createElement('input', {
@@ -1759,6 +1762,11 @@ var OptionItemDropdown = function (_React$Component) {
                     )
                 );
             }
+        }
+    }, {
+        key: '_onCodeInputChange',
+        value: function _onCodeInputChange(e) {
+            this.props.onCodeInputChange(e.target.value);
         }
     }]);
     return OptionItemDropdown;
@@ -1850,7 +1858,8 @@ var OptionItem = function (_React$Component) {
             return this.state.showDropdown ? React.createElement(OptionItemDropdown, {
                 item: this.props.item,
                 assessmentUrl: this.props.assessmentUrl,
-                errors: this.props.activationCodeErrors
+                errors: this.props.activationCodeErrors,
+                onCodeInputChange: this.props.onCodeInputChange
             }) : null;
         }
     }, {
@@ -1925,7 +1934,16 @@ var MultiPayAccessOptions = function (_React$Component) {
 
     function MultiPayAccessOptions(props) {
         classCallCheck(this, MultiPayAccessOptions);
-        return possibleConstructorReturn(this, (MultiPayAccessOptions.__proto__ || Object.getPrototypeOf(MultiPayAccessOptions)).call(this, props));
+
+        var _this = possibleConstructorReturn(this, (MultiPayAccessOptions.__proto__ || Object.getPrototypeOf(MultiPayAccessOptions)).call(this, props));
+
+        _this.state = {
+            activationCode: ''
+        };
+
+        _this._onCodeInputChange = _this._onCodeInputChange.bind(_this);
+        _this._onSubmitCode = _this._onSubmitCode.bind(_this);
+        return _this;
     }
 
     createClass(MultiPayAccessOptions, [{
@@ -1936,7 +1954,10 @@ var MultiPayAccessOptions = function (_React$Component) {
                 { style: styles$7.optionsWrapper },
                 React.createElement(
                     'form',
-                    { method: 'POST', action: this.props.endpointUrl },
+                    { method: 'POST',
+                        action: this.props.endpointUrl,
+                        onSubmit: this._onSubmitCode,
+                        className: 'nolimit' },
                     React.createElement(OptionItem, {
                         item: 1,
                         icon: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-store.png',
@@ -1947,7 +1968,8 @@ var MultiPayAccessOptions = function (_React$Component) {
                         subLabel: '',
                         buttonText: 'Enter Code',
                         assessmentUrl: this.props.assessmentUrl,
-                        activationCodeErrors: this.props.activationCodeErrors
+                        activationCodeErrors: this.props.activationCodeErrors,
+                        onCodeInputChange: this._onCodeInputChange
                     })
                 ),
                 React.createElement(OptionItem, {
@@ -2040,6 +2062,18 @@ var MultiPayAccessOptions = function (_React$Component) {
                 if ('in_trial' === this.props.paymentStatus || 'can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) {
                     return 'Continue Trial';
                 }
+            }
+        }
+    }, {
+        key: '_onCodeInputChange',
+        value: function _onCodeInputChange(code) {
+            this.setState({ code: code });
+        }
+    }, {
+        key: '_onSubmitCode',
+        value: function _onSubmitCode(e) {
+            if (!this.state.code) {
+                e.preventDefault();
             }
         }
     }]);
