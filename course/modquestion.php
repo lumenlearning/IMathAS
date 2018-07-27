@@ -125,7 +125,7 @@ if (!(isset($teacherid))) {
 			} else {
 				$skippenalty = 0;
 			}
-
+			
 			if ($line['points']==9999) {$line['points']='';}
 			if ($line['attempts']==9999) {$line['attempts']='';}
 			if ($line['penalty']==9999) {$line['penalty']='';}
@@ -228,8 +228,15 @@ if ($overwriteBody==1) {
 	<div class="breadcrumb"><?php echo $curBreadcrumb; ?></div>
 	<?php echo $page_beenTakenMsg; ?>
 
-
-<div id="headermodquestion" class="pagetitle"><h1>Modify Question Settings</h1></div>
+<div id="headermodquestion" class="pagetitle"><h1>
+<?php 
+if (isset($_GET['id'])) {
+	echo 'Modify Question Settings';
+} else {
+	echo 'New Question Settings';
+}
+?>
+</h1></div>
 <p><?php
 	echo '<b>'.Sanitize::encodeStringForDisplay($qdescrip).'</b> ';
 	echo '<button type="button" onclick="previewq('.Sanitize::encodeStringForJavascript($qsetid).')">'._('Preview').'</button>';
@@ -239,9 +246,14 @@ if ($overwriteBody==1) {
 <p>Leave items blank to use the assessment's default values.
 <input type="submit" value="<?php echo ('Save Settings');?>"></p>
 
+<?php
+if (!isset($_GET['id'])) {
+?>
 <span class=form>Points for this problem:</span>
 <span class=formright> <input type=text size=4 name=points value="<?php echo Sanitize::encodeStringForDisplay($line['points']);?>"><br/><i class="grey">Default: <?php echo Sanitize::encodeStringForDisplay($defaults['defpoints']);?></i></span><BR class=form>
-
+<?php
+}
+?>
 <span class=form>Attempts allowed for this problem (0 for unlimited):</span>
 <span class=formright> <input type=text size=4 name=attempts value="<?php echo Sanitize::encodeStringForDisplay($line['attempts']);?>"><br/><i class="grey">Default: <?php echo Sanitize::encodeStringForDisplay($defaults['defattempts']);?></i></span><BR class=form>
 
@@ -327,7 +339,13 @@ if ($overwriteBody==1) {
 		echo '<span class="form">Replace this question with question ID: <br/>';
 		echo '<span class=noticetext>WARNING: This is NOT recommended. It will mess up the question for any student who has already attempted it, and any work they have done may look garbled when you view it</span></span>';
 		echo '<span class="formright"><input size="7" name="replacementid"/></span><br class="form"/>';
+		
+		echo '<span class=form>Points for this problem: <br/>';
+		echo '<span class=noticetext>WARNING: you generally should not change point values after students have started the assessment, as the points already earned by students will not be re-calculated.</span></span>';
+		echo '<span class=formright> <input type=text size=4 name=points value="'.Sanitize::encodeStringForDisplay($line['points']).'"> (blank for default)</span><BR class=form>';		
 		echo '</div>';
+	} else if (isset($_GET['id'])) {
+		echo '<input type=hidden name=points value="'.Sanitize::encodeStringForDisplay($line['points']).'" />';
 	}
 	echo '<div class="submit"><input type="submit" value="'._('Save Settings').'"></div>';
 	echo '</form>';
