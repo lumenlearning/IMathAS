@@ -1,8 +1,12 @@
 <?php
+
+use OHM\Models\StudentPayApiResult;
+
 require_once(__DIR__ . "/../../init.php");
 
 global $studentPayStatus;
 
+$paymentType = $studentPayStatus->getStudentPaymentTypeRequired();
 $trialTimeRemaining = $studentPayStatus->getStudentTrialTimeRemainingSeconds();
 $paymentStatus = $studentPayStatus->getStudentPaymentRawStatus();
 $paymentAmount = $studentPayStatus->getCourseDirectPayAmountInCents();
@@ -10,13 +14,16 @@ $schoolLogoUrl = $studentPayStatus->getSchoolLogoUrl();
 $stripeModalLogoUrl = 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/branding/LumenBlueBG-80x80.png';
 $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
 	? 'null' : '\'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png\'';
-
+$assessmentUrl = $_SERVER['REQUEST_URI'];
 $endpointUrl = $GLOBALS["basesiteurl"]
 	. sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
 		. '&groupId=%d&courseId=%d&studentId=%d&assessmentId=%d', $courseOwnerGroupId,
 		$courseId, $userid, $assessmentId);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 $amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
+
+$activationCodeErrors = isset($_REQUEST['activationCodeErrors']) ?
+	$_REQUEST['activationCodeErrors'] : null;
 
 $stm = $DBH->prepare('SELECT email FROM imas_users WHERE id = :id');
 $stm->execute(array(':id' => $userid));
@@ -67,6 +74,9 @@ function displayPaymentPage()
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
 	require_once(__DIR__ . "/../../header.php");
+
+	// This is used for debugging way to frequently to not have.
+	printf('<!-- enrollmentid / enrollment_id = %d -->', $GLOBALS['enrollmentId']);
 	?>
 
     <style>
@@ -75,25 +85,38 @@ function displayPaymentPage()
         }
     </style>
 
-    <div id="directPay"></div>
+    <div id="paymentComponent"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
     <script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
     <script>
-      directPayComponents.renderDirectPayLandingPage('directPay', {
+	<?php
+      if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY) {
+	?> directPayComponents.renderDirectPayLandingPage('paymentComponent', { <?php
+      } else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_MULTI_PAY) {
+	?> directPayComponents.renderMultiPayPage('paymentComponent', { <?php
+	  }
+	?>
         'stripeKey': '<?php echo $GLOBALS['apiKey']; ?>',
-        'courseTitle': '<?php echo $GLOBALS['courseName']; ?>',
-        'userEmail': '<?php echo $GLOBALS['userEmail']; ?>',
+        'courseTitle': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['courseName']); ?>',
+        'studentName': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userfullname']) ?>',
+        'userEmail': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userEmail']); ?>',
         'chargeAmount': '<?php echo $GLOBALS['amount']; ?>',
+        'institutionOhmId': '<?php echo $GLOBALS['courseOwnerGroupId']; ?>',
+        'institutionGuid': '<?php echo $GLOBALS['courseOwnerGroupGuid']; ?>',
         'institutionName': 'Lumen Learning',
-        'chargeDescription': '<?php echo $GLOBALS['courseName']; ?>',
+        'sectionId': '<?php echo $GLOBALS['courseId']; ?>',
+        'enrollmentId': '<?php echo $GLOBALS['enrollmentId']; ?>',
+        'chargeDescription': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['courseName']); ?>',
         'stripeModalLogoUrl': '<?php echo $GLOBALS['stripeModalLogoUrl']; ?>',
         'endpointUrl': '<?php echo $GLOBALS['endpointUrl']; ?>',
         'redirectTo': '<?php echo $GLOBALS['redirectTo']; ?>',
+        'assessmentUrl': '<?php echo $GLOBALS['assessmentUrl'] ?>',
         'schoolLogoUrl': '<?php echo $GLOBALS['schoolLogoUrl']; ?>',
         'attributionLogoUrl': <?php echo $GLOBALS['attributionLogoUrl']; ?>,
         'trialTimeRemaining': '<?php echo $GLOBALS['trialTimeRemaining']; ?>',
         'paymentStatus': '<?php echo $GLOBALS['paymentStatus']; ?>',
+        'activationCodeErrors': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['activationCodeErrors']); ?>',
       });
     </script>
 

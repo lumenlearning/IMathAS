@@ -7,7 +7,6 @@ $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $cou
 $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 
 ?>
-<!-- Enrollment ID = <?php echo $enrollmentId; ?> -->
 <form id="ohmActivateCodeForm" method="POST" action="#">
     <input type="hidden" name="group_id" value="<?php echo $courseOwnerGroupId; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>

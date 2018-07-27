@@ -79,6 +79,9 @@ function displayStudentPaymentPage($phpFilename) {
 		require_once(__DIR__ . "/../../header.php");
 	}
 
+	// This is used for debugging way to frequently to not have.
+	printf('<!-- enrollmentid / enrollment_id = %d -->', $GLOBALS['enrollmentId']);
+
     ?>
 <div class="access-wrapper">
 <div class="access-block">

@@ -134,6 +134,9 @@
 			require(__DIR__ . '/../ohm/assessments/paywall_start.php');
 		}
 
+		// This is used for debugging way to frequently to not have.
+		printf('<!-- enrollmentid / enrollment_id = %d -->', $GLOBALS['enrollmentId']);
+
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
@@ -3730,6 +3733,10 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 	function isStartingAssessment()
 	{
 		if (isset($_REQUEST['begin_ohm_assessment'])) {
+			return true;
+		}
+
+		if (isset($_REQUEST['activationCodeErrors'])) {
 			return true;
 		}
 

@@ -1374,7 +1374,7 @@ function getGroupAssessmentAccessType($groupId) {
 				\OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
 				$apiResult->getAccessType();
 		} else {
-			$currentAccessType = \OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
+			$currentAccessType = \OHM\Models\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
 	} catch (\OHM\StudentPaymentException $e) {
 		// Don't allow failed API communication to break UX.
@@ -1394,8 +1394,9 @@ function getGroupAssessmentAccessType($groupId) {
 function renderAccessTypeSelector($currentAccessType) {
 	$validAccessTypes = array(
 		'not_required' => 'Not required',
-		'direct_pay' => 'Student pays directly',
-		'activation_code' => 'Student provides activation code'
+		'direct_pay' => 'Direct Pay - Student pays directly',
+		'activation_code' => 'Activation codes - Student enters an access code',
+		'multipay' => 'Multipay - Both methods'
 	);
 
 	echo "<label for='student_payment_type'>Student payments:</label>";

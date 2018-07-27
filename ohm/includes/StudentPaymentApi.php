@@ -228,7 +228,7 @@ class StudentPaymentApi
 		$result = $this->curl->execute();
 		$status = $this->curl->getInfo(CURLINFO_HTTP_CODE);
 
-		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201]);
+		$studentPayApiResult = $this->parseApiResponse($status, $result, [200, 201, 400, 404]);
 		$this->curl->close();
 
 		return $studentPayApiResult;
@@ -491,13 +491,6 @@ class StudentPaymentApi
 			// curl returns 0 on http failure
 			throw new StudentPaymentException("Unable to connect to student payment API.");
 		}
-		if (null == $apiResponse || '' == $apiResponse) {
-			// json_decode failed to find valid json content
-			if (!in_array($status, [204, 404])) {
-				throw new StudentPaymentException("Unexpected content returned from student payment API: "
-					. $responseBody);
-			}
-		}
 		if (!in_array($status, $acceptableHttpStatusList)) {
 			throw new StudentPaymentException(sprintf(
 				"Unexpected HTTP status %d returned from student payment API. Content: %s", $status,
@@ -509,8 +502,8 @@ class StudentPaymentApi
 		if (isset($apiResponse['message'])) {
 			$studentPayApiResult->setApiUserMessage($apiResponse['message']);
 		}
-		if (isset($apiResponse['trial_expired_in'])) {
-			$studentPayApiResult->setTrialExpiresInSeconds($apiResponse['trial_expired_in']);
+		if (isset($apiResponse['trial'])) {
+			$studentPayApiResult->setTrialExpiresInSeconds($apiResponse['trial']['expires_in']);
 		}
 		if (isset($apiResponse['access_type'])) {
 			$studentPayApiResult->setAccessType($apiResponse['access_type']);
