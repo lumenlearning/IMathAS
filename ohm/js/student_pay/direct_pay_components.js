@@ -262,6 +262,20 @@ var styles$1 = {
     cursor: 'not-allowed',
     margin: '13px 0',
     padding: 0
+  },
+  lumenAttributionWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '12px',
+    marginTop: '4em'
+  },
+  lumenLogo: {
+    height: '41px',
+    marginLeft: '1em',
+    width: '88.7px'
+  },
+  lumenLogoLink: {
+    height: '41px'
   }
 };
 
@@ -498,8 +512,31 @@ var CheckoutTaxPage = function (_React$Component) {
             )
           )
         ),
-        this._renderPayButton()
+        this._renderPayButton(),
+        this._renderFooterLogo()
       );
+    }
+  }, {
+    key: '_renderFooterLogo',
+    value: function _renderFooterLogo() {
+      if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '') {
+        return React.createElement(
+          'div',
+          { className: 'lumen-attribution', style: styles$1.lumenAttributionWrapper },
+          React.createElement(
+            'span',
+            null,
+            'Open Courseware by '
+          ),
+          React.createElement(
+            'a',
+            { style: styles$1.lumenLogoLink, href: "https://www.lumenlearning.com", target: '_blank' },
+            React.createElement('img', { src: 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
+              alt: 'Lumen Learning logo', className: 'lumen-logo',
+              style: styles$1.lumenLogo })
+          )
+        );
+      }
     }
   }, {
     key: '_renderPayButton',
@@ -1443,7 +1480,8 @@ var styles$5 = {
         fontSize: '14px'
     },
     usePassLink: {
-        marginLeft: '1.75em'
+        marginLeft: '0.2em',
+        textDecoration: 'underline'
     }
 };
 
@@ -1500,7 +1538,7 @@ var Banner = function (_React$Component) {
                     return React.createElement(
                         'p',
                         { style: styles$5.bannerText },
-                        'You have run out of activation passes. Use a final one-time pass to access this assessment',
+                        'You have run out of activation passes. Use a final one-time pass to access this assessment.',
                         React.createElement(
                             'a',
                             { href: this.props.redirectTo, style: styles$5.usePassLink },
@@ -1550,7 +1588,23 @@ var styles$6 = {
         fontSize: '12px'
     },
     footerLinks: {
-        color: '#000'
+        color: '#000',
+        textDecoration: 'underline'
+    },
+    lumenAttributionWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        fontSize: '12px',
+        marginTop: '4em',
+        height: '41px'
+    },
+    lumenLogo: {
+        height: '41px',
+        marginLeft: '1em',
+        width: '88.7px'
+    },
+    lumenLogoLink: {
+        height: '41px'
     }
 };
 
@@ -2131,7 +2185,7 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                     React.createElement(
                         'a',
                         { target: '_blank', href: 'https://lumenlearning.com/policies/terms-of-service', style: styles$6.footerLinks },
-                        'Terms of Use'
+                        'Terms of Service'
                     ),
                     ' and ',
                     React.createElement(
@@ -2140,7 +2194,8 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                         'Privacy Policy'
                     ),
                     '.'
-                )
+                ),
+                this._renderFooterLogo()
             );
         }
     }, {
@@ -2149,7 +2204,29 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
             if (this.props.trialType === "quiz_count") {
                 return "Use Pass";
             } else {
-                return "Continue Trial";
+                return this.props.paymentStatus === "in_trial" ? "Continue Trial" : "Start Trial";
+            }
+        }
+    }, {
+        key: '_renderFooterLogo',
+        value: function _renderFooterLogo() {
+            if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '') {
+                return React.createElement(
+                    'div',
+                    { className: 'lumen-attribution', style: styles$6.lumenAttributionWrapper },
+                    React.createElement(
+                        'span',
+                        null,
+                        'Open Courseware by '
+                    ),
+                    React.createElement(
+                        'a',
+                        { style: styles$6.lumenLogoLink, href: "https://www.lumenlearning.com", target: '_blank' },
+                        React.createElement('img', { src: 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
+                            alt: 'Lumen Learning logo', className: 'lumen-logo',
+                            style: styles$6.lumenLogo })
+                    )
+                );
             }
         }
     }]);
@@ -2233,7 +2310,8 @@ var MultiPayPage = function (_React$Component) {
                     chargeDescription: this.props.chargeDescription,
                     stripeModalLogoUrl: this.props.stripeModalLogoUrl,
                     endpointUrl: this.props.endpointUrl,
-                    userEmail: this.props.userEmail
+                    userEmail: this.props.userEmail,
+                    schoolLogoUrl: this.props.schoolLogoUrl
                 });
             } else {
                 return React.createElement(MultiPayCourseAssessmentActivation, {
@@ -2246,7 +2324,8 @@ var MultiPayPage = function (_React$Component) {
                     redirectTo: this.props.redirectTo,
                     activationCodeErrors: this.props.activationCodeErrors || [],
                     endpointUrl: this.props.endpointUrl,
-                    assessmentUrl: this.props.assessmentUrl
+                    assessmentUrl: this.props.assessmentUrl,
+                    schoolLogoUrl: this.props.schoolLogoUrl
                 });
             }
         }
