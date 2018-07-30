@@ -314,21 +314,6 @@ var createClass = function () {
   };
 }();
 
-var defineProperty = function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-};
-
 var _extends = Object.assign || function (target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i];
@@ -470,7 +455,6 @@ var CheckoutTaxPage = function (_React$Component) {
           name: 'zipcode',
           style: styles$1.zipcode,
           onChange: this._setZipCode,
-          onKeyUp: this._handleKeyUp,
           maxLength: '5'
         }),
         React.createElement(
@@ -577,7 +561,7 @@ var CheckoutTaxPage = function (_React$Component) {
     key: '_renderPayButton',
     value: function _renderPayButton() {
       if ('-' != this.state.total) {
-        return React.createElement(DirectPayButton, defineProperty({
+        return React.createElement(DirectPayButton, {
           paymentStatus: this.props.paymentStatus,
           stripeKey: this.props.stripeKey,
           chargeAmount: this.state.total,
@@ -587,7 +571,7 @@ var CheckoutTaxPage = function (_React$Component) {
           endpointUrl: this.props.endpointUrl,
           userEmail: this.props.userEmail,
           zipcode: this.state.zipcode
-        }, 'chargeAmount', this.state.total));
+        });
       } else {
         return React.createElement(
           'button',
@@ -601,7 +585,17 @@ var CheckoutTaxPage = function (_React$Component) {
     value: function _setZipCode(e) {
       if (e.target.value.length === 5) {
         this.setState({
+          taxAmount: '-',
+          total: '-'
+        });
+        this._getTaxAmount();
+        this.setState({
           zipcode: e.target.value
+        });
+      } else {
+        this.setState({
+          taxAmount: '-',
+          total: '-'
         });
       }
     }
@@ -616,13 +610,6 @@ var CheckoutTaxPage = function (_React$Component) {
           currency: 'USD',
           minimumFractionDigits: 2
         });
-      }
-    }
-  }, {
-    key: '_handleKeyUp',
-    value: function _handleKeyUp(e) {
-      if (e.target.value.length === 5) {
-        this._getTaxAmount();
       }
     }
   }, {
@@ -645,10 +632,17 @@ var CheckoutTaxPage = function (_React$Component) {
         var promise = res.json();
 
         promise.then(function (value) {
+          if (value.errors != undefined) {
+            _this2.setState({
+              taxAmount: '-',
+              total: '-',
+              errors: value.errors
+            });
+          }
           _this2.setState({
             taxAmount: value.tax_amount_in_cents,
             total: value.tax_amount_in_cents + parseInt(_this2.props.amount_in_cents, 10),
-            errors: value.errors || []
+            errors: []
           });
         });
       });
@@ -1988,7 +1982,7 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_renderItemButton',
         value: function _renderItemButton() {
-            if (1 === this.props.item && this.state.showDropdown || 'expired' === this.props.paymentStatus) {
+            if (1 === this.props.item && this.state.showDropdown) {
                 return;
             } else if (this.state.showItemButton) {
                 return React.createElement(
@@ -2005,16 +1999,31 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_setButtonDisabled',
         value: function _setButtonDisabled() {
-            if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
+            if (this._noQuizPassesLeft() || this._trialExpired() || this._noExtensionsLeft()) {
                 return 'disabled';
             } else {
                 return false;
             }
         }
     }, {
+        key: '_noQuizPassesLeft',
+        value: function _noQuizPassesLeft() {
+            return 'quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining;
+        }
+    }, {
+        key: '_trialExpired',
+        value: function _trialExpired() {
+            return ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining;
+        }
+    }, {
+        key: '_noExtensionsLeft',
+        value: function _noExtensionsLeft() {
+            return 'expired' === this.props.paymentStatus && 3 === this.props.item;
+        }
+    }, {
         key: '_getItemButtonStyles',
         value: function _getItemButtonStyles() {
-            if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
+            if (this._noQuizPassesLeft() || this._trialExpired() || this._noExtensionsLeft()) {
                 return styles$7.optionItemContentButtonDisabled;
             } else {
                 return styles$7.optionItemContentButton;
