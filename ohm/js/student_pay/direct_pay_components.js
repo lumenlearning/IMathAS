@@ -179,13 +179,24 @@ var styles$1 = {
     marginBottom: '6px',
     fontSize: '14px'
   },
-  zipcode: {
+  zipcodeInput: {
     display: 'block',
     width: '262px',
     height: '36px',
     borderRadius: '3px',
     backgroundColor: '#fff',
     border: 'solid 1px #c4cdd5',
+    fontSize: '16px',
+    padding: '0 6px',
+    marginBottom: '40px'
+  },
+  zipcodeInputError: {
+    display: 'block',
+    width: '262px',
+    height: '36px',
+    borderRadius: '3px',
+    backgroundColor: '#fff',
+    border: 'solid 1px #bf0711',
     fontSize: '16px',
     padding: '0 6px',
     marginBottom: '40px'
@@ -424,7 +435,6 @@ var CheckoutTaxPage = function (_React$Component) {
     };
 
     _this._setZipCode = _this._setZipCode.bind(_this);
-    _this._handleKeyUp = _this._handleKeyUp.bind(_this);
     return _this;
   }
 
@@ -453,7 +463,7 @@ var CheckoutTaxPage = function (_React$Component) {
           type: 'text',
           id: 'zipcode',
           name: 'zipcode',
-          style: styles$1.zipcode,
+          style: this.state.errors.length > 0 ? styles$1.zipcodeInputError : styles$1.zipcodeInput,
           onChange: this._setZipCode,
           maxLength: '5'
         }),
@@ -584,19 +594,7 @@ var CheckoutTaxPage = function (_React$Component) {
     key: '_setZipCode',
     value: function _setZipCode(e) {
       if (e.target.value.length === 5) {
-        this.setState({
-          taxAmount: '-',
-          total: '-'
-        });
-        this._getTaxAmount();
-        this.setState({
-          zipcode: e.target.value
-        });
-      } else {
-        this.setState({
-          taxAmount: '-',
-          total: '-'
-        });
+        this._getTaxAmount(e.target.value);
       }
     }
   }, {
@@ -614,12 +612,12 @@ var CheckoutTaxPage = function (_React$Component) {
     }
   }, {
     key: '_getTaxAmount',
-    value: function _getTaxAmount() {
+    value: function _getTaxAmount(zipcode) {
       var _this2 = this;
 
       var data = {
         amount_in_cents: parseInt(this.props.amount_in_cents, 10),
-        zipcode: this.state.zipcode
+        zipcode: zipcode
       };
 
       fetch(this._getTaxApiUrl(), {
@@ -638,12 +636,14 @@ var CheckoutTaxPage = function (_React$Component) {
               total: '-',
               errors: value.errors
             });
+          } else {
+            _this2.setState({
+              taxAmount: value.tax_amount_in_cents,
+              total: value.tax_amount_in_cents + parseInt(_this2.props.amount_in_cents, 10),
+              errors: [],
+              zipcode: zipcode
+            });
           }
-          _this2.setState({
-            taxAmount: value.tax_amount_in_cents,
-            total: value.tax_amount_in_cents + parseInt(_this2.props.amount_in_cents, 10),
-            errors: []
-          });
         });
       });
     }
@@ -1548,81 +1548,95 @@ var styles$5 = {
 };
 
 var Banner = function (_React$Component) {
-    inherits(Banner, _React$Component);
+  inherits(Banner, _React$Component);
 
-    function Banner(props) {
-        classCallCheck(this, Banner);
-        return possibleConstructorReturn(this, (Banner.__proto__ || Object.getPrototypeOf(Banner)).call(this, props));
+  function Banner(props) {
+    classCallCheck(this, Banner);
+    return possibleConstructorReturn(this, (Banner.__proto__ || Object.getPrototypeOf(Banner)).call(this, props));
+  }
+
+  createClass(Banner, [{
+    key: 'render',
+    value: function render() {
+      return React.createElement(
+        'div',
+        null,
+        React.createElement('div', { style: styles$5.bannerTop }),
+        React.createElement(
+          'div',
+          { className: 'banner-box', style: styles$5.bannerBox },
+          React.createElement(
+            'div',
+            { style: styles$5.bannerBoxInner },
+            React.createElement('img', {
+              src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-warning.svg',
+              alt: 'warning icon',
+              style: styles$5.bannerIcon
+            }),
+            React.createElement(
+              'div',
+              { style: styles$5.bannerTextGroup },
+              React.createElement(
+                'p',
+                { style: styles$5.bannerText },
+                this._renderBannerContent()
+              )
+            )
+          )
+        )
+      );
     }
-
-    createClass(Banner, [{
-        key: 'render',
-        value: function render() {
-            return React.createElement(
-                'div',
-                null,
-                React.createElement('div', { style: styles$5.bannerTop }),
-                React.createElement(
-                    'div',
-                    { className: 'banner-box', style: styles$5.bannerBox },
-                    React.createElement(
-                        'div',
-                        { style: styles$5.bannerBoxInner },
-                        React.createElement('img', {
-                            src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-warning.svg',
-                            alt: 'warning icon',
-                            style: styles$5.bannerIcon
-                        }),
-                        React.createElement(
-                            'div',
-                            { style: styles$5.bannerTextGroup },
-                            React.createElement(
-                                'p',
-                                { style: styles$5.bannerText },
-                                this._renderBannerContent()
-                            )
-                        )
-                    )
-                )
-            );
-        }
-    }, {
-        key: '_renderBannerContent',
-        value: function _renderBannerContent() {
-            if ('quiz_count' === this.props.trialType) {
-                if ('expired' === this.props.paymentStatus) {
-                    return React.createElement(
-                        'p',
-                        { style: styles$5.bannerText },
-                        'You\u2019ve run out of activation passes. Course content is still available. However, you need to pay to activate the assessments in this course.'
-                    );
-                } else if ('can_extend' === this.props.paymentStatus) {
-                    return React.createElement(
-                        'p',
-                        { style: styles$5.bannerText },
-                        'You have run out of activation passes. Use a final one-time pass to access this assessment.',
-                        React.createElement(
-                            'a',
-                            { href: this.props.redirectTo, style: styles$5.usePassLink },
-                            'Use Pass'
-                        )
-                    );
-                }
-            } else {
-                return React.createElement(
-                    'p',
-                    { style: styles$5.bannerText },
-                    'Your Trial Has Expired. Activate a one-time pass to extend your trial by 24 hours.',
-                    React.createElement(
-                        'a',
-                        { href: this.props.redirectTo, style: styles$5.usePassLink },
-                        'Activate One-time Pass'
-                    )
-                );
-            }
-        }
-    }]);
-    return Banner;
+  }, {
+    key: '_renderBannerContent',
+    value: function _renderBannerContent() {
+      return 'quiz_count' === this.props.trialType ? this._renderQuizCountBannerContent() : this._renderTimedTrialBannerContent();
+    }
+  }, {
+    key: '_renderQuizCountBannerContent',
+    value: function _renderQuizCountBannerContent() {
+      if ('expired' === this.props.paymentStatus) {
+        return React.createElement(
+          'p',
+          { style: styles$5.bannerText },
+          'You\u2019ve run out of activation passes. Course content is still available. However, you need to pay to activate the assessments in this course.'
+        );
+      } else if ('can_extend' === this.props.paymentStatus) {
+        return React.createElement(
+          'p',
+          { style: styles$5.bannerText },
+          'You have run out of activation passes. Use a final one-time pass to access this assessment.',
+          React.createElement(
+            'a',
+            { href: this.props.redirectTo, style: styles$5.usePassLink },
+            'Use Pass'
+          )
+        );
+      }
+    }
+  }, {
+    key: '_renderTimedTrialBannerContent',
+    value: function _renderTimedTrialBannerContent() {
+      if ('expired' === this.props.paymentStatus) {
+        return React.createElement(
+          'p',
+          { style: styles$5.bannerText },
+          'Your Trial Has Expired. Course content is still available. However, you need to pay to activate the assessments in this course.'
+        );
+      } else if ('can_extend' === this.props.paymentStatus) {
+        return React.createElement(
+          'p',
+          { style: styles$5.bannerText },
+          'Your Trial Has Expired. Activate a one-time pass to extend your trial by 24 hours.',
+          React.createElement(
+            'a',
+            { href: this.props.redirectTo, style: styles$5.usePassLink },
+            'Activate One-time Pass'
+          )
+        );
+      }
+    }
+  }]);
+  return Banner;
 }(React.Component);
 
 var styles$6 = {
@@ -1999,7 +2013,7 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_setButtonDisabled',
         value: function _setButtonDisabled() {
-            if (this._noQuizPassesLeft() || this._trialExpired() || this._noExtensionsLeft()) {
+            if (this._noQuizPassesLeft() || this._trialExpired()) {
                 return 'disabled';
             } else {
                 return false;
@@ -2013,17 +2027,12 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_trialExpired',
         value: function _trialExpired() {
-            return ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining;
-        }
-    }, {
-        key: '_noExtensionsLeft',
-        value: function _noExtensionsLeft() {
-            return 'expired' === this.props.paymentStatus && 3 === this.props.item;
+            return ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 1 > this.props.trialTimeRemaining;
         }
     }, {
         key: '_getItemButtonStyles',
         value: function _getItemButtonStyles() {
-            if (this._noQuizPassesLeft() || this._trialExpired() || this._noExtensionsLeft()) {
+            if (this._noQuizPassesLeft() || this._trialExpired()) {
                 return styles$7.optionItemContentButtonDisabled;
             } else {
                 return styles$7.optionItemContentButton;
@@ -2354,9 +2363,25 @@ var MultiPayPage = function (_React$Component) {
     }, {
         key: '_renderBanner',
         value: function _renderBanner() {
-            if ('quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining || ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 0 === this.props.trialTimeRemaining) {
-                return React.createElement(Banner, { trialType: this.props.trialType, paymentStatus: this.props.paymentStatus, redirectTo: this.props.redirectTo });
+            if ('in_trial' === this.props.paymentStatus || 'trial_not_started' === this.props.paymentStatus) {
+                return;
             }
+
+            if (this._noQuizPassesLeft() || this._trialExpired) {
+                return React.createElement(Banner, { trialType: this.props.trialType,
+                    paymentStatus: this.props.paymentStatus,
+                    redirectTo: this.props.redirectTo });
+            }
+        }
+    }, {
+        key: '_noQuizPassesLeft',
+        value: function _noQuizPassesLeft() {
+            return 'quiz_count' === this.props.trialType && 0 === this.props.trialPassesRemaining;
+        }
+    }, {
+        key: '_trialExpired',
+        value: function _trialExpired() {
+            return ('can_extend' === this.props.paymentStatus || 'expired' === this.props.paymentStatus) && 1 > this.props.trialTimeRemaining;
         }
     }, {
         key: '_showCheckout',
