@@ -153,6 +153,10 @@ var styles = {
 };
 
 var styles$1 = {
+  errorMessageWrapper: {
+    display: 'block',
+    marginTop: '4px'
+  },
   taxPageWrapper: {
     maxWidth: '278px',
     marginLeft: '40px'
@@ -185,6 +189,13 @@ var styles$1 = {
     fontSize: '16px',
     padding: '0 6px',
     marginBottom: '40px'
+  },
+  zipcodeError: {
+    fontSize: '14px',
+    color: '#bf0711',
+    display: 'inline-block',
+    verticalAlign: 'middle',
+    marginLeft: '4px'
   },
   table: {
     maxWidth: '278px',
@@ -423,7 +434,8 @@ var CheckoutTaxPage = function (_React$Component) {
     _this.state = {
       zipcode: '',
       taxAmount: '-',
-      total: '-'
+      total: '-',
+      errors: []
     };
 
     _this._setZipCode = _this._setZipCode.bind(_this);
@@ -510,11 +522,34 @@ var CheckoutTaxPage = function (_React$Component) {
               { style: styles$1.totalValueToCollect },
               this._convertToDollars(this.state.total)
             )
-          )
+          ),
+          this._renderErrors()
         ),
         this._renderPayButton(),
         this._renderFooterLogo()
       );
+    }
+  }, {
+    key: '_renderErrors',
+    value: function _renderErrors() {
+      if (this.state.errors.length > 0) {
+        return React.createElement(
+          'div',
+          { style: styles$1.errorMessageWrapper },
+          React.createElement('img', { style: styles$1.errorIcon, src: 'https://s3-us-west-2.amazonaws.com/lumen-components-prod/assets/icons/icon-polaris-warning.png', alt: 'warning icon' }),
+          React.createElement(
+            'p',
+            { style: styles$1.zipcodeError },
+            this.state.errors.map(function (error) {
+              return React.createElement(
+                'p',
+                { style: styles$1.zipcodeError },
+                error
+              );
+            })
+          )
+        );
+      }
     }
   }, {
     key: '_renderFooterLogo',
@@ -612,7 +647,8 @@ var CheckoutTaxPage = function (_React$Component) {
         promise.then(function (value) {
           _this2.setState({
             taxAmount: value.tax_amount_in_cents,
-            total: value.tax_amount_in_cents + parseInt(_this2.props.amount_in_cents, 10)
+            total: value.tax_amount_in_cents + parseInt(_this2.props.amount_in_cents, 10),
+            errors: value.errors || []
           });
         });
       });
@@ -1029,7 +1065,8 @@ var DirectPayConfirmation = function (_React$Component) {
               ),
               React.createElement(
                 'p',
-                { style: styles$2.confirmationText },
+                {
+                  style: styles$2.confirmationText },
                 'A receipt has been sent to your email address at ' + this.props.userEmail + '.'
               ),
               React.createElement('br', null),
@@ -1059,6 +1096,11 @@ var DirectPayConfirmation = function (_React$Component) {
               'You\'re all set!'
             ),
             React.createElement(
+              'h2',
+              { className: 'subheading', style: styles$2.confirmationSubheading },
+              'Thank you for submitting your Lumen OHM course activation code. Please print this screen or save it as a PDF for your records.'
+            ),
+            React.createElement(
               'div',
               { className: 'confirmation-text-wrapper', style: styles$2.confirmationTextWrapper },
               React.createElement(
@@ -1066,7 +1108,8 @@ var DirectPayConfirmation = function (_React$Component) {
                 { style: styles$2.confirmationDetailValue },
                 React.createElement(
                   'span',
-                  { style: styles$2.confirmationDetailKey },
+                  {
+                    style: styles$2.confirmationDetailKey },
                   'Student Name: '
                 ),
                 ' ',
@@ -1078,7 +1121,8 @@ var DirectPayConfirmation = function (_React$Component) {
                 { style: styles$2.confirmationDetailValue },
                 React.createElement(
                   'span',
-                  { style: styles$2.confirmationDetailKey },
+                  {
+                    style: styles$2.confirmationDetailKey },
                   'Course Name: '
                 ),
                 ' ',
@@ -1090,19 +1134,20 @@ var DirectPayConfirmation = function (_React$Component) {
                 { style: styles$2.confirmationDetailValue },
                 React.createElement(
                   'span',
-                  { style: styles$2.confirmationDetailKey },
+                  {
+                    style: styles$2.confirmationDetailKey },
                   'Activation Code Used: '
                 ),
                 ' ',
-                this.props.activationCode.toUpperCase(),
-                ' '
+                this.props.activationCode.toUpperCase()
               ),
               React.createElement(
                 'p',
                 { style: styles$2.confirmationDetailValue },
                 React.createElement(
                   'span',
-                  { style: styles$2.confirmationDetailKey },
+                  {
+                    style: styles$2.confirmationDetailKey },
                   'Timestamp: '
                 ),
                 ' ',
@@ -1114,7 +1159,8 @@ var DirectPayConfirmation = function (_React$Component) {
               'button',
               { style: styles$2.continueButton, onClick: this._handleClick },
               'Continue'
-            )
+            ),
+            this._renderFooterLogo()
           )
         );
       }
@@ -1123,6 +1169,28 @@ var DirectPayConfirmation = function (_React$Component) {
     key: '_handleClick',
     value: function _handleClick() {
       window.location = this.props.redirectTo;
+    }
+  }, {
+    key: '_renderFooterLogo',
+    value: function _renderFooterLogo() {
+      if (this.props.schoolLogoUrl != null && this.props.schoolLogoUrl !== '') {
+        return React.createElement(
+          'div',
+          { className: 'lumen-attribution', style: styles$2.lumenAttributionWrapper },
+          React.createElement(
+            'span',
+            null,
+            'Open Courseware by '
+          ),
+          React.createElement(
+            'a',
+            { style: styles$2.lumenLogoLink, href: "https://www.lumenlearning.com", target: '_blank' },
+            React.createElement('img', { src: 'https://s3-us-west-2.amazonaws.com/lumen-components/assets/Lumen-300x138.png',
+              alt: 'Lumen Learning logo', className: 'lumen-logo',
+              style: styles$2.lumenLogo })
+          )
+        );
+      }
     }
   }]);
   return DirectPayConfirmation;
@@ -1699,7 +1767,8 @@ var styles$7 = {
         color: '#bf0711',
         display: 'inline-block',
         verticalAlign: 'middle',
-        marginLeft: '4px'
+        marginLeft: '10px',
+        maxWidth: '500px'
     },
     errorMessageWrapper: {
         display: 'block',
@@ -1919,7 +1988,7 @@ var OptionItem = function (_React$Component) {
     }, {
         key: '_renderItemButton',
         value: function _renderItemButton() {
-            if (1 === this.props.item && this.state.showDropdown) {
+            if (1 === this.props.item && this.state.showDropdown || 'expired' === this.props.paymentStatus) {
                 return;
             } else if (this.state.showItemButton) {
                 return React.createElement(
@@ -2059,7 +2128,8 @@ var MultiPayAccessOptions = function (_React$Component) {
     }, {
         key: '_calculateAmount',
         value: function _calculateAmount() {
-            return this.props.chargeAmount / 100;
+            var amount = (this.props.chargeAmount / 100).toFixed(2);
+            return 0 === amount % 1 ? amount | 0 : amount;
         }
     }, {
         key: '_getLabelText',
