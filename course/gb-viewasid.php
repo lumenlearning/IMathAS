@@ -665,8 +665,7 @@
 		$excepadata = array(
 			'id'=>$line['assessmentid'], 
 			'allowlate'=>$line['allowlate'],
-			'enddate'=>$line['enddate'],
-			'LPcutoff'=>$line['LPcutoff']
+			'enddate'=>$line['enddate']
 			);
 			
 		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");

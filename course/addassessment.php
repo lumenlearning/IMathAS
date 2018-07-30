@@ -605,7 +605,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
             	    if ($GLOBALS['courseenddate']<2000000000) { //default to course enddate, if set
             	    	    $lpdate = tzdate("m/d/Y",$GLOBALS['courseenddate']); 
             	    } else {
-            	    	    $lpdate = '';
+            	    	    $lpdate = $edate;
             	    }
             	    $lptime = $etime;
             } else {
@@ -1126,11 +1126,11 @@ if ($overwriteBody==1) {
 				<label><input type="checkbox" name="latepassafterdue" <?php writeHtmlChecked($line['allowlate']>10,true); ?>>
 					Allow LatePasses after due date</label>
 				<br/>
-				<label><input type="checkbox" name="dolpcutoff" <?php writeHtmlChecked($lpdate!='',true); ?>
-					aria-controls="lpcutoffwrap" aria-expanded="<?php echo ($lpdate=='')?'false':'true';?>"/>
+				<label><input type="checkbox" name="dolpcutoff" <?php writeHtmlChecked($line['LPcutoff']>0,true); ?>
+					aria-controls="lpcutoffwrap" aria-expanded="<?php echo ($line['LPcutoff']==0)?'false':'true';?>"/>
 					Restrict by date. 
 				</label>
-				<span id=lpcutoffwrap <?php if ($lpdate=='') {echo 'style="display: none;"';}?>>
+				<span id=lpcutoffwrap <?php if ($line['LPcutoff']==0) {echo 'style="display: none;"';}?>>
 				<label for=lpcutoff>No extensions past</label> 
 				<input type=text size=10 name="lpdate" value="<?php echo $lpdate;?>">
 				<a href="#" onClick="displayDatePicker('lpdate', this, 'edate', 'due date'); return false">
