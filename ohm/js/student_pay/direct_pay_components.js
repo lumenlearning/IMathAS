@@ -957,6 +957,7 @@ var DirectPayCourseActivation = function (_React$Component) {
 var styles$2 = {
   confirmationPageWrapper: {
     fontFamily: 'Libre Franklin, sans serif',
+    margin: '2.5em 2em',
     color: '#212b36'
   },
   continueButton: {
@@ -1021,6 +1022,12 @@ var styles$2 = {
   schoolLogoWrapper: {
     height: '69px',
     width: '224px'
+  },
+  logoImg: {
+    width: '224px',
+    height: '69px',
+    objectFit: 'contain',
+    marginBottom: '1.75em'
   }
 };
 
@@ -1091,6 +1098,11 @@ var DirectPayConfirmation = function (_React$Component) {
         return React.createElement(
           'div',
           { style: styles$2.confirmationPageWrapper },
+          React.createElement('img', {
+            src: this._getLogoUrl(),
+            alt: this._getLogoAltText(),
+            style: styles$2.logoImg
+          }),
           React.createElement(
             'div',
             { className: 'confirmation-wrapper', style: styles$2.confirmationWrapper },
@@ -1173,6 +1185,16 @@ var DirectPayConfirmation = function (_React$Component) {
     key: '_handleClick',
     value: function _handleClick() {
       window.location = this.props.redirectTo;
+    }
+  }, {
+    key: '_getLogoUrl',
+    value: function _getLogoUrl() {
+      return this.props.schoolLogoUrl || 'https://s3-us-west-2.amazonaws.com/lumen-platform-assets/images/lumen-open-courseware.png';
+    }
+  }, {
+    key: '_getLogoAltText',
+    value: function _getLogoAltText() {
+      return this.props.institutionName ? this.props.institutionName + ' logo' : 'Lumen Open Courseware logo';
     }
   }, {
     key: '_renderFooterLogo',
