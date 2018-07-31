@@ -1961,18 +1961,7 @@ var OptionItem = function (_React$Component) {
                             this.props.subLabel
                         )
                     ),
-                    React.createElement(
-                        'div',
-                        { style: styles$7.optionItemInfoIconWrapper },
-                        React.createElement('img', {
-                            style: styles$7.optionItemInfoIcon,
-                            src: this.props.infoIcon,
-                            alt: this.props.infoIconAlt,
-                            onMouseEnter: this._handleMouseOver,
-                            onMouseLeave: this._handleMouseLeave
-                        }),
-                        this._renderPopOver()
-                    )
+                    this._renderHoverHelp()
                 ),
                 React.createElement(
                     'div',
@@ -1981,6 +1970,25 @@ var OptionItem = function (_React$Component) {
                 ),
                 this._renderDropdown()
             );
+        }
+    }, {
+        key: '_renderHoverHelp',
+        value: function _renderHoverHelp() {
+            console.log(this.props.infoIcon.length > 0);
+            if (this.props.infoIcon.length > 0) {
+                return React.createElement(
+                    'div',
+                    { style: styles$7.optionItemInfoIconWrapper },
+                    React.createElement('img', {
+                        style: styles$7.optionItemInfoIcon,
+                        src: this.props.infoIcon,
+                        alt: this.props.infoIconAlt,
+                        onMouseEnter: this._handleMouseOver,
+                        onMouseLeave: this._handleMouseLeave
+                    }),
+                    this._renderPopOver()
+                );
+            }
         }
     }, {
         key: '_renderPopOver',
