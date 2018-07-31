@@ -208,6 +208,12 @@ var styles$1 = {
     verticalAlign: 'middle',
     marginLeft: '4px'
   },
+  errorIcon: {
+    width: '20px',
+    height: '20px',
+    display: 'inline-block',
+    verticalAlign: 'middle'
+  },
   table: {
     maxWidth: '278px',
     marginBottom: '47px'
@@ -593,6 +599,10 @@ var CheckoutTaxPage = function (_React$Component) {
   }, {
     key: '_setZipCode',
     value: function _setZipCode(e) {
+      this.setState({
+        taxAmount: '-',
+        total: '-'
+      });
       if (e.target.value.length === 5) {
         this._getTaxAmount(e.target.value);
       }
