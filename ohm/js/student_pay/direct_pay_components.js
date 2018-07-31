@@ -2373,7 +2373,7 @@ var MultiPayPage = function (_React$Component) {
     }, {
         key: '_renderBanner',
         value: function _renderBanner() {
-            if ('in_trial' === this.props.paymentStatus || 'trial_not_started' === this.props.paymentStatus) {
+            if ('in_trial' === this.props.paymentStatus || 'trial_not_started' === this.props.paymentStatus || this.state.showCheckout) {
                 return;
             }
 
