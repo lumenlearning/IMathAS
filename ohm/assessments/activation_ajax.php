@@ -121,8 +121,13 @@ if ("payment_proxy" == $action) {
 		}
 	}
 
-	redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
-		$confirmationNum, $activationCode, $userEmail);
+	if (is_null($activationCode)) {
+		redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
+			$confirmationNum, $activationCode, $userEmail);
+	} else {
+		redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
+			$confirmationNum, $activationCode, $userEmail);
+	}
 
 	exit;
 }
@@ -146,6 +151,24 @@ function response($status, $msg)
 	echo json_encode(array(
 		'message' => $msg
 	));
+
+	exit;
+}
+
+/**
+ * Redirect a user to the activation confirmation page.
+ */
+function redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
+											 $confirmationNum, $activationCode, $email)
+{
+	$confirmationUrl = $GLOBALS["basesiteurl"] . '/ohm/assessments/activation_confirmation.php?'
+		. Sanitize::generateQueryStringFromMap(array(
+			'courseId' => $courseId,
+			'assessmentId' => $assessmentId,
+			'code' => $activationCode,
+			'activationTime' => time(),
+		));
+	header('Location: ' . $confirmationUrl, true);
 
 	exit;
 }
