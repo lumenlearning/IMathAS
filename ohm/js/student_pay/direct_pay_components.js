@@ -1098,11 +1098,6 @@ var DirectPayConfirmation = function (_React$Component) {
         return React.createElement(
           'div',
           { style: styles$2.confirmationPageWrapper },
-          React.createElement('img', {
-            src: this._getLogoUrl(),
-            alt: this._getLogoAltText(),
-            style: styles$2.logoImg
-          }),
           React.createElement(
             'div',
             { className: 'confirmation-wrapper', style: styles$2.confirmationWrapper },
@@ -1114,7 +1109,7 @@ var DirectPayConfirmation = function (_React$Component) {
             React.createElement(
               'h2',
               { className: 'subheading', style: styles$2.confirmationSubheading },
-              'Thank you for submitting your Lumen OHM course activation code. Please print this screen or save it as a PDF for your records.'
+              'Thank you for submitting your Lumen course activation code. Please print this screen or save it as a PDF for your records.'
             ),
             React.createElement(
               'div',
@@ -2403,7 +2398,7 @@ var MultiPayPage = function (_React$Component) {
     }, {
         key: '_renderBanner',
         value: function _renderBanner() {
-            if ('in_trial' === this.props.paymentStatus || 'trial_not_started' === this.props.paymentStatus || this.state.showCheckout) {
+            if ('in_trial' === this.props.paymentStatus || 'trial_not_started' === this.props.paymentStatus || undefined != this.props.activationCodeErrors || this.state.showCheckout) {
                 return;
             }
 
