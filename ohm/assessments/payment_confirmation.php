@@ -50,6 +50,7 @@ $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
         'paymentStatus': 'has_access',
         'schoolLogoUrl': '<?php echo $schoolLogoUrl; ?>',
         'attributionLogoUrl': <?php echo $attributionLogoUrl; ?>,
+        'confirmationNum': <?php echo $confirmationNum; ?>,
       });
     </script>
 
