@@ -5,11 +5,13 @@
 
 $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, $userid);
 $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
+$assessmentId = Sanitize::onlyInt($_REQUEST['id']);
 
 ?>
 <form id="ohmActivateCodeForm" method="POST" action="#">
     <input type="hidden" name="group_id" value="<?php echo $courseOwnerGroupId; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
+    <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
     <input type="hidden" name="student_id" value="<?php echo Sanitize::onlyInt($userid); ?>"/>
     <div class="access_code_input_wrapper">
       <label for="access_code">Enter an activation code:</label>
@@ -44,6 +46,7 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
         var activationCodeForm = $('#ohmActivateCodeForm');
         var groupId = activationCodeForm.find('input[name="group_id"]').val();
         var courseId = activationCodeForm.find('input[name="course_id"]').val();
+        var assessmentId = activationCodeForm.find('input[name="assessment_id"]').val();
         var studentId = activationCodeForm.find('input[name="student_id"]').val();
         var activationCode = $('#access_code').val();
 
@@ -65,6 +68,7 @@ $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
             success: function (data) {
                 window.location.href = imasroot + '/ohm/assessments/activation_confirmation.php'
                     + '?courseId=' + courseId
+                    + '&assessmentId=' + assessmentId
                     + '&code=' + activationCode
                     + '&activationTime=' + Math.round((new Date()).getTime() / 1000);
             },

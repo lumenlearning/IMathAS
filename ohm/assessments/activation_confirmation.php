@@ -11,6 +11,9 @@ if (!isset($_REQUEST['courseId']) || !isset($_REQUEST['activationTime'])) {
     exit;
 }
 
+$courseId = Sanitize::onlyInt($_REQUEST['courseId']);
+$assessmentId = Sanitize::onlyInt($_REQUEST['assessmentId']);
+
 // User Name
 $userDisplayName = explode(' ', $GLOBALS['userfullname'])[0];
 if ('' == trim($userDisplayName)) {
@@ -19,7 +22,7 @@ if ('' == trim($userDisplayName)) {
 
 // Course name
 $courseNameStm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
-$courseNameStm->execute(array(':id'=>$_REQUEST['courseId']));
+$courseNameStm->execute(array(':id'=>$courseId));
 $courseName = $courseNameStm->fetchColumn(0);
 
 // Access Code
@@ -33,6 +36,11 @@ $date = new DateTime();
 $date->setTimestamp($timestamp);
 $timestamp_string = $date->format('Y-m-d H:i:s');
 
+$assessmentUrl = $GLOBALS['basesiteurl'] . '/assessment/showtest.php?'
+	. Sanitize::generateQueryStringFromMap(array(
+		'id' => $assessmentId,
+		'cid' => $courseId
+	));
 ?>
 
 <div class="access-wrapper">
@@ -45,16 +53,16 @@ $timestamp_string = $date->format('Y-m-d H:i:s');
 
 	<h2 id="subhead">Submission Details</h2>
 	<div id="confirmation-details">
-		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($userfullname); ?></p>
+		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($GLOBALS['userfullname']); ?></p>
 		<p><strong>Course Name: </strong><?php echo Sanitize::encodeStringForDisplay($courseName); ?></p>
-        <p><strong>Course ID: </strong><?php echo Sanitize::encodeStringForDisplay($_REQUEST['courseId']); ?></p>
+        <p><strong>Course ID: </strong><?php echo Sanitize::encodeStringForDisplay($courseId); ?></p>
 		<p><strong>Activation Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
 		<p><strong>Timestamp: </strong><?php echo $timestamp_string; ?></p>
 	</div>
 
 	<div class="trial_button_wrapper">
 	  <p>
-	    <a href="<?php echo $GLOBALS['basesiteurl'] . '/assessment/showtest.php'; ?>">Continue to assessment</a>
+	    <a href="<?php echo $assessmentUrl; ?>">Continue to assessment</a>
 	  </p>
 	</div>
 
