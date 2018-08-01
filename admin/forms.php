@@ -1,6 +1,7 @@
 <?php
 //IMathAS:  Admin forms
 //(c) 2006 David Lippman
+
 require("../init.php");
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
@@ -10,6 +11,9 @@ $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/Dat
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
+
+use OHM\Models\StudentPayApiResult;
+use OHM\Exceptions\StudentPaymentException;
 
 $placeinhead .= '<script type="text/javascript" src="' . $imasroot . '/ohm/js/student_pay/studentPayAjax.js"></script>';
 
@@ -1371,12 +1375,12 @@ function getGroupAssessmentAccessType($groupId) {
 			// If the student payment API doesn't know about this group, then
 			// there is no required access type. AKA: free assessments!
 			$currentAccessType = is_null($apiResult->getAccessType()) ?
-				\OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
+				StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
 				$apiResult->getAccessType();
 		} else {
 			$currentAccessType = \OHM\Models\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
-	} catch (\OHM\StudentPaymentException $e) {
+	} catch (StudentPaymentException $e) {
 		// Don't allow failed API communication to break UX.
 		error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
 			Sanitize::onlyInt($_GET['id']), $e->getMessage()));
@@ -1413,7 +1417,7 @@ function renderAccessTypeSelector($currentAccessType) {
  * Create/Modify Course page.
  *
  * @param string $action One of "addcourse" or "modify"
- * @throws \OHM\StudentPaymentException
+ * @throws \OHM\Exceptions\StudentPaymentException
  */
 function renderCourseRequiresStudentPayment($action) {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
