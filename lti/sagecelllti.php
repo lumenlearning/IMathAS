@@ -34,7 +34,7 @@ $linkid = $_POST['resource_link_id'];
 
 if (isset($_GET['save'])) {
 	$code = $_POST['code'];
-	if ($_GET['id']!='new') {
+	if ($_GET['id']>0) {
 		$id = intval($_GET['id']);
 		$stm = $DBH->prepare("UPDATE celldata SET code=:code WHERE id=:id");
 		$stm->execute(array(':code'=>$code, ':id'=>$id));
@@ -53,7 +53,7 @@ if ($stm->rowCount()>0) {
 	list($code, $id) = $stm->fetch(PDO::FETCH_NUM);
 } else {
 	$code = "a = solve(x^2+3*x-2==0,x); print a\nplot(x^2+3*x-2,(-4,4))";
-	$id = 'new';
+	$id = 0;
 }
 
 ?>
