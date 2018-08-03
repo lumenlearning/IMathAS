@@ -503,7 +503,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $savetitle = _("Save Changes");
             } else {  //INITIAL LOAD IN ADD MODE
                 //set defaults
-                $line['name'] = "Enter assessment name";
+                $line['name'] = "";
                 $line['summary'] = "<p></p>";
                 $line['intro'] = "<p></p>";
                 $startdate = time()+60*60;
