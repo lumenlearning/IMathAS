@@ -116,7 +116,9 @@ function displayPaymentPage()
         'attributionLogoUrl': <?php echo $GLOBALS['attributionLogoUrl']; ?>,
         'trialTimeRemaining': '<?php echo $GLOBALS['trialTimeRemaining']; ?>',
         'paymentStatus': '<?php echo $GLOBALS['paymentStatus']; ?>',
+      <?php if (!empty($GLOBALS['activationCodeErrors'])) { ?>
         'activationCodeErrors': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['activationCodeErrors']); ?>',
+      <?php } ?>
       });
     </script>
 
