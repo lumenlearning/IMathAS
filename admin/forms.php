@@ -1453,7 +1453,7 @@ function renderCourseRequiresStudentPayment($action) {
 
 		$studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
 		$groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-		if ($groupRequiresPayment) {
+		if ($groupRequiresPayment && 'addcourse' != $action) {
 			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
 			echo '<span class=form>Assessments require payment or activation?</span><span class=formright>';
 			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
