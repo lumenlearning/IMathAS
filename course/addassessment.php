@@ -504,8 +504,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
             } else {  //INITIAL LOAD IN ADD MODE
                 //set defaults
                 $line['name'] = "Enter assessment name";
-                $line['summary'] = "<p>Enter summary here (shows on course page)</p>";
-                $line['intro'] = "<p>Enter intro/instructions</p>";
+                $line['summary'] = "<p></p>";
+                $line['intro'] = "<p></p>";
                 $startdate = time()+60*60;
                 $enddate = time() + 7*24*60*60;
                 $line['startdate'] = $startdate;
