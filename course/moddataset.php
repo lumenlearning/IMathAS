@@ -92,10 +92,6 @@
 	if (isset($_POST['qtext'])) {
 		require_once("../includes/filehandler.php");
 		$now = time();
-		//DB $_POST['qtext'] = stripsmartquotes(stripslashes($_POST['qtext']));
-		//DB $_POST['control'] = addslashes(stripsmartquotes(stripslashes($_POST['control'])));
-		//DB $_POST['qcontrol'] = addslashes(stripsmartquotes(stripslashes($_POST['qcontrol'])));
-		//DB $_POST['solution'] = stripsmartquotes(stripslashes($_POST['solution']));
 		foreach (array('qcontrol','answer','solution') as $v) {
 			if (!isset($_POST[$v])) {$_POST[$v] = '';}
 		}
@@ -115,21 +111,15 @@
 			require_once("../includes/htmLawed.php");
 			$_POST['qtext'] = convertdatauris($_POST['qtext']);
 		}
-		//DB $_POST['qtext'] = addslashes($_POST['qtext']);
-		//DB $_POST['solution'] = addslashes($_POST['solution']);
 
 		//handle help references
 		if (isset($_GET['id']) || isset($_GET['templateid'])) {
 			$stm = $DBH->prepare("SELECT extref FROM imas_questionset WHERE id=:id");
 			if (isset($_GET['id'])) {
-				//DB $query = "SELECT extref FROM imas_questionset WHERE id='{$_GET['id']}'";
 				$stm->execute(array(':id'=>$_GET['id']));
 			} else {
-				//DB $query = "SELECT extref FROM imas_questionset WHERE id='{$_GET['templateid']}'";
 				$stm->execute(array(':id'=>$_GET['templateid']));
 			}
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-			//DB $extref = mysql_result($result,0,0);
 			$extref = $stm->fetchColumn(0);
 			if ($extref=='') {
 				$extref = array();
@@ -190,10 +180,6 @@
 			$qsetid = intval($_GET['id']);
 			$isok = true;
 			if ($isgrpadmin) {
-				//DB $query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
-				//DB $query .= "WHERE iq.id='{$_GET['id']}' AND iq.ownerid=imas_users.id AND (imas_users.groupid='$groupid' OR iq.userights>2)";
-				//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-				//DB if (mysql_num_rows($result)==0) {
 				$query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
 				$query .= "WHERE iq.id=:id AND iq.ownerid=imas_users.id AND (imas_users.groupid=:groupid OR iq.userights>2)";
 				$stm = $DBH->prepare($query);
@@ -207,10 +193,6 @@
 				//$query .= "WHERE iq.id='{$_GET['id']}' AND iq.ownerid=imas_users.id AND (imas_users.groupid='$groupid' OR iq.userights>2)";
 			}
 			if (!$isadmin && !$isgrpadmin) {  //check is owner or is allowed to modify
-				//DB $query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
-				//DB $query .= "WHERE iq.id='{$_GET['id']}' AND iq.ownerid=imas_users.id AND (iq.ownerid='$userid' OR (iq.userights=3 AND imas_users.groupid='$groupid') OR iq.userights>3)";
-				//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-				//DB if (mysql_num_rows($result)==0) {
 				$query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
 				$query .= "WHERE iq.id=:id AND iq.ownerid=imas_users.id AND (iq.ownerid=:ownerid OR (iq.userights=3 AND imas_users.groupid=:groupid) OR iq.userights>3)";
 				$stm = $DBH->prepare($query);
@@ -223,15 +205,6 @@
 			//checked separately above now
 			//if (!$isadmin && !$isgrpadmin) { $query .= " AND (ownerid='$userid' OR userights>2);";}
 			if ($isok && !isset($_POST['justupdatelibs'])) {
-				//DB $query = "UPDATE imas_questionset SET description='{$_POST['description']}',author='{$_POST['author']}',userights='{$_POST['userights']}',license='{$_POST['license']}',";
-				//DB $query .= "otherattribution='{$_POST['addattr']}',qtype='{$_POST['qtype']}',control='{$_POST['control']}',qcontrol='{$_POST['qcontrol']}',solution='{$_POST['solution']}',";
-				//DB $query .= "qtext='{$_POST['qtext']}',answer='{$_POST['answer']}',lastmoddate=$now,extref='$extref',replaceby=$replaceby,solutionopts=$solutionopts";
-				//DB if (isset($_POST['undelete'])) {
-					//DB $query .= ',deleted=0';
-				//DB }
-				//DB $query .= " WHERE id='{$_GET['id']}'";
-				//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-				//DB if (mysql_affected_rows()>0) {
 				$query = "UPDATE imas_questionset SET description=:description,author=:author,userights=:userights,license=:license,";
 				$query .= "otherattribution=:otherattribution,qtype=:qtype,control=:control,qcontrol=:qcontrol,solution=:solution,";
 				$query .= "qtext=:qtext,answer=:answer,lastmoddate=:lastmoddate,extref=:extref,replaceby=:replaceby,solutionopts=:solutionopts";
@@ -250,61 +223,46 @@
 				} else {
 					$outputmsg .= "Library Assignments Updated. ";
 				}
-			}
-			//DB $query = "SELECT id,filename,var,alttext FROM imas_qimages WHERE qsetid='{$_GET['id']}'";
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-			//DB $imgcnt = mysql_num_rows($result);
-			//DB while ($row = mysql_fetch_row($result)) {
-			$stm = $DBH->prepare("SELECT id,filename,var,alttext FROM imas_qimages WHERE qsetid=:qsetid");
-			$stm->execute(array(':qsetid'=>$_GET['id']));
-			$imgcnt = $stm->rowCount();
-			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				$_POST['imgvar-'.$row[0]] = preg_replace('/[^\w\[\]]/','', $_POST['imgvar-'.$row[0]]); 
-				if (isset($_POST['delimg-'.$row[0]])) {
-					if (substr($row[1],0,4)!='http') {
-						//DB $query = "SELECT id FROM imas_qimages WHERE filename='{$row[1]}'";
-						//DB $r2 = mysql_query($query) or die("Query failed :$query " . mysql_error());
-						//DB if (mysql_num_rows($r2)==1) {
-						$stm2 = $DBH->prepare("SELECT id FROM imas_qimages WHERE filename=:filename");
-						$stm2->execute(array(':filename'=>$row[1]));
-						if ($stm2->rowCount()==1) {
-							//unlink(rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/'.$row[1]);
-							deleteqimage($row[1]);
+			
+				$stm = $DBH->prepare("SELECT id,filename,var,alttext FROM imas_qimages WHERE qsetid=:qsetid");
+				$stm->execute(array(':qsetid'=>$_GET['id']));
+				$imgcnt = $stm->rowCount();
+				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+					$_POST['imgvar-'.$row[0]] = preg_replace('/[^\w\[\]]/','', $_POST['imgvar-'.$row[0]]); 
+					if (isset($_POST['delimg-'.$row[0]])) {
+						if (substr($row[1],0,4)!='http') {
+							$stm2 = $DBH->prepare("SELECT id FROM imas_qimages WHERE filename=:filename");
+							$stm2->execute(array(':filename'=>$row[1]));
+							if ($stm2->rowCount()==1) {
+								//unlink(rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/'.$row[1]);
+								deleteqimage($row[1]);
+							}
+						}
+						$stm2 = $DBH->prepare("DELETE FROM imas_qimages WHERE id=:id");
+						$stm2->execute(array(':id'=>$row[0]));
+						$imgcnt--;
+						if ($imgcnt==0) {
+							$stm2 = $DBH->prepare("UPDATE imas_questionset SET hasimg=0 WHERE id=:id");
+							$stm2->execute(array(':id'=>$_GET['id']));
+						}
+					} else if ($row[2]!=$_POST['imgvar-'.$row[0]] || $row[3]!=$_POST['imgalt-'.$row[0]]) {
+						$newvar = $_POST['imgvar-'.$row[0]];
+						$newalt = $_POST['imgalt-'.$row[0]];
+						$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','laarr','shanspt','GLOBALS','laparts','anstype','kidx','iidx','tips','optionsPack','partla','partnum','score','disallowedvar','allowedmacros','wherecount','countcnt','myrights','myspecialrights');
+						if (in_array($newvar,$disallowedvar)) {
+							$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
+						} else {
+							$stm2 = $DBH->prepare("UPDATE imas_qimages SET var=:var,alttext=:alttext WHERE id=:id");
+							$stm2->execute(array(':var'=>$newvar, ':alttext'=>$newalt, ':id'=>$row[0]));
 						}
 					}
-					//DB $query = "DELETE FROM imas_qimages WHERE id='{$row[0]}'";
-					//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-					$stm2 = $DBH->prepare("DELETE FROM imas_qimages WHERE id=:id");
-					$stm2->execute(array(':id'=>$row[0]));
-					$imgcnt--;
-					if ($imgcnt==0) {
-						//DB $query = "UPDATE imas_questionset SET hasimg=0 WHERE id='{$_GET['id']}'";
-						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm2 = $DBH->prepare("UPDATE imas_questionset SET hasimg=0 WHERE id=:id");
-						$stm2->execute(array(':id'=>$_GET['id']));
-					}
-				} else if ($row[2]!=$_POST['imgvar-'.$row[0]] || $row[3]!=$_POST['imgalt-'.$row[0]]) {
-					$newvar = $_POST['imgvar-'.$row[0]];
-					$newalt = $_POST['imgalt-'.$row[0]];
-					$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','laarr','shanspt','GLOBALS','laparts','anstype','kidx','iidx','tips','optionsPack','partla','partnum','score','disallowedvar','allowedmacros','wherecount','countcnt','myrights','myspecialrights');
-					if (in_array($newvar,$disallowedvar)) {
-						$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
-					} else {
-						//DB $query = "UPDATE imas_qimages SET var='$newvar',alttext='$newalt' WHERE id='{$row[0]}'";
-						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm2 = $DBH->prepare("UPDATE imas_qimages SET var=:var,alttext=:alttext WHERE id=:id");
-						$stm2->execute(array(':var'=>$newvar, ':alttext'=>$newalt, ':id'=>$row[0]));
-					}
 				}
-			}
-			if ($replaceby!=0) {
-				//DB $query = 'UPDATE imas_questions LEFT JOIN imas_assessment_sessions ON imas_questions.assessmentid = imas_assessment_sessions.assessmentid ';
-				//DB $query .= "SET imas_questions.questionsetid='$replaceby' WHERE imas_assessment_sessions.id IS NULL AND imas_questions.questionsetid='$qsetid'";
-				//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-				$query = 'UPDATE imas_questions LEFT JOIN imas_assessment_sessions ON imas_questions.assessmentid = imas_assessment_sessions.assessmentid ';
-				$query .= "SET imas_questions.questionsetid=:replaceby WHERE imas_assessment_sessions.id IS NULL AND imas_questions.questionsetid=:questionsetid";
-				$stm = $DBH->prepare($query);
-				$stm->execute(array(':replaceby'=>$replaceby, ':questionsetid'=>$qsetid));
+				if ($replaceby!=0) {
+					$query = 'UPDATE imas_questions LEFT JOIN imas_assessment_sessions ON imas_questions.assessmentid = imas_assessment_sessions.assessmentid ';
+					$query .= "SET imas_questions.questionsetid=:replaceby WHERE imas_assessment_sessions.id IS NULL AND imas_questions.questionsetid=:questionsetid";
+					$stm = $DBH->prepare($query);
+					$stm->execute(array(':replaceby'=>$replaceby, ':questionsetid'=>$qsetid));
+				}
 			}
 
 		} else { //adding new
@@ -312,9 +270,6 @@
 			$uqid = substr($mt,11).substr($mt,2,6);
 			$ancestors = ''; $ancestorauthors = '';
 			if (isset($_GET['templateid'])) {
-				//DB $query = "SELECT ancestors,author,ancestorauthors FROM imas_questionset WHERE id='{$_GET['templateid']}'";
-				//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-				//DB list($ancestors,$lastauthor,$ancestorauthors) = mysql_fetch_row($result);
 				$stm = $DBH->prepare("SELECT ancestors,author,ancestorauthors FROM imas_questionset WHERE id=:id");
 				$stm->execute(array(':id'=>$_GET['templateid']));
 				list($ancestors,$lastauthor,$ancestorauthors) = $stm->fetch(PDO::FETCH_NUM);
@@ -332,12 +287,6 @@
 					$ancestorauthors = $lastauthor;
 				}
 			}
-			//DB $ancestorauthors = addslashes($ancestorauthors);
-			//DB $query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,description,ownerid,author,userights,license,otherattribution,qtype,control,qcontrol,qtext,answer,hasimg,ancestors,ancestorauthors,extref,replaceby,solution,solutionopts) VALUES ";
-			//DB $query .= "($uqid,$now,$now,'{$_POST['description']}','$userid','{$_POST['author']}','{$_POST['userights']}','{$_POST['license']}','{$_POST['addattr']}','{$_POST['qtype']}','{$_POST['control']}',";
-			//DB 	$query .= "'{$_POST['qcontrol']}','{$_POST['qtext']}','{$_POST['answer']}','{$_POST['hasimg']}','$ancestors','$ancestorauthors','$extref',$replaceby,'{$_POST['solution']}',$solutionopts);";
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-			//DB $qsetid = mysql_insert_id();
 			$query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,description,ownerid,author,userights,license,otherattribution,qtype,control,qcontrol,qtext,answer,hasimg,ancestors,ancestorauthors,extref,replaceby,solution,solutionopts) VALUES ";
 			$query .= "(:uniqueid, :adddate, :lastmoddate, :description, :ownerid, :author, :userights, :license, :otherattribution, :qtype, :control, :qcontrol, :qtext, :answer, :hasimg, :ancestors, :ancestorauthors, :extref, :replaceby, :solution, :solutionopts);";
 			$stm = $DBH->prepare($query);
@@ -350,9 +299,6 @@
 			$_GET['id'] = $qsetid;
 
 			if (isset($_GET['templateid'])) {
-				//DB $query = "SELECT var,filename,alttext,id FROM imas_qimages WHERE qsetid='{$_GET['templateid']}'";
-				//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$stm = $DBH->prepare("SELECT var,filename,alttext,id FROM imas_qimages WHERE qsetid=:qsetid");
 				$stm->execute(array(':qsetid'=>$_GET['templateid']));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -367,8 +313,6 @@
 							}
 							$row[2] = $newalt;
 						}
-						//DB $query = "INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES ('$qsetid','{$row[0]}','{$row[1]}','{$row[2]}')";
-						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
 						$stm2 = $DBH->prepare("INSERT INTO imas_qimages (qsetid,var,filename,alttext) VALUES (:qsetid, :var, :filename, :alttext)");
 						$stm2->execute(array(':qsetid'=>$qsetid, ':var'=>$row[0], ':filename'=>$row[1], ':alttext'=>$row[2]));
 					}
@@ -376,8 +320,6 @@
 			}
 
 			if (isset($_GET['makelocal'])) {
-				//DB $query = "UPDATE imas_questions SET questionsetid='$qsetid' WHERE id='{$_GET['makelocal']}'";
-				//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
 				$stm = $DBH->prepare("UPDATE imas_questions SET questionsetid=:questionsetid WHERE id=:id");
 				$stm->execute(array(':questionsetid'=>$qsetid, ':id'=>$_GET['makelocal']));
 				$outputmsg .= " Local copy of Question Created ";
@@ -386,63 +328,59 @@
 				$outputmsg .= " Question Added to QuestionSet. ";
 				$frompot = 1;
 			}
-
+			$isok = true;
 		}
 
-		//upload image files if attached
-		if ($_FILES['imgfile']['name']!='') {
-			$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
-			$_POST['newimgvar'] = preg_replace('/[^\w\[\]]/','', $_POST['newimgvar']);
-			if (!is_uploaded_file($_FILES['imgfile']['tmp_name'])) {
-				switch($_FILES['imgfile']['error']){
-			    case 1:
-			    case 2: //uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form
-			      $errmsg .= "The file you are trying to upload is too big.";
-			      break;
-			    case 3: //uploaded file was only partially uploaded
-			      $errmsg .= "The file you are trying upload was only partially uploaded.";
-			      break;
-			    default: //a default error, just in case!  :)
-			      $errmsg .= "There was a problem with your upload.";
-			      break;
-					}
-			} else if (trim($_POST['newimgvar'])=='') {
-				$errmsg .= "<p>Need to specify variable for image to be referenced by</p>";
-			} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
-				$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
-			} else {
-				$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/';
-				//$filename = basename($_FILES['imgfile']['name']);
-				$userfilename = preg_replace('/[^\w\.]/','',basename(str_replace('\\','/',$_FILES['imgfile']['name'])));
-				$filename = $userfilename;
-
-				//$uploadfile = $uploaddir . $filename;
-				//$t=0;
-				//while(file_exists($uploadfile)){
-				//	$filename = substr($filename,0,strpos($userfilename,"."))."_$t".strstr($userfilename,".");
-				//	$uploadfile=$uploaddir.$filename;
-				//	$t++;
-				//}
-				$result_array = getimagesize($_FILES['imgfile']['tmp_name']);
-				if ($result_array === false) {
-					$errmsg .= "<p>File is not image file</p>";
+		if ($isok) {
+			//upload image files if attached
+			if ($_FILES['imgfile']['name']!='') {
+				$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
+				$_POST['newimgvar'] = preg_replace('/[^\w\[\]]/','', $_POST['newimgvar']);
+				if (!is_uploaded_file($_FILES['imgfile']['tmp_name'])) {
+					switch($_FILES['imgfile']['error']){
+					case 1:
+					case 2: //uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form
+					  $errmsg .= "The file you are trying to upload is too big.";
+					  break;
+					case 3: //uploaded file was only partially uploaded
+					  $errmsg .= "The file you are trying upload was only partially uploaded.";
+					  break;
+					default: //a default error, just in case!  :)
+					  $errmsg .= "There was a problem with your upload.";
+					  break;
+						}
+				} else if (trim($_POST['newimgvar'])=='') {
+					$errmsg .= "<p>Need to specify variable for image to be referenced by</p>";
+				} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
+					$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
 				} else {
-					if (($filename=storeuploadedqimage('imgfile',$filename))!==false) {
-					//if (move_uploaded_file($_FILES['imgfile']['tmp_name'], $uploadfile)) {
-						//echo "<p>File is valid, and was successfully uploaded</p>\n";
+					$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/';
+					//$filename = basename($_FILES['imgfile']['name']);
+					$userfilename = preg_replace('/[^\w\.]/','',basename(str_replace('\\','/',$_FILES['imgfile']['name'])));
+					$filename = $userfilename;
 	
-						//DB $filename = addslashes($filename);
-						//DB $query = "INSERT INTO imas_qimages (var,qsetid,filename,alttext) VALUES ('{$_POST['newimgvar']}','$qsetid','$filename','{$_POST['newimgalt']}')";
-						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm = $DBH->prepare("INSERT INTO imas_qimages (var,qsetid,filename,alttext) VALUES (:var, :qsetid, :filename, :alttext)");
-						$stm->execute(array(':var'=>$_POST['newimgvar'], ':qsetid'=>$qsetid, ':filename'=>$filename, ':alttext'=>$_POST['newimgalt']));
-						//DB $query = "UPDATE imas_questionset SET hasimg=1 WHERE id='$qsetid'";
-						//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
-						$stm = $DBH->prepare("UPDATE imas_questionset SET hasimg=1 WHERE id=:id");
-						$stm->execute(array(':id'=>$qsetid));
+					//$uploadfile = $uploaddir . $filename;
+					//$t=0;
+					//while(file_exists($uploadfile)){
+					//	$filename = substr($filename,0,strpos($userfilename,"."))."_$t".strstr($userfilename,".");
+					//	$uploadfile=$uploaddir.$filename;
+					//	$t++;
+					//}
+					$result_array = getimagesize($_FILES['imgfile']['tmp_name']);
+					if ($result_array === false) {
+						$errmsg .= "<p>File is not image file</p>";
 					} else {
-						echo "<p>Error uploading image file!</p>\n";
-						exit;
+						if (($filename=storeuploadedqimage('imgfile',$filename))!==false) {
+						//if (move_uploaded_file($_FILES['imgfile']['tmp_name'], $uploadfile)) {
+							//echo "<p>File is valid, and was successfully uploaded</p>\n";
+							$stm = $DBH->prepare("INSERT INTO imas_qimages (var,qsetid,filename,alttext) VALUES (:var, :qsetid, :filename, :alttext)");
+							$stm->execute(array(':var'=>$_POST['newimgvar'], ':qsetid'=>$qsetid, ':filename'=>$filename, ':alttext'=>$_POST['newimgalt']));
+							$stm = $DBH->prepare("UPDATE imas_questionset SET hasimg=1 WHERE id=:id");
+							$stm->execute(array(':id'=>$qsetid));
+						} else {
+							echo "<p>Error uploading image file!</p>\n";
+							exit;
+						}
 					}
 				}
 			}
@@ -493,9 +431,7 @@
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':qsetid'=>$qsetid, ':ownerid'=>$userid, ':ownerid2'=>$userid));
 			}
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
 			$haverightslibs = array();
-			//DB while($row = mysql_fetch_row($result)) {
 			while($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$haverightslibs[] = $row[0];
 			}
@@ -562,9 +498,9 @@
 			// Don't echo or die if in quicksave mode.
 		} else {
 			if ($errmsg == '' && !isset($_GET['aid'])) {
-				header('Location: ' . $GLOBALS['basesiteurl'] . '/course/manageqset.php?cid='.$cid);
+				header('Location: ' . $GLOBALS['basesiteurl'] . '/course/manageqset.php?cid='.$cid.'&r='.Sanitize::randomQueryStringParam());
 			} else if ($errmsg == '' && $frompot==0) {
-				header('Location: ' . $GLOBALS['basesiteurl'] . '/course/addquestions.php?cid='.$cid.'&aid='.Sanitize::onlyInt($_GET['aid']));
+				header('Location: ' . $GLOBALS['basesiteurl'] . '/course/addquestions.php?cid='.$cid.'&aid='.Sanitize::onlyInt($_GET['aid']).'&r='.Sanitize::randomQueryStringParam());
 			} else {
 				require("../header.php");
 				echo $errmsg;
@@ -574,18 +510,11 @@
 			exit;
 		}
 	}
-	//DB $query = "SELECT firstName,lastName FROM imas_users WHERE id='$userid'";
-	//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-	//DB $row = mysql_fetch_row($result);
 	$stm = $DBH->prepare("SELECT firstName,lastName FROM imas_users WHERE id=:id");
 	$stm->execute(array(':id'=>$userid));
 	$row = $stm->fetch(PDO::FETCH_NUM);
 	$myname = $row[1].','.$row[0];
 	if (isset($_GET['id'])) {
-			//DB $query = "SELECT imas_questionset.*,imas_users.groupid FROM imas_questionset,imas_users WHERE ";
-			//DB $query .= "imas_questionset.ownerid=imas_users.id AND imas_questionset.id='{$_GET['id']}'";
-			//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			$query = "SELECT imas_questionset.*,imas_users.groupid FROM imas_questionset,imas_users WHERE ";
 			$query .= "imas_questionset.ownerid=imas_users.id AND imas_questionset.id=:id";
 			$stm = $DBH->prepare($query);
@@ -606,9 +535,10 @@
 			} else {
 				$author = implode(", mb ",$namelist);
 			}
+			/* No longer needed with encodeStringForDisplay
 			foreach ($line as $k=>$v) {
 				$line[$k] = str_replace('&','&amp;',$v);
-			}
+			}*/
 
 			$inlibs = array();
 			if($line['extref']!='') {
@@ -621,9 +551,6 @@
 			$images['files'] = array();
 			$images['alttext'] = array();
 			if ($line['hasimg']>0) {
-				//DB $query = "SELECT id,var,filename,alttext FROM imas_qimages WHERE qsetid='{$_GET['id']}'";
-				//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$stm = $DBH->prepare("SELECT id,var,filename,alttext FROM imas_qimages WHERE qsetid=:qsetid");
 				$stm->execute(array(':qsetid'=>$_GET['id']));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -633,9 +560,6 @@
 				}
 			}
 			if (isset($_GET['template'])) {
-				//DB $query = "SELECT deflib,usedeflib FROM imas_users WHERE id='$userid'";
-				//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-				//DB list($deflib,$usedeflib) = mysql_fetch_row($result);
 				$stm = $DBH->prepare("SELECT deflib,usedeflib FROM imas_users WHERE id=:id");
 				$stm->execute(array(':id'=>$userid));
 				list($deflib,$usedeflib) = $stm->fetch(PDO::FETCH_NUM);
@@ -648,11 +572,6 @@
 					if ($usedeflib==1) {
 						$inlibs[] = $deflib;
 					} else {
-						//DB $query = "SELECT imas_libraries.id,imas_libraries.ownerid,imas_libraries.userights,imas_libraries.groupid ";
-						//DB $query .= "FROM imas_libraries,imas_library_items WHERE imas_library_items.libid=imas_libraries.id ";
-						//DB $query .= "AND imas_library_items.qsetid='{$_GET['id']}'";
-						//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-						//DB while ($row = mysql_fetch_row($result)) {
 						$query = "SELECT imas_libraries.id,imas_libraries.ownerid,imas_libraries.userights,imas_libraries.groupid ";
 						$query .= "FROM imas_libraries,imas_library_items WHERE imas_library_items.libid=imas_libraries.id ";
 						$query .= "AND imas_library_items.qsetid=:qsetid AND imas_library_items.deleted=0";
@@ -674,34 +593,24 @@
 				}*/
 				$locklibs = array();
 				$addmod = "Add";
-
-				//DB $query = "SELECT qrightsdef FROM imas_users WHERE id='$userid'";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB $line['userights'] = mysql_result($result,0,0);
 				$stm = $DBH->prepare("SELECT qrightsdef FROM imas_users WHERE id=:id");
 				$stm->execute(array(':id'=>$userid));
 				$line['userights'] = $stm->fetchColumn(0);
 
 			} else {
 				if ($isadmin) {
-					//DB $query = "SELECT DISTINCT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}'";
 					$stm = $DBH->prepare("SELECT DISTINCT libid FROM imas_library_items WHERE qsetid=:qsetid AND imas_library_items.deleted=0");
 					$stm->execute(array(':qsetid'=>$_GET['id']));
 				} else if ($isgrpadmin) {
-					//DB $query = "SELECT DISTINCT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
-					//DB $query .= "AND imas_users.groupid='$groupid' AND ili.qsetid='{$_GET['id']}'";
 					$query = "SELECT DISTINCT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
 					$query .= "AND imas_users.groupid=:groupid AND ili.qsetid=:qsetid AND ili.deleted=0";
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':groupid'=>$groupid, ':qsetid'=>$_GET['id']));
 				} else {
-					//DB $query = "SELECT DISTINCT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND ownerid='$userid'";
 					$stm = $DBH->prepare("SELECT DISTINCT libid FROM imas_library_items WHERE qsetid=:qsetid AND ownerid=:ownerid AND deleted=0");
 					$stm->execute(array(':qsetid'=>$_GET['id'], ':ownerid'=>$userid));
 				}
 				//$query = "SELECT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND imas_library_items.ownerid='$userid'";
-				//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 					$inlibs[] = $row[0];
 				}
@@ -709,30 +618,20 @@
 				$locklibs = array();
 				if (!$isadmin) {
 					if ($isgrpadmin) {
-						//DB $query = "SELECT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
-						//DB $query .= "AND imas_users.groupid!='$groupid' AND ili.qsetid='{$_GET['id']}'";
 						$query = "SELECT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
 						$query .= "AND imas_users.groupid!=:groupid AND ili.qsetid=:qsetid AND ili.deleted=0";
 						$stm = $DBH->prepare($query);
 						$stm->execute(array(':qsetid'=>$_GET['id'], ':groupid'=>$groupid));
 					} else if (!$isadmin) {
-						//DB $query = "SELECT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND imas_library_items.ownerid!='$userid'";
 						$stm = $DBH->prepare("SELECT libid FROM imas_library_items WHERE qsetid=:qsetid AND imas_library_items.ownerid!=:userid AND deleted=0");
 						$stm->execute(array(':qsetid'=>$_GET['id'], ':userid'=>$userid));
 					}
 					//$query = "SELECT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND imas_library_items.ownerid!='$userid'";
-					//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-					//DB while ($row = mysql_fetch_row($result)) {
 					while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 						$locklibs[] = $row[0];
 					}
 				}
 				$addmod = "Modify";
-
-				//DB $query = "SELECT count(imas_questions.id) FROM imas_questions,imas_assessments,imas_courses WHERE imas_assessments.id=imas_questions.assessmentid ";
-				//DB $query .= "AND imas_assessments.courseid=imas_courses.id AND imas_questions.questionsetid='{$_GET['id']}' AND imas_courses.ownerid<>'$userid'";
-				//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-				//DB $inusecnt = mysql_result($result,0,0);
 				$query = "SELECT count(imas_questions.id) FROM imas_questions,imas_assessments,imas_courses WHERE imas_assessments.id=imas_questions.assessmentid ";
 				$query .= "AND imas_assessments.courseid=imas_courses.id AND imas_questions.questionsetid=:questionsetid AND imas_courses.ownerid<>:userid";
 				$stm = $DBH->prepare($query);
@@ -759,9 +658,6 @@
 	} else {
 			$myq = true;
 			$line['description'] = "Enter description here";
-			//DB $query = "SELECT qrightsdef FROM imas_users WHERE id='$userid'";
-			//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-			//DB $line['userights'] = mysql_result($result,0,0);
 			$stm = $DBH->prepare("SELECT qrightsdef FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$userid));
 			$line['userights'] = $stm->fetchColumn(0);
@@ -790,14 +686,8 @@
 			$images = array();
 			$extref = array();
 			$author = $myname;
-
-
-			//DB $inlibssafe = "'".implode("','",explode(',',$inlibs))."'";
 			$inlibssafe = implode(',', array_map('intval', explode(',',$inlibs)));
 			if (!isset($_GET['id']) || isset($_GET['template'])) {
-				//DB $query = "SELECT id,ownerid,userights,groupid FROM imas_libraries WHERE id IN ($inlibssafe)";
-				//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$stm = $DBH->query("SELECT id,ownerid,userights,groupid FROM imas_libraries WHERE id IN ($inlibssafe)");
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 					if ($row[2] == 8 || ($row[3]==$groupid && ($row[2]%3==2)) || $row[1]==$userid) {
@@ -811,17 +701,16 @@
 
 			$addmod = "Add";
 	}
-	//DB $inlibssafe = "'".implode("','",explode(',',$inlibs))."'";
+	if (!$myq) {
+		$addmod = 'View';
+	}
+	
 	$inlibssafe = implode(',', array_map('intval', explode(',',$inlibs)));
 
 	$lnames = array();
 	if (substr($inlibs,0,1)==='0') {
 		$lnames[] = "Unassigned";
 	}
-
-	//DB $query = "SELECT name FROM imas_libraries WHERE id IN ($inlibssafe)";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$stm = $DBH->query("SELECT name FROM imas_libraries WHERE id IN ($inlibssafe)");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$lnames[] = $row[0];
@@ -880,7 +769,7 @@
 	*/
 	$useeditor = "noinit";
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/codemirror/codemirror-compressed.js"></script>';
-	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/codemirror/imathas.js"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/codemirror/imathas.js?v=072018"></script>';
 	$placeinhead .= '<link rel="stylesheet" href="'.$imasroot.'/javascript/codemirror/codemirror_min.css">';
 
 	//$placeinhead .= '<script src="//sagecell.sagemath.org/embedded_sagecell.js"></script>'.PHP_EOL;
@@ -956,7 +845,7 @@
 
 	   function setupQtextEditor() {
 	   	var qtextbox = document.getElementById("qtext");
-			qtextbox.value = qtextbox.value.replace(/<br\s*\/>\s*<br\s*\/>/g, "\n<br /><br />\n");
+			qtextbox.value = qtextbox.value.replace(/\s*<br\s*\/>\s*<br\s*\/>\s*/g, "\n<br /><br />\n");
 	   	qEditor = CodeMirror.fromTextArea(qtextbox, {
 			matchTags: true,
 			mode: "imathasqtext",
@@ -964,6 +853,7 @@
 			lineWrapping: true,
 			indentUnit: 2,
 			tabSize: 2,
+			'.(!$myq?'readOnly:true,':'').'
 			styleSelectedText:true
 		      });
 			for (var i=0;i<qEditor.lineCount();i++) { qEditor.indentLine(i); }
@@ -980,6 +870,7 @@
 			lineWrapping: true,
 			indentUnit: 2,
 			tabSize: 2,
+			'.(!$myq?'readOnly:true,':'').'
 			styleSelectedText:true
 		      });
 		//controlEditor.setSize("100%",6+14*document.getElementById("control").rows);
@@ -1073,7 +964,7 @@
 		echo 'It is recommended you discontinue use of this question when possible</p>';
 	}
 
-	if (isset($inusecnt) && $inusecnt>0) {
+	if (isset($inusecnt) && $inusecnt>0 && $myq) {
 		echo '<p class=noticetext>This question is currently being used in ';
 		if ($inusecnt>1) {
 			echo Sanitize::onlyInt($inusecnt).' assessments that are not yours.  ';
@@ -1088,14 +979,14 @@
 		echo "This will let you modify the question for this assessment only without affecting the library version being used in other assessments.</p>";
 	}
 	if (!$myq) {
-		echo "<p>This question is not set to allow you to modify the code.  You can only view the code and make additional library assignments</p>";
+		echo "<p class=noticetext>This question is not set to allow you to modify the code.  You can only view the code and make additional library assignments</p>";
 	}
 ?>
 <form enctype="multipart/form-data" method=post action="<?php echo $formAction; ?>">
 <input type="hidden" name="hasimg" value="<?php echo Sanitize::encodeStringForDisplay($line['hasimg']);?>"/>
 <p>
 Description:<BR>
-<textarea cols=60 rows=4 name=description <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo Sanitize::encodeStringForDisplay($line['description']);?></textarea>
+<textarea cols=60 rows=4 name=description <?php if (!$myq) echo "disabled";?>><?php echo Sanitize::encodeStringForDisplay($line['description'], true);?></textarea>
 </p>
 <p>
 Author: <?php echo Sanitize::encodeStringForDisplay($line['author']); ?> <input type="hidden" name="author" value="<?php echo Sanitize::encodeStringForDisplay($author); ?>">
@@ -1130,7 +1021,7 @@ if (!isset($line['ownerid']) || isset($_GET['template']) || $line['ownerid']==$u
 	} else {
 		echo '<br/><span id="addattrspan">';
 	}
-	echo 'Additional Attribution: <input type="text" size="80" name="addattr" value="'.htmlentities($line['otherattribution']).'"/>';
+	echo 'Additional Attribution: <input type="text" size="80" name="addattr" value="'.Sanitize::encodeStringForDisplay($line['otherattribution'], true).'"/>';
 	if ($line['otherattribution']!='') {
 		echo '<br/><span class=noticetext style="font-size:80%">You should only modify the attribution if you are SURE you are removing all portions of the question that require the attribution</span>';
 	}
@@ -1231,7 +1122,7 @@ Common Control: <span class="noselect"><span class=pointer onclick="incctrlboxsi
 <button type="button" class="quickSaveButton" onclick="quickSaveQuestion()">Quick Save and Preview</button>
 <span class="noticetext quickSaveNotice"></span>
 <BR>
-<textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(20,substr_count($line['control'],"\n")+3));?> id=control name=control <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo str_replace(array(">","<"),array("&gt;","&lt;"),$line['control']);?></textarea>
+<textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(20,substr_count($line['control'],"\n")+3));?> id=control name=control <?php if (!$myq) echo "disabled";?>><?php echo Sanitize::encodeStringForDisplay($line['control'], true);?></textarea>
 </div>
 
 
@@ -1243,7 +1134,7 @@ Question Text: <span class="noselect"><span class=pointer onclick="incqtboxsize(
 <button type="button" class="quickSaveButton" onclick="quickSaveQuestion()">Quick Save and Preview</button>
 <span class="noticetext quickSaveNotice"></span>
 <BR>
-<textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(10,substr_count($line['qtext'],"\n")+3));?> id="qtext" name="qtext" <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo str_replace(array(">","<"),array("&gt;","&lt;"),$line['qtext']);?></textarea>
+<textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(10,substr_count($line['qtext'],"\n")+3));?> id="qtext" name="qtext" <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo Sanitize::encodeStringForDisplay($line['qtext'], true);?></textarea>
 </div>
 
 <?php
@@ -1271,11 +1162,13 @@ Uses random variables from the question.
 Use this as a "written example" help button<br/>
 <input type="checkbox" name="usewithans" value="4" <?php if (($line['solutionopts']&4)==4) {echo 'checked="checked"';};?>>
 Display with the "Show Answer"<br/>
-<textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(10,substr_count($line['solution'],"\n")+1));?> id="solution" name="solution" <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo str_replace(array(">","<"),array("&gt;","&lt;"),$line['solution']);?></textarea>
+<textarea style="width: 100%" cols=60 rows=<?php echo min(35,max(10,substr_count($line['solution'],"\n")+1));?> id="solution" name="solution" <?php if (!$myq) echo "readonly=\"readonly\"";?>><?php echo Sanitize::encodeStringForDisplay($line['solution'], true);?></textarea>
 </div>
 <div id=imgbox>
 <input type="hidden" name="MAX_FILE_SIZE" value="500000" />
-Image file: <input type="file" name="imgfile"/> assign to variable: <input type="text" name="newimgvar" size="6"/> Description: <input type="text" size="20" name="newimgalt" value=""/><br/>
+Image file: <input type="file" name="imgfile" <?php if (!$myq) {echo 'disabled';};?>/> 
+  assign to variable: <input type="text" name="newimgvar" size="6" <?php if (!$myq) {echo 'disabled';};?>/> 
+  Description: <input type="text" size="20" name="newimgalt" value="" <?php if (!$myq) {echo 'disabled';};?>/><br/>
 <div id="imgListContainer" style="display:<?php echo (isset($images['vars']) && count($images['vars'])>0) ? 'block' : 'none'; ?>">
 	Images:
 	<ul id='imgList'>
@@ -1290,19 +1183,19 @@ if (isset($images['vars']) && count($images['vars'])>0) {
 			$urlimg = "$imasroot/assessment/qimages/{$images['files'][$id]}";
 		}
 		echo "<li>";
-		echo "Variable: <input type=\"text\" name=\"imgvar-$id\" value=\"\$".Sanitize::encodeStringForDisplay($var)."\" size=\"10\"/> <a href=\"".Sanitize::url($urlimg)."\" target=\"_blank\">View</a> ";
-		echo "Description: <input type=\"text\" size=\"20\" name=\"imgalt-$id\" value=\"".Sanitize::encodeStringForDisplay($images['alttext'][$id])."\"/> Delete? <input type=checkbox name=\"delimg-$id\"/>";
+		echo "Variable: <input type=\"text\" name=\"imgvar-$id\" value=\"\$".Sanitize::encodeStringForDisplay($var)."\" size=\"10\" ".($myq?'':'disabled')."/> <a href=\"".Sanitize::url($urlimg)."\" target=\"_blank\">View</a> ";
+		echo "Description: <input type=\"text\" size=\"20\" name=\"imgalt-$id\" value=\"".Sanitize::encodeStringForDisplay($images['alttext'][$id])."\" ".($myq?'':'disabled')."/> Delete? <input type=checkbox name=\"delimg-$id\" ".($myq?'':'disabled')."/>";
 		echo "</li>";
 	}
 }
 ?>
 	</ul>
 </div>
-Help button: Type: <select name="helptype">
+Help button: Type: <select name="helptype" <?php if (!$myq) {echo 'disabled';};?>>
  <option value="video">Video</option>
  <option value="read">Read</option>
  </select>
- URL: <input type="text" name="helpurl" size="30" /><br/>
+ URL: <input type="text" name="helpurl" size="30" <?php if (!$myq) {echo 'disabled';};?>/><br/>
 <?php
 echo '<div id="helpbtnwrap" ';
 if (count($extref)==0) {
@@ -1317,7 +1210,7 @@ if (count($extref)>0) {
 		if ($extrefpt[0]=='video' && count($extrefpt)>2 && $extrefpt[2]==1) {
 			echo ' (cc)';
 		}
-	echo ', URL: <a href="'.Sanitize::url($extrefpt[1]).'">'.Sanitize::encodeStringForDisplay($extrefpt[1])."</a>.  Delete? <input type=\"checkbox\" name=\"delhelp-$i\"/></li>";
+	echo ', URL: <a href="'.Sanitize::url($extrefpt[1]).'">'.Sanitize::encodeStringForDisplay($extrefpt[1])."</a>.  Delete? <input type=\"checkbox\" name=\"delhelp-$i\" ".($myq?'':'disabled')."/></li>";
 	}
 }
 echo '</ul></div>'; //helpbtnlist, helpbtnwrap

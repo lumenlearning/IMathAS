@@ -29,7 +29,6 @@ function buildExistBlocksArray($items,$parent) {
 	$i=0;
 	foreach ($existblocks as $k=>$name) {
 		$existBlocksVals[$i]=$k;
-		//DB $existBlocksLabels[$i]=stripslashes($name);
 		$existBlocksLabels[$i]=$name;
 		$i++;
 	}
@@ -40,7 +39,13 @@ function updateBlocksArray(&$items,$tochg,$sets) {
 		if (is_array($item)) {
 			if (in_array($item['id'], $tochg)) {
 				foreach ($sets as $k=>$v) {
-					$items[$n][$k] = $v;
+					if (is_array($v)) {
+						foreach ($v as $kk=>$vv) {
+							$items[$n][$k][$kk] = $vv;
+						}
+					} else {
+						$items[$n][$k] = $v;
+					}
 				}
 			}
 			if (count($item['items'])>0) {
@@ -53,14 +58,12 @@ function updateBlocksArray(&$items,$tochg,$sets) {
 
 $overwriteBody = 0;
 $body = "";
-$pagetitle = "Mass Change Block Settings";
-$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=".Sanitize::courseId($_GET['cid']).'">'.Sanitize::encodeStringForDisplay($coursename)."</a> &gt; Mass Change Block Settings";
 
-//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-//DB $items = unserialize(mysql_result($result,0,0));
+$cid = Sanitize::courseId($_GET['cid']);
+$pagetitle = "Mass Change Block Settings";
+$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=".$cid.'">'.Sanitize::encodeStringForDisplay($coursename)."</a> &gt; Mass Change Block Settings";
 $stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-$stm->execute(array(':id'=>$_GET['cid']));
+$stm->execute(array(':id'=>$cid));
 $items = unserialize($stm->fetchColumn(0));
 
 if (!(isset($teacherid))) { // loaded by a NON-teacher
@@ -79,8 +82,17 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	if (isset($_POST['chgavail'])) {
 		$sets['avail'] = intval($_POST['avail']);
 	}
+	if (isset($_POST['chgshowhide']) || isset($_POST['chgavailbeh']) || isset($_POST['chggreyout'])) {
+		$sets['SH'] = array();
+	}
+	if (isset($_POST['chgshowhide'])) {
+		$sets['SH'][0] = $_POST['showhide'];
+	}
 	if (isset($_POST['chgavailbeh'])) {
-		$sets['SH'] = $_POST['showhide'] . $_POST['availbeh'];
+		$sets['SH'][1] = $_POST['availbeh'];
+	}
+	if (isset($_POST['chggreyout'])) {
+		$sets['SH'][2] = $_POST['contentbehavior'];
 	}
 	if (isset($_POST['chggrouplimit'])) {
 		$grouplimit = array();
@@ -106,14 +118,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	}
 
 	updateBlocksArray($items,$checked,$sets);
-
-	//DB $itemorder = addslashes(serialize($items));
 	$itemorder = serialize($items);
-	//DB $query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='$cid';";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 	$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
-	header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid");
+	header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid&r=" . Sanitize::randomQueryStringParam());
 
 	exit;
 
@@ -126,9 +134,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 	$page_sectionlistval = array("none");
 	$page_sectionlistlabel = array(_("No restriction"));
-	//DB $query = "SELECT DISTINCT section FROM imas_students WHERE courseid='$cid' ORDER BY section";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$stm = $DBH->prepare("SELECT DISTINCT section FROM imas_students WHERE courseid=:courseid ORDER BY section");
 	$stm->execute(array(':courseid'=>$cid));
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -210,21 +215,41 @@ foreach ($existblocks as $pos=>$name) {
 	</tr>
 	<tr>
 		<td><input type="checkbox" name="chgavailbeh" class="chgbox"/></td>
-		<td class="r">When available:<br/>
-		When not available:</td>
+		<td class="r">When available:</td>
 		<td>
 			<select name="availbeh">
 			<option value="O" selected="selected">Show Expanded</option>
 			<option value="C">Show Collapsed</option>
 			<option value="F">Show as Folder</option>
 			<option value="T">Show as TreeReader</option>
-			</select><br/>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="chgshowhide" class="chgbox"/></td>
+		<td class="r">When not available:</td>
+		<td>
 			<select name="showhide">
 			<option value="H" selected="selected">Hide from Students</option>
 			<option value="S">Show Collapsed/as folder</option>
 			</select>
 		</td>
 	</tr>
+	
+	<tr>
+		<td><input type="checkbox" name="chggreyout" class="chgbox"/></td>
+		<td class="r">For assignments within this block,<br/>when they are not available:</td>
+		<td>
+		<?php
+			writeHtmlSelect('contentbehavior',array(0,1,2,3),array(
+				_('Hide'),
+				_('Show greyed out before start date, hide after end date'),
+				_('Hide before start date, show greyed out after end date'),
+				_('Show greyed out before and after'),
+			), 0); 
+		?>
+		</td>
+	</tr>	
 	<tr>
 		<td><input type="checkbox" name="chggrouplimit" class="chgbox"/></td>
 		<td class="r">Restrict access to students in section:</td>

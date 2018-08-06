@@ -4,7 +4,7 @@
 	include("init_without_validate.php");
 	if (!isset($_GET['bare'])) {
 ?>
-<html
+<html>
 <head>
 <title><?php echo $installname;?> Help</title>
 <style type="text/css">
@@ -65,6 +65,7 @@ h2,h3,h4,h5,h6 {
 	if ($handle) {
 		while (!feof($handle)) {
 			$buffer = fgets($handle, 4096);
+			$buffer = str_replace('IMathAS', $installname, $buffer);
 			if (!$inbody) {
 				if (strpos($buffer,"<body")!==false) {
 					$inbody = true;
@@ -105,7 +106,7 @@ h2,h3,h4,h5,h6 {
 				if (!isset($_GET['bare'])) {
 					echo "<style>\n";
 					for ($i=$matches[1]+1;$i<5;$i++) {
-						echo "div.h$i { margin-left: " . 10*($i-$matches[1]) . "px;}\n";
+						echo "div.h$i { margin-left: " . 10*Sanitize::onlyFloat($i-$matches[1]) . "px;}\n";
 					}
 					echo "</style>\n";
 				}

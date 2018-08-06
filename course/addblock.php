@@ -28,7 +28,6 @@ function buildExistBlocksArray($items,$parent) {
 	$i=0;
 	foreach ($existblocks as $k=>$name) {
 		$existBlocksVals[$i]=$k;
-		//DB $existBlocksLabels[$i]=stripslashes($name);
 		$existBlocksLabels[$i]=$name;
 		$i++;
 	}
@@ -65,6 +64,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$overwriteBody=1;
 	$body = "You need to log in as a teacher to access this page";
 } elseif ($_POST['title']!= null) { //form posted to itself with new/modified data, update the block
+	$DBH->beginTransaction();
 	require_once("../includes/parsedatetime.php");
 	if ($_POST['avail']==1) {
 		if ($_POST['sdatetype']=='0') {
@@ -95,14 +95,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$grouplimit[] = $_POST['grouplimit'];
 	}
 	//$_POST['title'] = str_replace(array(',','\\"','\\\'','~'),"",$_POST['title']);
-
-	//DB $query = "SELECT itemorder,blockcnt FROM imas_courses WHERE id='$cid'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$stm = $DBH->prepare("SELECT itemorder,blockcnt FROM imas_courses WHERE id=:id");
 	$stm->execute(array(':id'=>$cid));
 	list ($itemlist, $blockcnt) = $stm->fetch(PDO::FETCH_NUM);
-	//DB $items = unserialize(mysql_result($result,0,0));
-	//DB $blockcnt = mysql_result($result,0,1);
 	$items = unserialize($itemlist);
 
 	if (isset($_GET['block'])) { //adding new
@@ -138,25 +133,23 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		}
 	}
 	if (isset($existingid)) {  //already have id; update
-		//DB $sub[$existingid]['name'] = htmlentities(stripslashes($_POST['title']));
 		$sub[$existingid]['name'] = htmlentities($_POST['title']);
 		$sub[$existingid]['startdate'] = $startdate;
 		$sub[$existingid]['enddate'] = $enddate;
 		$sub[$existingid]['avail'] = $_POST['avail'];
-		$sub[$existingid]['SH'] = $_POST['showhide'] . $_POST['availbeh'];
+		$sub[$existingid]['SH'] = $_POST['showhide'] . $_POST['availbeh'] . $_POST['contentbehavior'];
 		$sub[$existingid]['colors'] = $colors;
 		$sub[$existingid]['public'] = $public;
 		$sub[$existingid]['fixedheight'] = $fixedheight;
 		$sub[$existingid]['grouplimit'] = $grouplimit;
 	} else { //add new
 		$blockitems = array();
-		//DB $blockitems['name'] = htmlentities(stripslashes($_POST['title']));
 		$blockitems['name'] = htmlentities($_POST['title']);
 		$blockitems['id'] = $blockcnt;
 		$blockitems['startdate'] = $startdate;
 		$blockitems['enddate'] = $enddate;
 		$blockitems['avail'] = $_POST['avail'];
-		$blockitems['SH'] = $_POST['showhide'] . $_POST['availbeh'];
+		$blockitems['SH'] = $_POST['showhide'] . $_POST['availbeh'] . $_POST['contentbehavior'];;
 		$blockitems['colors'] = $colors;
 		$blockitems['public'] = $public;
 		$blockitems['fixedheight'] = $fixedheight;
@@ -170,23 +163,18 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 		$blockcnt++;
 	}
-	//DB $itemorder = addslashes(serialize($items));
 	$itemorder = serialize($items);
-	//DB $query = "UPDATE imas_courses SET itemorder='$itemorder',blockcnt=$blockcnt WHERE id='$cid';";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt WHERE id=:id");
 	$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':id'=>$cid));
-	header(sprintf('Location: %s/course/course.php?cid=%s', $GLOBALS['basesiteurl'], $cid));
+	$DBH->commit();
+	header(sprintf('Location: %s/course/course.php?cid=%s&r=' .Sanitize::randomQueryStringParam() , $GLOBALS['basesiteurl'], $cid));
 
 	exit;
 } else { //it is a teacher but the form has not been posted
 
 	if (isset($_GET['id'])) { //teacher modifying existing block, load form with block data
-		//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $items = unserialize(mysql_result($result,0,0));
 		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-		$stm->execute(array(':id'=>$_GET['cid']));
+		$stm->execute(array(':id'=>$cid));
 		$items = unserialize($stm->fetchColumn(0));
 
 		$blocktree = explode('-',$_GET['id']);
@@ -197,7 +185,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$blockitems = $blockitems[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
 			}
 		}
-		//DB $title = stripslashes($blockitems[$existingid]['name']);
 		$title = $blockitems[$existingid]['name'];
 		$title = str_replace('"','&quot;',$title);
 		$startdate = $blockitems[$existingid]['startdate'];
@@ -213,10 +200,15 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$public = 0;
 		}
 		$showhide = $blockitems[$existingid]['SH'][0];
-		if (strlen($blockitems[$existingid]['SH'])==1) {
-			$availbeh = 'O';
-		} else {
+		if (strlen($blockitems[$existingid]['SH'])>1) {
 			$availbeh = $blockitems[$existingid]['SH'][1];
+		} else {
+			$availbeh = 'O';
+		}
+		if (strlen($blockitems[$existingid]['SH'])>2) {
+			$contentbehavior = $blockitems[$existingid]['SH'][2];
+		} else {
+			$contentbehavior = 0;
 		}
 		if ($blockitems[$existingid]['colors']=='') {
 			$titlebg = "#DDDDFF";
@@ -238,6 +230,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$enddate = time() + 7*24*60*60;
 		$availbeh = 'O';
 		$showhide = 'H';
+		$contentbehavior = 0;
 		$avail = 1;
 		$public = 0;
 		$titlebg = "#DDDDFF";
@@ -246,11 +239,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$usedef = 1;
 		$fixedheight = 0;
 		$grouplimit = array();
-		//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $items = unserialize(mysql_result($result,0,0));
 		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-		$stm->execute(array(':id'=>$_GET['cid']));
+		$stm->execute(array(':id'=>$cid));
 		$items = unserialize($stm->fetchColumn(0));
 		$savetitle = _("Create Block");
 	}
@@ -263,9 +253,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 	$page_sectionlistval = array("none");
 	$page_sectionlistlabel = array("No restriction");
-	//DB $query = "SELECT DISTINCT section FROM imas_students WHERE courseid='$cid' ORDER BY section";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$stm = $DBH->prepare("SELECT DISTINCT section FROM imas_students WHERE courseid=:courseid ORDER BY section");
 	$stm->execute(array(':courseid'=>$cid));
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -389,6 +376,17 @@ if ($overwriteBody==1) {
 	<input type=radio name=showhide value="S" <?php writeHtmlChecked($showhide,'S') ?> />Show Collapsed/as folder
 	</span><br class=form />
 
+	<span class=form>For assignments within this block, when they are not available:</span
+	<span class=formright>
+	<?php
+		writeHtmlSelect('contentbehavior',array(0,1,2,3),array(
+			_('Hide'),
+			_('Show greyed out before start date, hide after end date'),
+			_('Hide before start date, show greyed out after end date'),
+			_('Show greyed out before and after'),
+		), $contentbehavior); 
+	?>
+	</span><br class=form />
 	<span class="form">If expanded, limit height to:</span>
 	<span class="formright">
 	<input type="text" name="fixedheight" size="4" value="<?php if ($fixedheight>0) {echo Sanitize::onlyInt($fixedheight);};?>" />pixels (blank for no limit)

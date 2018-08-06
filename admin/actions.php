@@ -399,7 +399,8 @@ switch($_POST['action']) {
 		$stm->execute(array(':sessionid'=>$sessionid));
 		$_SESSION = array();
 		if (isset($_COOKIE[session_name()])) {
-			setcookie(session_name(), '', time()-42000, '/');
+			setcookie(session_name(), '', time()-42000, '/', '',false ,true );
+
 		}
 		session_destroy();
 		break;
@@ -530,6 +531,13 @@ switch($_POST['action']) {
 		} else if (($old_istemplate&1)==1) {
 			$istemplate |= 1;
 		}
+		if (($myspecialrights&2)==2 || $myrights==100) {
+			if (isset($_POST['issupergrptemplate'])) {
+				$istemplate |= 32;
+			}
+		} else if (($old_istemplate&32)==32) {
+			$istemplate |= 32;
+		}
 		if ($myrights==100) {
 			if (isset($_POST['isselfenroll'])) {
 				$istemplate |= 4;
@@ -589,7 +597,7 @@ switch($_POST['action']) {
 				$updateJsonData = true;
 			}
 		}
-			
+
 		require_once("../includes/parsedatetime.php");
 		if (trim($_POST['sdate'])=='') {
 			$startdate = 0;
@@ -1015,8 +1023,6 @@ switch($_POST['action']) {
 						}
 					}
 				}
-				//DB $query = "DELETE FROM imas_instr_files WHERE itemid='{$ilid[0]}'";
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$stm = $DBH->prepare("DELETE FROM imas_instr_files WHERE itemid=:itemid");
 				$stm->execute(array(':itemid'=>$ilid[0]));
 			}

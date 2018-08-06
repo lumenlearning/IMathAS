@@ -79,9 +79,6 @@ if ($overwriteBody==1) {
 
 } else {
 	require("../assessment/header.php");
-	//DB $query = "SELECT itemorder,shuffle,defpoints,name,intro FROM imas_assessments WHERE id='$aid'";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	$stm = $DBH->prepare("SELECT itemorder,shuffle,defpoints,name,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -126,11 +123,7 @@ if ($overwriteBody==1) {
 	$points = array();
 	$qn = array();
 	$fixedseeds = array();
-	//DB $qlist = "'".implode("','",$questions)."'";
 	$qlist = array_map('Sanitize::onlyInt', $questions);
-	//DB $query = "SELECT id,points,questionsetid FROM imas_questions WHERE id IN ($qlist)";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$query_placeholders = Sanitize::generateQueryPlaceholders($qlist);
 	$stm = $DBH->prepare("SELECT id,points,questionsetid,fixedseeds FROM imas_questions WHERE id IN ($query_placeholders)");
 	$stm->execute($qlist);
@@ -261,9 +254,9 @@ if ($overwriteBody==1) {
 					for ($i=0; $i<$numq; $i++) {
 						echo '<li>';
 						if (is_array($sa[$j][$i])) {
-							echo printfilter(filter(implode(' ~ ',$sa[$j][$i])));
+							echo Sanitize::outgoingHTML(printfilter(filter(implode(' ~ ',$sa[$j][$i]))));
 						} else {
-							echo printfilter(filter($sa[$j][$i]));
+						  echo Sanitize::outgoingHTML(printfilter(filter($sa[$j][$i])));
 						}
 						echo "</li>\n";
 					}
@@ -303,9 +296,9 @@ if ($overwriteBody==1) {
 				for ($i=0; $i<count($sa); $i++) {
 					echo '<li>';
 					if (is_array($sa[$i])) {
-						echo printfilter(filter(implode(' ~ ',$sa[$i])));
+					  echo Sanitize::outgoingHTML(printfilter(filter(implode(' ~ ',$sa[$i]))));
 					} else {
-						echo printfilter(filter($sa[$i]));
+					  echo Sanitize::outgoingHTML(printfilter(filter($sa[$i])));
 					}
 					echo "</li>\n";
 				}
@@ -328,18 +321,11 @@ function printq($qn,$qsetid,$seed,$pts,$showpts) {
 	global $DBH,$RND,$isfinal,$imasroot,$urlmode;
 	$isbareprint = true;
 	$RND->srand($seed);
-
-	//DB $query = "SELECT qtype,control,qcontrol,qtext,answer,hasimg FROM imas_questionset WHERE id='$qsetid'";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	//DB $qdata = mysql_fetch_array($result, MYSQL_ASSOC);
 	$stm = $DBH->prepare("SELECT qtype,control,qcontrol,qtext,answer,hasimg FROM imas_questionset WHERE id=:id");
 	$stm->execute(array(':id'=>$qsetid));
 	$qdata = $stm->fetch(PDO::FETCH_ASSOC);
 
 	if ($qdata['hasimg']>0) {
-		//DB $query = "SELECT var,filename,alttext FROM imas_qimages WHERE qsetid='$qsetid'";
-		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT var,filename,alttext FROM imas_qimages WHERE qsetid=:qsetid");
 		$stm->execute(array(':qsetid'=>$qsetid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -422,11 +408,11 @@ function printq($qn,$qsetid,$seed,$pts,$showpts) {
 	if (strpos($toevalqtxt,'$answerbox')===false) {
 		if (is_array($answerbox)) {
 			foreach($answerbox as $iidx=>$abox) {
-				echo printfilter(filter("<div>$abox</div>\n"));
+			  echo Sanitize::outgoingHTML(printfilter(filter("<div>$abox</div>\n")));
 				echo "<div class=spacer>&nbsp;</div>\n";
 			}
 		} else {  //one question only
-			echo printfilter(filter("<div>$answerbox</div>\n"));
+		  echo Sanitize::outgoingHTML(printfilter(filter("<div>$answerbox</div>\n")));
 		}
 
 

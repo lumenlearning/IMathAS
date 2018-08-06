@@ -13,6 +13,7 @@ require_once(__DIR__ . '/../../init.php');
 use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
+use Sanitize;
 
 $validActions = array('activate_code', 'payment_proxy');
 
@@ -63,7 +64,11 @@ if ("activate_code" == $action) {
 }
 
 /**
- * This is called by the Stripe / direct pay component upon successful payment.
+ * Handle lumen-components activation codes and direct payments.
+ *
+ * This is the action for forms in lumen-components when:
+ *   1. After a successful payment via Stripe. (direct pay)
+ *   2. After entering an activation code, successful or not.
  */
 if ("payment_proxy" == $action) {
 	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
@@ -71,6 +76,8 @@ if ("payment_proxy" == $action) {
 	$courseName = getCourseNameById($courseId);
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 	$assessmentId = isset($_REQUEST['assessmentId']) ? $_REQUEST['assessmentId'] : NULL;
+	$assessmentUrl = isset($_REQUEST['assessmentUrl']) ? $_REQUEST['assessmentUrl'] : NULL;
+	$activationCode = isset($_REQUEST['code']) ? $_REQUEST['code'] : NULL;
 
 	studentPaymentDebug('Received POST data from Stripe checkout: '
 		. print_r($_POST, true));
@@ -84,11 +91,22 @@ if ("payment_proxy" == $action) {
 		$formData = array_merge($_POST, array('section_name' => $courseName));
 		$apiResponse = $studentPaymentApi->paymentProxy($formData);
 	} catch (StudentPaymentException $e) {
-		error_log(sprintf("Exception while attempting to proxy Stripe data to Lumenistration."
+		error_log(sprintf("Exception while attempting to proxy activation/payment data to Lumenistration."
 			. " groupId=%d, courseId=%d, studentId=%d, error: %s",
 			$groupId, $courseId, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
 		header('Location: ' . $GLOBALS["basesiteurl"] . '/assessment/showtest.php', true);
+		exit;
+	}
+
+	if (!empty($apiResponse->getErrors())) {
+		$errorMessage = implode(' ', $apiResponse->getErrors());
+
+		$glue = str_contains($assessmentUrl, '?') ? '&' : '?';
+		$redirectUrl = $assessmentUrl . $glue . 'activationCodeErrors=' .
+			Sanitize::encodeUrlParam($errorMessage);
+
+		header('Location: ' . $redirectUrl, true);
 		exit;
 	}
 
@@ -103,8 +121,13 @@ if ("payment_proxy" == $action) {
 		}
 	}
 
-	redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
-		$confirmationNum, $userEmail);
+	if (is_null($activationCode)) {
+		redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
+			$confirmationNum, $activationCode, $userEmail);
+	} else {
+		redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
+			$confirmationNum, $activationCode, $userEmail);
+	}
 
 	exit;
 }
@@ -133,19 +156,39 @@ function response($status, $msg)
 }
 
 /**
+ * Redirect a user to the activation confirmation page.
+ */
+function redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
+											 $confirmationNum, $activationCode, $email)
+{
+	$confirmationUrl = $GLOBALS["basesiteurl"] . '/ohm/assessments/activation_confirmation.php?'
+		. Sanitize::generateQueryStringFromMap(array(
+			'courseId' => $courseId,
+			'assessmentId' => $assessmentId,
+			'code' => $activationCode,
+			'activationTime' => time(),
+		));
+	header('Location: ' . $confirmationUrl, true);
+
+	exit;
+}
+
+/**
  * Redirect a user to the direct payment confirmation page.
  *
  * @param integer $groupId The group ID. (from imas_groups)
  * @param integer $courseId The course ID. (from imas_courses)
  * @param integer $assessmentId The assessment ID.
  * @param string $confirmationNum The confirmation number, as a string.
+ * @param string $activationCode The activation code used.
  * @param string $email The user's email used for payment receipts
  */
 function redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
-										  $confirmationNum, $email)
+										  $confirmationNum, $activationCode, $email)
 {
 	$cookieData = array(
 		'confNum' => $confirmationNum,
+		'code' => $activationCode,
 		'gid' => $groupId,
 		'cid' => $courseId,
 		'aid' => $assessmentId,

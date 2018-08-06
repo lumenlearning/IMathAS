@@ -57,13 +57,9 @@
 	exit;
  }
  $sessiondata = array();
- //DB $query = "SELECT * FROM imas_sessions WHERE sessionid='$sessionid'";
- //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
- //DB if (mysql_num_rows($result)>0) {
  $stm = $DBH->prepare("SELECT * FROM imas_sessions WHERE sessionid=:sessionid");
  $stm->execute(array(':sessionid'=>$sessionid));
  if ($stm->rowCount()>0) {
- 	 //DB $line = mysql_fetch_assoc($result);
  	 $line = $stm->fetch(PDO::FETCH_ASSOC);
  	 $userid = $line['userid'];
  	 $tzoffset = $line['tzoffset'];
@@ -78,8 +74,6 @@
 		 $sessiondata = unserialize(base64_decode($enc));
 		 //delete own session if old and not posting
 		 if ((time()-$line['time'])>24*60*60 && (!isset($_POST) || count($_POST)==0)) {
-			//DB $query = "DELETE FROM imas_sessions WHERE userid='$userid'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("DELETE FROM imas_sessions WHERE userid=:userid");
 			$stm->execute(array(':userid'=>$userid));
 			unset($userid);
@@ -100,22 +94,24 @@
 
 		 $sessiondata['secsalt'] = generaterandstring();
 		 if (isset($_POST['savesettings'])) {
-			 setcookie('mathgraphprefs',$_POST['mathdisp'].'-'.$_POST['graphdisp'],2000000000);
+			 setcookie('mathgraphprefs',$_POST['mathdisp'].'-'.$_POST['graphdisp'],2000000000, '', '', false, true);
 		 }
 		 $enc = base64_encode(serialize($sessiondata));
-		 //DB $query = "UPDATE imas_sessions SET sessiondata='$enc' WHERE sessionid='$sessionid'";
-		 //DB mysql_query($query) or die("Query failed : " . mysql_error());
 		 $stm = $DBH->prepare("UPDATE imas_sessions SET sessiondata=:sessiondata WHERE sessionid=:sessionid");
 		 $stm->execute(array(':sessiondata'=>$enc, ':sessionid'=>$sessionid));
 
 		// $now = time();
-		//DB //$query = "INSERT INTO imas_log (time,log) VALUES ($now,'$userid from IP: {$_SERVER['REMOTE_ADDR']}')";
-		//DB //mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("INSERT INTO imas_log (time,log) VALUES (:now,:log)");
 		$stm->execute(array(':now'=>$now, ':log'=>"$userid login from IP:{$_SERVER['REMOTE_ADDR']}"));
 
+		// checks if the array $querys is empty
+        if (!empty($querys)){
+            $rqp = "&r=" .Sanitize::randomQueryStringParam();
+        } else {
+            $rqp = "?r=" .Sanitize::randomQueryStringParam();
+        }
 
-		 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys);
+		 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::fullUrl($querys) . $rqp);
 		 exit;
 	 }
 
@@ -141,8 +137,6 @@
 	  //clean up old sessions
 	 //REMOVED since deleting old sessions can trigger login on LTI launches over 25 hours
 	 // $old = $now - 25*60*60;
-	 //DB $query = "DELETE FROM imas_sessions WHERE time<$old";
-	 //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	 //$stm = $DBH->prepare("DELETE FROM imas_sessions WHERE time<:old");
 	 //$stm->execute(array(':old'=>$old));
 	 if (rand(1,100)==1) { //1% of the time clear out really old sessions
@@ -152,13 +146,8 @@
 	 }
 
 	 if (isset($CFG['GEN']['guesttempaccts']) && $_POST['username']=='guest') { // create a temp account when someone logs in w/ username: guest
-	 	//DB $query = 'SELECT ver FROM imas_dbschema WHERE id=2';
-	 	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	 	//DB $guestcnt = mysql_result($result,0,0);
 	 	$stm = $DBH->query('SELECT ver FROM imas_dbschema WHERE id=2');
 	 	$guestcnt = $stm->fetchColumn(0);
-	 	//DB $query = 'UPDATE imas_dbschema SET ver=ver+1 WHERE id=2';
-	 	//DB mysql_query($query) or die("Query failed : " . mysql_error());
 	 	$stm = $DBH->query('UPDATE imas_dbschema SET ver=ver+1 WHERE id=2');
 
 		if (isset($CFG['GEN']['homelayout'])) {
@@ -166,20 +155,11 @@
 		} else {
 			$homelayout = '|0,1,2||0,1';
 		}
-	 	//DB $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,homelayout) ";
-	 	//DB $query .= "VALUES ('guestacct$guestcnt','',5,'Guest','Account','none@none.com',0,'$homelayout')";
-	 	//DB mysql_query($query) or die("Query failed : " . mysql_error());
-	 	//DB $userid = mysql_insert_id();
 	 	$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,homelayout,created_at) ";
 	 	$query .= "VALUES (:guestcnt,'',5,'Guest','Account','none@none.com',0,:homelayout,:created_at)";
 	 	$stm = $DBH->prepare($query);
 	 	$stm->execute(array(':guestcnt'=>"guestacct$guestcnt", ':homelayout'=>$homelayout, ':created_at'=>time()));
 	 	$userid = $DBH->lastInsertId();
-
-		//DB $query = "SELECT id FROM imas_courses WHERE (istemplate&8)=8 AND available<4";
-		//DB if (isset($_GET['cid'])) { $query.= ' AND id='.intval($_GET['cid']); }
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB if (mysql_num_rows($result)>0) {
     $query = "SELECT id FROM imas_courses WHERE (istemplate&8)=8 AND available<4";
 		if (isset($_GET['cid'])) { $query.= ' AND id=:id'; }
 		$stm = $DBH->prepare($query);
@@ -192,13 +172,11 @@
     		$timeNow = time();
 			$query = "INSERT INTO imas_students (userid,courseid,created_at) VALUES ";
 			$i = 0;
-			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				if ($i>0) { $query .= ',';}
 				$query .= "($userid,{$row[0]},$timeNow)";  //INT's from DB - safe
 				$i++;
 			}
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
       $DBH->query($query);
 		}
 
@@ -214,9 +192,6 @@
 	 	}
 	 	$_POST['usedetected'] = true;
 	 } else {
-		 //DB $query = "SELECT id,password,rights,groupid FROM imas_users WHERE SID = '{$_POST['username']}'";
-		 //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		 //DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 		 $stm = $DBH->prepare("SELECT id,password,rights,groupid FROM imas_users WHERE SID=:SID");
 		 $stm->execute(array(':SID'=>$_POST['username']));
 		 $line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -310,11 +285,17 @@
 		 	 	 $needToForcePasswordReset = true;
 		 	 }
 		 } 
-		 
+		 // checks if the array $querys is empty
+         if (!empty($querys)){
+             $rqp = "&r=" .Sanitize::randomQueryStringParam();
+         } else {
+             $rqp = "?r=" .Sanitize::randomQueryStringParam();
+         }
+
 		 if ($needToForcePasswordReset) {
-		 	 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd');
+		 	 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
 		 } else {
-		 	 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys);
+		 	 header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys . $rqp);
 		 }
 		 exit;
 	 } else {
@@ -348,7 +329,7 @@
 		/*
 		$query = "DELETE FROM imas_sessions WHERE userid='$userid'";
 		mysql_query($query) or die("Query failed : " . mysql_error());
-		header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::url($querys));
+		header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::fullUrl($querys));
 		exit;
 		*/
 	}
@@ -357,9 +338,6 @@
 	if (strpos(basename($_SERVER['PHP_SELF']),'upgrade.php')===false) {
 		$query .= ',listperpage,hasuserimg,theme,specialrights,FCMtoken,forcepwreset';
 	}
-	//DB $query .= " FROM imas_users WHERE id='$userid'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	$query .= " FROM imas_users WHERE id=:id";
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':id'=>$userid));
@@ -390,7 +368,7 @@
 	}
 	
 	if (!empty($line['forcepwreset']) && (empty($_GET['action']) || $_GET['action']!='forcechgpwd') && (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltirole']!='learner')) {
-		 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd');
+		 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
 		 exit;
 	}
 
@@ -429,7 +407,7 @@
 		writesessiondata();
 	}
 	if (isset($sessiondata['isdiag']) && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php");
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?r=".Sanitize::randomQueryStringParam());
 		exit;
 	}
 
@@ -444,7 +422,7 @@
 		} else if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner') {
 			require(__DIR__.'/includes/userutils.php');
 			logout();
-			header('Location: ' . $GLOBALS['basesiteurl'] . '/index.php');
+			header('Location: ' . $GLOBALS['basesiteurl'] . '/index.php?r='.Sanitize::randomQueryStringParam());
 			exit;
 		}
 	}
@@ -463,9 +441,9 @@
 		}
 		writesessiondata();
 	}
-	
+
 	if (isset($sessiondata['ltiitemtype'])) {
-		$flexwidth = true;
+		$hideAllHeaderNav = true;
 		if ($sessiondata['ltiitemtype']==1) {
 			if (strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false && isset($_GET['cid']) && $sessiondata['ltiitemid']!=$_GET['cid']) {
 				echo "You do not have access to this page";
@@ -501,16 +479,13 @@
 			 */
 			if (!in_array(basename($urlparts['path']),array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','process_activation.php','activation_confirmation.php','activation_ajax.php','payment_confirmation.php'))) {
 			//if (strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false && strpos(basename($_SERVER['PHP_SELF']),'printtest.php')===false && strpos(basename($_SERVER['PHP_SELF']),'msglist.php')===false && strpos(basename($_SERVER['PHP_SELF']),'sentlist.php')===false && strpos(basename($_SERVER['PHP_SELF']),'viewmsg.php')===false ) {
-				//DB $query = "SELECT courseid FROM imas_assessments WHERE id='{$sessiondata['ltiitemid']}'";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB $cid = mysql_result($result,0,0);
 				$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
 				$stm->execute(array(':id'=>$sessiondata['ltiitemid']));
 				$cid = Sanitize::courseId($stm->fetchColumn(0));
-				header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}");
+				header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
 				exit;
 			}
-		} else if ($sessiondata['ltirole']=='instructor' && $sessiondata['ltiitemtype']!=4) {
+		} else if ($sessiondata['ltirole']=='instructor') {
 			$breadcrumbbase = "<a href=\"$imasroot/ltihome.php?showhome=true\">LTI Home</a> &gt; ";
 		} else {
 			$breadcrumbbase = '';
@@ -523,11 +498,8 @@
 		if (isset($_GET['cid'])) {
 			$cid = Sanitize::courseId($_GET['cid']);
 		} else {
-			$cid = $sessiondata['courseid'];
+			$cid = Sanitize::courseId($sessiondata['courseid']);
 		}
-		//DB $query = "SELECT id,locked,timelimitmult,section,latepass FROM imas_students WHERE userid='$userid' AND courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 		$stm = $DBH->prepare("SELECT id,locked,timelimitmult,section,latepass,lastaccess FROM imas_students WHERE userid=:userid AND courseid=:courseid");
 		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 		$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -545,29 +517,19 @@
 			} else {
 				$now = time();
 				if (!isset($sessiondata['lastaccess'.$cid]) || $now-$sessiondata['lastaccess'.$cid] > 24*3600) {
-					//DB $query = "UPDATE imas_students SET lastaccess='$now' WHERE id=$studentid";
-					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 					$stm = $DBH->prepare("UPDATE imas_students SET lastaccess=:lastaccess WHERE id=:id");
 					$stm->execute(array(':lastaccess'=>$now, ':id'=>$studentid));
 					$sessiondata['lastaccess'.$cid] = $now;
-					//DB $query = "INSERT INTO imas_login_log (userid,courseid,logintime) VALUES ($userid,'$cid',$now)";
-					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					//DB $sessiondata['loginlog'.$cid] = mysql_insert_id();
 					$stm = $DBH->prepare("INSERT INTO imas_login_log (userid,courseid,logintime) VALUES (:userid, :courseid, :logintime)");
 					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':logintime'=>$now));
 					$sessiondata['loginlog'.$cid] = $DBH->lastInsertId();
 					writesessiondata();
 				} else if (isset($CFG['GEN']['keeplastactionlog'])) {
-					//DB $query = "UPDATE imas_login_log SET lastaction=$now WHERE id=".$sessiondata['loginlog'.$cid];
-					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 					$stm = $DBH->prepare("UPDATE imas_login_log SET lastaction=:lastaction WHERE id=:id");
 					$stm->execute(array(':lastaction'=>$now, ':id'=>$sessiondata['loginlog'.$cid]));
 				}
 			}
 		} else {
-			//DB $query = "SELECT id FROM imas_teachers WHERE userid='$userid' AND courseid='$cid'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE userid=:userid AND courseid=:courseid");
 			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -594,10 +556,6 @@
 				$teacherid = $userid;
 				$adminasteacher = true;
 			} else {
-
-				//DB $query = "SELECT id,section FROM imas_tutors WHERE userid='$userid' AND courseid='$cid'";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 				$stm = $DBH->prepare("SELECT id,section FROM imas_tutors WHERE userid=:userid AND courseid=:courseid");
 				$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 				$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -618,7 +576,6 @@
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$cid));
 		if ($stm->rowCount()>0) {
-			//DB $crow = mysql_fetch_row($result);
 			$crow = $stm->fetch(PDO::FETCH_ASSOC);
 			$coursename = $crow['name']; //mysql_result($result,0,0);
 			$coursetheme = $crow['theme']; //mysql_result($result,0,5);
@@ -678,7 +635,7 @@
 	$verified = true;
 
  }
- if (!empty($flexwidth)) {
+ if (!empty($flexwidth) || !empty($hideAllHeaderNav)) {
  	 $nologo = true;
  }
 
@@ -709,8 +666,6 @@
 	  global $DBH,$sessiondata,$sessionid;
 	  $enc = base64_encode(serialize($sessiondata));
 	  $now = time();
-	  //DB $query = "UPDATE imas_sessions SET sessiondata='$enc' WHERE sessionid='$sessionid'";
-	  //DB mysql_query($query) or die("Query failed : " . mysql_error());
 	  $stm = $DBH->prepare("UPDATE imas_sessions SET sessiondata=:sessiondata,time=:time WHERE sessionid=:sessionid");
 	  $stm->execute(array(':sessiondata'=>$enc, ':time'=>$now, ':sessionid'=>$sessionid));
   }
@@ -734,9 +689,6 @@
 		  return 1;
 	  }
   }
-  //DB function stripslashes_deep($value) {
-	//DB   return (is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value));
-  //DB }
   if (!isset($coursename)) {
 	  $coursename = "Course Page";
   }

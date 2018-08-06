@@ -40,7 +40,7 @@ if (isset($_GET['graphdisp'])) { //currently same is used for graphdisp and draw
 	setcookie("OEAembeduserprefs", json_encode(array(
 		'graphdisp'=>$sessiondata['userprefs']['graphdisp'],
 		'drawentry'=>$sessiondata['userprefs']['drawentry']
-		)));
+		)),0,'','',false,true);
 }
 foreach(array('graphdisp','mathdisp','useed') as $key) {
 	$sessiondata[$key] = $sessiondata['userprefs'][$key];
@@ -166,11 +166,8 @@ if (isset($QS['showscored'])) {
 	$seed = intval($_POST['seed']);
 	$scoredonsubmit = false;
 	if (isset($_POST['auth'])) {
-		//DB $query = "SELECT password FROM imas_users WHERE SID='{$_POST['auth']}'";
-		//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT password FROM imas_users WHERE SID=:SID");
-		$stm->execute(array(':SID'=>$_POST['auth']));
+		$stm->execute(array(':SID'=>Sanitize::stripHtmlTags($_POST['auth'])));
 		$row = $stm->fetch(PDO::FETCH_NUM);
 		$key = $row[0];
 		$jwtcheck = json_decode(json_encode(JWT::decode($_POST['jwtchk'], $key)), true);
@@ -289,11 +286,8 @@ if (isset($QS['showscored'])) {
   }
 	if (isset($QS['auth'])) {
 		$verarr = array("id"=>$qsetid, "seed"=>$seed, 'scoredonsubmit'=>$scoredonsubmit, 'showans'=>$showansonsubmit);
-		//DB $query = "SELECT password FROM imas_users WHERE SID='".addslashes(stripslashes($QS['auth']))."'";
-		//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT password FROM imas_users WHERE SID=:SID");
-		$stm->execute(array(':SID'=>$QS['auth']));
+		$stm->execute(array(':SID'=>Sanitize::stripHtmlTags($QS['auth'])));
 		$key = $stm->fetchColumn(0);
 
 		echo '<input type="hidden" name="jwtchk" value="'.JWT::encode($verarr,$key).'"/>';
@@ -371,9 +365,6 @@ function printscore($sc,$qsetid,$seed) {
 		$pts = $sc;
 		if (!is_numeric($pts)) { $pts = 0;}
 	} else {
-		//DB $query = "SELECT control FROM imas_questionset WHERE id='$qsetid'";
-		//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
-		//DB $control = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT control FROM imas_questionset WHERE id=:id");
 		$stm->execute(array(':id'=>$qsetid));
 		$control = $stm->fetchColumn(0);

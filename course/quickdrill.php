@@ -59,11 +59,8 @@ $pagetitle = "Quick Drill";
 if (isset($_GET['showresults']) && is_array($sessiondata['drillresults'])) {
 	$qids = array_keys($sessiondata['drillresults']);
 	$list = implode(',', array_map('intval', $qids));
-	//DB $query = "SELECT id,description FROM imas_questionset WHERE id IN ($list) ORDER BY description";
-	//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
 	$stm = $DBH->query("SELECT id,description FROM imas_questionset WHERE id IN ($list) ORDER BY description");
 	$out = '';
-	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$out .= "<p><b>".Sanitize::encodeStringForDisplay($row[1])."</b><ul>";
 		foreach ($sessiondata['drillresults'][$row[0]] as $item) {
@@ -184,7 +181,7 @@ if (isset($sessiondata['drill']) && empty($_GET['id'])) {
 		echo "<a href=\"" . $GLOBALS['basesiteurl'] . "/course/quickdrill.php$public\">Start</a>";
 		echo '</body></html>';
 	} else {
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/quickdrill.php$public");
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/quickdrill.php$public" . "&r=" . Sanitize::randomQueryStringParam());
 	}
 	exit;
 }
@@ -194,7 +191,6 @@ $page_formAction = "quickdrill.php$public";
 $showans = false;
 if (isset($_POST['seed'])) {
 	list($score,$rawscores) = scoreq(0,$qsetid,$_POST['seed'],$_POST['qn0']);
-	//DB $lastanswers[0] = stripslashes($lastanswers[0]);
 	$page_scoreMsg =  printscore($score,$qsetid,$_POST['seed']);
 	if (getpts($score)<1 && $sa==0) {
 		$showans = true;
@@ -457,9 +453,6 @@ function printscore($sc,$qsetid,$seed) {
 		$pts = $sc;
 		if (!is_numeric($pts)) { $pts = 0;}
 	} else {
-		//DB $query = "SELECT control FROM imas_questionset WHERE id='$qsetid'";
-		//DB $result = mysql_query($query) or die("Query failed: $query: " . mysql_error());
-		//DB $control = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT control FROM imas_questionset WHERE id=:id");
 		$stm->execute(array(':id'=>$qsetid));
 		$control = $stm->fetchColumn(0);
@@ -541,6 +534,7 @@ function linkgenerator() {
  <title>Quick Drill Link Generator</title>
  <script type="text/javascript">
  var baseaddr = "<?php echo $addr;?>";
+ 
  function makelink() {
 	 var id = document.getElementById("qid").value;
 	 if (id=='') {alert("Question ID is required"); return false;}
@@ -549,12 +543,13 @@ function linkgenerator() {
 	 var mode = document.getElementById("type").value;
 	 var val = document.getElementById("val").value;
 	 if (mode!='none' && val=='') { alert("need to specify N"); return false;}
-	 var url = baseaddr + '?id=' + id + '&sa='+sa;
+	 var url = baseaddr + '?id=' + encodeURIComponent(id) + '&sa='+encodeURIComponent(sa);
+	 
 	 if (cid != '') {
-		url += '&cid='+cid;
+		url += '&cid='+encodeURIComponent(cid);
 	 }
-	 if (mode != 'none') {
-		 url += '&'+mode+'='+val;
+	 if (mode == 'n' || mode == 'nc' ||  mode == 't') {
+		 url += '&'+mode+'='+encodeURIComponent(val);
 	 }
 	 document.getElementById("output").innerHTML = "<p>URL to use: "+url+"</p><p><a href=\""+url+"\" target=\"_blank\">Try it</a></p>";
  }
@@ -563,8 +558,8 @@ function linkgenerator() {
  <body>
  <h1>Quick Drill Link Generator</h1>
  <table border=0>
- <tr><td>Question ID to use:</td><td><input type="text" size="5" id="qid" /></td></tr>
- <tr><td>Course ID (optional):</td><td><input type="text" size="5" id="cid" /></td></tr>
+ <tr><td>Question ID to use:</td><td><input type="number" style="width: 6em" id="qid" /></td></tr>
+ <tr><td>Course ID (optional):</td><td><input type="number" style="width: 6em" id="cid" /></td></tr>
  <tr><td>Show answer option:</td><td><select id="sa">
  	<option value="0">Show score - reshow question with answer if wrong</option>
 	<option value="1">Show score - don't reshow question w answer if wrong</option>
@@ -578,7 +573,7 @@ function linkgenerator() {
 	<option value="nc">Do until N questions are correct, then stop</option>
 	<option value="t">Do as many questions as possible in N seconds</option>
 	</select><br/>
-	Where N = <input type="text" size="4" id="val"/></td></tr>
+	Where N = <input type="number" style="width: 3em" id="val"/></td></tr>
 </table>
 
 <input type="button" value="Generate Link" onclick="makelink()"/>

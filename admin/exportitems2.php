@@ -510,13 +510,10 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
 	}
 
 	//dump it!
-	echo json_encode($output, JSON_FORCE_OBJECT);
+	echo json_encode($output, JSON_FORCE_OBJECT|JSON_HEX_TAG);
 	exit;
 
 } else { //STEP 1 DATA PROCESSING, INITIAL LOAD
-	//DB $query = "SELECT itemorder FROM imas_courses WHERE id='$cid'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB $items = unserialize(mysql_result($result,0,0));
 	$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 	$stm->execute(array(':id'=>$cid));
 	$items = unserialize($stm->fetchColumn(0));

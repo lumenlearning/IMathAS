@@ -29,10 +29,6 @@ if (!(isset($_GET['cid']))) { //if the cid is missing go back to the index page
 
 		//mysql_query("START TRANSACTION") or die("Query failed :$query " . mysql_error());
 		$DBH->beginTransaction();
-
-		//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $items = unserialize(mysql_result($result,0,0));
 		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$items = unserialize($stm->fetchColumn(0));
@@ -57,29 +53,20 @@ if (!(isset($_GET['cid']))) { //if the cid is missing go back to the index page
 				array_splice($sub,$blockid,1); //empty block; just remove block
 			}
 		}
-		//DB $itemlist = addslashes(serialize($items));
 		$itemlist = serialize($items);
-		//DB $query = "UPDATE imas_courses SET itemorder='$itemlist' WHERE id='{$_GET['cid']}'";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
-
-		//DB mysql_query("COMMIT") or die("Query failed :$query " . mysql_error());
 		$DBH->commit();
 
 		$obarr = explode(',',$_COOKIE['openblocks-'.$cid]);
 		$obloc = array_search($obid,$obarr);
 		array_splice($obarr,$obloc,1);
-		setcookie('openblocks-'.Sanitize::courseId($_GET['cid']),implode(',',$obarr));
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".$cid);
+		setcookie('openblocks-'.Sanitize::courseId($_GET['cid']),implode(',',array_map('Sanitize::onlyInt',$obarr)));
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=". $cid . "&r=" . Sanitize::randomQueryStringParam());
 
 	} else {
 		$blocktree = explode('-',$_GET['id']);
 		$blockid = array_pop($blocktree) - 1; //-1 adjust for 1-index
-
-		//DB $query = "SELECT itemorder FROM imas_courses WHERE id='{$_GET['cid']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $items = unserialize(mysql_result($result,0,0));
 		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$items = unserialize($stm->fetchColumn(0));

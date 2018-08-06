@@ -3,13 +3,14 @@
  * Enforce all applicable Lumen OHM student payment rules.
  * (activation codes, direct payments, trials, etc)
  *
- * This function should be used in places where an assessment is about
+ * This file should be require()'d in places where an assessment is about
  * to be displayed to the student.
  */
 
 use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
+use OHM\Models\StudentPayApiResult;
 
 /*
  * So I won't forget for a 6th time and have to delete an hour of nice refactoring:
@@ -32,9 +33,13 @@ $courseName = $courseNameStm->fetchColumn(0);
 
 
 $courseOwnerGroupId = null;
+$courseOwnerGroupGuid = null;
+$enrollmentId = null;
 if (isStudentPayEnabled()) {
-	$studentPaymentDb = new StudentPaymentDb(null, $courseId, null);
+	$studentPaymentDb = new StudentPaymentDb(null, $courseId, $userid);
 	$courseOwnerGroupId = $studentPaymentDb->getCourseOwnerGroupId();
+	$courseOwnerGroupGuid = $studentPaymentDb->getGroupGuid($courseOwnerGroupId);
+	$enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
 
 	// We need the course owner's group ID before we can check a student's access code status.
 	if (!isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
@@ -62,17 +67,17 @@ if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupI
 		$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();
 
-		if (\OHM\Models\StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
+		if (StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/activation.php");
 			}
 		}
 
-		if (\OHM\Models\StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY ==
+		if (needsLumenComponents($paymentTypeRequired) &&
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
-				require_once(__DIR__ . "/../../ohm/assessments/direct_pay.php");
+				require_once(__DIR__ . "/../../ohm/assessments/direct_or_multi_pay.php");
 			}
 		}
 
@@ -118,6 +123,19 @@ function isValidGroupIdForStudentPayments($groupId)
 	}
 
 	return true;
+}
+
+/**
+ * Determine if Lumen Components should be used to handle student payments.
+ *
+ * @param $paymentTypeRequired
+ * @return bool
+ */
+function needsLumenComponents($paymentTypeRequired) {
+	return in_array($paymentTypeRequired, array(
+		StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY,
+		StudentPayApiResult::ACCESS_TYPE_MULTI_PAY
+	));
 }
 
 /**

@@ -44,7 +44,6 @@ if (isset($_POST['text'])) {
 	} else {
 		$id = Sanitize::onlyInt($_GET['id']);
 	}
-	//DB $_POST = stripslashes_deep($_POST);
 	$qtext = stripsmartquotes($_POST['text']);
 	$nparts = intval($_POST['nparts']);
 	$qtypes = array();
@@ -294,17 +293,12 @@ if (isset($_POST['text'])) {
 		}
 	}
 	$qtext = $qtextpre . $qtext;
-	//DB $code = addslashes($code);
-	//DB $qtext = addslashes($qtext);
 
 	if ($id=='new') {
 		$mt = microtime();
 		$uqid = substr($mt,11).substr($mt,2,6);
 		$ancestors = '';
 		if (isset($_GET['templateid'])) {
-			//DB $query = "SELECT ancestors FROM imas_questionset WHERE id='{$_GET['templateid']}'";
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-			//DB $ancestors = mysql_result($result,0,0);
 			$stm = $DBH->prepare("SELECT ancestors FROM imas_questionset WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['templateid']));
 			$ancestors = $stm->fetchColumn(0);
@@ -314,10 +308,6 @@ if (isset($_POST['text'])) {
 				$ancestors = $_GET['templateid'];
 			}
 		}
-		//DB $query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,description,ownerid,author,userights,qtype,control,qtext,ancestors) VALUES ";
-		//DB $query .= "($uqid,$now,$now,'{$_POST['description']}','$userid','{$_POST['author']}','{$_POST['userights']}','$qtype','$code','$qtext','$ancestors');";
-		//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-		//DB $id = mysql_insert_id();
 		$query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,description,ownerid,author,userights,qtype,control,qtext,ancestors) VALUES ";
 		$query .= "(:uniqueid, :adddate, :lastmoddate, :description, :ownerid, :author, :userights, :qtype, :control, :qtext, :ancestors);";
 		$stm = $DBH->prepare($query);
@@ -326,8 +316,6 @@ if (isset($_POST['text'])) {
 		$id = $DBH->lastInsertId();
 		$_GET['id'] = $id;
 		if (isset($_GET['makelocal'])) {
-			//DB $query = "UPDATE imas_questions SET questionsetid='$qsetid' WHERE id='{$_GET['makelocal']}'";
-			//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
 			$stm = $DBH->prepare("UPDATE imas_questions SET questionsetid=:questionsetid WHERE id=:id");
 			$stm->execute(array(':questionsetid'=>$id, ':id'=>$_GET['makelocal']));
 			$editmsg .= " Local copy of Question Created ";
@@ -339,10 +327,6 @@ if (isset($_POST['text'])) {
 	} else {
 		$isok = true;
 		if ($isgrpadmin) {
-			//DB $query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
-			//DB $query .= "WHERE iq.id='{$_GET['id']}' AND iq.ownerid=imas_users.id AND (imas_users.groupid='$groupid' OR iq.userights>2)";
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-			//DB if (mysql_num_rows($result)==0) {
 			$query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
 			$query .= "WHERE iq.id=:id AND iq.ownerid=imas_users.id AND (imas_users.groupid=:groupid OR iq.userights>2)";
 			$stm = $DBH->prepare($query);
@@ -356,10 +340,6 @@ if (isset($_POST['text'])) {
 			//$query .= "WHERE iq.id='{$_GET['id']}' AND iq.ownerid=imas_users.id AND (imas_users.groupid='$groupid' OR iq.userights>2)";
 		}
 		if (!$isadmin && !$isgrpadmin) {  //check is owner or is allowed to modify
-			//DB $query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
-			//DB $query .= "WHERE iq.id='{$_GET['id']}' AND iq.ownerid=imas_users.id AND (iq.ownerid='$userid' OR (iq.userights=3 AND imas_users.groupid='$groupid') OR iq.userights>3)";
-			//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
-			//DB if (mysql_num_rows($result)==0) {
 			$query = "SELECT iq.id FROM imas_questionset AS iq,imas_users ";
 			$query .= "WHERE iq.id=:id AND iq.ownerid=imas_users.id AND (iq.ownerid=:ownerid OR (iq.userights=3 AND imas_users.groupid=:groupid) OR iq.userights>3)";
 			$stm = $DBH->prepare($query);
@@ -369,11 +349,6 @@ if (isset($_POST['text'])) {
 			}
 		}
 		if ($isok) {
-			//DB $_POST = addslashes_deep($_POST);
-
-			//DB $query = "UPDATE imas_questionset SET description='{$_POST['description']}',author='{$_POST['author']}',userights='{$_POST['userights']}',";
-			//DB $query .= "qtype='$qtype',control='$code',qtext='$qtext',lastmoddate=$now WHERE id='$id'";
-			//DB mysql_query($query) or die("Query failed :$query " . mysql_error());
 			$query = "UPDATE imas_questionset SET description=:description,author=:author,userights=:userights,";
 			$query .= "qtype=:qtype,control=:control,qtext=:qtext,lastmoddate=:lastmoddate WHERE id=:id";
 			$stm = $DBH->prepare($query);
@@ -432,9 +407,7 @@ if (isset($_POST['text'])) {
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':qsetid'=>$id, ':ownerid'=>$userid, ':ownerid2'=>$userid));
 		}
-		//DB $result = mysql_query($query) or die("Query failed :$query " . mysql_error());
 		$haverightslibs = array();
-		//DB while($row = mysql_fetch_row($result)) {
 		while($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$haverightslibs[] = $row[0];
 		}
@@ -746,10 +719,6 @@ function getqvalues($code,$type) {
 	}
 	*/
 }
-
-//DB $query = "SELECT firstName,lastName FROM imas_users WHERE id='$userid'";
-//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-//DB $row = mysql_fetch_row($result);
 $stm = $DBH->prepare("SELECT firstName,lastName FROM imas_users WHERE id=:id");
 $stm->execute(array(':id'=>$userid));
 $row = $stm->fetch(PDO::FETCH_NUM);
@@ -757,11 +726,6 @@ $myname = $row[1].','.$row[0];
 
 if (isset($_GET['id']) && $_GET['id']!='new') {
 	$id = intval($_GET['id']);
-
-	//DB $query = "SELECT imas_questionset.*,imas_users.groupid FROM imas_questionset,imas_users WHERE ";
-	//DB $query .= "imas_questionset.ownerid=imas_users.id AND imas_questionset.id='{$_GET['id']}'";
-	//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	$query = "SELECT imas_questionset.*,imas_users.groupid FROM imas_questionset,imas_users WHERE ";
 	$query .= "imas_questionset.ownerid=imas_users.id AND imas_questionset.id=:id";
 	$stm = $DBH->prepare($query);
@@ -789,9 +753,6 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 	$inlibs = array();
 
 	if (isset($_GET['template'])) {
-		//DB $query = "SELECT deflib,usedeflib FROM imas_users WHERE id='$userid'";
-		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		//DB list($deflib,$usedeflib) = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT deflib,usedeflib FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$userid));
 		list($deflib,$usedeflib) = $stm->fetch(PDO::FETCH_NUM);
@@ -804,11 +765,6 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 			if ($usedeflib==1) {
 				$inlibs[] = $deflib;
 			} else {
-				//DB $query = "SELECT imas_libraries.id,imas_libraries.ownerid,imas_libraries.userights,imas_libraries.groupid ";
-				//DB $query .= "FROM imas_libraries,imas_library_items WHERE imas_library_items.libid=imas_libraries.id ";
-				//DB $query .= "AND imas_library_items.qsetid='{$_GET['id']}'";
-				//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$query = "SELECT imas_libraries.id,imas_libraries.ownerid,imas_libraries.userights,imas_libraries.groupid ";
 				$query .= "FROM imas_libraries,imas_library_items WHERE imas_library_items.libid=imas_libraries.id ";
 				$query .= "AND imas_library_items.qsetid=:qsetid AND imas_library_items.deleted=0";
@@ -830,34 +786,24 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 		}*/
 		$locklibs = array();
 		$addmod = "Add";
-
-		//DB $query = "SELECT qrightsdef FROM imas_users WHERE id='$userid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $line['userights'] = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT qrightsdef FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$userid));
 		$line['userights'] = $stm->fetchColumn(0);
 
 	} else {
 		if ($isadmin) {
-			//DB $query = "SELECT DISTINCT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}'";
 			$stm = $DBH->prepare("SELECT DISTINCT libid FROM imas_library_items WHERE qsetid=:qsetid AND imas_library_items.deleted=0");
 			$stm->execute(array(':qsetid'=>$_GET['id']));
 		} else if ($isgrpadmin) {
-			//DB $query = "SELECT DISTINCT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
-			//DB $query .= "AND imas_users.groupid='$groupid' AND ili.qsetid='{$_GET['id']}'";
 			$query = "SELECT DISTINCT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
 			$query .= "AND imas_users.groupid=:groupid AND ili.qsetid=:qsetid AND ili.deleted=0";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':groupid'=>$groupid, ':qsetid'=>$_GET['id']));
 		} else {
-			//DB $query = "SELECT DISTINCT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND ownerid='$userid'";
 			$stm = $DBH->prepare("SELECT DISTINCT libid FROM imas_library_items WHERE qsetid=:qsetid AND ownerid=:ownerid AND deleted=0");
 			$stm->execute(array(':qsetid'=>$_GET['id'], ':ownerid'=>$userid));
 		}
 		//$query = "SELECT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND imas_library_items.ownerid='$userid'";
-		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$inlibs[] = $row[0];
 		}
@@ -865,30 +811,20 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 		$locklibs = array();
 		if (!$isadmin) {
 			if ($isgrpadmin) {
-				//DB $query = "SELECT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
-				//DB $query .= "AND imas_users.groupid!='$groupid' AND ili.qsetid='{$_GET['id']}'";
 				$query = "SELECT ili.libid FROM imas_library_items AS ili,imas_users WHERE ili.ownerid=imas_users.id ";
 				$query .= "AND imas_users.groupid!=:groupid AND ili.qsetid=:qsetid AND ili.deleted=0";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':qsetid'=>$_GET['id'], ':groupid'=>$groupid));
 			} else if (!$isadmin) {
-				//DB $query = "SELECT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND imas_library_items.ownerid!='$userid'";
 				$stm = $DBH->prepare("SELECT libid FROM imas_library_items WHERE qsetid=:qsetid AND imas_library_items.ownerid!=:userid AND deleted=0");
 				$stm->execute(array(':qsetid'=>$_GET['id'], ':userid'=>$userid));
 			}
 			//$query = "SELECT libid FROM imas_library_items WHERE qsetid='{$_GET['id']}' AND imas_library_items.ownerid!='$userid'";
-			//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$locklibs[] = $row[0];
 			}
 		}
 		$addmod = "Modify";
-
-		//DB $query = "SELECT count(imas_questions.id) FROM imas_questions,imas_assessments,imas_courses WHERE imas_assessments.id=imas_questions.assessmentid ";
-		//DB $query .= "AND imas_assessments.courseid=imas_courses.id AND imas_questions.questionsetid='{$_GET['id']}' AND imas_courses.ownerid<>'$userid'";
-		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-		//DB $inusecnt = mysql_result($result,0,0);
 		$query = "SELECT count(imas_questions.id) FROM imas_questions,imas_assessments,imas_courses WHERE imas_assessments.id=imas_questions.assessmentid ";
 		$query .= "AND imas_assessments.courseid=imas_courses.id AND imas_questions.questionsetid=:questionsetid AND imas_courses.ownerid<>:userid";
 		$stm = $DBH->prepare($query);
@@ -963,9 +899,6 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 	$randvars = '';
 
 	$line['description'] = "Enter description here";
-	//DB $query = "SELECT qrightsdef FROM imas_users WHERE id='$userid'";
-	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-	//DB $line['userights'] = mysql_result($result,0,0);
 	$stm = $DBH->prepare("SELECT qrightsdef FROM imas_users WHERE id=:id");
 	$stm->execute(array(':id'=>$userid));
 	$line['userights'] = $stm->fetchColumn(0);
@@ -982,13 +915,8 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 	$locklibs='';
 
 	$author = $myname;
-
-	//DB $inlibssafe = "'".implode("','",explode(',',$inlibs))."'";
 	$inlibssafe = implode(',', array_map('intval', explode(',',$inlibs)));
 	if (!isset($_GET['id']) || isset($_GET['template'])) {
-		//DB $query = "SELECT id,ownerid,userights,groupid FROM imas_libraries WHERE id IN ($inlibssafe)";
-		//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,ownerid,userights,groupid FROM imas_libraries WHERE id IN ($inlibssafe)");
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			if ($row[2] == 8 || ($row[3]==$groupid && ($row[2]%3==2)) || $row[1]==$userid) {
@@ -1003,16 +931,12 @@ if (isset($_GET['id']) && $_GET['id']!='new') {
 	$addmod = "Add";
 
 }
-//DB $inlibssafe = "'".implode("','",explode(',',$inlibs))."'";
 $inlibssafe = implode(',', array_map('intval', explode(',',$inlibs)));
 
 $lnames = array();
 if (substr($inlibs,0,1)==='0') {
 	$lnames[] = "Unassigned";
 }
-//DB $query = "SELECT name FROM imas_libraries WHERE id IN ($inlibssafe)";
-//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-//DB while ($row = mysql_fetch_row($result)) {
 $stm = $DBH->query("SELECT name FROM imas_libraries WHERE id IN ($inlibssafe)");
 while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	$lnames[] = $row[0];
@@ -1388,7 +1312,7 @@ calculations you'll need to display simplified values below. <a href="#" onclick
 <p><a href="#" onclick="window.open('<?php echo $imasroot;?>/help.php?section=writingquestions','Help','width='+(.35*screen.width)+',height='+(.7*screen.height)+',toolbar=1,scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width*.6))">Function Reference</a> |
 <a href="#" onclick="window.open('<?php echo $imasroot;?>/assessment/libs/libhelp.php','Help','width='+(.35*screen.width)+',height='+(.7*screen.height)+',toolbar=1,scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width*.6))">Addon Macro Libraries Reference</a></p>
 
-<textarea name="randvars" id="randvars" style="width: 100%"><?php echo htmlentities($randvars);?></textarea>
+<textarea name="randvars" id="randvars" style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($randvars);?></textarea>
 </div>
 
 <p>This question has
@@ -1490,8 +1414,8 @@ for ($n=0;$n<10;$n++) {
 		echo '><td><input type="radio" name="ans'.$n.'" value="'.$i.'" ';
 		if (($qtype[$n]=='choices' && $i==$answer[$n]) || ($qtype[$n]!='choices' && isset($partial[$n][$i]) && $partial[$n][$i]==1)) {echo 'checked="checked"';}
 		echo '/></td>';
-		echo '<td><input autocomplete="off" id="txt'.$n.'-'.$i.'" name="txt'.$n.'-'.$i.'" type="text" size="60" value="'.(isset($questions[$n][$i])?prepd($questions[$n][$i]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'txt'.$n.'-'.$i.'\')"/></td>';
-		echo '<td><input autocomplete="off" id="fb'.$n.'-'.$i.'" name="fb'.$n.'-'.$i.'" type="text" size="60" value="'.(isset($feedbacktxt[$n][$i])?prepd($feedbacktxt[$n][$i]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'fb'.$n.'-'.$i.'\')"/></td>';
+		echo '<td><input autocomplete="off" id="txt'.$n.'-'.$i.'" name="txt'.$n.'-'.$i.'" type="text" size="60" value="'.(isset($questions[$n][$i])?Sanitize::encodeStringForDisplay($questions[$n][$i]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'txt'.$n.'-'.$i.'\')"/></td>';
+		echo '<td><input autocomplete="off" id="fb'.$n.'-'.$i.'" name="fb'.$n.'-'.$i.'" type="text" size="60" value="'.(isset($feedbacktxt[$n][$i])?Sanitize::encodeStringForDisplay($feedbacktxt[$n][$i]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'fb'.$n.'-'.$i.'\')"/></td>';
 		echo '<td><input autocomplete="off" id="pc'.$n.'-'.$i.'" name="pc'.$n.'-'.$i.'" type="text" size="3" value="'.(isset($partial[$n][$i])?Sanitize::encodeStringForDisplay($partial[$n][$i]):"").'"/></td>';
 
 		echo '</tr>';
@@ -1499,14 +1423,14 @@ for ($n=0;$n<10;$n++) {
 	echo '<tr id="qc'.$n.'-def" ';
 	if ($qtype[$n]!="number" && $qtype[$n]!="numfunc" && $qtype[$n]!="calculated") {echo ' style="display:none;"';};
 	echo '><td colspan="4">Default feedback for incorrect answers: ';
-	echo '<input autocomplete="off" id="fb'.$n.'-def" name="fb'.$n.'-def" type="text" size="60" value="'.(isset($feedbacktxtdef[$n])?prepd($feedbacktxtdef[$n]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'fb'.$n.'-def\')"/></td></tr>';
+	echo '<input autocomplete="off" id="fb'.$n.'-def" name="fb'.$n.'-def" type="text" size="60" value="'.(isset($feedbacktxtdef[$n])?Sanitize::encodeStringForDisplay($feedbacktxtdef[$n]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'fb'.$n.'-def\')"/></td></tr>';
 	echo '</tbody></table>';
 	echo '</div>'; //end hasparts holder div
 	echo '<div id="essay'.$n.'wrap" ';
 	if ($qtype[$n]!='essay') {echo ' style="display:none;"';};
 	echo '> Feedback to show: <br/>';
 	echo '<textarea id="essay'.$n.'-fb" name="essay'.$n.'-fb" cols="80" rows="4">';
-	if (isset($feedbacktxtessay[$n])) { echo prepd($feedbacktxtessay[$n]);}
+	if (isset($feedbacktxtessay[$n])) { echo Sanitize::encodeStringForDisplay($feedbacktxtessay[$n]);}
 	echo '</textarea><input type="button" class="txted" value="E" onclick="popupeditor(\'essay'.$n.'-fb\')"/>';
 	echo '</div>'; //end essaywrap div
 	echo '</div>'; //end partwrapper div
@@ -1520,7 +1444,7 @@ for ($n=0;$n<4;$n++) {
 	echo '<p id="hintwrapper'.$n.'"';
 	if ($n>=$nhints) {echo ' style="display:none;"';};
 	echo '>Hint '.($n+1).':';
-	echo '<input autocomplete="off" id="hint'.$n.'" name="hint'.$n.'" type="text" size="80" value="'.(isset($hinttext[$n])?prepd($hinttext[$n]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'hint'.$n.'\')"/></p>';
+	echo '<input autocomplete="off" id="hint'.$n.'" name="hint'.$n.'" type="text" size="80" value="'.(isset($hinttext[$n])?Sanitize::encodeStringForDisplay($hinttext[$n]):"").'"/><input type="button" class="txted" value="E" onclick="popupeditor(\'hint'.$n.'\')"/></p>';
 }
 
 if (trim($keepcode)=='') {
@@ -1533,7 +1457,7 @@ if (trim($keepcode)=='') {
 ?>
 <p>Here you can override or extend the default $requiretimes or $answerformat values, or define additional code needed for
 the question text, like creating graphs.</p>
-<textarea name="keepcode" id="keepcode" style="width: 100%"><?php echo htmlentities($keepcode);?></textarea>
+<textarea name="keepcode" id="keepcode" style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($keepcode);?></textarea>
 </div>
 <?php
 
@@ -1548,7 +1472,7 @@ echo 'enter <b>$feedback[0]</b> to indicate where the feedback for Part 0 should
 ?>
 
 <div class=editor>
-	<textarea cols="60" rows="20" id="text" name="text" style="width: 100%"><?php echo str_replace(array(">","<"),array("&gt;","&lt;"),$qtext);?></textarea>
+	<textarea cols="60" rows="20" id="text" name="text" style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($qtext);?></textarea>
 </div>
 
 <div class="editor" id="GB_window" style="display:none; position: absolute; height: auto;">
