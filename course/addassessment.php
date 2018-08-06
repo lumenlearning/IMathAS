@@ -323,11 +323,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $query .= ",groupsetid=:groupsetid";
                     $qarr[':groupsetid'] = $updategroupset;
                 }
-
-                if (!empty($defpoints)) {
-                    $query .= ",defpoints=:defpoints,defpenalty=:defpenalty";
-                    $qarr[':defpoints'] = $defpoints;
+                if (isset($_POST['defpenalty'])) {
+                    $query .= ",defpenalty=:defpenalty";
                     $qarr[':defpenalty'] = $defpenalty;
+                }
+                if (!empty($defpoints)) {
+                    $query .= ",defpoints=:defpoints";
+                    $qarr[':defpoints'] = $defpoints;
                 }
                 if (isset($_POST['copyendmsg'])) {
                     $query .= ",endmsg=:endmsg";
