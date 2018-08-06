@@ -37,23 +37,16 @@
 			echo ' <a href="gradebook.php?cid='.$cid.'">'._('Gradebook').'</a> &gt; ';
 		}
 		echo "Un-use LatePass</div>";
-		//DB $query = "SELECT enddate,islatepass FROM imas_exceptions WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB if (mysql_num_rows($result)==0) {
 		$stm = $DBH->prepare("SELECT enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 		if ($stm->rowCount()==0) {
 			echo '<p>Invalid</p>';
 		} else {
-			//DB $row = mysql_fetch_row($result);
 			$row = $stm->fetch(PDO::FETCH_NUM);
 			if ($row[1]==0) {
 				echo '<p>Invalid</p>';
 			} else {
 				$now = time();
-				//DB $query = "SELECT enddate FROM imas_assessments WHERE id='$aid'";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB $enddate = mysql_result($result,0,0);
 				$stm = $DBH->prepare("SELECT enddate FROM imas_assessments WHERE id=:id");
 				$stm->execute(array(':id'=>$aid));
 				$enddate = $stm->fetchColumn(0);
@@ -64,8 +57,6 @@
 					if ($now < $enddate) { //before enddate, return all latepasses
 						$maxLP = max(0,floor(($row[0]-$enddate)/($latepasshrs*3600)+.05));
 						$n = min($maxLP,$row[1]);
-						//DB $query = "DELETE FROM imas_exceptions WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-						//DB mysql_query($query) or die("Query failed : " . mysql_error());
 						$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 						$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 					} else { //figure how many are unused
@@ -74,22 +65,16 @@
 						$newend = strtotime("-".$tothrs." hours", $row[0]);
 						//$newend = $row[0] - $n*$latepasshrs*60*60;
 						if ($row[1]>$n) {
-							//DB $query = "UPDATE imas_exceptions SET islatepass=islatepass-$n,enddate=$newend WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-							//DB mysql_query($query) or die("Query failed : " . mysql_error());
 							$stm = $DBH->prepare("UPDATE imas_exceptions SET islatepass=islatepass-:n,enddate=:enddate WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 							$stm->execute(array(':enddate'=>$newend, ':userid'=>$userid, ':assessmentid'=>$aid, ':n'=>$n));
 						} else {
-							//DB $query = "DELETE FROM imas_exceptions WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-							//DB mysql_query($query) or die("Query failed : " . mysql_error());
 							$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 							$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 							$n = $row[1];
 						}
 					}
-					printf("<p>Returning %d LatePass", $n);
+					printf("<p>Returning %d LatePass", Sanitize::onlyInt($n));
 					echo ($n>1?"es":"")."</p>";
-					//DB $query = "UPDATE imas_students SET latepass=latepass+$n WHERE userid='$userid' AND courseid='$cid'";
-					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 					$stm = $DBH->prepare("UPDATE imas_students SET latepass=latepass+:n WHERE userid=:userid AND courseid=:courseid");
 					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':n'=>$n));
 				}
@@ -109,33 +94,25 @@
 
 	} else if (isset($_POST['confirm'])) {
 		//$addtime = $latepasshrs*60*60;
-		//DB $query = "SELECT allowlate,enddate,startdate FROM imas_assessments WHERE id='$aid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB list($allowlate,$enddate,$startdate) =mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT allowlate,enddate,startdate FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$aid));
 		list($allowlate,$enddate,$startdate) =$stm->fetch(PDO::FETCH_NUM);
-
-		//DB $query = "SELECT enddate,islatepass FROM imas_exceptions WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 		$hasexception = false;
-		//DB if (mysql_num_rows($result)==0) {
 		if ($stm->rowCount()==0) {
 			$usedlatepasses = 0;
 			$thised = $enddate;
 			$useexception = false;
 			$canuselatepass = $exceptionfuncs->getCanUseAssessLatePass(array('startdate'=>$startdate, 'enddate'=>$enddate, 'allowlate'=>$allowlate, 'id'=>$aid));
 		} else {
-			//DB $r = mysql_fetch_row($result);
 			$r = $stm->fetch(PDO::FETCH_NUM);
 			list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($r, array('startdate'=>$startdate, 'enddate'=>$enddate, 'allowlate'=>$allowlate, 'id'=>$aid));
 			if ($useexception) {
 				if (!empty($r[3])) { //is_lti - use count in exception
 					$usedlatepasses = $r[2];
 				} else {
-					$usedlatepasses = min(max(0,round(($r[1] - $enddate)/($latepasshrs*3600))), $r[2]);
+				$usedlatepasses = min(max(0,round(($r[1] - $enddate)/($latepasshrs*3600))), $r[2]);
 				}
 				$thised = $r[1];
 			} else {
@@ -144,37 +121,35 @@
 			}
 			$hasexception = true;
 		}
-
+		if ($now>$thised) {
+			//$LPneeded = ceil(($now - $thised)/($latepasshrs*3600) - .0001);
+			$LPneeded = $exceptionfuncs->calcLPneeded($thised);
+		} else {
+			$LPneeded = 1;
+		}
+		
 		if ($canuselatepass) {
-			//DB $query = "UPDATE imas_students SET latepass=latepass-1 WHERE userid='$userid' AND courseid='$cid' AND latepass>0";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB if (mysql_affected_rows()>0) {
-			$stm = $DBH->prepare("UPDATE imas_students SET latepass=latepass-1 WHERE userid=:userid AND courseid=:courseid AND latepass>0");
-			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
+			$stm = $DBH->prepare("UPDATE imas_students SET latepass=latepass-:lps WHERE userid=:userid AND courseid=:courseid AND latepass>=:lps2");
+			$stm->execute(array(':lps'=>$LPneeded, ':lps2'=>$LPneeded, ':userid'=>$userid, ':courseid'=>$cid));
 			if ($stm->rowCount()>0) {
-				$enddate = min(strtotime("+".$latepasshrs." hours", $thised), $courseenddate);
+				$enddate = min(strtotime("+".($latepasshrs*$LPneeded)." hours", $thised), $courseenddate);
 				if ($hasexception) { //already have exception
-					//DB $query = "UPDATE imas_exceptions SET enddate=enddate+$addtime,islatepass=islatepass+1 WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-					//DB mysql_query($query) or die("Query failed : " . mysql_error());
-					$stm = $DBH->prepare("UPDATE imas_exceptions SET enddate=:enddate,islatepass=islatepass+1 WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
-					$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid, ':enddate'=>$enddate));
+					$stm = $DBH->prepare("UPDATE imas_exceptions SET enddate=:enddate,islatepass=islatepass+:lps WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+					$stm->execute(array(':lps'=>$LPneeded, ':userid'=>$userid, ':assessmentid'=>$aid, ':enddate'=>$enddate));
 				} else {
-
-					//DB $query = "INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,islatepass,itemtype) VALUES ('$userid','$aid','$startdate','$enddate',1,'A')";
-					//DB mysql_query($query) or die("Query failed : " . mysql_error());
 					$stm = $DBH->prepare("INSERT INTO imas_exceptions (userid,assessmentid,startdate,enddate,islatepass,itemtype) VALUES (:userid, :assessmentid, :startdate, :enddate, :islatepass, :itemtype)");
-					$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid, ':startdate'=>$startdate, ':enddate'=>$enddate, ':islatepass'=>1, ':itemtype'=>'A'));
+					$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid, ':startdate'=>$startdate, ':enddate'=>$enddate, ':islatepass'=>$LPneeded, ':itemtype'=>'A'));
 				}
 			}
 		}
 		if ($from=='ltitimelimit') {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/bltilaunch.php?accessibility=ask");
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/bltilaunch.php?accessibility=ask" . "&r=" . Sanitize::randomQueryStringParam());
 		} else if ($from=='gb') {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/gradebook.php?cid=$cid");
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/gradebook.php?cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
 		} else if ((!isset($sessiondata['ltiitemtype']) || $sessiondata['ltiitemtype']!=0)) {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid");
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
 		} else {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}");
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}" . "&r=" . Sanitize::randomQueryStringParam());
 		}
 	} else {
 		require("../header.php");
@@ -192,42 +167,45 @@
 		//$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\"> $coursename</a>\n";
 		//$curBreadcrumb .= " Redeem LatePass\n";
 		//echo "<div class=\"breadcrumb\">$curBreadcrumb</div>";
-
-		//DB $query = "SELECT allowlate,enddate,startdate FROM imas_assessments WHERE id='$aid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB list($allowlate,$enddate,$startdate) =mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT allowlate,enddate,startdate,timelimit FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$aid));
 		list($allowlate,$enddate,$startdate,$timelimit) =$stm->fetch(PDO::FETCH_NUM);
-
-		//DB $query = "SELECT enddate,islatepass FROM imas_exceptions WHERE userid='$userid' AND assessmentid='$aid' AND itemtype='A'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
 		$hasexception = false;
-		//DB if (mysql_num_rows($result)==0) {
 		if ($stm->rowCount()==0) {
 			$usedlatepasses = 0;
 			$thised = $enddate;
 			$canuselatepass = $exceptionfuncs->getCanUseAssessLatePass(array('startdate'=>$startdate, 'enddate'=>$enddate, 'allowlate'=>$allowlate, 'id'=>$aid));
 		} else {
-			//DB $r = mysql_fetch_row($result);
 			$r = $stm->fetch(PDO::FETCH_NUM);
 			list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($r, array('startdate'=>$startdate, 'enddate'=>$enddate, 'allowlate'=>$allowlate, 'id'=>$aid));
 			if ($useexception) {
 				if (!empty($r[3])) { //is_lti - use count in exception
 					$usedlatepasses = $r[2];
 				} else {
-					$usedlatepasses = min(max(0,round(($r[1] - $enddate)/($latepasshrs*3600))), $r[2]);
+				$usedlatepasses = min(max(0,round(($r[1] - $enddate)/($latepasshrs*3600))), $r[2]);
 				}
 				$thised = $r[1];
 			} else {
 				$usedlatepasses = 0;
 				$thised = $enddate;
+				if ($now>$enddate) {
+					//$LPneeded = ceil(($now - $enddate)/($latepasshrs*3600) - .0001);
+					$LPneeded = $exceptionfuncs->calcLPneeded($enddate);
+				}
 			}
 			$hasexception = true;
 		}
-		$limitedByCourseEnd = (strtotime("+".$latepasshrs." hours", $thised) > $courseenddate);
+
+		if ($now>$thised) {
+			//$LPneeded = ceil(($now - $thised)/($latepasshrs*3600) - .0001);
+			$LPneeded = $exceptionfuncs->calcLPneeded($thised);
+		} else {
+			$LPneeded = 1;
+		}
+		$limitedByCourseEnd = (strtotime("+".($latepasshrs*$LPneeded)." hours", $thised) > $courseenddate);
+		
 		$timelimitstatus = $exceptionfuncs->getTimelimitStatus($aid);
 
 		if ($latepasses==0) { //shouldn't get here if 0
@@ -236,15 +214,27 @@
 			echo '<div id="headerredeemlatepass" class="pagetitle"><h1>Redeem LatePass</h1></div>';
 			echo "<form method=post action=\"redeemlatepass.php?cid=$cid&aid=$aid\">";
 			if ($allowlate%10>1) {
-				echo '<p>You may use up to '.($allowlate%10-1-$usedlatepasses).' more LatePass(es) on this assessment.</p>';
+			    echo '<p>You may use up to '.Sanitize::onlyInt($allowlate%10-1-$usedlatepasses).' more LatePass(es) on this assessment.</p>';
 			}
-			echo "<p>You have ".Sanitize::encodeStringForDisplay($latepasses)." LatePass(es) remaining.  ";
-			if ($limitedByCourseEnd) {
-				echo sprintf("You can redeem one LatePass for an extension up to the course end date, %s. ", tzdate("D n/j/y, g:i a", $courseenddate));
+			echo "<p>You have ".Sanitize::encodeStringForDisplay($latepasses)." LatePass(es) remaining.</p>";
+
+			if ($LPneeded==1) {
+				echo '<p>';
+				if ($limitedByCourseEnd) {
+					echo sprintf("You can redeem one LatePass for an extension up to the course end date, %s. ", tzdate("D n/j/y, g:i a", $courseenddate));
+				} else {
+					echo "You can redeem one LatePass for a ".Sanitize::encodeStringForDisplay($latepasshrs)." hour extension on this assessment. ";
+				}
+				echo "</p><p>Are you sure you want to redeem a LatePass?</p>";
 			} else {
-				echo "You can redeem one LatePass for a ".Sanitize::encodeStringForDisplay($latepasshrs)." hour extension on this assessment. ";
+				echo "<p>Each LatePass gives a ".Sanitize::encodeStringForDisplay($latepasshrs)." hour extension on this assessment. ";
+				if ($limitedByCourseEnd) {
+					echo sprintf("You would need %d LatePasses to reopen this assignment up to the course end date, %s. ", $LPneeded, tzdate("D n/j/y, g:i a", $courseenddate));
+				} else {
+					echo "You would need $LPneeded LatePasses to reopen this assignment. ";
+				}
+				echo "</p><p>Are you sure you want to redeem $LPneeded LatePasses?</p>";
 			}
-			echo "Are you sure you want to redeem a LatePass?</p>";
 			if ($timelimitstatus=='started') {
 				echo '<p class="noticetext">'._('Reminder: You have already started this assessment, and it has a time limit.  Using a LatePass does <b>not</b> extend or pause the time limit, only the due date.').'</p>';
 			} else if ($timelimitstatus=='expired') {
@@ -253,7 +243,7 @@
 			echo '<p><input type="hidden" name="confirm" value="true" />';
 			echo '<input type="hidden" name="from" value="'.Sanitize::encodeStringForDisplay($from).'" />';
 			if ($timelimitstatus!='expired') {
-				echo "<input type=submit value=\"Yes, Redeem LatePass\"/>";
+				echo "<input type=submit value=\"Yes, Redeem LatePass(es)\"/>";
 			}
 			if ($from=='ltitimelimit') {
 				echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='../bltilaunch.php?accessibility=ask'\"/>";

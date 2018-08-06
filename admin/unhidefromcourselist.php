@@ -18,19 +18,18 @@ if ($type=='teach') {
 	$type = 'take';
 }
 $actionuserid = $userid;
-if ($myrights==100 && isset($_GET['user'])) {
-	$actionuserid = Sanitize::onlyInt($_GET['user']);
-} else if ($myrights>=75 && isset($_GET['user'])) {
+$userIdInt = Sanitize::onlyInt(trim($_GET['user']));
+ if ($myrights==100 && !empty($userIdInt)) {
+	$actionuserid = $userIdInt;
+} else if ($myrights>=75 && !empty($userIdInt)) {
 	$stm = $DBH->prepare("SELECT groupid FROM imas_users WHERE id=:id");
-	$stm->execute(array(':id'=>$_GET['user']));
+	$stm->execute(array(':id'=>$userIdInt));
 	if ($groupid==$stm->fetchColumn(0)) {
-		$actionuserid = Sanitize::onlyInt($_GET['user']);
+		$actionuserid = $userIdInt;
 	}
 }
 if (isset($_GET['tohide'])) {
 	if ($tohide>0) {
-		//DB $query = "UPDATE imas_students SET hidefromcourselist=0 WHERE courseid='$cid' AND userid='$userid'";
-		//DB mysql_query($query) or die("Query failed : $query" . mysql_error());
 		$stm = $DBH->prepare("UPDATE $table SET hidefromcourselist=0 WHERE courseid=:courseid AND userid=:userid");
 		$stm->execute(array(':courseid'=>$tohide, ':userid'=>$actionuserid));
 		if (isset($_GET['ajax'])) {
@@ -50,12 +49,6 @@ require("../header.php");
 
 echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 echo '<h1>View Hidden Courses You\'re '.$typename.'</h1>';
-
-
-
-//DB $query = 'SELECT ic.name,ic.id FROM imas_courses AS ic JOIN imas_students AS istu ON ic.id=istu.courseid ';
-//DB $query .= "WHERE istu.userid='$userid' AND istu.hidefromcourselist=1";
-//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 $query = 'SELECT ic.name,ic.id,ic.ownerid,ic.available FROM imas_courses AS ic JOIN '.$table.' AS istu ON ic.id=istu.courseid ';
 $query .= "WHERE istu.userid=:userid AND istu.hidefromcourselist=1 ";
 if ($type=='take') {
@@ -67,11 +60,9 @@ $query .= "ORDER BY ic.name";
 $stm = $DBH->prepare($query);
 $stm->execute(array(':userid'=>$userid));
 echo '<ul class="nomark courselist">';
-//DB if (mysql_num_rows($result)==0) {
 if ($stm->rowCount()==0) {
 	echo '<li>No hidden courses</li>';
 } else {
-	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 		echo '<li>';
 

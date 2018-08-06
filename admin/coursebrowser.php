@@ -32,11 +32,22 @@ if (isset($_GET['embedded'])) {
 /*** Utility functions ***/
 function getCourseBrowserJSON() {
   global $DBH, $browserprops, $groupid;
-  $query = "SELECT ic.id,ic.name,ic.jsondata,iu.FirstName,iu.LastName,ig.name AS groupname,ic.istemplate,iu.groupid ";
-  $query .= "FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id JOIN imas_groups AS ig ON iu.groupid=ig.id ";
-  $query .= "WHERE ((ic.istemplate&17)>0 OR ((ic.istemplate&2)>0 AND iu.groupid=?))";
-  $stm = $DBH->prepare($query);
+  
+  $stm = $DBH->prepare("SELECT parent FROM imas_groups WHERE id=?");
   $stm->execute(array($groupid));
+  $supergroupid = $stm->fetchColumn(0);
+  
+  $query = "SELECT ic.id,ic.name,ic.jsondata,iu.FirstName,iu.LastName,ig.name AS groupname,ig.parent,ic.istemplate,iu.groupid ";
+  $query .= "FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id JOIN imas_groups AS ig ON iu.groupid=ig.id ";
+  $query .= "WHERE ((ic.istemplate&17)>0 OR ((ic.istemplate&2)>0 AND iu.groupid=?)";
+  $qarr = array($groupid);
+  if ($supergroupid>0) {
+  	  $query .= " OR ((ic.istemplate&32)>0 AND ig.parent=?)";
+  	  array_push($qarr, $supergroupid);
+  }
+  $query .= ")";
+  $stm = $DBH->prepare($query);
+  $stm->execute($qarr);
   $courseinfo = array();
   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
     $jsondata = json_decode($row['jsondata'], true);
@@ -54,6 +65,8 @@ function getCourseBrowserJSON() {
    
     if (($row['istemplate']&2)==2 && $row['groupid']==$groupid) { //group template for user's group
     	$jsondata['browser']['coursetype'] = 0;	    
+    } else if (($row['istemplate']&32)==32 && $row['parent']==$supergroupid) { //super-group template for user's group
+    	$jsondata['browser']['coursetype'] = 0;  
     } else if (($row['istemplate']&1)==1) { //global template
     	$jsondata['browser']['coursetype'] = 1;	        
     } else {
@@ -132,29 +145,41 @@ if (!isset($_GET['embedded'])) {
 }
 ?>
 <div id="app" v-cloak>
-<div <?php if (isset($_GET['embedded'])) {echo 'id="fixedfilters"';}?>>Filter results: 
-<span v-for="propname in propsToFilter" class="dropdown-wrap">
-	<button @click="showFilter = (showFilter==propname)?'':propname">
-		{{ courseBrowserProps[propname].name }} {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
-		<span class="arrow-down" :class="{rotated: showFilter==propname}"></span>	
-	</button>
-	<transition name="fade" @enter="adjustpos">
-		<ul v-if="showFilter == propname" class="filterwrap">
-			<li v-if="courseBrowserProps[propname].hasall">
-				<span>Show courses that contain <i>all</i> of:</span>
-			</li>
-			<li v-if="!courseBrowserProps[propname].hasall">
-				<span>Show courses that contain <i>any</i> of:</span>
-			</li>
-			<li v-for="(longname,propval) in courseBrowserProps[propname].options">
-				<span v-if="propval.match(/^group/)" class="optgrplabel"><em>{{ longname }}</em></span>
-				<label v-else><input type="checkbox" :value="propname+'.'+propval" v-model="selectedItems">
-				{{ longname }}</label>
-			</li>
-		</ul>
-	</transition>
-</span>
-<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
+<div <?php if (isset($_GET['embedded'])) {echo 'id="fixedfilters"';}?>>
+<div id="courseTypeTabs" v-if="useTabs">
+	<ul>
+		<li v-for="type in activeCourseTypes"
+			@click="activeTab=type"
+			:class="{'active': activeTab==type}">
+			{{courseBrowserProps.meta.courseTypeTabs[type]}}
+		</li>
+	<ul>
+</div>
+<div id="filters">
+	Filter results: 
+	<span v-for="propname in propsToFilter" class="dropdown-wrap">
+		<button @click="showFilter = (showFilter==propname)?'':propname">
+			{{ courseBrowserProps[propname].name }} {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
+			<span class="arrow-down" :class="{rotated: showFilter==propname}"></span>	
+		</button>
+		<transition name="fade" @enter="adjustpos">
+			<ul v-if="showFilter == propname" class="filterwrap">
+				<li v-if="courseBrowserProps[propname].hasall">
+					<span>Show courses that contain <i>all</i> of:</span>
+				</li>
+				<li v-if="!courseBrowserProps[propname].hasall">
+					<span>Show courses that contain <i>any</i> of:</span>
+				</li>
+				<li v-for="(longname,propval) in courseBrowserProps[propname].options">
+					<span v-if="propval.match(/^group/)" class="optgrplabel"><em>{{ longname }}</em></span>
+					<label v-else><input type="checkbox" :value="propname+'.'+propval" v-model="selectedItems">
+					{{ longname }}</label>
+				</li>
+			</ul>
+		</transition>
+	</span>
+	<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
+</div>
 </div>
 <div style="position: relative" id="card-deck-wrap">
 <transition-group name="fade" tag="div" class="card-deck">
@@ -205,6 +230,7 @@ new Vue({
 		showFilter: '',
 		filterLeft: 0,
 		courseTypes: courseBrowserProps.meta.courseTypes,
+		activeTab: 0,
 	},
 	methods: {
 		clickaway: function(event) {
@@ -293,11 +319,30 @@ new Vue({
 			}
 			return catarr;
 		},
+		activeCourseTypes: function() {
+			var activeTypes = [];
+			for (type in this.courseTypes) {
+				for (var i=0; i<courses.length; i++) {
+					if (courses[i].coursetype == type) {
+						activeTypes.push(type);
+						break;
+					}
+				}
+			}
+			return activeTypes;
+		},
+		useTabs: function () {
+			return (!!this.courseBrowserProps.meta.courseTypeTabs &&
+				this.activeCourseTypes.length>1);
+		},
 		filteredCourses: function() {
 			var selectedCourses = [];
 			
 			var includeCourse = true;
 			for (var i=0; i<courses.length; i++) {
+				if (this.useTabs && courses[i].coursetype != this.activeTab) {
+					continue;
+				}
 				includeCourse = true;
 				for (prop in this.courseBrowserProps) {
 					if (this.catprops[prop].length==0) {

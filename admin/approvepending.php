@@ -9,49 +9,38 @@ if (isset($_GET['skipn'])) {
 } else {
 	$offset = 0;
 }
-
+$uid = Sanitize::onlyInt($_POST['id']);
 if (isset($_GET['go'])) {
 	if (isset($_POST['skip'])) {
 		$offset++;
 	} else 	if (isset($_POST['deny'])) {
-		//DB $query = "UPDATE imas_users SET rights=10 WHERE id='{$_POST['id']}'";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("UPDATE imas_users SET rights=10 WHERE id=:id");
-		$stm->execute(array(':id'=>$_POST['id']));
+		$stm->execute(array(':id'=>$uid));
 		if (isset($CFG['GEN']['enrollonnewinstructor'])) {
 			require("../includes/unenroll.php");
 			foreach ($CFG['GEN']['enrollonnewinstructor'] as $rcid) {
-				unenrollstu($rcid, array(intval($_POST['id'])));
+				unenrollstu($rcid, array($uid));
 			}
 		}
 		$stm = $DBH->prepare("UPDATE imas_instr_acct_reqs SET status=10 WHERE userid=:id");
-		$stm->execute(array(':id'=>$_POST['id']));
+		$stm->execute(array(':id'=>$uid));
 	} else 	if (isset($_POST['approve'])) {
 		if ($_POST['group']>-1) {
 			$group = intval($_POST['group']);
 		} else if (trim($_POST['newgroup'])!='') {
-			//DB $query = "INSERT INTO imas_groups (name) VALUES ('{$_POST['newgroup']}')";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $group = mysql_insert_id();
 			$stm = $DBH->prepare("INSERT INTO imas_groups (name,created_at) VALUES (:name,:created_at)");
 			$stm->execute(array(':name'=>$_POST['newgroup'],':created_at'=>time()));
 			$group = $DBH->lastInsertId();
 		} else {
 			$group = 0;
 		}
-		//DB $query = "UPDATE imas_users SET rights=40,groupid=$group WHERE id='{$_POST['id']}'";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("UPDATE imas_users SET rights=40,groupid=:groupid WHERE id=:id");
-		$stm->execute(array(':groupid'=>$group, ':id'=>$_POST['id']));
+		$stm->execute(array(':groupid'=>$group, ':id'=>$uid));
 
 		$stm = $DBH->prepare("UPDATE imas_instr_acct_reqs SET status=11 WHERE userid=:id");
-		$stm->execute(array(':id'=>$_POST['id']));
-		
-		//DB $query = "SELECT FirstName,SID,email FROM imas_users WHERE id='{$_POST['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
+		$stm->execute(array(':id'=>$uid));
 		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
-		$stm->execute(array(':id'=>$_POST['id']));
+		$stm->execute(array(':id'=>$uid));
 		$row = $stm->fetch(PDO::FETCH_NUM);
 
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
@@ -92,25 +81,16 @@ if (isset($_GET['go'])) {
 			mail($row[2],$installname . ' Account Approval',$message,$headers);
 		}
 	}
-	header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/approvepending.php?skipn=$offset");
+	header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/approvepending.php?skipn=$offset&r=".Sanitize::randomQueryStringParam());
 	exit;
 }
 
 require("../header.php");
-//DB $query = "SELECT id,SID,LastName,FirstName,email FROM imas_users WHERE rights=0 OR rights=12 LIMIT 1 OFFSET $offset";
-//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-//DB if (mysql_num_rows($result)==0) {
 $stm = $DBH->query("SELECT id,SID,LastName,FirstName,email FROM imas_users WHERE rights=0 OR rights=12 LIMIT 1 OFFSET $offset"); //sanitized above
 if ($stm->rowCount()==0) {
 	echo 'No one to approve';
 } else {
-	//DB $row = mysql_fetch_row($result);
 	$row = $stm->fetch(PDO::FETCH_NUM);
-
-	//DB $query = "SELECT log FROM imas_log WHERE log LIKE 'New Instructor Request: {$row[0]}::%'";
-	//DB $res = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB if (mysql_num_rows($res)>0) {
-		//DB $log = explode('::', mysql_result($res,0,0));
 	$stm = $DBH->prepare("SELECT time,log FROM imas_log WHERE log LIKE :log");
 	$stm->execute(array(':log'=>"New Instructor Request: {$row[0]}::%"));
 	if ($stm->rowCount()>0) {
@@ -127,7 +107,7 @@ if ($stm->rowCount()==0) {
 	echo '<input type="hidden" name="email" value="' . Sanitize::encodeStringForDisplay($row[4]) . '"/>';
 	echo '<input type="hidden" name="id" value="' . Sanitize::encodeStringForDisplay($row[0]) . '"/>';
 	echo '<p>Username: ' . Sanitize::encodeStringForDisplay($row[1]) . '<br/>Name: ' . Sanitize::encodeStringForDisplay($row[2]) . ', ' . Sanitize::encodeStringForDisplay($row[3]) . ' (' . Sanitize::encodeStringForDisplay($row[4]) . ')</p>';
-	echo '<p>Request made: '.$reqdate.'</p>';
+	echo '<p>Request made: '.Sanitize::encodeStringForDisplay($reqdate).'</p>';
 	$school = '';
 	if ($details != '') {
 		$cleanDetails = sanitizeNewInstructorRequestLog($details);
@@ -160,9 +140,6 @@ if ($stm->rowCount()==0) {
 
 
 	echo '<p>Group: <select name="group"><option value="-1">New Group</option>';
-	//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 	$opts = '';
 	$groups = array();
@@ -261,7 +238,7 @@ function sanitizeNewInstructorRequestLog($logtext) {
 	if (!empty($verificationUrl)) {
 		if (!empty($sanitizedLogText)) $sanitizedLogText .= "<br/>";
 		//$verificationUrl is html so dont sanitize
-		$sanitizedLogText .= "VerificationURL: " . $verificationUrl;
+		$sanitizedLogText .= "VerificationURL: " . Sanitize::outgoingHtml($verificationUrl);
 	}
 	if (!empty($phone)) {
 		if (!empty($sanitizedLogText)) $sanitizedLogText .= "<br/>";

@@ -59,7 +59,7 @@ if (isset($_GET['graphdisp'])) { //currently same is used for graphdisp and draw
 	setcookie("embedquserprefs", json_encode(array(
 		'graphdisp'=>$sessiondata['userprefs']['graphdisp'],
 		'drawentry'=>$sessiondata['userprefs']['drawentry']
-		)));
+		)),0,'','',false,true);
 }
 foreach(array('graphdisp','mathdisp','useed') as $key) {
 	$sessiondata[$key] = $sessiondata['userprefs'][$key];
@@ -185,11 +185,17 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 	displayq($qn,$qids[$qn],$seeds[$qn],($showanstype>0),$showhints,$attempts[$qn],false,false,false,$colors);
 	$quesout .= ob_get_clean();
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$qn.',\'submitnotice'.$qn.'\')" /><span id="submitnotice'.$qn.'"></span></div>';
-	echo '<input type="hidden" id="verattempts'.$qn.'" value="'.$attempts[$qn].'"/>';
+	echo '<input type="hidden" id="verattempts'.$qn.'" value="'.Sanitize::encodeStringForDisplay($attempts[$qn]).'"/>';
 	echo $quesout;
 
 	//"save" session
 	echo '<script type="text/javscript">$("#asidverify").val("'.$jwtstring.'");</script>';
+	$scoremessage = array(
+		'action' => 'updatescores',
+		'scores' => $rawscores,
+		'jwt' => $jwtstring
+	);
+	echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify('.json_encode($scoremessage,JSON_HEX_TAG).'), "*");</script>';
 	exit;
 }
 
@@ -250,6 +256,7 @@ echo '<script type="text/javascript">var assesspostbackurl="' .$urlmode. Sanitiz
 echo '<input type="hidden" id="asidverify" value="'.$jwtstring.'"/>';
 echo '<input type="hidden" id="disptime" value="'.time().'"/>';
 echo '<input type="hidden" id="isreview" value="0"/>';
+
 // ####### Begin OHM-specific changes ##################################################################
 // ####### Begin OHM-specific changes ##################################################################
 // ####### Begin OHM-specific changes ##################################################################
@@ -265,6 +272,8 @@ echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&a
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
+
+echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.Sanitize::encodeUrlParam($sameseed).'&amp;theme='.Sanitize::encodeUrlParam($theme).'&amp;iframe_resize_id='.Sanitize::encodeUrlParam($targetid).'">';
 if (count($qids)>1) {
 	echo _('Try Another Version of These Questions').'</a></p>';
 } else {
@@ -294,7 +303,7 @@ foreach ($qids as $i=>$qid) {
 	$quesout .= ob_get_clean();
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
 	echo $quesout;
-	echo '<input type="hidden" id="verattempts'.$i.'" value="'.$attempts[$i].'"/>';
+	echo '<input type="hidden" id="verattempts'.$i.'" value="'.Sanitize::encodeStringForDisplay($attempts[$i]).'"/>';
 	echo '</div>';
 }
 

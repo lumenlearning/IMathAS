@@ -1,6 +1,7 @@
 <?php
 //IMathAS:  Admin forms
 //(c) 2006 David Lippman
+
 require("../init.php");
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
@@ -10,6 +11,9 @@ $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/Dat
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
+
+use OHM\Models\StudentPayApiResult;
+use OHM\Exceptions\StudentPaymentException;
 
 $placeinhead .= '<script type="text/javascript" src="' . $imasroot . '/ohm/js/student_pay/studentPayAjax.js"></script>';
 
@@ -58,9 +62,6 @@ if (!isset($_GET['cid'])) {
 switch($_GET['action']) {
 	case "delete":
 		if ($myrights < 40) { echo "You don't have the authority for this action"; break;}
-		//DB $query = "SELECT name FROM imas_courses WHERE id='{$_GET['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $name = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$name = $stm->fetchColumn(0);
@@ -150,9 +151,6 @@ switch($_GET['action']) {
 			$oldgroup = (isset($_GET['group'])?Sanitize::onlyInt($_GET['group']):0);
 			$oldrights = 10;
 		} else {
-			//DB $query = "SELECT FirstName,LastName,rights,groupid,specialrights FROM imas_users WHERE id='{$_GET['id']}'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			$stm = $DBH->prepare("SELECT SID,FirstName,LastName,email,rights,groupid,specialrights FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -294,12 +292,9 @@ switch($_GET['action']) {
 				echo "selected=1";
 			}
 			echo ">Default</option>\n";
-			//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
 			$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
+				printf('<option value="%d" ', $row[0]);
 				if ($oldgroup==$row[0]) {
 					echo "selected=1";
 				}
@@ -327,22 +322,17 @@ switch($_GET['action']) {
 
 		$isadminview = false;
 		if ($_GET['action']=='modify') {
-			//DB $query = "SELECT * FROM imas_courses WHERE id='{$_GET['id']}'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB if (mysql_num_rows($result)==0) {break;}
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			$stm = $DBH->prepare("SELECT * FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			if ($stm->rowCount()==0) {break;}
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
 			if ($myrights<75 && $line['ownerid']!=$userid) {
 				echo "You don't have the authority for this action"; break;
-			} else if ($myrights > 74 && $line['ownerid']!=$userid) {
-				$isadminview = true;
-				//DB $query = "SELECT iu.FirstName, iu.LastName, iu.groupid, ig.name FROM imas_users AS iu JOIN imas_groups AS ig ON ig.id=iu.groupid WHERE iu.id={$line['ownerid']}";
-				//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
-				//DB $udat = mysql_fetch_array($result, MYSQL_ASSOC);
-				$stm = $DBH->prepare("SELECT iu.FirstName, iu.LastName, iu.groupid, ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON ig.id=iu.groupid WHERE iu.id=:id");
+			} else if ($myrights > 74) {
+				if ($line['ownerid']!=$userid) {
+					$isadminview = true;
+				}
+				$stm = $DBH->prepare("SELECT iu.FirstName, iu.LastName, iu.groupid, ig.name, ig.parent FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON ig.id=iu.groupid WHERE iu.id=:id");
 				$stm->execute(array(':id'=>$line['ownerid']));
 				$udat = $stm->fetch(PDO::FETCH_ASSOC);
 				if ($udat['groupid']==0) {
@@ -350,6 +340,11 @@ switch($_GET['action']) {
 				}
 				if ($myrights===75 && $udat['groupid']!=$groupid) {
 					echo "You don't have the authority for this action"; break;
+				}
+				if ($udat['parent']>0) {
+					$hassupergroup = true;
+				} else {
+					$hassupergroup = false;
 				}
 			}
 			$courseid = $line['id'];
@@ -448,7 +443,7 @@ switch($_GET['action']) {
 		$(function() {
 			$("form").on("submit",function(e) {
 				var needsgrp = $("input[name=isgrptemplate]:checked").length;
-				var needsall = $("input[name=istemplate]:checked,input[name=isselfenroll]:checked").length;
+				var needsall = $("input[name=istemplate]:checked,input[name=isselfenroll]:checked,input[name=issupergrptemplate]:checked").length;
 
 				var copyrights = $("input[name=copyrights]:checked").val();
 				var ok = true;
@@ -457,7 +452,7 @@ switch($_GET['action']) {
 					ok = false;
 				}
 				if (copyrights<2 && needsall>0) {
-					alert(_("Setting a course as a template or self enroll requires setting the copy permissions to: no key required for anyone"));
+					alert(_("Setting a course as a global template, super-group template, or self enroll requires setting the copy permissions to: no key required for anyone"));
 					ok = false;
 				}
 				if (copyrights<1 && needsgrp) {
@@ -504,13 +499,10 @@ switch($_GET['action']) {
 			echo '<option value="0" ';
 			if ($lockaid==0) { echo 'selected="1"';}
 			echo '>No lock</option>';
-			//DB $query = "SELECT id,name FROM imas_assessments WHERE courseid='{$_GET['id']}' ORDER BY name";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
 			$stm = $DBH->prepare("SELECT id,name FROM imas_assessments WHERE courseid=:courseid ORDER BY name");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
+				printf('<option value="%d" ', $row[0]);
 				if ($lockaid==$row[0]) { echo 'selected="1"';}
 				printf(">%s</option>", Sanitize::encodeStringForDisplay($row[1]));
 			}
@@ -683,6 +675,11 @@ switch($_GET['action']) {
 				if (($istemplate&2)==2) {echo 'checked="checked"';};
 				echo ' /> Mark as group template course';
 			}
+			if ((($myspecialrights&2)==2 || $myrights==100) && $hassupergroup) {
+				echo '<br/><input type=checkbox name="issupergrptemplate" value="32" ';
+				if (($istemplate&32)==32) {echo 'checked="checked"';};
+				echo ' /> Mark as super-group template course';
+			}
 			if (($myspecialrights&2)==2 || $myrights==100) {
 				echo '<br/><input type=checkbox name="istemplate" value="1" ';
 				if (($istemplate&1)==1) {echo 'checked="checked"';};
@@ -821,7 +818,7 @@ switch($_GET['action']) {
 				} else if ($propvals['type']=='string') {
 					echo '<input type=text name="browser'.$propname.'" size=50 value="'.Sanitize::encodeStringForDisplay($browser[$propname]).'" />';
 				} else if ($propvals['type']=='textarea') {
-					echo '<textarea rows=6 cols=70 name=browser'.$propname.'>'.Sanitize::encodeStringForDisplay($browser[$propname]).'</textarea>';
+					echo '<textarea rows=6 cols=70 name=browser'.$propname.'>'.Sanitize::encodeStringForDisplay($browser[$propname], true).'</textarea>';
 				}
 				echo '</span><br class="form">';
 			}
@@ -875,9 +872,6 @@ switch($_GET['action']) {
 				$globalcourse = array();
 				$groupcourse = array();
 				$terms = array();
-				//DB $query = "SELECT id,name,copyrights,istemplate,termsurl FROM imas_courses WHERE (istemplate&1)=1 AND available<4 AND copyrights=2 ORDER BY name";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$stm = $DBH->query("SELECT id,name,copyrights,istemplate,termsurl FROM imas_courses WHERE (istemplate&1)=1 AND available<4 AND copyrights=2 ORDER BY name");
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 					$globalcourse[$row[0]] = $row[1];
@@ -885,10 +879,6 @@ switch($_GET['action']) {
 						$terms[$row[0]] = $row[4];
 					}
 				}
-				//DB $query = "SELECT ic.id,ic.name,ic.copyrights,ic.termsurl FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ";
-				//DB $query .= "iu.groupid='$groupid' AND (ic.istemplate&2)=2 AND ic.copyrights>0 AND ic.available<4 ORDER BY ic.name";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$query = "SELECT ic.id,ic.name,ic.copyrights,ic.termsurl FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id WHERE ";
 				$query .= "iu.groupid=:groupid AND (ic.istemplate&2)=2 AND ic.copyrights>0 AND ic.available<4 ORDER BY ic.name";
 				$stm = $DBH->prepare($query);
@@ -1001,9 +991,6 @@ switch($_GET['action']) {
 		echo "<h2>Modify LTI Domain Credentials</h2>\n";
 		echo '</div>';
 		echo "<table><tr><th>Domain</th><th>Key</th><th>Can create Instructors?</th><th>Modify</th><th>Delete</th></tr>\n";
-		//DB $query = "SELECT id,email,SID,rights FROM imas_users WHERE rights=11 OR rights=76 OR rights=77";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,email,SID,rights FROM imas_users WHERE rights=11 OR rights=76 OR rights=77");
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			printf("<tr><td>%s</td><td>%s</td>", Sanitize::encodeStringForDisplay($row[1]),
@@ -1033,9 +1020,6 @@ switch($_GET['action']) {
 		//echo "<option value=\"77\">Yes, with access via LMS only</option>
 		echo "</select><br/>\n";
 		echo 'Associate with group <select name="groupid"><option value="0">Default</option>';
-		//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -1066,9 +1050,6 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle">';
 		echo "<h2>Modify LTI Domain Credentials</h2>\n";
 		echo '</div>';
-		//DB $query = "SELECT id,email,SID,password,rights,groupid FROM imas_users WHERE id='{$_GET['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT id,email,SID,password,rights,groupid FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$row = $stm->fetch(PDO::FETCH_NUM);
@@ -1084,12 +1065,9 @@ switch($_GET['action']) {
 		if ($row[4]==76) {echo 'selected="selected"';}
 		echo ">Yes</option></select><br/>\n";
 		echo 'Associate with group <select name="groupid"><option value="0">Default</option>';
-		//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($r = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 		while ($r = $stm->fetch(PDO::FETCH_NUM)) {
-			printf('<option value="%d"', Sanitize::onlyInt($r[0]));
+			printf('<option value="%d"', $r[0]);
 			if ($r[0]==$row[5]) { echo ' selected="selected"';}
 			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
@@ -1148,9 +1126,6 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle">';
 		echo "<h2>Modify Federation Peer</h2>\n";
 		echo '</div>';
-		//DB $query = "SELECT id,email,SID,password,rights,groupid FROM imas_users WHERE id='{$_GET['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT id,peername,peerdescription,url,secret,lastpull FROM imas_federation_peers WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
@@ -1178,9 +1153,6 @@ switch($_GET['action']) {
 		if ($from=='admin2') {
 			echo '<tr class="even"><td><a href="admin2.php?groupdetails=0">'._('Default Group').'</a></td><td></td><td></td></tr>';
 		}
-		//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 		$alt = 1;
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -1226,10 +1198,7 @@ switch($_GET['action']) {
 	case "modgroup":
 		if ($myrights < 100) { echo "You don't have the authority for this action"; break;}
 		echo '<div id="headerforms" class="pagetitle"><h1>Rename Instructor Group</h1></div>';
-		//DB $query = "SELECT name,parent FROM imas_groups WHERE id='{$_GET['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB list($gpname,$parent) = mysql_fetch_row($result);
-		$stm = $DBH->prepare("SELECT name,parent,grouptype FROM imas_groups WHERE id=:id");
+		$stm = $DBH->prepare("SELECT name,parent FROM imas_groups WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		list($gpname,$parent,$grptype) = $stm->fetch(PDO::FETCH_NUM);
 
@@ -1240,9 +1209,6 @@ switch($_GET['action']) {
 		echo 'Parent: <select name="parentid"><option value="0" ';
 		if ($parent==0) { echo ' selected="selected"';}
 		echo '>None</option>';
-		//DB $query = "SELECT id,name FROM imas_groups ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($r = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 		while ($r = $stm->fetch(PDO::FETCH_NUM)) {
 			echo '<option value="'.Sanitize::encodeStringForDisplay($r[0]).'"';
@@ -1409,12 +1375,12 @@ function getGroupAssessmentAccessType($groupId) {
 			// If the student payment API doesn't know about this group, then
 			// there is no required access type. AKA: free assessments!
 			$currentAccessType = is_null($apiResult->getAccessType()) ?
-				\OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
+				StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
 				$apiResult->getAccessType();
 		} else {
-			$currentAccessType = \OHM\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
+			$currentAccessType = \OHM\Models\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
 		}
-	} catch (\OHM\StudentPaymentException $e) {
+	} catch (StudentPaymentException $e) {
 		// Don't allow failed API communication to break UX.
 		error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
 			Sanitize::onlyInt($_GET['id']), $e->getMessage()));
@@ -1432,8 +1398,9 @@ function getGroupAssessmentAccessType($groupId) {
 function renderAccessTypeSelector($currentAccessType) {
 	$validAccessTypes = array(
 		'not_required' => 'Not required',
-		'direct_pay' => 'Student pays directly',
-		'activation_code' => 'Student provides activation code'
+		'direct_pay' => 'Direct Pay - Student pays directly',
+		'activation_code' => 'Activation codes - Student enters an access code',
+		'multipay' => 'Multipay - Both methods'
 	);
 
 	echo "<label for='student_payment_type'>Student payments:</label>";
@@ -1450,7 +1417,7 @@ function renderAccessTypeSelector($currentAccessType) {
  * Create/Modify Course page.
  *
  * @param string $action One of "addcourse" or "modify"
- * @throws \OHM\StudentPaymentException
+ * @throws \OHM\Exceptions\StudentPaymentException
  */
 function renderCourseRequiresStudentPayment($action) {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
@@ -1486,7 +1453,7 @@ function renderCourseRequiresStudentPayment($action) {
 
 		$studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
 		$groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-		if ($groupRequiresPayment) {
+		if ($groupRequiresPayment && 'addcourse' != $action) {
 			$checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
 			echo '<span class=form>Assessments require payment or activation?</span><span class=formright>';
 			printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);

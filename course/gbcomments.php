@@ -53,7 +53,7 @@
 				$scorecol = $_POST['gradecol']-1;
 
 				// $_FILES[]['tmp_name'] is not user provided. This is safe.
-				$handle = fopen_utf8($_FILES['userfile']['tmp_name'],'r');
+				$handle = fopen_utf8(realpath($_FILES['userfile']['tmp_name']),'r');
 				if ($_POST['hashdr']==1) {
 					$data = fgetcsv($handle,4096,',');
 				} else if ($_POST['hashdr']==2) {
@@ -61,42 +61,33 @@
 					$data = fgetcsv($handle,4096,',');
 				}
 				while (($data = fgetcsv($handle, 4096, ",")) !== FALSE) {
-					//DB $query = "SELECT imas_users.id FROM imas_users,imas_students WHERE imas_users.id=imas_students.userid AND imas_students.courseid='$cid' AND ";
 					$query = "SELECT imas_users.id FROM imas_users,imas_students WHERE imas_users.id=imas_students.userid AND imas_students.courseid=:cid AND ";
 					$qarr = array(':cid'=>$cid);
 					if ($_POST['useridtype']==0) {
-						//DB $query .= "imas_users.SID='{$data[$usercol]}'";
 						$query .= "imas_users.SID=:SID";
-						$qarr[':SID'] = $data[$usercol];
+						$qarr[':SID'] = Sanitize::stripHtmlTags($data[$usercol]);
 					} else if ($_POST['useridtype']==1) {
 						list($last,$first) = explode(',',$data[$usercol]);
 						$first = str_replace(' ','',$first);
 						$last = str_replace(' ','',$last);
-						//DB $query .= "imas_users.FirstName='$first' AND imas_users.LastName='$last'";
 						$query .= "imas_users.FirstName=:first AND imas_users.LastName=:last";
-						$qarr[':first'] = $first;
-						$qarr[':last'] = $last;
+						$qarr[':first'] = Sanitize::stripHtmlTags($first);
+						$qarr[':last'] = Sanitize::stripHtmlTags($last);
 						//echo $query;
 					} else {
 						$query .= "0";
 					}
-					//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 					$stm = $DBH->prepare($query);
 					$stm->execute($qarr);
-					//DB if (mysql_num_rows($result)>0) {
-						//DB $cuserid=mysql_result($result,0,0);
 					if ($stm->rowCount()>0) {
 						$cuserid=$stm->fetchColumn(0);
 						if ($comtype=='stu') {
-							//DB $query = "UPDATE imas_students SET gbcomment='{$data[$scorecol]}' WHERE userid='$cuserid' AND courseid='$cid'";
 							$stm = $DBH->prepare("UPDATE imas_students SET gbcomment=:gbcomment WHERE userid=:userid AND courseid=:courseid");
-							$stm->execute(array(':gbcomment'=>$data[$scorecol], ':userid'=>$cuserid, ':courseid'=>$cid));
+							$stm->execute(array(':gbcomment'=>Sanitize::stripHtmlTags($data[$scorecol]), ':userid'=>$cuserid, ':courseid'=>$cid));
 						} else if ($comtype=='instr') {
-							//DB $query = "UPDATE imas_students SET gbinstrcomment='{$data[$scorecol]}' WHERE userid='$cuserid' AND courseid='$cid'";
 							$stm = $DBH->prepare("UPDATE imas_students SET gbinstrcomment=:gbinstrcomment WHERE userid=:userid AND courseid=:courseid");
-							$stm->execute(array(':gbinstrcomment'=>$data[$scorecol], ':userid'=>$cuserid, ':courseid'=>$cid));
+							$stm->execute(array(':gbinstrcomment'=>Sanitize::stripHtmlTags($data[$scorecol]), ':userid'=>$cuserid, ':courseid'=>$cid));
 						}
-						//DB mysql_query($query) or die("Query failed : " . mysql_error());
 						$successes++;
 					} else {
 						$failures[] = $data[$usercol];
@@ -106,7 +97,7 @@
 				echo "<p>Comments uploaded.". Sanitize::encodeStringForDisplay($successes) ."records.</p> ";
 				if (count($failures)>0) {
 					echo "<p>Comment upload failure on: <br/>";
-					echo implode('<br/>',$failures);
+					echo implode('<br/>', array_map('Sanitize::encodeStringForDisplay', $failures));
 					echo '</p>';
 				}
 				if ($successes>0) {
@@ -149,26 +140,21 @@
 	}
 
 	if (isset($_GET['record'])) {
-		//DB $query = "SELECT id FROM imas_students WHERE courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT id FROM imas_students WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			//if ($_POST[$row[0]]!='') {
+			$rowInfo = Sanitize::stripHtmlTags($_POST[$row[0]]);
 				if ($comtype=='stu') {
-					//DB $query = "UPDATE imas_students SET gbcomment='{$_POST[$row[0]]}' WHERE id='{$row[0]}'";
 					$stm2 = $DBH->prepare("UPDATE imas_students SET gbcomment=:gbcomment WHERE id=:id");
-					$stm2->execute(array(':gbcomment'=>$_POST[$row[0]], ':id'=>$row[0]));
+					$stm2->execute(array(':gbcomment'=>$rowInfo, ':id'=>$row[0]));
 				} else if ($comtype=='instr') {
-					//DB $query = "UPDATE imas_students SET gbinstrcomment='{$_POST[$row[0]]}' WHERE id='{$row[0]}'";
 					$stm2 = $DBH->prepare("UPDATE imas_students SET gbinstrcomment=:gbinstrcomment WHERE id=:id");
-					$stm2->execute(array(':gbinstrcomment'=>$_POST[$row[0]], ':id'=>$row[0]));
+					$stm2->execute(array(':gbinstrcomment'=>$rowInfo, ':id'=>$row[0]));
 				}
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			//}
 		}
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/gradebook.php?stu=".Sanitize::encodeUrlParam($_GET['stu'])."&gbmode=".Sanitize::encodeUrlParam($_GET['gbmode'])."&cid=$cid");
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/gradebook.php?stu=".Sanitize::encodeUrlParam($_GET['stu'])."&gbmode=".Sanitize::encodeUrlParam($_GET['gbmode'])."&cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
 		exit;
 	}
 
@@ -210,14 +196,11 @@
 	} else if ($comtype=='instr') {
 		$query = "SELECT i_s.id,iu.LastName,iu.FirstName,i_s.gbinstrcomment FROM imas_students AS i_s, imas_users as iu ";
 	}
-	//DB $query .= "WHERE i_s.userid=iu.id AND i_s.courseid='$cid' ORDER BY iu.LastName,iu.FirstName";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$query .= "WHERE i_s.userid=iu.id AND i_s.courseid=:courseid ORDER BY iu.LastName,iu.FirstName";
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':courseid'=>$cid));
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		echo "<span class=form>".Sanitize::encodeStringForDisplay($row[1]).", ". Sanitize::encodeStringForDisplay($row[2])."</span><span class=formright><textarea cols=50 rows=3 name=\"".Sanitize::encodeStringForDisplay($row[0])."\">".Sanitize::encodeStringForDisplay($row[3])."</textarea></span><br class=form>";
+		echo "<span class=form>".Sanitize::encodeStringForDisplay($row[1]).", ". Sanitize::encodeStringForDisplay($row[2])."</span><span class=formright><textarea cols=50 rows=3 name=\"".Sanitize::encodeStringForDisplay($row[0])."\">".Sanitize::encodeStringForDisplay($row[3], true)."</textarea></span><br class=form>";
 	}
 	echo '<div class="submit"><input type="submit" value="'._('Save Comments').'"/></div>';
 	echo "</form>";

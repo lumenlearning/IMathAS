@@ -1,78 +1,101 @@
 <?php
-//IMathAS:  show items function for main course page
-//(c) 2007 David Lippman
+// IMathAS: show items function for main course page
+// (c) 2007 David Lippman
+require_once ('../includes/loaditemshowdata.php');
+require_once ("../includes/exceptionfuncs.php");
 
-require_once('../includes/loaditemshowdata.php');
-require_once("../includes/exceptionfuncs.php");
-
-if (isset($studentid) && !isset($sessiondata['stuview'])) {
-	$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $studentinfo['latepasses'], $latepasshrs);
+if (isset ( $studentid ) && ! isset ( $sessiondata ['stuview'] )) {
+	$exceptionfuncs = new ExceptionFuncs ( $userid, $cid, true, $studentinfo ['latepasses'], $latepasshrs );
 } else {
-	$exceptionfuncs = new ExceptionFuncs($userid, $cid, false);
+	$exceptionfuncs = new ExceptionFuncs ( $userid, $cid, false );
 }
-function beginitem($canedit,$aname='') {
-	 if ($aname != '') {
-		 echo "<div class=\"item\" id=\"$aname\">\n";
-	 } else {
-	 	 echo "<div class=\"item\">\n";
-	 }
+function beginitem($canedit,$aname='',$greyed=false) {
+	if ($greyed) {
+		$class = "item itemgrey";
+	} else {
+		$class = "item";
+	}
+	if ($aname != '') {
+		 echo "<div class=\"$class\" id=\"$aname\">\n";
+	} else {
+	 	 echo "<div class=\"$class\">\n";
+	}
 }
 function enditem($canedit) {
 	echo '<div class="clear"></div>';
 	echo "</div>\n";
 }
 
-if (!isset($CFG['CPS']['itemicons'])) {
-  $itemicons = array('folder'=>'folder2.gif', 'foldertree'=>'folder_tree.png', 'assess'=>'assess.png',
-	'inline'=>'inline.png',	'web'=>'web.png', 'doc'=>'doc.png', 'wiki'=>'wiki.png',
-	'drill'=>'drill.png','html'=>'html.png', 'forum'=>'forum.png', 'pdf'=>'pdf.png',
-	'ppt'=>'ppt.png', 'zip'=>'zip.png', 'png'=>'image.png', 'xls'=>'xls.png',
-	'gif'=>'image.png', 'jpg'=>'image.png', 'bmp'=>'image.png',
-	'mp3'=>'sound.png', 'wav'=>'sound.png', 'wma'=>'sound.png',
-	'swf'=>'video.png', 'avi'=>'video.png', 'mpg'=>'video.png',
-	'nb'=>'mathnb.png', 'mws'=>'maple.png', 'mw'=>'maple.png');
+if (! isset ( $CFG ['CPS'] ['itemicons'] )) {
+	$itemicons = array (
+			'folder' => 'folder2.gif',
+			'foldertree' => 'folder_tree.png',
+			'assess' => 'assess.png',
+			'inline' => 'inline.png',
+			'web' => 'web.png',
+			'doc' => 'doc.png',
+			'wiki' => 'wiki.png',
+			'drill' => 'drill.png',
+			'html' => 'html.png',
+			'forum' => 'forum.png',
+			'pdf' => 'pdf.png',
+			'ppt' => 'ppt.png',
+			'zip' => 'zip.png',
+			'png' => 'image.png',
+			'xls' => 'xls.png',
+			'gif' => 'image.png',
+			'jpg' => 'image.png',
+			'bmp' => 'image.png',
+			'mp3' => 'sound.png',
+			'wav' => 'sound.png',
+			'wma' => 'sound.png',
+			'swf' => 'video.png',
+			'avi' => 'video.png',
+			'mpg' => 'video.png',
+			'nb' => 'mathnb.png',
+			'mws' => 'maple.png',
+			'mw' => 'maple.png' 
+	);
 } else {
-   $itemicons = $CFG['CPS']['itemicons'];
+	$itemicons = $CFG ['CPS'] ['itemicons'];
 }
 
 /*
-echo '<div class="itemhdr">';
-
-echo '<div class="itemhdricon">';
-echo '</div>';
-
-
-echo '</div>'; //itemhdr
-
-*/
-
-function getItemIcon($type, $alt, $faded=false) {
-	global $imasroot,$itemicons;
+ * echo '<div class="itemhdr">';
+ *
+ * echo '<div class="itemhdricon">';
+ * echo '</div>';
+ *
+ *
+ * echo '</div>'; //itemhdr
+ *
+ */
+function getItemIcon($type, $alt, $faded = false) {
+	global $imasroot, $itemicons;
 	$out = '<div class="itemhdricon">';
 	if ($faded) {
 		$class = 'class="faded"';
 	}
-	$out .= '<img alt="'.$alt.'" '.$class.' src="'.$imasroot.'/img/'.$itemicons[$type].'"/>';
+	$out .= '<img alt="' . $alt . '" ' . $class . ' src="' . $imasroot . '/img/' . $itemicons [$type] . '"/>';
 	$out .= '</div>';
 	return $out;
 }
-
 function getBlockDD($blocktype, $i, $parent, $bnum, $blockid) {
 	global $cid;
 	$out = '<div class="itemhdrdd dropdown">';
-	$out .= '<a tabindex=0 class="dropdown-toggle" id="dropdownMenu'.$i.'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+	$out .= '<a tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
 	$out .= ' <img src="../img/gearsdd.png" alt="Options" class="mida"/>';
 	$out .= '</a>';
-	$out .= '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu'.$i.'">';
-	if ($blocktype=='T') {
-		$out .= " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">" . _('Edit Contents') . "</a></li>";
-	} else if ($blocktype=='E') {
-		$out .= " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">" . _('Isolate') . "</a></li>";
+	$out .= '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
+	if ($blocktype == 'T') {
+		$out .= " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">" . _ ( 'Edit Contents' ) . "</a></li>";
+	} else if ($blocktype == 'E') {
+		$out .= " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">" . _ ( 'Isolate' ) . "</a></li>";
 	}
-	$out .= " <li><a href=\"addblock.php?cid=$cid&id=$parent-$bnum\">" . _('Modify') . "</a></li>";
-	$out .= " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$blockid}');\">" . _('Move') . '</a></li>';
-	$out .= " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">" . _('Delete') . "</a></li>";
-	$out .=  " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">" . _('Copy') . "</a></li>";
+	$out .= " <li><a href=\"addblock.php?cid=$cid&id=$parent-$bnum\">" . _ ( 'Modify' ) . "</a></li>";
+	$out .= " <li><a href=\"#\" onclick=\"return moveDialog('$parent','B{$blockid}');\">" . _ ( 'Move' ) . '</a></li>';
+	$out .= " <li><a href=\"deleteblock.php?cid=$cid&id=$parent-$bnum&remove=ask\">" . _ ( 'Delete' ) . "</a></li>";
+	$out .= " <li><a href=\"copyoneitem.php?cid=$cid&copyid=$parent-$bnum\">" . _('Copy') . "</a></li>";
 	$out .= " <li><a href=\"course.php?cid=$cid&togglenewflag=$parent-$bnum\">" . _('Toggle NewFlag') . "</a></li>";
 	$out .= '</ul>';
 	$out .= '</div>';
@@ -145,7 +168,7 @@ function getWikiDD($i, $typeid, $parent, $itemid) {
 
 
 $itemshowdata = null;
-function showitems($items,$parent,$inpublic=false) {
+function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 	   global $DBH,$teacherid,$tutorid,$studentid,$cid,$imasroot,$userid,$openblocks,$firstload,$sessiondata,$myrights,$courseenddate;
 	   global $itemicons,$exceptions,$latepasses,$ispublic,$studentinfo,$newpostcnts,$CFG,$latepasshrs,$toolset,$readlinkeditems;
 	   global $itemshowdata, $exceptionfuncs;
@@ -191,7 +214,6 @@ function showitems($items,$parent,$inpublic=false) {
 					continue;
 				}
 			}
-			//DB $items[$i]['name'] = stripslashes($items[$i]['name']);;
 			if ($canedit) {
 				//echo generatemoveselect($i,count($items),$parent,$blocklist);
 			}
@@ -217,6 +239,12 @@ function showitems($items,$parent,$inpublic=false) {
 			} else {
 				$availbeh = _('Collapsed');
 			}
+			if (strlen($items[$i]['SH'])>2) {
+				$contentbehavior = $items[$i]['SH'][2];
+			} else {
+				$contentbehavior = 0;
+			}
+			
 			if ($items[$i]['colors']=='') {
 				$titlebg = '';
 			} else {
@@ -225,6 +253,7 @@ function showitems($items,$parent,$inpublic=false) {
 			if (!isset($items[$i]['avail'])) { //backwards compat
 				$items[$i]['avail'] = 1;
 			}
+			
 			if ($items[$i]['avail']==2 || ($items[$i]['avail']==1 && $items[$i]['startdate']<$now && $items[$i]['enddate']>$now)) { //if "available"
 				if ($firstload && (strlen($items[$i]['SH'])==1 || $items[$i]['SH'][1]=='O')) {
 					echo "<script> oblist = oblist + ',".$items[$i]['id']."';</script>\n";
@@ -398,7 +427,7 @@ function showitems($items,$parent,$inpublic=false) {
 					echo "id=\"block{$items[$i]['id']}\">";
 					if ($isopen) {
 						//if (isset($teacherid)) {echo generateadditem($parent.'-'.$bnum,'t');}
-						showitems($items[$i]['items'],$parent.'-'.$bnum,$inpublic||$turnonpublic);
+						showitems($items[$i]['items'],$parent.'-'.$bnum,$inpublic||$turnonpublic, $contentbehavior);
 						//if (isset($teacherid) && count($items[$i]['items'])>0) {echo generateadditem($parent.'-'.$bnum,'b');}
 					} else {
 						echo _('Loading content...');
@@ -582,7 +611,7 @@ function showitems($items,$parent,$inpublic=false) {
 					echo "id=\"block{$items[$i]['id']}\">";
 					if ($isopen) {
 						//if (isset($teacherid)) {echo generateadditem($parent.'-'.$bnum,'t');}
-						showitems($items[$i]['items'],$parent.'-'.$bnum,$inpublic||$turnonpublic);
+						showitems($items[$i]['items'],$parent.'-'.$bnum,$inpublic||$turnonpublic, $contentbehavior);
 
 						//if (isset($teacherid) && count($items[$i]['items'])>0) {echo generateadditem($parent.'-'.$bnum,'b');}
 					} else {
@@ -598,7 +627,7 @@ function showitems($items,$parent,$inpublic=false) {
 		   }
 
 		   $line = $itemshowdata[$items[$i]];
-		   $typeid = $line['id'];
+		   $typeid = Sanitize::onlyInt($line['id']);
 
 		   if ($line['itemtype']=="Calendar") {
 			   if ($ispublic) { continue;}
@@ -683,15 +712,11 @@ function showitems($items,$parent,$inpublic=false) {
 			   	   if ($line['reqscore']<0 || $line['reqscoretype']&1) {
 			   	   	   $showgreyedout = true;
 			   	   }
-				   //DB $query = "SELECT bestscores FROM imas_assessment_sessions WHERE assessmentid='{$line['reqscoreaid']}' AND userid='$userid'";
-				   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				   //DB if (mysql_num_rows($result)==0) {
 				   $stm = $DBH->prepare("SELECT bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid AND userid=:userid");
 				   $stm->execute(array(':assessmentid'=>$line['reqscoreaid'], ':userid'=>$userid));
 				   if ($stm->rowCount()==0) {
 					   $nothidden = false;
 				   } else {
-					   //DB $scores = explode(';',mysql_result($result,0,0));
 					   $scores = explode(';',$stm->fetchColumn(0));
 					   if ($line['reqscoretype']&2) { //using percent-based
 					   	   if (round(100*getpts($scores[0])/$line['reqscoreptsposs'],1)+.02<abs($line['reqscore'])) {
@@ -861,6 +886,26 @@ function showitems($items,$parent,$inpublic=false) {
 				   echo filter("<div class=\"itemsum grey\">{$line['summary']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
 
+			   } else if (!$viewall && $line['avail']>0 && (($greyitems&1 && $now<$line['startdate']) || ($greyitems&2 && $now>$line['enddate']))) { //show greyed
+			   	   
+			   	   if ($now<$line['startdate']) {
+			   	   	   $show = sprintf(_('Will be available starting %1$s'), $startdate);
+			   	   } else {
+			   	   	   $show = sprintf(_('This assessment was due %1$s'), $enddate);
+			   	   }
+			   	   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
+				   echo '<div class="itemhdr">';
+				   echo getItemIcon('assess', 'assessment', true);
+				   echo "<div class=\"title grey\"><i>".Sanitize::encodeStringForDisplay($line['name'])."</i>";
+				   echo "<br/><i>$show</i>\n";
+				   echo '</div>'; //title
+				   if ($canedit) {
+				   	echo getAssessDD($i, $typeid, $parent, $items[$i]);
+				   }
+				   echo '</div>'; //itemhdr
+				   echo filter("<div class=\"itemsum grey\">{$line['summary']}</div>\n");
+				   enditem($canedit);
+				    				 		
 			   } else if ($viewall) { //not avail to stu
 				   if ($line['avail']==0) {
 				   	$show = _('Hidden');
@@ -998,16 +1043,12 @@ function showitems($items,$parent,$inpublic=false) {
 				   }
 
 				   echo filter("<div class=itemsum>{$line['text']}\n");
-				   //DB $query = "SELECT id,description,filename FROM imas_instr_files WHERE itemid='$typeid'";
-				   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				   //DB if (mysql_num_rows($result)>0) {
 				   $stm = $DBH->prepare("SELECT id,description,filename FROM imas_instr_files WHERE itemid=:itemid");
 				   $stm->execute(array(':itemid'=>$typeid));
 				   if ($stm->rowCount()>0) {
 					   echo '<ul class="fileattachlist">';
 					   $filenames = array();
 					   $filedescr = array();
-					   //DB while ($row = mysql_fetch_row($result)) {
 					   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 						   $filenames[$row[0]] = $row[2];
 						   $filedescr[$row[0]] = $row[1];
@@ -1051,16 +1092,12 @@ function showitems($items,$parent,$inpublic=false) {
 				   }
 
 				   echo filter("<div class=itemsum>{$line['text']}\n");
-				   //DB $query = "SELECT id,description,filename FROM imas_instr_files WHERE itemid='$typeid'";
-				   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				   //DB if (mysql_num_rows($result)>0) {
 				   $stm = $DBH->prepare("SELECT id,description,filename FROM imas_instr_files WHERE itemid=:itemid");
 				   $stm->execute(array(':itemid'=>$typeid));
 				   if ($stm->rowCount()>0) {
 					   echo '<ul class="fileattachlist">';
 					   $filenames = array();
 					   $filedescr = array();
-					   //DB while ($row = mysql_fetch_row($result)) {
 					   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 						   $filenames[$row[0]] = $row[2];
 						   $filedescr[$row[0]] = $row[1];
@@ -1127,6 +1164,34 @@ function showitems($items,$parent,$inpublic=false) {
 				   echo '</div>'; //itemhdr
 				   echo filter("<div class=itemsum>{$line['summary']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
+			   } else if (!$viewall && $line['avail']>0 && (($greyitems&1 && $now<$line['startdate']) || ($greyitems&2 && $now>$line['enddate']))) { //show greyed
+			   	   
+			   	   if ($now<$line['startdate']) {
+			   	   	   $show = sprintf(_('Will be available starting %1$s'), $startdate);
+			   	   } else {
+			   	   	   $show = sprintf(_('This item was available until %1$s'), $enddate);
+			   	   }
+			   	   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
+				   echo '<div class="itemhdr">';
+				   echo getItemIcon('drill', 'Drill', true);
+
+				   echo "<div class=\"title grey\">";
+				   echo "<i>".Sanitize::encodeStringForDisplay($line['name'])."</i>\n";
+				   if ($viewall) {
+					   echo '<span class="instrdates">';
+					   echo "<br/>$show ";
+					   echo '</span>';
+				   } else if ($line['enddate']!=2000000000) {
+					   echo "<br/>$show";
+				   }
+
+				   echo '</div>'; //title
+				   if ($canedit) {
+				   	   echo getDrillDD($i, $typeid, $parent, $items[$i]);
+				   }
+				   echo '</div>'; //itemhdr
+				   enditem($canedit); //echo "</div>\n";
+			   	   
 			   } else if ($viewall) {
 				   if ($line['avail']==0) {
 					   $show = _('Hidden');
@@ -1371,11 +1436,73 @@ function showitems($items,$parent,$inpublic=false) {
 				   echo '</div>'; //itemhdr
 				   echo filter("<div class=itemsum>{$line['description']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
+			   } else if (!$viewall && $line['avail']==1 && (($greyitems&1 && $now<$line['startdate']) || ($greyitems&2 && $now>$line['enddate'])) &&
+			   	   (($line['postby']!=2000000000 && $line['postby']!=0) || $line['replyby']!=2000000000 && $line['replyby']!=0)) { //show greyed
+			   	   
+			   	   if ($now<$line['startdate']) {
+			   	   	   $show = sprintf(_('Will be available starting %1$s'), $startdate);
+			   	   } else {
+			   	   	   $show = sprintf(_('This forum closed %1$s'), $enddate);
+			   	   }
+			   	   $duedates = "";
+			   	   if ($line['postby']!=2000000000 && $line['postby']!=0) {
+				   	   if ($line['postby']>$now) {
+					   	$duedates .= sprintf(_('New Threads will be due %s. '), formatdate($line['postby']));
+					   } else {
+					   	$duedates .= sprintf(_('New Threads were due %s. '), formatdate($line['postby']));
+					   }
+				   }
+				   if ($line['replyby']!=2000000000 && $line['replyby']!=0) {
+				   	   if ($line['replyby']>$now) {
+				   	   	   $duedates .= sprintf(_('Replies will be due %s. '), formatdate($line['replyby']));
+				   	   } else {
+				   	   	   $duedates .= sprintf(_('Replies were due %s. '), formatdate($line['replyby']));
+				   	   }
+				   }
+				   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
+				   echo '<div class="itemhdr">';
+				   echo getItemIcon('forum', 'forum', true);
+				   echo "<div class=\"title grey\"><i>".Sanitize::encodeStringForDisplay($line['name'])."</i>";
+				   echo "<br/><i>$show</i>\n";
+				   echo "<br/><i>$duedates</i>\n";
+				   if (!$canedit) {
+				   	if ($canuselatepassP || $canuselatepassR) {
+				   		echo " <a href=\"redeemlatepassforum.php?cid=$cid&fid=$typeid\">", _('Use LatePass'), "</a>";
+				   		if ($canundolatepass) {
+				   			echo ' |';
+				   		}
+				   	}
+				   	if ($canundolatepass) {
+				   		echo " <a href=\"redeemlatepassforum.php?cid=$cid&fid=$typeid&undo=true\">", _('Un-use LatePass'), "</a>";
+				   	}
+				   }
+				   echo '</div>'; //title
+				   if ($canedit) {
+				   	echo getForumDD($i, $typeid, $parent, $items[$i]);
+				   }
+				   echo '</div>'; //itemhdr
+				   echo filter("<div class=\"itemsum grey\">{$line['description']}</div>\n");
+				   enditem($canedit);
 			   } else if ($viewall) {
 				   if ($line['avail']==0) {
 					   $show = _('Hidden');
 				   } else {
 					   $show = sprintf(_('Showing %1$s until %2$s'), $startdate, $enddate);
+				   }
+				   $duedates = "";
+				   if ($line['postby']!=2000000000 && $line['postby']!=0) {
+				   	   if ($line['postby']>$now) {
+					   	$duedates .= sprintf(_('New Threads due %s. '), formatdate($line['postby']));
+					   } else {
+					   	$duedates .= sprintf(_('New Threads were due %s. '), formatdate($line['postby']));
+					   }
+				   }
+				   if ($line['replyby']!=2000000000 && $line['replyby']!=0) {
+				   	   if ($line['replyby']>$now) {
+				   	   	   $duedates .= sprintf(_('Replies due %s. '), formatdate($line['replyby']));
+				   	   } else {
+				   	   	   $duedates .= sprintf(_('Replies were due %s. '), formatdate($line['replyby']));
+				   	   }
 				   }
 				   beginitem($canedit,$items[$i]); //echo "<div class=item>\n";
 				   echo '<div class="itemhdr">';
@@ -1388,6 +1515,9 @@ function showitems($items,$parent,$inpublic=false) {
 				   }
 				   echo '<span class="instrdates">';
 				   echo "<br/><i>$show </i>";
+				   if ($duedates != '') {
+				   	   echo "<br/><i>$duedates </i>";
+				   }
 				   echo '</span>';
 
 				   if ($canedit) {
@@ -1427,11 +1557,6 @@ function showitems($items,$parent,$inpublic=false) {
 			   $hasnew = false;
 			   if ($viewall || $line['avail']==2 || ($line['avail']==1 && $line['startdate']<$now && $line['enddate']>$now)) {
 		   	   if ($line['groupsetid']>0 && !$canedit) {
-		   	   	   //DB $query = 'SELECT i_sg.id,i_sg.name FROM imas_stugroups AS i_sg JOIN imas_stugroupmembers as i_sgm ON i_sgm.stugroupid=i_sg.id ';
-		   	   	   //DB $query .= "WHERE i_sgm.userid='$userid' AND i_sg.groupsetid='{$line['groupsetid']}'";
-		   	   	   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   	   	   //DB if (mysql_num_rows($result)>0) {
-		   	   	   	   //DB $wikigroupid = mysql_result($result,0,0);
 		   	   	   $query = 'SELECT i_sg.id,i_sg.name FROM imas_stugroups AS i_sg JOIN imas_stugroupmembers as i_sgm ON i_sgm.stugroupid=i_sg.id ';
 		   	   	   $query .= "WHERE i_sgm.userid=:userid AND i_sg.groupsetid=:groupsetid";
 		   	   	   $stm = $DBH->prepare($query);
@@ -1443,21 +1568,11 @@ function showitems($items,$parent,$inpublic=false) {
 		   	   	   }
 		   	   }
 		   	   $wikilastviews = array();
-		   	   //DB $query = "SELECT stugroupid,lastview FROM imas_wiki_views WHERE userid='$userid' AND wikiid='$typeid'";
-		   	   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				   //DB while ($row = mysql_fetch_row($result)) {
 		   	   $stm = $DBH->prepare("SELECT stugroupid,lastview FROM imas_wiki_views WHERE userid=:userid AND wikiid=:wikiid");
 		   	   $stm->execute(array(':userid'=>$userid, ':wikiid'=>$typeid));
 				   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				   	   $wikilastviews[$row[0]] = $row[1];
 				   }
-
-				   //DB $query = "SELECT stugroupid,MAX(time) FROM imas_wiki_revisions WHERE wikiid='$typeid' ";
-				   //DB if ($line['groupsetid']>0 && !$canedit) {
-				   	   //DB $query .= "AND stugroupid='$wikigroupid' ";
-				   //DB }
-				   //DB $query .= "GROUP BY stugroupid";
-				   //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 				   $query = "SELECT stugroupid,MAX(time) FROM imas_wiki_revisions WHERE wikiid=:wikiid ";
 				   if ($line['groupsetid']>0 && !$canedit) {
 						 $query .= "AND stugroupid=:stugroupid ";
@@ -1469,7 +1584,6 @@ function showitems($items,$parent,$inpublic=false) {
 				   } else {
 						 $stm->execute(array(':wikiid'=>$typeid));
 					 }
-				   //DB while ($row = mysql_fetch_row($result)) {
 				   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				   	   if (!isset($wikilastviews[$row[0]]) || $wikilastviews[$row[0]] < $row[1]) {
 				   	   	   $hasnew = true;
@@ -1557,6 +1671,7 @@ function showitems($items,$parent,$inpublic=false) {
 
    function generateadditem($blk,$tb) {
    	global $cid, $CFG,$imasroot;
+   	
    	if (isset($CFG['CPS']['additemtype']) && $CFG['CPS']['additemtype'][0]=='links') {
    		if ($tb=='BB' || $tb=='LB') {$tb = 'b';}
    		if ($tb=='t' && $blk=='0') {
@@ -1566,7 +1681,7 @@ function showitems($items,$parent,$inpublic=false) {
    		} else {
    			$html = '<div class="additembox"><span><b>' . _('Add here:') . '</b> ';
    		}
-
+		
    		$blkUrlParam = Sanitize::encodeUrlParam($blk);
    		$tbUrlParam = Sanitize::encodeUrlParam($tb);
 
@@ -1728,63 +1843,41 @@ function showitems($items,$parent,$inpublic=false) {
 	   if (!is_array($openblocks)) {$openblocks = array();}
 	   if ($parent=='0') {
 		   $itemtypes = array();  $iteminfo = array();
-		   //DB $query = "SELECT id,itemtype,typeid FROM imas_items WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,itemtype,typeid FROM imas_items WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			   $itemtypes[$row[0]] = array($row[1],$row[2]);
 		   }
-		   //DB $query = "SELECT id,name,startdate,enddate,reviewdate,avail FROM imas_assessments WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,name,startdate,enddate,reviewdate,avail FROM imas_assessments WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			   $id = array_shift($row);
 			   $iteminfo['Assessment'][$id] = $row;
 		   }
-		   //DB $query = "SELECT id,title,text,startdate,enddate,avail FROM imas_inlinetext WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,title,text,startdate,enddate,avail FROM imas_inlinetext WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			   $id = array_shift($row);
 			   $iteminfo['InlineText'][$id] = $row;
 		   }
-		   //DB $query = "SELECT id,title,startdate,enddate,avail FROM imas_linkedtext WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,title,startdate,enddate,avail FROM imas_linkedtext WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			   $id = array_shift($row);
 			   $iteminfo['LinkedText'][$id] = $row;
 		   }
-		   //DB $query = "SELECT id,name,startdate,enddate,avail FROM imas_forums WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,name,startdate,enddate,avail FROM imas_forums WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			   $id = array_shift($row);
 			   $iteminfo['Forum'][$id] = $row;
 		   }
-
-		   //DB $query = "SELECT id,name,startdate,enddate,avail FROM imas_wikis WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,name,startdate,enddate,avail FROM imas_wikis WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			   $id = array_shift($row);
 			   $iteminfo['Wiki'][$id] = $row;
 		   }
-		   //DB $query = "SELECT id,name,startdate,enddate,avail FROM imas_drillassess WHERE courseid='$cid'";
-		   //DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
-		   //DB while ($row = mysql_fetch_row($result)) {
 		   $stm = $DBH->prepare("SELECT id,name,startdate,enddate,avail FROM imas_drillassess WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -1795,7 +1888,6 @@ function showitems($items,$parent,$inpublic=false) {
 	   $now = time();
 	   for ($i=0;$i<count($items); $i++) {
 		   if (is_array($items[$i])) { //is a block
-			//DB $items[$i]['name'] = stripslashes($items[$i]['name']);
 			$items[$i]['name'] = $items[$i]['name'];
 
 			if ($items[$i]['startdate']==0) {
@@ -1863,7 +1955,7 @@ function showitems($items,$parent,$inpublic=false) {
 			}
 			if (count($items[$i]['items'])>0) {
 				echo '<ul class=qview '.$qviewstyle.'>';
-				quickview($items[$i]['items'],$parent.'-'.$bnum,$showdats,$showlinks);
+				quickview($items[$i]['items'],$parent.'-'.$bnum,$showdates,$showlinks);
 				echo '</ul>';
 			}
 			echo '</li>';
@@ -1876,7 +1968,7 @@ function showitems($items,$parent,$inpublic=false) {
 			echo '<li id="' . Sanitize::encodeStringForDisplay($items[$i]) . '">'.$icon.'Calendar</li>';
 
 	   	   } else if ($itemtypes[$items[$i]][0] == 'Assessment') {
-			   $typeid = $itemtypes[$items[$i]][1];
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   list($line['name'],$line['startdate'],$line['enddate'],$line['reviewdate'],$line['avail']) = $iteminfo['Assessment'][$typeid];
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -1908,12 +2000,12 @@ function showitems($items,$parent,$inpublic=false) {
 			echo '<li id="' . Sanitize::encodeStringForDisplay($items[$i]) . '">'.$icon;
 			   if ($line['avail']==1 && $line['startdate']<$now && $line['enddate']>$now) {
 				   $show = sprintf(_('Available until %s'), $enddate);
-				   echo '<b><span id="A' . Sanitize::encodeStringForDisplay($typeid) . '" onclick="editinplace(this)">'.Sanitize::encodeStringForDisplay($line['name']). "</span></b>";
+				   echo '<b><span id="A' . $typeid . '" onclick="editinplace(this)">'.Sanitize::encodeStringForDisplay($line['name']). "</span></b>";
 				   //echo '<b>'.$line['name'].'</b> ';
 			   } else if ($line['avail']==1 && $line['startdate']<$now && $line['reviewdate']>$now) {
 				   $show = sprintf(_('Review until %s'), $reviewdate);
 				   //echo '<b>'.$line['name'].'</b> ';
-				   echo '<b><span id="A' . Sanitize::encodeStringForDisplay($typeid) . '" onclick="editinplace(this)">'.Sanitize::encodeStringForDisplay($line['name']). "</span></b>";
+				   echo '<b><span id="A' . $typeid . '" onclick="editinplace(this)">'.Sanitize::encodeStringForDisplay($line['name']). "</span></b>";
 			   } else {
 				   $show = sprintf(_('Available %1$s to %2$s'), $startdate, $enddate);
 				   if ($line['reviewdate']>0 && $line['enddate']!=2000000000) {
@@ -1927,16 +2019,16 @@ function showitems($items,$parent,$inpublic=false) {
 			   }
 			   if ($showlinks) {
 				   echo '<span class="links">';
-				    echo " <a href=\"addquestions.php?aid=$typeid&cid=$cid\">", _('Questions'), "</a> | <a href=\"addassessment.php?id=$typeid&cid=$cid\">", _('Settings'), "</a> | \n";
-				   echo "<a href=\"deleteassessment.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
+				   echo " <a href=\"addquestions.php?aid=" . Sanitize::onlyInt($typeid) . "&cid=$cid\">", _('Questions'), "</a> | <a href=\"addassessment.php?id=" . Sanitize::onlyInt($typeid) . "&cid=$cid\">", _('Settings'), "</a> | \n";
+				   echo "<a href=\"deleteassessment.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
 				   echo " | <a href=\"copyoneitem.php?cid=$cid&copyid=" . Sanitize::encodeUrlParam($items[$i]) . "\">", _('Copy'), "</a>";
-				   echo " | <a href=\"gb-itemanalysis.php?cid=$cid&asid=average&aid=$typeid\">", _('Grades'), "</a>";
+				   echo " | <a href=\"gb-itemanalysis.php?cid=$cid&asid=average&aid=" . Sanitize::onlyInt($typeid) . "\">", _('Grades'), "</a>";
 				   echo '</span>';
 			   }
 			   echo "</li>";
 
 		   } else if ($itemtypes[$items[$i]][0] == 'InlineText') {
-			   $typeid = $itemtypes[$items[$i]][1];
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   list($line['name'],$line['text'],$line['startdate'],$line['enddate'],$line['avail']) = $iteminfo['InlineText'][$typeid];
 			   if ($line['name'] == '##hidden##') {
 				   $line['name'] = strip_tags($line['text']);
@@ -1979,14 +2071,14 @@ function showitems($items,$parent,$inpublic=false) {
 			   }
 			   if ($showlinks) {
 				   echo '<span class="links">';
-				   echo " <a href=\"addinlinetext.php?id=$typeid&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
-				  echo "<a href=\"deleteinlinetext.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
+				   echo " <a href=\"addinlinetext.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
+				   echo "<a href=\"deleteinlinetext.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
 				  echo " | <a href=\"copyoneitem.php?cid=$cid&copyid=" . Sanitize::encodeUrlParam($items[$i]) . "\">", _('Copy'), "</a>";
 				  echo '</span>';
 			   }
 			   echo '</li>';
 		   } else if ($itemtypes[$items[$i]][0] == 'LinkedText') {
-			   $typeid = $itemtypes[$items[$i]][1];
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   list($line['name'],$line['startdate'],$line['enddate'],$line['avail']) = $iteminfo['LinkedText'][$typeid];
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -2026,14 +2118,14 @@ function showitems($items,$parent,$inpublic=false) {
 			   }
 			   if ($showlinks) {
 				   echo '<span class="links">';
-				   echo " <a href=\"addlinkedtext.php?id=$typeid&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
-				  echo "<a href=\"deletelinkedtext.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
+				   echo " <a href=\"addlinkedtext.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
+				   echo "<a href=\"deletelinkedtext.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
 				  echo " | <a href=\"copyoneitem.php?cid=$cid&copyid=" . Sanitize::encodeUrlParam($items[$i]) . "\">", _('Copy'), "</a>";
 				  echo '</span>';
 			   }
 			   echo '</li>';
 		   } else if ($itemtypes[$items[$i]][0] == 'Forum') {
-			   $typeid = $itemtypes[$items[$i]][1];
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   list($line['name'],$line['startdate'],$line['enddate'],$line['avail']) = $iteminfo['Forum'][$typeid];
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -2073,14 +2165,14 @@ function showitems($items,$parent,$inpublic=false) {
 			   }
 			   if ($showlinks) {
 				   echo '<span class="links">';
-				   echo " <a href=\"addforum.php?id=$typeid&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
-				  echo "<a href=\"deleteforum.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
+				   echo " <a href=\"addforum.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
+				   echo "<a href=\"deleteforum.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
 				  echo " | <a href=\"copyoneitem.php?cid=$cid&copyid=" . Sanitize::encodeUrlParam($items[$i]) . "\">", _('Copy'), "</a>";
 				  echo '</span>';
 			   }
 			   echo '</li>';
 		   } else if ($itemtypes[$items[$i]][0] == 'Wiki') {
-			   $typeid = $itemtypes[$items[$i]][1];
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   list($line['name'],$line['startdate'],$line['enddate'],$line['avail']) = $iteminfo['Wiki'][$typeid];
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -2120,14 +2212,14 @@ function showitems($items,$parent,$inpublic=false) {
 			   }
 			   if ($showlinks) {
 				   echo '<span class="links">';
-				   echo " <a href=\"addwiki.php?id=$typeid&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
-				  echo "<a href=\"deletewiki.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
+				   echo " <a href=\"addwiki.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
+				   echo "<a href=\"deletewiki.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
 				  echo " | <a href=\"copyoneitem.php?cid=$cid&copyid=" . Sanitize::encodeUrlParam($items[$i]) . "\">", _('Copy'), "</a>";
 				  echo '</span>';
 			   }
 			   echo '</li>';
 		   } else if ($itemtypes[$items[$i]][0] == 'Drill') {
-			   $typeid = $itemtypes[$items[$i]][1];
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   list($line['name'],$line['startdate'],$line['enddate'],$line['avail']) = $iteminfo['Drill'][$typeid];
 			   if ($line['startdate']==0) {
 				   $startdate = _('Always');
@@ -2167,10 +2259,10 @@ function showitems($items,$parent,$inpublic=false) {
 			   }
 			   if ($showlinks) {
 				   echo ' <span class="links">';
-				   echo "<a href=\"adddrillassess.php?daid=$typeid&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
-				   echo "<a href=\"deletedrillassess.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
+				   echo "<a href=\"adddrillassess.php?daid=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid\">", _('Modify'), "</a> | \n";
+				   echo "<a href=\"deletedrillassess.php?id=" . Sanitize::onlyInt($typeid) . "&block=$parent&cid=$cid&remove=ask\">", _('Delete'), "</a>\n";
 				   echo " | <a href=\"copyoneitem.php?cid=$cid&copyid=" . Sanitize::encodeUrlParam($items[$i]) . "\">", _('Copy'), "</a>";
-				   echo " | <a href=\"gb-viewdrill.php?cid=$cid&daid=$typeid\">", _('Scores'), "</a>";
+				   echo " | <a href=\"gb-viewdrill.php?cid=$cid&daid=" . Sanitize::onlyInt($typeid) . "\">", _('Scores'), "</a>";
 				  echo '</span>';
 			   }
 			   echo '</li>';

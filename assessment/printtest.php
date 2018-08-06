@@ -5,7 +5,7 @@
 		echo "<html><body>Error. </body></html>\n";
 		exit;
 	}
-	if (isset($teacherid) && isset($_GET['scored'])) {
+	if ($isteacher && isset($_GET['scored'])) {
 		$scoredtype = $_GET['scored'];
 		$scoredview = true;
 		$showcolormark = true;
@@ -27,39 +27,40 @@
 	$sessiondata['coursetheme'] = $coursetheme;
 	require("header.php");
 	echo "<style type=\"text/css\" media=\"print\">.hideonprint {display:none;} p.tips {display: none;}\n input.btn, button.btn {display: none;}\n textarea {display: none;}\n input.sabtn {display: none;} .question, .review {background-color:#fff;}</style>\n";
-	echo "<style type=\"text/css\">p.tips {	display: none;}\n </style>\n";
-	echo '<script type="text/javascript">function rendersa() { ';
-	echo '  el = document.getElementsByTagName("span"); ';
-	echo '   for (var i=0;i<el.length;i++) {';
-	echo '     if (el[i].className=="hidden") { ';
-	echo '         el[i].className = "shown";';
-	//echo '		 AMprocessNode(el)';
-	echo '     }';
-	echo '    }';
-	echo '}';
-	echo '
-			var introshowing = true;
-			function toggleintros() {
-				if (introshowing) {
-					$(".intro").slideUp();
-					$("#introtoggle").text("'._('Show Intro and Between-Question Text').'");
-				} else {
-					$(".intro").slideDown();
-					$("#introtoggle").text("'._('Hide Intro and Between-Question Text').'");
-				}
-				introshowing = !introshowing;
+	echo "<style type=\"text/css\">p.tips {	display: none;} input.sabtn { display: none;}</style>\n";
+	echo '<script type="text/javascript">
+		function rendersa() { 
+			$(".sabtn + span").prepend("<span>Answer: </span>").removeClass("hidden");
+		}
+		var introshowing = true;
+		function toggleintros() {
+			if (introshowing) {
+				$(".intro").slideUp();
+				$("#introtoggle").text("'._('Show Intro and Between-Question Text').'");
+			} else {
+				$(".intro").slideDown();
+				$("#introtoggle").text("'._('Hide Intro and Between-Question Text').'");
 			}
-			</script>';
+			introshowing = !introshowing;
+		}
+		var qshowing = true;
+		function toggleqs() {
+			if (qshowing) {
+				$(".printqwrap").slideUp();
+				$("#qtoggle").text("'._('Show Questions').'");
+			} else {
+				$(".printqwrap").slideDown();
+				$("#qtoggle").text("'._('Hide Questions').'");
+			}
+			qshowing = !qshowing;
+		}
+		</script>';
 
 	if ($isteacher && isset($_GET['asid'])) {
 		$testid = Sanitize::onlyInt($_GET['asid']);
 	} else {
-		//DB $testid = addslashes($sessiondata['sessiontestid']);
 		$testid = $sessiondata['sessiontestid'];
 	}
-	//DB $query = "SELECT * FROM imas_assessment_sessions WHERE id='$testid'";
-	//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	$stm = $DBH->prepare("SELECT * FROM imas_assessment_sessions WHERE id=:id");
 	$stm->execute(array(':id'=>$testid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -93,9 +94,6 @@
 
 	if ($isteacher) {
 		if ($line['userid']!=$userid) {
-			//DB $query = "SELECT LastName,FirstName FROM imas_users WHERE id='{$line['userid']}'";
-			//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-			//DB $row = mysql_fetch_row($result);
 			$stm = $DBH->prepare("SELECT LastName,FirstName FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$line['userid']));
 			$row = $stm->fetch(PDO::FETCH_NUM);
@@ -103,10 +101,6 @@
 		}
 		$userid= $line['userid'];
 	}
-
-	//DB $query = "SELECT * FROM imas_assessments WHERE id='{$line['assessmentid']}'";
-	//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-	//DB $testsettings = mysql_fetch_array($result, MYSQL_ASSOC);
 	$stm = $DBH->prepare("SELECT * FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$line['assessmentid']));
 	$testsettings = $stm->fetch(PDO::FETCH_ASSOC);
@@ -115,9 +109,6 @@
 	$now = time();
 	$isreview = false;
 	if (!$scoredview && ($now < $testsettings['startdate'] || $testsettings['enddate']<$now)) { //outside normal range for test
-		//DB $query = "SELECT startdate,enddate FROM imas_exceptions WHERE userid='$userid' AND assessmentid='{$line['assessmentid']}' AND itemtype='A'";
-		//DB $result2 = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $row = mysql_fetch_row($result2);
 		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$line['assessmentid']));
 		$row = $stm2->fetch(PDO::FETCH_NUM);
@@ -170,8 +161,12 @@
 	echo "<div class=breadcrumb>"._('Print Ready Version').' ';
 	echo '<button type="button" onclick="window.print()">'._('Print').'</button>';
 	echo '</div>';
-	echo '<p><button id="introtoggle" type="button" class="btn" onclick="toggleintros()">'._('Hide Intro and Between-Question Text').'</button></p>';
-
+	echo '<p><button id="introtoggle" type="button" class="btn" onclick="toggleintros()">'._('Hide Intro and Between-Question Text').'</button> ';
+	echo '<button id="qtoggle" type="button" class="btn" onclick="toggleqs()">'._('Hide Questions').'</button> ';
+	if ($isteacher) {
+		echo '<button type="button" class="btn" onclick="rendersa()">'._("Show Answers").'</button>';
+	}
+	echo '</p>';
 	if (($introjson=json_decode($testsettings['intro'],true))!==null) { //is json intro
 		$testsettings['intro'] = $introjson[0];
 	} else {
@@ -231,7 +226,7 @@
 
 	echo '<div class=intro>'.$testsettings['intro'].'</div>';
 	if ($isteacher && !$scoredview) {
-		echo '<p class="hideonprint">'._('Showing Current Versions').'<br/><button type="button" class="btn" onclick="rendersa()">'._("Show Answers").'</button> <a href="printtest.php?cid='.$cid.'&asid='.$testid.'&scored=best">'._('Show Scored View').'</a> <a href="printtest.php?cid='.$cid.'&asid='.$testid.'&scored=last">'._('Show Last Attempts').'</a></p>';
+		echo '<p class="hideonprint">'._('Showing Current Versions').'<br/><a href="printtest.php?cid='.$cid.'&asid='.$testid.'&scored=best">'._('Show Scored View').'</a> <a href="printtest.php?cid='.$cid.'&asid='.$testid.'&scored=last">'._('Show Last Attempts').'</a></p>';
 	} else if ($isteacher) {
 		if ($scoredtype=='last') {
 			echo '<p class="hideonprint">'._('Showing Last Attempts').' <a href="printtest.php?cid='.$cid.'&asid='.$testid.'&scored=best">'._('Show Scored View').'</a></p>';
@@ -252,11 +247,8 @@
 		if (isset($intropieces[$i+1])) {
 			echo '<div class="intro">'.filter($intropieces[$i+1]).'</div>';
 		}
-		echo '<div class="nobreak">';
+		echo '<div class="nobreak printqwrap">';
 		if (isset($_GET['descr'])) {
-			//DB $query = "SELECT description FROM imas_questionset WHERE id='$qsetid'";
-			//DB $result = mysql_query($query) or die("Query failed : $query: " . mysql_error());
-			//DB echo '<div>ID:'.$qsetid.', '.mysql_result($result,0,0).'</div>';
 			$stm = $DBH->prepare("SELECT description FROM imas_questionset WHERE id=:id");
 			$stm->execute(array(':id'=>$qsetid));
 			echo '<div>ID:'.Sanitize::onlyInt($qsetid).', '.Sanitize::encodeStringForDisplay($stm->fetchColumn(0)).'</div>';
@@ -299,7 +291,8 @@
 						echo "  <b>$cnt:</b> " ;
 						if (preg_match('/@FILE:(.+?)@/',$laarr[$k],$match)) {
 							$url = getasidfileurl($match[1]);
-							echo "<a href=\"$url\" target=\"_new\">".basename($match[1])."</a>";
+							echo '<a href="'.Sanitize::encodeStringForDisplay($url).'" ';
+							echo 'target="_blank">'.Sanitize::encodeStringForDisplay(basename($match[1])).'</a>';
 						} else {
 							if (strpos($laarr[$k],'$f$')) {
 								if (strpos($laarr[$k],'&')) { //is multipart q

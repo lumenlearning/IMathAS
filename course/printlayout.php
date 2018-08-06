@@ -51,10 +51,6 @@ if ($overwriteBody==1) {
 		$pw = $_POST['pw'];
 	}
 	$isfinal = isset($_GET['final']);
-
-	//DB $query = "SELECT itemorder,shuffle,defpoints,name,intro FROM imas_assessments WHERE id='$aid'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 	$stm = $DBH->prepare("SELECT itemorder,shuffle,defpoints,name,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -98,11 +94,7 @@ if ($overwriteBody==1) {
 	$points = array();
 	$qn = array();
 	$fixedseeds = array();
-	//DB $qlist = "'".implode("','",$questions)."'";
 	$qlist = array_map('Sanitize::onlyInt', $questions);
-	//DB $query = "SELECT id,points,questionsetid FROM imas_questions WHERE id IN ($qlist)";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB while ($row = mysql_fetch_row($result)) {
 	$query_placeholders = Sanitize::generateQueryPlaceholders($qlist);
 	$stm = $DBH->prepare("SELECT id,points,questionsetid,fixedseeds FROM imas_questions WHERE id IN ($query_placeholders)");
 	$stm->execute($qlist);
@@ -186,7 +178,7 @@ if ($overwriteBody==1) {
 		}
 		div.m {
 			float: left;
-			width: <?php echo $pws ?>in;
+			width: <?php echo Sanitize::onlyFloat($pws); ?>in;
 			border-bottom: 1px dashed #aaa;
 			padding: 0px;
 			overflow: hidden;
@@ -295,18 +287,12 @@ if ($overwriteBody==1) {
 			$headerleft .= "<br/>";
 		}
 		if (isset($_POST['cname'])) {
-			//DB $query = "SELECT name FROM imas_courses WHERE id=$cid";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $headerleft .= mysql_result($result,0,0);
 			$stm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$cid));
 			$headerleft .= Sanitize::encodeStringForDisplay($stm->fetchColumn(0));
 			if (isset($_POST['iname'])) { $headerleft .= ' - ';}
 		}
 		if (isset($_POST['iname'])) {
-			//DB $query = "SELECT LastName FROM imas_users WHERE id=$userid";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $headerleft .= mysql_result($result,0,0);
 			$stm = $DBH->prepare("SELECT LastName FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$userid));
 			$headerleft .= Sanitize::encodeStringForDisplay($stm->fetchColumn(0));
@@ -402,9 +388,9 @@ if ($overwriteBody==1) {
 			for ($i=0; $i<$numq; $i++) {
 				echo '<li>';
 				if (is_array($sa[$j][$i])) {
-					echo filter(implode(' ~ ',$sa[$j][$i]));
+					echo Sanitize::outgoingHtml(filter(implode(' ~ ',$sa[$j][$i])));
 				} else {
-					echo filter($sa[$j][$i]);
+				  echo Sanitize::outgoingHtml(filter($sa[$j][$i]));
 				}
 				echo "</li>\n";
 			}
@@ -429,18 +415,11 @@ require("../footer.php");
 function printq($qn,$qsetid,$seed,$pts) {
 	global $DBH,$RND,$isfinal,$imasroot,$urlmode;
 	$RND->srand($seed);
-
-	//DB $query = "SELECT qtype,control,qcontrol,qtext,answer,hasimg FROM imas_questionset WHERE id='$qsetid'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB $qdata = mysql_fetch_array($result, MYSQL_ASSOC);
 	$stm = $DBH->prepare("SELECT qtype,control,qcontrol,qtext,answer,hasimg FROM imas_questionset WHERE id=:id");
 	$stm->execute(array(':id'=>$qsetid));
 	$qdata = $stm->fetch(PDO::FETCH_ASSOC);
 
 	if ($qdata['hasimg']>0) {
-		//DB $query = "SELECT var,filename,alttext FROM imas_qimages WHERE qsetid='$qsetid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT var,filename,alttext FROM imas_qimages WHERE qsetid=:qsetid");
 		$stm->execute(array(':qsetid'=>$qsetid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -525,11 +504,11 @@ function printq($qn,$qsetid,$seed,$pts) {
 	if (strpos($toevalqtxt,'$answerbox')===false) {
 		if (is_array($answerbox)) {
 			foreach($answerbox as $iidx=>$abox) {
-				echo printfilter(filter("<div>$abox</div>\n"));
+				echo Sanitize::outgoingHtml(printfilter(filter("<div>$abox</div>\n")));
 				echo "<div class=spacer>&nbsp;</div>\n";
 			}
 		} else {  //one question only
-			echo printfilter(filter("<div>$answerbox</div>\n"));
+		  echo Sanitize::outgoingHtml(printfilter(filter("<div>$answerbox</div>\n")));
 		}
 
 

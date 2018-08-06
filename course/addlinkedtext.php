@@ -22,8 +22,9 @@ $body = "";
 $useeditor = "text,summary";
 
 $cid = Sanitize::courseId($_GET['cid']);
+$linkid = Sanitize::onlyInt($_GET['id']);
 $curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-if (isset($_GET['id'])) {
+if (!empty($linkid)) {
 	$curBreadcrumb .= "&gt; Modify Link\n";
 	$pagetitle = "Modify Link";
 } else {
@@ -39,21 +40,21 @@ if (isset($_GET['tb'])) {
 if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$overwriteBody=1;
 	$body = "You need to log in as a teacher to access this page";
-} elseif (!(isset($_GET['cid']))) {
+} elseif (empty($cid)) {
 	$overwriteBody=1;
 	$body = "You need to access this page from the course page menu";
 } else { // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
-	$cid = Sanitize::courseId($_GET['cid']);
 	$block = $_GET['block'];
 	$page_formActionTag = "addlinkedtext.php?" . Sanitize::generateQueryStringFromMap(array('block' => $block,
             'cid' => $cid, 'folder' => $_GET['folder']));
-	$page_formActionTag .= (isset($_GET['id'])) ? "&id=" . Sanitize::onlyInt($_GET['id']) : "";
+	$page_formActionTag .= (!empty($linkid)) ? "&id=" . $linkid : "";
 	$page_formActionTag .= "&tb=$totb";
 	$uploaderror = false;
-	$caltag = $_POST['caltag'];
+	$caltag = Sanitize::stripHtmlTags($_POST['caltag']);
 	$points = 0;
 
 	if ($_POST['title']!= null) { //if the form has been submitted
+		$DBH->beginTransaction();
 		if ($_POST['avail']==1) {
 			if ($_POST['sdatetype']=='0') {
 				$startdate = 0;
@@ -67,7 +68,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else {
 				$enddate = parsedatetime($_POST['edate'],$_POST['etime']);
 			}
-			$oncal = $_POST['oncal'];
+			$oncal = Sanitize::onlyInt($_POST['oncal']);
 		} else if ($_POST['avail']==2) {
 			if ($_POST['altoncal']==0) {
 				$startdate = 0;
@@ -75,7 +76,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else {
 				$startdate = parsedatetime($_POST['cdate'],"12:00 pm");
 				$oncal = 1;
-				$caltag = $_POST['altcaltag'];
+				$caltag = Sanitize::stripHtmlTags($_POST['altcaltag']);
 			}
 			$enddate =  2000000000;
 		} else {
@@ -86,15 +87,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 		$processingerror = false;
 		if ($_POST['linktype']=='text') {
-			require_once("../includes/htmLawed.php");
-			//DB $_POST['text'] = addslashes(myhtmLawed(stripslashes($_POST['text'])));
-			$_POST['text'] = myhtmLawed($_POST['text']);
+			$_POST['text'] = Sanitize::incomingHtml($_POST['text']);
 		} else if ($_POST['linktype']=='file') {
 			require_once("../includes/filehandler.php");
 			if ($_FILES['userfile']['name']!='') {
 				//$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/files/';
 				//$uploadfile = $uploaddir . "$cid-" . basename($_FILES['userfile']['name']);
-        $userfilename = Sanitize::sanitizeFilenameAndCheckBlacklist(basename(str_replace('\\','/',$_FILES['userfile']['name'])));
+				$userfilename = Sanitize::sanitizeFilenameAndCheckBlacklist(basename(str_replace('\\','/',$_FILES['userfile']['name'])));
 				$filename = $userfilename;
 				$extension = strtolower(strrchr($userfilename,"."));
 				$badextensions = array(".php",".php3",".php4",".php5",".bat",".com",".pl",".p");
@@ -148,10 +147,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else if (!empty($_POST['curfile'])) {
 				//$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/files/';
 				///if (!file_exists($uploaddir . $_POST['curfile'])) {
-				if (!doesfileexist('cfile',$_POST['curfile'])) {
+				$curfile = Sanitize::sanitizeFilePathAndCheckBlacklist($_POST['curfile']);
+				if (!doesfileexist('cfile', $curfile)) {
 					$processingerror = true;
 				} else {
-					$_POST['text'] = "file:".$_POST['curfile'];
+					$_POST['text'] = "file:".$curfile;
 				}
 			} else {
 				$processingerror = true;
@@ -176,22 +176,16 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 		}
 
-		if ($points==0 && isset($_POST['hadpoints']) && isset($_GET['id'])) {
-			//DB $query = "DELETE FROM imas_grades WHERE gradetypeid='{$_GET['id']}' AND gradetype='exttool'";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
+		if ($points==0 && isset($_POST['hadpoints']) && !empty($linkid)) {
 			$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetypeid=:gradetypeid AND gradetype='exttool'");
-			$stm->execute(array(':gradetypeid'=>$_GET['id']));
+			$stm->execute(array(':gradetypeid'=>$linkid));
 		}
+		$_POST['title'] = Sanitize::stripHtmlTags($_POST['title']);
 
-		//DB $_POST['title'] = addslashes(htmlentities(stripslashes($_POST['title'])));
-		$_POST['title'] = htmlentities($_POST['title']);
-
-		require_once("../includes/htmLawed.php");
 		if ($_POST['summary']=='<p>Enter summary here (displays on course page)</p>') {
 			$_POST['summary'] = '';
 		} else {
-			//DB $_POST['summary'] = addslashes(myhtmLawed(stripslashes($_POST['summary'])));
-			$_POST['summary'] = myhtmLawed($_POST['summary']);
+			$_POST['summary'] = Sanitize::incomingHtml($_POST['summary']);
 		}
 		$_POST['text'] = trim($_POST['text']);
 		$outcomes = array();
@@ -203,19 +197,12 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 		}
 		$outcomes = implode(',',$outcomes);
-		if (isset($_GET['id'])) {  //already have id; update
-			//DB $query = "SELECT text FROM imas_linkedtext WHERE id='{$_GET['id']}'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $text = trim(mysql_result($result,0,0));
+		if (!empty($linkid)) {  //already have id; update
 			$stm = $DBH->prepare("SELECT text FROM imas_linkedtext WHERE id=:id");
-			$stm->execute(array(':id'=>$_GET['id']));
+			$stm->execute(array(':id'=>$linkid));
 			$text = trim($stm->fetchColumn(0));
 			if (substr($text,0,5)=='file:') { //has file
-				//DB $safetext = addslashes($text);
 				if ($_POST['text']!=$text) { //if not same file, delete old if not used
-					//DB $query = "SELECT id FROM imas_linkedtext WHERE text='$safetext'";
-					//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-					//DB if (mysql_num_rows($result)==1) {
 					$stm = $DBH->prepare("SELECT id FROM imas_linkedtext WHERE text=:text");
 					$stm->execute(array(':text'=>$text));
 					if ($stm->rowCount()==1) {
@@ -229,44 +216,28 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				}
 			}
 			if (!$processingerror) {
-				//DB $query = "UPDATE imas_linkedtext SET title='{$_POST['title']}',summary='{$_POST['summary']}',text='{$_POST['text']}',startdate=$startdate,enddate=$enddate,avail='{$_POST['avail']}',oncal='$oncal',caltag='$caltag',target='{$_POST['target']}',outcomes='$outcomes',points=$points ";
-				//DB $query .= "WHERE id='{$_GET['id']}'";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
+				$available = sanitize::onlyInt($_POST['avail']);
+				$target = Sanitize::onlyInt($_POST['target']);
 				$query = "UPDATE imas_linkedtext SET title=:title,summary=:summary,text=:text,startdate=:startdate,enddate=:enddate,avail=:avail,";
 				$query .= "oncal=:oncal,caltag=:caltag,target=:target,outcomes=:outcomes,points=:points WHERE id=:id";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':title'=>$_POST['title'], ':summary'=>$_POST['summary'], ':text'=>$_POST['text'], ':startdate'=>$startdate,
-					':enddate'=>$enddate, ':avail'=>$_POST['avail'], ':oncal'=>$oncal, ':caltag'=>$caltag, ':target'=>$_POST['target'],
-					':outcomes'=>$outcomes, ':points'=>$points, ':id'=>$_GET['id']));
+					':enddate'=>$enddate, ':avail'=>$available, ':oncal'=>$oncal, ':caltag'=>$caltag, ':target'=>$target,
+					':outcomes'=>$outcomes, ':points'=>$points, ':id'=>$linkid));
 			}
 		} else if (!$processingerror) { //add new
-			//DB $query = "INSERT INTO imas_linkedtext (courseid,title,summary,text,startdate,enddate,avail,oncal,caltag,target,outcomes,points) VALUES ";
-			//DB $query .= "('$cid','{$_POST['title']}','{$_POST['summary']}','{$_POST['text']}',$startdate,$enddate,'{$_POST['avail']}','$oncal','$caltag','{$_POST['target']}','$outcomes',$points);";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$query = "INSERT INTO imas_linkedtext (courseid,title,summary,text,startdate,enddate,avail,oncal,caltag,target,outcomes,points) VALUES ";
 			$query .= "(:courseid, :title, :summary, :text, :startdate, :enddate, :avail, :oncal, :caltag, :target, :outcomes, :points);";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':courseid'=>$cid, ':title'=>$_POST['title'], ':summary'=>$_POST['summary'], ':text'=>$_POST['text'],
 				':startdate'=>$startdate, ':enddate'=>$enddate, ':avail'=>$_POST['avail'], ':oncal'=>$oncal, ':caltag'=>$caltag,
 				':target'=>$_POST['target'], ':outcomes'=>$outcomes, ':points'=>$points));
-
-			//DB $newtextid = mysql_insert_id();
 			$newtextid = $DBH->lastInsertId();
-
-			//DB $query = "INSERT INTO imas_items (courseid,itemtype,typeid) VALUES ";
-			//DB $query .= "('$cid','LinkedText','$newtextid');";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$query = "INSERT INTO imas_items (courseid,itemtype,typeid) VALUES ";
 			$query .= "(:courseid, 'LinkedText', :typeid);";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':courseid'=>$cid, ':typeid'=>$newtextid));
-
-			//DB $itemid = mysql_insert_id();
 			$itemid = $DBH->lastInsertId();
-
-			//DB $query = "SELECT itemorder FROM imas_courses WHERE id='$cid'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$cid));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -282,31 +253,28 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else if ($totb=='t') {
 				array_unshift($sub,$itemid);
 			}
-			//DB $itemorder = addslashes(serialize($items));
 			$itemorder = serialize($items);
-
-			//DB $query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='$cid'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
 
 		}
+		$DBH->commit();
 		if ($uploaderror == true || $processingerror == true) {
 			if ($uploaderror == true) {
 				$body = "<p>Error uploading file! $errormsg</p>\n";
 			} else {
 				$body = "<p>Error with your submission</p>";
 			}
-			$body .= "<p><a href=\"addlinkedtext.php?cid=" . Sanitize::courseId($_GET['cid']);
-			if (isset($_GET['id'])) {
-				$body .= "&id=" . Sanitize::onlyInt($_GET['id']);
+			$body .= "<p><a href=\"addlinkedtext.php?cid=" . $cid;
+			if (!empty($linkid)) {
+				$body .= "&id=" . $linkid;
 			} else {
 				$body .= "&id=$newtextid";
 			}
 			$body .= "\">Try Again</a></p>\n";
 			echo "<html><body>$body</body></html>";
 		} else {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']));
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".$cid ."&r=" .Sanitize::randomQueryStringParam());
 		}
 		exit;
 	} else {
@@ -314,12 +282,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$selectedtool = 0;
 		$filename = '';
 		$webaddr = '';
-		if (isset($_GET['id'])) {
-			//DB $query = "SELECT * FROM imas_linkedtext WHERE id='{$_GET['id']}'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
+		if (!empty($linkid)) {
 			$stm = $DBH->prepare("SELECT * FROM imas_linkedtext WHERE id=:id");
-			$stm->execute(array(':id'=>$_GET['id']));
+			$stm->execute(array(':id'=>$linkid));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
 			$startdate = $line['startdate'];
 			$enddate = $line['enddate'];
@@ -416,17 +381,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 		}
 
-		if (!isset($_GET['id'])) {
+		if (empty($linkid)) {
 			$stime = $defstime;
 			$etime = $deftime;
 		}
 
 		$toolvals = array(0);
 		$toollabels = array('Select a tool...');
-		//DB $query = "SELECT id,name FROM imas_external_tools WHERE courseid='$cid' ";
-		//DB $query .= "OR (courseid=0 AND (groupid='$groupid' OR groupid=0)) ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$query = "SELECT id,name FROM imas_external_tools WHERE courseid=:courseid ";
 		$query .= "OR (courseid=0 AND (groupid=:groupid OR groupid=0)) ORDER BY name";
 		$stm = $DBH->prepare($query);
@@ -439,15 +400,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$type = 'text';
 			$line['text'] = "<p>Invalid tool was selected</p>";
 		}
-
-		//DB $query = "SELECT id,name FROM imas_gbcats WHERE courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("SELECT id,name FROM imas_gbcats WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		$page_gbcatSelect = array();
 		$i=0;
-		//DB if (mysql_num_rows($result)>0) {
-			//DB while ($row = mysql_fetch_row($result)) {
 		if ($stm->rowCount()>0) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$page_gbcatSelect['val'][$i] = $row[0];
@@ -459,17 +415,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$page_tutorSelect['val'] = array(2,0,1);
 
 		$outcomenames = array();
-		//DB $query = "SELECT id,name FROM imas_outcomes WHERE courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT id,name FROM imas_outcomes WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$outcomenames[$row[0]] = $row[1];
 		}
-		//DB $query = "SELECT outcomes FROM imas_courses WHERE id='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT outcomes FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$row = $stm->fetch(PDO::FETCH_NUM);
@@ -537,7 +487,7 @@ if ($overwriteBody==1) {
 
 		Summary<BR>
 		<div class=editor>
-			<textarea cols=60 rows=10 id=summary name=summary style="width: 100%"><?php echo htmlentities($line['summary']);?></textarea>
+			<textarea cols=60 rows=10 id=summary name=summary style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($line['summary'], true);?></textarea>
 		</div>
 		<br/>
 
@@ -554,13 +504,13 @@ if ($overwriteBody==1) {
 		<div id="textinput" <?php if ($type != 'text') {echo 'style="display:none;"';}?> >
 			Text<BR>
 			<div class=editor>
-				<textarea cols=80 rows=20 id=text name=text style="width: 100%"><?php echo htmlentities($line['text']);?></textarea>
+				<textarea cols=80 rows=20 id=text name=text style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($line['text'], true);?></textarea>
 			</div>
 		</div>
 		<div id="webinput" <?php if ($type != 'web') {echo 'style="display:none;"';}?> >
 			<span class="form">Weblink (start with http://)</span>
 			<span class="formright">
-				<input size="80" name="web" value="<?php echo htmlentities($webaddr);?>" />
+				<input size="80" name="web" value="<?php echo Sanitize::encodeStringForDisplay($webaddr);?>" />
 			</span><br class="form">
 
 		</div>
@@ -586,14 +536,14 @@ if ($overwriteBody==1) {
 			<?php
 			if (count($toolvals)>0) {
 				writeHtmlSelect('tool',$toolvals,$toollabels,$selectedtool);
-				echo '<br/>Custom parameters: <input type="text" name="toolcustom" size="40" value="'.htmlentities($toolcustom).'" /><br/>';
-				echo 'Custom launch URL: <input type="text" name="toolcustomurl" size="40" value="'.htmlentities($toolcustomurl).'" /><br/>';
+				echo '<br/>Custom parameters: <input type="text" name="toolcustom" size="40" value="'.Sanitize::encodeStringForDisplay($toolcustom).'" /><br/>';
+				echo 'Custom launch URL: <input type="text" name="toolcustomurl" size="40" value="'.Sanitize::encodeStringForDisplay($toolcustomurl).'" /><br/>';
 			} else {
 				echo 'No Tools defined yet<br/>';
 			}
 			if (!isset($CFG['GEN']['noInstrExternalTools'])) {
 				echo '<a href="../admin/externaltools.php?' . Sanitize::generateQueryStringFromMap(array('cid' => $cid,
-                        'ltfrom' => Sanitize::onlyInt($_GET['id']))) .'">Add or edit an external tool</a>';
+                        'ltfrom' => $linkid)) .'">Add or edit an external tool</a>';
 			}
 			?>
 			</span><br class="form"/>

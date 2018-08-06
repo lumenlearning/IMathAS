@@ -40,6 +40,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$block = $_GET['block'];
 
 	if ($_POST['name']!= null) { //FORM SUBMITTED, DATA PROCESSING
+		$DBH->beginTransaction();
 		require_once("../includes/parsedatetime.php");
 		if ($_POST['avail']==1) {
 			if ($_POST['sdatetype']=='0') {
@@ -92,7 +93,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$tutoredit = 0;
 			$_POST['gbcat'] = 0;
 		} else {
-			$tutoredit = intval($_POST['tutoredit']);
+			$tutoredit = Sanitize::onlyInt($_POST['tutoredit']);
 			if ($_POST['cntingb']==4) {
 				$_POST['cntingb'] = 0;
 			}
@@ -102,20 +103,24 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$_POST['cntingb'] = 0;
 		}
 
-		$caltag = $_POST['caltagpost'].'--'.$_POST['caltagreply'];
+		$caltagpost = Sanitize::stripHtmlTags($_POST['caltagpost']);
+		$caltagreply = Sanitize::stripHtmlTags($_POST['caltagreply']);
+		$caltag = $caltagpost.'--'.$caltagreply;
 		if (isset($_POST['usetags'])) {
-			$taglist = trim($_POST['taglist']);
+			$taglist = Sanitize::stripHtmlTags($_POST['taglist']);
 		} else {
 			$taglist = '';
 		}
 		if (isset($_POST['rubric'])) {
-			$rubric = intval($_POST['rubric']);
+			$rubric = Sanitize::onlyInt($_POST['rubric']);
 		} else {
 			$rubric = 0;
 		}
 		$allowlate = 0;
 		if ($_POST['allowlate']>0) {
-			$allowlate = $_POST['allowlate'] + 10*$_POST['allowlateon'];
+			$allowlate = Sanitize::onlyInt($_POST['allowlate']);
+			$allowlateon = Sanitize::onlyInt($_POST['allowlateon']);
+			$allowlate = $allowlate + 10*$allowlateon;
 			if (isset($_POST['latepassafterdue'])) {
 				$allowlate += 100;
 			}
@@ -130,85 +135,68 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		}
 		$outcomes = implode(',',$outcomes);
 
-		//DB $_POST['name'] = addslashes(htmlentities(stripslashes($_POST['name'])));
-		$_POST['name'] = htmlentities($_POST['name']);
+		$forumname = Sanitize::stripHtmlTags($_POST['name']);
 
-		require_once("../includes/htmLawed.php");
 		if ($_POST['description']=='<p>Enter forum description here</p>') {
-			$_POST['description'] = '';
+			$forumdesc = '';
 		} else {
-			//DB $_POST['description'] = addslashes(myhtmLawed(stripslashes($_POST['description'])));
-			$_POST['description'] = myhtmLawed($_POST['description']);
+			$forumdesc = Sanitize::incomingHtml($_POST['description']);
 		}
 		if (!isset($_POST['postinstr']) || trim($_POST['postinstr'])=='' || preg_match('/^\s*<p>(\s|&nbsp;)*<\/p>\s*$/',$_POST['postinstr'])) {
-			$_POST['postinstr'] = '';
+			$postinstruction = '';
 		} else {
-			//DB $_POST['postinstr'] = addslashes(myhtmLawed(stripslashes($_POST['postinstr'])));
-			$_POST['postinstr'] = myhtmLawed($_POST['postinstr']);
+			$postinstruction = Sanitize::incomingHtml($_POST['postinstr']);
 		}
 		if (!isset($_POST['replyinstr']) || trim($_POST['replyinstr'])=='' || preg_match('/^\s*<p>(\s|&nbsp;)*<\/p>\s*$/',$_POST['replyinstr'])) {
-			$_POST['replyinstr'] = '';
+			$replyinstruction = '';
 		} else {
-			//DB $_POST['replyinstr'] = addslashes(myhtmLawed(stripslashes($_POST['replyinstr'])));
-			$_POST['replyinstr'] = myhtmLawed($_POST['replyinstr']);
+			$replyinstruction = Sanitize::incomingHtml($_POST['replyinstr']);
 		}
-		if (isset($_GET['id'])) {  //already have id; update
-			//DB $query = "SELECT groupsetid FROM imas_forums WHERE id='{$_GET['id']}';";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $oldgroupsetid = mysql_result($result,0,0);
+		
+		$defaultdisplay = Sanitize::onlyInt($_POST['defdisplay']);
+		$groupsetid = Sanitize::onlyInt($_POST['groupsetid']);
+		$points = Sanitize::onlyInt($_POST['points']);
+		$graded = Sanitize::onlyInt($_POST['cntingb']);
+		$gradebookcategory = Sanitize::onlyInt($_POST['gbcat']);
+		$available = Sanitize::onlyInt($_POST['avail']);
+		$sortby = Sanitize::onlyInt($_POST['sortby']);
+		$forumtype = Sanitize::onlyInt($_POST['forumtype']);
+		$forumid = Sanitize::onlyInt($_GET['id']);
+
+		if (!empty($forumid)) {  //already have id; update
 			$stm = $DBH->prepare("SELECT groupsetid FROM imas_forums WHERE id=:id");
-			$stm->execute(array(':id'=>$_GET['id']));
+			$stm->execute(array(':id'=>$forumid));
 			$oldgroupsetid = $stm->fetchColumn(0);
 			if ($oldgroupsetid!=$_POST['groupsetid']) {
 				//change of groupset; zero out stugroupid
-				//DB $query = "UPDATE imas_forum_threads SET stugroupid=0 WHERE forumid='{$_GET['id']}';";
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$stm = $DBH->prepare("UPDATE imas_forum_threads SET stugroupid=0 WHERE forumid=:forumid");
-				$stm->execute(array(':forumid'=>$_GET['id']));
+				$stm->execute(array(':forumid'=>$forumid));
 			}
-			//DB $query = "UPDATE imas_forums SET name='{$_POST['name']}',description='{$_POST['description']}',postinstr='{$_POST['postinstr']}',replyinstr='{$_POST['replyinstr']}',startdate=$startdate,enddate=$enddate,settings=$fsets,caltag='$caltag',";
-			//DB $query .= "defdisplay='{$_POST['defdisplay']}',replyby=$replyby,postby=$postby,groupsetid='{$_POST['groupsetid']}',points='{$_POST['points']}',cntingb='{$_POST['cntingb']}',tutoredit=$tutoredit,";
-			//DB $query .= "gbcategory='{$_POST['gbcat']}',avail='{$_POST['avail']}',sortby='{$_POST['sortby']}',forumtype='{$_POST['forumtype']}',taglist='$taglist',rubric=$rubric,outcomes='$outcomes',allowlate=$allowlate ";
-			//DB $query .= "WHERE id='{$_GET['id']}';";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$query = "UPDATE imas_forums SET name=:name,description=:description,postinstr=:postinstr,replyinstr=:replyinstr,startdate=:startdate,enddate=:enddate,settings=:settings,caltag=:caltag,";
 			$query .= "defdisplay=:defdisplay,replyby=:replyby,postby=:postby,groupsetid=:groupsetid,points=:points,cntingb=:cntingb,tutoredit=:tutoredit,";
 			$query .= "gbcategory=:gbcategory,avail=:avail,sortby=:sortby,forumtype=:forumtype,taglist=:taglist,rubric=:rubric,outcomes=:outcomes,allowlate=:allowlate ";
 			$query .= "WHERE id=:id;";
 			$stm = $DBH->prepare($query);
-			$stm->execute(array(':name'=>$_POST['name'], ':description'=>$_POST['description'], ':postinstr'=>$_POST['postinstr'], ':replyinstr'=>$_POST['replyinstr'],
-				':startdate'=>$startdate, ':enddate'=>$enddate, ':settings'=>$fsets, ':caltag'=>$caltag, ':defdisplay'=>$_POST['defdisplay'], ':replyby'=>$replyby,
-				':postby'=>$postby, ':groupsetid'=>$_POST['groupsetid'], ':points'=>$_POST['points'], ':cntingb'=>$_POST['cntingb'], ':tutoredit'=>$tutoredit,
-				':gbcategory'=>$_POST['gbcat'], ':avail'=>$_POST['avail'], ':sortby'=>$_POST['sortby'], ':forumtype'=>$_POST['forumtype'], ':taglist'=>$taglist,
-				':rubric'=>$rubric, ':outcomes'=>$outcomes, ':allowlate'=>$allowlate, ':id'=>$_GET['id']));
+			$stm->execute(array(':name'=>$forumname, ':description'=>$forumdesc, ':postinstr'=>$postinstruction, ':replyinstr'=>$replyinstruction,
+				':startdate'=>$startdate, ':enddate'=>$enddate, ':settings'=>$fsets, ':caltag'=>$caltag, ':defdisplay'=>$defaultdisplay, ':replyby'=>$replyby,
+				':postby'=>$postby, ':groupsetid'=>$groupsetid, ':points'=>$points, ':cntingb'=>$graded, ':tutoredit'=>$tutoredit,
+				':gbcategory'=>$gradebookcategory, ':avail'=>$available, ':sortby'=>$sortby, ':forumtype'=>$forumtype, ':taglist'=>$taglist,
+				':rubric'=>$rubric, ':outcomes'=>$outcomes, ':allowlate'=>$allowlate, ':id'=>$forumid));
 			$newforumid = $_GET['id'];
 
 		} else { //add new
-			//DB $query = "INSERT INTO imas_forums (courseid,name,description,postinstr,replyinstr,startdate,enddate,settings,defdisplay,replyby,postby,groupsetid,points,cntingb,tutoredit,gbcategory,avail,sortby,caltag,forumtype,taglist,rubric,outcomes,allowlate) VALUES ";
-			//DB $query .= "('$cid','{$_POST['name']}','{$_POST['description']}','{$_POST['postinstr']}','{$_POST['replyinstr']}',$startdate,$enddate,$fsets,'{$_POST['defdisplay']}',$replyby,$postby,'{$_POST['groupsetid']}','{$_POST['points']}','{$_POST['cntingb']}',$tutoredit,'{$_POST['gbcat']}','{$_POST['avail']}','{$_POST['sortby']}','$caltag','{$_POST['forumtype']}','$taglist',$rubric,'$outcomes',$allowlate);";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $newforumid = mysql_insert_id();
 			$query = "INSERT INTO imas_forums (courseid,name,description,postinstr,replyinstr,startdate,enddate,settings,defdisplay,replyby,postby,groupsetid,points,cntingb,tutoredit,gbcategory,avail,sortby,caltag,forumtype,taglist,rubric,outcomes,allowlate) VALUES ";
 			$query .= "(:courseid, :name, :description, :postinstr, :replyinstr, :startdate, :enddate, :settings, :defdisplay, :replyby, :postby, :groupsetid, :points, :cntingb, :tutoredit, :gbcategory, :avail, :sortby, :caltag, :forumtype, :taglist, :rubric, :outcomes, :allowlate);";
 			$stm = $DBH->prepare($query);
-			$stm->execute(array(':courseid'=>$cid, ':name'=>$_POST['name'], ':description'=>$_POST['description'], ':postinstr'=>$_POST['postinstr'],
-				':replyinstr'=>$_POST['replyinstr'], ':startdate'=>$startdate, ':enddate'=>$enddate, ':settings'=>$fsets, ':defdisplay'=>$_POST['defdisplay'],
-				':replyby'=>$replyby, ':postby'=>$postby, ':groupsetid'=>$_POST['groupsetid'], ':points'=>$_POST['points'], ':cntingb'=>$_POST['cntingb'],
-				':tutoredit'=>$tutoredit, ':gbcategory'=>$_POST['gbcat'], ':avail'=>$_POST['avail'], ':sortby'=>$_POST['sortby'], ':caltag'=>$caltag,
-				':forumtype'=>$_POST['forumtype'], ':taglist'=>$taglist, ':rubric'=>$rubric, ':outcomes'=>$outcomes, ':allowlate'=>$allowlate));
+			$stm->execute(array(':courseid'=>$cid, ':name'=>$forumname, ':description'=>$forumdesc, ':postinstr'=>$postinstruction,
+				':replyinstr'=>$replyinstruction, ':startdate'=>$startdate, ':enddate'=>$enddate, ':settings'=>$fsets, ':defdisplay'=>$defaultdisplay,
+				':replyby'=>$replyby, ':postby'=>$postby, ':groupsetid'=>$groupsetid, ':points'=>$points, ':cntingb'=>$graded,
+				':tutoredit'=>$tutoredit, ':gbcategory'=>$gradebookcategory, ':avail'=>$available, ':sortby'=>$sortby, ':caltag'=>$caltag,
+				':forumtype'=>$forumtype, ':taglist'=>$taglist, ':rubric'=>$rubric, ':outcomes'=>$outcomes, ':allowlate'=>$allowlate));
 			$newforumid = $DBH->lastInsertId();
-
-			//DB $query = "INSERT INTO imas_items (courseid,itemtype,typeid) VALUES ('$cid','Forum','$newforumid');";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $itemid = mysql_insert_id();
 			$stm = $DBH->prepare("INSERT INTO imas_items (courseid,itemtype,typeid) VALUES (:courseid, :itemtype, :typeid);");
 			$stm->execute(array(':courseid'=>$cid, ':itemtype'=>'Forum', ':typeid'=>$newforumid));
 			$itemid = $DBH->lastInsertId();
-
-			//DB $query = "SELECT itemorder FROM imas_courses WHERE id='$cid';";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
-			//DB $items = unserialize($line['itemorder']);
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$cid));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -224,51 +212,37 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else if ($totb=='t') {
 				array_unshift($sub,$itemid);
 			}
-			//DB $itemorder = addslashes(serialize($items));
 			$itemorder = serialize($items);
-			//DB $query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='$cid';";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
 
 		}
-		//DB $query = "SELECT id FROM imas_forum_subscriptions WHERE forumid='$newforumid' AND userid='$userid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB if (mysql_num_rows($result)>0) {
 		$stm = $DBH->prepare("SELECT id FROM imas_forum_subscriptions WHERE forumid=:forumid AND userid=:userid");
 		$stm->execute(array(':forumid'=>$newforumid, ':userid'=>$userid));
 		if ($stm->rowCount()>0) {
 			if (!isset($_POST['subscribe'])) {
-				//DB $query = "DELETE FROM imas_forum_subscriptions WHERE forumid='$newforumid' AND userid='$userid'";
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$stm = $DBH->prepare("DELETE FROM imas_forum_subscriptions WHERE forumid=:forumid AND userid=:userid");
 				$stm->execute(array(':forumid'=>$newforumid, ':userid'=>$userid));
 			}
 		} else if (isset($_POST['subscribe'])) {
-			//DB $query = "INSERT INTO imas_forum_subscriptions (forumid,userid) VALUES ('$newforumid','$userid')";
-			//DB mysql_query($query) or die("Query failed : " . mysql_error());
 			$stm = $DBH->prepare("INSERT INTO imas_forum_subscriptions (forumid,userid) VALUES (:forumid, :userid)");
 			$stm->execute(array(':forumid'=>$newforumid, ':userid'=>$userid));
 		}
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']));
+		$DBH->commit();
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".$cid."&r=" .Sanitize::randomQueryStringParam());
 
 		exit;
 	} else { //INITIAL LOAD DATA PROCESS
 		if (isset($_GET['id'])) { //MODIFY MODE
+			$forumid = Sanitize::onlyInt($_GET['id']);
 			$hassubscrip = false;
-			//DB $query = "SELECT id FROM imas_forum_subscriptions WHERE forumid='{$_GET['id']}' AND userid='$userid'";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB if (mysql_num_rows($result)>0) {
 			$stm = $DBH->prepare("SELECT id FROM imas_forum_subscriptions WHERE forumid=:forumid AND userid=:userid");
-			$stm->execute(array(':forumid'=>$_GET['id'], ':userid'=>$userid));
+			$stm->execute(array(':forumid'=>$forumid, ':userid'=>$userid));
 			if ($stm->rowCount()>0) {
 				$hassubscrip = true;
 			}
-			//DB $query = "SELECT * FROM imas_forums WHERE id='{$_GET['id']}';";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB $line = mysql_fetch_array($result, MYSQL_ASSOC);
 			$stm = $DBH->prepare("SELECT * FROM imas_forums WHERE id=:id");
-			$stm->execute(array(':id'=>$_GET['id']));
+			$stm->execute(array(':id'=>$forumid));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
 			$startdate = $line['startdate'];
 			$enddate = $line['enddate'];
@@ -283,11 +257,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$postby = $line['postby'];
 			$groupsetid = $line['groupsetid'];
 			if ($groupsetid>0) {
-				//DB $query = "SELECT * FROM imas_forum_threads WHERE forumid='{$_GET['id']}' AND stugroupid>0 LIMIT 1";
-				//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB if (mysql_num_rows($result)>0) {
 				$stm = $DBH->prepare("SELECT * FROM imas_forum_threads WHERE forumid=:forumid AND stugroupid>0 LIMIT 1");
-				$stm->execute(array(':forumid'=>$_GET['id']));
+				$stm->execute(array(':forumid'=>$forumid));
 				if ($stm->rowCount()>0) {
 					$hasgroupthreads = true;
 				} else {
@@ -340,7 +311,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		list($posttag,$replytag) = explode('--',$line['caltag']);
 
 		$page_formActionTag = "?block=".Sanitize::encodeUrlParam($block)."&cid=$cid&folder=" . Sanitize::encodeUrlParam($_GET['folder']);
-		$page_formActionTag .= (isset($_GET['id'])) ? "&id=" . Sanitize::encodeUrlParam($_GET['id']) : "";
+		$page_formActionTag .= (isset($_GET['id'])) ? "&id=" . $forumid : "";
 		$page_formActionTag .= "&tb=".Sanitize::encodeUrlParam($totb);
 
 		$hr = floor($coursedeftime/60)%12;
@@ -399,27 +370,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$i++;
 		}
 		*/
-		//DB $query = "SELECT id,name FROM imas_stugroupset WHERE courseid='$cid' ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("SELECT id,name FROM imas_stugroupset WHERE courseid=:courseid ORDER BY name");
 		$stm->execute(array(':courseid'=>$cid));
 		$i=0;
 		$page_groupSelect = array();
-		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$page_groupSelect['val'][$i] = $row[0];
 			$page_groupSelect['label'][$i] = "Use group set: {$row[1]}";
 			$i++;
 		}
-
-		//DB $query = "SELECT id,name FROM imas_gbcats WHERE courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("SELECT id,name FROM imas_gbcats WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		$page_gbcatSelect = array();
 		$i=0;
-		//DB if (mysql_num_rows($result)>0) {
-			//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$page_gbcatSelect['val'][$i] = $row[0];
 			$page_gbcatSelect['label'][$i] = $row[1];
@@ -427,27 +390,18 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		}
 		$rubric_vals = array(0);
 		$rubric_names = array('None');
-		//DB $query = "SELECT id,name FROM imas_rubrics WHERE ownerid='$userid' OR groupid='$gropuid' ORDER BY name";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT id,name FROM imas_rubrics WHERE ownerid=:ownerid OR groupid=:groupid ORDER BY name");
 		$stm->execute(array(':ownerid'=>$userid, ':groupid'=>$gropuid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$rubric_vals[] = $row[0];
 			$rubric_names[] = $row[1];
 		}
-		//DB $query = "SELECT id,name FROM imas_outcomes WHERE courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->prepare("SELECT id,name FROM imas_outcomes WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		$outcomenames = array();
-		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$outcomenames[$row[0]] = $row[1];
 		}
-		//DB $query = "SELECT outcomes FROM imas_courses WHERE id='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $row = mysql_fetch_row($result);
 		$stm = $DBH->prepare("SELECT outcomes FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$row = $stm->fetch(PDO::FETCH_NUM);

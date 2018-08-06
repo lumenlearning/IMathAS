@@ -23,10 +23,10 @@ function printlist($parent) {
 		if (!in_array($child,$parents)) { //if no children
 			echo "<li><span class=dd>-</span><input type=checkbox name=\"libs[]\" value=\"".Sanitize::encodeStringForDisplay($child)."\" CHECKED>".Sanitize::encodeStringForDisplay($names[$child])."</li>";
 		} else { // if children
-			echo "<li class=lihdr><span class=dd>-</span><span class=hdr onClick=\"toggle(".Sanitize::encodeStringForJavascript($child).")\"><span class=btn id=\"b$child\">+</span> ";
+			echo "<li class=lihdr><span class=dd>-</span><span class=hdr onClick=\"toggle(".Sanitize::encodeStringForJavascript($child).")\"><span class=btn id=\"b" . Sanitize::encodeStringForDisplay($child) . "\">+</span> ";
 			echo "</span><input type=checkbox name=\"libs[]\" value=\"".Sanitize::encodeStringForDisplay($child)."\" CHECKED>";
 			echo "<span class=hdr onClick=\"toggle(".Sanitize::encodeStringForJavascript($child).")\">".Sanitize::encodeStringForDisplay($names[$child])."</span>";
-			echo "<ul class=hide id=$child>\n";
+			echo "<ul class=hide id=\"" . Sanitize::encodeStringForDisplay($child) . "\">\n";
 			printlist($child);
 			echo "</ul></li>\n";
 		}
@@ -71,8 +71,6 @@ function parseqs($file,$touse,$rights) {
 					$updateq++;
 					if (!empty($qd['qimgs'])) {
 						//not efficient, but sufficient :)
-						//DB $query = "DELETE FROM imas_qimages WHERE qsetid='$qsetid'";
-						//DB mysql_query($query) or die("Import failed on $query: " . mysql_error());
 						$stm = $DBH->prepare("DELETE FROM imas_qimages WHERE qsetid=:qsetid");
 						$stm->execute(array(':qsetid'=>$qsetid));
 						$qimgs = explode("\n",trim($qd['qimgs']));
@@ -126,9 +124,6 @@ function parseqs($file,$touse,$rights) {
 			} else {
 				$thisownerid = $userid;
 			}
-			//DB $query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,ownerid,userights,description,author,qtype,control,qcontrol,qtext,answer,solution,solutionopts,extref,license,ancestorauthors,otherattribution,hasimg,importuid) VALUES ";
-			//DB $query .= "('{$qd['uqid']}',$now,$now,'$userid','$rights','{$qd['description']}','{$qd['author']}','{$qd['qtype']}','{$qd['control']}','{$qd['qcontrol']}','{$qd['qtext']}','{$qd['answer']}','{$qd['solution']}','{$qd['solutionopts']}','{$qd['extref']}','{$qd['license']}','{$qd['ancestorauthors']}','{$qd['otherattribution']}',$hasimg,$importuid)";
-			//DB mysql_query($query) or die("Import failed on $query: " . mysql_error());
 			$query = "INSERT INTO imas_questionset (uniqueid,adddate,lastmoddate,ownerid,userights,description,author,qtype,control,qcontrol,qtext,answer,solution,solutionopts,extref,license,ancestorauthors,otherattribution,hasimg,importuid) VALUES ";
 			$query .= "(:uniqueid, :adddate, :lastmoddate, :ownerid, :userights, :description, :author, :qtype, :control, :qcontrol, :qtext, :answer, :solution, :solutionopts, :extref, :license, :ancestorauthors, :otherattribution, :hasimg, :importuid)";
 			$stm = $DBH->prepare($query);
@@ -137,14 +132,11 @@ function parseqs($file,$touse,$rights) {
 				':qtext'=>$qd['qtext'], ':answer'=>$qd['answer'], ':solution'=>$qd['solution'], ':solutionopts'=>$qd['solutionopts'], ':extref'=>$qd['extref'],
 				':license'=>$qd['license'], ':ancestorauthors'=>$qd['ancestorauthors'], ':otherattribution'=>$qd['otherattribution'], ':hasimg'=>$hasimg, ':importuid'=>$importuid));
 			$newq++;
-			//DB $qsetid = mysql_insert_id();
 			$qsetid = $DBH->lastInsertId();
 			if (!empty($qd['qimgs'])) {
 				$qimgs = explode("\n",$qd['qimgs']);
 				foreach($qimgs as $qimg) {
 					$p = explode(',',$qimg);
-					//DB $query = "INSERT INTO imas_qimages (qsetid,var,filename) VALUES ($qsetid,'{$p[0]}','{$p[1]}')";
-					//DB mysql_query($query) or die("Import failed on $query: " . mysql_error());
 					$stm = $DBH->prepare("INSERT INTO imas_qimages (qsetid,var,filename) VALUES (:qsetid, :var, :filename)");
 					$stm->execute(array(':qsetid'=>$qsetid, ':var'=>$p[0], ':filename'=>$p[1]));
 				}
@@ -351,18 +343,12 @@ if ($myrights < 100) {
 	if (isset($_POST['process'])) {
 		$filename = rtrim(dirname(__FILE__), '/\\') .'/import/' . Sanitize::sanitizeFilenameAndCheckBlacklist($_POST['filename']);
 
-		$libstoadd = $_POST['libs'];
+		$libstoadd = array_map('intval',$_POST['libs']);
 
 		list($packname,$names,$parents,$libitems,$unique,$lastmoddate,$ownerid,$userights,$sourceinstall) = parselibs($filename);
-		//DB //need to addslashes before SQL insert
-		//DB $names = array_map('addslashes_deep', $names);
-		//DB $parents = array_map('addslashes_deep', $parents);
-		//DB $libitems = array_map('addslashes_deep', $libitems);
-		//DB $unique = array_map('addslashes_deep', $unique);
-		//DB $lastmoddate = array_map('addslashes_deep', $lastmoddate);
 
-		$root = $_POST['parent'];
-		$librights = $_POST['librights'];
+		$root = Sanitize::onlyInt(trim($_POST['parent']));
+        $librights = Sanitize::onlyInt(trim($_POST['librights']));
 		$qrights = $_POST['qrights'];
 		$touse = '';
 		//write libraries
@@ -372,10 +358,6 @@ if ($myrights < 100) {
 		$lookup = implode(',', $unique);
 		// intval doesn't work on uniqueid since they're bigint
 		// $lookup = implode(',', array_map('intval', $unique));
-
-		//DB $query = "SELECT id,uniqueid,adddate,lastmoddate FROM imas_libraries WHERE uniqueid IN ($lookup)";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->query("SELECT id,uniqueid,adddate,lastmoddate,deleted FROM imas_libraries WHERE uniqueid IN ($lookup)");
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			$exists[$row[1]] = $row[0];
@@ -390,11 +372,10 @@ if ($myrights < 100) {
 		$newli = 0;
 		$updateq = 0;
 		$newq = 0;
-
-		//DB mysql_query("START TRANSACTION") or die("Query failed :$query " . mysql_error());
 		$DBH->beginTransaction();
 
 		foreach ($libstoadd as $libid) {
+
 			if ($parents[$libid]==0) {  //use given root parent
 				$parent = $root;
 			} else if (isset($libs[$parents[$libid]])) { //if parent has been set
@@ -407,7 +388,7 @@ if ($myrights < 100) {
 			if (isset($exists[$unique[$libid]]) && $deleted[$exists[$unique[$libid]]]==1) {
 				//if lib is deleted, undelete it
 				$stm = $DBH->prepare("UPDATE imas_libraries SET deleted=0,name=:name,adddate=:adddate,lastmoddate=:lastmoddate WHERE id=:id");
-				$stm->execute(array(':name'=>$names[$libid], ':adddate'=>$now, ':lastmoddate'=>$now, ':id'=>$exists[$unique[$libid]]));
+				$stm->execute(array(':name'=>Sanitize::stripHtmlTags($names[$libid]), ':adddate'=>$now, ':lastmoddate'=>$now, ':id'=>$exists[$unique[$libid]]));
 				if ($stm->rowCount()>0) {
 					$newl++;
 				}
@@ -415,7 +396,7 @@ if ($myrights < 100) {
 				//lib exists and we're updating it (if possible)
 				if ($lastmoddate[$libid]>$adddate[$exists[$unique[$libid]]]) { //if library has changed
 					$stm = $DBH->prepare("UPDATE imas_libraries SET name=:name,adddate=:adddate,lastmoddate=:lastmoddate WHERE id=:id");
-					$stm->execute(array(':name'=>$names[$libid], ':adddate'=>$now, ':lastmoddate'=>$now, ':id'=>$exists[$unique[$libid]]));
+					$stm->execute(array(':name'=>Sanitize::stripHtmlTags($names[$libid]), ':adddate'=>$now, ':lastmoddate'=>$now, ':id'=>$exists[$unique[$libid]]));
 
 					if ($stm->rowCount()>0) {
 						$updatel++;
@@ -442,15 +423,11 @@ if ($myrights < 100) {
 					$thisownerid = $userid;
 					$thisgroupid = $groupid;
 				}
-				//DB $query = "INSERT INTO imas_libraries (uniqueid,adddate,lastmoddate,name,ownerid,userights,parent,groupid) VALUES ";
-				//DB $query .= "('{$unique[$libid]}',$now,$now,'{$names[$libid]}','$userid','$librights','$parent','$groupid')";
-				//DB mysql_query($query) or die("error on: $query: " . mysql_error());
-				//DB $libs[$libid] = mysql_insert_id();
 				$query = "INSERT INTO imas_libraries (uniqueid,adddate,lastmoddate,name,ownerid,userights,parent,groupid) VALUES ";
 				$query .= "(:uniqueid, :adddate, :lastmoddate, :name, :ownerid, :userights, :parent, :groupid)";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':uniqueid'=>$unique[$libid], ':adddate'=>$now, ':lastmoddate'=>$now, ':name'=>$names[$libid], ':ownerid'=>$thisownerid,
-					':userights'=>$thislibrights, ':parent'=>$parent, ':groupid'=>$thisgroupid));
+				$stm->execute(array(':uniqueid'=>Sanitize::onlyInt($unique[$libid]), ':adddate'=>$now, ':lastmoddate'=>$now, ':name'=>Sanitize::stripHtmlTags($names[$libid]), ':ownerid'=>Sanitize::onlyInt($thisownerid),
+					':userights'=>Sanitize::onlyInt($thislibrights), ':parent'=>Sanitize::onlyInt($parent), ':groupid'=>Sanitize::onlyInt($thisgroupid)));
 				$libs[$libid] = $DBH->lastInsertId();
 				$newl++;
 			}
@@ -466,12 +443,8 @@ if ($myrights < 100) {
 			$qidstocheck = implode(',', array_map('intval', $qids));
 			$qidstoupdate = array();
 			//look up any refs to UIDs
-			//DB $query = "SELECT id,control,qtext FROM imas_questionset WHERE id IN ($qidstocheck) AND (control LIKE '%includecodefrom(UID%' OR qtext LIKE '%includeqtextfrom(UID%')";
-			//DB $result = mysql_query($query) or die("error on: $query: " . mysql_error());
 			$stm = $DBH->query("SELECT id,control,qtext FROM imas_questionset WHERE id IN ($qidstocheck) AND (control LIKE '%includecodefrom(UID%' OR qtext LIKE '%includeqtextfrom(UID%')");
 			$includedqs = array();
-
-			//DB while ($row = mysql_fetch_row($result)) {
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$qidstoupdate[] = $row[0];
 				if (preg_match_all('/includecodefrom\(UID(\d+)\)/',$row[1],$matches,PREG_PATTERN_ORDER) >0) {
@@ -486,10 +459,7 @@ if ($myrights < 100) {
 				$includedbackref = array();
 				$toundel = array();
 				if (count($includedqs)>0) {
-					$includedlist = implode(',', $includedqs);  //known decimal values from above
-					//DB $query = "SELECT id,uniqueid FROM imas_questionset WHERE uniqueid IN ($includedlist)";
-					//DB $result = mysql_query($query) or die("Query failed : $query"  . mysql_error());
-					//DB while ($row = mysql_fetch_row($result)) {
+					$includedlist = implode(',', array_map('Sanitize::onlyInt', $includedqs));  //known decimal values from above
 					$stm = $DBH->query("SELECT id,uniqueid,deleted FROM imas_questionset WHERE uniqueid IN ($includedlist)");
 					while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 						$includedbackref[$row[1]] = $row[0];
@@ -504,21 +474,14 @@ if ($myrights < 100) {
 				}
 
 				$updatelist = implode(',', array_map('intval', $qidstoupdate));
-				//DB $query = "SELECT id,control,qtext FROM imas_questionset WHERE id IN ($updatelist)";
-				//DB $result = mysql_query($query) or die("error on: $query: " . mysql_error());
-				//DB while ($row = mysql_fetch_row($result)) {
 				$stm = $DBH->query("SELECT id,control,qtext FROM imas_questionset WHERE id IN ($updatelist)");
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-					//DB $control = addslashes(preg_replace('/includecodefrom\(UID(\d+)\)/e','"includecodefrom(".$includedbackref["\\1"].")"',$row[1]));
-					//DB $qtext = addslashes(preg_replace('/includeqtextfrom\(UID(\d+)\)/e','"includeqtextfrom(".$includedbackref["\\1"].")"',$row[2]));
 					$control = preg_replace_callback('/includecodefrom\(UID(\d+)\)/', function($matches) use ($includedbackref) {
   						return "includecodefrom(".$includedbackref[$matches[1]].")";
   					}, $row[1]);
   					$qtext = preg_replace_callback('/includeqtextfrom\(UID(\d+)\)/', function($matches) use ($includedbackref) {
   						return "includeqtextfrom(".$includedbackref[$matches[1]].")";
   					}, $row[2]);
-					//DB $query = "UPDATE imas_questionset SET control='$control',qtext='$qtext' WHERE id={$row[0]}";
-					//DB mysql_query($query) or die("error on: $query: " . mysql_error());
 					$stm2 = $DBH->prepare("UPDATE imas_questionset SET control=:control,qtext=:qtext WHERE id=:id");
 					$stm2->execute(array(':control'=>$control, ':qtext'=>$qtext, ':id'=>$row[0]));
 				}
@@ -544,11 +507,11 @@ if ($myrights < 100) {
 				foreach ($qidlist as $qid) {
 					if (isset($qids[$qid]) && (array_search($qids[$qid],$deletedli)!==false)) {
 						$stm = $DBH->prepare("UPDATE imas_library_items SET ownerid=:ownerid,lastmoddate=:now,deleted=0 WHERE libid=:libid AND qsetid=:qsetid");
-						$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>$qids[$qid], ':ownerid'=>$userid, ':now'=>$now));
+						$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>Sanitize::onlyInt($qids[$qid]), ':ownerid'=>$userid, ':now'=>$now));
 						$newli += count($deletedli);
 					} else if (isset($qids[$qid]) && (array_search($qids[$qid],$existingli)===false)) {
 						$stm = $DBH->prepare("INSERT INTO imas_library_items (libid,qsetid,ownerid,lastmoddate) VALUES (:libid, :qsetid, :ownerid, :now)");
-						$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>$qids[$qid], ':ownerid'=>$userid, ':now'=>$now));
+						$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>Sanitize::onlyInt($qids[$qid]), ':ownerid'=>$userid, ':now'=>$now));
 						$newli++;
 					}
 				}
@@ -558,8 +521,6 @@ if ($myrights < 100) {
 			$stm = $DBH->prepare("UPDATE imas_library_items as A JOIN imas_library_items as B on A.qsetid=B.qsetid SET A.deleted=1,A.lastmoddate=:now WHERE A.libid=0 AND A.deleted=0 AND B.libid>0 AND B.deleted=0");
 			$stm->execute(array(':now'=>$now));
 		}
-
-		//DB mysql_query("COMMIT") or die("Query failed :$query " . mysql_error());
 		$DBH->commit();
 
 		unlink($filename);

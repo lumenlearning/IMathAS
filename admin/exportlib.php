@@ -67,7 +67,6 @@ if (!(isset($teacherid)) && $myrights<20) {
 		if (isset($_POST['rootlib'])) {
 			array_unshift($rootlibs,$_POST['rootlib']);
 		}
-		//DB $rootlist = "'".implode("','",$rootlibs)."'";
 		$rootlist = implode(',', array_map('intval', $rootlibs));
 
 		$libcnt = 1;
@@ -85,26 +84,24 @@ if (!(isset($teacherid)) && $myrights<20) {
 			$query .= " AND userights>0";
 		}
 		$query .= " ORDER BY uniqueid";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 		$stm = $DBH->query($query);
-		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			if (!in_array($row[2],$rootlibs)) { //don't export children here
 				$libs[$row[0]] = $libcnt;
 				$parents[$libcnt] = 0;
 				echo "\nSTART LIBRARY\n";
 				echo "ID\n";
-				echo rtrim($libcnt) . "\n";
+				echo Sanitize::forRawExport(rtrim($libcnt)) . "\n";
 				echo "UID\n";
-				echo rtrim($row[3]) . "\n";
+				echo Sanitize::forRawExport(Sanitize::forRawExport(rtrim($row[3]))) . "\n";
 				echo "LASTMODDATE\n";
-				echo rtrim($row[4]) . "\n";
+				echo Sanitize::forRawExport(rtrim($row[4])) . "\n";
 				echo "OWNERID\n";
-				echo rtrim($row[5]) . "\n";
+				echo Sanitize::forRawExport(rtrim($row[5])) . "\n";
 				echo "USERIGHTS\n";
-				echo rtrim($row[6]) . "\n";
+				echo Sanitize::forRawExport(rtrim($row[6])) . "\n";
 				echo "NAME\n";
-				echo rtrim($row[1]) . "\n";
+				echo Sanitize::forRawExport(rtrim($row[1])) . "\n";
 				echo "PARENT\n";
 				echo "0\n";
 				$libcnt++;
@@ -114,14 +111,6 @@ if (!(isset($teacherid)) && $myrights<20) {
 		//lists child libraries
 		function getchildlibs($lib) {
 			global $DBH,$libs,$libcnt,$nonpriv;
-			//DB $query = "SELECT id,name,uniqueid,lastmoddate FROM imas_libraries WHERE parent='$lib'";
-			//DB if ($nonpriv) {
-				//DB $query .= " AND userights>0";
-			//DB }
-			//DB $query .= " ORDER BY uniqueid";
-			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-			//DB if (mysql_num_rows($result)>0) {
-				//DB while ($row = mysql_fetch_row($result)) {
 			$query = "SELECT id,name,uniqueid,lastmoddate FROM imas_libraries WHERE parent=:parent AND deleted=0";
 			if ($nonpriv) {
 				$query .= " AND userights>0";
@@ -137,19 +126,19 @@ if (!(isset($teacherid)) && $myrights<20) {
 						$parents[$libcnt] = $libs[$lib];
 						echo "\nSTART LIBRARY\n";
 						echo "ID\n";
-						echo rtrim($libcnt) . "\n";
+						echo Sanitize::forRawExport(rtrim($libcnt)) . "\n";
 						echo "UID\n";
-						echo rtrim($row[2]) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[2])) . "\n";
 						echo "LASTMODDATE\n";
-						echo rtrim($row[3]) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[3])) . "\n";
 						echo "OWNERID\n";
-						echo rtrim($row[5]) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[5])) . "\n";
 						echo "USERIGHTS\n";
-						echo rtrim($row[6]) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[6])) . "\n";
 						echo "NAME\n";
-						echo rtrim($row[1]) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[1])) . "\n";
 						echo "PARENT\n";
-						echo rtrim($libs[$lib]) . "\n";
+						echo Sanitize::forRawExport(rtrim($libs[$lib])) . "\n";
 						$libcnt++;
 						getchildlibs($row[0]);
 					}
@@ -176,12 +165,10 @@ if (!(isset($teacherid)) && $myrights<20) {
 		if ($noncopyright) {
 			$query .= " AND imas_questionset.license>0";
 		}
-		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 		$stm = $DBH->query($query);
 		$qassoc = Array();
 		$libitems = Array();
 		$qcnt = 0;
-		//DB while ($row = mysql_fetch_row($result)) {
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			if (!isset($qassoc[$row[0]])) {$qassoc[$row[0]] = $qcnt; $qcnt++;}
 			$libitems[$libs[$row[1]]][] = $qassoc[$row[0]];
@@ -191,9 +178,9 @@ if (!(isset($teacherid)) && $myrights<20) {
 			if (isset($libitems[$newid])) {
 				echo "\nSTART LIBRARY ITEMS\n";
 				echo "LIBID\n";
-				echo rtrim($newid) . "\n";
+				echo Sanitize::forRawExport(rtrim($newid)) . "\n";
 				echo "QSETIDS\n";
-				echo rtrim(implode(',',$libitems[$newid])) . "\n";
+				echo Sanitize::forRawExport(rtrim(implode(',',$libitems[$newid]))) . "\n";
 			}
 		}
 
@@ -207,10 +194,8 @@ if (!(isset($teacherid)) && $myrights<20) {
 			$query .= " AND userights>0";
 		}
 		$query .= " AND (control LIKE '%includecodefrom%' OR qtext LIKE '%includeqtextfrom%')";
-		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 		$stm = $DBH->query($query);
 		$includedqs = array();
-		//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 			if (preg_match_all('/includecodefrom\((\d+)\)/',$line['control'],$matches,PREG_PATTERN_ORDER) >0) {
 				$includedqs = array_merge($includedqs,$matches[1]);
@@ -222,9 +207,6 @@ if (!(isset($teacherid)) && $myrights<20) {
 		$includedbackref = array();
 		if (count($includedqs)>0) {
 			$includedlist = implode(',', array_map('intval', $includedqs));
-			//DB $query = "SELECT id,uniqueid FROM imas_questionset WHERE id IN ($includedlist)";
-			//DB $result = mysql_query($query) or die("Query failed : $query"  . mysql_error());
-			//DB while ($row = mysql_fetch_row($result)) {
 			$stm = $DBH->query("SELECT id,uniqueid FROM imas_questionset WHERE id IN ($includedlist)");
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$includedbackref[$row[0]] = $row[1];
@@ -238,12 +220,8 @@ if (!(isset($teacherid)) && $myrights<20) {
 			$query .= " AND userights>0";
 		}
 		$query .= " ORDER BY uniqueid";
-		//DB $result = mysql_query($query) or die("Query failed : $query" . mysql_error());
 		$stm = $DBH->query($query);
-		//DB while ($line = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
-			//DB $line['control'] = preg_replace('/includecodefrom\((\d+)\)/e','"includecodefrom(UID".$includedbackref["\\1"].")"',$line['control']);
-			//DB $line['qtext'] = preg_replace('/includeqtextfrom\((\d+)\)/e','"includeqtextfrom(UID".$includedbackref["\\1"].")"',$line['qtext']);
       $line['control'] = preg_replace_callback('/includecodefrom\((\d+)\)/', function($matches) use ($includedbackref) {
           return "includecodefrom(UID".$includedbackref[$matches[1]].")";
         }, $line['control']);
@@ -252,50 +230,47 @@ if (!(isset($teacherid)) && $myrights<20) {
         }, $line['qtext']);
 			echo "\nSTART QUESTION\n";
 			echo "QID\n";
-			echo rtrim($qassoc[$line['id']]) . "\n";
+			echo Sanitize::forRawExport(rtrim($qassoc[$line['id']])) . "\n";
 			echo "\nUQID\n";
-			echo rtrim($line['uniqueid']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['uniqueid'])) . "\n";
 			echo "\nLASTMOD\n";
-			echo rtrim($line['lastmoddate']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['lastmoddate'])) . "\n";
 			echo "\nDESCRIPTION\n";
-			echo rtrim($line['description']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['description'])) . "\n";
 			echo "\nAUTHOR\n";
-			echo rtrim($line['author']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['author'])) . "\n";
 			echo "\nOWNERID\n";
-			echo rtrim($line['ownerid']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['ownerid'])) . "\n";
 			echo "\nUSERIGHTS\n";
-			echo rtrim($line['userights']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['userights'])) . "\n";
 			echo "\nCONTROL\n";
-			echo rtrim($line['control']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['control'])) . "\n";
 			echo "\nQCONTROL\n";
-			echo rtrim($line['qcontrol']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['qcontrol'])) . "\n";
 			echo "\nQTYPE\n";
-			echo rtrim($line['qtype']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['qtype'])) . "\n";
 			echo "\nQTEXT\n";
-			echo rtrim($line['qtext']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['qtext'])) . "\n";
 			echo "\nANSWER\n";
-			echo rtrim($line['answer']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['answer'])) . "\n";
 			echo "\nSOLUTION\n";
-			echo rtrim($line['solution']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['solution'])) . "\n";
 			echo "\nSOLUTIONOPTS\n";
-			echo rtrim($line['solutionopts']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['solutionopts'])) . "\n";
 			echo "\nEXTREF\n";
-			echo rtrim($line['extref']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['extref'])) . "\n";
 			echo "\nLICENSE\n";
-			echo rtrim($line['license']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['license'])) . "\n";
 			echo "\nANCESTORAUTHORS\n";
-			echo rtrim($line['ancestorauthors']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['ancestorauthors'])) . "\n";
 			echo "\nOTHERATTRIBUTION\n";
-			echo rtrim($line['otherattribution']) . "\n";
+			echo Sanitize::forRawExport(rtrim($line['otherattribution'])) . "\n";
 			if ($line['hasimg']==1) {
 				echo "\nQIMGS\n";
-				//DB $query = "SELECT var,filename FROM imas_qimages WHERE qsetid='{$line['id']}'";
-				//DB $r2 = mysql_query($query) or die("Query failed : " . mysql_error());
-				//DB while ($row = mysql_fetch_row($r2)) {
 				$stm2 = $DBH->prepare("SELECT var,filename,alttext FROM imas_qimages WHERE qsetid=:qsetid");
 				$stm2->execute(array(':qsetid'=>$line['id']));
 				while ($row = $stm2->fetch(PDO::FETCH_NUM)) {
-					echo $row[0].','.getqimageurl($row[1],true).','.$row[2]. "\n";
+					echo Sanitize::forRawExport($row[0].','.getqimageurl($row[1],true).','.$row[2]). "\n";
 				}
 			}
 		}

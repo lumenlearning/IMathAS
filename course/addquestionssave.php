@@ -7,13 +7,9 @@
 	if (!isset($teacherid)) {
 		echo "error: validation";
 	}
-	//DB $query = "SELECT itemorder,viddata,intro FROM imas_assessments WHERE id='$aid'";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 	$stm = $DBH->prepare("SELECT itemorder,viddata,intro,defpoints FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	list($rawitemorder, $viddata,$current_intro_json, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
-	//DB $rawitemorder = mysql_result($result,0,0);
-	//DB $viddata = mysql_result($result,0,1);
 	$itemorder = str_replace('~',',',$rawitemorder);
 	$curitems = array();
 	foreach (explode(',',$itemorder) as $qid) {
@@ -47,7 +43,7 @@
 	$newitems = array();
 	foreach (explode(',',$submitted) as $qid) {
 		if (strpos($qid,'|')===false) {
-			$newitems[] = $qid;
+			$newitems[] = Sanitize::onlyInt($qid);
 		}
 	}
 	$toremove = array_diff($curitems,$newitems);
@@ -114,21 +110,40 @@
 			}
 		}
 		//any old items will not get copied.
-		//DB $viddata = addslashes(serialize($newviddata));
 		$viddata = serialize($newviddata);
 	}
-
+	
+	//update question point values
+	$ptschanged = false;
+	if (isset($_POST['pts'])) {
+		$newpts = json_decode($_POST['pts'], true);
+		$upd_pts = $DBH->prepare("UPDATE imas_questions SET points=? WHERE id=?");
+		$stm = $DBH->prepare("SELECT id,points FROM imas_questions WHERE assessmentid=?");
+		$stm->execute(array($aid));
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			if (!isset($newpts['qn'.$row['id']])) {
+				continue;  //shouldn't happen
+			} 
+			if ($row['points'] != $newpts['qn'.$row['id']]) {
+				$upd_pts->execute(array($newpts['qn'.$row['id']], $row['id']));
+				$ptschanged = true;
+			}
+		}
+	}
+	
+	$qarr = array(':itemorder'=>$_REQUEST['order'], ':viddata'=>$viddata, ':intro'=>$new_intro, ':id'=>$aid, ':courseid'=>$cid);
+	$query = "UPDATE imas_assessments SET itemorder=:itemorder,viddata=:viddata,intro=:intro";
+	if (isset($_POST['defpts'])) {
+		$defpts = Sanitize::onlyInt($_POST['defpts']);
+		$query .= ",defpoints=:defpts";
+		$qarr[':defpts'] = $defpts;
+	}
+	$query .= " WHERE id=:id AND courseid=:courseid";
 	//store new itemorder
-	//DB $query = "UPDATE imas_assessments SET itemorder='{$_GET['order']}',viddata='$viddata' WHERE id='$aid'";
-	//DB mysql_query($query) or die("Query failed : " . mysql_error());
-	$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder,viddata=:viddata,intro=:intro WHERE id=:id AND courseid=:courseid");
-	$stm->execute(array(':itemorder'=>$_REQUEST['order'], ':viddata'=>$viddata, ':intro'=>$new_intro, ':id'=>$aid, ':courseid'=>$cid));
-
-	//DB if (mysql_affected_rows()>0) {
-	if ($stm->rowCount()>0) {
+	$stm = $DBH->prepare($query);
+	$stm->execute($qarr);
+	if ($stm->rowCount()>0 || $ptschanged) {
 		//delete any removed questions
-		//DB $query = "DELETE FROM imas_questions WHERE id IN ('".implode("','",$toremove)."')";
-		//DB mysql_query($query) or die("Query failed : " . mysql_error());
 		if (count($toremove)>0) {
 			$toremove = implode(',', array_map('intval', $toremove));
 			$stm = $DBH->query("DELETE FROM imas_questions WHERE id IN ($toremove)");

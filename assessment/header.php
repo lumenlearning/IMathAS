@@ -44,7 +44,7 @@ window.onload = init;
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
 <link rel="stylesheet" href="<?php echo $imasroot . "/assessment/mathtest.css?ver=060918";?>" type="text/css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript">
   if (!window.jQuery) {  document.write('<script src="<?php echo $imasroot;?>/javascript/jquery.min.js"><\/script>');}
 </script>
@@ -54,6 +54,9 @@ if (isset($CFG['locale'])) {
 	if (file_exists(rtrim(dirname(__FILE__), '/\\').'/../i18n/locale/'.$lang.'/messages.js')) {
 		echo '<script type="text/javascript" src="'.$imasroot.'/i18n/locale/'.$lang.'/messages.js"></script>';
 	}
+}
+if (!isset($sessiondata['coursetheme']) && isset($coursetheme)) {
+	$sessiondata['coursetheme'] = $coursetheme;
 }
 if (isset($sessiondata['coursetheme'])) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
@@ -86,7 +89,7 @@ if (!empty($CFG['use_csrfp']) && class_exists('csrfProtector')) {
 	echo csrfProtector::output_header_code();
 }
 
-echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=060618" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=070218" type="text/javascript"></script>';
 
 /*
 
@@ -94,9 +97,9 @@ echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=060618" type
 
 echo '<script src="' . $imasroot . '/javascript/general.js?v=060618" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/mathjs.js?v=050918" type="text/javascript"></script>';
-echo '<script src="' . $imasroot . '/javascript/AMhelpers.js?v=041818" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/AMhelpers.js?v=070218" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/confirmsubmit.js?v=031018" type="text/javascript"></script>';
-echo '<script src="' . $imasroot . '/javascript/drawing.js?v=030118" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/drawing.js?v=062218" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/eqntips.js?v=082616" type="text/javascript"></script>';
 
 */
@@ -124,7 +127,7 @@ if (!isset($sessiondata['mathdisp'])) {
 		} else {
 			MathJax.Hub.Config({"HTML-CSS": {preferredFont: "STIX", webFont: "STIX-Web", imageFont:null}, "messageStyle": "none"});
 		}
-		MathJax.Ajax.config.path["Local"] = "'.$imasroot.'/mathjax/extensions";
+		MathJax.Ajax.config.path["Local"] = "'.$imasroot.'/javascript/mathjax";
 		MathJax.Hub.config.extensions.push("[Local]/InputToDataAttrCDN.js");
 		</script>';
 		//webFont: "STIX-Web",
@@ -144,7 +147,7 @@ if (!isset($sessiondata['mathdisp'])) {
 		} else {
 			MathJax.Hub.Config({"HTML-CSS": {preferredFont: "STIX", webFont: "STIX-Web", imageFont:null}, "messageStyle": "none", skipStartupTypeset: true});
 		}
-		MathJax.Ajax.config.path["Local"] = "'.$imasroot.'/mathjax/extensions";
+		MathJax.Ajax.config.path["Local"] = "'.$imasroot.'/javascript/mathjax";
 		MathJax.Hub.config.extensions.push("[Local]/InputToDataAttrCDN.js");
 		MathJax.Hub.Register.StartupHook("Begin Config", setupKatexAutoRenderWhenReady);
 		</script>
@@ -260,7 +263,7 @@ if (isset($sessiondata['ltiitemtype'])) {
 		$(sendLTIresizemsg);
 	}
 	</script>';
-}
+	}
 echo '</head>';
 if ($isfw!==false) {
 	echo "<body class=\"fw$isfw\">\n";
@@ -273,15 +276,15 @@ echo '<div class=mainbody>';
 if (isset($insertinheaderwrapper)) {
 	//echo '<div class="headerwrapper">'.$insertinheaderwrapper.'</div>';
 }
-if (!isset($flexwidth)) {
+if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
 	echo '<div class="headerwrapper">';
 }
 
-if (isset($CFG['GEN']['headerinclude']) && !isset($flexwidth)) {
+if (isset($CFG['GEN']['headerinclude']) && !isset($flexwidth) && !isset($hideAllHeaderNav)) {
 	require("$curdir/../{$CFG['GEN']['headerinclude']}");
 }
 
-if (isset($cid) && !isset($flexwidth) && !$isdiag && (!isset($sessiondata['intreereader']) || $sessiondata['intreereader']==false)) {
+if (isset($cid) && !isset($flexwidth) && !isset($hideAllHeaderNav) && !$isdiag && (!isset($sessiondata['intreereader']) || $sessiondata['intreereader']==false)) {
 	echo '<div id="navlistcont" role="navigation" aria-label="'._('Course Navigation').'">';
 	echo '<ul id="navlist">';
 
@@ -314,7 +317,7 @@ if (isset($cid) && !isset($flexwidth) && !$isdiag && (!isset($sessiondata['intre
 	$didnavlist = true;
 }
 
-if (!isset($flexwidth)) {
+if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
 	echo '</div>';
 }
 echo '<div class="midwrapper" role="main">';

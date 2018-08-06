@@ -26,11 +26,8 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 	$block = Sanitize::stripHtmlTags($_GET['block']);
 
 	if ($_POST['remove']=="really") {
-		$forumid = $_GET['id'];
+		$forumid = Sanitize::onlyInt($_GET['id']);
 		$DBH->beginTransaction();
-		//DB $query = "SELECT id FROM imas_items WHERE typeid='$forumid' AND itemtype='Forum' AND courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $itemid = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype='Forum' AND courseid=:courseid");
 		$stm->execute(array(':typeid'=>$forumid, ':courseid'=>$cid));
 		if ($stm->rowCount()>0) {
@@ -39,7 +36,7 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 			delitembyid($itemid);
 			
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$_GET['cid']));
+			$stm->execute(array(':id'=>$cid));
 			$items = unserialize($stm->fetchColumn(0));
 
 			$blocktree = explode('-',$block);
@@ -50,25 +47,19 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 			$key = array_search($itemid,$sub);
 			if ($key!==false) {
 				array_splice($sub,$key,1);
-				//DB $itemorder = addslashes(serialize($items));
 				$itemorder = serialize($items);
-				//DB $query = "UPDATE imas_courses SET itemorder='$itemorder' WHERE id='$cid'";
-				//DB mysql_query($query) or die("Query failed : " . mysql_error());
 				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 				$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
 			}
 
 		}
 		$DBH->commit();
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']));
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".$cid . "&r=" . Sanitize::randomQueryStringParam());
 
 		exit;
 	} else {
-		//DB $query = "SELECT name FROM imas_forums WHERE id='{$_GET['id']}'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB $itemname = mysql_result($result,0,0);
 		$stm = $DBH->prepare("SELECT name FROM imas_forums WHERE id=:id");
-		$stm->execute(array(':id'=>$_GET['id']));
+		$stm->execute(array(':id'=>$forumid));
 		$itemname = $stm->fetchColumn(0);
 	}
 }

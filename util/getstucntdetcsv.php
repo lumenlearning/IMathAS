@@ -64,7 +64,19 @@
 		'Total Active Students at Institution',
 		'Total Active Instructors at Institution',
 		'Lumen Customer',
-		'Supergroup'
+		'Supergroup',
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		'Lumen School GUID'
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		));
 
 
@@ -107,7 +119,20 @@
 		$lticourses[$row[0]] = $row[1];
 	}
 
-	$query = "SELECT g.name AS gname,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id) AS cnt,u.email,g.parent,g.grouptype,c.ancestors FROM imas_students AS s JOIN imas_teachers AS t ";
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	//
+	// OHM-specific code is the addition of "g.lumen_guid AS group_lumen_guid"
+	//
+	$query = "SELECT g.lumen_guid AS group_lumen_guid,g.name AS gname,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id) AS cnt,u.email,g.parent,g.grouptype,c.ancestors FROM imas_students AS s JOIN imas_teachers AS t ";
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
 	if ($end != $now) {
 		$query .= "AND s.lastaccess<$end ";
@@ -147,11 +172,33 @@
 					$d[] = $grpinstrcnt;
 					$d[] = $lastiscust;
 					$d[] = $lastparent;
+					// #### Begin OHM-specific code #####################################################
+					// #### Begin OHM-specific code #####################################################
+					// #### Begin OHM-specific code #####################################################
+					// #### Begin OHM-specific code #####################################################
+					// #### Begin OHM-specific code #####################################################
+					$d[] = $lastgroupguid;
+					// #### End OHM-specific code #######################################################
+					// #### End OHM-specific code #######################################################
+					// #### End OHM-specific code #######################################################
+					// #### End OHM-specific code #######################################################
+					// #### End OHM-specific code #######################################################
 					exportascsv($d);
 				}
 			}
 			$grpcnt = 0;  $grpdata = array(); $grpinstrcnt = 0;
 			$lastgroup = $row['gname'];
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			$lastgroupguid = $row['group_lumen_guid'];
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
 			$lastparent = (($row['parent']>0)?$grpnames[$row['parent']]:"");
 			$lastiscust = (($row['grouptype']==1)?'Y':'N');
 		}
@@ -186,6 +233,17 @@
 		$d[] = $grpinstrcnt;
 		$d[] = $lastiscust;
 		$d[] = $lastparent;
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		$d[] = $lastgroupguid;
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		exportascsv($d);
 	}
 

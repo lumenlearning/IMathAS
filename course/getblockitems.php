@@ -53,6 +53,11 @@
 			unset($blocktree);
 			break;
 		}
+		if (strlen($items[$blocktree[$i]-1]['SH'])>2) {
+			$contentbehavior = $items[$blocktree[$i]-1]['SH'][2];
+		} else {
+			$contentbehavior = 0;
+		}
 		$items = $items[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
 	   }
    }
@@ -79,17 +84,6 @@
    }
 
    //get new forum posts info
-   	//DB $query = "SELECT imas_forum_threads.forumid, COUNT(imas_forum_threads.id) FROM imas_forum_threads ";
-	//DB $query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid='$cid' ";
-	//DB $query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid='$userid' ";
-	//DB $query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
-	//DB if (!isset($teacherid)) {
-		//DB $query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid='$userid')) ";
-	//DB }
-	//DB $query .= "GROUP BY imas_forum_threads.forumid";
-	//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-	//DB $newpostcnts = array();
-	//DB while ($row = mysql_fetch_row($result)) {
    	$query = "SELECT imas_forum_threads.forumid, COUNT(imas_forum_threads.id) FROM imas_forum_threads ";
 	  $query .= "JOIN imas_forums ON imas_forum_threads.forumid=imas_forums.id AND imas_forums.courseid=:courseid ";
 	  $query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid=:userid ";
@@ -124,9 +118,6 @@
 	//get read linked items
 	$readlinkeditems = array();
 	if ($coursetheme=='otbsreader.css' && isset($studentid)) {
-		//DB $query = "SELECT DISTINCT typeid FROM imas_content_track WHERE userid='$userid' AND type='linkedlink' AND courseid='$cid'";
-		//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
-		//DB while ($row = mysql_fetch_row($result)) {
 		$stm = $DBH->prepare("SELECT DISTINCT typeid FROM imas_content_track WHERE userid=:userid AND type='linkedlink' AND courseid=:courseid");
 		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -140,9 +131,7 @@
    if (count($items)>0) {
 	   //update block start/end dates to show blocks containing items with exceptions
 
-
-
-	   showitems($items,$_GET['folder']);
+	   showitems($items,$_GET['folder'],false,$contentbehavior);
 	   if (isset($teacherid)) {
 		   //echo generateadditem($_GET['folder'],'b');
 	   }
