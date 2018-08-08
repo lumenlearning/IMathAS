@@ -24,6 +24,7 @@ use OHM\Models\StudentPayApiResult;
 // The business decision is to allow students through to assessments if we encounter any
 // problems checking access codes. This includes failure to interact with the payment API.
 
+$userId = $GLOBALS['userid'];
 $courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $sessiondata['courseid'];
 $assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
 
@@ -32,11 +33,16 @@ $courseNameStm->execute(array(':id' => $courseId));
 $courseName = $courseNameStm->fetchColumn(0);
 
 
+if (isStudentPayEnabled() && isTutor($userId, $courseId)) {
+	error_log(sprintf('Student ID %d is a tutor in course ID %d. Paywall will be bypassed.',
+		$userId, $courseId));
+}
+
 $courseOwnerGroupId = null;
 $courseOwnerGroupGuid = null;
 $enrollmentId = null;
-if (isStudentPayEnabled()) {
-	$studentPaymentDb = new StudentPaymentDb(null, $courseId, $userid);
+if (isStudentPayEnabled() && !isTutor($userId, $courseId)) {
+	$studentPaymentDb = new StudentPaymentDb(null, $courseId, $GLOBALS['userid']);
 	$courseOwnerGroupId = $studentPaymentDb->getCourseOwnerGroupId();
 	$courseOwnerGroupGuid = $studentPaymentDb->getGroupGuid($courseOwnerGroupId);
 	$enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
@@ -51,7 +57,7 @@ if (isStudentPayEnabled()) {
 
 $studentPayment = null;
 $studentPayStatus = null;
-if (isStudentPayEnabled() && isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
+if (isStudentPayEnabled() && !isTutor($userId, $courseId) && isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
 	$studentPayment = new StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
 
 	try {
@@ -123,6 +129,51 @@ function isValidGroupIdForStudentPayments($groupId)
 	}
 
 	return true;
+}
+
+/**
+ * Determine if the current user is a tutor in any capacity.
+ *
+ * @param $userId integer The user's ID from imas_users.
+ * @param $courseId integer The course's ID from imas_courses.
+ * @return bool True if the user is a tutor, false if not.
+ */
+function isTutor($userId, $courseId)
+{
+	return isGlobalTutor() || isTutorInCourse($userId, $courseId);
+}
+
+/**
+ * Determine if the current user is a global tutor.
+ *
+ * @return bool True if the user is a global tutor, false if not.
+ */
+function isGlobalTutor()
+{
+	return 15 <= $GLOBALS['myrights'];
+}
+
+/**
+ * Determine if a user is a tutor in a course.
+ *
+ * @param $userId integer The user's ID in imas_users.
+ * @param $courseId integer The course ID in imas_courses.
+ * @return bool bool True if the user is a tutor in the course. False if not.
+ */
+function isTutorInCourse($userId, $courseId)
+{
+	$stm = $GLOBALS['DBH']->prepare('SELECT id FROM imas_tutors WHERE userid=:userId AND courseid=:courseId');
+	$stm->execute(array(
+		':userId' => $userId,
+		':courseId' => $courseId
+	));
+	$result = $stm->fetchColumn(0);
+
+	if (null == $result || 1 > $result) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 /**
