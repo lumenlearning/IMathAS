@@ -323,11 +323,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $query .= ",groupsetid=:groupsetid";
                     $qarr[':groupsetid'] = $updategroupset;
                 }
-
-                if (!empty($defpoints)) {
-                    $query .= ",defpoints=:defpoints,defpenalty=:defpenalty";
-                    $qarr[':defpoints'] = $defpoints;
+                if (isset($_POST['defpenalty'])) {
+                    $query .= ",defpenalty=:defpenalty";
                     $qarr[':defpenalty'] = $defpenalty;
+                }
+                if (!empty($defpoints)) {
+                    $query .= ",defpoints=:defpoints";
+                    $qarr[':defpoints'] = $defpoints;
                 }
                 if (isset($_POST['copyendmsg'])) {
                     $query .= ",endmsg=:endmsg";
@@ -408,6 +410,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else {
 				$datebylti = 0;
 			}
+            if (empty($defpoints)) {
+                $defpoints = isset($CFG['AMS']['defpoints'])?$CFG['AMS']['defpoints']:10;
+            }
 
                 $query = "INSERT INTO imas_assessments (courseid,name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,";
                 $query .= "displaymethod,defpoints,defattempts,defpenalty,deffeedback,shuffle,gbcategory,password,cntingb,tutoredit,showcat,";
