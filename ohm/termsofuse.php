@@ -69,5 +69,5 @@ that implies that you control or own the site.</p>
 <p><strong>Attribution</strong></p>
 <p>Portions of this Terms of Service were remixed from <a href="http://opensource.org/ToS">http://opensource.org/ToS</a>, Creative Commons Attribution License.</p>
 <?php
-require("footer.php");
+require("../footer.php");
 ?>
