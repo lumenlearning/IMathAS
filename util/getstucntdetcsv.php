@@ -57,7 +57,8 @@
 		'Course Active Students',
 		'Is LTI',
 		'Template',
-		'Instructor',
+		'Instructor LastName',
+		'Instructor FirstName',
 		'Email',
 		'Total Active Students for Instructor',
 		'Institution',
@@ -107,7 +108,7 @@
 		$lticourses[$row[0]] = $row[1];
 	}
 
-	$query = "SELECT g.name AS gname,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id) AS cnt,u.email,g.parent,g.grouptype,c.ancestors FROM imas_students AS s JOIN imas_teachers AS t ";
+	$query = "SELECT g.name AS gname,u.id AS userid, u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id) AS cnt,u.email,g.parent,g.grouptype,c.ancestors FROM imas_students AS s JOIN imas_teachers AS t ";
 	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
 	if ($end != $now) {
 		$query .= "AND s.lastaccess<$end ";
@@ -119,22 +120,25 @@
 
 	//DB $result = mysql_query($query) or die("Query failed : $query " . mysql_error());
 	$stm = $DBH->query($query);
-	$lastgroup = '';  $lastparent = ''; $grpcnt = 0; $grpdata = array();  $lastuser = ''; $userdata = array(); $grpinstrcnt = 0;
+	$lastgroup = '';  $lastparent = ''; $grpcnt = 0; $grpdata = array();  $lastuser = 0; $userdata = array(); $grpinstrcnt = 0;
 	$lastemail; $instrstucnt = 0;
 	$seencid = array();
 	//DB while ($row = mysql_fetch_row($result)) {
 	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-		if ($row['LastName'].', '.$row['FirstName']!=$lastuser) {
-			if ($lastuser != '') {
+		if ($row['userid']!=$lastuser) {
+			if ($lastuser != 0) {
 				foreach ($userdata as $d) {
-					$d[] = $lastuser;
+					$d[] = $lastuserlastname;
+					$d[] = $lastuserfirstname;
 					$d[] = $lastemail;
 					$d[] = $instrstucnt;
 					$grpdata[] = $d;
 				}
 			}
 			$userdata = array();
-			$lastuser = $row['LastName'].', '.$row['FirstName'];
+			$lastuser = $row['userid'];
+			$lastuserlastname = $row['LastName'];
+			$lastuserfirstname = $row['FirstName'];
 			$lastemail = $row['email'];
 			$instrstucnt = 0;
 			$grpinstrcnt++;
@@ -175,7 +179,8 @@
 	}
 
 	foreach ($userdata as $d) {
-		$d[] = $lastuser;
+		$d[] = $lastuserlastname;
+		$d[] = $lastuserfirstname;
 		$d[] = $lastemail;
 		$d[] = $instrstucnt;
 		$grpdata[] = $d;
