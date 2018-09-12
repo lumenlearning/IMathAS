@@ -435,6 +435,12 @@ span.formright {
 	color:#AE131E;
 	font-weight: normal;
 }
+ul.courselist > li > a {
+	color: #1E74D1 !important;
+}
+.tablist > li > a {
+	color: #444 !important;
+}
 #header-menu-items {
 	color: #fff;
 }
