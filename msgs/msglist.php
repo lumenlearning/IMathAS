@@ -179,6 +179,28 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 				$message .= "<a href=\"" . $GLOBALS['basesiteurl'] . "/forms.php?action=chguserinfo\">click here to change your ";
 				$message .= "user preferences</a></p>\r\n";
 				mail($email,'New message notification',$message,$headers);
+
+		        // #### Begin OHM-specific code #####################################################
+			    // #### Begin OHM-specific code #####################################################
+			    // #### Begin OHM-specific code #####################################################
+			    // #### Begin OHM-specific code #####################################################
+			    // #### Begin OHM-specific code #####################################################
+
+                // OHM-specific details:
+                //   Replaced the previously unconditional usage of PHP's built-in mail() function.
+
+		        if (isset($CFG['GEN']['useSESmail'])) {
+			        ohmSESmail($email, $sendfrom, 'New message notification', $message);
+		        } else {
+					mail($email,'New message notification',$message,$headers);
+		        }
+
+		        // #### End OHM-specific code #######################################################
+			    // #### End OHM-specific code #######################################################
+			    // #### End OHM-specific code #######################################################
+			    // #### End OHM-specific code #######################################################
+			    // #### End OHM-specific code #######################################################
+
 			}
 			if ($FCMtokenTo != '') {
 				require_once("../includes/FCM.php");
