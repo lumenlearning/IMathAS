@@ -565,6 +565,9 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		if (($qdata['solutionopts']&2)==2 && $qdata['solution']!='') {
 			$addr = $GLOBALS['basesiteurl'] . "/assessment/showsoln.php?id=".$qidx.'&sig='.md5($qidx.$GLOBALS['sessiondata']['secsalt']);
 			$addr .= '&t='.($qdata['solutionopts']&1).'&cid='.$GLOBALS['cid'];
+			if ($GLOBALS['cid']=='embedq' && isset($GLOBALS['theme'])) {
+				$addr .= '&theme='.Sanitize::encodeUrlParam($GLOBALS['theme']);
+			}
 			echo formpopup(_("Written Example"),$addr,730,500,"button",true,"soln",$qref);
 		}
 		echo '</p></div>';
@@ -1090,7 +1093,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($reqsigfigs)) {
 			if ($reqsigfigs{0}=='=') {
 				$reqsigfigs = substr($reqsigfigs,1);
-				$answer = prettysigfig($answer,$reqsigfigs);
+				if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
+					$answer = implode(',', prettysigfig(explode(',', $answer), $reqsigfigs));
+				} else {
+					$answer = prettysigfig($answer,$reqsigfigs);
+				}
 				$tip .= "<br/>" . sprintf(_('Your answer should have exactly %d significant figures.'), $reqsigfigs);
 				$shorttip .= sprintf(_(', with exactly %d significant figures'), $reqsigfigs);
 			} else if ($reqsigfigs{0}=='[') {
@@ -1102,7 +1109,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$v = -1*floor(-log10(abs($answer))-1e-12) - $reqsigfigs;
 				}
 				if ($answer!=0  && $v < 0 && strlen($answer) - strpos($answer,'.')-1 + $v < 0) {
-					$answer = prettysigfig($answer,$reqsigfigs);
+					if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
+						$answer = implode(',', prettysigfig(explode(',', $answer), $reqsigfigs));
+					} else {
+						$answer = prettysigfig($answer,$reqsigfigs);
+					}
 				}
 				$tip .= "<br/>" . sprintf(_('Your answer should have at least %d significant figures.'), $reqsigfigs);
 				$shorttip .= sprintf(_(', with at least %d significant figures'), $reqsigfigs);
@@ -1572,6 +1583,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['reqdecimals'])) {if (is_array($options['reqdecimals'])) {$reqdecimals = $options['reqdecimals'][$qn];} else {$reqdecimals = $options['reqdecimals'];}}
+		if (isset($options['reqsigfigs'])) {if (is_array($options['reqsigfigs'])) {$reqsigfigs = $options['reqsigfigs'][$qn];} else {$reqsigfigs = $options['reqsigfigs'];}}
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 
 		if (!isset($sz)) { $sz = 20;}
@@ -1618,9 +1630,40 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$tip = '';
 			$eword = _('your answer');
 		}
-		list($longtip,$shorttip) = formathint($eword,$ansformats,'calculated',(in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats) || in_array('set',$ansformats) || in_array('exactset',$ansformats)), 1);
+		list($longtip,$shorttip) = formathint($eword,$ansformats,isset($reqdecimals)?$reqdecimals:null,'calculated',(in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats) || in_array('set',$ansformats) || in_array('exactset',$ansformats)), 1);
 		$tip .= $longtip;
-
+		if (isset($reqsigfigs) && !in_array("scinot",$ansformats) && !in_array("scinotordec",$ansformats) && !in_array("decimal",$ansformats)) {
+			unset($reqsigfigs);
+		}
+		if (isset($reqsigfigs)) {
+			if ($reqsigfigs{0}=='=') {
+				$reqsigfigs = substr($reqsigfigs,1);
+				if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
+					$answer = implode(',', prettysigfig(explode(',', $answer), $reqsigfigs,'',false,in_array("scinot",$ansformats)||in_array("scinotordec",$ansformats)));
+				} else {
+					$answer = prettysigfig($answer,$reqsigfigs,'',false,in_array("scinot",$ansformats)||in_array("scinotordec",$ansformats));
+				}
+				$tip .= "<br/>" . sprintf(_('Your answer should have exactly %d significant figures.'), $reqsigfigs);
+				$shorttip .= sprintf(_(', with exactly %d significant figures'), $reqsigfigs);
+			} else if ($reqsigfigs{0}=='[') {
+				$reqsigfigparts = explode(',',substr($reqsigfigs,1,-1));
+				$tip .= "<br/>" . sprintf(_('Your answer should have between %d and %d significant figures.'), $reqsigfigparts[0], $reqsigfigparts[1]);
+				$shorttip .= sprintf(_(', with %d - %d significant figures'), $reqsigfigparts[0], $reqsigfigparts[1]);
+			} else {
+				if ($answer!=0) {
+					$v = -1*floor(-log10(abs($answer))-1e-12) - $reqsigfigs;
+				}
+				if ($answer!=0  && $v < 0 && strlen($answer) - strpos($answer,'.')-1 + $v < 0) {
+					if (in_array('list',$ansformats) || in_array('exactlist',$ansformats) || in_array('orderedlist',$ansformats)) {
+						$answer = implode(',', prettysigfig(explode(',', $answer), $reqsigfigs,'',false,in_array("scinot",$ansformats)||in_array("scinotordec",$ansformats)));
+					} else {
+						$answer = prettysigfig($answer,$reqsigfigs,'',false,in_array("scinot",$ansformats)||in_array("scinotordec",$ansformats));
+					}
+				}
+				$tip .= "<br/>" . sprintf(_('Your answer should have at least %d significant figures.'), $reqsigfigs);
+				$shorttip .= sprintf(_(', with at least %d significant figures'), $reqsigfigs);
+			}
+		}
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -1669,7 +1712,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$sa = '`'.decimaltofraction($answer,"mixednumber").'`';
 			} else if (in_array("fraction",$ansformats) || in_array("reducedfraction",$ansformats)) {
 				$sa = '`'.decimaltofraction($answer).'`';
-			} else if (in_array("scinot",$ansformats)) {
+			} else if (in_array("scinot",$ansformats) || (in_array("scinotordec",$ansformats) && (abs($answer)>1000 || abs($answer)<.001))) {
 				$sa = '`'.makescinot($answer,-1,'*').'`';
 			} else {
 				$sa = $answer;
@@ -1681,6 +1724,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answerboxsize'])) {if (is_array($options['answerboxsize'])) {$sz = $options['answerboxsize'][$qn];} else {$sz = $options['answerboxsize'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['reqdecimals'])) {if (is_array($options['reqdecimals'])) {$reqdecimals = $options['reqdecimals'][$qn];} else {$reqdecimals = $options['reqdecimals'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 
@@ -1713,6 +1757,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= getcolormark($colorbox);
 			$out .= '</td><td class="matrixright">&nbsp;</td></tr></table>';
 			$tip = _('Enter each element of the matrix as  number (like 5, -3, 2.2)');
+			if (isset($reqdecimals)) {
+				$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
+			}
 		} else {
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -1721,6 +1768,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			}
 			if (!isset($sz)) { $sz = 20;}
 			$tip = _('Enter your answer as a matrix filled with numbers, like ((2,3,4),(3,4,5))');
+			if (isset($reqdecimals)) {
+				$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
+			}
 			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=qn$qn id=qn$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 			if ($showtips==2) {
 				$out .= "onfocus=\"showehdd('qn$qn','$tip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
@@ -1747,6 +1797,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['hidepreview'])) {if (is_array($options['hidepreview'])) {$hidepreview = $options['hidepreview'][$qn];} else {$hidepreview = $options['hidepreview'];}}
 		if (isset($options['answer'])) {if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['reqdecimals'])) {if (is_array($options['reqdecimals'])) {$reqdecimals = $options['reqdecimals'][$qn];} else {$reqdecimals = $options['reqdecimals'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 
@@ -1783,7 +1834,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if (!isset($hidepreview)) {$preview .= "<input type=button id=\"pbtn$qn\" class=btn value=\"" . _('Preview') . "\" onclick=\"matrixcalc('qn$qn','p$qn',{$answersize[0]},{$answersize[1]})\" /> &nbsp;\n";}
 			$preview .= "<span id=p$qn></span>\n";
 			$out .= "<script type=\"text/javascript\">matcalctoproc[$qn] = 1; matsize[$qn]='{$answersize[0]},{$answersize[1]}';</script>\n";
-			$tip .= formathint(_('each element of the matrix'),$ansformats,'calcmatrix');
+			$tip .= formathint(_('each element of the matrix'),$ansformats,isset($reqdecimals)?$reqdecimals:null,'calcmatrix');
 			//$tip = "Enter each element of the matrix as  number (like 5, -3, 2.2) or as a calculation (like 5/3, 2^3, 5+4)";
 		} else {
 			if ($multi==0) {
@@ -1792,7 +1843,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$qnref = ($multi-1).'-'.($qn%1000);
 			}
 			$shorttip = _('Enter your answer as a matrix, like ((2,3,4),(1,4,5))');
-			$tip = $shorttip.'<br/>'.formathint(_('each element of the matrix'),$ansformats,'calcmatrix');
+			$tip = $shorttip.'<br/>'.formathint(_('each element of the matrix'),$ansformats,isset($reqdecimals)?$reqdecimals:null,'calcmatrix');
 			if (!isset($sz)) { $sz = 20;}
 			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=\"tc$qn\" id=\"tc$qn\" value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 			if ($showtips==2) {
@@ -1997,6 +2048,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['reqdecimals'])) {if (is_array($options['reqdecimals'])) {$reqdecimals = $options['reqdecimals'][$qn];} else {$reqdecimals = $options['reqdecimals'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 
@@ -2024,6 +2076,10 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		} else {
 			$tip = _('Enter your answer as an n-tuple of numbers.  Example: (2,5.5172)') . "<br/>";
 			$shorttip = _('Enter an n-tuple');
+		}
+		if (isset($reqdecimals)) {
+			$tip .= sprintf(_('Each value should be accurate to %d decimal places.'), $reqdecimals).'<br/>';
+			$shorttip .= sprintf(_(", each value accurate to %d decimal places"), $reqdecimals);
 		}
 		if (!in_array('nosoln',$ansformats) && !in_array('nosolninf',$ansformats))  {
 			$tip .= _('Enter DNE for Does Not Exist');
@@ -2060,6 +2116,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['displayformat'])) {if (is_array($options['displayformat'])) {$displayformat = $options['displayformat'][$qn];} else {$displayformat = $options['displayformat'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['hidepreview'])) {if (is_array($options['hidepreview'])) {$hidepreview = $options['hidepreview'][$qn];} else {$hidepreview = $options['hidepreview'];}}
+		if (isset($options['reqdecimals'])) {if (is_array($options['reqdecimals'])) {$reqdecimals = $options['reqdecimals'][$qn];} else {$reqdecimals = $options['reqdecimals'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 
@@ -2091,7 +2148,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$tip = _('Enter your answer as an n-tuple of numbers.  Example: (2,5.5172)') . "<br/>";
 			$shorttip = _('Enter an n-tuple');
 		}
-		$tip .= formathint('each value',$ansformats,'calcntuple');
+		$tip .= formathint('each value',$ansformats,isset($reqdecimals)?$reqdecimals:null,'calcntuple');
 
 		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 		if ($showtips==2) { //eqntips: work in progress
@@ -2181,6 +2238,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['hidepreview'])) {if (is_array($options['hidepreview'])) {$hidepreview = $options['hidepreview'][$qn];} else {$hidepreview = $options['hidepreview'];}}
 		if (isset($options['ansprompt'])) {if (is_array($options['ansprompt'])) {$ansprompt = $options['ansprompt'][$qn];} else {$ansprompt = $options['ansprompt'];}}
+		if (isset($options['reqdecimals'])) {if (is_array($options['reqdecimals'])) {$reqdecimals = $options['reqdecimals'][$qn];} else {$reqdecimals = $options['reqdecimals'];}}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 
@@ -2196,7 +2254,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$tip = _('Enter your answer as a complex number in a+bi form.  Example: 2+5i') . "<br/>";
 			$shorttip = _('Enter a complex number');
 		}
-		$tip .= formathint('each value',$ansformats,'calccomplex');
+		$tip .= formathint('each value',$ansformats,isset($reqdecimals)?$reqdecimals:null,'calccomplex');
 
 		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 		if ($showtips==2) { //eqntips: work in progress
@@ -2599,11 +2657,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		}
 		//$tip .= "Enter values as numbers (like 5, -3, 2.2) or as calculations (like 5/3, 2^3, 5+4)<br/>";
 		//$tip .= "Enter DNE for an empty set, oo for Infinity";
-		$tip .= formathint(_('each value'),$ansformats,'calcinterval');
-		if (isset($reqdecimals)) {
-			$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
-		}
-
+		$tip .= formathint(_('each value'),$ansformats,isset($reqdecimals)?$reqdecimals:null,'calcinterval');
+		
 		$out .= "<input class=\"text $colorbox\" type=\"text\"  size=\"$sz\" name=tc$qn id=tc$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\"  ";
 		if ($showtips==2) { //eqntips: work in progress
 			if ($multi==0) {
@@ -3316,28 +3371,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if (isset($reqsigfigs)) {
-			$reqsigfigoffset = 0;
-			$reqsigfigparts = explode('+-',$reqsigfigs);
-			$reqsigfigs = $reqsigfigparts[0];
-			$sigfigscoretype = array('abs',0);
-			if (count($reqsigfigparts)>1) {
-				if (substr($reqsigfigparts[1], -1)=='%') {
-					$sigfigscoretype = array('rel', substr($reqsigfigparts[1], 0, -1));
-				} else {
-					$sigfigscoretype = array('abs',$reqsigfigparts[1]);
-				}
-			}
-			if ($reqsigfigs{0}=='=') {
-				$exactsigfig = true;
-				$reqsigfigs = substr($reqsigfigs,1);
-			} else if ($reqsigfigs{0}=='[') {
-				$exactsigfig = false;
-				$reqsigfigparts = explode(',',substr($reqsigfigs,1,-1));
-				$reqsigfigs = $reqsigfigparts[0];
-				$reqsigfigoffset = $reqsigfigparts[1] - $reqsigfigparts[0];
-			} else {
-				$exactsigfig = false;
-			}
+			list($reqsigfigs, $exactsigfig, $reqsigfigoffset, $sigfigscoretype) = parsereqsigfigs($reqsigfigs);
 		}
 
 		if ($answer==='') {
@@ -4174,6 +4208,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}
 		if (isset($options['reltolerance'])) {if (is_array($options['reltolerance'])) {$reltolerance = $options['reltolerance'][$qn];} else {$reltolerance = $options['reltolerance'];}}
 		if (isset($options['abstolerance'])) {if (is_array($options['abstolerance'])) {$abstolerance = $options['abstolerance'][$qn];} else {$abstolerance = $options['abstolerance'];}}
+		if (isset($options['reqsigfigs'])) {if (is_array($options['reqsigfigs'])) {$reqsigfigs = $options['reqsigfigs'][$qn];} else {$reqsigfigs = $options['reqsigfigs'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
 		if (isset($options['requiretimes'])) {if (is_array($options['requiretimes'])) {$requiretimes = $options['requiretimes'][$qn];} else {$requiretimes = $options['requiretimes'];}}
 		if (isset($options['requiretimeslistpart'])) {if (is_array($options['requiretimeslistpart'])) {$requiretimeslistpart = $options['requiretimeslistpart'][$qn];} else {$requiretimeslistpart = $options['requiretimeslistpart'];}}
@@ -4202,12 +4237,20 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			//return 0;
 			$formatok = "nowhole";
 		}
-
+		
+		if (isset($reqsigfigs)) {
+			if (!in_array("scinot",$ansformats) && !in_array("scinotordec",$ansformats) && !in_array("decimal",$ansformats)) {
+				unset($reqsigfigs);	
+			} else {
+				list($reqsigfigs, $exactsigfig, $reqsigfigoffset, $sigfigscoretype) = parsereqsigfigs($reqsigfigs);
+			}
+		}
+		
 		if (isset($requiretimeslistpart) && strpos($requiretimeslistpart,';')!==false) {
 			$requiretimeslistpart = explode(';', $requiretimeslistpart);
 		}
 
-		if (in_array("scinot",$ansformats)) {
+		if (in_array("scinot",$ansformats) || in_array("scinotordec",$ansformats)) {
 			$answer = str_replace('xx','*',$answer);
 		}
 		if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
@@ -4381,7 +4424,18 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							}
 						}*/
 					} else if (is_numeric($givenans)) {
-						if (isset($abstolerance)) {
+						if (isset($reqsigfigs)) {
+							$tocheck = preg_replace('/\s*(\*|x|X|×)\s*10\s*\^/','E',$orarr[$j]);
+							if (checksigfigs($tocheck, $anans, $reqsigfigs, $exactsigfig, $reqsigfigoffset, $sigfigscoretype)) {
+								if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
+									$formatok = "nopart";  $partformatok = false;
+								}
+								if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
+							} else if ($exactsigfig && checksigfigs($tocheck, $anans, $reqsigfigs, false, $reqsigfigoffset, $sigfigscoretype)) {
+								//see if it'd be right aside from exact sigfigs
+								$formatok = "nopart";  $partformatok = false; $correctanyformat++; $foundloc = $j; break 2;
+							}
+						} else if (isset($abstolerance)) {
 							if (abs($anans-$givenans) < $abstolerance+(($anans==0||abs($anans)>1)?1E-12:(abs($anans)*1E-12))) {
 								if (isset($requiretimeslistpart) && is_array($requiretimeslistpart) && checkreqtimes($orarr[$j],$requiretimeslistpart[$i])==0) {
 									$formatok = "nopart";  $partformatok = false;
@@ -7216,6 +7270,19 @@ function checkanswerformat($tocheck,$ansformats) {
 			return false;
 		}
 	}
+	if (in_array("decimal", $ansformats)) {
+		$totest = str_replace(' ','',$tocheck);
+		if (!is_numeric($totest) || !preg_match('/^[\d\.]+$/',$totest)) {
+			return false;
+		}
+	}
+	if (in_array("scinotordec",$ansformats)) {
+		$totest = str_replace(' ','',$tocheck);
+		if (!is_numeric($totest) && !preg_match('/^\-?[1-9](\.\d*)?(\*|x|X|×)10\^(\(?\-?\d+\)?)$/',$totest)) {
+			echo "here: $totest";
+			return false;
+		}
+	}
 	if (in_array("scinot",$ansformats)) {
 		$totest = str_replace(' ','',$tocheck);
 		if (!preg_match('/^\-?[1-9](\.\d*)?(\*|x|X|×)10\^(\(?\-?\d+\)?)$/',$totest)) {
@@ -7266,7 +7333,7 @@ function checkanswerformat($tocheck,$ansformats) {
 	return true;
 }
 
-function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false) {
+function formathint($eword,$ansformats,$reqdecimals,$calledfrom, $islist=false,$doshort=false) {
 	$tip = '';
 	$shorttip = '';
 	if (in_array('set',$ansformats) || in_array('exactset',$ansformats)) {
@@ -7308,6 +7375,12 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 			$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4), an integer (like 4 or -2), or exact decimal (like 0.5 or 1.25)'), $eword);
 			$shorttip = $islist?sprintf(_('Enter a %s of fractions or exact decimals'), $listtype):_('Enter a fraction or exact decimal');
 		}
+	} else if (in_array('decimal',$ansformats)) {
+		$tip .= sprintf(_('Enter %s as an integer or decimal value (like 5 or 3.72)'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of integer or decimal values'), $listtype):_('Enter an integer or decimal value');
+	} else if (in_array('scinotordec',$ansformats)) {
+		$tip .= sprintf(_('Enter %s as a decimal or in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of numbers using decimals or scientific notation'), $listtype):_('Enter a number using decimals or scientific notation');
 	} else if (in_array('scinot',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of numbers using scientific notation'), $listtype):_('Enter a number using scientific notation');
@@ -7330,11 +7403,11 @@ function formathint($eword,$ansformats,$calledfrom, $islist=false,$doshort=false
 	}
 	if (in_array('nodecimal',$ansformats)) {
 		$tip .= "<br/>" . _('Decimal values are not allowed');
-	} else if (isset($reqdecimals)) {
+	} else if (isset($reqdecimals) && $reqdecimals !== null) {
 		if ($reqdecimals == 0) {
-			$tip .= "<br/>" . _('Your answer should be accurate to the nearest integer.');
+			$tip .= "<br/>" . sprintf(_('Enter %s accurate to the nearest integer.'), $eword);
 		} else {
-			$tip .= "<br/>" . sprintf(_('Your answer should be accurate to %d decimal places.'), $reqdecimals);
+			$tip .= "<br/>" . sprintf(_('Enter %s accurate to %d decimal places.'), $eword, $reqdecimals);
 		}
 	}
 	if (in_array('notrig',$ansformats)) {

@@ -83,9 +83,9 @@
 	$msgid = Sanitize::onlyInt($_GET['msgid']);
 	$query = "SELECT imas_msgs.*,imas_users.LastName,imas_users.FirstName,imas_users.email,imas_users.hasuserimg,imas_students.section ";
 	if ($type=='sent') {
-		$query .= "FROM imas_msgs JOIN imas_users ON imas_msgs.msgto=imas_users.id ";
+		$query .= "FROM imas_msgs LEFT JOIN imas_users ON imas_msgs.msgto=imas_users.id ";
 	} else {
-		$query .= "FROM imas_msgs JOIN imas_users ON imas_msgs.msgfrom=imas_users.id ";
+		$query .= "FROM imas_msgs LEFT JOIN imas_users ON imas_msgs.msgfrom=imas_users.id ";
 	}
 	$query .= "LEFT JOIN imas_students ON imas_students.userid=imas_users.id AND imas_students.courseid=:courseid ";
 	$query .= "WHERE imas_msgs.id=:id ";
@@ -122,17 +122,25 @@
 	} else {
 		echo '<tr><td><b>'._('From').':</b></td>';
 	}
-	printf("<td>%s, %s", Sanitize::encodeStringForDisplay($line['LastName']),Sanitize::encodeStringForDisplay($line['FirstName']));
+	if ($line['FirstName']!==null) {
+		printf("<td>%s, %s", Sanitize::encodeStringForDisplay($line['LastName']),Sanitize::encodeStringForDisplay($line['FirstName']));
+	} else if ($type!='sent' && $line['msgfrom']==0) {
+		echo '<td>'._('[System Message]');
+	} else {
+		echo '<td>'._('[Deleted]');
+	}
 	if ($line['section']!='') {
 		echo ' <span class="small">(Section: '.Sanitize::encodeStringForDisplay($line['section']).')</span>';
 	}
 	if (isset($teacherof[$line['courseid']])) {
-		echo " <a href=\"mailto:".Sanitize::emailAddress($line['email'])."\">email</a> | ";
-		echo " <a href=\"$imasroot/course/gradebook.php?cid=". Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeUrlParam($line['msgfrom'])."\" target=\"_popoutgradebook\">gradebook</a>";
+		if ($line['email'] !== null) {
+			echo " <a href=\"mailto:".Sanitize::emailAddress($line['email'])."\">email</a> | ";
+			echo " <a href=\"$imasroot/course/gradebook.php?cid=". Sanitize::courseId($line['courseid'])."&stu=".Sanitize::encodeUrlParam($line['msgfrom'])."\" target=\"_popoutgradebook\">gradebook</a>";
+		}
 		if (preg_match('/Question\s+about\s+#(\d+)\s+in\s+(.*)\s*$/',$line['title'],$matches)) {
 			$qn = $matches[1];
 			$aname = $matches[2];
-			$stm = $DBH->prepare("SELECT id,startdate,enddate,allowlate FROM imas_assessments WHERE (name=:name OR name=:name2) AND courseid=:courseid");
+			$stm = $DBH->prepare("SELECT id,startdate,enddate,allowlate,LPcutoff FROM imas_assessments WHERE (name=:name OR name=:name2) AND courseid=:courseid");
 			$stm->execute(array(':name'=>$aname, ':name2'=>htmlentities($aname), ':courseid'=>$line['courseid']));
 			if ($stm->rowCount()>0) {
 				$adata = $stm->fetch(PDO::FETCH_ASSOC);
@@ -201,7 +209,7 @@
 		} else {
 			$cansendmsgs = true;
 		}
-		if ($cansendmsgs) {
+		if ($cansendmsgs && $line['msgfrom']>0 && $line['FirstName']!==null) {
 			echo "<button type=\"button\" onclick=\"window.location.href='msglist.php?"
 				. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid,
 					'page' => $page, 'type' => $type, 'add' => 'new', 'to' => $line['msgfrom'], 'toquote' => $msgid))

@@ -32,6 +32,7 @@ if ($stm->rowCount()==0) {
 	$n = 30;
 	$showtostu = 7;
 	$daid = 0;
+	$drillname = "";
 	$drillsummary = "";
 	$startdate = time();
 	$enddate = time() + 7*24*60*60;
@@ -85,13 +86,12 @@ if (isset($_GET['record'])) {
 		$startdate = 0;
 		$enddate =  2000000000;
 	}
-	$_POST['title'] = htmlentities($_POST['title']);
+	$_POST['title'] = Sanitize::stripHtmlTags($_POST['title']);
 
-	require_once("../includes/htmLawed.php");
-	if ($_POST['summary']=='<p>Enter summary here (displays on course page)</p>') {
+	if ($_POST['summary']=='<p>Enter summary here (displays on course page)</p>' || $_POST['summary']=='<p></p>') {
 		$_POST['summary'] = '';
 	} else {
-		$_POST['summary'] = myhtmLawed($_POST['summary']);
+		$_POST['summary'] = Sanitize::incomingHtml($_POST['summary']);
 	}
 
 	if (isset($_POST['descr'])) {
@@ -590,19 +590,19 @@ printf("<form id=\"selform\" method=\"post\" action=\"adddrillassess.php?cid=%s&
     $cid, $daid, Sanitize::encodeUrlParam($block), Sanitize::encodeUrlParam($totb));
 ?>
 		<span class=form>Title: </span>
-		<span class=formright><input type=text size=60 name="title" placeholder="Enter title here" value="<?php echo Sanitize::encodeStringForDisplay($drillname);?>" required>
+		<span class=formright><input type=text size=60 name="title" value="<?php echo Sanitize::encodeStringForDisplay($drillname);?>" required />
 		</span><BR class=form>
 
-		Summary<BR>
+		Summary: (shows on course page)<BR>
 		<div class=editor>
 			<textarea cols=60 rows=10 id=summary name=summary style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($drillsummary, true);?></textarea>
 		</div>
 		<br/>
 		<span class=form>Show:</span>
 		<span class=formright>
-			<input type=radio name="avail" value="0" <?php writeHtmlChecked($avail,0);?> onclick="document.getElementById('datediv').style.display='none';document.getElementById('altcaldiv').style.display='none';"/>Hide<br/>
-			<input type=radio name="avail" value="1" <?php writeHtmlChecked($avail,1);?> onclick="document.getElementById('datediv').style.display='block';document.getElementById('altcaldiv').style.display='none';"/>Show by Dates<br/>
-			<input type=radio name="avail" value="2" <?php writeHtmlChecked($avail,2);?> onclick="document.getElementById('datediv').style.display='none';document.getElementById('altcaldiv').style.display='block';"/>Show Always<br/>
+			<input type=radio name="avail" value="0" <?php writeHtmlChecked($avail,0);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideUp(100);"/>Hide<br/>
+			<input type=radio name="avail" value="1" <?php writeHtmlChecked($avail,1);?> onclick="$('#datediv').slideDown(100);$('#altcaldiv').slideUp(100);"/>Show by Dates<br/>
+			<input type=radio name="avail" value="2" <?php writeHtmlChecked($avail,2);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideDown(100);"/>Show Always<br/>
 		</span><br class="form"/>
 		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<div id="datediv" style="display:<?php echo ($avail==1)?"block":"none"; ?>">

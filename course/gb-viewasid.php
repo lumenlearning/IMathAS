@@ -504,7 +504,7 @@
 			$stm->execute(array(':starttime'=>$_GET['starttime'], ':assessmentid'=>$qp[2], ':qval'=>$qp[1]));
 		}
 		$query = "SELECT imas_assessments.name,imas_assessments.timelimit,imas_assessments.defpoints,imas_assessments.tutoredit,imas_assessments.defoutcome,";
-		$query .= "imas_assessments.showhints,imas_assessments.deffeedback,imas_assessments.startdate,imas_assessments.enddate,imas_assessments.allowlate,imas_assessment_sessions.* ";
+		$query .= "imas_assessments.showhints,imas_assessments.deffeedback,imas_assessments.startdate,imas_assessments.enddate,imas_assessments.LPcutoff,imas_assessments.allowlate,imas_assessment_sessions.* ";
 		$query .= "FROM imas_assessments,imas_assessment_sessions ";
 		$query .= "WHERE imas_assessments.id=imas_assessment_sessions.assessmentid AND imas_assessment_sessions.id=:id AND imas_assessments.courseid=:courseid";
 		if (!$isteacher && !$istutor) {
@@ -521,12 +521,7 @@
 			exit;
 		}
 		$line=$stm->fetch(PDO::FETCH_ASSOC);
-		if ($line['ver']==1 && $line['endtime']<1483117200) { //hack fix: Use 32-bit equivalent randomizers for assignments completed before rehost
-			$GLOBALS['assessver'] = 2;
-		} else {
-			$GLOBALS['assessver'] = $line['ver'];
-		}
-		
+		$GLOBALS['assessver'] = $line['ver'];
 
 		if (!$isteacher && !$istutor) {
 			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";
@@ -846,6 +841,7 @@
 		echo ' <button type="button" id="showanstoggle" onclick="showallans()">'._('Show All Answers').'</button>';
 		echo ' <button type="button" id="prevtoggle" onclick="previewall()">'._('Preview All').'</button></p>';
 		$total = 0;
+		$GLOBALS['capturedrawinit'] = true;
 
 		for ($i=0; $i<count($questions);$i++) {
 			echo "<div ";
@@ -991,27 +987,29 @@
 								//remove any $#$ numeric value bits
 								$laarr[$k] = preg_replace('/\$#\$.*?(&|$)/','$1', $laarr[$k]);
 
-								//replace MC with visual of answer
-								if (strpos($laarr[$k],'$!$')) {
-									if (strpos($laarr[$k],'&')) { //is multipart q
-										$laparr = explode('&',$laarr[$k]);
-										foreach ($laparr as $lk=>$v) {
-											if (strpos($v,'$!$')!==false) {
-												$qn = ($i+1)*1000+$lk;
-												$tmp = explode('$!$',$v);
-												$laparr[$lk] = prepchoicedisp($choicesdata[$qn][0]=='matching'?$tmp[0]:$tmp[1], $choicesdata[$qn]);
-											} else {
-												$laparr[$lk] = Sanitize::encodeStringForDisplay(str_replace(array('%nbsp;','%%'),array('&nbsp;','&'),$laparr[$lk]));
-											}
-										}
-										$laarr[$k] = implode('; ',$laparr);
+								$laparr = explode('&',$laarr[$k]); //handle multipart
+								foreach ($laparr as $lk=>$v) {
+									if (count($laparr)>1) {
+										$qn = ($i+1)*1000+$lk;
 									} else {
-										$tmp = explode('$!$',$laarr[$k]);
-										$laarr[$k] = prepchoicedisp($choicesdata[$i][0]=='matching'?$tmp[0]:$tmp[1], $choicesdata[$i]);
+										$qn = $i;
 									}
-								} else {
-									$laarr[$k] = Sanitize::encodeStringForDisplay(str_replace(array('&','%nbsp;','%%'),array('; ','&nbsp;','&'),strip_tags($laarr[$k])));
+									if (strpos($v,'$!$')!==false) { //choices
+										$tmp = explode('$!$',$v);
+										if ($qn==$i && !isset($choicesdata[$qn])) { //handle single-part multipart
+											$choicesdata[$qn] = $choicesdata[($i+1)*1000];
+										}
+										$laparr[$lk] = prepchoicedisp($choicesdata[$qn][0]=='matching'?$tmp[0]:$tmp[1], $choicesdata[$qn]);
+									} else if (strpos($v,';;')!==false) { //drawing
+										if ($qn==$i && !isset($GLOBALS['drawinitdata'][$qn])) { //handle single-part multipart
+											$GLOBALS['drawinitdata'][$qn] = $GLOBALS['drawinitdata'][($i+1)*1000];
+										}
+										$laparr[$lk] = '<span onmouseover="showgraphtip(this,\''.Sanitize::encodeStringForJavascript($v).'\',\''.Sanitize::encodeStringForJavascript($GLOBALS['drawinitdata'][$qn]).'\')" onmouseout="tipout()">[view]</span>';
+									} else {
+										$laparr[$lk] = Sanitize::encodeStringForDisplay(str_replace(array('%nbsp;','%%'),array('&nbsp;','&'),$v));
+									}
 								}
+								$laarr[$k] = implode('; ',$laparr);
 
 								echo $laarr[$k];
 							}
@@ -1169,11 +1167,7 @@
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$asid));
 		$line=$stm->fetch(PDO::FETCH_ASSOC);
-		if ($line['ver']==1 && $line['endtime']<1483117200) { //hack fix: Use 32-bit equivalent randomizers for assignments completed before rehost
-			$GLOBALS['assessver'] = 2;
-		} else {
-			$GLOBALS['assessver'] = $line['ver'];
-		}
+		$GLOBALS['assessver'] = $line['ver'];
 
 		if (!$isteacher && !$istutor) {
 			$query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime) VALUES ";

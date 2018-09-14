@@ -137,7 +137,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 		$forumname = Sanitize::stripHtmlTags($_POST['name']);
 
-		if ($_POST['description']=='<p>Enter forum description here</p>') {
+		if ($_POST['description']=='<p>Enter forum description here</p>' || $_POST['description']=='<p></p>') {
 			$forumdesc = '';
 		} else {
 			$forumdesc = Sanitize::incomingHtml($_POST['description']);
@@ -279,6 +279,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$savetitle = _("Save Changes");
 		} else {  //ADD MODE
 			//set defaults
+			$line['name'] = "";
 			$line['description'] = "";
 			$line['avail'] = 1;
 			$line['caltag'] = 'FP--FR';
@@ -287,7 +288,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$line['rubric'] = 0;
 			$line['postinstr'] = '';
 			$line['replyinstr'] = '';
-			$line['allowlate'] = 0;
+			$line['allowlate'] = isset($CFG['FORUM']['allowlate'])?$CFG['FORUM']['allowlate']:0;
 			$gradeoutcomes = array();
 			$startdate = time();
 			$enddate = time() + 7*24*60*60;
@@ -469,11 +470,11 @@ if ($overwriteBody==1) {
 	<div id="headeraddforum" class="pagetitle"><h1><?php echo $pagetitle ?><img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=forumitems','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/></h1></div>
 
 	<form method=post action="addforum.php<?php echo $page_formActionTag ?>">
-		<span class=form>Name: </span>
-		<span class=formright><input type=text size=60 name=name placeholder="Enter Forum Name here" value="<?php echo Sanitize::encodeStringForDisplay($line['name']);?>" required></span>
+		<span class=form>Forum Name: </span>
+		<span class=formright><input type=text size=60 name=name value="<?php echo Sanitize::encodeStringForDisplay($line['name']);?>" required /></span>
 		<BR class=form>
 
-		Description:<BR>
+		Description: (shows on course page)<BR>
 		<div class=editor>
 		<textarea cols=60 rows=20 id=description name=description style="width: 100%">
 		<?php echo Sanitize::encodeStringForDisplay($line['description']);?></textarea>
@@ -500,9 +501,9 @@ if ($overwriteBody==1) {
 		<br class="form"/>
 		<span class=form>Show:</span>
 		<span class=formright>
-			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="document.getElementById('datediv').style.display='none';"/>Hide<br/>
-			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="document.getElementById('datediv').style.display='block';"/>Show by Dates<br/>
-			<input type=radio name="avail" value="2" <?php writeHtmlChecked($line['avail'],2);?> onclick="document.getElementById('datediv').style.display='none';"/>Show Always<br/>
+			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="$('#datediv').slideUp(100);"/>Hide<br/>
+			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="$('#datediv').slideDown(100);"/>Show by Dates<br/>
+			<input type=radio name="avail" value="2" <?php writeHtmlChecked($line['avail'],2);?> onclick="$('#datediv').slideUp(100);"/>Show Always<br/>
 		</span><br class="form"/>
 		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">
@@ -612,7 +613,7 @@ if ($overwriteBody==1) {
 				echo ' on ';
 				writeHtmlSelect("allowlateon",$page_allowlateonSelect['val'],$page_allowlateonSelect['label'],floor($line['allowlate']/10)%10);
 				?>
-				<br/><label><input type="checkbox" name="latepassafterdue" <?php writeHtmlChecked($line['allowlate']>100,true); ?>> Allow LatePasses after due date, within 1 LatePass period</label>
+				<br/><label><input type="checkbox" name="latepassafterdue" <?php writeHtmlChecked($line['allowlate']>100,true); ?>> Allow LatePasses after due date</label>
 			</span><BR class=form>
 
 		<span class="form">Calendar icon:</span>

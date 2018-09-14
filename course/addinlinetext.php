@@ -101,9 +101,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$isplaylist = 0;
 		}
 
-		require_once("../includes/htmLawed.php");
-		$_POST['title'] = htmlentities($_POST['title']);
-		$_POST['text'] = myhtmLawed($_POST['text']);
+		$_POST['title'] = Sanitize::stripHtmlTags($_POST['title']);
+		$_POST['text'] = Sanitize::incomingHtml($_POST['text']);
 
 		$outcomes = array();
 		if (isset($_POST['outcomes'])) {
@@ -286,6 +285,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$savetitle = _("Save Changes");
 	} else {
 		//set defaults
+		$line['title'] = "";
 		$line['text'] = "";
 		$line['avail'] = 1;
 		$line['oncal'] = 0;
@@ -408,7 +408,6 @@ function chghidetitle() {
 	var hidetitle = $("input[name=hidetitle]").prop("checked");
 	if (hidetitle) {
 		$("#titlewrap").hide();
-		console.log(titleinput.prop("required"));
 		if (!!titleinput.prop("required")) {
 			titleinput.data("hasrequired",true);
 			titleinput.prop("required", false);
@@ -433,13 +432,13 @@ $(function() { chghidetitle(); });
 	<span class=form>Title: </span>
 	<span class=formright>
 		<span id="titlewrap" <?php if ($hidetitle==true) {echo 'style="display:none;"';} ?>>
-		<input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$line['title']);?>"><br/>
+		<input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$line['title']);?>" required /><br/>
 		</span>
 		<input type="checkbox" name="hidetitle" value="1" onclick="chghidetitle()" <?php writeHtmlChecked($hidetitle,true) ?>/>
 		Hide title and icon
 	</span><BR class=form>
 
-	Text:<BR>
+	Text: (shows on course page)<BR>
 	<div class=editor>
 		<textarea cols=60 rows=20 id=text name=text style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($line['text'], true);?></textarea>
 	</div>
@@ -477,9 +476,9 @@ $(function() { chghidetitle(); });
 	<div>
 		<span class=form>Show:</span>
 		<span class=formright>
-			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="document.getElementById('datediv').style.display='none';document.getElementById('altcaldiv').style.display='none';"/>Hide<br/>
-			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="document.getElementById('datediv').style.display='block';document.getElementById('altcaldiv').style.display='none';"/>Show by Dates<br/>
-			<input type=radio name="avail" value="2" <?php writeHtmlChecked($line['avail'],2);?> onclick="document.getElementById('datediv').style.display='none';document.getElementById('altcaldiv').style.display='block';"/>Show Always<br/>
+			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideUp(100);"/>Hide<br/>
+			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="$('#datediv').slideDown(100);$('#altcaldiv').slideUp(100);"/>Show by Dates<br/>
+			<input type=radio name="avail" value="2" <?php writeHtmlChecked($line['avail'],2);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideDown(100);"/>Show Always<br/>
 		</span><br class="form"/>
 		<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">

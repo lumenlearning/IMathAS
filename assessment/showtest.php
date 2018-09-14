@@ -58,7 +58,7 @@
 		//check dates, determine if review
 		$aid = Sanitize::onlyInt($_GET['id']);
 		$isreview = false;
-		$stm = $DBH->prepare("SELECT deffeedback,startdate,enddate,reviewdate,shuffle,itemorder,password,avail,isgroup,groupsetid,deffeedbacktext,timelimit,courseid,istutorial,name,allowlate,displaymethod,id,reqscoreaid,reqscore,reqscoretype FROM imas_assessments WHERE id=:id");
+		$stm = $DBH->prepare("SELECT deffeedback,startdate,enddate,reviewdate,LPcutoff,shuffle,itemorder,password,avail,isgroup,groupsetid,deffeedbacktext,timelimit,courseid,istutorial,name,allowlate,displaymethod,id,reqscoreaid,reqscore,reqscoretype FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$aid));
 		$adata = $stm->fetch(PDO::FETCH_ASSOC);
 		$now = time();
@@ -72,6 +72,7 @@
 		$canuselatepass = false;
 		$waivereqscore = false;
 		$useexception = false;
+		$activestartdate = $adata['startdate'];
 		if (!$actas) {
 			if ($isRealStudent) {
 				$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti,waivereqscore FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
@@ -104,6 +105,7 @@
 					}
 				}
 				$exceptionduedate = $row[1];
+				$activestartdate = $row[0];
 			} else { //has no exception
 				if ($now < $adata['startdate'] || $adata['enddate']<$now) { //outside normal dates
 					if ($now > $adata['startdate'] && $now<$adata['reviewdate']) {
@@ -161,8 +163,12 @@
 		if ($assessmentclosed) {
 			require("header.php");
 			showEnterAssessmentBreadcrumbs($adata['name']);
-			echo '<p>', _('This assessment is closed'), '</p>';
-			if ($adata['avail']>0) {
+			if ($now<$activestartdate) {
+				echo '<p>', _('This assessment is not available yet'), '</p>';
+			} else {
+				echo '<p>', _('This assessment is closed'), '</p>';
+			}
+			if ($adata['avail']>0 && $now>$activestartdate) {
 
 				if (!$actas && $canuselatepass) {
 					echo "<p><a href=\"$imasroot/course/redeemlatepass.php?cid=$cid&aid=$aid\">", _('Use LatePass'), "</a></p>";
@@ -188,7 +194,7 @@
 			exit;
 		}
 		//check reqscore
-		if ($isRealStudent && abs($adata['reqscore'])>0 && $adata['reqscoreaid']>0 && !$waivereqscore) {
+		if ($isRealStudent && abs($adata['reqscore'])>0 && $adata['reqscoreaid']>0 && !$waivereqscore && !$isreview) {
 			$isBlocked = false;
 			
 			$query = "SELECT ias.bestscores,ia.ptsposs,ia.name FROM imas_assessments AS ia LEFT JOIN ";
@@ -696,6 +702,14 @@
 	} else {
 		$introjson = array();
 	}
+	$extrefs = json_decode($testsettings['extrefs'], true);
+	if ($extrefs !== null && count($extrefs)>0 && $testsettings['displaymethod'] != "SkipAround") {
+		$testsettings['intro'] .= '<p>Resources: ';
+		foreach ($extrefs as $extref) {
+			$testsettings['intro'] .= '<a target="_blank" href="'.Sanitize::url($extref['link']).'">'.Sanitize::encodeStringForDisplay($extref['label']).'</a> ';
+		}
+		$testsettings['intro'] .= '</p>';
+	}
 
 	if (!$isteacher) {
 		$rec = "data-base=\"assessintro-{$line['assessmentid']}\" ";
@@ -857,7 +871,15 @@
 		//check for past time limit, with some leniency for javascript timing.
 		//want to reject if javascript was bypassed
 		if ($timelimitremaining < -1*max(0.05*$testsettings['timelimit'],10)) {
-			echo _('Time limit has expired.  Submission rejected. ');
+			require("header.php");
+			showEnterAssessmentBreadcrumbs($testsettings['name']);
+			echo '<p>';
+			if (isset($_POST['asidverify'])) {
+				echo _('Time limit has expired.  Submission rejected. ');
+			} else {
+				echo _('Your time limit on this assessment has expired.');
+			}
+			echo '</p>';
 			leavetestmsg();
 			exit;
 		}
@@ -1836,7 +1858,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				}
 			   if (!$superdone) {
 				echo filter("<div id=intro role=region aria-label=\""._('Intro or instructions')."\" class=hidden aria-hidden=true aria-expanded=false>{$testsettings['intro']}</div>\n");
-				$lefttodo = shownavbar($questions,$scores,$qn,$testsettings['showcat']);
+				$lefttodo = shownavbar($questions,$scores,$qn,$testsettings['showcat'],$testsettings['extrefs']);
 
 				echo "<div class=inset>\n";
 				echo "<div class=\"screenreader\" id=\"beginquestions\">"._('Start of Questions')."</div>\n";
@@ -1974,7 +1996,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				$next = $_GET['to'];
 				echo filter("<div id=intro role=region aria-label=\""._('Intro or instructions')."\"  class=hidden aria-hidden=true aria-expanded=false>{$testsettings['intro']}</div>\n");
 
-				$lefttodo = shownavbar($questions,$scores,$next,$testsettings['showcat']);
+				$lefttodo = shownavbar($questions,$scores,$next,$testsettings['showcat'],$testsettings['extrefs']);
 				if (unans($scores[$next]) || amreattempting($next)) {
 					echo "<div class=inset>\n";
 					if (isset($intropieces)) {
@@ -2727,7 +2749,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					break;
 				}
 			}
-			shownavbar($questions,$scores,$i,$testsettings['showcat']);
+			shownavbar($questions,$scores,$i,$testsettings['showcat'],$testsettings['extrefs']);
 			if ($i == count($questions)) {
 				echo "<div class=inset><br/>\n";
 				echo "<div class=\"screenreader\" id=\"beginquestions\">"._('Start of Questions')."</div>\n";
@@ -3356,7 +3378,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 		echo '</div>';
 	}
 
-	function shownavbar($questions,$scores,$current,$showcat) {
+	function shownavbar($questions,$scores,$current,$showcat,$extrefs) {
 		global $imasroot,$isdiag,$testsettings,$attempts,$qi,$allowregen,$bestscores,$isreview,$showeachscore,$noindivscores,$CFG;
 		$todo = 0;
 		$earned = 0;
@@ -3364,6 +3386,15 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 		
 		echo '<div class="navbar" role="navigation" aria-label="'._("Question navigation").'">';
 		echo "<a href=\"#beginquestions\" class=\"screenreader\">", _('Skip Navigation'), "</a>\n";
+		$extrefs = json_decode($extrefs, true);
+		if ($extrefs !== null && count($extrefs)>0) {
+			echo '<h3>'._('Resources').'</h3>';
+			echo '<ul class=qlist>';
+			foreach ($extrefs as $extref) {
+				echo '<li><a target="_blank" href="'.Sanitize::url($extref['link']).'">'.Sanitize::encodeStringForDisplay($extref['label']).'</a></li>';
+			}
+			echo '</ul>';
+		}
 		echo "<h3>", _('Questions'), "</h3>\n";
 		echo "<ul class=qlist>\n";
 		for ($i = 0; $i < count($questions); $i++) {
@@ -3541,6 +3572,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				Sanitize::encodeStringForDisplay($userinfo['FirstName']));
 			echo Sanitize::encodeStringForDisplay(substr($userinfo['SID'],0,strpos($userinfo['SID'],'~')));
 			echo "</h2>\n";
+			echo '<p>'._('Date: ').tzdate("F j, Y, g:i a", time()).'</p>';
 		}
 
 		echo "<h2>", _('Scores:'), "</h2>\n";

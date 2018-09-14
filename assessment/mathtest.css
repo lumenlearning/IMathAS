@@ -171,8 +171,11 @@ div.navbar.fixedonscroll {
 }
 div.navbar h4, div.navbar h3 {
 	margin-top: 0px;
+	margin-bottom: .3em;
 }
-
+div.navbar ul {
+	margin-bottom: .7em;
+}
 div.navbar a {
 	color: blue;
 }
@@ -410,10 +413,12 @@ td.l, table.stats tbody td.l {
 }
 
 div.tips {
- 	border: 1px solid #000;
+ 	border: 1px solid #91d5d5;
+ 	border-radius: 8px;
 	background-color: #cff;
 	position: absolute;
-	padding: 5px;
+	padding: 3px 6px;
+	z-index: 100;
 }
 /*for eqn helper*/
 .eebtn {

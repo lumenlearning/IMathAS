@@ -1468,6 +1468,9 @@ username or password, so they will only be able to access IMathAS resources thro
 		    them in IMathAS will not change them in your LMS</li>
 		<li>If you change assessment settings or the questions in an assessment in IMathAS,
 		    those changes will show up when the assessment is launched from the LMS</li>
+		<li>If you change due dates in IMathAS, they will be enforced by IMathAS, but the due dates
+		    in the LMS will not automatically be updated.  However, there is a course setting to allow
+		    Canvas to set the due dates in IMathAS.</li>
 		<li>Any new items added in IMathAS, including new assessments, will not
 		    automatically show up in the LMS; you would need to repeat the export/import process.</li>
 		<li>If configured, grades will be sent from IMathAS to the LMS immediately 
@@ -1534,6 +1537,8 @@ username or password, so they will only be able to access IMathAS resources thro
 		    them in IMathAS will not change them in your LMS</li>
 		<li>If you change assessment settings or the questions in an assessment in IMathAS,
 		    those changes will show up when the assessment is launched from the LMS</li>
+		<li>If you change due dates in IMathAS, they will be enforced by IMathAS, but the due dates
+		    in the LMS will not automatically be updated.</li>
 		<li>Any new items added in IMathAS, including new assessments, will not
 		    automatically show up in the LMS; you would need to repeat the export/import process.</li>
 		<li>If configured, grades will be sent from IMathAS to the LMS immediately 
@@ -1600,6 +1605,8 @@ username or password, so they will only be able to access IMathAS resources thro
 		    them in IMathAS will not change them in your LMS</li>
 		<li>If you change assessment settings or the questions in an assessment in IMathAS,
 		    those changes will show up when the assessment is launched from the LMS</li>
+		<li>If you change due dates in IMathAS, they will be enforced by IMathAS, but the due dates
+		    in the LMS will not automatically be updated.</li>
 		<li>Any new items added in IMathAS, including new assessments, will not
 		    automatically show up in the LMS; you would need to repeat the export/import process.</li>
 		<li>If configured, grades will be sent from IMathAS to the LMS immediately 
@@ -1671,6 +1678,8 @@ username or password, so they will only be able to access IMathAS resources thro
 		    them in IMathAS will not change them in your LMS</li>
 		<li>If you change assessment settings or the questions in an assessment in IMathAS,
 		    those changes will show up when the assessment is launched from the LMS</li>
+		<li>If you change due dates in IMathAS, they will be enforced by IMathAS, but the due dates
+		    in the LMS will not automatically be updated.</li>
 		<li>Any new items added in IMathAS, including new assessments, will not
 		    automatically show up in the LMS; you would need to repeat the export/import process.</li>
 		<li>If configured, grades will be sent from IMathAS to the LMS immediately 
@@ -1693,7 +1702,7 @@ username or password, so they will only be able to access IMathAS resources thro
 	   and Download the Export Cartridge</p>
 	<p>To import the cartridge in Moodle:</p>
 	<ul>
-		<li>Under Course Administration, select Restore.</li>
+		<li>Under Course Administration (in some versions, the big gear icon in the upper right), select Restore.</li>
 		<li>Choose the export file and select Restore.</li>
 		<li>Follow the prompts to import the content.</li>
 		<li>Turn on editing for your course.</li>
@@ -1702,7 +1711,7 @@ username or password, so they will only be able to access IMathAS resources thro
 		   then you must have an existing key and secret set up, and can skip ahead.  
 		   If you do see that warning, then follow these steps.
 			<ul>
-			<li>Click the + sign located directly after the External tool type pulldown</li>
+			<li>Click the + sign located directly after the External tool type pulldown (in some versions, this is labeled Preconfigured Tool) </li>
 			<li>Give the tool a name, like IMathAS</li>
 			<li>For Tool base URL enter the address shown on the Export page</li>
 			<li>For Consumer Key, enter: <code>LTIkey_####_1</code>, where #### is your Course ID</li>
@@ -1731,6 +1740,8 @@ username or password, so they will only be able to access IMathAS resources thro
 		    them in IMathAS will not change them in your LMS</li>
 		<li>If you change assessment settings or the questions in an assessment in IMathAS,
 		    those changes will show up when the assessment is launched from the LMS</li>
+		<li>If you change due dates in IMathAS, they will be enforced by IMathAS, but the due dates
+		    in the LMS will not automatically be updated.</li>
 		<li>Any new items added in IMathAS, including new assessments, will not
 		    automatically show up in the LMS; you would need to repeat the export/import process.</li>
 		<li>If configured, grades will be sent from IMathAS to the LMS immediately 
@@ -1771,6 +1782,8 @@ username or password, so they will only be able to access IMathAS resources thro
 		    them in IMathAS will not change them in your LMS</li>
 		<li>If you change assessment settings or the questions in an assessment in IMathAS,
 		    those changes will show up when the assessment is launched from the LMS</li>
+		<li>If you change due dates in IMathAS, they will be enforced by IMathAS, but the due dates
+		    in the LMS will not automatically be updated.</li>
 		<li>Any new items added in IMathAS, including new assessments, will not
 		    automatically show up in the LMS; you would need to repeat the export/import process.</li>
 		<li>If configured, grades will be sent from IMathAS to the LMS immediately 
@@ -2717,7 +2730,9 @@ A student is asked to enter a number or a calculation, like 2/3, 5^2, or sin(2).
 		<li>mixednumberorimproper: a reduced mixed number or improper fraction (like 2 1/2 or 5/2)</li>
 		<li>sloppymixednumber: a mixed number (will take 5/2, 2 1/2, even 1 3/2)</li>
 		<li>scinot: scientific notation (like 2.3*10^4)</li>
+		<li>scinotordec: scientific notation (like 2.3*10^4) or decimal value</li>
 		<li>fracordec: a single fraction or decimal value.  Can be combined with "allowmixed" to also allow mixed numbers.</li>
+		<li>decimal: requires the answer to be an integer or decimal value</li>
 		</ul></li>
 	<li>Mix-ins:  You can add these as needed to modify what's allowed
 		<ul>
@@ -2755,6 +2770,16 @@ A student is asked to enter a number or a calculation, like 2/3, 5^2, or sin(2).
 	<dd>Defines the decimal accuracy required (ie 2 for two decimal places).  This will put a message in the answer tips stating the
 	decimals required.  If neither $abstolerance or $reltolerance is set, this will set the tolerance, otherwise the provided tolerance
 	will be used (even if it doesn't agree with the $reqdecimal setting).</dd>
+<dt>$reqsigfigs = a number </dt>
+	<dd>Defines the significant figure accuracy required.  Only valid for "decimal", "scinot", and "scinotordec" $answerformat options. 
+	Use $reqsigfigs = 2 for at least 2 sig fig accuracy, or
+	$reqsigfigs = "=2" to require exactly 2 sig figs in the answer, or $reqsigfigs = "[2,3]" to require 2 or 3 sigfigs.  This will put also a message in the answer tips stating the
+	significant figures required.  If you use the "=2" form, it will also round your $answer if needed for the $showanswer.
+	<br/>This setting overrides both $reltolerance and $abstolerance, and by default tests that the student answer rounded to the specified sigfigs matches
+	the correct answer.  To override the tolerance use +- in the setting, like this:
+	<br/>$reqsigfigs = "=2+-.01" checks for exactly 2 sigfigs, but allows the answer to have an absolute error of .01
+	<br/>$reqsigfigs = "=2+-1%" checks for exactly 2 sigfigs, but allows the answer to have an relative error of 1% (equivalent to $relatolerance = .01)</dd>
+
 <dt>$requiretimes = a list, like "^,=3,cos,&lt;2" </dt>
 	<dd>Adds format checking to the student's answer.  The list can include multiple checks, which come in pairs.  The
 	first is the symbol to look for.  The second describes what is acceptable.  For example, in the string shown above,

@@ -52,6 +52,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
         $cid = Sanitize::courseId($_GET['cid']);
         $block = $_GET['block'];
         $assessName = Sanitize::stripHtmlTags($_POST['name']);
+        if ($assessName == '') {
+        	$assessName = _('Unnamed Assessment');
+        }
         $stm = $DBH->prepare("SELECT dates_by_lti FROM imas_courses WHERE id=?");
         $stm->execute(array($cid));
         $dates_by_lti = $stm->fetchColumn(0);
@@ -98,7 +101,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $cid, $assessmentId);
 			$body .= sprintf("<h2>%s</h2>", Sanitize::encodeStringForDisplay($assessmentname));
                 $body .= "<p>Are you SURE you want to delete all attempts (grades) for this assessment?</p>";
-                $body .= '<form method="POST" action="'.sprintf('addassessment.php?cid=%s&id=%d',$cid, $assessmentId).'">"';
+                $body .= '<form method="POST" action="'.sprintf('addassessment.php?cid=%s&id=%d',$cid, $assessmentId).'">';
                 $body .= '<p><button type=submit name=clearattempts value=confirmed>'._('Yes, Clear').'</button>';
                 $body .= sprintf("<input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addassessment.php?cid=%s&id=%d'\"></p>\n",
                     $cid, $assessmentId);
@@ -119,17 +122,23 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $enddate = parsedatetime($_POST['edate'],$_POST['etime']);
                 }
 
-                if ($_POST['doreview']=='0') {
+                if (empty($_POST['doreview'])) {
                     $reviewdate = 0;
                 } else if ($_POST['doreview']=='2000000000') {
                     $reviewdate = 2000000000;
-                } else {
-                    $reviewdate = parsedatetime($_POST['rdate'],$_POST['rtime']);
                 }
             } else {
                 $startdate = 0;
                 $enddate = 2000000000;
                 $reviewdate = 0;
+            }
+            if (isset($_POST['dolpcutoff']) && trim($_POST['lpdate']) != '' && trim($_POST['lptime']) != '') {
+            	$LPcutoff = parsedatetime($_POST['lpdate'],$_POST['lptime']);
+            	if (tzdate("m/d/Y",$GLOBALS['courseenddate']) == tzdate("m/d/Y", $LPcutoff)) {
+            		$LPcutoff = 0; //don't really set if it matches course end date
+            	}
+            } else {
+            	$LPcutoff = 0;
             }
 
             $shuffle = Sanitize::onlyInt($_POST['shuffle']);
@@ -195,22 +204,43 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
             } else if ($skippenalty_post>0) {
                 $defpenalty = 'S'.$skippenalty_post.$defpenalty;
             }
-		
-		$reqscoretype = 0;
-		if ($_POST['reqscoreshowtype']==1) {
-			$reqscoretype |= 1;
-		}
-		if ($_POST['reqscorecalctype']==1) {
-			$reqscoretype |= 2;
+
+            $extrefs = array();
+            $labelkeys = preg_grep('/extreflabel/', array_keys($_POST));
+            foreach ($labelkeys as $extkey) {
+            	$linkkey = str_replace('label','link',$extkey);
+            	$_POST[$extkey] = trim(Sanitize::simpleString($_POST[$extkey]));
+            	$_POST[$linkkey] = trim(Sanitize::url($_POST[$linkkey]));
+            	if ($_POST[$extkey] != '' && $_POST[$linkkey] != '') {
+            		$extrefs[] = array(
+            			'label' => $_POST[$extkey],
+            			'link' => $_POST[$linkkey]
+            		);
+            	}
+            }
+            $extrefencoded = json_encode($extrefs);
+
+		if ($_POST['reqscoreshowtype']==-1 || $reqscore==0) {
+			$reqscore = 0;
+			$reqscoretype = 0;
+			$_POST['reqscoreaid'] = 0;
+		} else {
+			$reqscoretype = 0;
+			if ($_POST['reqscoreshowtype']==1) {
+				$reqscoretype |= 1;
+			}
+			if ($_POST['reqscorecalctype']==1) {
+				$reqscoretype |= 2;
+			}
 		}
 
         $defattempts = Sanitize::onlyFloat($_POST['defattempts']);
         $copyFromId = Sanitize::onlyInt($_POST['copyfrom']);
         if (!empty($copyFromId)) {
-                $stm = $DBH->prepare("SELECT timelimit,minscore,displaymethod,defpoints,defattempts,defpenalty,deffeedback,shuffle,gbcategory,password,cntingb,tutoredit,showcat,intro,summary,startdate,enddate,reviewdate,isgroup,groupmax,groupsetid,showhints,reqscore,reqscoreaid,reqscoretype,noprint,allowlate,eqnhelper,endmsg,caltag,calrtag,deffeedbacktext,showtips,exceptionpenalty,ltisecret,msgtoinstr,posttoforum,istutorial,defoutcome FROM imas_assessments WHERE id=:id");
+                $stm = $DBH->prepare("SELECT timelimit,minscore,displaymethod,defpoints,defattempts,defpenalty,deffeedback,shuffle,gbcategory,password,cntingb,tutoredit,showcat,intro,summary,startdate,enddate,reviewdate,isgroup,groupmax,groupsetid,showhints,reqscore,reqscoreaid,reqscoretype,noprint,allowlate,eqnhelper,endmsg,caltag,calrtag,deffeedbacktext,showtips,exceptionpenalty,ltisecret,msgtoinstr,posttoforum,istutorial,defoutcome,extrefs FROM imas_assessments WHERE id=:id");
                 $stm->execute(array(':id'=>$copyFromId));
 
-                list($timelimit,$_POST['minscore'],$displayMethod,$defpoints,$defattempts,$defpenalty,$deffeedback,$shuffle,$grdebkcat,$assmpassword,$cntingb_int,$tutoredit,$shwqcat,$cpintro,$cpsummary,$cpstartdate,$cpenddate,$cpreviewdate,$isgroup,$grpmax,$grpsetid,$showhints,$reqscore,$_POST['reqscoreaid'],$reqscoretype,$_POST['noprint'],$allowlate,$eqnhelper,$endmsg,$_POST['caltagact'],$_POST['caltagrev'],$deffb,$showtips,$exceptpenalty,$ltisecret,$msgtoinstr,$posttoforum,$istutorial,$defoutcome) = $stm->fetch(PDO::FETCH_NUM);
+                list($timelimit,$_POST['minscore'],$displayMethod,$defpoints,$defattempts,$defpenalty,$deffeedback,$shuffle,$grdebkcat,$assmpassword,$cntingb_int,$tutoredit,$shwqcat,$cpintro,$cpsummary,$cpstartdate,$cpenddate,$cpreviewdate,$isgroup,$grpmax,$grpsetid,$showhints,$reqscore,$_POST['reqscoreaid'],$reqscoretype,$_POST['noprint'],$allowlate,$eqnhelper,$endmsg,$_POST['caltagact'],$_POST['caltagrev'],$deffb,$showtips,$exceptpenalty,$ltisecret,$msgtoinstr,$posttoforum,$istutorial,$defoutcome,$extrefencoded) = $stm->fetch(PDO::FETCH_NUM);
                 if (isset($_POST['copyinstr'])) {
                     if (($introjson=json_decode($cpintro))!==null) { //is json intro
                         $_POST['intro'] = $introjson[0];
@@ -274,19 +304,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 
             $caltag = Sanitize::stripHtmlTags($_POST['caltagact']);
-            $calrtag = Sanitize::stripHtmlTags($_POST['caltagrev']);
+            $calrtag = 'R'; //not used anymore Sanitize::stripHtmlTags($_POST['caltagrev']);
 
-		if ($_POST['summary']=='<p>Enter summary here (shows on course page)</p>') {
+		if ($_POST['summary']=='<p>Enter summary here (shows on course page)</p>' || $_POST['summary']=='<p></p>') {
 			$_POST['summary'] = '';
 		} else {
 			$_POST['summary'] = Sanitize::incomingHtml($_POST['summary']);
 		}
-		if ($_POST['intro']=='<p>Enter intro/instructions</p>') {
+		if ($_POST['intro']=='<p>Enter intro/instructions</p>' || $_POST['intro']=='<p></p>') {
 			$_POST['intro'] = '';
 		} else {
 			$_POST['intro'] = Sanitize::incomingHtml($_POST['intro']);
 		}
-
+		
 		if (isset($_GET['id'])) {  //already have id; update
 			$stm = $DBH->prepare("SELECT isgroup,intro,itemorder,deffeedbacktext FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
@@ -307,7 +337,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $query = "UPDATE imas_assessments SET name=:name,summary=:summary,intro=:intro,timelimit=:timelimit,minscore=:minscore,isgroup=:isgroup,showhints=:showhints,tutoredit=:tutoredit,eqnhelper=:eqnhelper,showtips=:showtips,";
                 $query .= "displaymethod=:displaymethod,defattempts=:defattempts,deffeedback=:deffeedback,shuffle=:shuffle,gbcategory=:gbcategory,password=:password,cntingb=:cntingb,showcat=:showcat,caltag=:caltag,calrtag=:calrtag,";
                 $query .= "reqscore=:reqscore,reqscoreaid=:reqscoreaid,reqscoretype=:reqscoretype,noprint=:noprint,avail=:avail,groupmax=:groupmax,allowlate=:allowlate,exceptionpenalty=:exceptionpenalty,ltisecret=:ltisecret,deffeedbacktext=:deffeedbacktext,";
-                $query .= "msgtoinstr=:msgtoinstr,posttoforum=:posttoforum,istutorial=:istutorial,defoutcome=:defoutcome";
+                $query .= "msgtoinstr=:msgtoinstr,posttoforum=:posttoforum,istutorial=:istutorial,defoutcome=:defoutcome,LPcutoff=:LPcutoff,extrefs=:extrefs";
                 $qarr = array(':name'=>$assessName, ':summary'=>$_POST['summary'], ':intro'=>$_POST['intro'], ':timelimit'=>$timelimit,
                     ':minscore'=>$_POST['minscore'], ':isgroup'=>$isgroup, ':showhints'=>$showhints, ':tutoredit'=>$tutoredit,
                     ':eqnhelper'=>$eqnhelper, ':showtips'=>$showtips, ':displaymethod'=>$displayMethod,
@@ -317,7 +347,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     ':avail'=>$_POST['avail'], ':groupmax'=>$grpmax, ':allowlate'=>$allowlate,
                     ':exceptionpenalty'=>$exceptpenalty, ':ltisecret'=>$ltisecret, ':deffeedbacktext'=>$deffb,
                     ':msgtoinstr'=>$msgtoinstr, ':posttoforum'=>$posttoforum, ':istutorial'=>$istutorial,
-                    ':defoutcome'=>$defoutcome);
+                    ':defoutcome'=>$defoutcome, ':LPcutoff'=>$LPcutoff, ':extrefs'=>$extrefencoded);
 
                 if ($updategroupset!='') {
                     $query .= ",groupsetid=:groupsetid";
@@ -410,19 +440,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			} else {
 				$datebylti = 0;
 			}
-            if (empty($defpoints)) {
-                $defpoints = isset($CFG['AMS']['defpoints'])?$CFG['AMS']['defpoints']:10;
-            }
+			if (empty($defpoints)) {
+				$defpoints = isset($CFG['AMS']['defpoints'])?$CFG['AMS']['defpoints']:10;
+			}
 
                 $query = "INSERT INTO imas_assessments (courseid,name,summary,intro,startdate,enddate,reviewdate,timelimit,minscore,";
                 $query .= "displaymethod,defpoints,defattempts,defpenalty,deffeedback,shuffle,gbcategory,password,cntingb,tutoredit,showcat,";
-			$query .= "eqnhelper,showtips,caltag,calrtag,isgroup,groupmax,groupsetid,showhints,reqscore,reqscoreaid,reqscoretype,noprint,avail,allowlate,";
-                $query .= "exceptionpenalty,ltisecret,endmsg,deffeedbacktext,msgtoinstr,posttoforum,istutorial,defoutcome,ptsposs,date_by_lti) VALUES ";
+		$query .= "eqnhelper,showtips,caltag,calrtag,isgroup,groupmax,groupsetid,showhints,reqscore,reqscoreaid,reqscoretype,noprint,avail,allowlate,";
+                $query .= "LPcutoff,exceptionpenalty,ltisecret,endmsg,deffeedbacktext,msgtoinstr,posttoforum,istutorial,defoutcome,extrefs,ptsposs,date_by_lti) VALUES ";
                 $query .= "(:courseid, :name, :summary, :intro, :startdate, :enddate, :reviewdate, :timelimit, :minscore, :displaymethod, ";
                 $query .= ":defpoints, :defattempts, :defpenalty, :deffeedback, :shuffle, :gbcategory, :password, :cntingb, :tutoredit, ";
                 $query .= ":showcat, :eqnhelper, :showtips, :caltag, :calrtag, :isgroup, :groupmax, :groupsetid, :showhints, :reqscore, ";
-			$query .= ":reqscoreaid, :reqscoretype, :noprint, :avail, :allowlate, :exceptionpenalty, :ltisecret, :endmsg, :deffeedbacktext, :msgtoinstr, ";
-                $query .= ":posttoforum, :istutorial, :defoutcome, 0, :datebylti)";
+			$query .= ":reqscoreaid, :reqscoretype, :noprint, :avail, :allowlate, :LPcutoff, :exceptionpenalty, :ltisecret, :endmsg, :deffeedbacktext, :msgtoinstr, ";
+                $query .= ":posttoforum, :istutorial, :defoutcome, :extrefs, 0, :datebylti)";
                 $stm = $DBH->prepare($query);
                 $stm->execute(array(':courseid'=>$cid, ':name'=>$assessName, ':summary'=>$_POST['summary'], ':intro'=>$_POST['intro'],
                     ':startdate'=>$startdate, ':enddate'=>$enddate, ':reviewdate'=>$reviewdate, ':timelimit'=>$timelimit,
@@ -432,10 +462,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     ':tutoredit'=>$tutoredit, ':showcat'=>$shwqcat, ':eqnhelper'=>$eqnhelper, ':showtips'=>$showtips,
                     ':caltag'=>$caltag, ':calrtag'=>$calrtag, ':isgroup'=>$isgroup, ':groupmax'=>$grpmax,
                     ':groupsetid'=>$grpsetid, ':showhints'=>$showhints, ':reqscore'=>$reqscore,
-				':reqscoreaid'=>$_POST['reqscoreaid'], ':reqscoretype'=>$reqscoretype, ':noprint'=>$_POST['noprint'], ':avail'=>$_POST['avail'],
-                    ':allowlate'=>$allowlate, ':exceptionpenalty'=>$exceptpenalty, ':ltisecret'=>$ltisecret,
+                    ':reqscoreaid'=>$_POST['reqscoreaid'], ':reqscoretype'=>$reqscoretype, ':noprint'=>$_POST['noprint'], ':avail'=>$_POST['avail'],
+                    ':allowlate'=>$allowlate, ':LPcutoff'=>$LPcutoff, ':exceptionpenalty'=>$exceptpenalty, ':ltisecret'=>$ltisecret,
                     ':endmsg'=>$endmsg, ':deffeedbacktext'=>$deffb, ':msgtoinstr'=>$msgtoinstr, ':posttoforum'=>$posttoforum,
-                    ':istutorial'=>$istutorial, ':defoutcome'=>$defoutcome, ':datebylti'=>$datebylti));
+                    ':istutorial'=>$istutorial, ':defoutcome'=>$defoutcome, ':extrefs'=>$extrefencoded, ':datebylti'=>$datebylti));
                 $newaid = $DBH->lastInsertId();
                 $query = "INSERT INTO imas_items (courseid,itemtype,typeid) VALUES ";
                 $query .= "(:courseid, :itemtype, :typeid);";
@@ -499,22 +529,21 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $usedeffb = true;
                     $deffb = $line['deffeedbacktext'];
                 }
-                if ($line['summary']=='') {
-                //	$line['summary'] = "<p>Enter summary here (shows on course page)</p>";
-                }
-                if ($line['intro']=='') {
-                //	$line['intro'] = "<p>Enter intro/instructions</p>";
-                }
                 $savetitle = _("Save Changes");
+                $extrefs = json_decode($line['extrefs'], true);
+                if ($extrefs === null) {
+                	$extrefs = array();
+                }
             } else {  //INITIAL LOAD IN ADD MODE
                 //set defaults
                 $line['name'] = "";
-                $line['summary'] = "<p></p>";
-                $line['intro'] = "<p></p>";
+                $line['summary'] = "";
+                $line['intro'] = "";
                 $startdate = time()+60*60;
                 $enddate = time() + 7*24*60*60;
                 $line['startdate'] = $startdate;
                 $line['enddate'] = $enddate;
+                $line['LPcutoff'] = 0;
                 $line['avail'] = 1;
                 $line['reviewdate'] = 0;
                 $timelimit = 0;
@@ -535,13 +564,12 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $line['groupsetid'] = 0;
                 $line['noprint'] = isset($CFG['AMS']['noprint'])?$CFG['AMS']['noprint']:0;
                 $line['groupmax'] = isset($CFG['AMS']['groupmax'])?$CFG['AMS']['groupmax']:6;
-                $line['allowlate'] = isset($CFG['AMS']['allowlate'])?$CFG['AMS']['allowlate']:1;
+                $line['allowlate'] = isset($CFG['AMS']['allowlate'])?$CFG['AMS']['allowlate']:11;
                 $line['exceptionpenalty'] = isset($CFG['AMS']['exceptionpenalty'])?$CFG['AMS']['exceptionpenalty']:0;
                 $line['tutoredit'] = isset($CFG['AMS']['tutoredit'])?$CFG['AMS']['tutoredit']:0;
                 $line['eqnhelper'] = isset($CFG['AMS']['eqnhelper'])?$CFG['AMS']['eqnhelper']:0;
                 $line['ltisecret'] = '';
                 $line['caltag'] = isset($CFG['AMS']['caltag'])?$CFG['AMS']['caltag']:'?';
-                $line['calrtag'] = isset($CFG['AMS']['calrtag'])?$CFG['AMS']['calrtag']:'R';
                 $line['showtips'] = isset($CFG['AMS']['showtips'])?$CFG['AMS']['showtips']:2;
                 $usedeffb = false;
                 $deffb = _("This assessment contains items that are not automatically graded.  Your grade may be inaccurate until your instructor grades these items.");
@@ -556,6 +584,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $line['reqscoretype'] = 0;
                 $line['date_by_lti'] = ($dates_by_lti==0)?0:1;
                 $savetitle = _("Create Assessment");
+                $extrefs = array();
             }
             if (($introjson=json_decode($line['intro']))!==null) { //is json intro
                 $line['intro'] = $introjson[0];
@@ -595,24 +624,22 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $edate = tzdate("m/d/Y",time()+7*24*60*60);
                 $etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
             }
-
-            if ($line['reviewdate'] > 0) {
-                if ($line['reviewdate']=='2000000000') {
-                    $rdate = tzdate("m/d/Y",$line['enddate']+7*24*60*60);
-                    $rtime = $deftime; //tzdate("g:i a",$line['enddate']+7*24*60*60);
-                } else {
-                    $rdate = tzdate("m/d/Y",$line['reviewdate']);
-                    $rtime = tzdate("g:i a",$line['reviewdate']);
-                }
+            if ($line['LPcutoff']==0) {
+            	    if ($GLOBALS['courseenddate']<2000000000) { //default to course enddate, if set
+            	    	    $lpdate = tzdate("m/d/Y",$GLOBALS['courseenddate']);
+            	    } else {
+            	    	    $lpdate = $edate;
+            	    }
+            	    $lptime = $etime;
             } else {
-                $rdate = tzdate("m/d/Y",$line['enddate']+7*24*60*60);
-                $rtime = $deftime; //tzdate("g:i a",$line['enddate']+7*24*60*60);
+            	$lpdate = tzdate("m/d/Y", $line['LPcutoff']);
+                $lptime = tzdate("g:i a", $line['LPcutoff']);
             }
 
             if (!isset($_GET['id'])) {
                 $stime = $defstime;
                 $etime = $deftime;
-                $rtime = $deftime;
+                $lptime = $deftime;
             }
 
             if ($line['defpenalty']{0}==='L') {
@@ -623,6 +650,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $line['defpenalty'] = substr($line['defpenalty'],2);
             } else {
                 $skippenalty = 0;
+            }
+            if ($line['reqscoreaid']==0) {
+            	    $reqscoredisptype=-1;
+            } else if ($line['reqscore']<0 || $line['reqscoretype']&1) {
+            	    $reqscoredisptype=1;
+            } else {
+            	   $reqscoredisptype=0;
             }
             if ($taken) {
                 $page_isTakenMsg = "<p>This assessment has already been taken.  Modifying some settings will mess up those assessment attempts, and those inputs ";
@@ -750,7 +784,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 //BEGIN DISPLAY BLOCK
 
  /******* begin html output ********/
- $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
+ $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js?v=080818\"></script>";
  require("../header.php");
 
 if ($overwriteBody==1) {
@@ -805,6 +839,34 @@ if ($overwriteBody==1) {
 			s.innerHTML = "Show";
 		}
 	}
+	var newextrefcnt = 0;
+	function addextref(el) {
+		var html = '<span class="aextref">';
+		html += '<label for=newextreflabel'+newextrefcnt+'>Label:</label>';
+		html += '<input id=newextreflabel'+newextrefcnt+' name=newextreflabel'+newextrefcnt+' size=10 /> ';
+		html += '<label for=newextreflink'+newextrefcnt+'>Link:</label>';
+		html += '<input id=newextreflink'+newextrefcnt+' name=newextreflink'+newextrefcnt+' size=30 />';
+		html += '<button type=button onclick="removeextref(this)">Remove</button><br/></span>';
+		newextrefcnt++;
+		$(el).before(html);
+	}
+	function removeextref(el) {
+		$(el).closest(".aextref").remove();
+	}
+	$(function() {
+		$("input[name=dolpcutoff]").on("click", function() {
+			var chk = $(this).is(":checked");
+			$("#lpcutoffwrap").toggle(chk);
+			$(this).attr("aria-expanded", chk);
+		});
+		$("#reqscoreshowtype").attr("aria-controls", "reqscorewrap")
+			.attr("aria-expanded", $("#reqscoreshowtype").val()>-1)
+			.on("change", function() {
+				var rqshow = ($(this).val()>-1);
+				$("#reqscorewrap").toggle(rqshow);
+				$(this).attr("aria-expanded", rqshow);
+		});
+	})
 	</script>
 
 	<div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
@@ -822,7 +884,7 @@ if ($overwriteBody==1) {
 		<span class=form>Assessment Name:</span>
         <span class=formright><input type=text size=30 name=name placeholder="Enter assessment name" value="<?php echo Sanitize::encodeStringForDisplay($line['name']); ?>" required></span><BR class=form>
 
-		Summary:<BR>
+		Summary: (shows on course page)<BR>
 		<div class=editor>
 			<textarea cols=50 rows=15 id=summary name=summary style="width: 100%"><?php echo Sanitize::encodeStringForDisplay($line['summary'], true); ?></textarea>
 		</div><BR>
@@ -837,8 +899,8 @@ if ($overwriteBody==1) {
 ?>
 		<span class=form>Show:</span>
 		<span class=formright>
-			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="document.getElementById('datediv').style.display='none';"/>Hide<br/>
-			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="document.getElementById('datediv').style.display='block';"/>Show by Dates<br/>
+			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="$('#datediv').slideUp(100)"/>Hide<br/>
+			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="$('#datediv').slideDown(100);"/>Show by Dates<br/>
 		</span><br class="form"/>
 
 		<div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">
@@ -852,7 +914,7 @@ if ($overwriteBody==1) {
 			<input type=text size=10 name="sdate" value="<?php echo $sdate;?>">
 			<a href="#" onClick="displayDatePicker('sdate', this); return false">
 			<img src="../img/cal.gif" alt="Calendar"/></A>
-			at <input type=text size=10 name=stime value="<?php echo $stime;?>">
+			at <input type=text size=8 name=stime value="<?php echo $stime;?>">
 		</span><BR class=form>
 			<!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
 		<span class=form>Due Date:</span>
@@ -867,15 +929,15 @@ if ($overwriteBody==1) {
 			<input type=text size=10 name="edate" value="<?php echo $edate;?>">
 			<a href="#" onClick="displayDatePicker('edate', this, 'sdate', 'start date'); return false">
 			<img src="../img/cal.gif" alt="Calendar"/></A>
-			at <input type=text size=10 name=etime value="<?php echo $etime;?>">
+			at <input type=text size=8 name=etime value="<?php echo $etime;?>">
 		</span><BR class=form>
 <?php
 	} else { //dates_by_lti is on
 ?>
 		<span class=form>Availability:</span>
 		<span class=formright>
-			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="document.getElementById('datediv').style.display='none';"/>Prevent access<br/>
-			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="document.getElementById('datediv').style.display='block';"/>Allow access<br/>
+			<input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="$('#datediv').slideUp(100);"/>Prevent access<br/>
+			<input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="$('#datediv').slideDown(100);"/>Allow access<br/>
 		</span><br class="form"/>
 		
 		<div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">
@@ -899,15 +961,9 @@ if ($overwriteBody==1) {
 <?php
 	}
 ?>
-		<span class=form>Keep open as review:</span>
+		<span class=form>Review mode:</span>
 		<span class=formright>
-			<input type=radio name="doreview" value="0" <?php writeHtmlChecked($line['reviewdate'],0,0); ?>> Never<br/>
-			<input type=radio name="doreview" value="2000000000" <?php writeHtmlChecked($line['reviewdate'],2000000000,0); ?>> Always after due date<br/>
-			<input type=radio name="doreview" value="rdate" <?php if ($line['reviewdate']>0 && $line['reviewdate']<2000000000) { echo "checked=1";} ?>> Until:
-			<input type=text size=10 name=rdate value="<?php echo $rdate;?>">
-			<a href="#" onClick="displayDatePicker('rdate', this, 'edate', 'due date'); return false">
-			<img src="../img/cal.gif" alt="Calendar"/></A>
-			at <input type=text size=10 name=rtime value="<?php echo $rtime;?>">
+			<input type=checkbox name="doreview" value="2000000000" <?php if ($line['reviewdate']>0) {echo 'checked';} ?>> Keep open for un-graded practice after the due date
 		</span><BR class=form>
 		</div>
 
@@ -946,12 +1002,7 @@ if ($overwriteBody==1) {
 
 		</div>
 		<div id="customoptions" class="show">
-			<fieldset><legend>Core Options</legend>
-			<span class=form>Require Password (blank for none):</span>
-			<span class=formright><input type="password" name="assmpassword" id="assmpassword" value="<?php echo Sanitize::encodeStringForDisplay($line['password']); ?>" autocomplete="new-password"> <a href="#" onclick="apwshowhide(this);return false;">Show</a></span><br class=form />
-			<span class=form>Time Limit (minutes, 0 for no time limit): </span>
-			<span class=formright><input type=text size=4 name=timelimit value="<?php echo abs($timelimit);?>">
-				<input type="checkbox" name="timelimitkickout" <?php if ($timelimit<0) echo 'checked="checked"';?> /> Kick student out at timelimit</span><BR class=form>
+			<hr/>
 			<span class=form>Display method: </span>
 			<span class=formright>
 				<select name="displaymethod">
@@ -969,8 +1020,20 @@ if ($overwriteBody==1) {
 				</select>
 			</span><BR class=form>
 
-			<span class=form>Default points per problem: </span>
-			<span class=formright><input type=text size=4 name=defpoints value="<?php echo Sanitize::encodeStringForDisplay($line['defpoints']); ?>" <?php if ($taken) {echo 'disabled=disabled';}?>></span><BR class=form>
+			<span class=form>Feedback method: </span>
+			<span class=formright>
+				<select id="deffeedback" name="deffeedback" onChange="chgfb()" >
+					<option value="NoScores" <?php if ($testtype=="NoScores") {echo "SELECTED";} ?>>No scores shown (last attempt is scored)</option>
+					<option value="EndScore" <?php if ($testtype=="EndScore") {echo "SELECTED";} ?>>Just show final score (total points &amp; average) - only whole test can be reattemped</option>
+					<option value="EachAtEnd" <?php if ($testtype=="EachAtEnd") {echo "SELECTED";} ?>>Show score on each question at the end of the test </option>
+					<option value="EndReview" <?php if ($testtype=="EndReview") {echo "SELECTED";} ?>>Reshow question with score at the end of the test </option>
+					<option value="EndReviewWholeTest" <?php if ($testtype=="EndReviewWholeTest") {echo "SELECTED";} ?>>Reshow question with score at the end of the test  - only whole test can be reattemped </option>
+
+					<option value="AsGo" <?php if ($testtype=="AsGo") {echo "SELECTED";} ?>>Show score on each question as it's submitted (does not apply to Full test at once display)</option>
+					<option value="Practice" <?php if ($testtype=="Practice") {echo "SELECTED";} ?>>Practice test: Show score on each question as it's submitted &amp; can restart test; scores not saved</option>
+					<option value="Homework" <?php if ($testtype=="Homework") {echo "SELECTED";} ?>>Homework: Show score on each question as it's submitted &amp; allow similar question to replace missed question</option>
+				</select>
+			</span><BR class=form>
 
 			<span class=form>Default attempts per problem (0 for unlimited): </span>
 			<span class=formright>
@@ -995,20 +1058,6 @@ if ($overwriteBody==1) {
 				</select>
 			</span><BR class=form>
 
-			<span class=form>Feedback method: </span>
-			<span class=formright>
-				<select id="deffeedback" name="deffeedback" onChange="chgfb()" >
-					<option value="NoScores" <?php if ($testtype=="NoScores") {echo "SELECTED";} ?>>No scores shown (last attempt is scored)</option>
-					<option value="EndScore" <?php if ($testtype=="EndScore") {echo "SELECTED";} ?>>Just show final score (total points &amp; average) - only whole test can be reattemped</option>
-					<option value="EachAtEnd" <?php if ($testtype=="EachAtEnd") {echo "SELECTED";} ?>>Show score on each question at the end of the test </option>
-					<option value="EndReview" <?php if ($testtype=="EndReview") {echo "SELECTED";} ?>>Reshow question with score at the end of the test </option>
-					<option value="EndReviewWholeTest" <?php if ($testtype=="EndReviewWholeTest") {echo "SELECTED";} ?>>Reshow question with score at the end of the test  - only whole test can be reattemped </option>
-
-					<option value="AsGo" <?php if ($testtype=="AsGo") {echo "SELECTED";} ?>>Show score on each question as it's submitted (does not apply to Full test at once display)</option>
-					<option value="Practice" <?php if ($testtype=="Practice") {echo "SELECTED";} ?>>Practice test: Show score on each question as it's submitted &amp; can restart test; scores not saved</option>
-					<option value="Homework" <?php if ($testtype=="Homework") {echo "SELECTED";} ?>>Homework: Show score on each question as it's submitted &amp; allow similar question to replace missed question</option>
-				</select>
-			</span><BR class=form>
 
 			<span class=form>Show Answers: </span>
 			<span class=formright>
@@ -1042,6 +1091,153 @@ if ($overwriteBody==1) {
 				</select>
 				</span>
 			</span><br class=form>
+
+			<span class=form>Gradebook Category:</span>
+			<span class=formright>
+
+<?php
+	writeHtmlSelect("gbcat",$page_gbcatSelect['val'],$page_gbcatSelect['label'],$gbcat,"Default",0);
+?>
+			</span><br class=form>
+
+		 <div class="block grouptoggle">
+		   <img class="mida" src="../img/expand.gif" />
+		   Additional Display Options
+		 </div>
+		 <div class="blockitems hidden">
+
+			<span class="form">Calendar icon:</span>
+			<span class="formright">
+				<input name="caltagact" type=text size=8 value="<?php echo Sanitize::encodeStringForDisplay($line['caltag']); ?>"/>
+			</span><br class="form" />
+
+			<span class=form>Shuffle item order: </span>
+			<span class=formright>
+				<select name="shuffle">
+					<option value="0" <?php writeHtmlSelected($line['shuffle']&(1+16),0) ?>>No</option>
+					<option value="1" <?php writeHtmlSelected($line['shuffle']&1,1) ?>>All</option>
+					<option value="16" <?php writeHtmlSelected($line['shuffle']&16,16) ?>>All but first</option>
+				</select>
+			</span><BR class=form>
+
+			<span class=form>Show question categories:</span>
+			<span class=formright>
+				<input name="showqcat" type="radio" value="0" <?php writeHtmlChecked($showqcat,"0"); ?>>No <br />
+				<input name="showqcat" type="radio" value="1" <?php writeHtmlChecked($showqcat,"1"); ?>>In Points Possible bar <br />
+				<input name="showqcat" type="radio" value="2" <?php writeHtmlChecked($showqcat,"2"); ?>>In navigation bar (Skip-Around only)
+			</span><br class="form" />
+
+			<span class=form>Make hard to print?</span>
+			<span class=formright>
+				<input type="radio" value="0" name="noprint" <?php writeHtmlChecked($line['noprint'],0); ?>/> No <input type="radio" value="1" name="noprint" <?php writeHtmlChecked($line['noprint'],1); ?>/> Yes
+			</span><br class=form>
+
+			<span class=form>All items same random seed: </span>
+			<span class=formright>
+				<input type="checkbox" name="sameseed" <?php writeHtmlChecked($line['shuffle']&2,2); ?>>
+				<i>Don't use "Homework" mode or "Reattempts different versions" if you use this setting</i>
+			</span><BR class=form>
+
+			<span class=form>All students same version of questions: </span>
+			<span class=formright>
+				<input type="checkbox" name="samever" <?php writeHtmlChecked($line['shuffle']&4,4); ?>>
+			</span><BR class=form>
+
+			<span class=form>Display for tutorial-style questions: </span>
+			<span class=formright>
+				<input type="checkbox" name="istutorial" <?php writeHtmlChecked($line['istutorial'],1); ?>>
+			</span><BR class=form>
+		 </div>
+
+		 <div class="block grouptoggle">
+		   <img class="mida" src="../img/expand.gif" />
+		   Time Limit and Access Control
+		 </div>
+		 <div class="blockitems hidden">
+
+			<span class=form>Allow use of LatePasses?: </span>
+			<span class=formright>
+				<?php
+				writeHtmlSelect("allowlate",$page_allowlateSelect['val'],$page_allowlateSelect['label'],$line['allowlate']%10);
+				?>
+				<label><input type="checkbox" name="latepassafterdue" <?php writeHtmlChecked($line['allowlate']>10,true); ?>>
+					Allow LatePasses after due date</label>
+				<br/>
+				<label><input type="checkbox" name="dolpcutoff" <?php writeHtmlChecked($line['LPcutoff']>0,true); ?>
+					aria-controls="lpcutoffwrap" aria-expanded="<?php echo ($line['LPcutoff']==0)?'false':'true';?>"/>
+					Restrict by date.
+				</label>
+				<span id=lpcutoffwrap <?php if ($line['LPcutoff']==0) {echo 'style="display: none;"';}?>>
+				<label for=lpcutoff>No extensions past</label>
+				<input type=text size=10 name="lpdate" value="<?php echo $lpdate;?>">
+				<a href="#" onClick="displayDatePicker('lpdate', this, 'edate', 'due date'); return false">
+				<img src="../img/cal.gif" alt="Calendar"/></a>
+				at <input type=text size=8 name=lptime value="<?php echo $lptime;?>">
+				</span>
+			</span><BR class=form>
+
+			<span class=form>Time Limit (minutes, 0 for no time limit): </span>
+			<span class=formright><input type=text size=4 name=timelimit value="<?php echo Sanitize::onlyFloat(abs($timelimit));?>">
+				<input type="checkbox" name="timelimitkickout" <?php if ($timelimit<0) echo 'checked="checked"';?> /> Kick student out at timelimit</span><BR class=form>
+
+			<span class=form>Require Password (blank for none):</span>
+			<span class=formright><input type="password" name="assmpassword" id="assmpassword" value="<?php echo Sanitize::encodeStringForDisplay($line['password']); ?>" autocomplete="new-password"> <a href="#" onclick="apwshowhide(this);return false;">Show</a></span><br class=form />
+
+			<span class=form>Show based on another assessment: </span>
+			<span class=formright>
+<?php
+	writeHtmlSelect("reqscoreshowtype", array(-1,0,1), array(_('No prerequisite'),_('Show only after'), _('Show greyed until')), $reqscoredisptype);
+			echo '<span id="reqscorewrap" ';
+			if ($reqscoredisptype==-1) {
+				echo 'style="display:none;"';
+			}
+			echo '>';
+?>
+			 a score of
+				<input type=text size=4 name=reqscore value="<?php echo abs($line['reqscore']);?>">
+<?php
+	writeHtmlSelect("reqscorecalctype", array(0,1), array(_('points'), _('percent')), ($line['reqscoretype']&2)?1:0);
+?>
+			is obtained on
+<?php
+	writeHtmlSelect ("reqscoreaid",$page_copyFromSelect['val'],$page_copyFromSelect['label'],$line['reqscoreaid']);
+?>
+			</span></span><br class=form>
+		 </div>
+
+		 <div class="block grouptoggle">
+		   <img class="mida" src="../img/expand.gif" />
+		   Help and Hints
+		 </div>
+		 <div class="blockitems hidden">
+
+			<span class=form>Show hints and video/text buttons when available?</span>
+			<span class=formright>
+				<input type="checkbox" name="showhints" <?php writeHtmlChecked($line['showhints'],1); ?>>
+			</span><br class=form>
+
+			<span class=form>Show "ask question" links?</span>
+			<span class=formright>
+				<input type="checkbox" name="msgtoinstr" <?php writeHtmlChecked($line['msgtoinstr'],1); ?>/> Show "Message instructor about this question" links<br/>
+				<input type="checkbox" name="doposttoforum" <?php writeHtmlChecked($line['posttoforum'],0,true); ?>/> Show "Post this question to forum" links, to forum <?php writeHtmlSelect("posttoforum",$page_forumSelect['val'],$page_forumSelect['label'],$line['posttoforum']); ?>
+			</span><br class=form>
+
+			<span class=form>Assessment resource links</span>
+			<span class=formright>
+<?php
+			foreach ($extrefs as $k=>$extref) {
+				echo '<span class="aextref">';
+				echo '<label for="extreflabel'.$k.'">Label:</label>';
+				echo '<input id="extreflabel'.$k.'" name="extreflabel'.$k.'" size=10 value="'.Sanitize::encodeStringForDisplay($extref['label']).'" /> ';
+				echo '<label for="extreflink'.$k.'">Link:</label>';
+				echo '<input id="extreflink'.$k.'" name="extreflink'.$k.'" size=30 value="'.Sanitize::encodeStringForDisplay($extref['link']).'" />';
+				echo '<button type=button onclick="removeextref(this)">Remove</button>';
+				echo '<br/></span>';
+			}
+?>
+			<button type=button onclick="addextref(this)">Add Resource</button>
+			</span><br class=form>
+
 			<span class="form">Use equation helper?</span>
 			<span class="formright">
 				<select name="eqnhelper">
@@ -1059,16 +1255,6 @@ if ($overwriteBody==1) {
 					<option value="4" <?php writeHtmlSelected($line['eqnhelper'],4) ?>>MathQuill, advanced form</option>
 				</select>
 			</span><br class="form" />
-			<span class=form>Show hints and video/text buttons when available?</span>
-			<span class=formright>
-				<input type="checkbox" name="showhints" <?php writeHtmlChecked($line['showhints'],1); ?>>
-			</span><br class=form>
-
-			<span class=form>Show "ask question" links?</span>
-			<span class=formright>
-				<input type="checkbox" name="msgtoinstr" <?php writeHtmlChecked($line['msgtoinstr'],1); ?>/> Show "Message instructor about this question" links<br/>
-				<input type="checkbox" name="doposttoforum" <?php writeHtmlChecked($line['posttoforum'],0,true); ?>/> Show "Post this question to forum" links, to forum <?php writeHtmlSelect("posttoforum",$page_forumSelect['val'],$page_forumSelect['label'],$line['posttoforum']); ?>
-			</span><br class=form>
 
 			<span class=form>Show answer entry tips?</span>
 			<span class=formright>
@@ -1078,47 +1264,41 @@ if ($overwriteBody==1) {
 					<option value="2" <?php writeHtmlSelected($line['showtips'],2) ?>>Yes, under answerbox</option>
 				</select>
 			</span><br class=form>
+		 </div>
 
-			<span class=form>Allow use of LatePasses?: </span>
-			<span class=formright>
-				<?php
-				writeHtmlSelect("allowlate",$page_allowlateSelect['val'],$page_allowlateSelect['label'],$line['allowlate']%10);
-				?>
-				<label><input type="checkbox" name="latepassafterdue" <?php writeHtmlChecked($line['allowlate']>10,true); ?>> Allow LatePasses after due date</label>
-			</span><BR class=form>
+		 <div class="block grouptoggle">
+		   <img class="mida" src="../img/expand.gif" />
+		   Grading and Feedback
+		 </div>
+		 <div class="blockitems hidden">
 
-			<span class=form>Make hard to print?</span>
-			<span class=formright>
-				<input type="radio" value="0" name="noprint" <?php writeHtmlChecked($line['noprint'],0); ?>/> No <input type="radio" value="1" name="noprint" <?php writeHtmlChecked($line['noprint'],1); ?>/> Yes
-			</span><br class=form>
-
-
-			<span class=form>Shuffle item order: </span>
-			<span class=formright>
-				<select name="shuffle">
-					<option value="0" <?php writeHtmlSelected($line['shuffle']&(1+16),0) ?>>No</option>
-					<option value="1" <?php writeHtmlSelected($line['shuffle']&1,1) ?>>All</option>
-					<option value="16" <?php writeHtmlSelected($line['shuffle']&16,16) ?>>All but first</option>
-				</select>
-			</span><BR class=form>
-			<span class=form>Gradebook Category:</span>
-			<span class=formright>
-
-<?php
-	writeHtmlSelect("gbcat",$page_gbcatSelect['val'],$page_gbcatSelect['label'],$gbcat,"Default",0);
-?>
-			</span><br class=form>
 			<span class=form>Count: </span>
 			<span <?php if ($testtype=="Practice") {echo "class=hidden";} else {echo "class=formright";} ?> id="stdcntingb">
-				<input type=radio name="cntingb" value="1" <?php writeHtmlChecked($cntingb,1,0); ?> /> Count in Gradebook<br/>
-				<input type=radio name="cntingb" value="0" <?php writeHtmlChecked($cntingb,0,0); ?> /> Don't count in grade total and hide from students<br/>
-				<input type=radio name="cntingb" value="3" <?php writeHtmlChecked($cntingb,3,0); ?> /> Don't count in grade total<br/>
-				<input type=radio name="cntingb" value="2" <?php writeHtmlChecked($cntingb,2,0); ?> /> Count as Extra Credit
+				<select name="cntingb">
+				<option value="1" <?php writeHtmlSelected($cntingb,1,0); ?>> Count in Gradebook</option>
+				<option value="0" <?php writeHtmlSelected($cntingb,0,0); ?>> Don't count in grade total and hide from students</option>
+				<option value="3" <?php writeHtmlSelected($cntingb,3,0); ?>> Don't count in grade total</option>
+				<option value="2" <?php writeHtmlSelected($cntingb,2,0); ?>> Count as Extra Credit</option>
+				</select>
 			</span>
 			<span <?php if ($testtype!="Practice") {echo "class=hidden";} else {echo "class=formright";} ?> id="praccntingb">
 				<input type=radio name="pcntingb" value="0" <?php writeHtmlChecked($pcntingb,0,0); ?> /> Don't count in grade total and hide from students<br/>
 				<input type=radio name="pcntingb" value="3" <?php writeHtmlChecked($pcntingb,3,0); ?> /> Don't count in grade total<br/>
 			</span><br class=form />
+
+			<span class=form>Minimum score to receive credit: </span>
+			<span class=formright>
+				<input type=text size=4 name=minscore value="<?php echo Sanitize::encodeStringForDisplay($line['minscore']); ?>">
+				<input type="radio" name="minscoretype" value="0" <?php writeHtmlChecked($minscoretype,0);?>> Points
+				<input type="radio" name="minscoretype" value="1" <?php writeHtmlChecked($minscoretype,1);?>> Percent
+			</span><BR class=form>
+
+			<span class="form">Default Feedback Text:</span>
+			<span class="formright">
+				Use? <input type="checkbox" name="usedeffb" <?php writeHtmlChecked($usedeffb,true); ?>><br/>
+				Text: <input type="text" size="60" name="deffb" value="<?php echo Sanitize::encodeStringForDisplay($deffb); ?>" />
+			</span><br class="form" />
+
 <?php
 		if (!isset($CFG['GEN']['allowinstraddtutors']) || $CFG['GEN']['allowinstraddtutors']==true) {
 ?>
@@ -1131,79 +1311,12 @@ if ($overwriteBody==1) {
 <?php
 		}
 ?>
-			<span class="form">Calendar icon:</span>
-			<span class="formright">
-				Active: <input name="caltagact" type=text size=8 value="<?php echo Sanitize::encodeStringForDisplay($line['caltag']); ?>"/>,
-				Review: <input name="caltagrev" type=text size=8 value="<?php echo Sanitize::encodeStringForDisplay($line['calrtag']); ?>"/>
-			</span><br class="form" />
-
-			</fieldset>
-
-			<fieldset><legend>Advanced Options</legend>
-			<span class=form>Minimum score to receive credit: </span>
-			<span class=formright>
-				<input type=text size=4 name=minscore value="<?php echo Sanitize::encodeStringForDisplay($line['minscore']); ?>">
-				<input type="radio" name="minscoretype" value="0" <?php writeHtmlChecked($minscoretype,0);?>> Points
-				<input type="radio" name="minscoretype" value="1" <?php writeHtmlChecked($minscoretype,1);?>> Percent
-			</span><BR class=form>
-
-			<span class=form>Show based on another assessment: </span>
-			<span class=formright>
-<?php
-	writeHtmlSelect("reqscoreshowtype", array(0,1), array(_('Show only after'), _('Show greyed until')), ($line['reqscore']<0 || $line['reqscoretype']&1)?1:0);
-?>
-			 a score of
-				<input type=text size=4 name=reqscore value="<?php echo abs($line['reqscore']);?>">
-<?php
-	writeHtmlSelect("reqscorecalctype", array(0,1), array(_('points'), _('percent')), ($line['reqscoretype']&2)?1:0);
-?>
-			is obtained on
-<?php
-	writeHtmlSelect ("reqscoreaid",$page_copyFromSelect['val'],$page_copyFromSelect['label'],$line['reqscoreaid'],"Dont Use",0,null);
-?>
-			</span><br class=form>
-			<span class="form">Default Feedback Text:</span>
-			<span class="formright">
-				Use? <input type="checkbox" name="usedeffb" <?php writeHtmlChecked($usedeffb,true); ?>><br/>
-				Text: <input type="text" size="60" name="deffb" value="<?php echo Sanitize::encodeStringForDisplay($deffb); ?>" />
-			</span><br class="form" />
-			<span class=form>All items same random seed: </span>
-			<span class=formright>
-				<input type="checkbox" name="sameseed" <?php writeHtmlChecked($line['shuffle']&2,2); ?>>
-				<i>Don't use "Homework" mode or "Reattempts different versions" if you use this setting</i>
-			</span><BR class=form>
-			<span class=form>All students same version of questions: </span>
-			<span class=formright>
-				<input type="checkbox" name="samever" <?php writeHtmlChecked($line['shuffle']&4,4); ?>>
-			</span><BR class=form>
 
 			<span class=form>Penalty for questions done while in exception/LatePass: </span>
 			<span class=formright>
 				<input type=text size=4 name="exceptionpenalty" value="<?php echo Sanitize::encodeStringForDisplay($line['exceptionpenalty']); ?>">%
 			</span><BR class=form>
 
-			<span class=form>Group assessment: </span>
-			<span class=formright>
-				<input type="radio" name="isgroup" value="0" <?php writeHtmlChecked($line['isgroup'],0); ?> />Not a group assessment<br/>
-				<input type="radio" name="isgroup" value="1" <?php  writeHtmlChecked($line['isgroup'],1); ?> />Students can add members with login passwords<br/>
-				<input type="radio" name="isgroup" value="2" <?php  writeHtmlChecked($line['isgroup'],2); ?> />Students can add members without passwords<br/>
-				<input type="radio" name="isgroup" value="3" <?php  writeHtmlChecked($line['isgroup'],3); ?> />Students cannot add members, and can't start the assessment until you add them to a group
-			</span><br class="form" />
-			<span class=form>Max group members (if group assessment): </span>
-			<span class=formright>
-				<input type="text" name="groupmax" value="<?php echo Sanitize::encodeStringForDisplay($line['groupmax']); ?>" />
-			</span><br class="form" />
-			<span class="form">Use group set:<?php
-				if ($taken) {
-					if ($line['isgroup']==0) {
-						echo '<br/>Only empty group sets can be used after the assessment has started';
-					} else {
-						echo '<br/>Cannot change group set after the assessment has started';
-					}
-				}?></span>
-			<span class="formright">
-				<?php writeHtmlSelect('groupsetid',$page_groupsets['val'],$page_groupsets['label'],$line['groupsetid'],null,null,($taken && $line['isgroup']>0)?'disabled="disabled"':''); ?>
-			</span><br class="form" />
 			<span class="form">Default Outcome:</span>
 			<span class="formright"><select name="defoutcome">
 				<?php
@@ -1224,40 +1337,39 @@ if ($overwriteBody==1) {
 				?>
 				</select>
 			</span><br class="form" />
-			<span class=form>Show question categories:</span>
+		 </div>
+
+		 <div class="block grouptoggle">
+		   <img class="mida" src="../img/expand.gif" />
+		   Group Assessment
+		 </div>
+		 <div class="blockitems hidden">
+
+			<span class=form>Group assessment: </span>
 			<span class=formright>
-				<input name="showqcat" type="radio" value="0" <?php writeHtmlChecked($showqcat,"0"); ?>>No <br />
-				<input name="showqcat" type="radio" value="1" <?php writeHtmlChecked($showqcat,"1"); ?>>In Points Possible bar <br />
-				<input name="showqcat" type="radio" value="2" <?php writeHtmlChecked($showqcat,"2"); ?>>In navigation bar (Skip-Around only)
+				<input type="radio" name="isgroup" value="0" <?php writeHtmlChecked($line['isgroup'],0); ?> />Not a group assessment<br/>
+				<input type="radio" name="isgroup" value="1" <?php  writeHtmlChecked($line['isgroup'],1); ?> />Students can add members with login passwords<br/>
+				<input type="radio" name="isgroup" value="2" <?php  writeHtmlChecked($line['isgroup'],2); ?> />Students can add members without passwords<br/>
+				<input type="radio" name="isgroup" value="3" <?php  writeHtmlChecked($line['isgroup'],3); ?> />Students cannot add members, and can't start the assessment until you add them to a group
 			</span><br class="form" />
 
-			<span class=form>Display for tutorial-style questions: </span>
+			<span class=form>Max group members (if group assessment): </span>
 			<span class=formright>
-				<input type="checkbox" name="istutorial" <?php writeHtmlChecked($line['istutorial'],1); ?>>
-			</span><BR class=form>
-	<?php
-	/*if ($enablebasiclti==true) {
-	?>
-			<span class="form">LTI access secret (max 10 chars; blank to not use)</span>
+				<input type="text" name="groupmax" value="<?php echo Sanitize::encodeStringForDisplay($line['groupmax']); ?>" />
+			</span><br class="form" />
+
+			<span class="form">Use group set:<?php
+				if ($taken) {
+					if ($line['isgroup']==0) {
+						echo '<br/>Only empty group sets can be used after the assessment has started';
+					} else {
+						echo '<br/>Cannot change group set after the assessment has started';
+					}
+				}?></span>
 			<span class="formright">
-				<input name="ltisecret" type="text" value="<?php echo $line['ltisecret'];?>" />
-				<a href="#" onclick="document.getElementById('ltiurl').style.display=''; return false;">LTI url/key?</a>
-				<span id="ltiurl" style="display:none;">
-				<?php
-				if (isset($_GET['id'])) {
-					echo '<br/>url: http://'. $_SERVER['HTTP_HOST'].$imasroot.'/bltilaunch.php<br/>';
-					echo 'key: aid_'.$_GET['id'].'_0 (to allow local login) or aid_'.$_GET['id'].'_1 (access from LMS only)';
-				} else {
-					echo 'Assessment ID not yet set.  Come back after submitting';
-				}
-				?>
-				</span>
+				<?php writeHtmlSelect('groupsetid',$page_groupsets['val'],$page_groupsets['label'],$line['groupsetid'],null,null,($taken && $line['isgroup']>0)?'disabled="disabled"':''); ?>
 			</span><br class="form" />
-	<?php
-	}*/
-	?>
-
-			</fieldset>
+		 </div>
 		</div>
 	</fieldset>
 	<div class=submit><input type=submit value="<?php echo $savetitle;?>"></div>

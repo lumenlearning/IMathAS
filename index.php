@@ -64,9 +64,9 @@ if ($myrights>15) {
   $placeinhead .= '<script type="text/javascript">$(function() {
   var html = \'<div class="coursedd dropdown"><a role="button" tabindex=0 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="img/gears.png" alt="Options"/></a>\';
   html += \'<ul role="menu" class="dropdown-menu dropdown-menu-right">\';
-  $(".courselist-teach li:not(.coursegroup)").css("clear","both").each(function (i,el) {
+  $(".courselist-teach li[data-cid]:not(.coursegroup)").css("clear","both").each(function (i,el) {
+  	var cid = $(el).attr("data-cid");
   	if ($(el).attr("data-isowner")=="true" && '.($myrights>39?'true':'false').') {
-  		var cid = $(el).attr("data-cid");
   		var thishtml = html + \' <li><a href="admin/forms.php?from=home&action=modify&id=\'+cid+\'">'._('Settings').'</a></li>\';
   		thishtml += \' <li><a href="#" onclick="hidefromcourselist(this,\'+cid+\',\\\'teach\\\');return false;">'._('Hide from course list').'</a></li>\';
   		thishtml += \' <li><a href="admin/addremoveteachers.php?from=home&id=\'+cid+\'">'._('Add/remove teachers').'</a></li>\';
@@ -75,7 +75,6 @@ if ($myrights>15) {
   		thishtml += \'</ul></div>\';
   		$(el).append(thishtml);
   	} else if ($(el).attr("data-isowner")!="true") {
-  		var cid = $(el).attr("data-cid");
   		var thishtml = html + \' <li><a href="#" onclick="hidefromcourselist(this,\'+cid+\',\\\'teach\\\');return false;">'._('Hide from course list').'</a></li>\';
   		thishtml += \' <li><a href="#" onclick="removeSelfAsCoteacher(this,\'+cid+\');return false;">'._('Remove yourself as a co-teacher').'</a></li>\';
   		thishtml += \'</ul></div>\';
@@ -103,13 +102,13 @@ $nologo = true;
 $newpostscnt = array();
 $postcheckcids = array();
 $postcheckstucids = array();
-$page_coursenames = array();
+$page_coursenames = array(0=>_('None'));
 $page_newpostlist = array();
 
 $newmsgcnt = array();
 if ($showmessagesgadget) {
 	$page_newmessagelist = array();
-	$query = "SELECT imas_msgs.id,imas_msgs.title,imas_msgs.senddate,imas_users.LastName,imas_users.FirstName,imas_msgs.courseid ";
+	$query = "SELECT imas_msgs.id,imas_msgs.msgfrom,imas_msgs.title,imas_msgs.senddate,imas_users.LastName,imas_users.FirstName,imas_msgs.courseid ";
 	$query .= "FROM imas_msgs LEFT JOIN imas_users ON imas_users.id=imas_msgs.msgfrom WHERE ";
 	$query .= "imas_msgs.msgto=:msgto AND (imas_msgs.isread=0 OR imas_msgs.isread=4) ";
 	$query .= "ORDER BY senddate DESC ";
@@ -167,7 +166,7 @@ if ($stm->rowCount()==0) {
 $page_teacherCourseData = array();
 if ($myrights>10) {
 	// check to see if the user is enrolled as a teacher
-	$query = "SELECT imas_courses.name,imas_courses.id,imas_courses.available,imas_courses.startdate,imas_courses.enddate,imas_courses.lockaid,imas_courses.ownerid,imas_teachers.hidefromcourselist,";
+	$query = "SELECT imas_courses.name,imas_courses.id,imas_courses.available,imas_courses.startdate,imas_courses.enddate,imas_courses.cleanupdate,imas_courses.lockaid,imas_courses.ownerid,imas_teachers.hidefromcourselist,";
 	$query .= "IF(UNIX_TIMESTAMP()<imas_courses.startdate OR UNIX_TIMESTAMP()>imas_courses.enddate,0,1) as active ";
 	$query .= "FROM imas_teachers,imas_courses ";
 	$query .= "WHERE imas_teachers.courseid=imas_courses.id AND imas_teachers.userid=:userid ";
@@ -481,10 +480,23 @@ function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 	}
 	echo '</ul>';
 
+	if ($type=='teach') {
+		$hasCleanup = false;
+		foreach ($data as $v) {
+			if ($v['cleanupdate']>1) {
+				$hasCleanup = true;
+				break;
+			}
+		}
+		if ($hasCleanup) {
+			echo '<p class="small info"><span style="color:orange;">**</span> ';
+			echo _('course is schedule for cleanup').'</p>';
+		}
+	}
 	if ($type=='take') {
 		echo '<div class="center"><a class="abutton" href="forms.php?action=enroll">', _('Enroll in a New Class'), '</a></div>';
 	} else if ($type=='teach' && $myrights>39) {
-		echo '<div class="center"><a class="abutton" href="admin/forms.php?from=home&action=addcourse">', _('Add New Course'), '</a></div>';
+		echo '<div class="center"><a class="abutton" href="admin/addcourse.php">', _('Add New Course'), '</a></div>';
 	}
 
 	echo '<div class="center">';
@@ -532,15 +544,18 @@ function printCourseLine($data, $type=null) {
 	} else {
 		echo Sanitize::encodeStringForDisplay($data['name']);
 	}
+	if ($type=='teach' && $data['cleanupdate']>1) {
+		echo ' <span style="color:orange;" title="'._('course is schedule for cleanup').'">**</span>';	
+	}
 	if (isset($data['available']) && (($data['available']&1)==1)) {
-		echo ' <em style="color:green;">', _('Unavailable'), '</em>';
+		echo ' <em style="color:green;" class=small>', _('Unavailable'), '</em>';
 	}
 	if (isset($data['startdate']) && $now<$data['startdate']) {
-		echo ' <em style="color:green;">';
+		echo ' <em style="color:green;" class=small>';
 		echo _('Starts ').tzdate('m/d/Y', $data['startdate']);
 		echo '</em>';
 	} else if (isset($data['enddate']) && $now>$data['enddate']) {
-		echo ' <em style="color:green;">';
+		echo ' <em style="color:green;" class=small>';
 		echo _('Ended ').tzdate('m/d/Y', $data['enddate']);
 		echo '</em>';
 	}
@@ -593,7 +608,16 @@ function printMessagesGadget() {
 		echo "<td><a href=\"msgs/viewmsg.php?cid={$line['courseid']}&type=new&msgid={$line['id']}\">";
 		echo $line['title'];
 		echo '</a></td>';
-		echo '<td>'.Sanitize::encodeStringForDisplay($line['LastName']).', '.Sanitize::encodeStringForDisplay($line['FirstName']).'</td>';
+		if ($line['LastName']==null) {
+			if ($line['msgfrom']==0) {
+				$line['fullname'] = _("[System Message]");
+			} else {
+				$line['fullname'] = _("[Deleted]");
+			}
+		} else {
+			$line['fullname'] = sprintf('%s, %s', $line['LastName'], $line['FirstName']);
+		}
+		echo '<td>'.Sanitize::encodeStringForDisplay($line['fullname']).'</td>';
 		echo '<td>'.Sanitize::encodeStringForDisplay($page_coursenames[$line['courseid']]).'</td>';
 		echo '<td>'.tzdate("D n/j/y, g:i a",$line['senddate']).'</td>';
 		echo '</tr>';

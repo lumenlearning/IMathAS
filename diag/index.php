@@ -55,6 +55,17 @@
 	}
 	$sel1 = array_map('decodeSelector', explode(',',$line['sel1list']));
 	$entryformat = $line['entryformat'];
+	
+	if ($line['sel1name'][0]=='!') {
+		$line['sel1name'] = substr($line['sel1name'], 1);
+	} else {
+		$line['sel1name'] = sprintf(_('Select your %s'), $line['sel1name']);
+	}
+	if ($line['sel2name'][0]=='!') {
+		$line['sel2name'] = substr($line['sel2name'], 1);
+	} else {
+		$line['sel2name'] = sprintf(_('Select your %s'), $line['sel2name']);
+	}
 
 	if (!($line['public']&1)) {
 		echo "<html><body>", _('This diagnostic is not currently available to be taken'), "</body></html>";
@@ -141,7 +152,7 @@ if (isset($_POST['SID'])) {
 	}
 
 	if ($_POST['course']==-1) {
-		echo "<html><body>", Sanitize::encodeStringForDisplay(sprintf(_('Please select a %1$s and %2$s.'), $line['sel1name'], $line['sel2name'])), "  <a href=\"index.php?id=" . Sanitize::onlyInt($diagid) . "\">", _('Try Again'), "</a>\n";
+		echo "<html><body>", Sanitize::encodeStringForDisplay(sprintf(_('Please make selections for "%1$s" and "%2$s".'), $line['sel1name'], $line['sel2name'])), "  <a href=\"index.php?id=" . Sanitize::onlyInt($diagid) . "\">", _('Try Again'), "</a>\n";
 			exit;
 	}
 	$pws = explode(';',$line['pws']);
@@ -352,9 +363,9 @@ function getteach() {
 
 </script>
 
-<span class=form><?php echo Sanitize::encodeStringForDisplay(sprintf(_('Select your %s'), $line['sel1name'])); ?></span><span class=formright>
+<span class=form><?php echo Sanitize::encodeStringForDisplay($line['sel1name']); ?></span><span class=formright>
 <select name="course" id="course" onchange="getteach()">
-<option value="-1"><?php echo Sanitize::encodeStringForDisplay(sprintf(_('Select a %s'), $line['sel1name'])); ?></option>
+<option value="-1"><?php echo Sanitize::encodeStringForDisplay($line['sel1name']); ?></option>
 <?php
 for ($i=0;$i<count($sel1);$i++) {
 	echo "<option value=\"$i\">".Sanitize::encodeStringForDisplay($sel1[$i])."</option>\n";
@@ -362,9 +373,9 @@ for ($i=0;$i<count($sel1);$i++) {
 ?>
 </select></span><br class=form>
 
-<span class=form><?php echo Sanitize::encodeStringForDisplay(sprintf(_('Select your %s'), $line['sel2name'])); ?></span><span class=formright>
+<span class=form><?php echo Sanitize::encodeStringForDisplay($line['sel2name']); ?></span><span class=formright>
 <select name="teachers" id="teachers">
-<option value="not selected"><?php echo Sanitize::encodeStringForDisplay(sprintf(_('Select a %s first'), $line['sel1name'])); ?></option>
+<option value="not selected"><?php echo Sanitize::encodeStringForDisplay($line['sel1name']); ?></option>
 </select></span><br class=form>
 
 <?php
@@ -374,7 +385,7 @@ for ($i=0;$i<count($sel1);$i++) {
 		$stm = $DBH->prepare("SELECT count(id) FROM imas_assessments WHERE id IN ($ph) AND ABS(timelimit)>0");
 		$stm->execute($aids);
 		$hasTimeLimit = ($stm->fetchColumn(0)>0);
-		echo "<b>", _('This test can only be accessed from this location with an access password'), "</b></br>\n";
+		echo "<b>", _('This test can only be accessed from this location with an access password'), "</b><br/>\n";
 		echo "<span class=form>", _('Access password:'), "</span>  <input class=form type=password size=40 name=passwd><BR class=form>";
 		if ($hasTimeLimit) {
 			echo "<span class=form>", _('Time limit (if timed):'), "</span>  ";
@@ -399,14 +410,13 @@ for ($i=0;$i<count($sel1);$i++) {
 $allowreentry = ($line['public']&4);
 $pws = explode(';',$line['pws']);
 if ($noproctor && count($pws)>1 && trim($pws[1])!='' && (!$allowreentry || $line['reentrytime']>0)) {
-	echo "<p>", _('No access code is required for this diagnostic.  However, if your testing window has expired, a proctor can enter a password to allow reaccess to this test.'), "</br>\n";
+	echo "<p>", _('No access code is required for this diagnostic.  However, if your testing window has expired, a proctor can enter a password to allow reaccess to this test.'), "<br/>\n";
 	echo "<span class=form>", _('Override password'), ":</span>  <input class=form type=password size=40 name=passwd><BR class=form>";
 }
 ?>
 </form>
-
 <div id="bsetup">JavaScript is not enabled. JavaScript is required for <?php echo $installname; ?>. Please enable JavaScript and reload this page</div>
-
+</div>
 <script type="text/javascript">
 function determinesetup() {
 	document.getElementById("submit").style.display = "block";
@@ -429,10 +439,10 @@ if (existingonload) {
 	window.onload = determinesetup;
 }
 </script>
-<hr/><div class=right style="font-size:70%;">Built on <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2014 David Lippman</div>
-</div>
-</body>
-</html>
+<hr/>
+<div class=right style="font-size:70%;">Built on <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2018 David Lippman</div>
+
 <?php
+require("../footer.php");
 }
 ?>

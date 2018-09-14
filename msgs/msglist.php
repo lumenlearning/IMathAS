@@ -178,7 +178,6 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 				$message .= "<p>If you do not wish to receive email notification of new messages, please ";
 				$message .= "<a href=\"" . $GLOBALS['basesiteurl'] . "/forms.php?action=chguserinfo\">click here to change your ";
 				$message .= "user preferences</a></p>\r\n";
-				mail($email,'New message notification',$message,$headers);
 
 		        // #### Begin OHM-specific code #####################################################
 			    // #### Begin OHM-specific code #####################################################
@@ -249,7 +248,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 				</script>';
 			require("../header.php");
 			echo "<div class=breadcrumb>$breadcrumbbase ";
-			if ($cid>0 && (!isset($sessiondata['ltiitemtype']) || ($sessiondata['ltiitemtype']!=0 && $sessiondata['ltiitemtype']!=4))) {
+			if ($cid>0 && (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltiitemtype']!=0)) {
 				echo "<a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
 			}
 			if ($type=='sent') {
@@ -563,7 +562,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 
 	echo "<div class=breadcrumb>$breadcrumbbase ";
-	if ($cid>0 && (!isset($sessiondata['ltiitemtype']) || ($sessiondata['ltiitemtype']!=0 && $sessiondata['ltiitemtype']!=4))) {
+	if ($cid>0 && (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltiitemtype']!=0)) {
 		echo " <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
 	}
 	echo " Message List</div>";
@@ -828,11 +827,10 @@ function chgfilter() {
 			$line['title'] = substr($line['title'],4);
 			$n++;
 		}
-		$line['title'] = Sanitize::encodeStringForDisplay($line['title']);
 		if ($n==1) {
-			$line['title'] = 'Re: ' . $line['title'];
+			$line['title'] = 'Re: ' . Sanitize::encodeStringForDisplay($line['title']);
 		} else if ($n>1) {
-			$line['title'] = "Re<sup>$n</sup>: " . $line['title'];
+			$line['title'] = "Re<sup>$n</sup>: " . Sanitize::encodeStringForDisplay($line['title']);
 		}
 		printf("<tr id=\"tr%d\" ", Sanitize::onlyInt($line['id']));
 		$stripe = ($cnt%2==0)?'even':'odd';
@@ -853,7 +851,13 @@ function chgfilter() {
 			echo "Yes";
 		}
 		if ($line['LastName']==null) {
-			$line['LastName'] = "[Deleted]";
+			if ($line['msgfrom']==0) {
+				$line['fullname'] = _("[System Message]");
+			} else {
+				$line['fullname'] = _("[Deleted]");
+			}
+		} else {
+			$line['fullname'] = sprintf('%s, %s', $line['LastName'], $line['FirstName']);
 		}
 		echo '</td><td>';
 
@@ -872,8 +876,7 @@ function chgfilter() {
 			echo "<img class=\"pointer\" id=\"tag".Sanitize::onlyInt($line['id'])."\" src=\"$imasroot/img/flagempty.gif\" onClick=\"toggletagged(".Sanitize::onlyInt($line['id']).");return false;\" alt=\"Not flagged\"/>";
 		}
 		echo '</td>';
-		printf('<td>%s, %s</td>', Sanitize::encodeStringForDisplay($line['LastName']),
-            Sanitize::encodeStringForDisplay($line['FirstName']));
+		printf('<td>%s</td>', Sanitize::encodeStringForDisplay($line['fullname']));
 
 
 		if ($line['name']==null) {
