@@ -35,9 +35,29 @@ if (isset($CFG['coursebrowser'])) {
 }
 echo '<p><button type=button onclick="showCopyOpts()">';
 if (isset($CFG['coursebrowser'])) {
-	echo _('Copy from my or a colleage\'s course');
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	echo _('Copy from an existing course');
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 } else {
-	echo _('Copy from my, a colleage\'s, or template course');
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	echo _('Copy from an existing course or template');
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 }
 echo '</button></p>';
 echo '<div id=copyoptions style="display:none; padding-left: 20px">';
