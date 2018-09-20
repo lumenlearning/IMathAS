@@ -1310,7 +1310,7 @@ switch($_GET['action']) {
 	case "modgroup":
 		if ($myrights < 100) { echo "You don't have the authority for this action"; break;}
 		echo '<div id="headerforms" class="pagetitle"><h1>Rename Instructor Group</h1></div>';
-		$stm = $DBH->prepare("SELECT name,parent FROM imas_groups WHERE id=:id");
+		$stm = $DBH->prepare("SELECT name,parent,grouptype FROM imas_groups WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		list($gpname,$parent,$grptype) = $stm->fetch(PDO::FETCH_NUM);
 
