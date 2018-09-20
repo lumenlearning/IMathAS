@@ -231,57 +231,51 @@ The Lumen Team
 
 		$messageIsLumenCustomer = "
 <p>
-Dear ${sanitizedName}, 
+    Hi ${sanitizedName},
 </p>
 
 <p>
-Welcome to Lumen OHM! Your account has been activated, and you're all set
-to log in at
-<a target='_blank' href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
-as an instructor using the username ${sanitizedUsername} and the password
-you provided.
+	Welcome to Lumen OHM! Your instructor access has been approved. Login with
+	your username ${sanitizedUsername} and password at
+	<a href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
+	to get started today.
 </p>
 
 <p>
-Here are some great resources to help you get started exploring OHM, creating
-and teaching courses:
-</p>
-
-<ul>
-    <li>
-        <a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>OHM Course-building Startup Guide</a>:
-        A quick-start guide to walk you step-by-step through setting up and
-        customizing a new OHM course.  
-    </li>
-    <li>
-        <a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115015412808-Lumen-OHM-Training-Videos'>OHM Training Videos</a>:
-        Short videos about setting up and customizing OHM courses. 
-    </li>
-    <li>
-        <a target='_blank' href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=11'>OHM Training Course:</b>
-        Documentation and videos to guide you through building courses and using OHM.   
-    </li>
-    <li>
-        <a target='_blank' href='${GLOBALS['basesiteurl']}/course/course.php?folder=0&cid=1'>OHM Community Course</a>:
-        A course in which all faculty users can connect! Provides searchable
-        discussion forums to find answers to common questions, learn practical
-        tips and tricks, and connect you with other OHM faculty users.
-    </li>
-</ul>
-
-<p>
-For help, Lumen OHM customers may also submit requests through
-<a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/requests/new'>https://lumenlearning.zendesk.com/hc/en-us/requests/new</a>.
+These resources can help orient you to using OHM: 
 </p>
 
 <p>
-We’re excited for you and your students to enjoy the benefits of learning and
-teaching with open educational resources (OER) in Lumen OHM. 
+    <ul>
+        <li>
+            <strong>Startup Guide:</strong> step-by-step instructions on the
+            basics of course creation, adding homework, quizzes, activities and
+            tests. 
+        </li>
+		<ul>
+			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>Download the PDF</a></li>
+			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115015412808-Lumen-OHM-Training-Videos'>Watch the Video Training Series</a></li>
+		</ul>
+		<li>
+            <strong>Complete User Guide:</strong> more detailed information
+            about every feature of OHM including course creation, course
+            management, LMS integrations and more.
+        </li>
+        <ul>
+            <li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>View the entire OHM User Guide</a></li>
+        </ul>
+    </ul>
+</p>
+ 
+<p>
+    We appreciate your interest in Open Educational Resources (OER) and look
+    forward to partnering with you to create affordable and effective math
+    courses. We welcome you to the Lumen OHM community! 
 </p>
 
 <p>
-Thank you,<br/>
-The Lumen Team
+	Thank you,<br/>
+	The Lumen Team
 </p>
 ";
 
