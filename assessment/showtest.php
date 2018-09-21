@@ -770,7 +770,7 @@
 		$exceptionrow = $stm2->fetch(PDO::FETCH_NUM);
 		if ($exceptionrow != null) {
 			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $testsettings, true);
-			$ltiexception = ($row[3]>0 && $row[2]==0);
+			$ltiexception = ($exceptionrow[3]>0 && $exceptionrow[2]==0);
 		} else if (isset($_SESSION['lti_duedate']) && $isteacher && $_SESSION['lti_duedate']!=$testsettings['enddate']) {
 			//teacher launch with lti duedate that's different than default
 			//do a pseudo-exception
@@ -790,7 +790,7 @@
 					}
 				}
 			} else { //in exception
-				if ($testsettings['enddate']<$now && ($row[3]==0 || $row[2]>0)) { //exception is for past-due-date
+				if ($testsettings['enddate']<$now && ($exceptionrow[3]==0 || $exceptionrow[2]>0)) { //exception is for past-due-date
 					$inexception = true;
 					$exceptiontype = $exceptionrow[2];
 					if ($exceptionrow[4]!==null) {
@@ -2907,7 +2907,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					//if (!preg_match('/^<div\s*class="intro"[^>]*>(\s|&nbsp;|<p[^>]*>(\s*|&nbsp;)*<\/p>)*<\/div>$/', $intropages[0])) {
 						echo $intropages[0];
 					//}
-					}
+				}
 				$intro =  $intropages[2*$_GET['page']+2];
 				preg_match_all('/\[QUESTION\s+(\d+)\s*\]/',$intro,$matches,PREG_PATTERN_ORDER);
 				if (isset($matches[1]) && count($matches[1])>0) {
@@ -3379,7 +3379,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 	}
 
 	function shownavbar($questions,$scores,$current,$showcat,$extrefs) {
-		global $imasroot,$isdiag,$testsettings,$attempts,$qi,$allowregen,$bestscores,$isreview,$showeachscore,$noindivscores,$CFG;
+		global $imasroot,$isteacher,$isdiag,$testsettings,$attempts,$qi,$allowregen,$bestscores,$isreview,$showeachscore,$noindivscores,$CFG;
 		$todo = 0;
 		$earned = 0;
 		$poss = 0;
@@ -3391,7 +3391,12 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			echo '<h3>'._('Resources').'</h3>';
 			echo '<ul class=qlist>';
 			foreach ($extrefs as $extref) {
-				echo '<li><a target="_blank" href="'.Sanitize::url($extref['link']).'">'.Sanitize::encodeStringForDisplay($extref['label']).'</a></li>';
+				if (!$isteacher) {
+					$rec = "data-base=\"assessintro-{$testsettings['id']}\"";
+				} else {
+					$rec = '';
+				}
+				echo '<li><a target="_blank" '.$rec.' href="'.Sanitize::url($extref['link']).'">'.Sanitize::encodeStringForDisplay($extref['label']).'</a></li>';
 			}
 			echo '</ul>';
 		}
