@@ -72,35 +72,15 @@ if (!empty($newStatus)) {
 		$stm->execute(array(':id'=>$instId));
 		$row = $stm->fetch(PDO::FETCH_NUM);
 		
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		$headers .= "From: $accountapproval\r\n";
 		$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row[0]).'</p>';
 		$message .= '<p>Welcome to '.$installname.'.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-		if ($installname == "MyOpenMath") {
-			$message .= '<p>Welcome to MyOpenMath.  Your account has been activated, and you\'re all set to log in at <a href="https://www.myopenmath.com">MyOpenMath.com</a> as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.myopenmath.com/docs/docs.php">Getting Started Guide</a> helpful</p>';
-			$message .= '<p>I\'ve added you to the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
-			$message .= '<p>I\'ve also added you to the MyOpenMath Training Course.  This course has video tutorials and assignments that will walk you through learning how to use MyOpenMath in your classes.</p>';
-			$message .= '<p>These will be your primary source of support; MyOpenMath does not provide individual email or phone support. We encourage you to form a learning community at your college to support each other in learning and using the system.</p>';
-			$message .= '<p>Please keep in mind that MyOpenMath is run and supported by volunteers from the user community. Likewise, all courses and questions were created by your colleagues, and shared out of the kindness of their hearts. ';
-			$message .= 'There is no big company or grant-funded nonprofit keeping this thing going. No one is paid by MyOpenMath to create or maintain content or provide support, ';
-			$message .= 'so please be respectful of the volunteers you interact with, and consider contributing back in the future.</p>'; 
-			$message .= '<p>We hope you enjoy both the cost savings and freedoms using open resources provide.</p>';
-		} else if ($installname=='WAMAP') {
-			$message .= 'Welcome to WAMAP.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row[1]).'</b> and the password you provided.</p>';
-			//$message .= '<p>If you haven\'t already looked at it, you may find the <a href="http://www.wamap.org/docs/docs.php">Getting Started Guide</a> helpful</p>';
-			$message .= '<p>I\'ve added you to  the Support Course, which has forums in which you can ask questions, report problems, or find out about new system improvements.</p>';
-			$message .= '<p>I\'ve also added you to the WAMAP Training Course.  This course has video tutorials and assignments that will walk you through learning how to use WAMAP in your classes.</p>';
-			$message .= '<p>If you are from outside Washington State, please be aware that WAMAP.org is only intended for regular use by Washington State faculty.  You are welcome to use this site for trial purposes.  If you wish to continue using it, we ask you set up your own installation of the IMathAS software, or use MyOpenMath.com if using content built around an open textbook.</p>';
-		}
-		$message .= '<p>'.$installname.' Account Approval Volunteers</p>';
+
+		require_once("../includes/email.php");
+		send_email(Sanitize::emailAddress($row[2]), !empty($accountapproval)?$accountapproval:$sendfrom, 
+			$installname._(' Account Approval'), $message, 
+			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(), 
+			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);
 		
-		if (isset($CFG['GEN']['useSESmail'])) {
-			SESmail($row[2], $accountapproval, $installname . ' Account Approval', $message);
-		} else {
-			mail($row[2],$installname . ' Account Approval',$message,$headers);
-		}
 	}
 	echo "OK";
 	exit;

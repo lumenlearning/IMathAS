@@ -1,4 +1,33 @@
 <?php
+
+function send_SESemail($email, $from, $subject, $message, $replyto=array(), $bccList=array()) {
+	require_once(__DIR__ . "/../includes/mailses.php");
+	$ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
+	$m = new SimpleEmailServiceMessage();
+	
+	foreach ($email as $address) {
+		if ($address != '') {
+			$m->addTo($address);
+		}
+	}
+	
+	$m->setFrom($from);
+	
+	foreach ($replyto as $address) {
+		if ($address != '') {
+			$m->addReplyTo($address);
+		}
+	}
+	foreach($bccList as $address) {
+		if ($address != '') {
+			$m->addBCC($address);
+		}
+	}
+	$m->setSubject($subject);
+	$m->setMessageFromString(null,$message);
+	$ses->sendEmail($m);
+}
+
 /**
 *
 * Copyright (c) 2014, Daniel Zahariev.
