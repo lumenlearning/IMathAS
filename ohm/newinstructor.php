@@ -91,39 +91,32 @@
 
 				$emailMessage = "
 <p>
-Dear ${sanitizedFirstName},
+	Hi ${sanitizedFirstName},
 </p>
 
 <p>
-Your instructor account request for username ${sanitizedUsername} is under review.
+	Thank you for your OHM instructor account request! In order to grant
+	instructor access, we need to verify your educator status and affiliation.
+	Once verification is complete, your account will be elevated to a Lumen’s
+	OHM instructor account. Account verification is typically completed within
+	2 business days.
 </p>
 
 <p>
-This request is manually verified, so it may take 1-2 business days to process.
-In the meantime, you are welcome to log in and explore these resources designed
-to orient you to OHM: 
-</p>
-
-<ul>
-	<li>
-		<b>OHM Orientation Course:</b> Documentation and videos to guide you
-		through building courses and using OHM.
-	</li>
-	<li>
-		<b>OHM Community Course:</b> A course in which all faculty users can
-		connect! Provides searchable discussion forums to find answers to
-		common questions, learn practical tips and tricks, and connect you
-		with other OHM faculty users.
-	</li>
-</ul>
-
-<p>
-Once your account is approved, you will have full access to all instructor account features. 
+	Once your instructor account is approved, periodically we’ll send you tips
+	to assist you in getting the most out of OHM. In the meantime, you can
+	watch our
+	<a target='_blank' href='https://www.youtube.com/watch?v=ApDlMfNU8HM&feature=youtu.be'>overview video</a>
+	to familiarize yourself with the OHM platform.
 </p>
 
 <p>
-Thank you for your interest in OHM!<br/>
-The Lumen Team
+	We appreciate your interest in using Open Education Resources (OER) to
+	increase student access and affordability of high-quality math courseware!
+</p>
+
+<p>
+	The Lumen Team
 </p>
 ";
 
