@@ -31,7 +31,7 @@ $dbusername = "username";
 $dbpassword = "password";
 
 $CFG['coursebrowser'] = 'coursebrowserprops.js';
-$CFG['coursebrowsermsg'] = 'Start with a template course';
+$CFG['coursebrowsermsg'] = 'Copy a template course';
 
 //error reporting level.  Set to 0 for production servers.
 error_reporting(E_ALL & ~E_NOTICE);

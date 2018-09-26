@@ -10,7 +10,20 @@ require("../includes/calendardisp.php");
 
 
 /*** pre-html data manipulation, including function code *******/
-
+function buildBlockLeftNav($items, $parent, &$blocklist) {
+	$now = time();
+	foreach ($items as $k=>$item) {
+		if (is_array($item)) {
+			if (!empty($item['innav'])) {
+				if (($item['avail']==2 || ($item['avail']==1 && $item['startdate']<$now && $item['enddate']>$now)) ||
+				    ($item['SH'][0]=='S' && $item['avail']>0)) {
+					$blocklist[] = array($item['name'], $parent.'-'.($k+1), $item['SH'][1]);
+				}
+			}
+			buildBlockLeftNav($item['items'], $parent .'-'.($k+1), $blocklist);
+		}
+	}
+}
 //set some page specific variables and counters
 $overwriteBody = 0;
 $body = "";
@@ -153,6 +166,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		}
 		$nocoursenav = true;
 	}
+
 	//get exceptions
 	$now = time();
 	$exceptions = array();
@@ -163,7 +177,12 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	if (count($exceptions)>0) {
 		upsendexceptions($items);
 	}
-		
+
+	if ($useleftnav && !isset($teacherid)) { //load quick block nav
+		$stuLeftNavBlocks = array();
+		buildBlockLeftNav($items, '0', $stuLeftNavBlocks);
+	}
+
 	if ($_GET['folder']!='0') {
 		$now = time();
 		$blocktree = array_map('intval', explode('-',$_GET['folder']));
@@ -351,7 +370,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	}
 }
 
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=070218\"></script>";
+$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=072518\"></script>";
 if (isset($tutorid) && isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
 	$placeinhead .= '<script type="text/javascript">$(function(){$(".instrdates").hide();});</script>';
 }
@@ -554,14 +573,27 @@ if ($overwriteBody==1) {
 			echo '<a href="showcalendar.php?cid='.$cid.'" class="essen">'._('Calendar').'</a><br/>';
 			}
 		echo '<a href="coursemap.php?cid='.$cid.'">'._('Course Map').'</a>';
-			echo '</p>';
-		
+		echo '</p>';
 	?>
 			
 			<p>
 			<a href="gradebook.php?cid=<?php echo $cid ?>" class="essen"><?php echo _('Gradebook'); ?></a> <?php if (($coursenewflag&1)==1) {echo '<span class="noticetext">', _('New'), '</span>';}?>
 			</p>
 	<?php
+		if (count($stuLeftNavBlocks)>0) {
+			echo '<p class=leftnavp><b>'._('Quick Links').'</b>';
+			foreach ($stuLeftNavBlocks as $bi) {
+				if ($bi[2]=='T') { //tree reader
+					echo '<br/><a href="treereader.php?cid='.$cid.'&folder='.Sanitize::encodeUrlParam($bi[1]).'">';
+				} else {
+					echo '<br/><a href="course.php?cid='.$cid.'&folder='.Sanitize::encodeUrlParam($bi[1]).'">';
+				}
+				echo Sanitize::encodeStringForDisplay($bi[0]);
+				echo '</a>';
+			}
+			echo '</p>';
+		}
+
 		if (!isset($sessiondata['ltiitemtype'])) { //don't show in LTI embed
 	?>
 			<p>
@@ -582,8 +614,7 @@ if ($overwriteBody==1) {
 if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migration_notice.php");}
 
    makeTopMenu();
-
-   echo "<div id=\"headercourse\" class=\"pagetitle\"><h1>".Sanitize::encodeStringForDisplay($curname)."</h1></div>\n";
+   echo "<div id=\"headercourse\" class=\"pagetitle\"><h2>".Sanitize::encodeStringForDisplay($curname)."</h2></div>\n";
    
    if (count($items)>0) {
 	   

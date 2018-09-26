@@ -76,7 +76,19 @@ function arraysearch(needle,hay) {
    }
 
 var tipobj = 0; var curtipel = null;
-function tipshow(el,tip) {
+function tipshow(el,tip, e) {
+	if (typeof e != 'undefined' && e.type=='touchstart') {
+		if (curtipel == el) {
+			tipout();
+			return false;
+		}
+		jQuery(document).on('touchstart.tipshow', function() {
+			tipout(el);
+		});
+	}
+	if (curtipel==el) {
+		return;
+	}
 	if (typeof tipobj!= 'object') {
 		tipobj = document.createElement("div");
 		tipobj.className = "tips";
@@ -91,12 +103,13 @@ function tipshow(el,tip) {
 		tipobj.innerHTML = tip;
 	}
 	tipobj.style.left = "5px";
-	tipobj.style.display = "block";
+	//tipobj.style.display = "block";
+	$(tipobj).stop(true,true).fadeIn(100);
 	tipobj.setAttribute("aria-hidden","false");
 	el.setAttribute("aria-describedby", "hovertipsholder");
 
 	if (typeof usingASCIIMath!='undefined' && typeof noMathRender != 'undefined') {
-		if (usingASCIIMath && !noMathRender) {
+		if (usingASCIIMath && !noMathRender && tipobj.innerHTML.indexOf('`')!=-1) {
 			rendermathnode(tipobj);
 		}
 	}
@@ -121,15 +134,30 @@ function tipshow(el,tip) {
         x += scrOfX;
         if ((p[0] + tipobj.offsetWidth)>x-10) {
         	p[0] = x - tipobj.offsetWidth - 30;
+        	$(tipobj).addClass("tipright");
+        } else {
+        	$(tipobj).removeClass("tipright");
         }
 
-	tipobj.style.left = (p[0]+20) + "px";
+	tipobj.style.left = (p[0]+15) + "px";
 	if (p[1] < 30) {
 		tipobj.style.top = (p[1]+20) + "px";
 	} else {
 		tipobj.style.top = (p[1]-tipobj.offsetHeight) + "px";
-	}
+	}	
 }
+
+function tipout(e) {
+	jQuery(document).off('touchstart.tipshow');
+	//tipobj.style.display = "none";
+	$(tipobj).fadeOut(100);
+	tipobj.setAttribute("aria-hidden","true");
+	if (curtipel) {
+		curtipel.removeAttribute("aria-describedby");
+	}
+	curtipel = null;
+}
+
 var popupwins = [];
 function popupwindow(id,content,width,height,scroll) {
 	if (height=='fit') {
@@ -153,14 +181,7 @@ function popupwindow(id,content,width,height,scroll) {
 		popupwins[id] = win1;
 	}
 }
-function tipout(el) {
-	tipobj.style.display = "none";
-	tipobj.setAttribute("aria-hidden","true");
-	if (curtipel) {
-		curtipel.removeAttribute("aria-describedby");
-	}
-	curtipel = null;
-}
+
 
 function findPos(obj) { //from quirksmode.org
 	var curleft = curtop = 0;
@@ -734,20 +755,20 @@ jQuery(document).ready(function($) {
 	$('a[href*="vimeo"]').each(setupvideoembeds);
 	$('body').fitVids();
 });
-jQuery(document).ready(function() {
-	jQuery.fn.isolatedScroll = function() {
-	    this.bind('mousewheel DOMMouseScroll', function (e) {
-		var delta = e.wheelDelta || (e.originalEvent && e.originalEvent.wheelDelta) || -e.detail,
-		    bottomOverflow = this.scrollTop + jQuery(this).outerHeight() - this.scrollHeight >= 0,
-		    topOverflow = this.scrollTop <= 0;
-	
-		if ((delta < 0 && bottomOverflow) || (delta > 0 && topOverflow)) {
-		    e.preventDefault();
-		}
-	    });
-	    return this;
-	};
-});
+
+jQuery.fn.isolatedScroll = function() {
+    this.bind('mousewheel DOMMouseScroll', function (e) {
+	var delta = e.wheelDelta || (e.originalEvent && e.originalEvent.wheelDelta) || -e.detail,
+	    bottomOverflow = this.scrollTop + jQuery(this).outerHeight() - this.scrollHeight >= 0,
+	    topOverflow = this.scrollTop <= 0;
+
+	if ((delta < 0 && bottomOverflow) || (delta > 0 && topOverflow)) {
+	    e.preventDefault();
+	}
+    });
+    return this;
+};
+
 
 jQuery(document).ready(function($) {
 	var fixedonscrollel = $('.fixedonscroll');
@@ -786,6 +807,39 @@ function _(txt) {
 	}
 	return outtxt;
 }
+
+function randID() {
+	return '_' + Math.random().toString(36).substr(2, 9);
+}
+
+//generic grouping block toggle
+jQuery(document).ready(function($) {
+	$(".grouptoggle").each(function() {
+		var id = randID();
+		$(this).next(".blockitems")
+			.hide()
+			.removeClass("hidden")
+			.attr("id", "bi"+id);
+		$(this).attr("id", id).attr("aria-controls", "bi"+id)
+			.attr("aria-expanded", false)
+			.attr("tabindex", 0)
+			.css("cursor", "pointer")
+			.on("click keydown", function(e) {
+				if (e.type=="click" || e.which==13) {
+					if ($(this).attr("aria-expanded") == "true") {
+						$(this).attr("aria-expanded", false);
+						$(this).children("img").attr("src", "../img/expand.gif");
+						$(this).next(".blockitems").slideUp();
+					} else {
+						$(this).attr("aria-expanded", true);
+						$(this).children("img").attr("src", "../img/collapse.gif");
+						$(this).next(".blockitems").slideDown();
+					}
+				}	
+			});
+	});
+	$(".grouptoggle img").attr("alt", "expand/collapse");
+});
 
 //https://github.com/davatron5000/FitVids.js
 (function( $ ){
@@ -828,7 +882,6 @@ function _(txt) {
 
 //code for alt selectors
 function setAltSelectors(group,val) {
-	console.log("looking for "+group);
 	$(".alts."+group).parents(".altWrap").find(".altContentOn").removeClass("altContentOn").addClass("altContentOff");
 	$(".alts."+group).parents(".altWrap").find("."+val).addClass("altContentOn").removeClass("altContentOff");
 	$("select.alts."+group).val(group+":"+val);

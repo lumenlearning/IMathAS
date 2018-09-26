@@ -244,7 +244,12 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$row[0] = trim($row[0]);
 				if ($row[0]!='' && $row[0]!='none@none.com') {
-					mail($row[0],'New forum post notification',$message,$headers);
+
+					if (isset($CFG['GEN']['useSESmail'])) {
+						ohmSESmail(Sanitize::emailAddress($row[0]), $sendfrom, 'New forum post notification', $message);
+					} else {
+						mail($row[0],'New forum post notification',$message,$headers);
+					}
 				}
 			}
 		}

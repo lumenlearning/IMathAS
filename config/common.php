@@ -31,7 +31,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
   $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
 }
 
-
+$CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
 
 //database access settings
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');

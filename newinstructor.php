@@ -71,7 +71,24 @@
 				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
 				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));
 				$message .= sprintf("Username: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['username']));
-				mail($accountapproval,$subject,$message,$headers);
+
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+
+				if (isset($CFG['GEN']['useSESmail'])) {
+					ohmSESmail($accountapproval, $accountapproval, $subject, $message);
+				} else {
+					mail($accountapproval,$subject,$message,$headers);
+				}
+
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
 
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
@@ -90,7 +107,60 @@
 			$message .= "log in an explore as a student; perhaps play around in one of the self-study courses.</p>";
 			$message .= "<p>Sometimes our account approval emails get eaten by spam filters.  You can reduce the likelihood by adding $sendfrom and $accountapproval to your contacts list.";
 			$message .= "If you don't hear anything in a week, go ahead and try logging in with your selected username and password.</p>";
-			mail(Sanitize::emailAddress($_POST['email']),$subject,$message,$headers);
+
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+
+				$mailto = Sanitize::emailAddress($_POST['email']);
+				$mailfrom = $CFG['OHM']['new_instructor_approval_reply_to'];
+				$subject = 'Thanks for your Lumen OHM instructor account request';
+				$sanitizedFirstName = Sanitize::encodeStringForDisplay($_POST['firstname']);
+
+				$message = "
+<p>
+	Hi ${sanitizedFirstName},
+</p>
+
+<p>
+	Thank you for your OHM instructor account request! In order to grant
+	instructor access, we need to verify your educator status and affiliation.
+	Once verification is complete, your account will be elevated to a Lumen’s
+	OHM instructor account. Account verification is typically completed within
+	2 business days.
+</p>
+
+<p>
+	Once your instructor account is approved, periodically we’ll send you tips
+	to assist you in getting the most out of OHM. In the meantime, you can
+	watch our
+	<a target='_blank' href='https://www.youtube.com/watch?v=ApDlMfNU8HM&feature=youtu.be'>overview video</a>
+	to familiarize yourself with the OHM platform.
+</p>
+
+<p>
+	We appreciate your interest in using Open Education Resources (OER) to
+	increase student access and affordability of high-quality math courseware!
+</p>
+
+<p>
+	The Lumen Team
+</p>
+";
+
+				if (isset($CFG['GEN']['useSESmail'])) {
+					ohmSESmail($mailto, $mailfrom, $subject, $message);
+				} else {
+					mail($mailto,$subject,$message,$headers);
+				}
+
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
 
 				echo $message;
 				require("footer.php");

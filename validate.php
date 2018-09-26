@@ -291,7 +291,7 @@
          } else {
              $rqp = "?r=" .Sanitize::randomQueryStringParam();
          }
-
+		 
 		 if ($needToForcePasswordReset) {
 		 	 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
 		 } else {
@@ -367,7 +367,9 @@
 		$coursetheme = $sessiondata['userprefs']['usertheme'];
 	}
 	
-	if (!empty($line['forcepwreset']) && (empty($_GET['action']) || $_GET['action']!='forcechgpwd') && (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltirole']!='learner')) {
+	if (!empty($line['forcepwreset']) && (empty($_GET['action']) || $_GET['action']!='forcechgpwd')
+		&& (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltirole']!='learner')
+		&& !isset($sessiondata['emulateuseroriginaluser'])) {
 		 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
 		 exit;
 	}
@@ -427,21 +429,6 @@
 		}
 	}
 	
-	//TEMP: Hide course browser from non-admins
-	// OHM-specific change: Allow all teachers (level 20). Original before change was level 100.
-	if ($myrights<20) {
-		unset($CFG['coursebrowser']);
-	}
-
-	if ($myrights>18 && isset($sessiondata['ltiitemtype']) && $_SERVER['PHP_SELF']==$imasroot.'/index.php') {
-		foreach ($sessiondata as $k=>$v) {
-			if (substr($k,0,3)=='lti') {
-				unset($sessiondata[$k]);
-			}
-		}
-		writesessiondata();
-	}
-
 	if (isset($sessiondata['ltiitemtype'])) {
 		$hideAllHeaderNav = true;
 		if ($sessiondata['ltiitemtype']==1) {

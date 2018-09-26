@@ -141,7 +141,7 @@ $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL');
 $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
 
 $CFG['coursebrowser'] = 'coursebrowserprops.js';
-$CFG['coursebrowsermsg'] = 'Start with a template course';
+$CFG['coursebrowsermsg'] = 'Copy a template course';
 
 // For OEA embedded OHM questions, show the answer & feedback (if existing)
 // when questions are embedded in text.

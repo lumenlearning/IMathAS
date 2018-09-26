@@ -102,11 +102,11 @@ class ExceptionFuncs {
 	//$exception should be from imas_exceptions, and be null, or
 	//   array(startdate,enddate,islatepass,is_lti)
 	//$adata should be associative array from imas_assessments including
-	//   startdate, enddate, allowlate, id
+	//   startdate, enddate, allowlate, id, LPcutoff
 	//returns normally array(useexception, canundolatepass, canuselatepass)
 	//if canuseifblocked is set, returns array(useexception, canuselatepass if unblocked)
 	//if limit is set, just returns useexception
-	public function getCanUseAssessException($exception, $adata, $limit=false, $canuseifblocked=false) {
+	public function getCanUseAssessException($exception, $adata, $limit=false, $canuseifunblocked=false) {
 		$now = time();
 		$canuselatepass = false;
 		$canundolatepass = false;
@@ -148,7 +148,7 @@ class ExceptionFuncs {
 					$latepasscnt = 0;
 				}
 			}
-			if ($canuseifblocked) {
+			if ($canuseifunblocked) {
 				$canuselatepass = $this->getLatePassBlockedByView($adata, $latepasscnt);
 				return array($useexception, $canuselatepass);
 			} else {
@@ -205,7 +205,11 @@ class ExceptionFuncs {
 		} else {
 			$latepassesAllowed = $adata['allowlate']%10-1;
 		}
-		if ((!in_array($adata['id'],$this->viewedassess) || $skipViewedCheck) && 
+		if (!isset($adata['LPcutoff'])) {
+			$adata['LPcutoff'] = 0;
+		}
+		if ((!in_array($adata['id'],$this->viewedassess) || $skipViewedCheck) &&
+			($adata['LPcutoff']==0 || ($now<$adata['LPcutoff'] && $adata['enddate']<$adata['LPcutoff'])) &&
 			$this->latepasses>0 && $this->isstu && $adata['enddate'] < $this->courseenddate) { //basic checks
 			if ($now<$adata['enddate'] && $latepassesAllowed > $latepasscnt) { //before due date and use is allowed
 				$canuselatepass = true;
@@ -286,8 +290,36 @@ class ExceptionFuncs {
 		$canuselatepassP = false;
 		$canuselatepassR = false;
 		if ($line['allowlate']>0 && $this->latepasses>0 && $this->isstu) {
-		   $allowlaten = $line['allowlate']%10;
-		   $allowlateon = floor($line['allowlate']/10)%10;
+		   //$allowlaten = $line['allowlate']%10;
+		   if ($line['allowlate']%10 == 1) { //unlimited
+		   	   $latepassesAllowed = 10000000;
+		   } else {
+		   	   $latepassesAllowed =  $line['allowlate']%10 - 1;
+		   }
+		   $allowlateon = floor($line['allowlate']/10)%10;  //0: both, 2: posts only, 3: replies only
+		   
+		   if ($allowlateon != 3  && $line['postby']<2000000000) { //it allows post LPs
+		   	if ($now < $line['postby'] && $latepassesAllowed > $latepasscntP) { //before due date and use is allowed
+		   		$canuselatepassP = true;
+		   	} else if ($now > $line['postby'] && $line['allowlate']>=100) { //after due date and allows use after due date
+		   		$latepassesNeededToExtend = $this->calcLPneeded($line['postby']);
+				if ($latepassesAllowed >= $latepasscntP + $latepassesNeededToExtend && $latepassesNeededToExtend<=$this->latepasses) {
+					$canuselatepassP = true;
+				}
+		   	}
+		   }
+		   if ($allowlateon != 2  && $line['replyby']<2000000000) { //it allows reply LPs
+		   	if ($now < $line['replyby'] && $latepassesAllowed > $latepasscntR) { //before due date and use is allowed
+		   		$canuselatepassR = true;
+		   	} else if ($now > $line['replyby'] && $line['allowlate']>=100) { //after due date and allows use after due date
+		   		$latepassesNeededToExtend = $this->calcLPneeded($line['replyby']);
+				if ($latepassesAllowed >= $latepasscntR + $latepassesNeededToExtend && $latepassesNeededToExtend<=$this->latepasses) {
+					$canuselatepassR = true;
+				}	
+		   	}
+		   }
+		   /*
+		   old code
 		   if ($allowlateon != 3 && $line['postby']<2000000000 && ($allowlaten==1 || $allowlaten-1>$latepasscntP)) { //it allows post LPs, and can use latepases
 			   if ($line['allowlate']>=100 && $now < strtotime("+".$this->latepasshrs." hours", $line['postby'])) { //allow after due date
 				   $canuselatepassP = true;
@@ -302,6 +334,7 @@ class ExceptionFuncs {
 				   $canuselatepassR = true;
 			   }
 		   }
+		   */
 		}
 		return array($canundolatepassP && $canundolatepass, $canundolatepassR && $canundolatepass, $canundolatepass, $canuselatepassP, $canuselatepassR, $line['postby'], $line['replyby'], $line['enddate']);
 	}
