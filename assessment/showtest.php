@@ -2907,7 +2907,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					//if (!preg_match('/^<div\s*class="intro"[^>]*>(\s|&nbsp;|<p[^>]*>(\s*|&nbsp;)*<\/p>)*<\/div>$/', $intropages[0])) {
 						echo $intropages[0];
 					//}
-				}
+					}
 				$intro =  $intropages[2*$_GET['page']+2];
 				preg_match_all('/\[QUESTION\s+(\d+)\s*\]/',$intro,$matches,PREG_PATTERN_ORDER);
 				if (isset($matches[1]) && count($matches[1])>0) {
@@ -3379,7 +3379,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 	}
 
 	function shownavbar($questions,$scores,$current,$showcat,$extrefs) {
-		global $imasroot,$isteacher,$isdiag,$testsettings,$attempts,$qi,$allowregen,$bestscores,$isreview,$showeachscore,$noindivscores,$CFG;
+		global $imasroot,$isdiag,$testsettings,$attempts,$qi,$allowregen,$bestscores,$isreview,$showeachscore,$noindivscores,$CFG;
 		$todo = 0;
 		$earned = 0;
 		$poss = 0;
@@ -3391,12 +3391,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			echo '<h3>'._('Resources').'</h3>';
 			echo '<ul class=qlist>';
 			foreach ($extrefs as $extref) {
-				if (!$isteacher) {
-					$rec = "data-base=\"assessintro-{$testsettings['id']}\"";
-				} else {
-					$rec = '';
-				}
-				echo '<li><a target="_blank" '.$rec.' href="'.Sanitize::url($extref['link']).'">'.Sanitize::encodeStringForDisplay($extref['label']).'</a></li>';
+				echo '<li><a target="_blank" href="'.Sanitize::url($extref['link']).'">'.Sanitize::encodeStringForDisplay($extref['label']).'</a></li>';
 			}
 			echo '</ul>';
 		}
