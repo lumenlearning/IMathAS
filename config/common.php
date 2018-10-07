@@ -25,6 +25,9 @@ $CFG['GEN']['noEmailButton'] = true;
 
 //$CFG['use_csrfp'] = 'log';
 
+//log LTI updates
+$CFG['LTI']['logupdate'] = true;
+
 //Amazon's load balancer acts as proxy. Put the real IP address in REMOTE_ADDR
 //for storing as user's IP address
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
