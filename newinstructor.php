@@ -7,8 +7,8 @@
 	require("header.php");
 	$pagetitle = "Instructor Account Request";
 	require("infoheader.php");
-
-
+	$extrarequired = array('SID','firstname','lastname','email','pw1','pw2','school','phone','verurl','agree');
+	
 	if (isset($_POST['firstname'])) {
 		if (!isset($_POST['agree'])) {
 			echo "<p>You must agree to the Terms and Conditions to set up an account</p>";
