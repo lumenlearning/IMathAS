@@ -9,10 +9,10 @@ $id = Sanitize::encodeStringForDisplay($_POST['id']);
 $email_from = 'support@lumenlearning.com';
 $email_body = "The following message was submitted via the contact form: \n $message. \n\n Sender name: $firstname $lastname \n Sender email: $email \n\ Sender ID: $id";
 
-$to = "support@lumenlearning.com";
-$headers = "From: $email_from \r\n";
-$headers .= "Reply-To: $email \r\n";
-mail($to,$email_subject,$email_body,$headers);
+require_once("../includes/email.php");
+send_email($to, $email_from, $email_subject, $email_body,
+	$email, null, 10);
+
 header('Location: lumenhelp.php');
 exit();
-?>
+
