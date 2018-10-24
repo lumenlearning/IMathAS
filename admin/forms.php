@@ -324,6 +324,10 @@ switch($_GET['action']) {
 
 		$isadminview = false;
 		if ($_GET['action']=='modify') {
+			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE (rights=11 OR rights=76 OR rights=77) AND groupid=?");
+			$stm->execute(array($groupid));
+			$hasGroupLTI = ($stm->fetchColumn() !== false);
+
 			$stm = $DBH->prepare("SELECT * FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			if ($stm->rowCount()==0) {break;}
@@ -356,9 +360,7 @@ switch($_GET['action']) {
 			$picicons = $line['picicons'];
 			$allowunenroll = $line['allowunenroll'];
 			$copyrights = $line['copyrights'];
-			$msgset = $line['msgset']%5;
-			$msgmonitor = (floor($line['msgset']/5))&1;
-			$msgOnEnroll = (floor($line['msgset']/5))&2;
+			$msgset = $line['msgset'];
 			$toolset = $line['toolset'];
 			$avail = $line['available'];
 			$lockaid = $line['lockaid'];
@@ -395,9 +397,6 @@ switch($_GET['action']) {
 			$copyrights = isset($CFG['CPS']['copyrights'])?$CFG['CPS']['copyrights'][0]:0;
 			$msgset = isset($CFG['CPS']['msgset'])?$CFG['CPS']['msgset'][0]:0;
 			$toolset = isset($CFG['CPS']['toolset'])?$CFG['CPS']['toolset'][0]:0;
-			$msgmonitor = (floor($msgset/5))&1;
-			$msgOnEnroll = (floor($msgset/5))&2;
-			$msgset = $msgset%5;
 			$theme = isset($CFG['CPS']['theme'])?$CFG['CPS']['theme'][0]:$defaultcoursetheme;
 			$showlatepass = isset($CFG['CPS']['showlatepass'])?$CFG['CPS']['showlatepass'][0]:0;
 			$istemplate = 0;
@@ -419,7 +418,7 @@ switch($_GET['action']) {
 					$ctc = Sanitize::onlyInt($_POST['ctc']);
 				}
 				if ($ctc>0) {
-					$query = "SELECT ic.name,ic.enrollkey,ic.copyrights,ic.ownerid,iu.groupid ";
+					$query = "SELECT ic.*,iu.groupid ";
 					$query .= "FROM imas_courses AS ic JOIN imas_users AS iu ";
 					$query .= "ON ic.ownerid=iu.id WHERE ic.id=:id";
 					$stm = $DBH->prepare($query);
@@ -442,11 +441,16 @@ switch($_GET['action']) {
 					}
 					$ctcekey = $_POST['ekey'];
 					$name = $ctcinfo['name'];
+					$latepasshrs = $ctcinfo['latepasshrs'];
+					$deflatepass = $ctcinfo['deflatepass'];
 				}
 			} else {
 				$ctc = 0;
 			}
 		}
+		$msgmonitor = (floor($msgset/5))&1;
+		$msgOnEnroll = (floor($msgset/5))&2;
+		$msgset = $msgset%5;
 		$defetime = $deftime%10000;
 		$hr = floor($defetime/60)%12;
 		$min = $defetime%60;
@@ -659,14 +663,30 @@ switch($_GET['action']) {
 			echo '<p>For integration setup instructions, visit the Course Items: Export page inside your course</p>';
 			
 			if (isset($_GET['id'])) {
-				echo '<span class="form">LTI Key:</span>';
-				echo '<span class="formright">LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_1 (to only allow access through the LMS) or <br/>';
-				echo ' LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_0 (to allow students to login directly to '.$installname.')';
-				echo '</span><br class="form" />';
-				
-				echo '<span class="form">LTI Secret (max 10 chars)</span>';
-				echo '<span class="formright"><input name="ltisecret" type="text" value="'.Sanitize::encodeStringForDisplay($ltisecret).'" maxlength="10"/> ';
-				echo '</span><br class="form" />';
+				if ($hasGroupLTI && !empty($CFG['LTI']['noCourseLevel'])) {
+					echo '<p>Your school already has a school-wide LTI key and secret established, so no course level configuration is required.</p>';
+				} else if (!empty($CFG['LTI']['noCourseLevel']) && !empty($CFG['LTI']['noGlobalMsg'])) {
+					echo '<p>'.$CFG['LTI']['noGlobalMsg'].'</p>';
+				} else {
+					if ($hasGroupLTI) {
+						echo '<p>Your school may already have a school-wide LTI key and secret established. ';
+						echo 'If so, you will not need to set up a course-level configuration. ';
+						echo '<a href="#" onclick="$(\'#courselevelkey\').slideDown();$(this).hide();return false;">Show course level key/secret</a></p>';
+						echo '<div id="courselevelkey" style="display:none">';
+					} else {
+						echo '<div>';
+					}
+
+					echo '<span class="form">LTI Key:</span>';
+					echo '<span class="formright">LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_1 (to only allow access through the LMS) or <br/>';
+					echo ' LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_0 (to allow students to login directly to '.$installname.')';
+					echo '</span><br class="form" />';
+
+					echo '<span class="form">LTI Secret (max 10 chars)</span>';
+					echo '<span class="formright"><input name="ltisecret" type="text" value="'.Sanitize::encodeStringForDisplay($ltisecret).'" maxlength="10"/> ';
+					echo '</span><br class="form" />';
+					echo '</div>';
+				}
 			}
 			
 			echo '<span class="form">Allow the LMS to set assessment due dates?<br/><span class="small">(Only supported by Canvas)</span></span>';

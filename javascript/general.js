@@ -637,6 +637,11 @@ function addNoopener(i,el) {
 		el.setAttribute("rel", "noopener noreferrer");
 	}
 }
+function addBlankTarget(i,el) {
+	if (el.host !== window.location.host) {
+		el.setAttribute("target", "_blank");
+	}
+}
 
 function addmultiselect(el,n) {
 	var p = jQuery(el).parent();
@@ -750,6 +755,9 @@ jQuery(document).ready(function($) {
 });
 
 jQuery(document).ready(function($) {
+	if (typeof isImathasAssessment != 'undefined') {
+		$('a:not([target])').each(addBlankTarget);
+	}
 	$('a').each(setuptracklinks).each(addNoopener);
 	$('a[href*="youtu"]').each(setupvideoembeds);
 	$('a[href*="vimeo"]').each(setupvideoembeds);

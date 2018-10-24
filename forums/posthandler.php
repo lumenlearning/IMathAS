@@ -130,6 +130,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				echo '<h1>Error:</h1><p>It looks like the post you were replying to was deleted.  Your post is below in case you ';
 				echo 'want to copy-and-paste it somewhere. <a href="'.Sanitize::url($returnurl).'">Continue</a></p>';
 				echo '<hr>';
+				// $_POST['message'] contains HTML.
 				echo '<p>Message:</p><div class="editor">'.Sanitize::outgoingHtml(filter($_POST['message'])).'</div>';
 				echo '<p>HTML format:</p>';
 				echo '<div class="editor">'.Sanitize::encodeStringForDisplay($_POST['message']).'</div>';
@@ -226,14 +227,13 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			}
 		}
 		if ($sendemail) {
+			require_once("../includes/email.php");
+
 			$query = "SELECT iu.email FROM imas_users AS iu,imas_forum_subscriptions AS ifs WHERE ";
 			$query .= "iu.id=ifs.userid AND ifs.forumid=:forumid AND iu.id<>:userid";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':forumid'=>$forumid, ':userid'=>$userid));
 			if ($stm->rowCount()>0) {
-				$headers  = 'MIME-Version: 1.0' . "\r\n";
-				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-				$headers .= "From: $sendfrom\r\n";
 				$message  = "<h3>This is an automated message.  Do not respond to this email</h3>\r\n";
 				$message .= "<p>A new post has been made in forum $forumname in course ".Sanitize::encodeStringForDisplay($coursename)."</p>\r\n";
 				$message .= "<p>Subject:".Sanitize::encodeStringForDisplay($_POST['subject'])."</p>";
@@ -244,12 +244,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$row[0] = trim($row[0]);
 				if ($row[0]!='' && $row[0]!='none@none.com') {
-
-					if (isset($CFG['GEN']['useSESmail'])) {
-						ohmSESmail(Sanitize::emailAddress($row[0]), $sendfrom, 'New forum post notification', $message);
-					} else {
-						mail($row[0],'New forum post notification',$message,$headers);
-					}
+					send_email($row[0], $sendfrom, _('New forum post notification'), $message, array(), array(), 1);
 				}
 			}
 		}
@@ -453,7 +448,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 								$notice =  '<span class=noticetext style="font-weight:bold">This question has already been posted about.</span><br/>';
 								$notice .= 'Please read and participate in the existing discussion.';
 								while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-									$notice .=  "<br/><a href=\"posts.php?cid=$cid&forum=$forumid&thread=" . Sanitize::encodeUrlParam($row[0]) . "\">".Sanitize::encodeStringForDisplay($line['subject'])."</a>";
+									$notice .=  "<br/><a href=\"posts.php?cid=$cid&forum=$forumid&thread={$row[0]}\">".Sanitize::encodeStringForDisplay($line['subject'])."</a>";
 								}
 							}
 						}
@@ -508,7 +503,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 					require_once('../includes/filehandler.php');
 					$files = explode('@@',$line['files']);
 					for ($i=0;$i<count($files)/2;$i++) {
-						echo '<input type="text" name="filedesc['.$i.']" value="'.Sanitize::encodeStringForDisplay($files[2*$i]).'" aria-label="'._('Description').'"/>';
+						echo '<input type="text" name="filedesc['.$i.']" value="'.$files[2*$i].'" aria-label="'._('Description').'"/>';
 						// $_GET['modify'] will be sanitized by getuserfileurl().
 						echo '<a href="'.getuserfileurl('ffiles/'.$_GET['modify'].'/'.$files[2*$i+1]).'" target="_blank">View</a> ';
 						echo '<label for="filedel['.$i.']">Delete?</label> <input type="checkbox" name="filedel['.$i.']" id="filedel['.$i.']" value="1"/><br/>';
