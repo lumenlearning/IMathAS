@@ -48,7 +48,6 @@ if (!empty($newStatus)) {
 
         $sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
         $sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
-		$sanitizedEmail = Sanitize::emailAddress($row[2]);
 
         $message = "
 <p>
@@ -89,18 +88,18 @@ The Lumen Team
 </p>
 ";
 
+		require_once("../includes/email.php");
+		send_email(Sanitize::emailAddress($row[2]), !empty($accountapproval)?$accountapproval:$sendfrom,
+			$installname._(' Account Status'), $message,
+			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(),
+			null, 10);
+
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 
-		if (isset($CFG['GEN']['useSESmail'])) {
-			SESmail($sanitizedEmail, $accountapproval, $installname . ' Account Status', $message);
-		} else {
-			mail($sanitizedEmail,$installname . ' Account Status',$message,$headers);
-		}
-		
 	} else if ($newStatus==11) { //approve
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
