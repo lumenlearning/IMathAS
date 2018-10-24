@@ -162,22 +162,4 @@ $CFG['email']['new_acct_replyto'] = 'support@lumenlearning.com';
 $CFG['email']['new_acct_bcclist'] = array('paul@lumenlearning.com');
 
 $CFG['GEN']['useSESmail'] = true;
-function ohmSESmail($email, $from, $subject, $message, $replyto='', $bccList=array()) {
-	require_once(__DIR__ . "/../includes/mailses.php");
-	$ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
 
-	$m = new SimpleEmailServiceMessage();
-	$m->addTo($email);
-	foreach($bccList as $address) {
-		$m->addBCC($address);
-	}
-	$m->setFrom($from);
-	if ($replyto != '') {
-		$m->addReplyTo($replyto);
-	}
-	$m->setSubject($subject);
-	$m->setMessageFromString(null,$message);
-	$ses->sendEmail($m);
-}
-
-?>
