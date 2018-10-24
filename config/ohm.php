@@ -158,8 +158,8 @@ $CFG['GEN']['communityforumlink'] = getenv('COMMUNITY_FORUM_URL');
      'icon' => '/img/MOMico.png'
      );*/
 
-$CFG['OHM']['new_instructor_approval_reply_to'] = 'support@lumenlearning.com';
-$CFG['OHM']['new_instructor_approval_non_customer_bcc_list'] = array('paul@lumenlearning.com');
+$CFG['email']['new_acct_replyto'] = 'support@lumenlearning.com';
+$CFG['email']['new_acct_bcclist'] = array('paul@lumenlearning.com');
 
 $CFG['GEN']['useSESmail'] = true;
 function ohmSESmail($email, $from, $subject, $message, $replyto='', $bccList=array()) {

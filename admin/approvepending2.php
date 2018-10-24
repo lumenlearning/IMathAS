@@ -273,7 +273,7 @@ These resources can help orient you to using OHM:
 
 		if ($isLumenCustomer) {
 		    $message = $messageIsLumenCustomer;
-		    $bccList = array();
+			$CFG['email']['new_acct_bcclist'] = array();
         } else {
 		    $message = $messageIsNotLumenCustomer;
         }
