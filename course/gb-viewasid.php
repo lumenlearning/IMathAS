@@ -661,11 +661,12 @@
 		unset($exped);
 		
 		require_once("../includes/exceptionfuncs.php");
-		$exceptionfuncs = new ExceptionFuncs($get_uid, $cid, true, $stuLP);
+		$exceptionfuncs = new ExceptionFuncs($get_uid, $cid, true, $stuLP, $latepasshrs);
 		$excepadata = array(
 			'id'=>$line['assessmentid'], 
 			'allowlate'=>$line['allowlate'],
-			'enddate'=>$line['enddate']
+			'enddate'=>$line['enddate'],
+			'LPcutoff'=>$line['LPcutoff']
 			);
 			
 		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
@@ -704,7 +705,7 @@
 			if ($LPblocked) {
 				echo '<p>Use of a LatePass is currently blocked because the student viewed the assessment in review mode. ';
 				echo "<a href=\"gb-viewasid.php?stu=$stu&cid=$cid&aid=$aid&asid=$asid&from=$from&uid=$get_uid&clearreviewview=true\">";
-				echo 'Clear review view</a> to allow use of a LatePass</p>';
+				echo 'Clear review view</a> to allow use of a LatePass.</p>';
 			}
 		}
 		if ($isteacher) {

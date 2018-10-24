@@ -995,7 +995,8 @@ function gbstudisp($stu) {
 			}
 			if ($stu>0) {
 				if ($includeduedate) {
-					if ($gbt[0][1][$i][11]<2000000000) {
+					if ($gbt[0][1][$i][6]!=1 &&  //skip offline
+						$gbt[0][1][$i][11]<2000000000 && $gbt[0][1][$i][11]>0) {
 						echo '<td>'.tzdate('n/j/y g:ia',$gbt[0][1][$i][11]);
 					} else {
 						echo '<td>-';
@@ -1716,7 +1717,11 @@ function gbinstrdisp() {
 				} else if ($gbt[0][1][$j][6]==1) { //offline
 					if ($isteacher) {
 						if ($gbt[$i][0][0]=='Averages') {
-							$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							if ($gbt[0][1][$j][2]>0) {
+								$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							} else {
+								$avgtip = '';
+							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 
 							echo "<a href=\"addgrades.php?stu=$stu&amp;cid=$cid&amp;grades=all&amp;gbitem={$gbt[0][1][$j][7]}\" ";
@@ -1753,7 +1758,11 @@ function gbinstrdisp() {
 							echo $gbt[$i][1][$j][0];
 							echo '</a>';
 						} else {
-							$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							if ($gbt[0][1][$j][2]>0) {
+								$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							} else {
+								$avgtip = '';
+							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 							echo "<span onmouseover=\"tipshow(this,'$avgtip')\" onmouseout=\"tipout()\"> ";
 							echo $gbt[$i][1][$j][0];
@@ -1773,7 +1782,11 @@ function gbinstrdisp() {
 				} else if ($gbt[0][1][$j][6]==3) { //exttool
 					if ($isteacher) {
 						if ($gbt[$i][0][0]=='Averages') {
-							$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							if ($gbt[0][1][$j][2]>0) {
+								$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							} else {
+								$avgtip = '';
+							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 							echo "<a href=\"edittoolscores.php?stu=$stu&amp;cid=$cid&amp;uid=all&amp;lid={$gbt[0][1][$j][7]}\" ";
 							echo "onmouseover=\"tipshow(this,'$avgtip')\" onmouseout=\"tipout()\" ";
