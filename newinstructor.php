@@ -78,11 +78,9 @@
 				#### Begin OHM-specific changes ############################################################
 				#### Begin OHM-specific changes ############################################################
 
-				if (isset($CFG['GEN']['useSESmail'])) {
-					ohmSESmail($accountapproval, $accountapproval, $subject, $message);
-				} else {
-					mail($accountapproval,$subject,$message,$headers);
-				}
+				require_once("./includes/email.php");
+				send_email($accountapproval, $accountapproval, $subject, $message,
+					null, null, 10);
 
 				#### End OHM-specific changes ############################################################
 				#### End OHM-specific changes ############################################################
@@ -150,11 +148,9 @@
 </p>
 ";
 
-				if (isset($CFG['GEN']['useSESmail'])) {
-					ohmSESmail($mailto, $mailfrom, $subject, $message);
-				} else {
-					mail($mailto,$subject,$message,$headers);
-				}
+				require_once("./includes/email.php");
+				send_email($mailto, $mailfrom, $subject, $message,
+					null, null, 10);
 
 				#### End OHM-specific changes ############################################################
 				#### End OHM-specific changes ############################################################
