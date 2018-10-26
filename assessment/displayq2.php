@@ -5103,7 +5103,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				foreach ($matches[0] as $var) {
 					$var = str_replace(' ','',$var);
 					if (in_array($var,$mathfuncs)) { continue;}
-					if ($var!= 'or' && $var!='and' && $var!='DNE' && $var!='oo' && $var != $variables && $_POST["qn$qn"]!="(-oo,oo)") {
+					if ($var!= 'or' && $var!='and' && $var!='DNE' && $var!='oo' && 
+						strtolower($var) != strtolower($variables) && $_POST["qn$qn"]!="(-oo,oo)") {
 						return 0;
 					}
 				}
@@ -5114,7 +5115,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$opts = preg_split('/(<=?|>=?)/',$opt);
 					foreach ($opts as $optp) {
 						$optp = trim($optp);
-						if ($optp==$variables || $optp=='oo' || $optp=='-oo') {continue;}
+						if (strtolower($optp)==strtolower($variables) || $optp=='oo' || $optp=='-oo') {continue;}
 						if (!checkanswerformat($optp,$ansformats)) {
 							return 0;
 						}
