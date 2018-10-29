@@ -344,7 +344,7 @@ function sandboxgetweights($code,$seed) {
 	srand($seed);
 	eval(interpret('control','multipart',$code));
 	if (!isset($answeights)) {
-		return false;
+		return array(1);
 	} else if (is_array($answeights)) {
 		return $answeights;
 	} else {
