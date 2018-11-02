@@ -13,7 +13,7 @@ $CFG['GEN']['AWSforcoursefiles'] = true;
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
 
-$CFG['GEN']['pandocserver'] = '54.191.55.159';//'54.212.251.50';
+$CFG['GEN']['pandocserver'] = 'https://livepoll.myopenmath.com';
 $CFG['GEN']['livepollserver'] = 'livepoll.myopenmath.com';
 $CFG['GEN']['livepollpassword'] = 'testing';
 
