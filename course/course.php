@@ -96,8 +96,8 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
 	}
-		
-	$stm = $DBH->prepare("SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,latepasshrs FROM imas_courses WHERE id=:id");
+
+	$stm = $DBH->prepare("SELECT name,itemorder,allowunenroll,msgset,toolset,latepasshrs FROM imas_courses WHERE id=:id");
 	$stm->execute(array(':id'=>$cid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($line == null) {
