@@ -927,7 +927,7 @@
 			echo "in {$attempts[$i]} attempt(s) ";
 			if ($isteacher || $istutor) {
 				if (empty($feedback["Q$i"])) {
-					echo '<a href="#" onclick="return revealfb('.$i.');" id="fb-'.$i.'-add">Add Feedback</a>';
+					echo '<a href="#" onclick="return revealfb('.$i.',true);" id="fb-'.$i.'-add">Add Feedback</a>';
 					echo '<span id="fb-'.$i.'-wrap" style="display:none;">';
 				} else {
 					echo '<span id="fb-'.$i.'-wrap">';
@@ -1376,7 +1376,7 @@ function sandboxgetweights($code,$seed) {
 		}
 	}
 	if (!isset($answeights)) {
-		if (!isset($anstypes)) {
+		if (!isset($anstypes)) { 
 			//this shouldn't happen unless the code crashed
 			return array(1);
 		}
