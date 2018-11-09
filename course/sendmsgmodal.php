@@ -8,9 +8,13 @@ $flexwidth = true;
 $nologo = true;
 
 if (isset($_POST['message'])) {
+	require_once("../includes/email.php");
 	
 	$message = Sanitize::incomingHtml($_POST['message']);
 	$subject = Sanitize::stripHtmlTags($_POST['subject']);
+	if (trim($subject)=='') {
+		$subject = '('._('none').')';
+	}
 	$msgto = Sanitize::onlyInt($_POST['sendto']);
 	$error = '';
 	if ($_POST['sendtype']=='msg') {
@@ -20,6 +24,21 @@ if (isset($_POST['message'])) {
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':title'=>$subject, ':message'=>$message, ':msgto'=>$msgto, ':msgfrom'=>$userid,
 			':senddate'=>$now, ':isread'=>0, ':courseid'=>$cid));
+		$msgid = $DBH->lastInsertId();
+		
+		$stm = $DBH->prepare("SELECT msgnotify,email,FCMtoken FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$msgto));
+		list($msgnotify, $email, $FCMtokenTo) = $stm->fetch(PDO::FETCH_NUM);
+		if ($msgnotify==1) {
+			send_msg_notification(Sanitize::emailAddress($email), $userfullname, $subject, $cid, $coursename, $msgid);
+		}
+		if ($FCMtokenTo != '') {
+			require_once("../includes/FCM.php");
+			$url = $GLOBALS['basesiteurl'] . "/msgs/viewmsg.php?cid=".Sanitize::courseId($cid)."&msgid=$msgid";
+			sendFCM($FCMtokenTo,_("Msg from:").' '.Sanitize::encodeStringForDisplay($userfullname),
+					Sanitize::encodeStringForDisplay($subject), $url);
+		}
+		
 		$success = _('Message sent');
 	} else if ($_POST['sendtype']=='email') {
 		$stm = $DBH->prepare("SELECT FirstName,LastName,email FROM imas_users WHERE id=:id");
@@ -27,20 +46,19 @@ if (isset($_POST['message'])) {
 		$row = $stm->fetch(PDO::FETCH_NUM);
 		$row[2] = trim($row[2]);
 		if ($row[2]!='' && $row[2]!='none@none.com') {
-			$addy = Sanitize::encodeStringForDisplay($row[0])." ".Sanitize::encodeStringForDisplay($row[1])." <".Sanitize::emailAddress($row[2]).">";
+			$addy = Sanitize::simpleASCII("{$row[0]} {$row[1]}")." <".Sanitize::emailAddress($row[2]).">";
 			$sessiondata['mathdisp']=2;
 			$sessiondata['graphdisp']=2;
 			require("../filter/filter.php");
 			$message = filter($message);
 			$message = preg_replace('/<img([^>])*src="\//','<img $1 src="' . $GLOBALS['basesiteurl'] . '/',$message);
-			$headers  = 'MIME-Version: 1.0' . "\r\n";
-			$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
 			$stm = $DBH->prepare("SELECT FirstName,LastName,email FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$userid));
 			$row = $stm->fetch(PDO::FETCH_NUM);
-			$self = Sanitize::encodeStringForDisplay($row[0])." ".Sanitize::encodeStringForDisplay($row[1]) ."<". Sanitize::emailAddress($row[2]).">";
-			$headers .= "From: $self\r\n";
-			mail($addy,$subject,$message,$headers);
+			$self = Sanitize::simpleASCII("{$row[0]} {$row[1]}") ." <". Sanitize::emailAddress($row[2]).">";
+			
+			send_email($addy, $sendfrom, $subject, $message, array($self), array(), 5); 
+			
 			$success = _('Email sent');
 		} else {
 			$error = _('Unable to send: Invalid email address');
@@ -56,20 +74,9 @@ if (isset($_POST['message'])) {
 	require("../footer.php");
 	exit;
 } else {
-	$msgto = Sanitize::onlyInt($_GET['to']);
-	$stm = $DBH->prepare("SELECT FirstName,LastName,email FROM imas_users WHERE id=:id");
-	$stm->execute(array(':id'=>$msgto));
-	list($firstname, $lastname, $email) = $stm->fetch(PDO::FETCH_NUM);
 	$useeditor = "message";
 	require("../header.php");
-	if ($_GET['sendtype']=='msg') {
-		echo '<h1>New Message</h1>';
-		$to = Sanitize::stripHtmlTags("$lastname, $firstname");
-	} else if ($_GET['sendtype']=='email') {
-		echo '<h1>New Email</h1>';
-		$to = Sanitize::stripHtmlTags("$lastname, $firstname ($email)");
-	}
-
+	
 	if (isset($_GET['quoteq'])) {
 		$quoteq = Sanitize::stripHtmlTags($_GET['quoteq']);
 		require("../assessment/displayq2.php");
@@ -81,7 +88,21 @@ if (isset($_POST['message'])) {
 
 		$message = '<p> </p><br/><hr/>'.$message;
 		$courseid = $cid;
-		if (isset($parts[3])) {  //sending to instructor
+		if (isset($parts[3]) && $parts[3] === 'reperr') {
+			$title = "Problem with question ID ".Sanitize::onlyInt($parts[1]);
+			
+			if (isset($CFG['GEN']['qerrorsendto'])) {
+				if (is_array($CFG['GEN']['qerrorsendto'])) {
+					list($_GET['to'],$sendtype,$sendtitle) = $CFG['GEN']['qerrorsendto'];
+				} else {
+					$_GET['to'] = $CFG['GEN']['qerrorsendto'];
+				}
+			} else {
+				$stm = $DBH->prepare("SELECT ownerid FROM imas_questionset WHERE id=:id");
+				$stm->execute(array(':id'=>$parts[1]));
+				$_GET['to'] = $stm->fetchColumn(0);
+			}
+		} else if (isset($parts[3])) {  //sending to instructor
 			$stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>Sanitize::onlyInt($parts[3])));
 			$title = 'Question about #'.($parts[0]+1).' in '.str_replace('"','&quot;',$stm->fetchColumn(0));
@@ -101,7 +122,19 @@ if (isset($_POST['message'])) {
 		$message = '';
 		$courseid=$cid;
 	}
-
+	
+	$msgto = Sanitize::onlyInt($_GET['to']);
+	$stm = $DBH->prepare("SELECT FirstName,LastName,email FROM imas_users WHERE id=:id");
+	$stm->execute(array(':id'=>$msgto));
+	list($firstname, $lastname, $email) = $stm->fetch(PDO::FETCH_NUM);
+	
+	if ($_GET['sendtype']=='msg') {
+		echo '<h1>New Message</h1>';
+		$to = Sanitize::stripHtmlTags("$lastname, $firstname");
+	} else if ($_GET['sendtype']=='email') {
+		echo '<h1>New Email</h1>';
+		$to = Sanitize::stripHtmlTags("$lastname, $firstname ($email)");
+	}
 
 	echo '<form method="post" action="sendmsgmodal.php?cid='.$cid.'">';
 	echo '<input type="hidden" name="sendto" value="'.$msgto.'"/>';

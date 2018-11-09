@@ -61,9 +61,6 @@
 
 					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits)); //known INTs - safe
 				}
-				$headers  = 'MIME-Version: 1.0' . "\r\n";
-				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-				$headers .= "From: $installname <$sendfrom>\r\n";
 				$subject = "New Instructor Account Request";
 				// trim() removes newlines, which prevents SMTP command injection.
 				$message = sprintf("Name: %s %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['firstname']),
@@ -72,7 +69,10 @@
 				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
 				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));
 				$message .= sprintf("Username: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['username']));
-				mail($accountapproval,$subject,$message,$headers);
+
+				require_once("../includes/email.php");
+				send_email($accountapproval, sprintf('%s <%s>', $installname, $sendfrom),
+					$subject, $message, null, null, 10);
 
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
@@ -138,11 +138,10 @@ to learn how to use OHM to increase student engagement and learning.
 spam filter.</em>
 </p>
 ";
-				if (isset($CFG['GEN']['useSESmail'])) {
-					SESmail(Sanitize::emailAddress($_POST['email']), $accountapproval, $subject, $emailMessage);
-				} else {
-					mail(Sanitize::emailAddress($_POST['email']),$subject,$emailMessage,$headers);
-				}
+				require_once("../includes/email.php");
+				send_email(Sanitize::emailAddress($_POST['email']),
+					!empty($accountapproval)?$accountapproval:$sendfrom,
+					$subject, $message, null, null, 10);
 
 				echo $browserMessage;
 				require("../footer.php");

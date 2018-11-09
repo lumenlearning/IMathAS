@@ -48,7 +48,6 @@ if (!empty($newStatus)) {
 
         $sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
         $sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
-		$sanitizedEmail = Sanitize::emailAddress($row[2]);
 
         $message = "
 <p>
@@ -89,18 +88,18 @@ The Lumen Team
 </p>
 ";
 
+		require_once("../includes/email.php");
+		send_email(Sanitize::emailAddress($row[2]), !empty($accountapproval)?$accountapproval:$sendfrom,
+			$installname._(' Account Status'), $message,
+			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(),
+			null, 10);
+
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 
-		if (isset($CFG['GEN']['useSESmail'])) {
-			SESmail($sanitizedEmail, $accountapproval, $installname . ' Account Status', $message);
-		} else {
-			mail($sanitizedEmail,$installname . ' Account Status',$message,$headers);
-		}
-		
 	} else if ($newStatus==11) { //approve
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
@@ -150,10 +149,6 @@ The Lumen Team
 		$stm->execute(array(':id'=>$instId));
 		$row = $stm->fetch(PDO::FETCH_NUM);
 		
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		$headers .= "From: $accountapproval\r\n";
-
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
@@ -277,27 +272,23 @@ These resources can help orient you to using OHM:
 
 		if ($isLumenCustomer) {
 		    $message = $messageIsLumenCustomer;
-		    $bccList = array();
+			$CFG['email']['new_acct_bcclist'] = array();
         } else {
 		    $message = $messageIsNotLumenCustomer;
-		    $bccList = $CFG['OHM']['new_instructor_approval_non_customer_bcc_list'];
         }
 
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
 
-		if (isset($CFG['GEN']['useSESmail'])) {
-			$replyTo = $CFG['OHM']['new_instructor_approval_reply_to'];
-
-			ohmSESmail($row[2], $accountapproval, $installname . ' Account Approval', $message,
-                $replyTo, $bccList);
-		} else {
-			mail($row[2],$installname . ' Account Approval',$message,$headers);
-		}
-
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
+		require_once("../includes/email.php");
+		send_email($row[2], !empty($accountapproval)?$accountapproval:$sendfrom, 
+			$installname._(' Account Approval'), $message, 
+			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(), 
+			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);
+		
 	}
 	echo "OK";
 	exit;

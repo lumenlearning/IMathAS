@@ -37,8 +37,8 @@ if ($myrights<20) {
 		$onlychk = 0;
 	}
 	if (isset($_GET['formn']) && isset($_GET['loc'])) {
-		$formn = Sanitize::encodeStringForJavascript($_GET['formn']);
-		$loc = Sanitize::encodeStringForJavascript($_GET['loc']);
+		$formn = Sanitize::simpleString($_GET['formn']);
+		$loc = Sanitize::simpleString($_GET['loc']);
 		if (isset($_GET['checked']) || isset($_GET['usecheck'])) {
 			$chk = "&checked=0";
 		} else {
@@ -272,13 +272,25 @@ if ($overwriteBody==1) {
 	echo htmlentities($message);
 	echo '</code>';
 
-	if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
+	if (isset($CFG['GEN']['qerrorsendto'])) {
+		if (is_array($CFG['GEN']['qerrorsendto'])) {
+			list($sendto,$sendtype,$sendtitle) = $CFG['GEN']['qerrorsendto'];
+		} else {
+			$sendto = $CFG['GEN']['qerrorsendto'];
+			$sendtype = 'email';
+			$sendtitle = _('Contact support');
+		}
+		printf("<p>Question id: %s.  ", Sanitize::encodeStringForDisplay($_GET['qsetid']));
+		echo "<a href=\"#\" onclick=\"GB_show('$sendtitle','$imasroot/course/sendmsgmodal.php?sendtype=$sendtype&cid=" . Sanitize::courseId($cid) . '&quoteq='.Sanitize::encodeUrlParam("0-{$_GET['qsetid']}-{$seed}-reperr-{$assessver}"). "',800,'auto')\">$sendtitle</a> to report problems</p>";
+
+	} else if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
 		printf("<p>Question id: %s.  ", Sanitize::encodeStringForDisplay($_GET['qsetid']));//<a href=\"$imasroot/msgs/msglist.php?add=new&cid={$CFG['GEN']['sendquestionproblemsthroughcourse']}&to={$line['ownerid']}&title=Problem%20with%20question%20id%20{$_GET['qsetid']}\" target=\"_blank\">Message owner</a> to report problems</p>";
 		echo "<a href=\"$imasroot/msgs/msglist.php?add=new&cid={$CFG['GEN']['sendquestionproblemsthroughcourse']}&";
 		echo "quoteq=".Sanitize::encodeUrlParam("0-{$_GET['qsetid']}-{$seed}-reperr-{$assessver}")."\" target=\"reperr\">Message owner</a> to report problems</p>";
+
 	} else {
-		echo "<p>Question id: ".Sanitize::encodeStringForDisplay($_GET['qsetid']).".  <a href=\"mailto:".Sanitize::emailAddress($line['email'])
-            ."?subject=" . Sanitize::encodeUrlParam("Problem with question id " . $_GET['qsetid'])
+		echo "<p>Question id: ".Sanitize::encodeStringForDisplay($_GET['qsetid']).".  <a href=\"mailto:".Sanitize::emailAddress($line['email'])."?"
+			. Sanitize::generateQueryStringFromMap(array('subject' => 'Problem with question id ' . $_GET['qsetid']))
 			. "\">E-mail owner</a> to report problems</p>";
 	}
 	printf("<p>Description: %s</p><p>Author: %s</p>", Sanitize::encodeStringForDisplay($line['description']),
