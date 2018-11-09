@@ -654,7 +654,7 @@ switch($_POST['action']) {
 			$qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
 				':picicons'=>$picicons, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
 				':toolset'=>$toolset, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
-				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, ':startdate'=>$startdate, ':enddate'=>$enddate,
+				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, ':startdate'=>$startdate, ':enddate'=>$enddate, 
 				':latepasshrs'=>$latepasshrs, ':cleanupdate'=>$cleanupdate,':id'=>$_GET['id']);
 			// #### Begin OHM-specific code #####################################################
 			// #### Begin OHM-specific code #####################################################
@@ -704,13 +704,13 @@ switch($_POST['action']) {
 		} else { //new course
 			$blockcnt = 1;
 			$itemorder = serialize(array());
-
+			
 			$chars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 			$ltisecret = '';
 			for ($i=0;$i<8;$i++) {
 				$ltisecret .= substr($chars,rand(0,56),1);
 			}
-
+			
 			$DBH->beginTransaction();
 			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,startdate,enddate,istemplate,deftime,deflatepass,latepasshrs,theme,ltisecret,dates_by_lti,blockcnt,created_at) VALUES ";
 			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :startdate, :enddate, :istemplate, :deftime, :deflatepass, :latepasshrs, :theme, :ltisecret, :ltidates, :blockcnt, :created_at);";
@@ -764,7 +764,7 @@ switch($_POST['action']) {
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':id'=>$ctc));
 				$ctcinfo = $stm->fetch(PDO::FETCH_ASSOC);
-				if (($ctcinfo['copyrights']==0 && $ctcinfo['ownerid'] != $userid) ||
+				if (($ctcinfo['copyrights']==0 && $ctcinfo['ownerid'] != $userid) || 
 					($ctcinfo['copyrights']==1 && $ctcinfo['groupid']!=$groupid)) {
 					if ($ctcinfo['enrollkey'] != '' && $ctcinfo['enrollkey'] != $_POST['ekey']) {
 						//did not provide valid enrollment key
@@ -796,13 +796,12 @@ switch($_POST['action']) {
 					$gbcats[$frid] = $DBH->lastInsertId();
 				}
 				$copystickyposts = true;
-				$stm = $DBH->prepare("SELECT itemorder,ancestors,outcomes,latepasshrs FROM imas_courses WHERE id=:id");
+				$stm = $DBH->prepare("SELECT itemorder,ancestors,outcomes FROM imas_courses WHERE id=:id");
 				$stm->execute(array(':id'=>$_POST['usetemplate']));
 				$r = $stm->fetch(PDO::FETCH_NUM);
 				$items = unserialize($r[0]);
 				$ancestors = $r[1];
 				$outcomesarr = $r[2];
-				$latepasshrs = $r[3];
 				if ($ancestors=='') {
 					$ancestors = intval($_POST['usetemplate']);
 				} else {
@@ -861,8 +860,8 @@ switch($_POST['action']) {
 				copyallsub($items,'0',$newitems,$gbcats);
 				doaftercopy($_POST['usetemplate']);
 				$itemorder = serialize($newitems);
-				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt,ancestors=:ancestors,outcomes=:outcomes,latepasshrs=:latepasshrs WHERE id=:id");
-				$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':ancestors'=>$ancestors, ':outcomes'=>$newoutcomearr, ':latepasshrs'=>$latepasshrs, ':id'=>$cid));
+				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt,ancestors=:ancestors,outcomes=:outcomes WHERE id=:id");
+				$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':ancestors'=>$ancestors, ':outcomes'=>$newoutcomearr, ':id'=>$cid));
 				//copy offline
 				$offlinerubrics = array();
 				$stm = $DBH->prepare("SELECT name,points,showdate,gbcategory,cntingb,tutoredit,rubric FROM imas_gbitems WHERE courseid=:courseid");
@@ -910,11 +909,11 @@ switch($_POST['action']) {
 			$stm = $DBH->prepare("SELECT id FROM imas_users WHERE (rights=11 OR rights=76 OR rights=77) AND groupid=?");
 			$stm->execute(array($groupid));
 			$hasGroupLTI = ($stm->fetchColumn() !== false);
-
+			
 			require("../header.php");
 			echo '<div class="breadcrumb">'.$breadcrumbbase.' Course Creation Confirmation</div>';
 			echo '<h1>Your course has been created!</h1>';
-			echo '<p>For students to enroll in this course, you will need to provide them two things:<ol>';
+			echo '<p>For students to enroll in this course via direct login, you will need to provide them two things:<ol>';
 			echo '<li>The course ID: <b>'.$cid.'</b></li>';
 			if (trim($_POST['ekey'])=='') {
 				echo '<li>Tell them to leave the enrollment key blank, since you didn\'t specify one.  The enrollment key acts like a course ';
@@ -924,19 +923,21 @@ switch($_POST['action']) {
 				echo '<li>The enrollment key: <b>'.$_POST['ekey'].'</b></li>';
 			}
 			echo '</ol></p>';
-
-			echo '<p>If you plan to integrate this course with your school\'s Learning Management System (LMS), ';
-			if ($hasGroupLTI) {
-				echo 'it looks like your school may already have a school-wide LTI key and secret established - check with your LMS admin. ';
-				echo 'If so, you will not need to set up a course-level configuration. ';
-				echo 'If you do need to set up a course-level configuration, here is the information you will need:</p>';
-			} else {
-				echo 'here is the information you will need to set up a course-level configuration, ';
-				echo 'since your school does not appear to have a school-wide LTI key and secret established.</p>';
+			
+			if (empty($CFG['LTI']['noCourseLevel'])) {
+				echo '<p>If you plan to integrate this course with your school\'s Learning Management System (LMS), ';
+				if ($hasGroupLTI) {
+					echo 'it looks like your school may already have a school-wide LTI key and secret established - check with your LMS admin. ';
+					echo 'If so, you will not need to set up a course-level configuration. ';
+					echo 'If you do need to set up a course-level configuration for some reason, the key and secret can be found in your course settings</p>';
+				} else {
+					echo 'here is the information you will need to set up a course-level configuration, ';
+					echo 'since your school does not appear to have a school-wide LTI key and secret established.</p>';
+					echo '<ul class=nomark><li>Key: LTIkey_'.$cid.'_1</li>';
+					echo '<li>Secret: '.Sanitize::encodeStringForDisplay($ltisecret).'</li></ul>';
+					echo '<p>If you forget these later, you can find them by viewing your course settings.</p>';
+				}
 			}
-			echo '<ul class=nomark><li>Key: LTIkey_'.$cid.'_1</li>';
-			echo '<li>Secret: '.Sanitize::encodeStringForDisplay($ltisecret).'</li></ul>';
-			echo '<p>If you forget these later, you can find them by viewing your course settings.</p>';
 			echo '<a href="../course/course.php?cid='.$cid.'">Enter the Course</a>';
 			require("../footer.php");
 			exit;
@@ -1152,6 +1153,8 @@ switch($_POST['action']) {
 			$DBH->commit();
 		}
 		break;
+	/*
+	removed from production code - security risk
 	case "importmacros":
 		if ($myrights < 100 || !$allowmacroinstall) { echo "You don't have the authority for this action"; break;}
 		$uploaddir = rtrim(dirname("../config.php"), '/\\') .'/assessment/libs/';
@@ -1166,9 +1169,11 @@ switch($_POST['action']) {
 						if (strpos($buffer,"//")===0) {
 							$trimmed = trim(substr($buffer,2));
 							if ($trimmed{0}!='<' && substr($trimmed,-1)!='>') {
-								$comments .= preg_replace('/^( +)/e', 'str_repeat("&nbsp;", strlen("$1"))', substr($buffer,2)) .  "<BR>";
+								$numspaces = strlen(substr($buffer,2)) - strlen(ltrim(substr($buffer,2)));
+								$comments .= str_repeat('&nbsp;', $numspaces);
+								$comments .= $trimmed . '<br/>';
 							} else {
-								$comments .= trim(substr($buffer,2));
+								$comments .= $trimmed;
 							}
 						} else if (strpos($buffer,"function")===0) {
 							$func = substr($buffer,9,strpos($buffer,"(")-9);
@@ -1207,6 +1212,7 @@ switch($_POST['action']) {
 			require("../footer.php");
 			exit;
 		}
+	*/
 	case "importqimages":
 		if ($myrights < 100 || !$allowmacroinstall) { echo "You don't have the authority for this action"; break;}
 		$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/import/';

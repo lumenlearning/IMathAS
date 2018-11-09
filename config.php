@@ -49,20 +49,21 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 
 $CFG['GEN']['useSESmail'] = true;
-function SESmail($email,$from,$subject,$message,$replyto='') {
-  require_once("includes/mailses.php");
-  $ses = new SimpleEmailService(getenv('SES_KEY_ID'), getenv('SES_SECRET_KEY'), 'email.us-west-2.amazonaws.com');
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+//
+// Change description: ['handlerpriority'] has been commented out
 
-  $m = new SimpleEmailServiceMessage();
-  $m->addTo($email);
-  $m->setFrom($from);
-  if ($replyto != '') {
-    $m->addReplyTo($replyto);
-  }
-  $m->setSubject($subject);
-  $m->setMessageFromString(null,$message);
-  $ses->sendEmail($m);
-}
+// $CFG['email']['handlerpriority'] = 2;
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 
 function enableDisplayErrors() {
   ini_set('display_errors',1);

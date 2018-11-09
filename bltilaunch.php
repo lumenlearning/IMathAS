@@ -66,6 +66,8 @@ $sessionid = session_id();
 $atstarthasltiuserid = isset($_SESSION['ltiuserid']);
 $askforuserinfo = false;
 
+$now = time();
+	
 //use new behavior for place_aid requests that don't come from a placein_###_# key
 if (
     (isset($_SESSION['place_aid']) && isset($_SESSION['lti_keytype']) && $_SESSION['lti_keytype']=='cc-a' && !isset($_REQUEST['oauth_consumer_key']))
@@ -95,7 +97,6 @@ if (isset($_GET['launch'])) {
 
 	$enc = base64_encode(serialize($sessiondata));
 
-	$now = time();
 	$stm = $DBH->prepare('UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id');
 	$stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 
@@ -958,7 +959,7 @@ if ($stm->rowCount()==0) {
 					$gbcats[$frid] = $DBH->lastInsertId();
 				}
 				$copystickyposts = true;
-				$stm = $DBH->prepare("SELECT itemorder,ancestors,outcomes,latepasshrs,dates_by_lti FROM imas_courses WHERE id=:id");
+				$stm = $DBH->prepare("SELECT itemorder,ancestors,outcomes,latepasshrs,dates_by_lti,deflatepass FROM imas_courses WHERE id=:id");
 				$stm->execute(array(':id'=>$sourcecid));
 				$r = $stm->fetch(PDO::FETCH_NUM);
 
@@ -967,6 +968,7 @@ if ($stm->rowCount()==0) {
 				$outcomesarr = $r[2];
 				$latepasshrs = $r[3];
 				$datesbylti = $r[4];
+				$deflatepass = $r[5];
 				if ($ancestors=='') {
 					$ancestors = intval($sourcecid);
 				} else {
@@ -1024,8 +1026,8 @@ if ($stm->rowCount()==0) {
 				doaftercopy($sourcecid);
 	
 				$itemorder = serialize($newitems);
-				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt,ancestors=:ancestors,outcomes=:outcomes,latepasshrs=:latepasshrs,dates_by_lti=:datesbylti WHERE id=:id");
-				$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':ancestors'=>$ancestors, ':outcomes'=>$newoutcomearr, ':latepasshrs'=>$latepasshrs, ':datesbylti'=>$datesbylti, ':id'=>$destcid));
+				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt,ancestors=:ancestors,outcomes=:outcomes,latepasshrs=:latepasshrs,deflatepass=:deflatepass,dates_by_lti=:datesbylti WHERE id=:id");
+				$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':ancestors'=>$ancestors, ':outcomes'=>$newoutcomearr, ':latepasshrs'=>$latepasshrs, ':deflatepass'=>$deflatepass, ':datesbylti'=>$datesbylti, ':id'=>$destcid));
 
 				$offlinerubrics = array();
 				/*
@@ -1277,8 +1279,9 @@ if ($linkparts[0]=='cid') {
 			$newdatebylti = 3; //mark as student-set
 		}
 		//no default due date set yet, or is the instructor:  set the default due date
-		$stm = $DBH->prepare("UPDATE imas_assessments SET enddate=:enddate,date_by_lti=:datebylti WHERE id=:id");
-		$stm->execute(array(':enddate'=>$_SESSION['lti_duedate'], ':datebylti'=>$newdatebylti, ':id'=>$aid));
+		$stm = $DBH->prepare("UPDATE imas_assessments SET startdate=:startdate,enddate=:enddate,date_by_lti=:datebylti WHERE id=:id");
+		$stm->execute(array(':startdate'=>min($now, $_SESSION['lti_duedate']), 
+			':enddate'=>$_SESSION['lti_duedate'], ':datebylti'=>$newdatebylti, ':id'=>$aid));
 		$line['enddate'] = $_SESSION['lti_duedate'];
 	}
 	if (!isset($_SESSION['lti_duedate']) && $line['date_by_lti']==1) {
@@ -1313,15 +1316,17 @@ if ($linkparts[0]=='cid') {
 			if (isset($_SESSION['lti_duedate']) && $line['date_by_lti']>0 && $_SESSION['lti_duedate']!=$exceptionrow[1]) {
 				//if new due date is later, or no latepass used, then update
 				if ($exceptionrow[2]==0 || $_SESSION['lti_duedate']>$exceptionrow[1]) {
-					$stm = $DBH->prepare("UPDATE imas_exceptions SET enddate=:enddate,is_lti=1,islatepass=0 WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
-					$stm->execute(array(':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
+					$stm = $DBH->prepare("UPDATE imas_exceptions SET startdate=:startdate,enddate=:enddate,is_lti=1,islatepass=0 WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+					$stm->execute(array(':startdate'=>min($now, $line['startdate'], $exceptionrow[0]),
+						':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
 				}
 			}
 			require_once("./includes/exceptionfuncs.php");
 			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
 			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
-		} else if ($line['date_by_lti']==3 && $line['enddate']!=$_SESSION['lti_duedate']) {
+		} else if ($line['date_by_lti']==3 && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
 			//default dates already set by LTI, and users's date doesn't match - create new exception
+			//also create if it's before the default assessment startdate - since they could access via LMS, it should be available.
 			$exceptionrow = array(min($now,$_SESSION['lti_duedate']), $_SESSION['lti_duedate'], 0, 1);
 			$stm = $DBH->prepare("INSERT INTO imas_exceptions (startdate,enddate,islatepass,is_lti,userid,assessmentid,itemtype) VALUES (?,?,?,?,?,?,'A')");
 			$stm->execute(array_merge($exceptionrow, array($userid, $aid)));

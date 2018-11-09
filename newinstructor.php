@@ -78,11 +78,9 @@
 				#### Begin OHM-specific changes ############################################################
 				#### Begin OHM-specific changes ############################################################
 
-				if (isset($CFG['GEN']['useSESmail'])) {
-					ohmSESmail($accountapproval, $accountapproval, $subject, $message);
-				} else {
-					mail($accountapproval,$subject,$message,$headers);
-				}
+				require_once("./includes/email.php");
+				send_email($accountapproval, $accountapproval, $subject, $message,
+					null, null, 10);
 
 				#### End OHM-specific changes ############################################################
 				#### End OHM-specific changes ############################################################
@@ -115,7 +113,7 @@
 				#### Begin OHM-specific changes ############################################################
 
 				$mailto = Sanitize::emailAddress($_POST['email']);
-				$mailfrom = $CFG['OHM']['new_instructor_approval_reply_to'];
+				$mailfrom = $CFG['email']['new_acct_replyto'];
 				$subject = 'Thanks for your Lumen OHM instructor account request';
 				$sanitizedFirstName = Sanitize::encodeStringForDisplay($_POST['firstname']);
 
@@ -150,11 +148,9 @@
 </p>
 ";
 
-				if (isset($CFG['GEN']['useSESmail'])) {
-					ohmSESmail($mailto, $mailfrom, $subject, $message);
-				} else {
-					mail($mailto,$subject,$message,$headers);
-				}
+				require_once("./includes/email.php");
+				send_email($mailto, $mailfrom, $subject, $message,
+					null, null, 10);
 
 				#### End OHM-specific changes ############################################################
 				#### End OHM-specific changes ############################################################

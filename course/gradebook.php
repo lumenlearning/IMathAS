@@ -557,7 +557,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 }
 
 function gbstudisp($stu) {
-	global $DBH,$hidenc,$cid,$gbmode,$availshow,$isteacher,$istutor,$catfilter,$imasroot,$canviewall,$urlmode;
+	global $DBH,$CFG,$hidenc,$cid,$gbmode,$availshow,$isteacher,$istutor,$catfilter,$imasroot,$canviewall,$urlmode;
 	global $includeduedate, $includelastchange,$latepasshrs,$latepasses,$hidelocked,$exceptionfuncs;
 	if ($availshow==4) {
 		$availshow=1;
@@ -653,7 +653,11 @@ function gbstudisp($stu) {
 		if ($isteacher) {
 			echo '<div style="clear:both;display:inline-block" class="cpmid secondary">';
 			//echo '<a href="mailto:'.$stuemail.'">', _('Email'), '</a> | ';
-			echo "<a href=\"#\" onclick=\"GB_show('Send Email','$imasroot/course/sendmsgmodal.php?to=" . Sanitize::onlyInt($stu) . "&sendtype=email&cid=" . Sanitize::courseId($cid) . "',800,'auto')\" title=\"Send Email\">", _('Email'), "</a> | ";
+			if (!isset($CFG['GEN']['noEmailButton'])) {
+				echo "<a href=\"#\" onclick=\"GB_show('Send Email','$imasroot/course/sendmsgmodal.php?to=" . Sanitize::onlyInt($stu) . "&sendtype=email&cid=" . Sanitize::courseId($cid) . "',800,'auto')\" title=\"Send Email\">", _('Email'), "</a> | ";
+			} else if ($stuemail != '' && $stuemail != 'none@none.com' && filter_var($stuemail, FILTER_VALIDATE_EMAIL)) {
+				echo '<a href="mailto:'.Sanitize::emailAddress($stuemail).'">', _('Email'), '</a> | ';
+			}
 
 			//echo "<a href=\"$imasroot/msgs/msglist.php?cid={$_GET['cid']}&add=new&to=$stu\">", _('Message'), "</a> | ";
 			echo "<a href=\"#\" onclick=\"GB_show('Send Message','$imasroot/course/sendmsgmodal.php?to=" . Sanitize::onlyInt($stu) . "&sendtype=msg&cid=" . Sanitize::courseId($cid) . "',800,'auto')\" title=\"Send Message\">", _('Message'), "</a> | ";
@@ -991,7 +995,8 @@ function gbstudisp($stu) {
 			}
 			if ($stu>0) {
 				if ($includeduedate) {
-					if ($gbt[0][1][$i][11]<2000000000) {
+					if ($gbt[0][1][$i][6]!=1 &&  //skip offline
+						$gbt[0][1][$i][11]<2000000000 && $gbt[0][1][$i][11]>0) {
 						echo '<td>'.tzdate('n/j/y g:ia',$gbt[0][1][$i][11]);
 					} else {
 						echo '<td>-';
@@ -1712,7 +1717,11 @@ function gbinstrdisp() {
 				} else if ($gbt[0][1][$j][6]==1) { //offline
 					if ($isteacher) {
 						if ($gbt[$i][0][0]=='Averages') {
-							$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							if ($gbt[0][1][$j][2]>0) {
+								$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							} else {
+								$avgtip = '';
+							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 
 							echo "<a href=\"addgrades.php?stu=$stu&amp;cid=$cid&amp;grades=all&amp;gbitem={$gbt[0][1][$j][7]}\" ";
@@ -1749,7 +1758,11 @@ function gbinstrdisp() {
 							echo $gbt[$i][1][$j][0];
 							echo '</a>';
 						} else {
-							$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							if ($gbt[0][1][$j][2]>0) {
+								$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							} else {
+								$avgtip = '';
+							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 							echo "<span onmouseover=\"tipshow(this,'$avgtip')\" onmouseout=\"tipout()\"> ";
 							echo $gbt[$i][1][$j][0];
@@ -1769,7 +1782,11 @@ function gbinstrdisp() {
 				} else if ($gbt[0][1][$j][6]==3) { //exttool
 					if ($isteacher) {
 						if ($gbt[$i][0][0]=='Averages') {
-							$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							if ($gbt[0][1][$j][2]>0) {
+								$avgtip = _('Mean:').' '.round(100*$gbt[$i][1][$j][0]/$gbt[0][1][$j][2],1).'%<br/>';
+							} else {
+								$avgtip = '';
+							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 							echo "<a href=\"edittoolscores.php?stu=$stu&amp;cid=$cid&amp;uid=all&amp;lid={$gbt[0][1][$j][7]}\" ";
 							echo "onmouseover=\"tipshow(this,'$avgtip')\" onmouseout=\"tipout()\" ";
