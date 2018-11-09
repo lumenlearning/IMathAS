@@ -76,7 +76,7 @@ if (isset($sessiondata['coursetheme'])) {
 			$coursetheme = str_replace(array('_fw1000','_fw'),'',$coursetheme);
 		}
 	}
-	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/$coursetheme?v=042217\"/>\n";
+	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/$coursetheme?v=110918\"/>\n";
 }
 echo '<link rel="stylesheet" href="'.$imasroot.'/handheld.css?v=101817" media="handheld,only screen and (max-width:480px)"/>';
 if ($isdiag) {

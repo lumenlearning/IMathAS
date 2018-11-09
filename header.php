@@ -33,7 +33,7 @@ if (isset($coursetheme)) {
 		$coursetheme = str_replace(array('_fw1000','_fw'),'',$coursetheme);
 	}
 	?>
-<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=042217";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=110918";?>" type="text/css" />
 <link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=042217" media="only screen and (max-width:480px)"/>
 
 <?php
