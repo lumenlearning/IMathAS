@@ -49,7 +49,21 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 
 $CFG['GEN']['useSESmail'] = true;
-$CFG['email']['handlerpriority'] = 2;
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+//
+// Change description: ['handlerpriority'] has been commented out
+
+// $CFG['email']['handlerpriority'] = 2;
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 
 function enableDisplayErrors() {
   ini_set('display_errors',1);
