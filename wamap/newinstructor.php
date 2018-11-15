@@ -11,7 +11,7 @@
 	require("../header.php");
 	$pagetitle = "Instructor Account Request";
 	require("infoheader.php");
-	$extrarequired = array('school','phone','verurl','agree');
+	$extrarequired = array('SID','firstname','lastname','email','pw1','pw2','school','phone','verurl','agree');
 	
 	if (isset($_POST['firstname'])) {
 		$error = '';
@@ -96,7 +96,7 @@
 		}
 	}
 	if (isset($_POST['firstname'])) {$firstname=$_POST['firstname'];} else {$firstname='';}
-	if (isset($_POST['lastname'])) {$lasname=$_POST['lastname'];} else {$lastname='';}
+	if (isset($_POST['lastname'])) {$lastname=$_POST['lastname'];} else {$lastname='';}
 	if (isset($_POST['email'])) {$email=$_POST['email'];} else {$email='';}
 	if (isset($_POST['phone'])) {$phone=$_POST['phone'];} else {$phone='';}
 	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}

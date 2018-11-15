@@ -115,11 +115,13 @@
 							$scores[$loc] = $sv;
 						}
 					}
-					foreach ($grpfeedback[$line['agroupid']] as $loc=>$sv) {
-						if (trim(strip_tags($sv))=='') {
-							unset($feedback["Q".$loc]);
-						} else {
-							$feedback["Q".$loc] = $sv;
+					if (isset($grpfeedback[$line['agroupid']])) {
+						foreach ($grpfeedback[$line['agroupid']] as $loc=>$sv) {
+							if (trim(strip_tags($sv))=='') {
+								unset($feedback["Q".$loc]);
+							} else {
+								$feedback["Q".$loc] = $sv;
+							}
 						}
 					}
 				} else {
@@ -130,11 +132,13 @@
 							$scores[$loc] = $sv;
 						}
 					}
-					foreach ($allfeedbacks[$line['id']] as $loc=>$sv) {
-						if (trim(strip_tags($sv))=='') {
-							unset($feedback["Q".$loc]);
-						} else {
-							$feedback["Q".$loc] = $sv;
+					if (isset($allfeedbacks[$line['id']])) {
+						foreach ($allfeedbacks[$line['id']] as $loc=>$sv) {
+							if (trim(strip_tags($sv))=='') {
+								unset($feedback["Q".$loc]);
+							} else {
+								$feedback["Q".$loc] = $sv;
+							}
 						}
 					}
 					//$feedback = $_POST['feedback-'.$line['id']];
@@ -243,7 +247,7 @@
 	if ($sessiondata['useed']!=0) {
 		$placeinhead .= '<script type="text/javascript"> initeditor("divs","fbbox",1,true);</script>';
 	}
-	$placeinhead .= '<style type="text/css"> .fixedbottomright {position: fixed; right: 10px; bottom: 10px;}</style>';
+	$placeinhead .= '<style type="text/css"> .fixedbottomright {position: fixed; right: 10px; bottom: 10px; z-index:10;}</style>';
 	require("../includes/rubric.php");
 	$sessiondata['coursetheme'] = $coursetheme;
 	require("../assessment/header.php");
