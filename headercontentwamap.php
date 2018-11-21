@@ -40,7 +40,7 @@ if (isset($userid)) {
 echo '</div>'; //headerbarlogo
 ?>
 <div id="headermenu">
-  <a tabindex=0 id="topnavmenu" aria-expanded="false" aria-controls="headermobilemenulist">
+  <a href="#" tabindex=0 id="topnavmenu" aria-expanded="false" aria-controls="headermobilemenulist">
       <img src="<?php echo $imasroot;?>/img/menu.png" alt="Options" class="mida"/>
   </a>
 </div>

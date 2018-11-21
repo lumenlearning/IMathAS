@@ -480,6 +480,10 @@ function ntuplecalc(inputId,outputId,format) {
 		fullstr = fullstr.toUpperCase();
 		outcalced = 'DNE';
 		outstr = 'DNE';
+	} else if (fullstr.match(/^\s*oo\s*$/i)) {
+		fullstr = fullstr.toLowerCase();
+		outcalced = 'oo';
+		outstr = '`oo`';
 	} else {
 		var outcalced = '';
 		var NCdepth = 0;
@@ -759,20 +763,29 @@ function parsecomplex(v) {
 	}
 }
 
-function matrixcalc(inputId,outputId,rows,cols) {
+function matrixcalc(inputId,outputId,rows,cols,format) {
 
 	function calced(estr) {
 		var err='';
 		try {
 			var res = eval(prepWithMath(mathjs(estr)));
 		} catch(e) {
-			err = _("syntax incomplete");
+			err = _("syntax incomplete")+". ";
 		}
-		if (!isNaN(res) && res!="Infinity")
+		if (!isNaN(res) && res!="Infinity") {
 			estr = (Math.abs(res)<1e-15?0:res)+err;
-		else if (estr!="") estr = _("undefined");
-		return estr;
+		} else if (estr!="") {
+			err = _("undefined")+". ";
+			estr = err;
+		}
+		return [estr, err];
 	}
+	var err = "";
+	var calcout;
+	if (typeof format != 'string') {
+		format = '';
+	}
+
 	if (rows!=null && cols!=null) {
 		var count=0;
 		var str = "[";
@@ -785,7 +798,18 @@ function matrixcalc(inputId,outputId,rows,cols) {
 				if (col>0) {str += ","; calcstr += ",";}
 				val = normalizemathunicode(document.getElementById(inputId+'-'+count).value);
 				str += val;
-				calcstr += calced(val);
+				//calcstr += calced(val);
+				calcout = calced(val);
+				
+				calcout[1] += syntaxcheckexpr(val,format);
+				if (calcout[1] == '') {
+					calcout[1] += singlevalsyntaxcheck(val,format);
+				}
+				if (err=='') {
+					err = calcout[1];
+				}
+				
+				calcstr += calcout[0];
 				count++;
 			}
 			str += ")";
@@ -817,14 +841,28 @@ function matrixcalc(inputId,outputId,rows,cols) {
 		for (var i=0; i<calclist.length; i++) {
 			calclist2 = calclist[i].split(',');
 			for (var j=0; j<calclist2.length; j++) {
-				calclist2[j] = calced(calclist2[j]);
+				//calclist2[j] = calced(calclist2[j]);
+				calcout = calced(calclist2[j]);
+				calcout[1] += syntaxcheckexpr(calclist2[j],format);
+				if (calcout[1] == '') {
+					calcout[1] += singlevalsyntaxcheck(calclist2[j],format);
+				}
+				if (err=='') { 
+					err = calcout[1];
+				}
+				
+				calclist2[j] = calcout[0];
 			}
 			calclist[i] = calclist2.join(',');
 		}
 		calcstr = '[('+calclist.join('),(')+')]';
 	}
 	//calcstr = calcstr.replace(/([^\[\(\)\],]+)/g, calced);
-	str = "`"+str+"` = `"+calcstr+"`";
+	if (format.indexOf("showval")==-1) {
+		str = "`"+str+"`. "+err;
+	} else {
+		str = "`"+str+"` = `"+calcstr+"`. "+err;
+	}
 
 	if (outputId != null) {
 		var outnode = document.getElementById(outputId);
@@ -966,7 +1004,16 @@ function AMnumfuncPrepVar(qn,str) {
   }
   dispstr = dispstr.replace("varE","E");
   dispstr = dispstr.replace(/@(\d+)@/g, indextofunc);
-
+  
+  //Correct rendering when f or g is a variable not a function
+  if (vl.match(/\bf\b/) && !fl.match(/\bf\b/)) {
+  	  dispstr = dispstr.replace(/([^a-zA-Z])f\^([\d\.]+)([^\d\.])/g, "$1f^$2{::}$3");
+  	  dispstr = dispstr.replace(/([^a-zA-Z])f\(/g, "$1f{::}(");
+  }
+  if (vl.match(/\bg\b/) && !fl.match(/\bg\b/)) {
+  	  dispstr = dispstr.replace(/([^a-zA-Z])g\^([\d\.]+)([^\d\.])/g, "$1g^$2{::}$3");
+  	  dispstr = dispstr.replace(/([^a-zA-Z])g\(/g, "$1g{::}(");
+  }
   return [str,dispstr,vars.join("|")];
 }
 
