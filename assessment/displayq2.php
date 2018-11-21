@@ -322,7 +322,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 
 
 	//create hintbuttons
-	if (isset($hints) && $showhints) {
+	if (isset($hints) && is_array($hints) && count($hints)>0 && $showhints) {
 		//$hintkeys = array_keys($hints);
 		//$lastkey = array_pop($hintkeys);
 		$lastkey = max(array_keys($hints));
@@ -1724,6 +1724,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$sa = '`'.decimaltofraction($answer).'`';
 			} else if (in_array("scinot",$ansformats) || (in_array("scinotordec",$ansformats) && (abs($answer)>1000 || abs($answer)<.001))) {
 				$sa = '`'.makescinot($answer,-1,'*').'`';
+			} else if (is_numeric($answer) && $answer!=0 && abs($answer)<.001 && abs($answer)>1e-9) {
+				$sa = prettysmallnumber($answer);
 			} else {
 				$sa = $answer;
 			}
@@ -1744,6 +1746,12 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "<label for=\"qn$qn\">$ansprompt</label>";
 		}
 		if (isset($answersize)) {
+			$tip = _('Enter each element of the matrix as  number (like 5, -3, 2.2)');
+			$shorttip = _('Enter an integer or decimal number');
+			if (isset($reqdecimals)) {
+				$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
+				$shorttip .= sprintf(_(", accurate to at least %d decimal places"), $reqdecimals);
+			}
 			if (!isset($sz)) { $sz = 3;}
 			if ($colorbox=='') {
 				$out .= '<table id="qnwrap'.$qn.'">';
@@ -1758,7 +1766,16 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			for ($row=0; $row<$answersize[0]; $row++) {
 				$out .= "<tr>";
 				for ($col=0; $col<$answersize[1]; $col++) {
-					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" value=\"".Sanitize::encodeStringForDisplay($las[$count])."\"  autocomplete=\"off\" /></td>\n";
+					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"".Sanitize::encodeStringForDisplay($las[$count])."\"  autocomplete=\"off\" ";
+					if ($showtips==2) {
+						if ($multi==0) {
+							$qnref = "$qn-0";
+						} else {
+							$qnref = ($multi-1).'-'.($qn%1000);
+						}
+						$out .= "onfocus=\"showehdd('qn$qn-$count','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn-$count')\" ";
+					}
+					$out .= "/></td>\n";
 					$count++;
 				}
 				$out .= "</tr>";
@@ -1766,10 +1783,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "</table>\n";
 			$out .= getcolormark($colorbox);
 			$out .= '</td><td class="matrixright">&nbsp;</td></tr></table>';
-			$tip = _('Enter each element of the matrix as  number (like 5, -3, 2.2)');
-			if (isset($reqdecimals)) {
-				$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
-			}
+			
 		} else {
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -1819,6 +1833,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "<label for=\"qn$qn\">$ansprompt</label>";
 		}
 		if (isset($answersize)) {
+			list($tip,$shorttip) = formathint(_('each element of the matrix'),$ansformats,isset($reqdecimals)?$reqdecimals:null,'calcmatrix',false,true);
+			//$tip = "Enter each element of the matrix as  number (like 5, -3, 2.2) or as a calculation (like 5/3, 2^3, 5+4)";
+
 			if (!isset($sz)) { $sz = 3;}
 			$answersize = explode(",",$answersize);
 			if ($colorbox=='') {
@@ -1833,7 +1850,16 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			for ($row=0; $row<$answersize[0]; $row++) {
 				$out .= "<tr>";
 				for ($col=0; $col<$answersize[1]; $col++) {
-					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"".Sanitize::encodeStringForDisplay($las[$count])."\" autocomplete=\"off\" /></td>\n";
+					$out .= "<td><input class=\"text\" type=\"text\" size=\"$sz\" name=\"qn$qn-$count\" id=\"qn$qn-$count\" value=\"".Sanitize::encodeStringForDisplay($las[$count])."\" autocomplete=\"off\" ";
+					if ($showtips==2) {
+						if ($multi==0) {
+							$qnref = "$qn-0";
+						} else {
+							$qnref = ($multi-1).'-'.($qn%1000);
+						}
+						$out .= "onfocus=\"showehdd('qn$qn-$count','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn-$count')\" ";
+					}
+					$out .= "/></td>\n";
 					$count++;
 				}
 				$out .= "</tr>";
@@ -1841,11 +1867,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "</table>\n";
 			$out .= '</td><td class="matrixright">&nbsp;</td></tr></table>';
 			$out .= getcolormark($colorbox);
-			if (!isset($hidepreview)) {$preview .= "<input type=button id=\"pbtn$qn\" class=btn value=\"" . _('Preview') . "\" onclick=\"matrixcalc('qn$qn','p$qn',{$answersize[0]},{$answersize[1]})\" /> &nbsp;\n";}
+			if (!isset($hidepreview)) {$preview .= "<input type=button id=\"pbtn$qn\" class=btn value=\"" . _('Preview') . "\" onclick=\"matrixcalc('qn$qn','p$qn',{$answersize[0]},{$answersize[1]},'$answerformat')\" /> &nbsp;\n";}
 			$preview .= "<span id=p$qn></span>\n";
 			$out .= "<script type=\"text/javascript\">matcalctoproc[$qn] = 1; matsize[$qn]='{$answersize[0]},{$answersize[1]}';</script>\n";
-			$tip .= formathint(_('each element of the matrix'),$ansformats,isset($reqdecimals)?$reqdecimals:null,'calcmatrix');
-			//$tip = "Enter each element of the matrix as  number (like 5, -3, 2.2) or as a calculation (like 5/3, 2^3, 5+4)";
 		} else {
 			if ($multi==0) {
 				$qnref = "$qn-0";
@@ -1862,9 +1886,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			$out .= "/>\n";
 			$out .= getcolormark($colorbox);
 			if (!isset($hidepreview)) {
-				$preview .= "<input type=button value=\"" . _('Preview') . "\" onclick=\"matrixcalc('tc$qn','p$qn')\" /> &nbsp;\n";
+				$preview .= "<input type=button value=\"" . _('Preview') . "\" onclick=\"matrixcalc('tc$qn','p$qn',null,null,'$answerformat')\" /> &nbsp;\n";
+				$preview .= "<span id=p$qn></span> \n";
 			}
-			$out .= "<span id=p$qn></span> \n";
 			$out .= "<script type=\"text/javascript\">matcalctoproc[$qn] = 1;</script>\n";
 
 		}
@@ -3055,8 +3079,22 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						if (count($answerformat)>1 && $answerformat[1]=='opendot') { $out .= 'class="sel" '; $def = 2;}
 						$out .= ' alt="Open dot"/>';
 					}
-
-
+				} else if ($answerformat[0]=='numberline') {
+					if (in_array('lineseg',$answerformat)) {
+						$out .= "<img src=\"$imasroot/img/numlines.png\" onclick=\"imathasDraw.settool(this,$qn,0.5)\" ";
+						if (count($answerformat)==1 || $answerformat[1]=='lineseg') { $out .= 'class="sel" '; $def = 0.5;}
+						$out .= ' alt="Line segments and rays" title="Line segments and rays"/>';
+					}
+					if (count($answerformat)==1 || in_array('dot',$answerformat)) {
+						$out .= "<img src=\"$imasroot/img/tpdot.gif\" onclick=\"imathasDraw.settool(this,$qn,1)\" ";
+						if (count($answerformat)>1 && $answerformat[1]=='dot') { $out .= 'class="sel" '; $def = 1;}
+						$out .= ' alt="Closed dot" title="Closed dot"/>';
+					}
+					if (in_array('opendot',$answerformat)) {
+						$out .= "<img src=\"$imasroot/img/tpodot.gif\" onclick=\"imathasDraw.settool(this,$qn,2)\" ";
+						if (count($answerformat)>1 && $answerformat[1]=='opendot') { $out .= 'class="sel" '; $def = 2;}
+						$out .= ' alt="Open dot" title="Open dot"/>';
+					}
 				} else {
 					if ($answerformat[0]=='numberline') {
 						array_shift($answerformat);
@@ -3209,9 +3247,29 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						if (count($function)>2) {
 							if ($function[1] == '-oo') { $function[1] = $settings[0]-.1*($settings[1]-$settings[0]);}
 							if ($function[2] == 'oo') { $function[2] = $settings[1]+.1*($settings[1]-$settings[0]);}
+							if ($locky && $function[1] < $settings[0]) {
+								$function[1] = $settings[0]-10*($settings[1]-$settings[0])/($settings[6]-10);
+							}
+							if ($locky && $function[2] > $settings[1]) {
+								$function[2] = $settings[1] + 10*($settings[1]-$settings[0])/($settings[6]-10);
+							}
 							$saarr[$k] .= ','.$function[1].','.$function[2];
+							if ($locky) {
+								if ($function[1] == '-oo' || $function[1] < $settings[0]) { //left arrow
+									$saarr[$k] .= ',arrow';
+								} else {
+									$saarr[$k] .= ',';
+								}
+								if ($function[2] == 'oo' || $function[2] > $settings[1]) { //right arrow
+									$saarr[$k] .= ',arrow';
+								} else {
+									$saarr[$k] .= ',';
+								}
+							} else {
+								$saarr[$k] .= ',,';
+							}
 							if ($locky==1) {
-								$saarr[$k] .=',,,3';
+								$saarr[$k] .=',3';
 							}
 						} else if ($locky==1) {
 							$saarr[$k] .=',,,,,3';
@@ -3221,7 +3279,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 							$func = makepretty($function[0]);
 							$func = mathphp($func,'x');
 							$func = str_replace("(x)",'($x)',$func);
-							$func = create_function('$x', 'return ('.$func.');');
+							$func = my_create_function('$x', 'return ('.$func.');');
 							
 							$epsilon = ($settings[1]-$settings[0])/97;
 							$x1 = 1/4*$settings[1] + 3/4*$settings[0] + $epsilon;
@@ -5087,7 +5145,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				foreach ($matches[0] as $var) {
 					$var = str_replace(' ','',$var);
 					if (in_array($var,$mathfuncs)) { continue;}
-					if ($var!= 'or' && $var!='and' && $var!='DNE' && $var!='oo' && $var != $variables && $_POST["qn$qn"]!="(-oo,oo)") {
+					if ($var!= 'or' && $var!='and' && $var!='DNE' && $var!='oo' && 
+						strtolower($var) != strtolower($variables) && $_POST["qn$qn"]!="(-oo,oo)") {
 						return 0;
 					}
 				}
@@ -5098,7 +5157,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$opts = preg_split('/(<=?|>=?)/',$opt);
 					foreach ($opts as $optp) {
 						$optp = trim($optp);
-						if ($optp==$variables || $optp=='oo' || $optp=='-oo') {continue;}
+						if (strtolower($optp)==strtolower($variables) || $optp=='oo' || $optp=='-oo') {continue;}
 						if (!checkanswerformat($optp,$ansformats)) {
 							return 0;
 						}
@@ -5316,8 +5375,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$pixelsperx = ($settings[6] - 2*$imgborder)/($settings[1]-$settings[0]);
 		$pixelspery = ($settings[7] - 2*$imgborder)/($settings[3]-$settings[2]);
 
-		$xtopix = create_function('$x',"return ((\$x - ({$settings[0]}))*($pixelsperx) + ($imgborder));");
-		$ytopix = create_function('$y',"return (({$settings[7]}) - (\$y- ({$settings[2]}))*($pixelspery) - ($imgborder));");
+		$xtopix = my_create_function('$x',"return ((\$x - ({$settings[0]}))*($pixelsperx) + ($imgborder));");
+		$ytopix = my_create_function('$y',"return (({$settings[7]}) - (\$y- ({$settings[2]}))*($pixelspery) - ($imgborder));");
 
 		$anslines = array();
 		$ansdots = array();
@@ -5494,7 +5553,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 						$func = makepretty(substr($function[0],2));
 						$func = mathphp($func,'y');
 						$func = str_replace("(y)",'($y)',$func);
-						$func = create_function('$y', 'return ('.$func.');');
+						$func = my_create_function('$y', 'return ('.$func.');');
 						$x1p = $xtopix(@$func($y1));
 						$x2p = $xtopix(@$func($y2));
 						$x3p = $xtopix(@$func($y3));
@@ -5541,7 +5600,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$func = makepretty($function[0]);
 					$func = mathphp($func,'x');
 					$func = str_replace("(x)",'($x)',$func);
-					$func = create_function('$x', 'return ('.$func.');');
+					$func = my_create_function('$x', 'return ('.$func.');');
 					if ($function[1]=='-oo') { //ray to left
 						$y1p = $ytopix($func(floatval($function[2])-1));
 						$y2p = $ytopix($func(floatval($function[2])));
@@ -5564,7 +5623,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$func = makepretty($function[0]);
 					$func = mathphp($func,'x');
 					$func = str_replace("(x)",'($x)',$func);
-					$func = create_function('$x', 'return ('.$func.');');
+					$func = my_create_function('$x', 'return ('.$func.');');
 
 					$y1 = @$func($x1);
 					$y2 = @$func($x2);
@@ -5692,7 +5751,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							$infunc = makepretty(substr($function[0],$p+5,$i-$p-5));
 							$infunc = mathphp($infunc,'x');
 							$infunc = str_replace("(x)",'($x)',$infunc);
-							$infunc = create_function('$x', 'return ('.$infunc.');');
+							$infunc = my_create_function('$x', 'return ('.$infunc.');');
 							$y0 = $infunc(0);
 							$y1 = $infunc(1);
 							$xint = -$y0/($y1-$y0);
@@ -5716,7 +5775,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							$infunc = makepretty(substr($function[0],$p+4,$i-$p-4));
 							$infunc = mathphp($infunc,'x');
 							$infunc = str_replace("(x)",'($x)',$infunc);
-							$infunc = create_function('$x', 'return ('.$infunc.');');
+							$infunc = my_create_function('$x', 'return ('.$infunc.');');
 							$y0 = $infunc(0);
 							$y1 = $infunc(1);
 							$period = 2*M_PI/($y1-$y0); //slope of inside function
@@ -6410,7 +6469,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$func = makepretty(substr($function[0],$c));
 					$func = mathphp($func,'x');
 					$func = str_replace("(x)",'($x)',$func);
-					$func = create_function('$x', 'return ('.$func.');');
+					$func = my_create_function('$x', 'return ('.$func.');');
 					$y1 = $func($x1);
 					$y2 = $func($x2);
 					$y3 = $func($x3);
@@ -6704,7 +6763,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$func = makepretty($function[0]);
 				$func = mathphp($func,'x');
 				$func = str_replace("(x)",'($x)',$func);
-				$func = create_function('$x', 'return ('.$func.');');
+				$func = my_create_function('$x', 'return ('.$func.');');
 
 				if (!isset($function[1])) {
 					$function[1] = $settings[0];

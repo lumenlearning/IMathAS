@@ -479,7 +479,7 @@ function AStextInternal($p,$st,$pos,$angle) {
 	}
 }
 
-function ASinitPicture($arg) {
+function ASinitPicture($arg=array()) {
 
 	//$arg = explode(',',$arg);
 	if (isset($arg[0]) && $arg[0]!='') { $this->xmin = $this->evalifneeded($arg[0]);}
@@ -1047,14 +1047,14 @@ function ASslopefield($arg) {
 	*/
 	$func = mathphp($func,"x|y");
 	$func = str_replace(array('(x)','(y)'),array('($x)','($y)'),$func);
-	$efunc = create_function('$x,$y','return ('.$func.');');
+	$efunc = my_create_function('$x,$y','return ('.$func.');');
 	$dz = sqrt($dx*$dx + $dy*$dy)/6;
 	$x_min = ceil($this->xmin/$dx);
 	$y_min = ceil($this->ymin/$dy);
 	for ($x = $x_min; $x<= $this->xmax; $x+= $dx) {
 		for ($y = $y_min; $y<= $this->ymax; $y+= $dy) {
 			$gxy = @$efunc($x,$y);
-			if ($gxy!=null && !is_nan($gxy)) {
+			if ($gxy!=null && !is_infinite($gxy) && !is_nan($gxy)) {
 				if ($gxy===false) {
 					$u = 0; $v = $dz;
 				} else {
@@ -1085,16 +1085,16 @@ function ASplot($function) {
 		$xfunc = str_replace("[","",$funcp[0]);
 		$xfunc = mathphp($xfunc,"t");
 		$xfunc = str_replace("(t)",'($t)',$xfunc);
-		$exfunc = create_function('$t','return ('.$xfunc.');');
+		$exfunc = my_create_function('$t','return ('.$xfunc.');');
 		$yfunc = str_replace("]","",$funcp[1]);
 		$yfunc = mathphp($yfunc,"t");
 		$yfunc = str_replace("(t)",'($t)',$yfunc);
-		$eyfunc = create_function('$t','return ('.$yfunc.');');
+		$eyfunc = my_create_function('$t','return ('.$yfunc.');');
 	} else {
 		$isparametric = false;
 		$func = mathphp($function[0],"x");
 		$func = str_replace("(x)",'($x)',$func);
-		$efunc = create_function('$x','return ('.$func.');');
+		$efunc = my_create_function('$x','return ('.$func.');');
 	}
 	$avoid = array();
 	if (isset($function[1]) && $function[1]!='' && $function[1]!='null') {
@@ -1131,12 +1131,12 @@ function ASplot($function) {
 			if (in_array($t,$avoid)) { continue;}
 			$x = $exfunc($t);
 			$y = $eyfunc($t);
-			if (is_nan($x) || is_nan($y)) { continue; }
+			if (is_infinite($x) || is_infinite($y) || is_nan($x) || is_nan($y)) { continue; }
 		} else {
 			$x = $xmin + $dx*$i;
 			if (in_array($x,$avoid)) { continue;}
 			$y = $efunc($x);
-			if (is_nan($y)) { continue;}
+			if (is_infinite($y) || is_nan($y)) { continue;}
 		}
 		if ($i<2 || $i==$stopat-2) {
 			$fx[$i] = $x;

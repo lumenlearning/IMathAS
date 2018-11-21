@@ -138,12 +138,12 @@ div.blockitems, div.blockitems div.blockitems div.blockitems {
 	margin-top: -10px;
 	margin-bottom: 10px;
 }
-div.block.grouptoggle {
-	margin-bottom: 0px;
-	margin-top: 10px
-}
-div.block.grouptoggle + div.blockitems {
-	margin-top: 0px
+div.block.grouptoggle { 
+	margin-bottom: 0px; 
+	margin-top: 10px 
+} 
+div.block.grouptoggle + div.blockitems { 
+	margin-top: 0px 
 }
 div.hidden {
 	display:none;
@@ -194,7 +194,7 @@ ul.nomark li {
 	margin-left: 0px;
 	padding-left: 0px;
 }
-
+	
 ul.qview {
 	list-style-type: none;
 	margin-left: 12px;
@@ -553,7 +553,7 @@ div.tips:after {
 	border-color: rgba(204, 255, 255, 0);
 	border-top-color: #cff;
 	border-width: 6px;
-	margin-left: -6px;
+	margin-left: -6px;        
 }
 div.tips:before {
 	border-color: rgba(145, 213, 213, 0);
@@ -795,7 +795,40 @@ input[type=submit]:disabled:hover,input[type=button]:disabled:hover {
   filter:alpha(opacity=65); /* For IE6&7 */
   background-color: #000;
 }
+#GB_frameoverlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  opacity: 0.01;
+  -moz-opacity: 0.01;
+  filter:alpha(opacity=1); /* For IE6&7 */
+  background-color: #fff;
+}
+#GB_resizehandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  cursor: nwse-resize;
+  z-index: 1001;
+}
 
+#GB_resizehandle::after {
+  content: '';
+  position: absolute;
+  display: block;
+  width: 50px;
+  height: 0;
+  box-shadow: 0 10px 0 1px black, 0 17px 0 1px black, 0 24px 0 1px black;
+  transform: translate(-50%, -50%) rotate(-45deg) scale(0.5);
+  top: 50%;
+  left: 50%;
+}
 #GB_window {
   top: 10px;
   left: 0px;
@@ -804,7 +837,7 @@ input[type=submit]:disabled:hover,input[type=button]:disabled:hover {
   position: fixed;
   background: #fff;
   border: 3px solid #369;
-  overflow: auto;
+  overflow: hidden;/*auto;*/
   width: 400px;
   height: 400px;
   z-index: 150;
@@ -824,11 +857,13 @@ input[type=submit]:disabled:hover,input[type=button]:disabled:hover {
   padding: 2px 0 2px 5px;
   margin: 0;
   text-align: left;
+  cursor: pointer;
 }
 #GB_caption a, #GB_caption a:hover, #GB_caption a:focus {
 	color: #fff;
 	text-decoration: none;
 }
+
 ol li ol {
 	list-style-type: lower-alpha;
 }
@@ -1160,9 +1195,9 @@ a.dropdown-toggle.arrow-down:hover {
 }
 
 .arrow-down::after {
-	content: "\25bc";
-	padding-left: 0.2em;
-	font-size:70%;
+	content: "\25bc"; 
+	padding-left: 0.2em; 
+	font-size:70%; 
 	position:relative;
 	top:-.2em;
 	text-decoration: none;
