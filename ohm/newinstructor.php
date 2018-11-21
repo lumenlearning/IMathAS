@@ -61,18 +61,6 @@
 
 					$stm = $DBH->query("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits)); //known INTs - safe
 				}
-				$subject = "New Instructor Account Request";
-				// trim() removes newlines, which prevents SMTP command injection.
-				$message = sprintf("Name: %s %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['firstname']),
-					Sanitize::encodeStringForDisplay($_POST['lastname']));
-				$message .= sprintf("Email: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['email']));
-				$message .= sprintf("School: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['school']));
-				$message .= sprintf("Phone: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['phone']));
-				$message .= sprintf("Username: %s <br/>\n", Sanitize::encodeStringForDisplay($_POST['username']));
-
-				require_once("../includes/email.php");
-				send_email($accountapproval, sprintf('%s <%s>', $installname, $sendfrom),
-					$subject, $message, null, null, 10);
 
 				$now = time();
 				//DB $query = "INSERT INTO imas_log (time, log) VALUES ($now, '$str')";
@@ -88,7 +76,9 @@
 
 				$sanitizedFirstName = Sanitize::encodeStringForDisplay($_POST['firstname']);
 				$sanitizedUsername = Sanitize::encodeStringForDisplay($_POST['username']);
+				$sanitizedEmailTo = Sanitize::emailAddress($_POST['email']);
 
+				$subject = "New Instructor Account Request";
 				$emailMessage = "
 <p>
 	Hi ${sanitizedFirstName},
@@ -139,9 +129,8 @@ spam filter.</em>
 </p>
 ";
 				require_once("../includes/email.php");
-				send_email(Sanitize::emailAddress($_POST['email']),
-					!empty($accountapproval)?$accountapproval:$sendfrom,
-					$subject, $message, null, null, 10);
+				send_email($sanitizedEmailTo, sprintf('%s <%s>', $installname, $sendfrom),
+					$subject, $emailMessage, null, null, 10);
 
 				echo $browserMessage;
 				require("../footer.php");
