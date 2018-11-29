@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__ . "/htmLawed.php");
+
 class Sanitize
 {
 
@@ -141,7 +143,7 @@ class Sanitize
 		$stringLength = strlen($string);
 		for ($i = 0; $i < $stringLength; $i++) {
 			$char = substr($string, $i, 1);
-			$safeString .= preg_match("/[\da-z]/i", $char) ? $char : '\\' . dechex(ord($char));
+			$safeString .= preg_match("/[\da-z\;#]/i", $char) ? $char : '\\' . dechex(ord($char));
 		}
 
 		return $safeString;
@@ -216,19 +218,21 @@ class Sanitize
 	 * @return string A sanitized URL.
 	 * @see generateQueryStringFromMap
 	 */
-	public static function fullUrl($url)
+	public static function url($url)
 	{
 		// Sanitize url parts
 		$parsed_url = parse_url($url);
-		$scheme = preg_replace('/[^a-z]/i', '', $parsed_url['scheme']);
-		$user = isset($parsed_url['user']) ? rawurlencode($parsed_url['user']) : '';
-		$pass = isset($parsed_url['pass']) ? rawurlencode($parsed_url['pass']) : '';
-		$host = preg_replace('/[^\da-z\.-]/i', '', $parsed_url['host']);
+		$scheme = isset($parsed_url['scheme'])
+			? preg_replace('/[^a-z]/i', '', $parsed_url['scheme']) : '';
+		$user = isset($parsed_url['user']) ? rawurlencode(rawurldecode($parsed_url['user'])) : '';
+		$pass = isset($parsed_url['pass']) ? rawurlencode(rawurldecode($parsed_url['pass'])) : '';
+		$host = isset($parsed_url['host'])
+			? preg_replace('/[^\da-z\.-]/i', '', $parsed_url['host']) : '';
 		$port = isset($parsed_url['port']) ? preg_replace('/[^\d]/', '', $parsed_url['port']) : '';
-		$fragment = isset($parsed_url['fragment']) ? rawurlencode($parsed_url['fragment']) : '';
+		$fragment = isset($parsed_url['fragment']) ? rawurlencode(rawurldecode($parsed_url['fragment'])) : '';
 
 		// Sanitize the path
-		$path = rawurlencode($parsed_url['path']);
+		$path = rawurlencode(rawurldecode($parsed_url['path']));
 		$path = preg_replace("/%2F/", "/", $path);
 
 		// Sanitize query string
@@ -251,7 +255,17 @@ class Sanitize
 		$encoded_query = '' != $encoded_query ? '?' . $encoded_query : '';
 
 		// Put it all together.
-		$safeUrl = sprintf("%s://%s%s%s%s%s%s", $scheme, $auth, $host, $port, $path, $encoded_query, $fragment);
+		$safeUrl = null;
+		if ('' != $scheme) {
+			// A fully formed URL.
+			$safeUrl = sprintf("%s://%s%s%s%s%s%s", $scheme, $auth, $host, $port, $path, $encoded_query, $fragment);
+		} elseif ('' != $host) {
+			// URL beginning with host:port.
+			$safeUrl = sprintf("//%s%s%s%s%s", $host, $port, $path, $encoded_query, $fragment);
+		} else {
+			// URL beginning with path.
+			$safeUrl = sprintf("%s%s%s", $path, $encoded_query, $fragment);
+		}
 
 		return $safeUrl;
 	}
