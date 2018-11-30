@@ -367,8 +367,8 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			$xrnd = 6;
 			$yrnd = 6;
 		} else {
-			$xrnd = floor(-log10(abs($xmax-$xmin))-1e-12)+4;
-			$yrnd = floor(-log10(abs($ymax-$ymin))-1e-12)+4;
+			$xrnd = max(0,intval(floor(-log10(abs($xmax-$xmin))-1e-12))+4);
+			$yrnd = max(0,intval(floor(-log10(abs($ymax-$ymin))-1e-12))+4);
 		}
 
 		$lasty = 0;
@@ -382,18 +382,27 @@ function showplot($funcs) { //optional arguments:  $xmin,$xmax,$ymin,$ymax,label
 			if ($isparametric) {
 				$t = $xmin + $dx*$i + 1E-10;
 				if (in_array($t,$avoid)) { continue;}
-				$x = round($evalxfunc($t),$xrnd);//round(eval("return ($xfunc);"),3);
-				$y = round($evalyfunc($t),$yrnd);//round(eval("return ($yfunc);"),3);
-				if ($xmax != $xmin) {
+				$x = $evalxfunc($t);
+				$y = $evalyfunc($t);
+				if (!is_numeric($x) || !is_numeric($y)) {
+					continue;
+				}
+				$x = round($x,$xrnd);//round(eval("return ($xfunc);"),3);
+				$y = round($y,$yrnd);//round(eval("return ($yfunc);"),3);
+				if ($xmax != $xmin && $y>$yymin && $y<$yymax) {
 					$alt .= "<tr><td>$x</td><td>$y</td></tr>";
 				}
 			} else {
 				$x = $xmin + $dx*$i + (($i<$stopat/2)?1E-10:-1E-10) - (($domainlimited || $GLOBALS['sessiondata']['graphdisp']==0)?0:5*abs($xmax-$xmin)/$settings[6]);
 				if (in_array($x,$avoid)) { continue;}
 				//echo $func.'<br/>';
-				$y = round($evalfunc($x),$yrnd);//round(eval("return ($func);"),3);
+				$y = $evalfunc($x);
+				if (!is_numeric($y)) {
+					continue;
+				}
+				$y = round($y,$yrnd);//round(eval("return ($func);"),3);
 				$x = round($x,$xrnd);
-				if ($xmax != $xmin) {
+				if ($xmax != $xmin && $y>$yymin && $y<$yymax) {
 					$alt .= "<tr><td>$x</td><td>$y</td></tr>";
 				}
 			}
