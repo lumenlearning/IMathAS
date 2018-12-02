@@ -1124,3 +1124,6 @@ button.hamburger {
 		display: block;
 	}
 }
+.katex {
+	font-size: 1.05em !important;
+}
