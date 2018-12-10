@@ -69,7 +69,10 @@
 			$stm = $DBH->prepare("SELECT * FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
 			$adata = $stm->fetch(PDO::FETCH_ASSOC);
-
+			if ($adata['courseid'] != $cid) {
+				echo "Invalid assessment ID";
+				exit;
+			}
 			$stugroupmem = array();
 			$agroupid = 0;
 			$doadd = true;
@@ -716,7 +719,7 @@
 		}
 		if ($myrights == 100 && $line['lti_sourcedid']!='') {
 			echo '<p class=small>LTI sourced_id: '.Sanitize::encodeStringForDisplay($line['lti_sourcedid']).'</p>';
-		}
+		}	
 		echo "<form id=\"mainform\" method=post action=\"gb-viewasid.php?stu=$stu&cid=$cid&from=$from&asid={$asid}&update=true\">\n";
 
 		if ($isteacher) {
