@@ -267,6 +267,10 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		$qcolors = array();
 	}
 	if ($qdata['qtype']=="multipart" || $qdata['qtype']=='conditional') {
+		if (!isset($anstypes) && $GLOBALS['myrights']>10) {
+			echo 'Error in question: missing $anstypes for multipart or conditional question';
+			$anstypes = array("number");
+		}
 		if ($qdata['qtype']=="multipart") {
 			if (isset($answeights)) {
 				if (!is_array($answeights)) {
@@ -718,6 +722,7 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 
 	if ($qdata['qtype']=="multipart" || $qdata['qtype']=='conditional') {
 		$stuanswers[$thisq] = array();
+		$stuanswersval[$thisq] = array();
 		$postpartstoprocess = array();
 		foreach ($_POST as $postk=>$postv) {
 			$prefix = substr($postk,0,2);
@@ -3901,6 +3906,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$ansr = preg_replace('/\)\s*\,\s*\(/',',',$ansr);
 		$answerlist = explode(',',$ansr);
 
+		if (count($answerlist) != count($givenanslist)) {
+			return 0;
+		}
 		foreach ($answerlist as $k=>$v) {
 			//$v = eval('return ('.mathphp($v,null).');');
 			$v = evalMathPHP($v,null);
@@ -3908,7 +3916,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 
 		for ($i=0; $i<count($answerlist); $i++) {
-			if (isset($abstolerance)) {
+			if (!is_numeric($givenanslist[$i])) {
+				$correct = false;
+				break;
+			} else if (isset($abstolerance)) {
 				if (abs($answerlist[$i] - $givenanslist[$i]) > $abstolerance-1E-12) {
 					$correct = false;
 					break;
@@ -4493,7 +4504,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				if ($lastval===null) {
 					$gaarr[] = $tmp[$i];
 					$orarr[] = $tmpor[$i];
-				} else {
+				} else if (is_numeric($v)) {
 					if (abs($v-$lastval)>1E-12) {
 						$gaarr[] = $tmp[$i];
 						$orarr[] = $tmpor[$i];
