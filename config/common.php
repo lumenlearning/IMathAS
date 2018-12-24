@@ -36,6 +36,11 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
 
 $CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
 
+$CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
+$CFG['LTI']['logltiqueue'] = true;
+//prep for deploy
+//$CFG['LTI']['usequeue'] = true; 
+
 //database access settings
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');
 $AWSsecret = getenv('AWS_SECRET_KEY');
