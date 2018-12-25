@@ -26,7 +26,7 @@ $CFG['GEN']['noEmailButton'] = true;
 //$CFG['use_csrfp'] = 'log';
 
 //log LTI updates
-$CFG['LTI']['logupdate'] = true;
+//$CFG['LTI']['logupdate'] = true;
 
 //Amazon's load balancer acts as proxy. Put the real IP address in REMOTE_ADDR
 //for storing as user's IP address
@@ -38,8 +38,7 @@ $CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
 
 $CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
 $CFG['LTI']['logltiqueue'] = true;
-//prep for deploy
-//$CFG['LTI']['usequeue'] = true; 
+$CFG['LTI']['usequeue'] = true; 
 
 //database access settings
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');
