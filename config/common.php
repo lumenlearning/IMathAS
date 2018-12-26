@@ -35,6 +35,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
 }
 
 $CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
+$CFG['cleanup']['delay'] = 30;
 
 $CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
 $CFG['LTI']['logltiqueue'] = true;
