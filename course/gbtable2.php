@@ -1717,7 +1717,7 @@ function gbtable() {
 
 		foreach($catorder as $cat) {//foreach category
 			for ($stype=0;$stype<4;$stype++) {  //for each of past, cur, future, and attempted
-				if (isset($cattotstu[$stype][$cat])) {			
+				if (isset($cattotstu[$stype][$cat])) {		
 					//cats: name,scale,scaletype,chop,drop,weight
 					if ($cats[$cat][7]==1) { //if using percent-based drops
 						foreach($cattotstu[$stype][$cat] as $col=>$v) {
@@ -1865,13 +1865,17 @@ function gbtable() {
 				$gb[$ln][3][$stype] = 0;
 				if (isset($cattotstu[$stype]) && is_array($cattotstu[$stype])) {
 					foreach ($cattotstu[$stype] as $cat=>$v) {
-						$gb[$ln][3][$stype] += $cats[$cat][5]*$v/$catpossstu[$stype][$cat];
+						if ($catpossstu[$stype][$cat] > 0) {
+							$gb[$ln][3][$stype] += $cats[$cat][5]*$v/$catpossstu[$stype][$cat];
+						}
 					}
 					$gb[$ln][3][$stype] = round($gb[$ln][3][$stype], 1);	
 				}
 				if (isset($catpossstu[$stype]) && is_array($catpossstu[$stype])) {
 					foreach ($catpossstu[$stype] as $cat=>$v) {
-						$gb[$ln][3][4+$stype] += $cats[$cat][5];
+						if ($v>0) {
+							$gb[$ln][3][4+$stype] += $cats[$cat][5];
+						}
 					}
 					$gb[$ln][3][4+$stype] = round($gb[$ln][3][4+$stype], 1);
 				}
