@@ -4,6 +4,11 @@
 require("../init.php");
 require_once("../includes/password.php");
 
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['admin/actions'])) {
+	require($CFG['hooks']['admin/actions']);
+}
+
 
 function returnrole($role_num){
  	if ($role_num == 5) {return "Guest User";}
@@ -63,7 +68,7 @@ switch($_POST['action']) {
 			echo "invalid id";
 			exit;
 		} else if ($myrights < 100 && ($myspecialrights&32)!=32 && $oldgroupid!=$groupid) {
-			echo "You don't have the authority for this action";
+			echo "You don't have the authority for this action"; 
 			exit;
 		}
 
@@ -403,7 +408,7 @@ switch($_POST['action']) {
 			$stm->execute(array($newuserid, $now, json_encode($reqdata)));
 		}
 		if ($_POST['newrights']>=20 && !empty($_POST['addnewcourse'])) {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/addcourse.php?for=".Sanitize::onlyInt($newuserid));
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/addcourse.php?for=".Sanitize::onlyInt($newuserid));	
 			exit;
 		}
 		break;
@@ -692,6 +697,12 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
+
+			//call hook, if defined
+			if (function_exists('onModCourse')) {
+				onModCourse($_GET['id'], $userid, $myrights, $groupid);
+			}
+
 			if ($stm->rowCount()>0) {
 				if ($setdatesbylti==1) {
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
@@ -736,7 +747,7 @@ switch($_POST['action']) {
 					}
 				}
 			}
-
+			
 			$DBH->beginTransaction();
 			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,startdate,enddate,istemplate,deftime,deflatepass,latepasshrs,theme,ltisecret,dates_by_lti,blockcnt,created_at) VALUES ";
 			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :startdate, :enddate, :istemplate, :deftime, :deflatepass, :latepasshrs, :theme, :ltisecret, :ltidates, :blockcnt, :created_at);";
@@ -771,6 +782,12 @@ switch($_POST['action']) {
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
+
+            //call hook, if defined
+            if (function_exists('onAddCourse')) {
+                onAddCourse($cid, $userid, $myrights, $groupid);
+            }
+
 			//if ($myrights==40) {
 				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
 				$stm->execute(array(':userid'=>$courseownerid, ':courseid'=>$cid, ':created_at'=>time()));
@@ -790,7 +807,7 @@ switch($_POST['action']) {
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':id'=>$ctc));
 				$ctcinfo = $stm->fetch(PDO::FETCH_ASSOC);
-				if (($ctcinfo['copyrights']==0 && $ctcinfo['ownerid'] != $courseownerid) ||
+				if (($ctcinfo['copyrights']==0 && $ctcinfo['ownerid'] != $courseownerid) || 
 					($ctcinfo['copyrights']==1 && $ctcinfo['groupid']!=$groupid)) {
 					if ($ctcinfo['enrollkey'] != '' && $ctcinfo['enrollkey'] != $_POST['ekey']) {
 						//did not provide valid enrollment key
@@ -816,7 +833,7 @@ switch($_POST['action']) {
 						$query = "INSERT INTO imas_gbcats (courseid,name,scale,scaletype,chop,dropn,weight,hidden,calctype) VALUES ";
 						$query .= "(:courseid, :name, :scale, :scaletype, :chop, :dropn, :weight, :hidden, :calctype)";
 						$gb_cat_ins = $DBH->prepare($query);
-				}
+					}
 					$gb_cat_ins->execute(array(':courseid'=>$cid, ':name'=>$row['name'], ':scale'=>$row['scale'], ':scaletype'=>$row['scaletype'],
 						':chop'=>$row['chop'], ':dropn'=>$row['dropn'], ':weight'=>$row['weight'], ':hidden'=>$row['hidden'], ':calctype'=>$row['calctype']));
 					$gbcats[$frid] = $DBH->lastInsertId();
@@ -857,10 +874,10 @@ switch($_POST['action']) {
 							$row[2] = $row[0].','.$row[2];
 						}
 						if ($out_ins_stm===null) {
-						$query = "INSERT INTO imas_outcomes (courseid,name,ancestors) VALUES ";
+							$query = "INSERT INTO imas_outcomes (courseid,name,ancestors) VALUES ";
 							$query .= "(:courseid, :name, :ancestors)";
 							$out_ins_stm = $DBH->prepare($query);
-					}
+						}
 						$out_ins_stm->execute(array(':courseid'=>$cid, ':name'=>$row[1], ':ancestors'=>$row[2]));
 						$outcomes[$row[0]] = $DBH->lastInsertId();
 					}
@@ -990,7 +1007,7 @@ switch($_POST['action']) {
 				$stm->execute(array(':id'=>$_GET['id'], ':groupid'=>$groupid));
 				if ($stm->rowCount()>0) {
 					$oktodel = true;
-			}
+				}
 			}
 			if ($oktodel) {
 				$stm = $DBH->prepare("UPDATE imas_courses SET available=4 WHERE id=:id");
@@ -1269,6 +1286,12 @@ switch($_POST['action']) {
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
+
+		//call hook, if defined
+		if (function_exists('onModGroup')) {
+			onModGroup($_GET['id'], $userid, $myrights, $groupid);
+		}
+
 		break;
 	case "delgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}

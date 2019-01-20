@@ -7,6 +7,12 @@ if (!isset($sessiondata['ltirole']) || $sessiondata['ltirole']!='instructor') {
 	echo "Not authorized to view this page";
 	exit;
 }
+
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['ltihome'])) {
+	require($CFG['hooks']['ltihome']);
+}
+
 //decide what we need to display
 if ($sessiondata['ltiitemtype']==0) {
 	$hascourse = true;
@@ -172,6 +178,10 @@ if (!empty($createcourse)) {
 		copyrubrics();
 		$DBH->commit();
 
+		//call hook, if defined
+		if (function_exists('onAddCourse')) {
+			onAddCourse($cid, $userid);
+		}
 	}
 	$stm = $DBH->prepare("UPDATE imas_lti_courses SET courseid=:courseid WHERE org=:org AND contextid=:contextid");
 	$stm->execute(array(':courseid'=>$cid, ':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id']));
@@ -255,7 +265,7 @@ if (!empty($createcourse)) {
 					'placementAdvice' => array(
 						'presentationDocumentTarget' => $target
 					)
-				)
+				)	
 			)
 		);
 		if ($placementtype=='assess' && $ptsposs>0) {
@@ -290,7 +300,7 @@ if (!empty($createcourse)) {
 		$acc_req = OAuthRequest::from_consumer_and_token($consumer, false, 'POST', $sessiondata['lti_selection_return'], $params);
 		$acc_req->sign_request($hmac_method, $consumer, false);
 		$newparms = $acc_req->get_parameters();
-
+		
 		echo '<body><form id="theform" method="post" action="'.Sanitize::encodeStringForDisplay($sessiondata['lti_selection_return']).'">';
 		//output form fields
 		foreach($newparms as $key => $value ) {
@@ -405,7 +415,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	}
 
 	echo '<br/> <select name="setplacement"> ';
-
+	
 	if (isset($sessiondata['lti_selection_type']) && $sessiondata['lti_selection_type']=='link') {
 		echo '<option value="course">Whole Course Placement</option>';
 	}

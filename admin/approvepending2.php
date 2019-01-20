@@ -4,6 +4,11 @@ require("../init.php");
 
 if ($myrights<100 && ($myspecialrights&64)!=64) {exit;}
 
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['admin/approvepending'])) {
+	require($CFG['hooks']['admin/approvepending']);
+}
+
 $newStatus = Sanitize::onlyInt($_POST['newstatus']);
 $instId = Sanitize::onlyInt($_POST['userid']);
 $defGrouptype = isset($CFG['GEN']['defGroupType'])?$CFG['GEN']['defGroupType']:0;
@@ -34,9 +39,41 @@ if (!empty($newStatus)) {
 				unenrollstu($rcid, array(intval($instId)));
 			}
 		}
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		$headers .= "From: $accountapproval\r\n";
+
+		$stm = $DBH->prepare("SELECT FirstName,LastName,SID,email FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$instId));
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
+
+		//call hook, if defined
+		if (function_exists('getDenyMessage')) {
+			$message = getDenyMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
+		} else {
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #
+            #  Uncomment this entire block when OHM is using the new hook code.
+            #
+
+//			$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
+//			$message .= '<p>You recently requested an instructor account on '.$installname.' with the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b>. ';
+//			$message .= 'Unfortunately, the information you provided was not sufficient for us to verify your instructor status, ';
+//			$message .= 'so your account has been converted to a student account. If you believe you should have an instructor account, ';
+//			$message .= 'you are welcome to reply to this email with additional verification information.</p>';
+
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+		}
+
+		//call hook, if defined
+		if (function_exists('getDenyBcc')) {
+			$CFG['email']['new_acct_bcclist'] = getDenyBcc();
+		}
 
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
@@ -44,12 +81,12 @@ if (!empty($newStatus)) {
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 
-		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
-		$stm->execute(array(':id'=>$_POST['userid']));
-		$row = $stm->fetch(PDO::FETCH_NUM);
+        $headers  = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+        $headers .= "From: $accountapproval\r\n";
 
-        $sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
-        $sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
+        $sanitizedName = Sanitize::encodeStringForDisplay($row['FirstName']);
+        $sanitizedUsername = Sanitize::encodeStringForDisplay($row['SID']);
 
         $message = "
 <p>
@@ -90,17 +127,17 @@ The Lumen Team
 </p>
 ";
 
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+		#### End OHM-specific changes ############################################################
+
 		require_once("../includes/email.php");
-		send_email(Sanitize::emailAddress($row[2]), !empty($accountapproval)?$accountapproval:$sendfrom,
+		send_email(Sanitize::emailAddress($row['email']), !empty($accountapproval)?$accountapproval:$sendfrom,
 			$installname._(' Account Status'), $message,
 			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(),
-			null, 10);
-
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
+			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);
 
 	} else if ($newStatus==11) { //approve
 		#### Begin OHM-specific changes ##########################################################
@@ -147,18 +184,46 @@ The Lumen Team
 		$stm = $DBH->prepare("UPDATE imas_users SET rights=40,groupid=:groupid WHERE id=:id");
 		$stm->execute(array(':groupid'=>$group, ':id'=>$instId));
 		
-		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
+		$stm = $DBH->prepare("SELECT FirstName,LastName,SID,email FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$instId));
-		$row = $stm->fetch(PDO::FETCH_NUM);
-		
-		#### Begin OHM-specific changes ##########################################################
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
+
+        //call hook, if defined
+		if (function_exists('getApproveMessage')) {
+			$message = getApproveMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
+		} else {
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #### Begin OHM-specific changes ##########################################################
+            #
+            #  Uncomment this entire block when OHM is using the new hook code.
+            #
+
+			$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
+			$message .= '<p>Welcome to '.$installname.'.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b> and the password you provided.</p>';
+
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+		}
+
+        //call hook, if defined
+        if (function_exists('getApproveBcc')) {
+            $CFG['email']['new_acct_bcclist'] = getApproveBcc();
+        }
+
+        #### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 		#### Begin OHM-specific changes ##########################################################
 
-		$sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
-		$sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
+		$sanitizedName = Sanitize::encodeStringForDisplay($row['FirstName']);
+		$sanitizedUsername = Sanitize::encodeStringForDisplay($row['SID']);
 
 		$messageIsNotLumenCustomer = "
 <p>
@@ -286,7 +351,7 @@ These resources can help orient you to using OHM:
 		#### End OHM-specific changes ############################################################
 
 		require_once("../includes/email.php");
-		send_email($row[2], !empty($accountapproval)?$accountapproval:$sendfrom, 
+		send_email($row['email'], !empty($accountapproval)?$accountapproval:$sendfrom,
 			$installname._(' Account Approval'), $message, 
 			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(), 
 			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);

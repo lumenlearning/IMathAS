@@ -4,6 +4,11 @@
 
 	require("../init.php");
 
+	//Look to see if a hook file is defined, and include if it is
+	if (isset($CFG['hooks']['assessment/showtest'])) {
+		require($CFG['hooks']['assessment/showtest']);
+	}
+
 	if (!isset($CFG['TE']['navicons'])) {
 		 $CFG['TE']['navicons'] = array(
 			 'untried'=>'te_blue_arrow.png',
@@ -2062,7 +2067,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 							if ($v[1]==$next+2) {//right divider
 								echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
 								echo _('Hide Question Information'), '</a></div>';
-								echo '<div class="intro" role=region aria-label="'._('Pre-question text').'" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+								echo '<div class="intro" role=region aria-label="'._('Pre-question text').'" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';								
 							}
 						}
 					}
@@ -2963,7 +2968,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					//if (!preg_match('/^<div\s*class="intro"[^>]*>(\s|&nbsp;|<p[^>]*>(\s*|&nbsp;)*<\/p>)*<\/div>$/', $intropages[0])) {
 						echo $intropages[0];
 					//}
-					}
+				}
 				$intro =  $intropages[2*$_GET['page']+2];
 				preg_match_all('/\[QUESTION\s+(\d+)\s*\]/',$intro,$matches,PREG_PATTERN_ORDER);
 				if (isset($matches[1]) && count($matches[1])>0) {

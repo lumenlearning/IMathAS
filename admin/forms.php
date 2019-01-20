@@ -2,6 +2,12 @@
 //IMathAS:  Admin forms
 //(c) 2006 David Lippman
 require("../init.php");
+
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['admin/forms'])) {
+	require($CFG['hooks']['admin/forms']);
+}
+
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 
@@ -22,8 +28,16 @@ $placeinhead .= '<script type="text/javascript" src="' . $imasroot . '/ohm/js/st
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
 
+
+//call hook, if defined
+if (function_exists('getHeaderCode')) {
+	$placeinhead .= getHeaderCode();
+}
+
 require("../header.php");
 require("../includes/htmlutil.php");
+
+
 
 $from = 'admin2';
 $backloc = 'admin2.php';
@@ -171,8 +185,18 @@ switch($_GET['action']) {
 			$oldrights = $line['rights'];
 			$oldspecialrights = $line['specialrights'];
 		}
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+    	// #### Begin OHM-specific code #####################################################
 		echo '<input type=hidden name=oldrole value="'.Sanitize::onlyInt($oldrights).'" />';
 		echo '<input type=hidden name=username value="'.Sanitize::encodeStringForDisplay($line['SID']).'" />';
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		echo '<script type="text/javascript">
 			function onrightschg() {
 				var selrights = this.value;
@@ -305,7 +329,7 @@ switch($_GET['action']) {
 			echo ">Default</option>\n";
 			$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', $row[0]);
+				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
 				if ($oldgroup==$row[0]) {
 					echo "selected=1";
 				}
@@ -322,7 +346,7 @@ switch($_GET['action']) {
 			echo '<span class=formright><label><input type=checkbox name=addnewcourse value=1> ';
 			echo _('Add a new course for this user').'</span><br class=form>';
 		}
-
+		
 		echo "<div class=submit><input type=submit value=Save></div></form>\n";
 		if ($_GET['action'] == "newadmin") {
 			require_once("../includes/newusercommon.php");
@@ -576,7 +600,7 @@ switch($_GET['action']) {
 			echo _('Add New Course');
 		}
 		echo '</h1></div>';
-
+		
 		echo "<form method=post action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
 		if (isset($_GET['cid'])) {
 			echo "&cid=$cid";
@@ -710,6 +734,12 @@ switch($_GET['action']) {
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
+
+		//call hook, if defined
+		if (function_exists('getCourseSettingsForm')) {
+			getCourseSettingsForm($_GET['action'], $myrights, $_GET['action']=="modify"?$courseid:null);
+		}
+
 		if ($_GET['action']=="modify") {
 			echo '<span class=form>Lock for assessment:</span><span class=formright><select name="lockaid">';
 			echo '<option value="0" ';
@@ -718,7 +748,7 @@ switch($_GET['action']) {
 			$stm = $DBH->prepare("SELECT id,name FROM imas_assessments WHERE courseid=:courseid ORDER BY name");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', $row[0]);
+				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
 				if ($lockaid==$row[0]) { echo 'selected="1"';}
 				printf(">%s</option>", Sanitize::encodeStringForDisplay($row[1]));
 			}
@@ -1338,7 +1368,7 @@ switch($_GET['action']) {
 		echo 'Associate with group <select name="groupid"><option value="0">Default</option>';
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 		while ($r = $stm->fetch(PDO::FETCH_NUM)) {
-			printf('<option value="%d"', $r[0]);
+			printf('<option value="%d"', Sanitize::onlyInt($r[0]));
 			if ($r[0]==$row[5]) { echo ' selected="selected"';}
 			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
@@ -1487,14 +1517,15 @@ switch($_GET['action']) {
 			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
 		echo '</select><br/>';
-		echo '<input type="checkbox" id="iscust" name="iscust" ';
-		if ($grptype==1) { echo 'checked';}
-		echo '> <label for="iscust">'._('Lumen Customer').'</label><br/>';
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
+        echo '<input type="checkbox" id="iscust" name="iscust" ';
+        if ($grptype==1) { echo 'checked';}
+        echo '> <label for="iscust">'._('Lumen Customer').'</label><br/>';
+
 		if (100 <= $GLOBALS['myrights']) {
 			$stm = $DBH->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :groupId");
 			$stm->execute(array(':groupId' => $_GET['id']));
@@ -1524,6 +1555,12 @@ switch($_GET['action']) {
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
+
+		//call hook, if defined
+		if (function_exists('getModGroupForm')) {
+			getModGroupForm($_GET['id'], $grptype, $myrights);
+		}
+
 		echo "<input type=submit value=\"Update Group\">\n";
 		echo "</form>\n";
 		break;

@@ -32,6 +32,10 @@ include("init_without_validate.php");
 unset($init_skip_csrfp);
 
 require_once(__DIR__ . '/includes/ltiroles.php');
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['bltilaunch'])) {
+	require($CFG['hooks']['bltilaunch']);
+}
 
 $curdir = rtrim(dirname(__FILE__), '/\\');
 
@@ -600,25 +604,11 @@ if (isset($_GET['launch'])) {
 		$_SESSION['selection_data'] = @$_REQUEST['data'];
 	}
 	unset($_SESSION['lti_duedate']);
-
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-
-    // Doing it this way will make it easy to remove this OHM-specific code later. :(
 	if (!isset($_REQUEST['custom_canvas_assignment_due_at'])) {
-	    if (isset($_REQUEST['custom_assignment_due_at'])) {
+		if (isset($_REQUEST['custom_assignment_due_at'])) {
 			$_REQUEST['custom_canvas_assignment_due_at'] = $_REQUEST['custom_assignment_due_at'];
+		}
         }
-    }
-
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
 	if (isset($_REQUEST['custom_canvas_assignment_due_at'])) {
 		$duedate = strtotime($_REQUEST['custom_canvas_assignment_due_at']);
 		if ($duedate !== false) {
@@ -956,15 +946,22 @@ if ($stm->rowCount()==0) {
 				if ($groupRequiresStudentPayment) {
 					$studentPaymentDb->setCourseRequiresStudentPayment(true);
 				}
-				// #### End OHM-specific code #######################################################
-				// #### End OHM-specific code #######################################################
-				// #### End OHM-specific code #######################################################
-				// #### End OHM-specific code #######################################################
-				// #### End OHM-specific code #######################################################
 
+				// Note: The only OHM-specific change here is the created_at column.
 				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid,:destcid,:created_at)');
 				$stm->execute(array(':userid'=>$userid, ':destcid'=>$destcid, ':created_at'=>time()));
 
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+				// #### End OHM-specific code #######################################################
+
+				//call hook, if defined
+				if (function_exists('onAddCourse')) {
+					onAddCourse($destcid, $userid, $myrights, $groupid);
+				}
+		
 				//DO full course copy
 				$query = "SELECT useweights,orderby,defaultcat,defgbmode,stugbmode,usersort FROM imas_gbscheme WHERE courseid=:courseid";
 				$stm = $DBH->prepare($query);
@@ -2343,14 +2340,17 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 							':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 							':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 						$destcid  = $DBH->lastInsertId();
-						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
-						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid, ':created_at'=>time()));
 
 						// #### Begin OHM-specific code #####################################################
 						// #### Begin OHM-specific code #####################################################
 						// #### Begin OHM-specific code #####################################################
 						// #### Begin OHM-specific code #####################################################
 						// #### Begin OHM-specific code #####################################################
+
+				        // Note: The only OHM-specific change here is the created_at column.
+						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
+						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid, ':created_at'=>time()));
+
 						require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
 
 						$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $destcid, $userid);
@@ -2365,6 +2365,12 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						// #### End OHM-specific code #######################################################
 						// #### End OHM-specific code #######################################################
 						// #### End OHM-specific code #######################################################
+
+						//call hook, if defined
+						if (function_exists('onAddCourse')) {
+							onAddCourse($destcid, $userid);
+						}
+				
 					}
 					$stm = $DBH->prepare("INSERT INTO imas_lti_courses (org,contextid,courseid,contextlabel) VALUES (:org, :contextid, :courseid, :contextlabel)");
 					$stm->execute(array(

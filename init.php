@@ -32,6 +32,12 @@ if (isset($GLOBALS['configEnvironment']) && 'development' == $GLOBALS['configEnv
 ######### End OHM-specific changes #########################################
 ######### End OHM-specific changes #########################################
 
+
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['init'])) {
+	require($CFG['hooks']['init']);
+}
+
 // Store PHP sessions in the database.
 require_once(__DIR__ . "/includes/session.php");
 if (!isset($use_local_sessions)) {
