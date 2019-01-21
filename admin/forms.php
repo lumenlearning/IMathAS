@@ -5,7 +5,7 @@ require("../init.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/forms'])) {
-	require($CFG['hooks']['admin/forms']);
+	require(__DIR__.'/../'.$CFG['hooks']['admin/forms']);
 }
 
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
@@ -739,7 +739,7 @@ switch($_GET['action']) {
 		if (function_exists('getCourseSettingsForm')) {
 			getCourseSettingsForm($_GET['action'], $myrights, $_GET['action']=="modify"?$courseid:null);
 		}
-
+		
 		if ($_GET['action']=="modify") {
 			echo '<span class=form>Lock for assessment:</span><span class=formright><select name="lockaid">';
 			echo '<option value="0" ';
@@ -1560,7 +1560,7 @@ switch($_GET['action']) {
 		if (function_exists('getModGroupForm')) {
 			getModGroupForm($_GET['id'], $grptype, $myrights);
 		}
-
+			
 		echo "<input type=submit value=\"Update Group\">\n";
 		echo "</form>\n";
 		break;

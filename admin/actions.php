@@ -6,17 +6,7 @@ require_once("../includes/password.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/actions'])) {
-	require($CFG['hooks']['admin/actions']);
-}
-
-
-function returnrole($role_num){
- 	if ($role_num == 5) {return "Guest User";}
- 	if ($role_num == 10) {return "Student";}
- 	if ($role_num == 20) {return "Teacher";}
- 	if ($role_num == 40) {return "Limited Course Creator";}
- 	if ($role_num == 75) {return "Group Admin";}
- 	if ($role_num == 100) {return "Full Admin";}
+	require(__DIR__.'/../'.$CFG['hooks']['admin/actions']);
 }
 
 $from = 'admin';
@@ -697,12 +687,12 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
-
+			
 			//call hook, if defined
 			if (function_exists('onModCourse')) {
 				onModCourse($_GET['id'], $userid, $myrights, $groupid);
 			}
-
+			
 			if ($stm->rowCount()>0) {
 				if ($setdatesbylti==1) {
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
@@ -1291,7 +1281,7 @@ switch($_POST['action']) {
 		if (function_exists('onModGroup')) {
 			onModGroup($_GET['id'], $userid, $myrights, $groupid);
 		}
-
+		
 		break;
 	case "delgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
