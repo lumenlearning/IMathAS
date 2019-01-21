@@ -41,6 +41,10 @@ $CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
 $CFG['LTI']['logltiqueue'] = true;
 $CFG['LTI']['usequeue'] = true; 
 
+$CFG['hooks']['admin/forms'] = "myopenmath/hooks.php";
+$CFG['hooks']['admin/actions'] = "myopenmath/hooks.php";
+$CFG['hooks']['admin/approvepending'] = "myopenmath/hooks.php";
+
 //database access settings
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');
 $AWSsecret = getenv('AWS_SECRET_KEY');
