@@ -5,7 +5,7 @@ require("../init.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/forms'])) {
-	require($CFG['hooks']['admin/forms']);
+	require(__DIR__.'/../'.$CFG['hooks']['admin/forms']);
 }
 
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
@@ -301,7 +301,7 @@ switch($_GET['action']) {
 			echo ">Default</option>\n";
 			$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', $row[0]);
+				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
 				if ($oldgroup==$row[0]) {
 					echo "selected=1";
 				}
@@ -707,7 +707,7 @@ switch($_GET['action']) {
 			$stm = $DBH->prepare("SELECT id,name FROM imas_assessments WHERE courseid=:courseid ORDER BY name");
 			$stm->execute(array(':courseid'=>$_GET['id']));
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				printf('<option value="%d" ', $row[0]);
+				printf('<option value="%d" ', Sanitize::onlyInt($row[0]));
 				if ($lockaid==$row[0]) { echo 'selected="1"';}
 				printf(">%s</option>", Sanitize::encodeStringForDisplay($row[1]));
 			}
@@ -1305,7 +1305,7 @@ switch($_GET['action']) {
 		echo 'Associate with group <select name="groupid"><option value="0">Default</option>';
 		$stm = $DBH->query("SELECT id,name FROM imas_groups ORDER BY name");
 		while ($r = $stm->fetch(PDO::FETCH_NUM)) {
-			printf('<option value="%d"', $r[0]);
+			printf('<option value="%d"', Sanitize::onlyInt($r[0]));
 			if ($r[0]==$row[5]) { echo ' selected="selected"';}
 			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
@@ -1454,7 +1454,7 @@ switch($_GET['action']) {
 			echo '>'.Sanitize::encodeStringForDisplay($r[1]).'</option>';
 		}
 		echo '</select><br/>';
-
+		
 		//call hook, if defined
 		if (function_exists('getModGroupForm')) {
 			getModGroupForm($_GET['id'], $grptype, $myrights);

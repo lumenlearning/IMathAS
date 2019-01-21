@@ -6,7 +6,7 @@ require_once("../includes/password.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/actions'])) {
-	require($CFG['hooks']['admin/actions']);
+	require(__DIR__.'/../'.$CFG['hooks']['admin/actions']);
 }
 
 $from = 'admin';
@@ -772,7 +772,7 @@ switch($_POST['action']) {
 						$query = "INSERT INTO imas_gbcats (courseid,name,scale,scaletype,chop,dropn,weight,hidden,calctype) VALUES ";
 						$query .= "(:courseid, :name, :scale, :scaletype, :chop, :dropn, :weight, :hidden, :calctype)";
 						$gb_cat_ins = $DBH->prepare($query);
-				}
+					}
 					$gb_cat_ins->execute(array(':courseid'=>$cid, ':name'=>$row['name'], ':scale'=>$row['scale'], ':scaletype'=>$row['scaletype'],
 						':chop'=>$row['chop'], ':dropn'=>$row['dropn'], ':weight'=>$row['weight'], ':hidden'=>$row['hidden'], ':calctype'=>$row['calctype']));
 					$gbcats[$frid] = $DBH->lastInsertId();
@@ -813,10 +813,10 @@ switch($_POST['action']) {
 							$row[2] = $row[0].','.$row[2];
 						}
 						if ($out_ins_stm===null) {
-						$query = "INSERT INTO imas_outcomes (courseid,name,ancestors) VALUES ";
+							$query = "INSERT INTO imas_outcomes (courseid,name,ancestors) VALUES ";
 							$query .= "(:courseid, :name, :ancestors)";
 							$out_ins_stm = $DBH->prepare($query);
-					}
+						}
 						$out_ins_stm->execute(array(':courseid'=>$cid, ':name'=>$row[1], ':ancestors'=>$row[2]));
 						$outcomes[$row[0]] = $DBH->lastInsertId();
 					}
@@ -946,7 +946,7 @@ switch($_POST['action']) {
 				$stm->execute(array(':id'=>$_GET['id'], ':groupid'=>$groupid));
 				if ($stm->rowCount()>0) {
 					$oktodel = true;
-			}
+				}
 			}
 			if ($oktodel) {
 				$stm = $DBH->prepare("UPDATE imas_courses SET available=4 WHERE id=:id");
