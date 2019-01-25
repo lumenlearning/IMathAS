@@ -144,7 +144,7 @@ spam filter.</em>
 	echo "<form method=post id=newinstrform class=limitaftervalidate action=\"newinstructor.php\" >\n";
 	echo "<input class='lumenform form' type=text name=firstname id=firstname placeholder='First Name' value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40 aria-label='First Name' required>";
 	echo "<input class='lumenform form' type=text name=lastname id=lastname placeholder='Last Name' value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40 aria-label='Last Name' required></span>";
-	echo "<input class='lumenform form' type=text name=email id=email placeholder='Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
+	echo "<input class='lumenform form' type=text name=email id=email placeholder='School Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
 	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40 aria-label='Phone Number' required>";
 	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"".Sanitize::encodeStringForDisplay($school)."\" size=40 aria-label='School & District / College' required>";
 	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";

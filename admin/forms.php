@@ -34,6 +34,9 @@ if (!empty($_GET['from'])) {
 	} else if ($_GET['from']=='admin2') {
 		$from = 'admin2';
 		$backloc = 'admin2.php';
+	} else if ($_GET['from']=='userreports') {
+		$from = 'userreports';
+		$backloc = 'userreports.php';
 	} else if (substr($_GET['from'],0,2)=='ud') {
 		$userdetailsuid = Sanitize::onlyInt(substr($_GET['from'],2));
 		$from = 'ud'.$userdetailsuid;
@@ -50,6 +53,8 @@ if (!isset($_GET['cid'])) {
 		echo "<a href=\"admin2.php\">Admin</a> &gt; ";
 	} else if ($from == 'admin2') {
 		echo '<a href="admin2.php">'._('Admin').'</a> &gt; ';
+	} else if ($from == 'userreports') {
+		echo '<a href="userreports.php">'._('User Reports').'</a> &gt; ';
 	} else if (substr($_GET['from'],0,2)=='ud') {
 		echo '<a href="admin2.php">'._('Admin').'</a> &gt; <a href="'.$backloc.'">'._('User Details').'</a> &gt; ';
 	} else if (substr($_GET['from'],0,2)=='gd') {
@@ -156,6 +161,10 @@ switch($_GET['action']) {
 			$stm = $DBH->prepare("SELECT SID,FirstName,LastName,email,rights,groupid,specialrights FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
+			if ($myrights < 100 && ($myspecialrights&32)!=32 && $line['groupid']!=$groupid) {
+				echo "You do not have access to edit this user";
+				break;
+			}
 			printf("<div class=pagetitle><h1>%s %s</h1></div>\n", Sanitize::encodeStringForDisplay($line['FirstName']),
 				Sanitize::encodeStringForDisplay($line['LastName']));
 			$oldgroup = $line['groupid'];
@@ -308,6 +317,12 @@ switch($_GET['action']) {
 			echo ' <input name=newgroupname size=20 onblur="checkgroupisnew()"/></span>';
 			echo "</span><br class=form />\n";
 		}
+		if ($myrights >= 75 || ($myspecialrights&32)==32) {
+			echo '<span class=form>'._('Add a course').'</span>';
+			echo '<span class=formright><label><input type=checkbox name=addnewcourse value=1> ';
+			echo _('Add a new course for this user').'</span><br class=form>';
+		}
+
 		echo "<div class=submit><input type=submit value=Save></div></form>\n";
 		if ($_GET['action'] == "newadmin") {
 			require_once("../includes/newusercommon.php");
@@ -337,8 +352,8 @@ switch($_GET['action']) {
 			//show limited info version
 			$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=? AND userid=?");
 			$stm->execute(array($_GET['id'], $userid));
-			if ($stm->rowCount()==0) {
-				echo "You don't have the authority for this action";
+			if ($stm->rowCount()==0) { 
+				echo "You don't have the authority for this action"; 
 				break;
 			}
 			if (isset($_GET['cid'])) {
@@ -349,7 +364,7 @@ switch($_GET['action']) {
 			echo _('Course Settings');
 			echo '</h1></div>';
 			if ($line['ownerid']!=$userid) {
-				echo '<p>'.sprintf('You are a teacher in this course, but <b>%s</b> is the course owner, and the only one who can modify the course settings',
+				echo '<p>'.sprintf('You are a teacher in this course, but <b>%s</b> is the course owner, and the only one who can modify the course settings', 
 				  Sanitize::encodeStringForDisplay($line['FirstName'].' '.$line['LastName'])).'</p>';
 			}
 			echo "<div><span class=form>Course ID:</span><span class=formright>".Sanitize::encodeStringForDisplay($line['id'])."</span><br class=form>\n";
@@ -361,9 +376,9 @@ switch($_GET['action']) {
 				echo 'LMS Integration (LTI)';
 				echo '</div>';
 				echo '<div class="blockitems hidden">';
-
+		
 				echo '<p>For integration setup instructions, visit the Course Items: Export page inside your course</p>';
-
+				
 				if ($hasGroupLTI && !empty($CFG['LTI']['noCourseLevel'])) {
 					echo '<p>Your school already has a school-wide LTI key and secret established, so no course level configuration is required.</p>';
 				} else if (!empty($CFG['LTI']['noCourseLevel']) && !empty($CFG['LTI']['noGlobalMsg'])) {
@@ -377,15 +392,15 @@ switch($_GET['action']) {
 					} else {
 						echo '<div>';
 					}
-
+					
 					echo '<span class="form">LTI Key:</span>';
 					echo '<span class="formright">LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_1 (to only allow access through the LMS) or <br/>';
 					echo ' LTIkey_'.Sanitize::encodeStringForDisplay($_GET['id']).'_0 (to allow students to login directly to '.$installname.')';
 					echo '</span><br class="form" />';
-
+					
 					echo '<span class="form">LTI Secret:</span>';
 					echo '<span class="formright">'.Sanitize::encodeStringForDisplay($line['ltisecret']).'</span><br class="form" />';
-
+					
 					if (!empty($CFG['LTI']['showURLinSettings'])) {
 						echo '<span class="form">LTI Launch URL (if needed):</span>';
 						echo '<span class="formright">'.Sanitize::encodeStringForDisplay($basesiteurl).'/bltilaunch.php</span><br class="form" />';
@@ -396,7 +411,7 @@ switch($_GET['action']) {
 			}
 			break;
 		}
-
+		
 		if ($myrights < 40) { echo "You don't have the authority for this action"; break;}
 
 		$isadminview = false;
@@ -429,8 +444,6 @@ switch($_GET['action']) {
 			$courseid = $line['id'];
 			$name = $line['name'];
 			$ekey = $line['enrollkey'];
-			$hideicons = $line['hideicons'];
-			$picicons = $line['picicons'];
 			$allowunenroll = $line['allowunenroll'];
 			$copyrights = $line['copyrights'];
 			$msgset = $line['msgset'];
@@ -462,8 +475,6 @@ switch($_GET['action']) {
 			$courseid = _("Will be assigned when the course is created");
 			$name = "";
 			$ekey = "";
-			$hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
-			$picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
 			$allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
 			//0 no un, 1 allow un;  0 allow enroll, 2 no enroll
 
@@ -484,6 +495,18 @@ switch($_GET['action']) {
 			$dates_by_lti = 0;
 			$startdate = 0;
 			$enddate = 2000000000;
+			$for = 0;
+			if (($myrights >= 75 || ($myspecialrights&32)==32) && isset($_POST['for']) && $_POST['for']>0) {
+				$for = Sanitize::onlyInt($_POST['for']);
+				$stm = $DBH->prepare("SELECT FirstName,LastName,groupid FROM imas_users WHERE id=?");
+				$stm->execute(array($for));
+				$forinfo = $stm->fetch(PDO::FETCH_ASSOC);
+				if ($myrights<100 && ($myspecialrights&32)!=32 && $forinfo['groupid']!=$groupid) {
+					$for = 0;
+				} else {
+					$forname = $forinfo['LastName'].', '.$forinfo['FirstName'];
+				}
+			}
 			if (isset($_POST['ctc']) || isset($_POST['coursebrowserctc'])) {
 				if (!empty($_POST['coursebrowserctc'])) {                                           
 					$ctc = Sanitize::onlyInt($_POST['coursebrowserctc']);
@@ -516,6 +539,9 @@ switch($_GET['action']) {
 					$name = $ctcinfo['name'];
 					$latepasshrs = $ctcinfo['latepasshrs'];
 					$deflatepass = $ctcinfo['deflatepass'];
+					$showlatepass = $ctcinfo['showlatepass'];
+					$theme = $ctcinfo['theme'];
+					$msgset = $ctcinfo['msgset'];
 				}
 			} else {
 				$ctc = 0;
@@ -550,6 +576,7 @@ switch($_GET['action']) {
 			echo _('Add New Course');
 		}
 		echo '</h1></div>';
+
 		echo "<form method=post action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
 		if (isset($_GET['cid'])) {
 			echo "&cid=$cid";
@@ -587,6 +614,12 @@ switch($_GET['action']) {
 		</script>';
 		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']) .'" />';
 		if ($_GET['action']=='addcourse') {
+			if ($for != 0) {
+				echo '<span class=form>'._('Creating course for:').'</span>';
+				echo '<span class=formright>'.Sanitize::encodeStringForDisplay($forname);
+				echo '<input type=hidden name=for value="'.Sanitize::onlyInt($for).'" />';
+				echo '</span><br class=form>';
+			}
 			if ($ctc==0) {
 				echo '<span class=form>'._('Starting with:').'</span><span class=formright>';
 				echo _('A blank course');
@@ -597,7 +630,7 @@ switch($_GET['action']) {
 				echo '<input type=hidden name=ekey value="'.Sanitize::encodeStringForDisplay($ctcekey).'"/>';
 				echo '<input type=hidden name=termsagree value="1"/>';
 			}
-			echo ' <a class=small href="addcourse.php">Change</a>';
+			echo ' <a class=small href="addcourse.php?for='.Sanitize::onlyInt($for).'">Change</a>';
 			echo '</span><br class=form>';
 		} else {
 			echo "<span class=form>Course ID:</span><span class=formright>".Sanitize::encodeStringForDisplay($courseid)."</span><br class=form>\n";
@@ -631,10 +664,32 @@ switch($_GET['action']) {
 				echo 'opt out of having the student data deleted. </p>';
 			}
 		}
+		//Start grouping: copy options
+		if ($_GET['action']=='addcourse' && $ctc>0) {
+			echo '<div class="block grouptoggle">';
+			echo '<img class="mida" src="../img/expand.gif" /> ';
+			echo _('Course Copy Options');
+			echo '</div>';
+			echo '<div class="blockitems hidden">';
+			echo '<span class=form><label for=copyoffline>'._('Copy offline grade items?').'</label></span>';
+			echo '<span class=formright><input type=checkbox name="copyoffline" id="copyoffline" value="1"/>';
+			echo '</span><br class=form>';
+			echo '<span class=form><label for=copyrubrics>'._('Copy rubrics?').'</label></span>';
+			echo '<span class=formright><input type=checkbox name="copyrubrics" id="copyrubrics" value="1" checked/>';
+			echo '</span><br class=form>';
+			echo '<span class=form><label for=copyoutcomes>'._('Copy outcomes?').'</label></span>';
+			echo '<span class=formright><input type=checkbox name="copyoutcomes" id="copyoutcomes" value="1"/>';
+			echo '</span><br class=form>';
+			echo '<span class=form><label for=copystickyposts>'._('Copy "display at top" instructor forum posts?').'</label></span>';
+			echo '<span class=formright><input type=checkbox name="copystickyposts" id="copystickyposts" value="1" checked/>';
+			echo '</span><br class=form>';
+			echo '</div>';
+			//TODO:  FINISH ME ****
+		}
 		//Start grouping: Availability and Access
 		echo '<div class="block grouptoggle">';
 		echo '<img class="mida" src="../img/expand.gif" /> ';
-		echo 'Availability and Access';
+		echo _('Availability and Access');
 		echo '</div>';
 		echo '<div class="blockitems hidden">';
 		
@@ -758,7 +813,7 @@ switch($_GET['action']) {
 					echo '<span class="form">LTI Secret (max 10 chars)</span>';
 					echo '<span class="formright"><input name="ltisecret" type="text" value="'.Sanitize::encodeStringForDisplay($ltisecret).'" maxlength="10"/> ';
 					echo '</span><br class="form" />';
-
+					
 					echo '</div>';
 				}
 				if (!empty($CFG['LTI']['showURLinSettings'])) {
@@ -1146,6 +1201,9 @@ switch($_GET['action']) {
 
 
 		echo "<div class=submit><input type=submit value=Submit></div></form>\n";
+		if ($myrights==100 && $_GET['action']=='modify' && $line['ancestors'] != '') {
+			echo '<p class=small>'._('Course Ancestors').': '.Sanitize::encodeStringForDisplay($line['ancestors']).'</p>';
+		}
 		break;
 	case "importmacros":
 		if ($myrights < 100) { echo "You don't have the authority for this action"; break;}

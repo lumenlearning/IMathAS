@@ -1,10 +1,5 @@
 <?php
 
-@set_time_limit(0);
-ini_set("max_input_time", "600");
-ini_set("max_execution_time", "600");
-
-
 function getfilehandlertype($filetype) {
 	if ($filetype=='filehandlertype' || $filetype=='filehandlertypecfiles') {
 		if (isset($GLOBALS[$filetype])) {
@@ -402,13 +397,15 @@ function deleteasidfilesfromstring2($str,$tosearchby,$val,$aid=null) {
 	}
 	$lookforstr = implode(' OR ',$lookforph);
 	//$searchnot santized above
-	$stm = $DBH->prepare("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)");
-	$stm->execute($valarr);
-	$skip = array();
-	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$exmatch);
-		//remove from todel list all files found in other sessions
-		$todel = array_diff($todel,$exmatch[1]);
+	if ($aid != null) {
+		$stm = $DBH->prepare("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)");
+		$stm->execute($valarr);
+		$skip = array();
+		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+			preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$exmatch);
+			//remove from todel list all files found in other sessions
+			$todel = array_diff($todel,$exmatch[1]);
+		}
 	}
 	$deled = array();
 	if (getfilehandlertype('filehandlertype') == 's3') {
@@ -449,6 +446,10 @@ function deleteasidfilesbyquery2($tosearchby,$val,$aid=null,$lim=0) {
 		$searchwhere = "$tosearchby=$val";
 		$searchnot = "$tosearchby<>$val";
 	}
+	if ($aid === null && $tosearchby!='userid') {
+		$stm = $DBH->query("SELECT assessmentid FROM imas_assessment_sessions WHERE $searchwhere");
+		$aid = $stm->fetchColumn(0);
+	}
 	if ($aid != null) {
 		if (is_array($aid)) {
 			$keylist = implode(',', array_map('intval', $aid));
@@ -483,13 +484,15 @@ function deleteasidfilesbyquery2($tosearchby,$val,$aid=null,$lim=0) {
 		array_push($valarr, "%$file%", "%$file%", "%$file%");
 	}
 	$lookforstr = implode(' OR ',$lookforph);
-	$stm = $DBH->prepare("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)");
-	$stm->execute($valarr);
-	$skip = array();
-	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$exmatch);
-		//remove from todel list all files found in other sessions
-		$todel = array_diff($todel,$exmatch[1]);
+	if ($aid != null) {
+		$stm = $DBH->prepare("SELECT lastanswers,bestlastanswers,reviewlastanswers FROM imas_assessment_sessions WHERE $searchnot AND ($lookforstr)");
+		$stm->execute($valarr);
+		$skip = array();
+		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+			preg_match_all('/@FILE:(.+?)@/',$row[0].$row[1].$row[2],$exmatch);
+			//remove from todel list all files found in other sessions
+			$todel = array_diff($todel,$exmatch[1]);
+		}
 	}
 	$deled = array();
 

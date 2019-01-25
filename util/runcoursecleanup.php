@@ -19,7 +19,14 @@ $CFG['cleanup']['msgfrom']
 $CFG['cleanup']['keepsent']
    set =0 to keep a copy of sent notifications in sent list
 $CFG['cleanup']['allowoptout']:
-   (default: true) set to false to prevent teachers opting out 
+   (default: true) set to false to prevent teachers opting out
+$CFG['cleanup']['deloldstus']:
+   (default: true) delete old student accounts that are no longer enrolled in
+   any courses and lastaccess is more than 
+   $CFG['cleanup']['old']+$CFG['cleanup']['delay'] days ago.
+$CFG['cleanup']['clearoldpw']:
+   a number of days since lastaccess that a users's password should be cleared
+   forcing a reset.  Set =0 to not use. (def: 365)
    
 You can specify different old/delay values for different groups by defining
 $CFG['cleanup']['groups'] = array(groupid => array('old'=>days, 'delay'=>days));
@@ -33,6 +40,8 @@ ini_set("memory_limit", "104857600");
 
 require("../init_without_validate.php");
 require("../includes/AWSSNSutil.php");
+require("../includes/unenroll.php");
+require("../includes/delcourse.php");
 
 if (php_sapi_name() == "cli") { 
 	//running command line - no need for auth code
@@ -44,14 +53,16 @@ if (php_sapi_name() == "cli") {
 	exit;
 }
 
-if (php_sapi_name() != "cli") {
+if (isset($_SERVER['HTTP_X_AMZ_SNS_MESSAGE_TYPE'])) {
 	respondOK(); //send 200 response now
 }
 
 $now = time();
+$old = 24*60*60*(isset($CFG['cleanup']['old'])?$CFG['cleanup']['old']:610);
 $delay = 24*60*60*(isset($CFG['cleanup']['delay'])?$CFG['cleanup']['delay']:120);
 $msgfrom = isset($CFG['cleanup']['msgfrom'])?$CFG['cleanup']['msgfrom']:0;
 $keepsent = isset($CFG['cleanup']['keepsent'])?$CFG['cleanup']['keepsent']:4;
+$clearpw = 24*60*60*(isset($CFG['cleanup']['clearoldpw'])?$CFG['cleanup']['clearoldpw']:365);
 
 //run notifications 10 in a batch
 
@@ -61,14 +72,22 @@ $msgins = $DBH->prepare($query);
 
 $updcrs = $DBH->prepare("UPDATE imas_courses SET cleanupdate=? WHERE id=?");
 $stuchk = $DBH->prepare("SELECT count(id) FROM imas_students WHERE courseid=?");
-	
-$query = "SELECT ic.id,ic.name,ic.ownerid,iu.FirstName,iu.LastName,iu.email,iu.msgnotify,iu.groupid,ic.enddate ";
+
+$query = "SELECT ic.id,ic.name,ic.ownerid,iu.FirstName,iu.LastName,iu.email,iu.msgnotify,iu.groupid,ic.enddate,ic.available ";
 $query .= "FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id ";
 $query .= "WHERE ic.cleanupdate=1 ORDER BY ic.id LIMIT 10";
 $stm = $DBH->query($query);
 $num = 0;
+$didDelete = false;
 $allowoptout = (!isset($CFG['cleanup']['allowoptout']) || $CFG['cleanup']['allowoptout']==true);
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+	if ($row['available']==4) { //soft-deleted course; now we'll hard delete it
+		if (!$didDelete) { //one per run
+			deleteCourse($row['id']);
+			$didDelete = true;
+		}
+		continue;
+	}
 	if ($row['enddate']<2000000000) { //check to ensure course isn't alredy empty
 		$stuchk->execute(array($row['id']));
 		if ($stuchk->fetchColumn(0) == 0) {
@@ -128,10 +147,34 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$stus[] = $row['userid'];
 }
 if (count($stus)>0) {
-	require("../includes/unenroll.php");
 	$DBH->beginTransaction();
 	unenrollstu($cidtoclean, $stus, true, false, true, 2);
 	$stm = $DBH->prepare("UPDATE imas_courses SET cleanupdate=0 WHERE id=?");
 	$stm->execute(array($cidtoclean));
 	$DBH->commit();
+}
+
+//delete old students
+/* this appears to be broken :(
+if (!isset($CFG['cleanup']['deloldstus']) || $CFG['cleanup']['deloldstus']==true) {
+	$query = 'DELETE imas_users FROM imas_users ';
+	$query .= 'LEFT JOIN imas_students ON imas_users.id=imas_students.userid ';
+	$query .= 'WHERE imas_users.rights<11 AND imas_students.id IS NULL AND ';
+	$query .= 'imas_users.lastaccess<?';
+	$stm = $DBH->prepare($query);
+	$stm->execute(array($now-$old-$delay));
+}
+*/
+
+//clear out any old pw
+if ($clearpw>0) {
+	/*
+	As is, this will disable newly created accounts if they're not enrolled in anything,
+	which probably isn't ideal
+	
+	$query = "UPDATE imas_users SET password=CONCAT('cleared_',MD5(CONCAT(SID, UUID()))) ";
+	$query .= "WHERE lastaccess<? AND rights<>11 AND rights<>76 AND rights<>77";
+	$stm = $DBH->prepare($query);
+	$stm->execute(array($now - $clearpw));
+	*/
 }

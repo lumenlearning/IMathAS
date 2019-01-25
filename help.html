@@ -2316,12 +2316,15 @@ The following macros create graphs or tables:
   question and pulls out the two-point line data.  Returns an array of lines, each of form array(x1,y1,x2,y2) giving the coordinates
   of the two points used.</li>
   <li><strong>gettwopointdata(stuans, type, [xmin, xmax, ymin, ymax, drawing width, drawing height])</strong>:  Takes a $stuanswers from a drawing question
-  and pulls out the two-point data for the given curve type.  Type should be one of 'line', 'parab', 'sqrt',
-  'sin', 'cos', 'abs', 'vector', 'circle'.  Returns an array of curve data, each of form array(x1,y1,x2,y2) giving the coordinates of
+  and pulls out the two-point data for the given curve type.  Type should be one of 'line', 'lineseg', 'ray', 'parab', 'horizparab', 'sqrt', 'cubic', 'cuberoot',
+  'rationa', 'exp', 'log', 'sin', 'cos', 'abs', 'vector', 'circle'.  Returns an array of curve data, each of form array(x1,y1,x2,y2) giving the coordinates of
   the two points used.  They are returned in the order clicked.  For example, with 'parab' type, the first point is the vertex and the
   second point is an arbitrary point.</li>
 <li><strong>getdotsdata(stuans, [xmin, xmax, ymin, ymax, drawing width, drawing height])</strong>:  Takes a $stuanswers from a drawing
   question and pulls out the closed dots data.  Returns an array of dots, each of form array(x1,y1) giving the coordinates
+  of the dot.</li>
+<li><strong>getopendotsdata(stuans, [xmin, xmax, ymin, ymax, drawing width, drawing height])</strong>:  Takes a $stuanswers from a drawing
+  question and pulls out the open dots data.  Returns an array of dots, each of form array(x1,y1) giving the coordinates
   of the dot.</li>
 <li><strong>getlinesdata(stuans, [xmin, xmax, ymin, ymax, drawing width, drawing height])</strong>:  Takes a $stuanswers from a drawing
   question and pulls out the lines data, which includes polygons.  Returns an array, with an element for each line/curve draw.  Each of those
@@ -2572,6 +2575,7 @@ available in each library</p>
 <tr><td>abs</td><td>Absolute Value.  Note that while abs() is used for calculations, you may prefer to use | brackets for display</td></tr>
 <tr><td>round(n,d)</td><td>round number n to d decimal places</td></tr>
 <tr><td>floor,ceil</td><td>floor/ceiling: integer below/above given number</td></tr>
+<tr><td>min,max</td><td>min or max of the passed values. Can be used as min($a,$b,$c) or min($arrayvariable).</td></tr>
 </tbody>
 </table>
 
@@ -3083,7 +3087,7 @@ A student is asked to enter a function
 <dl>
 <dt>$answer = string </dt>
 	<dd>Defines the answer function, entered as a string.  For example, $answer="2sin(x)".  You can
-	specify multiple acceptable answers by separating with a comma, like $answer="x^2 or x^4"<br/>
+	specify multiple acceptable answers by separating with "or", like $answer="x^2 or x^4"<br/>
 	Note: The system will accept any algebraically equivalent answer. To only allow answers of a 
 	specific format, you'll also need to define $requiretimes (see below).</dd>
 </dl>
@@ -3268,19 +3272,23 @@ drawn line from the correct line.
 	        	<li>ray (rays)</li>
 	        	<li>parab (vertical parabolas)</li>
 	        	<li>horizparab (horizontal parabolas)</li>
+	        	<li>cubic (a(x-h)^3+k style cubics)</li>
 	        	<li>abs (absolute value)</li>
 	        	<li>circle (circles)</li>
 	        	<li>dot (open and closed dots)</li>
 	        	<li>sqrt (square root)</li>
+	        	<li>cuberoot (cube root)</li>
 	        	<li>trig (sin and cos)</li>
 	        	<li>vector (position or displacement vectors)</li>
 	        	<li>exp (exponential with horizontal asymptote at y=0)</li>
+	        	<li>genexp (exponential with any horizontal asymptote)</li>
 	        	<li>log (logarithm with vertical asymptote at x=0)</li>
+	        	<li>genlog (logarithm with any vertical asymptote)</li>
 	        	<li>rational (linear/linear rational)</li>
 	        	<li>ellipse (ellipses)</li>
 	        	<li>hyperbola (vertical or horizontal hyperbolas)</li>
 	        	</ul></li>
-	        <li>For lines, vertical parabolas, absolute values, square roots, sines, cosines, exponentials, logs, and rationals (linear/linear only) give $answers as a function of x, like "2(x-1)^2+3"</li>
+	        <li>For lines, vertical parabolas, absolute values, square roots, cubics, cuberoots, sines, cosines, exponentials, logs, and rationals (linear/linear only) give $answers as a function of x, like "2(x-1)^2+3"</li>
 	        <li>For line segments and rays, given $answers as a function with domain, like "2x+4,-oo,3", or for vertical line segments use x= and give the range, like "x=4,-2,3"</li>
 	        <li>For dots give $answers as "x,y", or "x,y,open" for open dots</li>
 	        <li>For circles, give $answers as "circle,x,y,radius", like "circle,2,-1,3"</li>
@@ -3366,6 +3374,10 @@ This can be used for coordinate points, vectors, or any other n-tuple of numbers
 <dt>$displayformat = "point", "pointlist", "vector", "vectorlist", "list" </dt>
 	<dd>Changes the answer entry tips (does NOT change how the question is graded).  For points,
 	entry like (2,3) is specified.  For vectors, entry like &lt;2,3&gt; is specified.</dd>
+<dt>$scoremethod = "byelement" </dt>
+	<dd>By default, the whole n-tuple must be correct to receive any credit.  
+	Set $scoremethod = "byelement" to give partial credit if only some elements of
+	the n-tuple are correct.</dd>
 <dt>$reltolerance = a decimal value </dt>
 	<dd>Defines the largest relative error that will be accepted.  If this is not set, a relative error of .001 (.1%) is
 	used by default.</dd>
@@ -3414,6 +3426,10 @@ rather than just numbers, such as (5/3, 2/3).
 	$answerformat = "nosoln" or "nosolninf" adds a list radio buttons for "no solutions" and optionally "infinite solutions". $ansprompt can override the default statements like this:
 	$ansprompt = "One value, x=;No values;Many values"
 	</dd>
+<dt>$scoremethod = "byelement" </dt>
+	<dd>By default, the whole n-tuple must be correct to receive any credit.  
+	Set $scoremethod = "byelement" to give partial credit if only some elements of
+	the n-tuple are correct.</dd>
 <dt>$reltolerance = a decimal value </dt>
 	<dd>Defines the largest relative error that will be accepted.  If this is not set, a relative error of .001 (.1%) is
 	used by default.</dd>
@@ -3528,6 +3544,8 @@ The entries are compared to a given tolerance.
 	<dd>Defines the size of the answer matrix.  If this is supplied, the student will be provided with a grid of
 	entry boxes in which to input the matrix.  If this is not supplied, they will be required to enter the matrix
 	using the ASCIIMath notation, like "[(1,2,3),(4,5,6)]"</dd>
+<dt>$answerformat = "scalarmult"</dt>
+	<dd>If used, any scalar multiple of the correct matrix will be accepted</dd>
 <dt>$reltolerance = a decimal value </dt>
 	<dd>Defines the largest relative error that will be accepted.  If this is not set, a relative error of .001 (.1%) is
 	used by default.</dd>
@@ -3568,10 +3586,11 @@ The entries are compared to a given tolerance.
 	<dd>Defines the size of the answer matrix.  If this is supplied, the student will be provided with a grid of
 	entry boxes in which to input the matrix.  If this is not supplied, they will be required to enter the matrix
 	using the ASCIIMath notation, like "[(1,2,3),(4,5,6)]"</dd>
-<dt>$answerformat = "fraction", "reducedfraction", "mixednumber", "scinot", "fracordec", "nodecimal", or "notrig" </dt>
+<dt>$answerformat = "scalarmult","fraction", "reducedfraction", "mixednumber", "scinot", "fracordec", "nodecimal", or "notrig" </dt>
 	<dd>Requires the entries of the answer to be a single fraction (like 10/6), a reduced fraction (like 5/3), a reduced mixed number (like 2_1/2), scientific notation (like 2.3*10^4), a single fraction or decimal, an answer
 	without decimals (also disallows 10^-2 and 3E-2), or
 	an answer without trig functions (sin,cos,tan,sec,csc,cot).  Multiple options can be specified like $answerformat="nodecimal,notrig".<br/>
+	If "scalarmult" is used, any scalar multiple of the correct matrix will be accepted.
 	</dd>
 <dt>$reltolerance = a decimal value </dt>
 	<dd>Defines the largest relative error that will be accepted.  If this is not set, a relative error of .001 (.1%) is
