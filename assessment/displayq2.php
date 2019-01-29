@@ -5092,7 +5092,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$givenans = normalizemathunicode($givenans);
 		$GLOBALS['partlastanswer'] = $givenans;
 
-		if (isset($scoremethod) && $scoremethod=='takeanything' && trim($givenans)!='') {
+		if (isset($scoremethod) && (($scoremethod=='takeanything'  && trim($givenans)!='') || $scoremethod=='takeanythingorblank')) {
 			return 1;
 		}
 
@@ -5247,7 +5247,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		$givenans = preg_replace('/&(\w+;)/',"%$1",$givenans);
 		$GLOBALS['partlastanswer'] = $givenans;
 		if (isset($options['scoremethod']))if (is_array($options['scoremethod'])) {$scoremethod = $options['scoremethod'][$qn];} else {$scoremethod = $options['scoremethod'];}
-		if (isset($scoremethod) && $scoremethod=='takeanything'  && trim($givenans)!='') {
+		if (isset($scoremethod) && (($scoremethod=='takeanything'  && trim($givenans)!='') || $scoremethod=='takeanythingorblank')) {
 			return 1;
 		} else if (trim($givenans)=='') {
 			return 0;
@@ -7257,7 +7257,11 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$hasfile = true;
 			} else {
 				$GLOBALS['partlastanswer'] = '';
-				return 0;
+				if (isset($scoremethod) && $scoremethod=='takeanythingorblank') {
+					return 1;
+				} else {
+					return 0;
+				}
 			}
 		}
 		if (!$hasfile) {
@@ -7361,7 +7365,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				return 0;
 			}
 		}
-		if (isset($scoremethod) && $scoremethod=='takeanything') {
+		if (isset($scoremethod) && ($scoremethod=='takeanything' || $scoremethod=='takeanythingorblank')) {
 			return 1;
 		} else {
 			if ($answerformat=='excel') {
