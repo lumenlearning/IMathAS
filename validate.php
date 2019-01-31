@@ -14,19 +14,16 @@
 	require($CFG['hooks']['validate']);
  }
 
+ $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
+ if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
+ 	 session_set_cookie_params(0, '/', '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
+ }
  if (isset($CFG['GEN']['randfunc'])) {
  	 $randf = $CFG['GEN']['randfunc'];
  } else {
  	 $randf = 'rand';
  }
 
- if (isset($sessionpath) && $sessionpath!='') { session_save_path($sessionpath);}
- ini_set('session.gc_maxlifetime',86400);
- ini_set('auto_detect_line_endings',true);
- $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
- if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
-	session_set_cookie_params(0, '/', '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
- }
  session_start();
  $sessionid = session_id();
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
@@ -88,7 +85,7 @@
 	 } else {
 	 	 //no reason we should be here...
 		 if (!empty($_SERVER['QUERY_STRING'])) {
-			 $querys = '?' . $_SERVER['QUERY_STRING'] . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
+			 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']) . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 } else {
 			 $querys = (!empty($addtoquerystring) ? '?' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 }
@@ -323,7 +320,7 @@
 		/*
 		$query = "DELETE FROM imas_sessions WHERE userid='$userid'";
 		mysql_query($query) or die("Query failed : " . mysql_error());
-		header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::fullUrl($querys));
+		header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::url($querys));
 		exit;
 		*/
 	}
@@ -437,7 +434,7 @@
 		} else if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner') {
 			$breadcrumbbase = "<a href=\"$imasroot/assessment/showtest.php?cid=".Sanitize::courseId($_GET['cid'])."&id={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
 			$urlparts = parse_url($_SERVER['PHP_SELF']);
-			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php');
+			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','file_manager.php','upload_handler.php');
 			//call hook, if defined
 			if (function_exists('allowedInAssessment')) {
 				$allowedinLTI = array_merge($allowedinLTI, allowedInAssessment());
@@ -577,7 +574,7 @@
 				if (strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
 					require("header.php");
 					echo '<p>This course is currently locked for an assessment</p>';
-					echo "<p><a href=\"$imasroot/assessment/showtest.php?cid=$cid&id=$lockaid\">Go to Assessment</a> | <a href=\"$imasroot/index.php\">Go Back</a></p>";
+					echo "<p><a href=\"$imasroot/assessment/showtest.php?cid=$cid&id=".Sanitize::encodeUrlParam($lockaid)."\">Go to Assessment</a> | <a href=\"$imasroot/index.php\">Go Back</a></p>";
 					require("footer.php");
 					//header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id=$lockaid");
 					exit;
