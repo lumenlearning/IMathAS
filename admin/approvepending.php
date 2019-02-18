@@ -28,8 +28,10 @@ if (isset($_GET['go'])) {
 		if ($_POST['group']>-1) {
 			$group = intval($_POST['group']);
 		} else if (trim($_POST['newgroup'])!='') {
-			$stm = $DBH->prepare("INSERT INTO imas_groups (name,created_at) VALUES (:name,:created_at)");
-			$stm->execute(array(':name'=>$_POST['newgroup'],':created_at'=>time()));
+			$newGroupName = Sanitize::stripHtmlTags(trim($_POST['newgroup']));
+			$defGrouptype = isset($CFG['GEN']['defGroupType'])?$CFG['GEN']['defGroupType']:0;
+			$stm = $DBH->prepare("INSERT INTO imas_groups (name,grouptype,created_at) VALUES (:name,:grouptype,:created_at)");
+			$stm->execute(array(':name'=>$newGroupName, ':grouptype'=>$defGrouptype, ':created_at'=>time()));
 			$group = $DBH->lastInsertId();
 		} else {
 			$group = 0;
@@ -116,7 +118,7 @@ if ($stm->rowCount()==0) {
 	$opts = '';
 	$groups = array();
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-		$opts .= '<option value="'.Sanitize::onlyInt($row[0]).'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
+		$opts .= '<option value="'.$row[0].'">'.Sanitize::encodeStringForDisplay($row[1]).'</option>';
 		if ($school!='' && !$havesuggestion) {
 			$groups[] = array(levenshtein($school,normalizeGroup($row[1])), $row[0], $row[1]);
 		}

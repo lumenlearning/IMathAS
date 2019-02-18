@@ -35,6 +35,14 @@
 	} else {
 		$page = -1;
 	}
+	
+	$stm = $DBH->prepare("SELECT name,defpoints,isgroup,groupsetid,deffeedbacktext,courseid FROM imas_assessments WHERE id=:id");
+	$stm->execute(array(':id'=>$aid));
+	list($aname,$defpoints,$isgroup,$groupsetid,$deffbtext,$assesscourseid) = $stm->fetch(PDO::FETCH_NUM);
+	if ($assesscourseid != $cid) {
+		echo "Invalid assessment ID";
+		exit;
+	}
 
 	if (isset($_GET['update'])) {
 		$allscores = array();
@@ -189,10 +197,6 @@
 
 	require("../assessment/displayq2.php");
 
-
-	$stm = $DBH->prepare("SELECT name,defpoints,isgroup,groupsetid,deffeedbacktext FROM imas_assessments WHERE id=:id");
-	$stm->execute(array(':id'=>$aid));
-	list($aname,$defpoints,$isgroup,$groupsetid,$deffbtext) = $stm->fetch(PDO::FETCH_NUM);
 
 	if ($isgroup>0) {
 		$groupnames = array();
@@ -510,7 +514,7 @@
 					echo ' | <a href="#" onclick="quickgrade('.$cnt.',1,\'scorebox\',['.$togr.'],['.$answeights.']);return false;">Full credit all manually-graded parts</a>';
 				}
 			} else {
-				echo '<br/>Quick grade: <a href="#" class="fullcredlink" onclick="quicksetscore(\'scorebox' . $cnt .'\','.Sanitize::onlyInt($points).');return false;">Full credit</a>';
+				echo '<br/>Quick grade: <a href="#" class="fullcredlink" onclick="quicksetscore(\'scorebox' . $cnt .'\','.Sanitize::onlyInt($points).',this);return false;">Full credit</a> <span class=quickfb></span>';
 			}
 			$laarr = explode('##',$la[$loc]);
 			if (count($laarr)>1) {
@@ -671,7 +675,15 @@ function sandboxgetweights($code,$seed) {
 		}
 		//$code = str_replace("\n",';if(isset($anstypes)){return;};'."\n",$code);
 	}
-	eval($code);
+	try {
+		eval($code);
+	} catch (Throwable $t) {
+		if ($GLOBALS['myrights']>10) {
+			echo '<p>Caught error in evaluating a function in a question: ';
+			echo Sanitize::encodeStringForDisplay($t->getMessage());
+			echo '</p>';
+		}
+	}
 	if (!isset($answeights)) {
 		if (!isset($anstypes)) { 
 			//this shouldn't happen unless the code crashed

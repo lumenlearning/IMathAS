@@ -134,7 +134,15 @@ function sandboxgetweights($code,$seed,$attemptn) {
 		}
 		//$code = str_replace("\n",';if(isset($anstypes)){return;};'."\n",$code);
 	}
-	eval($code);
+	try {
+		eval($code);
+	} catch (Throwable $t) {
+		if ($GLOBALS['myrights']>10) {
+			echo '<p>Caught error in evaluating the code in a question: ';
+			echo Sanitize::encodeStringForDisplay($t->getMessage());
+			echo '</p>';
+		}
+	}
 	if (!isset($answeights)) {
 		if (!isset($anstypes)) { 
 			//this shouldn't happen unless the code crashed
@@ -191,6 +199,9 @@ function calcpointsafterpenalty($frac,$qi,$testsettings,$attempts) {
 			$skipsome = $penalty{1};
 			$penalty = substr($penalty,2);
 		}
+	}
+	if (!is_numeric($penalty)) {
+		$penalty = 0;
 	}
 	$rowatt = $qi['attempts'];
 
@@ -592,7 +603,7 @@ function recordtestdata($limit=false, $updateLTI=true) {
 	}
 	$bestattemptslist = implode(',',$bestattempts);
 	$bestseedslist = implode(',',$bestseeds);
-	$bestlastanswers = str_replace('~','',$bestlastanswers);
+	$bestlastanswers = str_replace('~','&tilde;',$bestlastanswers);
 	$bestlalist = implode('~',$bestlastanswers);
 
 	if ($noraw) {
@@ -602,7 +613,7 @@ function recordtestdata($limit=false, $updateLTI=true) {
 	}
 	$attemptslist = implode(',',$attempts);
 	$seedslist = implode(',',$seeds);
-	$lastanswers = str_replace('~','',$lastanswers);
+	$lastanswers = str_replace('~','&tilde;',$lastanswers);
 	$lalist = implode('~',$lastanswers);
 	$timeslist = implode(',',$timesontask);
 
@@ -642,12 +653,16 @@ function recordtestdata($limit=false, $updateLTI=true) {
 				require_once("../includes/ltioutcomes.php");
 	
 				$total = 0;
+				$allans = true;
 				for ($i =0; $i < count($bestscores);$i++) {
+					if ($allans && strpos($scores[$i],'-1')!==FALSE) {
+						$allans = false;
+					}
 					if (getpts($bestscores[$i])>0) { $total += getpts($bestscores[$i]);}
 				}
 				$totpossible = totalpointspossible($qi);
 				$grade = round($total/$totpossible,8);
-				$res = updateLTIgrade('update',$lti_sourcedid,$testsettings['id'],$grade);
+				$res = updateLTIgrade('update',$lti_sourcedid,$testsettings['id'],$grade,$allans);
 			}
 		}
 	}

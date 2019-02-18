@@ -96,8 +96,8 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
 	}
-		
-	$stm = $DBH->prepare("SELECT name,itemorder,hideicons,picicons,allowunenroll,msgset,toolset,latepasshrs FROM imas_courses WHERE id=:id");
+
+	$stm = $DBH->prepare("SELECT name,itemorder,allowunenroll,msgset,toolset,latepasshrs FROM imas_courses WHERE id=:id");
 	$stm->execute(array(':id'=>$cid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($line == null) {
@@ -166,7 +166,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		}
 		$nocoursenav = true;
 	}
-
+	
 	//get exceptions
 	$now = time();
 	$exceptions = array();
@@ -177,7 +177,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	if (count($exceptions)>0) {
 		upsendexceptions($items);
 	}
-
+	
 	if ($useleftnav && !isset($teacherid)) { //load quick block nav
 		$stuLeftNavBlocks = array();
 		buildBlockLeftNav($items, '0', $stuLeftNavBlocks);
@@ -515,8 +515,6 @@ if ($overwriteBody==1) {
 		if ($allowcourseimport) {
 ?>
 		<p><b><?php echo _('Export/Import'); ?></b><br/>
-			<a href="../admin/export.php?cid=<?php echo $cid ?>"><?php echo _('Export Question Set'); ?></a><br/>
-			<a href="../admin/import.php?cid=<?php echo $cid ?>"><?php echo _('Import Question Set'); ?></a><br/>
 			<a href="../admin/exportlib.php?cid=<?php echo $cid ?>"><?php echo _('Export Libraries'); ?></a><br/>
 			<a href="../admin/importlib.php?cid=<?php echo $cid ?>"><?php echo _('Import Libraries'); ?></a>
 		</p>
@@ -593,7 +591,7 @@ if ($overwriteBody==1) {
 			}
 			echo '</p>';
 		}
-
+	
 		if (!isset($sessiondata['ltiitemtype'])) { //don't show in LTI embed
 	?>
 			<p>
@@ -614,6 +612,7 @@ if ($overwriteBody==1) {
 if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migration_notice.php");}
 
    makeTopMenu();
+
    echo "<div id=\"headercourse\" class=\"pagetitle\"><h2>".Sanitize::encodeStringForDisplay($curname)."</h2></div>\n";
    
    if (count($items)>0) {

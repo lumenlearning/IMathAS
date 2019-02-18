@@ -155,7 +155,7 @@
 			echo '<p>'.sprintf(_('You have %d LatePass(es) available which you could use to re-open the assignment for scored work.'), $latepasses).'</p>';
 			echo '<p><button type="button" onclick="window.location.href=\'../course/redeemlatepass.php?cid='.$cid.'&aid='.$aid.'\'">'._('Use LatePass').'</button> ';
 			echo _('This will re-open the assessment for graded work').'</p>';
-			echo '<p><button type="button" onclick="window.location.href=\'showtest.php?cid='.$cid.'&id='.$aid.'&goreview=true\'">'.('Continue in Review Mode').'</button> ';
+			echo '<p><a href="showtest.php?cid='.$cid.'&id='.$aid.'&goreview=true">'.('Continue in Review Mode').'</a> ';
 			echo '<span class="noticetext">'._('If you open the assessment in un-graded review mode now, you will not be able to use a LatePass later').'</span></p>';
 			require("../footer.php");
 			exit;
@@ -282,6 +282,12 @@
 				exit;
 			}
 		}
+		if (!$isreview && trim($adata['password'])!='' && isset($_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'])) {
+			$testhash = hash("sha256", $urlmode.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] . trim($adata['password']));
+			if ($testhash == $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH']) {
+				$adata['password'] = '';
+			}
+		}
 		if (!$isreview && trim($adata['password'])!='' && !isset($teacherid) && !isset($tutorid)) { //has passwd
 			$pwfail = true;
 			if (isset($_POST['password'])) {
@@ -362,7 +368,7 @@
 			$starttime = time();
 
 			$stugroupid = 0;
-			if ($adata['isgroup']>0 && !$isreview && !isset($teacherid) && !isset($tutorid)) {
+			if ($adata['isgroup']>0 && !$isreview && !isset($teacherid) && !isset($tutorid) && $isRealStudent) {
 				$query = 'SELECT i_sg.id FROM imas_stugroups as i_sg JOIN imas_stugroupmembers as i_sgm ON i_sg.id=i_sgm.stugroupid ';
 				$query .= "WHERE i_sgm.userid=:userid AND i_sg.groupsetid=:groupsetid";
 				$stm = $DBH->prepare($query);
@@ -620,6 +626,12 @@
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 
+	if (extension_loaded('newrelic')) { // Ensure PHP agent is available
+		// Record custom data about this web transaction
+		newrelic_add_custom_parameter ('showtest_aid', $line['assessmentid']);
+		newrelic_add_custom_parameter ('showtest_asid', $line['id']);
+	}
+
 	$GLOBALS['assessver'] = $line['ver'];
 	if (strpos($line['questions'],';')===false) {
 		$questions = explode(",",$line['questions']);
@@ -750,6 +762,7 @@
 			$LPinf = $stm->fetch(PDO::FETCH_ASSOC);
 		}
 		$testsettings['shuffle'] = $testsettings['shuffle'] | 4; //force all students same seed
+		$hideAllHeaderNav = true; //hide header nav to expand real estate for questions / results
 	}
 
 	$now = time();
@@ -1194,6 +1207,7 @@
 	$isdiag = isset($sessiondata['isdiag']);
 	if ($isdiag) {
 		$diagid = $sessiondata['isdiag'];
+		$hideAllHeaderNav = true;
 	}
 	$isltilimited = (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner');
 
@@ -1297,7 +1311,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			echo "<span id=\"myname\">".('User Preferences')."</span></p>";
 		}
 		$out = '';
-		if ($testsettings['msgtoinstr']==1) {
+		if ($testsettings['msgtoinstr']==1 && $coursemsgset<4) {
 			$stm = $DBH->prepare("SELECT COUNT(id) FROM imas_msgs WHERE msgto=:msgto AND courseid=:courseid AND (isread=0 OR isread=4)");
 			$stm->execute(array(':msgto'=>$userid, ':courseid'=>$cid));
 			$msgcnt = $stm->fetchColumn(0);
@@ -1323,6 +1337,17 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				echo '<p><a href="../course/gb-viewasid.php?cid='.$cid.'&asid='.$testid.'">';
 				echo _('View your scored assessment'), '</a></p>';
 			}
+		}
+		echo '</div>';
+	} else if ($isdiag) {
+		echo '<div class="floatright">';
+		if ($userfullname != ' ') {
+			echo "<p><a href=\"#\" onclick=\"GB_show('"._('User Preferences')."','$imasroot/admin/ltiuserprefs.php?cid=$cid&greybox=true',800,'auto');return false;\" title=\""._('User Preferences')."\" aria-label=\""._('Edit User Preferences')."\">";
+			echo "<span id=\"myname\">".Sanitize::encodeStringForDisplay($userfullname)."</span> ";
+			echo "<img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a></p>";
+		} else {
+			echo "<p><a href=\"#\" onclick=\"GB_show('"._('User Preferences')."','$imasroot/admin/ltiuserprefs.php?cid=$cid&greybox=true',800,'auto');return false;\">";
+			echo "<span id=\"myname\">".('User Preferences')."</span></p>";
 		}
 		echo '</div>';
 	}
@@ -1991,7 +2016,8 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 
 				}
 				if ($testsettings['testtype']!="NoScores") {
-					echo "<br/><p>". _("When you are done, ") . " <a href=\"showtest.php?action=skip&amp;done=true\">" . _("click here to see a summary of your scores") . "</a>.</p>\n";
+					echo "<br/><p>". _("When you are done, ") . " <a href=\"showtest.php?action=skip&amp;done=true\" ".getSummaryConfirm().">";
+					echo  _("click here to see a summary of your scores") . "</a>.</p>\n";
 				}
 
 				echo "</div>\n";
@@ -2031,6 +2057,15 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 						echo ' <input type="button" class="btn" value="', _('Jump to Answer'), '" onclick="if (confirm(\'', _('If you jump to the answer, you must generate a new version to earn credit'), '\')) {window.location = \'showtest.php?action=skip&amp;jumptoans='.$next.'&amp;to='.$next.'\'}"/>';
 					}
 					echo "</form>\n";
+					if (isset($intropieces) && $next==count($questions)-1) {
+						foreach ($introdividers as $k=>$v) {
+							if ($v[1]==$next+2) {//right divider
+								echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
+								echo _('Hide Question Information'), '</a></div>';
+								echo '<div class="intro" role=region aria-label="'._('Pre-question text').'" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							}
+						}
+					}
 					echo "</div>\n";
 				} else {
 					echo "<div class=inset>\n";
@@ -2793,6 +2828,16 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					echo ' <input type="button" class="btn" value="', _('Jump to Answer'), '" onclick="if (confirm(\'', _('If you jump to the answer, you must generate a new version to earn credit'), '\')) {window.location = \'showtest.php?action=skip&amp;jumptoans='.$i.'&amp;to='.$i.'\'}"/>';
 				}
 				echo "</form>\n";
+				if (isset($intropieces) && $i==count($questions)-1) {
+					foreach ($introdividers as $k=>$v) {
+						if ($v[1]==$i+2) {//right divider
+							echo '<div><a href="#" id="introtoggle'.$k.'" onclick="toggleintroshow('.$k.'); return false;" aria-controls="intropiece'.$k.'" aria-expanded="true">';
+							echo _('Hide Question Information'), '</a></div>';
+							echo '<div class="intro" role=region aria-label="'._('Pre-question text').'" aria-expanded="true" id="intropiece'.$k.'">'.filter($intropieces[$k]).'</div>';
+							break;
+						}
+					}
+				}
 				echo "</div>\n";
 
 			}
@@ -3059,7 +3104,8 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 
 			echo '</div>'; //ends either inset or formcontents div
 			if (!$sessiondata['istutorial'] && $testsettings['displaymethod'] != "VideoCue"  && $testsettings['testtype']!="NoScores") {
-				echo "<p><a href=\"showtest.php?action=embeddone\">", _('When you are done, click here to see a summary of your score'), "</a></p>\n";
+				echo "<p><a href=\"showtest.php?action=embeddone\" ".getSummaryConfirm().">";
+				echo _('When you are done, click here to see a summary of your score'), "</a></p>\n";
 			}
 			if (!$introhaspages && $testsettings['displaymethod'] != "VideoCue") {
 				echo '</div>';
@@ -3125,6 +3171,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				echo ' <div id="livepollqcontent"></div>';
 				echo ' <div id="livepollrwrapper"><p id="livepollrcnt"></p>';
 				echo ' <div id="livepollrcontent" style="display:none"></div></div>';
+				echo ' <p>&nbsp;</p><p>&nbsp;</p>';
 				echo '</div>';
 				//pull any existing result data
 				$LPdata = array();
@@ -3549,14 +3596,28 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 		return $todo;
 	}
 
-	function showscores($questions,$attempts,$testsettings) {
-		global $DBH,$regenonreattempt,$isdiag,$allowregen,$isreview,$noindivscores,$scores,$bestscores,$qi,$superdone,$timelimitkickout, $reviewatend;
+	function showscores($questions,&$attempts,$testsettings) {
+		global $DBH,$regenonreattempt,$reattempting,$isdiag,$allowregen,$isreview,$noindivscores,$reattemptduring,$scores,$bestscores,$qi,$superdone,$timelimitkickout, $reviewatend;
 
 		$total = 0;
 		$lastattempttotal = 0;
 		for ($i =0; $i < count($bestscores);$i++) {
 			if (getpts($bestscores[$i])>0) { $total += getpts($bestscores[$i]);}
 			if (getpts($scores[$i])>0) { $lastattempttotal += getpts($scores[$i]);}
+			if (!$reattemptduring) {
+				if ($scores[$i]=='-1' || amreattempting($i)) {
+					//burn attempt
+					$attempts[$i]++;
+					$scores[$i] = 0;
+					$loc = array_search($i,$reattempting);
+					if ($loc!==false) {
+						array_splice($reattempting,$loc,1);
+					}
+				} else {
+					//clear out unans for multipart
+					$scores[$i] = str_replace('-1','0',$scores[$i]);
+				}
+			}
 		}
 		$totpossible = totalpointspossible($qi);
 		$average = round(100*((float)$total)/((float)$totpossible),1);
@@ -3775,48 +3836,59 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 		}
 		echo '</p>';
 	}
-
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	/**
-	 * Determine if a user is starting an assessment.
-	 *
-	 * tl;dr: If this function returns true, and student payments are enabled,
-	 * then a payment page should be displayed instead of the assessment.
-	 *
-	 * Details:
-	 *
-	 * If the user is not clicking links from within an assessment that point to things
-	 * within the same assessment, this should return true.
-	 *
-	 * We do this by checking URL query arguments and referring URLs.
-	 */
-	function isStartingAssessment()
-	{
-		if (isset($_REQUEST['begin_ohm_assessment'])) {
-			return true;
+	function getSummaryConfirm() {
+		global $reattemptduring, $scores;
+		if (!$reattemptduring && in_array(-1,$scores)) {
+			$oc = ' onclick="return confirm(\'';
+			$oc .= _('Viewing the score summary will use up an attempt on any unanswered questions. Continue?');
+			$oc .= '\')" ';
+			return $oc;
+		} else {
+			return '';
 		}
-
-		if (isset($_REQUEST['activationCodeErrors'])) {
-			return true;
-		}
-
-		if (!isset($_SERVER['HTTP_REFERER'])) {
-			return true;
-		}
-
-		if (isset($_SERVER['HTTP_REFERER']) && !strpos($_SERVER['HTTP_REFERER'], 'showtest.php')) {
-			return true;
-		}
-
-		return false;
 	}
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+/**
+ * Determine if a user is starting an assessment.
+ *
+ * tl;dr: If this function returns true, and student payments are enabled,
+ * then a payment page should be displayed instead of the assessment.
+ *
+ * Details:
+ *
+ * If the user is not clicking links from within an assessment that point to things
+ * within the same assessment, this should return true.
+ *
+ * We do this by checking URL query arguments and referring URLs.
+ */
+function isStartingAssessment()
+{
+	if (isset($_REQUEST['begin_ohm_assessment'])) {
+		return true;
+	}
+
+	if (isset($_REQUEST['activationCodeErrors'])) {
+		return true;
+	}
+
+	if (!isset($_SERVER['HTTP_REFERER'])) {
+		return true;
+	}
+
+	if (isset($_SERVER['HTTP_REFERER']) && !strpos($_SERVER['HTTP_REFERER'], 'showtest.php')) {
+		return true;
+	}
+
+	return false;
+}
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 ?>

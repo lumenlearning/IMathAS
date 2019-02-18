@@ -227,11 +227,19 @@ function matrixdisplaytable() {
     return $Tableau;
 }
 
-//matrixsystemdisp(matrix,[variables])
+//matrixsystemdisp(matrix,[variables,leftbracket])
 //Writes out a matrix as an equivalent system of equations
 //variables is optional array of variables to use
-function matrixsystemdisp($m,$v=array('x','y','z','w','v')) {
-	$out = '{';
+//leftbracket determines if left bracket is shown (def true)
+function matrixsystemdisp($m,$v=null,$leftbracket=true) {
+	if ($leftbracket) {
+		$out = '{';
+	} else {
+		$out = '{:';
+	}
+	if (!is_array($v)) {
+		$v = array('x','y','z','w','v');
+	}
 	for ($i=0; $i<count($m); $i++) {
 		if ($i!=0) {
 			$out .= ',';
@@ -1031,7 +1039,7 @@ function matrixAxbHasSolution($A,$b){
 	$testMatrix = matrixreduce($AB,false,false);
 	$lastCol = count($testMatrix[0])-1;
 	for ($r=0;$r<count($testMatrix);$r++) {  //for each row
-		if ($testmatrix[$r][$lastCol] != 0) { //if right hand side is non-zero
+		if ($testMatrix[$r][$lastCol] != 0) { //if right hand side is non-zero
 			$hasnonzero = false;
 			for ($c=0;$c<$lastCol;$c++) { //for each column other than last
 				if ($testMatrix[$r][$c] != 0) {
