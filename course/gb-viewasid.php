@@ -69,7 +69,10 @@
 			$stm = $DBH->prepare("SELECT * FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
 			$adata = $stm->fetch(PDO::FETCH_ASSOC);
-
+			if ($adata['courseid'] != $cid) {
+				echo "Invalid assessment ID";
+				exit;
+			}
 			$stugroupmem = array();
 			$agroupid = 0;
 			$doadd = true;
@@ -714,6 +717,9 @@
 				echo "<a href=\"gb-viewasid.php?stu=$stu&cid=$cid&asid={$asid}&from=$from&uid=$get_uid&breakfromgroup=true\">Separate from Group</a></p>";
 			}
 		}
+		if ($myrights == 100 && $line['lti_sourcedid']!='') {
+			echo '<p class=small>LTI sourced_id: '.Sanitize::encodeStringForDisplay($line['lti_sourcedid']).'</p>';
+		}	
 		echo "<form id=\"mainform\" method=post action=\"gb-viewasid.php?stu=$stu&cid=$cid&from=$from&asid={$asid}&update=true\">\n";
 
 		if ($isteacher) {
@@ -927,7 +933,7 @@
 			echo "in {$attempts[$i]} attempt(s) ";
 			if ($isteacher || $istutor) {
 				if (empty($feedback["Q$i"])) {
-					echo '<a href="#" onclick="return revealfb('.$i.');" id="fb-'.$i.'-add">Add Feedback</a>';
+					echo '<a href="#" onclick="return revealfb('.$i.',true);" id="fb-'.$i.'-add">Add Feedback</a>';
 					echo '<span id="fb-'.$i.'-wrap" style="display:none;">';
 				} else {
 					echo '<span id="fb-'.$i.'-wrap">';
@@ -1376,7 +1382,7 @@ function sandboxgetweights($code,$seed) {
 		}
 	}
 	if (!isset($answeights)) {
-		if (!isset($anstypes)) {
+		if (!isset($anstypes)) { 
 			//this shouldn't happen unless the code crashed
 			return array(1);
 		}

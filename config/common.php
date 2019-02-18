@@ -13,7 +13,7 @@ $CFG['GEN']['AWSforcoursefiles'] = true;
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
 
-$CFG['GEN']['pandocserver'] = '54.191.55.159';//'54.212.251.50';
+$CFG['GEN']['pandocserver'] = 'https://livepoll.myopenmath.com';
 $CFG['GEN']['livepollserver'] = 'livepoll.myopenmath.com';
 $CFG['GEN']['livepollpassword'] = 'testing';
 
@@ -26,7 +26,7 @@ $CFG['GEN']['noEmailButton'] = true;
 //$CFG['use_csrfp'] = 'log';
 
 //log LTI updates
-$CFG['LTI']['logupdate'] = true;
+//$CFG['LTI']['logupdate'] = true;
 
 //Amazon's load balancer acts as proxy. Put the real IP address in REMOTE_ADDR
 //for storing as user's IP address
@@ -35,6 +35,11 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
 }
 
 $CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
+$CFG['cleanup']['delay'] = 30;
+
+$CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
+$CFG['LTI']['logltiqueue'] = true;
+$CFG['LTI']['usequeue'] = true; 
 
 //database access settings
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');

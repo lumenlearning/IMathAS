@@ -37,8 +37,8 @@ if ($myrights<20) {
 		$onlychk = 0;
 	}
 	if (isset($_GET['formn']) && isset($_GET['loc'])) {
-		$formn = Sanitize::simpleString($_GET['formn']);
-		$loc = Sanitize::simpleString($_GET['loc']);
+		$formn = Sanitize::encodeStringForJavascript($_GET['formn']);
+		$loc = Sanitize::encodeStringForJavascript($_GET['loc']);
 		if (isset($_GET['checked']) || isset($_GET['usecheck'])) {
 			$chk = "&checked=0";
 		} else {
@@ -157,6 +157,12 @@ if ($overwriteBody==1) {
 			document.getElementById("brokenmsgok").style.display = (tagged==1)?"none":"block";
 			if (tagged==1) {alert("Make sure you also contact the question author or support so they know why you marked the question as broken");}
 		}
+
+		$(window).on('beforeunload', function() {
+			if (window.opener && !window.opener.closed) {
+				window.opener.sethighlightrow(-1);
+			}
+		});
 	</script>
 	<?php
 	if (isset($_GET['formn']) && isset($_GET['loc'])) {
@@ -164,6 +170,7 @@ if ($overwriteBody==1) {
 		echo "<script type=\"text/javascript\">";
 		echo "var numchked = -1;";
 		echo "if (window.opener && !window.opener.closed) {";
+		echo " window.opener.sethighlightrow(\"$loc\"); ";
 		echo $page_onlyChkMsg;
 		echo " if (prevnext[0][1]>0){
 				  document.write('<a href=\"testquestion.php?cid=$cid$chk&formn=$formn&onlychk=$onlychk&loc='+prevnext[0][0]+'&qsetid='+prevnext[0][1]+'\">Prev</a> ');
@@ -280,19 +287,19 @@ if ($overwriteBody==1) {
 			$sendtype = 'email';
 			$sendtitle = _('Contact support');
 		}
-		printf("<p>Question id: %s.  ", Sanitize::encodeStringForDisplay($_GET['qsetid']));
-		echo "<a href=\"#\" onclick=\"GB_show('$sendtitle','$imasroot/course/sendmsgmodal.php?sendtype=$sendtype&cid=" . Sanitize::courseId($cid) . '&quoteq='.Sanitize::encodeUrlParam("0-{$_GET['qsetid']}-{$seed}-reperr-{$assessver}"). "',800,'auto')\">$sendtitle</a> to report problems</p>";
-
+		$sendcid = $cid;
 	} else if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
-		printf("<p>Question id: %s.  ", Sanitize::encodeStringForDisplay($_GET['qsetid']));//<a href=\"$imasroot/msgs/msglist.php?add=new&cid={$CFG['GEN']['sendquestionproblemsthroughcourse']}&to={$line['ownerid']}&title=Problem%20with%20question%20id%20{$_GET['qsetid']}\" target=\"_blank\">Message owner</a> to report problems</p>";
-		echo "<a href=\"$imasroot/msgs/msglist.php?add=new&cid={$CFG['GEN']['sendquestionproblemsthroughcourse']}&";
-		echo "quoteq=".Sanitize::encodeUrlParam("0-{$_GET['qsetid']}-{$seed}-reperr-{$assessver}")."\" target=\"reperr\">Message owner</a> to report problems</p>";
-
+		$sendtype = 'msg';
+		$sendtitle = ('Message owner');
+		$sendcid = $CFG['GEN']['sendquestionproblemsthroughcourse'];
 	} else {
-		echo "<p>Question id: ".Sanitize::encodeStringForDisplay($_GET['qsetid']).".  <a href=\"mailto:".Sanitize::emailAddress($line['email'])."?"
-			. Sanitize::generateQueryStringFromMap(array('subject' => 'Problem with question id ' . $_GET['qsetid']))
-			. "\">E-mail owner</a> to report problems</p>";
+		$sendtype = 'email';
+		$sendtitle = ('Email owner');
+		$sendcid = $cid;
 	}
+	printf("<p>Question id: %s.  ", Sanitize::encodeStringForDisplay($_GET['qsetid']));
+	echo "<a href=\"#\" onclick=\"GB_show('$sendtitle','$imasroot/course/sendmsgmodal.php?sendtype=$sendtype&cid=" . Sanitize::courseId($sendcid) . '&quoteq='.Sanitize::encodeUrlParam("0-{$_GET['qsetid']}-{$seed}-reperr-{$assessver}"). "',800,'auto')\">$sendtitle</a> to report problems</p>";
+
 	printf("<p>Description: %s</p><p>Author: %s</p>", Sanitize::encodeStringForDisplay($line['description']),
         Sanitize::encodeStringForDisplay($line['author']));
 	echo "<p>Last Modified: $lastmod</p>";
@@ -305,9 +312,9 @@ if ($overwriteBody==1) {
 	  echo 'by searching all libraries with the ID number as the search term</p>';
 	}
 
-	echo '<p id="brokenmsgbad" class=noticetext style="display:'.(($line['broken']==1)?"block":"none").'">This message has been marked as broken.  This indicates ';
+	echo '<p id="brokenmsgbad" class=noticetext style="display:'.(($line['broken']==1)?"block":"none").'">This question has been marked as broken.  This indicates ';
 	echo 'there might be an error with this question.  Use with caution.  <a href="#" onclick="submitBrokenFlag(0);return false;">Unmark as broken</a></p>';
-	echo '<p id="brokenmsgok" style="display:'.(($line['broken']==0)?"block":"none").'"><a href="#" onclick="submitBrokenFlag(1);return false;">Mark as broken</a> if there appears to be an error with the question.</p>';
+	//echo '<p id="brokenmsgok" style="display:'.(($line['broken']==0)?"block":"none").'"><a href="#" onclick="submitBrokenFlag(1);return false;">Mark as broken</a> if there appears to be an error with the question.</p>';
 
 	echo '<p>'._('License').': ';
 	$license = array('Copyrighted','IMathAS Community License','Public Domain','Creative Commons Attribution-NonCommercial-ShareAlike','Creative Commons Attribution-ShareAlike');

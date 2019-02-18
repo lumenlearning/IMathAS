@@ -7,9 +7,13 @@
 	if (!isset($teacherid)) {
 		echo "error: validation";
 	}
-	$stm = $DBH->prepare("SELECT itemorder,viddata,intro,defpoints FROM imas_assessments WHERE id=:id");
+	$stm = $DBH->prepare("SELECT itemorder,viddata,intro,defpoints,courseid FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
-	list($rawitemorder, $viddata,$current_intro_json, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
+	list($rawitemorder, $viddata,$current_intro_json, $defpoints,$assesscourseid) = $stm->fetch(PDO::FETCH_NUM);
+	if ($assesscourseid != $cid) {
+		echo "error: invalid ID";
+		exit;
+	}
 	$itemorder = str_replace('~',',',$rawitemorder);
 	$curitems = array();
 	foreach (explode(',',$itemorder) as $qid) {
@@ -67,16 +71,18 @@
 
 		$qorder = explode(',',$_REQUEST['order']);
 		$newbynum = array();
-		for ($i=0;$i<count($qorder);$i++) {
-			if (strpos($qorder[$i],'~')!==false) {
-				$qids = explode('~',$qorder[$i]);
-				if (strpos($qids[0],'|')!==false) { //pop off nCr
-					$newbynum[$i] = $qids[1];
+		if (trim($_REQUEST['order'])!='') {
+			for ($i=0;$i<count($qorder);$i++) {
+				if (strpos($qorder[$i],'~')!==false) {
+					$qids = explode('~',$qorder[$i]);
+					if (strpos($qids[0],'|')!==false) { //pop off nCr
+						$newbynum[$i] = $qids[1];
+					} else {
+						$newbynum[$i] = $qids[0];
+					}
 				} else {
-					$newbynum[$i] = $qids[0];
+					$newbynum[$i] = $qorder[$i];
 				}
-			} else {
-				$newbynum[$i] = $qorder[$i];
 			}
 		}
 
@@ -112,6 +118,8 @@
 		//any old items will not get copied.
 		$viddata = serialize($newviddata);
 	}
+	
+	$DBH->beginTransaction();
 	
 	//update question point values
 	$ptschanged = false;
@@ -156,5 +164,6 @@
 	} else {
 		echo "error: not saved";
 	}
+	$DBH->commit();
 
 ?>

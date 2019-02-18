@@ -841,14 +841,20 @@ input[type=submit]:disabled:hover,input[type=button]:disabled:hover {
   width: 400px;
   height: 400px;
   z-index: 150;
-  -webkit-overflow-scrolling: touch;
 }
 
+#GB_frameholder {
+	position: relative;
+	overflow: auto;
+	width: 100%;
+	height: 500px;
+	-webkit-overflow-scrolling: touch;
+}
 #GB_frame {
   border: 0;
-  overflow: auto;
   width: 100%;
-  height: 378px;
+  height: 100%;
+  position: absolute;
 }
 
 #GB_caption {
@@ -1201,6 +1207,10 @@ a.dropdown-toggle.arrow-down:hover {
 	position:relative;
 	top:-.2em;
 	text-decoration: none;
+}
+
+.katex {
+	font-size: 1.1em !important;
 }
 
 .fw1000 div#headercontent, .fw1000 div#navlistcont,.fw1000 .footerwrapper, .fw1000 .midwrapper {

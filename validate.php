@@ -367,7 +367,7 @@
 		$coursetheme = $sessiondata['userprefs']['usertheme'];
 	}
 	
-	if (!empty($line['forcepwreset']) && (empty($_GET['action']) || $_GET['action']!='forcechgpwd')
+	if (!empty($line['forcepwreset']) && (empty($_GET['action']) || $_GET['action']!='forcechgpwd') 
 		&& (!isset($sessiondata['ltiitemtype']) || $sessiondata['ltirole']!='learner')
 		&& !isset($sessiondata['emulateuseroriginaluser'])) {
 		 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
@@ -408,9 +408,12 @@
 		$sessiondata['graphdisp'] = $_GET['graphdisp'];
 		writesessiondata();
 	}
-	if (isset($sessiondata['isdiag']) && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?r=".Sanitize::randomQueryStringParam());
-		exit;
+	if (isset($sessiondata['isdiag'])) { // && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
+		$urlparts = parse_url($_SERVER['PHP_SELF']);
+		if (!in_array(basename($urlparts['path']),array('showtest.php','ltiuserprefs.php'))) {
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?r=".Sanitize::randomQueryStringParam());
+			exit;
+		}
 	}
 
 	if (isset($sessiondata['ltiitemtype']) && $_SERVER['PHP_SELF']==$imasroot.'/index.php') {
