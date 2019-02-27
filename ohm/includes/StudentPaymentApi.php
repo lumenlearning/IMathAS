@@ -360,7 +360,7 @@ class StudentPaymentApi
 	 * Update student payment settings for a group in the student payment API.
 	 *
 	 * @param $accessType string Currently one of: "not_required",
-	 *        "activation_code", "direct_pay"
+	 *        "activation_code", "direct_pay", "multipay"
 	 * @return StudentPayApiResult An instance of StudentPayApiResult.
 	 * @throws StudentPaymentException Thrown on student payment API errors.
 	 */
