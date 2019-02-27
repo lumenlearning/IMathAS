@@ -39,7 +39,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		echo "Invalid ID";
 		exit;
 	}
-	
+
 	if (isset($_GET['grp'])) { $sessiondata['groupopt'.$aid] = Sanitize::onlyInt($_GET['grp']); writesessiondata();}
 	if (isset($_GET['selfrom'])) {
 		$sessiondata['selfrom'.$aid] = Sanitize::stripHtmlTags($_GET['selfrom']);
@@ -369,7 +369,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var previewqaddr = '$imasroot/course/testquestion.php?cid=$cid';
 		var addqaddr = '$address';
 		</script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=030818\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=022719\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=010519\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";
@@ -487,7 +487,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$timeout = array(0);
 		}
 		if (isset($avgtimepts[3]) && $avgtimepts[3]>10) {
-			$timeout[1] = round($avgtimepts[2]); //score 
+			$timeout[1] = round($avgtimepts[2]); //score
 			$timeout[2] = round($avgtimepts[1]/60,1); //time first try
 			$timeout[3] = Sanitize::onlyInt($avgtimepts[3]); //# of data
 		}
@@ -519,7 +519,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$jsarr[] = array("text", $text_seg['text'],
 					Sanitize::onlyInt($text_seg['displayUntil']-$text_seg['displayBefore']+1),
 					Sanitize::onlyInt($text_seg['ispage']),
-					$text_seg['pagetitle'], 
+					$text_seg['pagetitle'],
 					isset($text_seg['forntype'])?$text_seg['forntype']:0);
 			}
 		}
@@ -735,7 +735,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 						$query .= " AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=?) ";
 						$qarr[] = $userid;
 					}
-					
+
 				}
 				$query .= " ORDER BY imas_library_items.libid,imas_library_items.junkflag,imas_questionset.id";
 				if ($searchall==1) {
