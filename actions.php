@@ -195,7 +195,6 @@ require_once("includes/sanitize.php");
 							$stm->execute($array);
 							echo '<p>You have been enrolled in course ID '.Sanitize::encodeStringForDisplay($_POST['courseid']).'</p>';
 
-
 							$msgOnEnroll = ((floor($line['msgset']/5)&2) > 0);
 							if ($msgOnEnroll) {
 								$stm_nmsg = $DBH->prepare("INSERT INTO imas_msgs (courseid,title,message,msgto,msgfrom,senddate,isread) VALUES (:cid,:title,:message,:msgto,:msgfrom,:senddate,4)");
@@ -241,7 +240,6 @@ require_once("includes/sanitize.php");
 		}
 	} else if ($_GET['action']=="resetpw") {
 		require_once("init_without_validate.php");
-
 		if (isset($_POST['username'])) {
 
 			$query = "SELECT id,email,rights FROM imas_users WHERE SID=:sid";
@@ -275,9 +273,6 @@ require_once("includes/sanitize.php");
 				echo 'If you do not see it in a few minutes, check your spam or junk box to see if the email ended up there.<br/>';
 				echo 'It may help to add <b>'.Sanitize::encodeStringForDisplay($sendfrom).'</b> to your contacts list.</p>';
 				echo '<p>If you still have trouble or the wrong email address is on file, contact your instructor - they can reset your password for you.</p>';
-				if ($rights>10) {
-					echo '<p>If you still have trouble and are an instructor, please contact dlippman@lumenlearning.com for a manual reset.</p>';
-				}
 				require("footer.php");
 				exit;
 			} else {
@@ -408,15 +403,24 @@ require_once("includes/sanitize.php");
 			echo "<html><body>\nError: Guests can't enroll in courses</body></html";
 			exit;
 		}
-
 		if (isset($_POST['courseselect']) && $_POST['courseselect']>0) {
 			$_POST['cid'] = $_POST['courseselect'];
 			$_POST['ekey'] = '';
 		}
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
 	  if(isset($_GET['cid'])&& isset($_GET['ekey'])) {
 			$_POST['cid'] = $_GET['cid'];
 			$_POST['ekey'] = $_GET['ekey'];
 		}
+	    // #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		$pagetopper = '';
 		if ($gb == '') {
 			$pagetopper .= "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; Enroll in a Course</div>\n";
@@ -680,6 +684,26 @@ require_once("includes/sanitize.php");
 				require("footer.php");
 				exit;
 			}
+		}
+		if (isset($_POST['dochgmfa'])) {
+			require('includes/GoogleAuthenticator.php');
+			$MFA = new GoogleAuthenticator();
+			$mfasecret = $_POST['mfasecret'];
+
+			if ($MFA->verifyCode($mfasecret, $_POST['mfaverify'])) {
+				$mfadata = array('secret'=>$mfasecret, 'last'=>'', 'laston'=>0);
+				$stm = $DBH->prepare("UPDATE imas_users SET mfa = :mfa WHERE id = :uid");
+				$stm->execute(array(':uid'=>$userid, ':mfa'=>json_encode($mfadata)));
+			} else {
+				require("header.php");
+				echo $pagetopper;
+				echo "2-factor authentication verification failed.  <a href=\"forms.php?action=chguserinfo$gb\">Try Again</a>\n";
+				require("footer.php");
+				exit;
+			}
+		} else if (isset($_POST['delmfa'])) {
+			$stm = $DBH->prepare("UPDATE imas_users SET mfa = '' WHERE id = :uid");
+			$stm->execute(array(':uid'=>$userid));
 		}
 
 		require("includes/userprefs.php");

@@ -167,8 +167,18 @@ switch($_GET['action']) {
 			$oldrights = $line['rights'];
 			$oldspecialrights = $line['specialrights'];
 		}
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		echo '<input type=hidden name=oldrole value="'.Sanitize::onlyInt($oldrights).'" />';
 		echo '<input type=hidden name=username value="'.Sanitize::encodeStringForDisplay($line['SID']).'" />';
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 		echo '<script type="text/javascript">
 			function onrightschg() {
 				var selrights = this.value;
@@ -1471,6 +1481,18 @@ switch($_GET['action']) {
 		echo "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onclick=\"window.location='".Sanitize::encodeStringForJavascript($backloc)."'\"></p>\n";
 		echo '</form>';
 
+		break;
+	case "entermfa":
+		if (isset($_GET['error'])) {
+			echo '<p class=noticetext>Invalid code - try again</p>';
+		}
+		echo '<p>Enter the 2-factor authentication code from your device</p>';
+		echo '<form method="POST" action="actions.php?from='.Sanitize::encodeUrlParam($from).'">';
+		echo '<input type=hidden name=action value="entermfa" />';
+		echo '<p>Code: <input size=8 name=mfatoken /></p>';
+		echo '<p><label><input type=checkbox name=mfatrust /> Do not ask again on this device</label></p>';
+		echo '<p><input type=submit value="Verify Code" /></p>';
+		echo '</form>';
 		break;
 	case "findstudent":
 		if ($myrights < 20) { echo "You don't have the authority for this action"; break;}
