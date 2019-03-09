@@ -37,10 +37,13 @@ the IMathAS platform, and to provide students self-study opportunities.</p>
 <p>Lumen Learning provides supported tools using OER, including Waymaker, an
 adaptive learning platform, and OHM, an online math homework site.</p>
 
-<h3>xyzHomework</h3>
+<h3>XYZ Homework</h3>
  
-<p>xyzHomework provides a supported online math homework site with content
-aligned to OER and to books from xyzTextbooks.</p>
+<p>XYZ Homework is an IMATHAS compatible online homework system. 
+They are an OpenStax Ally providing custom templates and coding for their math titles. 
+XYZ Homework specializes in customization including printable eBooks and additional 
+ancillaries based on OpenStax and other OER materials. They are also the online 
+homework partner for XYZ Textbooks.</p>
 </div>
 
 <h2>Pricing</h2>

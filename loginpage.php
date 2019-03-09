@@ -96,7 +96,7 @@ Then read more about <a href="<?php echo $imasroot;?>/info/classroom.php">using 
 <br class=clear>
 <p>&nbsp;</p>
 <p class="textright"><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2019 David Lippman<br/>
-with financial support from <a href="https://www.lumenlearning.com">Lumen Learning</a> and <a href="https://www.xyzhomework.com/">xyzHomework</a><br/>
+with financial support from <a href="https://www.lumenlearning.com">Lumen Learning</a> and <a href="https://www.xyzhomework.com/">XYZ Homework</a><br/>
 <a href="<?php echo $imasroot;?>/info/privacy.php">Privacy Policy</a> |
 <a href="https://docs.google.com/document/d/1vS2LLJSsoW6v9qa3P_ru5dv9NfmNDJGijZtBJp_eGEM/edit?usp=sharing">Accessibility</a>
 </p>
