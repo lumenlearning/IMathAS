@@ -7478,7 +7478,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$spc++;
 				}
 				$la[$i] = implode('|', $tmp);
-				if (isset($_POST["qn$qnt"])) {
+				if (isset($_POST["qn$qnt"]) && $_POST["qn$qnt"] !== 'done') {
 					$stuav = str_replace(array('(',')','[',']'),'',$_POST["qn$qnt"]);
 					$la[$i] .= '$#$'.str_replace(',','|',$stuav);
 				}
@@ -7490,6 +7490,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 
 		$GLOBALS['partlastanswer'] = implode('&',$la);
+
 		if (isset($abstolerance)) {
 			$tol = '|'.$abstolerance;
 		} else {
