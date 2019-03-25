@@ -646,38 +646,12 @@ switch($_POST['action']) {
 			if ($updateJsonData) {
 				$query .= "jsondata=:jsondata,";
 			}
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-				$query .= "student_pay_required=:studentpay,";
-			}
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
 			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass,latepasshrs=:latepasshrs,dates_by_lti=:ltidates,startdate=:startdate,enddate=:enddate,cleanupdate=:cleanupdate WHERE id=:id";
 			$qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
 				':picicons'=>$picicons, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
 				':toolset'=>$toolset, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
 				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, ':startdate'=>$startdate, ':enddate'=>$enddate, 
 				':latepasshrs'=>$latepasshrs, ':cleanupdate'=>$cleanupdate,':id'=>$_GET['id']);
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-				$qarr[':studentpay'] = $_POST['studentpay'] ? 1 : 0;
-			}
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
 			if ($myrights<75) {
 				$query .= " AND ownerid=:ownerid";
 				$qarr[':ownerid']=$userid;
@@ -748,30 +722,6 @@ switch($_POST['action']) {
 				':deflatepass'=>$deflatepass, ':latepasshrs'=>$latepasshrs, ':theme'=>$theme, ':ltisecret'=>$ltisecret, ':ltidates'=>$setdatesbylti, ':blockcnt'=>$blockcnt,
 				':created_at'=>time()));
 			$cid = $DBH->lastInsertId();
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
-
-			$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $cid, $userid);
-			$studentPaymentDb->setDbh($DBH);
-
-			try {
-				$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-				if ($groupRequiresStudentPayment) {
-					$studentPaymentDb->setCourseRequiresStudentPayment(true);
-				}
-			} catch (\OHM\StudentPaymentException $e) {
-				error_log($e->getMessage());
-				error_log($e->getTraceAsString());
-			}
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
 
             //call hook, if defined
             if (function_exists('onAddCourse')) {
@@ -1262,20 +1212,6 @@ switch($_POST['action']) {
 		$grptype = (isset($_POST['iscust'])?1:0);
 		$stm = $DBH->prepare("UPDATE imas_groups SET name=:name,parent=:parent,grouptype=:grouptype WHERE id=:id");
 		$stm->execute(array(':name'=>$_POST['gpname'], ':parent'=>$_POST['parentid'], ':grouptype'=>$grptype, ':id'=>$_GET['id']));
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		if (100 <= $GLOBALS['myrights']) {
-			$stm = $DBH->prepare("UPDATE imas_groups SET lumen_guid = :lumenGuid WHERE id = :groupId");
-			$stm->execute(array(':lumenGuid' => $_POST['lumen_guid'], ':groupId' => $_GET['id']));
-		}
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
 
 		//call hook, if defined
 		if (function_exists('onModGroup')) {

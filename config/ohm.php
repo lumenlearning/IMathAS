@@ -166,3 +166,5 @@ $CFG['GEN']['useSESmail'] = true;
 $CFG['hooks']['init'] = 'ohm-hooks/init.php';
 $CFG['hooks']['util/batchcreateinstr'] = 'ohm-hooks/util/batchcreateinstr.php';
 $CFG['hooks']['actions'] = 'ohm-hooks/actions.php';
+$CFG['hooks']['admin/actions'] = 'ohm-hooks/admin/actions.php';
+
