@@ -163,3 +163,4 @@ $CFG['email']['new_acct_bcclist'] = array('paul@lumenlearning.com');
 
 $CFG['GEN']['useSESmail'] = true;
 
+$CFG['hooks']['init'] = 'ohm-hooks/init.php';
