@@ -90,21 +90,6 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
 	$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,11,?,?)");
 	$stm->execute(array($newuserid, $now, json_encode($reqdata)));
 
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	// #### Begin OHM-specific code #####################################################
-	require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
-
-	$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, null, $newuserid);
-	$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-	// #### End OHM-specific code #######################################################
-
     //copy courses
     $i = 5;
     while (isset($data[$i]) && $data[$i]!='' && intval($data[$i])>0) {
@@ -144,23 +129,6 @@ if (isset($_POST['groupid']) && is_uploaded_file($_FILES['uploadedfile']['tmp_na
       $stm = $DBH->prepare($query);
       $stm->execute(array(':ownerid'=>$uid, ':itemorder'=>$itemorder, ':sourceid'=>$sourcecid));
       $cid = $DBH->lastInsertId();
-
-      // #### Begin OHM-specific code #####################################################
-      // #### Begin OHM-specific code #####################################################
-      // #### Begin OHM-specific code #####################################################
-      // #### Begin OHM-specific code #####################################################
-      // #### Begin OHM-specific code #####################################################
-      if ($groupRequiresStudentPayment) {
-      	$stm = $DBH->prepare("UPDATE imas_courses SET student_pay_required = 1 WHERE id = :courseId");
-      	$stm->execute(array(':courseId'=>$cid));
-      }
-      // #### End OHM-specific code #######################################################
-      // #### End OHM-specific code #######################################################
-      // #### End OHM-specific code #######################################################
-      // #### End OHM-specific code #######################################################
-      // #### End OHM-specific code #######################################################
-
-
       //if ($myrights==40) {
         $stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
         $stm->execute(array(':userid'=>$uid, ':courseid'=>$cid, ':created_at'=>time()));
