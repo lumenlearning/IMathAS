@@ -170,4 +170,5 @@ $CFG['hooks']['admin/actions'] = 'ohm-hooks/admin/actions.php';
 $CFG['hooks']['admin/approvepending'] = 'ohm-hooks/admin/approvepending2.php';
 $CFG['hooks']['admin/forms'] = 'ohm-hooks/admin/forms.php';
 $CFG['hooks']['bltilaunch'] = 'ohm-hooks/bltilaunch.php';
+$CFG['hooks']['validate'] = 'ohm-hooks/validate.php';
 

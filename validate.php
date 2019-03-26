@@ -263,23 +263,6 @@
 			onLogin();
 		 }
 
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	//
-// If the post of ekey and courseid then look to see if already enrolled
-    if ($_POST['enrollandlogin']) {
-      header("Location:" . $GLOBALS['basesiteurl'] . "/actions.php?" . Sanitize::fullQueryString("action=enroll&cid=" . $_POST['cid'] . "&ekey=" . $_POST['ekey'] . "&enrollandlogin=1")); /* Redirect browser */
-      exit;
-    }
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-
 		 if (!empty($_SERVER['QUERY_STRING'])) {
 		 	 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']) . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
 		 } else {
@@ -453,31 +436,7 @@
 		} else if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner') {
 			$breadcrumbbase = "<a href=\"$imasroot/assessment/showtest.php?cid=".Sanitize::courseId($_GET['cid'])."&id={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
 			$urlparts = parse_url($_SERVER['PHP_SELF']);
-            /*
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 *
-			 * The following line, containing an array of php filenames, has been modified to allow
-			 * OHM-specific files (related to student payments) to be accessible via an LMS.
-			 *
-			 * As of 2018 Apr 24, the OHM-specific files added to the array are:
-			 *   process_activation.php
-			 *   activation_confirmation.php
-			 *   activation_ajax.php
-			 *   payment_confirmation.php
-			 *
-			 * No other OHM-specific changes have been made.
-			 *
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 */
-			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','process_activation.php','activation_confirmation.php','activation_ajax.php','payment_confirmation.php');
+			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php');
 			//call hook, if defined
 			if (function_exists('allowedInAssessment')) {
 				$allowedinLTI = array_merge($allowedinLTI, allowedInAssessment());
