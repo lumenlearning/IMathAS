@@ -117,26 +117,6 @@ if (!empty($createcourse)) {
 			':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 			':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 		$cid = $DBH->lastInsertId();
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
-
-		$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $cid, $userid);
-		$studentPaymentDb->setDbh($DBH);
-
-		$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-		if ($groupRequiresStudentPayment) {
-			$studentPaymentDb->setCourseRequiresStudentPayment(true);
-		}
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-
 		//if ($myrights==40) {
 			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
 			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
