@@ -159,7 +159,7 @@ $CFG['GEN']['communityforumlink'] = getenv('COMMUNITY_FORUM_URL');
      );*/
 
 $CFG['email']['new_acct_replyto'] = 'support@lumenlearning.com';
-$CFG['email']['new_acct_bcclist'] = array('paul@lumenlearning.com');
+$CFG['email']['new_acct_bcclist_ohm_hook'] = array('paul@lumenlearning.com');
 
 $CFG['GEN']['useSESmail'] = true;
 
@@ -167,4 +167,5 @@ $CFG['hooks']['init'] = 'ohm-hooks/init.php';
 $CFG['hooks']['util/batchcreateinstr'] = 'ohm-hooks/util/batchcreateinstr.php';
 $CFG['hooks']['actions'] = 'ohm-hooks/actions.php';
 $CFG['hooks']['admin/actions'] = 'ohm-hooks/admin/actions.php';
+$CFG['hooks']['admin/approvepending'] = 'ohm-hooks/admin/approvepending2.php';
 
