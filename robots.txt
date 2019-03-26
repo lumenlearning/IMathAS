@@ -1,4 +1,4 @@
 User-agent: *
-Disallow: /course/
+Disallow: /course/course.php
 Disallow: /filestore/
 Disallow: /cgi-bin/
