@@ -937,15 +937,6 @@ if ($stm->rowCount()==0) {
 				// #### Begin OHM-specific code #####################################################
 				// #### Begin OHM-specific code #####################################################
 				// #### Begin OHM-specific code #####################################################
-				require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
-
-				$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $destcid, $userid);
-				$studentPaymentDb->setDbh($DBH);
-
-				$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-				if ($groupRequiresStudentPayment) {
-					$studentPaymentDb->setCourseRequiresStudentPayment(true);
-				}
 
 				// Note: The only OHM-specific change here is the created_at column.
 				$stm = $DBH->prepare('INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid,:destcid,:created_at)');
@@ -2351,15 +2342,6 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
 						$stm->execute(array(':userid'=>$userid, ':courseid'=>$destcid, ':created_at'=>time()));
 
-						require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
-
-						$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $destcid, $userid);
-						$studentPaymentDb->setDbh($DBH);
-
-						$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-						if ($groupRequiresStudentPayment) {
-							$studentPaymentDb->setCourseRequiresStudentPayment(true);
-						}
 						// #### End OHM-specific code #######################################################
 						// #### End OHM-specific code #######################################################
 						// #### End OHM-specific code #######################################################
