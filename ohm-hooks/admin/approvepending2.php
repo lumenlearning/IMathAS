@@ -66,15 +66,54 @@ The Lumen Team
  * @param string $username The user's username.
  * @param int $groupId The user's group ID.
  * @return string The raw HTML to be used for the email content.
+ * @see getApprovalEmailForNonLumenCustomer
+ * @see getApprovalEmailForLumenCustomer
  */
 function getApproveMessage($firstName, $lastName, $username, $groupId)
 {
-    global $CFG;
+    return isLumenCustomer($groupId)
+        ? getApprovalEmailForLumenCustomer($firstName, $username)
+        : getApprovalEmailForNonLumenCustomer($firstName, $username);
+}
 
+
+/**
+ * Get the BCC list to use for new account approval emails.
+ *
+ * @return array An array of email addresses.
+ */
+function getApproveBcc()
+{
+    global $CFG, $group;
+
+    if (isLumenCustomer($group)) {
+        return array();
+    } else {
+        return $CFG['email']['new_acct_bcclist_ohm_hook'];
+    }
+}
+
+
+/*
+ * The following are what would normally be private methods.
+ */
+
+
+/**
+ * Return the approval email content for a non-Lumen customer new account.
+ *
+ * @param string $firstName The user's first name.
+ * @param string $username The user's username.
+ * @return string The full, raw email content. Includes HTML.
+ * @see getApprovalEmailForLumenCustomer For Lumen customers.
+ */
+function getApprovalEmailForNonLumenCustomer(string $firstName,
+                                             string $username): string
+{
     $sanitizedName = Sanitize::encodeStringForDisplay($firstName);
     $sanitizedUsername = Sanitize::encodeStringForDisplay($username);
 
-    $messageForNonLumenCustomer = "
+    return "
 <p>
     Hi ${sanitizedName},
 </p>
@@ -135,8 +174,24 @@ function getApproveMessage($firstName, $lastName, $username, $groupId)
     courses. We welcome you to the Lumen OHM community!
 </p>
 ";
+}
 
-    $messageForLumenCustomer = "
+
+/**
+ * Return the approval email content for a Lumen customer new account.
+ *
+ * @param string $firstName The user's first name.
+ * @param string $username The user's username.
+ * @return string The full, raw email content. Includes HTML.
+ * @see getApprovalEmailForNonLumenCustomer For non-Lumen customers.
+ */
+function getApprovalEmailForLumenCustomer(string $firstName,
+                                          string $username): string
+{
+    $sanitizedName = Sanitize::encodeStringForDisplay($firstName);
+    $sanitizedUsername = Sanitize::encodeStringForDisplay($username);
+
+    return "
 <p>
     Hi ${sanitizedName},
 </p>
@@ -185,26 +240,6 @@ These resources can help orient you to using OHM:
 	The Lumen Team
 </p>
 ";
-
-    return isLumenCustomer($groupId) ? $messageForLumenCustomer
-        : $messageForNonLumenCustomer;
-}
-
-
-/**
- * Get the BCC list to use for new account approval emails.
- *
- * @return array An array of email addresses.
- */
-function getApproveBcc()
-{
-    global $CFG, $group;
-
-    if (isLumenCustomer($group)) {
-        return array();
-    } else {
-        return $CFG['email']['new_acct_bcclist_ohm_hook'];
-    }
 }
 
 
@@ -214,7 +249,7 @@ function getApproveBcc()
  * @param int $groupId The group ID.
  * @return bool True if the group is a Lumen customer. False if not.
  */
-function isLumenCustomer($groupId)
+function isLumenCustomer($groupId): bool
 {
     global $DBH;
 
