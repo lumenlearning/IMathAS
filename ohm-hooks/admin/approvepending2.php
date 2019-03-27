@@ -7,10 +7,10 @@
  * @param string $firstName The user's first name.
  * @param string $lastName The user's last name.
  * @param string $username The user's username.
- * @param int $groupId The user's group ID.
+ * @param int $userGroupId The user's group ID.
  * @return string The raw HTML to be used for the email content.
  */
-function getDenyMessage($firstName, $lastName, $username, $groupId)
+function getDenyMessage($firstName, $lastName, $username, $userGroupId)
 {
     $sanitizedName = Sanitize::encodeStringForDisplay($firstName);
     $sanitizedUsername = Sanitize::encodeStringForDisplay($username);
@@ -64,14 +64,14 @@ The Lumen Team
  * @param string $firstName The user's first name.
  * @param string $lastName The user's last name.
  * @param string $username The user's username.
- * @param int $groupId The user's group ID.
+ * @param int $userGroupId The user's group ID.
  * @return string The raw HTML to be used for the email content.
  * @see getApprovalEmailForNonLumenCustomer
  * @see getApprovalEmailForLumenCustomer
  */
-function getApproveMessage($firstName, $lastName, $username, $groupId)
+function getApproveMessage($firstName, $lastName, $username, $userGroupId)
 {
-    return isLumenCustomer($groupId)
+    return isLumenCustomer($userGroupId)
         ? getApprovalEmailForLumenCustomer($firstName, $username)
         : getApprovalEmailForNonLumenCustomer($firstName, $username);
 }

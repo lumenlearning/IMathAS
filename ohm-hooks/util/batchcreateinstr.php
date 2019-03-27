@@ -3,6 +3,13 @@
 require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
 
 
+/**
+ * Called when adding a course.
+ *
+ * @param int $courseId The course's ID.
+ * @param int $userId The user's ID.
+ * @throws \OHM\Exceptions\StudentPaymentException
+ */
 function onAddCourse($courseId, $userId)
 {
     global $DBH;

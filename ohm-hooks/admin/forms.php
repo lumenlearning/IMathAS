@@ -4,6 +4,11 @@ use OHM\Models\StudentPayApiResult;
 use OHM\Exceptions\StudentPaymentException;
 
 
+/**
+ * Return raw HTML to insert directly into <head/>.
+ *
+ * @return string Raw HTML for insertion into <head/>.
+ */
 function getHeaderCode()
 {
     global $imasroot;
@@ -14,16 +19,16 @@ function getHeaderCode()
 
 
 /**
- * Render a form snippet for the "create/modify a course" page.
+ * Render a form snippet for the "create/modify a course" settings page.
  *
- * @param string $action
- * @param int $myrights
- * @param int $courseId
+ * @param string $action One of "addcourse" or "modify"
+ * @param int $userRights The user's rights. (from imas_users)
+ * @param int $courseId The ID of the course being created/modified.
  * @throws StudentPaymentException
  */
-function getCourseSettingsForm($action, $myrights, $courseId)
+function getCourseSettingsForm($action, $userRights, $courseId)
 {
-    renderCourseRequiresStudentPayment($action);
+    renderCourseRequiresStudentPayment($action, $userRights, $courseId);
 }
 
 
@@ -32,9 +37,9 @@ function getCourseSettingsForm($action, $myrights, $courseId)
  *
  * @param $groupId
  * @param $groupType
- * @param $myrights
+ * @param $userRights
  */
-function getModGroupForm($groupId, $groupType, $myrights)
+function getModGroupForm($groupId, $groupType, $userRights)
 {
     global $DBH;
 
@@ -44,29 +49,33 @@ function getModGroupForm($groupId, $groupType, $myrights)
     }
     echo '> <label for="iscust">' . _('Lumen Customer') . '</label><br/>';
 
-    if (100 <= $myrights) {
-        $stm = $DBH->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :groupId");
-        $stm->execute(array(':groupId' => $_GET['id']));
-        $lumenGuid = $stm->fetchColumn(0);
-        printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/><br/>', $lumenGuid);
+    // Rights level 100 == admins
+    if (100 > $userRights) {
+        return;
+    }
 
-        if (isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-            echo "<div id='ohmEditGroup'>";
+    $stm = $DBH->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :groupId");
+    $stm->execute(array(':groupId' => $_GET['id']));
 
-            $currentAccessType = getGroupAssessmentAccessType($groupId);
-            if (is_null($currentAccessType)) {
-                echo "<div id='student_payment_api_failure'>Error: Failed to get current student payment / access type from API.</div>";
-            }
+    $lumenGuid = Sanitize::simpleString($stm->fetchColumn(0));
+    printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/><br/>', $lumenGuid);
 
-            renderAccessTypeSelector($currentAccessType);
+    if (isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+        echo "<div id='ohmEditGroup'>";
 
-            echo '<span id="student_payment_update_message"></span>';
-            printf('<br/><button id="update_student_payment_type" type="button"'
-                . ' onClick="updateStudentPaymentType(%d);">Update student payment type</button>',
-                Sanitize::onlyInt($groupId));
-
-            echo "</div>";
+        $currentAccessType = getGroupAssessmentAccessType($groupId);
+        if (is_null($currentAccessType)) {
+            echo "<div id='student_payment_api_failure'>Error: Failed to get current student payment / access type from API.</div>";
         }
+
+        renderAccessTypeSelector($currentAccessType);
+
+        echo '<span id="student_payment_update_message"></span>';
+        printf('<br/><button id="update_student_payment_type" type="button"'
+            . ' onClick="updateStudentPaymentType(%d);">Update student payment type</button>',
+            Sanitize::onlyInt($groupId));
+
+        echo "</div>";
     }
 }
 
@@ -78,53 +87,82 @@ function getModGroupForm($groupId, $groupType, $myrights)
 
 /**
  * Render the "Assessments require payment or activation" portion of the
- * Create/Modify Course page.
+ * Create/Modify course settings page.
  *
  * @param string $action One of "addcourse" or "modify"
+ * @param int $userRights The user's rights. (from imas_users)
+ * @param int $courseId The course's ID, if one is being modified.
  * @throws \OHM\Exceptions\StudentPaymentException
  */
-function renderCourseRequiresStudentPayment($action)
+function renderCourseRequiresStudentPayment($action, $userRights, $courseId): void
 {
+    // Rights level 100 == admins
+    if (100 > $userRights || !isset($GLOBALS['student_pay_api'])
+        || !$GLOBALS['student_pay_api']['enabled']) {
+        return;
+    }
+
     extract($GLOBALS, EXTR_SKIP | EXTR_REFS); // Sadface. :(
 
-    if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-        require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
+    $userId = $GLOBALS['userid'];
 
-        $courseId = intval($_GET['id']);
-
-        $courseOwnerGroupId = null;
-        if ('addcourse' == $action) {
-            $stm = $GLOBALS['DBH']->prepare("SELECT g.id
-												FROM imas_users AS u
-													JOIN imas_groups AS g ON g.id = u.groupid
-													WHERE u.id = :userId");
-            $stm->execute(array(':userId' => $GLOBALS['userid']));
-            $courseOwnerGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
-        }
-        if ('modify' == $action) {
-            $stm = $GLOBALS['DBH']->prepare("SELECT u.groupid
-												FROM imas_courses AS c
-													JOIN imas_users AS u ON c.ownerid = u.id
-													WHERE c.id = :courseId");
-            $stm->execute(array(':courseId' => $courseId));
-            $courseOwnerGroupId = $stm->fetch(PDO::FETCH_NUM)[0];
-        }
-
-        if (empty($courseOwnerGroupId)) {
-            // It's possible for users to have a group ID of "0". (default group)
-            // Group 0 isn't an actual group, so we can't do anything with that.
-            return;
-        }
-
-        $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
-        $groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-        if ($groupRequiresPayment && 'addcourse' != $action) {
-            $checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
-            echo '<span class=form>Assessments require payment or activation?</span><span class=formright>';
-            printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
-            echo '<label for="studentpay">Students must provide an access code or payment for assessments</label></span><br class="form"/>';
-        }
+    $courseOwnerGroupId = null;
+    if ('addcourse' == $action) {
+        $courseOwnerGroupId = getUserGroupId($userId);
     }
+    if ('modify' == $action) {
+        $courseOwnerGroupId = getCourseOwnerGroupId($courseId);
+    }
+
+    if (empty($courseOwnerGroupId)) {
+        // It's possible for users to have a group ID of "0". (default group)
+        // Group 0 doesn't represent any school, so we can't do anything with that.
+        return;
+    }
+
+    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
+    $groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
+    if ($groupRequiresPayment && 'addcourse' != $action) {
+        $checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
+        echo '<span class=form>Assessments require payment or activation?</span><span class=formright>';
+        printf('<input type="checkbox" id="studentpay" name="studentpay" %s/>', $checked);
+        echo '<label for="studentpay">Students must provide an access code or payment for assessments</label></span><br class="form"/>';
+    }
+}
+
+
+/**
+ * Get a user's group ID.
+ *
+ * @param int $userId
+ * @return int The course ID.
+ */
+function getUserGroupId($userId): int
+{
+    global $DBH;
+
+    $stm = $DBH->prepare("SELECT groupid FROM imas_users WHERE id = :userId");
+    $stm->execute(array(':userId' => $userId));
+    return $stm->fetch(PDO::FETCH_NUM)[0];
+}
+
+
+/**
+ * Get a course owner's group ID.
+ *
+ * @param int $courseId The course ID.
+ * @return int The course owner's group ID.
+ */
+function getCourseOwnerGroupId($courseId): int
+{
+    global $DBH;
+
+    $stm = $DBH->prepare("SELECT u.groupid
+                            FROM imas_courses AS c
+                                JOIN imas_users AS u ON c.ownerid = u.id
+                            WHERE c.id = :courseId");
+    $stm->execute(array(':courseId' => $courseId));
+    return $stm->fetch(PDO::FETCH_NUM)[0];
 }
 
 
@@ -140,9 +178,9 @@ function renderCourseRequiresStudentPayment($action)
  * - "direct_pay"
  *
  * @param $groupId integer The group ID to get the payment/access type for.
- * @return string The access type. Null is returned on API communication failure.
+ * @return string|null The access type. Null is returned on API communication failure.
  */
-function getGroupAssessmentAccessType($groupId)
+function getGroupAssessmentAccessType($groupId): ?string
 {
     require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
     require_once(__DIR__ . "/../../ohm/models/StudentPayApiResult.php");
@@ -181,7 +219,7 @@ function getGroupAssessmentAccessType($groupId)
  *
  * @param $currentAccessType string The groups current student payment / access type.
  */
-function renderAccessTypeSelector($currentAccessType)
+function renderAccessTypeSelector($currentAccessType): void
 {
     $validAccessTypes = array(
         'not_required' => 'Not required',

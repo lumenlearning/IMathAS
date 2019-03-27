@@ -3,6 +3,11 @@
 require_once("../includes/sanitize.php");
 
 
+/**
+ * Called when a user enrolls in a course.
+ *
+ * @param int $courseId The course ID the user is enrolling in.
+ */
 function onEnroll($courseId)
 {
     if ($_GET['enrollandlogin']) {
@@ -13,6 +18,9 @@ function onEnroll($courseId)
 }
 
 
+/**
+ * Called when an error is generated during new user account creation.
+ */
 function onNewUserError()
 {
     if ($_POST['courseid'] && $_POST['ekey'] && $_POST['enrollandregister']) {

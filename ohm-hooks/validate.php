@@ -1,6 +1,12 @@
 <?php
 
 
+/**
+ * Called during a user's login process.
+ *
+ * This happens after updating their last login time and before forcing
+ * password resets.
+ */
 function onLogin()
 {
     // If post data contains ekey and courseid, then check for user enrollment.
