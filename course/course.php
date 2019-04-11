@@ -1,4 +1,4 @@
-<?php 
+<?php
 //IMathAS:  Main course page
 //(c) 2006 David Lippman
 
@@ -33,7 +33,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$body = _("You are not enrolled in this course.  Please return to the <a href=\"../index.php\">Home Page</a> and enroll\n");
 } else { // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 	$cid = Sanitize::courseId($_GET['cid']);
-	
+
 	if (isset($teacherid) && isset($sessiondata['sessiontestid']) && !isset($sessiondata['actas']) && $sessiondata['courseid']==$cid) {
 		//clean up coming out of an assessment
 		require_once("../includes/filehandler.php");
@@ -42,7 +42,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE id=:id LIMIT 1");
 		$stm->execute(array(':id'=>$sessiondata['sessiontestid']));
 	}
-   
+
 	if (isset($teacherid) && isset($_GET['from']) && isset($_GET['to'])) {
 		$from = $_GET['from'];
 		$to = $_GET['to'];
@@ -61,10 +61,10 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		} else {
 			$curblock =& $sub;
 		}
-	   	   
-		$blockloc = $blocktree[count($blocktree)-1]-1; 
+
+		$blockloc = $blocktree[count($blocktree)-1]-1;
 	   	//$sub[$blockloc]['items'] is block with items
-	   
+
 		if (strpos($to,'-')!==false) {  //in or out of block
 			if ($to[0]=='O') {  //out of block
 				$itemtomove = $curblock[$from-1];  //+3 to adjust for other block params
@@ -112,7 +112,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$toolset = $line['toolset'];
 	$latepasshrs = $line['latepasshrs'];
 	$useleftnav = true;
-  
+
 	if (isset($teacherid) && isset($_GET['togglenewflag'])) { //handle toggle of NewFlag
 		$sub =& $items;
 		$blocktree = explode('-',$_GET['togglenewflag']);
@@ -131,14 +131,14 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
 	}
-	
+
 	//enable teacher guest access
 	if (isset($instrPreviewId)) {
 		$tutorid = $instrPreviewId;
 	}
 
 	if ((!isset($_GET['folder']) || $_GET['folder']=='') && !isset($sessiondata['folder'.$cid])) {
-		$_GET['folder'] = '0';  
+		$_GET['folder'] = '0';
 		$sessiondata['folder'.$cid] = '0';
 		writesessiondata();
 	} else if ((isset($_GET['folder']) && $_GET['folder']!='') && (!isset($sessiondata['folder'.$cid]) || $sessiondata['folder'.$cid]!=$_GET['folder'])) {
@@ -166,18 +166,18 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		}
 		$nocoursenav = true;
 	}
-	
+
 	//get exceptions
 	$now = time();
 	$exceptions = array();
 	if (!isset($teacherid) && !isset($tutorid)) {
 		$exceptions = loadExceptions($cid, $userid);
-		}
+	}
 	//update block start/end dates to show blocks containing items with exceptions
 	if (count($exceptions)>0) {
 		upsendexceptions($items);
 	}
-	
+
 	if ($useleftnav && !isset($teacherid)) { //load quick block nav
 		$stuLeftNavBlocks = array();
 		buildBlockLeftNav($items, '0', $stuLeftNavBlocks);
@@ -221,7 +221,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	if (isset($_COOKIE['prevloadedblocks-'.$cid]) && $_COOKIE['prevloadedblocks-'.$cid]!='') {$prevloadedblocks = explode(',',$_COOKIE['prevloadedblocks-'.$cid]);}
 	$plblist = implode(',',$prevloadedblocks);
 	$oblist = implode(',',$openblocks);
-	
+
 	$curBreadcrumb = $breadcrumbbase;
 	if (isset($backtrack) && count($backtrack)>0) {
 		if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
@@ -247,32 +247,32 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 				$backlink = "<span class=right><a href=\"course.php?cid=$cid&folder=".Sanitize::encodeUrlParam($backtrack[count($backtrack)-2][1])."\">" . _('Back') . "</a></span><br class=\"form\" />";
 			}
 			$_SESSION['backtrack'] = array($sendcrumb,$backtrack[count($backtrack)-1][1]);
-			
+
 		} else {
 			$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder=0\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-		for ($i=0;$i<count($backtrack);$i++) {
+			for ($i=0;$i<count($backtrack);$i++) {
 				$curBreadcrumb .= " &gt; ";
 			if ($i!=count($backtrack)-1) {
 				$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder=" . Sanitize::encodeUrlParam($backtrack[$i][1]) . "\">";
 			}
 				$curBreadcrumb .= Sanitize::encodeStringForDisplay($backtrack[$i][0]);
-			if ($i!=count($backtrack)-1) {
-				$curBreadcrumb .= "</a>";
-			}
-		}
-		$curname = $backtrack[count($backtrack)-1][0];
-		if (count($backtrack)==1) {
-			$backlink =  "<span class=right><a href=\"course.php?cid=$cid&folder=0\">" . _('Back') . "</a></span><br class=\"form\" />";
-		} else {
-			$backlink = "<span class=right><a href=\"course.php?cid=$cid&folder=".Sanitize::encodeUrlParam($backtrack[count($backtrack)-2][1])."\">" . _('Back') . "</a></span><br class=\"form\" />";
-		}
+				if ($i!=count($backtrack)-1) {
+					$curBreadcrumb .= "</a>";
+				}
+            }
+            $curname = $backtrack[count($backtrack)-1][0];
+            if (count($backtrack)==1) {
+                $backlink =  "<span class=right><a href=\"course.php?cid=$cid&folder=0\">" . _('Back') . "</a></span><br class=\"form\" />";
+            } else {
+                $backlink = "<span class=right><a href=\"course.php?cid=$cid&folder=".Sanitize::encodeUrlParam($backtrack[count($backtrack)-2][1])."\">" . _('Back') . "</a></span><br class=\"form\" />";
+            }
 		}
 	} else {
 		$curBreadcrumb .= Sanitize::encodeStringForDisplay($coursename);
 		$curname = Sanitize::encodeStringForDisplay($coursename);
 	}
-	
-	
+
+
 	if ($msgset<4) {
 	   $stm = $DBH->prepare("SELECT COUNT(id) FROM imas_msgs WHERE msgto=:msgto AND courseid=:courseid AND (isread=0 OR isread=4)");
 	   $stm->execute(array(':msgto'=>$userid, ':courseid'=>$cid));
@@ -289,7 +289,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$query .= "JOIN imas_forums ON imas_forum_posts.forumid=imas_forums.id LEFT JOIN imas_forum_views AS mfv ";
 	$query .= "ON mfv.threadid=imas_forum_posts.threadid AND mfv.userid='$userid' WHERE imas_forums.courseid='$cid' ";
 	$query .= "GROUP BY imas_forum_posts.threadid HAVING ((max(imas_forum_posts.postdate)>mfv.lastview) OR (mfv.lastview IS NULL))) AS newitems ";
-	*/	
+	*/
 	/*
 	$query = "SELECT count(*) FROM ";
 	$query .= "(SELECT imas_forum_threads.id FROM imas_forum_threads ";
@@ -315,7 +315,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	} else {
 		$stm->execute(array(':now'=>$now, ':courseid'=>$cid, ':userid'=>$userid));
 	}
-	
+
 
 
 	/*$query = "SELECT imas_forum_threads.forumid,imas_forum_threads.id FROM imas_forum_threads ";
@@ -331,34 +331,34 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	if (array_sum($newpostcnts)>0) {
 		$newpostscnt = " <a href=\"$imasroot/forums/newthreads.php?cid=$cid\" class=noticetext>" . sprintf(_('New (%d)'), array_sum($newpostcnts)) . "</a>";
 	} else {
-		$newpostscnt = '';	
+		$newpostscnt = '';
 	}
-	
+
 	//get items with content views, for enabling stats link
 	/*
 	//removed - always showing stats link now.
-	if (isset($teacherid) || isset($tutorid)) { 
+	if (isset($teacherid) || isset($tutorid)) {
 		$hasstats = array();
 		$query = "SELECT DISTINCT(CONCAT(SUBSTRING(type,1,1),typeid)) FROM imas_content_track WHERE courseid='$cid' AND type IN ('inlinetext','linkedsum','linkedlink','linkedintext','linkedviacal','assessintro','assess','assesssum','wiki','wikiintext') ";
 		//not sure this is useful information, since this is in the list posts by name page, and we don't track forum views in content tracking
 		//$query .= "UNION SELECT DISTINCT(CONCAT(SUBSTRING(type,1,1),info)) FROM imas_content_track WHERE courseid='$cid' AND type in ('forumpost','forumreply')";
 		$result = mysql_query($query) or die("Query failed : " . mysql_error());
 		while ($row = mysql_fetch_row($result)) {
-			$hasstats[$row[0]] = true;	
+			$hasstats[$row[0]] = true;
 		}
 	}
 	*/
-	
+
 	//get read linked items
 	$readlinkeditems = array();
 	if ($coursetheme=='otbsreader.css' && isset($studentid)) {
 		$stm = $DBH->prepare("SELECT DISTINCT typeid FROM imas_content_track WHERE userid=:userid AND type='linkedlink' AND courseid=:courseid");
 		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			$readlinkeditems[$row[0]] = true;	
+			$readlinkeditems[$row[0]] = true;
 		}
 	}
-	
+
 	//get latepasses
 	if (!isset($teacherid) && !isset($tutorid) && !$inInstrStuView && isset($studentinfo)) {
 	   //$query = "SELECT latepass FROM imas_students WHERE userid='$userid' AND courseid='$cid'";
@@ -374,7 +374,7 @@ $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/cour
 if (isset($tutorid) && isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
 	$placeinhead .= '<script type="text/javascript">$(function(){$(".instrdates").hide();});</script>';
 }
-	
+
 /******* begin html output ********/
 require("../header.php");
 
@@ -388,7 +388,7 @@ if ($overwriteBody==1) {
 } else {
 
 	if (isset($teacherid)) {
- ?>  
+ ?>
 	<script type="text/javascript">
 		//function moveitem(from,blk) {
 		//	var to = document.getElementById(blk+'-'+from).value;
@@ -413,15 +413,15 @@ if ($overwriteBody==1) {
 	</script>
 
 <?php
-	}	
+	}
 ?>
 	<script type="text/javascript">
 		var getbiaddr = 'getblockitems.php?cid=<?php echo $cid ?>&folder=';
 		var oblist = '<?php echo Sanitize::encodeStringForJavascript($oblist); ?>';
 		var plblist = '<?php echo Sanitize::encodeStringForJavascript($plblist); ?>';
 		var cid = '<?php echo $cid ?>';
-	</script> 
-	
+	</script>
+
 <?php
 	//check for course layout
 	if (isset($CFG['GEN']['courseinclude'])) {
@@ -435,7 +435,7 @@ if ($overwriteBody==1) {
 	}
 ?>
 	<div class=breadcrumb>
-		<?php 
+		<?php
 		if (isset($CFG['GEN']['logopad'])) {
 			echo '<span class="padright hideinmobile" style="padding-right:'.$CFG['GEN']['logopad'].'">';
 		} else {
@@ -450,11 +450,11 @@ if ($overwriteBody==1) {
 			echo "<img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a>";
 		} else {
 			echo Sanitize::encodeStringForDisplay($userfullname);
-		} 
+		}
 		?>
 		</span>
-		<?php 
-		
+		<?php
+
 		if ($useleftnav) {
 			if ($didnavlist && !isset($teacherid) && !$inInstrStuView) {
 				$incclass = 'class="hideifnavlist"';
@@ -467,16 +467,16 @@ if ($overwriteBody==1) {
 		?>
 		<div class=clear></div>
 	</div>
-	
-<?php  
+
+<?php
 	if ($useleftnav && isset($teacherid)) {
-?>	
+?>
 	<div id="leftcontent" class="hiddenmobile" role="navigation" aria-label="<?php echo _('Instructor tool navigation');?>">
 		<p class="showinmobile"><b><?php echo _('Views'); ?></b><br/>
 			<a href="course.php?cid=<?php echo $cid ?>&stuview=on"><?php echo _('Student View'); ?></a><br/>
 			<a href="course.php?cid=<?php echo $cid ?>&quickview=on"><?php echo _('Quick Rearrange'); ?></a>
 		</p>
-		
+
 		<p>
 		<b><?php echo _('Communication'); ?></b><br/>
 			<a href="<?php echo $imasroot ?>/msgs/msglist.php?cid=<?php echo $cid ?>&folder=<?php echo Sanitize::encodeUrlParam($_GET['folder']); ?>" class="essen">
@@ -504,14 +504,14 @@ if ($overwriteBody==1) {
 			<a href="coursemap.php?cid=<?php echo $cid ?>"><?php echo _('Course Map'); ?></a>
 		</p>
 	<?php
-	} 
+	}
 	?>
 
 		<p><b><?php echo _('Questions'); ?></b><br/>
 			<a href="manageqset.php?cid=<?php echo $cid ?>"><?php echo _('Manage'); ?></a><br/>
 			<a href="managelibs.php?cid=<?php echo $cid ?>"><?php echo _('Libraries'); ?></a>
 		</p>
-<?php			
+<?php
 		if ($allowcourseimport) {
 ?>
 		<p><b><?php echo _('Export/Import'); ?></b><br/>
@@ -528,7 +528,7 @@ if ($overwriteBody==1) {
 			<br/><a href="../admin/importitems2.php?cid=<?php echo $cid ?>"><?php echo _('Import'); ?></a>
 		<?php } ?>
 		</p>
-		
+
 		<p><b><?php echo _('Mass Change'); ?></b><br/>
 			<a href="chgassessments.php?cid=<?php echo $cid ?>"><?php echo _('Assessments'); ?></a><br/>
 			<a href="chgforums.php?cid=<?php echo $cid ?>"><?php echo _('Forums'); ?></a><br/>
@@ -543,11 +543,11 @@ if ($overwriteBody==1) {
 		</p>
 	</div>
 	<div id="centercontent">
-<?php	
+<?php
 	} else if ($useleftnav && !isset($teacherid)) {
 ?>
 		<div id="leftcontent" class="hiddenmobile"  role="navigation" aria-label="<?php echo _('Tools navigation');?>">
-			
+
 <?php
 		if ($inInstrStuView) { //instructor in student view
 ?>
@@ -557,23 +557,23 @@ if ($overwriteBody==1) {
 		  </p>
 <?php
 		}
-		
-			echo '<p>';
+
+		echo '<p>';
 		if ($msgset<4) {
 				echo '<a href="'.$imasroot.'/msgs/msglist.php?cid='.$cid.'&amp;folder=' . Sanitize::encodeUrlParam($_GET['folder']) . '" class="essen"> ';
 				echo _('Messages').'</a> '.$newmsgs .' <br/>';
 			}
 			if (($toolset&2)==0) {
 				echo '<a href="'.$imasroot.'/forums/forums.php?cid='.$cid.'&amp;folder=' . Sanitize::encodeUrlParam($_GET['folder']) . '" class="essen">';
-				echo _('Forums').'</a> ' . $newpostscnt . '<br/>';
+				echo _('Forums').'</a> '.$newpostscnt.'<br/>';
 			}
 		if (($toolset&1)==0) {
 			echo '<a href="showcalendar.php?cid='.$cid.'" class="essen">'._('Calendar').'</a><br/>';
-			}
+		}
 		echo '<a href="coursemap.php?cid='.$cid.'">'._('Course Map').'</a>';
 		echo '</p>';
 	?>
-			
+
 			<p>
 			<a href="gradebook.php?cid=<?php echo $cid ?>" class="essen"><?php echo _('Gradebook'); ?></a> <?php if (($coursenewflag&1)==1) {echo '<span class="noticetext">', _('New'), '</span>';}?>
 			</p>
@@ -591,14 +591,14 @@ if ($overwriteBody==1) {
 			}
 			echo '</p>';
 		}
-	
+
 		if (!isset($sessiondata['ltiitemtype'])) { //don't show in LTI embed
 	?>
 			<p>
-			<a href="../actions.php?action=logout"><?php echo _('Log Out'); ?></a><br/>   
+			<a href="../actions.php?action=logout"><?php echo _('Log Out'); ?></a><br/>
 			<a href="<?php echo $imasroot ?>/help.php?section=usingimas"><?php printf(_('Help Using %s'), $installname); ?></a>
 			</p>
-			<?php		  
+			<?php
 			if ($myrights > 5 && $allowunenroll==1) {
 				echo "<p><a href=\"../forms.php?action=unenroll&cid=$cid\">", _('Unenroll From Course'), "</a></p>\n";
 			}
@@ -608,16 +608,12 @@ if ($overwriteBody==1) {
 		<div id="centercontent">
 <?php
 	}
-
-if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migration_notice.php");}
-
    makeTopMenu();
+   echo "<div id=\"headercourse\" class=\"pagetitle\"><h1>".Sanitize::encodeStringForDisplay($curname)."</h1></div>\n";
 
-   echo "<div id=\"headercourse\" class=\"pagetitle\"><h2>".Sanitize::encodeStringForDisplay($curname)."</h2></div>\n";
-   
    if (count($items)>0) {
-	   
-	   	   
+
+
 	   if ($quickview=='on' && isset($teacherid)) {
 		   echo '<style type="text/css">.drag {color:red; background-color:#fcc;} .icon {cursor: pointer;}</style>';
 		   echo "<script>var AHAHsaveurl = '$imasroot/course/savequickreorder.php?cid=$cid';";
@@ -625,10 +621,10 @@ if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migra
 		   echo 'var itemorderhash="'.md5(serialize($items)).'";';
 		   echo "</script>";
 		   echo "<script src=\"$imasroot/javascript/mootools.js\"></script>";
-		   echo "<script src=\"$imasroot/javascript/nested1.js?v=011917\"></script>";
+		   echo "<script src=\"$imasroot/javascript/nested1.js?v=041119\"></script>";
 		   echo '<p><button type="button" onclick="quickviewexpandAll()">'._("Expand All").'</button> ';
 		   echo '<button type="button" onclick="quickviewcollapseAll()">'._("Collapse All").'</button></p>';
-		   
+
 		   echo '<ul id=qviewtree class=qview>';
 		   quickview($items,0);
 		   echo '</ul>';
@@ -640,9 +636,9 @@ if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migra
    } else {
 	   if (isset($teacherid) && $quickview!='on') {
 	   	   if ($_GET['folder']=='0') {
-	   	echo '<p><b>Welcome to your course!</b></p>';
-	   	echo '<p>To start by copying from another course, use the <a href="copyitems.php?cid='.$cid.'">Course Items: Copy</a> ';
-	   	echo 'link along the left side of the screen.</p><p>If you want to build from scratch, use the "Add An Item" pulldown below to get started.</p><p>&nbsp;</p>';
+			echo '<p><b>Welcome to your course!</b></p>';
+			echo '<p>To start by copying from another course, use the <a href="copyitems.php?cid='.$cid.'">Course Items: Copy</a> ';
+			echo 'link along the left side of the screen.</p><p>If you want to build from scratch, use the "Add An Item" pulldown below to get started.</p><p>&nbsp;</p>';
 	   	   }
 	   	echo generateadditem($_GET['folder'],'t');
 	   }
@@ -650,14 +646,14 @@ if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migra
    if (isset($backlink)) {
 	   echo $backlink;
    }
-   
+
    echo "</div>"; //centercontent
-   
-	if ($firstload) {
+
+   if ($firstload) {
 		echo "<script>document.cookie = 'openblocks-$cid=' + oblist;\n";
 		echo "document.cookie = 'loadedblocks-$cid=0';</script>\n";
-	}
-}   
+   }
+}
 
 require("../footer.php");
 
@@ -670,7 +666,7 @@ function makeTopMenu() {
 	global $CFG;
 	global $inInstrStuView;
 	global $useleftnav;
-	
+
 	if (isset($teacherid) || $inInstrStuView) {
 		echo '<div id="viewbuttoncont" class="hideinmobile">';
 
@@ -698,30 +694,30 @@ function makeTopMenu() {
 		echo '>', _('Quick Rearrange'), '</a>';
 		echo '</div>';
 		//echo '<br class="clear"/>';
-			
-		
+
+
 	}
-	
+
 	if (isset($teacherid) && $quickview=='on') {
 		echo '<div class="clear"></div>';
-		
+
 		echo '<div class="cpmid">';
-		
+
 		echo '<span class="showinmobile"><b>'._('Quick Rearrange.'), "</b> <a href=\"course.php?cid=$cid&quickview=off\">", _('Back to regular view'), "</a>.</span> ";
-		
+
 		if (isset($CFG['CPS']['miniicons'])) {
-			echo _('Use icons to drag-and-drop order.'),' ',_('Click the icon next to a block to expand or collapse it. Click an item title to edit it in place.'), '  <input type="button" id="recchg" disabled="disabled" value="', _('Save Changes'), '" onclick="submitChanges()"/>';
-		
+			echo _('Use icons to drag-and-drop order.'),' ',_('Click the icon next to a block to expand or collapse it. Click an item title to edit it in place.'), '  <input type="button" id="recchg" disabled="disabled" value="', _('Save Changes'), '" onclick="submitChanges(\'json\')"/>';
+
 		} else {
-			echo _('Use colored boxes to drag-and-drop order.'),' ',_('Click the B next to a block to expand or collapse it. Click an item title to edit it in place.'), '  <input type="button" id="recchg" disabled="disabled" value="', _('Save Changes'), '" onclick="submitChanges()"/>';
+			echo _('Use colored boxes to drag-and-drop order.'),' ',_('Click the B next to a block to expand or collapse it. Click an item title to edit it in place.'), '  <input type="button" id="recchg" disabled="disabled" value="', _('Save Changes'), '" onclick="submitChanges(\'json\')"/>';
 		}
 		 echo '<span id="submitnotice" class=noticetext></span>';
 		 echo '<div class="clear"></div>';
 		 echo '</div>';
-		
+
 	}
-		
-		}
+
+}
 
 
 
