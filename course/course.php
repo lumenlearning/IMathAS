@@ -620,8 +620,7 @@ if ($overwriteBody==1) {
 		   echo 'var unsavedmsg = "'._("You have unrecorded changes.  Are you sure you want to abandon your changes?").'";';
 		   echo 'var itemorderhash="'.md5(serialize($items)).'";';
 		   echo "</script>";
-		   echo "<script src=\"$imasroot/javascript/mootools.js\"></script>";
-		   echo "<script src=\"$imasroot/javascript/nested1.js?v=041119\"></script>";
+		   echo "<script src=\"$imasroot/javascript/nestedjq.js?v=041119\"></script>";
 		   echo '<p><button type="button" onclick="quickviewexpandAll()">'._("Expand All").'</button> ';
 		   echo '<button type="button" onclick="quickviewcollapseAll()">'._("Collapse All").'</button></p>';
 
@@ -640,6 +639,7 @@ if ($overwriteBody==1) {
 			echo '<p>To start by copying from another course, use the <a href="copyitems.php?cid='.$cid.'">Course Items: Copy</a> ';
 			echo 'link along the left side of the screen.</p><p>If you want to build from scratch, use the "Add An Item" pulldown below to get started.</p><p>&nbsp;</p>';
 	   	   }
+	   	// $_GET['folder'] is sanitized in generateadditem()
 	   	echo generateadditem($_GET['folder'],'t');
 	   }
    }
