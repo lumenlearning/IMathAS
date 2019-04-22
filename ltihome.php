@@ -7,6 +7,12 @@ if (!isset($sessiondata['ltirole']) || $sessiondata['ltirole']!='instructor') {
 	echo "Not authorized to view this page";
 	exit;
 }
+
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['ltihome'])) {
+	require($CFG['hooks']['ltihome']);
+}
+
 //decide what we need to display
 if ($sessiondata['ltiitemtype']==0) {
 	$hascourse = true;
@@ -111,26 +117,6 @@ if (!empty($createcourse)) {
 			':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 			':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 		$cid = $DBH->lastInsertId();
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		require_once(__DIR__ . "/ohm/includes/StudentPaymentDb.php");
-
-		$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $cid, $userid);
-		$studentPaymentDb->setDbh($DBH);
-
-		$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-		if ($groupRequiresStudentPayment) {
-			$studentPaymentDb->setCourseRequiresStudentPayment(true);
-		}
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-
 		//if ($myrights==40) {
 			$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
 			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':created_at'=>time()));
@@ -172,6 +158,10 @@ if (!empty($createcourse)) {
 		copyrubrics();
 		$DBH->commit();
 
+		//call hook, if defined
+		if (function_exists('onAddCourse')) {
+			onAddCourse($cid, $userid);
+		}
 	}
 	$stm = $DBH->prepare("UPDATE imas_lti_courses SET courseid=:courseid WHERE org=:org AND contextid=:contextid");
 	$stm->execute(array(':courseid'=>$cid, ':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id']));
@@ -255,7 +245,7 @@ if (!empty($createcourse)) {
 					'placementAdvice' => array(
 						'presentationDocumentTarget' => $target
 					)
-				)
+				)	
 			)
 		);
 		if ($placementtype=='assess' && $ptsposs>0) {
@@ -290,7 +280,7 @@ if (!empty($createcourse)) {
 		$acc_req = OAuthRequest::from_consumer_and_token($consumer, false, 'POST', $sessiondata['lti_selection_return'], $params);
 		$acc_req->sign_request($hmac_method, $consumer, false);
 		$newparms = $acc_req->get_parameters();
-
+		
 		echo '<body><form id="theform" method="post" action="'.Sanitize::encodeStringForDisplay($sessiondata['lti_selection_return']).'">';
 		//output form fields
 		foreach($newparms as $key => $value ) {
@@ -405,7 +395,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	}
 
 	echo '<br/> <select name="setplacement"> ';
-
+	
 	if (isset($sessiondata['lti_selection_type']) && $sessiondata['lti_selection_type']=='link') {
 		echo '<option value="course">Whole Course Placement</option>';
 	}

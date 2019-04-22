@@ -13,24 +13,11 @@ if (!file_exists(__DIR__ . "/config.php")) {
 
 require_once(__DIR__ . "/config.php");
 
-######### Begin OHM-specific changes #######################################
-######### Begin OHM-specific changes #######################################
-######### Begin OHM-specific changes #######################################
-######### Begin OHM-specific changes #######################################
-######### Begin OHM-specific changes #######################################
 
-require_once(__DIR__ . '/vendor/autoload.php');
-
-// Development dependencies
-if (isset($GLOBALS['configEnvironment']) && 'development' == $GLOBALS['configEnvironment']) {
-	require_once(__DIR__ . '/c3.php');
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['init'])) {
+	require($CFG['hooks']['init']);
 }
-
-######### End OHM-specific changes #########################################
-######### End OHM-specific changes #########################################
-######### End OHM-specific changes #########################################
-######### End OHM-specific changes #########################################
-######### End OHM-specific changes #########################################
 
 // Store PHP sessions in the database.
 require_once(__DIR__ . "/includes/session.php");

@@ -5,6 +5,11 @@ ini_set("memory_limit", "104857600");
 ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['actions'])) {
+	require($CFG['hooks']['actions']);
+}
+
 require_once("includes/sanitize.php");
 
 	if (isset($_GET['greybox'])) {
@@ -48,14 +53,12 @@ require_once("includes/sanitize.php");
 			}
 			echo '<div id="headerforms" class="pagetitle"><h1>New User Signup</h1></div>';
 			echo $error;
-			if($_POST['courseid']&& $_POST['ekey']& $_POST['enrollandregister']){
-				$cid = Sanitize::courseId($_POST['courseid']);
-				$ekey = Sanitize::encodeStringForDisplay($_POST['ekey']);
-				echo "<p><a href='ohm/registerorsignin.php?cid=$cid&ekey=$ekey'>Try Again</a></p>";
+			//call hook, if defined
+			if (function_exists('onNewUserError')) {
+				onNewUserError();
+			} else {
+				echo '<p><a href="forms.php?action=newuser">Try Again</a></p>';
 			}
-			else{
-			echo '<p><a href="forms.php?action=newuser">Try Again</a></p>';
-      }
 			require("footer.php");
 			exit;
 		}
@@ -135,7 +138,7 @@ require_once("includes/sanitize.php");
 			$message .= $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id</a>\r\n";
 			require_once("./includes/email.php");
 			send_email($_POST['email'], $sendfrom, $installname.' Confirmation', $message, array(), array(), 10);
-			
+
 			require("header.php");
 			if ($gb == '') {
 				echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; New User Signup</div>\n";
@@ -328,7 +331,7 @@ require_once("includes/sanitize.php");
 		if ($stm->rowCount() > 0) {
 			echo $stm->rowCount();
 			echo " usernames match this email address and were emailed.  <a href=\"index.php\">Return to login page</a>";
-			
+
 			$message  = "<h3>This is an automated message from $installname.  Do not respond to this email</h3>\r\n";
 			$message .= "<p>Your email was entered in the Username Lookup page on $installname.  If you did not do this, you may ignore and delete this message.  ";
 			$message .= "All usernames using this email address are listed below</p><p>";
@@ -341,7 +344,7 @@ require_once("includes/sanitize.php");
 				$message .= "Username: <b>{$row['SID']}</b>.  Last logged in: $lastlogin<br/>";
 			}
 			$message .= "</p><p>If you forgot your password, use the Lost Password link at the login page.</p>";
-			
+
 			require_once("./includes/email.php");
 			send_email($_POST['email'], $sendfrom, $installname._(' Username Request'), $message, array(), array(), 10);
 
@@ -512,12 +515,10 @@ require_once("includes/sanitize.php");
 						}
 					}
 
-					//================= OHM-specific changes begin here =====================
-					if($_GET['enrollandlogin']){
-						header("Location:" . $GLOBALS['basesiteurl'] . "/course/course.php?folder=0&cid=".Sanitize::courseId($_POST['cid'])); /* Redirect browser */
-						exit;
+					//call hook, if defined
+					if (function_exists('onEnroll')) {
+						onEnroll($_POST['cid']);
 					}
-					//================= OHM-specific changes end here =====================
 
 					require("header.php");
 					echo $pagetopper;
@@ -575,7 +576,7 @@ require_once("includes/sanitize.php");
 			$query .= "(SELECT ifp.threadid FROM imas_forum_posts AS ifp JOIN imas_forums ON ifp.forumid=imas_forums.id WHERE imas_forums.courseid=:cid)";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
-			
+
 			$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetype='forum' AND gradetypeid IN (SELECT id FROM imas_forums WHERE courseid=:cid) AND userid=:uid");
 			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
 

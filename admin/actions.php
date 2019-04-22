@@ -4,14 +4,9 @@
 require("../init.php");
 require_once("../includes/password.php");
 
-
-function returnrole($role_num){
- 	if ($role_num == 5) {return "Guest User";}
- 	if ($role_num == 10) {return "Student";}
- 	if ($role_num == 20) {return "Teacher";}
- 	if ($role_num == 40) {return "Limited Course Creator";}
- 	if ($role_num == 75) {return "Group Admin";}
- 	if ($role_num == 100) {return "Full Admin";}
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['admin/actions'])) {
+	require(__DIR__.'/../'.$CFG['hooks']['admin/actions']);
 }
 
 $from = 'admin';
@@ -63,7 +58,7 @@ switch($_POST['action']) {
 			echo "invalid id";
 			exit;
 		} else if ($myrights < 100 && ($myspecialrights&32)!=32 && $oldgroupid!=$groupid) {
-			echo "You don't have the authority for this action";
+			echo "You don't have the authority for this action"; 
 			exit;
 		}
 
@@ -403,7 +398,7 @@ switch($_POST['action']) {
 			$stm->execute(array($newuserid, $now, json_encode($reqdata)));
 		}
 		if ($_POST['newrights']>=20 && !empty($_POST['addnewcourse'])) {
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/addcourse.php?for=".Sanitize::onlyInt($newuserid));
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/addcourse.php?for=".Sanitize::onlyInt($newuserid));	
 			exit;
 		}
 		break;
@@ -651,38 +646,12 @@ switch($_POST['action']) {
 			if ($updateJsonData) {
 				$query .= "jsondata=:jsondata,";
 			}
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-				$query .= "student_pay_required=:studentpay,";
-			}
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
 			$query .= "allowunenroll=:allowunenroll,copyrights=:copyrights,msgset=:msgset,toolset=:toolset,theme=:theme,ltisecret=:ltisecret,istemplate=:istemplate,deftime=:deftime,deflatepass=:deflatepass,latepasshrs=:latepasshrs,dates_by_lti=:ltidates,startdate=:startdate,enddate=:enddate,cleanupdate=:cleanupdate WHERE id=:id";
 			$qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
 				':picicons'=>$picicons, ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset,
 				':toolset'=>$toolset, ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
 				':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, ':startdate'=>$startdate, ':enddate'=>$enddate, 
 				':latepasshrs'=>$latepasshrs, ':cleanupdate'=>$cleanupdate,':id'=>$_GET['id']);
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			if (100 <= $GLOBALS['myrights'] && isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
-				$qarr[':studentpay'] = $_POST['studentpay'] ? 1 : 0;
-			}
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
 			if ($myrights<75) {
 				$query .= " AND ownerid=:ownerid";
 				$qarr[':ownerid']=$userid;
@@ -692,6 +661,12 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
+			
+			//call hook, if defined
+			if (function_exists('onModCourse')) {
+				onModCourse($_GET['id'], $userid, $myrights, $groupid);
+			}
+			
 			if ($stm->rowCount()>0) {
 				if ($setdatesbylti==1) {
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
@@ -736,7 +711,7 @@ switch($_POST['action']) {
 					}
 				}
 			}
-
+			
 			$DBH->beginTransaction();
 			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,startdate,enddate,istemplate,deftime,deflatepass,latepasshrs,theme,ltisecret,dates_by_lti,blockcnt,created_at) VALUES ";
 			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :startdate, :enddate, :istemplate, :deftime, :deflatepass, :latepasshrs, :theme, :ltisecret, :ltidates, :blockcnt, :created_at);";
@@ -747,30 +722,12 @@ switch($_POST['action']) {
 				':deflatepass'=>$deflatepass, ':latepasshrs'=>$latepasshrs, ':theme'=>$theme, ':ltisecret'=>$ltisecret, ':ltidates'=>$setdatesbylti, ':blockcnt'=>$blockcnt,
 				':created_at'=>time()));
 			$cid = $DBH->lastInsertId();
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			// #### Begin OHM-specific code #####################################################
-			require_once(__DIR__ . "/../ohm/includes/StudentPaymentDb.php");
 
-			$studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $cid, $userid);
-			$studentPaymentDb->setDbh($DBH);
+            //call hook, if defined
+            if (function_exists('onAddCourse')) {
+                onAddCourse($cid, $userid, $myrights, $groupid);
+            }
 
-			try {
-				$groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
-				if ($groupRequiresStudentPayment) {
-					$studentPaymentDb->setCourseRequiresStudentPayment(true);
-				}
-			} catch (\OHM\StudentPaymentException $e) {
-				error_log($e->getMessage());
-				error_log($e->getTraceAsString());
-			}
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
-			// #### End OHM-specific code #######################################################
 			//if ($myrights==40) {
 				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
 				$stm->execute(array(':userid'=>$courseownerid, ':courseid'=>$cid, ':created_at'=>time()));
@@ -790,7 +747,7 @@ switch($_POST['action']) {
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':id'=>$ctc));
 				$ctcinfo = $stm->fetch(PDO::FETCH_ASSOC);
-				if (($ctcinfo['copyrights']==0 && $ctcinfo['ownerid'] != $courseownerid) ||
+				if (($ctcinfo['copyrights']==0 && $ctcinfo['ownerid'] != $courseownerid) || 
 					($ctcinfo['copyrights']==1 && $ctcinfo['groupid']!=$groupid)) {
 					if ($ctcinfo['enrollkey'] != '' && $ctcinfo['enrollkey'] != $_POST['ekey']) {
 						//did not provide valid enrollment key
@@ -816,7 +773,7 @@ switch($_POST['action']) {
 						$query = "INSERT INTO imas_gbcats (courseid,name,scale,scaletype,chop,dropn,weight,hidden,calctype) VALUES ";
 						$query .= "(:courseid, :name, :scale, :scaletype, :chop, :dropn, :weight, :hidden, :calctype)";
 						$gb_cat_ins = $DBH->prepare($query);
-				}
+					}
 					$gb_cat_ins->execute(array(':courseid'=>$cid, ':name'=>$row['name'], ':scale'=>$row['scale'], ':scaletype'=>$row['scaletype'],
 						':chop'=>$row['chop'], ':dropn'=>$row['dropn'], ':weight'=>$row['weight'], ':hidden'=>$row['hidden'], ':calctype'=>$row['calctype']));
 					$gbcats[$frid] = $DBH->lastInsertId();
@@ -857,10 +814,10 @@ switch($_POST['action']) {
 							$row[2] = $row[0].','.$row[2];
 						}
 						if ($out_ins_stm===null) {
-						$query = "INSERT INTO imas_outcomes (courseid,name,ancestors) VALUES ";
+							$query = "INSERT INTO imas_outcomes (courseid,name,ancestors) VALUES ";
 							$query .= "(:courseid, :name, :ancestors)";
 							$out_ins_stm = $DBH->prepare($query);
-					}
+						}
 						$out_ins_stm->execute(array(':courseid'=>$cid, ':name'=>$row[1], ':ancestors'=>$row[2]));
 						$outcomes[$row[0]] = $DBH->lastInsertId();
 					}
@@ -990,7 +947,7 @@ switch($_POST['action']) {
 				$stm->execute(array(':id'=>$_GET['id'], ':groupid'=>$groupid));
 				if ($stm->rowCount()>0) {
 					$oktodel = true;
-			}
+				}
 			}
 			if ($oktodel) {
 				$stm = $DBH->prepare("UPDATE imas_courses SET available=4 WHERE id=:id");
@@ -1255,20 +1212,12 @@ switch($_POST['action']) {
 		$grptype = (isset($_POST['iscust'])?1:0);
 		$stm = $DBH->prepare("UPDATE imas_groups SET name=:name,parent=:parent,grouptype=:grouptype WHERE id=:id");
 		$stm->execute(array(':name'=>$_POST['gpname'], ':parent'=>$_POST['parentid'], ':grouptype'=>$grptype, ':id'=>$_GET['id']));
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		// #### Begin OHM-specific code #####################################################
-		if (100 <= $GLOBALS['myrights']) {
-			$stm = $DBH->prepare("UPDATE imas_groups SET lumen_guid = :lumenGuid WHERE id = :groupId");
-			$stm->execute(array(':lumenGuid' => $_POST['lumen_guid'], ':groupId' => $_GET['id']));
+
+		//call hook, if defined
+		if (function_exists('onModGroup')) {
+			onModGroup($_GET['id'], $userid, $myrights, $groupid);
 		}
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
-		// #### End OHM-specific code #######################################################
+		
 		break;
 	case "delgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
