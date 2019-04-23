@@ -123,6 +123,15 @@
  $hasusername = isset($userid);
  $haslogin = isset($_POST['password']);
  if (!$hasusername && !$haslogin && isset($_GET['guestaccess']) && isset($CFG['GEN']['guesttempaccts'])) {
+ 	 if (empty($_SERVER['HTTP_REFERER'])) {
+ 	 	require("header.php");
+ 	 	echo '<p>You have requested guest access to a course.</p>';
+ 	 	$cid = Sanitize::onlyInt($_GET['cid']);
+ 	 	echo '<p><a href="'.$imasroot.'/index.php">Nevermind</a> ';
+ 	 	echo '<a href="'.$imasroot.'/course/course.php?cid='.$cid.'&guestaccess=true">Continue</a></p>';
+ 	 	require("footer.php");
+ 	 	exit;
+ 	 }
  	 $haslogin = true;
  	 $_POST['username']='guest';
  	 $_POST['mathdisp'] = 0;
@@ -329,7 +338,7 @@
 	//$username = $_COOKIE['username'];
 	$query = "SELECT SID,rights,groupid,LastName,FirstName,deflib";
 	if (strpos(basename($_SERVER['PHP_SELF']),'upgrade.php')===false) {
-		$query .= ',listperpage,hasuserimg,theme,specialrights,FCMtoken,forcepwreset';
+		$query .= ',listperpage,hasuserimg,theme,specialrights,FCMtoken,forcepwreset,mfa';
 	}
 	$query .= " FROM imas_users WHERE id=:id";
 	$stm = $DBH->prepare($query);
@@ -338,6 +347,24 @@
 	$username = $line['SID'];
 	$myrights = $line['rights'];
 	$myspecialrights = $line['specialrights'];
+	$userHasAdminMFA = false;
+	if (($myrights>40 || $myspecialrights>0) && !empty($line['mfa']) && empty($sessiondata['mfaverified'])) {
+		$mfadata = json_decode($line['mfa'], true);
+		if (isset($_COOKIE['gat']) && isset($mfadata['trusted'])) {
+			foreach ($mfadata['trusted'] as $mfatoken) {
+				if ($mfatoken == $_COOKIE['gat']) {
+					$sessiondata['mfaverified'] = true;
+					writesessiondata();
+					break;
+				}
+			}
+		}
+		if (empty($sessiondata['mfaverified'])) {
+			$userHasAdminMFA = true;
+			$myrights = 40;
+			$myspecialrights = 0;
+		}
+	}
 	$groupid = $line['groupid'];
 	$userdeflib = $line['deflib'];
 	$listperpage = $line['listperpage'];
@@ -436,7 +463,7 @@
 		} else if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner') {
 			$breadcrumbbase = "<a href=\"$imasroot/assessment/showtest.php?cid=".Sanitize::courseId($_GET['cid'])."&id={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
 			$urlparts = parse_url($_SERVER['PHP_SELF']);
-			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php');
+			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','file_manager.php','upload_handler.php');
 			//call hook, if defined
 			if (function_exists('allowedInAssessment')) {
 				$allowedinLTI = array_merge($allowedinLTI, allowedInAssessment());

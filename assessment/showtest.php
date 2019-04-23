@@ -3,7 +3,7 @@
 //(c) 2006 David Lippman
 
 	require("../init.php");
-	
+
 	//Look to see if a hook file is defined, and include if it is
 	if (isset($CFG['hooks']['assessment/showtest'])) {
 		require(__DIR__.'/../'.$CFG['hooks']['assessment/showtest']);
@@ -636,7 +636,7 @@
 		newrelic_add_custom_parameter ('showtest_aid', $line['assessmentid']);
 		newrelic_add_custom_parameter ('showtest_asid', $line['id']);
 	}
-
+	
 	$GLOBALS['assessver'] = $line['ver'];
 	if (strpos($line['questions'],';')===false) {
 		$questions = explode(",",$line['questions']);
@@ -2968,7 +2968,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					//if (!preg_match('/^<div\s*class="intro"[^>]*>(\s|&nbsp;|<p[^>]*>(\s*|&nbsp;)*<\/p>)*<\/div>$/', $intropages[0])) {
 						echo $intropages[0];
 					//}
-				}
+					}
 				$intro =  $intropages[2*$_GET['page']+2];
 				preg_match_all('/\[QUESTION\s+(\d+)\s*\]/',$intro,$matches,PREG_PATTERN_ORDER);
 				if (isset($matches[1]) && count($matches[1])>0) {

@@ -90,7 +90,7 @@ if (!empty($newStatus)) {
 		$stm->execute(array(':id'=>$instId));
 		$row = $stm->fetch(PDO::FETCH_ASSOC);
 
-        //call hook, if defined
+		//call hook, if defined
 		if (function_exists('getApproveMessage')) {
 			$message = getApproveMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
 		} else {
@@ -98,10 +98,10 @@ if (!empty($newStatus)) {
 			$message .= '<p>Welcome to '.$installname.'.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b> and the password you provided.</p>';
 		}
 
-        //call hook, if defined
-        if (function_exists('getApproveBcc')) {
-            $CFG['email']['new_acct_bcclist'] = getApproveBcc();
-        }
+		//call hook, if defined
+		if (function_exists('getApproveBcc')) {
+			$CFG['email']['new_acct_bcclist'] = getApproveBcc();
+		}
 
 		require_once("../includes/email.php");
 		send_email($row['email'], !empty($accountapproval)?$accountapproval:$sendfrom,

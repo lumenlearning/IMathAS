@@ -843,7 +843,7 @@ function drawTarget(x,y) {
 					var cury = 0;				
 					for (var curx=0;curx < targets[curTarget].imgwidth+4;curx += 1) {
 						cury = stretch*safepow(curx-tplines[curTarget][i][0][0], 1/3) + tplines[curTarget][i][0][1];
-						if (curx==90) {console.log(originy+","+tplines[curTarget][i][0][0]+","+tplines[curTarget][i][0][1]+","+curx+","+cury)};
+						//if (curx==90) {console.log(originy+","+tplines[curTarget][i][0][0]+","+tplines[curTarget][i][0][1]+","+curx+","+cury)};
 						if (cury<-100) { cury = -100;}
 						if (cury>targets[curTarget].imgheight+100) { cury=targets[curTarget].imgheight+100;}
 						if (curx==0) {
@@ -2124,7 +2124,6 @@ function mouseCoords(ev){
 	if(ev.pageX || ev.pageY){
 		return {x:ev.pageX, y:ev.pageY};
 	}
-
 	var dd = document.documentElement, db = document.body;
 	if (dd && (dd.scrollTop || dd.scrollLeft)) {
 		var SL = dd.scrollLeft;
@@ -2160,32 +2159,11 @@ function getMouseOffset(target, ev){
 }
 
 function getPosition(e){
-	var left = 0;
-	var top  = 0;
-
-	//seems to be causing issues
-	/*if (e.getBoundingClientRect) {
-		var box = e.getBoundingClientRect();
-		var scrollTop = Math.max(document.documentElement.scrollTop, document.body.scrollTop);
-                var scrollLeft = Math.max(document.documentElement.scrollLeft, document.body.scrollLeft);
-                return {x: box.left + scrollLeft, y: box.top + scrollTop};
-	}*/
 	if (e.className.match(/hidden/)) {
 		return {x:-10000, y:-10000};
 	}
-	while (e.offsetParent){
-		left += e.offsetLeft;
-		top  += e.offsetTop;
-		e     = e.offsetParent;
-		if (e.className.match(/hidden/)) {
-			return {x:-10000, y:-10000};
-		}
-	}
-
-	left += e.offsetLeft;
-	top  += e.offsetTop;
-	return {x:left, y:top};
-
+	var pos = $(e).offset();
+	return {x: pos.left, y: pos.top};
 }
 
 

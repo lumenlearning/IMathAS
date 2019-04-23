@@ -39,7 +39,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		echo "Invalid ID";
 		exit;
 	}
-
+	
 	if (isset($_GET['grp'])) { $sessiondata['groupopt'.$aid] = Sanitize::onlyInt($_GET['grp']); writesessiondata();}
 	if (isset($_GET['selfrom'])) {
 		$sessiondata['selfrom'.$aid] = Sanitize::stripHtmlTags($_GET['selfrom']);
@@ -287,22 +287,27 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				}
 			}
 
+			if ($_POST['withdrawtype']=='zero' || $_POST['withdrawtype']=='groupzero') {
+				//update points possible
+				require_once("../includes/updateptsposs.php");
+				updatePointsPossible($aid, $itemorder, $defpoints);
+			}
+
 			//update assessment sessions
-			$stm = $DBH->prepare("SELECT id,questions,bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
+			$stm = $DBH->prepare("SELECT id,questions,bestscores,lti_sourcedid FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
 			$stm->execute(array(':assessmentid'=>$aid));
-			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-				//$qarr = explode(',',$row[1]);
-				if (strpos($row[1],';')===false) {
-					$qarr = explode(",",$row[1]);
+			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+				if (strpos($row['questions'],';')===false) {
+					$qarr = explode(",",$row['questions']);
 				} else {
-					list($questions,$bestquestions) = explode(";",$row[1]);
+					list($questions,$bestquestions) = explode(";",$row['questions']);
 					$qarr = explode(",",$bestquestions);
 				}
-				if (strpos($row[2],';')===false) {
-					$bestscores = explode(',',$row[2]);
+				if (strpos($row['bestscores'],';')===false) {
+					$bestscores = explode(',',$row['bestscores']);
 					$doraw = false;
 				} else {
-					list($bestscorelist,$bestrawscorelist,$firstscorelist) = explode(';',$row[2]);
+					list($bestscorelist,$bestrawscorelist,$firstscorelist) = explode(';',$row['bestscores']);
 					$bestscores = explode(',', $bestscorelist);
 					$bestrawscores = explode(',', $bestrawscorelist);
 					$firstscores = explode(',', $firstscorelist);
@@ -323,13 +328,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$slist = implode(',',$bestscores );
 				}
 				$stm2 = $DBH->prepare("UPDATE imas_assessment_sessions SET bestscores=:bestscores WHERE id=:id");
-				$stm2->execute(array(':bestscores'=>$slist, ':id'=>$row[0]));
-			}
+				$stm2->execute(array(':bestscores'=>$slist, ':id'=>$row['id']));
 
-			if ($_POST['withdrawtype']=='zero' || $_POST['withdrawtype']=='groupzero') {
-				//update points possible
-				require_once("../includes/updateptsposs.php");
-				updatePointsPossible($aid, $itemorder, $defpoints);
+				if (strlen($row['lti_sourcedid'])>1) {
+					//update LTI score
+					require_once("../includes/ltioutcomes.php");
+					calcandupdateLTIgrade($row['lti_sourcedid'], $aid, $bestscores, true);
+				}
 			}
 
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/addquestions.php?cid=$cid&aid=$aid&r=" .Sanitize::randomQueryStringParam());
@@ -487,7 +492,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$timeout = array(0);
 		}
 		if (isset($avgtimepts[3]) && $avgtimepts[3]>10) {
-			$timeout[1] = round($avgtimepts[2]); //score
+			$timeout[1] = round($avgtimepts[2]); //score 
 			$timeout[2] = round($avgtimepts[1]/60,1); //time first try
 			$timeout[3] = Sanitize::onlyInt($avgtimepts[3]); //# of data
 		}
@@ -519,7 +524,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$jsarr[] = array("text", $text_seg['text'],
 					Sanitize::onlyInt($text_seg['displayUntil']-$text_seg['displayBefore']+1),
 					Sanitize::onlyInt($text_seg['ispage']),
-					$text_seg['pagetitle'],
+					$text_seg['pagetitle'], 
 					isset($text_seg['forntype'])?$text_seg['forntype']:0);
 			}
 		}
@@ -712,7 +717,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 			$page_libRowHeader = ($searchall==1) ? "<th>Library</th>" : "";
 
-			if (isset($search) && ($searchall==0 || $searchlikes!='')) {
+			if (isset($search) && ($searchall==0 || $searchlikes!='' || $searchmine==1)) {
 				$qarr = $searchlikevals;
 				$query = "SELECT DISTINCT imas_questionset.id,imas_questionset.description,imas_questionset.userights,imas_questionset.qtype,imas_questionset.extref,imas_library_items.libid,imas_questionset.ownerid,imas_questionset.avgtime,imas_questionset.solution,imas_questionset.solutionopts,imas_library_items.junkflag, imas_library_items.id AS libitemid,imas_users.groupid ";
 				$query .= "FROM imas_questionset JOIN imas_library_items ON imas_library_items.qsetid=imas_questionset.id AND imas_library_items.deleted=0 ";
@@ -735,11 +740,18 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 						$query .= " AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=?) ";
 						$qarr[] = $userid;
 					}
-
+					
 				}
 				$query .= " ORDER BY imas_library_items.libid,imas_library_items.junkflag,imas_questionset.id";
 				if ($searchall==1) {
 					$query .= " LIMIT 300";
+					$offset = 0;
+					if (isset($_REQUEST['offset'])) {
+						$offset = Sanitize::onlyInt($_REQUEST['offset']);
+						if ($offset>0 && $offset < 1000000000) {
+							$query .= " OFFSET $offset";
+						}
+					}
 				}
 
 				if ($search=='recommend' && count($existingq)>0) {
@@ -1240,7 +1252,7 @@ if ($overwriteBody==1) {
 
 	</form>
 <?php
-			if ($searchall==1 && trim($search)=='') {
+			if ($searchall==1 && trim($search)=='' && $searchmine==0) {
 				echo "Must provide a search term when searching all libraries";
 			} elseif (isset($search)) {
 				if ($noSearchResults) {
@@ -1331,8 +1343,18 @@ if ($overwriteBody==1) {
 <?php
 					}
 				}
-				if ($searchall==1 && $searchlimited) {
-					echo '<tr><td></td><td><i>'._('Search cut off at 300 results').'</i></td></tr>';
+				if ($searchall==1 && ($searchlimited || $offset>0)) {
+					echo '<tr><td></td><td><i>'._('Search cut off at 300 results');
+					echo '<br>'._('Showing ').($offset+1).'-'.($offset + 300).'. ';
+					if ($offset>0) {
+						$prevoffset = max($offset-300, 0);
+						echo "<a href=\"addquestions.php?cid=$cid&aid=$aid&offset=$prevoffset\">"._('Previous').'</a> ';
+					}
+					if ($searchlimited) {
+						$nextoffset = $offset+300;
+						echo "<a href=\"addquestions.php?cid=$cid&aid=$aid&offset=$nextoffset\">"._('Next').'</a> ';
+					}
+					echo '</i></td></tr>';
 				}
 ?>
 			</tbody>

@@ -225,11 +225,11 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$curBreadcrumb = $breadcrumbbase;
 	if (isset($backtrack) && count($backtrack)>0) {
 		if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
-			$curBreadcrumb = '';
+			array_unshift($backtrack, array($coursename, '0'));
 			$sendcrumb = '';
 			$depth = substr_count($sessiondata['ltiitemid'][1],'-');
-			for ($i=$depth-1;$i<count($backtrack);$i++) {
-				if ($i>$depth-1) {
+			for ($i=$depth;$i<count($backtrack);$i++) {
+				if ($i>$depth) {
 					$curBreadcrumb .= " &gt; ";
 					$sendcrumb .= " &gt; ";
 				}
@@ -608,6 +608,8 @@ if ($overwriteBody==1) {
 		<div id="centercontent">
 <?php
 	}
+   makeTopMenu();
+   echo "<div id=\"headercourse\" class=\"pagetitle\"><h1>".Sanitize::encodeStringForDisplay($curname)."</h1></div>\n";
 
 if ($installname == "MyOpenMath") {include(__DIR__ . "/../ohm/includes/ohm_migration_notice.php");}
 

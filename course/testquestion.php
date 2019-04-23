@@ -157,9 +157,9 @@ if ($overwriteBody==1) {
 			document.getElementById("brokenmsgok").style.display = (tagged==1)?"none":"block";
 			if (tagged==1) {alert("Make sure you also contact the question author or support so they know why you marked the question as broken");}
 		}
-
-		$(window).on('beforeunload', function() {
-			if (window.opener && !window.opener.closed) {
+		
+		$(window).on('beforeunload', function() { 
+			if (window.opener && !window.opener.closed  && window.opener.sethighlightrow) {
 				window.opener.sethighlightrow(-1);
 			}
 		});
@@ -169,7 +169,7 @@ if ($overwriteBody==1) {
 		echo '<p>';
 		echo "<script type=\"text/javascript\">";
 		echo "var numchked = -1;";
-		echo "if (window.opener && !window.opener.closed) {";
+		echo "if (window.opener && !window.opener.closed && window.opener.sethighlightrow && window.opener.getnextprev) {";
 		echo " window.opener.sethighlightrow(\"$loc\"); ";
 		echo $page_onlyChkMsg;
 		echo " if (prevnext[0][1]>0){
@@ -195,12 +195,17 @@ if ($overwriteBody==1) {
 	}
 
 	if (isset($_GET['checked'])) {
-		echo "<p><input type=\"checkbox\" name=\"usecheck\" id=\"usecheck\" value=\"Mark Question for Use\" onclick=\"parentcbox.checked=this.checked;togglechk(this.checked)\" ";
+		echo "<p id=usecheckwrap><input type=\"checkbox\" name=\"usecheck\" id=\"usecheck\" value=\"Mark Question for Use\" onclick=\"parentcbox.checked=this.checked;togglechk(this.checked)\" ";
 		echo "/> Mark Question for Use</p>";
 		echo "
 		  <script type=\"text/javascript\">
 		  var parentcbox = opener.document.getElementById(\"$loc\");
-		  document.getElementById(\"usecheck\").checked = parentcbox.checked;
+		  if (!parentcbox) {
+		  	$('#usecheckwrap').hide();
+		  } else {
+		  	$('#usecheckwrap').show();
+		  	document.getElementById(\"usecheck\").checked = parentcbox.checked;
+		  }
 		  function togglechk(ischk) {
 			  if (numchked!=-1) {
 				if (ischk) {
@@ -279,16 +284,7 @@ if ($overwriteBody==1) {
 	echo htmlentities($message);
 	echo '</code>';
 
-	if (isset($CFG['GEN']['qerrorsendto'])) {
-		if (is_array($CFG['GEN']['qerrorsendto'])) {
-			list($sendto,$sendtype,$sendtitle) = $CFG['GEN']['qerrorsendto'];
-		} else {
-			$sendto = $CFG['GEN']['qerrorsendto'];
-			$sendtype = 'email';
-			$sendtitle = _('Contact support');
-		}
-		$sendcid = $cid;
-	} else if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
+	if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
 		$sendtype = 'msg';
 		$sendtitle = ('Message owner');
 		$sendcid = $CFG['GEN']['sendquestionproblemsthroughcourse'];
@@ -297,6 +293,18 @@ if ($overwriteBody==1) {
 		$sendtitle = ('Email owner');
 		$sendcid = $cid;
 	}
+	if (isset($CFG['GEN']['qerrorsendto'])) {
+		if (is_array($CFG['GEN']['qerrorsendto'])) {
+			if (empty($CFG['GEN']['qerrorsendto'][3])) { //if not also sending to owner
+				$sendtype = $CFG['GEN']['qerrorsendto'][1];
+			}
+			$sendtitle = $CFG['GEN']['qerrorsendto'][2];
+		} else {
+			$sendtype = 'email';
+			$sendtitle = _('Contact support');
+		}
+	}
+
 	printf("<p>Question id: %s.  ", Sanitize::encodeStringForDisplay($_GET['qsetid']));
 	echo "<a href=\"#\" onclick=\"GB_show('$sendtitle','$imasroot/course/sendmsgmodal.php?sendtype=$sendtype&cid=" . Sanitize::courseId($sendcid) . '&quoteq='.Sanitize::encodeUrlParam("0-{$_GET['qsetid']}-{$seed}-reperr-{$assessver}"). "',800,'auto')\">$sendtitle</a> to report problems</p>";
 
