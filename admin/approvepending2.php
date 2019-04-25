@@ -4,6 +4,11 @@ require("../init.php");
 
 if ($myrights<100 && ($myspecialrights&64)!=64) {exit;}
 
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['admin/approvepending'])) {
+	require(__DIR__.'/../'.$CFG['hooks']['admin/approvepending']);
+}
+
 $newStatus = Sanitize::onlyInt($_POST['newstatus']);
 $instId = Sanitize::onlyInt($_POST['userid']);
 $defGrouptype = isset($CFG['GEN']['defGroupType'])?$CFG['GEN']['defGroupType']:0;
@@ -34,102 +39,36 @@ if (!empty($newStatus)) {
 				unenrollstu($rcid, array(intval($instId)));
 			}
 		}
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		$headers .= "From: $accountapproval\r\n";
 
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
+		$stm = $DBH->prepare("SELECT FirstName,LastName,SID,email FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$instId));
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
 
-		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
-		$stm->execute(array(':id'=>$_POST['userid']));
-		$row = $stm->fetch(PDO::FETCH_NUM);
+		//call hook, if defined
+		if (function_exists('getDenyMessage')) {
+			$message = getDenyMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
+		} else {
+			$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
+			$message .= '<p>You recently requested an instructor account on '.$installname.' with the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b>. ';
+			$message .= 'Unfortunately, the information you provided was not sufficient for us to verify your instructor status, ';
+			$message .= 'so your account has been converted to a student account. If you believe you should have an instructor account, ';
+			$message .= 'you are welcome to reply to this email with additional verification information.</p>';
+		}
 
-        $sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
-        $sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
-
-        $message = "
-<p>
-Dear ${sanitizedName},
-</p>
-
-<p>
-Thank you for your interest in Lumen OHM. We are unable to verify your
-instructor status, either because you used a non-institutional email, or
-because the URL provided did not include information we could use to verify
-your status as an instructor.  
-</p>
-
-<p>
-If you still want an OHM instructor account, please respond to this message
-<u>from your institutional email address</u> and include:
-</p>
-
-<ul>
-    <li>
-        Your requested username: ${sanitizedUsername}
-    </li>
-    <li>
-        A web page address or other documentation that clearly shows your
-        instructor status. If this is unavailable, please send the name and
-        email address for a supervisor or departmental colleague who can
-        confirm your instructor status.  
-    </li>
-</ul>
-
-<p>
-If you did not request an account, no action is required.  
-</p>
-
-<p>
-Thank you,<br/>
-The Lumen Team
-</p>
-";
+		//call hook, if defined
+		if (function_exists('getDenyBcc')) {
+			$CFG['email']['new_acct_bcclist'] = getDenyBcc();
+		}
 
 		require_once("../includes/email.php");
-		send_email(Sanitize::emailAddress($row[2]), !empty($accountapproval)?$accountapproval:$sendfrom,
+		send_email(Sanitize::emailAddress($row['email']), !empty($accountapproval)?$accountapproval:$sendfrom,
 			$installname._(' Account Status'), $message,
 			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(),
-			null, 10);
-
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
+			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);
 
 	} else if ($newStatus==11) { //approve
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		$isLumenCustomer = false;
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
 		if ($_POST['group']>-1) {
 			$group = Sanitize::onlyInt($_POST['group']);
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			#### Begin OHM-specific changes ##########################################################
-			$stm = $DBH->prepare("SELECT grouptype FROM imas_groups WHERE id = :id");
-			$stm->execute(array(':id' => $_POST['group']));
-			$groupType = $stm->fetchColumn(0);
-			$isLumenCustomer = (1 == $groupType) ? true : false;
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
-			#### End OHM-specific changes ############################################################
 		} else if (trim($_POST['newgroup'])!='') {
 			$newGroupName = Sanitize::stripHtmlTags(trim($_POST['newgroup']));
 			$stm = $DBH->prepare("SELECT id FROM imas_groups WHERE name REGEXP ?");
@@ -147,146 +86,25 @@ The Lumen Team
 		$stm = $DBH->prepare("UPDATE imas_users SET rights=40,groupid=:groupid WHERE id=:id");
 		$stm->execute(array(':groupid'=>$group, ':id'=>$instId));
 		
-		$stm = $DBH->prepare("SELECT FirstName,SID,email FROM imas_users WHERE id=:id");
+		$stm = $DBH->prepare("SELECT FirstName,LastName,SID,email FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$instId));
-		$row = $stm->fetch(PDO::FETCH_NUM);
-		
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
-		#### Begin OHM-specific changes ##########################################################
+		$row = $stm->fetch(PDO::FETCH_ASSOC);
 
-		$sanitizedName = Sanitize::encodeStringForDisplay($row[0]);
-		$sanitizedUsername = Sanitize::encodeStringForDisplay($row[1]);
+        //call hook, if defined
+		if (function_exists('getApproveMessage')) {
+			$message = getApproveMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
+		} else {
+			$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
+			$message .= '<p>Welcome to '.$installname.'.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b> and the password you provided.</p>';
+		}
 
-		$messageIsNotLumenCustomer = "
-<p>
-    Hi ${sanitizedName},
-</p>
-
-<p>
-	Welcome to Lumen OHM! Your instructor access has been approved. Login with
-	your username ${sanitizedUsername} and password at
-	<a href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
-	to get started today.
-</p>
-
-<p>
-    These resources can help orient you to using OHM: 
-</p>
-
-<p>
-	<ul>
-		<li>
-		    <strong>Startup Guide:</strong> step-by-step instructions on the
-		    basics of course creation, adding homework, quizzes, activities and
-		    tests.
-		</li>
-		<ul>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>Download the PDF</a></li>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>Watch the Video Training Series</a></li>
-		</ul>
-	</ul>
-</p>
-
-<p>
-    <ul>
-        <li>
-            <strong>Complete User Guide:</strong> more detailed information
-            about every feature of OHM including course creation, course
-            management, LMS integrations and more.
-        </li>
-		<ul>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>View the entire OHM User Guide.</a></li>
-		</ul>
-    </ul>
-</p>
-
-<p>
-    As you explore OHM and begin building courses, we’ll check in on your
-    progress. Our standard pricing is just $25 per student for full use of
-    courseware, etext, online homework, and other learning content. Typically
-    this is handled through the bookstore, via a course materials fee, or by
-    students paying Lumen directly. Your institution may have an agreement in
-    place to cover this cost for your students. When you’re ready to enroll
-    students, we’ll confirm how to handle payment. Learn more about payment
-    options
-    <a target='_blank' href='https://lumenlearning.com/how/payment-options/'>here</a>.
-</p>
-
-<p>
-    We appreciate your interest in Open Educational Resources (OER) and look
-    forward to partnering with you to create affordable and effective math
-    courses. We welcome you to the Lumen OHM community! 
-</p>
-";
-
-		$messageIsLumenCustomer = "
-<p>
-    Hi ${sanitizedName},
-</p>
-
-<p>
-	Welcome to Lumen OHM! Your instructor access has been approved. Login with
-	your username ${sanitizedUsername} and password at
-	<a href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
-	to get started today.
-</p>
-
-<p>
-These resources can help orient you to using OHM: 
-</p>
-
-<p>
-    <ul>
-        <li>
-            <strong>Startup Guide:</strong> step-by-step instructions on the
-            basics of course creation, adding homework, quizzes, activities and
-            tests. 
-        </li>
-		<ul>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>Download the PDF</a></li>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115015412808-Lumen-OHM-Training-Videos'>Watch the Video Training Series</a></li>
-		</ul>
-		<li>
-            <strong>Complete User Guide:</strong> more detailed information
-            about every feature of OHM including course creation, course
-            management, LMS integrations and more.
-        </li>
-        <ul>
-            <li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>View the entire OHM User Guide</a></li>
-        </ul>
-    </ul>
-</p>
- 
-<p>
-    We appreciate your interest in Open Educational Resources (OER) and look
-    forward to partnering with you to create affordable and effective math
-    courses. We welcome you to the Lumen OHM community! 
-</p>
-
-<p>
-	Thank you,<br/>
-	The Lumen Team
-</p>
-";
-
-		if ($isLumenCustomer) {
-		    $message = $messageIsLumenCustomer;
-			$CFG['email']['new_acct_bcclist'] = array();
-        } else {
-		    $message = $messageIsNotLumenCustomer;
+        //call hook, if defined
+        if (function_exists('getApproveBcc')) {
+            $CFG['email']['new_acct_bcclist'] = getApproveBcc();
         }
 
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-		#### End OHM-specific changes ############################################################
-
 		require_once("../includes/email.php");
-		send_email($row[2], !empty($accountapproval)?$accountapproval:$sendfrom, 
+		send_email($row['email'], !empty($accountapproval)?$accountapproval:$sendfrom,
 			$installname._(' Account Approval'), $message, 
 			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(), 
 			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);

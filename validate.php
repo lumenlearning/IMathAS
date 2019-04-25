@@ -6,20 +6,24 @@
 
  $curdir = rtrim(dirname(__FILE__), '/\\');
  require("i18n/i18n.php");
+ if (isset($sessionpath) && $sessionpath!='') { session_save_path($sessionpath);}
+ ini_set('session.gc_maxlifetime',86400);
+ ini_set('auto_detect_line_endings',true);
+ //Look to see if a hook file is defined, and include if it is
+ if (isset($CFG['hooks']['validate'])) {
+	require($CFG['hooks']['validate']);
+ }
 
+ $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
+ if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
+ 	 session_set_cookie_params(0, '/', '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
+ }
  if (isset($CFG['GEN']['randfunc'])) {
  	 $randf = $CFG['GEN']['randfunc'];
  } else {
  	 $randf = 'rand';
  }
 
- if (isset($sessionpath) && $sessionpath!='') { session_save_path($sessionpath);}
- ini_set('session.gc_maxlifetime',86400);
- ini_set('auto_detect_line_endings',true);
- $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
- if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
-	session_set_cookie_params(0, '/', '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
- }
  session_start();
  $sessionid = session_id();
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
@@ -160,15 +164,16 @@
 	 	$stm = $DBH->prepare($query);
 	 	$stm->execute(array(':guestcnt'=>"guestacct$guestcnt", ':homelayout'=>$homelayout, ':created_at'=>time()));
 	 	$userid = $DBH->lastInsertId();
-    $query = "SELECT id FROM imas_courses WHERE (istemplate&8)=8 AND available<4";
+	 	$query = "SELECT id FROM imas_courses WHERE (istemplate&8)=8 AND available<4";
 		if (isset($_GET['cid'])) { $query.= ' AND id=:id'; }
 		$stm = $DBH->prepare($query);
-    if (isset($_GET['cid'])) {
+		if (isset($_GET['cid'])) {
 		    $stm->execute(array(':id'=>$_GET['cid']));
-    } else {
-      $stm->execute(array());
-    }
+		} else {
+			$stm->execute(array());
+		}
 		if ($stm->rowCount()>0) {
+		    // OHM-specific code for created_at column.
     		$timeNow = time();
 			$query = "INSERT INTO imas_students (userid,courseid,created_at) VALUES ";
 			$i = 0;
@@ -177,7 +182,7 @@
 				$query .= "($userid,{$row[0]},$timeNow)";  //INT's from DB - safe
 				$i++;
 			}
-      $DBH->query($query);
+			$DBH->query($query);
 		}
 
 	 	$line['id'] = $userid;
@@ -253,22 +258,10 @@
 		 	 $stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 		 }
 
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	// ####### Begin OHM-specific changes ##################################################################
-	//
-// If the post of ekey and courseid then look to see if already enrolled
-    if ($_POST['enrollandlogin']) {
-      header("Location:" . $GLOBALS['basesiteurl'] . "/actions.php?" . Sanitize::fullQueryString("action=enroll&cid=" . $_POST['cid'] . "&ekey=" . $_POST['ekey'] . "&enrollandlogin=1")); /* Redirect browser */
-      exit;
-    }
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
-	// ####### End OHM-specific changes ####################################################################
+		 //call hook, if defined
+		 if (function_exists('onLogin')) {
+			onLogin();
+		 }
 
 		 if (!empty($_SERVER['QUERY_STRING'])) {
 		 	 $querys = '?' . Sanitize::fullQueryString($_SERVER['QUERY_STRING']) . (isset($addtoquerystring) ? '&' . Sanitize::fullQueryString($addtoquerystring) : '');
@@ -286,11 +279,11 @@
 		 	 }
 		 } 
 		 // checks if the array $querys is empty
-         if (!empty($querys)){
-             $rqp = "&r=" .Sanitize::randomQueryStringParam();
-         } else {
-             $rqp = "?r=" .Sanitize::randomQueryStringParam();
-         }
+		 if (!empty($querys)){
+		     $rqp = "&r=" .Sanitize::randomQueryStringParam();
+		 } else {
+		     $rqp = "?r=" .Sanitize::randomQueryStringParam();
+		 }
 		 
 		 if ($needToForcePasswordReset) {
 		 	 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
@@ -329,7 +322,7 @@
 		/*
 		$query = "DELETE FROM imas_sessions WHERE userid='$userid'";
 		mysql_query($query) or die("Query failed : " . mysql_error());
-		header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::fullUrl($querys));
+		header('Location: ' . $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . Sanitize::url($querys));
 		exit;
 		*/
 	}
@@ -443,31 +436,12 @@
 		} else if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner') {
 			$breadcrumbbase = "<a href=\"$imasroot/assessment/showtest.php?cid=".Sanitize::courseId($_GET['cid'])."&id={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
 			$urlparts = parse_url($_SERVER['PHP_SELF']);
-			/*
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 *
-			 * The following line, containing an array of php filenames, has been modified to allow
-			 * OHM-specific files (related to student payments) to be accessible via an LMS.
-			 *
-			 * As of 2018 Apr 24, the OHM-specific files added to the array are:
-			 *   process_activation.php
-			 *   activation_confirmation.php
-			 *   activation_ajax.php
-			 *   payment_confirmation.php
-			 *
-			 * No other OHM-specific changes have been made.
-			 *
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 * #### Begin OHM-specific code notes #####################################################
-			 */
-			if (!in_array(basename($urlparts['path']),array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','process_activation.php','activation_confirmation.php','activation_ajax.php','payment_confirmation.php'))) {
+			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php');
+			//call hook, if defined
+			if (function_exists('allowedInAssessment')) {
+				$allowedinLTI = array_merge($allowedinLTI, allowedInAssessment());
+			}
+			if (!in_array(basename($urlparts['path']),$allowedinLTI)) {
 			//if (strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false && strpos(basename($_SERVER['PHP_SELF']),'printtest.php')===false && strpos(basename($_SERVER['PHP_SELF']),'msglist.php')===false && strpos(basename($_SERVER['PHP_SELF']),'sentlist.php')===false && strpos(basename($_SERVER['PHP_SELF']),'viewmsg.php')===false ) {
 				$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
 				$stm->execute(array(':id'=>$sessiondata['ltiitemid']));
