@@ -435,12 +435,17 @@ span.formright {
 	color:#AE131E;
 	font-weight: normal;
 }
+
+ul.courselist > li {
+	color: #444;
+}
 ul.courselist > li > a {
 	color: #1E74D1 !important;
 }
 ul.courselist > li > a.noticetext {
 	color: #db0000 !important;
 }
+
 .tablist > li > a {
 	color: #444 !important;
 }
