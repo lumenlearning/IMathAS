@@ -382,6 +382,8 @@ if (!isset($CFG['GEN']['homelinkbox'])) {
 		echo '<br/><a href="admin/admin2.php">'._('Admin Page').'</a>';
 	} else if (($myspecialrights&4)==4) {
 		echo '<br/><a href="admin/listdiag.php">'._('Diagnostics').'</a>';
+	} else if (!empty($userHasAdminMFA)) {
+		echo '<br/><a href="admin/forms.php?action=entermfa">'._('Enable Admin Features').'</a>';
 	}
 	if ((($myspecialrights&32)==32) || $myrights == 100) {
 		if ($myrights >=75 || ($myspecialrights&4)==4) {
@@ -475,7 +477,7 @@ require('./footer.php');
 
 function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 	global $myrights, $shownewmsgnote, $shownewpostnote, $imasroot, $userid, $courseListOrder;
-	if (count($data)==0 && $type=='tutor') {return;}
+	if (count($data)==0 && $type=='tutor' && !$hashiddencourses) {return;}
 	
 	echo '<div role="navigation" aria-label="'.$title.'">';
 	echo '<div class="block"><h2>'.$title.'</h2></div>';
@@ -511,7 +513,7 @@ function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 		}
 		if ($hasCleanup) {
 			echo '<p class="small info"><span style="color:orange;">**</span> ';
-			echo _('course is schedule for cleanup').'</p>';
+			echo _('course is scheduled for cleanup').'</p>';
 		}
 	}
 	if ($type=='take') {
@@ -566,7 +568,7 @@ function printCourseLine($data, $type=null) {
 		echo Sanitize::encodeStringForDisplay($data['name']);
 	}
 	if ($type=='teach' && $data['cleanupdate']>1) {
-		echo ' <span style="color:orange;" title="'._('course is schedule for cleanup').'">**</span>';	
+		echo ' <span style="color:orange;" title="'._('course is scheduled for cleanup').'">**</span>';	
 	}
 	if (isset($data['available']) && (($data['available']&1)==1)) {
 		echo ' <em style="color:green;" class=small>', _('Unavailable'), '</em>';

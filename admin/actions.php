@@ -624,12 +624,12 @@ switch($_POST['action']) {
 		if (trim($_POST['sdate'])=='') {
 			$startdate = 0;
 		} else {
-			$startdate = parsedatetime($_POST['sdate'],'12:01am');
+			$startdate = parsedatetime($_POST['sdate'],'12:01am',0);
 		}
 		if (trim($_POST['edate'])=='') {
 			$enddate = 2000000000;
 		} else {
-			$enddate = parsedatetime($_POST['edate'],'11:59pm');
+			$enddate = parsedatetime($_POST['edate'],'11:59pm',2000000000);
 		}
 		$_POST['ltisecret'] = trim($_POST['ltisecret']);
 		if (isset($_POST['setdatesbylti']) && $_POST['setdatesbylti']==1) {
@@ -661,12 +661,12 @@ switch($_POST['action']) {
 			}
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
-			
+
 			//call hook, if defined
 			if (function_exists('onModCourse')) {
 				onModCourse($_GET['id'], $userid, $myrights, $groupid);
 			}
-			
+
 			if ($stm->rowCount()>0) {
 				if ($setdatesbylti==1) {
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
@@ -723,10 +723,10 @@ switch($_POST['action']) {
 				':created_at'=>time()));
 			$cid = $DBH->lastInsertId();
 
-            //call hook, if defined
-            if (function_exists('onAddCourse')) {
-                onAddCourse($cid, $userid, $myrights, $groupid);
-            }
+			//call hook, if defined
+			if (function_exists('onAddCourse')) {
+				onAddCourse($cid, $userid, $myrights, $groupid);
+			}
 
 			//if ($myrights==40) {
 				$stm = $DBH->prepare("INSERT INTO imas_teachers (userid,courseid,created_at) VALUES (:userid, :courseid, :created_at)");
@@ -1209,15 +1209,32 @@ switch($_POST['action']) {
 			echo "<html><body>Group name already exists.  <a href=\"forms.php?action=modgroup&id=".Sanitize::encodeUrlParam($_GET['id'])."\">Try again</a></body></html>\n";
 			exit;
 		}
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		//
+		// The following behavior for updating the "grouptype" column is now OHM-specific.
+		// Updating that column should be moved into an OHM hook. (/ohm-hooks/admin/actions.php)
+		//
+		// Do NOT remove this entire UPDATE statement after moving the grouptype update to a hook.
+		// Compare against upstream MOM code to see what should remain.
+		//
 		$grptype = (isset($_POST['iscust'])?1:0);
 		$stm = $DBH->prepare("UPDATE imas_groups SET name=:name,parent=:parent,grouptype=:grouptype WHERE id=:id");
 		$stm->execute(array(':name'=>$_POST['gpname'], ':parent'=>$_POST['parentid'], ':grouptype'=>$grptype, ':id'=>$_GET['id']));
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
 
 		//call hook, if defined
 		if (function_exists('onModGroup')) {
 			onModGroup($_GET['id'], $userid, $myrights, $groupid);
 		}
-		
+
 		break;
 	case "delgroup":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
@@ -1284,6 +1301,47 @@ switch($_POST['action']) {
 			$stm->execute(array(':id'=>$_GET['id']));
 			$stm = $DBH->prepare("DELETE FROM imas_diag_onetime WHERE diag=:diag");
 			$stm->execute(array(':diag'=>$_GET['id']));
+		}
+		break;
+	case "entermfa":
+		$stm = $DBH->prepare("SELECT mfa FROM imas_users WHERE id=:id");
+		$stm->execute(array(':id'=>$userid));
+		$mfadata = $stm->fetchColumn(0);
+		$error = '';
+		if ($mfadata != '') {
+			$mfadata = json_decode($mfadata, true);
+			require('../includes/GoogleAuthenticator.php');
+			$MFA = new GoogleAuthenticator();
+			//check that code is valid and not a replay
+			if ($MFA->verifyCode($mfadata['secret'], $_POST['mfatoken']) &&
+			   ($_POST['mfatoken'] != $mfadata['last'] || time() - $mfadata['laston'] > 600)) {
+				$sessiondata['mfaverified'] = true;
+				writesessiondata();
+				$mfadata['last'] = $_POST['mfatoken'];
+				$mfadata['laston'] = time();
+				if (isset($_POST['mfatrust'])) {
+					$trusttoken = $MFA->createSecret();
+					setcookie('gat', $trusttoken, time()+60*60*24*365*10, $imasroot.'/', '', true, true);
+					if (!isset($mfadata['trusted'])) {
+						$mfadata['trusted'] = array();
+					}
+					$mfadata['trusted'][] = $trusttoken;
+				}
+				$stm = $DBH->prepare("UPDATE imas_users SET mfa = :mfa WHERE id = :uid");
+				$stm->execute(array(':uid'=>$userid, ':mfa'=>json_encode($mfadata)));
+				if (isset($_POST['mfatrust'])) {
+					require("../header.php");
+					echo '<p>This device is now trusted; you will not be asked for your 2-factor authentication on this device again.</p>';
+					echo '<p>If you ever need to un-trust this device, you can clear all cookies, or disable 2-factor authentication in your account settings.</p>';
+					echo '<p><a href="../index.php">Continue</a></p>';
+					require("../footer.php");
+					exit;
+				}
+
+			} else {
+				header('Location: ' . $GLOBALS['basesiteurl'] . "/admin/forms.php?action=entermfa&error=true");
+				exit;
+			}
 		}
 		break;
 }

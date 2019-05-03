@@ -153,20 +153,20 @@ function outputHtml() {
 			$row['name'] = _('Default');
 		}
 		if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
-		echo '<td>'.$row['name'].'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($row['name']).'</td>';
 		echo '<td>';
 		echo '<a href="../admin/userdetails.php?id='.$row['id'].'" target="_blank">';
-		echo $row['LastName'].', '.$row['FirstName'].'</a></td>';
-		echo '<td>'.$row['SID'].'</td>';
-		echo '<td>'.$row['email'].'</td>';
+		echo Sanitize::encodeStringForDisplay($row['LastName'].', '.$row['FirstName']).'</a></td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($row['SID']).'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($row['email']).'</td>';
 		echo '<td>'.getFormattedRequestDate($row).'</td>';
 		echo '<td>'.getFormattedApprovalDate($row).'</td>';
-		echo '<td>'.$GLOBALS['reqhow'][$row['id']].'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($GLOBALS['reqhow'][$row['id']]).'</td>';
 		echo '<td>'.getFormattedLastLogin($row).'</td>';
-		echo '<td>'.$GLOBALS['reqstatus'][$row['id']].'</td>';
-		echo '<td>'.$row['ccnt'].'</td>';
-		echo '<td>'.implode('<br>', getTemplatesUsed($row)).'</td>';
-		echo '<td>'.$row['scnt'].'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($GLOBALS['reqstatus'][$row['id']]).'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($row['ccnt']).'</td>';
+		echo '<td>'.implode('<br>', array_map('Sanitize::encodeStringForDisplay',getTemplatesUsed($row))).'</td>';
+		echo '<td>'.Sanitize::encodeStringForDisplay($row['scnt']).'</td>';
 		echo '</tr>';
 	}
 	echo '</tbody></table>';

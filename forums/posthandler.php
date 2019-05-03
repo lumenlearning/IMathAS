@@ -54,7 +54,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				$replyby = 0;
 			} else {
 				require_once("../includes/parsedatetime.php");
-				$replyby = parsedatetime($_POST['replybydate'],$_POST['replybytime']);
+				$replyby = parsedatetime($_POST['replybydate'],$_POST['replybytime'],null);
 			}
 		} else {
 			$type = 0;
@@ -77,7 +77,7 @@ if (isset($_GET['modify'])) { //adding or modifying post
 		if ($isteacher) {
 			if ($_POST['releaseon']=='Date') {
 				require_once("../includes/parsedatetime.php");
-				$thisposttime = parsedatetime($_POST['releasedate'],$_POST['releasetime']);
+				$thisposttime = parsedatetime($_POST['releasedate'],$_POST['releasetime'],$now-1);
 			}
 		}
 		if ($_GET['modify']=="new") { //new thread
@@ -125,9 +125,9 @@ if (isset($_GET['modify'])) { //adding or modifying post
 						$query .= "(:gradetype, :gradetypeid, :userid, :refid, :score)";
 						$stm = $DBH->prepare($query);
 						$stm->execute(array(':gradetype'=>'forum', ':gradetypeid'=>$forumid, ':userid'=>$userid, ':refid'=>$threadid, ':score'=>$autoscore[0]));
-					}
+					} 
 				}
-			}
+			} 
 			$_GET['modify'] = $threadid;
 			$files = array();
 		} else if ($_GET['modify']=="reply") { //new reply post
@@ -153,6 +153,11 @@ if (isset($_GET['modify'])) { //adding or modifying post
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':forumid'=>$forumid, ':threadid'=>$threadid, ':subject'=>$_POST['subject'], ':message'=>$_POST['message'], ':userid'=>$userid, ':postdate'=>$now, ':parent'=>$_GET['replyto'], ':posttype'=>0, ':isanon'=>$isanon));
 				$_GET['modify'] = $DBH->lastInsertId();
+				if ($page==-3) {
+					$stm = $DBH->prepare("SELECT lastposttime FROM imas_forum_threads WHERE id=:id");
+					$stm->execute(array(':id'=>$threadid));
+					$returnurl .= '&olpt='.Sanitize::onlyInt($stm->fetchColumn(0));
+				}
 				$stm = $DBH->prepare("UPDATE imas_forum_threads SET lastposttime=:lastposttime,lastpostuser=:lastpostuser WHERE id=:id");
 				$stm->execute(array(':lastposttime'=>$now, ':lastpostuser'=>$userid, ':id'=>$threadid));
 

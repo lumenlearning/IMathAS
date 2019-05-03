@@ -188,6 +188,7 @@ span.done {
 }
 
 div.inset {
+	position: relative;
 	padding: 0px;
 	margin-left: 155px;
 	margin-right: 10px;
