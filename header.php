@@ -33,7 +33,7 @@ if (isset($coursetheme)) {
 		$coursetheme = str_replace(array('_fw1000','_fw'),'',$coursetheme);
 	}
 	?>
-<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=110918";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/themes/$coursetheme?v=042217";?>" type="text/css" />
 <link rel="stylesheet" href="<?php echo $imasroot;?>/handheld.css?v=042217" media="only screen and (max-width:480px)"/>
 
 <?php
@@ -171,8 +171,8 @@ if (isset($sessiondata['graphdisp']) && $sessiondata['graphdisp']==1) {
 
 
 if (isset($useeditor) && $sessiondata['useed']==1) {
-	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=102018"></script>';
-	//echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=082716"></script>';
+	echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce_bundled.js?v=051419"></script>';
+	//echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=082719"></script>';
 	echo "\n";
 	echo '<script type="text/javascript">';
 	echo 'var coursetheme = "'.$coursetheme.'";';
