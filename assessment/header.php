@@ -93,14 +93,14 @@ if (!empty($CFG['use_csrfp']) && class_exists('csrfProtector')) {
 	echo csrfProtector::output_header_code();
 }
 
-echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=051719" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=042519" type="text/javascript"></script>';
 
 //assessment_min.js bundles: general.js, mathjs.js, AMhelpers.js, confirmsubmit.js, drawing.js, and eqntips.js
 /*
 
 echo '<script src="' . $imasroot . '/javascript/general.js?v=112918" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/mathjs.js?v=021919" type="text/javascript"></script>';
-echo '<script src="' . $imasroot . '/javascript/AMhelpers.js?v=051719" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/AMhelpers.js?v=042519" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/confirmsubmit.js?v=031018" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/drawing.js?v=021419" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/eqntips.js?v=082616" type="text/javascript"></script>';
@@ -144,7 +144,7 @@ if (!isset($sessiondata['mathdisp'])) {
 	//Katex experimental
 	echo '<script type="text/javascript">var AMTcgiloc = "'.$mathimgurl.'";</script>';
 	echo "<script src=\"$imasroot/javascript/ASCIIMathTeXImg_min.js?ver=100418\" type=\"text/javascript\"></script>\n";
-
+	// removed MathJax fallback since Katex covers pretty much everything now, and MathJax load was slowing display.
 	/*echo '<script type="text/x-mathjax-config">
 		MathJax.Hub.Config({"messageStyle": "none", asciimath2jax: {ignoreClass:"skipmathrender"}, skipStartupTypeset: true});
 		MathJax.Ajax.config.path["Local"] = "'.$imasroot.'/javascript/mathjax";
@@ -167,6 +167,10 @@ if (!isset($sessiondata['mathdisp'])) {
 	}
 	echo '<script type="text/javascript" src="'.$imasroot.'/katex/auto-render.js?v=120118"></script>';
 	echo '<script type="text/javascript">setupKatexAutoRender();</script>';
+	// re-route MathJax render requests to katex. Allows jsxgraph to work.
+	echo '<script type="text/javascript">
+	  var MathJax = {Hub: {Queue: function(arr) { rendermathnode(arr[2]);}}};
+		</script>';
 	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = true; var MathJaxCompatible = true; var mathRenderer = "Katex";</script>';
 	//echo '<style type="text/css">span.AM { font-size: 105%;}</style>';
 } else if ($sessiondata['mathdisp']==2) {
