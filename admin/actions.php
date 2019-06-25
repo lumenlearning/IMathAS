@@ -678,6 +678,9 @@ switch($_POST['action']) {
 				}
 			}
 		} else { //new course
+
+			$destUIver = isset($_POST['newassessver']) ? 2 : 1;
+
 			$blockcnt = 1;
 			$itemorder = serialize(array());
 
@@ -700,13 +703,13 @@ switch($_POST['action']) {
 			}
 
 			$DBH->beginTransaction();
-			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,startdate,enddate,istemplate,deftime,deflatepass,latepasshrs,theme,ltisecret,dates_by_lti,blockcnt,created_at) VALUES ";
-			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :startdate, :enddate, :istemplate, :deftime, :deflatepass, :latepasshrs, :theme, :ltisecret, :ltidates, :blockcnt, :created_at);";
+			$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,toolset,showlatepass,itemorder,available,startdate,enddate,istemplate,deftime,deflatepass,latepasshrs,theme,ltisecret,dates_by_lti,blockcnt,UIver,created_at) VALUES ";
+			$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :toolset, :showlatepass, :itemorder, :available, :startdate, :enddate, :istemplate, :deftime, :deflatepass, :latepasshrs, :theme, :ltisecret, :ltidates, :blockcnt, :UIver, :created_at);";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':name'=>$_POST['coursename'], ':ownerid'=>$courseownerid, ':enrollkey'=>$_POST['ekey'], ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 				':allowunenroll'=>$unenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':toolset'=>$toolset, ':showlatepass'=>$showlatepass,
 				':itemorder'=>$itemorder, ':available'=>$avail, ':istemplate'=>$istemplate, ':deftime'=>$deftime, ':startdate'=>$startdate, ':enddate'=>$enddate,
-				':deflatepass'=>$deflatepass, ':latepasshrs'=>$latepasshrs, ':theme'=>$theme, ':ltisecret'=>$ltisecret, ':ltidates'=>$setdatesbylti, ':blockcnt'=>$blockcnt,
+				':deflatepass'=>$deflatepass, ':latepasshrs'=>$latepasshrs, ':theme'=>$theme, ':ltisecret'=>$ltisecret, ':ltidates'=>$setdatesbylti, ':blockcnt'=>$blockcnt, ':UIver'=>$destUIver,
 				':created_at'=>time()));
 			$cid = $DBH->lastInsertId();
 
@@ -828,6 +831,7 @@ switch($_POST['action']) {
 				$usereplaceby = "all";
 				$newitems = array();
 				require("../includes/copyiteminc.php");
+				$convertAssessVer = $destUIver;
 				copyallsub($items,'0',$newitems,$gbcats);
 				doaftercopy($_POST['usetemplate']);
 				$itemorder = serialize($newitems);
@@ -1153,6 +1157,8 @@ switch($_POST['action']) {
 			while ($row = $sstm->fetch(PDO::FETCH_NUM)) {
 				$uid = $row[0];
 				$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE userid=:userid");
+				$stm->execute(array(':userid'=>$uid));
+				$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE userid=:userid");
 				$stm->execute(array(':userid'=>$uid));
 				$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE userid=:userid");
 				$stm->execute(array(':userid'=>$uid));

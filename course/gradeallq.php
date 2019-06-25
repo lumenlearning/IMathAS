@@ -452,13 +452,13 @@
 			}
 			echo "<div ";
 			if (getpts($scores[$loc])==$points) {
-				echo 'class="iscorrect"';
+				echo 'class="iscorrect bigquestionwrap"';
 			} else if (getpts($scores[$loc])>0) {
-				echo 'class="isnonzero"';
+				echo 'class="isnonzero bigquestionwrap"';
 			} else if ($scores[$loc]==-1) {
-				echo 'class="notanswered"';
+				echo 'class="notanswered bigquestionwrap"';
 			} else {
-				echo 'class="iswrong"';
+				echo 'class="iswrong bigquestionwrap"';
 			}
 			echo '>';
 
@@ -471,9 +471,9 @@
 				}
 				echo '</select></p>';
 			}
-			
+
 			echo "<p class=\"person\"><b>".Sanitize::encodeStringForDisplay($line['LastName'].', '.$line['FirstName']).'</b></p>';
-			    
+
 			if (!$groupdup) {
 				echo '<p class="group" style="display:none"><b>'.Sanitize::encodeStringForDisplay($groupnames[$line['agroupid']]);
 				if (isset($groupmembers[$line['agroupid']]) && count($groupmembers[$line['agroupid']])>0) {
@@ -761,7 +761,7 @@ function sandboxgetweights($code,$seed) {
 		}
 	}
 	if (!isset($answeights)) {
-		if (!isset($anstypes)) { 
+		if (!isset($anstypes)) {
 			//this shouldn't happen unless the code crashed
 			return array(1);
 		}
