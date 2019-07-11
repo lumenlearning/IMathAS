@@ -1,8 +1,10 @@
 <?php
 
-use OHM\Models\StudentPayApiResult;
-
 require_once(__DIR__ . "/../../init.php");
+require_once(__DIR__ . '/../assessments/payment_lib.php');
+
+use OHM\Models\StudentPayApiResult;
+use OHM\Assessments\PaymentLib;
 
 global $studentPayStatus;
 
@@ -57,7 +59,7 @@ if ('expired' == $paymentStatus) {
 
 
 if ('in_trial' == $paymentStatus) {
-	if (isStartingAssessment() || 0 > $studentPayStatus->getStudentTrialTimeRemainingSeconds()) {
+	if (PaymentLib::isStartingAssessment() || 0 > $studentPayStatus->getStudentTrialTimeRemainingSeconds()) {
 		$studentPayment->logDirectPaymentPageSeen();
 		displayPaymentPage();
 		exit;
