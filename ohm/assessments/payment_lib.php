@@ -4,6 +4,12 @@ namespace OHM\Assessments;
 
 class PaymentLib
 {
+	const REFERERS_INDICATING_QUIZ_TAKING = array(
+		'showtest.php',				// Assessments version 1
+		'assess2/',					// Assessments version 2
+		'process_activation.php',
+	);
+
 	/**
 	 * Determine if a user is starting an assessment.
 	 *
@@ -27,12 +33,31 @@ class PaymentLib
 			return true;
 		}
 
+		// This handles bookmarks to assessment pages.
 		if (!isset($_SERVER['HTTP_REFERER'])) {
 			return true;
 		}
 
-		if (isset($_SERVER['HTTP_REFERER']) && !strpos($_SERVER['HTTP_REFERER'], 'showtest.php')) {
+		// This handles question navigation during quiz-taking. Questions
+		// in assessment pages link back to the same URL.
+		if (isset($_SERVER['HTTP_REFERER']) && !self::isTakingQuizByReferer()) {
 			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine if a user is currently taking a quiz, based on referer URL.
+	 *
+	 * @return bool
+	 */
+	private static function isTakingQuizByReferer()
+	{
+		foreach (self::REFERERS_INDICATING_QUIZ_TAKING as $refererString) {
+			if (strpos($_SERVER['HTTP_REFERER'], $refererString)) {
+				return true;
+			}
 		}
 
 		return false;
