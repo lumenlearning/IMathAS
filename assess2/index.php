@@ -62,6 +62,21 @@ if ((!$isltilimited || $sessiondata['ltirole']!='learner') && !$inTreeReader && 
     echo '</a> &gt; ', _('Assessment'), '</div>';
   }
 }
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+require(__DIR__ . '/../ohm/assessments/paywall_start.php');
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 ?>
 <noscript>
   <strong>We're sorry but <?php echo $installname; ?> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
