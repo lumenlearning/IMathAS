@@ -34,6 +34,7 @@ $assessmentName = $assessNameStm->fetchColumn(0);
                 <input type="hidden" name="group_id" value="<?php echo Sanitize::onlyInt($courseOwnerGroupId); ?>"/>
                 <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
                 <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
+                <input type="hidden" name="assessment_version" value="<?php echo Sanitize::onlyInt($assessmentVersion); ?>"/>
                 <button id="begin_trial" type="submit">Start two week trial</button>
             </form>
         </div>

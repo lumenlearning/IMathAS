@@ -34,8 +34,6 @@ if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($as
 
 $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 
-error_log("In process_activation.php for assessment version " . $assessmentVersion);
-
 if (1 == $assessmentVersion) {
 	$assessmentUrl = $GLOBALS['basesiteurl']
 		. sprintf("/assessment/showtest.php?id=%d&cid=%d",

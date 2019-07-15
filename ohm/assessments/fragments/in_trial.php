@@ -48,8 +48,8 @@ else if (86400 <= $trialTimeRemaining) {
     </p>
     <div class="trial_button_wrapper">
       <a href="<?php
-         printf($GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?action=%s&course_id=%d&assessment_id=%d',
-            'continue_trial', $courseId, $assessmentId);
+         printf($GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?action=%s&course_id=%d&assessment_id=%d&assessment_version=%d',
+            'continue_trial', $courseId, $assessmentId, $assessmentVersion);
       ?>">Continue to assessment</a>
     </div>
   </div>
