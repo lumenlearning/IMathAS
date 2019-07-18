@@ -611,6 +611,30 @@ if ($overwriteBody==1) {
    makeTopMenu();
    echo "<div id=\"headercourse\" class=\"pagetitle\"><h1>".Sanitize::encodeStringForDisplay($curname)."</h1></div>\n";
 
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+
+    $courseBannerForStudents = getCourseBannerForStudents();
+    $courseBannerForTeachers = getCourseBannerForTeachers();
+
+    // Display a message on the course page to all students only.
+    if (20 > $GLOBALS['myrights'] && !empty($courseBannerForStudents)) {
+        display_course_banner($courseBannerForStudents);
+    }
+    // Display a message on the course page to all teachers only.
+    if (19 < $GLOBALS['myrights'] && !empty($courseBannerForTeachers)) {
+		display_course_banner($courseBannerForTeachers);
+    }
+
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+
    if (count($items)>0) {
 
 
@@ -720,6 +744,64 @@ function makeTopMenu() {
 }
 
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+/**
+ * Get the message to display to all students on the course page, if available.
+ *
+ * @return string|null
+ */
+function getCourseBannerForStudents(): ?string
+{
+    // In a better world...
+//	$stm = $GLOBALS['DBH']->prepare("SELECT config_value FROM ohm_config WHERE config_name = :cname");
+//	$stm->execute(array(':config_name' => 'course_banner_message_students'));
+//	return $stm->fetchColumn(0);
+
+	// For now :(
+    return trim($_ENV['COURSE_BANNER_STUDENTS']);
+}
+
+/**
+ * Get the message to display to all teachers on the course page, if available.
+ *
+ * @return string|null
+ */
+function getCourseBannerForTeachers(): ?string
+{
+	// In a better world...
+//	$stm = $GLOBALS['DBH']->prepare("SELECT config_value FROM ohm_config WHERE config_name = :cname");
+//	$stm->execute(array(':config_name' => 'course_banner_message_teachers'));
+//	return $stm->fetchColumn(0);
+
+	// For now :(
+	return trim($_ENV['COURSE_BANNER_TEACHERS']);
+}
+
+/**
+ * Output (as HTML) a div containing a message for the user.
+ *
+ * @param string $message The message to be displayed to the user.
+ */
+function display_course_banner(string $message): void
+{
+    $messageAsHtml = trim($message);
+	$messageAsHtml = preg_replace(array('/\n/', '/\\n/', '/\[br\]/'),
+        '<br/>', $messageAsHtml);
+    echo '<div id="ohm_course_banner">';
+    echo '<p>' . $messageAsHtml . '</p>';
+    echo '</div>';
+}
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 
 
 ?>

@@ -1004,6 +1004,13 @@ div#ohmEditGroup {
 	padding: 1em;
 }
 
+div#ohm_course_banner {
+	border: 2px solid #115eaf;
+	border-radius: 5px;
+	margin: 1em 0em;
+    padding: 0.5em 1em;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {
