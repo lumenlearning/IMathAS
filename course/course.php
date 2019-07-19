@@ -792,9 +792,18 @@ function display_course_banner(string $message): void
     $messageAsHtml = trim($message);
 	$messageAsHtml = preg_replace(array('/\n/', '/\\n/', '/\[br\]/'),
         '<br/>', $messageAsHtml);
-    echo '<div id="ohm_course_banner">';
-    echo '<p>' . $messageAsHtml . '</p>';
-    echo '</div>';
+
+	$bannerHeader = isset($_ENV['COURSE_BANNER_HEADER']) ?
+		$_ENV['COURSE_BANNER_HEADER'] : 'Important Notice:';
+
+    ?>
+        <div id="ohm_course_banner">
+        <div id="ohm_course_banner_header"><?php echo $bannerHeader; ?></div>
+        <div id="ohm_course_banner_content">
+            <p><?php echo $messageAsHtml; ?></p>
+        </div>
+        </div>
+    <?php
 }
 
 // #### End OHM-specific code #######################################################

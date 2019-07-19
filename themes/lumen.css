@@ -1005,10 +1005,22 @@ div#ohmEditGroup {
 }
 
 div#ohm_course_banner {
-	border: 2px solid #115eaf;
-	border-radius: 5px;
+	border: 2px solid #1E74D1;
 	margin: 1em 0em;
+	padding: 0px;
+}
+
+div#ohm_course_banner_header {
+	border: 2px solid #1E74D1;
+	margin: 0px;
     padding: 0.5em 1em;
+    background-color: #1E74D1;
+	color: #fff;
+    font-weight: bold;
+}
+
+div#ohm_course_banner_content {
+	padding: 0.5em 1em;
 }
 
 /* MEDIA QUERIES */
