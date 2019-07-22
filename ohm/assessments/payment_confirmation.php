@@ -7,7 +7,9 @@ if (!isset($_COOKIE['ohm_payment_confirmation'])) {
 
 require_once(__DIR__ . "/../../init.php");
 require_once(__DIR__ . "/../../header.php");
+require_once(__DIR__ . '/../assessments/payment_lib.php');
 
+use OHM\Assessments\PaymentLib;
 use OHM\Includes\StudentPaymentApi;
 use OHM\Exceptions\StudentPaymentException;
 use OHM\Models\StudentPayApiResult;
@@ -22,8 +24,20 @@ $courseId = $cookieData['cid'];
 $assessmentId = $cookieData['aid'];
 $userEmail = $cookieData['email'];
 
-$redirectTo = sprintf('%s/assessment/showtest.php?id=%d&cid=%d',
-	$GLOBALS['basesiteurl'], $assessmentId, $courseId);
+$assessmentVersion = PaymentLib::getAssessmentVersion($courseId);
+switch ($assessmentVersion) {
+	case 1:
+		$redirectTo = sprintf('%s/assessment/showtest.php?id=%d&cid=%d',
+			$GLOBALS['basesiteurl'], $assessmentId, $courseId);
+		break;
+	case 2:
+		$redirectTo = sprintf('%s/assess2/?aid=%d&cid=%d',
+			$GLOBALS['basesiteurl'], $assessmentId, $courseId);
+		break;
+	default:
+		error_log("In " . __FILE__ . ": Unknown assessment version!");
+		break;
+}
 
 $institution = getInstitutionData($groupId, $courseId, $userid);
 $schoolLogoUrl = $institution->getSchoolLogoUrl();

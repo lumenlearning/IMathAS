@@ -11,6 +11,23 @@ class PaymentLib
 	);
 
 	/**
+	 * Get the assessment version for a course.
+	 *
+	 * As of 2019 July 12, this can be one of: 1, 2
+	 *
+	 * @param $courseId integer The course version number.
+	 * @return mixed integer|null The assessment version.
+	 */
+	public static function getAssessmentVersion($courseId)
+	{
+		/* @var $stm \PDOStatement */
+		$stm = $GLOBALS['DBH']->prepare('SELECT UIver FROM imas_courses WHERE id = :courseId');
+		$stm->execute(array(':courseId' => $courseId));
+
+		return $stm->fetchColumn(0);
+	}
+
+	/**
 	 * Determine if a user is starting an assessment.
 	 *
 	 * tl;dr: If this function returns true, and student payments are enabled,

@@ -30,11 +30,17 @@ use OHM\Assessments\PaymentLib;
 $userId = $GLOBALS['userid'];
 $courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $sessiondata['courseid'];
 
-$assessmentVersion = getAssessmentVersion($courseId);
-if (1 == $assessmentVersion) {
-	$assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
-} elseif (2 == $assessmentVersion) {
-	$assessmentId = isset($_GET['aid']) ? intval($_GET['aid']) : $assessmentIdFromDb;
+$assessmentVersion = PaymentLib::getAssessmentVersion($courseId);
+switch ($assessmentVersion) {
+	case 1:
+		$assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
+		break;
+	case 2:
+		$assessmentId = isset($_GET['aid']) ? intval($_GET['aid']) : $assessmentIdFromDb;
+		break;
+	default:
+		error_log("In " . __FILE__ . ": Unknown assessment version!");
+		break;
 }
 
 $courseNameStm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
@@ -183,22 +189,6 @@ function isTutorInCourse($userId, $courseId)
 	} else {
 		return true;
 	}
-}
-
-/**
- * Get the assessment version for a course.
- *
- * As of 2019 July 12, this can be one of: 1, 2
- *
- * @param $courseId integer The course version number.
- * @return mixed integer|null The assessment version.
- */
-function getAssessmentVersion($courseId)
-{
-	$stm = $GLOBALS['DBH']->prepare('SELECT UIver FROM imas_courses WHERE id = :courseId');
-	$stm->execute(array(':courseId' => $courseId));
-
-	return $stm->fetchColumn(0);
 }
 
 /**
