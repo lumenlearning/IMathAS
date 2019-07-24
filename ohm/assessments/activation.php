@@ -1,10 +1,13 @@
 <?php
 /**
- * This file is currently included from assessment/showtest.php. (inline, near line 640)
+ * This file is currently included from assessment/paywall_start.php. (inline, near line 88)
  *
- * $studentPayStatus is created in showtest.php and must contain valid data.
+ * $studentPayStatus is created in paywall_start.php and must contain valid data.
  */
 
+require_once(__DIR__ . '/../assessments/payment_lib.php');
+
+use OHM\Assessments\PaymentLib;
 use OHM\Includes\StudentPayment;
 use OHM\Models\StudentPayApiResult;
 
@@ -30,7 +33,7 @@ $pageDisplayed = false;
 $trialPageSeen = false;
 
 if (in_array($paymentStatus, $inTrial)) {
-    if (isStartingAssessment()) {
+    if (PaymentLib::isStartingAssessment()) {
 		$studentPayment->logActivationPageSeen();
 		$pageDisplayed = displayStudentPaymentPage(__DIR__ . "/fragments/in_trial.php");
 	} else {

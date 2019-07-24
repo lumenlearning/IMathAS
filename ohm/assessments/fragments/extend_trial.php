@@ -31,6 +31,7 @@
                 <input type="hidden" name="group_id" value="<?php echo Sanitize::onlyInt($courseOwnerGroupId); ?>"/>
                 <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
                 <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
+                <input type="hidden" name="assessment_version" value="<?php echo Sanitize::onlyInt($assessmentVersion); ?>"/>
                 <button id="begin_trial" type="submit">Use 24 hour pass</button>
             </form>
         </div>

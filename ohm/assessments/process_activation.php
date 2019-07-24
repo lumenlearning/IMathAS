@@ -23,6 +23,7 @@ $action = Sanitize::simpleString($_REQUEST['action']);
 $groupId = Sanitize::onlyInt($_REQUEST['group_id']);
 $courseId = Sanitize::courseId($_REQUEST['course_id']);
 $assessmentId = Sanitize::onlyInt($_REQUEST['assessment_id']);
+$assessmentVersion = Sanitize::onlyInt($_REQUEST['assessment_version']);
 
 $validActions = array('begin_trial', 'extend_trial', 'continue_trial', 'decline_trial');
 
@@ -33,8 +34,15 @@ if (!in_array($action, $validActions) || "" == trim($courseId) || "" == trim($as
 
 $courseUrl = $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . $courseId;
 
-$assessmentUrl = $GLOBALS['basesiteurl'] . sprintf("/assessment/showtest.php?id=%d&cid=%d",
-		$assessmentId, $courseId); // used by fragments/api_error.php
+if (1 == $assessmentVersion) {
+	$assessmentUrl = $GLOBALS['basesiteurl']
+		. sprintf("/assessment/showtest.php?id=%d&cid=%d",
+			$assessmentId, $courseId); // used by fragments/api_error.php
+} elseif (2 == $assessmentVersion) {
+	$assessmentUrl = $GLOBALS['basesiteurl']
+		. sprintf("/assess2/?aid=%d&cid=%d",
+			$assessmentId, $courseId); // used by fragments/api_error.php
+}
 
 $studentPayment = new StudentPayment($groupId, $courseId, $GLOBALS['userid']);
 

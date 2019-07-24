@@ -235,12 +235,6 @@ final class SanitizeTest extends TestCase
 		$this->assertEquals(123, $result);
 	}
 
-	public function testOnlyIntLargerThanPhpMax()
-	{
-		$result = Sanitize::onlyInt(PHP_INT_MAX . "1234567890");
-		$this->assertEquals(PHP_INT_MAX . "1234567890", $result);
-	}
-
 	/*
 	 * onlyFloat
 	 */

@@ -4,6 +4,22 @@
 
 	require("../init.php");
 
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+
+	require_once(__DIR__ . '/../ohm/assessments/payment_lib.php');
+	use OHM\Assessments\PaymentLib;
+
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+
+
 	//Look to see if a hook file is defined, and include if it is
 	if (isset($CFG['hooks']['assessment/showtest'])) {
 		require(__DIR__.'/../'.$CFG['hooks']['assessment/showtest']);
@@ -491,7 +507,7 @@
 			 * for assessments.
 			 */
 
-			$ohmQueryString = isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
+			$ohmQueryString = PaymentLib::isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
 
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
@@ -586,7 +602,7 @@
 			 * for assessments.
 			 */
 
-			$ohmQueryString = isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
+			$ohmQueryString = PaymentLib::isStartingAssessment() ? '?begin_ohm_assessment=1' : '';
 
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
@@ -3853,47 +3869,4 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 		}
 	}
 
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-/**
- * Determine if a user is starting an assessment.
- *
- * tl;dr: If this function returns true, and student payments are enabled,
- * then a payment page should be displayed instead of the assessment.
- *
- * Details:
- *
- * If the user is not clicking links from within an assessment that point to things
- * within the same assessment, this should return true.
- *
- * We do this by checking URL query arguments and referring URLs.
- */
-function isStartingAssessment()
-{
-	if (isset($_REQUEST['begin_ohm_assessment'])) {
-		return true;
-	}
-
-	if (isset($_REQUEST['activationCodeErrors'])) {
-		return true;
-	}
-
-	if (!isset($_SERVER['HTTP_REFERER'])) {
-		return true;
-	}
-
-	if (isset($_SERVER['HTTP_REFERER']) && !strpos($_SERVER['HTTP_REFERER'], 'showtest.php')) {
-		return true;
-	}
-
-	return false;
-}
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
 ?>

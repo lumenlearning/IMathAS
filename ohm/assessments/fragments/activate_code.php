@@ -5,13 +5,13 @@
 
 $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, $userid);
 $enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
-$assessmentId = Sanitize::onlyInt($_REQUEST['id']);
 
 ?>
 <form id="ohmActivateCodeForm" method="POST" action="#">
     <input type="hidden" name="group_id" value="<?php echo $courseOwnerGroupId; ?>"/>
     <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
     <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
+    <input type="hidden" name="assessment_version" value="<?php echo Sanitize::onlyInt($assessmentVersion); ?>"/>
     <input type="hidden" name="student_id" value="<?php echo Sanitize::onlyInt($userid); ?>"/>
     <div class="access_code_input_wrapper">
       <label for="access_code">Enter an activation code:</label>

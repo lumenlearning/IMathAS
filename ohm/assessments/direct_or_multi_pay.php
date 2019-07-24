@@ -1,8 +1,10 @@
 <?php
 
-use OHM\Models\StudentPayApiResult;
-
 require_once(__DIR__ . "/../../init.php");
+require_once(__DIR__ . '/../assessments/payment_lib.php');
+
+use OHM\Models\StudentPayApiResult;
+use OHM\Assessments\PaymentLib;
 
 global $studentPayStatus;
 
@@ -36,18 +38,18 @@ $groupName = $stm->fetch(PDO::FETCH_ASSOC)['name'];
 $redirectTo = null;
 if ('trial_not_started' == $paymentStatus) {
 	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
-		. sprintf('action=begin_trial&group_id=%d&course_id=%d&assessment_id=%d',
-			$courseOwnerGroupId, $courseId, $assessmentId);
+		. sprintf('action=begin_trial&group_id=%d&course_id=%d&assessment_id=%d&assessment_version=%d',
+			$courseOwnerGroupId, $courseId, $assessmentId, $assessmentVersion);
 }
 if ('in_trial' == $paymentStatus) {
 	$redirectTo = $GLOBALS['basesiteurl']
-		. sprintf('/ohm/assessments/process_activation.php?action=%s&course_id=%d&assessment_id=%d',
-			'continue_trial', $courseId, $assessmentId);
+		. sprintf('/ohm/assessments/process_activation.php?action=%s&course_id=%d&assessment_id=%d&assessment_version=%d',
+			'continue_trial', $courseId, $assessmentId, $assessmentVersion);
 }
 if ('can_extend' == $paymentStatus) {
 	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
-		. sprintf('action=extend_trial&group_id=%d&course_id=%d&assessment_id=%d',
-			$courseOwnerGroupId, $courseId, $assessmentId);
+		. sprintf('action=extend_trial&group_id=%d&course_id=%d&assessment_id=%d&assessment_version=%d',
+			$courseOwnerGroupId, $courseId, $assessmentId, $assessmentVersion);
 }
 if ('expired' == $paymentStatus) {
 	http://ludev1.example.com/ohm/course/course.php?folder=0&cid=1
@@ -57,7 +59,7 @@ if ('expired' == $paymentStatus) {
 
 
 if ('in_trial' == $paymentStatus) {
-	if (isStartingAssessment() || 0 > $studentPayStatus->getStudentTrialTimeRemainingSeconds()) {
+	if (PaymentLib::isStartingAssessment() || 0 > $studentPayStatus->getStudentTrialTimeRemainingSeconds()) {
 		$studentPayment->logDirectPaymentPageSeen();
 		displayPaymentPage();
 		exit;
