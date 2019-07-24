@@ -7,10 +7,13 @@
  * to be displayed to the student.
  */
 
+require_once(__DIR__ . '/../assessments/payment_lib.php');
+
 use OHM\Includes\StudentPayment;
 use OHM\Includes\StudentPaymentDb;
 use OHM\Exceptions\StudentPaymentException;
 use OHM\Models\StudentPayApiResult;
+use OHM\Assessments\PaymentLib;
 
 /*
  * So I won't forget for a 6th time and have to delete an hour of nice refactoring:
@@ -26,7 +29,19 @@ use OHM\Models\StudentPayApiResult;
 
 $userId = $GLOBALS['userid'];
 $courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $sessiondata['courseid'];
-$assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
+
+$assessmentVersion = PaymentLib::getAssessmentVersion($courseId);
+switch ($assessmentVersion) {
+	case 1:
+		$assessmentId = isset($_GET['id']) ? intval($_GET['id']) : $assessmentIdFromDb;
+		break;
+	case 2:
+		$assessmentId = isset($_GET['aid']) ? intval($_GET['aid']) : $assessmentIdFromDb;
+		break;
+	default:
+		error_log("In " . __FILE__ . ": Unknown assessment version!");
+		break;
+}
 
 $courseNameStm = $DBH->prepare("SELECT name FROM imas_courses WHERE id=:id");
 $courseNameStm->execute(array(':id' => $courseId));
@@ -68,7 +83,7 @@ if (isStudentPayEnabled() && !isTutor($userId, $courseId) && isValidGroupIdForSt
 		error_log("Stack trace: " . $e->getTraceAsString());
 	}
 
-	if (!is_null($studentPayStatus) && isStartingAssessment()) {
+	if (!is_null($studentPayStatus) && PaymentLib::isStartingAssessment()) {
 		$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
 		$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();

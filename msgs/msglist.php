@@ -735,7 +735,7 @@ function chgfilter() {
 		echo " >".Sanitize::encodeStringForDisplay($v)."</option>";
 	}
 	echo "</select> ";
-	
+
 	echo '<label for="filteruid">By sender</label>: <select id="filteruid" onchange="chgfilter()"><option value="0" ';
 	if ($filteruid==0) {
 		echo 'selected="selected" ';
@@ -775,7 +775,7 @@ function chgfilter() {
 	</thead>
 	<tbody>
 <?php
-  $offset = ($page-1)*$threadsperpage;
+  $offset = max(0, ($page-1)*$threadsperpage);
 
   $query = "SELECT imas_msgs.id,imas_msgs.title,imas_msgs.senddate,imas_msgs.replied,imas_users.LastName,imas_users.FirstName,imas_msgs.isread,imas_courses.name,imas_msgs.msgfrom,imas_users.hasuserimg ";
 	$query .= "FROM imas_msgs LEFT JOIN imas_users ON imas_users.id=imas_msgs.msgfrom LEFT JOIN imas_courses ON imas_courses.id=imas_msgs.courseid WHERE ";
@@ -814,12 +814,13 @@ function chgfilter() {
 			$line['title'] = substr($line['title'],4);
 			$n++;
 		}
+		$line['title'] = Sanitize::encodeStringForDisplay($line['title']);
 		if ($n==1) {
-			$line['title'] = 'Re: ' . Sanitize::encodeStringForDisplay($line['title']);
+			$line['title'] = 'Re: ' . $line['title'];
 		} else if ($n>1) {
-			$line['title'] = "Re<sup>$n</sup>: " . Sanitize::encodeStringForDisplay($line['title']);
+			$line['title'] = "Re<sup>$n</sup>: " . $line['title'];
 		}
-		echo "<tr id=\"tr{$line['id']}\" ";
+		printf("<tr id=\"tr%d\" ", Sanitize::onlyInt($line['id']));
 		$stripe = ($cnt%2==0)?'even':'odd';
 		if (($line['isread']&8)==8) {
 			echo 'class="tagged '.$stripe.'" ';

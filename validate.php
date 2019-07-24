@@ -430,10 +430,12 @@
 	}
 	if (isset($sessiondata['isdiag'])) { // && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
 		$urlparts = parse_url($_SERVER['PHP_SELF']);
-		if (!in_array(basename($urlparts['path']),array('showtest.php','ltiuserprefs.php'))) {
+		if ($sessiondata['diag_aver'] == 1 &&
+      !in_array(basename($urlparts['path']),array('showtest.php','ltiuserprefs.php'))
+    ) {
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?r=".Sanitize::randomQueryStringParam());
 			exit;
-		}
+		} // TODO: handle assess2 case
 	}
 
 	if (isset($sessiondata['ltiitemtype']) && $_SERVER['PHP_SELF']==$imasroot.'/index.php') {
@@ -461,9 +463,13 @@
 				exit;
 			}
 		} else if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltirole']=='learner') {
-			$breadcrumbbase = "<a href=\"$imasroot/assessment/showtest.php?cid=".Sanitize::courseId($_GET['cid'])."&id={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
+      if (isset($sessiondata['ltiitemver']) && $sessiondata['ltiitemver'] > 1) {
+        $breadcrumbbase = "<a href=\"$imasroot/assess2/?cid=".Sanitize::courseId($_GET['cid'])."&aid={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
+      } else {
+        $breadcrumbbase = "<a href=\"$imasroot/assessment/showtest.php?cid=".Sanitize::courseId($_GET['cid'])."&id={$sessiondata['ltiitemid']}\">Assignment</a> &gt; ";
+      }
 			$urlparts = parse_url($_SERVER['PHP_SELF']);
-			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','file_manager.php','upload_handler.php');
+			$allowedinLTI = array('showtest.php','printtest.php','msglist.php','sentlist.php','viewmsg.php','msghistory.php','redeemlatepass.php','gb-viewasid.php','showsoln.php','ltiuserprefs.php','file_manager.php','upload_handler.php','index.php','gbviewassess.php','autosave.php','endassess.php','getscores.php','livepollstatus.php','loadassess.php','loadquestion.php','scorequestion.php','startassess.php','uselatepass.php');
 			//call hook, if defined
 			if (function_exists('allowedInAssessment')) {
 				$allowedinLTI = array_merge($allowedinLTI, allowedInAssessment());
@@ -473,7 +479,11 @@
 				$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
 				$stm->execute(array(':id'=>$sessiondata['ltiitemid']));
 				$cid = Sanitize::courseId($stm->fetchColumn(0));
-				header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
+        if (isset($sessiondata['ltiitemver']) && $sessiondata['ltiitemver'] > 1) {
+          header('Location: ' . $GLOBALS['basesiteurl'] . "/assess2/?cid=$cid&aid={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
+        } else {
+				  header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
+        }
 				exit;
 			}
 		} else if ($sessiondata['ltirole']=='instructor') {
@@ -554,7 +564,7 @@
 					$tutorid = $line['id'];
 					$tutorsection = trim($line['section']);
 				} else if ($myrights==5 && isset($_GET['guestaccess']) && isset($CFG['GEN']['guesttempaccts'])) {
-					//guest user not enrolled, but trying via guestaccess; enroll	
+					//guest user not enrolled, but trying via guestaccess; enroll
 					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES (?,?,?)");
 					$stm->execute(array($userid, $cid, time()));
 					$studentid = $DBH->lastInsertId();
@@ -562,7 +572,7 @@
 				}
 			}
 		}
-		$query = "SELECT imas_courses.name,imas_courses.available,imas_courses.lockaid,imas_courses.copyrights,imas_users.groupid,imas_courses.theme,imas_courses.newflag,imas_courses.msgset,imas_courses.toolset,imas_courses.deftime,imas_courses.picicons,imas_courses.latepasshrs,imas_courses.startdate,imas_courses.enddate ";
+		$query = "SELECT imas_courses.name,imas_courses.available,imas_courses.lockaid,imas_courses.copyrights,imas_users.groupid,imas_courses.theme,imas_courses.newflag,imas_courses.msgset,imas_courses.toolset,imas_courses.deftime,imas_courses.picicons,imas_courses.latepasshrs,imas_courses.startdate,imas_courses.enddate,imas_courses.UIver ";
 		$query .= "FROM imas_courses JOIN imas_users ON imas_users.id=imas_courses.ownerid WHERE imas_courses.id=:id";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$cid));
@@ -593,6 +603,7 @@
 			$courseenddate = $crow['enddate'];
 			$picicons = $crow['picicons'];
 			$latepasshrs = $crow['latepasshrs'];
+      $courseUIver = $crow['UIver'];
 
 			if (isset($studentid) && !$inInstrStuView && ((($crow['available'])&1)==1 || time()<$crow['startdate'])) {
 				echo "This course is not available at this time";
@@ -600,10 +611,16 @@
 			}
 			$lockaid = $crow['lockaid']; //ysql_result($result,0,2);
 			if (isset($studentid) && $lockaid>0) {
-				if (strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) {
+				if (($courseUIver == 1 && strpos(basename($_SERVER['PHP_SELF']),'showtest.php')===false) ||
+          ($courseUIver > 1 && strpos($_SERVER['PHP_SELF'],'assess2/')===false)
+        ) {
 					require("header.php");
 					echo '<p>This course is currently locked for an assessment</p>';
-					echo "<p><a href=\"$imasroot/assessment/showtest.php?cid=$cid&id=".Sanitize::encodeUrlParam($lockaid)."\">Go to Assessment</a> | <a href=\"$imasroot/index.php\">Go Back</a></p>";
+          if ($courseUIver > 1) {
+            echo "<p><a href=\"$imasroot/assess2/?cid=$cid&aid=".Sanitize::encodeUrlParam($lockaid)."\">Go to Assessment</a> | <a href=\"$imasroot/index.php\">Go Back</a></p>";
+          } else {
+            echo "<p><a href=\"$imasroot/assessment/showtest.php?cid=$cid&id=".Sanitize::encodeUrlParam($lockaid)."\">Go to Assessment</a> | <a href=\"$imasroot/index.php\">Go Back</a></p>";
+          }
 					require("footer.php");
 					//header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id=$lockaid");
 					exit;
@@ -632,7 +649,16 @@
 
  if (!$verified) {
 	if (!isset($skiploginredirect) && strpos(basename($_SERVER['SCRIPT_NAME']),'directaccess.php')===false) {
-		if (!isset($loginpage)) {
+    if (isset($no_session_handler)) {
+      if ($no_session_handler === 'json_error') {
+        header('Content-Type: application/json; charset=utf-8');
+        echo '{"error": "no_session"}';
+      } else {
+        call_user_func($no_session_handler);
+      }
+      exit;
+    }
+    if (!isset($loginpage)) {
 			 $loginpage = "loginpage.php";
 		}
 		require($loginpage);

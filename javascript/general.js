@@ -144,7 +144,7 @@ function tipshow(el,tip, e) {
 		tipobj.style.top = (p[1]+20) + "px";
 	} else {
 		tipobj.style.top = (p[1]-tipobj.offsetHeight) + "px";
-	}	
+	}
 }
 
 function tipout(e) {
@@ -339,7 +339,7 @@ function GB_show(caption,url,width,height) {
 			  .css("margin", 0);
 			jQuery("#GB_window").append($("<div/>", {id: "GB_frameoverlay"}));
 			jQuery("body").css("user-select","none");
-			
+
 			if (e.type == 'touchstart') {
 				jQuery(window).on('touchmove.GBmove', GB_move)
 				 .on('touchend.GBmove', GB_drop);
@@ -353,7 +353,7 @@ function GB_show(caption,url,width,height) {
 				var touch = e.originalEvent.changedTouches[0] || e.originalEvent.touches[0];
 			}
 			var gbwin = document.getElementById("GB_window");
-			
+
 			jQuery("#GB_window").css("left", gbwin.getBoundingClientRect().left)
 			  .css("top", gbwin.getBoundingClientRect().top)
 			  .css("margin", 0)
@@ -361,10 +361,10 @@ function GB_show(caption,url,width,height) {
 			  .data("original_h", $(gbwin).height())
 			  .data("original_mouse_x", (e.type=='touchstart')?touch.pageX:e.pageX)
 			  .data("original_mouse_y", (e.type=='touchstart')?touch.pageY:e.pageY);
-			  
+
 			jQuery("#GB_window").append($("<div/>", {id: "GB_frameoverlay"}));
 			jQuery("body").css("user-select","none");
-			
+
 			if (e.type == 'touchstart') {
 				jQuery(window).on('touchmove.GBresize', GB_resize)
 				 .on('touchend.GBresize', GB_endresize);
@@ -414,6 +414,8 @@ function GB_show(caption,url,width,height) {
 	//document.getElementById("GB_window").style.left = ((w - width)/2)+"px";
 	if (url.charAt(0)!='<') {
 		document.getElementById("GB_frameholder").style.height = (h - 30 -36)+"px";
+	} else {
+		document.getElementById("GB_frameholder").style.height = "auto";
 	}
 	document.getElementById("GB_window").focus();
 	$(document).on('keydown.GB', function(evt) {
@@ -538,7 +540,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 	//for (var i in tinymce.editors) {
 	//	tinymce.editors[i].remove();
 	//}
-	tinymce.remove();
+	tinymce.remove(selectorstr);
 	tinymce.init(edsetup);
 
 };
@@ -845,7 +847,7 @@ function sendLTIresizemsg() {
 		parent.postMessage(JSON.stringify({subject:'lti.frameResize', height: default_height}), '*');
 	}
 }
-	
+
 jQuery(document).ready(function($) {
 	$(window).on("message", function(e) {
 		if (typeof e.originalEvent.data=='string' && e.originalEvent.data.match(/lti\.frameResize/)) {
@@ -857,9 +859,11 @@ jQuery(document).ready(function($) {
 			} else {
 				var frames = document.getElementsByTagName('iframe');
 				for (var i = 0; i < frames.length; i++) {
-				    if (frames[i].contentWindow === e.originalEvent.source) {
-					$(frames[i]).height(edata.height); //the height sent from iframe
-					break;
+				    if (frames[i].contentWindow === e.originalEvent.source &&
+							!frames[i].hasAttribute('data-noresize')
+						) {
+							$(frames[i]).height(edata.height); //the height sent from iframe
+							break;
 				    }
 				}
 			}
@@ -957,12 +961,17 @@ function groupToggleAll(dir) {
 jQuery(document).ready(function($) {
 	$(".grouptoggle").each(function() {
 		var id = randID();
-		$(this).next(".blockitems")
-			.hide()
-			.removeClass("hidden")
-			.attr("id", "bi"+id);
+		var blockitem = $(this).next(".blockitems");
+		var initclosed = blockitem.hasClass("hidden");
+		if (initclosed) {
+			blockitem.hide().removeClass("hidden");
+		} else {
+			blockitem.show();
+		}
+		blockitem.attr("id", "bi"+id);
+
 		$(this).attr("id", id).attr("aria-controls", "bi"+id)
-			.attr("aria-expanded", false)
+			.attr("aria-expanded", !initclosed)
 			.attr("tabindex", 0)
 			.css("cursor", "pointer")
 			.on("click keydown", function(e) {
@@ -976,11 +985,29 @@ jQuery(document).ready(function($) {
 						$(this).children("img").attr("src", "../img/collapse.gif");
 						$(this).next(".blockitems").slideDown();
 					}
-				}	
+				}
 			});
 	});
 	$(".grouptoggle img").attr("alt", "expand/collapse");
 });
+
+// restyled file uploads
+function initFileAlt(el) {
+	var label = jQuery(el).next().find(".filealt-label");
+	var origLabel = label.attr('data-def') || label.html();
+	jQuery(el).off("focus.filealt, blur.filealt, click.filealt, change.filealt")
+		.on("focus.filealt", function(e) { jQuery(e.target).addClass("has-focus");} )
+		.on("blur.filealt", function(e) { jQuery(e.target).removeClass("has-focus");} )
+		.on("click.filealt", function(e) { label.html(origLabel); } )
+		.on("change.filealt", function(e) {
+			var fileName = '';
+			fileName = e.target.value.split(/(\\|\/)/g).pop();
+			if (fileName) {
+				label.html(fileName);
+			}
+		});
+}
+jQuery('input.filealt').each(function(i,el) { initFileAlt(el);});
 
 //https://github.com/davatron5000/FitVids.js
 (function( $ ){
@@ -1126,6 +1153,7 @@ function initSageCell(base) {
 		if (typeof jQuery(ta).attr("id") != "undefined") {
 				url += '&update_id='+jQuery(ta).attr("id");
 		}
+		url += '&evallabel=' + encodeURIComponent(_('Evaluate'));
 		jQuery(ta).addClass("allowupdate").hide()
 		.after(jQuery("<iframe/>", {
 				id: frame_id,
@@ -1142,13 +1170,12 @@ jQuery(function() {
 });
 
 function setActiveTab(el) {
-	var tabid = el.id;
 	jQuery(el).closest(".tabwrap").find("li.active").removeClass("active");
 	jQuery(el).closest(".tablist").find("a[role=tab]").attr("aria-selected",false);
 	jQuery(el).attr("aria-selected",true);
 	jQuery(el).parent().addClass("active");
-	jQuery(el).closest(".tabwrap").find(".tabpanel").hide().attr("aria-hidden",true);    
-	var tabpanelid = tabid.replace(/tab/,"tabpanel");
+	jQuery(el).closest(".tabwrap").find(".tabpanel").hide().attr("aria-hidden",true);
+	var tabpanelid = el.getAttribute('aria-controls');
 	jQuery(el).closest(".tabwrap").find("#"+tabpanelid).show().attr("aria-hidden",false);
 }
 

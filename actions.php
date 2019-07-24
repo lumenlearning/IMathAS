@@ -138,7 +138,7 @@ require_once("includes/sanitize.php");
 			$message .= $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id</a>\r\n";
 			require_once("./includes/email.php");
 			send_email($_POST['email'], $sendfrom, $installname.' Confirmation', $message, array(), array(), 10);
-			
+
 			require("header.php");
 			if ($gb == '') {
 				echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; New User Signup</div>\n";
@@ -326,7 +326,7 @@ require_once("includes/sanitize.php");
 		if ($stm->rowCount() > 0) {
 			echo $stm->rowCount();
 			echo " usernames match this email address and were emailed.  <a href=\"index.php\">Return to login page</a>";
-			
+
 			$message  = "<h3>This is an automated message from $installname.  Do not respond to this email</h3>\r\n";
 			$message .= "<p>Your email was entered in the Username Lookup page on $installname.  If you did not do this, you may ignore and delete this message.  ";
 			$message .= "All usernames using this email address are listed below</p><p>";
@@ -339,7 +339,7 @@ require_once("includes/sanitize.php");
 				$message .= "Username: <b>{$row['SID']}</b>.  Last logged in: $lastlogin<br/>";
 			}
 			$message .= "</p><p>If you forgot your password, use the Lost Password link at the login page.</p>";
-			
+
 			require_once("./includes/email.php");
 			send_email($_POST['email'], $sendfrom, $installname._(' Username Request'), $message, array(), array(), 10);
 
@@ -566,6 +566,8 @@ require_once("includes/sanitize.php");
 			*/
 			$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid IN (SELECT id FROM imas_assessments WHERE courseid=:cid) AND userid=:uid");
 			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
+			$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid IN (SELECT id FROM imas_assessments WHERE courseid=:cid) AND userid=:uid");
+			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
 
 			$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE itemtype='A' AND assessmentid IN (SELECT id FROM imas_assessments WHERE courseid=:cid) AND userid=:uid");
 			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
@@ -580,7 +582,7 @@ require_once("includes/sanitize.php");
 			$query .= "(SELECT ifp.threadid FROM imas_forum_posts AS ifp JOIN imas_forums ON ifp.forumid=imas_forums.id WHERE imas_forums.courseid=:cid)";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
-			
+
 			$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetype='forum' AND gradetypeid IN (SELECT id FROM imas_forums WHERE courseid=:cid) AND userid=:uid");
 			$stm->execute(array(':uid'=>$userid,':cid'=>$cid));
 
@@ -742,7 +744,11 @@ require_once("includes/sanitize.php");
 		$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$sessiondata['ltiitemid']));
 		$cid = Sanitize::courseId($stm->fetchColumn(0));
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
+		if (isset($sessiondata['ltiitemver']) && $sessiondata['ltiitemver'] > 1) {
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assess2/?cid=$cid&aid={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
+		} else {
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id={$sessiondata['ltiitemid']}&r=".Sanitize::randomQueryStringParam());
+		}
 	} else {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" . Sanitize::randomQueryStringParam());
 	}

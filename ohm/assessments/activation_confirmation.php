@@ -5,6 +5,9 @@
 
 require_once(__DIR__ . '/../../init.php');
 require_once(__DIR__ . '/../../header.php');
+require_once(__DIR__ . '/../assessments/payment_lib.php');
+
+use OHM\Assessments\PaymentLib;
 
 if (!isset($_REQUEST['courseId']) || !isset($_REQUEST['activationTime'])) {
     header("Location: " . $GLOBALS['basesiteurl']);
@@ -36,11 +39,20 @@ $date = new DateTime();
 $date->setTimestamp($timestamp);
 $timestamp_string = $date->format('Y-m-d H:i:s');
 
-$assessmentUrl = $GLOBALS['basesiteurl'] . '/assessment/showtest.php?'
-	. Sanitize::generateQueryStringFromMap(array(
-		'id' => $assessmentId,
-		'cid' => $courseId
-	));
+$assessmentVersion = PaymentLib::getAssessmentVersion($courseId);
+switch ($assessmentVersion) {
+	case 1:
+		$assessmentUrl = sprintf('%s/assessment/showtest.php?id=%d&cid=%d',
+			$GLOBALS['basesiteurl'], $assessmentId, $courseId);
+		break;
+	case 2:
+		$assessmentUrl = sprintf('%s/assess2/?aid=%d&cid=%d',
+			$GLOBALS['basesiteurl'], $assessmentId, $courseId);
+		break;
+	default:
+		error_log("In " . __FILE__ . ": Unknown assessment version!");
+		break;
+}
 ?>
 
 <div class="access-wrapper">

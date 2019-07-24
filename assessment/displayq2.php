@@ -287,6 +287,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 	if (isset($GLOBALS['nocolormark'])) {  //no colors
 		$qcolors = array();
 	}
+	$GLOBALS['lastansweights'] = array();
 	if ($qdata['qtype']=="multipart" || $qdata['qtype']=='conditional') {
 		if (!isset($anstypes) && $GLOBALS['myrights']>10) {
 			echo 'Error in question: missing $anstypes for multipart or conditional question';
@@ -315,6 +316,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 					$answeights = array(1);
 				}
 			}
+			$GLOBALS['lastansweights'] = $answeights;
 		}
 		$laparts = explode("&",$la);
 
@@ -339,7 +341,6 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			$showanswer = _('Answers may vary');
 		}
 	}
-
 
 	if ($returnqtxt) {
 		//$toevalqtxt = preg_replace('/\$answerbox(\[\d+\])?/','',$toevalqtxt);
@@ -4737,7 +4738,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
 						} else if ($anans=="-oo" && $givenans=="-oo") {
 							if ($partformatok) {$correct += 1;}; $correctanyformat++; $foundloc = $j; break 2;
-						}
+							}
 					} else if (is_numeric($givenans)) {
 						if (isset($reqsigfigs)) {
 							$tocheck = preg_replace('/\s*(\*|x|X|×|✕)\s*10\s*\^/','E',$orarr[$j]);
@@ -4989,7 +4990,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$varvals = array();
 				for($j=0; $j < count($variables); $j++) {
 					$varvals[$variables[$j]] = $tps[$i][$j];
-				}
+					}
 				$realans = $answerfunc($varvals);
 
 				//echo "$answer, real: $realans, my: {$myans[$i]},rel: ". (abs($myans[$i]-$realans)/abs($realans))  ."<br/>";
@@ -5558,6 +5559,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				array_pop($ansdots);
 			}
 			list($lines,$dots,$odots,$tplines,$ineqlines) = array_slice(explode(';;',$givenans),0,5);
+			$stuclosed = false;
 			if ($lines=='') {
 				$line = array();
 				$extrapolys = 0;
@@ -5571,6 +5573,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				}
 				if ($isclosed && ($line[0][0]-$line[count($line)-1][0])*($line[0][0]-$line[count($line)-1][0]) + ($line[0][1]-$line[count($line)-1][1])*($line[0][1]-$line[count($line)-1][1]) <=25*max(1,$reltolerance)) {
 					array_pop($line);
+					$stuclosed = true;
 				}
 			}
 
@@ -5582,11 +5585,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					}
 				}
 			}
-			if ($isclosed && isset($matchstu[0])) {
+			if ($isclosed && $stuclosed && isset($matchstu[0])) {
 				$matchstu[count($ansdots)] = $matchstu[0];
 			}
 
 			$totaladj = 0;  $correctadj = 0;
+
 			for ($i =0;$i<count($ansdots) - ($isclosed?0:1);$i++) {
 				$totaladj++;
 				/*if ($i==count($ansdots)-1) {
@@ -6835,7 +6839,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					$newdot = array($pixx, $pixy);
 					if (count($function)==2 || $function[2]=='closed') {
 						if (!in_array($newdot, $ansdots)) { // no duplicates
-							$ansdots[$key] = $newdot; 
+							$ansdots[$key] = $newdot;
 						}
 					} else {
 						if (!in_array($newdot, $ansodots)) { // no duplicates
@@ -6845,6 +6849,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				} else {
 					$xminpix = round(max(1,($function[1] - $settings[0])*$pixelsperx + $imgborder));
 					$xmaxpix = round(min($settings[6]-1,($function[2] - $settings[0])*$pixelsperx + $imgborder));
+					if ($xminpix == $xmaxpix) { continue; } // skip if zero-length line
 					$overlap = false;
 					foreach ($anslines as $lk=>$line) {
 						if ($line[0] <= $xmaxpix && $line[1] >= $xminpix) { // overlap
@@ -7208,8 +7213,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			}
 		}
 		$totscore = 0;
+		$pcnt = 0;
 		foreach ($scores as $key=>$score) {
-			$totscore += $score*$partweights[$key];
+			$totscore += $score*$partweights[$pcnt];
+			$pcnt++;
 		}
 		if ($extrastuffpenalty>0) {
 			$totscore = max($totscore*(1-$extrastuffpenalty),0);

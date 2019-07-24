@@ -4,7 +4,7 @@
 
 
 
-array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r","replacealttext","randpythag","changeimagesize");
+array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog","sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands","randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand","nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands","nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle","makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays","showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive","gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays","intersectarrays","joinarray","unionarrays","count","polymakepretty","polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array","prettyint","prettyreal","prettysigfig","arraystodots","subarray","showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray","array_reverse","root","getsnapwidthheight","is_numeric","sign","prettynegs","dechex","hexdec","print_r","replacealttext","randpythag","changeimagesize","mod");
 array_push($allowedmacros,"numtowords","randname","randnamewpronouns","randmalename","randfemalename","randnames","randmalenames","randfemalenames","randcity","randcities","prettytime","definefunc","evalfunc","safepow","arrayfindindices","stringtoarray","strtoupper","strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend","stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today","numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction","ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots","jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace","makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes","comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp","getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt","getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc","getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata","getopendotsdata","gettwopointdata","getlinesdata","adddrawcommand","mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate","randstates","prettysmallnumber","makeprettynegative");
 function mergearrays() {
 	$args = func_get_args();
@@ -2563,6 +2563,41 @@ function forminlinebutton($label,$content,$style='button',$outstyle='block') {
 	return $out;
 }
 
+function ineqtointerval($str, $var) {
+	if ($str === 'DNE') {
+		return $str;
+	}
+	$str = strtolower($str);
+	$var = strtolower($var);
+	if (preg_match('/all\s*real/', $str)) {
+		return '(-oo,oo)';
+	}
+	$pieces = preg_split('/(<=?|>=?)/', $str, -1, PREG_SPLIT_DELIM_CAPTURE);
+	$cnt = count($pieces);
+	$pieces = array_map('trim', $pieces);
+	if ($cnt != 3 && $cnt != 5) {
+		return false; //invalid
+	} else if ($cnt == 5 && ($pieces[1][0] != $pieces[3][0] || $pieces[2] != $var)) {
+		return false; // mixes > with <
+	}
+	if ($cnt==3 && $pieces[0]==$var && $pieces[1][0]=='>') {
+		return ($pieces[1]=='>'?'(':'[') . $pieces[2] . ',oo)';
+	} else if ($cnt==3 && $pieces[0]==$var && $pieces[1][0]=='<') {
+		return '(-oo,' . $pieces[2] . ($pieces[1]=='<'?')':']');
+	} else if ($cnt==3 && $pieces[2]==$var && $pieces[1][0]=='>') {
+		return '(-oo,' . $pieces[0] . ($pieces[1]=='>'?')':']');
+	} else if ($cnt==3 && $pieces[2]==$var && $pieces[1][0]=='<') {
+		return ($pieces[1]=='<'?'(':'[') . $pieces[0] . ',oo)';
+	} else if ($cnt==5 && $pieces[1][0]=='<') {
+		return ($pieces[1]=='<'?'(':'[') . $pieces[0] . ',' .
+			$pieces[4] . ($pieces[3]=='<'?')':']');
+	} else if ($cnt==5 && $pieces[1][0]=='>') {
+		return ($pieces[3]=='>'?'(':'[') . $pieces[4] . ',' .
+			$pieces[0] . ($pieces[1]=='>'?')':']');
+	}
+	return false;
+}
+
 function intervaltoineq($str,$var) {
 	if ($str=='DNE') {
 		return 'DNE';
@@ -3603,6 +3638,10 @@ function getsnapwidthheight($xmin,$xmax,$ymin,$ymax,$width,$height,$snaptogrid) 
 	return array($newwidth,$newheight);
 }
 
+function mod($p,$n) {
+	return (($p % $n) + $n)%$n;
+}
+
 function getscorenonzero() {
 	global $scores;
 	$out = array();
@@ -3623,6 +3662,9 @@ function getscorenonzero() {
 function getiscorrect() {
 	global $rawscores;
 	$out = array();
+	if (!is_array($rawscores)) {
+		return $out;
+	}
 	foreach ($rawscores as $i=>$v) {
 		if (strpos($v,'~')===false) {
 			$out[$i+1] = ($v<0)?-1:(($v==1)?1:0);
@@ -4056,7 +4098,6 @@ function checkMinMax($min, $max, $isint, $funcname) {
 	}
 	return array($min,$max);
 }
-
 
 
 ?>

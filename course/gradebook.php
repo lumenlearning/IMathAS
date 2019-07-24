@@ -136,6 +136,12 @@ if ($canviewall && !empty($_GET['stu'])) {
 	$stu = 0;
 }
 
+if (!empty($CFG['assess2-use-vue-dev'])) {
+	$assessGbUrl = "http://localhost:8080/gbviewassess.html";
+} else {
+	$assessGbUrl = "../assess2/gbviewassess.php";
+}
+
 //HANDLE ANY POSTS
 if ($isteacher) {
 	if (isset($_GET['togglenewflag'])) {
@@ -291,6 +297,8 @@ if (isset($studentid) || $stu!=0) { //show student view
 				GB_show(_("Feedback"), "showfeedbackall.php?cid="+cid+"&stu="+id, 600, 600);
 			} else if (type=="F") {
 				GB_show(_("Feedback"), "viewforumgrade.php?embed=true&cid="+cid+"&uid="+uid+"&fid="+id, 600, 600);
+			} else if (type=="A2") {
+				GB_show(_("Feedback"), "showfeedback.php?cid="+cid+"&type="+type+"&id="+id+"&uid="+uid, 600, 600);
 			} else {
 				GB_show(_("Feedback"), "showfeedback.php?cid="+cid+"&type="+type+"&id="+id, 600, 600);
 			}
@@ -399,7 +407,7 @@ if (isset($studentid) || $stu!=0) { //show student view
 		$usefullwidth = true;
 	}
 	$showwidthtoggle = (strpos($coursetheme, '_fw')!==false);
-	
+
 	$placeinhead .= "</script>\n";
 	$placeinhead .= "<style type=\"text/css\"> table.gb { margin: 0px; } td.trld {display:table-cell;vertical-align:middle;} </style>";
 	$placeinhead .= '<style type="text/css"> .dropdown-header {  font-size: inherit;  padding: 3px 10px;} </style>';
@@ -426,11 +434,11 @@ if (isset($studentid) || $stu!=0) { //show student view
 	$togglehtml .= '<li class="dropdown-header">'._('Headers').'</li>';
 	$togglehtml .= '<li><a data-hdrs="1">'._('Locked').'</a></li>';
 	$togglehtml .= '<li><a data-hdrs="0">'._('Unlocked').'</a></li>';
-	
+
 	if ($showwidthtoggle && $headerslocked) {
 		$togglehtml .= '<li class="dropdown-header" data-pgw="hdr">'._('Width').'</li>';
 		$togglehtml .= '<li><a data-pgw="0">'._('Fixed').'</a></li>';
-		$togglehtml .= '<li><a data-pgw="1">'._('Full').'</a></li>';	
+		$togglehtml .= '<li><a data-pgw="1">'._('Full').'</a></li>';
 	}
 	$togglehtml .= '<li class="dropdown-header">'._('Scores').'</li>';
 	$togglehtml .= '<li><a data-pts="0">'._('Points').'</a></li>';
@@ -590,6 +598,8 @@ if (isset($studentid) || $stu!=0) { //show student view
 function gbstudisp($stu) {
 	global $DBH,$CFG,$hidenc,$cid,$gbmode,$availshow,$isteacher,$istutor,$catfilter,$imasroot,$canviewall,$urlmode;
 	global $includeduedate, $includelastchange,$latepasshrs,$latepasses,$hidelocked,$exceptionfuncs;
+	global $assessGbUrl;
+
 	if ($availshow==4) {
 		$availshow=1;
 		$hidepast = true;
@@ -717,7 +727,7 @@ function gbstudisp($stu) {
 			}
 		}
 		if ($showlatepass==1) {
-			if ($latepasses==0) { 
+			if ($latepasses==0) {
 				$lpmsg = _('No LatePasses available');
 			} else if ($latepasses>1) {
 				$lpmsg = sprintf(_('%d LatePasses available'), $latepasses);
@@ -747,7 +757,7 @@ function gbstudisp($stu) {
 	if ($stu>0 && $isteacher) {
 		echo '<th></th>';
 	}
-	echo '<th>', _('Item'), '</th><th>', _('Possible'), '</th><th>', _('Grade'), '</th><th>', _('Percent'), '</th>';
+	echo '<th>', _('Item'), '</th><th>', _('Percent'), '</th><th>', _('Grade'), '</th><th>', _('Possible'), '</th>';
 	if ($stu>0 && $isteacher) {
 		echo '<th>', _('Time Spent (In Questions)'), '</th>';
 		$sarr = "false,'S','N','N','N','N'";
@@ -767,8 +777,10 @@ function gbstudisp($stu) {
 			$sarr .= ",'D'";
 		}
 		//echo '<th>', _('Feedback'), '<br/><a href="#" class="small pointer" onclick="return showhideallfb(this);">', _('[Show Feedback]'), '</a></th>';
-		echo '<th>', _('Feedback'), '<br/>';
-		echo '<a href="#" class="small feedbacksh pointer" onclick="return showfb('.Sanitize::onlyInt($stu).',\'all\')">', _('View All'), '</a>';
+		echo '<th>', _('Feedback');
+		// Disable for now, since we can't do this for assess2 right now
+		//echo '<br/>';
+		//echo '<a href="#" class="small feedbacksh pointer" onclick="return showfb('.Sanitize::onlyInt($stu).',\'all\')">', _('View All'), '</a>';
 		echo '</th>';
 		$sarr .= ",'N'";
 	}
@@ -804,13 +816,17 @@ function gbstudisp($stu) {
 					echo '<td></td>';
 				}
 			}
-			echo '<td class="cat'.Sanitize::onlyInt($gbt[0][1][$i][1]).'">';
-			
+			echo '<td class="cat'.Sanitize::onlyInt(($gbt[0][1][$i][1]%10)).'">';
+
 			$showlink = false;
 			if ($gbt[0][1][$i][6]==0 && $gbt[0][1][$i][3]==1 && $gbt[1][1][$i][13]==1 && !$isteacher && !$istutor) {
 				$showlink = true;
-				echo '<a href="../assessment/showtest.php?cid='.$cid.'&id='.$gbt[0][1][$i][7].'"';
-				if (abs($gbt[0][1][$i][13])>0) {
+				if ($gbt[0][1][$i][15] > 1) {
+					echo '<a href="../assess2/?cid='.$cid.'&aid='.$gbt[0][1][$i][7].'"';
+				} else {
+					echo '<a href="../assessment/showtest.php?cid='.$cid.'&id='.$gbt[0][1][$i][7].'"';
+				}
+				if (abs($gbt[0][1][$i][13])>0 && $gbt[0][1][$i][15]==1) {
 					$tlwrds = '';
 					$timelimit = abs($gbt[0][1][$i][13])*$gbt[1][4][4];
 					if ($timelimit>3600) {
@@ -866,21 +882,18 @@ function gbstudisp($stu) {
 			}
 
 			echo '</td>';
+
 			echo '<td>';
-
-			if ($gbt[0][1][$i][4]==0 || $gbt[0][1][$i][4]==3) {
-				echo $gbt[0][1][$i][2].'&nbsp;', _('pts'), ' ', _('(Not Counted)');
-			} else {
-				echo $gbt[0][1][$i][2].'&nbsp;', _('pts');
-				if ($gbt[0][1][$i][4]==2) {
-					echo ' (EC)';
+			if (isset($gbt[1][1][$i][0]) && is_numeric($gbt[1][1][$i][0])) {
+				if ($gbt[0][1][$i][2]>0) {
+					echo round(100*$gbt[1][1][$i][0]/$gbt[0][1][$i][2],1).'%';
 				}
+			} else {
+				echo '0%';
 			}
-			if ($gbt[0][1][$i][5]==1 && $gbt[0][1][$i][6]==0) {
-				echo ' (PT)';
-			}
+			echo '</td>';
 
-			echo '</td><td>';
+			echo '<td>';
 
 			$haslink = false;
 
@@ -888,35 +901,60 @@ function gbstudisp($stu) {
 				if ($gbt[0][1][$i][6]==0) {//online
 					if ($stu==-1) { //in averages
 						if (isset($gbt[1][1][$i][0])) { //has score
-							echo "<a href=\"gb-itemanalysis.php?stu=$stu&cid=$cid&aid={$gbt[0][1][$i][7]}\">";
+							if ($gbt[0][1][$i][15] > 1) {
+								echo "<a href=\"gb-itemanalysis2.php?stu=$stu&cid=$cid&aid={$gbt[0][1][$i][7]}\">";
+							} else {
+								echo "<a href=\"gb-itemanalysis.php?stu=$stu&cid=$cid&aid={$gbt[0][1][$i][7]}\">";
+							}
 							$haslink = true;
 						}
 					} else {
 						if (isset($gbt[1][1][$i][0])) { //has score
-							$querymap = array(
-                                'stu' => $stu,
-                                'cid' => $cid,
-                                'asid' => $gbt[1][1][$i][4],
-                                'uid' => $gbt[1][4][0]
-                            );
+							if ($gbt[0][1][$i][15] > 1) { // assess2
+								$querymap = array(
+	                                'stu' => $stu,
+	                                'cid' => $cid,
+	                                'aid' => $gbt[0][1][$i][7],
+	                                'uid' => $gbt[1][4][0]
+	                            );
 
-							echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\"";
+								echo '<a href="'.$assessGbUrl.'?' . Sanitize::generateQueryStringFromMap($querymap) . "\"";
+							} else {
+								$querymap = array(
+	                                'stu' => $stu,
+	                                'cid' => $cid,
+	                                'asid' => $gbt[1][1][$i][4],
+	                                'uid' => $gbt[1][4][0]
+	                            );
 
+								echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\"";
+							}
 							if ($afterduelatepass) {
 								echo ' onclick="return confirm(\''._('If you view this assignment, you will not be able to use a LatePass on it').'\');"';
 							}
 							echo ">";
 							$haslink = true;
 						} else if ($isteacher) {
-                            $querymap = array(
-                                'stu' => $stu,
-                                'cid' => $cid,
-                                'aid' => $gbt[0][1][$i][7],
-                                'uid' => $gbt[1][4][0],
-                                'asid' => 'new'
-                            );
+							if ($gbt[0][1][$i][15] > 1) { // assess2
+								$querymap = array(
+                    'stu' => $stu,
+                    'cid' => $cid,
+                    'aid' => $gbt[0][1][$i][7],
+                    'uid' => $gbt[1][4][0]
+                );
 
-                            echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
+								echo '<a href="'.$assessGbUrl.'?' . Sanitize::generateQueryStringFromMap($querymap) . "\"";
+							} else {
+                $querymap = array(
+                    'stu' => $stu,
+                    'cid' => $cid,
+                    'aid' => $gbt[0][1][$i][7],
+                    'uid' => $gbt[1][4][0],
+                    'asid' => 'new'
+                );
+
+                echo '<a href="gb-viewasid.php?' . Sanitize::generateQueryStringFromMap($querymap) . "\">";
+							}
 							$haslink = true;
 						}
 					}
@@ -1006,20 +1044,27 @@ function gbstudisp($stu) {
 				echo $exceptionnote;
 			}
 			if (!empty($gbt[1][1][$i][14])) { //excused
-				echo '<sup>x</sup>';	
+				echo '<sup>x</sup>';
 			}
 			if (isset($gbt[1][1][$i][5]) && ($gbt[1][1][$i][5]&(1<<$availshow)) && !$hidepast) {
 				echo '<sub>d</sub>';
 			}
-			echo '</td><td>';
-			if (isset($gbt[1][1][$i][0]) && is_numeric($gbt[1][1][$i][0])) {
-				if ($gbt[0][1][$i][2]>0) {
-					echo round(100*$gbt[1][1][$i][0]/$gbt[0][1][$i][2],1).'%';
-				}
+			echo '</td>';
+
+			echo '<td>';
+			if ($gbt[0][1][$i][4]==0 || $gbt[0][1][$i][4]==3) {
+				echo $gbt[0][1][$i][2].'&nbsp;', _('pts'), ' ', _('(Not Counted)');
 			} else {
-				echo '0%';
+				echo $gbt[0][1][$i][2].'&nbsp;', _('pts');
+				if ($gbt[0][1][$i][4]==2) {
+					echo ' (EC)';
+				}
+			}
+			if ($gbt[0][1][$i][5]==1 && $gbt[0][1][$i][6]==0) {
+				echo ' (PT)';
 			}
 			echo '</td>';
+
 			if ($stu>0 && $isteacher) {
 				if ($gbt[1][1][$i][7] > -1) {
 					echo '<td>'.$gbt[1][1][$i][7].' min ('.$gbt[1][1][$i][8].' min)</td>';
@@ -1054,14 +1099,18 @@ function gbstudisp($stu) {
 				if ($gbt[1][1][$i][1]==0) { //no feedback
 					echo '<td></td>';
 				} else if ($gbt[0][1][$i][6]==0) { //online
-					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][4]).',\'A\')">', _('View Feedback'), '</a></td>';
+					if ($gbt[0][1][$i][15]>1) { //assess2
+						echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[0][1][$i][7]).',\'A2\','.Sanitize::onlyInt($gbt[1][4][0]).')">', _('View Feedback'), '</a></td>';
+					} else {
+						echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][4]).',\'A\')">', _('View Feedback'), '</a></td>';
+					}
 				} else if ($gbt[0][1][$i][6]==1) { //offline
-					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][2]).',\'O\')">', _('View Feedback'), '</a></td>';					
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][2]).',\'O\')">', _('View Feedback'), '</a></td>';
 				} else if ($gbt[0][1][$i][6]==3) { //exttool
-					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][2]).',\'E\')">', _('View Feedback'), '</a></td>';										
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[1][1][$i][2]).',\'E\')">', _('View Feedback'), '</a></td>';
 				} else if ($gbt[0][1][$i][6]==2) { //forum
-					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[0][1][$i][7]).',\'F\','.Sanitize::onlyInt($gbt[1][4][0]).')">', _('View Feedback'), '</a></td>';										
-				} 
+					echo '<td><a href="#" onclick="return showfb('.Sanitize::onlyInt($gbt[0][1][$i][7]).',\'F\','.Sanitize::onlyInt($gbt[1][4][0]).')">', _('View Feedback'), '</a></td>';
+				}
 			}
 			echo '</tr>';
 		}
@@ -1104,7 +1153,7 @@ function gbstudisp($stu) {
 				//} else {
 					echo '<tr class="grid">';
 				//}
-				echo '<td class="cat'.Sanitize::onlyFloat($gbt[0][2][$i][1]).'"><span class="cattothdr">'.Sanitize::encodeStringForDisplay($gbt[0][2][$i][0]).'</span>';
+				echo '<td class="cat'.Sanitize::onlyFloat($gbt[0][2][$i][1]%10).'"><span class="cattothdr">'.Sanitize::encodeStringForDisplay($gbt[0][2][$i][0]).'</span>';
 				if (isset($gbt[0][2][$i][11])) {  //category weight
 					echo ' ('.Sanitize::onlyFloat($gbt[0][2][$i][11]).'%)';
 				}
@@ -1153,7 +1202,7 @@ function gbstudisp($stu) {
 					}
 					if ($gbt[1][2][$i][5]>0) {
 						echo round(100*$gbt[1][2][$i][1]/$gbt[1][2][$i][5],1).'%';
-					} else {                          
+					} else {
 						echo '0%';
 					}
 					if ($gbt[0][4][0]==0) {
@@ -1191,31 +1240,40 @@ function gbstudisp($stu) {
 			if ($gbt[0][4][0]==0) { //using points based
 				echo '<td>', _('Total'), '</td>';
 				if (($show&1)==1) {
-					$pct = round(100*$gbt[1][3][0]/$gbt[1][3][4], 1);
+					if ($gbt[1][3][4] > 0) {}
+					$pct = ($gbt[1][3][4] > 0) ? round(100*$gbt[1][3][0]/$gbt[1][3][4], 1) : 0;
 					echo '<td>'.Sanitize::onlyFloat($gbt[1][3][0]).'/'.Sanitize::onlyFloat($gbt[1][3][4]).' ('.$pct.'%)</td>';
 				}
 				if (($show&2)==2) {
-					$pct = round(100*$gbt[1][3][3]/$gbt[1][3][7], 1);
+					$pct = ($gbt[1][3][7] > 0) ? round(100*$gbt[1][3][3]/$gbt[1][3][7], 1) : 0;
 					echo '<td>'.Sanitize::onlyFloat($gbt[1][3][3]).'/'.Sanitize::onlyFloat($gbt[1][3][7]).' ('.$pct.'%)</td>';
 				}
 				if (($show&4)==4) {
-					$pct = round(100*$gbt[1][3][1]/$gbt[1][3][5], 1);
+					$pct = ($gbt[1][3][5] > 0) ? round(100*$gbt[1][3][1]/$gbt[1][3][5], 1) : 0;
 					echo '<td>'.Sanitize::onlyFloat($gbt[1][3][1]).'/'.Sanitize::onlyFloat($gbt[1][3][5]).' ('.$pct.'%)</td>';
 				}
 				if (($show&8)==8) {
-					$pct = round(100*$gbt[1][3][2]/$gbt[1][3][6], 1);
+					$pct = ($gbt[1][3][6] > 0) ? round(100*$gbt[1][3][2]/$gbt[1][3][6], 1) : 0;
 					echo '<td>'.Sanitize::onlyFloat($gbt[1][3][2]).'/'.Sanitize::onlyFloat($gbt[1][3][6]).' ('.$pct.'%)</td>';
 				}
 
 			} else {
 				echo '<td>', _('Weighted Total'), '</td>';
-				if (($show&1)==1) {echo '<td>'.round(100*$gbt[1][3][0]/$gbt[1][3][4], 1).'%</td>';}
-				if (($show&2)==2) {echo '<td>'.round(100*$gbt[1][3][3]/$gbt[1][3][7], 1).'%</td>';}
-				if (($show&4)==4) {echo '<td>'.round(100*$gbt[1][3][1]/$gbt[1][3][5], 1).'%</td>';}
-				if (($show&8)==8) {echo '<td>'.round(100*$gbt[1][3][2]/$gbt[1][3][6], 1).'%</td>';}
+				if (($show&1)==1) {
+					echo '<td>'.(($gbt[1][3][4] > 0) ? round(100*$gbt[1][3][0]/$gbt[1][3][4], 1) : 0) .'%</td>';
+				}
+				if (($show&2)==2) {
+					echo '<td>'.(($gbt[1][3][7] > 0) ? round(100*$gbt[1][3][3]/$gbt[1][3][7], 1) : 0) .'%</td>';
+				}
+				if (($show&4)==4) {
+					echo '<td>'.(($gbt[1][3][5] > 0) ? round(100*$gbt[1][3][1]/$gbt[1][3][5], 1) : 0) .'%</td>';
+				}
+				if (($show&8)==8) {
+					echo '<td>'.(($gbt[1][3][6] > 0) ? round(100*$gbt[1][3][2]/$gbt[1][3][6], 1) : 0) .'%</td>';
+				}
 			}
 			echo '</tr>';
-			
+
 		}
 		echo '</tbody></table><br/>';
 		echo '<p>';
@@ -1257,7 +1315,7 @@ function gbstudisp($stu) {
 
 function gbInstrCatHdrs(&$gbt, &$collapsegbcat) {
 	global $catfilter, $availshow, $totonleft, $cid;
-	
+
 	$n = 0;
 	$tots = '';
 	if ($catfilter<0) {
@@ -1284,9 +1342,9 @@ function gbInstrCatHdrs(&$gbt, &$collapsegbcat) {
 			} else if ($availshow==2 && $gbt[0][2][$i][2]==3) { //don't show future in cur view
 				continue;
 			} else if ($availshow==0 && $gbt[0][2][$i][2]==1) { //don't show cur in past view
-				continue;	
+				continue;
 			}
-			echo '<th class="cat'.$gbt[0][2][$i][1].'"><div><span class="cattothdr">';
+			echo '<th class="cat'.($gbt[0][2][$i][1]%10).'"><div><span class="cattothdr">';
 			if ($availshow<3) {
 				echo $gbt[0][2][$i][0].'<br/>';
 				if ($gbt[0][4][0]==0) { //using points based
@@ -1316,7 +1374,7 @@ function gbInstrCatHdrs(&$gbt, &$collapsegbcat) {
 }
 function gbInstrCatCols(&$gbt, $i, $insdiv, $enddiv) {
 	global $catfilter, $availshow, $totonleft, $cid;
-	
+
 	//total totals
 	$tot = '';
 	if ($catfilter<0) {
@@ -1369,7 +1427,7 @@ function gbInstrCatCols(&$gbt, $i, $insdiv, $enddiv) {
 			} else if ($availshow==2 && $gbt[0][2][$j][2]==3) {
 				continue;
 			} else if ($availshow==0 && $gbt[0][2][$j][2]==1) { //don't show cur in past view
-				continue;	
+				continue;
 			}
 			if ($gbt[$i][2][$j][4+$availshow]>0) {
 				$pct = round(100*$gbt[$i][2][$j][$availshow]/$gbt[$i][2][$j][4+$availshow],1);
@@ -1379,9 +1437,9 @@ function gbInstrCatCols(&$gbt, $i, $insdiv, $enddiv) {
 			echo '<td class="c">'.$insdiv;
 			if ($gbt[$i][0][0]=='Averages' && $gbt[0][2][$j][6+$availshow]!='') {
 				echo "<span onmouseover=\"tipshow(this,'", _('5-number summary:'), " {$gbt[0][2][$j][6+$availshow]}')\" onmouseout=\"tipout()\" >";
-			} 
+			}
 			if ($catfilter!=-1) { //single category view
-			
+
 				if ($gbt[$i][0][0]=='Averages') {
 					if ($gbt[$i][2][$j][4+$availshow] == 0) {
 						echo $gbt[$i][2][$j][$availshow].'%';
@@ -1419,12 +1477,13 @@ function gbInstrCatCols(&$gbt, $i, $insdiv, $enddiv) {
 	}
 	if (!$totonleft) {
 		echo $tot;
-	}	
+	}
 }
 
 function gbinstrdisp() {
 	global $DBH,$hidenc,$showpics,$isteacher,$istutor,$cid,$gbmode,$stu,$availshow,$catfilter,$secfilter,$totonleft,$imasroot,$isdiag,$tutorsection;
 	global $avgontop,$hidelocked,$colorize,$urlmode,$overridecollapse,$includeduedate,$lastlogin,$hidesection,$hidecode,$showpercents;
+	global $assessGbUrl;
 
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	if ($availshow==4) {
@@ -1522,7 +1581,7 @@ function gbinstrdisp() {
 				continue;
 			}
 			//name and points
-			echo '<th class="cat'.$gbt[0][1][$i][1].'"><div>'.$gbt[0][1][$i][0].'<br/>';
+			echo '<th class="cat'.($gbt[0][1][$i][1]%10).'"><div>'.$gbt[0][1][$i][0].'<br/>';
 			if ($gbt[0][1][$i][4]==0 || $gbt[0][1][$i][4]==3) {
 				echo $gbt[0][1][$i][2].'&nbsp;', _('pts'), ' ', _('(Not Counted)');
 			} else {
@@ -1540,7 +1599,12 @@ function gbinstrdisp() {
 			//links
 			if ($gbt[0][1][$i][6]==0 ) { //online
 				if ($isteacher) {
-					echo "<br/><a class=small href=\"addassessment.php?id={$gbt[0][1][$i][7]}&amp;cid=$cid&amp;from=gb\">", _('[Settings]'), "</a>";
+					if (!empty($gbt[0][1][$i][15]) && $gbt[0][1][$i][15]>1) {
+						$addassess = 'addassessment2.php';
+					} else {
+						$addassess = 'addassessment.php';
+					}
+					echo "<br/><a class=small href=\"$addassess?id={$gbt[0][1][$i][7]}&amp;cid=$cid&amp;from=gb\">", _('[Settings]'), "</a>";
 					echo "<br/><a class=small href=\"isolateassessgrade.php?cid=$cid&amp;aid={$gbt[0][1][$i][7]}\">", _('[Isolate]'), "</a>";
 					if ($gbt[0][1][$i][10]==true) {
 						echo "<br/><a class=small href=\"isolateassessbygroup.php?cid=$cid&amp;aid={$gbt[0][1][$i][7]}\">", _('[By Group]'), "</a>";
@@ -1608,7 +1672,7 @@ function gbinstrdisp() {
 		for ($j=($gbt[0][0][1]=='ID'?1:2);$j<count($gbt[0][0]);$j++) {
 			echo '<td class="c">'.$insdiv.$gbt[$i][0][$j].$enddiv .'</td>';
 		}
- 
+
 		if ($totonleft && !$hidepast) {
 			gbInstrCatCols($gbt, $i, $insdiv, $enddiv);
 		}
@@ -1650,17 +1714,25 @@ function gbinstrdisp() {
 								$avgtip = '';
 							}
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
-							echo "<a href=\"gb-itemanalysis.php?stu=$stu&amp;cid=$cid&amp;asid={$gbt[$i][1][$j][4]}&amp;aid={$gbt[0][1][$j][7]}\" ";
+							if ($gbt[0][1][$i][15] > 1) {
+								echo "<a href=\"gb-itemanalysis2.php?stu=$stu&amp;cid=$cid&amp;asid={$gbt[$i][1][$j][4]}&amp;aid={$gbt[0][1][$j][7]}\" ";
+							} else {
+								echo "<a href=\"gb-itemanalysis.php?stu=$stu&amp;cid=$cid&amp;asid={$gbt[$i][1][$j][4]}&amp;aid={$gbt[0][1][$j][7]}\" ";
+							}
 							echo "onmouseover=\"tipshow(this,'$avgtip')\" onmouseout=\"tipout()\" ";
 							echo ">";
 						} else {
-							echo "<a href=\"gb-viewasid.php?stu=$stu&amp;cid=$cid&amp;asid={$gbt[$i][1][$j][4]}&amp;uid={$gbt[$i][4][0]}\">";
+							if ($gbt[0][1][$j][15] > 1) { // assess2
+								echo "<a href=\"$assessGbUrl?stu=$stu&amp;cid=$cid&amp;aid={$gbt[0][1][$j][7]}&amp;uid={$gbt[$i][4][0]}\">";
+							} else {
+								echo "<a href=\"gb-viewasid.php?stu=$stu&amp;cid=$cid&amp;asid={$gbt[$i][1][$j][4]}&amp;uid={$gbt[$i][4][0]}\">";
+							}
 						}
-						
+
 						echo $gbt[$i][1][$j][0];
-						
+
 						echo '</a>';
-						
+
 						if ($gbt[$i][1][$j][3]>9) {
 							$gbt[$i][1][$j][3] -= 10;
 						}
@@ -1673,7 +1745,7 @@ function gbinstrdisp() {
 						} else if ($gbt[$i][1][$j][3]==4) {
 							echo ' (PT)';
 						}
-						
+
 						if ($gbt[$i][1][$j][1]==1) {
 							echo '<sup>*</sup>';
 						}
@@ -1682,7 +1754,11 @@ function gbinstrdisp() {
 						if ($gbt[$i][0][0]=='Averages') {
 							echo '-';
 						} else if ($isteacher) {
-							echo "<a href=\"gb-viewasid.php?stu=$stu&amp;cid=$cid&amp;asid=new&amp;aid={$gbt[0][1][$j][7]}&amp;uid={$gbt[$i][4][0]}\">-</a>";
+							if ($gbt[0][1][$j][15] > 1) { // assess2
+								echo "<a href=\"$assessGbUrl?stu=$stu&amp;cid=$cid&amp;aid={$gbt[0][1][$j][7]}&amp;uid={$gbt[$i][4][0]}\">-</a>";
+							} else {
+								echo "<a href=\"gb-viewasid.php?stu=$stu&amp;cid=$cid&amp;asid=new&amp;aid={$gbt[0][1][$j][7]}&amp;uid={$gbt[$i][4][0]}\">-</a>";
+							}
 						} else {
 							echo '-';
 						}
@@ -1723,7 +1799,7 @@ function gbinstrdisp() {
 					}
 					if (isset($gbt[$i][1][$j][0])) {
 						echo $gbt[$i][1][$j][0];
-						
+
 						if ($gbt[$i][1][$j][3]==1) {
 							echo ' (NC)';
 						}
@@ -1751,7 +1827,7 @@ function gbinstrdisp() {
 							$avgtip .= _('5-number summary:').' '.$gbt[0][1][$j][9];
 							echo "<span onmouseover=\"tipshow(this,'$avgtip')\" onmouseout=\"tipout()\"> ";
 							echo $gbt[$i][1][$j][0];
-							
+
 							echo '</span>';
 						}
 						if ($gbt[$i][1][$j][1]==1) {
@@ -1789,7 +1865,7 @@ function gbinstrdisp() {
 					}
 					if (isset($gbt[$i][1][$j][0])) {
 						echo $gbt[$i][1][$j][0];
-						
+
 						if ($gbt[$i][1][$j][3]==1) {
 							echo ' (NC)';
 						}
@@ -1804,7 +1880,7 @@ function gbinstrdisp() {
 					}
 				}
 				if (!empty($gbt[$i][1][$j][14])) { //excused
-					echo '<sup>x</sup>';	
+					echo '<sup>x</sup>';
 				}
 				if (isset($gbt[$i][1][$j][5]) && ($gbt[$i][1][$j][5]&(1<<$availshow)) && !$hidepast) {
 					echo '<sub>d</sub></span>';
