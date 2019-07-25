@@ -95,6 +95,7 @@ class UserSeeder extends AbstractSeed
 				'groupid' => 0, // "default" group
 				'jsondata' => '',
 				'hideonpostswidget' => '',
+				'mfa' => '882ef4e72b756d803bbd6cb17847451ee3cb',
 				'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 			];
 		}
