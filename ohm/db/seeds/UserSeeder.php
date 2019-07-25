@@ -34,6 +34,7 @@ class UserSeeder extends AbstractSeed
 			'groupid' => $groupId,
 			'jsondata' => '',
 			'hideonpostswidget' => '',
+			'mfa' => '9f0e6515fe365044448e4b0ac267d2876bcb',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -46,6 +47,7 @@ class UserSeeder extends AbstractSeed
 			'groupid' => $groupId,
 			'jsondata' => '',
 			'hideonpostswidget' => '',
+			'mfa' => '0709e1322c13134a1922365bd4ff8b8fd98b',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -58,6 +60,7 @@ class UserSeeder extends AbstractSeed
 			'groupid' => $groupId,
 			'jsondata' => '',
 			'hideonpostswidget' => '',
+			'mfa' => '191e7d7b72546bc46456e2edbcdcdea11609',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
@@ -74,6 +77,7 @@ class UserSeeder extends AbstractSeed
 				'groupid' => $groupId,
 				'jsondata' => '',
 				'hideonpostswidget' => '',
+				'mfa' => '6bed70a27829ba2e3101c937ee857bae36d8',
 				'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 			];
 		}

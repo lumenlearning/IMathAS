@@ -34,6 +34,7 @@ class LtiCredentialSeeder extends AbstractSeed
 			'groupid' => $groupId,
 			'jsondata' => '',
 			'hideonpostswidget' => '',
+			'mfa' => 'dd57b5ece110bf997d744ce726fba0116d5b',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -46,6 +47,7 @@ class LtiCredentialSeeder extends AbstractSeed
 			'groupid' => $groupId,
 			'jsondata' => '',
 			'hideonpostswidget' => '',
+			'mfa' => '7a052b86970c79b079c5621e189519c8f79c',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 		$data[] = [
@@ -58,6 +60,7 @@ class LtiCredentialSeeder extends AbstractSeed
 			'groupid' => $groupId,
 			'jsondata' => '',
 			'hideonpostswidget' => '',
+			'mfa' => 'd632e8a97d080d38d04e4d04cd5c73031c38',
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
