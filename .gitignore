@@ -6,6 +6,8 @@
 *.js~
 c3.php
 .env
+*.code-workspace
+*.iml
 
 # Runtime
 /vendor/
