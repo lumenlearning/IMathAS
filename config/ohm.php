@@ -99,6 +99,9 @@ $CFG['CPS']['theme'] = array("lumen.css_fw1920",1);
 $CFG['CPS']['themelist'] ="lumen.css";
 $CFG['CPS']['themenames'] = "Lumen Theme";
 
+// add a course-level selector to the course settings page
+$CFG['CPS']['usecourselevel'] = 'required';
+
 $CFG['TE']['navicons'] = array(
     'untried'=>'te_blue_arrow.png',
     'canretrywrong'=>'te_red_redo.png',
