@@ -68,6 +68,45 @@ function reporterror($err) {
 	exit;
 }
 
+function generateToolState() {
+	if (function_exists("random_bytes")) {
+		$token = bin2hex(random_bytes(64));
+	} elseif (function_exists("openssl_random_pseudo_bytes")) {
+		$token = bin2hex(openssl_random_pseudo_bytes(64));
+	} else {
+		$token = '';
+		for ($i = 0; $i < 64; ++$i) {
+			$r = mt_rand (0, 35);
+			if ($r < 26) {
+				$c = chr(ord('a') + $r);
+			} else {
+				$c = chr(ord('0') + $r - 26);
+			}
+			$token .= $c;
+		}
+	}
+	return substr($token, 0, 64);
+}
+function do112relaunch() {
+	if (!isset($_REQUEST['platform_state'])) {
+		reporterror("Missing platform_state");
+	}
+
+	$_SESSION['lti_tool_state'] = generateToolState();
+	echo '<html><body><form id="theform" method="POST" action="'.Sanitize::encodeStringForDisplay($_REQUEST['relaunch_url']).'">
+		<input type=hidden name="tool_state" value="'.Sanitize::encodeUrlParam($_SESSION['lti_tool_state']).'">
+		<input type=hidden name="platform_state" value="'.Sanitize::encodeUrlParam($_REQUEST['platform_state']).'">
+		</form><script>document.getElementById("theform").submit();</script></body></html>';
+	exit;
+}
+
+function verify112relaunch() {
+	if ($_REQUEST['tool_state'] != $_SESSION['lti_tool_state']) {
+		reporterror("Invalid tool_state");
+		exit;
+	}
+}
+
 //start session
 if (isset($sessionpath)) { session_save_path($sessionpath);}
 ini_set('session.gc_maxlifetime',86400);
@@ -496,9 +535,15 @@ if (isset($_GET['launch'])) {
 		reporterror("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again");
 	}
 	if (empty($_REQUEST['user_id'])) {
+		if (isset($_REQUEST['relaunch_url'])) {
+			do112relaunch();
+		}
 		reporterror("Unable to launch - User information not provided (user_id is required)");
 	} else {
 		$ltiuserid = $_REQUEST['user_id'];
+	}
+	if (!empty($_REQUEST['tool_state'])) {
+		verify112relaunch();
 	}
 
 	if (empty($_REQUEST['context_id'])) {
@@ -540,6 +585,8 @@ if (isset($_GET['launch'])) {
 	$server = new OAuthServer($store);
 	$method = new OAuthSignatureMethod_HMAC_SHA1();
 	$server->add_signature_method($method);
+	$method2 = new OAuthSignatureMethod_HMAC_SHA256();
+	$server->add_signature_method($method2);
 	$request = OAuthRequest::from_request();
 	$base = $request->get_signature_base_string();
 	try {
@@ -1012,7 +1059,7 @@ if ($stm->rowCount()==0) {
 					$gbcats[$frid] = $DBH->lastInsertId();
 				}
 				$copystickyposts = true;
-				$stm = $DBH->prepare("SELECT itemorder,ancestors,outcomes,latepasshrs,dates_by_lti,deflatepass,UIver FROM imas_courses WHERE id=:id");
+				$stm = $DBH->prepare("SELECT itemorder,ancestors,outcomes,latepasshrs,dates_by_lti,deflatepass,UIver,level FROM imas_courses WHERE id=:id");
 				$stm->execute(array(':id'=>$sourcecid));
 				$r = $stm->fetch(PDO::FETCH_NUM);
 
@@ -1023,6 +1070,7 @@ if ($stm->rowCount()==0) {
 				$datesbylti = $r[4];
 				$deflatepass = $r[5];
 				$sourceUIver = $r[6];
+				$courselevel = $r[7];
 				if (isset($_POST['usenewassess'])) {
 					$destUIver = 2;
 					$convertAssessVer = 2;
@@ -1086,8 +1134,8 @@ if ($stm->rowCount()==0) {
 				doaftercopy($sourcecid);
 
 				$itemorder = serialize($newitems);
-				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt,ancestors=:ancestors,outcomes=:outcomes,latepasshrs=:latepasshrs,deflatepass=:deflatepass,dates_by_lti=:datesbylti,UIver=:UIver WHERE id=:id");
-				$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':ancestors'=>$ancestors, ':outcomes'=>$newoutcomearr, ':latepasshrs'=>$latepasshrs, ':deflatepass'=>$deflatepass, ':datesbylti'=>$datesbylti, ':UIver'=>$destUIver, ':id'=>$destcid));
+				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt,ancestors=:ancestors,outcomes=:outcomes,latepasshrs=:latepasshrs,deflatepass=:deflatepass,dates_by_lti=:datesbylti,UIver=:UIver,level=:level WHERE id=:id");
+				$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':ancestors'=>$ancestors, ':outcomes'=>$newoutcomearr, ':latepasshrs'=>$latepasshrs, ':deflatepass'=>$deflatepass, ':datesbylti'=>$datesbylti, ':UIver'=>$destUIver, ':level'=>$courselevel, ':id'=>$destcid));
 
 				$offlinerubrics = array();
 				/*
@@ -2018,9 +2066,15 @@ if (isset($_GET['launch'])) {
 		reporterror("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again");
 	}
 	if (empty($_REQUEST['user_id'])) {
+		if (isset($_REQUEST['relaunch_url'])) {
+			do112relaunch();
+		}
 		reporterror("Unable to launch - User information not provided (user_id is required)");
 	} else {
 		$ltiuserid = $_REQUEST['user_id'];
+	}
+	if (!empty($_REQUEST['tool_state'])) {
+		verify112relaunch();
 	}
 
 	if (empty($_REQUEST['context_id'])) {

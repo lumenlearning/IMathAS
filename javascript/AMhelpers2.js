@@ -65,6 +65,7 @@ to question output or something.
 
  */
 var initstack = [];
+var loadedscripts = [];
 var callbackstack = {};
 
 var imathasAssess = (function($) {
@@ -178,16 +179,23 @@ function init(paramarr, enableMQ) {
   if (paramarr.scripts) {
     function handleScript(arr, cnt) {
       if (arr[cnt][0] == 'code') {
-        window.eval(arr[cnt][1]);
+        try {
+          window.eval(arr[cnt][1]);
+        } catch (e) { console.log("Error executing question script:" + arr[cnt][1]);}
         if (arr.length > cnt+1) {
           handleScript(arr, cnt+1);
         }
-      } else {
+      } else if (loadedscripts.indexOf(arr[cnt][1]) == -1) {
         jQuery.getScript(arr[cnt][1]).always(function() {
+          loadedscripts.push(arr[cnt][1]);
           if (arr.length > cnt+1) {
             handleScript(arr, cnt+1);
           }
         })
+      } else {
+        if (arr.length > cnt+1) {
+          handleScript(arr, cnt+1);
+        }
       }
     }
     handleScript(paramarr.scripts, 0);
@@ -509,12 +517,12 @@ function setupLivePreview(qn, skipinitial) {
 			  RenderBuffer: function() {
 			      if (mathRenderer=="MathJax") {
 				      MathJax.Hub.Queue(
-					["Typeset",MathJax.Hub,this.buffer],
-					["PreviewDone",this]
+					      ["Typeset",MathJax.Hub,this.buffer],
+					      ["PreviewDone",this]
 				      );
 			      } else if (mathRenderer=="Katex") {
 			      	      renderMathInElement(this.buffer);
-				      if (typeof MathJax != "undefined" && $(this.buffer).children(".mj").length>0) {//has MathJax elements
+				      if (typeof MathJax != "undefined" && MathJax.version && $(this.buffer).children(".mj").length>0) {//has MathJax elements
 					      MathJax.Hub.Queue(["PreviewDone",this]);
 				      } else {
 					      this.PreviewDone();
@@ -1311,40 +1319,45 @@ function ineqtointerval(strw, intendedvar) {
   } else if (strw.match(/DNE/)) {
     return ['DNE'];
   }
-  var pat, interval;
-  if (pat = strw.match(/^(.*?)(<=?|>=?)(.*?)(<=?|>=?)(.*?)$/)) {
-    if (simplifyVariable(pat[3]) != simpvar) { // wrong var
-      return ['', 'wrongvar'];
-    } else if (pat[2].charAt(0) != pat[4].charAt(0)) { // mixes > and <
+  var pat, interval, out = [];
+  var strpts = strw.split(/\s*or\s*/);
+	for (var i=0; i<strpts.length; i++) {
+		str = strpts[i];
+    if (pat = str.match(/^(.*?)(<=?|>=?)(.*?)(<=?|>=?)(.*?)$/)) {
+      if (simplifyVariable(pat[3]) != simpvar) { // wrong var
+        return ['', 'wrongvar'];
+      } else if (pat[2].charAt(0) != pat[4].charAt(0)) { // mixes > and <
+        return ['', 'invalid'];
+      }
+      if (pat[2].charAt(0)=='<') {
+        interval = (pat[2]=='<'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='<'?')':']');
+      } else {
+        interval = (pat[2]=='>'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='>'?')':']');
+      }
+      out.push(interval);
+    } else if (pat = str.match(/^(.*?)(<=?|>=?)(.*?)$/)) {
+      if (simplifyVariable(pat[1])== simpvar) { // x> or x<
+        if (pat[2].charAt(0)=='<') { // x<
+          interval = '(-oo,' + pat[3] + (pat[2]=='<'?')':']');
+        } else { // x>
+          interval = (pat[2]=='>'?'(':'[') + pat[3] + ',oo)';
+        }
+        out.push(interval);
+      } else if (simplifyVariable(pat[3])== simpvar) { // 3<x or 3>x
+        if (pat[2].charAt(0)=='<') { // 3<x
+          interval = (pat[2]=='<'?'(':'[') + pat[1] + ',oo)';
+        } else { // x>
+          interval = '(-oo,' + pat[1] + (pat[2]=='>'?')':']');
+        }
+        out.push(interval);
+      } else {
+        return ['', 'wrongvar'];
+      }
+    } else {
       return ['', 'invalid'];
     }
-    if (pat[2].charAt(0)=='<') {
-      interval = (pat[2]=='<'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='<'?')':']');
-    } else {
-      interval = (pat[2]=='<'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='<'?')':']');
-    }
-    return [interval];
-  } else if (pat = strw.match(/^(.*?)(<=?|>=?)(.*?)$/)) {
-    if (simplifyVariable(pat[1])== simpvar) { // x> or x<
-      if (pat[2].charAt(0)=='<') { // x<
-        interval = '(-oo,' + pat[3] + (pat[2]=='<'?')':']');
-      } else { // x>
-        interval = (pat[2]=='<'?'(':'[') + pat[3] + ',oo)';
-      }
-      return [interval];
-    } else if (simplifyVariable(pat[3])== simpvar) { // 3<x or 3>x
-      if (pat[2].charAt(0)=='<') { // 3<x
-        interval = (pat[2]=='<'?'(':'[') + pat[1] + ',oo)';
-      } else { // x>
-        interval = '(-oo,' + pat[1] + (pat[2]=='<'?')':']');
-      }
-      return [interval];
-    } else {
-      return ['', 'wrongvar'];
-    }
-  } else {
-    return ['', 'invalid'];
   }
+  return [out.join("U")];
 }
 
 function parsecomplex(v) {

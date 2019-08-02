@@ -18,7 +18,7 @@ if (!empty($CFG['GEN']['uselocaljs'])) {
 	echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>';
 }
 ?>
-<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=051519";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot . "/imascore.css?ver=072419";?>" type="text/css" />
 <?php
 if (isset($coursetheme)) {
 	if (isset($flexwidth) || isset($usefullwidth)) {
@@ -42,6 +42,9 @@ if (isset($CFG['GEN']['favicon'])) {
 	echo '<link rel="shortcut icon" href="'.$CFG['GEN']['favicon'].'" />';
 } else {
 	echo '<link rel="shortcut icon" href="/favicon.ico" />';
+}
+if (isset($CFG['GEN']['appleicon'])) {
+	echo '<link rel="apple-touch-icon" href="'.$CFG['GEN']['appleicon'].'" />';
 }
 if (!empty($CFG['use_csrfp']) && class_exists('csrfProtector')) {
 	echo csrfProtector::output_header_code();
@@ -67,7 +70,7 @@ div.breadcrumb { display:none;}
 <script type="text/javascript">
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 </script>
-<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=070419"></script>
+<script type="text/javascript" src="<?php echo $imasroot;?>/javascript/general.js?v=072219"></script>
 <?php
 //$sessiondata['mathdisp'] = 3;
 //writesessiondata();
@@ -119,7 +122,7 @@ if (!isset($sessiondata['mathdisp'])) {
 	}
 	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = true; var MathJaxCompatible = true;var mathRenderer="MathJax";
 		function rendermathnode(node) {
-			if (MathJax) {
+			if (window.MathJax) {
 				MathJax.Hub.Queue(["Typeset", MathJax.Hub, node]);
 			} else {
 				setTimeout(function() {rendermathnode(node);}, 100);
@@ -151,7 +154,7 @@ if (!isset($sessiondata['mathdisp'])) {
 		echo '<script src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>';
 		//echo '<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=AM_CHTML-full"></script>';
 	}
-	echo '<script type="text/javascript" src="'.$imasroot.'/katex/auto-render.js?v=120118"></script>';
+	echo '<script type="text/javascript" src="'.$imasroot.'/katex/auto-render.js?v=073119"></script>';
 	echo '<script type="text/javascript">setupKatexAutoRender();</script>';
 	echo '<script type="text/javascript">noMathRender = false; var usingASCIIMath = true; var AMnoMathML = true; var MathJaxCompatible = true; var mathRenderer = "Katex";</script>';
 	//echo '<style type="text/css">span.AM { font-size: 105%;}</style>';
