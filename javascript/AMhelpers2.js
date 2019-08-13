@@ -236,27 +236,32 @@ function initqsclickchange() {
 	});
 }
 
-function initClearScoreMarkers() {
-  $('input[id^=qs],input[id^=qn],select[id^=qn]')
-    .off('input.clearmarkers change.clearmarkers')
-    .on('input.clearmarkers change.clearmarkers', function(e) {
-    var m;
-    var target = e.currentTarget
-    if ((m = target.className.match(/(ansgrn|ansred|ansyel)/)) !== null) {
-      $(target).removeClass(m[0]);
-      if (target.type == 'hidden') { // may be MQ box
-        $("#mqinput-"+target.id).removeClass(m[0]);
-      }
-    } else {
-      var wrap = $(target).closest("[id^=qnwrap]");
-      if (wrap.length > 0 &&
-        ((m = wrap[0].className.match(/(ansgrn|ansred|ansyel)/)) !== null)
-      ) {
-        wrap.removeClass(m[0]);
-        wrap.find(".scoremarker").remove();
-      }
+function clearScoreMarkers(e) {
+  var m;
+  var target = e.currentTarget
+  if ((m = target.className.match(/(ansgrn|ansred|ansyel)/)) !== null) {
+    $(target).removeClass(m[0]);
+    if (target.type == 'hidden') { // may be MQ box
+      $("#mqinput-"+target.id).removeClass(m[0]);
     }
-  });
+  } else {
+    var wrap = $(target).closest("[id^=qnwrap]");
+    if (wrap.length > 0 &&
+      ((m = wrap[0].className.match(/(ansgrn|ansred|ansyel)/)) !== null)
+    ) {
+      wrap.removeClass(m[0]);
+      wrap.find(".scoremarker").remove();
+    }
+  }
+}
+
+function initClearScoreMarkers() {
+  $('input[id^=qn]')
+    .off('input.clearmarkers')
+    .on('input.clearmarkers', clearScoreMarkers);
+  $('input[id^=qs],select[id^=qn]')
+    .off('change.clearmarkers')
+    .on('change.clearmarkers', clearScoreMarkers);
 }
 
 function initEnterHandler(qn) {
@@ -393,10 +398,9 @@ function setupDraw(qn) {
   window.drawla[qn] = todraw;
   window.canvases[qn] = allParams[qn].canvas;
   imathasDraw.initCanvases(qn);
-  var drawbtns = document.getElementById("qn"+qn).parentNode.querySelectorAll("[data-drawaction]");
-  for (i=0; i<drawbtns.length; i++) {
-    drawbtns[i].addEventListener('click', function() {
-      var target = event.target;
+  document.getElementById('drawtools'+qn).addEventListener('click', function(event) {
+    var target = event.target;
+    if (target.hasAttribute('data-drawaction')) {
       var action = target.getAttribute('data-drawaction');
       var qn = target.getAttribute('data-qn');
       if (action === 'clearcanvas') {
@@ -405,11 +409,11 @@ function setupDraw(qn) {
         var val = target.getAttribute('data-val');
         imathasDraw.settool(target, qn, val);
       }
-    });
-  }
+    }
+  });
   var a11ydrawbtn = document.getElementById("qn"+qn).parentNode.querySelector(".a11ydrawadd");
   if (a11ydrawbtn) {
-    a11ydrawbtn.addEventListener('click', function() {
+    a11ydrawbtn.addEventListener('click', function(event) {
       var qn = event.target.getAttribute('data-qn');
       imathasDraw.adda11ydraw(qn);
     });
