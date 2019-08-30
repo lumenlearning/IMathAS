@@ -100,6 +100,7 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			),
 			null, //no special callback
 			array( 	  //user-data; will get passed to response
+				'sourcedid' => $row['sourcedid'],
 				'hash' => $row['hash'],
 				'sendon' => $row['sendon'],
 				'lasttry' => ($row['failures']>=2)
@@ -163,7 +164,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 	//echo 'got response with hash'.$user_data['hash'].'<br/>';
 	//echo htmlentities($response);
 	//var_dump($request_info);
-	if ($reponse === false || strpos($response, 'success')===false) { //failed
+	if ($response === false || strpos($response, 'success')===false) { //failed
 		//on call failure, we'll update failure count and push back sendon
 		$setfailed = $DBH->prepare('UPDATE imas_ltiqueue SET sendon=sendon+(failures+1)*(failures+1)*300,failures=failures+1 WHERE hash=?');
 		$setfailed->execute(array($user_data['hash']));
@@ -177,5 +178,9 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 		$delfromqueue = $DBH->prepare('DELETE FROM imas_ltiqueue WHERE hash=? AND sendon=?');
 		$delfromqueue->execute(array($user_data['hash'], $user_data['sendon']));
 		$cntsuccess++;
+		error_log(sprintf(
+			"LTI grade return success for sourcedid=%s -- DELETE FROM imas_ltiqueue WHERE hash=%s AND sendon=%s",
+			$user_data['sourcedid'], $user_data['hash'], $user_data['sendon']
+		));
 	}
 }
