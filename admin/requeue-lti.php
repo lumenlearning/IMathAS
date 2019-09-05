@@ -56,7 +56,7 @@ if ($_POST['cid']) {
         $records = getAssessmentRecords($assessmentids);
     }
     if (empty($records)) {
-        echo '<h2>unable to find assessment records</h2>';
+        echo '<h2>unable to find assessment records for assessment ids: ' . implode(', ', $assessmentids). '</h2>';
     } else {
         echo '<ol>';
         $current_assessment = '';
