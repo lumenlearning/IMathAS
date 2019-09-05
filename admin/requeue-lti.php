@@ -96,7 +96,7 @@ if ($_POST['cid']) {
     echo '<form method="post">';
     echo '<h2>Course Assessments</h2>';
     echo 'Course ID: <input type="text" name="cid" required /><br />';
-    echo 'Assessment ID: <input type="text" name="aid" /> *optional<br />';
+    echo 'Assessment ID: <input type="text" name="aid" /><br />';
     echo '<button type="submit">Search</button>';
 
     echo '</form>';
