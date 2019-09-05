@@ -49,65 +49,66 @@ if ($_POST['cid']) {
     }
     if (empty($assessmentids)) {
         echo '<h2>unable to find assessment ids</h2>';
-        return;
-    }
-    $course = getCourse($cid);
-    echo '<h2>'. $course['name'] . ' (' . $course['id'] . ')</h2>';
+    } else {
+        $course = getCourse($cid);
+        echo '<h2>' . $course['name'] . ' (' . $course['id'] . ')</h2>';
 
-    $records = getAssessmentRecords($assessmentids);
-    echo '<ol>';
-    $current_assessment = '';
-    foreach ($records as $us) {
-        if ($current_assessment != $us['aid']) {
-            $assessment = getAssessment($us['aid']);
-            echo '<lh><h3>Assessment: ' . $assessment['name'] . '</h3></lh>';
-            $current_assessment = $us['aid'];
-        }
-        updateLTI($us['sourcedid'], $us['aid'], $us['scores'], $queue);
+        $records = getAssessmentRecords($assessmentids);
     }
-    echo '</ol>';
-    if ($queue == false) repostForm();
-    return;
-}
-if ($_POST['sourcedid'] && $_POST['aid'] && $_POST['scores']) {
+    if (empty($records)) {
+        echo '<h2>unable to find assessment records</h2>';
+    } else {
+        echo '<ol>';
+        $current_assessment = '';
+        foreach ($records as $us) {
+            if ($current_assessment != $us['aid']) {
+                $assessment = getAssessment($us['aid']);
+                echo '<lh><h3>Assessment: ' . $assessment['name'] . '</h3></lh>';
+                $current_assessment = $us['aid'];
+            }
+            updateLTI($us['sourcedid'], $us['aid'], $us['scores'], $queue);
+        }
+        echo '</ol>';
+        if ($queue == false) repostForm();
+    }
+} elseif ($_POST['sourcedid'] && $_POST['aid'] && $_POST['scores']) {
     $sourcedid = filter_input(INPUT_POST, 'sourcedid', FILTER_SANITIZE_NUMBER_INT);
     $aid = filter_input(INPUT_POST, 'aid', FILTER_SANITIZE_NUMBER_INT);
     $scores = filter_input(INPUT_POST, 'scores', FILTER_SANITIZE_NUMBER_FLOAT);
     if (empty($sourcedid) || empty($aid) || empty($scores)) {
         echo 'invalid values';
-        return;
+    } else {
+        echo '<ol>';
+        $assessment = getAssessment($aid);
+        echo '<lh><h3>Assessment: ' . $assessment['name'] . '</h3></lh>';
+        updateLTI($sourcedid, $aid, $scores, $queue);
+        echo '</ol>';
+        if ($queue == false) repostForm();
     }
-    echo '<ol>';
-    $assessment = getAssessment($aid);
-    echo '<lh><h3>Assessment: ' . $assessment['name'] . '</h3></lh>';
-    updateLTI($sourcedid, $aid, $scores, $queue);
-    echo '</ol>';
-    if ($queue == false) repostForm();
-    return;
 
-}
-if ($_POST) {
+} elseif ($_POST) {
     echo "unable to process your request, please try again";
+} else {
+
+    /*
+     * Initial form
+     */
+    echo '<form method="post">';
+    echo '<h2>Course Assessments</h2>';
+    echo 'Course ID: <input type="text" name="cid" required /><br />';
+    echo 'Assessment ID: <input type="text" name="aid" /> *optional<br />';
+    echo '<button type="submit">Search</button>';
+
+    echo '</form>';
+
+    echo '<form method="post">';
+    echo '<h2>Individual</h2>';
+    echo 'sourcedid <input type="text" name="sourcedid"><br />';
+    echo 'aid <input type="text" name="aid"><br />';
+    echo 'score <input type="text" name="scores"><br />';
+    echo '<button type="submit">Search</button>';
+    echo '</form>';
 }
-
-/*
- * Initial form
- */
-echo '<form method="post">';
-echo '<h2>Course Assessments</h2>';
-echo 'Course ID: <input type="text" name="cid" required /><br />';
-echo 'Assessment ID: <input type="text" name="aid" /> *optional<br />';
-echo '<button type="submit">Search</button>';
-
-echo '</form>';
-
-echo '<form method="post">';
-echo '<h2>Individual</h2>';
-echo 'sourcedid <input type="text" name="sourcedid"><br />';
-echo 'aid <input type="text" name="aid"><br />';
-echo 'score <input type="text" name="scores"><br />';
-echo '<button type="submit">Search</button>';
-echo '</form>';
 
 require("../footer.php");
 
