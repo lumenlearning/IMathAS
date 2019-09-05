@@ -38,10 +38,9 @@ if ($_POST['queue']) {
     $queue = true;
 }
 //global $DBH, $CFG, $aidtotalpossible;
-if ($_POST['caid']) {
-    list($cid,$aid) = explode(':', $_POST['caid']);
-    $cid = filter_var($cid, FILTER_SANITIZE_NUMBER_INT);
-    $aid = filter_var($aid, FILTER_SANITIZE_NUMBER_INT);
+if ($_POST['cid']) {
+    $cid = filter_input(INPUT_POST, 'cid', FILTER_SANITIZE_NUMBER_INT);
+    $aid = filter_input(INPUT_POST, 'aid', FILTER_SANITIZE_NUMBER_INT);
 
     if (empty($aid)) {
         $assessmentids = getCourseAssessmentIds($cid);
@@ -96,21 +95,10 @@ if ($_POST) {
  */
 echo '<form method="post">';
 echo '<h2>Course Assessments</h2>';
-$courses = getCourseAssessments();
-if ($courses) {
-    echo '<select name="caid">';
-    echo '<option value="">Select Course or assessment</option>';
-    $cur = "";
-    foreach ($courses as $course) {
-        if ($course['course'] != $cur) {
-            $cur = $course['course'];
-            echo '<option value="'.$course['cid'].'">' . $course['course'] . '</option>';
-        }
-        echo '<option value="'.$course['cid'].':'.$course['aid'].'"> - ' . $course['assessment'] . '</option>';
-    }
-    echo '</select>';
-    echo '<button type="submit">Go</button>';
-}
+echo 'Course ID: <input type="text" name="cid" required /><br />';
+echo 'Assessment ID: <input type="text" name="aid" /> *optional<br />';
+echo '<button type="submit">Search</button>';
+
 echo '</form>';
 
 echo '<form method="post">';
@@ -118,7 +106,7 @@ echo '<h2>Individual</h2>';
 echo 'sourcedid <input type="text" name="sourcedid"><br />';
 echo 'aid <input type="text" name="aid"><br />';
 echo 'score <input type="text" name="scores"><br />';
-echo '<button type="submit">Go</button>';
+echo '<button type="submit">Search</button>';
 echo '</form>';
 
 require("../footer.php");
