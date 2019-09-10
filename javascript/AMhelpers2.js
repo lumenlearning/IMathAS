@@ -2063,3 +2063,6 @@ function AutoSuggest(elem, suggestions)
 var AutoSuggestIdCounter = 0;
 var autoSuggestLists = {};
 var autoSuggestObjects = {};
+
+//override document.write to prevent errors
+document.write = function() {};
