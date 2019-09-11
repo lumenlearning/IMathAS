@@ -4,7 +4,6 @@ if ($myrights<100) {
     echo 'You must be an admin';
     exit;
 }
-echo md5('2493-30181-549952-97676-c391c0e0d270ab7e2c1f5fe7c707d91ed2cbb078:|:https://tcc.instructure.com/api/lti/v1/tools/2493/grade_passback:|:a7ef7e0c1b8c363c6a9a4793f419331b8917a80f:|:u');
 
 /*
  * user score
@@ -249,4 +248,3 @@ function addToLTIQueue($sourcedid, $grade, $sendnow=false) {
 
     return ($stm->rowCount()>0);
 }
-INSERT INTO imas_ltiqueue (hash, sourcedid, grade) VALUES ("def6d0f03bcfb5ca0db6037aafa27978", "2493-30181-549952-97676-c391c0e0d270ab7e2c1f5fe7c707d91ed2cbb078:|:https://tcc.instructure.com/api/lti/v1/tools/2493/grade_passback:|:a7ef7e0c1b8c363c6a9a4793f419331b8917a80f:|:u", 1);
