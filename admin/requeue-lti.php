@@ -4,6 +4,7 @@ if ($myrights<100) {
     echo 'You must be an admin';
     exit;
 }
+echo md5('2493-30181-549952-97676-c391c0e0d270ab7e2c1f5fe7c707d91ed2cbb078:|:https://tcc.instructure.com/api/lti/v1/tools/2493/grade_passback:|:a7ef7e0c1b8c363c6a9a4793f419331b8917a80f:|:u');
 
 /*
  * user score
@@ -59,7 +60,6 @@ if ($_POST['cid']) {
         $records = getAssessmentRecords($assessmentids, $uid);
     }
     if (empty($records)) {
-        var_dump($assessmentids);
         echo '<h2>unable to find assessment records for assessment ids: ' . implode(', ', $assessmentids). '</h2>';
     } else {
         echo '<ol>';
@@ -67,13 +67,12 @@ if ($_POST['cid']) {
         foreach ($records as $us) {
             if ($current_assessment != $us['aid']) {
                 $assessment = getAssessment($us['aid']);
-                echo '<lh><h3>Assessment V' .  $us['ver'] . ': ';
-                echo $assessment['name'] . ' (' . $us['aid'] . ')</h3></lh>';
+                echo '<lh><h3>Assessment: ' . $assessment['name'] . ' (' . $us['aid'] . ')</h3></lh>';
                 $current_assessment = $us['aid'];
             }
             echo '<li>User ID: ' . $us['uid'] . '<ul>';
-            echo '<li>LTI sourced_id: ' . Sanitize::encodeStringForDisplay($us['sourcedid']) . '</li>';
-            echo '<li>Score: ' . getpts($us['scores']) . '</li>';
+            echo '<li>sourcedid: ' . $us['sourcedid'] . '</li>';
+            echo '<li>Score: ' . $us['scores'] . '</li>';
             $grade = calcandupdateLTIgrade($us['aid'], $us['scores']);
             echo '<li>Grade: ' . $grade . '</li>';
 
@@ -159,10 +158,10 @@ function getAssessmentRecords($assessments, $uid = null) {
 function getAssessmentResults($aids, $uid = null, $ver = 1) {
     global $DBH;
     if ($ver == 2) {
-        $query = "SELECT 2 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
+        $query = "SELECT userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
             . " FROM imas_assessment_records WHERE assessmentid IN (:assessmentids)";
     } else {
-        $query = "SELECT 1 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, bestscores as scores "
+        $query = "SELECT userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, bestscores as scores "
             . " FROM imas_assessment_sessions WHERE assessmentid IN (:assessmentids)";
     }
     $bind[':assessmentids'] = implode(",", $aids);
@@ -204,26 +203,6 @@ function getAssessment($aid) {
 /*
  * iMathAS functions
  */
-function getpts($scs) {
-$tot = 0;
-  	foreach(explode(',',$scs) as $sc) {
-        $qtot = 0;
-        if (strpos($sc,'~')===false) {
-            if ($sc>0) {
-                $qtot = $sc;
-            }
-        } else {
-            $sc = explode('~',$sc);
-            foreach ($sc as $s) {
-                if ($s>0) {
-                    $qtot+=$s;
-                }
-            }
-        }
-        $tot += round($qtot,1);
-    }
-	return $tot;
-}
 function calcandupdateLTIgrade($aid,$scores) {
     global $DBH;
     $stm = $DBH->prepare("SELECT ptsposs,itemorder,defpoints FROM imas_assessments WHERE id=:id");
@@ -245,14 +224,16 @@ function calcandupdateLTIgrade($aid,$scores) {
         }
     } else {
         // new assesses
-        $total = getpts($scores);
+        $total = $scores;
     }
     $grade = min(1, max(0,$total/$aidposs));
     $grade = number_format($grade,8);
     return $grade;
 }
-function addToLTIQueue($sourcedid, $grade) {
+function addToLTIQueue($sourcedid, $grade, $sendnow=false) {
     global $DBH, $CFG;
+
+    $LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
 
     $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon) ';
     $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon) ON DUPLICATE KEY UPDATE ';
@@ -263,8 +244,9 @@ function addToLTIQueue($sourcedid, $grade) {
         ':hash' => md5($sourcedid),
         ':sourcedid' => $sourcedid,
         ':grade' => $grade,
-        ':sendon' => time()
+        ':sendon' => (time() + ($sendnow?0:$LTIdelay))
     ));
 
     return ($stm->rowCount()>0);
 }
+INSERT INTO imas_ltiqueue (hash, sourcedid, grade) VALUES ("def6d0f03bcfb5ca0db6037aafa27978", "2493-30181-549952-97676-c391c0e0d270ab7e2c1f5fe7c707d91ed2cbb078:|:https://tcc.instructure.com/api/lti/v1/tools/2493/grade_passback:|:a7ef7e0c1b8c363c6a9a4793f419331b8917a80f:|:u", 1);
