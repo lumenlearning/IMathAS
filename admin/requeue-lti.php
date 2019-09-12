@@ -59,6 +59,7 @@ if ($_POST['cid']) {
         $records = getAssessmentRecords($assessmentids, $uid);
     }
     if (empty($records)) {
+        var_dump($assessmentids);
         echo '<h2>unable to find assessment records for assessment ids: ' . implode(', ', $assessmentids). '</h2>';
     } else {
         echo '<ol>';
@@ -66,12 +67,13 @@ if ($_POST['cid']) {
         foreach ($records as $us) {
             if ($current_assessment != $us['aid']) {
                 $assessment = getAssessment($us['aid']);
-                echo '<lh><h3>Assessment: ' . $assessment['name'] . ' (' . $us['aid'] . ')</h3></lh>';
+                echo '<lh><h3>Assessment V' .  $us['ver'] . ': ';
+                echo $assessment['name'] . ' (' . $us['aid'] . ')</h3></lh>';
                 $current_assessment = $us['aid'];
             }
             echo '<li>User ID: ' . $us['uid'] . '<ul>';
-            echo '<li>sourcedid: ' . $us['sourcedid'] . '</li>';
-            echo '<li>Score: ' . $us['scores'] . '</li>';
+            echo '<li>LTI sourced_id: ' . Sanitize::encodeStringForDisplay($us['sourcedid']) . '</li>';
+            echo '<li>Score: ' . getpts($us['scores']) . '</li>';
             $grade = calcandupdateLTIgrade($us['aid'], $us['scores']);
             echo '<li>Grade: ' . $grade . '</li>';
 
@@ -157,10 +159,10 @@ function getAssessmentRecords($assessments, $uid = null) {
 function getAssessmentResults($aids, $uid = null, $ver = 1) {
     global $DBH;
     if ($ver == 2) {
-        $query = "SELECT userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
+        $query = "SELECT 2 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
             . " FROM imas_assessment_records WHERE assessmentid IN (:assessmentids)";
     } else {
-        $query = "SELECT userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, bestscores as scores "
+        $query = "SELECT 1 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, bestscores as scores "
             . " FROM imas_assessment_sessions WHERE assessmentid IN (:assessmentids)";
     }
     $bind[':assessmentids'] = implode(",", $aids);
@@ -202,6 +204,26 @@ function getAssessment($aid) {
 /*
  * iMathAS functions
  */
+function getpts($scs) {
+$tot = 0;
+  	foreach(explode(',',$scs) as $sc) {
+        $qtot = 0;
+        if (strpos($sc,'~')===false) {
+            if ($sc>0) {
+                $qtot = $sc;
+            }
+        } else {
+            $sc = explode('~',$sc);
+            foreach ($sc as $s) {
+                if ($s>0) {
+                    $qtot+=$s;
+                }
+            }
+        }
+        $tot += round($qtot,1);
+    }
+	return $tot;
+}
 function calcandupdateLTIgrade($aid,$scores) {
     global $DBH;
     $stm = $DBH->prepare("SELECT ptsposs,itemorder,defpoints FROM imas_assessments WHERE id=:id");
@@ -223,16 +245,14 @@ function calcandupdateLTIgrade($aid,$scores) {
         }
     } else {
         // new assesses
-        $total = $scores;
+        $total = getpts($scores);
     }
     $grade = min(1, max(0,$total/$aidposs));
     $grade = number_format($grade,8);
     return $grade;
 }
-function addToLTIQueue($sourcedid, $grade, $sendnow=false) {
+function addToLTIQueue($sourcedid, $grade) {
     global $DBH, $CFG;
-
-    $LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
 
     $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon) ';
     $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon) ON DUPLICATE KEY UPDATE ';
@@ -243,7 +263,7 @@ function addToLTIQueue($sourcedid, $grade, $sendnow=false) {
         ':hash' => md5($sourcedid),
         ':sourcedid' => $sourcedid,
         ':grade' => $grade,
-        ':sendon' => (time() + ($sendnow?0:$LTIdelay))
+        ':sendon' => time()
     ));
 
     return ($stm->rowCount()>0);
