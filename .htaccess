@@ -51,6 +51,7 @@ RewriteRule ^(.*)$ https://www.wamap.org/$1 [R=permanent,L]
 
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_USER_AGENT} !ELB-HealthChecker
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]
 
 RewriteCond %{HTTP_HOST} wamap\.org
