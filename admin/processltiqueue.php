@@ -160,7 +160,13 @@ function LTIqueuePostdataCallback($data) {
 
 function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 	global $DBH,$cntsuccess,$cntfailure,$cntgiveup;
-	
+    // check env variable, see file ohm/.ebextensions/custom_log_lti.config
+    // log $response
+    $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
+    if (!empty($lti_response_log_file)) {
+        file_put_contents($lti_response_log_file, $response);
+    }
+
 	//echo 'got response with hash'.$user_data['hash'].'<br/>';
 	//echo htmlentities($response);
 	//var_dump($request_info);
@@ -180,6 +186,9 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 		}
 	} else { //success
 		//we'll call this when send is successful
+        //remove sendon
+        //catch exceptions
+
 		$delfromqueue = $DBH->prepare('DELETE FROM imas_ltiqueue WHERE hash=? AND sendon=?');
 		$delfromqueue->execute(array($user_data['hash'], $user_data['sendon']));
 		$cntsuccess++;
