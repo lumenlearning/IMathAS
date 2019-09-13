@@ -164,7 +164,8 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
     // log $response
     $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
     if (!empty($lti_response_log_file)) {
-        file_put_contents($lti_response_log_file, $response);
+
+        file_put_contents($lti_response_log_file, print_r($user_data,true)."\n".$response);
     }
 
 	//echo 'got response with hash'.$user_data['hash'].'<br/>';
