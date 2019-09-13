@@ -18,6 +18,12 @@ if ($myrights<100) {
  *      lti_sourcedid (sourcedid)
  *      score   (single scores)
  *
+ *  imas_assessment_sessions
+ *      assessmentid (aid)
+ *      userid
+ *      lti_sourcedid (sourcedid)
+ *      bestscores   (comma separated scores)
+ *
  * imas_courses
  *      id
  *      ownerid
@@ -39,23 +45,21 @@ if ($_POST['queue']) {
 }
 //global $DBH, $CFG, $aidtotalpossible;
 if ($_POST['cid']) {
-    $cid = filter_input(INPUT_POST, 'cid', FILTER_SANITIZE_NUMBER_INT);
-    $aid = filter_input(INPUT_POST, 'aid', FILTER_SANITIZE_NUMBER_INT);
+    $cid = Sanitize::onlyInt($_POST['cid']);
+    $aid = Sanitize::onlyInt($_POST['aid']);
+    $uid = Sanitize::onlyInt($_POST['uid']);
 
-    if (empty($aid)) {
-        $assessmentids = getCourseAssessmentIds($cid);
-    } else {
-        $assessmentids[] = $aid;
-    }
+    $assessmentids = getCourseAssessmentIds($cid, $aid);
     if (empty($assessmentids)) {
         echo '<h2>unable to find assessment ids</h2>';
     } else {
         $course = getCourse($cid);
         echo '<h2>' . $course['name'] . ' (' . $course['id'] . ')</h2>';
 
-        $records = getAssessmentRecords($assessmentids);
+        $records = getAssessmentRecords($assessmentids, $uid);
     }
     if (empty($records)) {
+        var_dump($assessmentids);
         echo '<h2>unable to find assessment records for assessment ids: ' . implode(', ', $assessmentids). '</h2>';
     } else {
         echo '<ol>';
@@ -63,25 +67,23 @@ if ($_POST['cid']) {
         foreach ($records as $us) {
             if ($current_assessment != $us['aid']) {
                 $assessment = getAssessment($us['aid']);
-                echo '<lh><h3>Assessment: ' . $assessment['name'] . '</h3></lh>';
+                echo '<lh><h3>Assessment V' .  $us['ver'] . ': ';
+                echo $assessment['name'] . ' (' . $us['aid'] . ')</h3></lh>';
                 $current_assessment = $us['aid'];
             }
-            updateLTI($us['sourcedid'], $us['aid'], $us['scores'], $queue);
+            echo '<li>User ID: ' . $us['uid'] . '<ul>';
+            echo '<li>LTI sourced_id: ' . Sanitize::encodeStringForDisplay($us['sourcedid']) . '</li>';
+            echo '<li>Score: ' . getpts($us['scores']) . '</li>';
+            $grade = calcandupdateLTIgrade($us['aid'], $us['scores']);
+            echo '<li>Grade: ' . $grade . '</li>';
+
+            if ($queue === true && addToLTIQueue($us['sourcedid'],$grade)) {
+                echo '<li>Added to queue</li>';
+            } else {
+                echo '<li>NOT added to queue</li>';
+            }
+            echo '</ul></li>';
         }
-        echo '</ol>';
-        if ($queue == false) repostForm();
-    }
-} elseif ($_POST['sourcedid'] && $_POST['aid'] && $_POST['scores']) {
-    $sourcedid = filter_input(INPUT_POST, 'sourcedid', FILTER_SANITIZE_NUMBER_INT);
-    $aid = filter_input(INPUT_POST, 'aid', FILTER_SANITIZE_NUMBER_INT);
-    $scores = filter_input(INPUT_POST, 'scores', FILTER_SANITIZE_NUMBER_FLOAT);
-    if (empty($sourcedid) || empty($aid) || empty($scores)) {
-        echo 'invalid values';
-    } else {
-        echo '<ol>';
-        $assessment = getAssessment($aid);
-        echo '<lh><h3>Assessment: ' . $assessment['name'] . '</h3></lh>';
-        updateLTI($sourcedid, $aid, $scores, $queue);
         echo '</ol>';
         if ($queue == false) repostForm();
     }
@@ -97,16 +99,9 @@ if ($_POST['cid']) {
     echo '<h2>Course Assessments</h2>';
     echo 'Course ID: <input type="text" name="cid" required /><br />';
     echo 'Assessment ID: <input type="text" name="aid" /><br />';
+    echo 'User ID: <input type="text" name="uid" /> *optional<br />';
     echo '<button type="submit">Search</button>';
 
-    echo '</form>';
-
-    echo '<form method="post">';
-    echo '<h2>Individual</h2>';
-    echo 'sourcedid <input type="text" name="sourcedid"><br />';
-    echo 'aid <input type="text" name="aid"><br />';
-    echo 'score <input type="text" name="scores"><br />';
-    echo '<button type="submit">Search</button>';
     echo '</form>';
 }
 
@@ -124,42 +119,61 @@ function repostForm() {
 }
 
 function updateLTI($sourcedid, $aid, $scores, $queue = false) {
-    echo '<li>sourcedid ' . $sourcedid . '<ul>';
-    echo '<li>Calculate grade with score ' . $scores . '</li>';
-    $grade = calcandupdateLTIgrade($sourcedid, $aid, $scores);
-    echo '<li>grade = ' . $grade . '</li>';
-
-    if ($queue === true && addToLTIQueue($sourcedid,$grade)) {
-        echo '<li>Added to queue</li>';
-    } else {
-        echo '<li>NOT added to queue</li>';
-    }
-    echo '</ul></li>';
 }
 
-function getCourseAssessmentIds($cid) {
+function getCourseAssessmentIds($cid, $aid=null) {
     global $DBH;
-    $query = "SELECT id as aid"
+    $query = "SELECT id as aid, ver"
         ." FROM imas_assessments WHERE courseid = :courseid ";
-    $stm = $DBH->prepare($query);
-    $stm->execute(array(':courseid'=>$cid));
-    if ($stm->rowCount()==0) {
-        return false;
-    } else {
-        return array_keys($stm->fetchAll(PDO::FETCH_UNIQUE));
+    $bind[':courseid'] = $cid;
+    if (!empty($aid)) {
+        $query .= ' AND id = :aid';
+        $bind[':aid'] = $aid;
     }
-}
-
-function getAssessmentRecords($assessmentids) {
-    global $DBH;
-    $query = "SELECT assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
-        ." FROM imas_assessment_records WHERE assessmentid IN (:assessmentids)";
     $stm = $DBH->prepare($query);
-    $stm->execute(array(':assessmentids'=>implode(",",$assessmentids)));
+    $stm->execute($bind);
     if ($stm->rowCount()==0) {
         return false;
     } else {
         return $stm->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+function getAssessmentRecords($assessments, $uid = null) {
+    foreach ($assessments as $assess) {
+        if ($assess['ver'] == 2) {
+            $assess2[] = $assess['aid'];
+        } else {
+            $assess1[] = $assess['aid'];
+        }
+    }
+    $results = array();
+    if (!empty($assess2)) {
+        $results = array_merge($results, getAssessmentResults($assess2, $uid, 2));
+    }
+    if (!empty($assess1)) {
+        $results = array_merge($results, getAssessmentResults($assess1, $uid, 1));
+    }
+    return $results;
+}
+function getAssessmentResults($aids, $uid = null, $ver = 1) {
+    global $DBH;
+    if ($ver == 2) {
+        $query = "SELECT 2 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
+            . " FROM imas_assessment_records WHERE assessmentid IN (:assessmentids)";
+    } else {
+        $query = "SELECT 1 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, bestscores as scores "
+            . " FROM imas_assessment_sessions WHERE assessmentid IN (:assessmentids)";
+    }
+    $bind[':assessmentids'] = implode(",", $aids);
+    if (!empty($uid)) {
+        $query .= " AND userid = :userid";
+        $bind[':userid'] = $uid;
+    }
+    $stm = $DBH->prepare($query);
+    $stm->execute($bind);
+    if ($stm->rowCount() > 0) {
+        return $results = $stm->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 function getCourse($courseid) {
@@ -186,41 +200,39 @@ function getAssessment($aid) {
         return $stm->fetch(PDO::FETCH_ASSOC);
     }
 }
-function getCourseAssessments($assessmentids = null) {
-    global $DBH;
-    $query = "SELECT imas_courses.name as course, imas_courses.id as cid, "
-        ." imas_assessments.name as assessment, imas_assessments.id as aid "
-        ." FROM imas_courses JOIN imas_assessments ON imas_courses.id = imas_assessments.courseid ";
-    if ($assessmentids) {
-        $query .= " WHERE imas_assessments.id IN (:assessmentids)";
-    }
-    $stm = $DBH->prepare($query);
-    $stm->execute(array(':assessmentids'=>implode(",",$assessmentids)));
-    if ($stm->rowCount()==0) {
-        return false;
-    } else {
-        return $stm->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
 
 /*
  * iMathAS functions
  */
-function calcandupdateLTIgrade($sourcedid,$aid,$scores,$sendnow=false,$aidposs=-1) {
-    global $DBH, $aidtotalpossible;
-    if ($aidposs == -1) {
-        if (isset($aidtotalpossible[$aid])) {
-            $aidposs = $aidtotalpossible[$aid];
-        } else {
-            $stm = $DBH->prepare("SELECT ptsposs,itemorder,defpoints FROM imas_assessments WHERE id=:id");
-            $stm->execute(array(':id'=>$aid));
-            $line = $stm->fetch(PDO::FETCH_ASSOC);
-            if ($line['ptsposs']==-1) {
-                $line['ptsposs'] = updatePointsPossible($aid, $line['itemorder'], $line['defpoints']);
+function getpts($scs) {
+$tot = 0;
+  	foreach(explode(',',$scs) as $sc) {
+        $qtot = 0;
+        if (strpos($sc,'~')===false) {
+            if ($sc>0) {
+                $qtot = $sc;
             }
-            $aidposs = $line['ptsposs'];
+        } else {
+            $sc = explode('~',$sc);
+            foreach ($sc as $s) {
+                if ($s>0) {
+                    $qtot+=$s;
+                }
+            }
         }
+        $tot += round($qtot,1);
     }
+	return $tot;
+}
+function calcandupdateLTIgrade($aid,$scores) {
+    global $DBH;
+    $stm = $DBH->prepare("SELECT ptsposs,itemorder,defpoints FROM imas_assessments WHERE id=:id");
+    $stm->execute(array(':id'=>$aid));
+    $line = $stm->fetch(PDO::FETCH_ASSOC);
+    if ($line['ptsposs']==-1) {
+        $line['ptsposs'] = updatePointsPossible($aid, $line['itemorder'], $line['defpoints']);
+    }
+    $aidposs = $line['ptsposs'];
     $allans = true;
     if (is_array($scores)) {
         // old assesses
@@ -233,16 +245,14 @@ function calcandupdateLTIgrade($sourcedid,$aid,$scores,$sendnow=false,$aidposs=-
         }
     } else {
         // new assesses
-        $total = $scores;
+        $total = getpts($scores);
     }
     $grade = min(1, max(0,$total/$aidposs));
     $grade = number_format($grade,8);
     return $grade;
 }
-function addToLTIQueue($sourcedid, $grade, $sendnow=false) {
+function addToLTIQueue($sourcedid, $grade) {
     global $DBH, $CFG;
-
-    $LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
 
     $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon) ';
     $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon) ON DUPLICATE KEY UPDATE ';
@@ -253,7 +263,7 @@ function addToLTIQueue($sourcedid, $grade, $sendnow=false) {
         ':hash' => md5($sourcedid),
         ':sourcedid' => $sourcedid,
         ':grade' => $grade,
-        ':sendon' => (time() + ($sendnow?0:$LTIdelay))
+        ':sendon' => time()
     ));
 
     return ($stm->rowCount()>0);
