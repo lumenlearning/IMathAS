@@ -25,7 +25,7 @@ var courseBrowserProps = {
 		"options": {
 			"arith": "Arithmetic",
 			"prealg": "Prealgebra",
-			"elemalg": "Elementary Algebra",
+			"elemalg": "Beginning Algebra",
 			"intalg": "Intermediate Algebra",
 			"mathlit": "Non-STEM Algebra / Math Literacy",
 			"colalg": "College Algebra",
@@ -37,6 +37,8 @@ var courseBrowserProps = {
 			"linalg": "Linear Algebra",
 			"diffeq": "Differential Equations",
             "chem": "Chemistry",
+			"acct": "Accounting",
+			"phys": "Physics",
 			"other": "Other"
 		},
 		"multi": true,
