@@ -246,6 +246,7 @@ Class RollingCurlX {
         $request_info['time'] = $time = $this->stopTimer($request); //record request time
         $request_info['url_raw'] = $url = $request['url'];
         $request_info['user_data'] = $user_data = $request['user_data'];
+        $request_info['post_data'] = $request['post_data'];
 
         if(curl_errno($ch) !== 0 || intval($request_info['http_code']) !== 200) { //if server responded with http error
             $response = false;
