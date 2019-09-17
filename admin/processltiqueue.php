@@ -160,13 +160,44 @@ function LTIqueuePostdataCallback($data) {
 
 function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 	global $DBH,$cntsuccess,$cntfailure,$cntgiveup;
+
+	// Get the LTI request data for debugging.
+	$post_data = $request_info['post_data'];
+	// Don't log LTI secrets!
+	unset($post_data['key']);
+	unset($post_data['keytype']);
+
     // check env variable, see file ohm/.ebextensions/custom_log_lti.config
     // log $response
     $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
-    if (!empty($lti_response_log_file)) {
-
-        file_put_contents($lti_response_log_file, print_r($user_data,true)."\n".$response, FILE_APPEND);
-    }
+	if (!empty($lti_response_log_file)) {
+		file_put_contents(
+			$lti_response_log_file,
+			"===============================================================================\n"
+			. "Timestamp: " . strftime("%Y-%b-%d %H:%M:%S %Z", time()) . "\n"
+			. "---------\n"
+			. "POST data\n"
+			. "---------\n"
+			. print_r($post_data, true) . "\n"
+			. "---------\n"
+			. "user_data \n"
+			. "---------\n"
+			. print_r($user_data, true) . "\n"
+			. "-----------------\n"
+			. "Response metadata\n"
+			. "-----------------\n"
+			. "http_code: " . $request_info['http_code'] . "\n"
+			. "content_type: " . $request_info['content_type'] . "\n"
+			. "ssl_verify_result: " . $request_info['ssl_verify_result'] . "\n"
+			. "total_time: " . $request_info['total_time'] . "\n"
+			. "redirect_url: " . $request_info['redirect_url'] . "\n"
+			. "--------\n"
+			. "Response \n"
+			. "--------\n"
+			. $response,
+			FILE_APPEND
+		);
+	}
 
 	//echo 'got response with hash'.$user_data['hash'].'<br/>';
 	//echo htmlentities($response);
