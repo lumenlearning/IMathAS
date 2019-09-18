@@ -116,6 +116,8 @@ if (!(isset($teacherid))) {
 							}
 						}
 					}
+				} else {
+					$defregenpenalty = 0;
 				}
 			}
 			if ($submitby == 'by_assessment') {
@@ -147,6 +149,8 @@ if (!(isset($teacherid))) {
 							}
 						}
 					}
+				} else {
+					$defattemptpenalty = 0;
 				}
 			}
 			$showscores = Sanitize::simpleASCII($_POST['showscores']);
@@ -192,6 +196,11 @@ if (!(isset($teacherid))) {
 			if ($_POST['gbcategory'] !== 'DNC') {
 				$sets[] = "gbcategory=:gbcategory";
 				$qarr[':gbcategory'] = Sanitize::onlyInt($_POST['gbcategory']);
+			}
+
+			if ($_POST['caltag'] !== '') {
+				$sets[] = "caltag=:caltag";
+				$qarr[':caltag'] = Sanitize::stripHtmlTags($_POST['caltag']);
 			}
 
 			if ($_POST['noprint'] !== 'DNC') {

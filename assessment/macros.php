@@ -2395,6 +2395,9 @@ function decimaltofraction($d,$format="fraction",$maxden = 5000) {
 	if (floor($d)==$d) {
 		return floor($d);
 	}
+	if (abs($d)<1e-12) {
+		return '0';
+	}
 	if ($d<0) {
 		$sign = '-';
 	} else {
@@ -3171,6 +3174,10 @@ function stringtopolyterms($str) {
 function getfeedbackbasic($correct,$wrong,$thisq,$partn=null) {
 	global $rawscores,$imasroot;
 	if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype']=='NoScores' || $GLOBALS['testsettings']['testtype']=='EndScore')) {
+		return '';
+	}
+	if (isset($GLOBALS['assessver']) && $GLOBALS['assessver'] > 1) {
+		// don't have access to rawscores via global, so just abort
 		return '';
 	}
 	$qn = $thisq-1;

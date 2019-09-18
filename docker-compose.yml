@@ -1,0 +1,66 @@
+# https://docs.docker.com/compose/
+# https://docs.docker.com/compose/compose-file/
+
+version: '3'
+
+services:
+
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile-php
+    expose:
+      - 80
+      - 443
+      - 9000
+    ports:
+      - "443:443"
+      - "80:80"
+      - "127.0.0.1:9000:9000" # for xdebug
+    links:
+      - db
+    volumes:
+      - "$HOME/Sites/ohm:/var/www/html"
+      - "$HOME/Sites/ohm/docker/ssl:/etc/ssl/certs"
+      - "$HOME/Sites/ohm/docker/ssl:/etc/ssl/private"
+
+    hostname: ohm
+    domainname: ludev.team
+
+    restart: unless-stopped
+    privileged: true
+    stdin_open: false
+    tty: false
+
+    environment:
+      DB_SERVER: "db"
+      DB_NAME: "ohm"
+      DB_USERNAME: "ohm"
+      DB_PASSWORD: "ohm"
+      CONFIG_ENV: "development"
+      ZENDESK_API_KEY: "I3gNBevdv4TkdbYVLGLFVD7giLGMk5WMHvMOG51j"
+      ZENDESK_API_URL: "https://lumenlearning1469289677.zendesk.com/api/v2"
+      ZENDESK_API_USER: "ohmsupport@lumenlearning.com"
+
+  db:
+    image: mysql:5.5
+    expose:
+      - 3306
+    ports:
+      - "127.0.0.1:3305:3306"
+    volumes:
+      - "$HOME/docker-data/mysql-ohm:/var/lib/mysql"
+
+    hostname: db
+    domainname: ludev.team
+
+    restart: unless-stopped
+    privileged: false
+    stdin_open: false
+    tty: false
+
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_USER: "ohm"
+      MYSQL_PASSWORD: "ohm"
+      MYSQL_DATABASE: "ohm"

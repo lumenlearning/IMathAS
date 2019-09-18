@@ -1633,6 +1633,9 @@ class AssessRecord
       if (strlen(trim($match[2])) == 0 && preg_match('/src="(.*?)"/', $match[1], $sub)) {
         $scripts[] = array('src', $sub[1]);
       } else {
+        if (preg_match('/document\.write.*?script.*?src="(.*?)"/', $match[2], $sub)) {
+          $scripts[] = array('src', $sub[1]);
+        }
         $scripts[] = array('code', $match[2]);
       }
     }
@@ -2500,8 +2503,12 @@ class AssessRecord
       } else {
         $ptsposs = $assess_info->getQuestionSetting($qdata['qid'], 'points_possible');
       }
-      $answeightTot = array_sum($qdata['answeights']);
-      $adjscore = round($score/($ptsposs * $qdata['answeights'][$pn]/$answeightTot), 5);
+      if (!isset($qdata['answeights'])) {
+        $adjscore = round($score/$ptsposs, 5);
+      } else {
+        $answeightTot = array_sum($qdata['answeights']);
+        $adjscore = round($score/($ptsposs * $qdata['answeights'][$pn]/$answeightTot), 5);
+      }
       $out[$av.'-'.$qn.'-'.$qv.'-'.$pn] = $adjscore;
     }
     return $out;

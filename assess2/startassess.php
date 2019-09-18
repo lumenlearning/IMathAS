@@ -208,7 +208,10 @@ if ($isRealStudent) {
 }
 
 // update lti_sourcedid if needed
-if (isset($sessiondata['lti_lis_result_sourcedid'])) {
+if (isset($sessiondata['lti_lis_result_sourcedid'.$aid])) {
+  $altltisourcedid = $sessiondata['lti_lis_result_sourcedid'.$aid].':|:'.$sessiondata['lti_outcomeurl'].':|:'.$sessiondata['lti_origkey'].':|:'.$sessiondata['lti_keylookup'];
+  $assess_record->updateLTIsourcedId($altltisourcedid);
+} else if (isset($sessiondata['lti_lis_result_sourcedid'])) {
   $altltisourcedid = $sessiondata['lti_lis_result_sourcedid'].':|:'.$sessiondata['lti_outcomeurl'].':|:'.$sessiondata['lti_origkey'].':|:'.$sessiondata['lti_keylookup'];
   $assess_record->updateLTIsourcedId($altltisourcedid);
 }
@@ -245,6 +248,12 @@ if ($in_practice) {
   );
 }
 $assessInfoOut = array_merge($assessInfoOut, $assess_info->extractSettings($include_from_assess_info));
+
+// filter interquestion text html
+foreach ($assessInfoOut['interquestion_text'] as $k=>$v) {
+  $assessInfoOut['interquestion_text'][$k]['text'] = filter($v['text']);
+}
+$assessInfoOut['intro'] = filter($assessInfoOut['intro']);
 
 $assessInfoOut['show_results'] = !$assess_info->getSetting('istutorial');
 

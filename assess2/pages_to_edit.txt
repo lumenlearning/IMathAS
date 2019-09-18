@@ -12,7 +12,15 @@ TODOs:
       Skip in next/prev navigation
     Set based on status of previous
       If regen, should still count as attempted
-  importitems: handle new ver
+
+Misc:
+  Can't preview password-protected assessment (gives invalid password error)
+  Make sure "use latepass" option is available before time limit starts, old assess LTI
+  Make sure other settings that get hidden are updated as well - might be related to the scores showing as NA issue.
+  Chem stuff
+  Update MOM help file to remove non-MOM feature
+  Re-add "save answer" button on one try in quiz mode?
+    Maybe placebo button that just does autosave
 
 Test:
   Instructor preview
@@ -22,6 +30,10 @@ Test:
   hinttext, hints, etc.
 
 Bugs:
+  Commas in numfunc answers
+  possible race condition: https://lumenlearning.atlassian.net/browse/IM-354
+  "Review work in GB" stuck on loading page
+  - make sure error msgs display
   Large number answers not working (qn-val)
   JSXgraph questions not working - MOM 75910 for example
     Need to modify library, and existing questions
@@ -32,6 +44,7 @@ Bugs:
   Average not showing until not IP
 
 To discuss:
+  Some kind of polling for new messages in LTI?
   In new player, skip, is there any way to get to a score summary and
     end message display?
   Some way to submit all unsubmitted assessment attempts?
@@ -91,6 +104,19 @@ Delay for later:
   ~ Edit /course/massexception.php (need to handle or rewrite "force regen")
     Punt on these by just disabling the regen option for now.
 
+X Better notification for new message in LTI mode.
+X Fix variable case insensitivity in new player
+X Intercept document.write and try to handle
+X importitems: handle new ver
+X Bug when "# of tries on each version" is changed to 1 when there is a penalty of 25% after 2 tries.  Not saving (prob seeing invalid value)
+X No between question text in Practice Mode?
+X No between question text in Print version?  (when paged, at least)
+X [+] in assessment text
+X [EMBED: ] tags (is filter being run?)
+X On assessment summary page, showing review, make sure it shows last attempt, not best attempt
+    When shuffle is enabled, this is causing the wrong answers to show in the wrong boxes
+X Encoding error on saving in gradeallq2 for an unsubmitted file upload question
+X gbtable2, line 2141/2147: rounding before dividing causing issues - maybe move rounding to gradebook display?
 X In quiz-style, if settings allow, provide link to gradebook to review previous attempts.
 X On Delete this attempt, need to update attempt selector to other version
 X Single assessment exception page redirect not working (reporting invalid assessment ID)

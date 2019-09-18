@@ -723,6 +723,20 @@ function preSubmit(qn) {
   }
 }
 
+function preSubmitString(name, str) {
+  var qn = parseInt(name.substr(2));
+  if (!allParams.hasOwnProperty(qn)) {
+    return str;
+  }
+  var params = allParams[qn];
+  str = normalizemathunicode(str);
+  str = str.replace(/^\s+/,'').replace(/\s+$/,'');
+  if (params.qtype == 'numfunc') {
+    str = AMnumfuncPrepVar(qn, str)[3];
+  }
+  return str;
+}
+
 /**
  * Processes each question type.  Return object has:
  *   .str:  the input, formatted for rendering
@@ -830,9 +844,9 @@ function AMnumfuncPrepVar(qn,str) {
   	  str = str.replace(/lamda/, 'lambda');
   }
 
-  str = str.replace(/,/g,"").replace(/^\s+/,'').replace(/\s+$/,'');
   var foundaltcap = [];
   var dispstr = str;
+
   dispstr = dispstr.replace(/(arcsinh|arccosh|arctanh|arcsech|arccsch|arccoth|arcsin|arccos|arctan|arcsec|arccsc|arccot|sinh|cosh|tanh|sech|csch|coth|sqrt|ln|log|exp|sin|cos|tan|sec|csc|cot|abs|root)/g, functoindex);
   for (var i=0; i<vars.length; i++) {
   	  if (vars[i] == "varE") {
@@ -868,6 +882,7 @@ function AMnumfuncPrepVar(qn,str) {
   	  return vars[contents];
        });
 
+  var submitstr = str;
   //quote out multiletter variables
   var varstoquote = new Array(); var regmod;
   for (var i=0; i<vars.length; i++) {
@@ -887,6 +902,7 @@ function AMnumfuncPrepVar(qn,str) {
 		  	var remvarparen = new RegExp(varpts[1]+'_\\('+varpts[2]+'\\)', regmod);
 		  	dispstr = dispstr.replace(remvarparen, vars[i]);
 		  	str = str.replace(remvarparen, vars[i]);
+        submitstr = submitstr.replace(remvarparen, vars[i]);
 		  	if (varpts[1].length>1 && greekletters.indexOf(varpts[1].toLowerCase())==-1) {
 		  		varpts[1] = '"'+varpts[1]+'"';
 		  	}
@@ -919,7 +935,7 @@ function AMnumfuncPrepVar(qn,str) {
   	  dispstr = dispstr.replace(/([^a-zA-Z])g\^([\d\.]+)([^\d\.])/g, "$1g^$2{::}$3");
   	  dispstr = dispstr.replace(/([^a-zA-Z])g\(/g, "$1g{::}(");
   }
-  return [str,dispstr,vars.join("|")];
+  return [str,dispstr,vars.join("|"),submitstr];
 }
 
 
@@ -1264,6 +1280,8 @@ function processNumfunc(qn, fullstr, format) {
   var strprocess = AMnumfuncPrepVar(qn, fullstr);
 
   var totesteqn = strprocess[0];
+  totesteqn = totesteqn.replace(/,/g,"").replace(/^\s+/,'').replace(/\s+$/,'');
+  var remapVars = strprocess[2].split('|');
 
   if (fullstr.match(/=/)) {
     if (!iseqn) {
@@ -1280,19 +1298,18 @@ function processNumfunc(qn, fullstr, format) {
 	  reg = new RegExp("("+fvars.join('|')+")\\(","g");
 	  totesteqn = totesteqn.replace(reg,"$1*sin($1+");
   }
-
-  totesteqn = prepWithMath(mathjs(totesteqn,vars.join('|')));
+  totesteqn = prepWithMath(mathjs(totesteqn,remapVars.join('|')));
   var i,j,totest,testval,res;
   var successfulEvals = 0;
   for (j=0; j < 20; j++) {
     totest = 'var DNE=1;';
-    for (i=0; i < vars.length; i++) {
+    for (i=0; i < remapVars.length - 1; i++) {  // -1 to skip DNE pushed to end
       if (domain[i][2]) { //integers
         testval = Math.floor(Math.random()*(domain[i][0] - domain[i][1] + 1) + domain[i][0]);
       } else { //any real between min and max
         testval = Math.random()*(domain[i][0] - domain[i][1]) + domain[i][0];
       }
-      totest += 'var ' + vars[i] + '=' + testval + ';';
+      totest += 'var ' + remapVars[i] + '=' + testval + ';';
     }
     res = scopedeval(totest + totesteqn);
     if (res !== 'synerr') {
@@ -1602,7 +1619,6 @@ function singlevaleval(evalstr, format) {
   if (format.indexOf('scinot')!=-1) {
       evalstr = evalstr.replace("xx","*");
   }
-  console.log(evalstr);
   try {
     var res = scopedmatheval(evalstr);
     return [res, ''];
@@ -1635,6 +1651,7 @@ return {
   clearparams: clearparams,
   preSubmitForm: preSubmitForm,
   preSubmit: preSubmit,
+  preSubmitString: preSubmitString,
   clearLivePreviewTimeouts: clearLivePreviewTimeouts,
   syntaxCheckMQ: syntaxCheckMQ,
   handleMQenter: handleMQenter
@@ -2064,3 +2081,6 @@ function AutoSuggest(elem, suggestions)
 var AutoSuggestIdCounter = 0;
 var autoSuggestLists = {};
 var autoSuggestObjects = {};
+
+//override document.write to prevent errors
+document.write = function() {};
