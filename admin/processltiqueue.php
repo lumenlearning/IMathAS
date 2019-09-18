@@ -173,7 +173,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 	if (!empty($lti_response_log_file)) {
 		file_put_contents(
 			$lti_response_log_file,
-			"\n===============================================================================\n"
+			"===============================================================================\n"
 			. "Timestamp: " . strftime("%Y-%b-%d %H:%M:%S %Z", time()) . "\n"
 			. "---------\n"
 			. "POST data\n"
