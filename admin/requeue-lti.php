@@ -37,7 +37,7 @@ if ($myrights<100) {
  *
  */
 require("../header.php");
-echo '<h1>Reprocess LTI Requests</h1>';
+echo '<h1>View and ReQueue LTI Grade Passback</h1>';
 
 /* add to queue? */
 $queue = false;

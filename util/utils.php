@@ -372,6 +372,7 @@ if (isset($_GET['form'])) {
 	######### Begin OHM-specific code #########################################
 	echo '<a href="itemsearch.php">Search inline/linked items</a><br/>';
 	echo '<a href="ohm_api_consumers.php">Manage API consumers</a>';
+	echo '<a href="admin/requeue-lti.php">View and ReQueue LTI Grade Passback</a>';
 	######### End OHM-specific code ###########################################
 	######### End OHM-specific code ###########################################
 	######### End OHM-specific code ###########################################
