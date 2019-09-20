@@ -1,7 +1,13 @@
 <?php
+
+namespace OHM\Admin;
+
+use Sanitize;
+
 require '../init.php';
-require("../includes/ltioutcomes.php");
-if ($myrights<100) {
+require("requeue-lti-lib.php");
+
+if ($GLOBALS['myrights'] < 100) {
     echo 'You must be an admin';
     exit;
 }
@@ -51,14 +57,14 @@ if ($_POST['cid']) {
     $uid = Sanitize::onlyInt($_POST['uid']);
     $lms = Sanitize::simpleString($_POST['lms']);
 
-    $assessmentids = getCourseAssessmentIds($cid, $aid);
+    $assessmentids = RequeueLtiLib::getCourseAssessmentIds($cid, $aid);
     if (empty($assessmentids)) {
         echo '<h2>unable to find assessment ids</h2>';
     } else {
-        $course = getCourse($cid);
+        $course = RequeueLtiLib::getCourseName($cid);
         echo '<h2>' . $course['name'] . ' (' . $course['id'] . ')</h2>';
 
-        $records = getAssessmentRecords($assessmentids, $uid);
+        $records = RequeueLtiLib::getAssessmentRecords($assessmentids, $uid);
     }
     if (empty($records)) {
         var_dump($assessmentids);
@@ -68,7 +74,7 @@ if ($_POST['cid']) {
         $current_assessment = '';
         foreach ($records as $us) {
             if ($current_assessment != $us['aid']) {
-                $assessment = getAssessment($us['aid']);
+                $assessment = RequeueLtiLib::getAssessmentName($us['aid']);
                 echo '<lh><h3>Assessment V' .  $us['ver'] . ': ';
                 echo $assessment['name'] . ' (' . $us['aid'] . ')</h3></lh>';
                 $current_assessment = $us['aid'];
@@ -76,7 +82,7 @@ if ($_POST['cid']) {
             echo '<li>User ID: ' . $us['uid'] . '<ul>';
             echo '<li>LTI sourced_id: ' . Sanitize::encodeStringForDisplay($us['sourcedid']) . '</li>';
             echo '<li>Score: ' . getpts($us['scores']) . '</li>';
-            $grade = reCalcandupdateLTIgrade($us['aid'], $us['scores']);
+            $grade = RequeueLtiLib::reCalcandupdateLTIgrade($us['aid'], $us['scores']);
             echo '<li>Grade: ' . $grade . '</li>';
 
             if ($queue === true && addToLTIQueue($us['sourcedid'], $grade, true)) {
@@ -86,7 +92,7 @@ if ($_POST['cid']) {
                 echo '<li>Added to queue</li>';
             } else {
                 if ($lms==true and $uid) {
-                    $lms_grade = requestLMSGrade($us['sourcedid']);
+                    $lms_grade = RequeueLtiLib::requestLMSGrade($us['sourcedid']);
                     echo "<li>LMS Grade: $lms_grade</li>";
                 }
                 echo '<li>NOT added to queue</li>';
@@ -128,173 +134,3 @@ function repostForm() {
     echo '</form>';
 }
 
-function requestLMSGrade($sourcedid) {
-    global $DBH;
-
-    list($lti_sourcedid,$ltiurl,$ltikey,$keytype) = explode(':|:', $sourcedid);
-
-    $secret = '';
-    if (strlen($lti_sourcedid)>1 && strlen($ltiurl)>1 && strlen($ltikey)>1) {
-        if ($keytype=='c') {
-            $keyparts = explode('_',$ltikey);
-            $stm = $DBH->prepare("SELECT ltisecret FROM imas_courses WHERE id=:id");
-            $stm->execute(array(':id'=>$keyparts[1]));
-            if ($stm->rowCount()>0) {
-                $secret = $stm->fetchColumn(0);
-            }
-        } else {
-            $stm = $DBH->prepare("SELECT password FROM imas_users WHERE SID=:SID AND (rights=11 OR rights=76 OR rights=77)");
-            $stm->execute(array(':SID'=>$ltikey));
-            if ($stm->rowCount()>0) {
-                $secret = $stm->fetchColumn(0);
-            }
-        }
-    }
-    if ($secret != '') {
-        //echo "<p>Calling $ltiurl with $ltikey, $secret, and $lti_sourcedid</p>";
-        $value = sendLTIOutcome('read',$ltikey,$secret,$ltiurl,$lti_sourcedid,0,true);
-        if (isset($value[1])) {
-            $grade = preg_replace('/.*textString\>([\d\.]*)\<\/textString.*/', '$1', $value[1]);
-            if (!empty($grade)) {
-                return $grade;
-            } else {
-                return Sanitize::encodeStringForDisplay($value[1]);
-            }
-        } else {
-            return "unable to read LTI grade";
-        }
-    } else {
-        return "Unable to lookup secret";
-    }
-}
-
-function getCourseAssessmentIds($cid, $aid=null) {
-    global $DBH;
-    $query = "SELECT id as aid, ver"
-        ." FROM imas_assessments WHERE courseid = :courseid ";
-    $bind[':courseid'] = $cid;
-    if (!empty($aid)) {
-        $query .= ' AND id = :aid';
-        $bind[':aid'] = $aid;
-    }
-    $stm = $DBH->prepare($query);
-    $stm->execute($bind);
-    if ($stm->rowCount()==0) {
-        return false;
-    } else {
-        return $stm->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-function getAssessmentRecords($assessments, $uid = null) {
-    foreach ($assessments as $assess) {
-        if ($assess['ver'] == 2) {
-            $assess2[] = $assess['aid'];
-        } else {
-            $assess1[] = $assess['aid'];
-        }
-    }
-    $results = array();
-    if (!empty($assess2)) {
-        $results = array_merge($results, getAssessmentResults($assess2, $uid, 2));
-    }
-    if (!empty($assess1)) {
-        $results = array_merge($results, getAssessmentResults($assess1, $uid, 1));
-    }
-    return $results;
-}
-function getAssessmentResults($aids, $uid = null, $ver = 1) {
-    global $DBH;
-    if ($ver == 2) {
-        $query = "SELECT 2 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, score as scores "
-            . " FROM imas_assessment_records WHERE assessmentid IN (:assessmentids)";
-    } else {
-        $query = "SELECT 1 as ver, userid as uid, assessmentid as aid, lti_sourcedid as sourcedid, bestscores as scores "
-            . " FROM imas_assessment_sessions WHERE assessmentid IN (:assessmentids)";
-    }
-    $bind[':assessmentids'] = implode(",", $aids);
-    if (!empty($uid)) {
-        $query .= " AND userid = :userid";
-        $bind[':userid'] = $uid;
-    }
-    $stm = $DBH->prepare($query);
-    $stm->execute($bind);
-    if ($stm->rowCount() > 0) {
-        return $results = $stm->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-function getCourse($courseid) {
-    global $DBH;
-    $query = "SELECT name, id "
-        ." FROM imas_courses WHERE imas_courses.id = :courseid ";
-    $stm = $DBH->prepare($query);
-    $stm->execute(array(':courseid'=>$courseid));
-    if ($stm->rowCount()==0) {
-        return false;
-    } else {
-        return $stm->fetch(PDO::FETCH_ASSOC);
-    }
-}
-function getAssessment($aid) {
-    global $DBH;
-    $query = "SELECT name, id "
-        ." FROM imas_assessments WHERE id = :aid ";
-    $stm = $DBH->prepare($query);
-    $stm->execute(array(':aid'=>$aid));
-    if ($stm->rowCount()==0) {
-        return false;
-    } else {
-        return $stm->fetch(PDO::FETCH_ASSOC);
-    }
-}
-
-/*
- * iMathAS functions
- */
-function getpts($scs) {
-    $tot = 0;
-  	foreach(explode(',',$scs) as $sc) {
-        $qtot = 0;
-        if (strpos($sc,'~')===false) {
-            if ($sc>0) {
-                $qtot = $sc;
-            }
-        } else {
-            $sc = explode('~',$sc);
-            foreach ($sc as $s) {
-                if ($s>0) {
-                    $qtot+=$s;
-                }
-            }
-        }
-        $tot += round($qtot,1);
-    }
-	return $tot;
-}
-function reCalcandupdateLTIgrade($aid,$scores) {
-    global $DBH;
-    $stm = $DBH->prepare("SELECT ptsposs,itemorder,defpoints FROM imas_assessments WHERE id=:id");
-    $stm->execute(array(':id'=>$aid));
-    $line = $stm->fetch(PDO::FETCH_ASSOC);
-    if ($line['ptsposs']==-1) {
-        $line['ptsposs'] = updatePointsPossible($aid, $line['itemorder'], $line['defpoints']);
-    }
-    $aidposs = $line['ptsposs'];
-    $allans = true;
-    if (is_array($scores)) {
-        // old assesses
-        $total = 0;
-        for ($i =0; $i < count($scores);$i++) {
-            if ($allans && strpos($scores[$i],'-1')!==FALSE) {
-                $allans = false;
-            }
-            if (getpts($scores[$i])>0) { $total += getpts($scores[$i]);}
-        }
-    } else {
-        // new assesses
-        $total = getpts($scores);
-    }
-    $grade = min(1, max(0,$total/$aidposs));
-    $grade = number_format($grade,8);
-    return $grade;
-}
