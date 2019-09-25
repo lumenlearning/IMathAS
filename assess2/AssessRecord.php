@@ -749,8 +749,8 @@ class AssessRecord
 
     // Load the question code
     $qns = array_keys($autosaves);
-    $qids = $this->getQuestionIds($qns);
-    $this->assess_info->loadQuestionSettings($qids, true);
+    list($qids, $toloadqids) = $this->getQuestionIds($qns);
+    $this->assess_info->loadQuestionSettings($toloadqids, true);
 
     // add a submission
     $submission = $this->addSubmission($maxtime + $this->assessRecord['starttime']);
@@ -1376,6 +1376,13 @@ class AssessRecord
     $exceptionPenalty = $this->assess_info->getSetting('exceptionpenalty');
     $overtimePenalty = $this->assess_info->getSetting('overtime_penalty');
 
+    if (empty($qsettings['points_possible']) && $qsettings['points_possible'] !== 0) {
+      error_log("empty points possible. QID ".$qver['qid'].
+        ". qn $qn in ver $ver try $try of aid ".
+        $this->curAid." by userid ".$this->curUid
+        . ". Request URI: ".$_SERVER['REQUEST_URI']);
+    }
+
     $answeights = isset($qver['answeights']) ? $qver['answeights'] : array(1);
     $answeightTot = array_sum($answeights);
     $partscores = array_fill(0, count($answeights), 0);
@@ -1535,9 +1542,17 @@ class AssessRecord
         if (is_string($autosave['stuans'][$pn]) && strpos($autosave['stuans'][$pn], '@FILE') !== false) {
           // it's  a file autosave.  As a bit of a hack we'll make an array
           // with both the last submitted answer and the autosave
-          $stuanswers[$qn+1][$pn] = array($stuanswers[$qn+1][$pn], $autosave['stuans'][$pn]);
+          if (is_array($stuanswers[$qn+1]) || $numParts > 1) {
+            $stuanswers[$qn+1][$pn] = array($stuanswers[$qn+1][$pn], $autosave['stuans'][$pn]);
+          } else {
+            $stuanswers[$qn+1] = array($stuanswers[$qn+1], $autosave['stuans'][$pn]);
+          }
         } else {
-          $stuanswers[$qn+1][$pn] = $autosave['stuans'][$pn];
+          if (is_array($stuanswers[$qn+1]) || $numParts > 1) {
+            $stuanswers[$qn+1][$pn] = $autosave['stuans'][$pn];
+          } else {
+            $stuanswers[$qn+1] = $autosave['stuans'][$pn];
+          }
         }
         $usedAutosave[] = $pn;
       }
@@ -1837,23 +1852,41 @@ class AssessRecord
    * Gets the question ID for the given question number
    * @param  int  $qn             Question Number
    * @param  string  $ver         version #, or 'last'
-   * @return int  question ID
+   * @return array(int current question ID, array all question IDs)
    */
   public function getQuestionId($qn, $ver = 'last') {
-    $curq = $this->getQuestionVer($qn, $ver);
-    return $curq['qid'];
+    $by_question = ($this->assess_info->getSetting('submitby') == 'by_question');
+    $assessver = $this->getAssessVer($ver);
+    $outall = array();
+    $question_versions = $assessver['questions'][$qn]['question_versions'];
+    if (!$by_question || $ver === 'last') {
+      $curq = $question_versions[count($question_versions) - 1];
+    } else if ($ver === 'scored') {
+      $curq = $question_versions[$assessver['questions'][$qn]['scored_version']];
+    } else {
+      $curq = $question_versions[$ver];
+    }
+    $out = $curq['qid'];
+    foreach ($question_versions as $qver) {
+      $outall[] = $qver['qid'];
+    }
+    return array($out, $outall);
   }
 
   /**
    * Gets the question IDs for the given question numbers
    * @param  array  $qns           Array of Question Numbers
    * @param  string  $ver         version #, or 'last'
-   * @return array  question IDs, indexed by question number
+   * @return array(active,all)
+   *   active: array  active question IDs, indexed by question number
+   *   all: array IDs for all question IDs used for these question numbers
+   *    (accounts for pooled questions)
    */
   public function getQuestionIds($qns, $ver = 'last') {
     $by_question = ($this->assess_info->getSetting('submitby') == 'by_question');
     $assessver = $this->getAssessVer($ver);
     $out = array();
+    $outall = array();
     if ($qns === 'all') {
       $qns = range(0, count($assessver['questions']) - 1);
     }
@@ -1867,8 +1900,11 @@ class AssessRecord
         $curq = $question_versions[$ver];
       }
       $out[$qn] = $curq['qid'];
+      foreach ($question_versions as $qver) {
+        $outall[] = $qver['qid'];
+      }
     }
-    return $out;
+    return array($out, array_unique($outall));
   }
 
   /**
@@ -1887,7 +1923,7 @@ class AssessRecord
     $aScoredVer = 0;
     $allAssessVerScores = array();
     $totalTime = 0;
-
+    $lastAver = count($this->data['assess_versions']) - 1;
     // loop through all the assessment versions
     for ($av = 0; $av < count($this->data['assess_versions']); $av++) {
       $curAver = &$this->data['assess_versions'][$av];
@@ -1895,9 +1931,12 @@ class AssessRecord
       // loop through the question numbers
       $aVerScore = 0;
       for ($qn = 0; $qn < count($curAver['questions']); $qn++) {
-        // if not rescoring this question, or if withdrawn, use existing score
+        // if not rescoring this question, or if withdrawn, 
+        // or retotalling indiv questions and not latest assess version, 
+        // use existing score
         if (($rescoreQs !== 'all' && !in_array($qn, $rescoreQs)) ||
-            !empty($curAver['questions'][$qn]['withdrawn'])
+            !empty($curAver['questions'][$qn]['withdrawn']) ||
+        	($rescoreQs !== 'all' && $av < $lastAver)
         ) {
           $aVerScore += $curAver['questions'][$qn]['score'];
           $verTime += $curAver['questions'][$qn]['time'];
