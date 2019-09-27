@@ -9,6 +9,10 @@ if (empty($_GET['cid']) || empty($_GET['aid'])) {
   echo 'Error - need to specify course ID and assessment ID in URL';
   exit;
 }
+if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($instrPreviewId)) { // loaded by a NON-teacher
+  echo "You are not enrolled in this course.  Please return to the <a href=\"../index.php\">Home Page</a> and enroll.";
+  exit;
+}
 $cid = Sanitize::onlyInt($_GET['cid']);
 $aid = Sanitize::onlyInt($_GET['aid']);
 
@@ -35,10 +39,10 @@ $placeinhead .= '<script src="'.$imasroot.'/javascript/drawing_min.js" type="tex
 $placeinhead .= '<script src="'.$imasroot.'/javascript/AMhelpers2_min.js?v=091219" type="text/javascript"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/eqntips_min.js" type="text/javascript"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/mathjs_min.js" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/mathquill/AMtoMQ_min.js?v=082919" type="text/javascript"></script>
-  <script src="'.$imasroot.'/mathquill/mathquill.min.js" type="text/javascript"></script>
+$placeinhead .= '<script src="'.$imasroot.'/mathquill/AMtoMQ_min.js?v=092319" type="text/javascript"></script>
+  <script src="'.$imasroot.'/mathquill/mathquill.min.js?v=092419" type="text/javascript"></script>
   <script src="'.$imasroot.'/mathquill/mqeditor_min.js?v=091619" type="text/javascript"></script>
-  <script src="'.$imasroot.'/mathquill/mqedlayout_min.js?v=091019" type="text/javascript"></script>
+  <script src="'.$imasroot.'/mathquill/mqedlayout_min.js?v=092419" type="text/javascript"></script>
   <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mathquill-basic.css">
   <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mqeditor.css">';
 if ($isltilimited || $inTreeReader) {
