@@ -739,7 +739,12 @@ if ($overwriteBody==1) {
 		<thead>
 		<tr>
 			<th></th>
-			<th></th>
+            <?php
+            if ($myrights == 100) {
+                echo '<th>Enrollment ID</th>';
+            }
+            ?>
+            <th></th>
 			<?php echo $hasSectionRowHeader; ?>
 			<?php echo $hasCodeRowHeader; ?>
 			<th>Name</th>
@@ -786,6 +791,11 @@ if ($overwriteBody==1) {
 			if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
 ?>
 				<td><input type=checkbox name="checked[]" value="<?php echo Sanitize::onlyInt($line['userid']); ?>" <?php if ($line['locked']>0) echo 'class="locked"'?>></td>
+            <?php
+            if ($myrights == 100) {
+                echo '<td>' . Sanitize::onlyInt($line['id']) . '</td>';
+            }
+            ?>
 				<td>
 <?php
 
