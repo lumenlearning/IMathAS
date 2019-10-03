@@ -17,7 +17,7 @@
         </button>
       </p>
 
-      <p v-if="settings.can_use_latepass > 0 && this.settings.available !== 'needprereq'">
+      <p v-if="settings.can_use_latepass > 0 && showLatePassOffer">
         {{ $tc('closed.latepassn', settings.latepasses_avail) }}
         <br/>
         {{ latepassExtendMsg }}
@@ -136,10 +136,9 @@ export default {
       );
     },
     hasActiveMsg () {
-      if (this.settings.hasOwnProperty('timelimit_expires')) {
-        let expires = new Date(this.settings.timelimit_expires * 1000);
-        let now = new Date();
-        if (expires < now) {
+      if (this.settings.hasOwnProperty('timelimit_expiresin')) {
+        let expires = this.settings.timelimit_expiresin * 1000;
+        if (expires < 0) {
           return this.$t('closed.unsubmitted_overtime');
         } else {
           return this.$t('closed.unsubmitted_pastdue');
@@ -148,6 +147,10 @@ export default {
         return this.$t('closed.unsubmitted_pastdue');
       }
     },
+    showLatePassOffer () {
+      return (this.settings.available !== 'needprereq' &&
+        this.settings.available !== 'pasttime');
+    },
     latepassExtendMsg () {
       return this.$tc('closed.latepass_needed', this.settings.can_use_latepass, {
         n: this.settings.can_use_latepass,
@@ -155,7 +158,7 @@ export default {
       });
     },
     primaryButton () {
-      if (this.settings.can_use_latepass > 0 && this.settings.available !== 'needprereq') {
+      if (this.settings.can_use_latepass > 0 && this.showLatePassOffer) {
         return this.$tc('closed.use_latepass', this.settings.can_use_latepass);
       } else if (this.settings.available === 'practice') {
         return this.$t('closed.do_practice');
@@ -168,7 +171,7 @@ export default {
       }
     },
     primaryAction () {
-      if (this.settings.can_use_latepass > 0 && this.settings.available !== 'needprereq') {
+      if (this.settings.can_use_latepass > 0 && this.showLatePassOffer) {
         return 'latepass';
       } else if (this.settings.available === 'practice') {
         return 'practice';
@@ -194,7 +197,7 @@ export default {
       // Practice is secondary if we can use latepass
       if (this.settings.can_use_latepass > 0 && this.settings.available === 'practice') {
         return 'practice';
-      } else if (window.exiturl && window.exiturl !== '') {
+      } else if (window.exiturl && window.exiturl !== '' && this.primaryAction !== 'exit') {
         return 'exit';
       } else {
         return '';
