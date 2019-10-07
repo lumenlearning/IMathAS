@@ -64,7 +64,11 @@ final class StudentPaymentTest extends TestCase
 	{
 		$this->studentPaymentDbMock->method('getGroupRequiresStudentPayment')->willReturn(true);
 		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
-		$this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(true);
+        $studentPayApiResult = new StudentPayApiResult();
+        $studentPayApiResult->setApiUserMessage("API user message");
+        $studentPayApiResult->setCourseRequiresStudentPayment(true);
+        $studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::IS_ACTIVATED);
+        $this->studentPaymentApiMock->method('getActivationStatusFromApi')->willReturn($studentPayApiResult);
 
 		$studentPaymentStatus = $this->studentPayment->getCourseAndStudentPaymentInfo();
 
