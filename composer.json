@@ -1,6 +1,7 @@
 {
     "require": {
-        "php": ">=5.5.0",
+        "php": ">=7.1.0",
+        "ext-pdo": "*",
         "slim/slim": "3.9.2",
         "slim/php-view": "2.2.0",
         "monolog/monolog": "1.23.0",
@@ -14,13 +15,19 @@
         "codeception/codeception": "^2.4",
         "codeception/c3": "^2.4",
         "flow/jsonpath": "0.4.0",
-        "fzaninotto/faker": "^1.7"
+        "fzaninotto/faker": "^1.7",
+        "squizlabs/php_codesniffer": "3.4.2"
     },
     "autoload": {
         "psr-4": {
+            "\\": "includes/",
             "OHM\\": "ohm/",
+            "OHM\\Admin\\": "admin/",
             "OHM\\Models\\": "ohm/models/",
-            "OHM\\Api\\": "ohm/api/src/"
+            "OHM\\Controlers\\": "ohm/controlers/",
+            "OHM\\Api\\": "ohm/api/src/",
+            "OHM\\Includes\\": "ohm/includes/",
+            "OHM\\Exceptions\\": "ohm/exceptions/"
         }
     },
     "autoload-dev": {
@@ -29,25 +36,12 @@
             "Tests\\": "tests/",
             "OHM\\Tests\\Api\\": "ohm/tests/api/",
             "OHM\\Tests\\Functional\\": "ohm/tests/functional/",
-            "OHM\\Tests\\Unit\\": "ohm/tests/unit/"
+            "OHM\\Tests\\Unit\\": "ohm/tests/unit/",
+            "OHM\\Mocks\\": "ohm/mocks/"
         }
     },
     "config": {
         "process-timeout" : 0
-    },
-    "autoload": {
-        "psr-4": {
-            "OHM\\": "ohm/",
-            "OHM\\Includes\\": "ohm/includes/",
-            "OHM\\Models\\": "ohm/models/",
-            "OHM\\Exceptions\\": "ohm/exceptions/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "OHM\\Tests\\": "tests/",
-            "OHM\\Mocks\\": "ohm/mocks/"
-        }
     },
     "scripts": {
         "start": "php -S localhost:8080 -t .",
@@ -60,6 +54,7 @@
         "test-ohmv": "codecept run --steps --coverage --coverage-html",
         "coverage-ohm": "codecept run --coverage --coverage-html",
         "migrate-ohm": "phinx migrate",
-        "seed-ohm": "phinx seed:run"
+        "seed-ohm": "phinx seed:run",
+        "php-cs-fixer": "php-cs-fixer --rules=@PSR12"
     }
 }
