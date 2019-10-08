@@ -191,19 +191,21 @@ function init(paramarr, enableMQ) {
           if (arr.length > cnt+1) {
             handleScript(arr, cnt+1);
           }
-        })
+        });
       } else {
         if (arr.length > cnt+1) {
           handleScript(arr, cnt+1);
         }
       }
+      if (arr.length <= cnt+1) {
+        for (var i=0; i<initstack.length; i++) {
+              var foo = initstack[i]();
+        }
+        initstack.length = 0;
+      }
     }
     handleScript(paramarr.scripts, 0);
   }
-  for (var i=0; i<initstack.length; i++) {
-        var foo = initstack[i]();
-  }
-  initstack.length = 0;
 }
 
 // setup tip focus/blur handlers
@@ -421,14 +423,17 @@ function setupDraw(qn) {
 }
 
 function initMultAns(qn) {
-  var boxes = $('input[name^="qn'+qn+'["]');
-  boxes.on('change', function () {
-    if (this.checked && this.value == boxes.length-1) {
-      boxes.not(':last').prop('checked', false);
-    } else if (this.checked) {
-      boxes.last().prop('checked', false);
-    }
-  });
+  var hasnone = $("#qnwrap"+qn).find('label:last').text().match(/none\s+of/i);
+  if (hasnone) {
+    var boxes = $('input[name^="qn'+qn+'["]');
+    boxes.on('change', function () {
+      if (this.checked && this.value == boxes.length-1) {
+        boxes.not(':last').prop('checked', false);
+      } else if (this.checked) {
+        boxes.last().prop('checked', false);
+      }
+    });
+  }
 }
 
 function isBlank(str) {
@@ -1149,7 +1154,7 @@ function processCalcComplex(fullstr, format) {
       }
     }
     err + syntaxcheckexpr(str, format);
-    prep = prepWithMath(mathjs(str));
+    prep = prepWithMath(mathjs(str,'i'));
     real = scopedeval('var i=0;'+prep);
     imag = scopedeval('var i=1;'+prep);
     imag2 = scopedeval('var i=-1;'+prep);
