@@ -122,7 +122,36 @@ $CFG['CPS']['miniicons'] = array(
     'folder'=>'folder_tiny.png',
     'calendar'=>'1day.png');
 
-$CFG['CPS']['itemicons']['desmos'] = '../ohm/img/desmos.png';
+$CFG['CPS']['itemicons'] = array (
+    'folder' => 'folder2.gif',
+    'foldertree' => 'folder_tree.png',
+    'assess' => 'assess.png',
+    'inline' => 'inline.png',
+    'desmos' => '../ohm/img/desmos.png',
+    'web' => 'web.png',
+    'doc' => 'doc.png',
+    'wiki' => 'wiki.png',
+    'drill' => 'drill.png',
+    'html' => 'html.png',
+    'forum' => 'forum.png',
+    'pdf' => 'pdf.png',
+    'ppt' => 'ppt.png',
+    'zip' => 'zip.png',
+    'png' => 'image.png',
+    'xls' => 'xls.png',
+    'gif' => 'image.png',
+    'jpg' => 'image.png',
+    'bmp' => 'image.png',
+    'mp3' => 'sound.png',
+    'wav' => 'sound.png',
+    'wma' => 'sound.png',
+    'swf' => 'video.png',
+    'avi' => 'video.png',
+    'mpg' => 'video.png',
+    'nb' => 'mathnb.png',
+    'mws' => 'maple.png',
+    'mw' => 'maple.png'
+);
 
 $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
 
