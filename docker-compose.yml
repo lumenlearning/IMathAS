@@ -16,13 +16,13 @@ services:
     ports:
       - "443:443"
       - "80:80"
-      - "127.0.0.1:9000:9000" # for xdebug
+      - "9000:9000" # for xdebug
     links:
       - db
     volumes:
-      - "$HOME/Sites/ohm:/var/www/html"
-      - "$HOME/Sites/ohm/docker/ssl:/etc/ssl/certs"
-      - "$HOME/Sites/ohm/docker/ssl:/etc/ssl/private"
+      - "./:/var/www/html"
+      - "./docker/ssl:/etc/ssl/certs"
+      - "./docker/ssl:/etc/ssl/private"
 
     hostname: ohm
     domainname: ludev.team
@@ -38,9 +38,6 @@ services:
       DB_USERNAME: "ohm"
       DB_PASSWORD: "ohm"
       CONFIG_ENV: "development"
-      ZENDESK_API_KEY: "I3gNBevdv4TkdbYVLGLFVD7giLGMk5WMHvMOG51j"
-      ZENDESK_API_URL: "https://lumenlearning1469289677.zendesk.com/api/v2"
-      ZENDESK_API_USER: "ohmsupport@lumenlearning.com"
 
   db:
     image: mysql:5.5
