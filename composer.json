@@ -7,7 +7,8 @@
         "monolog/monolog": "1.23.0",
         "illuminate/database": "5.4.36",
         "ramsey/uuid": "3.7.3",
-        "tuupola/slim-jwt-auth": "^2.4.0"
+        "tuupola/slim-jwt-auth": "^2.4.0",
+        "twig/twig": "^2.12"
     },
     "require-dev": {
         "robmorgan/phinx": "^0.9.2",
@@ -27,7 +28,11 @@
             "OHM\\Controlers\\": "ohm/controlers/",
             "OHM\\Api\\": "ohm/api/src/",
             "OHM\\Includes\\": "ohm/includes/",
-            "OHM\\Exceptions\\": "ohm/exceptions/"
+            "OHM\\Exceptions\\": "ohm/exceptions/",
+            "Desmos\\": "desmos/",
+            "Desmos\\Models\\": "desmos/models/",
+            "Desmos\\Controlers\\": "desmos/controlers/",
+            "Desmos\\Views\\": "desmos/views/"
         }
     },
     "autoload-dev": {
@@ -37,7 +42,11 @@
             "OHM\\Tests\\Api\\": "ohm/tests/api/",
             "OHM\\Tests\\Functional\\": "ohm/tests/functional/",
             "OHM\\Tests\\Unit\\": "ohm/tests/unit/",
-            "OHM\\Mocks\\": "ohm/mocks/"
+            "OHM\\Mocks\\": "ohm/mocks/",
+            "Desmos\\": "desmos/",
+            "Desmos\\Models\\": "desmos/models/",
+            "Desmos\\Controlers\\": "desmos/controlers/",
+            "Desmos\\Views\\": "desmos/views/"
         }
     },
     "config": {

@@ -113,6 +113,7 @@ $CFG['TE']['navicons'] = array(
 
 $CFG['CPS']['miniicons'] = array(
     'assess'=>'assess_tiny.png',
+    'desmos'=>'../ohm/img/desmos_tiny.png',
     'drill'=>'assess_tiny.png',
     'inline'=>'inline_tiny.png',
     'linked'=>'html_tiny.png',
@@ -120,6 +121,8 @@ $CFG['CPS']['miniicons'] = array(
     'wiki'=>'wiki_tiny.png',
     'folder'=>'folder_tiny.png',
     'calendar'=>'1day.png');
+
+$CFG['CPS']['itemicons']['desmos'] = '../ohm/img/desmos.png';
 
 $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
 

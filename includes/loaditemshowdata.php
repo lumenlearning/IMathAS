@@ -244,6 +244,30 @@ function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=fa
 			$itemshowdata[$typelookups['Wiki'][$line['id']]] = $line;
 		}
 	}
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if (isset($typelookups['DesmosInteractive'])) {
+		$placeholders = Sanitize::generateQueryPlaceholders($typelookups['DesmosInteractive']);
+		if ($limited) {
+			$tosel = 'id,title,summary';
+		} else {
+			$tosel = 'id,title,summary,startdate,enddate,avail';
+		}
+		$stm = $DBH->prepare("SELECT $tosel FROM desmos_interactives WHERE id IN ($placeholders)");
+		$stm->execute(array_keys($typelookups['DesmosInteractive']));
+		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$line['itemtype'] = 'DesmosInteractive';
+			$itemshowdata[$typelookups['DesmosInteractive'][$line['id']]] = $line;
+		}
+	}
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 
 	return $itemshowdata;
 }
