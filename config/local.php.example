@@ -1,14 +1,25 @@
 <?php
-//IMathAS Math Config File.  Adjust settings here!
+//Local Config File.  Adjust settings here!
 
-$imasroot = "/ohm";
-$AWSbucket = null;
-//$AWSkey = 'api_key_goes_here';
-//$AWSsecret = 'api_secret_goes_here';
+//error reporting level.  Set to 0 for production servers.
+error_reporting(E_ALL & ~E_NOTICE);
 
 require('ohm.php');
 //require('wamap.php');
 //require('myopenmath.php');
+
+$installname = "Lumen OHM Local";
+
+//$imasroot = "/ohm";
+//$AWSbucket = null;
+//$AWSkey = 'api_key_goes_here';
+//$AWSsecret = 'api_secret_goes_here';
+
+//database access settings
+$dbserver = getenv('DB_SERVER') ?? 'localhost';
+$dbname = getenv('DB_NAME') ?? 'myopenmath';
+$dbusername = getenv('DB_USERNAME') ?? 'username';
+$dbpassword = getenv('DB_PASSWORD') ?? 'password';
 
 // Lumen student payment authorization API
 $GLOBALS['student_pay_api']['enabled'] = false;
@@ -24,21 +35,10 @@ $GLOBALS['student_pay_api']['stripe_api_key'] = 'api_key_here';
 $GLOBALS['student_pay_api']['direct_pay_component_url'] = '../../../lumen-components/build/vanilla_js/direct_pay_components.js';
 $GLOBALS['student_pay_api']['debug'] = true;
 
-//database access settings
-$dbserver = "localhost";
-$dbname = "myopenmath";
-$dbusername = "username";
-$dbpassword = "password";
-
-$CFG['coursebrowser'] = 'coursebrowserprops.js';
-$CFG['coursebrowsermsg'] = 'Copy a template course';
-
-//error reporting level.  Set to 0 for production servers.
-error_reporting(E_ALL & ~E_NOTICE);
-
-$installname = "Lumen Ohm Local";
+//$CFG['coursebrowser'] = 'coursebrowserprops.js';
+//$CFG['coursebrowsermsg'] = 'Copy a template course';
 
 //zendesk stuff
-$CFG['GEN']['zdapikey'] = 'api_key_goes_here';
-$CFG['GEN']['zdurl'] = 'api_url_goes_here';
-
+$CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY') ?? 'api_key_goes_here';
+$CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL') ?? 'api_url_goes_here';
+$CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER') ?? 'ohmsupport@lumenlearning.com';
