@@ -1,9 +1,7 @@
 <?php
-//OHM:  Add/modify desmos block items on course page
-//(c) 2019 Alena Holligan
-namespace Desmos;
-use OHM\Includes\CourseItems;
-use Desmos\Models\DesmosInteractive;
+//iMathAs:  Add/modify course block items on course page
+//2019 Alena Holligan
+namespace Course;
 /*** master php includes *******/
 require("../init.php");
 require("../includes/htmlutil.php");
@@ -20,10 +18,13 @@ if (!(isset($_GET['cid']))) {
 }
 $cid = \Sanitize::courseId($_GET['cid']);
 $block = \Sanitize::encodeStringForDisplay($_GET['block']);
-$desmos = new DesmosInteractive($cid);
+$type = \Sanitize::encodeStringForDisplay($_GET['type']);
+
+$itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
+$item = new $itemObject($cid, $block);
 if (isset($_GET['id'])) {
-    $desmosid = \Sanitize::onlyInt($_GET['id']);
-    if (!$desmos->getItem($desmosid)) {
+    $itemid = \Sanitize::onlyInt($_GET['id']);
+    if (!$item->getItem($itemid)) {
         $body = "Invalid ID";
         require __DIR__ . "/views/layout.php";
         exit;
@@ -31,62 +32,62 @@ if (isset($_GET['id'])) {
 }
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters
-$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">".\Sanitize::encodeStringForDisplay($coursename)."</a> ";
-if (isset($_GET['id'])) {  //already have id; update
-    $curBreadcrumb .= "&gt; Modify Desmos Interactive\n";
-    $pagetitle = "Modify Desmos Interactive";
-} else {
-    $curBreadcrumb .= "&gt; Add Desmos Interactive\n";
-    $pagetitle = "Add Desmos Interactive";
-}
 if (isset($_GET['tb'])) {
     $totb = \Sanitize::encodeStringForDisplay($_GET['tb']);
 } else {
     $totb = 'b';
 }
 $useeditor = "desmos";
-$page_formActionTag = "adddesmos.php?" . \Sanitize::generateQueryStringFromMap(
-        array('block' => $block, 'cid' => $cid)
-    );
-$page_formActionTag .= "&tb=$totb";
-if ($_POST['title']!= null || $_POST['summary']!=null || $_POST['sdate']!=null) { //if the form has been submitted
+if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been submitted
     if ($_POST['avail']==1) {
         if ($_POST['sdatetype']=='0') {
-            $startdate = 0;
+            $fields['startdate'] = 0;
         } else {
-            $startdate = parsedatetime($_POST['sdate'],$_POST['stime'],0);
+            $fields['startdate'] = parsedatetime($_POST['sdate'],$_POST['stime'],0);
         }
         if ($_POST['edatetype']=='2000000000') {
-            $enddate = 2000000000;
+            $fields['enddate'] = 2000000000;
         } else {
-            $enddate = parsedatetime($_POST['edate'],$_POST['etime'],2000000000);
+            $fields['enddate'] = parsedatetime($_POST['edate'],$_POST['etime'],2000000000);
         }
-        $oncal = \Sanitize::onlyInt($_POST['oncal']);
+        if ($_POST['oncal']) {
+            $fields['oncal'] = \Sanitize::onlyInt($_POST['oncal']);
+        }
     } else if ($_POST['avail']==2) {
         if ($_POST['altoncal']==0) {
-            $startdate = 0;
-            $oncal = 0;
+            $fields['startdate'] = 0;
+            //$fields['oncal'] = 0;
         } else {
-            $startdate = parsedatetime($_POST['cdate'],"12:00 pm",0);
-            $oncal = ($startdate>0)?1:0;
-            $caltag = \Sanitize::stripHtmlTags($_POST['altcaltag']);
+            $fields['startdate'] = parsedatetime($_POST['cdate'],"12:00 pm",0);
+            //$fields['oncal'] = ($fields['startdate']>0)?1:0;
+            //$fields['caltag'] = \Sanitize::stripHtmlTags($_POST['altcaltag']);
         }
-        $enddate =  2000000000;
+        $fields['enddate'] =  2000000000;
     }else {
-        $startdate = 0;
-        $enddate = 2000000000;
-        $oncal = 0;
+        $fields['startdate'] = 0;
+        $fields['enddate'] = 2000000000;
+        //$fields['oncal'] = 0;
     }
     if (isset($_POST['hidetitle'])) {
         $_POST['title']='##hidden##';
     }
     if (isset($_POST['isplaylist'])) {
-        $isplaylist = 1;
+        $fields['isplaylist'] = 1;
     } else {
-        $isplaylist = 0;
+        //$fields['isplaylist'] = 0;
     }
-    $_POST['title'] = \Sanitize::stripHtmlTags($_POST['title']);
-    $_POST['summary'] = \Sanitize::incomingHtml($_POST['summary']);
+    if (isset($_POST['title'])) {
+        $fields['title'] = \Sanitize::stripHtmlTags($_POST['title']);
+    }
+    if (isset($_POST['name'])) {
+        $fields['name'] = \Sanitize::stripHtmlTags($_POST['name']);
+    }
+    if (isset($_POST['summary'])) {
+        $fields['summary'] = \Sanitize::incomingHtml($_POST['summary']);
+    }
+    if (isset($_POST['description'])) {
+        $fields['description'] = \Sanitize::incomingHtml($_POST['description']);
+    }
     $outcomes = array();
     if (isset($_POST['outcomes'])) {
         foreach ($_POST['outcomes'] as $o) {
@@ -95,55 +96,41 @@ if ($_POST['title']!= null || $_POST['summary']!=null || $_POST['sdate']!=null) 
             }
         }
     }
-    $outcomes = implode(',',$outcomes);
-    $fields = [
-        'title' => $_POST['title'],
-        'summary' => $_POST['summary'],
-        'startdate' => $startdate,
-        'enddate' => $enddate,
-        'avail' => \Sanitize::onlyInt($_POST['avail']),
-    ];
-    if (isset($desmosid)) {  //already have id; update
-        $desmos->updateItem($desmosid, $fields);
+    $fields['outcomes'] = implode(',', $outcomes);
+    if (isset($itemid)) {  //already have id; update
+        $item->updateItem($itemid, $fields);
     } else { //add new
         $fields['courseid'] = $cid;
-        $courseitems = new CourseItems($cid, $block, $totb);
-        $desmosid  = $desmos->addItem($fields, $courseitems);
+        $item = new $itemObject($cid, $block, $totb);
+        $itemid  = $item->addItem($fields);
     }
-}
-if ($_POST['submitbtn']=='Submit') {
     header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".\Sanitize::courseId($_GET['cid']) ."&r=" .\Sanitize::randomQueryStringParam());
     exit;
 }
-if (isset($desmosid)) {
-    $line = $desmos->getItem($desmosid);
-    if ($line['title']=='##hidden##') {
+if (isset($itemid)) {
+    $item->getItem($itemid);
+    if ($item->name=='##hidden##' || $item->title=='##hidden##') {
         $hidetitle = true;
-        $line['title']='';
+        $item->name='';
+        $item->title='';
     }
-    $startdate = $line['startdate'];
-    $enddate = $line['enddate'];
-    if ($line['avail']==2 && $startdate>0) {
+    if ($item->avail == 2 && $item->startdate > 0) {
         $altoncal = 1;
     } else {
         $altoncal = 0;
     }
-    if ($line['outcomes']!='') {
-        $gradeoutcomes = explode(',',$line['outcomes']);
+    if ($item->outcomes != '') {
+        $gradeoutcomes = explode(',',$item->outcomes);
     } else {
         $gradeoutcomes = array();
     }
     $savetitle = _("Save Changes");
 } else {
     //set defaults
-    $line['title'] = "";
-    $line['summary'] = "";
-    $line['avail'] = 1;
-    $line['oncal'] = 0;
-    $line['caltag'] = '!';
+    $item->avail = 1;
+    $item->startdate = time();
+    $item->enddate = time() + 7*24*60*60;
     $altoncal = 0;
-    $startdate = time();
-    $enddate = time() + 7*24*60*60;
     $hidetitle = false;
     $gradeoutcomes = array();
     $savetitle = _("Create Item");
@@ -156,21 +143,21 @@ $hr = floor($coursedefstime/60)%12;
 $min = $coursedefstime%60;
 $am = ($coursedefstime<12*60)?'am':'pm';
 $defstime = (($hr==0)?12:$hr).':'.(($min<10)?'0':'').$min.' '.$am;
-if ($startdate!=0) {
-    $sdate = tzdate("m/d/Y",$startdate);
-    $stime = tzdate("g:i a",$startdate);
+if ($item->startdate!=0) {
+    $sdate = tzdate("m/d/Y",$item->startdate);
+    $stime = tzdate("g:i a",$item->startdate);
 } else {
     $sdate = tzdate("m/d/Y",time());
     $stime = $defstime; //tzdate("g:i a",time());
 }
-if ($enddate!=2000000000) {
-    $edate = tzdate("m/d/Y",$enddate);
-    $etime = tzdate("g:i a",$enddate);
+if ($item->enddate!=2000000000) {
+    $edate = tzdate("m/d/Y",$item->enddate);
+    $etime = tzdate("g:i a",$item->enddate);
 } else {
     $edate = tzdate("m/d/Y",time()+7*24*60*60);
     $etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 }
-if (!isset($desmosid)) {
+if (!isset($itemid)) {
     $stime = $defstime;
     $etime = $deftime;
 }
@@ -204,8 +191,25 @@ function flattenarr($ar) {
     }
 }
 flattenarr($outcomearr);
-$page_formActionTag .= (isset($desmosid)) ? "&id=" . $desmosid : "";
+
+$page_actionArray = array('type' => $type, 'block' => $block, 'cid' => $cid);
+$page_actionArray['tb'] = $totb;
+if (isset($itemid)) {
+    $page_actionArray['id'] = $itemid;
+}
+$page_formActionTag = "itemadd.php?" . \Sanitize::generateQueryStringFromMap(
+        $page_actionArray
+    );
+
+$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">".\Sanitize::encodeStringForDisplay($coursename)."</a> ";
+if (isset($_GET['id'])) {  //already have id; update
+    $curBreadcrumb .= "&gt; Modify " . $item->display_name . "\n";
+    $pagetitle = "Modify " . $item->display_name;
+} else {
+    $curBreadcrumb .= "&gt; Add " . $item->display_name . "\n";
+    $pagetitle = "Add " . $item->display_name;
+}
 /******* begin html output ********/
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
-$body = __DIR__ . "/views/edit.php";
+$body = __DIR__ . "/../" . $item->typename . "/views/edit.php";
 require __DIR__ . "/views/layout.php";

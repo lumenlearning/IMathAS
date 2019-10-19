@@ -3,30 +3,30 @@
 
 <form enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
     Title: <br />
-    <input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$line['title']);?>" required /><br />
+    <input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$item->title);?>" required /><br />
     <BR class=form>
 
     Summary: (shows on course page) <br />
-    <input type=text size=60 id=summary name=summary value="<?php echo \Sanitize::encodeStringForDisplay($line['summary'], true);?>" /><br />
+    <input type=text size=60 id=summary name=summary value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" /><br />
     <BR class=form>
 
     <div>
         <span class=form>Show:</span>
         <span class=formright>
-            <input type=radio name="avail" value="0" <?php writeHtmlChecked($line['avail'],0);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideUp(100);"/>Hide<br/>
-            <input type=radio name="avail" value="1" <?php writeHtmlChecked($line['avail'],1);?> onclick="$('#datediv').slideDown(100);$('#altcaldiv').slideUp(100);"/>Show by Dates<br/>
-            <input type=radio name="avail" value="2" <?php writeHtmlChecked($line['avail'],2);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideDown(100);"/>Show Always<br/>
+            <input type=radio name="avail" value="0" <?php writeHtmlChecked($item->avail,0);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideUp(100);"/>Hide<br/>
+            <input type=radio name="avail" value="1" <?php writeHtmlChecked($item->avail,1);?> onclick="$('#datediv').slideDown(100);$('#altcaldiv').slideUp(100);"/>Show by Dates<br/>
+            <input type=radio name="avail" value="2" <?php writeHtmlChecked($item->avail,2);?> onclick="$('#datediv').slideUp(100);$('#altcaldiv').slideDown(100);"/>Show Always<br/>
         </span>
         <br class="form"/>
         <!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
-        <div id="datediv" style="display:<?php echo ($line['avail']==1)?"block":"none"; ?>">
+        <div id="datediv" style="display:<?php echo ($item->avail ==1)?"block":"none"; ?>">
             <!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
             <span class=form>Start Date:</span>
             <span class=formright>
-        <input type=radio name="sdatetype" value="0" <?php writeHtmlChecked($startdate,'0',0) ?>/>
+        <input type=radio name="sdatetype" value="0" <?php writeHtmlChecked($item->startdate,'0',0) ?>/>
                 <!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
          Always available until End Date<br/>
-        <input type=radio name="sdatetype" value="sdate" <?php writeHtmlChecked($startdate,'0',1) ?>/>
+        <input type=radio name="sdatetype" value="sdate" <?php writeHtmlChecked($item->startdate,'0',1) ?>/>
         <input type=text size=10 name=sdate value="<?php echo $sdate;?>">
         <a href="#" onClick="displayDatePicker('sdate', this); return false">
         <img src="../../img/cal.gif" alt="Calendar"/></a>
@@ -35,10 +35,10 @@
             <!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
             <span class=form>End Date:</span>
             <span class=formright>
-        <input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($enddate,'2000000000',0) ?>/>
+        <input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($item->enddate,'2000000000',0) ?>/>
                 <!-- ############################### OHM SPECIFIC CHANGES ########################################### -->
         Always available after Start Date<br/>
-        <input type=radio name="edatetype" value="edate" <?php writeHtmlChecked($enddate,'2000000000',1) ?>/>
+        <input type=radio name="edatetype" value="edate" <?php writeHtmlChecked($item->enddate,'2000000000',1) ?>/>
         <input type=text size=10 name=edate value="<?php echo $edate;?>">
         <a href="#" onClick="displayDatePicker('edate', this, 'sdate', 'start date'); return false">
         <img src="../../img/cal.gif" alt="Calendar"/></a>

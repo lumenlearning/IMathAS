@@ -1795,9 +1795,10 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   // #### Begin OHM-specific code #####################################################
 		   // #### Begin OHM-specific code #####################################################
 		   } else if ($line['itemtype']=="DesmosInteractive") {
-			   if ($ispublic) { continue;}
-			   $desmos = new \Desmos\Models\DesmosInteractive($cid);
-			   echo $desmos->getCourseItem($line, $typeid, $items[$i], $parent, $now, 'teacher', $viewall, $canedit);
+		   	   if ($ispublic) { continue;echo "continue";}
+			   $desmos[$line['itemid']] = new \Desmos\Models\DesmosItem($cid);
+			   $desmos[$line['itemid']]->getItem($line['typeid']);
+			   echo $desmos[$line['itemid']]->getCourseItem($line['itemid'], $parent, $now, 'teacher', $viewall, $canedit);
 			   // #### End OHM-specific code #####################################################
 			   // #### End OHM-specific code #####################################################
 			   // #### End OHM-specific code #####################################################
@@ -2036,9 +2037,14 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   // #### Begin OHM-specific code #####################################################
 		   $stm = $DBH->prepare("SELECT id,title,startdate,enddate,avail FROM desmos_interactives WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
-		   while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			   $id = array_shift($row);
-			   $iteminfo['DesmosInteractive'][$id] = $row;
+		   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			   $iteminfo['DesmosInteractive'][$row['id']] = new \Desmos\Models\DesmosItem($cid);
+			   $iteminfo['DesmosInteractive'][$row['id']]
+				   ->setId($row['id'])
+				   ->setName($row['title'])
+				   ->setStartDate($row['startdate'])
+				   ->setEndDate($row['enddate'])
+			       ->setAvail($row['avail']);
 		   }
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################
@@ -2451,9 +2457,9 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   // #### Begin OHM-specific code #####################################################
 		   } else if ($itemtypes[$items[$i]][0] == 'DesmosInteractive') {
 			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
-			   list($line['name'],$line['startdate'],$line['enddate'],$line['avail']) = $iteminfo['DesmosInteractive'][$typeid];
-			   $desmos = new \Desmos\Models\DesmosInteractive($cid);
-			   echo $desmos->getCourseItem($line, $typeid, $items[$i], $parent, $now, 'quick', $viewall, $canedit, $showlinks, $showdates, $duedates);
+			   if ($iteminfo['DesmosInteractive'][$typeid]) {
+				   echo $iteminfo['DesmosInteractive'][$typeid]->getCourseItem($items[$i], $parent, $now, 'quick', $viewall, $canedit, $showlinks, $showdates, $duedates);
+			   }
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################

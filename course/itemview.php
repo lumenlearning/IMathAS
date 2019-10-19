@@ -1,15 +1,16 @@
 <?php
-//OHM:  View Desmos page
-//(c) 2019 Alena Holligan
-namespace Desmos;
-use Desmos\Models\DesmosInteractive;
+//iMathAS: View Item Page
+//2019 Alena Holligan
+
 /*** master php includes *******/
 require("../init.php");
 require("../includes/htmlutil.php");
-/*** pre-html data manipulation, including function code *******/
+/*** pre-html data manipulation *******/
 //set some page specific variables and counters
-$cid = \Sanitize::onlyInt($_GET['cid']);
+$cid = \Sanitize::courseId($_GET['cid']);
 $id = \Sanitize::onlyInt($_GET['id']);
+$type = \Sanitize::encodeStringForDisplay($_GET['type']);
+
 if (isset($_GET['framed'])) {
     $flexwidth = true;
     $shownav = false;
@@ -31,20 +32,29 @@ if ($id==0) {
     exit;
 }
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
-$desmos = new DesmosInteractive($cid);
-$row = $desmos->getItem($id);
+$itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
+$item = new $itemObject($cid);
+$item->getItem($id);
 $now = time();
-if (!isset($teacherid) && ($row['avail']==0 || ($row['avail']==1 && ($now<$row['startdate'] || $now>$row['enddate'])))) {
-    $body = "This Desmos Interactive is not currently available for viewing";
+if (
+    !isset($teacherid) && (
+        $item->getAvail()==0 || (
+            $item->getAvail()==1 && (
+                $now < $item->getStartDate() || $now > $item->getEnddate()
+            )
+        )
+    )
+) {
+    $body = "This " . $item->display_name . " is not currently available for viewing";
     require __DIR__ . "/views/layout.php";
     exit;
 }
-$pagetitle = $row['title'];
+$pagetitle = $item->name;
 $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
     . \Sanitize::encodeStringForDisplay($coursename)."</a>"
-    . " &gt; View Desmos Interactive";
+    . " &gt; " . $item->display_name;
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/viewwiki.js?v=051710"></script>';
-$body = __DIR__ . "/views/view.php";
+$body = __DIR__ . "/../" . $item->typename . "/views/view.php";
 require __DIR__ . "/views/layout.php";

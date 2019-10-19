@@ -5,5 +5,5 @@ if ($shownav) {
 ?>
 <div id="headerviewwiki" class="pagetitle"><h1><?php echo $pagetitle ?></h1></div>
 <div class=itemsum>
-    <?php echo $row['summary']; ?>
+    <?php echo $item->summary; ?>
 </div>

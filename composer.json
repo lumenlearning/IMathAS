@@ -7,8 +7,7 @@
         "monolog/monolog": "1.23.0",
         "illuminate/database": "5.4.36",
         "ramsey/uuid": "3.7.3",
-        "tuupola/slim-jwt-auth": "^2.4.0",
-        "twig/twig": "^2.12"
+        "tuupola/slim-jwt-auth": "^2.4.0"
     },
     "require-dev": {
         "robmorgan/phinx": "^0.9.2",
@@ -22,6 +21,7 @@
     "autoload": {
         "psr-4": {
             "\\": "includes/",
+            "Course\\Includes\\": "course/includes/",
             "OHM\\": "ohm/",
             "OHM\\Admin\\": "admin/",
             "OHM\\Models\\": "ohm/models/",
@@ -39,6 +39,8 @@
         "phpunit/phpunit": "^5.7",
         "psr-4": {
             "Tests\\": "tests/",
+            "\\": "includes/",
+            "Course\\Includes\\": "course/includes/",
             "OHM\\Tests\\Api\\": "ohm/tests/api/",
             "OHM\\Tests\\Functional\\": "ohm/tests/functional/",
             "OHM\\Tests\\Unit\\": "ohm/tests/unit/",
@@ -64,6 +66,6 @@
         "coverage-ohm": "codecept run --coverage --coverage-html",
         "migrate-ohm": "phinx migrate",
         "seed-ohm": "phinx seed:run",
-        "php-cs-fixer": "php-cs-fixer --rules=@PSR12"
+        "php-cs-fixer": "php-cs-fixer --rules=@PSR12 --"
     }
 }
