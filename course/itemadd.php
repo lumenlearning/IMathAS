@@ -19,9 +19,14 @@ if (!(isset($_GET['cid']))) {
 $cid = \Sanitize::courseId($_GET['cid']);
 $block = \Sanitize::encodeStringForDisplay($_GET['block']);
 $type = \Sanitize::encodeStringForDisplay($_GET['type']);
+if (isset($_GET['tb'])) {
+    $totb = \Sanitize::encodeStringForDisplay($_GET['tb']);
+} else {
+    $totb = 'b';
+}
 
 $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
-$item = new $itemObject($cid, $block);
+$item = new $itemObject($cid, $block, $totb);
 if (isset($_GET['id'])) {
     $itemid = \Sanitize::onlyInt($_GET['id']);
     if (!$item->getItem($itemid)) {
@@ -32,12 +37,7 @@ if (isset($_GET['id'])) {
 }
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters
-if (isset($_GET['tb'])) {
-    $totb = \Sanitize::encodeStringForDisplay($_GET['tb']);
-} else {
-    $totb = 'b';
-}
-$useeditor = "desmos";
+$useeditor = $type;
 if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been submitted
     if ($_POST['avail']==1) {
         if ($_POST['sdatetype']=='0') {
