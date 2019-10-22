@@ -28,8 +28,8 @@ if (isset($_GET['tb'])) {
 $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid, $block, $totb);
 if (isset($_GET['id'])) {
-    $itemid = \Sanitize::onlyInt($_GET['id']);
-    if (!$item->getItem($itemid)) {
+    $typeid = \Sanitize::onlyInt($_GET['id']);
+    if (!$item->getItem($typeid)) {
         $body = "Invalid ID";
         require __DIR__ . "/views/layout.php";
         exit;
@@ -97,18 +97,18 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
         }
     }
     $fields['outcomes'] = implode(',', $outcomes);
-    if (isset($itemid)) {  //already have id; update
-        $item->updateItem($itemid, $fields);
+    if (isset($typeid)) {  //already have id; update
+        $item->updateItem($typeid, $fields);
     } else { //add new
         $fields['courseid'] = $cid;
         $item = new $itemObject($cid, $block, $totb);
-        $itemid  = $item->addItem($fields);
+        $item->addItem($fields);
     }
-    header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".\Sanitize::courseId($_GET['cid']) ."&r=" .\Sanitize::randomQueryStringParam());
+    header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$item->courseid&r=" .\Sanitize::randomQueryStringParam());
     exit;
 }
-if (isset($itemid)) {
-    $item->getItem($itemid);
+if (isset($typeid)) {
+    $item->getItem($typeid);
     if ($item->name=='##hidden##' || $item->title=='##hidden##') {
         $hidetitle = true;
         $item->name='';
@@ -127,9 +127,9 @@ if (isset($itemid)) {
     $savetitle = _("Save Changes");
 } else {
     //set defaults
-    $item->avail = 1;
-    $item->startdate = time();
-    $item->enddate = time() + 7*24*60*60;
+    $item->setAvail(1);
+    $item->setStartDate(time());
+    $item->setEndDate(time() + 7*24*60*60);
     $altoncal = 0;
     $hidetitle = false;
     $gradeoutcomes = array();
@@ -157,7 +157,7 @@ if ($item->enddate!=2000000000) {
     $edate = tzdate("m/d/Y",time()+7*24*60*60);
     $etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 }
-if (!isset($itemid)) {
+if (!isset($typeid)) {
     $stime = $defstime;
     $etime = $deftime;
 }
@@ -194,8 +194,8 @@ flattenarr($outcomearr);
 
 $page_actionArray = array('type' => $type, 'block' => $block, 'cid' => $cid);
 $page_actionArray['tb'] = $totb;
-if (isset($itemid)) {
-    $page_actionArray['id'] = $itemid;
+if (isset($typeid)) {
+    $page_actionArray['id'] = $typeid;
 }
 $page_formActionTag = "itemadd.php?" . \Sanitize::generateQueryStringFromMap(
         $page_actionArray

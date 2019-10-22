@@ -1797,8 +1797,8 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   } else if ($line['itemtype']=="DesmosInteractive") {
 		   	   if ($ispublic) { continue;echo "continue";}
 			   $desmos[$line['itemid']] = new \Desmos\Models\DesmosItem($cid);
-			   $desmos[$line['itemid']]->getItem($line['typeid']);
-			   echo $desmos[$line['itemid']]->getCourseItem($line['itemid'], $parent, $now, 'teacher', $viewall, $canedit);
+			   $desmos[$line['itemid']]->findItem($line['typeid']);
+			   echo $desmos[$line['itemid']]->courseView($now, $viewall, $canedit);
 			   // #### End OHM-specific code #####################################################
 			   // #### End OHM-specific code #####################################################
 			   // #### End OHM-specific code #####################################################
@@ -2040,11 +2040,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			   $iteminfo['DesmosInteractive'][$row['id']] = new \Desmos\Models\DesmosItem($cid);
 			   $iteminfo['DesmosInteractive'][$row['id']]
-				   ->setId($row['id'])
-				   ->setName($row['title'])
-				   ->setStartDate($row['startdate'])
-				   ->setEndDate($row['enddate'])
-			       ->setAvail($row['avail']);
+				   ->setItem($row);
 		   }
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################
@@ -2458,7 +2454,8 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   } else if ($itemtypes[$items[$i]][0] == 'DesmosInteractive') {
 			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
 			   if ($iteminfo['DesmosInteractive'][$typeid]) {
-				   echo $iteminfo['DesmosInteractive'][$typeid]->getCourseItem($items[$i], $parent, $now, 'quick', $viewall, $canedit, $showlinks, $showdates, $duedates);
+				   echo $iteminfo['DesmosInteractive'][$typeid]->courseQuickView($now, $viewall, $showlinks, $showdates, $duedates);
+				   //getCourseItem($items[$i], $parent, $now, 'quick', $viewall, $canedit, $showlinks, $showdates, $duedates);
 			   }
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################

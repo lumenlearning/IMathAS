@@ -49,6 +49,12 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	$stm->execute(array(':id'=>$itemid));
 	if ($stm->rowCount()==0) {return false;}
 	list($itemtype,$typeid) = $stm->fetch(PDO::FETCH_NUM);
+
+	if ($itemtype == "DesmosInteractive") {
+		$item = new \Desmos\Models\DesmosItem($cid);
+		$item->copyItem($typeid, $_POST['append'], $sethidden);
+		return $item->itemid;
+	} else
 	if ($itemtype == "InlineText") {
 		//$query = "INSERT INTO imas_inlinetext (courseid,title,text,startdate,enddate) ";
 		//$query .= "SELECT '$cid',title,text,startdate,enddate FROM imas_inlinetext WHERE id='$typeid'";
@@ -606,6 +612,19 @@ function getiteminfo($itemid) {
 		case ($itemtype==="Drill"):
 			$stm = $DBH->prepare("SELECT name,summary FROM imas_drillassess WHERE id=:id");
 			break;
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		case ($itemtype==="DesmosInteractive"):
+			$stm = $DBH->prepare("SELECT title,summary FROM desmos_interactives WHERE id=:id");
+			break;
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 	}
 	$stm->execute(array(':id'=>$typeid));
 	list($name, $summary) = $stm->fetch(PDO::FETCH_NUM);
