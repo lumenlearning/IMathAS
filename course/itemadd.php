@@ -88,6 +88,16 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
     if (isset($_POST['description'])) {
         $fields['description'] = \Sanitize::incomingHtml($_POST['description']);
     }
+    if (isset($_POST['libs'])) {
+        $fields['libs'] = trim(
+            str_replace(
+                ',,',',', preg_replace(
+                    '/[^0-9,]/','', $_POST['libs']
+                )
+            ),
+            ','
+        );
+    }
     $outcomes = array();
     if (isset($_POST['outcomes'])) {
         foreach ($_POST['outcomes'] as $o) {
@@ -108,7 +118,6 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
     exit;
 }
 if (isset($typeid)) {
-    $item->findItem($typeid);
     if ($item->name=='##hidden##' || $item->title=='##hidden##') {
         $hidetitle = true;
         $item->name='';
@@ -210,6 +219,7 @@ if (isset($_GET['id'])) {  //already have id; update
     $pagetitle = "Add " . $item->display_name;
 }
 /******* begin html output ********/
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
+$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
+$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/edit.php";
 require __DIR__ . "/views/layout.php";

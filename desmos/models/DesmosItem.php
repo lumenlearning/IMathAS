@@ -21,10 +21,11 @@ class DesmosItem extends CourseItem
     protected $miniicon = "../ohm/img/desmos_tiny.php";
     protected $itemicon = "../ohm/img/desmos.php";
     protected $valid_fields = [
-        'title','summary','startdate','enddate','avail','outcomes','courseid'
+        'title','summary','startdate','enddate','avail','outcomes','libs','courseid'
     ];
     protected $statusletter = "E";
     protected $showstats = false;
+    protected $lnames = array();
 
     /**
      * Update course item data
@@ -127,6 +128,22 @@ class DesmosItem extends CourseItem
         $item = $stm->fetch(PDO::FETCH_ASSOC);
 
         $this->setItem($item);
+        $this->libraryNames();
+        return $this;
+    }
+
+    public function libraryNames()
+    {
+        if (empty($this->libs)) {
+            return $this;
+        }
+        $query = "SELECT name FROM imas_libraries WHERE id IN ($this->libs)";
+        $stm = $this->dbh->prepare($query);
+        $stm->execute();
+        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+            $this->lnames[] = $row['name'];
+        }
+        $this->lnames = array_unique($this->lnames);
         return $this;
     }
 
