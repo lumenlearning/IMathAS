@@ -34,7 +34,7 @@ if ($_POST['remove']=="really") {
     header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".$cid . "&r=" . \Sanitize::randomQueryStringParam());
     exit;
 }
-$item->getItem($typeid);
+$item->findItem($typeid);
 
 /******* begin html output ********/
 $body = __DIR__ . "/views/itemdelete.php";

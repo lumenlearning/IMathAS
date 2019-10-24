@@ -29,7 +29,7 @@ $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid, $block, $totb);
 if (isset($_GET['id'])) {
     $typeid = \Sanitize::onlyInt($_GET['id']);
-    if (!$item->getItem($typeid)) {
+    if (!$item->findItem($typeid)) {
         $body = "Invalid ID";
         require __DIR__ . "/views/layout.php";
         exit;
@@ -108,7 +108,7 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
     exit;
 }
 if (isset($typeid)) {
-    $item->getItem($typeid);
+    $item->findItem($typeid);
     if ($item->name=='##hidden##' || $item->title=='##hidden##') {
         $hidetitle = true;
         $item->name='';

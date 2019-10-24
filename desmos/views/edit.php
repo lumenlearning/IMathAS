@@ -45,6 +45,10 @@
         at <input type=text size=10 name=etime value="<?php echo $etime;?>">
     </span><BR class=form>
         </div>
+        In Libraries:
+        <span id="libnames"><?php echo Sanitize::encodeStringForDisplay($lnames) ?></span>
+        <input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($searchlibs) ?>">
+        <input type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
         <?php
         if (count($outcomes)>0) {
             echo '<span class="form">Associate Outcomes:</span></span class="formright">';

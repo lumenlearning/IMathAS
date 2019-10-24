@@ -34,13 +34,13 @@ if ($id==0) {
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid);
-$item->getItem($id);
+$item->findItem($id);
 $now = time();
 if (
     !isset($teacherid) && (
-        $item->getAvail()==0 || (
-            $item->getAvail()==1 && (
-                $now < $item->getStartDate() || $now > $item->getEnddate()
+        $item->avail==0 || (
+            $item->avail==1 && (
+                $now < $item->startdate || $now > $item->enddate
             )
         )
     )
