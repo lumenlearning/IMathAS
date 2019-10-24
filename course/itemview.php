@@ -55,6 +55,5 @@ $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid
     . " &gt; " . $item->display_name;
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/
-$placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/viewwiki.js?v=051710"></script>';
 $body = __DIR__ . "/../" . $item->typename . "/views/view.php";
 require __DIR__ . "/views/layout.php";
