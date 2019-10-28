@@ -53,6 +53,11 @@ $pagetitle = $item->name;
 $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
     . \Sanitize::encodeStringForDisplay($coursename)."</a>"
     . " &gt; " . $item->display_name;
+// log access
+$isRealStudent = (isset($studentid) && !isset($sessiondata['stuview']));
+//if ($isRealStudent) {
+    $item->track('view');
+//}
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/
 $body = __DIR__ . "/../" . $item->typename . "/views/view.php";

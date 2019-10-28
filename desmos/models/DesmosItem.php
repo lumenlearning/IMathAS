@@ -4,6 +4,7 @@
  */
 
 namespace Desmos\Models;
+use Course\Includes\ContentTracker;
 use Course\Includes\CourseItem;
 use PDO;
 
@@ -24,8 +25,10 @@ class DesmosItem extends CourseItem
         'title','summary','startdate','enddate','avail','outcomes','libs','courseid'
     ];
     protected $statusletter = "E";
-    protected $showstats = false;
+    protected $showstats = true;
     protected $lnames = array();
+    protected $trackview = true;
+    protected $trackedit = true;
 
     /**
      * Update course item data
@@ -35,7 +38,7 @@ class DesmosItem extends CourseItem
      *
      * @return int
      */
-    public function updateItem(int $typeid, array $fields)
+    public function updateItemType(int $typeid, array $fields)
     {
         $query = "UPDATE desmos_interactives SET "
             . implode('=?, ', array_keys($fields))
@@ -49,36 +52,6 @@ class DesmosItem extends CourseItem
         $stm->bindValue($key, $typeid);
         $stm->execute();
         return $stm->rowCount();
-    }
-
-    /**
-     * Duplicate Item
-     *
-     * @param int    $typeid    desmos_interactive.id
-     * @param string $append    add to title
-     * @param bool   $sethidden set avail
-     *
-     * @return $this|CourseItem
-     */
-    public function copyItem(int $typeid, $append = " (Copy)", $sethidden = false)
-    {
-        $field_values = $this->valid_fields;
-        if ($sethidden) {
-            $key = array_search("avail", $field_values);
-            $field_values[$key] = 0;
-        }
-        $key = array_search("title", $field_values);
-        $field_values[$key] = "CONCAT($field_values[$key], '$append')";
-        $query = "INSERT INTO desmos_interactives ("
-            . implode(', ', $this->valid_fields) . ") "
-            . " SELECT " . implode(', ', $field_values)
-            . " FROM desmos_interactives"
-            . " WHERE id=:id";
-        $stm = $this->dbh->prepare($query);
-        $stm->bindValue(":id", $typeid);
-        $stm->execute();
-        $newtypeid = $this->dbh->lastInsertId();
-        return $this->addCourseItems($newtypeid);
     }
 
     /**

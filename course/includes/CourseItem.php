@@ -59,6 +59,18 @@ abstract class CourseItem
         if (isset($GLOBALS['CFG']['CPS']['miniicons'])) {
             $this->miniicon = $GLOBALS['CFG']['CPS']['miniicons'][$this->typename];
         }
+        //if ($this->trackview === true || $this->trackedit === true)
+    }
+
+    public function track($track_type, $info = '')
+    {
+        if ($track_type === 'view') {
+            if ($this->trackview === true) {
+                ContentTracker::addTracking($this, $this->typename . 'view', $info);
+            }
+        } else if ($this->trackedit === true) {
+            ContentTracker::addTracking($this, $this->typename . $track_type, $info);
+        }
     }
 
     /**
@@ -76,9 +88,28 @@ abstract class CourseItem
             return false;
         }
         $newtypeid = $this->insertItem($fields);
-        $this->setItem($fields);
-        $this->addCourseItems($newtypeid);
-        $this->setItemOrder();
+        if ($newtypeid) {
+            $fields['id'] = $newtypeid;
+            $this->setItem($fields);
+            $this->addCourseItems($newtypeid);
+            $this->track('add');
+            $this->setItemOrder();
+        }
+        return $this;
+    }
+    /**
+     * Update course item data
+     *
+     * @param int   $typeid original desmos_interactives.id
+     * @param array $fields fields to update
+     *
+     * @return CourseItem $this
+     */
+    public function updateItem(int $typeid, array $fields)
+    {
+        if ( $this->updateItemType($typeid, $fields) ) {
+            $this->track('edit');
+        }
         return $this;
     }
 
@@ -90,7 +121,7 @@ abstract class CourseItem
      * @param string $append    Individual Item Types
      * @param bool   $sethidden Set avail=0
      *
-     * @return CourseItem
+     * @return CourseItem $this
      */
     public function copyItem(int $typeid, $append = " (Copy)", $sethidden = false)
     {
@@ -102,12 +133,17 @@ abstract class CourseItem
         foreach ($this->valid_fields as $key) {
             $fields[$key] = $this->$key;
             if ($key == 'title' || $key == 'name') {
-                $fields[$key] = "CONCAT($this->$key, '$append')";
+                $fields[$key] = $this->$key.$append;
             }
         }
         $newtypeid = $this->insertItem($fields);
-        $this->setItem($fields);
-        return $this->addCourseItems($newtypeid);
+        if ($newtypeid) {
+            $fields['id'] = $newtypeid;
+            $this->setItem($fields);
+            $this->addCourseItems($newtypeid);
+            $this->track('copy', $typeid);
+        }
+        return $this;
     }
 
     /**
@@ -115,7 +151,7 @@ abstract class CourseItem
      *
      * @param int $typeid linked to the items table
      *
-     * @return CourseItem
+     * @return CourseItem $this
      */
     public function addCourseItems($typeid)
     {

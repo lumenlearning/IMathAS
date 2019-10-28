@@ -109,10 +109,12 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
     $fields['outcomes'] = implode(',', $outcomes);
     if (isset($typeid)) {  //already have id; update
         $item->updateItem($typeid, $fields);
+        $track_type = $item->typename.'edit';
     } else { //add new
         $fields['courseid'] = $cid;
         $item = new $itemObject($cid, $block, $totb);
         $item->addItem($fields);
+        $track_type = $item->typename.'add';
     }
     header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$item->courseid&r=" .\Sanitize::randomQueryStringParam());
     exit;

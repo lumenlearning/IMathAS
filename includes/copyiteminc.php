@@ -50,11 +50,21 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	if ($stm->rowCount()==0) {return false;}
 	list($itemtype,$typeid) = $stm->fetch(PDO::FETCH_NUM);
 
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
 	if ($itemtype == "DesmosInteractive") {
 		$item = new \Desmos\Models\DesmosItem($cid);
 		$item->copyItem($typeid, $_POST['append'], $sethidden);
 		return $item->itemid;
 	} else
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	if ($itemtype == "InlineText") {
 		//$query = "INSERT INTO imas_inlinetext (courseid,title,text,startdate,enddate) ";
 		//$query .= "SELECT '$cid',title,text,startdate,enddate FROM imas_inlinetext WHERE id='$typeid'";
