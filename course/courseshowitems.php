@@ -1881,6 +1881,23 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 			$html .= "<img alt=\"calendar\" class=\"mida\" src=\"$imasroot/img/{$CFG['CPS']['miniicons']['calendar']}\"/> ";
 		}
 		$html .= _('Calendar') . "</a>";
+
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		$html .= "<a href=\"itemadd.php?type=desmos&block=$blkUrlParam&tb=$tbUrlParam&cid=$cid\">";
+		if (isset($CFG['CPS']['miniicons']['desmos'])) {
+			$html .= "<img alt=\"calendar\" class=\"mida\" src=\"$imasroot/{$CFG['CPS']['miniicons']['desmos']}\"/> ";
+		}
+		$html .= _('Add Desmos') . "</a>";
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+
 		$html .= '</span>';
 		$html .= '</div>';
 
@@ -1906,6 +1923,17 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		$html .= "<option value=\"drillassess\">" . _('Add Drill') . "</option>\n";
 		$html .= "<option value=\"block\">" . _('Add Block') . "</option>\n";
 		$html .= "<option value=\"calendar\">" . _('Add Calendar') . "</option>\n";
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		$html .= "<option value=\"desmos\">" . _('Add Desmos') . "</option>\n";
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 		$html .= "</select><BR>\n";
 
    	}
