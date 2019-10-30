@@ -111,6 +111,7 @@ class QuestionHtmlGenerator
         ob_start();
 
         $GLOBALS['inquestiondisplay'] = true;
+        $GLOBALS['assessver'] = 2;
 
         $doShowAnswer = $this->questionParams->getShowAnswer();
         $doShowAnswerParts = $this->questionParams->getShowAnswerParts();
@@ -131,6 +132,23 @@ class QuestionHtmlGenerator
         $quesData = $this->questionParams->getQuestionData();
         $showHints = ($this->questionParams->getShowHints()&1)==1;
         $thisq = $this->questionParams->getQuestionNumber() + 1;
+
+        if ($attemptn == 0) {
+          $GLOBALS['assess2-curq-iscorrect'] = -1;
+        } else {
+          if (count($partattemptn) == 1) {
+            $GLOBALS['assess2-curq-iscorrect'] = $scoreiscorrect[$thisq-1] ? 1 : 0;
+          } else {
+            $GLOBALS['assess2-curq-iscorrect'] = array();
+            foreach ($partattemptn as $k=>$v) {
+              if ($v==0) {
+                $GLOBALS['assess2-curq-iscorrect'][$k] = -1;
+              } else {
+                $GLOBALS['assess2-curq-iscorrect'][$k] = $scoreiscorrect[$thisq-1][$k] ? 1 : 0;
+              }
+            }
+          }
+        }
 
         if ($quesData['hasimg'] > 0) {
             // We need to "unpack" this into locally scoped variables.
