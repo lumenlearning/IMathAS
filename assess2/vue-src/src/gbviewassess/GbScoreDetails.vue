@@ -65,14 +65,12 @@
         :value = "qdata.feedback"
         @input="updateFeedback"
       ></textarea>
-      <div
+      <tinymce-input
         v-else-if="canedit"
-        rows="2"
         :id="'fb'+qn"
-        class="fbbox"
-        v-html="qdata.feedback"
-        @input="updateFeedback"
-      />
+        :value = "qdata.feedback"
+        @input = "updateFeedback"
+      ></tinymce-input>
       <div
         v-else
         v-html="qdata.feedback"
@@ -127,6 +125,7 @@ import GbAllTries from '@/gbviewassess/GbAllTries';
 import GbPenalties from '@/gbviewassess/GbPenalties';
 import Icons from '@/components/widgets/Icons';
 import MenuButton from '@/components/widgets/MenuButton';
+import TinymceInput from '@/components/TinymceInput.vue';
 
 export default {
   name: 'GbScoreDetails',
@@ -135,7 +134,8 @@ export default {
     GbAllTries,
     GbPenalties,
     MenuButton,
-    Icons
+    Icons,
+    TinymceInput
   },
   data: function () {
     return {
