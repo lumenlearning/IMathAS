@@ -53,7 +53,7 @@ $denames = array();
 if (count($lookups['de'])>0) {
 	$lookuplist = array_map('intval', array_unique($lookups['de']));
 	$query_placeholders = Sanitize::generateQueryPlaceholders($lookuplist);
-	$stm = $DBH->prepare("SELECT id,title FROM desmos_interactives WHERE id IN ($query_placeholders)");
+	$stm = $DBH->prepare("SELECT id,title FROM desmos_items WHERE id IN ($query_placeholders)");
 	$stm->execute(array_values($lookuplist));
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$denames[$row[0]] = $row[1];

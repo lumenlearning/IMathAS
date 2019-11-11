@@ -1,0 +1,38 @@
+#step_box {
+    clear: both;
+}
+.step-list {
+    float: left;
+    width: 20%;
+}
+.step-li {
+    display: block;
+    clear: left;
+    padding-left: 20px;
+    list-style: decimal inside;
+    padding: 5px;
+    background-color: #EEE;
+}
+.step-li:hover{
+    background-color: #4bb6e8;
+    cursor: pointer;
+}
+.step-li.selected {
+    background-color: #88bbdd;
+}
+.step-items {
+    float: right;
+    width: 75%;
+    min-width:610px;
+    min-height: 600px;
+    border: 1px #000 solid;
+    padding:0 10px;
+}
+.step-items textarea {
+    min-height: 600px;
+    width:99%;
+}
+h1:before {
+    padding: 0 5px;
+    content: url("<?php echo $CFG['CPS']['itemicons']['desmos']; ?>");
+}

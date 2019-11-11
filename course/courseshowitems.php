@@ -2063,7 +2063,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   // #### Begin OHM-specific code #####################################################
 		   // #### Begin OHM-specific code #####################################################
 		   // #### Begin OHM-specific code #####################################################
-		   $stm = $DBH->prepare("SELECT id,title,startdate,enddate,avail FROM desmos_interactives WHERE courseid=:courseid");
+		   $stm = $DBH->prepare("SELECT id,title,startdate,enddate,avail FROM desmos_items WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			   $iteminfo['DesmosInteractive'][$row['id']] = new \Desmos\Models\DesmosItem($cid);

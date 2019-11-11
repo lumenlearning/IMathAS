@@ -1,11 +1,14 @@
 <?php
-//iMathAs:  Add/modify course block items on course page
-//2019 Alena Holligan
+/**
+ * iMathAs:  Add/modify course block items on course page
+ *
+ * @author Alena Holligan <alena@lumenlearning.com>
+ */
 namespace Course;
 /*** master php includes *******/
-require("../init.php");
-require("../includes/htmlutil.php");
-require("../includes/parsedatetime.php");
+require "../init.php";
+require "../includes/htmlutil.php";
+require"../includes/parsedatetime.php";
 if (!(isset($teacherid))) { // loaded by a NON-teacher
     $body = "You need to log in as a teacher to access this page";
     require __DIR__ . "/views/layout.php";
@@ -38,17 +41,18 @@ if (isset($_GET['id'])) {
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters
 $useeditor = $type;
-if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been submitted
+//if the form has been submitted
+if ($_POST['name']!= null || $_POST['title']!=null) {
     if ($_POST['avail']==1) {
         if ($_POST['sdatetype']=='0') {
             $fields['startdate'] = 0;
         } else {
-            $fields['startdate'] = parsedatetime($_POST['sdate'],$_POST['stime'],0);
+            $fields['startdate']=parsedatetime($_POST['sdate'], $_POST['stime'], 0);
         }
         if ($_POST['edatetype']=='2000000000') {
             $fields['enddate'] = 2000000000;
         } else {
-            $fields['enddate'] = parsedatetime($_POST['edate'],$_POST['etime'],2000000000);
+            $fields['enddate']=parsedatetime($_POST['edate'], $_POST['etime'], 2000000000);
         }
         if ($_POST['oncal']) {
             $fields['oncal'] = \Sanitize::onlyInt($_POST['oncal']);
@@ -58,12 +62,12 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
             $fields['startdate'] = 0;
             //$fields['oncal'] = 0;
         } else {
-            $fields['startdate'] = parsedatetime($_POST['cdate'],"12:00 pm",0);
+            $fields['startdate'] = parsedatetime($_POST['cdate'], "12:00 pm", 0);
             //$fields['oncal'] = ($fields['startdate']>0)?1:0;
             //$fields['caltag'] = \Sanitize::stripHtmlTags($_POST['altcaltag']);
         }
         $fields['enddate'] =  2000000000;
-    }else {
+    } else {
         $fields['startdate'] = 0;
         $fields['enddate'] = 2000000000;
         //$fields['oncal'] = 0;
@@ -89,10 +93,14 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
         $fields['description'] = \Sanitize::incomingHtml($_POST['description']);
     }
     if (isset($_POST['libs'])) {
-        $fields['libs'] = trim(
+        $fields['tags'] = trim(
             str_replace(
-                ',,',',', preg_replace(
-                    '/[^0-9,]/','', $_POST['libs']
+                ',,',
+                ',',
+                preg_replace(
+                    '/[^0-9,]/',
+                    '',
+                    $_POST['libs']
                 )
             ),
             ','
@@ -107,16 +115,29 @@ if ($_POST['name']!= null || $_POST['title']!=null) { //if the form has been sub
         }
     }
     $fields['outcomes'] = implode(',', $outcomes);
+    if (isset($_POST['step_title'])) {
+        foreach ($_POST['step_title'] as $key => $title) {
+            $fields['steps'][$key] = [
+                "title" => $title,
+                "text" => $_POST['step_text'][$key],
+                "id" => $_POST['step'][$key],
+            ];
+        }
+    }
     if (isset($typeid)) {  //already have id; update
         $item->updateItem($typeid, $fields);
-        $track_type = $item->typename.'edit';
+        $track_type = $item->track('edit');
     } else { //add new
         $fields['courseid'] = $cid;
         $item = new $itemObject($cid, $block, $totb);
         $item->addItem($fields);
-        $track_type = $item->typename.'add';
+        $track_type = $item->track('add');
     }
-    header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$item->courseid&r=" .\Sanitize::randomQueryStringParam());
+    header(
+        'Location: ' . $GLOBALS['basesiteurl']
+        . "/course/course.php?cid=$item->courseid&r="
+        .\Sanitize::randomQueryStringParam()
+    );
     exit;
 }
 if (isset($typeid)) {
@@ -131,7 +152,7 @@ if (isset($typeid)) {
         $altoncal = 0;
     }
     if ($item->outcomes != '') {
-        $gradeoutcomes = explode(',',$item->outcomes);
+        $gradeoutcomes = explode(',', $item->outcomes);
     } else {
         $gradeoutcomes = array();
     }
@@ -155,17 +176,17 @@ $min = $coursedefstime%60;
 $am = ($coursedefstime<12*60)?'am':'pm';
 $defstime = (($hr==0)?12:$hr).':'.(($min<10)?'0':'').$min.' '.$am;
 if ($item->startdate!=0) {
-    $sdate = tzdate("m/d/Y",$item->startdate);
-    $stime = tzdate("g:i a",$item->startdate);
+    $sdate = tzdate("m/d/Y", $item->startdate);
+    $stime = tzdate("g:i a", $item->startdate);
 } else {
-    $sdate = tzdate("m/d/Y",time());
+    $sdate = tzdate("m/d/Y", time());
     $stime = $defstime; //tzdate("g:i a",time());
 }
 if ($item->enddate!=2000000000) {
-    $edate = tzdate("m/d/Y",$item->enddate);
-    $etime = tzdate("g:i a",$item->enddate);
+    $edate = tzdate("m/d/Y", $item->enddate);
+    $etime = tzdate("g:i a", $item->enddate);
 } else {
-    $edate = tzdate("m/d/Y",time()+7*24*60*60);
+    $edate = tzdate("m/d/Y", time()+7*24*60*60);
     $etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 }
 if (!isset($typeid)) {
@@ -209,10 +230,11 @@ if (isset($typeid)) {
     $page_actionArray['id'] = $typeid;
 }
 $page_formActionTag = "itemadd.php?" . \Sanitize::generateQueryStringFromMap(
-        $page_actionArray
-    );
+    $page_actionArray
+);
 
-$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">".\Sanitize::encodeStringForDisplay($coursename)."</a> ";
+$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
+    .\Sanitize::encodeStringForDisplay($coursename)."</a> ";
 if (isset($_GET['id'])) {  //already have id; update
     $curBreadcrumb .= "&gt; Modify " . $item->display_name . "\n";
     $pagetitle = "Modify " . $item->display_name;
@@ -223,5 +245,7 @@ if (isset($_GET['id'])) {  //already have id; update
 /******* begin html output ********/
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
+$placeinhead .= "<script src=\"$imasroot/desmos/js/calculator.js\"></script>";
+$placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/edit.php";
 require __DIR__ . "/views/layout.php";

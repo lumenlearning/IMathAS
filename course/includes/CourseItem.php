@@ -100,7 +100,7 @@ abstract class CourseItem
     /**
      * Update course item data
      *
-     * @param int   $typeid original desmos_interactives.id
+     * @param int   $typeid original desmos_items.id
      * @param array $fields fields to update
      *
      * @return CourseItem $this
@@ -470,7 +470,7 @@ abstract class CourseItem
             $out .= " | <a href=\"itemadd.php?type=$this->typename&id=$this->typeid"
                 . "&block=$this->block&cid=$this->courseid\">"
                 . _('Modify') . "</a>\n";
-            $out .= " | <a href=\"itemdelete?type=$this->typename&id=$this->typeid"
+            $out .= " | <a href=\"itemdelete.php?type=$this->typename&id=$this->typeid"
                 . "&block=$this->block&cid=$this->courseid&remove=ask\">"
                 . _('Delete') . "</a>\n";
             $out .= " | <a href=\"copyoneitem.php?cid=" . $this->courseid

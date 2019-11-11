@@ -22,25 +22,28 @@ class DesmosItem extends CourseItem
     protected $miniicon = "../ohm/img/desmos_tiny.php";
     protected $itemicon = "../ohm/img/desmos.php";
     protected $valid_fields = [
-        'title','summary','startdate','enddate','avail','outcomes','libs','courseid'
+        'title','summary','startdate','enddate','avail','outcomes','tags','steps','courseid'
     ];
     protected $statusletter = "E";
     protected $showstats = true;
-    protected $lnames = array();
+    protected $tagnames = array();
     protected $trackview = true;
     protected $trackedit = true;
+    protected $steps = array();
 
     /**
      * Update course item data
      *
-     * @param int   $typeid desmos_interactives.id
+     * @param int   $typeid desmos_items.id
      * @param array $fields fields to update
      *
      * @return int
      */
     public function updateItemType(int $typeid, array $fields)
     {
-        $query = "UPDATE desmos_interactives SET "
+        $steps = $fields['steps'];
+        unset($fields['steps']);
+        $query = "UPDATE desmos_items SET "
             . implode('=?, ', array_keys($fields))
             . "=? WHERE id=?";
         $stm = $this->dbh->prepare($query);
@@ -51,11 +54,15 @@ class DesmosItem extends CourseItem
         }
         $stm->bindValue($key, $typeid);
         $stm->execute();
+        if ($steps) {
+            $this->typeid = $typeid;
+            $this->modifySteps($steps);
+        }
         return $stm->rowCount();
     }
 
     /**
-     * Insert Item into desmos_interactives
+     * Insert Item into desmos_items
      *
      * @param array $fields data to insert
      *
@@ -63,7 +70,9 @@ class DesmosItem extends CourseItem
      */
     public function insertItem(array $fields)
     {
-        $query = "INSERT INTO desmos_interactives ("
+        $steps = $fields['steps'];
+        unset($fields['steps']);
+        $query = "INSERT INTO desmos_items ("
             . implode(',', array_keys($fields)) . ") "
             . " VALUES (:" . implode(',:', array_keys($fields)) . ")";
         $stm = $this->dbh->prepare($query);
@@ -71,52 +80,64 @@ class DesmosItem extends CourseItem
             $stm->bindValue(":$key", $value);
         }
         $stm->execute();
-        return $this->dbh->lastInsertId();
+        $this->typeid = $this->dbh->lastInsertId();
+        if ($steps) {
+            $this->modifySteps($steps, $this->typeid);
+        }
+        return $this->typeid;
     }
 
     /**
-     * Delete item from desmos_interactives table
+     * Delete item from desmos_items table
      *
      * @return $this|CourseItem
      */
     public function deleteItem()
     {
-        $stm = $this->dbh->prepare("DELETE FROM desmos_interactives WHERE id=:id");
+        $stm = $this->dbh->prepare("DELETE FROM desmos_items WHERE id=:id");
         $stm->execute(array(':id'=>$this->typeid));
+        DesmosSteps::deleteSteps($this->typeid);
         return $this;
     }
 
     /**
-     * Find desmos_interactives item by id
+     * Find desmos_items item by id
      *
-     * @param int $typeid desmos_interactives.id
+     * @param int $typeid desmos_items.id
      *
-     * @return DesmosItem $this
+     * @return $this|CourseItem
      */
     public function findItem(int $typeid)
     {
-        $query = "SELECT * FROM desmos_interactives WHERE id=:id";
+        $query = "SELECT * FROM desmos_items WHERE id=:id";
         $stm = $this->dbh->prepare($query);
         $stm->execute(array(':id' => $typeid));
         $item = $stm->fetch(PDO::FETCH_ASSOC);
 
         $this->setItem($item);
-        $this->libraryNames();
+        $this->steps = DesmosSteps::findSteps($this->typeid);
+        $this->findTags();
         return $this;
     }
-
-    public function libraryNames()
+    
+    /**
+     * Find learning objectives item by id
+     * currently using imas_libraries as a hack
+     *
+     * @return $this|CourseItem
+     */
+    public function findTags()
     {
-        if (empty($this->libs)) {
+        if (empty($this->tags)) {
             return $this;
         }
-        $query = "SELECT name FROM imas_libraries WHERE id IN ($this->libs)";
+        $query = "SELECT name FROM imas_libraries WHERE id IN ($this->tags)";
         $stm = $this->dbh->prepare($query);
         $stm->execute();
         while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-            $this->lnames[] = $row['name'];
+            $this->tagnames[] = $row['name'];
         }
-        $this->lnames = array_unique($this->lnames);
+        $this->tagnames = array_unique($this->tagnames);
         return $this;
     }
 
@@ -180,5 +201,60 @@ class DesmosItem extends CourseItem
             $this->avail = $value;
         }
         return $this;
+    }
+
+
+    /**
+     * Modify Desmos Steps
+     *
+     * @param array $steps must include title
+     *
+     * @return $this|CourseItem
+     */
+    public function modifySteps(array $steps)
+    {
+        if (isset($steps[0]['title'])) {
+            //delete any steps that need to be removed
+            //before adding new steps so new steps do not get deleted
+            $item_steps = DesmosSteps::findSteps($this->typeid);
+            $stepIds = array_map(
+                function ($num) {
+                    return $num['id'];
+                },
+                $steps
+            );
+            foreach ($item_steps as $id) {
+                if (!in_array($id['id'], $stepIds)) {
+                    //?do we want to just unassociate the desmosid?
+                    DesmosSteps::deleteStep($id['id']);
+                }
+            }
+            //add steps
+            foreach (array_keys($steps) as $key) {
+                if (!empty($steps[$key]['title'])) {
+                    if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
+                        //update step
+                        DesmosSteps::updateStep(
+                            $steps[$key]['id'],
+                            [
+                                'title' => $steps[$key]['title'],
+                                'text' => $steps[$key]['text']
+                            ]
+                        );
+                    } else {
+                        //add step
+                        DesmosSteps::insertStep(
+                            [
+                                'desmosid' => $this->typeid,
+                                'title' => $steps[$key]['title'],
+                                'text' => $steps[$key]['text']
+                            ]
+                        );
+                    }
+                }
+            }
+            $this->steps = $steps;
+            return $this;
+        }
     }
 }

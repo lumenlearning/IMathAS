@@ -151,7 +151,7 @@ $params[':cid6']=$cid;
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
-$query .= " UNION SELECT 'DesmosInteractive',id,title FROM desmos_interactives WHERE courseid=:cid7";
+$query .= " UNION SELECT 'DesmosInteractive',id,title FROM desmos_items WHERE courseid=:cid7";
 $params[':cid7']=$cid;
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################

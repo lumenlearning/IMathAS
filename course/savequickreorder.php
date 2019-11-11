@@ -60,7 +60,7 @@
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	 } else if ($type=="E") {
-		 $stm = $DBH->prepare("UPDATE desmos_interactives SET title=:title WHERE id=:id AND courseid=:cid");
+		 $stm = $DBH->prepare("UPDATE desmos_items SET title=:title WHERE id=:id AND courseid=:cid");
 		 $stm->execute(array(':title'=>$val, ':id'=>$typeid, ':cid'=>$cid));
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################

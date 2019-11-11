@@ -628,7 +628,7 @@ function getiteminfo($itemid) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		case ($itemtype==="DesmosInteractive"):
-			$stm = $DBH->prepare("SELECT title,summary FROM desmos_interactives WHERE id=:id");
+			$stm = $DBH->prepare("SELECT title,summary FROM desmos_items WHERE id=:id");
 			break;
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
