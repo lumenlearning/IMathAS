@@ -87,9 +87,11 @@ class AssessInfo
    * @return void
    */
   public function loadException($uid, $isstu, $latepasses=0, $latepasshrs=24, $courseenddate=2000000000) {
-    if (!$isstu && isset($_SESSION['lti_duedate'])) {
+    if (!$isstu && $this->assessData['date_by_lti'] > 0 && isset($_SESSION['lti_duedate'])) {
       // fake exception for teachers from LTI
       $this->exception = array(0, $_SESSION['lti_duedate'], 0, 1, 0);
+    } else if (!$isstu) {
+      $this->exception = false;
     } else {
       $query = "SELECT startdate,enddate,islatepass,is_lti,exceptionpenalty,waivereqscore ";
       $query .= "FROM imas_exceptions WHERE userid=? AND assessmentid=?";
@@ -156,6 +158,27 @@ class AssessInfo
     } else {
       $this->assessData['can_use_latepass'] = 0;
     }
+  }
+
+  /**
+   * Determine whether latepass use is being blocked by practice mode access
+   * Also sets assessData['latepass_blocked_by_practice']
+   * @return boolean
+   */
+  public function getLatePassBlockedByView() {
+    if ($this->assessData['hasexception']) {
+      list($useexception,$LPblocked) =
+        $this->exceptionfunc->getCanUseAssessException(
+          $this->exception,
+          $this->assessData,
+          false,
+          true
+        );
+    } else {
+      $LPblocked = $this->exceptionfunc->getLatePassBlockedByView($this->assessData,0);
+    }
+    $this->assessData['latepass_blocked_by_practice'] = $LPblocked;
+    return $this->assessData['latepass_blocked_by_practice'];
   }
 
   /**
@@ -696,7 +719,9 @@ class AssessInfo
    * @return void
    */
   public function overridePracticeSettings() {
-    $this->assessData['displaymethod'] = 'skip';
+    if ($this->assessData['displaymethod'] != 'video_cued') {
+      $this->assessData['displaymethod'] = 'skip';
+    }
     $this->assessData['submitby'] = 'by_question';
     $this->assessData['showscores'] = 'during';
     $this->assessData['showans'] = 'with_score';
