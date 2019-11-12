@@ -8,8 +8,7 @@ $DBH->beginTransaction();
 $query = "CREATE TABLE `desmos_graphs` (
     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `data` text NOT NULL,
-    PRIMARY KEY (`id`),
-    INDEX (`desmosid`)
+    PRIMARY KEY (`id`)
     ) ENGINE=InnoDB;
 ";
 $res = $DBH->query($query);
