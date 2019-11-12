@@ -207,7 +207,7 @@ table thead th {
 }
 
 table {
-	width: 100%;
+	text-align: left;
 }
 
 table.mce-item-table {
