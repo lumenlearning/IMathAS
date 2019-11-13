@@ -1,0 +1,12 @@
+<svg 
+    width="20" 
+    height="20" 
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    aria-hidden="true"
+>
+    <g fill-rule="nonzero" fill="none">
+        <path fill="#FFF" d="M0 3h20v17H0z"/>
+        <path d="M5 0v1.83h10.048V0h1.113v1.83H20V20H0V1.83h3.887V0H5zm13.81 7.037H1.19v11.945h17.62V7.037zM5 15v2H3v-2h2zm4 0v2H7v-2h2zm4 0v2h-2v-2h2zm-8-3v2H3v-2h2zm4 0v2H7v-2h2zm4 0v2h-2v-2h2zm4 0v2h-2v-2h2zM5 9v2H3V9h2zm4 0v2H7V9h2zm4 0v2h-2V9h2zm4 0v2h-2V9h2zM3.839 3.006H1.19V5.86h17.62V3.006h-2.65v1.11h-1.113v-1.11H4.952v1.11H3.839v-1.11z" fill="#212B36"/>
+    </g>
+</svg>
