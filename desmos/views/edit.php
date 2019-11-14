@@ -2,45 +2,14 @@
     var curlibs = '<?php Sanitize::encodeStringForJavascript($item->libs); ?>';
 </script>
 
-<style>
-/* OVERWRITING LUX STYLES */
-    .form .button {
-        padding: .5em 1em; 
-    }
-
-    .form input {
-        padding: .25em .5em; 
-    }
-/* *** */
-
-    .form-group {
-        display: flex;
-    }
-
-    .form-group > div:first-child {
-        margin-right: 2em;
-    }
-
-    .datepicker input {
-        margin-top: .25em;
-        width: 12em;
-        background-repeat: no-repeat;
-        background-position: 140px 3px;
-    }
-
-    .datepicker .cal-datepicker {
-        background-image: url('../img/cal-icon.svg');
-    }
-</style>
-
 <div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
 
-<h1 class="-small-type -inset --exlarge">
+<h1 class="-small-type">
     <img src="../ohm/img/desmos.png" alt=""/> 
     <?php echo $pagetitle ?>    
 </h1>
 
-<form class="form" enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
+<form class="desmos form" enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
     <div class="form-group">
         <div class="form-left">
             <div class="controls">
