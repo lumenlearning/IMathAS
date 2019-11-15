@@ -22,14 +22,20 @@ function getsubinfo($items,$parent,$pre) {
 		if (is_array($anitem)) {
 			$ids[] = $parent.'-'.($k+1);
 			$types[] = $pre."Block";
-			$names[] = $anitem['name'];
+            if (is_object($anitem['itemtype'])) {
+                $names[] = $anitem['itemtype']->name;
+            } else
+            $names[] = $anitem['name'];
 			$parents[] = $parent;
 			getsubinfo($anitem['items'],$parent.'-'.($k+1),$pre.'--');
 		} else {
 			$ids[] = $anitem;
 			$parents[] = $parent;
 			$types[] = $pre.$item[$anitem]['type'];
-			if (isset($item[$anitem]['name'])) {
+            if (is_object($anitem['itemtype'])) {
+                $names[] = $anitem['itemtype']->name;
+            } else
+            if (isset($item[$anitem]['name'])) {
 				$names[] = $item[$anitem]['name'];
 			} else {
 				$names[] = $item[$anitem]['title'];

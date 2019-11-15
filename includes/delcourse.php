@@ -119,6 +119,8 @@ function deleteCourse($cid) {
 		}
 	}
 
+    //delete desmos interactives
+    \Desmos\Models\DesmosItem::deleteCourse($cid);
 
 	$stm = $DBH->prepare("DELETE FROM imas_linkedtext WHERE courseid=:courseid");
 	$stm->execute(array(':courseid'=>$cid));

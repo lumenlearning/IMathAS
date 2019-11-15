@@ -14,14 +14,14 @@ function getsubinfo($items,$parent,$pre) {
 		if (is_array($anitem)) {
 			$ids[] = $parent.'-'.($k+1);
 			$types[] = $pre."Block";
-			$names[] = $anitem['name'];
+            $names[] = $anitem['item'];
 			$parents[] = $parent;
 			getsubinfo($anitem['items'],$parent.'-'.($k+1),$pre.'--');
 		} else {
 			$ids[] = $anitem;
 			$parents[] = $parent;
 			$types[] = $pre.$data['items'][$anitem]['type'];
-			if (isset($data['items'][$anitem]['data']['name'])) {
+            if (isset($data['items'][$anitem]['data']['name'])) {
 				$names[] = $data['items'][$anitem]['data']['name'];
 			} else {
 				$names[] = $data['items'][$anitem]['data']['title'];
@@ -165,6 +165,11 @@ public function importdata($data, $cid, $checked, $options) {
 		$this->insertAssessment();
 	}
 
+    //insert the desmos items
+    if (isset($this->toimportbytype['DesmosInteractive'])) {
+        $this->insertDesmos();
+    }
+
 	//add imas_items
 	$exarr = array();
 	foreach ($this->itemstoimport as $item) {
@@ -220,7 +225,8 @@ public function importdata($data, $cid, $checked, $options) {
 		'Forums Imported'=>count($this->typemap['Forum']),
 		'Assessments Imported'=>count($this->typemap['Assessment']),
 		'Drills Imported'=>count($this->typemap['Drill']),
-		'Wikis Imported'=>count($this->typemap['Wiki'])
+		'Wikis Imported'=>count($this->typemap['Wiki']),
+        'Desmos Imported'=>count($this->typemap['DesmosInteractive'])
 		);
 }
 
@@ -695,6 +701,26 @@ private function insertWiki() {
 	foreach ($this->toimportbytype['Wiki'] as $k=>$toimport) {
 		$this->typemap['Wiki'][$toimport] = $firstinsid+$k;
 	}
+}
+
+private function insertDesmos() {
+    global $db_fields;
+
+    $this->typemap['DesmosInteractive'] = array();
+    foreach ($this->toimportbytype['DesmosInteractive'] as $k=>$toimport) {
+        $exarr = array();
+        $exarr['courseid'] = $this->cid;
+        //sanitize html fields
+        foreach ($db_fields['html']['desmos'] as $field) {
+            $this->data['items'][$toimport]['data'][$field] = Sanitize::incomingHtml($this->data['items'][$toimport]['data'][$field]);
+        }
+        foreach (explode(',', $db_fields['desmos']) as $field) {
+            $exarr[$field] = $this->data['items'][$toimport]['data'][$field];
+        }
+        $desmos = new \Desmos\Models\DesmosItem($this->cid);
+        $desmos->addItem($exarr);
+        $this->typemap['DesmosInteractive'][$toimport] = $desmos->typeid+0;
+    }
 }
 
 private function insertDrill() {

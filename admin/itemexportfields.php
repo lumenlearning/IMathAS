@@ -20,6 +20,7 @@ $db_fields['wiki'] = 'name,description,startdate,enddate,editbydate,settings,ava
 $db_fields['questions'] = 'questionsetid,points,attempts,penalty,category,regen,showans,showhints,extracredit,fixedseeds';
 $db_fields['assessment'] = 'name,summary,intro,startdate,enddate,reviewdate,timelimit,displaymethod,defpoints,defattempts,deffeedback,defpenalty,itemorder,shuffle,gbcategory,password,cntingb,minscore,showcat,showhints,isgroup,reqscoreaid,reqscore,reqscoretype,noprint,avail,groupmax,allowlate,exceptionpenalty,endmsg,tutoredit,eqnhelper,caltag,showtips,calrtag,deffeedbacktext,posttoforum,msgtoinstr,istutorial,viddata,ptsposs,LPcutoff,extrefs,submitby,showscores,showans,viewingb,scoresingb,ansingb,defregens,defregenpenalty,ver,keepscore,overtime_grace,overtime_penalty';
 $db_fields['drill'] = 'itemdescr,itemids,scoretype,showtype,n,showtostu,name,summary,startdate,enddate,avail,caltag';
+$db_fields['desmos'] = 'title,summary,startdate,enddate,avail,outcomes,tags,steps';
 //added qimgs field if hasimg==1
 //includecodefrom(EID___) uses export ID
 $db_fields['questionset'] = 'uniqueid,adddate,lastmoddate,ownerid,author,userights,description,qtype,control,qcontrol,qtext,answer,hasimg,extref,deleted,broken,replaceby,solution,solutionopts,license,ancestorauthors,otherattribution';
@@ -31,5 +32,6 @@ $db_fields['html'] = array(
 	'wiki'=>array('description'),
 	'assessment'=>array('summary'), //need to handle intro specially
 	'drill'=>array('summary'),
-	'forum_posts'=>array('message')
+	'forum_posts'=>array('message'),
+	'desmos'=>array('summary')
 );

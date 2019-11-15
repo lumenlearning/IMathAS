@@ -42,7 +42,7 @@ abstract class CourseItem
      * @param int    $block    parental hierarchy of course items
      * @param string $totb     "to Top or Bottom" of course"
      */
-    public function __construct($courseid, $block = 0, $totb = 'b')
+    public function __construct($courseid = null, $block = 0, $totb = 'b')
     {
         $this->courseid = $courseid;
         $this->block = $block;
@@ -641,6 +641,9 @@ abstract class CourseItem
      */
     public function __get($name)
     {
+        if ($name == 'itemtype') {
+            return str_replace(' ', '', $this->display_name);
+        }
         return $this->$name;
     }
 
@@ -658,6 +661,7 @@ abstract class CourseItem
         }
         $this->setId();
         $this->setName();
+        $this->setSummary();
         $this->setStartDate();
         $this->setEndDate();
         $this->setAvail();
@@ -685,6 +689,15 @@ abstract class CourseItem
     abstract function setName($value = null);
 
     /**
+     * Required parameter for all items: maybe in database as summary, text or description
+     *
+     * @param int|null $value default to this->summary
+     *
+     * @return CourseItem compatible object
+     */
+    abstract function setSummary($value = null);
+
+    /**
      * Required parameter for all items
      *
      * @param int|null $value default to this->startdate
@@ -710,5 +723,7 @@ abstract class CourseItem
      * @return CourseItem compatible object
      */
     abstract function setAvail($value = null);
+
+    abstract static function deleteCourse(int $courseid);
 
 }

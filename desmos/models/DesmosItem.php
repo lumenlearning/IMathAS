@@ -17,6 +17,7 @@ use PDO;
 class DesmosItem extends CourseItem
 {
     protected $typename = "desmos";
+    protected $itemtype = "DesmosInteractive";
     //imas_items.itemtype with spaces
     protected $display_name = "Desmos Interactive";
     protected $miniicon = "../ohm/img/desmos_tiny.php";
@@ -141,6 +142,14 @@ class DesmosItem extends CourseItem
         return $this;
     }
 
+    public static function deleteCourse(int $cid)
+    {
+        $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_steps WHERE desmosid IN (SELECT id FROM desmos_interactives WHERE courseid=:id)");
+        $stm->execute(array(':id'=>$cid));
+        $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_items WHERE courseid=:id");
+        $stm->execute(array(':id'=>$cid));
+    }
+
     /**
      * Set required parameter
      *
@@ -154,6 +163,23 @@ class DesmosItem extends CourseItem
             $this->name = $value;
         } else {
             $this->name = $this->title;
+        }
+        return $this;
+    }
+
+    /**
+     * Set required parameter
+     *
+     * @param null $value or use $this->summary
+     *
+     * @return $this|CourseItem
+     */
+    public function setSummary($value = null)
+    {
+        if ($value) {
+            $this->summary = $value;
+        } else {
+            $this->summary = $this->summary;
         }
         return $this;
     }
@@ -256,5 +282,30 @@ class DesmosItem extends CourseItem
             $this->steps = $steps;
             return $this;
         }
+    }
+
+    public function asArray($copy=false)
+    {
+        $data = [
+            'title'=>$this->title,
+            'summary'=>$this->summary,
+            'startdate'=>$this->startdate,
+            'enddate'=>$this->enddate,
+            'avail'=>$this->avail,
+            'outcomes'=>$this->outcomes,
+            'tags'=>$this->tags,
+            'type'=>str_replace(' ', '', $this->display_name)
+        ];
+        if ($copy === false) {
+            $data['id'] = $this->typeid;
+            $data['courseid'] = $this->itemid;
+        }
+        foreach ($this->steps as $step) {
+            if ($copy === true) {
+                unset($step['id'], $step['desmosid']);
+            }
+            $data['steps'][]=$step;
+        }
+        return $data;
     }
 }

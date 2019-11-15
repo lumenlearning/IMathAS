@@ -660,7 +660,22 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   $line = $itemshowdata[$items[$i]];
 		   $typeid = Sanitize::onlyInt($line['id']);
 
-		   if ($line['itemtype']=="Calendar") {
+
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   if (is_object($line['itemtype'])) {//
+		   	   if ($ispublic) { continue;echo "continue";}
+			   echo $line['itemtype']->courseView($now, $viewall, $canedit);
+           } else
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           if ($line['itemtype']=="Calendar") {
 			   if ($ispublic) { continue;}
 			   //echo "<div class=item>\n";
 			   beginitem($canedit);
@@ -1789,21 +1804,6 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 				   echo filter("<div class=itemsum>{$line['description']}</div>\n");
 				   enditem($canedit); //echo "</div>\n";
 			   }
-		   // #### Begin OHM-specific code #####################################################
-		   // #### Begin OHM-specific code #####################################################
-		   // #### Begin OHM-specific code #####################################################
-		   // #### Begin OHM-specific code #####################################################
-		   // #### Begin OHM-specific code #####################################################
-		   } else if ($line['itemtype']=="DesmosInteractive") {
-		   	   if ($ispublic) { continue;echo "continue";}
-			   $desmos[$line['itemid']] = new \Desmos\Models\DesmosItem($cid);
-			   $desmos[$line['itemid']]->findItem($line['typeid']);
-			   echo $desmos[$line['itemid']]->courseView($now, $viewall, $canedit);
-			   // #### End OHM-specific code #####################################################
-			   // #### End OHM-specific code #####################################################
-			   // #### End OHM-specific code #####################################################
-			   // #### End OHM-specific code #####################################################
-			   // #### End OHM-specific code #####################################################
 		   }
 	   }
 	   if (count($items)>0) {
@@ -1889,7 +1889,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		// #### Begin OHM-specific code #####################################################
 		$html .= "<a href=\"itemadd.php?type=desmos&block=$blkUrlParam&tb=$tbUrlParam&cid=$cid\">";
 		if (isset($CFG['CPS']['miniicons']['desmos'])) {
-			$html .= "<img alt=\"calendar\" class=\"mida\" src=\"$imasroot/{$CFG['CPS']['miniicons']['desmos']}\"/> ";
+			$html .= "<img alt=\"desmos\" class=\"mida\" src=\"$imasroot/{$CFG['CPS']['miniicons']['desmos']}\"/> ";
 		}
 		$html .= _('Add Desmos') . "</a>";
 		// #### End OHM-specific code #####################################################
@@ -2067,8 +2067,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			   $iteminfo['DesmosInteractive'][$row['id']] = new \Desmos\Models\DesmosItem($cid);
-			   $iteminfo['DesmosInteractive'][$row['id']]
-				   ->setItem($row);
+			   $iteminfo['DesmosInteractive'][$row['id']]->setItem($row);
 		   }
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################

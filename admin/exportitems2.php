@@ -247,19 +247,31 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
 	}
 
 
-	//get wikis
-	if (isset($itemtypebackref['Wiki'])) {
-		$toget = array_keys($itemtypebackref['Wiki']);
-		$ph = Sanitize::generateQueryPlaceholders($toget);
-		$stm = $DBH->prepare("SELECT id,".$db_fields['wiki']." FROM imas_wikis WHERE id IN ($ph)");
-		$stm->execute($toget);
-		$wikimap = array();
-		while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
-			$output_item_id = $itemtypebackref['Wiki'][$line['id']];
-			unset($line['id']);
-			$output['items'][$output_item_id] = array('type'=>'Wiki', 'data'=>$line);
-		}
-	}
+    //get wikis
+    if (isset($itemtypebackref['Wiki'])) {
+        $toget = array_keys($itemtypebackref['Wiki']);
+        $ph = Sanitize::generateQueryPlaceholders($toget);
+        $stm = $DBH->prepare("SELECT id,".$db_fields['wiki']." FROM imas_wikis WHERE id IN ($ph)");
+        $stm->execute($toget);
+        $wikimap = array();
+        while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
+            $output_item_id = $itemtypebackref['Wiki'][$line['id']];
+            unset($line['id']);
+            $output['items'][$output_item_id] = array('type'=>'Wiki', 'data'=>$line);
+        }
+    }
+
+    //get Desmos
+    if (isset($itemtypebackref['DesmosInteractive'])) {
+        $toget = array_keys($itemtypebackref['DesmosInteractive']);
+        //$ph = Sanitize::generateQueryPlaceholders($toget);
+        foreach ($toget as $typeid) {
+            $desmos = new \Desmos\Models\DesmosItem($cid);
+            $desmos->findItem($typeid);
+            $output_item_id = $itemtypebackref['DesmosInteractive'][$typeid];
+            $output['items'][$output_item_id] = array('type'=>'DesmosInteractive', 'data'=>$desmos->asArray(true));
+        }
+    }
 
 	//get imas_questions
 	if (isset($itemtypebackref['Assessment'])) {

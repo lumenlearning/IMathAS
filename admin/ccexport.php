@@ -162,6 +162,7 @@ if (isset($_GET['create']) && isset($_POST['whichitems'])) {
 				case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
 				case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
 				case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
+                case 'DesmosInteractive': echo $CFG['CPS']['miniicons']['desmos']; break;
 			}
 			echo '" class="floatleft"/><div style="margin-left:21px">'.Sanitize::encodeStringForDisplay($names[$i]).'</div></td>';
 		} else {
