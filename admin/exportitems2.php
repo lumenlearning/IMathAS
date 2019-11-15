@@ -261,7 +261,12 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
         }
     }
 
-    //get Desmos
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    //get desmos_items
     if (isset($itemtypebackref['DesmosInteractive'])) {
         $toget = array_keys($itemtypebackref['DesmosInteractive']);
         //$ph = Sanitize::generateQueryPlaceholders($toget);
@@ -272,6 +277,11 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
             $output['items'][$output_item_id] = array('type'=>'DesmosInteractive', 'data'=>$desmos->asArray(true));
         }
     }
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 
 	//get imas_questions
 	if (isset($itemtypebackref['Assessment'])) {

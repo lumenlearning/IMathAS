@@ -49,6 +49,11 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$lookups['forums'][] = $ip[0];
 	}
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 $denames = array();
 if (count($lookups['de'])>0) {
 	$lookuplist = array_map('intval', array_unique($lookups['de']));
@@ -59,6 +64,11 @@ if (count($lookups['de'])>0) {
 		$denames[$row[0]] = $row[1];
 	}
 }
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 $asnames = array();
 if (count($lookups['as'])>0) {
 	$lookuplist = array_map('intval', array_unique($lookups['as']));
@@ -144,9 +154,19 @@ foreach ($actions as $r) {
 	}
 	$actionmsg = '';
 	switch ($r[0]) {
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
 	case 'desmosview':
 		$actionmsg =  'Viewed Desmos Interactive item '.Sanitize::encodeStringForDisplay($denames[$r[1]]);
 		break;
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	case 'inlinetext':
 		$actionmsg =  'In inline text item '.Sanitize::encodeStringForDisplay($innames[$r[1]]).', clicked link to '.$thelink;
 		break;

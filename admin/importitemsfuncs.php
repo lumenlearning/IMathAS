@@ -165,10 +165,20 @@ public function importdata($data, $cid, $checked, $options) {
 		$this->insertAssessment();
 	}
 
-    //insert the desmos items
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    //insert the desmos_items
     if (isset($this->toimportbytype['DesmosInteractive'])) {
         $this->insertDesmos();
     }
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 
 	//add imas_items
 	$exarr = array();
@@ -226,7 +236,17 @@ public function importdata($data, $cid, $checked, $options) {
 		'Assessments Imported'=>count($this->typemap['Assessment']),
 		'Drills Imported'=>count($this->typemap['Drill']),
 		'Wikis Imported'=>count($this->typemap['Wiki']),
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
         'Desmos Imported'=>count($this->typemap['DesmosInteractive'])
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		);
 }
 
@@ -703,6 +723,11 @@ private function insertWiki() {
 	}
 }
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 private function insertDesmos() {
     global $db_fields;
 
@@ -722,6 +747,11 @@ private function insertDesmos() {
         $this->typemap['DesmosInteractive'][$toimport] = $desmos->typeid+0;
     }
 }
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 
 private function insertDrill() {
 	global $DBH, $db_fields;

@@ -203,6 +203,11 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 			if ($usechecked && array_search($item,$checked)===FALSE) {
 				continue;
 			}
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
             if ($iteminfo[$item][0]=='DesmosInteractive') {
                 //$stm = $DBH->prepare("SELECT name,summary,defpoints,itemorder,enddate,gbcategory,avail,startdate,ptsposs FROM imas_assessments WHERE id=:id");
                 $courseItem = new \Desmos\Models\DesmosItem();
@@ -258,6 +263,11 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $res[] = $resitem;
                 }
             } else
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
             if ($iteminfo[$item][0]=='InlineText') {
 				$stm = $DBH->prepare("SELECT title,text,fileorder,avail FROM imas_inlinetext WHERE id=:id");
 				$stm->execute(array(':id'=>$iteminfo[$item][1]));
