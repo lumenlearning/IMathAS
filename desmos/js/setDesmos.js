@@ -7,6 +7,12 @@ if (elt.length>0) {
 }
 function setDesmos(item)
 {
+    json = item.getAttribute("data");
+    var calculator = Desmos.GraphingCalculator(item);
+    calculator.setState(json);
+}
+function oldSetDesmos(item)
+{
     id = item.getAttribute("data-id");
     $.ajax(
         {
