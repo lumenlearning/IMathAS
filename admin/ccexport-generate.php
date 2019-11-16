@@ -224,16 +224,26 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $canvout .= "<position>$ccnt</position> <indent>".max($mod_depth-1,0)."</indent> </item>";
                     $ccnt++;
 
-                    mkdir($newdir.$courseItem->typename.$iteminfo[$item][1]);
-                    $fp = fopen($newdir.$courseItem->typename.$iteminfo[$item][1].'/assignment_settings.xml','w');
+                    mkdir($newdir.'/assn'.$iteminfo[$item][1]);
+                    $fp = fopen($newdir.'/assn'.$iteminfo[$item][1].'/assignment_settings.xml','w');
                     fwrite($fp,'<assignment xmlns="http://canvas.instructure.com/xsd/cccv1p0" identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://canvas.instructure.com/xsd/cccv1p0 http://canvas.instructure.com/xsd/cccv1p0.xsd">'."\n");
                     fwrite($fp,'<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n");
                     fwrite($fp,'<workflow_state>'.($courseItem->avail==0?'unpublished':'published').'</workflow_state>'."\n");
+                    if (isset($_POST['includeduedates']) && $row[4]<2000000000) {
+                        fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $row[4]).'</due_at>'."\n");
+                    }
+                    if ($row[7] > 0 && isset($_POST['includestartdates'])) {
+                        fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $row[7]).'</unlock_at>'."\n");
+                    }
+                    if (isset($_POST['includegbcats'])) {
+                        fwrite($fp,'<assignment_group_identifierref>GBCAT'.$row[5].'</assignment_group_identifierref>'."\n");
+                    }
+                    $usedcats[$row[5]]++;
                     fwrite($fp,'<submission_types>external_tool</submission_types>'."\n");
                     fwrite($fp,'<external_tool_url>'. $GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_place_aid='.$iteminfo[$item][1].'</external_tool_url>'."\n");
                     fwrite($fp,'</assignment>');
                     fclose($fp);
-                    $fp = fopen($newdir.$courseItem->typename.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html','w');
+                    $fp = fopen($newdir.'/assn'.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html','w');
                     fwrite($fp,'<html><body> </body></html>');
                     fclose($fp);
                     $resitem =  '<resource identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" type="associatedcontent/imscc_xmlv1p1/learning-application-resource" href="assn'.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html">'."\n";
@@ -503,12 +513,6 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 					fwrite($fp,'<workflow_state>'.($row[6]==0?'unpublished':'published').'</workflow_state>'."\n");
 					fwrite($fp,'<points_possible>'.$row[8].'</points_possible>'."\n");
 					fwrite($fp,'<grading_type>points</grading_type>'."\n");
-					if (isset($_POST['includeduedates']) && $row[4]<2000000000) {
-						fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $row[4]).'</due_at>'."\n");
-					}
-					if ($row[7] > 0 && isset($_POST['includestartdates'])) {
-						fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $row[7]).'</unlock_at>'."\n");
-					}
 					if (isset($_POST['includegbcats'])) {
 						fwrite($fp,'<assignment_group_identifierref>GBCAT'.$row[5].'</assignment_group_identifierref>'."\n");
 					}
