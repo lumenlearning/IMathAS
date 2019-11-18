@@ -229,18 +229,14 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     fwrite($fp,'<assignment xmlns="http://canvas.instructure.com/xsd/cccv1p0" identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://canvas.instructure.com/xsd/cccv1p0 http://canvas.instructure.com/xsd/cccv1p0.xsd">'."\n");
                     fwrite($fp,'<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n");
                     fwrite($fp,'<workflow_state>'.($courseItem->avail==0?'unpublished':'published').'</workflow_state>'."\n");
-                    if (isset($_POST['includeduedates']) && $row[4]<2000000000) {
-                        fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $row[4]).'</due_at>'."\n");
+                    if (isset($_POST['includeduedates']) && $courseItem->enddate<2000000000) {
+                        fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $courseItem->enddate).'</due_at>'."\n");
                     }
-                    if ($row[7] > 0 && isset($_POST['includestartdates'])) {
-                        fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $row[7]).'</unlock_at>'."\n");
+                    if ($courseItem->startdate > 0 && isset($_POST['includestartdates'])) {
+                        fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $courseItem->startdate).'</unlock_at>'."\n");
                     }
-                    if (isset($_POST['includegbcats'])) {
-                        fwrite($fp,'<assignment_group_identifierref>GBCAT'.$row[5].'</assignment_group_identifierref>'."\n");
-                    }
-                    $usedcats[$row[5]]++;
                     fwrite($fp,'<submission_types>external_tool</submission_types>'."\n");
-                    fwrite($fp,'<external_tool_url>'. $GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_place_aid='.$iteminfo[$item][1].'</external_tool_url>'."\n");
+                    fwrite($fp,'<external_tool_url>'. $GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_item_id='.$courseItem->itemid.'</external_tool_url>'."\n");
                     fwrite($fp,'</assignment>');
                     fclose($fp);
                     $fp = fopen($newdir.'/assn'.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html','w');
