@@ -4,6 +4,7 @@
 
 <div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
 
+
 <h1 class="-small-type">
     <img src="../ohm/img/desmos.png" alt=""/> 
     <?php echo $pagetitle ?>    
@@ -23,22 +24,18 @@
         </div>
         <div class="form-right">
             <div class="controls">
-                <div class="datepicker">
-                    <label for="sdate">Start Date:</label>
-                    <input class="cal-datepicker" onClick="displayDatePicker('sdate', this); return false" id="sdate" type="text" name="sdate" value="<?php echo $sdate;?>"/>
-                </div>
+                <label for="sdate">Start Date:</label>
+                <input type="text"class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
             </div>
             <div class="controls">
-                <div class="datepicker">
-                    <label class="-offset --xsmall" for="edate">End Date:</label>
-                    <input class="cal-datepicker" onClick="displayDatePicker('edate', this); return false" id="sdate" type="text" name="edate" value="<?php echo $edate;?>"/>
-                </div>
+                <label for="edate">End Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
             </div>
         </div>
     </div>
     <div class="libraries -inset --exlarge">
         In Libraries:
-        <span class="pill" id="libnames"><?php echo implode(', ', $item->lnames); ?></span>
+        <span id="libnames"><?php echo implode(', ', $item->lnames); ?></span>
         <input type="hidden" name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->libs) ?>"/>
         <button class="button" type="button" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" >Select Libraries</button>
         <?php

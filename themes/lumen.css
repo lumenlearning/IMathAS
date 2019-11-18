@@ -1025,6 +1025,7 @@ div#ohm_course_banner_content {
 
 /* DESMOS */
 /* OVERWRITING LUX STYLES */
+
 .desmos .button {
 	padding: .5em 1em; 
 }
@@ -1032,6 +1033,12 @@ div#ohm_course_banner_content {
 .desmos input {
 	padding: .25em .5em; 
 	width: 32em;
+}
+
+.desmos .--input-icon {
+	margin-top: .25em;
+	width: 10em;
+	padding: .5em, 1em;
 }
 /* *** */
 
@@ -1041,17 +1048,6 @@ div#ohm_course_banner_content {
 
 .desmos .form-group > div:first-child {
 	margin-right: 2em;
-}
-
-.desmos .datepicker input {
-	margin-top: .25em;
-	width: 10em;
-	background-repeat: no-repeat;
-	background-position: 97% 48%;
-}
-
-.desmos .datepicker .cal-datepicker {
-	background-image: url('../img/cal-icon.svg');
 }
 
 /* MEDIA QUERIES */
