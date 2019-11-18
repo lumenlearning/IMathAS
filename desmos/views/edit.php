@@ -25,7 +25,7 @@
         <div class="form-right">
             <div class="controls">
                 <label for="sdate">Start Date:</label>
-                <input type="text"class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
             </div>
             <div class="controls">
                 <label for="edate">End Date:</label>
@@ -40,7 +40,7 @@
         <button class="button" type="button" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" >Select Libraries</button>
         <?php
         if (count($outcomes)>0) {
-            echo '<span class="form pill">Associate Outcomes:</span></span class="formright">';
+            echo '<span class="form">Associate Outcomes:</span></span class="formright">';
             writeHtmlMultiSelect('outcomes',$outcomes,$outcomenames,$gradeoutcomes,'Select an outcome...');
             echo '</span><br class="form"/>';
         }
