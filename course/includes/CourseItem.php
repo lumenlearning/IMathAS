@@ -174,6 +174,24 @@ abstract class CourseItem
      *
      * @return CourseItem $this
      */
+    public static function findCourseItem($id)
+    {
+        $query = "SELECT courseid, itemtype, typeid FROM imas_items "
+            . " WHERE id=:id";
+        $stm = $GLOBALS['DBH']->prepare($query);
+        $stm->bindValue(':id', $id);
+        $stm->execute();
+        if ($stm->rowCount()>0) {
+            return $stm->fetch(PDO::FETCH_ASSOC);
+        }
+        return false;
+    }
+
+    /**
+     * ID from imas_items table
+     *
+     * @return CourseItem $this
+     */
     public function findCourseItemId()
     {
         $query = "SELECT id FROM imas_items "

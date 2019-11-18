@@ -2182,6 +2182,20 @@ if (isset($_GET['launch'])) {
 		$_SESSION['ltilookup'] = 'u';
 		$ltiorg = $ltikey.':'.$ltiorg;
 		$keytype = 'g';
+		if (isset($_REQUEST['custom_item_id'])) {
+            $place_item_id = intval($_REQUEST['custom_item_id']);
+            $keytype = 'cc-g';
+            $course_item = \Course\Includes\CourseItem::findCouseItem($place_item_id);
+            $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+            $item = new $itemObject($course_item['courseid']);
+            $item->findItem($course_item['typeid']);
+            $sourcecid = $item->courseid;
+            if ($sourcecid===false) {
+                $diaginfo = "(Debug info: 6-$placeaid)";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
+            }
+            $_SESSION['place_item_id'] = array($sourcecid,$place_item_id);
+        } else
 		if (isset($_REQUEST['custom_place_aid'])) {
 			$placeaid = intval($_REQUEST['custom_place_aid']);
 			$keytype = 'cc-g';
@@ -2377,6 +2391,48 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':org'=>"$shortorg:%"));
 	if ($stm->rowCount()==0) {
+        if (isset($_SESSION['place_item_id'])) {
+            //look to see if we've already linked this context_id with a course
+            $stm = $DBH->prepare("SELECT courseid FROM imas_lti_courses WHERE contextid=:contextid AND org LIKE :org");
+            $stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':org'=>"$shortorg:%"));
+            if ($stm->rowCount()==0) {
+                if ($_SESSION['lti_keytype']=='cc-g') {
+                    //if instructor, see if the source course is ours
+                    $copycourse = true;
+                    if ($_SESSION['ltirole']=='instructor') {
+                        $stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
+                        $stm->execute(array(':courseid'=>$_SESSION['place_aid'][0], ':userid'=>$userid));
+                        if ($stm->rowCount()>0) {
+                            $copycourse=false;
+                            $destcid = intval($_SESSION['place_aid'][0]);
+                        }
+                    } else {
+                        reporterror("Course link not established yet");
+                    }
+                    $stm = $DBH->prepare("INSERT INTO imas_lti_courses (org,contextid,courseid,contextlabel) VALUES (:org, :contextid, :courseid, :contextlabel)");
+                    $stm->execute(array(
+                        ':org'=>$_SESSION['ltiorg'],
+                        ':contextid'=>$_SESSION['lti_context_id'],
+                        ':courseid'=>$destcid,
+                        ':contextlabel'=>$_SESSION['lti_context_label']));
+
+                }
+            } else {
+                $destcid = $stm->fetchColumn(0);
+            }
+            if ($destcid==$_SESSION['place_item_id'][0]) {
+                //aid is in destination course - just make placement
+                $itemid = $_SESSION['place_item_id'][1];
+            } else {
+                //aid is in source course.  Let's see if we already copied it.
+            }
+            $query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
+            $query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
+            $stm = $DBH->prepare($query);
+            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'assess', ':typeid'=>$aid));
+            $keyparts = array('aid',$aid);
+
+        } else
 		if (isset($_SESSION['place_aid'])) {
 			//look to see if we've already linked this context_id with a course
 			$stm = $DBH->prepare("SELECT courseid FROM imas_lti_courses WHERE contextid=:contextid AND org LIKE :org");

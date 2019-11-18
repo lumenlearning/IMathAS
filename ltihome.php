@@ -175,12 +175,28 @@ if (!empty($createcourse)) {
 	if ($_POST['setplacement']=='course') {
 		$placementtype = 'course';
 		$typeid = $cid;
+	} elseif (substr($_POST['setplacement'],0, 4) =='item') {
+		$placementtype = 'item';
+		$itemid = substr($_POST['setplacement'],4);
 	} else {
 		$placementtype = 'assess';
 		$typeid = $_POST['setplacement'];
 	}
 	if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "Canvas") {
 		//Canvas custom LTI selection return or IMS deeplink LTI selection return
+		if ($placementtype=='item') {
+			$course_item = \Course\Includes\CourseItem::findCouseItem($itemid);
+			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+			$item = new $itemObject($course_item['courseid']);
+			$item->findItem($course_item['typeid']);
+			$atitle = $item->name;
+
+			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=$itemid";
+
+			header('Location: '.$sessiondata['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($atitle).'&text='.Sanitize::encodeUrlParam($atitle). '&r=' .Sanitize::randomQueryStringParam());
+			exit;
+
+		} else
 		if ($placementtype=='assess') {
 			$stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$typeid));
@@ -201,6 +217,15 @@ if (!empty($createcourse)) {
 	} else if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "IMSdeeplink") {
 		require_once 'includes/OAuth.php';
 		require_once 'includes/ltioauthstore.php';
+		if ($placementtype=='item') {
+			$course_item = \Course\Includes\CourseItem::findCouseItem($itemid);
+			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+			$item = new $itemObject($course_item['courseid']);
+			$item->findItem($course_item['typeid']);
+			$title = $item->name;
+			$text = $item->summary;
+			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=$itemid";
+		} else
 		if ($placementtype=='assess') {
 			$stm = $DBH->prepare("SELECT name,summary,ptsposs FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$typeid));
@@ -248,6 +273,12 @@ if (!empty($createcourse)) {
 				)
 			)
 		);
+		if ($placementtype=='item') {
+			$contentitems['@graph'][0]['lineItem'] = array(
+				'@type' => 'LineItem',
+				'label' => $title,
+			);
+		}
 		if ($placementtype=='assess' && $ptsposs>0) {
 			$contentitems['@graph'][0]['lineItem'] = array(
 				'@type' => 'LineItem',
@@ -405,6 +436,15 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 		echo '<optgroup label="Assessments">';
 		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 			printf('<option value="%d">%s</option>', Sanitize::onlyInt($row[0]), Sanitize::encodeStringForDisplay($row[1]));
+		}
+		echo '</optgroup>';
+	}
+	$stm = $DBH->prepare("SELECT imas_items.id,title FROM imas_items JOIN desmos_items ON imas_items.typeid = desmos_items.id WHERE courseid=:courseid ORDER BY title");
+	$stm->execute(array(':courseid'=>$cid));
+	if ($stm->rowCount()>0) {
+		echo '<optgroup label="Desmos">';
+		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+			printf('<option value="item%d">%s</option>', Sanitize::onlyInt($row[0]), Sanitize::encodeStringForDisplay($row[1]));
 		}
 		echo '</optgroup>';
 	}
