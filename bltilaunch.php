@@ -165,11 +165,8 @@ if (isset($_GET['launch'])) {
     if ($sessiondata['ltiitemtype']==38) { //is item
         $itemid = $sessiondata['ltiitemid'];
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-        $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-        $item = new $itemObject($course_item['courseid']);
-        $item->findItem($course_item['typeid']);
-        if (empty($item->courseid)) {
-            $diaginfo = "(Debug info: 31-$aid)";
+        if (empty($course_item)) {
+            $diaginfo = "(Debug info: 31-$itemid)";
             reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         if ($sessiondata['ltirole'] == 'learner') {
@@ -177,9 +174,9 @@ if (isset($_GET['launch'])) {
             $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
         }
         header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-            ."?type=".$item->typename
-            ."&cid=".$item->courseid
-            ."&id=".$item->typeid
+            ."?type=".str_replace('Item', '', $course_item['itemtype'])
+            ."&cid=".$course_item['courseid']
+            ."&id=".$course_item['typeid']
         );
     } else
 	if ($sessiondata['ltiitemtype']==0) { //is aid

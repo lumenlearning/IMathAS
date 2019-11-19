@@ -14,6 +14,22 @@ if (isset($CFG['hooks']['ltihome'])) {
 }
 
 //decide what we need to display
+if ($sessiondata['ltiitemtype']==38) {
+	$hascourse = true;
+	$hasplacement = true;
+	$placementtype = 'item';
+	$itemid = $sessiondata['ltiitemid'];
+	$stm = $DBH->prepare("SELECT courseid FROM imas_items WHERE id=:id");
+	$stm->execute(array(':id'=>$itemid));
+	$cid = $stm->fetchColumn(0);
+	$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
+	$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
+	if ($stm->rowCount()==0) {
+		$role = 'tutor';
+	} else {
+		$role = 'teacher';
+	}
+} else
 if ($sessiondata['ltiitemtype']==0) {
 	$hascourse = true;
 	$hasplacement = true;
@@ -172,12 +188,13 @@ if (!empty($createcourse)) {
 	$hascourse = true;
 
 } else if (isset($_POST['setplacement'])) {
+	if (substr($_POST['setplacement'],0, 4) =='item') {
+		$placementtype = 'item';
+		$itemid = substr($_POST['setplacement'],4);
+	} else
 	if ($_POST['setplacement']=='course') {
 		$placementtype = 'course';
 		$typeid = $cid;
-	} elseif (substr($_POST['setplacement'],0, 4) =='item') {
-		$placementtype = 'item';
-		$itemid = substr($_POST['setplacement'],4);
 	} else {
 		$placementtype = 'assess';
 		$typeid = $_POST['setplacement'];
@@ -336,10 +353,19 @@ if (!empty($createcourse)) {
 	}
 }
 
-if ($hasplacement && $placementtype=='course') {
-	if (!isset($_GET['showhome']) && !isset($_GET['chgplacement'])) {
+if ($hasplacement) {
+	if ($placementtype=='course' && !isset($_GET['showhome']) && !isset($_GET['chgplacement'])) {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . Sanitize::courseId($cid) . "&r=" .Sanitize::randomQueryStringParam());
 		exit;
+	}
+	if ($placementtype=='item') {
+		$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
+			."?type=".str_replace('Item', '', $course_item['itemtype'])
+			."&cid=".$course_item['courseid']
+			."&id=".$course_item['typeid']
+			."&r=" .Sanitize::randomQueryStringParam()
+		);
 	}
 }
 
