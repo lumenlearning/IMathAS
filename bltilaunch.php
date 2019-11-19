@@ -162,6 +162,26 @@ if (isset($_GET['launch'])) {
 	$stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessionid'=>$sessionid));
 
 	$keyparts = explode('_',$_SESSION['ltikey']);
+    if ($sessiondata['ltiitemtype']==38) { //is item
+        $itemid = $sessiondata['ltiitemid'];
+        $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+        $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+        $item = new $itemObject($course_item['courseid']);
+        $item->findItem($course_item['typeid']);
+        if (empty($item->courseid)) {
+            $diaginfo = "(Debug info: 1-$aid)";
+            reporterror("This assignment does not appear to exist anymore. $diaginfo");
+        }
+        if ($sessiondata['ltirole'] == 'learner') {
+            $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
+            $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
+        }
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
+            ."?type=".$item->typename
+            ."&cid=".$item->courseid
+            ."&id=".$item->typeid
+        );
+    } else
 	if ($sessiondata['ltiitemtype']==0) { //is aid
 		$aid = $sessiondata['ltiitemid'];
 		$stm = $DBH->prepare('SELECT courseid,ver FROM imas_assessments WHERE id=:aid');
@@ -1308,6 +1328,9 @@ if ($stm->rowCount()==0) {
 	}
 } else {
 	$row = $stm->fetch(PDO::FETCH_NUM);
+	if ($row[0]=='item') {
+        $linkparts = array('itemid', $row[1]);
+    } else
 	if ($row[0]=='course') {
 		$linkparts = array('cid',$row[1]);
 	} else if ($row[0]=='assess') {
@@ -1359,6 +1382,15 @@ if ($_SESSION['lti_keytype']=='cc-of') {
 	}
 }
 
+if ($linkparts[0]=='itemid') {   //is assessment level placement
+    $itemid = intval($linkparts[1]);
+    $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+    if (empty($course_item)) {
+        $diaginfo = "(Debug info: 6-$placeaid)";
+        reporterror("This item does not appear to exist anymore. $diaginfo");
+    }
+    $cid = $course_item['courseid'];
+} else
 //is course level placement
 if ($linkparts[0]=='cid') {
 	$cid = intval($linkparts[1]);
@@ -1499,7 +1531,7 @@ if ($linkparts[0]=='cid') {
 }
 
 //see if student is enrolled, if appropriate to action type
-if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || $linkparts[0]=='folder') {
+if ($linkparts[0]=='itemid' || $linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || $linkparts[0]=='folder') {
 	$latepasses = 0;
 	if ($_SESSION['ltirole']=='instructor') {
 		$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE userid=:userid AND courseid=:courseid");
@@ -1573,7 +1605,10 @@ if ($stm->rowCount()>0) {	//check that same userid, and that we're not jumping o
 	$sessiondata = array();
 	$createnewsession = true;
 }
-
+if ($linkparts[0]=='itemid') {
+    $sessiondata['ltiitemtype']=38;
+    $sessiondata['ltiitemid'] = $linkparts[1];
+} else
 //if assessment, going to check for timelimit
 if ($linkparts[0]=='aid') {
 	$stm = $DBH->prepare("SELECT timelimit,ver FROM imas_assessments WHERE id=:id");
@@ -1743,7 +1778,27 @@ if (isset($_GET['launch'])) {
 	$stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessionid'=>$sessionid));
 
 	$keyparts = explode('_',$_SESSION['ltikey']);
-	if ($sessiondata['ltiitemtype']==0) { //is aid
+    if ($sessiondata['ltiitemtype']==38) { //is item
+        $itemid = $sessiondata['ltiitemid'];
+        $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+        $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+        $item = new $itemObject($course_item['courseid']);
+        $item->findItem($course_item['typeid']);
+        if (empty($item->courseid)) {
+            $diaginfo = "(Debug info: 1-$aid)";
+            reporterror("This assignment does not appear to exist anymore. $diaginfo");
+        }
+        if ($sessiondata['ltirole'] == 'learner') {
+            $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
+            $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
+        }
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
+            ."?type=".$item->typename
+            ."&cid=".$item->courseid
+            ."&id=".$item->typeid
+        );
+    } else
+    if ($sessiondata['ltiitemtype']==0) { //is aid
 		$aid = $sessiondata['ltiitemid'];
 		$stm = $DBH->prepare("SELECT courseid,ver FROM imas_assessments WHERE id=:id");
 		$stm->execute(array(':id'=>$aid));
@@ -2404,7 +2459,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
                         $stm->execute(array(':courseid'=>$_SESSION['place_aid'][0], ':userid'=>$userid));
                         if ($stm->rowCount()>0) {
                             $copycourse=false;
-                            $destcid = intval($_SESSION['place_aid'][0]);
+                            $destcid = intval($_SESSION['place_item_id'][0]);
                         }
                     } else {
                         reporterror("Course link not established yet");
@@ -2429,7 +2484,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
             $query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
             $query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
             $stm = $DBH->prepare($query);
-            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'assess', ':typeid'=>$aid));
+            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'item', ':typeid'=>$itemid));
             $keyparts = array('aid',$aid);
 
         } else
@@ -2768,7 +2823,10 @@ if ($stm->rowCount()>0) {
 	$sessiondata = array();
 	$createnewsession = true;
 }
-
+if ($keyparts[0]=='itemid') { //is cid
+    $sessiondata['ltiitemtype']=38;
+    $sessiondata['ltiitemid'] = $keyparts[1];
+} else
 //if assessment, going to check for timelimit
 if ($keyparts[0]=='aid') {
 	$stm = $DBH->prepare("SELECT timelimit,ver FROM imas_assessments WHERE id=:id");
