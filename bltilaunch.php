@@ -169,7 +169,7 @@ if (isset($_GET['launch'])) {
         $item = new $itemObject($course_item['courseid']);
         $item->findItem($course_item['typeid']);
         if (empty($item->courseid)) {
-            $diaginfo = "(Debug info: 1-$aid)";
+            $diaginfo = "(Debug info: 31-$aid)";
             reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         if ($sessiondata['ltirole'] == 'learner') {
@@ -1386,7 +1386,7 @@ if ($linkparts[0]=='itemid') {   //is assessment level placement
     $itemid = intval($linkparts[1]);
     $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
     if (empty($course_item)) {
-        $diaginfo = "(Debug info: 6-$placeaid)";
+        $diaginfo = "(Debug info: 32-$placeaid)";
         reporterror("This item does not appear to exist anymore. $diaginfo");
     }
     $cid = $course_item['courseid'];
@@ -1785,7 +1785,7 @@ if (isset($_GET['launch'])) {
         $item = new $itemObject($course_item['courseid']);
         $item->findItem($course_item['typeid']);
         if (empty($item->courseid)) {
-            $diaginfo = "(Debug info: 1-$aid)";
+            $diaginfo = "(Debug info: 33-$aid)";
             reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         if ($sessiondata['ltirole'] == 'learner') {
@@ -2198,7 +2198,29 @@ if (isset($_GET['launch'])) {
 		} else {
 			$keytype = 'c';
 		}
-		if (isset($_REQUEST['custom_place_aid'])) { //common catridge blti placement using cid_### or placein_### key type
+        if (isset($_REQUEST['custom_item_id'])) {
+            $place_item_id = intval($_REQUEST['custom_item_id']);
+            $keytype = 'cc-g';
+            $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
+            $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+            $item = new $itemObject($course_item['courseid']);
+            $item->findItem($course_item['typeid']);
+            $sourcecid = $item->courseid;
+            if ($sourcecid===false) {
+                $diaginfo = "(Debug info: 34-$placea_item_id)";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
+            }
+            if ($keyparts[1]==$sourcecid) { //is key is for source course; treat like aid_### placement
+                $keyparts[0] = 'itemid';
+                $keyparts[1] = $place_item_id;
+                $ltikey = implode('_',$keyparts);
+                $keytype = 'i';
+            } else {  //key is for a different course; mark as cc placement
+                $keytype = 'cc-c';
+                $_SESSION['place_item_id'] = array($sourcecid, $place_item_id);
+            }
+        } else
+        if (isset($_REQUEST['custom_place_aid'])) { //common catridge blti placement using cid_### or placein_### key type
 			$placeaid = intval($_REQUEST['custom_place_aid']);
 			$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$placeaid));
@@ -2258,7 +2280,7 @@ if (isset($_GET['launch'])) {
 			$stm->execute(array(':id'=>$placeaid));
 			$sourcecid = $stm->fetchColumn(0);
 			if ($sourcecid===false) {
-				$diaginfo = "(Debug info: 6-$placeaid)";
+				$diaginfo = "(Debug info: 35-$placeaid)";
 				reporterror("This assignment does not appear to exist anymore. $diaginfo");
 			}
 			$_SESSION['place_aid'] = array($sourcecid,$_REQUEST['custom_place_aid']);
@@ -2641,6 +2663,15 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 if ($_SESSION['lti_keytype']=='cc-vf' || $_SESSION['lti_keytype']=='cc-of') {
 	$keyparts = array('folder',$_SESSION['view_folder'][0],$_SESSION['view_folder'][1]);
 }
+if ($keyparts[0]=='itemid') {   //is assessment level placement
+    $itemid = intval($keyparts[1]);
+    $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+    if (empty($course_item)) {
+        $diaginfo = "(Debug info: 36-$placeaid)";
+        reporterror("This item does not appear to exist anymore. $diaginfo");
+    }
+    $cid = $course_item['courseid'];
+} else
 //is course level placement
 if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 	$cid = intval($keyparts[1]);
