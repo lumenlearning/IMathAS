@@ -2650,6 +2650,9 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 		}
 	} else {
 		$row = $stm->fetch(PDO::FETCH_NUM);
+        if ($row[0]=='item') {
+            $keyparts = array('itemid', $row[1]);
+        } else
 		if ($row[0]=='course') {
 			$keyparts = array('cid',$row[1]);
 		} else if ($row[0]=='assess') {
