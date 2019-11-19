@@ -185,7 +185,7 @@ if (!empty($createcourse)) {
 	if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "Canvas") {
 		//Canvas custom LTI selection return or IMS deeplink LTI selection return
 		if ($placementtype=='item') {
-			$course_item = \Course\Includes\CourseItem::findCouseItem($itemid);
+			$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
 			$item = new $itemObject($course_item['courseid']);
 			$item->findItem($course_item['typeid']);
@@ -218,7 +218,7 @@ if (!empty($createcourse)) {
 		require_once 'includes/OAuth.php';
 		require_once 'includes/ltioauthstore.php';
 		if ($placementtype=='item') {
-			$course_item = \Course\Includes\CourseItem::findCouseItem($itemid);
+			$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
 			$item = new $itemObject($course_item['courseid']);
 			$item->findItem($course_item['typeid']);

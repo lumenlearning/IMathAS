@@ -167,7 +167,7 @@ if (isset($_GET['create']) && isset($_POST['whichitems'])) {
                 // #### Begin OHM-specific code #####################################################
                 // #### Begin OHM-specific code #####################################################
                 // #### Begin OHM-specific code #####################################################
-                case 'DesmosInteractive': echo $CFG['CPS']['miniicons']['desmos']; break;
+                case 'DesmosItem': echo $CFG['CPS']['miniicons']['desmos']; break;
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################

@@ -161,7 +161,7 @@ abstract class CourseItem
         $stm->execute(
             array(
                 ':courseid'=>$this->courseid,
-                ':itemtype'=>str_replace(' ', '', $this->display_name),
+                ':itemtype'=>ucwords($this->typename).'Item',
                 ':typeid'=>$typeid
             )
         );
@@ -198,7 +198,7 @@ abstract class CourseItem
             . " WHERE typeid=:typeid AND itemtype=:itemtype AND courseid=:courseid";
         $stm = $this->dbh->prepare($query);
         $stm->bindValue(':typeid', $this->typeid);
-        $stm->bindValue(':itemtype', str_replace(' ', '', $this->display_name));
+        $stm->bindValue(':itemtype', ucwords($this->typename).'Item');
         $stm->bindValue(':courseid', $this->courseid);
         $stm->execute();
         if ($stm->rowCount()>0) {
@@ -659,9 +659,6 @@ abstract class CourseItem
      */
     public function __get($name)
     {
-        if ($name == 'itemtype') {
-            return str_replace(' ', '', $this->display_name);
-        }
         return $this->$name;
     }
 

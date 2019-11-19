@@ -55,7 +55,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	if ($itemtype == "DesmosInteractive") {
+	if ($itemtype == "DesmosItem") {
 		$item = new \Desmos\Models\DesmosItem($cid);
 		$item->copyItem($typeid, $_POST['append'], $sethidden);
 		return $item->itemid;
@@ -627,7 +627,7 @@ function getiteminfo($itemid) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		case ($itemtype==="DesmosInteractive"):
+		case ($itemtype==="DesmosItem"):
 			$stm = $DBH->prepare("SELECT title,summary FROM desmos_items WHERE id=:id");
 			break;
 		// #### End OHM-specific code #####################################################

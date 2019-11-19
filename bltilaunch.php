@@ -2185,7 +2185,7 @@ if (isset($_GET['launch'])) {
 		if (isset($_REQUEST['custom_item_id'])) {
             $place_item_id = intval($_REQUEST['custom_item_id']);
             $keytype = 'cc-g';
-            $course_item = \Course\Includes\CourseItem::findCouseItem($place_item_id);
+            $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
             $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
             $item = new $itemObject($course_item['courseid']);
             $item->findItem($course_item['typeid']);

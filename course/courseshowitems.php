@@ -2066,8 +2066,8 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   $stm = $DBH->prepare("SELECT id,title,startdate,enddate,avail FROM desmos_items WHERE courseid=:courseid");
 		   $stm->execute(array(':courseid'=>$cid));
 		   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-			   $iteminfo['DesmosInteractive'][$row['id']] = new \Desmos\Models\DesmosItem($cid);
-			   $iteminfo['DesmosInteractive'][$row['id']]->setItem($row);
+			   $iteminfo['DesmosItem'][$row['id']] = new \Desmos\Models\DesmosItem($cid);
+			   $iteminfo['DesmosItem'][$row['id']]->setItem($row);
 		   }
 		   // #### End OHM-specific code #####################################################
 		   // #### End OHM-specific code #####################################################
@@ -2478,10 +2478,10 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   // #### Begin OHM-specific code #####################################################
 		   // #### Begin OHM-specific code #####################################################
 		   // #### Begin OHM-specific code #####################################################
-		   } else if ($itemtypes[$items[$i]][0] == 'DesmosInteractive') {
+		   } else if ($itemtypes[$items[$i]][0] == 'DesmosItem') {
 			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
-			   if ($iteminfo['DesmosInteractive'][$typeid]) {
-				   echo $iteminfo['DesmosInteractive'][$typeid]->courseQuickView($now, $viewall, $showlinks, $showdates, $duedates);
+			   if ($iteminfo['DesmosItem'][$typeid]) {
+				   echo $iteminfo['DesmosItem'][$typeid]->courseQuickView($now, $viewall, $showlinks, $showdates, $duedates);
 				   //getCourseItem($items[$i], $parent, $now, 'quick', $viewall, $canedit, $showlinks, $showdates, $duedates);
 			   }
 		   // #### End OHM-specific code #####################################################

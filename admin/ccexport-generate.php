@@ -208,7 +208,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
-            if ($iteminfo[$item][0]=='DesmosInteractive') {
+            if ($iteminfo[$item][0]=='DesmosItem') {
                 //$stm = $DBH->prepare("SELECT name,summary,defpoints,itemorder,enddate,gbcategory,avail,startdate,ptsposs FROM imas_assessments WHERE id=:id");
                 $courseItem = new \Desmos\Models\DesmosItem();
                 $courseItem->findItem($iteminfo[$item][1]);

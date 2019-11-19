@@ -171,7 +171,7 @@ public function importdata($data, $cid, $checked, $options) {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     //insert the desmos_items
-    if (isset($this->toimportbytype['DesmosInteractive'])) {
+    if (isset($this->toimportbytype['DesmosItem'])) {
         $this->insertDesmos();
     }
     // #### End OHM-specific code #####################################################
@@ -241,7 +241,7 @@ public function importdata($data, $cid, $checked, $options) {
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        'Desmos Imported'=>count($this->typemap['DesmosInteractive'])
+        'Desmos Imported'=>count($this->typemap['DesmosItem'])
         // #### End OHM-specific code #####################################################
         // #### End OHM-specific code #####################################################
         // #### End OHM-specific code #####################################################
@@ -731,8 +731,8 @@ private function insertWiki() {
 private function insertDesmos() {
     global $db_fields;
 
-    $this->typemap['DesmosInteractive'] = array();
-    foreach ($this->toimportbytype['DesmosInteractive'] as $k=>$toimport) {
+    $this->typemap['DesmosItem'] = array();
+    foreach ($this->toimportbytype['DesmosItem'] as $k=>$toimport) {
         $exarr = array();
         $exarr['courseid'] = $this->cid;
         //sanitize html fields
@@ -744,7 +744,7 @@ private function insertDesmos() {
         }
         $desmos = new \Desmos\Models\DesmosItem($this->cid);
         $desmos->addItem($exarr);
-        $this->typemap['DesmosInteractive'][$toimport] = $desmos->typeid+0;
+        $this->typemap['DesmosItem'][$toimport] = $desmos->typeid+0;
     }
 }
 // #### End OHM-specific code #####################################################

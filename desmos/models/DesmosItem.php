@@ -17,7 +17,6 @@ use PDO;
 class DesmosItem extends CourseItem
 {
     protected $typename = "desmos";
-    protected $itemtype = "DesmosInteractive";
     //imas_items.itemtype with spaces
     protected $display_name = "Desmos Interactive";
     protected $miniicon = "../ohm/img/desmos_tiny.php";
@@ -294,7 +293,7 @@ class DesmosItem extends CourseItem
             'avail'=>$this->avail,
             'outcomes'=>$this->outcomes,
             'tags'=>$this->tags,
-            'type'=>str_replace(' ', '', $this->display_name)
+            'type'=>ucwords($this->typename).'Item'
         ];
         if ($copy === false) {
             $data['id'] = $this->typeid;
