@@ -2729,7 +2729,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($row[0]=='item') {
+        if (substr($row[0], -4)=='Item') {
             $keyparts = array('itemid', $row[1]);
         } else
         // #### End OHM-specific code #####################################################
