@@ -162,6 +162,11 @@ if (isset($_GET['launch'])) {
 	$stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessionid'=>$sessionid));
 
 	$keyparts = explode('_',$_SESSION['ltikey']);
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
     if ($sessiondata['ltiitemtype']==38) { //is item
         $itemid = $sessiondata['ltiitemid'];
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
@@ -179,6 +184,11 @@ if (isset($_GET['launch'])) {
             ."&id=".$course_item['typeid']
         );
     } else
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 	if ($sessiondata['ltiitemtype']==0) { //is aid
 		$aid = $sessiondata['ltiitemid'];
 		$stm = $DBH->prepare('SELECT courseid,ver FROM imas_assessments WHERE id=:aid');
@@ -1325,9 +1335,19 @@ if ($stm->rowCount()==0) {
 	}
 } else {
 	$row = $stm->fetch(PDO::FETCH_NUM);
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
 	if ($row[0]=='item') {
         $linkparts = array('itemid', $row[1]);
     } else
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 	if ($row[0]=='course') {
 		$linkparts = array('cid',$row[1]);
 	} else if ($row[0]=='assess') {
@@ -1379,6 +1399,11 @@ if ($_SESSION['lti_keytype']=='cc-of') {
 	}
 }
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 if ($linkparts[0]=='itemid') {   //is assessment level placement
     $itemid = intval($linkparts[1]);
     $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
@@ -1388,6 +1413,11 @@ if ($linkparts[0]=='itemid') {   //is assessment level placement
     }
     $cid = $course_item['courseid'];
 } else
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 //is course level placement
 if ($linkparts[0]=='cid') {
 	$cid = intval($linkparts[1]);
@@ -1528,6 +1558,7 @@ if ($linkparts[0]=='cid') {
 }
 
 //see if student is enrolled, if appropriate to action type
+// #### itemid OHM-specific code #####################################################
 if ($linkparts[0]=='itemid' || $linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || $linkparts[0]=='folder') {
 	$latepasses = 0;
 	if ($_SESSION['ltirole']=='instructor') {
@@ -1602,10 +1633,20 @@ if ($stm->rowCount()>0) {	//check that same userid, and that we're not jumping o
 	$sessiondata = array();
 	$createnewsession = true;
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 if ($linkparts[0]=='itemid') {
     $sessiondata['ltiitemtype']=38;
     $sessiondata['ltiitemid'] = $linkparts[1];
 } else
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 //if assessment, going to check for timelimit
 if ($linkparts[0]=='aid') {
 	$stm = $DBH->prepare("SELECT timelimit,ver FROM imas_assessments WHERE id=:id");
@@ -1775,6 +1816,11 @@ if (isset($_GET['launch'])) {
 	$stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessionid'=>$sessionid));
 
 	$keyparts = explode('_',$_SESSION['ltikey']);
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
     if ($sessiondata['ltiitemtype']==38) { //is item
         $itemid = $sessiondata['ltiitemid'];
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
@@ -1795,6 +1841,11 @@ if (isset($_GET['launch'])) {
             ."&id=".$item->typeid
         );
     } else
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
     if ($sessiondata['ltiitemtype']==0) { //is aid
 		$aid = $sessiondata['ltiitemid'];
 		$stm = $DBH->prepare("SELECT courseid,ver FROM imas_assessments WHERE id=:id");
@@ -2195,6 +2246,11 @@ if (isset($_GET['launch'])) {
 		} else {
 			$keytype = 'c';
 		}
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
         if (isset($_REQUEST['custom_item_id'])) {
             $place_item_id = intval($_REQUEST['custom_item_id']);
             $keytype = 'cc-g';
@@ -2217,6 +2273,11 @@ if (isset($_GET['launch'])) {
                 $_SESSION['place_item_id'] = array($sourcecid, $place_item_id);
             }
         } else
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
         if (isset($_REQUEST['custom_place_aid'])) { //common catridge blti placement using cid_### or placein_### key type
 			$placeaid = intval($_REQUEST['custom_place_aid']);
 			$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
@@ -2256,6 +2317,11 @@ if (isset($_GET['launch'])) {
 		$_SESSION['ltilookup'] = 'u';
 		$ltiorg = $ltikey.':'.$ltiorg;
 		$keytype = 'g';
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
 		if (isset($_REQUEST['custom_item_id'])) {
             $place_item_id = intval($_REQUEST['custom_item_id']);
             $keytype = 'cc-g';
@@ -2270,6 +2336,11 @@ if (isset($_GET['launch'])) {
             }
             $_SESSION['place_item_id'] = array($sourcecid,$place_item_id);
         } else
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		if (isset($_REQUEST['custom_place_aid'])) {
 			$placeaid = intval($_REQUEST['custom_place_aid']);
 			$keytype = 'cc-g';
@@ -2854,10 +2925,20 @@ if ($stm->rowCount()>0) {
 	$sessiondata = array();
 	$createnewsession = true;
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 if ($keyparts[0]=='itemid') { //is cid
     $sessiondata['ltiitemtype']=38;
     $sessiondata['ltiitemid'] = $keyparts[1];
 } else
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 //if assessment, going to check for timelimit
 if ($keyparts[0]=='aid') {
 	$stm = $DBH->prepare("SELECT timelimit,ver FROM imas_assessments WHERE id=:id");

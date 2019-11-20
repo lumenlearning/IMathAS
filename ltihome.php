@@ -14,6 +14,11 @@ if (isset($CFG['hooks']['ltihome'])) {
 }
 
 //decide what we need to display
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 if ($sessiondata['ltiitemtype']==38) {
 	$hascourse = true;
 	$hasplacement = true;
@@ -30,6 +35,11 @@ if ($sessiondata['ltiitemtype']==38) {
 		$role = 'teacher';
 	}
 } else
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 if ($sessiondata['ltiitemtype']==0) {
 	$hascourse = true;
 	$hasplacement = true;
@@ -188,10 +198,20 @@ if (!empty($createcourse)) {
 	$hascourse = true;
 
 } else if (isset($_POST['setplacement'])) {
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
 	if (substr($_POST['setplacement'],0, 4) =='item') {
 		$placementtype = 'item';
 		$itemid = substr($_POST['setplacement'],4);
 	} else
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	if ($_POST['setplacement']=='course') {
 		$placementtype = 'course';
 		$typeid = $cid;
@@ -201,6 +221,11 @@ if (!empty($createcourse)) {
 	}
 	if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "Canvas") {
 		//Canvas custom LTI selection return or IMS deeplink LTI selection return
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
 		if ($placementtype=='item') {
 			$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
@@ -214,6 +239,11 @@ if (!empty($createcourse)) {
 			exit;
 
 		} else
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 		if ($placementtype=='assess') {
 			$stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$typeid));
@@ -234,6 +264,11 @@ if (!empty($createcourse)) {
 	} else if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "IMSdeeplink") {
 		require_once 'includes/OAuth.php';
 		require_once 'includes/ltioauthstore.php';
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
 		if ($placementtype=='item') {
 			$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
@@ -243,6 +278,11 @@ if (!empty($createcourse)) {
 			$text = $item->summary;
 			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=$itemid";
 		} else
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 		if ($placementtype=='assess') {
 			$stm = $DBH->prepare("SELECT name,summary,ptsposs FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$typeid));
@@ -290,12 +330,22 @@ if (!empty($createcourse)) {
 				)
 			)
 		);
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
 		if ($placementtype=='item') {
 			$contentitems['@graph'][0]['lineItem'] = array(
-				'@type' => 'LineItem',
+				'@type' => 'DesmosItem',
 				'label' => $title,
 			);
 		}
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 		if ($placementtype=='assess' && $ptsposs>0) {
 			$contentitems['@graph'][0]['lineItem'] = array(
 				'@type' => 'LineItem',
@@ -353,21 +403,32 @@ if (!empty($createcourse)) {
 	}
 }
 
-if ($hasplacement) {
-	if ($placementtype=='course' && !isset($_GET['showhome']) && !isset($_GET['chgplacement'])) {
+if ($hasplacement && $placementtype=='course') {
+	if (!isset($_GET['showhome']) && !isset($_GET['chgplacement'])) {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=" . Sanitize::courseId($cid) . "&r=" .Sanitize::randomQueryStringParam());
 		exit;
 	}
-	if ($placementtype=='item') {
-		$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-			."?type=".str_replace('Item', '', $course_item['itemtype'])
-			."&cid=".$course_item['courseid']
-			."&id=".$course_item['typeid']
-			."&r=" .Sanitize::randomQueryStringParam()
-		);
-	}
 }
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+if ($hasplacement && $placementtype=='item') {
+	$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+	header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
+		."?type=".str_replace('Item', '', $course_item['itemtype'])
+		."&cid=".$course_item['courseid']
+		."&id=".$course_item['typeid']
+		."&r=" .Sanitize::randomQueryStringParam()
+	);
+}
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 
 //HTML Output
 $pagetitle = "LTI Home";
@@ -465,6 +526,11 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 		}
 		echo '</optgroup>';
 	}
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
 	$stm = $DBH->prepare("SELECT imas_items.id,title FROM imas_items JOIN desmos_items ON imas_items.typeid = desmos_items.id WHERE courseid=:courseid ORDER BY title");
 	$stm->execute(array(':courseid'=>$cid));
 	if ($stm->rowCount()>0) {
@@ -474,6 +540,11 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 		}
 		echo '</optgroup>';
 	}
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	if (!isset($sessiondata['lti_selection_type']) || $sessiondata['lti_selection_type']=='all') {
 		echo '<optgroup label="Course">';
 		echo '<option value="course">Whole Course Placement</option>';
