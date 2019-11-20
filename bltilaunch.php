@@ -1830,7 +1830,7 @@ if (isset($_GET['launch'])) {
         }
         if ($sessiondata['ltirole'] == 'learner') {
             $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
-            $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
+            $stm->execute(array(':userid' => $userid, ':courseid' => $course_item['courseid'], ':typeid' => $itemid, ':viewtime' => $now));
         }
         header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
             ."?type=".str_replace('Item', '', $course_item['itemtype'])
