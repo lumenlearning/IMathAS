@@ -1828,7 +1828,7 @@ if (isset($_GET['launch'])) {
         $item = new $itemObject($course_item['courseid']);
         $item->findItem($course_item['typeid']);
         if (empty($item->courseid)) {
-            $diaginfo = "(Debug info: 33-$aid)";
+            $diaginfo = "(Debug info: 33-$itemid)".print_r($item);
             reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         if ($sessiondata['ltirole'] == 'learner') {
