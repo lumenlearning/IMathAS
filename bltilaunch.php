@@ -1340,7 +1340,7 @@ if ($stm->rowCount()==0) {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
-	if ($row[0]=='item') {
+	if (substr($row[0], -4)=='Item') {
         $linkparts = array('itemid', $row[1]);
     } else
     // #### End OHM-specific code #####################################################
