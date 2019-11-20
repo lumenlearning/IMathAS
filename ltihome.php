@@ -22,11 +22,10 @@ if (isset($CFG['hooks']['ltihome'])) {
 if ($sessiondata['ltiitemtype']==38) {
 	$hascourse = true;
 	$hasplacement = true;
-	$placementtype = 'item';
 	$itemid = $sessiondata['ltiitemid'];
-	$stm = $DBH->prepare("SELECT courseid FROM imas_items WHERE id=:id");
-	$stm->execute(array(':id'=>$itemid));
-	$cid = $stm->fetchColumn(0);
+	$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+	$cid = $course_item['courseid'];
+	$placementtype = $course_item['itemtype'];
 	$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 	$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
 	if ($stm->rowCount()==0) {
@@ -204,7 +203,7 @@ if (!empty($createcourse)) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	if (substr($_POST['setplacement'],0, 4) =='item') {
-		$placementtype = 'item';
+		$placementtype = $course_item['itemtype'];
 		$itemid = substr($_POST['setplacement'],4);
 	} else
 	// #### End OHM-specific code #####################################################
@@ -227,7 +226,6 @@ if (!empty($createcourse)) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		if ($placementtype=='item') {
-			$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
 			$item = new $itemObject($course_item['courseid']);
 			$item->findItem($course_item['typeid']);
@@ -270,7 +268,6 @@ if (!empty($createcourse)) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		if ($placementtype=='item') {
-			$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
 			$item = new $itemObject($course_item['courseid']);
 			$item->findItem($course_item['typeid']);
@@ -415,8 +412,7 @@ if ($hasplacement && $placementtype=='course') {
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
-if ($hasplacement && $placementtype=='item') {
-	$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+if ($hasplacement && $placementtype==$course_item['itemtype']) {
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
 		."?type=".str_replace('Item', '', $course_item['itemtype'])
 		."&cid=".$course_item['courseid']

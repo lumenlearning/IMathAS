@@ -209,7 +209,6 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             if ($iteminfo[$item][0]=='DesmosItem') {
-                //$stm = $DBH->prepare("SELECT name,summary,defpoints,itemorder,enddate,gbcategory,avail,startdate,ptsposs FROM imas_assessments WHERE id=:id");
                 $courseItem = new \Desmos\Models\DesmosItem();
                 $courseItem->findItem($iteminfo[$item][1]);
                 $out .= $ind.'<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'" identifierref="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
@@ -509,6 +508,12 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 					fwrite($fp,'<workflow_state>'.($row[6]==0?'unpublished':'published').'</workflow_state>'."\n");
 					fwrite($fp,'<points_possible>'.$row[8].'</points_possible>'."\n");
 					fwrite($fp,'<grading_type>points</grading_type>'."\n");
+					if (isset($_POST['includeduedates']) && $row[4]<2000000000) {
+					    fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $row[4]).'</due_at>'."\n");
+                    }
+                    if ($row[7] > 0 && isset($_POST['includestartdates'])) {
+                        fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $row[7]).'</unlock_at>'."\n");
+                    }
 					if (isset($_POST['includegbcats'])) {
 						fwrite($fp,'<assignment_group_identifierref>GBCAT'.$row[5].'</assignment_group_identifierref>'."\n");
 					}

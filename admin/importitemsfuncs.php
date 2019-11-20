@@ -14,7 +14,7 @@ function getsubinfo($items,$parent,$pre) {
 		if (is_array($anitem)) {
 			$ids[] = $parent.'-'.($k+1);
 			$types[] = $pre."Block";
-            $names[] = $anitem['item'];
+			$names[] = $anitem['name'];
 			$parents[] = $parent;
 			getsubinfo($anitem['items'],$parent.'-'.($k+1),$pre.'--');
 		} else {
@@ -228,6 +228,17 @@ public function importdata($data, $cid, $checked, $options) {
 	$DBH->commit();
 
 	return array(
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        'Desmos Imported'=>count($this->typemap['DesmosItem']),
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		'Questions Added'=>$this->qsadded,
 		'Questions Updated'=>$this->qmodcnt,
 		'InlineText Imported'=>count($this->typemap['InlineText']),
@@ -235,18 +246,7 @@ public function importdata($data, $cid, $checked, $options) {
 		'Forums Imported'=>count($this->typemap['Forum']),
 		'Assessments Imported'=>count($this->typemap['Assessment']),
 		'Drills Imported'=>count($this->typemap['Drill']),
-		'Wikis Imported'=>count($this->typemap['Wiki']),
-        // #### Begin OHM-specific code #####################################################
-        // #### Begin OHM-specific code #####################################################
-        // #### Begin OHM-specific code #####################################################
-        // #### Begin OHM-specific code #####################################################
-        // #### Begin OHM-specific code #####################################################
-        'Desmos Imported'=>count($this->typemap['DesmosItem'])
-        // #### End OHM-specific code #####################################################
-        // #### End OHM-specific code #####################################################
-        // #### End OHM-specific code #####################################################
-        // #### End OHM-specific code #####################################################
-        // #### End OHM-specific code #####################################################
+		'Wikis Imported'=>count($this->typemap['Wiki'])
 		);
 }
 

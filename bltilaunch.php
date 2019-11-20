@@ -1558,7 +1558,7 @@ if ($linkparts[0]=='cid') {
 }
 
 //see if student is enrolled, if appropriate to action type
-// #### itemid OHM-specific code #####################################################
+// #### $linkparts[0]=='itemid' is OHM-specific code #####################################################
 if ($linkparts[0]=='itemid' || $linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || $linkparts[0]=='folder') {
 	$latepasses = 0;
 	if ($_SESSION['ltirole']=='instructor') {
@@ -1824,11 +1824,8 @@ if (isset($_GET['launch'])) {
     if ($sessiondata['ltiitemtype']==38) { //is item
         $itemid = $sessiondata['ltiitemid'];
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-        $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-        $item = new $itemObject($course_item['courseid']);
-        $item->findItem($course_item['typeid']);
-        if (empty($item->courseid)) {
-            $diaginfo = "(Debug info: 33-$itemid)".print_r($item);
+        if (empty($course_item)) {
+            $diaginfo = "(Debug info: 33-$itemid)";
             reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         if ($sessiondata['ltirole'] == 'learner') {
@@ -1836,9 +1833,9 @@ if (isset($_GET['launch'])) {
             $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
         }
         header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-            ."?type=".$item->typename
-            ."&cid=".$item->courseid
-            ."&id=".$item->typeid
+            ."?type=".str_replace('Item', '', $course_item['itemtype'])
+            ."&cid=".$course_item['courseid']
+            ."&id=".$course_item['typeid']
         );
     } else
     // #### End OHM-specific code #####################################################
@@ -2255,10 +2252,7 @@ if (isset($_GET['launch'])) {
             $place_item_id = intval($_REQUEST['custom_item_id']);
             $keytype = 'cc-g';
             $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
-            $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-            $item = new $itemObject($course_item['courseid']);
-            $item->findItem($course_item['typeid']);
-            $sourcecid = $item->courseid;
+            $sourcecid = $course_item['courseid'];
             if ($sourcecid===false) {
                 $diaginfo = "(Debug info: 34-$placea_item_id)";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
@@ -2326,12 +2320,9 @@ if (isset($_GET['launch'])) {
             $place_item_id = intval($_REQUEST['custom_item_id']);
             $keytype = 'cc-g';
             $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
-            $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-            $item = new $itemObject($course_item['courseid']);
-            $item->findItem($course_item['typeid']);
-            $sourcecid = $item->courseid;
+            $sourcecid = $course_item['courseid'];
             if ($sourcecid===false) {
-                $diaginfo = "(Debug info: 6-$placeaid)";
+                $diaginfo = "(Debug info: 35-$place_item_id)";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
             $_SESSION['place_item_id'] = array($sourcecid,$place_item_id);
@@ -2348,7 +2339,7 @@ if (isset($_GET['launch'])) {
 			$stm->execute(array(':id'=>$placeaid));
 			$sourcecid = $stm->fetchColumn(0);
 			if ($sourcecid===false) {
-				$diaginfo = "(Debug info: 35-$placeaid)";
+				$diaginfo = "(Debug info: 6-$placeaid)";
 				reporterror("This assignment does not appear to exist anymore. $diaginfo");
 			}
 			$_SESSION['place_aid'] = array($sourcecid,$_REQUEST['custom_place_aid']);
@@ -2536,6 +2527,11 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':org'=>"$shortorg:%"));
 	if ($stm->rowCount()==0) {
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
         if (isset($_SESSION['place_item_id'])) {
             //look to see if we've already linked this context_id with a course
             $stm = $DBH->prepare("SELECT courseid FROM imas_lti_courses WHERE contextid=:contextid AND org LIKE :org");
@@ -2565,19 +2561,29 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
             } else {
                 $destcid = $stm->fetchColumn(0);
             }
-            if ($destcid==$_SESSION['place_item_id'][0]) {
-                //aid is in destination course - just make placement
-                $itemid = $_SESSION['place_item_id'][1];
-            } else {
-                //aid is in source course.  Let's see if we already copied it.
-            }
-            $query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
-            $query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
+            $itemid = $_SESSION['place_item_id'][1];
+            $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+
+            $query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid)";
+            $query .= " VALUES (:org, :contextid, :linkid, :placementtype, :typeid)";
             $stm = $DBH->prepare($query);
-            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'item', ':typeid'=>$itemid));
-            $keyparts = array('aid',$aid);
+            $stm->execute(
+                [
+                    ':org'=>$_SESSION['ltiorg'],
+                    ':contextid'=>$_SESSION['lti_context_id'],
+                    ':linkid'=>$_SESSION['lti_resource_link_id'],
+                    ':placementtype'=>$course_item['itemtype'],
+                    ':typeid'=>$itemid
+                ]
+            );
+            $keyparts = array('itemid',$itemid);
 
         } else
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		if (isset($_SESSION['place_aid'])) {
 			//look to see if we've already linked this context_id with a course
 			$stm = $DBH->prepare("SELECT courseid FROM imas_lti_courses WHERE contextid=:contextid AND org LIKE :org");
@@ -2718,9 +2724,19 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 		}
 	} else {
 		$row = $stm->fetch(PDO::FETCH_NUM);
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
         if ($row[0]=='item') {
             $keyparts = array('itemid', $row[1]);
         } else
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		if ($row[0]=='course') {
 			$keyparts = array('cid',$row[1]);
 		} else if ($row[0]=='assess') {
@@ -2734,6 +2750,11 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 if ($_SESSION['lti_keytype']=='cc-vf' || $_SESSION['lti_keytype']=='cc-of') {
 	$keyparts = array('folder',$_SESSION['view_folder'][0],$_SESSION['view_folder'][1]);
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
 if ($keyparts[0]=='itemid') {   //is assessment level placement
     $itemid = intval($keyparts[1]);
     $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
@@ -2743,6 +2764,10 @@ if ($keyparts[0]=='itemid') {   //is assessment level placement
     }
     $cid = $course_item['courseid'];
 } else
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 //is course level placement
 if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 	$cid = intval($keyparts[1]);
