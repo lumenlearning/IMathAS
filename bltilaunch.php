@@ -1751,7 +1751,29 @@ if (!$promptforsettings && !$createnewsession && !($linkparts[0]=='aid' && $tlwr
 	$stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id");
 	$stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 
-	if ($linkparts[0]=='aid') { //is aid
+	// #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if ($linkparts[0]=='itemid') { //is itemid
+        $course_item = \Course\Includes\CourseItem::findCourseItem($linkparts[1]);
+        if ($sessiondata['ltirole'] == 'learner') {
+            $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
+            $stm->execute(array(':userid' => $userid, ':courseid' => $course_item['courseid'], ':typeid' => $course_item['typeid'], ':viewtime' => $now));
+        }
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
+            ."?type=".str_replace('Item', '', $course_item['itemtype'])
+            ."&cid=".$course_item['courseid']
+            ."&id=".$course_item['typeid']
+        );
+    } else
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    if ($linkparts[0]=='aid') { //is aid
 		if ($sessiondata['ltirole'] == 'learner') {
 			$stm = $DBH->prepare("INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid, :courseid, :type, :typeid, :viewtime, :info)");
 			$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':type'=>'assesslti', ':typeid'=>$aid, ':viewtime'=>$now, ':info'=>''));
