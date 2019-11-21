@@ -10,7 +10,7 @@
     <?php echo $pagetitle ?>    
 </h1>
 
-<form class="desmos form" enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
+<form class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
     <div class="form-group">
         <div class="form-left">
             <div class="controls">
