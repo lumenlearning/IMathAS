@@ -55,7 +55,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	if ($itemtype == "DesmosInteractive") {
+	if ($itemtype == "DesmosItem") {
 		$item = new \Desmos\Models\DesmosItem($cid);
 		$item->copyItem($typeid, $_POST['append'], $sethidden);
 		return $item->itemid;
@@ -627,8 +627,8 @@ function getiteminfo($itemid) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		case ($itemtype==="DesmosInteractive"):
-			$stm = $DBH->prepare("SELECT title,summary FROM desmos_interactives WHERE id=:id");
+		case ($itemtype==="DesmosItem"):
+			$stm = $DBH->prepare("SELECT title,summary FROM desmos_items WHERE id=:id");
 			break;
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
@@ -664,20 +664,31 @@ function getsubinfo($items,$parent,$pre,$itemtypelimit=false,$spacer='|&nbsp;&nb
 				continue;
 			}
 			if (!empty($itemshowdata)) {
-				array($itemtype,$name,$summary,$typeid);
-				if (isset($itemshowdata[$item]['name'])) {
-					$name = $itemshowdata[$item]['name'];
+				//arr = array(itemtype, name, summary, typeid);
+				if (is_object($itemshowdata[$item]['itemtype'])) {
+					$name = $itemshowdata[$item]['itemtype']->name;
+					$summary = $itemshowdata[$item]['itemtype']->summary;
+					$arr = array(
+						$itemshowdata[$item]['itemtype']->itemtype,
+						$name,
+						$summary,
+						$itemshowdata[$item]['itemtype']->typeid
+					);
 				} else {
-					$name = $itemshowdata[$item]['title'];
+					if (isset($itemshowdata[$item]['name'])) {
+						$name = $itemshowdata[$item]['name'];
+					} else {
+						$name = $itemshowdata[$item]['title'];
+					}
+					if (isset($itemshowdata[$item]['summary'])) {
+						$summary = $itemshowdata[$item]['summary'];
+					} else if (isset($itemshowdata[$item]['text'])) {
+						$summary = $itemshowdata[$item]['text'];
+					} else {
+						$summary = $itemshowdata[$item]['description'];
+					}
+					$arr = array($itemshowdata[$item]['itemtype'], $name, $summary, $itemshowdata[$item]['id']);
 				}
-				if (isset($itemshowdata[$item]['summary'])) {
-					$summary = $itemshowdata[$item]['summary'];
-				} else if (isset($itemshowdata[$item]['text'])) {
-					$summary = $itemshowdata[$item]['text'];
-				} else {
-					$summary = $itemshowdata[$item]['description'];
-				}
-				$arr = array($itemshowdata[$item]['itemtype'], $name, $summary, $itemshowdata[$item]['id']);
 			} else {
 				$arr = getiteminfo($item);
 			}

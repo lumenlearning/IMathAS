@@ -42,7 +42,7 @@ abstract class CourseItem
      * @param int    $block    parental hierarchy of course items
      * @param string $totb     "to Top or Bottom" of course"
      */
-    public function __construct($courseid, $block = 0, $totb = 'b')
+    public function __construct($courseid = null, $block = 0, $totb = 'b')
     {
         $this->courseid = $courseid;
         $this->block = $block;
@@ -100,7 +100,7 @@ abstract class CourseItem
     /**
      * Update course item data
      *
-     * @param int   $typeid original desmos_interactives.id
+     * @param int   $typeid original desmos_items.id
      * @param array $fields fields to update
      *
      * @return CourseItem $this
@@ -161,12 +161,30 @@ abstract class CourseItem
         $stm->execute(
             array(
                 ':courseid'=>$this->courseid,
-                ':itemtype'=>str_replace(' ', '', $this->display_name),
+                ':itemtype'=>ucwords($this->typename).'Item',
                 ':typeid'=>$typeid
             )
         );
         $this->itemid = $this->dbh->lastInsertId();
         return $this;
+    }
+
+    /**
+     * ID from imas_items table
+     *
+     * @return CourseItem $this
+     */
+    public static function findCourseItem($id)
+    {
+        $query = "SELECT courseid, itemtype, typeid FROM imas_items "
+            . " WHERE id=:id";
+        $stm = $GLOBALS['DBH']->prepare($query);
+        $stm->bindValue(':id', $id);
+        $stm->execute();
+        if ($stm->rowCount()>0) {
+            return $stm->fetch(PDO::FETCH_ASSOC);
+        }
+        return false;
     }
 
     /**
@@ -180,7 +198,7 @@ abstract class CourseItem
             . " WHERE typeid=:typeid AND itemtype=:itemtype AND courseid=:courseid";
         $stm = $this->dbh->prepare($query);
         $stm->bindValue(':typeid', $this->typeid);
-        $stm->bindValue(':itemtype', str_replace(' ', '', $this->display_name));
+        $stm->bindValue(':itemtype', ucwords($this->typename).'Item');
         $stm->bindValue(':courseid', $this->courseid);
         $stm->execute();
         if ($stm->rowCount()>0) {
@@ -470,7 +488,7 @@ abstract class CourseItem
             $out .= " | <a href=\"itemadd.php?type=$this->typename&id=$this->typeid"
                 . "&block=$this->block&cid=$this->courseid\">"
                 . _('Modify') . "</a>\n";
-            $out .= " | <a href=\"itemdelete?type=$this->typename&id=$this->typeid"
+            $out .= " | <a href=\"itemdelete.php?type=$this->typename&id=$this->typeid"
                 . "&block=$this->block&cid=$this->courseid&remove=ask\">"
                 . _('Delete') . "</a>\n";
             $out .= " | <a href=\"copyoneitem.php?cid=" . $this->courseid
@@ -658,6 +676,7 @@ abstract class CourseItem
         }
         $this->setId();
         $this->setName();
+        $this->setSummary();
         $this->setStartDate();
         $this->setEndDate();
         $this->setAvail();
@@ -685,6 +704,15 @@ abstract class CourseItem
     abstract function setName($value = null);
 
     /**
+     * Required parameter for all items: maybe in database as summary, text or description
+     *
+     * @param int|null $value default to this->summary
+     *
+     * @return CourseItem compatible object
+     */
+    abstract function setSummary($value = null);
+
+    /**
      * Required parameter for all items
      *
      * @param int|null $value default to this->startdate
@@ -710,5 +738,7 @@ abstract class CourseItem
      * @return CourseItem compatible object
      */
     abstract function setAvail($value = null);
+
+    abstract static function deleteCourse(int $courseid);
 
 }

@@ -127,8 +127,8 @@ function copyStuData($destcid, $sourcecid = null) {
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             if (strpos($row['type'], 'desmos')!==false &&
-                isset($itemtypemap['DesmosInteractive'.$row['typeid']])) {
-                $execarr[] = $itemtypemap['DesmosInteractive'.$row['typeid']];
+                isset($itemtypemap['DesmosItem'.$row['typeid']])) {
+                $execarr[] = $itemtypemap['DesmosItem'.$row['typeid']];
             } else
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################

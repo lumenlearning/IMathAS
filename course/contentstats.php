@@ -28,7 +28,7 @@ if ($typeid==0 || !in_array($stype,array('I','L','A','W','F','E'))) { // #### OH
 	// #### Begin OHM-specific code #####################################################
 	if ($stype=='E') {
 		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type IN ('desmosview') AND typeid=:typeid");
-		$stm2 = $DBH->prepare("SELECT title FROM desmos_interactives WHERE id=:id");
+		$stm2 = $DBH->prepare("SELECT title FROM desmos_items WHERE id=:id");
 	} else
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################

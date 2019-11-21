@@ -249,14 +249,11 @@ function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=fa
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	if (isset($typelookups['DesmosInteractive'])) {
-		foreach ($typelookups['DesmosInteractive'] as $typeid=>$itemid) {
-			$line = [
-				'itemid' => $itemid,
-				'typeid' => $typeid,
-				'itemtype'=>'DesmosInteractive'
-			];
-			$itemshowdata[$typelookups['DesmosInteractive'][$line['typeid']]] = $line;
+	if (isset($typelookups['DesmosItem'])) {
+		foreach ($typelookups['DesmosItem'] as $typeid=>$itemid) {
+			$desmos = new \Desmos\Models\DesmosItem(3);
+			$desmos->findItem($typeid);
+			$itemshowdata[$typelookups['DesmosItem'][$typeid]] = array('itemtype'=>$desmos);
 		}
 	}
 	// #### End OHM-specific code #####################################################

@@ -1,15 +1,18 @@
 <?php
-//iMathAS: View Item Page
-//2019 Alena Holligan
+/**
+ * iMathAS: View Item Page
+ *
+ * @author Alena Holligan <alena@lumenlearning.com>
+ */
 
-/*** master php includes *******/
-require("../init.php");
-require("../includes/htmlutil.php");
-/*** pre-html data manipulation *******/
+/* master php includes */
+require "../init.php";
+require "../includes/htmlutil.php";
+/* pre-html data manipulation */
 //set some page specific variables and counters
-$cid = \Sanitize::courseId($_GET['cid']);
-$id = \Sanitize::onlyInt($_GET['id']);
-$type = \Sanitize::encodeStringForDisplay($_GET['type']);
+$cid = Sanitize::courseId($_GET['cid']);
+$id = Sanitize::onlyInt($_GET['id']);
+$type = Sanitize::encodeStringForDisplay($_GET['type']);
 
 if (isset($_GET['framed'])) {
     $flexwidth = true;
@@ -36,12 +39,10 @@ $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid);
 $item->findItem($id);
 $now = time();
-if (
-    !isset($teacherid) && (
-        $item->avail==0 || (
-            $item->avail==1 && (
-                $now < $item->startdate || $now > $item->enddate
-            )
+if (!isset($teacherid)
+    && ($item->avail==0
+        || ($item->avail==1
+            && ($now < $item->startdate || $now > $item->enddate)
         )
     )
 ) {
@@ -51,7 +52,7 @@ if (
 }
 $pagetitle = $item->name;
 $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
-    . \Sanitize::encodeStringForDisplay($coursename)."</a>"
+    . Sanitize::encodeStringForDisplay($coursename)."</a>"
     . " &gt; " . $item->display_name;
 // log access
 $isRealStudent = (isset($studentid) && !isset($sessiondata['stuview']));
@@ -60,5 +61,7 @@ $isRealStudent = (isset($studentid) && !isset($sessiondata['stuview']));
 //}
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/
+$placeinhead = "<script src=\"$imasroot/desmos/js/calculator.js\"></script>";
+$placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/view.php";
 require __DIR__ . "/views/layout.php";
