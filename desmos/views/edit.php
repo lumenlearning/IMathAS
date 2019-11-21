@@ -37,15 +37,9 @@
     </div>
     <div class="libraries -inset --exlarge">
         In Libraries:
-<<<<<<< HEAD
-        <span id="libnames"><?php echo implode(', ', $item->lnames); ?></span>
-        <input type="hidden" name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->libs) ?>"/>
-        <button class="button" type="button" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" >Select Libraries</button>
-=======
         <span id="libnames"><?php echo implode(', ', $item->tagnames); ?></span>
         <input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->tags) ?>">
         <input type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
->>>>>>> 144a81250254d77ffc5acc4df5bd5fa20512e889
         <?php
         if (count($outcomes)>0) {
             echo '<span class="form">Associate Outcomes:</span></span class="formright">';
@@ -60,10 +54,6 @@
         }
         ?>
     </div>
-<<<<<<< HEAD
-    <button class="button" type="submit" name="submitbtn" value="Submit"><?php echo $savetitle; ?></button>
-</form>
-=======
     <div id="step_box">
         <div id="step_list" class="step-list">
             <h2>Steps</h2>
@@ -106,4 +96,3 @@
     </div>
     <div class=submit><button type=submit name="submitbtn" value="Submit"><?php echo $savetitle; ?></button></div>
 </form>
->>>>>>> 144a81250254d77ffc5acc4df5bd5fa20512e889
