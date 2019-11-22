@@ -1,68 +1,58 @@
 <link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
 <script type="text/javascript">
-    var curlibs = '<?php Sanitize::encodeStringForJavascript($item->tags); ?>';
+    var curlibs = '<?php Sanitize::encodeStringForJavascript($item->libs); ?>';
 </script>
+
 <div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
-<div id="headeraddinlinetext" class="pagetitle"><h1><?php echo $pagetitle ?><img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=desmositemitems','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/></h1></div>
 
-<form enctype="multipart/form-data" method=post action="<?php echo $page_formActionTag ?>">
-    Title: <br />
-    <input type=text size=60 name=title value="<?php echo str_replace('"','&quot;',$item->title);?>" required /><br />
-    <BR class=form>
+<h1 class="-small-type">
+    <img src="../ohm/img/desmos.png" alt=""/>
+    <?php echo $pagetitle ?>
+</h1>
 
-    Summary: (shows on course page) <br />
-    <input type=text size=60 id=summary name=summary value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" /><br />
-    <BR class=form>
-
-    <div>
-        <div id="datediv" style="display:<?php echo ($item->avail ==1)?"block":"none"; ?>">
-            <span class=form>Start Date:</span>
-            <span class=formright>
-                <input type=radio name="sdatetype" value="0" <?php writeHtmlChecked($item->startdate,'0',0) ?>/>
-                Always available until End Date<br/>
-                <input type=radio name="sdatetype" value="sdate" <?php writeHtmlChecked($item->startdate,'0',1) ?>/>
-                <input type=text size=10 name=sdate value="<?php echo $sdate;?>">
-                <a href="#" onClick="displayDatePicker('sdate', this); return false">
-                <img src="../../img/cal.gif" alt="Calendar"/></a>
-                at <input type=text size=10 name=stime value="<?php echo $stime;?>">
-            </span>
-            <BR class=form>
-            <span class=form>End Date:</span>
-            <span class=formright>
-                <input type=radio name="edatetype" value="2000000000" <?php writeHtmlChecked($item->enddate,'2000000000',0) ?>/>
-                Always available after Start Date<br/>
-                <input type=radio name="edatetype" value="edate" <?php writeHtmlChecked($item->enddate,'2000000000',1) ?>/>
-                <input type=text size=10 name=edate value="<?php echo $edate;?>">
-                <a href="#" onClick="displayDatePicker('edate', this, 'sdate', 'start date'); return false">
-                <img src="../../img/cal.gif" alt="Calendar"/></a>
-                at <input type=text size=10 name=etime value="<?php echo $etime;?>">
-            </span>
-            <BR class=form>
+<form class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
+    <div class="form-group">
+        <div class="form-left">
+            <div class="controls">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
+            </div>
+            <div class="controls">
+                <label for="summary">Summary:</label>
+                <input type="text" id="summary" name="summary" value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" />
+            </div>
         </div>
+        <div class="form-right">
+            <div class="controls">
+                <label for="sdate">Start Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
+            </div>
+            <div class="controls">
+                <label for="edate">End Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
+            </div>
+        </div>
+    </div>
+    <div class="libraries -inset --exlarge">
         In Libraries:
-        <span id="libnames"><?php echo implode(', ', $item->tagnames); ?></span>
-        <input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->tags) ?>">
+        <span id="libnames"><?php echo implode(', ', $item->lnames); ?></span>
+        <input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->libs) ?>">
         <input type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
         <?php
         if (count($outcomes)>0) {
             echo '<span class="form">Associate Outcomes:</span></span class="formright">';
-            writeHtmlMultiSelect(
-                'outcomes',
-                $outcomes,
-                $outcomenames,
-                $gradeoutcomes,
-                'Select an outcome...'
-            );
+            writeHtmlMultiSelect('outcomes',$outcomes,$outcomenames,$gradeoutcomes,'Select an outcome...');
             echo '</span><br class="form"/>';
         }
         ?>
 
     </div>
     <div id="step_box">
-        <div id="step_list" class="step-list">
+        <div id="step_list" class="step-list" style="float:left;">
             <h2>Steps</h2>
             <a class="button" href="javascript:addStep()">Add</a>
             <a class="button" href="javascript:removeStep()">Delete</a>
+            <ul>
             <?php
             $action = '';
             if (count($item->steps)>1) {
@@ -73,7 +63,7 @@
                 if ($i==0) {
                     $selected = "selected";
                 }
-                printf("<span class=\"step-li $selected\" $action>", $i);
+                printf("<li><span class=\"step-li $selected\" $action>", $i);
                 printf(
                     "<input type='text' name='step_title[$d]' value='%s' />",
                     $item->steps[$i]['title']
@@ -83,20 +73,21 @@
                     $i,
                     $item->steps[$i]['id']
                 );
-                echo "</span>";
+                echo "</span></li>";
             }
             ?>
+            </ul>
         </div>
-        <div id="step_items" class="step-items">
-        <?php
-        for ($i=0; $i<count($item->steps); $i++) {
-            echo "<textarea name=\"step_text[$i]\" class=\"step-item editor";
-            if ($i>0) echo " hidden";
-            echo "\"> ";
-            echo $item->steps[$i]['text'];
-            echo "</textarea>";
-        } ?>
+        <div id="step_items" class="step-items" style="float: left">
+            <?php
+            for ($i=0; $i<count($item->steps); $i++) {
+                echo "<textarea name=\"step_text[$i]\" class=\"step-item editor";
+                if ($i>0) echo " hidden";
+                echo "\"> ";
+                echo $item->steps[$i]['text'];
+                echo "</textarea>";
+            } ?>
         </div>
     </div>
-    <div class=submit><button type=submit name="submitbtn" value="Submit"><?php echo $savetitle; ?></button></div>
+    <button class="button" type="submit" name="submitbtn" value="Submit" style="clear:both"><?php echo $savetitle; ?></button>
 </form>

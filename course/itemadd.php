@@ -246,6 +246,8 @@ if (isset($_GET['id'])) {  //already have id; update
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 $placeinhead .= "<script src=\"$imasroot/desmos/js/calculator.js\"></script>";
+$placeinhead .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/lux-temp.css\">";
+$placeinhead .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/desmos/desmos_temp.css\">";
 $placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/edit.php";
 require __DIR__ . "/views/layout.php";
