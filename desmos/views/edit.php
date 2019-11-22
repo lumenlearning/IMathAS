@@ -4,8 +4,6 @@
 </script>
 
 <div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
-<div id="headeraddinlinetext" class="pagetitle"><h1><?php echo $pagetitle ?><img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=desmositemitems','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/></h1></div>
-
 
 <h1 class="-small-type">
     <img src="../ohm/img/desmos.png" alt=""/> 
@@ -39,7 +37,7 @@
         In Libraries:
         <span id="libnames"><?php echo implode(', ', $item->tagnames); ?></span>
         <input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->tags) ?>">
-        <input type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
+        <button type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
         <?php
         if (count($outcomes)>0) {
             echo '<span class="form">Associate Outcomes:</span></span class="formright">';
