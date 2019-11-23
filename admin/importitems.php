@@ -22,19 +22,6 @@ function getsubinfo($items,$parent,$pre) {
 		if (is_array($anitem)) {
 			$ids[] = $parent.'-'.($k+1);
 			$types[] = $pre."Block";
-            // #### Begin OHM-specific code #####################################################
-            // #### Begin OHM-specific code #####################################################
-            // #### Begin OHM-specific code #####################################################
-            // #### Begin OHM-specific code #####################################################
-            // #### Begin OHM-specific code #####################################################
-            if (is_object($anitem['itemtype'])) {
-                $names[] = $anitem['itemtype']->name;
-            } else
-            // #### End OHM-specific code #####################################################
-            // #### End OHM-specific code #####################################################
-            // #### End OHM-specific code #####################################################
-            // #### End OHM-specific code #####################################################
-            // #### End OHM-specific code #####################################################
             $names[] = $anitem['name'];
 			$parents[] = $parent;
 			getsubinfo($anitem['items'],$parent.'-'.($k+1),$pre.'--');
@@ -49,6 +36,7 @@ function getsubinfo($items,$parent,$pre) {
             // #### Begin OHM-specific code #####################################################
             if (is_object($anitem['itemtype'])) {
                 $names[] = $anitem['itemtype']->name;
+                $types[] = $anitem['itemtype']->itemtype;
             } else
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################

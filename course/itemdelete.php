@@ -26,8 +26,8 @@ $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid, $block);
 
 $curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$item->courseid\">".\Sanitize::encodeStringForDisplay($coursename)."</a> ";
-$curBreadcrumb .= "&gt; Delete $item->display_name\n";
-$pagetitle = "Delete $item->display_name";
+$curBreadcrumb .= "&gt; Delete $item->itemname\n";
+$pagetitle = "Delete $item->itemname";
 
 if ($_POST['remove']=="really") {
     $item->deleteItemData($typeid);

@@ -236,11 +236,11 @@ $page_formActionTag = "itemadd.php?" . \Sanitize::generateQueryStringFromMap(
 $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
     .\Sanitize::encodeStringForDisplay($coursename)."</a> ";
 if (isset($_GET['id'])) {  //already have id; update
-    $curBreadcrumb .= "&gt; Modify " . $item->display_name . "\n";
-    $pagetitle = "Modify " . $item->display_name;
+    $curBreadcrumb .= "&gt; Modify " . $item->itemname . "\n";
+    $pagetitle = "Modify " . $item->itemname;
 } else {
-    $curBreadcrumb .= "&gt; Add " . $item->display_name . "\n";
-    $pagetitle = "Add " . $item->display_name;
+    $curBreadcrumb .= "&gt; Add " . $item->itemname . "\n";
+    $pagetitle = "Add " . $item->itemname;
 }
 /******* begin html output ********/
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";

@@ -17,8 +17,8 @@ use PDO;
 class DesmosItem extends CourseItem
 {
     protected $typename = "desmos";
-    //imas_items.itemtype with spaces
-    protected $display_name = "Desmos Interactive";
+    protected $itemtype = "DesmosItem";
+    protected $itemname = "Desmos Interactive";
     protected $miniicon = "../ohm/img/desmos_tiny.php";
     protected $itemicon = "../ohm/img/desmos.php";
     protected $valid_fields = [

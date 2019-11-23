@@ -46,14 +46,14 @@ if (!isset($teacherid)
         )
     )
 ) {
-    $body = "This " . $item->display_name . " is not currently available for viewing";
+    $body = "This " . $item->itemname . " is not currently available for viewing";
     require __DIR__ . "/views/layout.php";
     exit;
 }
 $pagetitle = $item->name;
 $curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
     . Sanitize::encodeStringForDisplay($coursename)."</a>"
-    . " &gt; " . $item->display_name;
+    . " &gt; " . $item->itemname;
 // log access
 $isRealStudent = (isset($studentid) && !isset($sessiondata['stuview']));
 //if ($isRealStudent) {
