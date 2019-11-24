@@ -5,7 +5,7 @@
 
 <div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
 
-<h1 class="-small-type">
+<h1 class="-small-type -inset --exlarge">
     <img src="../ohm/img/desmos.png" alt=""/> 
     <?php echo $pagetitle ?>    
 </h1>
@@ -33,10 +33,10 @@
             </div>
         </div>
     </div>
-    <div class="libraries -inset --exlarge">
-        In Libraries:
+    <!-- <div class="libraries -inset --exlarge">
+        In Libraries: 
         <span id="libnames"><?php echo implode(', ', $item->tagnames); ?></span>
-        <input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->tags) ?>">
+        <input type="hidden" name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->tags) ?>">
         <button type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
         <?php
         if (count($outcomes)>0) {
@@ -50,47 +50,49 @@
             );
             echo '</span><br class="form"/>';
         }
-        ?>
-    </div>
-    <div id="step_box">
-        <div id="step_list" class="step-list">
-            <h2>Steps</h2>
-            <a class="button" href="javascript:addStep()">Add</a>
-            <a class="button" href="javascript:removeStep()">Delete</a>
-            <?php
-            $action = '';
-            if (count($item->steps)>1) {
-                $action = "onClick=\"showSteps(%d)\"";
-            }
-            for ($i=0; $i<count($item->steps); $i++) {
-                $selected = '';
-                if ($i==0) {
-                    $selected = "selected";
+        ?> 
+    </div> -->
+    <div id="step_box" class="desmos create-steps -inset --exlarge">
+        <div class="steps-left">
+            <div class="step-controls">
+                <a class="button" href="javascript:addStep()">Add</a>
+                <!-- <a class="button" href="javascript:removeStep()">Delete</a> -->
+            </div>
+            <ul id="step_list">
+                <?php
+                $action = '';
+                if (count($item->steps)>1) {
+                    $action = "onClick=\"showSteps(%d)\"";
                 }
-                printf("<span class=\"step-li $selected\" $action>", $i);
-                printf(
-                    "<input type='text' name='step_title[$d]' value='%s' />",
-                    $item->steps[$i]['title']
-                );
-                printf(
-                    "<input type='hidden' name='step[%d]' value='%d'>",
-                    $i,
-                    $item->steps[$i]['id']
-                );
-                echo "</span>";
-            }
-            ?>
+                for ($i=0; $i<count($item->steps); $i++) {
+                    $selected = '';
+                    if ($i==0) {
+                        $selected = "selected";
+                    }
+                    printf("<li class=\"step-li $selected\" $action>", $i);
+                    printf(
+                        "<input type='text' name='step_title[$d]' value='%s' />",
+                        $item->steps[$i]['title']
+                    );
+                    printf(
+                        "<input type='hidden' name='step[%d]' value='%d'>",
+                        $i,
+                        $item->steps[$i]['id']
+                    );
+                    echo "</ul>";
+                }
+                ?>
         </div>
-        <div id="step_items" class="step-items">
-        <?php
-        for ($i=0; $i<count($item->steps); $i++) {
-            echo "<textarea name=\"step_text[$i]\" class=\"step-item editor";
-            if ($i>0) echo " hidden";
-            echo "\"> ";
-            echo $item->steps[$i]['text'];
-            echo "</textarea>";
-        } ?>
+        <div id="step_items" class="step-items steps-right">
+            <?php
+            for ($i=0; $i<count($item->steps); $i++) {
+                echo "<textarea name=\"step_text[$i]\" class=\"step-item editor";
+                if ($i>0) echo " hidden";
+                echo "\"> ";
+                echo $item->steps[$i]['text'];
+                echo "</textarea>";
+            } ?>
         </div>
     </div>
-    <div class=submit><button type=submit name="submitbtn" value="Submit"><?php echo $savetitle; ?></button></div>
+    <button type="submit" class="button" name="submitbtn" value="Submit"><?php echo $savetitle; ?></button>
 </form>

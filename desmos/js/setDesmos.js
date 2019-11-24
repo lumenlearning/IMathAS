@@ -5,14 +5,14 @@ if (elt.length>0) {
         setDesmos(elt[i]);
     }
 }
-function setDesmos(item)
-{
+
+function setDesmos(item){
     json = item.getAttribute("data");
     var calculator = Desmos.GraphingCalculator(item);
     calculator.setState(json);
 }
-function oldSetDesmos(item)
-{
+
+function oldSetDesmos(item){
     id = item.getAttribute("data-id");
     $.ajax(
         {
@@ -33,8 +33,8 @@ function oldSetDesmos(item)
         }
     );
 }
-function showSteps(num)
-{
+
+function showSteps(num){
     var stepItems = document.querySelectorAll(".step-item");
     var listItems = document.querySelectorAll('.step-li');
     for (i=0; i<listItems.length; i++) {
@@ -47,12 +47,12 @@ function showSteps(num)
         }
     }
 }
-function addStep()
-{
+
+function addStep(){
     var num = document.querySelectorAll('.step-li').length;
 
     // Create a <li> node
-    var step = document.createElement("span");
+    var step = document.createElement("li");
     step.className = "step-li selected";
     step.setAttribute("onclick", "showSteps("+num+")");
     // Create an <input> element, set its type and name attributes
@@ -70,8 +70,8 @@ function addStep()
 
     showSteps(num);
 }
-function removeStep()
-{
+
+function removeStep(){
     var listItems = document.querySelectorAll('.step-li');
     for (i=0; i<listItems.length; i++) {
         if (listItems[i].classList.contains('selected')) {
