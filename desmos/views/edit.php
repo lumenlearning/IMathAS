@@ -3,9 +3,9 @@
     var curlibs = '<?php Sanitize::encodeStringForJavascript($item->tags); ?>';
 </script>
 
-<div class=breadcrumb><?php echo $curBreadcrumb  ?></div>
+<div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
 
-<h1 class="-small-type -inset --exlarge">
+<h1 class="-small-type -inset --small">
     <img src="../ohm/img/desmos.png" alt=""/> 
     <?php echo $pagetitle ?>    
 </h1>
@@ -52,13 +52,13 @@
         }
         ?> 
     </div> -->
-    <div id="step_box" class="desmos create-steps -inset --exlarge">
+    <div id="step_box" class="desmos desmos-steps -offset --exlarge">
         <div class="steps-left">
             <div class="step-controls">
                 <a class="button" href="javascript:addStep()">Add</a>
-                <!-- <a class="button" href="javascript:removeStep()">Delete</a> -->
+                <a class="button" href="javascript:removeStep()">Delete</a>
             </div>
-            <ul id="step_list">
+            <ul id="step_list" class="step-box">
                 <?php
                 $action = '';
                 if (count($item->steps)>1) {

@@ -59,8 +59,15 @@ function addStep(){
     var input = document.createElement("input");
     input.type = "text";
     input.name = "step_title["+num+"]";
+
+    //Create a <button> element
+    var button = document.createElement("button"); 
+    button.type = "button"; 
+    button.innerHTML = "X";
+    
     // Append the text to <li>
     step.appendChild(input);
+    step.appendChild(button)
     document.getElementById("step_list").appendChild(step);
 
     var textarea = document.createElement("textarea");

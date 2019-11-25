@@ -1,44 +1,7 @@
-/* figure {
-    margin: 0;
-}
-#step_box {
-    clear: both;
-} */
-/* .step-list {
-    float: left;
-    width: 20%;
-} */
-.step-li {
-    display: block;
-    clear: left;
-    padding-left: 20px;
-    list-style: decimal inside;
-    padding: 5px;
-    background-color: #EEE;
-}
-.step-li:hover{
-    background-color: #4bb6e8;
-    cursor: pointer;
-}
-.step-li.selected {
-    background-color: #88bbdd;
-}
-.step-items {
-    float: right;
-    width: 75%;
-    min-width:610px;
-    min-height: 600px;
-    border: 1px #000 solid;
-    padding:0 10px;
-}
-.step-items textarea {
-    min-height: 600px;
-    width:99%;
-}
+
 h1:before {
     content: url("<?php echo $CFG['CPS']['itemicons']['desmos']; ?>");
 }
-
 
 /* DESMOS */
 /* OVERWRITING LUX STYLES */
@@ -57,7 +20,8 @@ h1:before {
 	width: 10em;
 	padding: .5em, 1em;
 }
-/* *** */
+
+/* End lux overwrite */
 
 .desmos .form-group {
     display: flex;
@@ -69,19 +33,13 @@ h1:before {
 }
 
 /* DESMOS STEPS */
-.desmos .create-steps {
+.desmos.desmos-steps {
     display: flex; 
 }
 
-.desmos .step-controls {
-    background: gray; /*find right gray  */
-    padding: 1em;
-}
-.desmos .step-li input {
-    max-width: 100%;
-}
-
 .desmos .steps-left {
+    border: 1px solid black;
+    border-right: none;
     width: 30%; 
     min-width: 30vw;
 }
@@ -89,3 +47,53 @@ h1:before {
 .desmos .steps-right {
     width: 70%;
 }
+
+/* DESMOS CREATE STEPS LIST */
+.desmos .step-controls {
+    background: gray; /*find right gray  */
+    padding: 1.5em;
+}
+
+.desmos .step-li  {
+    margin-bottom: 1px;
+    padding: .5em;
+    list-style: decimal inside;
+}
+.desmos .step-li input {
+    max-width: 80%;
+}
+
+/* DESMOS VIEW STEPS LIST */
+.desmos .step-li.view {
+    
+}
+
+.desmos .step-li:hover{
+    background-color: #4bb6e8;
+    cursor: pointer;
+}
+.desmos .step-li.selected {
+    background-color: #88bbdd;
+}
+
+/* Temporarily, need to add icon */
+.desmos .step-li button {
+    font-size: 22px;
+    vertical-align: middle;
+    text-align: center;
+    margin-left: .5em;
+    padding: 0 .5em;
+    width: 10%;
+}
+
+/* DESMOS STEP BODY */
+.desmos .step-items {
+    min-width:610px;
+    min-height: 600px;
+    border: 1px #000 solid;
+    padding:0 10px;
+} 
+.desmos .step-items textarea {
+    min-height: 100%;
+    min-width: 100%;
+} 
