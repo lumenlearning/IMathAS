@@ -151,7 +151,7 @@ $inmodule = false;
 
 function getorg($it,$parent,&$res,$ind,$mod_depth) {
 	global $DBH,$iteminfo,$newdir,$installname,$urlmode,$linktype,$urlmode,$imasroot,$ccnt,$module_meta,$htmldir,$filedir, $toplevelitems, $inmodule;
-	global $usechecked,$checked,$usedcats;
+	global $usechecked,$checked,$usedcats,$gbcatitems;
 
 	$out = '';
 
@@ -215,6 +215,8 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                 $out .= $ind.'  <title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
                 $out .= $ind.'</item>'."\n";
                 if ($linktype=='canvas') {
+                    $gbcatitems[$iteminfo[$item][0]] = $courseItem->itemname;
+
                     $canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
                     $canvout .= '<content_type>Assignment</content_type>'."\n";
                     $canvout .= '<workflow_state>'.($courseItem->avail==0?'unpublished':'active').'</workflow_state>'."\n";
@@ -234,6 +236,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     if ($courseItem->startdate > 0 && isset($_POST['includestartdates'])) {
                         fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $courseItem->startdate).'</unlock_at>'."\n");
                     }
+                    fwrite($fp,'<assignment_group_identifierref>GBCAT'.$iteminfo[$item][0].'</assignment_group_identifierref>'."\n");
                     fwrite($fp,'<submission_types>external_tool</submission_types>'."\n");
                     fwrite($fp,'<external_tool_url>'. $GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_item_id='.$courseItem->itemid.'</external_tool_url>'."\n");
                     fwrite($fp,'</assignment>');
@@ -695,6 +698,25 @@ if ($linktype=='canvas') {
 			fwrite($fp, ' </assignmentGroup>'."\n");
 		}
 	}
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if (isset($gbcatitems)) {
+        foreach ($gbcatitems as $item=>$cat) {
+            fwrite($fp, ' <assignmentGroup identifier="GBCAT' . $item . '">' . "\n");
+            fwrite($fp, '  <title>' . htmlentities($cat, ENT_XML1, 'UTF-8', false) . '</title>' . "\n");
+            fwrite($fp, '  <position>' . $pcnt . '</position>' . "\n");
+            $pcnt++;
+            fwrite($fp, ' </assignmentGroup>' . "\n");
+        }
+    }
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 	fwrite($fp,'</assignmentGroups>');
 	fclose($fp);
 	$fp = fopen($newdir.'/course_settings/module_meta.xml','w');
