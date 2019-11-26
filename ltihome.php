@@ -225,7 +225,7 @@ if (!empty($createcourse)) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		if ($placementtype=='item') {
+		if ($placementtype==$course_item['itemtype']) {
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
 			$item = new $itemObject($course_item['courseid']);
 			$item->findItem($course_item['typeid']);
@@ -267,7 +267,7 @@ if (!empty($createcourse)) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		if ($placementtype=='item') {
+		if ($placementtype==$course_item['itemtype']) {
 			$itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
 			$item = new $itemObject($course_item['courseid']);
 			$item->findItem($course_item['typeid']);
@@ -332,7 +332,7 @@ if (!empty($createcourse)) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		if ($placementtype=='item') {
+		if ($placementtype==$course_item['itemtype']) {
 			$contentitems['@graph'][0]['lineItem'] = array(
 				'@type' => 'DesmosItem',
 				'label' => $title,
