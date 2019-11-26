@@ -10,7 +10,7 @@
 
 <div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
 
-<h1 class="-small-type -inset --small">
+<h1 class="-small-type desmos-header">
     <img src="../ohm/img/desmos.png" alt=""/> 
     <?php echo $pagetitle ?>    
 </h1>

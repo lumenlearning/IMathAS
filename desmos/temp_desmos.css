@@ -2,8 +2,16 @@
 body {
     background-color: white;
 }
-h1:before {
+/* h1:before {
     content: url("<?php echo $CFG['CPS']['itemicons']['desmos']; ?>");
+} */
+
+.desmos-header {
+    padding: 1em 0;
+}
+
+.desmos-header img {
+    vertical-align: middle;
 }
 
 /* DESMOS TEACHER VIEW */
@@ -115,9 +123,6 @@ h1:before {
 } 
 
 /* DESMOS STUDENT VIEW */
-.desmos-header {
-    padding-bottom: 2em;
-}
 
 .desmos-header p {
     margin-left: 32px;
