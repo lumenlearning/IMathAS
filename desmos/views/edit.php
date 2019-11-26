@@ -1,6 +1,11 @@
 <link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
+
 <script type="text/javascript">
     var curlibs = '<?php Sanitize::encodeStringForJavascript($item->tags); ?>';
+
+    window.onload = ()=> {
+        addStep();
+    }
 </script>
 
 <div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
@@ -33,25 +38,6 @@
             </div>
         </div>
     </div>
-    <!-- <div class="libraries -inset --exlarge">
-        In Libraries: 
-        <span id="libnames"><?php echo implode(', ', $item->tagnames); ?></span>
-        <input type="hidden" name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($item->tags) ?>">
-        <button type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
-        <?php
-        if (count($outcomes)>0) {
-            echo '<span class="form">Associate Outcomes:</span></span class="formright">';
-            writeHtmlMultiSelect(
-                'outcomes',
-                $outcomes,
-                $outcomenames,
-                $gradeoutcomes,
-                'Select an outcome...'
-            );
-            echo '</span><br class="form"/>';
-        }
-        ?> 
-    </div> -->
     <div id="step_box" class="desmos desmos-steps -offset --exlarge">
         <div class="steps-left">
             <div class="step-controls">
@@ -94,5 +80,5 @@
             } ?>
         </div>
     </div>
-    <button type="submit" class="button" name="submitbtn" value="Submit"><?php echo $savetitle; ?></button>
+    <button type="submit" class="button --primary -offset" name="submitbtn" value="Submit">Save and Exit</button>
 </form>

@@ -55,19 +55,40 @@ function addStep(){
     var step = document.createElement("li");
     step.className = "step-li selected";
     step.setAttribute("onclick", "showSteps("+num+")");
+
+    // Create a select menu
+    var select = document.createElement("select");
+    select.innerText = "Choose One"
+    select.setAttribute("id", num);
+    select.setAttribute("onchange", "moveitem2("+num+")");
+
+    // Create select menu options
+    for(let i = 0; i <= num; i++){
+        var option = document.createElement("option");
+        option.innerText = i;
+        option.setAttribute("value", i);
+
+        if(i === num){
+            option.setAttribute("selected", true);
+        }
+        select.append(option);
+    }
+
     // Create an <input> element, set its type and name attributes
     var input = document.createElement("input");
     input.type = "text";
     input.name = "step_title["+num+"]";
 
     //Create a <button> element
-    var button = document.createElement("button"); 
+    var button = document.createElement("button");
     button.type = "button"; 
-    button.innerHTML = "X";
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 16 16"><defs><path d="M9.885 8l5.724-5.724a1.332 1.332 0 000-1.885 1.332 1.332 0 00-1.885 0L8 6.115 2.276.39a1.332 1.332 0 00-1.885 0 1.332 1.332 0 000 1.885L6.115 8 .39 13.724A1.332 1.332 0 001.334 16c.34 0 .682-.13.942-.39L8 9.884l5.724 5.724a1.33 1.33 0 001.885 0 1.332 1.332 0 000-1.885L9.885 8z" id="a"/></defs><use fill="#637381" xlink:href="#a" fill-rule="evenodd"/></svg>';
     
     // Append the text to <li>
+    step.appendChild(select);
     step.appendChild(input);
-    step.appendChild(button)
+    step.appendChild(button);
+    
     document.getElementById("step_list").appendChild(step);
 
     var textarea = document.createElement("textarea");
@@ -92,3 +113,4 @@ function removeStep(){
 
     showSteps(0);
 }
+
