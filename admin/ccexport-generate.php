@@ -255,7 +255,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     fwrite($fp,'<blti:title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</blti:title>');
                     fwrite($fp,'<blti:description>'.htmlentities(html_entity_decode($courseItem->summary),ENT_XML1,'UTF-8',false).'</blti:description>');
                     if ($linktype=='url') {
-                        $urladd = '?custom_place_aid='.$iteminfo[$item][1];
+                        $urladd = '?custom_item_aid='.$iteminfo[$item][1];
                     } else {
                         fwrite($fp, '<blti:custom><lticm:property name="place_aid">' . $iteminfo[$item][1] . '</lticm:property></blti:custom>');
                         $urladd = '';
