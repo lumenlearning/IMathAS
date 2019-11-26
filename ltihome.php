@@ -203,8 +203,9 @@ if (!empty($createcourse)) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	if (substr($_POST['setplacement'],0, 4) =='item') {
-		$placementtype = $course_item['itemtype'];
 		$typeid = substr($_POST['setplacement'],4);
+		$course_item = \Course\Includes\CourseItem::findCourseItem($typeid);
+		$placementtype = $course_item['itemtype'];
 	} else
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
