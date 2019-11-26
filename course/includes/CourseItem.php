@@ -198,7 +198,7 @@ abstract class CourseItem
             . " WHERE typeid=:typeid AND itemtype=:itemtype AND courseid=:courseid";
         $stm = $this->dbh->prepare($query);
         $stm->bindValue(':typeid', $this->typeid);
-        $stm->bindValue(':itemtype', ucwords($this->typename).'Item');
+        $stm->bindValue(':itemtype', $this->itemtype);
         $stm->bindValue(':courseid', $this->courseid);
         $stm->execute();
         if ($stm->rowCount()>0) {

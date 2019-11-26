@@ -334,7 +334,7 @@ if (!empty($createcourse)) {
 		// #### Begin OHM-specific code #####################################################
 		if ($placementtype==$course_item['itemtype']) {
 			$contentitems['@graph'][0]['lineItem'] = array(
-				'@type' => 'DesmosItem',
+				'@type' => 'LineItem',
 				'label' => $title,
 			);
 		}
@@ -527,7 +527,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	$stm = $DBH->prepare("SELECT imas_items.id,title FROM imas_items JOIN desmos_items ON imas_items.typeid = desmos_items.id WHERE courseid=:courseid ORDER BY title");
+	$stm = $DBH->prepare("SELECT imas_items.id,title FROM imas_items JOIN desmos_items ON imas_items.typeid = desmos_items.id WHERE imas_items.courseid=:courseid ORDER BY title");
 	$stm->execute(array(':courseid'=>$cid));
 	if ($stm->rowCount()>0) {
 		echo '<optgroup label="Desmos">';

@@ -2276,7 +2276,7 @@ if (isset($_GET['launch'])) {
             $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
             $sourcecid = $course_item['courseid'];
             if ($sourcecid===false) {
-                $diaginfo = "(Debug info: 34-$placea_item_id)";
+                $diaginfo = "(Debug info: 34-$place_item_id)";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
             if ($keyparts[1]==$sourcecid) { //is key is for source course; treat like aid_### placement
