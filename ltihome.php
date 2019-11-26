@@ -204,7 +204,7 @@ if (!empty($createcourse)) {
 	// #### Begin OHM-specific code #####################################################
 	if (substr($_POST['setplacement'],0, 4) =='item') {
 		$placementtype = $course_item['itemtype'];
-		$itemid = substr($_POST['setplacement'],4);
+		$typeid = substr($_POST['setplacement'],4);
 	} else
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
@@ -231,7 +231,7 @@ if (!empty($createcourse)) {
 			$item->findItem($course_item['typeid']);
 			$atitle = $item->name;
 
-			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=$itemid";
+			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=".$item->itemid;
 
 			header('Location: '.$sessiondata['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($atitle).'&text='.Sanitize::encodeUrlParam($atitle). '&r=' .Sanitize::randomQueryStringParam());
 			exit;
@@ -273,7 +273,7 @@ if (!empty($createcourse)) {
 			$item->findItem($course_item['typeid']);
 			$title = $item->name;
 			$text = $item->summary;
-			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=$itemid";
+			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=".$item->itemid;
 		} else
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
