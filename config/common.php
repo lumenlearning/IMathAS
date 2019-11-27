@@ -24,7 +24,11 @@ $CFG['GEN']['newpasswords'] = "only";
 $CFG['GEN']['noEmailButton'] = true;
 
 // rate limit page access
-$CFG['GEN']['ratelimit'] = 0.2;
+$CFG['GEN']['ratelimit'] = 0.1;
+
+// set email handler
+$CFG['GEN']['useSESmail'] = true;
+$CFG['email']['handlerpriority'] = 0;
 
 //$CFG['use_csrfp'] = 'log';
 
