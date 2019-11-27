@@ -35,11 +35,12 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
 }
 
 $CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
+$CFG['email']['authcode'] = getenv('SES_KEY_ID');
 //$CFG['cleanup']['delay'] = 30;
 
 $CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
 $CFG['LTI']['logltiqueue'] = true;
-$CFG['LTI']['usequeue'] = true; 
+$CFG['LTI']['usequeue'] = true;
 
 $CFG['hooks']['admin/forms'] = "myopenmath/hooks.php";
 $CFG['hooks']['admin/actions'] = "myopenmath/hooks.php";
