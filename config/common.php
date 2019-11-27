@@ -23,6 +23,9 @@ $CFG['GEN']['newpasswords'] = "only";
 //hide Email button on Roster and GB pages
 $CFG['GEN']['noEmailButton'] = true;
 
+// rate limit page access
+$CFG['GEN']['ratelimit'] = 0.2;
+
 //$CFG['use_csrfp'] = 'log';
 
 //log LTI updates
