@@ -16,7 +16,6 @@ services:
     ports:
       - "443:443"
       - "80:80"
-      - "9000:9000" # for xdebug
     links:
       - db
     volumes:
