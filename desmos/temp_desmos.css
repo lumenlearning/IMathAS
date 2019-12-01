@@ -58,7 +58,8 @@ body {
 .desmos .steps-left {
     border: 1px solid #dadada;
     border-right: none;
-    width: 35%; 
+    width: 35%;
+    overflow: scroll; 
 }
 
 .desmos .steps-left ul {
