@@ -1,6 +1,6 @@
 
 body {
-    background-color: white;
+    background-color: #fff;
 }
 /* h1:before {
     content: url("<?php echo $CFG['CPS']['itemicons']['desmos']; ?>");
@@ -36,9 +36,6 @@ body {
 
 /* End lux overwrite */
 
-.desmos ul {
-    padding: 0;
-}
 .desmos .form-group {
     display: flex;
     padding-bottom: 1em;
@@ -55,19 +52,18 @@ body {
     width: 1220px;
 }
 
-.desmos .steps-left {
+.desmos .step-navigation {
     border: 1px solid #dadada;
     border-right: none;
     width: 35%;
     overflow: scroll; 
 }
 
-.desmos .steps-left ul {
+.desmos .step-navigation ol {
     overflow: scroll; 
-    height: 600px;
 }
 
-.desmos .steps-right {
+.desmos .step-details {
     width: 65%;
 }
 
@@ -85,7 +81,7 @@ body {
     margin: 2px 0;
     padding: .5em;
     background-color: #f2f2f2;
-    /* list-style: decimal inside; */
+    list-style: decimal inside;
 }
 .desmos .step-li input {
     margin: 0 16px;
@@ -144,10 +140,6 @@ body {
     border: none;
 }
 
-.desmos-student-view .steps-right {
-    width: 70%;
-}
-
 .desmos-student-view .step-box li {
     padding: 1em;
     list-style: decimal inside;
@@ -155,8 +147,7 @@ body {
 .desmos-student-view .step-items {
     border: #dadada 1px solid;
     border-radius: 4px;
-    padding: 2em;
-    padding-bottom: 0;
+    padding: 2em 2em 0 2em;
 }
 
 /* Overide button style from imasscore.css */
@@ -167,5 +158,5 @@ body {
 }
 
 .desmos-nav-btns .button:hover {
-    background-color: rgb(249,250,251);
+    background-color: #F9FAFB;
 }

@@ -39,12 +39,12 @@
         </div>
     </div>
     <div id="step_box" class="desmos desmos-steps -offset --exlarge">
-        <div class="steps-left">
+        <div class="step-navigation">
             <div class="step-controls">
                 <a class="button" href="javascript:addStep()">Add</a>
                 <a class="button" href="javascript:removeStep()">Delete</a>
             </div>
-            <ul id="step_list" class="step-box">
+            <ol id="step_list" class="step-box">
                 <?php
                 $action = '';
                 if (count($item->steps)>1) {
@@ -65,11 +65,11 @@
                         $i,
                         $item->steps[$i]['id']
                     );
-                    echo "</ul>";
+                    echo "</ol>";
                 }
                 ?>
         </div>
-        <div id="step_items" class="step-items steps-right">
+        <div id="step_items" class="step-items step-details">
             <?php
             for ($i=0; $i<count($item->steps); $i++) {
                 echo "<textarea name=\"step_text[$i]\" class=\"step-item editor";
