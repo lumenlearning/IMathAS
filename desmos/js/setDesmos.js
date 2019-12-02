@@ -58,7 +58,6 @@ function addStep(){
 
     // Create a select menu
     var select = document.createElement("select");
-    select.innerText = "Choose One"
     select.setAttribute("id", num);
     select.setAttribute("onchange", "moveitem2("+num+")");
 
