@@ -34,6 +34,7 @@ function allowedInAssessment()
         'process_activation.php',
         'activation_confirmation.php',
         'activation_ajax.php',
-        'payment_confirmation.php'
+        'payment_confirmation.php',
+        'resync-lms-grades.php',
     );
 }
