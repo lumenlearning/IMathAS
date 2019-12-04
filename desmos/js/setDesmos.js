@@ -1,38 +1,15 @@
-//loop through js-desmos class items
-var elt = document.getElementsByClassName("js-desmos");
-if (elt.length>0) {
-    for (i=0; i<elt.length; i++) {
-        setDesmos(elt[i]);
+function loadDesmos(){
+    //loop through js-desmos class items
+    var elt = document.getElementsByClassName("js-desmos");
+    if (elt.length>0) {
+        for (i = 0; i < elt.length; i++) {
+            json = elt[i].getAttribute("data-json");
+            var calculator = Desmos.GraphingCalculator(elt[i]);
+            calculator.setState(json);
+        }
     }
 }
-
-function setDesmos(item){
-    json = item.getAttribute("data");
-    var calculator = Desmos.GraphingCalculator(item);
-    calculator.setState(json);
-}
-
-function oldSetDesmos(item){
-    id = item.getAttribute("data-id");
-    $.ajax(
-        {
-            type: 'GET',
-            url: '/../desmos/returnjson.php',
-            data: {
-                "id": id
-            },
-            success: function (res) {
-                var calculator = Desmos.GraphingCalculator(item);
-                calculator.setState(res);
-                console.log(res);
-            },
-            error: function (err) {
-                calculator.setState(err.responseText);
-                console.log('error:', err);
-            }
-        }
-    );
-}
+loadDesmos();
 
 function showSteps(num){
     var stepItems = document.querySelectorAll(".step-item");
@@ -63,7 +40,8 @@ function addStep(){
 
     //Create a <button> element
     var button = document.createElement("button");
-    button.type = "button"; 
+    button.type = "button";
+    button.setAttribute("onclick", "removeStep("+num+")");
     button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 16 16"><defs><path d="M9.885 8l5.724-5.724a1.332 1.332 0 000-1.885 1.332 1.332 0 00-1.885 0L8 6.115 2.276.39a1.332 1.332 0 00-1.885 0 1.332 1.332 0 000 1.885L6.115 8 .39 13.724A1.332 1.332 0 001.334 16c.34 0 .682-.13.942-.39L8 9.884l5.724 5.724a1.33 1.33 0 001.885 0 1.332 1.332 0 000-1.885L9.885 8z" id="a"/></defs><use fill="#637381" xlink:href="#a" fill-rule="evenodd"/></svg>';
     
     // Append the text to <li>
@@ -81,18 +59,10 @@ function addStep(){
     showSteps(num);
 }
 
-function removeStep(){
-    var listItems = document.querySelectorAll('.step-li');
-    for (i=0; i<listItems.length; i++) {
-        if (listItems[i].classList.contains('selected')) {
-            listItems[i].remove();
-            document.querySelectorAll(".step-item")[i].remove();
-            if (document.getElementsByName("step["+i+"]").length > 0) {
-                document.getElementsByName("step[" + i + "]").remove();
-            }
-        }
-    }
-
+function removeStep(num){
+    document.querySelectorAll('.step-li')[num].remove();
+    document.querySelectorAll(".step-item")[num].remove();
+    document.getElementsByName("step[" + num + "]").remove();
     showSteps(0);
 }
 

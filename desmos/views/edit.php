@@ -1,10 +1,11 @@
 <link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
 <script type="text/javascript">
     var curlibs = '<?php Sanitize::encodeStringForJavascript($item->tags); ?>';
-
+<?php if (count($item->steps)<1) { ?>
     window.onload = ()=> {
         addStep();
     }
+<?php } ?>
 </script>
 
 <div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
@@ -56,7 +57,8 @@
                     }
                     printf("<li class=\"step-li $selected\" $action>", $i);
                     printf(
-                        "<input type='text' name='step_title[$d]' value='%s' />",
+                        "<input type='text' name='step_title[%d]' value='%s' />",
+                        $i,
                         $item->steps[$i]['title']
                     );
                     printf(
@@ -64,9 +66,10 @@
                         $i,
                         $item->steps[$i]['id']
                     );
-                    echo "</ol>";
+                    echo '<button type="button" onclick="removeStep('.$i.')"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 16 16"><defs><path d="M9.885 8l5.724-5.724a1.332 1.332 0 000-1.885 1.332 1.332 0 00-1.885 0L8 6.115 2.276.39a1.332 1.332 0 00-1.885 0 1.332 1.332 0 000 1.885L6.115 8 .39 13.724A1.332 1.332 0 001.334 16c.34 0 .682-.13.942-.39L8 9.884l5.724 5.724a1.33 1.33 0 001.885 0 1.332 1.332 0 000-1.885L9.885 8z" id="a"/></defs><use fill="#637381" xlink:href="#a" fill-rule="evenodd"/></svg></button>';
                 }
                 ?>
+            </ol>
         </div>
         <div id="step_items" class="step-items step-details">
             <?php
