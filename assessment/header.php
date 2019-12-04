@@ -77,7 +77,7 @@ if (isset($sessiondata['coursetheme'])) {
 			$coursetheme = str_replace(array('_fw1000','_fw'),'',$coursetheme);
 		}
 	}
-	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/$coursetheme?v=112019\"/>\n"; 
+	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/$coursetheme?v=042217\"/>\n";
 }
 echo '<link rel="stylesheet" href="'.$imasroot.'/handheld.css?v=101817" media="handheld,only screen and (max-width:480px)"/>';
 if ($isdiag) {
@@ -182,7 +182,7 @@ if (!isset($sessiondata['mathdisp'])) {
 	echo '<script type="text/javascript">var noMathRender = true; var usingASCIIMath = false; var MathJaxCompatible = false; var mathRenderer = "none";function rendermathnode(el) {}</script>';
 }
 if ($sessiondata['graphdisp']==1) {
-	echo "<script src=\"$imasroot/javascript/ASCIIsvg_min.js?v=110119\" type=\"text/javascript\"></script>\n";
+	echo "<script src=\"$imasroot/javascript/ASCIIsvg_min.js?v=052319\" type=\"text/javascript\"></script>\n";
 	echo "<script type=\"text/javascript\">var usingASCIISvg = true;</script>";
 } else {
 	echo "<script type=\"text/javascript\">var usingASCIISvg = false;</script>";
