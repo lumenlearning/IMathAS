@@ -77,11 +77,14 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
+                    $displayed = 0 == $i ? 'block' : 'none';
+                    printf('<div id="step-item-display-%d" style="display: %s;">', $i, $displayed);
                     echo "<textarea name=\"step_text[$i]\" class=\"step-item editor";
                     if ($i>0) echo " hidden";
                     echo "\"> ";
                     echo $item->steps[$i]['text'];
                     echo "</textarea>";
+                    echo "</div>";
                 } ?>
             </div>
         </div>

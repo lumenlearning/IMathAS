@@ -243,7 +243,15 @@ if (isset($_GET['id'])) {  //already have id; update
     $pagetitle = "Add " . $item->itemname;
 }
 /******* begin html output ********/
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
+// Use TinyMCE for Desmos items.
+$useeditor = 'noinit';
+$placeinhead = '<script type="text/javascript">
+	$(function() {
+		initeditor("selector","textarea");
+	});
+	</script>';
+
+$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/lux-temp.css\">";
 $placeinhead .= "<script src=\"$imasroot/desmos/js/calculator.js\"></script>";
