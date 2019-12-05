@@ -245,7 +245,7 @@ if (isset($_GET['id'])) {  //already have id; update
 /******* begin html output ********/
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
-$placeinhead .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/lux-temp.css\">";
+$placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/lux-temp.css\">";
 $placeinhead .= "<script src=\"$imasroot/desmos/js/calculator.js\"></script>";
 $placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
 $placeinfooter .= "<script src=\"$imasroot/desmos/js/editItem.js\"></script>";

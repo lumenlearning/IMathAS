@@ -12,6 +12,7 @@ $(document).ready(function() {
                 $("#desmos_previewmode_buttons").show();
                 $("#desmos_preview_container").html(data);
                 $("#desmos_preview_container").show();
+                $('link[title=lux]')[0].disabled=true;
                 loadDesmos();
             },
             error: function(data) {
@@ -27,6 +28,7 @@ $(document).ready(function() {
         $("#desmos_preview_container").hide();
         $("#desmos_preview_container").empty();
         $("#desmos_edit_container").show();
+        $('link[title=lux]')[0].disabled=false;
     });
 
     $("#desmos_save_button").click(function() {
