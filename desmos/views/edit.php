@@ -58,7 +58,7 @@
                         if ($i==0) {
                             $selected = "is-selected";
                         }
-                        printf("<li class=\"step-li $selected\" $action>", $i);
+                        printf("<li class=\"step-li $selected\" $action data-num=\"$i\">", $i);
                         printf(
                             "<input type='text' name='step_title[%d]' value='%s' />",
                             $i,

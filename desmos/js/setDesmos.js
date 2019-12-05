@@ -28,12 +28,21 @@ function showSteps(parent, num){
     }
 }
 
+function showThis(el) {
+    var itemNum = el.dataset.num;
+    var stepItem = document.querySelectorAll('[name=step_text_' + itemNum + ']')[0];
+    el.className = "step-li is-selected";
+    el.setAttribute("aria-selected", true);
+    stepItem.style.display = "block";
+}
+
 function addStep(){
     var num = document.querySelectorAll('.step-li').length;
 
     // Create a <li> node
     var step = document.createElement("li");
     step.className = "step-li selected";
+    step.dataset.num = num;
     step.setAttribute("onclick", "showSteps('#desmos_edit_container', "+num+")");
 
     // Create an <input> element, set its type and name attributes
@@ -55,21 +64,24 @@ function addStep(){
     document.getElementById("step_list").appendChild(step);
 
     var textarea = document.createElement("textarea");
-    textarea.name = "step_text["+num+"]";
+    textarea.name = "step_text_"+num;
     textarea.className = "step-item editor";
     document.getElementById("step_items").appendChild(textarea);
 
     showSteps("#desmos_edit_container", num);
 }
 
-function removeStep() {
-    console.log("Delete this!");
-    // if(confirm("Permanently delete this item?")){
-    //     document.querySelectorAll('.step-li')[num].remove();
-    //     document.querySelectorAll(".step-item")[num].remove();
-    //     document.getElementsByName("step[" + num + "]")[0].remove();
-    //     showSteps("#desmos_edit_container", 0);
-    // }
+function removeStep(event){
+    if(confirm("Permanently delete this item?")){
+        var parent = this.parentElement;
+        var itemNum = parent.dataset.num;
+        var relatedItems = document.querySelectorAll('[name=step' + itemNum + '], [name=step_text_' + itemNum + ']');
+        parent.remove();
+        for (let i = 0; i < relatedItems.length; i++) {
+            relatedItems[i].remove();
+        }
+        showThis(document.getElementById("step_list").children[0]);
+    }
 }
 
 function handleStudentViewNav(event){
@@ -138,4 +150,4 @@ function syncNavButtons(event){
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 $('.js-step-list li').on("keydown", syncNavButtons);
 $('.js-add').on("click", addStep);
-$('.js-delete').on("click", removeStep);
+$('.js-step-list').on("click", ".js-delete", removeStep);
