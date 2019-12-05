@@ -8,7 +8,7 @@ if ("preview" == $_GET['mode']) {
     $item->setSummary($_POST['summary']);
     // Build steps array
     $steps = [];
-    for ($i = 0; $i < count($_POST['step']); $i++) {
+    for ($i = 0; $i < count($_POST['step_title']); $i++) {
         $steps[] = [
             'id' => intval($_POST['step'][$i]),
             'title' => $_POST['step_title'][$i],
