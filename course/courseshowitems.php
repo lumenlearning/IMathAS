@@ -1812,7 +1812,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
    }
 
    function generateadditem($blk,$tb) {
-   	global $cid, $CFG,$imasroot,$addassess;
+   	global $cid, $CFG,$imasroot,$addassess, $myrights;
 
    	if (isset($CFG['CPS']['additemtype']) && $CFG['CPS']['additemtype'][0]=='links') {
    		if ($tb=='BB' || $tb=='LB') {$tb = 'b';}
@@ -1891,7 +1891,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		if (isset($CFG['CPS']['miniicons']['desmos'])) {
 			$html .= "<img alt=\"desmos\" class=\"mida\" src=\"$imasroot/{$CFG['CPS']['miniicons']['desmos']}\"/> ";
 		}
-		$html .= _('Add Desmos') . "</a>";
+		$html .= _('Desmos') . " Alena</a>";
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
@@ -1928,7 +1928,9 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		$html .= "<option value=\"desmos\">" . _('Add Desmos') . "</option>\n";
+		if ($myrights == 100) {
+			$html .= "<option value=\"desmos\">" . _('Add Desmos') . "</option>\n";
+		}
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################
