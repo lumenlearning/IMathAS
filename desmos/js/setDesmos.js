@@ -17,11 +17,13 @@ function showSteps(parent, num){
     var listItems = document.querySelectorAll(parent + ' .step-li');
     for (i=0; i<listItems.length; i++) {
         if (num == i) {
-            listItems[i].className = "step-li selected";
-            document.querySelector( parent + " #step-item-display-" + i).style.display = "block";
+            listItems[i].className = "step-li is-selected";
+            listItems[i].setAttribute("aria-selected", true);
+            stepItems[i].style.display = "block";
         } else {
             listItems[i].className = "step-li";
-            document.querySelector(parent + " #step-item-display-" + i).style.display = "none";
+            listItems[i].setAttribute("aria-selected", false);
+            stepItems[i].style.display = "none";
         }
     }
 }
@@ -43,10 +45,11 @@ function addStep(){
     var button = document.createElement("button");
     button.type = "button";
     button.setAttribute("onclick", "removeStep("+num+")");
-    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 16 16"><defs><path d="M9.885 8l5.724-5.724a1.332 1.332 0 000-1.885 1.332 1.332 0 00-1.885 0L8 6.115 2.276.39a1.332 1.332 0 00-1.885 0 1.332 1.332 0 000 1.885L6.115 8 .39 13.724A1.332 1.332 0 001.334 16c.34 0 .682-.13.942-.39L8 9.884l5.724 5.724a1.33 1.33 0 001.885 0 1.332 1.332 0 000-1.885L9.885 8z" id="a"/></defs><use fill="#637381" xlink:href="#a" fill-rule="evenodd"/></svg>';
+    button.classList.add("js-delete");
+    button.setAttribute("aria-label", "Delete this item.");
+    button.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
     
     // Append the text to <li>
-
     step.appendChild(input);
     step.appendChild(button);
     
@@ -57,13 +60,81 @@ function addStep(){
     textarea.className = "step-item editor";
     document.getElementById("step_items").appendChild(textarea);
 
-    showSteps('#desmos_edit_container', num);
+    showSteps("#desmos_edit_container", num);
 }
 
 function removeStep(num){
-    document.querySelectorAll('.step-li')[num].remove();
-    document.querySelectorAll(".step-item")[num].remove();
-    document.getElementsByName("step[" + num + "]").remove();
-    showSteps(0);
+    if(confirm("Permanently delete this item?")){
+        document.querySelectorAll('.step-li')[num].remove();
+        document.querySelectorAll(".step-item")[num].remove();
+        document.getElementsByName("step[" + num + "]").remove();
+        showSteps("#desmos_edit_container", 0);
+    }
 }
 
+function handleStudentViewNav(event){
+    var listItems = document.querySelectorAll('.step-li');
+    var listItem;
+    var stepIndex; 
+
+    document.querySelector('.prev').disabled = false;
+    document.querySelector('.next').disabled = false;
+
+    function handleNext(){
+        for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+                stepIndex = i+1;
+            }
+        }
+        
+        if(stepIndex > listItems.length - 2){
+            event.target.disabled = true;
+            document.querySelector('.prev').disabled = false;
+        } 
+    
+        listItem.classList.remove('is-selected');
+        listItem.nextSibling.classList.add('is-selected');
+    }
+
+    function handlePrev(){
+        for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+                stepIndex = i-1;
+            }
+        }
+    
+        if(stepIndex === 0){
+            event.target.disabled = true;
+            document.querySelector('.next').disabled = false;
+        }
+        listItem.classList.remove('select');
+        listItem.previousSibling.classList.add('is-selected');
+    }
+
+    event.target.classList.contains("next") ? 
+    handleNext() : handlePrev();
+
+    showSteps(stepIndex);
+}
+
+// Disable "Previous" and "Next" buttons when first and last list items selected with spacebar 
+function syncNavButtons(event){
+    var listItems = document.querySelectorAll('.step-li');
+
+    $('.prev').prop('disabled', false);
+    $('.next').prop('disabled', false);
+
+    if(event.code === "Space" || event.code === "Tab"){
+        if($(this).index() === 0){
+            $('.prev').prop('disabled', true);
+        } else if($(this).index() === listItems.length - 1){
+            $('.next').prop('disabled', true);
+        }
+    }
+}
+
+$('.js-desmos-nav').on("click", "button", handleStudentViewNav);
+$('.js-step-list li').on("keydown", syncNavButtons);
+$('.js-add').on("click", addStep);
