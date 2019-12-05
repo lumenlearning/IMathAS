@@ -31,7 +31,7 @@ function addStep(){
     // Create a <li> node
     var step = document.createElement("li");
     step.className = "step-li selected";
-    step.setAttribute("onclick", "showSteps("+num+")");
+    step.setAttribute("onclick", "showSteps('#desmos_edit_container', "+num+")");
 
     // Create an <input> element, set its type and name attributes
     var input = document.createElement("input");
@@ -56,7 +56,7 @@ function addStep(){
     textarea.className = "step-item editor";
     document.getElementById("step_items").appendChild(textarea);
 
-    showSteps(num);
+    showSteps('#desmos_edit_container', num);
 }
 
 function removeStep(num){
