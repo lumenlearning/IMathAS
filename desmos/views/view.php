@@ -1,10 +1,28 @@
 <link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
 <?php
+if ("preview" == $_GET['mode']) {
+    require_once(__DIR__ . '/../../vendor/autoload.php');
+    require_once(__DIR__ . '/../../includes/sanitize.php');
+    $item = new \Desmos\Models\DesmosItem();
+    $item->setName($_POST['title']);
+    $item->setSummary($_POST['summary']);
+    // Build steps array
+    $steps = [];
+    for ($i = 0; $i < count($_POST['step']); $i++) {
+        $steps[] = [
+            'id' => intval($_POST['step'][$i]),
+            'title' => $_POST['step_title'][$i],
+            'text' => $_POST['step_text'][$i],
+        ];
+    };
+    $item->setSteps($steps);
+    $pagetitle = Sanitize::encodeStringForDisplay($item->name);
+}
 if ($shownav) {
     echo '<div class="breadcrumb">'.$curBreadcrumb.'</div>';
 }
 ?>
-
+<div id="desmos_view_container">
 <div class="desmos-header">
     <h1><img src="../ohm/img/desmos.png" alt=""/> <?php echo $pagetitle ?></h1>
     <p><?php echo $item->summary; ?></p>
@@ -16,7 +34,7 @@ if ($shownav) {
             <?php
             $action = '';
             if (count($item->steps)>1) {
-                $action = "onClick=\"showSteps(%d)\"";
+                $action = "onClick=\"showSteps('#desmos_view_container', %d)\"";
             }
             for ($i=0; $i<count($item->steps); $i++) {
                 $selected = '';
@@ -52,4 +70,4 @@ if ($shownav) {
         </div>
     </div>
 </div>
-
+</div>

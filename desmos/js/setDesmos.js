@@ -11,9 +11,9 @@ function loadDesmos(){
 }
 loadDesmos();
 
-function showSteps(num){
-    var stepItems = document.querySelectorAll(".step-item");
-    var listItems = document.querySelectorAll('.step-li');
+function showSteps(parent, num){
+    var stepItems = document.querySelectorAll(parent + " .step-item");
+    var listItems = document.querySelectorAll(parent + ' .step-li');
     for (i=0; i<listItems.length; i++) {
         if (num == i) {
             listItems[i].className = "step-li selected";

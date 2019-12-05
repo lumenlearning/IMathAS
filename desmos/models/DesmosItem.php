@@ -307,4 +307,10 @@ class DesmosItem extends CourseItem
         }
         return $data;
     }
+
+    public function setSteps(array $steps): DesmosItem
+    {
+        $this->steps = $steps;
+        return $this;
+    }
 }
