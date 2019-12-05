@@ -44,7 +44,6 @@ function addStep(){
     //Create a <button> element
     var button = document.createElement("button");
     button.type = "button";
-    button.setAttribute("onclick", "removeStep("+num+")");
     button.classList.add("js-delete");
     button.setAttribute("aria-label", "Delete this item.");
     button.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
@@ -63,13 +62,14 @@ function addStep(){
     showSteps("#desmos_edit_container", num);
 }
 
-function removeStep(num){
-    if(confirm("Permanently delete this item?")){
-        document.querySelectorAll('.step-li')[num].remove();
-        document.querySelectorAll(".step-item")[num].remove();
-        document.getElementsByName("step[" + num + "]").remove();
-        showSteps("#desmos_edit_container", 0);
-    }
+function removeStep() {
+    console.log("Delete this!");
+    // if(confirm("Permanently delete this item?")){
+    //     document.querySelectorAll('.step-li')[num].remove();
+    //     document.querySelectorAll(".step-item")[num].remove();
+    //     document.getElementsByName("step[" + num + "]")[0].remove();
+    //     showSteps("#desmos_edit_container", 0);
+    // }
 }
 
 function handleStudentViewNav(event){
@@ -138,3 +138,4 @@ function syncNavButtons(event){
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 $('.js-step-list li').on("keydown", syncNavButtons);
 $('.js-add').on("click", addStep);
+$('.js-delete').on("click", removeStep);
