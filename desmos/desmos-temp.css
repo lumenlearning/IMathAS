@@ -14,6 +14,10 @@ body {
     vertical-align: middle;
 }
 
+.desmos ol {
+    padding-left: 0;
+}
+
 /* DESMOS TEACHER VIEW */
 /* OVERWRITING LUX STYLES */
 
@@ -24,14 +28,8 @@ body {
 
 .desmos .--input-icon {
 	margin-top: .25em;
-	width: 10em;
 	padding: .5em, 1em;
-}
-
-/* OVERWRITING SELECT MENU STYLES */
-.desmos select {
-    width: 40px; 
-    padding: 4px;
+	width: 10em;
 }
 
 /* End lux overwrite */
@@ -56,12 +54,15 @@ body {
     border: 1px solid #dadada;
     border-right: none;
     width: 35%;
+}
+
+.desmos .step-naviation.teacher-view {
     overflow: scroll; 
 }
 
-.desmos .step-navigation ol {
+/* .desmos.teacher-view ol {
     overflow: scroll; 
-}
+} */
 
 .desmos .step-details {
     width: 65%;
@@ -74,49 +75,57 @@ body {
     padding: 1.5em;
 }
 
-.desmos .step-box {
+.desmos .teacher-view {
     overflow: scroll;
 }
+
 .desmos .step-li  {
-    margin: 2px 0;
-    padding: .5em;
     background-color: #f2f2f2;
     list-style: decimal inside;
+    margin: 2px 0;
+    padding: .5em;
 }
+
 .desmos .step-li input {
     margin: 0 16px;
     width: 298px;
 }
 
-.desmos .step-li:hover{
+.desmos .step-li:hover {
     background-color: #dde3e9;
     cursor: pointer;
 }
-.desmos .step-li.selected {
+
+.desmos .step-li.is-selected {
     background-color: #c8e4ff;
 }
 
 .desmos .step-li button {
-    width: 40px;
     padding: 10px;
+    width: 40px;
 }
 
 .step-li button svg {
+    display: inline-block;
+    height: 16px;
+    width: 16px;
     vertical-align: middle;
 }
 
 /* DESMOS BODY */
 .desmos .step-items {
-    min-width: 610px;
-    min-height: 600px;
-    border-radius: 0;
     border: 1px #dadada solid;
+    border-radius: 0;
+    min-height: 600px;
+    min-width: 610px;
+    overflow: hidden;
 } 
+
 .desmos .step-items textarea {
-    min-height: 100%;
-    min-width: 100%;
     border: none;
     border-radius: 0;
+    min-height: 100%;
+    min-width: 100%;
 } 
 
 /* DESMOS STUDENT VIEW */
@@ -134,16 +143,17 @@ body {
     width: 1000px;
 }
 
-.desmos-student-view .steps-left {
+.desmos-student-view .steps-navigation {
+    border: none;
     margin-right: 2em;
     width: 30%; 
-    border: none;
 }
 
 .desmos-student-view .step-box li {
-    padding: 1em;
     list-style: decimal inside;
+    padding: 1em;
 }
+
 .desmos-student-view .step-items {
     border: #dadada 1px solid;
     border-radius: 4px;
@@ -152,9 +162,9 @@ body {
 
 /* Overide button style from imasscore.css */
 .desmos-nav-btns .button {
-    padding: .75em 2em;
     background-color: #fff; 
     margin-top: 1em;
+    padding: .75em 2em;
 }
 
 .desmos-nav-btns .button:hover {
