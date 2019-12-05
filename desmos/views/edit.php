@@ -46,7 +46,6 @@
             <div class="step-navigation">
                 <div class="step-controls">
                     <a class="button" href="javascript:addStep()">Add</a>
-                    <a class="button" href="javascript:removeStep()">Delete</a>
                 </div>
                 <ol id="step_list" class="step-box">
                     <?php
