@@ -40,7 +40,6 @@ if (isset($_GET['id'])) {
 }
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters
-$useeditor = $type;
 //if the form has been submitted
 if ($_POST['name']!= null || $_POST['title']!=null) {
     if ($_POST['avail']==1) {
