@@ -47,7 +47,10 @@
                 <div class="step-controls">
                     <button class="button js-add" type="button">Add</button>
                 </div>
-                <ol id="step_list" class="js-step-list step-box">
+                <span id="step-notifications" aria-live="assertive" class="u-sr-only"></span>
+                <span id="step-directions" class="u-sr-only">Press spacebar to toggle drag-and-drop mode, use arrow keys to move selected elements.</span>
+                <ol id="step_list" class="js-step-list step-box"  data-description="step-directions" data-liveregion="step-notifications">
+                    <!-- Changes to step markup must also be duplicated in the addStep JS -->
                     <?php
                     $action = '';
                     if (count($item->steps)>1) {
@@ -58,10 +61,16 @@
                         if ($i==0) {
                             $selected = "is-selected";
                         }
-                        printf("<li class=\"step-li $selected\" $action data-num=\"$i\">", $i);
+                        printf("<li class=\"step-li $selected\" $action  draggable=\"false\" data-num=\"$i\">", $i);
+                        echo "<span class=\"js-drag-trigger move-trigger\"><button class=\"u-button-reset\" aria-label=\"Move this item.\" type=\"button\"><svg aria-hidden=\"true\"><use xlink:href=\"#lux-icon-drag\"></use></svg></button></span>";
                         printf(
-                            "<input type='text' name='step_title[%d]' value='%s' />",
+                            "<label for='step_title[%d]' class='u-sr-only'>Step Title</label>",
                             $i,
+                            $item->steps[$i]['title']
+                        );
+                        printf(
+                            "<input type='text' id='step_title[%d]' name='step_title[%d]' value='%s' />",
+                            $i, $i,
                             $item->steps[$i]['title']
                         );
                         printf(

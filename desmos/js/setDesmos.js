@@ -17,9 +17,7 @@ function showSteps(parent, num){
     var listItems = document.querySelectorAll(parent + ' .step-li');
     for (i=0; i<listItems.length; i++) {
         if (num == i) {
-            listItems[i].className = "step-li is-selected";
-            listItems[i].setAttribute("aria-selected", true);
-            stepItems[i].style.display = "block";
+            showThis(listItems[i]);
         } else {
             listItems[i].className = "step-li";
             listItems[i].setAttribute("aria-selected", false);
@@ -44,22 +42,42 @@ function addStep(){
     step.className = "step-li is-selected";
     step.dataset.num = num;
     step.setAttribute("onclick", "showSteps('#desmos_edit_container', "+num+")");
+    step.setAttribute("draggable", false);
 
-    // Create an <input> element, set its type and name attributes
+    // Create a <span> wrapper for the drag button
+    var buttonDragWrapper = document.createElement("span");
+    buttonDragWrapper.classList.add("js-drag-trigger", "move-trigger");
+
+    // Create a drag <button> element
+    var buttonDrag = document.createElement("button");
+    buttonDrag.type = "button";
+    buttonDrag.classList.add("u-button-reset");
+    buttonDrag.setAttribute("aria-label", "Move this item.");
+    buttonDrag.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-drag"></use></svg>';
+
+    // Create a <label> and <input> set
+    var label = document.createElement("label");
+    label.setAttribute("for", "step_title["+num+"]");
+    label.classList.add("u-sr-only");
     var input = document.createElement("input");
     input.type = "text";
     input.name = "step_title["+num+"]";
 
-    //Create a <button> element
-    var button = document.createElement("button");
-    button.type = "button";
-    button.classList.add("js-delete");
-    button.setAttribute("aria-label", "Delete this item.");
-    button.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
-    
-    // Append the text to <li>
+    //Create a delete <button> element
+    var buttonDelete = document.createElement("button");
+    buttonDelete.type = "button";
+    buttonDelete.classList.add("js-delete");
+    buttonDelete.setAttribute("aria-label", "Delete this item.");
+    buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
+
+
+    // Wrap the drag <button> in the <span> wrapper;
+    buttonDragWrapper.appendChild(buttonDrag);
+    // Append the new elements to <li>
+    step.appendChild(buttonDragWrapper);
+    step.appendChild(label);
     step.appendChild(input);
-    step.appendChild(button);
+    step.appendChild(buttonDelete);
     
     document.getElementById("step_list").appendChild(step);
 
