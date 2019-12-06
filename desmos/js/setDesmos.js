@@ -18,9 +18,12 @@ function showSteps(parent, num){
         if (num == i) {
             listItems[i].className = "step-li selected";
             stepItems[i].style.display = "block";
+            document.querySelector( "#step-item-display-" + i + " textarea").style.display = "none";
+            document.querySelector( "#step-item-display-" + i).style.display = "block";
         } else {
             listItems[i].className = "step-li";
             stepItems[i].style.display = "none";
+            document.querySelector("#step-item-display-" + i).style.display = "none";
         }
     }
 }
