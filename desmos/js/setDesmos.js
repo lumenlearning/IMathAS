@@ -12,18 +12,14 @@ function loadDesmos(){
 loadDesmos();
 
 function showSteps(parent, num){
-    var stepItems = document.querySelectorAll(parent + " .step-item");
     var listItems = document.querySelectorAll(parent + ' .step-li');
     for (i=0; i<listItems.length; i++) {
         if (num == i) {
             listItems[i].className = "step-li selected";
-            stepItems[i].style.display = "block";
-            document.querySelector( "#step-item-display-" + i).style.display = "none";
-            document.querySelector( "#step-item-display-" + i).style.display = "block";
+            document.querySelector( parent + " #step-item-display-" + i).style.display = "block";
         } else {
             listItems[i].className = "step-li";
-            stepItems[i].style.display = "none";
-            document.querySelector("#step-item-display-" + i).style.display = "none";
+            document.querySelector(parent + " #step-item-display-" + i).style.display = "none";
         }
     }
 }

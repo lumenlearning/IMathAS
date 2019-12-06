@@ -1,11 +1,13 @@
 <link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
 <script type="text/javascript">
     var curlibs = '<?php Sanitize::encodeStringForJavascript($item->tags); ?>';
-<?php if (count($item->steps)<1) { ?>
     window.onload = ()=> {
-        addStep();
+        <?php if (count($item->steps) < 1) {
+            echo 'addStep();';
+        } else {
+            echo 'showSteps("#desmos_edit_container",0);';
+        } ?>
     }
-<?php } ?>
 </script>
 
 <div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
@@ -77,9 +79,8 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    $displayed = 0 == $i ? 'block' : 'none';
-                    printf('<div id="step-item-display-%d" style="display: %s;">', $i, $displayed);
-                    echo "<textarea name=\"step_text[$i]\" class=\"step-item editor\"> ";
+                    printf('<div id="step-item-display-%d">', $i);
+                    echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
                     echo $item->steps[$i]['text'];
                     echo "</textarea>";
                     echo "</div>";
