@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--[if lt IE 9]>
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+    <![endif]-->
+    <title>Graph Editor</title>
+    <script type="text/javascript" src="https://desmos.lumenlearning.com/desmos/js/calculator.js"></script>
+    <script type="text/javascript" src="js/desmos.js"></script>
+</head>
+<body onload="desmosDialog.init();">
+
+<form onsubmit="return false;" action="#">
+    <figure id="editdesmos" style="width: 600px; height: 400px;" data-json=''></figure>
+    <div class="mceActionPanel">
+        <div style="float: left">
+            <button class="mce-btn mce-primary" id="insert" name="insert" value="" onclick="desmosDialog.insert();">Insert</button>
+        </div>
+
+        <div style="float: right">
+            <button class="mce-btn" id="cancel" name="cancel" value="Cancel" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
+        </div>
+    </div>
+</form>
+
+</body>
+</html>
