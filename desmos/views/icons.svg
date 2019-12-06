@@ -5,4 +5,7 @@
     </defs>
     <use fill="#637381" xlink:href="#lux-icon-x_a" fill-rule="evenodd"/>
   </symbol>
+  <symbol id="lux-icon-drag" viewBox="0 0 5 14">
+    <path fill="#637381" fill-rule="evenodd" d="M0 0h2v2H0zm0 4h2v2H0zm0 4h2v2H0zm0 4h2v2H0zM3 0h2v2H3zm0 4h2v2H3zm0 4h2v2H3zm0 4h2v2H3z"/>
+  </symbol>
 </svg>
