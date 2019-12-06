@@ -3,9 +3,11 @@ function loadDesmos(){
     var elt = document.getElementsByClassName("js-desmos");
     if (elt.length>0) {
         for (i = 0; i < elt.length; i++) {
-            json = elt[i].getAttribute("data-json");
             var calculator = Desmos.GraphingCalculator(elt[i]);
-            calculator.setState(json);
+            json = elt[i].getAttribute("data-json").replace(/\\"/g,'"');
+            if (json!="") {
+                calculator.setState(json);
+            }
         }
     }
 }
