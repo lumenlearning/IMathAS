@@ -165,6 +165,266 @@ function syncNavButtons(event){
     }
 }
 
+function index(el) {
+	if (!el) return -1;
+	var i = 0;
+	do {
+		i++;
+	} while ((el = el.previousElementSibling));
+	return i;
+}
+
+var reorderList = {
+	listItems: null,
+	objCurrent: null,
+	objParent: null,
+	originalPosition: null,
+	currentPosition: null,
+	objTrigger: null,
+	init: function(objNode) {
+		var trigger = objNode.querySelector("button");
+		objNode.onmousedown = reorderList.mouseStart;
+		objNode.parentNode.ondragstart = reorderList.dragStart;
+		objNode.parentNode.ondragover = reorderList.dragOver;
+		objNode.parentNode.ondragleave = reorderList.dragLeave;
+		objNode.parentNode.ondragend = reorderList.dragEnd;
+		objNode.onmouseup = reorderList.dragDrop;
+		objNode.parentNode.ondrop = reorderList.dragDrop;
+		objNode.onkeydown = reorderList.keyboardNav;
+		trigger.onfocus = reorderList.focus;
+	},
+	keyboardNav: function(objEvent) {
+		var key = objEvent.code;
+		switch (key) {
+			case "Space":
+				if (!reorderList.objCurrent) {
+					reorderList.objCurrent = this.parentNode;
+					reorderList.objParent = reorderList.objCurrent.parentNode;
+					reorderList.objTrigger = reorderList.objCurrent.querySelector(
+						"button"
+					);
+				}
+				reorderList.toggleSelect();
+				break;
+			case "ArrowUp":
+			case "ArrowDown":
+				event.preventDefault();
+				reorderList.move(key);
+				break;
+			case "Escape":
+				reorderList.cancel();
+				break;
+		}
+	},
+	focus: function() {
+		if (!reorderList.objCurrent) {
+			// we only want the focus action and update to happen if there isn't a currently grabbed item
+			// otherwise, this would constantly override our drag-and-drop instructions
+			var objFocused = this.parentNode.parentNode;
+			var focusedVal = objFocused.querySelector("input[type=text]").value;
+			var focusedTitle = focusedVal || "Item " + index(objFocused);
+			reorderList.update(
+				focusedTitle + ", draggable item. Press spacebar to lift and reorder."
+			);
+		}
+	},
+	mouseStart: function(objEvent) {
+		reorderList.reset();
+		reorderList.objCurrent = this.parentNode;
+		reorderList.objParent = reorderList.objCurrent.parentNode;
+		reorderList.objTrigger = reorderList.objCurrent.querySelector("button");
+		reorderList.objParent.setAttribute("aria-dropeffect", "move");
+		reorderList.objCurrent.classList.add("is-selected");
+		reorderList.objCurrent.setAttribute("draggable", true);
+		var dataTransfer = new DataTransfer;
+		dataTransfer.setData("text", "");
+		reorderList.objCurrent.dispatchEvent(new DragEvent("dragstart", { dataTransfer: dataTransfer }));
+	},
+	dragStart: function(objEvent) {
+		objEvent.dataTransfer.setData("text", "");  // drag and drop fails on moz w/o this
+		reorderList.select();
+	},
+	dragOver: function(objEvent) {
+		var target;
+		objEvent.preventDefault(); // prevent default to allow drop
+		objEvent.target.classList.add("is-over");
+		if (reorderList.originalPosition > index(objEvent.target)) {
+			target = index(objEvent.target) + 1;
+		} else {
+			target = index(objEvent.target);
+		}
+		reorderList.update("You have moved the item to position " + target + ".");
+	},
+	dragLeave: function(objEvent) {
+		event.target.classList.remove("is-over");
+	},
+	// dragEnd: function() {
+	// },
+	dragDrop: function(objEvent) {
+		objEvent.preventDefault(); // prevent default action (open as link for some elements)
+		objEvent.target.classList.remove("is-over");
+		reorderList.objCurrent.classList.remove("is-selected");
+		if (
+			objEvent.target.parentNode.id == "step_list" ||
+			objEvent.target.id == "step_list"
+		) {
+			// move dragged elem to the selected drop target
+			reorderList.objParent.removeChild(reorderList.objCurrent);
+			reorderList.objParent.insertBefore(
+				reorderList.objCurrent,
+				objEvent.target.nextSibling
+			);
+			reorderList.drop();
+		}
+		// ignore; item doesn't move
+	},
+	toggleSelect: function() {
+		var grabbed = reorderList.objCurrent.getAttribute("aria-grabbed");
+		if (grabbed === "false") {
+			reorderList.select();
+		} else {
+			reorderList.drop();
+		}
+	},
+	select: function() {
+		reorderList.listItems = reorderList.objParent.children.length;
+		reorderList.originalPosition = index(reorderList.objCurrent);
+		reorderList.currentPosition = reorderList.originalPosition;
+		reorderList.objCurrent.setAttribute("draggable", true);
+		reorderList.objCurrent.setAttribute("aria-grabbed", true);
+		reorderList.objCurrent.setAttribute("aria-selected", true);
+		reorderList.objParent.setAttribute("aria-dropeffect", "move");
+		reorderList.objTrigger.focus();
+		reorderList.update(
+			"You have lifted an item. It is in position " +
+				reorderList.originalPosition +
+				" of " +
+				reorderList.listItems +
+				" in the list. Use the arrow keys to move, spacebar to drop, and escape key to cancel."
+		);
+	},
+	move: function(key) {
+		if (
+			reorderList.objCurrent == null ||
+			reorderList.objCurrent.getAttribute("aria-grabbed") === "false"
+		) {
+			// ignore; this item is not currently grabbed
+		} else {
+			if (key === "ArrowUp") {
+				if (reorderList.currentPosition > 1) {
+					reorderList.currentPosition = reorderList.currentPosition - 1;
+					reorderList.objParent.insertBefore(
+						reorderList.objCurrent,
+						reorderList.objCurrent.previousElementSibling
+					);
+				}
+				// ignore; this item is already at the top of the list
+			} else if (key === "ArrowDown") {
+				if (reorderList.currentPosition < reorderList.listItems) {
+					var next = reorderList.objCurrent.nextElementSibling;
+					reorderList.currentPosition = reorderList.currentPosition + 1;
+					reorderList.objParent.insertBefore(
+						reorderList.objCurrent,
+						next.nextElementSibling
+					);
+				}
+				// ignore; this item is already at the bottom of the list
+			}
+			reorderList.update(
+				"You have moved the item to position " + reorderList.currentPosition + "."
+			);
+			reorderList.objTrigger.focus();
+		}
+	},
+	drop: function(objEvent) {
+		if (reorderList.objCurrent) {
+			reorderList.currentPosition = index(reorderList.objCurrent);
+			if (reorderList.currentPosition === reorderList.originalPosition) {
+				// nothing moved!
+				reorderList.update(
+					"You have dropped the item. It is in its original position."
+				);
+			} else {
+				reorderList.update(
+					"You have dropped the item. It has moved from position " +
+						reorderList.originalPosition +
+						" to " +
+						reorderList.currentPosition +
+						"."
+                );
+			}
+			setTimeout("reorderList.reset()", 350); // this is not my fave thing, but will do in a pinch
+		}
+		// ignore; no item currently grabbed
+	},
+	cancel: function(objEvent) {
+		if (reorderList.objCurrent) {
+			if (reorderList.originalPosition === reorderList.currentPosition) {
+				// nothing moved!
+			} else if (reorderList.originalPosition < reorderList.currentPosition) {
+				var targetElement = reorderList.originalPosition - 1;
+				reorderList.objParent.insertBefore(
+					reorderList.objCurrent,
+					reorderList.objParent.children[targetElement]
+				);
+			} else if (reorderList.originalPosition > reorderList.currentPosition) {
+				reorderList.objParent.insertBefore(
+					reorderList.objCurrent,
+					reorderList.objParent.children[reorderList.originalPosition]
+				);
+			}
+			reorderList.objTrigger.focus();
+			reorderList.update(
+				"Movement cancelled. The item has returned to its starting position of " +
+					reorderList.originalPosition +
+					"."
+			);
+			setTimeout("reorderList.reset()", 350);
+		}
+	},
+	update: function(message) {
+		var draggableList = document.getElementById("step_list");
+		var liveRegion = document.getElementById(draggableList.dataset.liveregion);
+		liveRegion.innerHTML = message;
+	},
+	reset: function() {
+		if (reorderList.objParent) {
+			reorderList.objParent.removeAttribute("aria-dropeffect");
+		}
+		reorderList.listItems = null;
+		reorderList.objCurrent = null;
+		reorderList.objTrigger = null;
+		reorderList.objParent = null;
+		reorderList.originalPosition = null;
+		reorderList.currentPosition = null;
+
+		var listItems = document.querySelectorAll("#step_list [draggable]");
+		for (var i = 0; i < listItems.length; i++) {
+			listItems[i].setAttribute("aria-grabbed", false);
+			listItems[i].setAttribute("aria-selected", false);
+			listItems[i].setAttribute("draggable", false);
+			listItems[i].classList.remove("is-selected");
+		}
+	}
+};
+
+function setupDnD() {
+	var draggableList = document.getElementById("step_list");
+	var listDescription = draggableList.dataset.description;
+	var listItems = document.querySelectorAll("#step_list [draggable]");
+
+	for (var i = 0; i < listItems.length; i++) {
+		// @TODO This same action will need to be applied to any new elements added to the list via the "Add" function
+		var trigger = listItems[i].querySelector(".js-drag-trigger");
+		trigger.setAttribute("aria-describedby", listDescription);
+		listItems[i].setAttribute("aria-grabbed", false);
+		listItems[i].setAttribute("aria-selected", false);
+		reorderList.init(trigger);
+	}
+}
+
+setupDnD();
+
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 $('.js-step-list li').on("keydown", syncNavButtons);
 $('.js-add').on("click", addStep);
