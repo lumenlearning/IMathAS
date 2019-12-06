@@ -41,7 +41,7 @@ function addStep(){
 
     // Create a <li> node
     var step = document.createElement("li");
-    step.className = "step-li selected";
+    step.className = "step-li is-selected";
     step.dataset.num = num;
     step.setAttribute("onclick", "showSteps('#desmos_edit_container', "+num+")");
 
