@@ -13,7 +13,6 @@ var desmosDialog = {
         this.height = top.tinymce.activeEditor.windowManager.getParams().height;
         this.isnew = top.tinymce.activeEditor.windowManager.getParams().isnew;
         this.desmosjson = top.tinymce.activeEditor.windowManager.getParams().desmosjson;
-        this.desmosjson.replace('"','\"');
         document.getElementById("editdesmos").setAttribute("data-json",this.desmosjson);
         this.loadDesmos();
     },

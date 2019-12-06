@@ -4,7 +4,7 @@ function loadDesmos(){
     if (elt.length>0) {
         for (i = 0; i < elt.length; i++) {
             var calculator = Desmos.GraphingCalculator(elt[i]);
-            json = elt[i].getAttribute("data-json").replace(/\\"/g,'"');
+            json = elt[i].getAttribute("data-json");
             if (json!="") {
                 calculator.setState(json);
             }
