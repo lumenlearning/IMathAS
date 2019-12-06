@@ -57,9 +57,8 @@ if ($shownav) {
         <div class="step-items">
             <?php
             for ($i=0; $i<count($item->steps); $i++) {
-                echo "<div class=\"step-item";
-                if ($i>0) echo " hidden";
-                echo "\">";
+                $displayed = 0 == $i ? 'block' : 'none';
+                printf('<div id="step-item-display-%d" style="display: %s;" class="step-item">', $i, $displayed);
                 echo $item->steps[$i]['text'];
                 echo "</div>";
             } ?>
