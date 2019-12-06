@@ -78,7 +78,7 @@
                             $i,
                             $item->steps[$i]['id']
                         );
-                        echo "<button class='js-delete' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
+                        echo "<button class='js-delete delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
                         echo "</li>";
                     }
                     ?>

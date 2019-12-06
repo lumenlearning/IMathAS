@@ -18,6 +18,9 @@ function showSteps(parent, num){
     for (i=0; i<listItems.length; i++) {
         if (num == i) {
             showThis(listItems[i]);
+            // listItems[i].className = "step-li is-selected";
+            // listItems[i].setAttribute("aria-selected", true);
+            // stepItems[i].style.display = "block";
         } else {
             listItems[i].className = "step-li";
             listItems[i].setAttribute("aria-selected", false);
@@ -66,7 +69,7 @@ function addStep(){
     //Create a delete <button> element
     var buttonDelete = document.createElement("button");
     buttonDelete.type = "button";
-    buttonDelete.classList.add("js-delete");
+    buttonDelete.classList.add("js-delete", "delete-trigger");
     buttonDelete.setAttribute("aria-label", "Delete this item.");
     buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
 
