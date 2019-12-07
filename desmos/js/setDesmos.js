@@ -91,7 +91,11 @@ function addStep(){
 	
 	var newItem = document.querySelectorAll("[data-num='"+num+"']")[0];
 
-    showSteps(newItem);
+	var draggableList = document.getElementById("step_list");
+	var listDescription = draggableList.dataset.description;
+
+	showSteps(newItem);
+	addDnDAttributes(newItem, listDescription);
 }
 
 function removeStep(event){
@@ -413,18 +417,21 @@ var reorderList = {
 	}
 };
 
+function addDnDAttributes(el, listDescription) {
+	var trigger = el.querySelector(".js-drag-trigger");
+	trigger.setAttribute("aria-describedby", listDescription);
+	el.setAttribute("aria-grabbed", false);
+	el.setAttribute("aria-selected", false);
+	reorderList.init(trigger);
+}
+
 function setupDnD() {
 	var draggableList = document.getElementById("step_list");
 	var listDescription = draggableList.dataset.description;
 	var listItems = document.querySelectorAll("#step_list [draggable]");
 
 	for (var i = 0; i < listItems.length; i++) {
-		// @TODO This same action will need to be applied to any new elements added to the list via the "Add" function
-		var trigger = listItems[i].querySelector(".js-drag-trigger");
-		trigger.setAttribute("aria-describedby", listDescription);
-		listItems[i].setAttribute("aria-grabbed", false);
-		listItems[i].setAttribute("aria-selected", false);
-		reorderList.init(trigger);
+		addDnDAttributes(listItems[i], listDescription);
 	}
 }
 
