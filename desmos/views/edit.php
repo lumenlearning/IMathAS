@@ -45,16 +45,17 @@
         <div id="step_box" class="desmos desmos-steps -offset --exlarge">
             <div class="step-navigation teacher-view">
                 <div class="step-controls">
-                    <button class="button js-add" type="button">Add</button>
+                    <button class="button --small js-add" type="button">Add</button>
                 </div>
                 <span id="step-notifications" aria-live="assertive" class="u-sr-only"></span>
                 <span id="step-directions" class="u-sr-only">Press spacebar to toggle drag-and-drop mode, use arrow keys to move selected elements.</span>
-                <ol id="step_list" class="js-step-list step-box"  data-description="step-directions" data-liveregion="step-notifications">
+                <ol id="step_list" class="js-step-list step-list" data-description="step-directions" data-liveregion="step-notifications">
                     <!-- Changes to step markup must also be duplicated in the addStep JS -->
                     <?php
                     $action = '';
                     if (count($item->steps)>1) {
-                        $action = "onClick=\"showSteps('#desmos_edit_container',%d)\"";
+                        $itemNum = 
+                        $action = "onClick=\"showSteps(this)\"";
                     }
                     for ($i=0; $i<count($item->steps); $i++) {
                         $selected = '';
@@ -87,8 +88,9 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    printf('<div id="step-item-display-%d">', $i);
-                    echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
+                    echo "<textarea name=\"step_text_$i\" class=\"step-item editor";
+                    if ($i>0) echo " hidden";
+                    echo "\"> ";
                     echo $item->steps[$i]['text'];
                     echo "</textarea>";
                     echo "</div>";

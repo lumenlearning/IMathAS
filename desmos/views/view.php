@@ -30,13 +30,13 @@ if ($shownav) {
 
     <div id="step_box" class="desmos desmos-student-view -offset --xlarge">
         <div class="steps-navigation">
-            <ol id="step_list" class="js-step-list step-box" role="listbox">
+            <ol id="step_list" class="js-step-list step-list" role="listbox">
                 <?php
                 $clickaction = '';
                 $keyaction = '';
                 if (count($item->steps)>1) {
-                    $clickaction = "onclick=\"showSteps('#desmos_edit_container', %d);\"";
-                    $keyaction = "onkeydown=\"javascript: if(event.code === 'Space') showSteps('#desmos_edit_container', %d);\"";
+                    $clickaction = "onclick=\"showSteps(this);\"";
+                    $keyaction = "onkeydown=\"javascript: if(event.code === 'Space') showSteps(this);\"";
                 }
                 for ($i=0; $i<count($item->steps); $i++) {
                     $selected = '';
