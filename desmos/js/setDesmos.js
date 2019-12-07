@@ -22,19 +22,10 @@ function showSteps(el){
 			listItems[i].classList.remove("is-selected");
 			listItems[i].removeAttribute("aria-selected");
 			var stepNum = listItems[i].dataset.num;
-			var stepItem = document.querySelectorAll('[name=step_text_' + stepNum + ']')[0];
+			var stepItem = document.getElementById("step_text_" + stepNum + "");
 			stepItem.style.display = "none";
 		}
 	}
-}
-
-function showThis(el) {
-	var listItems = document.getElementsByClassName('step-li');
-    var itemNum = el.dataset.num;
-	var stepItem = document.querySelectorAll('[name=step_text_' + itemNum + ']')[0];
-    el.classList.add("is-selected");
-    el.setAttribute("aria-selected", true);
-	stepItem.style.display = "block";
 }
 
 function addStep(){
@@ -82,12 +73,22 @@ function addStep(){
     step.appendChild(input);
     step.appendChild(buttonDelete);
     
-    document.getElementById("step_list").appendChild(step);
+	document.getElementById("step_list").appendChild(step);
+	
+	// echo  "<div id=\"step_text_$i\">";
+	// echo "<textarea name=\"step_text[$i]\" class=\"step-item\" editor";
+
+	var textareaWrapper = document.createElement("div");
+	textareaWrapper.id = "step_text_" + num;
 
     var textarea = document.createElement("textarea");
-    textarea.name = "step_text_"+num;
-    textarea.className = "step-item editor";
-	document.getElementById("step_items").appendChild(textarea);
+	textarea.name = "step_text["+num+"]";
+	textarea.setAttribute("editor", "");
+	textarea.className = "step-item editor";
+	
+
+	textareaWrapper.appendChild(textarea);
+	document.getElementById("step_items").appendChild(textareaWrapper);
 	
 	var newItem = document.querySelectorAll("[data-num='"+num+"']")[0];
 
@@ -96,6 +97,15 @@ function addStep(){
 
 	showSteps(newItem);
 	addDnDAttributes(newItem, listDescription);
+}
+
+function showThis(el) {
+	var listItems = document.getElementsByClassName('step-li');
+	var itemNum = el.dataset.num;
+	var stepItem = document.getElementById("step_text_" + itemNum);
+    el.classList.add("is-selected");
+    el.setAttribute("aria-selected", true);
+	stepItem.style.display = "block";
 }
 
 function removeStep(event){

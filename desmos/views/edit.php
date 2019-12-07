@@ -1,11 +1,10 @@
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
 <script type="text/javascript">
-<?php if (count($item->steps)<1) { ?>
     window.onload = ()=> {
         <?php if (count($item->steps) < 1) {
             echo 'addStep();';
         } else {
-            echo 'showSteps("#desmos_edit_container",0);';
+            echo 'showSteps(document.getElementById("step_list").children[0])';
         } ?>
     }
 </script>
@@ -54,7 +53,6 @@
                     <?php
                     $action = '';
                     if (count($item->steps)>1) {
-                        $itemNum = 
                         $action = "onClick=\"showSteps(this)\"";
                     }
                     for ($i=0; $i<count($item->steps); $i++) {
@@ -88,12 +86,13 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    echo "<textarea name=\"step_text_$i\" class=\"step-item editor";
+                    echo  "<div id=\"step_text_$i\">";
+                    echo "<textarea name=\"step_text[$i]\" class=\"step-item\" editor";
                     if ($i>0) echo " hidden";
                     echo "\"> ";
                     echo $item->steps[$i]['text'];
                     echo "</textarea>";
-                    echo "</div>";
+                    echo  "</div>";
                 } ?>
             </div>
         </div>
