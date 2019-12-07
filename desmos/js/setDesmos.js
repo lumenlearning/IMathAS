@@ -374,6 +374,7 @@ var reorderList = {
 			}
 			setTimeout("reorderList.reset()", 350); // this is not my fave thing, but will do in a pinch
 		}
+		showSteps(reorderList.objCurrent);
 		// ignore; no item currently grabbed
 	},
 	cancel: function(objEvent) {
@@ -422,7 +423,7 @@ var reorderList = {
 			listItems[i].setAttribute("aria-grabbed", false);
 			listItems[i].setAttribute("aria-selected", false);
 			listItems[i].setAttribute("draggable", false);
-			listItems[i].classList.remove("is-selected");
+			// listItems[i].classList.remove("is-selected");
 		}
 	}
 };
