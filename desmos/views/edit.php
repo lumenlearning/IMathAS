@@ -81,7 +81,7 @@
                 for ($i=0; $i<count($item->steps); $i++) {
                     printf('<div id="step-item-display-%d">', $i);
                     echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
-                    echo $item->steps[$i]['text'];
+                    echo htmlspecialchars($item->steps[$i]['text']);
                     echo "</textarea>";
                     echo "</div>";
                 } ?>

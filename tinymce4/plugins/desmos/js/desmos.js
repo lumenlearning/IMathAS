@@ -38,7 +38,8 @@ var desmosDialog = {
         var elt = document.getElementById("editdesmos");
 
         desmosjson = elt.getAttribute("data-json");
-        this.calculator = Desmos.GraphingCalculator(elt);
+        var options = {administerSecretFolders: true};
+        this.calculator = Desmos.GraphingCalculator(elt, options);
         this.calculator.setState(desmosjson);
     }
 };

@@ -497,7 +497,6 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 			{title:"Gridded Centered", value:"gridded centered"}],
 		style_formats_merge: true,
 		snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
-		entity_encoding: "numeric",
 		setup: function (editor) {
 			editor.on('change', function () {
 				editor.save();
