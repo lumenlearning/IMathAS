@@ -86,11 +86,9 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    echo  "<div id=\"step_text_$i\">";
-                    echo "<textarea name=\"step_text[$i]\" class=\"step-item\" editor";
-                    if ($i>0) echo " hidden";
-                    echo "\"> ";
-                    echo $item->steps[$i]['text'];
+                    printf('<div id="step_text_%d step-item-display-%d">', $i, $i);
+                    echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
+                    echo htmlspecialchars($item->steps[$i]['text']);
                     echo "</textarea>";
                     echo  "</div>";
                 } ?>
