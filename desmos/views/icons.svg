@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+ <symbol id="lux-icon-x" viewBox="0 0 16 16">
+  <defs>
+      <path d="M9.885 8l5.724-5.724a1.332 1.332 0 000-1.885 1.332 1.332 0 00-1.885 0L8 6.115 2.276.39a1.332 1.332 0 00-1.885 0 1.332 1.332 0 000 1.885L6.115 8 .39 13.724A1.332 1.332 0 001.334 16c.34 0 .682-.13.942-.39L8 9.884l5.724 5.724a1.33 1.33 0 001.885 0 1.332 1.332 0 000-1.885L9.885 8z" id="lux-icon-x_a"/>
+    </defs>
+    <use fill="#637381" xlink:href="#lux-icon-x_a" fill-rule="evenodd"/>
+  </symbol>
+  <symbol id="lux-icon-drag" viewBox="0 0 5 14">
+    <path fill="#637381" fill-rule="evenodd" d="M0 0h2v2H0zm0 4h2v2H0zm0 4h2v2H0zm0 4h2v2H0zM3 0h2v2H3zm0 4h2v2H3zm0 4h2v2H3zm0 4h2v2H3z"/>
+  </symbol>
+</svg>

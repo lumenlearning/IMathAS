@@ -1,19 +1,16 @@
-<link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
+<link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
 <script type="text/javascript">
-    var curlibs = '<?php Sanitize::encodeStringForJavascript($item->tags); ?>';
     window.onload = ()=> {
         <?php if (count($item->steps) < 1) {
             echo 'addStep();';
         } else {
-            echo 'showSteps("#desmos_edit_container",0);';
+            echo 'showSteps(document.getElementById("step_list").children[0])';
         } ?>
     }
 </script>
 
 <div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
 <div id="desmos_edit_container">
-    <link rel="stylesheet" href="/desmos/temp_desmos.css" type="text/css" />
-
     <h1 class="-small-type desmos-header">
         <img src="../ohm/img/desmos.png" alt=""/>
         <?php echo $pagetitle ?>
@@ -45,25 +42,34 @@
             </div>
         </div>
         <div id="step_box" class="desmos desmos-steps -offset --exlarge">
-            <div class="step-navigation">
+            <div class="step-navigation teacher-view">
                 <div class="step-controls">
-                    <a class="button" href="javascript:addStep()">Add</a>
+                    <button class="button --small js-add" type="button">Add</button>
                 </div>
-                <ol id="step_list" class="step-box">
+                <span id="step-notifications" aria-live="assertive" class="u-sr-only"></span>
+                <span id="step-directions" class="u-sr-only">Press spacebar to toggle drag-and-drop mode, use arrow keys to move selected elements.</span>
+                <ol id="step_list" class="js-step-list step-list" data-description="step-directions" data-liveregion="step-notifications">
+                    <!-- Changes to step markup must also be duplicated in the addStep JS -->
                     <?php
                     $action = '';
                     if (count($item->steps)>1) {
-                        $action = "onClick=\"showSteps('#desmos_edit_container',%d)\"";
+                        $action = "onClick=\"showSteps(this)\"";
                     }
                     for ($i=0; $i<count($item->steps); $i++) {
                         $selected = '';
                         if ($i==0) {
-                            $selected = "selected";
+                            $selected = "is-selected";
                         }
-                        printf("<li class=\"step-li $selected\" $action>", $i);
+                        printf("<li class=\"step-li $selected\" $action  draggable=\"false\" data-num=\"$i\">", $i);
+                        echo "<span class=\"js-drag-trigger move-trigger\"><button class=\"u-button-reset\" aria-label=\"Move this item.\" type=\"button\"><svg aria-hidden=\"true\"><use xlink:href=\"#lux-icon-drag\"></use></svg></button></span>";
                         printf(
-                            "<input type='text' name='step_title[%d]' value='%s' />",
+                            "<label for='step_title[%d]' class='u-sr-only'>Step Title</label>",
                             $i,
+                            $item->steps[$i]['title']
+                        );
+                        printf(
+                            "<input type='text' id='step_title[%d]' name='step_title[%d]' value='%s' />",
+                            $i, $i,
                             $item->steps[$i]['title']
                         );
                         printf(
@@ -71,7 +77,8 @@
                             $i,
                             $item->steps[$i]['id']
                         );
-                        echo '<button type="button" onclick="removeStep('.$i.')"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 16 16"><defs><path d="M9.885 8l5.724-5.724a1.332 1.332 0 000-1.885 1.332 1.332 0 00-1.885 0L8 6.115 2.276.39a1.332 1.332 0 00-1.885 0 1.332 1.332 0 000 1.885L6.115 8 .39 13.724A1.332 1.332 0 001.334 16c.34 0 .682-.13.942-.39L8 9.884l5.724 5.724a1.33 1.33 0 001.885 0 1.332 1.332 0 000-1.885L9.885 8z" id="a"/></defs><use fill="#637381" xlink:href="#a" fill-rule="evenodd"/></svg></button>';
+                        echo "<button class='js-delete delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
+                        echo "</li>";
                     }
                     ?>
                 </ol>
@@ -79,17 +86,17 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    printf('<div id="step-item-display-%d">', $i);
+                    printf('<div id="step_text_%d step-item-display-%d">', $i, $i);
                     echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
                     echo htmlspecialchars($item->steps[$i]['text']);
                     echo "</textarea>";
-                    echo "</div>";
+                    echo  "</div>";
                 } ?>
             </div>
         </div>
-        <button id="desmos_form_submit_button" class="button" type="submit" name="submitbtn"
-                value="Submit" style="clear:both">Save and Exit</button>
+        <button id="desmos_form_submit_button" class="button --primary -offset" type="submit" name="submitbtn" value="Submit" style="clear:both">Save and Exit</button>
     </form>
+    <?php include 'icons.svg'; ?>
 </div>
 
 <div id="desmos_previewmode_buttons" style="display: none;">

@@ -1,0 +1,225 @@
+body {
+    /* Overriding Lux */
+    background-color: #fff;
+}
+
+.desmos-header {
+    padding: 1em 0;
+}
+
+.desmos-header h1 {
+    margin-bottom: 0;
+}
+
+.desmos-header img {
+    vertical-align: middle;
+}
+
+.desmos-header p {
+    margin-left: 32px;
+}
+
+.desmos-steps {
+    box-sizing: border-box;
+    display: flex; 
+    height: 600px;
+    width: 1220px;
+}
+
+/* Step Navigation */
+.desmos-steps .step-navigation {
+    border: 1px solid #dadada;
+    border-right: none;
+    width: 35%;
+}
+
+.step-list ol {
+    padding-left: 0;
+}
+
+.step-li  {
+    background-color: #f2f2f2;
+    list-style: decimal inside;
+    padding: .5em;
+    position: relative;
+}
+
+.step-li:hover {
+    background-color: #dde3e9;
+    cursor: pointer;
+}
+
+.step-li[aria-selected=true] {
+    background-color: silver;
+}
+
+.step-li.is-selected {
+    background-color: #c8e4ff;
+}
+
+/* Step Display */
+.step-items {
+    border: 1px #dadada solid;
+    border-radius: 0;
+    min-height: 600px;
+    width: 65%;
+    min-width: 610px;
+    overflow: hidden;
+} 
+
+.step-items textarea {
+    border: none;
+    border-radius: 0;
+    min-height: 100%;
+    height: 510px;
+    min-width: 100%;
+} 
+
+
+/* DESMOS TEACHER VIEW */
+.step-naviation.teacher-view {
+    overflow: scroll; 
+}
+
+/* Overwriting Lux */
+.desmos input {
+	padding: .25em .5em; 
+}
+
+.desmos .form-group input {
+    width: 32em;
+}
+
+.desmos .form-group .--input-icon {
+	padding: .5em, 1em;
+	width: 10em;
+}
+/* End Lux overwrite */
+
+.desmos .form-group {
+    display: flex;
+    padding-bottom: 1em;
+}
+
+.desmos .form-group input {
+    margin-top: 0.4em;
+}
+
+.desmos .form-group > div:first-child {
+	margin-right: 2em;
+}
+
+.desmos .teacher-view {
+    overflow-y: scroll;
+}
+
+.desmos-steps button:not(.button):hover {
+    background-color: transparent;
+}
+
+.step-controls {
+    background: #f2f2f2;
+    border-bottom: #dadada solid 1px;
+    padding: 8px;
+}
+
+.teacher-view .step-li {
+    /* display: flex; */
+    padding-left:36px;
+}
+
+.step-li[draggable=true].is-selected {
+    opacity: 0.4;
+}
+
+.step-li.is-over {
+    border-bottom: 2px solid #1e74d1;
+} 
+
+.step-li input {
+    margin: 0!important; /* overriding lux */
+    width: calc(100% - 50px);
+}
+
+.step-li button svg {
+    display: inline-block;
+    opacity: 0.5;
+    transition: opacity 0.1s;
+    vertical-align: middle;
+}
+
+.step-li button:hover svg,
+.step-li button:focus svg {
+    opacity: 1;
+}
+
+.delete-trigger, .move-trigger {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.delete-trigger {
+    padding: 10px;
+    min-height: 100%;
+    right: 0;
+    width: 40px;
+}
+
+.delete-trigger svg {
+    height: 20px;
+    width: 20px;
+}
+
+.move-trigger {
+    cursor: move;
+    left: 0;  
+}
+
+.move-trigger button {
+    min-height: 100%;
+    margin: auto;
+    pointer-events: none;
+    text-align: center;
+    width: 40px;
+}
+
+.move-trigger svg {
+    height: 14px;
+    width: 5px;
+}
+
+
+/* DESMOS STUDENT VIEW */
+.desmos-student-view {
+    display: flex;
+    width: 1000px;
+}
+
+.desmos-student-view .steps-navigation {
+    border: none;
+    margin-right: 2em;
+    width: 30%; 
+}
+
+.desmos-student-view .step-li {
+    list-style: decimal inside;
+    padding: 1em;
+}
+
+.desmos-student-view .step-items {
+    border: #dadada 1px solid;
+    border-radius: 4px;
+    padding: 2em 2em 0 2em;
+}
+
+/* Overide button style from imasscore.css */
+.desmos-nav-btns .button {
+    background-color: #fff; 
+    margin-top: 1em;
+    padding: .75em 2em;
+}
+
+.desmos-nav-btns .button:hover {
+    background-color: #F9FAFB;
+}
