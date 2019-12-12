@@ -45,7 +45,7 @@ if ($shownav) {
                         $selected = "is-selected";
                         $ariastate = "true";
                     }
-                    printf("<li role=\"option\" tabindex=\"0\" class=\"step-li view $selected\" $clickaction $keyaction>", $i, $i);
+                    printf("<li role=\"option\" tabindex=\"0\" class=\"step-li view $selected\" $clickaction $keyaction data-num=\"$i\">", $i, $i);
                     echo $item->steps[$i]['title'];
                     //printf("<input type='hidden' name='step[%d]' value='%d'>", $i, $item->steps[$i]['id']);
                     echo "</li>";
