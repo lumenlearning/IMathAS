@@ -13,17 +13,19 @@ function loadDesmos(){
 }
 loadDesmos();
 
-function showSteps(el){
-	showThis(el);
-
-	var listItems = document.getElementsByClassName('step-li');
+function showSteps(parent, el){
+	//showThis(el);
+	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
 	for (var i = 0; i < listItems.length; i++) {
+		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + i)[0];
 		if (!(listItems[i] == el)) {
 			listItems[i].classList.remove("is-selected");
-			listItems[i].removeAttribute("aria-selected");
-			var stepNum = listItems[i].dataset.num;
-			var stepItem = document.getElementById("step_text_" + stepNum + "");
+			listItems[i].setAttribute("aria-selected", false);
 			stepItem.style.display = "none";
+		} else {
+			listItems[i].classList.add("is-selected");
+			listItems[i].setAttribute("aria-selected", true);
+			stepItem.style.display = "block";
 		}
 	}
 }
@@ -95,17 +97,8 @@ function addStep(){
 	var draggableList = document.getElementById("step_list");
 	var listDescription = draggableList.dataset.description;
 
-	showSteps(newItem);
+	showSteps("#desmos_edit_container", newItem);
 	addDnDAttributes(newItem, listDescription);
-}
-
-function showThis(el) {
-	var listItems = document.getElementsByClassName('step-li');
-	var itemNum = el.dataset.num;
-	var stepItem = document.getElementById("step_text_" + itemNum);
-    el.classList.add("is-selected");
-    el.setAttribute("aria-selected", true);
-	stepItem.style.display = "block";
 }
 
 function removeStep(event){
@@ -374,7 +367,7 @@ var reorderList = {
 			}
 			setTimeout("reorderList.reset()", 350); // this is not my fave thing, but will do in a pinch
 		}
-		showSteps(reorderList.objCurrent);
+		showSteps("#desmos_edit_container", reorderList.objCurrent);
 		// ignore; no item currently grabbed
 	},
 	cancel: function(objEvent) {

@@ -35,8 +35,8 @@ if ($shownav) {
                 $clickaction = '';
                 $keyaction = '';
                 if (count($item->steps)>1) {
-                    $clickaction = "onclick=\"showSteps(this);\"";
-                    $keyaction = "onkeydown=\"javascript: if(event.code === 'Space') showSteps(this);\"";
+                    $clickaction = "onclick=\"showSteps('desmos_view_container', this);\"";
+                    $keyaction = "onkeydown=\"javascript: if(event.code === 'Space') showSteps('desmos_view_container', this);\"";
                 }
                 for ($i=0; $i<count($item->steps); $i++) {
                     $selected = '';
@@ -46,12 +46,8 @@ if ($shownav) {
                         $ariastate = "true";
                     }
                     printf("<li role=\"option\" tabindex=\"0\" class=\"step-li view $selected\" $clickaction $keyaction>", $i, $i);
-                    // printf(
-                    //     "<input type='text' name='step_title[$d]' value='%s' />",
-                    //     $item->steps[$i]['title']
-                    // );
-                    printf($item->steps[$i]['title']);
-                    printf("<input type='hidden' name='step[%d]' value='%d'>", $i, $item->steps[$i]['id']);
+                    echo $item->steps[$i]['title'];
+                    //printf("<input type='hidden' name='step[%d]' value='%d'>", $i, $item->steps[$i]['id']);
                     echo "</li>";
                 }
                 ?>
@@ -61,16 +57,11 @@ if ($shownav) {
             <div class="step-items">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    echo "<div class=\"step-item";
-                    if ($i>0) echo " hidden";
-                    echo "\">";
+                    $displayed = 0 == $i ? 'block' : 'none';
+                    printf('<div id="step-item-display-%d" style="display: %s;" class="step-item-display-%d step-item">', $i, $displayed, $i);
                     echo $item->steps[$i]['text'];
                     echo "</div>";
                 } ?>
-            </div>
-            <div class="desmos-nav-btns -inset">
-                <button class="button --primary">Previous</button>
-                <button class="button --primary">Next</button>
             </div>
         </div>
     </div>

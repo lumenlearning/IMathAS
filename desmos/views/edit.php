@@ -4,7 +4,7 @@
         <?php if (count($item->steps) < 1) {
             echo 'addStep();';
         } else {
-            echo 'showSteps(document.getElementById("step_list").children[0])';
+            echo 'showSteps("desmos_edit_container", document.getElementById("step_list").children[0])';
         } ?>
     }
 </script>
@@ -53,17 +53,18 @@
                     <?php
                     $action = '';
                     if (count($item->steps)>1) {
-                        $action = "onClick=\"showSteps(this)\"";
+                        $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
+                        $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
                     }
                     for ($i=0; $i<count($item->steps); $i++) {
                         $selected = '';
                         if ($i==0) {
                             $selected = "is-selected";
                         }
-                        printf("<li class=\"step-li $selected\" $action  draggable=\"false\" data-num=\"$i\">", $i);
+                        echo "<li class=\"step-li $selected\" $action $keyaction draggable=\"false\" data-num=\"$i\">";
                         echo "<span class=\"js-drag-trigger move-trigger\"><button class=\"u-button-reset\" aria-label=\"Move this item.\" type=\"button\"><svg aria-hidden=\"true\"><use xlink:href=\"#lux-icon-drag\"></use></svg></button></span>";
                         printf(
-                            "<label for='step_title[%d]' class='u-sr-only'>Step Title</label>",
+                            "<label for='step_title[%d]' class='u-sr-only'>%s</label>",
                             $i,
                             $item->steps[$i]['title']
                         );
@@ -86,7 +87,7 @@
             <div id="step_items" class="step-items step-details">
                 <?php
                 for ($i=0; $i<count($item->steps); $i++) {
-                    printf('<div id="step_text_%d step-item-display-%d">', $i, $i);
+                    printf('<div id="step_text_%d" class="step-item-display-%d">', $i, $i);
                     echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
                     echo htmlspecialchars($item->steps[$i]['text']);
                     echo "</textarea>";
