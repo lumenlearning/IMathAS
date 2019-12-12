@@ -62,7 +62,7 @@ $isRealStudent = (isset($studentid) && !isset($sessiondata['stuview']));
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/
 if ($item->typename=='desmos') {
-    $placeinhead = "<script src=\"https://desmos.lumenlearning.com/desmos/js/calculator.js\"></script>";
+    $placeinhead = "<script src=\"".$CFG['desmos_calculator']."\"></script>";
 }
 $placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/view.php";

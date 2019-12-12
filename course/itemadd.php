@@ -250,10 +250,12 @@ $placeinhead = '<script type="text/javascript">
 	});
 	</script>';
 
+if ($item->typename=='desmos') {
+    //$placeinhead .= "<script src=\"".$CFG['desmos_calculator']."\"></script>";
+}
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/lux-temp.css\">";
-$placeinhead .= "<script src=\"$imasroot/desmos/js/calculator.js\"></script>";
 $placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
 $placeinfooter .= "<script src=\"$imasroot/desmos/js/editItem.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/edit.php";
