@@ -245,6 +245,7 @@ if (isset($_GET['id'])) {  //already have id; update
 // Use TinyMCE for Desmos items.
 $useeditor = 'noinit';
 $placeinhead = '<script type="text/javascript">
+    var numsteps = '.count($item->steps).';
 	$(function() {
 		initeditor("selector","textarea");
 	});

@@ -17,7 +17,8 @@ function showSteps(parent, el){
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
 	for (var i = 0; i < listItems.length; i++) {
-		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + i)[0];
+		var num = listItems[i].getAttribute("data-num");
+		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + num)[0];
 		if (!(listItems[i] == el)) {
 			listItems[i].classList.remove("is-selected");
 			listItems[i].setAttribute("aria-selected", false);
@@ -31,13 +32,12 @@ function showSteps(parent, el){
 }
 
 function addStep(){
-    var num = document.querySelectorAll('.step-li').length;
-
+	var parent = "desmos_edit_container";
     // Create a <li> node
     var step = document.createElement("li");
     step.className = "step-li";
-    step.dataset.num = num;
-    step.setAttribute("onclick", "showSteps(this)");
+    step.dataset.num = numsteps;
+    step.setAttribute("onclick", "showSteps('"+parent+"', this)");
     step.setAttribute("draggable", false);
 
     // Create a <span> wrapper for the drag button
@@ -53,11 +53,11 @@ function addStep(){
 
     // Create a <label> and <input> set
     var label = document.createElement("label");
-    label.setAttribute("for", "step_title["+num+"]");
+    label.setAttribute("for", "step_title["+numsteps+"]");
     label.classList.add("u-sr-only");
     var input = document.createElement("input");
     input.type = "text";
-    input.name = "step_title["+num+"]";
+    input.name = "step_title["+numsteps+"]";
 
     //Create a delete <button> element
     var buttonDelete = document.createElement("button");
@@ -76,41 +76,48 @@ function addStep(){
     step.appendChild(buttonDelete);
     
 	document.getElementById("step_list").appendChild(step);
-	
+
+	// Add textarea
 	// echo  "<div id=\"step_text_$i\">";
 	// echo "<textarea name=\"step_text[$i]\" class=\"step-item\" editor";
 
 	var textareaWrapper = document.createElement("div");
-	textareaWrapper.id = "step_text_" + num;
+	textareaWrapper.id = "step_text_" + numsteps;
+	textareaWrapper.className = 'step-item-display-'+numsteps;
 
-    var textarea = document.createElement("textarea");
-	textarea.name = "step_text["+num+"]";
-	textarea.setAttribute("editor", "");
+	var textarea = document.createElement("textarea");
+	textarea.name = "step_text["+numsteps+"]";
 	textarea.className = "step-item editor";
-	
+
 
 	textareaWrapper.appendChild(textarea);
+
+	//document.getElementById(parent).getElementsByClassName("step-items")[0];
 	document.getElementById("step_items").appendChild(textareaWrapper);
-	
-	var newItem = document.querySelectorAll("[data-num='"+num+"']")[0];
 
-	var draggableList = document.getElementById("step_list");
-	var listDescription = draggableList.dataset.description;
+	//var newItem = document.querySelectorAll("[data-num='"+num+"']")[0];
 
-	showSteps("#desmos_edit_container", newItem);
-	addDnDAttributes(newItem, listDescription);
+	//var draggableList = document.getElementById("step_list");
+	//var listDescription = draggableList.dataset.description;
+
+
+	//var num = document.getElementById('desmos_edit_container').getElementsByClassName('step-li').length;
+
+	numsteps++;
+	initeditor("selector","textarea");
+	showSteps(parent, step);
 }
 
 function removeStep(event){
     if(confirm("Permanently delete this item?")){
         var parent = this.parentElement;
         var itemNum = parent.dataset.num;
-        var relatedItems = document.querySelectorAll('[name=step' + itemNum + '], [name=step_text_' + itemNum + ']');
+        var relatedItems = document.getElementById('desmos_edit_container').getElementsByClassName("step-item-display-" + itemNum);
         parent.remove();
         for (let i = 0; i < relatedItems.length; i++) {
             relatedItems[i].remove();
 		}
-        showThis(document.getElementById("step_list").children[0]);
+        showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
     }
 }
 
