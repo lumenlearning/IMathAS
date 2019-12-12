@@ -247,6 +247,7 @@ $useeditor = 'noinit';
 $placeinhead = '<script type="text/javascript">
     var numsteps = '.count($item->steps).';
 	$(function() {
+	    desmos = " desmos ";
 		initeditor("selector","textarea");
 	});
 	</script>';
