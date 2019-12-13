@@ -268,38 +268,3 @@ body {
     border: 2px solid #E2E7EA;
     border-radius: 5px;
 }
-
-
-/* DESMOS STUDENT VIEW */
-.desmos-student-view {
-    display: flex;
-    width: 1000px;
-}
-
-.desmos-student-view .steps-navigation {
-    border: none;
-    margin-right: 2em;
-    width: 30%; 
-}
-
-.desmos-student-view .step-li {
-    list-style: decimal inside;
-    padding: 1em;
-}
-
-.desmos-student-view .step-items {
-    border: #dadada 1px solid;
-    border-radius: 4px;
-    padding: 2em 2em 0 2em;
-}
-
-/* Overide button style from imasscore.css */
-.desmos-nav-btns .button {
-    background-color: #fff; 
-    margin-top: 1em;
-    padding: .75em 2em;
-}
-
-.desmos-nav-btns .button:hover {
-    background-color: #F9FAFB;
-}
