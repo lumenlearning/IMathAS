@@ -39,6 +39,7 @@ body {
 
 .step-li  {
     background-color: #f2f2f2;
+    cursor: pointer;
     list-style: decimal inside;
     padding: .5em;
     position: relative;
@@ -46,7 +47,6 @@ body {
 
 .step-li:hover {
     background-color: #dde3e9;
-    cursor: pointer;
 }
 
 .step-li[aria-selected=true] {
@@ -124,7 +124,6 @@ body {
 }
 
 .teacher-view .step-li {
-    /* display: flex; */
     padding-left:36px;
 }
 
@@ -208,22 +207,22 @@ body {
 
 #desmos_preview_warning {
     background-color: #ffffff;
-    margin: 0 0 0 1em;
-    padding: .75em 1em .75em .75em;
     border: 2px #FACAA6 solid;
     border-radius: 5px;
+    margin: 0 0 0 1em;
+    padding: .75em 1em .75em .75em;
 }
 
 #desmos_preview_warning_image {
-    vertical-align: middle;
     margin-right: .5em;
+    vertical-align: middle;
 }
 
 #desmos_preview_content {
-    margin: 0;
-    padding: 0 1em 1em 1em;
     border: 2px solid #E2E7EA;
     border-radius: 5px;
+    margin: 0;
+    padding: 0 1em 1em 1em;
 }
 
 
@@ -259,11 +258,4 @@ body {
 
 .desmos-nav-btns .button:hover {
     background-color: #F9FAFB;
-}
-
-#desmos_preview_content {
-    margin: 0px;
-    padding: 0 1em 1em 1em;
-    border: 2px solid #E2E7EA;
-    border-radius: 5px;
 }
