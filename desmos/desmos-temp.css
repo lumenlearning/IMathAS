@@ -189,22 +189,33 @@ body {
     width: 5px;
 }
 
+/* The "Preview" button on the Desmos edit screen. */
+#desmos_preview_button {
+    margin-left: .5em;
+}
+
 #desmos_preview_container {
     background-color: #F9FAFB;
     margin: 0;
     padding: 1em;
 }
 
+/* The action buttons displayed on the preview page. */
 #desmos_previewmode_buttons {
     margin: 0;
     padding-bottom: 1em;
 }
 
 #desmos_return_to_edit_button {
-    background-color: transparent;
+    background-color: #ffffff;
     margin: 0;
     padding: .75em 2em;
 }
+
+#desmos_return_to_edit_button:hover {
+    background-color: #EBEFF2;
+}
+
 
 #desmos_preview_warning {
     background-color: #ffffff;
@@ -220,9 +231,10 @@ body {
 }
 
 #desmos_preview_content {
+    background-color: #ffffff;
     margin: 0;
     padding: 0 1em 1em 1em;
-    border: 2px solid #E2E7EA;
+    border: 1px solid #E2E7EA;
     border-radius: 5px;
 }
 
@@ -259,7 +271,6 @@ body {
 
 .desmos-nav-btns .button:hover {
     background-color: #F9FAFB;
-}
 }
 
 #desmos_preview_content {
@@ -301,5 +312,5 @@ body {
 }
 
 .desmos-nav-btns .button:hover {
-    background-color: #F9FAFB;
+    background-color: #EBEFF2;
 }
