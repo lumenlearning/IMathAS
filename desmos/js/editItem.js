@@ -9,10 +9,10 @@ $(document).ready(function() {
             success: function(data) {
                 $("#desmos_edit_container").hide();
                 $("#desmos_preview_button").html("Preview");
-                $("#desmos_previewmode_buttons").show();
-                $("#desmos_preview_container").html(data);
+                $("#desmos_preview_content").html(data);
                 $("#desmos_preview_container").show();
                 $('link[title=lux]')[0].disabled=true;
+                $('html, body').animate({ scrollTop: 0 }, "slow");
                 loadDesmos();
             },
             error: function(data) {
@@ -23,10 +23,9 @@ $(document).ready(function() {
         });
     });
 
-    $("#desmos_edit_button").click(function() {
-        $("#desmos_previewmode_buttons").hide();
+    $("#desmos_return_to_edit_button").click(function() {
         $("#desmos_preview_container").hide();
-        $("#desmos_preview_container").empty();
+        $("#desmos_preview_content").empty();
         $("#desmos_edit_container").show();
         $('link[title=lux]')[0].disabled=false;
     });
