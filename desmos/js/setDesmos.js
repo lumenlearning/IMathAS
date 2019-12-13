@@ -374,7 +374,7 @@ var reorderList = {
 			}
 			setTimeout("reorderList.reset()", 350); // this is not my fave thing, but will do in a pinch
 		}
-		showSteps("#desmos_edit_container", reorderList.objCurrent);
+		showSteps("desmos_edit_container", reorderList.objCurrent);
 		// ignore; no item currently grabbed
 	},
 	cancel: function(objEvent) {
