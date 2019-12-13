@@ -16,8 +16,6 @@
         <?php echo $pagetitle ?>
     </h1>
 
-    <button id="desmos_preview_button" class="desmos button" type="button">Preview</button>
-
     <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
             <div class="form-left">
@@ -96,13 +94,19 @@
             </div>
         </div>
         <button id="desmos_form_submit_button" class="button --primary -offset" type="submit" name="submitbtn" value="Submit" style="clear:both">Save and Exit</button>
+        <button id="desmos_preview_button" class="desmos button -offset" type="button">Preview</button>
     </form>
     <?php include 'icons.svg'; ?>
 </div>
 
-<div id="desmos_previewmode_buttons" style="display: none;">
-    <button id="desmos_edit_button" class="desmos button" type="button">Edit</button>
-    <button id="desmos_save_button" class="desmos button" type="button">Save and Exit</button>
-</div>
+<div id="desmos_preview_container" style="display: none;">
+    <div id="desmos_previewmode_buttons">
+        <button id="desmos_return_to_edit_button" class="desmos button" type="button">Back to Edit</button>
+        <span id="desmos_preview_warning">
+            <img id="desmos_preview_warning_image" src="/ohm/img/warning.png" alt="Warning"/>
+            Desmos graph changes in the preview are not saved for students.
+        </span>
+    </div>
 
-<div id="desmos_preview_container" style="display: none;"></div>
+    <div id="desmos_preview_content"></div>
+</div>

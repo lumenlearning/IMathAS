@@ -4,7 +4,7 @@ body {
 }
 
 .desmos-header {
-    padding: 1em 0;
+    padding-bottom: 1em;
 }
 
 .desmos-header h1 {
@@ -187,6 +187,86 @@ body {
 .move-trigger svg {
     height: 14px;
     width: 5px;
+}
+
+#desmos_preview_container {
+    background-color: #F9FAFB;
+    margin: 0;
+    padding: 1em;
+}
+
+#desmos_previewmode_buttons {
+    margin: 0;
+    padding-bottom: 1em;
+}
+
+#desmos_return_to_edit_button {
+    background-color: transparent;
+    margin: 0;
+    padding: .75em 2em;
+}
+
+#desmos_preview_warning {
+    background-color: #ffffff;
+    margin: 0 0 0 1em;
+    padding: .75em 1em .75em .75em;
+    border: 2px #FACAA6 solid;
+    border-radius: 5px;
+}
+
+#desmos_preview_warning_image {
+    vertical-align: middle;
+    margin-right: .5em;
+}
+
+#desmos_preview_content {
+    margin: 0;
+    padding: 0 1em 1em 1em;
+    border: 2px solid #E2E7EA;
+    border-radius: 5px;
+}
+
+
+/* DESMOS STUDENT VIEW */
+.desmos-student-view {
+    display: flex;
+    width: 1000px;
+}
+
+.desmos-student-view .steps-navigation {
+    border: none;
+    margin-right: 2em;
+    width: 30%;
+}
+
+.desmos-student-view .step-li {
+    list-style: decimal inside;
+    padding: 1em;
+}
+
+.desmos-student-view .step-items {
+    border: #dadada 1px solid;
+    border-radius: 4px;
+    padding: 2em 2em 0 2em;
+}
+
+/* Overide button style from imasscore.css */
+.desmos-nav-btns .button {
+    background-color: #fff;
+    margin-top: 1em;
+    padding: .75em 2em;
+}
+
+.desmos-nav-btns .button:hover {
+    background-color: #F9FAFB;
+}
+}
+
+#desmos_preview_content {
+    margin: 0px;
+    padding: 0 1em 1em 1em;
+    border: 2px solid #E2E7EA;
+    border-radius: 5px;
 }
 
 
