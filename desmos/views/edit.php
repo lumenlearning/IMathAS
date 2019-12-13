@@ -50,46 +50,50 @@
                     <!-- Changes to step markup must also be duplicated in the addStep JS -->
                     <?php
                     $action = '';
+                    $numsteps = 0;
                     if (count($item->steps)>1) {
                         $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
                         $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
                     }
                     foreach ($item->steporder as $i) {
                         $selected = '';
-                        if ($i==0) {
+                        if ($numsteps==0) {
                             $selected = "is-selected";
                         }
-                        echo "<li class=\"step-li $selected\" $action $keyaction draggable=\"false\" data-num=\"$i\">";
+                        echo "<li class=\"step-li $selected\" $action $keyaction draggable=\"false\" data-num=\"$numsteps\">";
                         echo "<span class=\"js-drag-trigger move-trigger\"><button class=\"u-button-reset\" aria-label=\"Move this item.\" type=\"button\"><svg aria-hidden=\"true\"><use xlink:href=\"#lux-icon-drag\"></use></svg></button></span>";
                         printf(
                             "<label for='step_title[%d]' class='u-sr-only'>%s</label>",
-                            $i,
+                            $numsteps,
                             $item->steps[$i]['title']
                         );
                         printf(
                             "<input type='text' id='step_title[%d]' name='step_title[%d]' value='%s' />",
-                            $i, $i,
+                            $numsteps, $numsteps,
                             $item->steps[$i]['title']
                         );
                         printf(
                             "<input type='hidden' name='step[%d]' value='%d'>",
-                            $i,
+                            $numsteps,
                             $item->steps[$i]['id']
                         );
                         echo "<button class='js-delete delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
                         echo "</li>";
+                        $numsteps++;
                     }
                     ?>
                 </ol>
             </div>
             <div id="step_items" class="step-items step-details">
                 <?php
+                $numsteps = 0;
                 foreach ($item->steporder as $i) {
-                    printf('<div id="step_text_%d" class="step-item-display-%d">', $i, $i);
-                    echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
+                    printf('<div id="step_text_%d" class="step-item-display-%d">', $numsteps, $numsteps);
+                    echo "<textarea rows=24 name=\"step_text[$numsteps]\" class=\"step-item\"> ";
                     echo htmlspecialchars($item->steps[$i]['text']);
                     echo "</textarea>";
                     echo  "</div>";
+                    $numsteps++;
                 } ?>
             </div>
         </div>

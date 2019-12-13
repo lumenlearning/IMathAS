@@ -37,6 +37,7 @@ if ($shownav) {
         <div class="steps-navigation">
             <ol id="step_list" class="js-step-list step-list" role="listbox">
                 <?php
+                $numsteps = 0;
                 $clickaction = '';
                 $keyaction = '';
                 if (count($item->steps)>1) {
@@ -50,10 +51,11 @@ if ($shownav) {
                         $selected = "is-selected";
                         $ariastate = "true";
                     }
-                    printf("<li role=\"option\" tabindex=\"0\" class=\"step-li view $selected\" $clickaction $keyaction data-num=\"$i\">", $i, $i);
+                    printf("<li role=\"option\" tabindex=\"0\" class=\"step-li view $selected\" $clickaction $keyaction data-num=\"$numsteps\">", $i, $i);
                     echo $item->steps[$i]['title'];
                     //printf("<input type='hidden' name='step[%d]' value='%d'>", $i, $item->steps[$i]['id']);
                     echo "</li>";
+                    $numsteps++;
                 }
                 ?>
             </ol>
@@ -61,11 +63,13 @@ if ($shownav) {
         <div class="steps-details">
             <div class="step-items">
                 <?php
+                $numsteps = 0;
                 foreach ($item->steporder as $i) {
                     $displayed = $item->steporder[0] == $i ? 'block' : 'none';
-                    printf('<div id="step-item-display-%d" style="display: %s;" class="step-item-display-%d step-item">', $i, $displayed, $i);
+                    printf('<div id="step-item-display-%d" style="display: %s;" class="step-item-display-%d step-item">', $numsteps, $displayed, $numsteps);
                     echo $item->steps[$i]['text'];
                     echo "</div>";
+                    $numsteps++;
                 } ?>
             </div>
         </div>

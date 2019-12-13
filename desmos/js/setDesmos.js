@@ -38,11 +38,14 @@ function addStep(){
     step.className = "step-li";
     step.dataset.num = numsteps;
     step.setAttribute("onclick", "showSteps('"+parent+"', this)");
+	step.setAttribute("onkeydown", "javascript: if(event.keyCode == 9) showSteps('"+parent+"', this)");
     step.setAttribute("draggable", false);
+	step.setAttribute("aria-grabbed", false);
 
     // Create a <span> wrapper for the drag button
     var buttonDragWrapper = document.createElement("span");
     buttonDragWrapper.classList.add("js-drag-trigger", "move-trigger");
+	buttonDragWrapper.setAttribute("aria-discribedby", 'step-directions');
 
     // Create a drag <button> element
     var buttonDrag = document.createElement("button");
@@ -106,6 +109,7 @@ function addStep(){
 	numsteps++;
 	initeditor("selector","textarea");
 	showSteps(parent, step);
+	setupDnD();
 }
 
 function removeStep(event){
