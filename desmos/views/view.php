@@ -1,4 +1,9 @@
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
+<script type="text/javascript">
+    window.onload = ()=> {
+        showSteps("desmos_view_container", document.getElementById("step_list").children[0]);
+    }
+</script>
 <?php
 if ("preview" == $_GET['mode']) {
     require_once(__DIR__ . '/../../vendor/autoload.php');
@@ -8,13 +13,13 @@ if ("preview" == $_GET['mode']) {
     $item->setSummary($_POST['summary']);
     // Build steps array
     $steps = [];
-    for ($i = 0; $i < count($_POST['step_title']); $i++) {
-        $steps[] = [
-            'id' => intval($_POST['step'][$i]),
-            'title' => $_POST['step_title'][$i],
-            'text' => $_POST['step_text'][$i],
+    foreach ($_POST['step_title'] as $key => $title) {
+        $steps[$key] = [
+            "title" => $title,
+            "text" => $_POST['step_text'][$key],
+            "id" => $_POST['step'][$key],
         ];
-    };
+    }
     $item->setSteps($steps);
     $pagetitle = Sanitize::encodeStringForDisplay($item->name);
 }
@@ -38,10 +43,10 @@ if ($shownav) {
                     $clickaction = "onclick=\"showSteps('desmos_view_container', this);\"";
                     $keyaction = "onkeydown=\"javascript: if(event.code === 'Space') showSteps('desmos_view_container', this);\"";
                 }
-                for ($i=0; $i<count($item->steps); $i++) {
+                foreach ($item->steporder as $i) {
                     $selected = '';
                     $ariastate = 'false';
-                    if ($i==0) {
+                    if ($i==$item->steporder[0]) {
                         $selected = "is-selected";
                         $ariastate = "true";
                     }
@@ -56,8 +61,8 @@ if ($shownav) {
         <div class="steps-details">
             <div class="step-items">
                 <?php
-                for ($i=0; $i<count($item->steps); $i++) {
-                    $displayed = 0 == $i ? 'block' : 'none';
+                foreach ($item->steporder as $i) {
+                    $displayed = $item->steporder[0] == $i ? 'block' : 'none';
                     printf('<div id="step-item-display-%d" style="display: %s;" class="step-item-display-%d step-item">', $i, $displayed, $i);
                     echo $item->steps[$i]['text'];
                     echo "</div>";

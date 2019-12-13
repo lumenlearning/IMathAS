@@ -82,7 +82,7 @@ class DesmosItem extends CourseItem
         $stm->execute();
         $this->typeid = $this->dbh->lastInsertId();
         if ($steps) {
-            $this->modifySteps($steps, $this->typeid);
+            $this->modifySteps($steps);
         }
         return $this->typeid;
     }
@@ -116,6 +116,7 @@ class DesmosItem extends CourseItem
 
         $this->setItem($item);
         $this->steps = DesmosSteps::findSteps($this->typeid);
+        $this->setStepOrder();
         $this->findTags();
         return $this;
     }
@@ -238,49 +239,97 @@ class DesmosItem extends CourseItem
      */
     public function modifySteps(array $steps)
     {
-        if (isset($steps[0]['title'])) {
-            //delete any steps that need to be removed
-            //before adding new steps so new steps do not get deleted
-            $item_steps = DesmosSteps::findSteps($this->typeid);
-            $stepIds = array_map(
-                function ($num) {
-                    return $num['id'];
-                },
-                $steps
-            );
-            foreach ($item_steps as $id) {
-                if (!in_array($id['id'], $stepIds)) {
-                    //?do we want to just unassociate the desmosid?
-                    DesmosSteps::deleteStep($id['id']);
-                }
+        //delete any steps that need to be removed
+        //before adding new steps so new steps do not get deleted
+        $item_steps = DesmosSteps::findSteps($this->typeid);
+        $stepIds = array_map(
+            function ($num) {
+                return $num['id'];
+            },
+            $steps
+        );
+        foreach ($item_steps as $id) {
+            if (!in_array($id['id'], $stepIds)) {
+                //?do we want to just unassociate the desmosid?
+                DesmosSteps::deleteStep($id['id']);
             }
-            //add steps
-            foreach (array_keys($steps) as $key) {
-                if (!empty($steps[$key]['title'])) {
-                    if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
-                        //update step
-                        DesmosSteps::updateStep(
-                            $steps[$key]['id'],
-                            [
-                                'title' => $steps[$key]['title'],
-                                'text' => $steps[$key]['text']
-                            ]
-                        );
-                    } else {
-                        //add step
-                        DesmosSteps::insertStep(
-                            [
-                                'desmosid' => $this->typeid,
-                                'title' => $steps[$key]['title'],
-                                'text' => $steps[$key]['text']
-                            ]
-                        );
-                    }
-                }
-            }
-            $this->steps = $steps;
-            return $this;
         }
+        //add steps
+        foreach (array_keys($steps) as $key) {
+            if (!empty($steps[$key]['title'])) {
+                if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
+                    //update step
+                    DesmosSteps::updateStep(
+                        $steps[$key]['id'],
+                        [
+                            'title' => $steps[$key]['title'],
+                            'text' => $steps[$key]['text']
+                        ]
+                    );
+                } else {
+                    //add step
+                    $steps[$key]['id'] = DesmosSteps::insertStep(
+                        [
+                            'desmosid' => $this->typeid,
+                            'title' => $steps[$key]['title'],
+                            'text' => $steps[$key]['text']
+                        ]
+                    );
+                }
+            }
+        }
+        $this->steps = $steps;
+        $this->_updateStepOrder();
+        return $this;
+    }
+
+    private function _updateStepOrder()
+    {
+        if (count($this->steps)>0) {
+            foreach ($this->steps as $step) {
+                $stepOrder[]=$step['id'];
+            }
+            $this->setStepOrder($stepOrder);
+            $this->updateItemType($this->typeid, array('steporder' => implode(',', $stepOrder)));
+        }
+    }
+
+    /**
+     * Set required parameter
+     *
+     * @param null $value or keep $this->setorder
+     *
+     * @return $this|CourseItem
+     */
+    public function setStepOrder($value = null)
+    {
+        if ($value === null) {
+            $steporder = $this->steporder;
+            if (!is_array($steporder)) {
+                $steporder = explode(',', $steporder);
+            }
+            $keys = array_keys($this->steps);
+            $removeOrder = array_filter($steporder, function($s) use ($keys) {
+                if (in_array($s,$keys)) {
+                    return true;
+                }
+            });
+            $addOrder = array_filter($this->steps, function($step) use ($steporder) {
+                if (!in_array($step['id'],$steporder)) {
+                    return true;
+                }
+            });
+            $value = array_merge($removeOrder, array_keys($addOrder));
+            if ($value != $steporder) {
+                $this->updateItemType($this->typeid, array('steporder' => implode(',', $value)));
+            }
+        }
+        if (is_array($value)) {
+            $this->steporder = $value;
+        } else {
+            $this->steporder = explode(',', $value);
+        }
+        return $this;
     }
 
     public function asArray($copy=false)
@@ -311,6 +360,7 @@ class DesmosItem extends CourseItem
     public function setSteps(array $steps): DesmosItem
     {
         $this->steps = $steps;
+        $this->steporder = array_keys($steps);
         return $this;
     }
 }

@@ -56,7 +56,7 @@
                         $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
                         $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
                     }
-                    for ($i=0; $i<count($item->steps); $i++) {
+                    foreach ($item->steporder as $i) {
                         $selected = '';
                         if ($i==0) {
                             $selected = "is-selected";
@@ -86,7 +86,7 @@
             </div>
             <div id="step_items" class="step-items step-details">
                 <?php
-                for ($i=0; $i<count($item->steps); $i++) {
+                foreach ($item->steporder as $i) {
                     printf('<div id="step_text_%d" class="step-item-display-%d">', $i, $i);
                     echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
                     echo htmlspecialchars($item->steps[$i]['text']);

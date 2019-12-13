@@ -28,7 +28,11 @@ class DesmosSteps
         $stm = $GLOBALS['DBH']->prepare($query);
         $stm->bindValue(':desmosid', $desmosid);
         $stm->execute();
-        return $stm->fetchAll(PDO::FETCH_ASSOC);
+        $steps = $stm->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($steps as $step) {
+            $stepOrder[$step['id']] = $step;
+        }
+        return $stepOrder;
     }
 
     /**
