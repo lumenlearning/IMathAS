@@ -6,6 +6,7 @@ body {
 /* Overriding tiny mce */
 .step-items .mce-panel {
     border: 0;
+    padding-bottom: 8px;
 }
 
 /* Overriding Lux button styles */
