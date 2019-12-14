@@ -3,6 +3,45 @@ body {
     background-color: #fff;
 }
 
+/* Overriding tiny mce */
+.step-items .mce-panel {
+    border: 0;
+}
+
+/* Overriding Lux button styles */
+.button {
+  font-weight: 300;
+  padding: 8px 16px;
+  min-width: 80px;
+  border-radius: 3px;
+}
+
+.button.--button-primary {
+    background:#1d71cb;
+    background: linear-gradient(0deg, rgba(29,112,203,1) 0%, rgba(29,115,208,1) 90%, rgba(46,125,211,1) 90%);
+    border: 1px solid #69717A;
+    color: #fff;
+}
+
+.button.--button-primary:hover {
+    background:#0059ba;
+    background: linear-gradient(0deg, rgba(0,89,186,1) 0%, rgba(0,89,186,1) 90%, rgba(20,102,191,1) 90%);
+    border: 1px solid #004C9F;
+  }
+
+.button.--button-secondary {
+    background: #e6ebf0;
+    background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
+    border: 1px solid #C4CDD5;
+}
+
+.button.--button-secondary:hover {
+    background: #e6ebf0;
+    background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
+    border: 1px solid #C4CDD5;
+}
+/* End overriding Lux button styles */
+
 .desmos-header {
     padding-bottom: 1em;
 }
@@ -27,13 +66,14 @@ body {
 }
 
 /* Step Navigation */
-.desmos-steps .step-navigation {
+.desmos-steps .steps-navigation {
     border: 1px solid #dadada;
     border-right: none;
-    width: 35%;
+    width: 30%;
 }
 
-.step-list ol {
+.steps-navigation .step-list {
+    margin-top: 0;
     padding-left: 0;
 }
 
@@ -62,7 +102,7 @@ body {
     border: 1px #dadada solid;
     border-radius: 0;
     min-height: 600px;
-    width: 65%;
+    width: 70%;
     min-width: 610px;
     overflow: hidden;
 } 
@@ -121,6 +161,10 @@ body {
     background: #f2f2f2;
     border-bottom: #dadada solid 1px;
     padding: 8px;
+}
+
+.step-controls .button {
+    margin: 8px;
 }
 
 .teacher-view .step-li {
@@ -226,7 +270,6 @@ body {
     border-radius: 5px;
 }
 
-
 /* DESMOS STUDENT VIEW */
 .desmos-student-view {
     display: flex;
@@ -235,12 +278,13 @@ body {
 
 .desmos-student-view .steps-navigation {
     border: none;
-    margin-right: 2em;
-    width: 30%;
+    margin-right: 1.5em;
+    width: 30%; 
 }
 
 .desmos-student-view .step-li {
     list-style: decimal inside;
+    margin-bottom: 1px;
     padding: 1em;
 }
 
@@ -248,6 +292,7 @@ body {
     border: #dadada 1px solid;
     border-radius: 4px;
     padding: 2em 2em 0 2em;
+    width: 256px;
 }
 
 /* Overide button style from imasscore.css */
@@ -260,46 +305,10 @@ body {
 .desmos-nav-btns .button:hover {
     background-color: #F9FAFB;
 }
-}
 
 #desmos_preview_content {
     margin: 0px;
     padding: 0 1em 1em 1em;
     border: 2px solid #E2E7EA;
     border-radius: 5px;
-}
-
-
-/* DESMOS STUDENT VIEW */
-.desmos-student-view {
-    display: flex;
-    width: 1000px;
-}
-
-.desmos-student-view .steps-navigation {
-    border: none;
-    margin-right: 2em;
-    width: 30%; 
-}
-
-.desmos-student-view .step-li {
-    list-style: decimal inside;
-    padding: 1em;
-}
-
-.desmos-student-view .step-items {
-    border: #dadada 1px solid;
-    border-radius: 4px;
-    padding: 2em 2em 0 2em;
-}
-
-/* Overide button style from imasscore.css */
-.desmos-nav-btns .button {
-    background-color: #fff; 
-    margin-top: 1em;
-    padding: .75em 2em;
-}
-
-.desmos-nav-btns .button:hover {
-    background-color: #F9FAFB;
 }

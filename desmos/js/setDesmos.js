@@ -57,7 +57,8 @@ function addStep(){
     label.classList.add("u-sr-only");
     var input = document.createElement("input");
     input.type = "text";
-    input.name = "step_title["+numsteps+"]";
+	input.name = "step_title["+numsteps+"]";
+	input.setAttribute("maxlength", "100");
 
     //Create a delete <button> element
     var buttonDelete = document.createElement("button");
