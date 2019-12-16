@@ -21,10 +21,14 @@ var desmosDialog = {
         var ed = top.tinymce.activeEditor;
         // Insert the contents from the input into the document
         this.desmosjson = JSON.stringify(this.calculator.getState());
+        alert(this.desmosjson);
         console.log(desmosjson);
         if (this.isnew) {
-            figure = '<figure class="editdesmos" class="js-desmos" data-json=\''+desmosjson+'\'></figure>';
-            ed.execCommand('mceInsertContent', false, figure);
+            ed.execCommand(
+                'mceInsertContent',
+                false,
+                '<figure class="editdesmos" class="js-desmos" data-json=\''+this.desmosjson+'\'></figure>'
+            );
         } else {
             el = ed.selection.getNode();
             ed.dom.setAttrib(el,"data-json",this.desmosjson);
