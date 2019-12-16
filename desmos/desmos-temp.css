@@ -320,9 +320,43 @@ body {
     background-color: #F9FAFB;
 }
 
+.desmos-nav-btns .button:hover {
+    background-color: #EBEFF2;
+}
+
 #desmos_preview_content {
     margin: 0px;
     padding: 0 1em 1em 1em;
     border: 2px solid #E2E7EA;
     border-radius: 5px;
 }
+
+.js-desmos {
+    margin: 0;
+    padding: 0;
+    width:600px;
+    height: 400px;
+}
+
+#tinymce .js-desmos {
+    display: block;
+    width: 452px;
+    height: 75px;
+    background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
+}
+
+#editdesmos.js-desmos {
+    width: 100%;
+}
+
+.mce-window-head {
+    background-color: #336699;
+    border: 0px;
+    border-collapse: collapse;
+}
+.mce-window-head .mce-title {
+    font-size: 14px;
+    color: #FFFFFF;
+    font-weight: normal;
+}
+
