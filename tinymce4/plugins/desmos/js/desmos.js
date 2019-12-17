@@ -21,7 +21,6 @@ var desmosDialog = {
         var ed = top.tinymce.activeEditor;
         // Insert the contents from the input into the document
         this.desmosjson = JSON.stringify(this.calculator.getState());
-        alert(this.desmosjson);
         console.log(desmosjson);
         if (this.isnew) {
             ed.execCommand(
