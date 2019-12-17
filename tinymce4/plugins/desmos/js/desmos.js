@@ -27,7 +27,7 @@ var desmosDialog = {
             ed.execCommand(
                 'mceInsertContent',
                 false,
-                '<figure class="editdesmos" class="js-desmos" data-json=\''+this.desmosjson+'\'></figure>'
+                '<figure class="js-desmos" data-json=\''+this.desmosjson+'\'></figure>'
             );
         } else {
             el = ed.selection.getNode();
@@ -35,6 +35,21 @@ var desmosDialog = {
 
         }
         top.tinymce.activeEditor.windowManager.close();
+    },
+
+    import : function() {
+        var theResponse = false;
+        $.ajax({
+            type: "GET",
+            url: document.getElementById("import").value,
+            success: function (data) {
+                console.log(data);
+                theResponse = data;
+            },
+            async: false,
+            dataType: "json"
+        });
+        this.calculator.setState(theResponse.state);
     },
 
     loadDesmos : function() {
