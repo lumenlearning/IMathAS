@@ -23,7 +23,7 @@ $CFG['GEN']['newpasswords'] = "only";
 //hide Email button on Roster and GB pages
 $CFG['GEN']['noEmailButton'] = true;
 
-$CFG['use_csrfp'] = true;
+//$CFG['use_csrfp'] = 'log';
 
 //log LTI updates
 //$CFG['LTI']['logupdate'] = true;
