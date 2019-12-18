@@ -40,9 +40,9 @@
             </div>
         </div>
         <div id="step_box" class="desmos desmos-steps -offset --exlarge">
-            <div class="step-navigation teacher-view">
+            <div class="steps-navigation teacher-view">
                 <div class="step-controls">
-                    <button class="button --small js-add" type="button">Add</button>
+                    <button class="button --button-secondary js-add" type="button">Add</button>
                 </div>
                 <span id="step-notifications" aria-live="assertive" class="u-sr-only"></span>
                 <span id="step-directions" class="u-sr-only">Press spacebar to toggle drag-and-drop mode, use arrow keys to move selected elements.</span>
@@ -68,7 +68,7 @@
                             $item->steps[$i]['title']
                         );
                         printf(
-                            "<input type='text' id='step_title[%d]' name='step_title[%d]' value='%s' />",
+                            "<input type='text' id='step_title[%d]' name='step_title[%d]' maxlength='100' value='%s' />",
                             $numsteps, $numsteps,
                             $item->steps[$i]['title']
                         );
@@ -97,8 +97,8 @@
                 } ?>
             </div>
         </div>
-        <button id="desmos_form_submit_button" class="button --primary -offset" type="submit" name="submitbtn" value="Submit" style="clear:both">Save and Exit</button>
-        <button id="desmos_preview_button" class="desmos button -offset" type="button">Preview</button>
+        <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save and Exit</button>
+        <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
     </form>
     <?php include 'icons.svg'; ?>
 </div>
