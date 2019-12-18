@@ -74,6 +74,7 @@ body {
 
 .step-li  {
     background-color: #f2f2f2;
+    cursor: pointer;
     list-style: decimal inside;
     padding: .5em;
     position: relative;
@@ -81,7 +82,6 @@ body {
 
 .step-li:hover {
     background-color: #dde3e9;
-    cursor: pointer;
 }
 
 .step-li[aria-selected=true] {
@@ -169,7 +169,6 @@ body {
 }
 
 .teacher-view .step-li {
-    /* display: flex; */
     padding-left:36px;
 }
 
@@ -234,22 +233,33 @@ body {
     width: 5px;
 }
 
+/* The "Preview" button on the Desmos edit screen. */
+#desmos_preview_button {
+    margin-left: .5em;
+}
+
 #desmos_preview_container {
     background-color: #F9FAFB;
     margin: 0;
     padding: 1em;
 }
 
+/* The action buttons displayed on the preview page. */
 #desmos_previewmode_buttons {
     margin: 0;
     padding-bottom: 1em;
 }
 
 #desmos_return_to_edit_button {
-    background-color: transparent;
+    background-color: #ffffff;
     margin: 0;
     padding: .75em 2em;
 }
+
+#desmos_return_to_edit_button:hover {
+    background-color: #EBEFF2;
+}
+
 
 #desmos_preview_warning {
     background-color: #ffffff;
@@ -265,6 +275,7 @@ body {
 }
 
 #desmos_preview_content {
+    background-color: #ffffff;
     border: 2px solid #E2E7EA;
     border-radius: 5px;
     margin: 0;
@@ -307,9 +318,43 @@ body {
     background-color: #F9FAFB;
 }
 
+.desmos-nav-btns .button:hover {
+    background-color: #EBEFF2;
+}
+
 #desmos_preview_content {
     border: 2px solid #E2E7EA;
     border-radius: 5px;
     margin: 0px;
     padding: 0 1em 1em 1em;
 }
+
+.js-desmos {
+    margin: 0;
+    padding: 0;
+    width:600px;
+    height: 400px;
+}
+
+#tinymce .js-desmos {
+    display: block;
+    width: 452px;
+    height: 75px;
+    background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
+}
+
+#editdesmos.js-desmos {
+    width: 100%;
+}
+
+.mce-window-head {
+    background-color: #336699;
+    border: 0px;
+    border-collapse: collapse;
+}
+.mce-window-head .mce-title {
+    font-size: 14px;
+    color: #FFFFFF;
+    font-weight: normal;
+}
+

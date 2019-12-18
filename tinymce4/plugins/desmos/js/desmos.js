@@ -23,7 +23,7 @@ var desmosDialog = {
         this.desmosjson = JSON.stringify(this.calculator.getState());
         console.log(desmosjson);
         if (this.isnew) {
-            figure = '<figure class="editdesmos" style="width: 600px; height: 400px;" data-json=\''+desmosjson+'\'></figure>';
+            figure = '<figure class="editdesmos" class="js-desmos" data-json=\''+desmosjson+'\'></figure>';
             ed.execCommand('mceInsertContent', false, figure);
         } else {
             el = ed.selection.getNode();
