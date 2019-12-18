@@ -40,9 +40,9 @@
             </div>
         </div>
         <div id="step_box" class="desmos desmos-steps -offset --exlarge">
-            <div class="step-navigation teacher-view">
+            <div class="steps-navigation teacher-view">
                 <div class="step-controls">
-                    <button class="button --small js-add" type="button">Add</button>
+                    <button class="button --button-secondary js-add" type="button">Add</button>
                 </div>
                 <span id="step-notifications" aria-live="assertive" class="u-sr-only"></span>
                 <span id="step-directions" class="u-sr-only">Press spacebar to toggle drag-and-drop mode, use arrow keys to move selected elements.</span>
@@ -50,51 +50,55 @@
                     <!-- Changes to step markup must also be duplicated in the addStep JS -->
                     <?php
                     $action = '';
+                    $numsteps = 0;
                     if (count($item->steps)>1) {
                         $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
                         $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
                     }
                     foreach ($item->steporder as $i) {
                         $selected = '';
-                        if ($i==0) {
+                        if ($numsteps==0) {
                             $selected = "is-selected";
                         }
-                        echo "<li class=\"step-li $selected\" $action $keyaction draggable=\"false\" data-num=\"$i\">";
+                        echo "<li class=\"step-li $selected\" $action $keyaction draggable=\"false\" data-num=\"$numsteps\">";
                         echo "<span class=\"js-drag-trigger move-trigger\"><button class=\"u-button-reset\" aria-label=\"Move this item.\" type=\"button\"><svg aria-hidden=\"true\"><use xlink:href=\"#lux-icon-drag\"></use></svg></button></span>";
                         printf(
                             "<label for='step_title[%d]' class='u-sr-only'>%s</label>",
-                            $i,
+                            $numsteps,
                             $item->steps[$i]['title']
                         );
                         printf(
-                            "<input type='text' id='step_title[%d]' name='step_title[%d]' value='%s' />",
-                            $i, $i,
+                            "<input type='text' id='step_title[%d]' name='step_title[%d]' maxlength='100' value='%s' />",
+                            $numsteps, $numsteps,
                             $item->steps[$i]['title']
                         );
                         printf(
                             "<input type='hidden' name='step[%d]' value='%d'>",
-                            $i,
+                            $numsteps,
                             $item->steps[$i]['id']
                         );
                         echo "<button class='js-delete delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
                         echo "</li>";
+                        $numsteps++;
                     }
                     ?>
                 </ol>
             </div>
             <div id="step_items" class="step-items step-details">
                 <?php
+                $numsteps = 0;
                 foreach ($item->steporder as $i) {
-                    printf('<div id="step_text_%d" class="step-item-display-%d">', $i, $i);
-                    echo "<textarea rows=24 name=\"step_text[$i]\" class=\"step-item\"> ";
+                    printf('<div id="step_text_%d" class="step-item-display-%d">', $numsteps, $numsteps);
+                    echo "<textarea rows=24 name=\"step_text[$numsteps]\" class=\"step-item\"> ";
                     echo htmlspecialchars($item->steps[$i]['text']);
                     echo "</textarea>";
                     echo  "</div>";
+                    $numsteps++;
                 } ?>
             </div>
         </div>
-        <button id="desmos_form_submit_button" class="button --primary -offset" type="submit" name="submitbtn" value="Submit" style="clear:both">Save and Exit</button>
-        <button id="desmos_preview_button" class="desmos button -offset" type="button">Preview</button>
+        <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save and Exit</button>
+        <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
     </form>
     <?php include 'icons.svg'; ?>
 </div>
@@ -103,7 +107,8 @@
     <div id="desmos_previewmode_buttons">
         <button id="desmos_return_to_edit_button" class="desmos button" type="button">Back to Edit</button>
         <span id="desmos_preview_warning">
-            <img id="desmos_preview_warning_image" src="/ohm/img/warning.png" alt="Warning"/>
+            <img id="desmos_preview_warning_image" src="/ohm/img/warning.svg"
+                 onerror="this.src='/ohm/img/warning.png'" alt="Warning">
             Desmos graph changes in the preview are not saved for students.
         </span>
     </div>
