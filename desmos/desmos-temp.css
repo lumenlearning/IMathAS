@@ -339,6 +339,7 @@ body {
 #tinymce .js-desmos {
     background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
     display: block;
+    cursor: pointer;
     height: 75px;
     width: 452px;
 }
@@ -349,8 +350,6 @@ body {
 
 .mce-window-head {
     background-color: #336699;
-    border: 0px;
-    border-collapse: collapse;
 }
 .mce-window-head .mce-title {
     color: #FFFFFF;

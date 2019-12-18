@@ -23,14 +23,32 @@ var desmosDialog = {
         this.desmosjson = JSON.stringify(this.calculator.getState());
         console.log(desmosjson);
         if (this.isnew) {
-            figure = '<figure class="editdesmos" class="js-desmos" data-json=\''+desmosjson+'\'></figure>';
-            ed.execCommand('mceInsertContent', false, figure);
+            ed.execCommand(
+                'mceInsertContent',
+                false,
+                '<figure class="js-desmos" data-json=\''+this.desmosjson+'\'></figure>'
+            );
         } else {
             el = ed.selection.getNode();
             ed.dom.setAttrib(el,"data-json",this.desmosjson);
 
         }
         top.tinymce.activeEditor.windowManager.close();
+    },
+
+    import : function() {
+        var theResponse = false;
+        $.ajax({
+            type: "GET",
+            url: document.getElementById("import").value,
+            success: function (data) {
+                console.log(data);
+                theResponse = data;
+            },
+            async: false,
+            dataType: "json"
+        });
+        this.calculator.setState(theResponse.state);
     },
 
     loadDesmos : function() {
