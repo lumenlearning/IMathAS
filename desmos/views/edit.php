@@ -67,7 +67,7 @@
                             $item->steps[$i]['title']
                         );
                         printf(
-                            "<input type='text' id='step_title[%d]' name='step_title[%d]' value='%s' />",
+                            "<input type='text' id='step_title[%d]' name='step_title[%d]' maxlength='100' value='%s' />",
                             $i, $i,
                             $item->steps[$i]['title']
                         );
