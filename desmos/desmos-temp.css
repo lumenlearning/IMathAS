@@ -198,9 +198,9 @@ body {
 }
 
 .delete-trigger, .move-trigger {
+    bottom: 0;
     position: absolute;
     top: 0;
-    bottom: 0;
 }
 
 .delete-trigger {
@@ -337,10 +337,10 @@ body {
 }
 
 #tinymce .js-desmos {
-    display: block;
-    width: 452px;
-    height: 75px;
     background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
+    display: block;
+    height: 75px;
+    width: 452px;
 }
 
 #editdesmos.js-desmos {
@@ -353,8 +353,8 @@ body {
     border-collapse: collapse;
 }
 .mce-window-head .mce-title {
-    font-size: 14px;
     color: #FFFFFF;
+    font-size: 14px;
     font-weight: normal;
 }
 
