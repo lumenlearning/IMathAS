@@ -198,6 +198,20 @@
 		$stm->execute(array(':courseid'=>$cid, ':assessmentid'=>$aid, ':courseid2'=>$cid));
 	}
 
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if (courseHasLtiSecret($cid)) {
+		printf('<a href="%s/../util/resync-lms-grades.php?cid=%s&aid=%s">Resync grades with LMS</a>',
+			$basesiteurl, $cid, $aid);
+	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 
 	echo "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
 	echo '<form method="post" action="isolateassessgrade.php?cid='.$cid.'&aid='.$aid.'">';
@@ -505,4 +519,31 @@
 			return round($tot,1);
 		}
 	}
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+/**
+ * Determine if a course has an LTI secret set.
+ *
+ * @param int $courseId The course ID.
+ * @return bool True if the course has an LTI secret set. False if not.
+ */
+function courseHasLtiSecret(int $courseId): bool {
+	global $DBH;
+	$stm = $DBH->prepare('SELECT ltisecret FROM imas_courses WHERE id = :courseId');
+	$stm->bindParam(':courseId', $courseId);
+	$stm->execute();
+	$ltiSecret = $stm->fetchColumn(0);
+
+	return !empty(trim($ltiSecret));
+}
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 ?>
