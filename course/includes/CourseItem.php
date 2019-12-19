@@ -39,10 +39,10 @@ abstract class CourseItem
      * CourseItem constructor.
      *
      * @param int    $courseid course to which this item is tied
-     * @param int    $block    parental hierarchy of course items
+     * @param string $block    parental hierarchy of course items
      * @param string $totb     "to Top or Bottom" of course"
      */
-    public function __construct($courseid = null, $block = 0, $totb = 'b')
+    public function __construct($courseid = null, $block = '0', $totb = 'b')
     {
         $this->courseid = $courseid;
         $this->block = $block;
