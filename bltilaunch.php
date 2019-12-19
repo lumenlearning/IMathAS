@@ -1818,6 +1818,7 @@ if (isset($_GET['launch'])) {
 	<input type="hidden" id="tzoffset" name="tzoffset" value="" />
 	<input type="hidden" id="tzname" name="tzname" value="">
 	<script type="text/javascript">
+		 document.cookie = session_name().'=; path=; expires=' + new Date(0).toUTCString();
 		 $(function() {
 			var thedate = new Date();
 			document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
@@ -2498,7 +2499,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						if ($stm->rowCount()==0) {
 							reporterror("Error.  Assessment ID '{$_SESSION['place_aid'][1]}' not found.");
 						}
-						
+
 						$newitem = copyitem($stm->fetchColumn(0),array());
 						$stm = $DBH->prepare("SELECT typeid FROM imas_items WHERE id=:id");
 						$stm->execute(array(':id'=>$newitem));
