@@ -669,7 +669,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   // #### Begin OHM-specific code #####################################################
 		   if (is_object($line['itemtype'])) {//
 		   	   if ($ispublic) { continue;echo "continue";}
-			   echo $line['itemtype']->courseView($now, $viewall, $canedit);
+			   echo $line['itemtype']->courseView($now, $viewall, $canedit, $parent);
            } else
            // #### End OHM-specific code #####################################################
            // #### End OHM-specific code #####################################################
