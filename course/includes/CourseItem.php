@@ -250,8 +250,27 @@ abstract class CourseItem
      */
     private function _deleteCourseItem()
     {
+        // Delete the item from imas_items
         $stm = $this->dbh->prepare("DELETE FROM imas_items WHERE id=:id");
         $stm->execute(array(':id'=>$this->itemid));
+
+        // Delete the item from imas_courses
+        $stm = $this->dbh->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
+        $stm->execute([':id' => $this->courseid]);
+
+        $allItems = unserialize($stm->fetchColumn(0)); // contains ALL blocks in the course
+        $blockItems = $allItems[$this->block]['items'];
+
+        $key = array_search($this->itemid, $blockItems); // get the key for the item being deleted
+        unset($allItems[$this->block]['items'][$key]);
+
+        // Save the course items array with the deleted item removed
+        $stm = $this->dbh->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
+        $stm->execute([
+            ':id' => $this->courseid,
+            ':itemorder' => serialize($allItems),
+        ]);
+
         return $this;
     }
 
