@@ -33,3 +33,15 @@ $db_fields['html'] = array(
 	'drill'=>array('summary'),
 	'forum_posts'=>array('message')
 );
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+$db_fields['desmos'] = 'title,summary,startdate,enddate,avail,outcomes,tags,steps';
+$db_fields['html']['desmos']=array('summary');
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################

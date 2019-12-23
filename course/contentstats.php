@@ -14,13 +14,27 @@ if (!isset($teacherid) && !isset($tutorid)) {
 $stype = $_GET['type'];
 $typeid = Sanitize::onlyInt($_GET['id']);
 
-if ($typeid==0 || !in_array($stype,array('I','L','A','W','F','D'))) {
+if ($typeid==0 || !in_array($stype,array('I','L','A','W','F','D','E'))) { // #### OHM-specific 'E'
 	$overwritebody = true;
 	$body = 'Invalid request';
 } else {
 	$data = array();
 	$descrips = array();
 	$qarr = array(':courseid'=>$cid, ':typeid'=>$typeid);
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if ($stype=='E') {
+		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type IN ('desmosview') AND typeid=:typeid");
+		$stm2 = $DBH->prepare("SELECT title FROM desmos_items WHERE id=:id");
+	} else
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	if ($stype=='I') {
 		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type='inlinetext' AND typeid=:typeid");
 		$stm2 = $DBH->prepare("SELECT title FROM imas_inlinetext WHERE id=:id");
@@ -40,6 +54,12 @@ if ($typeid==0 || !in_array($stype,array('I','L','A','W','F','D'))) {
 	} else if ($stype=='D') {
 		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type='drill' AND typeid=:typeid");
 		$stm2 = $DBH->prepare("SELECT name FROM imas_drillassess WHERE id=:id");
+	}
+	if (!empty($stm_auth)) {
+		$stm_auth->execute($qarr);
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$type = $row['type'];
+		}
 	}
 	$stm->execute($qarr);
 	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
@@ -115,6 +135,45 @@ if ($overwritebody) {
 	echo '<div id="headermoddataset" class="pagetitle">';
 	echo "<h1>Stats: $itemname</h1>\n";
 	echo '</div>';
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if ($stype=='E') {
+		$actions = Course\Includes\ContentTracker::findActions($cid, $typeid, array('desmosedit', 'desmosadd', 'desmoscopy'));
+	}
+	if ($actions) {
+		echo '<table><thead><tr><th>Date</th><th>Action</th></tr></thead><tbody>';
+		foreach ($actions as $r) {
+			switch ($r[0]) {
+				case 'desmosadd':
+					$actionmsg =  'Added Item';
+					break;
+				case 'desmoscopy':
+					$old = new \Desmos\Models\DesmosItem($cid);
+					$old->findItem($r[3]);
+					$actionmsg =  'Copied Item from ' . $old->name;
+					break;
+				case 'desmosedit':
+					$actionmsg =  'Modified Item';
+					break;
+			}
+			if ($actionmsg != '') {
+				echo '<tr>';
+				echo '<td>'.tzdate("l, F j, Y, g:i a",$r[2]).'</td>';
+				echo '<td>'. $actionmsg. '</td>';
+				echo '</tr>';
+			}
+		}
+		echo '</tbody></table>';
+	}
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 
 	$idents = array_keys($descrips);
 

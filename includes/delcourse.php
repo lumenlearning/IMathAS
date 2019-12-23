@@ -119,6 +119,17 @@ function deleteCourse($cid) {
 		}
 	}
 
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    \Desmos\Models\DesmosItem::deleteCourse($cid);
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 
 	$stm = $DBH->prepare("DELETE FROM imas_linkedtext WHERE courseid=:courseid");
 	$stm->execute(array(':courseid'=>$cid));

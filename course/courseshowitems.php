@@ -661,7 +661,22 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		   $line = $itemshowdata[$items[$i]];
 		   $typeid = Sanitize::onlyInt($line['id']);
 
-		   if ($line['itemtype']=="Calendar") {
+
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   if (is_object($line['itemtype'])) {//
+		   	   if ($ispublic) { continue;echo "continue";}
+			   echo $line['itemtype']->courseView($now, $viewall, $canedit, $parent);
+           } else
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           // #### End OHM-specific code #####################################################
+           if ($line['itemtype']=="Calendar") {
 			   if ($ispublic) { continue;}
 			   //echo "<div class=item>\n";
 			   beginitem($canedit);
@@ -1798,7 +1813,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
    }
 
    function generateadditem($blk,$tb) {
-   	global $cid, $CFG,$imasroot,$addassess;
+   	global $cid, $CFG,$imasroot,$addassess, $myrights, $DBH, $userid;
 
    	if (isset($CFG['CPS']['additemtype']) && $CFG['CPS']['additemtype'][0]=='links') {
    		if ($tb=='BB' || $tb=='LB') {$tb = 'b';}
@@ -1867,6 +1882,23 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 			$html .= "<img alt=\"calendar\" class=\"mida\" src=\"$imasroot/img/{$CFG['CPS']['miniicons']['calendar']}\"/> ";
 		}
 		$html .= _('Calendar') . "</a>";
+
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		$html .= "<a href=\"itemadd.php?type=desmos&block=$blkUrlParam&tb=$tbUrlParam&cid=$cid\">";
+		if (isset($CFG['CPS']['miniicons']['desmos'])) {
+			$html .= "<img alt=\"desmos\" class=\"mida\" src=\"$imasroot/{$CFG['CPS']['miniicons']['desmos']}\"/> ";
+		}
+		$html .= _('Desmos') . "</a>";
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+
 		$html .= '</span>';
 		$html .= '</div>';
 
@@ -1892,6 +1924,23 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		$html .= "<option value=\"drillassess\">" . _('Add Drill') . "</option>\n";
 		$html .= "<option value=\"block\">" . _('Add Block') . "</option>\n";
 		$html .= "<option value=\"calendar\">" . _('Add Calendar') . "</option>\n";
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		$query = "SELECT groupid FROM imas_users WHERE id=:id";
+		$stm = $DBH->prepare($query);
+		$stm->execute(array(':id'=>$userid));
+		$groupid = $stm->fetchColumn();
+		if ($myrights == 100 || ($groupid==11 && $myrights >= 40)) {
+			$html .= "<option value=\"desmos\">" . _('Add Desmos') . "</option>\n";
+		}
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 		$html .= "</select><BR>\n";
 
    	}
@@ -2016,6 +2065,22 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 			   $id = array_shift($row);
 			   $iteminfo['Drill'][$id] = $row;
 		   }
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   $stm = $DBH->prepare("SELECT id,title,startdate,enddate,avail FROM desmos_items WHERE courseid=:courseid");
+		   $stm->execute(array(':courseid'=>$cid));
+		   while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			   $iteminfo['DesmosItem'][$row['id']] = new \Desmos\Models\DesmosItem($cid);
+			   $iteminfo['DesmosItem'][$row['id']]->setItem($row);
+		   }
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
 	   }
 	   $now = time();
 	   for ($i=0;$i<count($items); $i++) {
@@ -2415,6 +2480,22 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 				  echo '</span>';
 			   }
 			   echo '</li>';
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   // #### Begin OHM-specific code #####################################################
+		   } else if ($itemtypes[$items[$i]][0] == 'DesmosItem') {
+			   $typeid = Sanitize::onlyInt($itemtypes[$items[$i]][1]);
+			   if ($iteminfo['DesmosItem'][$typeid]) {
+				   echo $iteminfo['DesmosItem'][$typeid]->courseQuickView($now, $viewall, $showlinks, $showdates, $duedates);
+				   //getCourseItem($items[$i], $parent, $now, 'quick', $viewall, $canedit, $showlinks, $showdates, $duedates);
+			   }
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
+		   // #### End OHM-specific code #####################################################
 		   }
 
 	   }

@@ -113,6 +113,7 @@ $CFG['TE']['navicons'] = array(
 
 $CFG['CPS']['miniicons'] = array(
     'assess'=>'assess_tiny.png',
+    'desmos'=>'../ohm/img/desmos_tiny.png',
     'drill'=>'assess_tiny.png',
     'inline'=>'inline_tiny.png',
     'linked'=>'html_tiny.png',
@@ -120,6 +121,37 @@ $CFG['CPS']['miniicons'] = array(
     'wiki'=>'wiki_tiny.png',
     'folder'=>'folder_tiny.png',
     'calendar'=>'1day.png');
+
+$CFG['CPS']['itemicons'] = array (
+    'folder' => 'folder2.gif',
+    'foldertree' => 'folder_tree.png',
+    'assess' => 'assess.png',
+    'inline' => 'inline.png',
+    'desmos' => '../ohm/img/desmos.png',
+    'web' => 'web.png',
+    'doc' => 'doc.png',
+    'wiki' => 'wiki.png',
+    'drill' => 'drill.png',
+    'html' => 'html.png',
+    'forum' => 'forum.png',
+    'pdf' => 'pdf.png',
+    'ppt' => 'ppt.png',
+    'zip' => 'zip.png',
+    'png' => 'image.png',
+    'xls' => 'xls.png',
+    'gif' => 'image.png',
+    'jpg' => 'image.png',
+    'bmp' => 'image.png',
+    'mp3' => 'sound.png',
+    'wav' => 'sound.png',
+    'wma' => 'sound.png',
+    'swf' => 'video.png',
+    'avi' => 'video.png',
+    'mpg' => 'video.png',
+    'nb' => 'mathnb.png',
+    'mws' => 'maple.png',
+    'mw' => 'maple.png'
+);
 
 $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
 
@@ -176,3 +208,4 @@ $CFG['hooks']['bltilaunch'] = 'ohm-hooks/bltilaunch.php';
 $CFG['hooks']['validate'] = 'ohm-hooks/validate.php';
 $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 
+$CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/desmos/js/calculator.js';
