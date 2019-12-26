@@ -2567,12 +2567,19 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
                         reporterror("Course link not established yet");
                     }
                     $stm = $DBH->prepare("INSERT INTO imas_lti_courses (org,contextid,courseid,contextlabel) VALUES (:org, :contextid, :courseid, :contextlabel)");
-                    $stm->execute(array(
-                        ':org'=>$_SESSION['ltiorg'],
-                        ':contextid'=>$_SESSION['lti_context_id'],
-                        ':courseid'=>$destcid,
-                        ':contextlabel'=>$_SESSION['lti_context_label']));
-
+                    // FIXME: Instead of reaching this scenario, a screen should be displayed
+                    //        to the user that allows them to link the OHM course to the LMS
+                    //        course. Search this file for the following text:
+                    //        "Your LMS course is not yet associated with a course on"
+                    try {
+                        $stm->execute(array(
+                            ':org' => $_SESSION['ltiorg'],
+                            ':contextid' => $_SESSION['lti_context_id'],
+                            ':courseid' => $destcid,
+                            ':contextlabel' => $_SESSION['lti_context_label']));
+                    } catch (\PDOException $e) {
+                        reporterror("Course link not established yet. Click on any OHM assessment from your LMS to establish the connection.");
+                    }
                 }
             } else {
                 $destcid = $stm->fetchColumn(0);
