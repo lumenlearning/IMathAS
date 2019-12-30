@@ -121,7 +121,21 @@ function copyStuData($destcid, $sourcecid = null) {
 		$stm->execute(array($sourcecid));
 		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			$adding = false;
-			if (strpos($row['type'], 'inline')!==false && 
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            if (strpos($row['type'], 'desmos')!==false &&
+                isset($itemtypemap['DesmosItem'.$row['typeid']])) {
+                $execarr[] = $itemtypemap['DesmosItem'.$row['typeid']];
+            } else
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+			if (strpos($row['type'], 'inline')!==false &&
 				isset($itemtypemap['InlineText'.$row['typeid']])) {
 				$execarr[] = $itemtypemap['InlineText'.$row['typeid']];
 			} else if (strpos($row['type'], 'linked')!==false && 

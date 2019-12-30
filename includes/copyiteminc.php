@@ -49,6 +49,22 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	$stm->execute(array(':id'=>$itemid));
 	if ($stm->rowCount()==0) {return false;}
 	list($itemtype,$typeid) = $stm->fetch(PDO::FETCH_NUM);
+
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if ($itemtype == "DesmosItem") {
+		$item = new \Desmos\Models\DesmosItem($cid);
+		$item->copyItem($typeid, $_POST['append'], $sethidden);
+		return $item->itemid;
+	} else
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	if ($itemtype == "InlineText") {
 		//$query = "INSERT INTO imas_inlinetext (courseid,title,text,startdate,enddate) ";
 		//$query .= "SELECT '$cid',title,text,startdate,enddate FROM imas_inlinetext WHERE id='$typeid'";
@@ -606,6 +622,19 @@ function getiteminfo($itemid) {
 		case ($itemtype==="Drill"):
 			$stm = $DBH->prepare("SELECT name,summary FROM imas_drillassess WHERE id=:id");
 			break;
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		case ($itemtype==="DesmosItem"):
+			$stm = $DBH->prepare("SELECT title,summary FROM desmos_items WHERE id=:id");
+			break;
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
+		// #### End OHM-specific code #####################################################
 	}
 	$stm->execute(array(':id'=>$typeid));
 	list($name, $summary) = $stm->fetch(PDO::FETCH_NUM);
@@ -635,20 +664,31 @@ function getsubinfo($items,$parent,$pre,$itemtypelimit=false,$spacer='|&nbsp;&nb
 				continue;
 			}
 			if (!empty($itemshowdata)) {
-				array($itemtype,$name,$summary,$typeid);
-				if (isset($itemshowdata[$item]['name'])) {
-					$name = $itemshowdata[$item]['name'];
+				//arr = array(itemtype, name, summary, typeid);
+				if (is_object($itemshowdata[$item]['itemtype'])) {
+					$name = $itemshowdata[$item]['itemtype']->name;
+					$summary = $itemshowdata[$item]['itemtype']->summary;
+					$arr = array(
+						$itemshowdata[$item]['itemtype']->itemtype,
+						$name,
+						$summary,
+						$itemshowdata[$item]['itemtype']->typeid
+					);
 				} else {
-					$name = $itemshowdata[$item]['title'];
+					if (isset($itemshowdata[$item]['name'])) {
+						$name = $itemshowdata[$item]['name'];
+					} else {
+						$name = $itemshowdata[$item]['title'];
+					}
+					if (isset($itemshowdata[$item]['summary'])) {
+						$summary = $itemshowdata[$item]['summary'];
+					} else if (isset($itemshowdata[$item]['text'])) {
+						$summary = $itemshowdata[$item]['text'];
+					} else {
+						$summary = $itemshowdata[$item]['description'];
+					}
+					$arr = array($itemshowdata[$item]['itemtype'], $name, $summary, $itemshowdata[$item]['id']);
 				}
-				if (isset($itemshowdata[$item]['summary'])) {
-					$summary = $itemshowdata[$item]['summary'];
-				} else if (isset($itemshowdata[$item]['text'])) {
-					$summary = $itemshowdata[$item]['text'];
-				} else {
-					$summary = $itemshowdata[$item]['description'];
-				}
-				$arr = array($itemshowdata[$item]['itemtype'], $name, $summary, $itemshowdata[$item]['id']);
 			} else {
 				$arr = getiteminfo($item);
 			}

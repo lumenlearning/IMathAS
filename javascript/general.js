@@ -451,6 +451,7 @@ function chkAllNone(frmid, arr, mark, skip) {
 }
 
 var tinyMCEPreInit = {base: imasroot+"/tinymce4"};
+var desmos = '';
 function initeditor(edmode,edids,css,inline,setupfunction){
 	var cssmode = css || 0;
 	var inlinemode = inline || 0;
@@ -468,15 +469,15 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		selector: selectorstr,
 		inline: inlinemode,
 		plugins: [
-			"lists advlist autolink attach image charmap anchor",
+			desmos+"lists advlist autolink attach image charmap anchor",
 			"searchreplace code link textcolor snippet",
 			"media table paste asciimath asciisvg rollups colorpicker"
 		],
 		menubar: false,//"edit insert format table tools ",
 		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
-		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg",
+		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg " + desmos,
 		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder],param[name|value],@[sscr]',
-		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme,
+		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme+(desmos==''?'':','+imasroot+'/desmos/desmos-temp.css'),
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
 		file_picker_callback: filePickerCallBackFunc,
@@ -496,6 +497,11 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 			{title:"Gridded Centered", value:"gridded centered"}],
 		style_formats_merge: true,
 		snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
+		setup: function (editor) {
+			editor.on('change', function () {
+				editor.save();
+			});
+		},
 		style_formats: [{
 			title: "Font Family",
 			items: [
@@ -526,13 +532,13 @@ function initeditor(edmode,edids,css,inline,setupfunction){
         }
 	if (document.documentElement.clientWidth<385) {
 		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline | saveclose";
-		edsetup.toolbar2 = "bullist numlist outdent indent  | link image | asciimath asciisvg";
+		edsetup.toolbar2 = "bullist numlist outdent indent  | link image | asciimath asciisvg " + desmos;
 	} else if (document.documentElement.clientWidth<465) {
 		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline forecolor | saveclose";
-		edsetup.toolbar2 = "bullist numlist outdent indent  | link unlink image | asciimath asciisvg";
+		edsetup.toolbar2 = "bullist numlist outdent indent  | link unlink image | asciimath asciisvg " + desmos;
 	} else if (document.documentElement.clientWidth<575) {
 		edsetup.toolbar1 = "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor | saveclose";
-		edsetup.toolbar2 = " alignleft aligncenter | bullist numlist outdent indent  | link unlink image | asciimath asciimathcharmap asciisvg";
+		edsetup.toolbar2 = " alignleft aligncenter | bullist numlist outdent indent  | link unlink image | asciimath asciimathcharmap asciisvg " + desmos;
 	}
 	if (setupfunction) {
 		edsetup.setup = setupfunction;
