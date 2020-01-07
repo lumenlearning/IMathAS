@@ -45,7 +45,7 @@ deploy:
       secure: "g1dbhOtr6ziziEHIogI0W54pXn8q2BbkQ79eV0uJZXEBhOniobd57Q/FrnGvzVe91gpi3ypYtORrYwcJBxN3fhVQN26NVYaVRmjnl8Qagr+P26+n31JtQdSi4z9vri4R8FdLs0apSNXI5y57+LgRpoW9SfVyTNcg8wlTidGvFcNRFvfgNIdJaZjqYLLshZI732u92py92GksRH1r0DuGWjf7JZSrCZoD0f6cBJ9hcZWOK+k2G6pUZutNJ2bJgfykowg0PpnXe9LjeHUlbaC3EZPxtKJ8am69so3UPFTbEULmWFciCZcsKcawt39v1bfPGmYEkkgG4ljcBzdgtff1PL6t0tMYyR4ezQuHPD2lA/ZSmY2YEE85LEguFgJx/918aaLKYHwFWKg7KqHPfgxhzXFvwnV0wXqikcqvwjJcnbPdwqmoxm60Y/wlFUQw/S9Qz+5AJGlrN0O8ykdYUCAPr3azLlcjw/sFWgn7sK52SK2QI3l4Kvj3kKcDVnIa/L9gEKXHpNVZ/7IZcUzsjtUQu0UyAt1n6eaj54bp2BASudybrsKuZp56bFnwVNeRaadisNIigrHz1ZFj/bk8qD1ng4QjUSr4Zg2FgMYEg4Nzv1q+Ycr9qppcsko5PJixPUYMkTLnwdAocpYynS80XzVg4Ue6E9gILd1tK7T6H0lR11w="
     region: "us-west-2"
     app: "Ohm"
-    env: "ohm-prod-71"
+    env: "ohm-prod-73"
     bucket_name: elasticbeanstalk-us-west-2-523740042085
     on:
       repo: lumenlearning/ohm

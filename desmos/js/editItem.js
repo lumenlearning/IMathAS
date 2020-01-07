@@ -34,7 +34,35 @@ $(document).ready(function() {
         $('link[title=lux]')[0].disabled=false;
     });
 
-    $("#desmos_save_button").click(function() {
-        $("#desmos_form_submit_button").trigger('click');
+    $("#desmos_form_submit_button").click(function(e) {
+        $.ajax({
+            type: "POST",
+            url: $('#desmos_item').attr('action'),
+            data: $('#desmos_item').serialize(),
+            beforeSend: function() {
+                $('#desmos_save_status')
+                  .stop()
+                  .removeClass('desmos_save_status_success')
+                  .removeClass('desmos_save_status_failed')
+                  .addClass('desmos_save_status_saving')
+                  .text('Saving...')
+                  .css('opacity', '1.0')
+                  .css('display', 'inline-block');
+            },
+            success: function(data) {
+                $('#desmos_save_status')
+                  .removeClass('desmos_save_status_saving')
+                  .addClass('desmos_save_status_success')
+                  .text('Saved!')
+                  .fadeOut(3000);
+            },
+            error: function() {
+                $('#desmos_save_status')
+                  .removeClass('desmos_save_status_saving')
+                  .addClass('desmos_save_status_failed')
+                  .text('Failed to save!');
+            }
+        });
+        e.preventDefault();
     });
 });

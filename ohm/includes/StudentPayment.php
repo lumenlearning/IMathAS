@@ -64,7 +64,7 @@ class StudentPayment
 	 * Determine if payment is required for this course and, if required, has the student provided * a valid
 	 * activation code.
 	 *
-	 * As of 2019 October 4, request for student activation status always uses call to the student payment API.
+	 * If cached data exists, it will be returned instead of making an API call to the student payment API.
 	 *
 	 * Current known status list:
 	 *
@@ -96,8 +96,7 @@ class StudentPayment
 		}
 
 		// Get the student's "has an activation code" status and return it.
-        $studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
-        $studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
+		$studentPayStatus = $this->getStudentPayStatusCacheFirst($studentPayStatus);
 		return $studentPayStatus;
 	}
 
@@ -135,6 +134,40 @@ class StudentPayment
 			// IMPORTANT NOTE -- As of 2017 Nov 28:
 			// If we have no value in the database, NULL == course does not require activation code.
 			$studentPayStatus->setCourseRequiresStudentPayment(false);
+		}
+
+		return $studentPayStatus;
+	}
+
+	/**
+	 * Determine if a student has a valid activation code. This will attempt to get data from MySQL
+	 * before hitting the student payment API.
+	 *
+	 * Note: A student's activation code status is only stored in the database if they have a valid
+	 * activation code. For "in trial" status, we always need to hit the API to get their remaining
+	 * trial time.
+	 *
+	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
+	 * @return StudentPayStatus $studentPayStatus The same StudentPayStatus object with updated data.
+	 * @throws StudentPaymentException Thrown if unable to get activation status.
+	 */
+	public function getStudentPayStatusCacheFirst($studentPayStatus)
+	{
+		$studentHasAccessCode = $this->studentPaymentDb->getStudentHasActivationCode();
+
+		// If the database has what we want, return the data immediately.
+		if (null != $studentHasAccessCode && 1 == $studentHasAccessCode) {
+			$studentPayStatus->setStudentHasValidAccessCode($studentHasAccessCode);
+			return $studentPayStatus;
+		}
+
+		// Get the student's activation code status from the student payment API.
+		$studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
+		$studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
+
+		// If the student has a valid activation code, let's store that state (in MySQL) to minimize API traffic.
+		if ($studentPayStatus->getStudentHasValidAccessCode()) {
+			$this->studentPaymentDb->setStudentHasActivationCode($studentPayStatus->getStudentHasValidAccessCode());
 		}
 
 		return $studentPayStatus;

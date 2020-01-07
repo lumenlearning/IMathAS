@@ -112,6 +112,28 @@ body {
 
 /* DESMOS TEACHER VIEW */
 
+#desmos_save_buttons {
+    position: relative;
+}
+
+#desmos_save_status {
+    position: absolute;
+    top: 50%;
+    margin-left: 0.5em;
+}
+
+.desmos_save_status_saving {
+    color: #606060;
+}
+
+.desmos_save_status_success {
+    color: #1E74D1;
+}
+
+.desmos_save_status_failed {
+    color: #ff2222;
+}
+
 /* Overriding tiny mce */
 .step-items .mce-panel {
     border: 0;

@@ -28,6 +28,12 @@ var desmosDialog = {
                 false,
                 '<figure class="js-desmos" data-json=\''+this.desmosjson+'\'></figure>'
             );
+            elt = ed.dom.doc.getElementsByClassName("js-desmos");
+            if (elt.length>0) {
+                for (i = 0; i < elt.length; i++) {
+                    elt[i].setAttribute("onClick", "top.tinymce.activeEditor.execCommand('mceDesmos')");
+                }
+            }
         } else {
             el = ed.selection.getNode();
             ed.dom.setAttrib(el,"data-json",this.desmosjson);

@@ -39,10 +39,10 @@ abstract class CourseItem
      * CourseItem constructor.
      *
      * @param int    $courseid course to which this item is tied
-     * @param int    $block    parental hierarchy of course items
+     * @param string $block    parental hierarchy of course items
      * @param string $totb     "to Top or Bottom" of course"
      */
-    public function __construct($courseid = null, $block = 0, $totb = 'b')
+    public function __construct($courseid = null, $block = '0', $totb = 'b')
     {
         $this->courseid = $courseid;
         $this->block = $block;
@@ -250,8 +250,27 @@ abstract class CourseItem
      */
     private function _deleteCourseItem()
     {
+        // Delete the item from imas_items
         $stm = $this->dbh->prepare("DELETE FROM imas_items WHERE id=:id");
         $stm->execute(array(':id'=>$this->itemid));
+
+        // Delete the item from imas_courses
+        $stm = $this->dbh->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
+        $stm->execute([':id' => $this->courseid]);
+
+        $allItems = unserialize($stm->fetchColumn(0)); // contains ALL blocks in the course
+        $blockItems = $allItems[$this->block]['items'];
+
+        $key = array_search($this->itemid, $blockItems); // get the key for the item being deleted
+        unset($allItems[$this->block]['items'][$key]);
+
+        // Save the course items array with the deleted item removed
+        $stm = $this->dbh->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
+        $stm->execute([
+            ':id' => $this->courseid,
+            ':itemorder' => serialize($allItems),
+        ]);
+
         return $this;
     }
 
@@ -506,12 +525,17 @@ abstract class CourseItem
      * @param int  $now     time()
      * @param bool $viewall show all items
      * @param bool $canedit user can edit the item
+     * @paremt string $parent The parent block for this item.
      *
      * @return string
      */
     public function courseView(
-        $now, $viewall = true, $canedit = false
+        $now, $viewall = true, $canedit = false, $parentBlock = null
     ) {
+        if (empty($parentBlock)) {
+            $parentBlock = $this->block;
+        }
+
         $settings = $this->itemSettings($now, $viewall);
         $out = '';
         if (strpos($this->summary, '<p') !== 0) {
@@ -576,14 +600,14 @@ abstract class CourseItem
                     . 'aria-labelledby="dropdownMenu' . $this->itemid . '">';
                 $out .= "<li><a href=\""
                     . $this->imasroot . "/course/itemadd.php?type="
-                    . $this->typename . "&id=$this->typeid&block=$this->block&cid="
+                    . $this->typename . "&id=$this->typeid&block=$parentBlock&cid="
                     . $this->courseid . "\">" . _('Modify') . "</a></li>";
                 $out .= "<li><a href=\"#\" "
-                    ."onclick=\"return moveDialog('$this->block','$this->itemid')\">"
+                    ."onclick=\"return moveDialog('$parentBlock','$this->itemid')\">"
                     . _('Move') . '</a></li>';
                 $out .= "<li><a href=\"". $this->imasroot
                     . "/course/itemdelete.php?type="
-                    . $this->typename."&id=".$this->typeid."&block=$this->block&cid="
+                    . $this->typename."&id=".$this->typeid."&block=$parentBlock&cid="
                     . $this->courseid
                     . "&remove=ask\">" . _('Delete') . "</a></li>";
                 $out .= " <li><a href=\"copyoneitem.php?cid=" . $this->courseid

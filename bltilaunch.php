@@ -107,14 +107,7 @@ function verify112relaunch() {
 	}
 }
 
-//start session
-if (isset($sessionpath)) { session_save_path($sessionpath);}
-ini_set('session.gc_maxlifetime',86400);
-ini_set('auto_detect_line_endings',true);
-if ($_SERVER['HTTP_HOST'] != 'localhost') {
-	 session_set_cookie_params(0, '/', '.'.implode('.',array_slice(explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST'])),isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2)));
-}
-session_start();
+//start session - session_start already called in init
 $sessionid = session_id();
 $atstarthasltiuserid = isset($_SESSION['ltiuserid']);
 $askforuserinfo = false;
@@ -584,7 +577,7 @@ if (isset($_GET['launch'])) {
 		session_regenerate_id();
 		$sessionid = session_id();
 		$_SESSION = array();
-		setcookie(session_name(),session_id(),0,'','',false,true );
+		//setcookie(session_name(),session_id(),0,'','',false,true );
 	}
 
 	/*if (empty($_REQUEST['roles'])) {
@@ -1616,7 +1609,7 @@ if ($stm->rowCount()>0) {	//check that same userid, and that we're not jumping o
 		session_start();
 		session_regenerate_id();
 		$sessionid = session_id();
-		setcookie(session_name(),session_id(),0,'','',false,true );
+		//setcookie(session_name(),session_id(),0,'','',false,true );
 		$sessiondata = array();
 		$createnewsession = true;
 	} else {
@@ -1939,6 +1932,7 @@ if (isset($_GET['launch'])) {
 	<input type="hidden" id="tzoffset" name="tzoffset" value="" />
 	<input type="hidden" id="tzname" name="tzname" value="">
 	<script type="text/javascript">
+		 document.cookie = 'PHPSESSID=; path=; expires=' + new Date(0).toUTCString();
 		 $(function() {
 			var thedate = new Date();
 			document.getElementById("tzoffset").value = thedate.getTimezoneOffset();
@@ -2216,7 +2210,7 @@ if (isset($_GET['launch'])) {
 		session_regenerate_id();
 		$sessionid = session_id();
 		$_SESSION = array();
-		setcookie(session_name(),session_id(),0,'','',false,true );
+		//setcookie(session_name(),session_id(),0,'','',false,true );
 	}
 
 	/*if (empty($_REQUEST['roles'])) {
@@ -2573,12 +2567,19 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
                         reporterror("Course link not established yet");
                     }
                     $stm = $DBH->prepare("INSERT INTO imas_lti_courses (org,contextid,courseid,contextlabel) VALUES (:org, :contextid, :courseid, :contextlabel)");
-                    $stm->execute(array(
-                        ':org'=>$_SESSION['ltiorg'],
-                        ':contextid'=>$_SESSION['lti_context_id'],
-                        ':courseid'=>$destcid,
-                        ':contextlabel'=>$_SESSION['lti_context_label']));
-
+                    // FIXME: Instead of reaching this scenario, a screen should be displayed
+                    //        to the user that allows them to link the OHM course to the LMS
+                    //        course. Search this file for the following text:
+                    //        "Your LMS course is not yet associated with a course on"
+                    try {
+                        $stm->execute(array(
+                            ':org' => $_SESSION['ltiorg'],
+                            ':contextid' => $_SESSION['lti_context_id'],
+                            ':courseid' => $destcid,
+                            ':contextlabel' => $_SESSION['lti_context_label']));
+                    } catch (\PDOException $e) {
+                        reporterror("Course link not established yet. Click on any OHM assessment from your LMS to establish the connection.");
+                    }
                 }
             } else {
                 $destcid = $stm->fetchColumn(0);
@@ -2959,7 +2960,7 @@ if ($stm->rowCount()>0) {
 		session_start();
 		session_regenerate_id();
 		$sessionid = session_id();
-		setcookie(session_name(),session_id(),0,'','',false,true );
+		//setcookie(session_name(),session_id(),0,'','',false,true );
 		$sessiondata = array();
 		$createnewsession = true;
 	} else {

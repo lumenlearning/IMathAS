@@ -2,7 +2,6 @@
 
 use OHM\Models\StudentPayApiResult;
 use OHM\Exceptions\StudentPaymentException;
-use OHM\Includes\StudentPaymentApi;
 
 
 /**
@@ -62,8 +61,21 @@ function getModGroupForm($groupId, $groupType, $userRights)
     printf('Lumen GUID: <input type="text" name="lumen_guid" size="50" value="%s"/><br/>', $lumenGuid);
 
     if (isset($GLOBALS['student_pay_api']) && $GLOBALS['student_pay_api']['enabled']) {
+        echo "<div id='ohmEditGroup'>";
+
         $currentAccessType = getGroupAssessmentAccessType($groupId);
-        printf('Student payments: %s<br/>', StudentPayApiResult::VALID_ACCESS_TYPES[$currentAccessType]);
+        if (is_null($currentAccessType)) {
+            echo "<div id='student_payment_api_failure'>Error: Failed to get current student payment / access type from API.</div>";
+        }
+
+        renderAccessTypeSelector($currentAccessType);
+
+        echo '<span id="student_payment_update_message"></span>';
+        printf('<br/><button id="update_student_payment_type" type="button"'
+            . ' onClick="updateStudentPaymentType(%d);">Update student payment type</button>',
+            Sanitize::onlyInt($groupId));
+
+        echo "</div>";
     }
 }
 
@@ -157,31 +169,40 @@ function getCourseOwnerGroupId($courseId): int
 /**
  * Get the current student payment / access type from the student payment API for a group.
  *
- * As of 2019 October 4, always check luministration api for group payment status
+ * If our cache (OHM db) says student payments are disabled for a group, we
+ * immediately return "not_required".
  *
- * As of 2018 July 19, valid access types are:
+ * As of 2018 Apr 2, valid access types are:
  * - "not_required"
  * - "activation_code"
  * - "direct_pay"
- * - "multipay"
  *
  * @param $groupId integer The group ID to get the payment/access type for.
  * @return string|null The access type. Null is returned on API communication failure.
  */
 function getGroupAssessmentAccessType($groupId): ?string
 {
+    require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
+    require_once(__DIR__ . "/../../ohm/models/StudentPayApiResult.php");
+
     $groupId = Sanitize::onlyInt($groupId);
+    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($groupId, null, null);
 
     $currentAccessType = null;
     try {
-        $studentPaymentApi = new StudentPaymentApi($groupId, null, null);
-        $apiResult = $studentPaymentApi->getGroupAccessType();
+        if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
+            require_once(__DIR__ . "/../../ohm/includes/StudentPaymentApi.php");
+            $studentPaymentApi = new \OHM\Includes\StudentPaymentApi($groupId, null, null);
+            $apiResult = $studentPaymentApi->getGroupAccessType();
 
-        // If the student payment API doesn't know about this group, then
-        // there is no required access type. AKA: free assessments!
-        $currentAccessType = is_null($apiResult->getAccessType()) ?
-            StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
-            $apiResult->getAccessType();
+            // If the student payment API doesn't know about this group, then
+            // there is no required access type. AKA: free assessments!
+            $currentAccessType = is_null($apiResult->getAccessType()) ?
+                StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED :
+                $apiResult->getAccessType();
+        } else {
+            $currentAccessType = \OHM\Models\StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED;
+        }
     } catch (StudentPaymentException $e) {
         // Don't allow failed API communication to break UX.
         error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
@@ -190,5 +211,29 @@ function getGroupAssessmentAccessType($groupId): ?string
     }
 
     return $currentAccessType;
+}
+
+
+/**
+ * Render the <select> portion of a form for student payment / access types.
+ *
+ * @param $currentAccessType string The groups current student payment / access type.
+ */
+function renderAccessTypeSelector($currentAccessType): void
+{
+    $validAccessTypes = array(
+        'not_required' => 'Not required',
+        'direct_pay' => 'Direct Pay - Student pays directly',
+        'activation_code' => 'Activation codes - Student enters an access code',
+        'multipay' => 'Multipay - Both methods'
+    );
+
+    echo "<label for='student_payment_type'>Student payments:</label>";
+    echo "<select id='student_payment_type' name='student_payment_type' aria-label='Student payments'>";
+    foreach ($validAccessTypes as $key => $value) {
+        $selected = $currentAccessType == $key ? " selected='selected'" : "";
+        printf("<option value='%s'%s>%s</option>", $key, $selected, $value);
+    }
+    echo "</select>";
 }
 
