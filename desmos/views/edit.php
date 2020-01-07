@@ -97,8 +97,11 @@
                 } ?>
             </div>
         </div>
-        <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save and Exit</button>
-        <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
+        <div id="desmos_save_buttons">
+            <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save</button>
+            <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
+            <span id="desmos_save_status"></span>
+        </div>
     </form>
     <?php include 'icons.svg'; ?>
 </div>
