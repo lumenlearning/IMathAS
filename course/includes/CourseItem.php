@@ -254,7 +254,8 @@ abstract class CourseItem
         $stm = $this->dbh->prepare("DELETE FROM imas_items WHERE id=:id");
         $stm->execute(array(':id'=>$this->itemid));
 
-        // Delete the item from imas_courses
+        // Delete the item from imas_courses.
+        // This appears to be necessary only for items within blocks.
         $stm = $this->dbh->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
         $stm->execute([':id' => $this->courseid]);
 
@@ -262,14 +263,16 @@ abstract class CourseItem
         $blockItems = $allItems[$this->block]['items'];
 
         $key = array_search($this->itemid, $blockItems); // get the key for the item being deleted
-        unset($allItems[$this->block]['items'][$key]);
+        if (!is_null($key)) {
+            unset($allItems[$this->block]['items'][$key]);
 
-        // Save the course items array with the deleted item removed
-        $stm = $this->dbh->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-        $stm->execute([
-            ':id' => $this->courseid,
-            ':itemorder' => serialize($allItems),
-        ]);
+            // Save the course items array with the deleted item removed
+            $stm = $this->dbh->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
+            $stm->execute([
+                ':id' => $this->courseid,
+                ':itemorder' => serialize($allItems),
+            ]);
+        }
 
         return $this;
     }
