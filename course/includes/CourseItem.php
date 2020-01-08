@@ -696,7 +696,9 @@ abstract class CourseItem
     public function setItem(array $items)
     {
         foreach ($items as $key=>$value) {
-            $this->$key = $value;
+            if ($key != 'courseid' OR !isset($this->courseid)) {
+                $this->$key = $value;
+            }
         }
         $this->setId();
         $this->setName();
