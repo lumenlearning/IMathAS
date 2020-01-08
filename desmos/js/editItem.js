@@ -8,6 +8,21 @@ $(document).ready(function() {
         }
     };
 
+    /**
+     * Validate form data.
+     *
+     * @returns {boolean} True if form data is valid. False if not.
+     */
+    function validateDesmosFormData() {
+        let title = $('input#title').val();
+        if ('' === title.trim()) {
+            alert('Title cannot be empty.');
+            return false;
+        }
+
+        return true;
+    }
+
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
@@ -44,6 +59,11 @@ $(document).ready(function() {
     });
 
     $("#desmos_form_submit_button").click(function(e) {
+        if (!validateDesmosFormData()) {
+            e.preventDefault();
+            return;
+        }
+
         $.ajax({
             type: "POST",
             url: $('#desmos_item').attr('action'),
