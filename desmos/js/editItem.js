@@ -13,14 +13,29 @@ $(document).ready(function() {
      *
      * @returns {boolean} True if form data is valid. False if not.
      */
-    function validateDesmosFormData() {
+    function isValidDesmosFormData() {
         let title = $('input#title').val();
         if ('' === title.trim()) {
-            alert('Title cannot be empty.');
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Determine if a URL contains an item ID.
+     *
+     * @param url The URL to check.
+     * @returns {boolean} True if an item ID was found. False if not.
+     */
+    function containsItemId(url) {
+        let params = getUrlArguments(url);
+        for (i = 0; i < params.length; i++) {
+            if ('id=' === params[i].substring(0, 3)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function getUrlArguments(url) {
@@ -31,16 +46,6 @@ $(document).ready(function() {
 
         let queryString = url.substring(idx + 1);
         return queryString.split('&');
-    }
-
-    function haveItemId(url) {
-        let params = getUrlArguments(url);
-        for (i = 0; i < params.length; i++) {
-            if ('id=' === params[i].substring(0, 3)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     $("#desmos_preview_button").click(function() {
@@ -79,16 +84,15 @@ $(document).ready(function() {
     });
 
     $("#desmos_form_submit_button").click(function(e) {
-        if (true !== validateDesmosFormData()) {
-            e.preventDefault();
+        let formAction = $('#desmos_item').attr('action');
+
+        if (false === isValidDesmosFormData()) {
             return;
         }
 
-        let formAction = $('#desmos_item').attr('action');
-
         // As far as I know, "id=" in query parameters is the only way to
         // detect if we're adding or editing a Desmos item.
-        if (!haveItemId(formAction)) {
+        if (!containsItemId(formAction)) {
             // If we're creating a new Desmos item, return to the course page.
             // This prevents the user from continuing to submit the same
             // form to create more of the same item.
