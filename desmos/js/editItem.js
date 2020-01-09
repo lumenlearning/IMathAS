@@ -87,6 +87,8 @@ $(document).ready(function() {
         let formAction = $('#desmos_item').attr('action');
 
         if (false === isValidDesmosFormData()) {
+            alert('Title cannot be empty.');
+            e.preventDefault();
             return;
         }
 
