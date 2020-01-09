@@ -1,7 +1,13 @@
 $(document).ready(function() {
     let formDataBeforeChanges = $('#desmos_item').serialize();
+    let formIsSubmitting = false;
 
     window.onbeforeunload = function () {
+        if (formIsSubmitting) {
+            formIsSubmitting = false;
+            return;
+        }
+
         let formDataBeforeUnload = $('#desmos_item').serialize();
         if (formDataBeforeUnload !== formDataBeforeChanges) {
             return 'Data has been modified. Are you sure you want to abandon changes?';
@@ -84,6 +90,7 @@ $(document).ready(function() {
     });
 
     $("#desmos_form_submit_button").click(function(e) {
+        formIsSubmitting = true;
         let formAction = $('#desmos_item').attr('action');
 
         if (false === isValidDesmosFormData()) {
