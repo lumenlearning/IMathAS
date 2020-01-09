@@ -5,6 +5,9 @@
  * @author Alena Holligan <alena@lumenlearning.com>
  */
 namespace Course;
+
+use Sanitize;
+
 /*** master php includes *******/
 require "../init.php";
 require "../includes/htmlutil.php";
@@ -98,9 +101,10 @@ if ($_POST['name']!= null || $_POST['title']!=null) {
         $track_type = $item->track('add');
     }
     header(
-        'Location: ' . $GLOBALS['basesiteurl']
-        . "/course/course.php?cid=$item->courseid&r="
-        .\Sanitize::randomQueryStringParam()
+        sprintf('Location: %s/course/itemadd.php?type=desmos&id=%d&block=%d&cid=%d&r=%s',
+            $GLOBALS['basesiteurl'], $item->typeid, $item->block, $item->courseid,
+            Sanitize::randomQueryStringParam()
+        )
     );
     exit;
 }
