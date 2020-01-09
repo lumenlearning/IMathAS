@@ -23,6 +23,26 @@ $(document).ready(function() {
         return true;
     }
 
+    function getUrlArguments(url) {
+        let idx = url.indexOf('?');
+        if (-1 === idx) {
+            return [];
+        }
+
+        let queryString = url.substring(idx + 1);
+        return queryString.split('&');
+    }
+
+    function haveItemId(url) {
+        let params = getUrlArguments(url);
+        for (i = 0; i < params.length; i++) {
+            if ('id=' === params[i].substring(0, 3)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
@@ -59,16 +79,27 @@ $(document).ready(function() {
     });
 
     $("#desmos_form_submit_button").click(function(e) {
-        if (!validateDesmosFormData()) {
+        if (true !== validateDesmosFormData()) {
             e.preventDefault();
+            return;
+        }
+
+        let formAction = $('#desmos_item').attr('action');
+
+        // As far as I know, "id=" in query parameters is the only way to
+        // detect if we're adding or editing a Desmos item.
+        if (!haveItemId(formAction)) {
+            // If we're creating a new Desmos item, return to the course page.
+            // This prevents the user from continuing to submit the same
+            // form to create more of the same item.
             return;
         }
 
         $.ajax({
             type: "POST",
-            url: $('#desmos_item').attr('action'),
+            url: formAction,
             data: $('#desmos_item').serialize(),
-            beforeSend: function() {
+            beforeSend: function () {
                 $('#desmos_save_status')
                   .stop()
                   .removeClass('desmos_save_status_success')
@@ -78,14 +109,14 @@ $(document).ready(function() {
                   .css('opacity', '1.0')
                   .css('display', 'inline-block');
             },
-            success: function(data) {
+            success: function (data) {
                 $('#desmos_save_status')
                   .removeClass('desmos_save_status_saving')
                   .addClass('desmos_save_status_success')
                   .text('Saved!')
                   .fadeOut(3000);
             },
-            error: function() {
+            error: function () {
                 $('#desmos_save_status')
                   .removeClass('desmos_save_status_saving')
                   .addClass('desmos_save_status_failed')
