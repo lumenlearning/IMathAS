@@ -51,10 +51,8 @@
                     <?php
                     $action = '';
                     $numsteps = 0;
-                    if (count($item->steps)>1) {
-                        $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
-                        $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
-                    }
+                    $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
+                    $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
                     foreach ($item->steporder as $i) {
                         $selected = '';
                         if ($numsteps==0) {
