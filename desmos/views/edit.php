@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
+<link rel="stylesheet" href="/desmos/ohm-modal.css" type="text/css" />
+
+<script type="text/javascript" src="<?php echo $imasroot; ?>/desmos/js/ohmModal.js"></script>
 <script type="text/javascript">
     window.onload = ()=> {
         <?php if (count($item->steps) < 1) {
@@ -15,7 +18,7 @@
         <img src="../ohm/img/desmos.png" alt=""/>
         <?php echo $pagetitle ?>
     </h1>
-
+    <button id="modal-test">MODAL</button>
     <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
             <div class="form-left">
@@ -116,3 +119,18 @@
 
     <div id="desmos_preview_content"></div>
 </div>
+
+<script>
+    $(document).ready(function(){
+        $.get("<?php echo $imasroot; ?>/desmos/views/ConfirmDesmosDelete.php", function(data){
+            $('#modal-test').click(function(e) {
+                ohmModal.open({
+                    content: data,
+                    height: "auto",
+                    width: "50%"
+                });
+                e.preventDefault();
+            });
+        });
+    });
+</script>
