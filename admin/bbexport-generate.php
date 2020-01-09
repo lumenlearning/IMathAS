@@ -276,14 +276,6 @@ function getorg($it,$parent,&$res,$ind, $parentid) {
                     '{{extendeddata}}' => $extended
                 ), 'lti', $res);
 
-                $gbitem = $bbtemplates['outcomedef'];
-                $gbitem = str_replace('{{defid}}', '_11'.$item.'_1', $gbitem);
-                $gbitem = str_replace('{{resid}}', $resid, $gbitem);
-                $includeduedate = ($_POST['includeduedates']==1 && $courseItem->enddate<2000000000);
-                $gbitem = str_replace('{{duedate}}', $includeduedate?bbdate($courseItem->enddate):'', $gbitem);
-                $gbitem = str_replace('{{title}}', xmlstr($courseItem->name), $gbitem);
-                $gbitems[] = $gbitem;
-
             } else
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################
