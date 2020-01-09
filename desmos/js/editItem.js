@@ -110,6 +110,7 @@ $(document).ready(function() {
                   .css('display', 'inline-block');
             },
             success: function (data) {
+                formDataBeforeChanges = $('#desmos_item').serialize();
                 $('#desmos_save_status')
                   .removeClass('desmos_save_status_saving')
                   .addClass('desmos_save_status_success')
