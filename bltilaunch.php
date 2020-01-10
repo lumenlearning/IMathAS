@@ -125,6 +125,8 @@ if (
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     ||
+    (isset($_SESSION['place_item_id']) && isset($_SESSION['lti_keytype']) && $_SESSION['lti_keytype']=='cc-a' && !isset($_REQUEST['oauth_consumer_key']))
+    ||
     (isset($_REQUEST['custom_item_id']) && isset($_REQUEST['oauth_consumer_key']) && substr($_REQUEST['oauth_consumer_key'],0,7)!='placein')
     // #### End OHM-specific code #####################################################
     // #### End OHM-specific code #####################################################
@@ -641,7 +643,22 @@ if (isset($_GET['launch'])) {
 		$ltiorg = $ltikey.':'.$ltiorg;
 		$keytype = 'g';
 	}
-	if (isset($_REQUEST['custom_place_aid'])) { //common catridge lti placement, or Canvas LTI selection
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if (isset($_REQUEST['custom_item_id'])) { //common catridge lti placement, or Canvas LTI selection
+        $place_item_id = intval($_REQUEST['custom_item_id']);
+        $keytype = 'cc-a';
+        $_SESSION['place_item_id'] = $_REQUEST['custom_item_id'];
+    } else
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    if (isset($_REQUEST['custom_place_aid'])) { //common catridge lti placement, or Canvas LTI selection
 		$placeaid = intval($_REQUEST['custom_place_aid']);
 		$keytype = 'cc-a';
 		$_SESSION['place_aid'] = $_REQUEST['custom_place_aid'];
@@ -875,13 +892,28 @@ $query .= "contextid=:contextid AND linkid=:linkid AND typeid>0 AND org LIKE :or
 $stm = $DBH->prepare($query);
 $stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':org'=>"$shortorg:%"));
 if ($stm->rowCount()==0) {
-	if (isset($_SESSION['place_aid'])) {
-		$stm = $DBH->prepare('SELECT courseid,name FROM imas_assessments WHERE id=:aid');
-		$stm->execute(array(':aid'=>$_SESSION['place_aid']));
-		list($aidsourcecid,$aidsourcename) = $stm->fetch(PDO::FETCH_NUM);
-		if ($aidsourcecid===false) {
-			$diaginfo = "(Debug info: 2-{$_SESSION['place_aid']})";
-			reporterror("This assignment does not appear to exist anymore. $diaginfo");
+    if (isset($_SESSION['place_aid']) || isset($_SESSION['place_item_id'])) {
+        if (isset($_SESSION['place_item_id'])) {
+            $course_item = \Course\Includes\CourseItem::findCourseItem($_SESSION['place_item_id']);
+            $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+            $item = new $itemObject($course_item['courseid']);
+            $item->findItem($_SESSION['place_item_id']);
+
+            if (empty($item->title)) {
+                $diaginfo = "(Debug info: 3-".$_SESSION['place_item_id'].")";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
+            }
+            $aidsourcecid = $item->courseid;
+            $aidsourcename = $item->title;
+        }
+        if (isset($_SESSION['place_aid'])) {
+            $stm = $DBH->prepare('SELECT courseid,name FROM imas_assessments WHERE id=:aid');
+            $stm->execute(array(':aid'=>$_SESSION['place_aid']));
+            list($aidsourcecid,$aidsourcename) = $stm->fetch(PDO::FETCH_NUM);
+            if ($aidsourcecid===false) {
+                $diaginfo = "(Debug info: 2-{$_SESSION['place_aid']})";
+                reporterror("This assignment does not appear to exist anymore. $diaginfo");
+            }
 		}
 
 		//look to see if we've already linked this context_id with a course
@@ -1211,100 +1243,120 @@ if ($stm->rowCount()==0) {
 			//echo "here 1: $aid";
 		} else {
 			$foundaid = false;
-			$aidtolookfor = intval($_SESSION['place_aid']);
-			//aid is in original source course.  Let's see if we already copied it.
-			if ($copiedfromcid == $aidsourcecid) {
-				$anregex = '^([0-9]+:)?'.$aidtolookfor.'[[:>:]]';
-				$stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:destcid");
-				$stm->execute(array(':ancestors'=>$anregex, ':destcid'=>$destcid));
-				if ($stm->rowCount()>0) {
-					$aid = $stm->fetchColumn(0);
-					//echo "here 2: $aid";
-					$foundaid = true;
-					//echo "found 1";
-					//exit;
-				}
-			}
-			if (!$foundaid) { //do course ancestor walk-back
-				//need to look up ancestor depth
-				$stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
-				$stm->execute(array($destcid));
-				$ancestors = explode(',', $stm->fetchColumn(0));
-				$ciddepth = array_search($aidsourcecid, $ancestors);  //so if we're looking for 23, "20,24,23,26" would give 2 here.
-				if ($ciddepth !== false) {
-					array_unshift($ancestors, $destcid);  //add current course to front
-					$foundsubaid = true;
-					for ($i=$ciddepth;$i>=0;$i--) {  //starts one course back from aidsourcecid because of the unshift
-						$stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:cid");
-						$stm->execute(array(':ancestors'=>'^([0-9]+:)?'.$aidtolookfor.'[[:>:]]', ':cid'=>$ancestors[$i]));
-						if ($stm->rowCount()>0) {
-							$aidtolookfor = $stm->fetchColumn(0);
-						} else {
-							$foundsubaid = false;
-							break;
-						}
-					}
-					if ($foundsubaid) {
-						$aid = $aidtolookfor;
-						$foundaid = true;
-						//echo "here 3: $aid";
-						//echo "found 2";
-						//exit;
-					}
-				}
-			}
-			if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
-				$anregex = '[[:<:]]'.intval($_SESSION['place_aid']).'[[:>:]]';
-				$stm = $DBH->prepare("SELECT id,name,ancestors FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:destcid");
-				$stm->execute(array(':ancestors'=>$anregex, ':destcid'=>$destcid));
-				$res = $stm->fetchAll(PDO::FETCH_ASSOC);
-				if (count($res)==1) {  //only one result - we found it
-					$aid = $res[0]['id'];
-					$foundaid = true;
-					//echo "here 4: $aid";
-					//echo "found 3";
-					//exit;
-				}
-				if (!$foundaid && count($res)>0) { //multiple results - look for the identical name
-					foreach ($res as $k=>$row) {
-						$res[$k]['loc'] = strpos($row['ancestors'], $aidtolookfor);
-						if ($row['name']==$aidsourcename) {
-							$aid = $row['id'];
-							$foundaid = true;
-							//echo "here 5: $aid";
-							//echo "found 4";
-							//exit;
-							break;
-						}
-					}
-				}
-				if (!$foundaid && count($res)>0) { //no name match. pick the one with the assessment closest to the start
-					usort($res, function($a,$b) { return $a['loc'] - $b['loc'];});
-					$aid = $res[0]['id'];
-					//echo "here 6: $aid";
-					$foundaid = true;
-					//echo "found 5";
-					//exit;
-				}
-			}
+			if (isset($_SESSION['place_aid'])) {
+            $aidtolookfor = intval($_SESSION['place_aid']);
+            //aid is in original source course.  Let's see if we already copied it.
+            if ($copiedfromcid == $aidsourcecid) {
+                $anregex = '^([0-9]+:)?' . $aidtolookfor . '[[:>:]]';
+                $stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:destcid");
+                $stm->execute(array(':ancestors' => $anregex, ':destcid' => $destcid));
+                if ($stm->rowCount() > 0) {
+                    $aid = $stm->fetchColumn(0);
+                    //echo "here 2: $aid";
+                    $foundaid = true;
+                    //echo "found 1";
+                    //exit;
+                }
+            }
+            if (!$foundaid) { //do course ancestor walk-back
+                //need to look up ancestor depth
+                $stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
+                $stm->execute(array($destcid));
+                $ancestors = explode(',', $stm->fetchColumn(0));
+                $ciddepth = array_search($aidsourcecid, $ancestors);  //so if we're looking for 23, "20,24,23,26" would give 2 here.
+                if ($ciddepth !== false) {
+                    array_unshift($ancestors, $destcid);  //add current course to front
+                    $foundsubaid = true;
+                    for ($i = $ciddepth; $i >= 0; $i--) {  //starts one course back from aidsourcecid because of the unshift
+                        $stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:cid");
+                        $stm->execute(array(':ancestors' => '^([0-9]+:)?' . $aidtolookfor . '[[:>:]]', ':cid' => $ancestors[$i]));
+                        if ($stm->rowCount() > 0) {
+                            $aidtolookfor = $stm->fetchColumn(0);
+                        } else {
+                            $foundsubaid = false;
+                            break;
+                        }
+                    }
+                    if ($foundsubaid) {
+                        $aid = $aidtolookfor;
+                        $foundaid = true;
+                        //echo "here 3: $aid";
+                        //echo "found 2";
+                        //exit;
+                    }
+                }
+            }
+            if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
+                $anregex = '[[:<:]]' . intval($_SESSION['place_aid']) . '[[:>:]]';
+                $stm = $DBH->prepare("SELECT id,name,ancestors FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:destcid");
+                $stm->execute(array(':ancestors' => $anregex, ':destcid' => $destcid));
+                $res = $stm->fetchAll(PDO::FETCH_ASSOC);
+                if (count($res) == 1) {  //only one result - we found it
+                    $aid = $res[0]['id'];
+                    $foundaid = true;
+                    //echo "here 4: $aid";
+                    //echo "found 3";
+                    //exit;
+                }
+                if (!$foundaid && count($res) > 0) { //multiple results - look for the identical name
+                    foreach ($res as $k => $row) {
+                        $res[$k]['loc'] = strpos($row['ancestors'], $aidtolookfor);
+                        if ($row['name'] == $aidsourcename) {
+                            $aid = $row['id'];
+                            $foundaid = true;
+                            //echo "here 5: $aid";
+                            //echo "found 4";
+                            //exit;
+                            break;
+                        }
+                    }
+                }
+                if (!$foundaid && count($res) > 0) { //no name match. pick the one with the assessment closest to the start
+                    usort($res, function ($a, $b) {
+                        return $a['loc'] - $b['loc'];
+                    });
+                    $aid = $res[0]['id'];
+                    //echo "here 6: $aid";
+                    $foundaid = true;
+                    //echo "found 5";
+                    //exit;
+                }
+            }
+            }
 			if (!$foundaid) {
-				//aid is in source course.  Let's look and see if there's an assessment in destination with the same title.
-				//this handles cases where an assessment was linked in from elsewhere and manually copied
+			    if ($_SESSION['place_item_id']) {
+                    $stm = $DBH->prepare("SELECT id FROM desmos_items WHERE title=:name AND courseid=:courseid");
+                    $stm->execute(array(':name' => $aidsourcename, ':courseid' => $destcid));
+                    if ($stm->rowCount() > 0) {
+                        $itemid = $stm->fetchColumn(0);
+                        //echo "here 7: $aid";
+                    }
+                    $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='DesmosItem' AND typeid=:typeid");
+                    $stm->execute(array(':typeid'=>$_SESSION['place_item_id']));
+                    if ($stm->rowCount()==0) {
+                        reporterror("Error.  DesmosItem ID '{$_SESSION['place_item_id']}' not found.");
+                    }
+                    $sourceitemid = $stm->fetchColumn(0);
+                } else {
+                //aid is in source course.  Let's look and see if there's an assessment in destination with the same title.
+                //this handles cases where an assessment was linked in from elsewhere and manually copied
 
-				$stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE name=:name AND courseid=:courseid");
-				$stm->execute(array(':name'=>$aidsourcename, ':courseid'=>$destcid));
-				if ($stm->rowCount()>0) {
-					$aid = $stm->fetchColumn(0);
-					//echo "here 7: $aid";
-				} else {
+                $stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE name=:name AND courseid=:courseid");
+                $stm->execute(array(':name' => $aidsourcename, ':courseid' => $destcid));
+                if ($stm->rowCount() > 0) {
+                    $aid = $stm->fetchColumn(0);
+                    //echo "here 7: $aid";
+                }
+                    $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
+                    $stm->execute(array(':typeid'=>$_SESSION['place_aid']));
+                    if ($stm->rowCount()==0) {
+                        reporterror("Error.  Assessment ID '{$_SESSION['place_aid']}' not found.");
+                    }
+                    $sourceitemid = $stm->fetchColumn(0);
+                }
+			    if ($stm->rowCount() == 0) {
 					// no assessment with same title - need to copy assessment from destination to source course
 					require_once("includes/copyiteminc.php");
-					$stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
-					$stm->execute(array(':typeid'=>$_SESSION['place_aid']));
-					if ($stm->rowCount()==0) {
-						reporterror("Error.  Assessment ID '{$_SESSION['place_aid']}' not found.");
-					}
-					$sourceitemid = $stm->fetchColumn(0);
 					$cid = $destcid;
 
 					$stm = $DBH->prepare("SELECT itemorder,dates_by_lti,UIver FROM imas_courses WHERE id=:id");
@@ -1314,7 +1366,10 @@ if ($stm->rowCount()==0) {
 					$newitem = copyitem($sourceitemid,array());
 					$stm = $DBH->prepare("SELECT typeid FROM imas_items WHERE id=:id");
 					$stm->execute(array(':id'=>$newitem));
-					$aid = $stm->fetchColumn(0);
+                    if ($_SESSION['place_item_id']) {
+                        $itemid = $stm->fetchColumn(0);
+                    } else
+                    $aid = $stm->fetchColumn(0);
 
 					$items[] = $newitem;
 					$items = serialize($items);
@@ -1329,6 +1384,9 @@ if ($stm->rowCount()==0) {
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'assess', ':typeid'=>$aid));
 
+		if (isset($itemid)) {
+            $linkparts = array('itemid',$itemid);
+        } elseif (isset($aid))
 		$linkparts = array('aid',$aid);
 
 	} else if ($_SESSION['ltirole']=='instructor') {
