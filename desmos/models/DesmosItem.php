@@ -113,6 +113,9 @@ class DesmosItem extends CourseItem
         $stm = $this->dbh->prepare($query);
         $stm->execute(array(':id' => $typeid));
         $item = $stm->fetch(PDO::FETCH_ASSOC);
+        if (!$item) {
+            return false;
+        }
 
         $this->setItem($item);
         $this->steps = DesmosSteps::findSteps($this->typeid);
