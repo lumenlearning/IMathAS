@@ -113,20 +113,33 @@ function addStep(){
 	setupDnD();
 }
 
+function confirmDelete(event){
+	event.preventDefault();
+	var itemNum = $(this).parent().attr("data-num");
+	
+
+	$.get("../desmos/views/ConfirmDesmosDelete.php", function(data){
+		ohmModal.open({
+			content: data,
+			height: "auto",
+			width: "50%"
+		});
+		$(".js-confirm-delete").data("num", itemNum);
+	});	
+}
+
 function removeStep(event){
-    if(confirm("Permanently delete this item?")){
-        var parent = this.parentElement;
-        var itemNum = parent.dataset.num;
-        var relatedItems = document.getElementById('desmos_edit_container').getElementsByClassName("step-item-display-" + itemNum);
-        parent.remove();
-        for (let i = 0; i < relatedItems.length; i++) {
-            relatedItems[i].remove();
-		}
-		if (document.getElementById("step_list").childElementCount == 0) {
-			addStep();
-		}
-        showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
-    }
+	var itemNum = $(".js-confirm-delete").data("num");
+	var desmosItem = $(".step-item-display-" + itemNum);
+	var listItem  = $(".js-step-list").find("[data-num='" + itemNum + "']"); 
+
+	desmosItem.remove(); 
+	listItem.remove(); 
+	ohmModal.close();
+
+	if ($("#step-list li").length === 0) {
+		addStep();
+	}
 }
 
 // function handleStudentViewNav(event){
@@ -493,5 +506,9 @@ setupDnD();
 
 // $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 // $('.js-step-list li').on("keydown", syncNavButtons);
-$('.js-add').on("click", addStep);
-$('.js-step-list').on("click", ".js-delete", removeStep);
+$(".js-add").on("click", addStep);
+$(".js-step-list").on("click", ".js-delete", confirmDelete);
+$("body").on("click", ".js-confirm-delete", removeStep);
+$("body").on("click", ".js-cancel-modal", function(){
+	ohmModal.close(); 
+});

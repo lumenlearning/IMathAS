@@ -120,10 +120,10 @@
     <div id="desmos_preview_content"></div>
 </div>
 
-<script>
+<!-- <script>
     $(document).ready(function(){
         $.get("<?php echo $imasroot; ?>/desmos/views/ConfirmDesmosDelete.php", function(data){
-            $('#modal-test').click(function(e) {
+            $('.js-delete').click(function(e) {
                 ohmModal.open({
                     content: data,
                     height: "auto",
@@ -133,4 +133,4 @@
             });
         });
     });
-</script>
+</script> -->
