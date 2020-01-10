@@ -894,9 +894,7 @@ $stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESS
 if ($stm->rowCount()==0) {
     if (isset($_SESSION['place_aid']) || isset($_SESSION['place_item_id'])) {
         if (isset($_SESSION['place_item_id'])) {
-            $course_item = \Course\Includes\CourseItem::findCourseItem($_SESSION['place_item_id']);
-            $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-            $item = new $itemObject($course_item['courseid']);
+            $item = new \Desmos\Models\DesmosItem();
             $item->findItem($_SESSION['place_item_id']);
 
             if (empty($item->title)) {
