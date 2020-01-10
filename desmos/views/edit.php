@@ -119,18 +119,3 @@
 
     <div id="desmos_preview_content"></div>
 </div>
-
-<!-- <script>
-    $(document).ready(function(){
-        $.get("<?php echo $imasroot; ?>/desmos/views/ConfirmDesmosDelete.php", function(data){
-            $('.js-delete').click(function(e) {
-                ohmModal.open({
-                    content: data,
-                    height: "auto",
-                    width: "50%"
-                });
-                e.preventDefault();
-            });
-        });
-    });
-</script> -->

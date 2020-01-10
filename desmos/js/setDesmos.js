@@ -117,13 +117,18 @@ function confirmDelete(event){
 	event.preventDefault();
 	var itemNum = $(this).parent().attr("data-num");
 	
-
 	$.get("../desmos/views/ConfirmDesmosDelete.php", function(data){
 		ohmModal.open({
 			content: data,
 			height: "auto",
 			width: "50%"
 		});
+		
+		//add event listeners once modal is on page
+		$(".ohm-modal").on("click", ".js-confirm-delete", removeStep);
+		$(".ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
+
+		// pass id of target element to delete button 
 		$(".js-confirm-delete").data("num", itemNum);
 	});	
 }
@@ -140,6 +145,7 @@ function removeStep(event){
 	if ($("#step-list li").length === 0) {
 		addStep();
 	}
+	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
 }
 
 // function handleStudentViewNav(event){
@@ -508,7 +514,6 @@ setupDnD();
 // $('.js-step-list li').on("keydown", syncNavButtons);
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
-$("body").on("click", ".js-confirm-delete", removeStep);
-$("body").on("click", ".js-cancel-modal", function(){
-	ohmModal.close(); 
-});
+
+// PROBABLY SHOULDN'T BE ON BODY
+
