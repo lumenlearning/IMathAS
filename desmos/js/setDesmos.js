@@ -124,6 +124,8 @@ function confirmDelete(event){
 			width: "50%"
 		});
 		
+		$(".ohm-modal").focus(); 
+		
 		//add event listeners once modal is on page
 		$(".ohm-modal").on("click", ".js-confirm-delete", removeStep);
 		$(".ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
@@ -515,5 +517,4 @@ setupDnD();
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
 
-// PROBABLY SHOULDN'T BE ON BODY
 

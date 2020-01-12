@@ -10,11 +10,11 @@ var ohmModal = (function() {
     $overlay = $('<div class="ohm-modal-overlay"></div>');
     $modal = $('<div class="ohm-modal"></div>');
     $content = $('<div class="ohm-modal-content"></div>');
-    $close = $('<button class="ohm-modal-close">Close</button>');
+    // $close = $('<button class="ohm-modal-close">Close</button>');
   
     $modal.hide();
     $overlay.hide();
-    $modal.append($content, $close);
+    $modal.append($content);
   
     $(document).ready(function() {
       $('body').append($overlay, $modal);
@@ -36,7 +36,8 @@ var ohmModal = (function() {
     // Open the modal
     method.open = function(settings) {
       $content.empty().append(settings.content);
-  
+      //$modal.focus();
+      
       $modal.css({
         width: settings.width || 'auto',
         height: settings.height || 'auto'
@@ -60,10 +61,10 @@ var ohmModal = (function() {
     };
   
     // Click 'x' to close
-    $close.click(function(e) {
-      e.preventDefault();
-      method.close();
-    });
+    // $close.click(function(e) {
+    //   e.preventDefault();
+    //   method.close();
+    // });
   
     // Press 'esc' to close
     $(document).keyup(function(e) {
