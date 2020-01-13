@@ -36,7 +36,6 @@ var ohmModal = (function() {
     // Open the modal
     method.open = function(settings) {
       $content.empty().append(settings.content);
-      //$modal.focus();
       
       $modal.css({
         width: settings.width || 'auto',
