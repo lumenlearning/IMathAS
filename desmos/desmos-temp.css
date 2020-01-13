@@ -198,7 +198,7 @@ body {
     padding-left: 40px;
 }
 
-.step-li[draggable=true].is-selected {
+.step-li[aria-grabbed=true].is-selected {
     opacity: 0.4;
 }
 
