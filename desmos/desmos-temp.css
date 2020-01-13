@@ -194,7 +194,8 @@ body {
 }
 
 .teacher-view .step-li {
-    padding-left:36px;
+    border-bottom: 2px solid transparent;
+    padding-left: 40px;
 }
 
 .step-li[draggable=true].is-selected {
@@ -202,7 +203,7 @@ body {
 }
 
 .step-li.is-over {
-    border-bottom: 2px solid #1e74d1;
+    border-bottom-color: #1e74d1;
 } 
 
 .step-li input {
