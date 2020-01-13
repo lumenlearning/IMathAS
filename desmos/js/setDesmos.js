@@ -205,6 +205,7 @@ var reorderList = {
 	listItems: null,
 	objCurrent: null,
 	objParent: null,
+	lastTarget: null,
 	currentTarget: null,
 	originalPosition: null,
 	currentPosition: null,
@@ -275,6 +276,7 @@ var reorderList = {
 	dragOver: function(objEvent) {
 		var target;
 		reorderList.currentTarget = objEvent.target.closest(".step-li");
+		reorderList.lastTarget = reorderList.currentTarget;
 		objEvent.preventDefault(); // prevent default to allow drop
 		reorderList.currentTarget.classList.add("is-over");
 		if (reorderList.originalPosition > index(reorderList.currentTarget)) {
@@ -286,9 +288,30 @@ var reorderList = {
 	},
 	dragLeave: function(objEvent) {
 		reorderList.currentTarget.classList.remove("is-over");
+		reorderList.currentTarget = null;
+		if ((index(reorderList.currentTarget) == -1) && index(reorderList.lastTarget) == 1) {
+			reorderList.update("You have moved the item to position 1.");
+		}
 	},
-	// dragEnd: function() {
-	// },
+	dragEnd: function(objEvent) {
+		reorderList.objCurrent.setAttribute("aria-grabbed", false);
+		reorderList.objCurrent.setAttribute("aria-selected", false);
+		var num = reorderList.objCurrent.getAttribute("data-num");
+		var relatedContent = document.getElementById("step_text_" + num);
+		// remove selected styles from an element if its content isn't currently showing
+		if (relatedContent.style.display === 'none') {
+			reorderList.objCurrent.classList.remove("is-selected");
+		}
+		// handle attempts to move an item to the top of the list
+		if ((index(reorderList.currentTarget) == -1) && index(reorderList.lastTarget) == 1) {
+			reorderList.objParent.removeChild(reorderList.objCurrent);
+			reorderList.objParent.insertBefore(
+				reorderList.objCurrent,
+				reorderList.lastTarget
+			);
+			reorderList.drop();
+		}
+	},
 	dragDrop: function(objEvent) {
 		objEvent.preventDefault(); // prevent default action (open as link for some elements)
 		reorderList.currentTarget.classList.remove("is-over");
