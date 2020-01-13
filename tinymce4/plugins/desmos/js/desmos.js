@@ -62,7 +62,28 @@ var desmosDialog = {
         var elt = document.getElementById("editdesmos");
 
         desmosjson = elt.getAttribute("data-json");
-        var options = {administerSecretFolders: true};
+        var options = {
+            administerSecretFolders: true,
+            imageUploadCallback: function (file, cb) {
+                // https://www.desmos.com/api/v1.4/docs/index.html#document-image-uploads
+                Desmos.imageFileToDataURL(file, function (err, dataURL) {
+                    $.ajax({
+                        type: "POST",
+                        url: '/desmos/upload-image.php',
+                        dataType: 'json',
+                        data: {
+                            imageData: dataURL
+                        },
+                        success: function (data, textStatus, jqXHR) {
+                            cb(null, data.imageUrl);
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            cb(true);
+                        },
+                    });
+                });
+            }
+        };
         this.calculator = Desmos.GraphingCalculator(elt, options);
         this.calculator.setState(desmosjson);
     }
