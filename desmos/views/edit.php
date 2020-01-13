@@ -18,7 +18,6 @@
         <img src="../ohm/img/desmos.png" alt=""/>
         <?php echo $pagetitle ?>
     </h1>
-    <button id="modal-test">MODAL</button>
     <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
             <div class="form-left">
