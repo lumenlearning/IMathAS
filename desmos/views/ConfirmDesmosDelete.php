@@ -4,7 +4,7 @@
         <h3 class="ohm-modal-title">Confirm Delete</h3>
     </div>
     <div class="ohm-modal-body">
-        <p>Deleting this will remove all of the content in this item. Are you sure you want to delete?<p>
+        <p>Deleting this will remove all of the content in this item. Are you sure you want to delete?</p>
     </div>
     <div class="ohm-modal-footer">
         <button type="button" class="js-cancel-modal button">Cancel</button>
