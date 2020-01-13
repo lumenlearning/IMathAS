@@ -274,34 +274,34 @@ var reorderList = {
 	},
 	dragOver: function(objEvent) {
 		var target;
-		currentTarget = objEvent.target.closest(".step-li");
+		reorderList.currentTarget = objEvent.target.closest(".step-li");
 		objEvent.preventDefault(); // prevent default to allow drop
-		currentTarget.classList.add("is-over");
-		if (reorderList.originalPosition > index(currentTarget)) {
-			target = index(currentTarget) + 1;
+		reorderList.currentTarget.classList.add("is-over");
+		if (reorderList.originalPosition > index(reorderList.currentTarget)) {
+			target = index(reorderList.currentTarget) + 1;
 		} else {
-			target = index(currentTarget);
+			target = index(reorderList.currentTarget);
 		}
 		reorderList.update("You have moved the item to position " + target + ".");
 	},
 	dragLeave: function(objEvent) {
-		currentTarget.classList.remove("is-over");
+		reorderList.currentTarget.classList.remove("is-over");
 	},
 	// dragEnd: function() {
 	// },
 	dragDrop: function(objEvent) {
 		objEvent.preventDefault(); // prevent default action (open as link for some elements)
-		currentTarget.classList.remove("is-over");
+		reorderList.currentTarget.classList.remove("is-over");
 		reorderList.objCurrent.classList.remove("is-selected");
 		if (
-			currentTarget.parentNode.id == "step_list" ||
-			currentTarget.id == "step_list"
+			reorderList.currentTarget.parentNode.id == "step_list" ||
+			reorderList.currentTarget.id == "step_list"
 		) {
 			// move dragged elem to the selected drop target
 			reorderList.objParent.removeChild(reorderList.objCurrent);
 			reorderList.objParent.insertBefore(
 				reorderList.objCurrent,
-				currentTarget.nextSibling
+				reorderList.currentTarget.nextSibling
 			);
 			reorderList.drop();
 		}
