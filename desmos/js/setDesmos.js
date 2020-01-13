@@ -205,6 +205,7 @@ var reorderList = {
 	listItems: null,
 	objCurrent: null,
 	objParent: null,
+	currentTarget: null,
 	originalPosition: null,
 	currentPosition: null,
 	objTrigger: null,
@@ -273,33 +274,34 @@ var reorderList = {
 	},
 	dragOver: function(objEvent) {
 		var target;
+		currentTarget = objEvent.target.closest(".step-li");
 		objEvent.preventDefault(); // prevent default to allow drop
-		objEvent.target.classList.add("is-over");
-		if (reorderList.originalPosition > index(objEvent.target)) {
-			target = index(objEvent.target) + 1;
+		currentTarget.classList.add("is-over");
+		if (reorderList.originalPosition > index(currentTarget)) {
+			target = index(currentTarget) + 1;
 		} else {
-			target = index(objEvent.target);
+			target = index(currentTarget);
 		}
 		reorderList.update("You have moved the item to position " + target + ".");
 	},
 	dragLeave: function(objEvent) {
-		event.target.classList.remove("is-over");
+		currentTarget.classList.remove("is-over");
 	},
 	// dragEnd: function() {
 	// },
 	dragDrop: function(objEvent) {
 		objEvent.preventDefault(); // prevent default action (open as link for some elements)
-		objEvent.target.classList.remove("is-over");
+		currentTarget.classList.remove("is-over");
 		reorderList.objCurrent.classList.remove("is-selected");
 		if (
-			objEvent.target.parentNode.id == "step_list" ||
-			objEvent.target.id == "step_list"
+			currentTarget.parentNode.id == "step_list" ||
+			currentTarget.id == "step_list"
 		) {
 			// move dragged elem to the selected drop target
 			reorderList.objParent.removeChild(reorderList.objCurrent);
 			reorderList.objParent.insertBefore(
 				reorderList.objCurrent,
-				objEvent.target.nextSibling
+				currentTarget.nextSibling
 			);
 			reorderList.drop();
 		}
