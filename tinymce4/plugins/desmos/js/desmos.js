@@ -18,23 +18,13 @@ var desmosDialog = {
     },
 
     insert : function() {
-        var ed = top.tinymce.activeEditor;
         // Insert the contents from the input into the document
         this.desmosjson = JSON.stringify(this.calculator.getState());
         console.log(desmosjson);
         if (this.isnew) {
-            ed.execCommand(
-                'mceInsertContent',
-                false,
-                '<figure class="js-desmos" data-json=\''+this.desmosjson+'\'></figure>'
-            );
-            elt = ed.dom.doc.getElementsByClassName("js-desmos");
-            if (elt.length>0) {
-                for (i = 0; i < elt.length; i++) {
-                    elt[i].setAttribute("onClick", "top.tinymce.activeEditor.execCommand('mceDesmos')");
-                }
-            }
+            this.addDesmos(this.desmosjson);
         } else {
+            var ed = top.tinymce.activeEditor;
             el = ed.selection.getNode();
             ed.dom.setAttrib(el,"data-json",this.desmosjson);
 
@@ -54,7 +44,23 @@ var desmosDialog = {
             async: false,
             dataType: "json"
         });
-        this.calculator.setState(theResponse.state);
+        this.addDesmos(JSON.stringify(theResponse.state));
+        top.tinymce.activeEditor.windowManager.close();
+    },
+
+    addDesmos : function(json) {
+        var ed = top.tinymce.activeEditor;
+        ed.execCommand(
+            'mceInsertContent',
+            false,
+            '<figure class="js-desmos" data-json=\''+json+'\'></figure>'
+        );
+        elt = ed.dom.doc.getElementsByClassName("js-desmos");
+        if (elt.length>0) {
+            for (i = 0; i < elt.length; i++) {
+                elt[i].setAttribute("onClick", "top.tinymce.activeEditor.execCommand('mceDesmos')");
+            }
+        }
     },
 
     loadDesmos : function() {
