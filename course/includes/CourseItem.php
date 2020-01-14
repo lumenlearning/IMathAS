@@ -203,6 +203,7 @@ abstract class CourseItem
         $stm->execute();
         if ($stm->rowCount()>0) {
             $this->itemid = $stm->fetchColumn(0);
+            $this->block = $this->_findItemBlock($this->itemid);
         }
         return $this;
     }
@@ -223,7 +224,7 @@ abstract class CourseItem
             $this->_deleteCourseGrade();
         }
         $this->deleteItem();
-        $this->setItemOrder(true);
+        $this->setItemOrder($typeid);
         $this->dbh->commit();
         return $this;
     }
@@ -252,24 +253,7 @@ abstract class CourseItem
     {
         // Delete the item from imas_items
         $stm = $this->dbh->prepare("DELETE FROM imas_items WHERE id=:id");
-        $stm->execute(array(':id'=>$this->itemid));
-
-        // Delete the item from imas_courses
-        $stm = $this->dbh->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-        $stm->execute([':id' => $this->courseid]);
-
-        $allItems = unserialize($stm->fetchColumn(0)); // contains ALL blocks in the course
-        $blockItems = $allItems[$this->block]['items'];
-
-        $key = array_search($this->itemid, $blockItems); // get the key for the item being deleted
-        unset($allItems[$this->block]['items'][$key]);
-
-        // Save the course items array with the deleted item removed
-        $stm = $this->dbh->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-        $stm->execute([
-            ':id' => $this->courseid,
-            ':itemorder' => serialize($allItems),
-        ]);
+        $stm->execute(array(':id' => $this->itemid));
 
         return $this;
     }
@@ -287,15 +271,16 @@ abstract class CourseItem
         $blocktree = explode('-', $this->block);
         $sub =& $order;
         for ($i=1;$i<count($blocktree);$i++) {
-            $sub =& $sub[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
+            $sub =& $sub[$blocktree[$i]]['items'];
         }
         if ($delete) {
             $key = array_search($this->itemid, $sub);
             if ($key!==false) {
                 array_splice($sub, $key, 1);
             }
+
         } elseif ($this->totb=='b') {
-                $sub[] = $this->itemid;
+            $sub[] = $this->itemid;
         } else if ($this->totb=='t') {
             array_unshift($sub, $this->itemid);
         }
@@ -309,7 +294,6 @@ abstract class CourseItem
         }
         return false;
     }
-
 
     /**
      * Unserialized json data of the order and hierarchy of course items
@@ -325,6 +309,29 @@ abstract class CourseItem
         $stm->execute();
         $json = $stm->fetch(PDO::FETCH_ASSOC);
         return unserialize($json['itemorder']);
+    }
+
+    /**
+     * Find the block for the item
+     *
+     * @param int $item id of item from imas_items.id
+     *
+     * @return string for block, 0 would be main level
+     */
+    function _findItemBlock($item) {
+        $array = $this->findItemOrder();
+        foreach ($array as $key=>$value) {
+            if ($value == $item) {
+                return '0';
+            }
+            if (is_array($value)) {
+                foreach ($array[$key]['items'] as $v2) {
+                    if ($v2 == $item) {
+                        return '0-'.$key;
+                    }
+                }
+            }
+        }
     }
 
     /**
