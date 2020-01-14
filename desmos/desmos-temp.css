@@ -160,6 +160,16 @@ body {
 	padding: .5em, 1em;
 	width: 10em;
 }
+.desmos #import {
+    clear: both;
+    width: 100%;
+    height: 30px;
+    margin-top: 0.4em;
+}
+.mce-i-desmos {
+    background: url('../ohm/img/desmos.png') no-repeat;
+    background-size: 16px 16px;
+}
 /* End Lux overwrite */
 
 .desmos .form-group {
