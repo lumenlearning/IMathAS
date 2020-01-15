@@ -144,9 +144,10 @@ function removeStep(event){
 	listItem.remove(); 
 	ohmModal.close();
 
-	if ($("#step-list li").length === 0) {
+	if($("#step_list li").length === 0){
 		addStep();
 	}
+
 	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
 }
 
