@@ -198,13 +198,21 @@ body {
     padding-left: 40px;
 }
 
+.teacher-view .step-li:first-child {
+    border-top: 2px solid transparent;
+}
+
 .step-li[aria-grabbed=true].is-selected {
     opacity: 0.4;
 }
 
-.step-li.is-over {
+.step-li.is-target {
     border-bottom-color: #1e74d1;
-} 
+}
+
+.step-li:first-child:not(.is-target).is-over {
+    border-top-color: #1e74d1;
+}
 
 .step-li input {
     margin: 0!important; /* overriding lux */
