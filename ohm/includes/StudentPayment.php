@@ -82,14 +82,41 @@ class StudentPayment
 	{
 		$studentPayStatus = new StudentPayStatus();
 
-		// Note: We now ignore the group payment setting in OHM's DB.
-        // If this behavior should be restored, see prior commit diffs for WORKING code.
+		// Are student payments enabled at the group level?
+		$groupMayRequirePayment = $this->studentPaymentDb->getGroupRequiresStudentPayment();
+		if (!$groupMayRequirePayment) {
+			$studentPayStatus->setCourseRequiresStudentPayment(false);
+			return $studentPayStatus;
+		}
 
-		// Determine if the course requires student payment and get the
-        // student's "has an activation code" status.
+		// If the group uses student payments, determine if the course requires student payment.
+		$studentPayStatus = $this->getCoursePayStatus($studentPayStatus);
+		if (!$studentPayStatus->getCourseRequiresStudentPayment()) {
+			return $studentPayStatus;
+		}
+
+		// Get the student's "has an activation code" status and return it.
         $studentPayApiResult = $this->studentPaymentApi->getActivationStatusFromApi();
         $studentPayStatus = $this->mapApiResultToPayStatus($studentPayApiResult, $studentPayStatus);
 		return $studentPayStatus;
+	}
+
+	/**
+	 * Determine if a course requires student payment.
+	 *
+	 * IMPORTANT NOTES:
+	 * - As of 2017 Nov 28, OHM is the authoritative source for this information.
+	 * - In the future, we may obtain this from the student payment API.
+	 *   - See THIS commit diff for previously WORKING code to make that happen.
+	 *
+	 * @param $studentPayStatus StudentPayStatus The StudentPayStatus object to update.
+	 * @return StudentPayStatus $studentPayStatus The same StudentPayStatus object with updated data.
+	 */
+	public function getCoursePayStatus($studentPayStatus)
+	{
+		// Note: In the future, the student payment API may become the authoritative source for this data.
+		// When this happens, search this entire file for the variable named $sadFace.
+		return $this->getCoursePayStatusFromDatabase($studentPayStatus);
 	}
 
 	/**
