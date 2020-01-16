@@ -205,6 +205,8 @@ var reorderList = {
 	listItems: null,
 	objCurrent: null,
 	objParent: null,
+	lastTarget: null,
+	currentTarget: null,
 	originalPosition: null,
 	currentPosition: null,
 	objTrigger: null,
@@ -273,33 +275,66 @@ var reorderList = {
 	},
 	dragOver: function(objEvent) {
 		var target;
+		reorderList.currentTarget = objEvent.target.closest(".step-li");
 		objEvent.preventDefault(); // prevent default to allow drop
-		objEvent.target.classList.add("is-over");
-		if (reorderList.originalPosition > index(objEvent.target)) {
-			target = index(objEvent.target) + 1;
+		reorderList.currentTarget.classList.add("is-target");
+		if (index(reorderList.currentTarget) == 1) {
+			// this class only ever gets applied to the first item to create a
+			// visible indicator for the top of the list
+			reorderList.currentTarget.classList.add("is-over");
+		}
+		if (reorderList.originalPosition > index(reorderList.currentTarget)) {
+			target = index(reorderList.currentTarget) + 1;
 		} else {
-			target = index(objEvent.target);
+			target = index(reorderList.currentTarget);
 		}
 		reorderList.update("You have moved the item to position " + target + ".");
 	},
 	dragLeave: function(objEvent) {
-		event.target.classList.remove("is-over");
+		reorderList.currentTarget.classList.remove("is-target");
+		if (index(reorderList.currentTarget) !== 1 && reorderList.lastTarget !== null) {
+			// we need the conditional b/c dragging to the top of the list often triggers
+			// the dragLeave, so this class would never get applied in the first place
+			reorderList.lastTarget.classList.remove("is-over");
+		}
+		reorderList.lastTarget = reorderList.currentTarget;
+		reorderList.currentTarget = null;
+		if ((index(reorderList.currentTarget) == -1) && index(reorderList.lastTarget) == 1) {
+			reorderList.update("You have moved the item to position 1.");
+		}
 	},
-	// dragEnd: function() {
-	// },
+	dragEnd: function(objEvent) {
+		reorderList.objCurrent.setAttribute("aria-grabbed", false);
+		reorderList.objCurrent.setAttribute("aria-selected", false);
+		var num = reorderList.objCurrent.getAttribute("data-num");
+		var relatedContent = document.getElementById("step_text_" + num);
+		// remove selected styles from an element if its content isn't currently showing
+		if (relatedContent.style.display === 'none') {
+			reorderList.objCurrent.classList.remove("is-selected");
+		}
+		// handle attempts to move an item to the top of the list
+		if ((index(reorderList.currentTarget) == -1) && index(reorderList.lastTarget) == 1) {
+			reorderList.objParent.removeChild(reorderList.objCurrent);
+			reorderList.objParent.insertBefore(
+				reorderList.objCurrent,
+				reorderList.lastTarget
+			);
+			reorderList.drop();
+		}
+	},
 	dragDrop: function(objEvent) {
 		objEvent.preventDefault(); // prevent default action (open as link for some elements)
-		objEvent.target.classList.remove("is-over");
+		reorderList.currentTarget.classList.remove("is-target", "is-over");
 		reorderList.objCurrent.classList.remove("is-selected");
 		if (
-			objEvent.target.parentNode.id == "step_list" ||
-			objEvent.target.id == "step_list"
+			reorderList.currentTarget.parentNode.id == "step_list" ||
+			reorderList.currentTarget.id == "step_list"
 		) {
 			// move dragged elem to the selected drop target
 			reorderList.objParent.removeChild(reorderList.objCurrent);
 			reorderList.objParent.insertBefore(
 				reorderList.objCurrent,
-				objEvent.target.nextSibling
+				reorderList.currentTarget.nextSibling
 			);
 			reorderList.drop();
 		}
@@ -431,7 +466,7 @@ var reorderList = {
 			listItems[i].setAttribute("aria-grabbed", false);
 			listItems[i].setAttribute("aria-selected", false);
 			listItems[i].setAttribute("draggable", false);
-			// listItems[i].classList.remove("is-selected");
+			listItems[i].classList.remove("is-target", "is-over");
 		}
 	}
 };
