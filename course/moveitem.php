@@ -133,14 +133,33 @@ makebrief($items, $briefitems);
 
 
 $itemdata = array();
+$params = array();
 $query = "SELECT 'Assessment',id,name FROM imas_assessments WHERE courseid=:cid1 UNION ";
+$params[':cid1']=$cid;
 $query .= "SELECT 'InlineText',id,title FROM imas_inlinetext WHERE courseid=:cid2 UNION ";
+$params[':cid2']=$cid;
 $query .= "SELECT 'LinkedText',id,title FROM imas_linkedtext WHERE courseid=:cid3 UNION ";
+$params[':cid3']=$cid;
 $query .= "SELECT 'Forum',id,name FROM imas_forums WHERE courseid=:cid4 UNION ";
+$params[':cid4']=$cid;
 $query .= "SELECT 'Wiki',id,name FROM imas_wikis WHERE courseid=:cid5 UNION ";
+$params[':cid5']=$cid;
 $query .= "SELECT 'Drill',id,name FROM imas_drillassess WHERE courseid=:cid6";
+$params[':cid6']=$cid;
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+$query .= " UNION SELECT 'DesmosItem',id,title FROM desmos_items WHERE courseid=:cid7";
+$params[':cid7']=$cid;
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 $stm = $DBH->prepare($query);
-$stm->execute(array(':cid1'=>$cid, ':cid2'=>$cid, ':cid3'=>$cid, ':cid4'=>$cid, ':cid5'=>$cid, ':cid6'=>$cid));
+$stm->execute($params);
 
 while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	if (!isset($itemdata[$row[0]])) { $itemdata[$row[0]] = array(); }

@@ -244,6 +244,23 @@ function loadItemShowData($items,$onlyopen,$viewall,$inpublic=false,$ispublic=fa
 			$itemshowdata[$typelookups['Wiki'][$line['id']]] = $line;
 		}
 	}
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	if (isset($typelookups['DesmosItem'])) {
+		foreach ($typelookups['DesmosItem'] as $typeid=>$itemid) {
+			$desmos = new \Desmos\Models\DesmosItem();
+			$desmos->findItem($typeid);
+			$itemshowdata[$typelookups['DesmosItem'][$typeid]] = array('itemtype'=>$desmos);
+		}
+	}
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 
 	return $itemshowdata;
 }

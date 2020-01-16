@@ -21,23 +21,34 @@
     "autoload": {
         "psr-4": {
             "\\": "includes/",
+            "Course\\Includes\\": "course/includes/",
             "OHM\\": "ohm/",
             "OHM\\Admin\\": "admin/",
             "OHM\\Models\\": "ohm/models/",
             "OHM\\Controlers\\": "ohm/controlers/",
             "OHM\\Api\\": "ohm/api/src/",
             "OHM\\Includes\\": "ohm/includes/",
-            "OHM\\Exceptions\\": "ohm/exceptions/"
+            "OHM\\Exceptions\\": "ohm/exceptions/",
+            "Desmos\\": "desmos/",
+            "Desmos\\Models\\": "desmos/models/",
+            "Desmos\\Controlers\\": "desmos/controlers/",
+            "Desmos\\Views\\": "desmos/views/"
         }
     },
     "autoload-dev": {
         "phpunit/phpunit": "^5.7",
         "psr-4": {
             "Tests\\": "tests/",
+            "\\": "includes/",
+            "Course\\Includes\\": "course/includes/",
             "OHM\\Tests\\Api\\": "ohm/tests/api/",
             "OHM\\Tests\\Functional\\": "ohm/tests/functional/",
             "OHM\\Tests\\Unit\\": "ohm/tests/unit/",
-            "OHM\\Mocks\\": "ohm/mocks/"
+            "OHM\\Mocks\\": "ohm/mocks/",
+            "Desmos\\": "desmos/",
+            "Desmos\\Models\\": "desmos/models/",
+            "Desmos\\Controlers\\": "desmos/controlers/",
+            "Desmos\\Views\\": "desmos/views/"
         }
     },
     "config": {
@@ -55,6 +66,6 @@
         "coverage-ohm": "codecept run --coverage --coverage-html",
         "migrate-ohm": "phinx migrate",
         "seed-ohm": "phinx seed:run",
-        "php-cs-fixer": "php-cs-fixer --rules=@PSR12"
+        "php-cs-fixer": "php-cs-fixer --rules=@PSR12 --"
     }
 }

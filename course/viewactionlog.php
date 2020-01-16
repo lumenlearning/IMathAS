@@ -37,6 +37,7 @@ echo '<h2>Activity Log for '.Sanitize::encodeStringForDisplay($row[0]).', '.Sani
 
 $actions = array();
 $lookups = array('as'=>array(), 'in'=>array(), 'li'=>array(), 'ex'=>array(), 'wi'=>array(), 'fo'=>array(), 'forums'=>array(), 'dr'=>array(),);
+$lookups['de'] = array();
 $stm = $DBH->prepare("SELECT type,typeid,viewtime,info FROM imas_content_track WHERE userid=:userid AND courseid=:courseid ORDER BY viewtime DESC");
 $stm->execute(array(':userid'=>$uid, ':courseid'=>$cid));
 while ($row = $stm->fetch(PDO::FETCH_NUM)) {
@@ -48,6 +49,26 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$lookups['forums'][] = $ip[0];
 	}
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+$denames = array();
+if (count($lookups['de'])>0) {
+	$lookuplist = array_map('intval', array_unique($lookups['de']));
+	$query_placeholders = Sanitize::generateQueryPlaceholders($lookuplist);
+	$stm = $DBH->prepare("SELECT id,title FROM desmos_items WHERE id IN ($query_placeholders)");
+	$stm->execute(array_values($lookuplist));
+	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+		$denames[$row[0]] = $row[1];
+	}
+}
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 $asnames = array();
 if (count($lookups['as'])>0) {
 	$lookuplist = array_map('intval', array_unique($lookups['as']));
@@ -143,6 +164,19 @@ foreach ($actions as $r) {
 	}
 	$actionmsg = '';
 	switch ($r[0]) {
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	case 'desmosview':
+		$actionmsg =  'Viewed Desmos Interactive item '.Sanitize::encodeStringForDisplay($denames[$r[1]]);
+		break;
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	case 'inlinetext':
 		$actionmsg =  'In inline text item '.Sanitize::encodeStringForDisplay($innames[$r[1]]).', clicked link to '.$thelink;
 		break;

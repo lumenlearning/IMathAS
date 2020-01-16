@@ -21,7 +21,7 @@ function getsubinfo($items,$parent,$pre) {
 			$ids[] = $anitem;
 			$parents[] = $parent;
 			$types[] = $pre.$data['items'][$anitem]['type'];
-			if (isset($data['items'][$anitem]['data']['name'])) {
+            if (isset($data['items'][$anitem]['data']['name'])) {
 				$names[] = $data['items'][$anitem]['data']['name'];
 			} else {
 				$names[] = $data['items'][$anitem]['data']['title'];
@@ -165,6 +165,21 @@ public function importdata($data, $cid, $checked, $options) {
 		$this->insertAssessment();
 	}
 
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    //insert the desmos_items
+    if (isset($this->toimportbytype['DesmosItem'])) {
+        $this->insertDesmos();
+    }
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+
 	//add imas_items
 	$exarr = array();
 	foreach ($this->itemstoimport as $item) {
@@ -213,6 +228,17 @@ public function importdata($data, $cid, $checked, $options) {
 	$DBH->commit();
 
 	return array(
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        'Desmos Imported'=>count($this->typemap['DesmosItem']),
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		'Questions Added'=>$this->qsadded,
 		'Questions Updated'=>$this->qmodcnt,
 		'InlineText Imported'=>count($this->typemap['InlineText']),
@@ -696,6 +722,36 @@ private function insertWiki() {
 		$this->typemap['Wiki'][$toimport] = $firstinsid+$k;
 	}
 }
+
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+private function insertDesmos() {
+    global $db_fields;
+
+    $this->typemap['DesmosItem'] = array();
+    foreach ($this->toimportbytype['DesmosItem'] as $k=>$toimport) {
+        $exarr = array();
+        $exarr['courseid'] = $this->cid;
+        //sanitize html fields
+        foreach ($db_fields['html']['desmos'] as $field) {
+            $this->data['items'][$toimport]['data'][$field] = Sanitize::incomingHtml($this->data['items'][$toimport]['data'][$field]);
+        }
+        foreach (explode(',', $db_fields['desmos']) as $field) {
+            $exarr[$field] = $this->data['items'][$toimport]['data'][$field];
+        }
+        $desmos = new \Desmos\Models\DesmosItem($this->cid);
+        $desmos->addItem($exarr);
+        $this->typemap['DesmosItem'][$toimport] = $desmos->typeid+0;
+    }
+}
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
+// #### End OHM-specific code #####################################################
 
 private function insertDrill() {
 	global $DBH, $db_fields;

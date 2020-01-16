@@ -22,14 +22,28 @@ function getsubinfo($items,$parent,$pre) {
 		if (is_array($anitem)) {
 			$ids[] = $parent.'-'.($k+1);
 			$types[] = $pre."Block";
-			$names[] = $anitem['name'];
+            $names[] = $anitem['name'];
 			$parents[] = $parent;
 			getsubinfo($anitem['items'],$parent.'-'.($k+1),$pre.'--');
 		} else {
 			$ids[] = $anitem;
 			$parents[] = $parent;
 			$types[] = $pre.$item[$anitem]['type'];
-			if (isset($item[$anitem]['name'])) {
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            if (is_object($anitem['itemtype'])) {
+                $names[] = $anitem['itemtype']->name;
+                $types[] = $anitem['itemtype']->itemtype;
+            } else
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            if (isset($item[$anitem]['name'])) {
 				$names[] = $item[$anitem]['name'];
 			} else {
 				$names[] = $item[$anitem]['title'];

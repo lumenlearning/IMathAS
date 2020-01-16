@@ -54,6 +54,19 @@
 	 } else if ($type=="D") {
 		 $stm = $DBH->prepare("UPDATE imas_drillassess SET name=:name WHERE id=:id AND courseid=:cid");
 		 $stm->execute(array(':name'=>$val, ':id'=>$typeid, ':cid'=>$cid));
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	 } else if ($type=="E") {
+		 $stm = $DBH->prepare("UPDATE desmos_items SET title=:title WHERE id=:id AND courseid=:cid");
+		 $stm->execute(array(':title'=>$val, ':id'=>$typeid, ':cid'=>$cid));
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 	 } else if ($type=="B") {
 		$blocktree = explode('-',$typeid);
 		$existingid = array_pop($blocktree) - 1; //-1 adjust for 1-index

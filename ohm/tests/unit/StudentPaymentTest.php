@@ -64,11 +64,7 @@ final class StudentPaymentTest extends TestCase
 	{
 		$this->studentPaymentDbMock->method('getGroupRequiresStudentPayment')->willReturn(true);
 		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
-        $studentPayApiResult = new StudentPayApiResult();
-        $studentPayApiResult->setApiUserMessage("API user message");
-        $studentPayApiResult->setCourseRequiresStudentPayment(true);
-        $studentPayApiResult->setStudentPaymentStatus(StudentPayApiResult::IS_ACTIVATED);
-        $this->studentPaymentApiMock->method('getActivationStatusFromApi')->willReturn($studentPayApiResult);
+		$this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(true);
 
 		$studentPaymentStatus = $this->studentPayment->getCourseAndStudentPaymentInfo();
 
@@ -104,6 +100,44 @@ final class StudentPaymentTest extends TestCase
 		$studentPayStatus = $this->studentPayment->getCoursePayStatusFromDatabase(new StudentPayStatus());
 
 		$this->assertFalse($studentPayStatus->getCourseRequiresStudentPayment());
+	}
+
+	/*
+	 * getStudentPayStatusCacheFirst
+	 */
+
+	public function testGetStudentPayStatusCacheFirst()
+	{
+		$this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(true);
+
+		$studentPayStatus = $this->studentPayment->getStudentPayStatusCacheFirst(new StudentPayStatus());
+
+		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
+
+	}
+
+	public function testGetStudentPayStatusCacheFirst_DbMissingValue()
+	{
+		// Mock return data
+		$apiResult = new StudentPayApiResult();
+		$apiResult->setCourseRequiresStudentPayment(false);
+		$apiResult->setStudentPaymentStatus(true);
+
+		// Setup mocks
+		$this->studentPaymentApiMock->method('getActivationStatusFromApi')->willReturn($apiResult);
+
+		$this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(null);
+		$this->studentPaymentDbMock->expects($this->once())->method('setStudentHasActivationCode')
+			->with(true);
+
+		// Run test
+		$stupay = new StudentPayStatus();
+		$stupay->setCourseRequiresStudentPayment(true); // this value should be returned to us unmodified.
+		$studentPayStatus = $this->studentPayment->getStudentPayStatusCacheFirst($stupay);
+
+		// Assertions
+		$this->assertFalse($studentPayStatus->getCourseRequiresStudentPayment());
+		$this->assertTrue($studentPayStatus->getStudentHasValidAccessCode());
 	}
 
 	/*
