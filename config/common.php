@@ -30,6 +30,9 @@ $CFG['GEN']['ratelimit'] = 0.1;
 $CFG['GEN']['useSESmail'] = true;
 $CFG['email']['handlerpriority'] = 0;
 
+// temporary, for testing impact on IOPS
+$use_local_sessions = true;
+
 //$CFG['use_csrfp'] = 'log';
 
 //log LTI updates
