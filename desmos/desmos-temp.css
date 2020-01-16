@@ -219,6 +219,10 @@ body {
     width: calc(100% - 50px);
 }
 
+.step-li button:focus {
+    background-color: unset;
+}
+
 .step-li button svg {
     display: inline-block;
     opacity: 0.5;
