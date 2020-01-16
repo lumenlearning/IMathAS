@@ -392,3 +392,7 @@ body {
     font-weight: normal;
 }
 
+/* Overriding desmos stylesheet to fix button icon alignment issues  */
+#editdesmos [class*="dcg-icon-"] {
+    line-height: 38px;
+}
