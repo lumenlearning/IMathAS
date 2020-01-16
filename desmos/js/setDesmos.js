@@ -122,6 +122,9 @@ function removeStep(event){
         for (let i = 0; i < relatedItems.length; i++) {
             relatedItems[i].remove();
 		}
+		if (document.getElementById("step_list").childElementCount == 0) {
+			addStep();
+		}
         showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
     }
 }

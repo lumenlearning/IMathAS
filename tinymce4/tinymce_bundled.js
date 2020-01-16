@@ -30600,10 +30600,7 @@ var image = (function (domGlobals) {
     function curry(fn) {
       var initialArgs = [];
       for (var _i = 1; _i < arguments.length; _i++) {
-
-
-
-          ialArgs[_i - 1] = arguments[_i];
+        initialArgs[_i - 1] = arguments[_i];
       }
       return function () {
         var restArgs = [];

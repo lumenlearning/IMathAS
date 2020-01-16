@@ -1,4 +1,19 @@
 $(document).ready(function() {
+    let formIsSubmitting = false;
+    let formDataBeforeChanges = $('#desmos_item').serialize();
+
+    window.onbeforeunload = function () {
+        if (formIsSubmitting) {
+            formIsSubmitting = false;
+            return;
+        }
+
+        let formDataBeforeUnload = $('#desmos_item').serialize();
+        if (formDataBeforeUnload !== formDataBeforeChanges) {
+            return 'Data has been modified. Are you sure you want to abandon changes?';
+        }
+    };
+
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
@@ -35,34 +50,6 @@ $(document).ready(function() {
     });
 
     $("#desmos_form_submit_button").click(function(e) {
-        $.ajax({
-            type: "POST",
-            url: $('#desmos_item').attr('action'),
-            data: $('#desmos_item').serialize(),
-            beforeSend: function() {
-                $('#desmos_save_status')
-                  .stop()
-                  .removeClass('desmos_save_status_success')
-                  .removeClass('desmos_save_status_failed')
-                  .addClass('desmos_save_status_saving')
-                  .text('Saving...')
-                  .css('opacity', '1.0')
-                  .css('display', 'inline-block');
-            },
-            success: function(data) {
-                $('#desmos_save_status')
-                  .removeClass('desmos_save_status_saving')
-                  .addClass('desmos_save_status_success')
-                  .text('Saved!')
-                  .fadeOut(3000);
-            },
-            error: function() {
-                $('#desmos_save_status')
-                  .removeClass('desmos_save_status_saving')
-                  .addClass('desmos_save_status_failed')
-                  .text('Failed to save!');
-            }
-        });
-        e.preventDefault();
+        formIsSubmitting = true;
     });
 });
