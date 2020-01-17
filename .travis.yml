@@ -1,8 +1,9 @@
+dist: bionic
 language: php
 php:
-  - '7.2'
+  - '7.3'
 services:
-  - mysql
+  - mysql  # dist "bionic" provides MySQL 5.7.
 before_script:
   - mysql -e 'CREATE DATABASE myopenmathdb;'
   - composer install
