@@ -124,11 +124,11 @@ function confirmDelete(event){
 			width: "50%"
 		});
 		
-		$(".ohm-modal").focus(); 
+		$(".js-ohm-modal").focus(); 
 		
 		//add event listeners once modal is on page
-		$(".ohm-modal").on("click", ".js-confirm-delete", removeStep);
-		$(".ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
+		$(".js-ohm-modal").on("click", ".js-confirm-delete", removeStep);
+		$(".js-ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
 
 		// pass id of target element to delete button 
 		$(".js-confirm-delete").data("num", itemNum);

@@ -20,25 +20,19 @@
   z-index: 100;
 }
 
-.js-confirm-modal {
-  background: #fff;
-}
-
 .ohm-modal-header,
-.ohm-modal-body,
-.ohm-modal-footer {
+.ohm-modal-body {
   padding: 8px 16px;
 }
 
 .ohm-modal-content {
-  height: 300px; 
+  background: #fff;
   width: auto;
 }
 
 .ohm-modal-header {
   background: #336699;
   color: #fff;
-  padding: 8px 16px; 
 }
 
 .ohm-modal-body {
@@ -51,6 +45,6 @@
   padding: 16px; 
 }
 
-.ohm-modal-footer button:first-child {
-  margin-right: 8px;
+.ohm-modal-footer button + button {
+  margin-left: 8px;
 }
