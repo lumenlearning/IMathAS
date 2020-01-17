@@ -4,13 +4,11 @@ var ohmModal = (function() {
         $overlay,
         $modal,
         $content,
-        $close;
   
     // Append the html
     $overlay = $('<div class="ohm-modal-overlay"></div>');
     $modal = $('<div class="js-ohm-modal ohm-modal"></div>');
     $content = $('<div class="ohm-modal-content"></div>');
-    // $close = $('<button class="ohm-modal-close">Close</button>');
   
     $modal.hide();
     $overlay.hide();
@@ -58,13 +56,7 @@ var ohmModal = (function() {
         $(window).unbind('resize.modal');
       });
     };
-  
-    // Click 'x' to close
-    // $close.click(function(e) {
-    //   e.preventDefault();
-    //   method.close();
-    // });
-  
+
     // Press 'esc' to close
     $(document).keyup(function(event) {
       if (e.code == "Escape") {
