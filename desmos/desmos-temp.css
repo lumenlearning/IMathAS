@@ -388,8 +388,8 @@ body {
     background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
     display: block;
     cursor: pointer;
-    height: 75px;
-    width: 452px;
+    height: 36px;
+    width: 190px;
 }
 
 #editdesmos.js-desmos {
