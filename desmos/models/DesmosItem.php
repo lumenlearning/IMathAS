@@ -22,7 +22,8 @@ class DesmosItem extends CourseItem
     protected $miniicon = "../ohm/img/desmos_tiny.php";
     protected $itemicon = "../ohm/img/desmos.php";
     protected $valid_fields = [
-        'title','summary','startdate','enddate','avail','outcomes','tags','steps','courseid'
+        'title','summary','startdate','enddate','avail','outcomes','tags','steps',
+        'courseid','origin_itemid','itemid_chain','itemid_chain_size'
     ];
     protected $statusletter = "E";
     protected $showstats = true;
@@ -30,6 +31,9 @@ class DesmosItem extends CourseItem
     protected $trackview = true;
     protected $trackedit = true;
     protected $steps = array();
+    protected $origin_itemid;
+    protected $itemid_chain;
+    protected $itemid_chain_size;
 
     /**
      * Update course item data

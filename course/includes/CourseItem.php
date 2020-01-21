@@ -89,6 +89,7 @@ abstract class CourseItem
         }
         $newtypeid = $this->insertItem($fields);
         if ($newtypeid) {
+            $this->saveOriginId($newtypeid, $fields);
             $fields['id'] = $newtypeid;
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
@@ -97,6 +98,34 @@ abstract class CourseItem
         }
         return $this;
     }
+
+    /**
+     * Add an origin item ID to a newly saved CourseItem. Used only by $this->addItem().
+     *
+     * @param int $originId The CourseItem's origin ID. (Top-most ancestor)
+     * @param array $fields The CourseItem's fields.
+     * @return CourseItem $this
+     */
+    protected function saveOriginId(int $originId, array $fields) {
+        $need_update = false;
+        foreach (['origin_itemid','itemid_chain'] as $key) {
+            if (in_array($key, $this->valid_fields) && empty($fields[$key])) {
+                $fields[$key] = $originId;
+                $need_update = true;
+            }
+        }
+        if (in_array('itemid_chain', $this->valid_fields)
+            && in_array('itemid_chain_size', $this->valid_fields)
+        ) {
+            $fields['itemid_chain_size'] = 1;
+            $need_update = true;
+        }
+        if ($need_update) {
+            $this->updateItemType($originId, $fields);
+        }
+        return $this;
+    }
+
     /**
      * Update course item data
      *
@@ -135,14 +164,39 @@ abstract class CourseItem
             if ($key == 'title' || $key == 'name') {
                 $fields[$key] = $this->$key.$append;
             }
+            if (in_array($key, ['origin_itemid','itemid_chain']) && empty($this->$key)) {
+                $fields[$key] = $typeid;
+            }
         }
         $newtypeid = $this->insertItem($fields);
         if ($newtypeid) {
+            $this->addAncestorNode($newtypeid, $fields);
             $fields['id'] = $newtypeid;
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
             $this->track('copy', $typeid);
         }
+        return $this;
+    }
+
+    /**
+     * Update this CourseItem's ancestor list. Used by $this->copyItem();
+     *
+     * @param int $newtypeid The new CourseItem's ID to add.
+     * @param array $fields This CourseItem's data.
+     * @return CourseItem $this
+     */
+    protected function addAncestorNode(int $newtypeid, array $fields) {
+        if (!in_array('itemid_chain', $this->valid_fields)) {
+            return $this;
+        }
+
+        $fields['itemid_chain'] .= ',' . $newtypeid;
+        if (in_array('itemid_chain_size', $this->valid_fields)) {
+            $fields['itemid_chain_size'] = count(explode(',', $fields['itemid_chain']));
+        }
+        $this->updateItemType($newtypeid, $fields);
+
         return $this;
     }
 
