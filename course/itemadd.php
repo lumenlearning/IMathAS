@@ -222,7 +222,7 @@ $placeinhead = '<script type="text/javascript">
 	</script>';
 
 if ($item->typename=='desmos') {
-    //$placeinhead .= "<script src=\"".$CFG['desmos_calculator']."\"></script>";
+    $placeinhead .= "<script src=\"".$CFG['desmos_calculator']."\"></script>";
 }
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
