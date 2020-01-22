@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
+<link rel="stylesheet" href="/desmos/ohm-modal.css" type="text/css" />
+
+<script type="text/javascript" src="<?php echo $imasroot; ?>/desmos/js/ohmModal.js"></script>
 <script type="text/javascript">
     window.onload = ()=> {
         <?php if (count($item->steps) < 1) {
@@ -15,7 +18,6 @@
         <img src="../ohm/img/desmos.png" alt=""/>
         <?php echo $pagetitle ?>
     </h1>
-
     <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
             <div class="form-left">
