@@ -8,8 +8,8 @@ var ohmModal = (function() {
     // Append the html
     $overlay = $('<div class="ohm-modal-overlay"></div>');
     $modal = $('<div class="js-ohm-modal ohm-modal"></div>');
-    $content = $('<div class="ohm-modal-content"></div>');
-  
+    $content = $('<div class="ohm-modal-content" role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"></div>');
+
     $modal.hide();
     $overlay.hide();
     $modal.append($content);
@@ -35,6 +35,8 @@ var ohmModal = (function() {
     method.open = function(settings) {
       $content.empty().append(settings.content);
       
+      method.forceDialogFocus(); 
+
       $modal.css({
         width: settings.width || 'auto',
         height: settings.height || 'auto'
@@ -57,9 +59,16 @@ var ohmModal = (function() {
       });
     };
 
+    method.forceDialogFocus = function(){
+      setTimeout(function(event){
+        $content.attr('tabindex', '-1');
+        $(".js-cancel-modal").focus();
+      }, 0);
+    }
+  
     // Press 'esc' to close
     $(document).keyup(function(event) {
-      if (event.code == "Escape") {
+      if (event.key === "Escape") {
         event.preventDefault();
         method.close();
       }

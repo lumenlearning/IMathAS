@@ -111,9 +111,7 @@ function confirmDelete(event){
 			height: "auto",
 			width: "50%"
 		});
-		
-		$(".js-ohm-modal").focus(); 
-		
+
 		//add event listeners once modal is on page
 		$(".js-ohm-modal").on("click", ".js-confirm-delete", removeStep);
 		$(".js-ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
