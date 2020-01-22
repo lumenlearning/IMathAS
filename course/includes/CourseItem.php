@@ -109,16 +109,18 @@ abstract class CourseItem
     protected function saveOriginId(int $originId, array $fields) {
         $need_update = false;
         foreach (['origin_itemid','itemid_chain'] as $key) {
-            if (in_array($key, $this->valid_fields) && empty($fields[$key])) {
-                $fields[$key] = $originId;
-                $need_update = true;
+            if (in_array($key, $this->valid_fields)) {
+                if (empty($fields[$key])) {
+                    $fields[$key] = $originId;
+                    $need_update = true;
+                }
+                if ('itemid_chain' == $key
+                    && in_array('itemid_chain_size', $this->valid_fields)
+                ) {
+                    $fields['itemid_chain_size'] = count(explode(',', $fields['itemid_chain']));
+                    $need_update = true;
+                }
             }
-        }
-        if (in_array('itemid_chain', $this->valid_fields)
-            && in_array('itemid_chain_size', $this->valid_fields)
-        ) {
-            $fields['itemid_chain_size'] = 1;
-            $need_update = true;
         }
         if ($need_update) {
             $this->updateItemType($originId, $fields);
