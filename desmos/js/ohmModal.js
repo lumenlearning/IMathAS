@@ -3,7 +3,7 @@ var ohmModal = (function() {
     var method = {},
         $overlay,
         $modal,
-        $content,
+        $content;
   
     // Append the html
     $overlay = $('<div class="ohm-modal-overlay"></div>');
@@ -59,8 +59,8 @@ var ohmModal = (function() {
 
     // Press 'esc' to close
     $(document).keyup(function(event) {
-      if (e.code == "Escape") {
-        e.preventDefault();
+      if (event.code == "Escape") {
+        event.preventDefault();
         method.close();
       }
     });
