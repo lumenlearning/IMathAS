@@ -60,6 +60,7 @@ var ohmModal = (function() {
     };
 
     method.forceDialogFocus = function(focusEl){
+      // setTimeout to prevent JS from trying to set focus on element before fade in animation has completed
       setTimeout(function(event){
         $content.attr('tabindex', '-1');
         $(focusEl).focus();
