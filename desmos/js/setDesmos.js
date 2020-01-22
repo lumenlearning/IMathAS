@@ -109,7 +109,9 @@ function confirmDelete(event){
 		ohmModal.open({
 			content: data,
 			height: "auto",
-			width: "50%"
+			width: "50%",
+			// set element to focus when modal opens
+			focusEl: ".js-cancel-modal"
 		});
 
 		//add event listeners once modal is on page

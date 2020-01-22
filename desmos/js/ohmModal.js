@@ -35,7 +35,7 @@ var ohmModal = (function() {
     method.open = function(settings) {
       $content.empty().append(settings.content);
       
-      method.forceDialogFocus(); 
+      method.forceDialogFocus(settings.focusEl); 
 
       $modal.css({
         width: settings.width || 'auto',
@@ -59,10 +59,10 @@ var ohmModal = (function() {
       });
     };
 
-    method.forceDialogFocus = function(){
+    method.forceDialogFocus = function(focusEl){
       setTimeout(function(event){
         $content.attr('tabindex', '-1');
-        $(".js-cancel-modal").focus();
+        $(focusEl).focus();
       }, 0);
     }
   
