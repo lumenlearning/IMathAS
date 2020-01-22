@@ -556,11 +556,7 @@ abstract class CourseItem
             && $this->startdate < $now
             && $this->enddate > $now)
         ) {
-            if ($settings['faded']) {
-                $class = "item itemgrey";
-            } else {
-                $class = "item";
-            }
+            $class = "item";
             if ($this->itemid != '') {
                 $out .= "<div class=\"$class\" id=\"$this->itemid\">\n";
             } else {
