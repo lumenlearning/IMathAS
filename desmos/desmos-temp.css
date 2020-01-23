@@ -157,17 +157,24 @@ body {
 	padding: .5em, 1em;
 	width: 10em;
 }
+
+.desmos .controls + .controls {
+    margin-left: 1em;
+    margin-top: 0; /* overriding lux */
+}
+/* End Lux overwrite */
+
 .desmos #import {
     clear: both;
     width: 100%;
     height: 30px;
     margin-top: 0.4em;
 }
+
 .mce-i-desmos {
     background: url('../ohm/img/desmos.png') no-repeat;
     background-size: 16px 16px;
 }
-/* End Lux overwrite */
 
 .desmos .form-group {
     display: flex;
@@ -176,11 +183,6 @@ body {
 
 .desmos .form-group input, .desmos .controls .mce-tinymce {
     margin-top: 0.4em;
-}
-
-.desmos .controls + .controls {
-    margin-left: 1em;
-    margin-top: 0; /* overriding lux */
 }
 
 .desmos .controls .mce-tinymce {
@@ -313,7 +315,6 @@ body {
 #desmos_return_to_edit_button:hover {
     background-color: #EBEFF2;
 }
-
 
 #desmos_preview_warning {
     background-color: #ffffff;
