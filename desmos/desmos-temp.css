@@ -49,10 +49,6 @@ body {
     vertical-align: middle;
 }
 
-.desmos-header p {
-    margin-left: 32px;
-}
-
 .desmos-steps {
     box-sizing: border-box;
     display: flex; 
