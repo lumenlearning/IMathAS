@@ -180,7 +180,7 @@ function handleStudentViewNav(event){
         for (let i = 0; i < listItems.length; i++) {
             if (listItems[i].classList.contains('is-selected')) {
                 listItem = listItems[i];
-                stepIndex = i-1;
+                stepIndex = i - 1;
             }
         }
     
@@ -192,8 +192,7 @@ function handleStudentViewNav(event){
         listItem.previousSibling.classList.add('is-selected');
     }
 
-    event.target.classList.contains("js-next") ? 
-    handleNext() : handlePrev();
+    event.target.classList.contains("js-next") ? handleNext() : handlePrev();
 
 	showSteps('desmos_view_container', document.getElementById("step_list").children[stepIndex]);
     
