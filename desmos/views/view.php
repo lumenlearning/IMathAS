@@ -72,6 +72,10 @@ if ($shownav) {
                     $numsteps++;
                 } ?>
             </div>
+            <div class="js-desmos-nav desmos-nav-btns -inset">
+                <button class="button --button-secondary js-prev" disabled>Previous</button>
+                <button class="button --button-secondary js-next">Next</button>
+            </div>
         </div>
     </div>
 

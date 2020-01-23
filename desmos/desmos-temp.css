@@ -25,13 +25,14 @@ body {
   }
 
 .button.--button-secondary {
-    background: #e6ebf0;
-    background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
+    background: #f2f3f4;
+    background: linear-gradient(0deg, rgba(242,243,244,1) 0%, rgba(255,255,255,1) 100%);
     border: 1px solid #C4CDD5;
+    margin-left: 0;
 }
 
 .button.--button-secondary:hover {
-    background: #e6ebf0;
+    background: #E6EBF0;
     background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
     border: 1px solid #C4CDD5;
 }
@@ -358,17 +359,16 @@ body {
 /* Overide button style from imasscore.css */
 .desmos-nav-btns .button {
     background-color: #fff;
-    margin-top: 1em;
-    padding: .75em 2em;
+    margin-top: 16px;
 }
 
-.desmos-nav-btns .button:hover {
+/* .desmos-nav-btns .button:hover {
     background-color: #F9FAFB;
 }
 
 .desmos-nav-btns .button:hover {
     background-color: #EBEFF2;
-}
+} */
 
 #desmos_preview_content {
     border: 2px solid #E2E7EA;
