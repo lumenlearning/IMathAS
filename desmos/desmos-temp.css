@@ -189,10 +189,6 @@ body {
     max-width: 1220px;
 }
 
-.desmos .controls .mce-tinymce #mceu_27 {
-    display: none; /* temporarily hiding the Desmos button until it's actually removed */
-}
-
 .desmos .teacher-view {
     overflow-y: scroll;
 }
