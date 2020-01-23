@@ -32,7 +32,7 @@ body {
 }
 
 .button.--button-secondary:hover {
-    background: #E6EBF0;
+    background: #e6ebf0;
     background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
     border: 1px solid #C4CDD5;
 }
