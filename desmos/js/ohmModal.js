@@ -66,6 +66,39 @@ var ohmModal = (function() {
         $(focusEl).focus();
       }, 0);
     }
+
+    $content.on('keydown', function (event) {
+      var cancel = false;
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
+      console.log(event.key)
+      switch(event.key) {
+        case "Escape": 
+          console.log("ESCAPE")
+          // $modal.hide();
+          // lastfocus.focus();
+          // cancel = true;
+          break;
+        case "Tab": // TAB
+          // if (e.shiftKey) {
+          //   if (e.target === links[0]) {
+          //     links[links.length - 1].focus();
+          //     cancel = true;
+          //   }
+          // } else {
+          //   if (e.target === links[links.length - 1]) {
+          //     links[0].focus();
+          //     cancel = true;
+          //   }
+          // }
+          break;
+      }
+      if (cancel) {
+        e.preventDefault();
+      }
+    });
   
     // Press 'esc' to close
     $(document).keyup(function(event) {
