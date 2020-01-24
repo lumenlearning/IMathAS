@@ -40,7 +40,6 @@ function addStep(){
     step.setAttribute("onclick", "showSteps('"+parent+"', this)");
 	step.setAttribute("onkeydown", "javascript: if(event.keyCode == 9) showSteps('"+parent+"', this)");
     step.setAttribute("draggable", false);
-	step.setAttribute("aria-grabbed", false);
 
     // Create a <span> wrapper for the drag button
     var buttonDragWrapper = document.createElement("span");
@@ -70,20 +69,19 @@ function addStep(){
     buttonDelete.setAttribute("aria-label", "Delete this item.");
     buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
 
-
     // Wrap the drag <button> in the <span> wrapper;
     buttonDragWrapper.appendChild(buttonDrag);
     // Append the new elements to <li>
     step.appendChild(buttonDragWrapper);
     step.appendChild(label);
     step.appendChild(input);
-    step.appendChild(buttonDelete);
+	step.appendChild(buttonDelete);
+	
+	var draggableList = document.getElementById("step_list");
+	var listDescription = draggableList.dataset.description;
+	addDnDAttributes(step, listDescription);
     
-	document.getElementById("step_list").appendChild(step);
-
-	// Add textarea
-	// echo  "<div id=\"step_text_$i\">";
-	// echo "<textarea name=\"step_text[$i]\" class=\"step-item\" editor";
+	draggableList.appendChild(step);
 
 	var textareaWrapper = document.createElement("div");
 	textareaWrapper.id = "step_text_" + numsteps;
@@ -93,19 +91,9 @@ function addStep(){
 	textarea.name = "step_text["+numsteps+"]";
 	textarea.className = "step-item editor";
 
-
 	textareaWrapper.appendChild(textarea);
 
-	//document.getElementById(parent).getElementsByClassName("step-items")[0];
 	document.getElementById("step_items").appendChild(textareaWrapper);
-
-	//var newItem = document.querySelectorAll("[data-num='"+num+"']")[0];
-
-	//var draggableList = document.getElementById("step_list");
-	//var listDescription = draggableList.dataset.description;
-
-
-	//var num = document.getElementById('desmos_edit_container').getElementsByClassName('step-li').length;
 
 	numsteps++;
 	initeditor("selector","textarea");
@@ -146,6 +134,9 @@ function removeStep(event){
 
 	if($("#step_list li").length === 0){
 		addStep();
+	} else if($("#step_list li").length === 1){
+		var trigger = document.querySelector(".js-drag-trigger");
+		reorderList.init(trigger);
 	}
 
 	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
@@ -234,6 +225,20 @@ var reorderList = {
 	objTrigger: null,
 	init: function(objNode) {
 		var trigger = objNode.querySelector("button");
+		reorderList.listItems = document.querySelectorAll("#step_list [draggable]");
+		var listLength = reorderList.listItems.length;
+		if (listLength > 1) {
+			reorderList.setListeners(objNode);
+			for (var i = 0; i < listLength; i++) {
+				trigger.removeAttribute("disabled");
+			}
+		} else {
+			trigger.setAttribute("disabled", true);
+			reorderList.removeListeners(objNode);
+		}
+	},
+	setListeners: function(objNode) {
+		var trigger = objNode.querySelector("button");
 		objNode.onmousedown = reorderList.mouseStart;
 		objNode.parentNode.ondragstart = reorderList.dragStart;
 		objNode.parentNode.ondragover = reorderList.dragOver;
@@ -243,6 +248,18 @@ var reorderList = {
 		objNode.parentNode.ondrop = reorderList.dragDrop;
 		objNode.onkeydown = reorderList.keyboardNav;
 		trigger.onfocus = reorderList.focus;
+	},
+	removeListeners: function(objNode) {
+		var trigger = objNode.querySelector("button");
+		objNode.onmousedown = null;
+		objNode.parentNode.ondragstart = null;
+		objNode.parentNode.ondragover = null;
+		objNode.parentNode.ondragleave = null;
+		objNode.parentNode.ondragend = null;
+		objNode.onmouseup = null;
+		objNode.parentNode.ondrop = null;
+		objNode.onkeydown = null;
+		trigger.onfocus = null;
 	},
 	keyboardNav: function(objEvent) {
 		var key = objEvent.code;

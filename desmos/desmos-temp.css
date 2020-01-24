@@ -252,6 +252,7 @@ body {
 }
 
 .delete-trigger {
+    cursor: pointer;
     padding: 10px;
     min-height: 100%;
     right: 0;
@@ -264,16 +265,20 @@ body {
 }
 
 .move-trigger {
-    cursor: move;
-    left: 0;  
+    left: 0;
 }
 
 .move-trigger button {
+    cursor: move;
     min-height: 100%;
     margin: auto;
-    pointer-events: none;
     text-align: center;
     width: 40px;
+}
+
+.move-trigger button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .move-trigger svg {
