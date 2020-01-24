@@ -6,6 +6,7 @@
 namespace Desmos\Models;
 use Course\Includes\ContentTracker;
 use Course\Includes\CourseItem;
+use DateTime;
 use PDO;
 
 /**
@@ -155,6 +156,48 @@ class DesmosItem extends CourseItem
         $stm->execute(array(':id'=>$cid));
         $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_items WHERE courseid=:id");
         $stm->execute(array(':id'=>$cid));
+    }
+
+    /**
+     * Get the total number of Desmos Items created by all schools.
+     *
+     * @param DateTime $startTimestamp Limit search by this starting timestamp.
+     * @param DateTime $endTimestamp Limit search by this ending timestamp.
+     * @param bool $authoredOnly Only count Desmos Items with itemid_chain_size of 1.
+     * @return array An associative array.
+     */
+    public static function getTotalItemsCreatedByAllGroups(DateTime $startTimestamp,
+                                                           DateTime $endTimestamp,
+                                                           bool $authoredOnly = false
+    ): array
+    {
+        $authoredOnlySql = '';
+        if (true === $authoredOnly) {
+            $authoredOnlySql = 'AND itemid_chain_size = 1';
+        }
+
+        $stm = $GLOBALS['DBH']->prepare("SELECT
+                g.id AS group_id,
+                g.name AS group_name,
+                COUNT(di.id) AS total_items
+            FROM imas_groups AS g
+                JOIN imas_users AS u ON u.groupid = g.id
+                JOIN imas_courses AS c ON c.ownerid = u.id
+                JOIN desmos_items AS di ON di.courseid = c.id
+            WHERE di.created_at >= :startTime AND di.created_at <= :endTime
+                $authoredOnlySql
+            GROUP BY g.id");
+        $stm->execute([
+            ':startTime' => self::getSqlTimestamp($startTimestamp),
+            ':endTime' => self::getSqlTimestamp($endTimestamp)
+        ]);
+
+        $results = [];
+        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+            $results[$row['group_id']]['group_name'] = $row['group_name'];
+            $results[$row['group_id']]['total_items'] = $row['total_items'];
+        }
+        return $results;
     }
 
     /**
@@ -369,5 +412,16 @@ class DesmosItem extends CourseItem
         $this->steps = $steps;
         $this->steporder = array_keys($steps);
         return $this;
+    }
+
+    /**
+     * Format a date for SQL.
+     *
+     * @param DateTime $dateTime A DateTime object.
+     * @return string A date usable in a SQL query. ("0000-00-00 00:00:00")
+     */
+    protected static function getSqlTimestamp(DateTime $dateTime): string
+    {
+        return $dateTime->format('Y-m-d H:i:s');
     }
 }

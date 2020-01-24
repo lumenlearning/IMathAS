@@ -137,6 +137,17 @@ if ($overwriteBody==1) {
   	echo '<span class="column">';
   	echo '<a href="userreports.php?listgroups=true">',_('Groups List'),'</a> <br/>';
   	echo '<a href="../util/listnewteachers.php">',_('New Instructors Report');
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    echo '<br/><a href="../util/desmos-usage-report.php">Desmos Overview</a>';
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
   	echo '</span><span class="column">';
   	echo '<a href="forms.php?from=userreports&action=newadmin&group='.Sanitize::encodeUrlParam($showgroup).'">'._('Add New User').'</a>';
     echo '<br/><a href="../util/batchcreateinstr.php?from=userreports">'._('Batch Add Instructors').'</a>';
