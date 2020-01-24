@@ -20,26 +20,25 @@
     </h1>
     <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
-            <div class="form-left">
-                <div class="controls">
-                    <label for="title">Title:</label>
-                    <input type="text" id="title" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
-                </div>
-                <div class="controls">
-                    <label for="summary">Summary:</label>
-                    <input type="text" id="summary" name="summary" value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" />
-                </div>
+            <div class="controls">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
             </div>
-            <div class="form-right">
-                <div class="controls">
-                    <label for="sdate">Start Date:</label>
-                    <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
-                </div>
-                <div class="controls">
-                    <label for="edate">End Date:</label>
-                    <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
-                </div>
+            <div class="controls">
+                <label for="sdate">Start Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
             </div>
+            <div class="controls">
+                <label for="edate">End Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
+            </div>
+        </div>
+        <div class="controls">
+            <label for="summary">Summary:</label>
+            <!-- <input type="text" id="summary" name="summary" value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" /> -->
+            <textarea name="summary" id="summary" rows="5">
+                <?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>
+            </textarea>
         </div>
         <div id="step_box" class="desmos desmos-steps -offset --exlarge">
             <div class="steps-navigation teacher-view">

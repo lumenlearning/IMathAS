@@ -49,10 +49,6 @@ body {
     vertical-align: middle;
 }
 
-.desmos-header p {
-    margin-left: 32px;
-}
-
 .desmos-steps {
     box-sizing: border-box;
     display: flex; 
@@ -109,7 +105,8 @@ body {
     min-height: 100%;
     min-width: 100%;
 }
-.mce-edit-area {
+
+.step-items .mce-edit-area {
     min-height: 500px;
 }
 
@@ -160,29 +157,36 @@ body {
 	padding: .5em, 1em;
 	width: 10em;
 }
+
+.desmos .controls + .controls {
+    margin-left: 1em;
+    margin-top: 0; /* overriding lux */
+}
+/* End Lux overwrite */
+
 .desmos #import {
     clear: both;
     width: 100%;
     height: 30px;
     margin-top: 0.4em;
 }
+
 .mce-i-desmos {
     background: url('../ohm/img/desmos.png') no-repeat;
     background-size: 16px 16px;
 }
-/* End Lux overwrite */
 
 .desmos .form-group {
     display: flex;
     padding-bottom: 1em;
 }
 
-.desmos .form-group input {
+.desmos .form-group input, .desmos .controls .mce-tinymce {
     margin-top: 0.4em;
 }
 
-.desmos .form-group > div:first-child {
-	margin-right: 2em;
+.desmos .controls .mce-tinymce {
+    max-width: 1220px;
 }
 
 .desmos .teacher-view {
@@ -312,7 +316,6 @@ body {
 #desmos_return_to_edit_button:hover {
     background-color: #EBEFF2;
 }
-
 
 #desmos_preview_warning {
     background-color: #ffffff;
