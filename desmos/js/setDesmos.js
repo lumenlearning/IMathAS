@@ -16,9 +16,14 @@ loadDesmos();
 function showSteps(parent, el){
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
+	var listIndex = el.getAttribute("data-num");
+	
+	syncBtnNavigation(listItems.length, listIndex);
+
 	for (var i = 0; i < listItems.length; i++) {
 		var num = listItems[i].getAttribute("data-num");
 		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + num)[0];
+
 		if (!(listItems[i] == el)) {
 			listItems[i].classList.remove("is-selected");
 			listItems[i].setAttribute("aria-selected", false);
@@ -195,7 +200,22 @@ function handleStudentViewNav(event){
     event.target.classList.contains("js-next") ? handleNext() : handlePrev();
 
 	showSteps('desmos_view_container', document.getElementById("step_list").children[stepIndex]);
-    
+}
+
+// Used by showSteps function to disabled next/prev button if first or last items are clicked 
+function syncBtnNavigation(length, listIndex){
+	var index = parseInt(listIndex);
+	var next = document.querySelector('.js-next');
+	var prev = document.querySelector('.js-prev');
+
+	next.disabled = false;
+	prev.disabled = false;
+
+	if(index === length - 1){
+		next.disabled = true;
+	} else if(index === 0){
+		prev.disabled = true;
+	}
 }
 
 //Disable "Previous" and "Next" buttons when first and last list items selected with spacebar 
