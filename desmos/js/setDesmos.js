@@ -17,8 +17,6 @@ function showSteps(parent, el){
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
 	var listIndex = el.getAttribute("data-num");
-	
-	syncBtnNavigation(listItems.length, listIndex);
 
 	for (var i = 0; i < listItems.length; i++) {
 		var num = listItems[i].getAttribute("data-num");
@@ -34,6 +32,7 @@ function showSteps(parent, el){
 			stepItem.style.display = "block";
 		}
 	}
+	syncBtnNavigation(listItems.length, listIndex);
 }
 
 function addStep(){
