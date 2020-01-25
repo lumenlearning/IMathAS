@@ -17,7 +17,7 @@
  *          object, but may also update some assessInfo fields
  */
 
-
+$st = microtime(true);
 $no_session_handler = 'json_error';
 require_once("../init.php");
 require_once("./common_start.php");
@@ -208,5 +208,11 @@ $assess_record->saveRecordIfNeeded();
 //prep date display
 prepDateDisp($assessInfoOut);
 
+$et = microtime(true);
+if ($et - $st > .6) {
+  error_log('loadquestion took '.($et-$st).' for '.
+    $assessInfoOut['questions'][$qn]['questionsetid']
+  );
+}
 //output JSON object
 echo json_encode($assessInfoOut);
