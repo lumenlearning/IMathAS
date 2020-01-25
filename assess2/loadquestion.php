@@ -25,6 +25,8 @@ require_once("./AssessInfo.php");
 require_once("./AssessRecord.php");
 require_once('./AssessUtils.php');
 
+$tm1 = microtime(true);
+
 header('Content-Type: application/json; charset=utf-8');
 
 // validate inputs
@@ -45,6 +47,7 @@ $now = time();
 
 // load settings including question info
 $assess_info = new AssessInfo($DBH, $aid, $cid, false);
+$tm2 = microtime(true);
 $assess_info->loadException($uid, $isstudent);
 if ($isstudent) {
   $assess_info->applyTimelimitMultiplier($studentinfo['timelimitmult']);
@@ -62,11 +65,11 @@ if ($assess_info->getSetting('available') === 'practice' && !empty($_POST['pract
   echo '{"error": "not_avail"}';
   exit;
 }
-
+$tm3 = microtime(true);
 // load user's assessment record
 $assess_record = new AssessRecord($DBH, $assess_info, $in_practice);
 $assess_record->loadRecord($uid);
-
+$tm4 = microtime(true);
 // make sure a record exists
 if (!$assess_record->hasRecord() || !$assess_record->hasActiveAttempt()) {
   echo '{"error": "not_ready"}';
@@ -130,13 +133,13 @@ if ($assessInfoOut['has_active_attempt'] && $assessInfoOut['timelimit'] > 0) {
   $assessInfoOut['timelimit_expiresin'] = $assess_record->getTimeLimitExpires() - $now;
   $assessInfoOut['timelimit_gracein'] = max($assess_record->getTimeLimitGrace() - $now, 0);
 }
-
+$tm5 = microtime(true);
 // get current question version
 list($qid, $qidstoload) = $assess_record->getQuestionId($qn);
 
 // load question settings and code
 $assess_info->loadQuestionSettings($qidstoload, true);
-
+$tm6 = microtime(true);
 // For livepoll, verify seed and generate new question version if needed
 if (!$isteacher && $assess_info->getSetting('displaymethod') === 'livepoll') {
   $curQuestionObject = $assess_record->getQuestionObject($qn, false, false, false);
@@ -198,20 +201,29 @@ if ($assess_info->getSetting('displaymethod') === 'livepoll') {
 } else {
   $showscores = $assess_info->showScoresDuring();
 }
+$tm7 = microtime(true);
 $assessInfoOut['questions'] = array(
   $qn => $assess_record->getQuestionObject($qn, $showscores, true, true)
 );
-
+$tm8 = microtime(true);
 // save record if needed
 $assess_record->saveRecordIfNeeded();
-
+$tm9 = microtime(true);
 //prep date display
 prepDateDisp($assessInfoOut);
 
 $et = microtime(true);
 if ($et - $st > .6) {
   error_log('loadquestion took '.($et-$st).' for '.
-    $assessInfoOut['questions'][$qn]['questionsetid']
+    $assessInfoOut['questions'][$qn]['questionsetid'].
+    ' breaks: '.
+    ($tm1 - $st).','.
+    ($tm2 - $tm1).','.
+    ($tm3 - $tm2).','.
+    ($tm4 - $tm3).','.
+    ($tm6 - $tm5).','.
+    ($tm8 - $tm7).','.
+    ($tm9 - $tm8)
   );
 }
 //output JSON object
