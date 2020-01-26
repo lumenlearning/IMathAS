@@ -20,12 +20,16 @@
 $st = microtime(true);
 $no_session_handler = 'json_error';
 require_once("../init.php");
-require_once("./common_start.php");
-require_once("./AssessInfo.php");
-require_once("./AssessRecord.php");
-require_once('./AssessUtils.php');
-
 $tm1 = microtime(true);
+require_once("./common_start.php");
+$tm2 = microtime(true);
+require_once("./AssessInfo.php");
+$tm3 = microtime(true);
+require_once("./AssessRecord.php");
+$tm4 = microtime(true);
+require_once('./AssessUtils.php');
+$tm5 = microtime(true);
+
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -47,7 +51,7 @@ $now = time();
 
 // load settings including question info
 $assess_info = new AssessInfo($DBH, $aid, $cid, false);
-$tm2 = microtime(true);
+
 $assess_info->loadException($uid, $isstudent);
 if ($isstudent) {
   $assess_info->applyTimelimitMultiplier($studentinfo['timelimitmult']);
@@ -65,11 +69,11 @@ if ($assess_info->getSetting('available') === 'practice' && !empty($_POST['pract
   echo '{"error": "not_avail"}';
   exit;
 }
-$tm3 = microtime(true);
+
 // load user's assessment record
 $assess_record = new AssessRecord($DBH, $assess_info, $in_practice);
 $assess_record->loadRecord($uid);
-$tm4 = microtime(true);
+
 // make sure a record exists
 if (!$assess_record->hasRecord() || !$assess_record->hasActiveAttempt()) {
   echo '{"error": "not_ready"}';
@@ -133,7 +137,7 @@ if ($assessInfoOut['has_active_attempt'] && $assessInfoOut['timelimit'] > 0) {
   $assessInfoOut['timelimit_expiresin'] = $assess_record->getTimeLimitExpires() - $now;
   $assessInfoOut['timelimit_gracein'] = max($assess_record->getTimeLimitGrace() - $now, 0);
 }
-$tm5 = microtime(true);
+
 // get current question version
 list($qid, $qidstoload) = $assess_record->getQuestionId($qn);
 
@@ -221,9 +225,7 @@ if ($et - $st > .6) {
     ($tm2 - $tm1).','.
     ($tm3 - $tm2).','.
     ($tm4 - $tm3).','.
-    ($tm6 - $tm5).','.
-    ($tm8 - $tm7).','.
-    ($tm9 - $tm8)
+    ($tm5 - $tm4)
   );
 }
 //output JSON object
