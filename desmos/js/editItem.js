@@ -1,4 +1,19 @@
 $(document).ready(function() {
+    let formIsSubmitting = false;
+    let formDataBeforeChanges = $('#desmos_item').serialize();
+
+    window.onbeforeunload = function () {
+        if (formIsSubmitting) {
+            formIsSubmitting = false;
+            return;
+        }
+
+        let formDataBeforeUnload = $('#desmos_item').serialize();
+        if (formDataBeforeUnload !== formDataBeforeChanges) {
+            return 'Data has been modified. Are you sure you want to abandon changes?';
+        }
+    };
+
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
@@ -34,7 +49,7 @@ $(document).ready(function() {
         $('link[title=lux]')[0].disabled=false;
     });
 
-    $("#desmos_save_button").click(function() {
-        $("#desmos_form_submit_button").trigger('click');
+    $("#desmos_form_submit_button").click(function(e) {
+        formIsSubmitting = true;
     });
 });

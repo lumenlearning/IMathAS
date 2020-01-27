@@ -1,0 +1,50 @@
+.ohm-modal-overlay {
+  align-items: center;
+  background: #000;
+  display: flex; 
+  filter: alpha(opacity=50);
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  opacity: 0.7;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 99;
+}
+.ohm-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  position: absolute;
+  z-index: 100;
+}
+
+.ohm-modal-header,
+.ohm-modal-body {
+  padding: 8px 16px;
+}
+
+.ohm-modal-content {
+  background: #fff;
+  width: auto;
+}
+
+.ohm-modal-header {
+  background: #336699;
+  color: #fff;
+}
+
+.ohm-modal-body {
+  height: 160px;
+}
+
+.ohm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px; 
+}
+
+.ohm-modal-footer button + button {
+  margin-left: 8px;
+}

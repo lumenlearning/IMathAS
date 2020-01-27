@@ -1,8 +1,9 @@
+dist: bionic
 language: php
 php:
-  - '7.2'
+  - '7.3'
 services:
-  - mysql
+  - mysql  # dist "bionic" provides MySQL 5.7.
 before_script:
   - mysql -e 'CREATE DATABASE myopenmathdb;'
   - composer install
@@ -34,7 +35,7 @@ deploy:
       secure: "nRKjpv/5vXeg0J2U0plBLvHDZJc3ccg8VzvavmpRxLd2IGrkeC9F83EirFfiCmHWN8307YFNJNQixzGmFPkVgzbqrVCXsDpx9/jye++aLTkbJrlhihq1kWF8Wvz6aCARMGfPcq7XnlPaRhgR67SyYv+DjO1gjHHSdmEClOdbFDlzQbAEhKWv9h8DlJCuoRBaMx+fQ+A7lP18GxYMUkweBhNhApWSLoFwCRPNV3kKr506S/JzSIPDb+yCHlGZeGIzdIMjnLJW21WG+Ima7DAOqxZp+kAqcpUsIc1tgdlLSgsozr1n+xO5MkdqAbs73TjgwIu2LYWDJaVtsdvK0JAP1D15lX2gCSSo1dfHsze2QpPtCN49umuZl+puORZk/kEyDJ1p5uFILy9WRouRu6A59nEJgGjFfu0kV+XHsDYHOF9YPBT6Z+l+IE1f2qHN9/luPNfkcgLz7PvRAfdEpcUG1KJpblqxABFoR1XGpO2sKDlVq4suK81tkCOUvWtczaq70cKboIn41/hmShurQvhWwGC6pZmwP0ROlxZZZEDEubqFbyzAZvCfndlPN6ZGPxhiPUBZf/cZcUYv0wMLkDWaBSF5I5bed1kWiuCr5M9pA8+oUVysj+C51IToYMjZ5wlAQQqB6fqf69tXbSvxeiC0QlSAr9a6G0k1GWbn+Qlo6eo="
     region: "us-west-2"
     app: "LuMOM-stg"
-    env: "lumom-stg"
+    env: "lumom-stg-1"
     bucket_name: elasticbeanstalk-us-west-2-725843923591
     on:
       repo: lumenlearning/ohm

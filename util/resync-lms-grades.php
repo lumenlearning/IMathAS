@@ -67,8 +67,8 @@ function resyncGrades(): void
     $totalNotQueued = 0;
     $errorLogIds = array();
     $current_assessment = '';
+    $assessmentName = '';
     foreach ($records as $us) {
-        $assessmentName = '';
         if ($current_assessment != $us['aid']) {
             $current_assessment = $us['aid'];
             $assessment = Assessments::getAssessmentName((int)$us['aid']);
@@ -79,10 +79,18 @@ function resyncGrades(): void
         $score = Assessments::getpts($us['scores']);
         $logInfo = createLogInfo($cid, $us, $assessmentName, $grade, $score);
 
-        if (LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
+        if (empty($us['sourcedid'])) {
+            $logInfo['failReason'] = 'Assessment record does not have a sourcedid.'
+                . ' Did the LMS provide a sourcedid? Are sourcedids enabled from the LMS (course and LMS-wide)?';
+            error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
+            $totalNotQueued++;
+        }
+        elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
             error_log('Queued LMS grade. ' . json_encode($logInfo));
             $totalQueued++;
         } else {
+            $logInfo['failReason'] = 'LTI::addToLTIQueue did not insert a new row into imas_ltiqueue.'
+                . ' Possible hash collision?';
             error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;

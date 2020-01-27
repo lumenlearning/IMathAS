@@ -49,10 +49,6 @@ body {
     vertical-align: middle;
 }
 
-.desmos-header p {
-    margin-left: 32px;
-}
-
 .desmos-steps {
     box-sizing: border-box;
     display: flex; 
@@ -108,9 +104,35 @@ body {
     height: 510px;
     min-height: 100%;
     min-width: 100%;
-} 
+}
+
+.step-items .mce-edit-area {
+    min-height: 500px;
+}
 
 /* DESMOS TEACHER VIEW */
+
+#desmos_save_buttons {
+    position: relative;
+}
+
+#desmos_save_status {
+    position: absolute;
+    top: 50%;
+    margin-left: 0.5em;
+}
+
+.desmos_save_status_saving {
+    color: #606060;
+}
+
+.desmos_save_status_success {
+    color: #1E74D1;
+}
+
+.desmos_save_status_failed {
+    color: #ff2222;
+}
 
 /* Overriding tiny mce */
 .step-items .mce-panel {
@@ -135,19 +157,36 @@ body {
 	padding: .5em, 1em;
 	width: 10em;
 }
+
+.desmos .controls + .controls {
+    margin-left: 1em;
+    margin-top: 0; /* overriding lux */
+}
 /* End Lux overwrite */
+
+.desmos #import {
+    clear: both;
+    width: 100%;
+    height: 30px;
+    margin-top: 0.4em;
+}
+
+.mce-i-desmos {
+    background: url('../ohm/img/desmos.png') no-repeat;
+    background-size: 16px 16px;
+}
 
 .desmos .form-group {
     display: flex;
     padding-bottom: 1em;
 }
 
-.desmos .form-group input {
+.desmos .form-group input, .desmos .controls .mce-tinymce {
     margin-top: 0.4em;
 }
 
-.desmos .form-group > div:first-child {
-	margin-right: 2em;
+.desmos .controls .mce-tinymce {
+    max-width: 1220px;
 }
 
 .desmos .teacher-view {
@@ -169,20 +208,33 @@ body {
 }
 
 .teacher-view .step-li {
-    padding-left:36px;
+    border-bottom: 2px solid transparent;
+    padding-left: 40px;
 }
 
-.step-li[draggable=true].is-selected {
+.teacher-view .step-li:first-child {
+    border-top: 2px solid transparent;
+}
+
+.step-li[aria-grabbed=true].is-selected {
     opacity: 0.4;
 }
 
-.step-li.is-over {
-    border-bottom: 2px solid #1e74d1;
-} 
+.step-li.is-target {
+    border-bottom-color: #1e74d1;
+}
+
+.step-li:first-child:not(.is-target).is-over {
+    border-top-color: #1e74d1;
+}
 
 .step-li input {
     margin: 0!important; /* overriding lux */
     width: calc(100% - 50px);
+}
+
+.step-li button:focus {
+    background-color: unset;
 }
 
 .step-li button svg {
@@ -204,6 +256,7 @@ body {
 }
 
 .delete-trigger {
+    cursor: pointer;
     padding: 10px;
     min-height: 100%;
     right: 0;
@@ -216,16 +269,20 @@ body {
 }
 
 .move-trigger {
-    cursor: move;
-    left: 0;  
+    left: 0;
 }
 
 .move-trigger button {
+    cursor: move;
     min-height: 100%;
     margin: auto;
-    pointer-events: none;
     text-align: center;
     width: 40px;
+}
+
+.move-trigger button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .move-trigger svg {
@@ -259,7 +316,6 @@ body {
 #desmos_return_to_edit_button:hover {
     background-color: #EBEFF2;
 }
-
 
 #desmos_preview_warning {
     background-color: #ffffff;
@@ -357,3 +413,7 @@ body {
     font-weight: normal;
 }
 
+/* Overriding desmos stylesheet to fix button icon alignment issues  */
+#editdesmos [class*="dcg-icon-"] {
+    line-height: 38px;
+}

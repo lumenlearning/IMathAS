@@ -5,6 +5,9 @@
  * @author Alena Holligan <alena@lumenlearning.com>
  */
 namespace Course;
+
+use Sanitize;
+
 /*** master php includes *******/
 require "../init.php";
 require "../includes/htmlutil.php";
@@ -42,43 +45,8 @@ if (isset($_GET['id'])) {
 //set some page specific variables and counters
 //if the form has been submitted
 if ($_POST['name']!= null || $_POST['title']!=null) {
-    if ($_POST['avail']==1) {
-        if ($_POST['sdatetype']=='0') {
-            $fields['startdate'] = 0;
-        } else {
-            $fields['startdate']=parsedatetime($_POST['sdate'], $_POST['stime'], 0);
-        }
-        if ($_POST['edatetype']=='2000000000') {
-            $fields['enddate'] = 2000000000;
-        } else {
-            $fields['enddate']=parsedatetime($_POST['edate'], $_POST['etime'], 2000000000);
-        }
-        if ($_POST['oncal']) {
-            $fields['oncal'] = \Sanitize::onlyInt($_POST['oncal']);
-        }
-    } else if ($_POST['avail']==2) {
-        if ($_POST['altoncal']==0) {
-            $fields['startdate'] = 0;
-            //$fields['oncal'] = 0;
-        } else {
-            $fields['startdate'] = parsedatetime($_POST['cdate'], "12:00 pm", 0);
-            //$fields['oncal'] = ($fields['startdate']>0)?1:0;
-            //$fields['caltag'] = \Sanitize::stripHtmlTags($_POST['altcaltag']);
-        }
-        $fields['enddate'] =  2000000000;
-    } else {
-        $fields['startdate'] = 0;
-        $fields['enddate'] = 2000000000;
-        //$fields['oncal'] = 0;
-    }
-    if (isset($_POST['hidetitle'])) {
-        $_POST['title']='##hidden##';
-    }
-    if (isset($_POST['isplaylist'])) {
-        $fields['isplaylist'] = 1;
-    } else {
-        //$fields['isplaylist'] = 0;
-    }
+    $fields['startdate']=parsedatetime($_POST['sdate'], $_POST['stime'], 0);
+    $fields['enddate']=parsedatetime($_POST['edate'], $_POST['etime'], 2000000000);
     if (isset($_POST['title'])) {
         $fields['title'] = \Sanitize::stripHtmlTags($_POST['title']);
     }
@@ -133,9 +101,10 @@ if ($_POST['name']!= null || $_POST['title']!=null) {
         $track_type = $item->track('add');
     }
     header(
-        'Location: ' . $GLOBALS['basesiteurl']
-        . "/course/course.php?cid=$item->courseid&r="
-        .\Sanitize::randomQueryStringParam()
+        sprintf('Location: %s/course/itemadd.php?type=desmos&id=%d&block=%d&cid=%d&r=%s',
+            $GLOBALS['basesiteurl'], $item->typeid, $item->block, $item->courseid,
+            Sanitize::randomQueryStringParam()
+        )
     );
     exit;
 }
@@ -247,13 +216,14 @@ $useeditor = 'noinit';
 $placeinhead = '<script type="text/javascript">
     var numsteps = '.count($item->steps).';
 	$(function() {
-	    desmos = " desmos ";
-		initeditor("selector","textarea");
+        initeditor("exact","summary");
+        desmos = " desmos ";
+        initeditor("textareas","step-item");
 	});
 	</script>';
 
 if ($item->typename=='desmos') {
-    //$placeinhead .= "<script src=\"".$CFG['desmos_calculator']."\"></script>";
+    $placeinhead .= "<script src=\"".$CFG['desmos_calculator']."\"></script>";
 }
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js\"></script>";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";

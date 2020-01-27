@@ -469,10 +469,11 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		selector: selectorstr,
 		inline: inlinemode,
 		plugins: [
-			desmos+"lists advlist autolink attach image charmap anchor",
+			desmos+" noneditable lists advlist autolink attach image charmap anchor",
 			"searchreplace code link textcolor snippet",
 			"media table paste asciimath asciisvg rollups colorpicker"
 		],
+		noneditable_noneditable_class: "js-desmos",
 		menubar: false,//"edit insert format table tools ",
 		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
 		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg " + desmos,
