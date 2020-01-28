@@ -7,8 +7,8 @@ var ohmModal = (function() {
 
     // Append the html
     $overlay = $('<div class="ohm-modal-overlay"></div>');
-    $modal = $('<div class="js-ohm-modal ohm-modal"></div>');
-    $content = $('<div class="ohm-modal-content" role="dialog alertdialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"></div>');
+    $modal = $('<div class="js-ohm-modal ohm-modal" role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"></div>');
+    $content = $('<div class="ohm-modal-content"></div>');
 
     $modal.hide();
     $overlay.hide();
