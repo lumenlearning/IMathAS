@@ -315,6 +315,7 @@ var reorderList = {
 	dragOver: function(objEvent) {
 		var target;
 		reorderList.currentTarget = objEvent.target.closest(".step-li");
+		reorderList.currentPosition = index(reorderList.currentTarget);
 		objEvent.preventDefault(); // prevent default to allow drop
 		reorderList.currentTarget.classList.add("is-target");
 		if (index(reorderList.currentTarget) == 1) {
@@ -369,12 +370,14 @@ var reorderList = {
 			reorderList.currentTarget.parentNode.id == "step_list" ||
 			reorderList.currentTarget.id == "step_list"
 		) {
-			// move dragged elem to the selected drop target
-			reorderList.objParent.removeChild(reorderList.objCurrent);
-			reorderList.objParent.insertBefore(
-				reorderList.objCurrent,
-				reorderList.currentTarget.nextSibling
-			);
+			if (reorderList.currentPosition != reorderList.originalPosition) {
+				// move dragged elem to the selected drop target
+				reorderList.objParent.removeChild(reorderList.objCurrent);
+				reorderList.objParent.insertBefore(
+					reorderList.objCurrent,
+					reorderList.currentTarget.nextSibling
+				);
+			}
 			reorderList.drop();
 		}
 		// ignore; item doesn't move
