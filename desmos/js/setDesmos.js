@@ -16,9 +16,12 @@ loadDesmos();
 function showSteps(parent, el){
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
+	var listIndex = el.getAttribute("data-num");
+
 	for (var i = 0; i < listItems.length; i++) {
 		var num = listItems[i].getAttribute("data-num");
 		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + num)[0];
+
 		if (!(listItems[i] == el)) {
 			listItems[i].classList.remove("is-selected");
 			listItems[i].setAttribute("aria-selected", false);
@@ -29,6 +32,7 @@ function showSteps(parent, el){
 			stepItem.style.display = "block";
 		}
 	}
+	syncBtnNavigation(listItems, listIndex);
 }
 
 function addStep(){
@@ -142,68 +146,63 @@ function removeStep(event){
 	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
 }
 
-// function handleStudentViewNav(event){
-//     var listItems = document.querySelectorAll('.step-li');
-//     var listItem;
-//     var stepIndex; 
+function handleStudentViewNav(event){
+    var listItems = document.querySelectorAll('.step-li');
+    var listItem;
+	var stepIndex; 
 
-//     document.querySelector('.prev').disabled = false;
-//     document.querySelector('.next').disabled = false;
-
-//     function handleNext(){
-//         for (let i = 0; i < listItems.length; i++) {
-//             if (listItems[i].classList.contains('is-selected')) {
-//                 listItem = listItems[i];
-//                 stepIndex = i+1;
-//             }
-//         }
+    document.querySelector('.js-prev').disabled = false;
+	document.querySelector('.js-next').disabled = false;
+	
+	if (event.target.classList.contains("js-next")){
+		for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+                stepIndex = i + 1;
+            }
+        }
         
-//         if(stepIndex > listItems.length - 2){
-//             event.target.disabled = true;
-//             document.querySelector('.prev').disabled = false;
-//         } 
+        if(stepIndex > listItems.length - 2){
+            event.target.disabled = true;
+            document.querySelector('.js-prev').disabled = false;
+        } 
     
-//         listItem.classList.remove('is-selected');
-//         listItem.nextSibling.classList.add('is-selected');
-//     }
-
-//     function handlePrev(){
-//         for (let i = 0; i < listItems.length; i++) {
-//             if (listItems[i].classList.contains('is-selected')) {
-//                 listItem = listItems[i];
-//                 stepIndex = i-1;
-//             }
-//         }
+        listItem.classList.remove('is-selected');
+		listItem.nextSibling.classList.add('is-selected');
+	} else {
+		for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+                stepIndex = i - 1;
+            }
+        }
     
-//         if(stepIndex === 0){
-//             event.target.disabled = true;
-//             document.querySelector('.next').disabled = false;
-//         }
-//         listItem.classList.remove('select');
-//         listItem.previousSibling.classList.add('is-selected');
-//     }
+        if(stepIndex === 0){
+            event.target.disabled = true;
+            document.querySelector('.js-next').disabled = false;
+        }
+        listItem.classList.remove('is-selected');
+        listItem.previousSibling.classList.add('is-selected');
+	}
 
-//     event.target.classList.contains("next") ? 
-//     handleNext() : handlePrev();
+	showSteps('desmos_view_container', document.getElementById("step_list").children[stepIndex]);
+}
 
-//     showSteps();
-// }
+// Used by showSteps function to disabled next/prev button if first or last items are clicked 
+function syncBtnNavigation(listItems, listIndex){
+	var listIndex = parseInt(listIndex);
+	var nextBtn = document.querySelector('.js-next');
+	var prevBtn = document.querySelector('.js-prev');
 
-// Disable "Previous" and "Next" buttons when first and last list items selected with spacebar 
-// function syncNavButtons(event){
-//     var listItems = document.querySelectorAll('.step-li');
+	nextBtn.disabled = false;
+	prevBtn.disabled = false;
 
-//     $('.prev').prop('disabled', false);
-//     $('.next').prop('disabled', false);
-
-//     if(event.code === "Space" || event.code === "Tab"){
-//         if($(this).index() === 0){
-//             $('.prev').prop('disabled', true);
-//         } else if($(this).index() === listItems.length - 1){
-//             $('.next').prop('disabled', true);
-//         }
-//     }
-// }
+	if(listIndex === listItems.length - 1){
+		nextBtn.disabled = true;
+	} else if(listIndex === 0){
+		prevBtn.disabled = true;
+	}
+}
 
 function index(el) {
 	if (!el) return -1;
@@ -530,9 +529,8 @@ function setupDnD() {
 
 setupDnD();
 
-// $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 // $('.js-step-list li').on("keydown", syncNavButtons);
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
-
+$('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 
