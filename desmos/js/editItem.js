@@ -25,6 +25,7 @@ $(document).ready(function() {
                 $("#desmos_edit_container").hide();
                 $("#desmos_preview_button").html("Preview");
                 $("#desmos_preview_content").html(data);
+                window.rendermathnode();
                 $("div.mainbody").css("background-color", "#F9FAFB");
                 $("div.breadcrumb").css("background-color", "#F9FAFB");
                 $("#desmos_preview_container").show();
