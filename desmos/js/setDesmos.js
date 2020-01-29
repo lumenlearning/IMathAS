@@ -32,7 +32,9 @@ function showSteps(parent, el){
 			stepItem.style.display = "block";
 		}
 	}
-	syncBtnNavigation(listItems, listIndex);
+	if (document.getElementById('step_box').classList.contains('desmos-student-view')) {
+		syncBtnNavigation(listItems, listIndex);
+	}
 }
 
 function addStep(){
@@ -148,59 +150,71 @@ function removeStep(event){
 
 function handleStudentViewNav(event){
     var listItems = document.querySelectorAll('.step-li');
+	var selectEl = document.getElementById('js-step-nav');
+	var prevButtons = document.querySelectorAll('.js-prev');
+	var nextButtons = document.querySelectorAll('.js-next');
     var listItem;
-	var stepIndex; 
-
-    document.querySelector('.js-prev').disabled = false;
-	document.querySelector('.js-next').disabled = false;
+	var stepIndex;
 	
 	if (event.target.classList.contains("js-next")){
 		for (let i = 0; i < listItems.length; i++) {
             if (listItems[i].classList.contains('is-selected')) {
                 listItem = listItems[i];
-                stepIndex = i + 1;
+				stepIndex = i + 1;
             }
         }
-        
-        if(stepIndex > listItems.length - 2){
-            event.target.disabled = true;
-            document.querySelector('.js-prev').disabled = false;
-        } 
-    
-        listItem.classList.remove('is-selected');
+		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+			prevButtons[buttons].disabled = false;
+		}
+		if(stepIndex > listItems.length - 2){
+			for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+				nextButtons[buttons].disabled = true;
+			}
+        }
+		listItem.classList.remove('is-selected');
 		listItem.nextSibling.classList.add('is-selected');
-	} else {
+		selectEl.value = stepIndex;
+	} else if (event.target.classList.contains("js-prev")) {
 		for (let i = 0; i < listItems.length; i++) {
             if (listItems[i].classList.contains('is-selected')) {
                 listItem = listItems[i];
                 stepIndex = i - 1;
             }
         }
-    
+		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+			nextButtons[buttons].disabled = false;
+		}
         if(stepIndex === 0){
-            event.target.disabled = true;
-            document.querySelector('.js-next').disabled = false;
+			for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+				prevButtons[buttons].disabled = true;
+			}
         }
-        listItem.classList.remove('is-selected');
-        listItem.previousSibling.classList.add('is-selected');
+		listItem.classList.remove('is-selected');
+		listItem.previousSibling.classList.add('is-selected');
+		selectEl.value = stepIndex;
 	}
-
 	showSteps('desmos_view_container', document.getElementById("step_list").children[stepIndex]);
 }
 
 // Used by showSteps function to disabled next/prev button if first or last items are clicked 
 function syncBtnNavigation(listItems, listIndex){
 	var listIndex = parseInt(listIndex);
-	var nextBtn = document.querySelector('.js-next');
-	var prevBtn = document.querySelector('.js-prev');
+	var navButtons = document.querySelectorAll('.js-prev, .js-next');
+	var prevButtons = document.querySelectorAll('.js-prev');
+	var nextButtons = document.querySelectorAll('.js-next');
 
-	nextBtn.disabled = false;
-	prevBtn.disabled = false;
+	for (let buttons = 0; buttons < navButtons.length; buttons++) {
+		navButtons[buttons].disabled = false;
+	}
 
 	if(listIndex === listItems.length - 1){
-		nextBtn.disabled = true;
+		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+			nextButtons[buttons].disabled = true;
+		}
 	} else if(listIndex === 0){
-		prevBtn.disabled = true;
+		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+			prevButtons[buttons].disabled = true;
+		}
 	}
 }
 
@@ -533,4 +547,7 @@ setupDnD();
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
-
+document.getElementById('js-step-nav').onchange = function() {
+	var activeItem = this.value;
+	showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
+};

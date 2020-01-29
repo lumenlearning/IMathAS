@@ -36,6 +36,9 @@ body {
     background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
     border: 1px solid #C4CDD5;
 }
+.button-group .button:not(:first-child) {
+    margin-left: -5px;
+}
 /* End overriding Lux button styles */
 
 .desmos-header {
@@ -340,34 +343,112 @@ body {
 }
 
 /* DESMOS STUDENT VIEW */
-.desmos-student-view {
-    display: flex;
-    width: 1000px;
-}
-
-.desmos-student-view .steps-navigation {
-    border: none;
-    margin-right: 1.5em;
-    width: 30%; 
-}
-
-.desmos-student-view .step-li {
-    list-style: decimal inside;
-    margin-bottom: 1px;
-    padding: 1em;
+.desmos-header p:empty, .desmos-student-view .step-item p:empty {
+    /* TinyMCE sometimes enters in blank p tags and this makes them less likely to be apparent */
+    margin: 0;
+    padding: 0;
 }
 
 .desmos-student-view .step-items {
     border: #dadada 1px solid;
     border-radius: 4px;
-    padding: 2em 2em 0 2em;
-    width: 256px;
+    padding: 0.75em;
 }
 
 /* Overide button style from imasscore.css */
 .desmos-nav-btns .button {
     background-color: #fff;
-    margin-top: 16px;
+}
+
+@media (max-width: 1023px) {
+    .desmos-student-view {
+        margin-top: 0;
+    }
+
+    .desmos-student-view #mobile_nav {
+        display: flex;
+        margin-bottom: 8px;
+    }
+
+    .desmos-student-view .step-nav {
+        flex: 1 0 auto;
+    }
+
+    .desmos-student-view #step_list {
+        display: none;
+    }
+
+    .desmos-student-view .steps-navigation select {
+        -webkit-appearance: menulist; /* Overriding lux */
+        appearance: menulist; /* Overriding lux */
+        margin-right: 8px;
+        max-width: calc(100% - 96px);
+    }
+
+    .desmos-student-view .steps-navigation .button {
+        min-width: unset;
+        padding: 8px;
+    }
+
+    .desmos-student-view .steps-navigation svg {
+        display: inline-block;
+        height: 24px;
+        opacity: 0.5;
+        pointer-events: none;
+        transition: opacity 0.1s;
+        vertical-align: middle;
+        width: 24px;
+    }
+
+    .desmos-student-view #mobile_nav button:hover svg,
+    .desmos-student-view #mobile_nav button:focus svg {
+        opacity: 1;
+    }
+
+    .desmos-student-view .step-items {
+        min-width: 100%;
+        width: 100%;
+    }
+
+}
+
+@media (min-width: 1024px) {
+    .desmos-student-view {
+        display: flex;
+        width: 100%;
+    }
+    
+    .desmos-student-view .steps-navigation {
+        border: none;
+        margin-right: 1.5em;
+        max-width: 360px;
+        width: 30%; 
+    }
+
+    .desmos-student-view .steps-details {
+        min-width: 640px;
+        width: 70%;
+    }
+
+    .desmos-student-view #mobile_nav {
+        display: none;
+    }
+    
+    .desmos-student-view .step-li {
+        list-style: decimal inside;
+        margin-bottom: 1px;
+        padding: 1em;
+    }
+    
+    .desmos-student-view .step-items {
+        min-width: 256px;
+        padding: 2em 2em 0 2em;
+        width: 100%;
+    }
+
+    .desmos-nav-btns .button {
+        margin-top: 16px;
+    }    
 }
 
 #desmos_preview_content {
@@ -377,14 +458,20 @@ body {
     padding: 0 1em 1em 1em;
 }
 
-.js-desmos {
+.js-desmos, .desmos-fig {
+    height: 400px;
     margin: 0;
     padding: 0;
-    width:600px;
-    height: 400px;
+    width: 100%;
 }
 
-#tinymce .js-desmos {
+@media (min-height:800px) {
+    .js-desmos, .desmos-fig {
+        height: 600px;
+    }
+}
+
+#tinymce .desmos-edit-button, #tinymce .js-desmos {
     background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
     display: block;
     cursor: pointer;
@@ -392,7 +479,7 @@ body {
     width: 190px;
 }
 
-#editdesmos.js-desmos {
+#editdesmos.desmos-fig, #editdesmos.js-desmos {
     width: 100%;
 }
 
