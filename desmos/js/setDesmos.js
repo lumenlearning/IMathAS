@@ -96,7 +96,7 @@ function addStep(){
 	document.getElementById("step_items").appendChild(textareaWrapper);
 
 	numsteps++;
-	initeditor("selector","textarea");
+	initeditor("textareas","step-item");
 	showSteps(parent, step);
 	setupDnD();
 }
