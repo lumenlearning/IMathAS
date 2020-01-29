@@ -108,7 +108,7 @@ function addStep(){
 	//var num = document.getElementById('desmos_edit_container').getElementsByClassName('step-li').length;
 
 	numsteps++;
-	initeditor("selector","textarea");
+	initeditor("textareas","step-item");
 	showSteps(parent, step);
 	setupDnD();
 }
