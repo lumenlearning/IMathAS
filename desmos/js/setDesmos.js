@@ -357,7 +357,7 @@ var reorderList = {
 			reorderList.objParent.removeChild(reorderList.objCurrent);
 			reorderList.objParent.insertBefore(
 				reorderList.objCurrent,
-				reorderList.lastTarget
+				reorderList.objParent.children[0]
 			);
 			reorderList.drop();
 		}
