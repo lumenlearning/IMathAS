@@ -4,12 +4,12 @@ var ohmModal = (function() {
         $overlay,
         $modal,
         $content;
-  
+
     // Append the html
     $overlay = $('<div class="ohm-modal-overlay"></div>');
-    $modal = $('<div class="js-ohm-modal ohm-modal"></div>');
+    $modal = $('<div class="js-ohm-modal ohm-modal" role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"></div>');
     $content = $('<div class="ohm-modal-content"></div>');
-  
+
     $modal.hide();
     $overlay.hide();
     $modal.append($content);
@@ -35,6 +35,8 @@ var ohmModal = (function() {
     method.open = function(settings) {
       $content.empty().append(settings.content);
       
+      method.forceDialogFocus(settings.focusEl); 
+
       $modal.css({
         width: settings.width || 'auto',
         height: settings.height || 'auto'
@@ -57,9 +59,17 @@ var ohmModal = (function() {
       });
     };
 
+    method.forceDialogFocus = function(focusEl){
+      // setTimeout to prevent JS from trying to set focus on element before fade in animation has completed
+      setTimeout(function(event){
+        $content.attr('tabindex', '-1');
+        $(focusEl).focus();
+      }, 0);
+    }
+  
     // Press 'esc' to close
     $(document).keyup(function(event) {
-      if (event.code == "Escape") {
+      if (event.key === "Escape") {
         event.preventDefault();
         method.close();
       }

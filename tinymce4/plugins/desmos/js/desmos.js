@@ -53,7 +53,7 @@ var desmosDialog = {
         ed.execCommand(
             'mceInsertContent',
             false,
-            '<figure class="js-desmos" data-json=\''+json+'\'></figure>'
+            '<figure class="js-desmos desmos-fig" data-json=\''+json+'\'></figure>'
         );
         elt = ed.dom.doc.getElementsByClassName("js-desmos");
         if (elt.length>0) {

@@ -17,7 +17,7 @@
 <body onload="desmosDialog.init();">
 
 <form onsubmit="return false;" action="#" style="margin:10px;">
-    <figure id="editdesmos" class="js-desmos" data-json=""></figure>
+    <figure id="editdesmos" class="js-desmos desmos-fig" data-json=""></figure>
         <div class="desmos-nav-btns"  style="float: right">
             <button id="desmos_preview_button" class="button -offset" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
             <button id="desmos_form_submit_button" class="button -offset" type="submit" name="submitbtn" value="Submit" style="clear:both" onclick="desmosDialog.insert();">Add</button>

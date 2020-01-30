@@ -16,9 +16,12 @@ loadDesmos();
 function showSteps(parent, el){
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
+	var listIndex = el.getAttribute("data-num");
+
 	for (var i = 0; i < listItems.length; i++) {
 		var num = listItems[i].getAttribute("data-num");
 		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + num)[0];
+
 		if (!(listItems[i] == el)) {
 			listItems[i].classList.remove("is-selected");
 			listItems[i].setAttribute("aria-selected", false);
@@ -28,6 +31,9 @@ function showSteps(parent, el){
 			listItems[i].setAttribute("aria-selected", true);
 			stepItem.style.display = "block";
 		}
+	}
+	if (document.getElementById('step_box').classList.contains('desmos-student-view')) {
+		syncBtnNavigation(listItems, listIndex);
 	}
 }
 
@@ -109,11 +115,11 @@ function confirmDelete(event){
 		ohmModal.open({
 			content: data,
 			height: "auto",
-			width: "50%"
+			width: "50%",
+			// set element to focus when modal opens
+			focusEl: ".js-cancel-modal"
 		});
-		
-		$(".js-ohm-modal").focus(); 
-		
+
 		//add event listeners once modal is on page
 		$(".js-ohm-modal").on("click", ".js-confirm-delete", removeStep);
 		$(".js-ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
@@ -142,68 +148,75 @@ function removeStep(event){
 	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
 }
 
-// function handleStudentViewNav(event){
-//     var listItems = document.querySelectorAll('.step-li');
-//     var listItem;
-//     var stepIndex; 
+function handleStudentViewNav(event){
+    var listItems = document.querySelectorAll('.step-li');
+	var selectEl = document.getElementById('js-step-nav');
+	var prevButtons = document.querySelectorAll('.js-prev');
+	var nextButtons = document.querySelectorAll('.js-next');
+    var listItem;
+	var stepIndex;
+	
+	if (event.target.classList.contains("js-next")){
+		for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+				stepIndex = i + 1;
+            }
+        }
+		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+			prevButtons[buttons].disabled = false;
+		}
+		if(stepIndex > listItems.length - 2){
+			for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+				nextButtons[buttons].disabled = true;
+			}
+        }
+		listItem.classList.remove('is-selected');
+		listItem.nextSibling.classList.add('is-selected');
+		selectEl.value = stepIndex;
+	} else if (event.target.classList.contains("js-prev")) {
+		for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+                stepIndex = i - 1;
+            }
+        }
+		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+			nextButtons[buttons].disabled = false;
+		}
+        if(stepIndex === 0){
+			for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+				prevButtons[buttons].disabled = true;
+			}
+        }
+		listItem.classList.remove('is-selected');
+		listItem.previousSibling.classList.add('is-selected');
+		selectEl.value = stepIndex;
+	}
+	showSteps('desmos_view_container', document.getElementById("step_list").children[stepIndex]);
+}
 
-//     document.querySelector('.prev').disabled = false;
-//     document.querySelector('.next').disabled = false;
+// Used by showSteps function to disabled next/prev button if first or last items are clicked 
+function syncBtnNavigation(listItems, listIndex){
+	var listIndex = parseInt(listIndex);
+	var navButtons = document.querySelectorAll('.js-prev, .js-next');
+	var prevButtons = document.querySelectorAll('.js-prev');
+	var nextButtons = document.querySelectorAll('.js-next');
 
-//     function handleNext(){
-//         for (let i = 0; i < listItems.length; i++) {
-//             if (listItems[i].classList.contains('is-selected')) {
-//                 listItem = listItems[i];
-//                 stepIndex = i+1;
-//             }
-//         }
-        
-//         if(stepIndex > listItems.length - 2){
-//             event.target.disabled = true;
-//             document.querySelector('.prev').disabled = false;
-//         } 
-    
-//         listItem.classList.remove('is-selected');
-//         listItem.nextSibling.classList.add('is-selected');
-//     }
+	for (let buttons = 0; buttons < navButtons.length; buttons++) {
+		navButtons[buttons].disabled = false;
+	}
 
-//     function handlePrev(){
-//         for (let i = 0; i < listItems.length; i++) {
-//             if (listItems[i].classList.contains('is-selected')) {
-//                 listItem = listItems[i];
-//                 stepIndex = i-1;
-//             }
-//         }
-    
-//         if(stepIndex === 0){
-//             event.target.disabled = true;
-//             document.querySelector('.next').disabled = false;
-//         }
-//         listItem.classList.remove('select');
-//         listItem.previousSibling.classList.add('is-selected');
-//     }
-
-//     event.target.classList.contains("next") ? 
-//     handleNext() : handlePrev();
-
-//     showSteps();
-// }
-
-// Disable "Previous" and "Next" buttons when first and last list items selected with spacebar 
-// function syncNavButtons(event){
-//     var listItems = document.querySelectorAll('.step-li');
-
-//     $('.prev').prop('disabled', false);
-//     $('.next').prop('disabled', false);
-
-//     if(event.code === "Space" || event.code === "Tab"){
-//         if($(this).index() === 0){
-//             $('.prev').prop('disabled', true);
-//         } else if($(this).index() === listItems.length - 1){
-//             $('.next').prop('disabled', true);
-//         }
-//     }
-// }
+	if(listIndex === listItems.length - 1){
+		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+			nextButtons[buttons].disabled = true;
+		}
+	} else if(listIndex === 0){
+		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+			prevButtons[buttons].disabled = true;
+		}
+	}
+}
 
 function index(el) {
 	if (!el) return -1;
@@ -530,9 +543,11 @@ function setupDnD() {
 
 setupDnD();
 
-// $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 // $('.js-step-list li').on("keydown", syncNavButtons);
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
-
-
+$('.js-desmos-nav').on("click", "button", handleStudentViewNav);
+document.getElementById('js-step-nav').onchange = function() {
+	var activeItem = this.value;
+	showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
+};
