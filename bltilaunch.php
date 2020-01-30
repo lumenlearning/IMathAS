@@ -1383,12 +1383,26 @@ if ($stm->rowCount()==0) {
 		$query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
 		$query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
 		$stm = $DBH->prepare($query);
-		$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'assess', ':typeid'=>$aid));
-
-		if (isset($_SESSION['place_item_id'])) {
-            $linkparts = array('itemid',$_SESSION['place_item_id']);
-        } else
-		$linkparts = array('aid',$aid);
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // change placementtype and typeid based on connection item
+        $placementtype = 'assess';
+        $typeid = $aid;
+        $linkparts = array('aid',$aid);
+        if (isset($_SESSION['place_item_id'])) {
+            $linkparts = array('itemid', $_SESSION['place_item_id']);
+            $placementtype = 'DesmosItem';
+            $typeid = $_SESSION['place_item_id'];
+        }
+		$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 
 	} else if ($_SESSION['ltirole']=='instructor') {
 		//don't need to do anything - will prompt for linking
