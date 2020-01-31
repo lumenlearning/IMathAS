@@ -83,6 +83,7 @@ function resyncGrades(): void
             $logInfo['failReason'] = 'Assessment record does not have a sourcedid.'
                 . ' Did the LMS provide a sourcedid? Are sourcedids enabled from the LMS (course and LMS-wide)?';
             error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
+            $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
         }
         elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
