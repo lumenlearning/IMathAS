@@ -327,7 +327,7 @@ abstract class CourseItem
         $blocktree = explode('-', $this->block);
         $sub =& $order;
         for ($i=1;$i<count($blocktree);$i++) {
-            $sub =& $sub[$blocktree[$i]]['items'];
+            $sub =& $sub[$blocktree[$i]-1]['items'];
         }
         if ($delete) {
             $key = array_search($this->itemid, $sub);
