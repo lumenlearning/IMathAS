@@ -5,6 +5,7 @@ namespace OHM\Util;
 
 use OHM\Controlers\Assessments;
 use OHM\Controlers\LTI;
+use PDO;
 use Sanitize;
 
 require("../init.php");
@@ -52,6 +53,8 @@ function resyncGrades(): void
         return;
     }
 
+    $studentIds = getStudentIdsInCourse($cid);
+
     error_log(sprintf('User is requested a course grade resync. %s',
         json_encode([
             'userId' => $GLOBALS['userid'],
@@ -69,6 +72,10 @@ function resyncGrades(): void
     $current_assessment = '';
     $assessmentName = '';
     foreach ($records as $us) {
+        if (!in_array($us['uid'], $studentIds)) {
+            continue;
+        }
+
         if ($current_assessment != $us['aid']) {
             $current_assessment = $us['aid'];
             $assessment = Assessments::getAssessmentName((int)$us['aid']);
@@ -105,6 +112,23 @@ function resyncGrades(): void
     if (0 < $totalNotQueued) {
         dumpErrors($totalNotQueued, $errorLogIds);
     }
+}
+
+/**
+ * Get the user IDs for students enrolled in a course.
+ *
+ * @param int $courseId The course ID.
+ * @return array An array of user IDs from imas_users.
+ */
+function getStudentIdsInCourse(int $courseId): array {
+    $stm = $GLOBALS['DBH']->prepare("SELECT userid FROM `imas_students` WHERE courseid = :courseId");
+    $stm->execute([':courseId' => $courseId]);
+
+    $userIds = [];
+    while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+        $userIds[] = $row['userid'];
+    }
+    return $userIds;
 }
 
 /**
