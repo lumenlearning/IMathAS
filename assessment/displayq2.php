@@ -1584,7 +1584,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= '<li>';
 			}
-			$out .= "<select name=\"qn$qn-$i\">";
+			$out .= "<select name=\"qn$qn-$i\" id=\"qn$qn-$i\">";
 			$out .= '<option value="-" ';
 			if ($las[$i]=='-' || strcmp($las[$i],'')==0) {
 				$out .= 'selected="1"';
@@ -1609,7 +1609,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$out .= ">$v</option>";
 				}
 			}
-			$out .= "</select>&nbsp;{$questions[$randqkeys[$i]]}</li>\n";
+			$out .= "</select>&nbsp;<label for=\"qn$qn-$i\">{$questions[$randqkeys[$i]]}</label></li>\n";
 		}
 		$out .= "</ul>\n";
 		$out .= "</div>";
