@@ -151,7 +151,7 @@ $inmodule = false;
 
 function getorg($it,$parent,&$res,$ind,$mod_depth) {
 	global $DBH,$iteminfo,$newdir,$installname,$urlmode,$linktype,$urlmode,$imasroot,$ccnt,$module_meta,$htmldir,$filedir, $toplevelitems, $inmodule;
-	global $usechecked,$checked,$usedcats;
+	global $usechecked,$checked,$usedcats,$gbcatitems;
 
 	$out = '';
 
@@ -203,7 +203,80 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 			if ($usechecked && array_search($item,$checked)===FALSE) {
 				continue;
 			}
-			if ($iteminfo[$item][0]=='InlineText') {
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            if ($iteminfo[$item][0]=='DesmosItem') {
+                $courseItem = new \Desmos\Models\DesmosItem();
+                $courseItem->findItem($iteminfo[$item][1]);
+                $out .= $ind.'<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'" identifierref="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
+                $out .= $ind.'  <title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
+                $out .= $ind.'</item>'."\n";
+                if ($linktype=='canvas') {
+                    $gbcatitems[$iteminfo[$item][0]] = $courseItem->itemname;
+
+                    $canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
+                    $canvout .= '<content_type>Assignment</content_type>'."\n";
+                    $canvout .= '<workflow_state>'.($courseItem->avail==0?'unpublished':'active').'</workflow_state>'."\n";
+                    $canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>'."\n";
+                    $canvout .= '<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
+                    $canvout .= "<position>$ccnt</position> <indent>".max($mod_depth-1,0)."</indent> </item>";
+                    $ccnt++;
+
+                    mkdir($newdir.'/assn'.$iteminfo[$item][1]);
+                    $fp = fopen($newdir.'/assn'.$iteminfo[$item][1].'/assignment_settings.xml','w');
+                    fwrite($fp,'<assignment xmlns="http://canvas.instructure.com/xsd/cccv1p0" identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://canvas.instructure.com/xsd/cccv1p0 http://canvas.instructure.com/xsd/cccv1p0.xsd">'."\n");
+                    fwrite($fp,'<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n");
+                    fwrite($fp,'<workflow_state>'.($courseItem->avail==0?'unpublished':'published').'</workflow_state>'."\n");
+                    if (isset($_POST['includeduedates']) && $courseItem->enddate<2000000000) {
+                        fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $courseItem->enddate).'</due_at>'."\n");
+                    }
+                    if ($courseItem->startdate > 0 && isset($_POST['includestartdates'])) {
+                        fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $courseItem->startdate).'</unlock_at>'."\n");
+                    }
+                    fwrite($fp,'<assignment_group_identifierref>GBCAT'.$iteminfo[$item][0].'</assignment_group_identifierref>'."\n");
+                    fwrite($fp,'<submission_types>external_tool</submission_types>'."\n");
+                    fwrite($fp,'<external_tool_url>'. $GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_item_id='.$courseItem->itemid.'</external_tool_url>'."\n");
+                    fwrite($fp,'</assignment>');
+                    fclose($fp);
+                    $fp = fopen($newdir.'/assn'.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html','w');
+                    fwrite($fp,'<html><body> </body></html>');
+                    fclose($fp);
+                    $resitem =  '<resource identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" type="associatedcontent/imscc_xmlv1p1/learning-application-resource" href="assn'.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html">'."\n";
+                    $resitem .= '  <file href="assn'.$iteminfo[$item][1].'/assignmenthtml'.$iteminfo[$item][1].'.html" />'."\n";
+                    $resitem .= '  <file href="assn'.$iteminfo[$item][1].'/assignment_settings.xml" />'."\n";
+                    $resitem .= '</resource>';
+                    $res[] = $resitem;
+                } else {
+                    $fp = fopen($newdir.'/blti'.$iteminfo[$item][1].'.xml','w');
+                    fwrite($fp,'<cartridge_basiclti_link xmlns="http://www.imsglobal.org/xsd/imslticc_v1p0" xmlns:blti="http://www.imsglobal.org/xsd/imsbasiclti_v1p0" xmlns:lticm ="http://www.imsglobal.org/xsd/imslticm_v1p0" xmlns:lticp ="http://www.imsglobal.org/xsd/imslticp_v1p0">');
+                    fwrite($fp,'<blti:title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</blti:title>');
+                    fwrite($fp,'<blti:description>'.htmlentities(html_entity_decode($courseItem->summary),ENT_XML1,'UTF-8',false).'</blti:description>');
+                    if ($linktype=='url') {
+                        $urladd = '?custom_item_id='.$courseItem->itemid;
+                    } else {
+                        fwrite($fp, '<blti:custom><lticm:property name="place_aid">' . $iteminfo[$item][1] . '</lticm:property></blti:custom>');
+                        $urladd = '';
+                    }
+                    fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                    if ($urlmode == 'https://') {fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');}
+                    fwrite($fp,'<blti:vendor><lticp:code>IMathAS</lticp:code><lticp:name>'.$installname.'</lticp:name></blti:vendor>');
+                    fwrite($fp,'</cartridge_basiclti_link>');
+                    fclose($fp);
+                    $resitem =  '<resource identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" type="imsbasiclti_xmlv1p0">'."\n";
+                    $resitem .= '  <file href="blti'.$iteminfo[$item][1].'.xml" />'."\n";
+                    $resitem .= '</resource>';
+                    $res[] = $resitem;
+                }
+            } else
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            if ($iteminfo[$item][0]=='InlineText') {
 				$stm = $DBH->prepare("SELECT title,text,fileorder,avail FROM imas_inlinetext WHERE id=:id");
 				$stm->execute(array(':id'=>$iteminfo[$item][1]));
 				$row = $stm->fetch(PDO::FETCH_NUM);
@@ -399,7 +472,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 				$row = $stm->fetch(PDO::FETCH_NUM);
 				if ($row[8]==-1) {
 					require_once("../includes/updateptsposs.php");
-					$row[8] = updatePointsPossible($iteminfo[$item][1], $row[3], $row[2]);	
+					$row[8] = updatePointsPossible($iteminfo[$item][1], $row[3], $row[2]);
 				}
 				//echo "encoding {$row[0]} as ".htmlentities($row[0],ENT_XML1,'UTF-8',false).'<br/>';
 				$out .= $ind.'<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'" identifierref="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
@@ -430,7 +503,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 							$aitemcnt[$k] = 1;
 						}
 					}
-					
+
 					mkdir($newdir.'/assn'.$iteminfo[$item][1]);
 					$fp = fopen($newdir.'/assn'.$iteminfo[$item][1].'/assignment_settings.xml','w');
 					fwrite($fp,'<assignment xmlns="http://canvas.instructure.com/xsd/cccv1p0" identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://canvas.instructure.com/xsd/cccv1p0 http://canvas.instructure.com/xsd/cccv1p0.xsd">'."\n");
@@ -439,11 +512,11 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 					fwrite($fp,'<points_possible>'.$row[8].'</points_possible>'."\n");
 					fwrite($fp,'<grading_type>points</grading_type>'."\n");
 					if (isset($_POST['includeduedates']) && $row[4]<2000000000) {
-						fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $row[4]).'</due_at>'."\n");
-					}
-					if ($row[7] > 0 && isset($_POST['includestartdates'])) {
-						fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $row[7]).'</unlock_at>'."\n");
-					}
+					    fwrite($fp,'<due_at>'.gmdate("Y-m-d\TH:i:s", $row[4]).'</due_at>'."\n");
+                    }
+                    if ($row[7] > 0 && isset($_POST['includestartdates'])) {
+                        fwrite($fp,'<unlock_at>'.gmdate("Y-m-d\TH:i:s", $row[7]).'</unlock_at>'."\n");
+                    }
 					if (isset($_POST['includegbcats'])) {
 						fwrite($fp,'<assignment_group_identifierref>GBCAT'.$row[5].'</assignment_group_identifierref>'."\n");
 					}
@@ -471,8 +544,12 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
 						fwrite($fp,'<blti:custom><lticm:property name="place_aid">'.$iteminfo[$item][1].'</lticm:property></blti:custom>');
 						$urladd = '';
 					}
-					fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
-					if ($urlmode == 'https://') {fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');}
+					if ($urlmode == 'https://') {
+						fwrite($fp,'<blti:launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
+						fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');
+					} else {
+						fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
+					}
 					fwrite($fp,'<blti:vendor><lticp:code>IMathAS</lticp:code><lticp:name>'.$installname.'</lticp:name></blti:vendor>');
 					fwrite($fp,'</cartridge_basiclti_link>');
 					fclose($fp);
@@ -604,7 +681,7 @@ if ($linktype=='canvas') {
 	mkdir($newdir.'/non_cc_assessments');
 	mkdir($newdir.'/course_settings');
 	file_put_contents($newdir.'/course_settings/canvas_export.txt', "Q: Why do pandas prefer Cartesian coordinates? A: Because they're not polar bears");
-	
+
 	$fp = fopen($newdir.'/course_settings/assignment_groups.xml','w');
 	fwrite($fp,'<?xml version="1.0" encoding="UTF-8"?>'."\n");
 	fwrite($fp, '<assignmentGroups xsi:schemaLocation="http://canvas.instructure.com/xsd/cccv1p0 http://canvas.instructure.com/xsd/cccv1p0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://canvas.instructure.com/xsd/cccv1p0">'."\n");
@@ -625,6 +702,25 @@ if ($linktype=='canvas') {
 			fwrite($fp, ' </assignmentGroup>'."\n");
 		}
 	}
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if (isset($gbcatitems)) {
+        foreach ($gbcatitems as $item=>$cat) {
+            fwrite($fp, ' <assignmentGroup identifier="GBCAT' . $item . '">' . "\n");
+            fwrite($fp, '  <title>' . htmlentities($cat, ENT_XML1, 'UTF-8', false) . '</title>' . "\n");
+            fwrite($fp, '  <position>' . $pcnt . '</position>' . "\n");
+            $pcnt++;
+            fwrite($fp, ' </assignmentGroup>' . "\n");
+        }
+    }
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 	fwrite($fp,'</assignmentGroups>');
 	fclose($fp);
 	$fp = fopen($newdir.'/course_settings/module_meta.xml','w');
@@ -639,9 +735,9 @@ if ($linktype=='canvas') {
 	}
 	fwrite($fp, '</course>');
 	fclose($fp);
-	
+
 	if (dir_is_empty($newdir.'/web_resources')) {
-		rmdir($newdir.'/web_resources');	
+		rmdir($newdir.'/web_resources');
 	}
 }
 
@@ -749,10 +845,10 @@ rrmdir($newdir);
 $archive_file_name = 'CCEXPORT'.$cid.'.imscc';
 //echo "<br/><a href=\"$imasroot/course/files/CCEXPORT$cid.imscc\">Download</a><br/>";
 //echo "Once downloaded, keep things clean and <a href=\"ccexport.php?cid=$cid&delete=true\">Delete</a> the export file off the server.";
-header("Content-type: application/vnd.ims.imsccv1p1"); 
+header("Content-type: application/vnd.ims.imsccv1p1");
 header("Content-Disposition: attachment; filename=$archive_file_name");
 header("Content-length: " . filesize($path.'/'.$archive_file_name));
-header("Pragma: no-cache"); 
-header("Expires: 0"); 
+header("Pragma: no-cache");
+header("Expires: 0");
 readfile($path.'/'.$archive_file_name);
 unlink($path.'/'.$archive_file_name);

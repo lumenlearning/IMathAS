@@ -5,6 +5,7 @@ namespace OHM\Util;
 
 use OHM\Controlers\Assessments;
 use OHM\Controlers\LTI;
+use PDO;
 use Sanitize;
 
 require("../init.php");
@@ -52,6 +53,8 @@ function resyncGrades(): void
         return;
     }
 
+    $studentIds = getStudentIdsInCourse($cid);
+
     error_log(sprintf('User is requested a course grade resync. %s',
         json_encode([
             'userId' => $GLOBALS['userid'],
@@ -67,8 +70,12 @@ function resyncGrades(): void
     $totalNotQueued = 0;
     $errorLogIds = array();
     $current_assessment = '';
+    $assessmentName = '';
     foreach ($records as $us) {
-        $assessmentName = '';
+        if (!in_array($us['uid'], $studentIds)) {
+            continue;
+        }
+
         if ($current_assessment != $us['aid']) {
             $current_assessment = $us['aid'];
             $assessment = Assessments::getAssessmentName((int)$us['aid']);
@@ -79,10 +86,19 @@ function resyncGrades(): void
         $score = Assessments::getpts($us['scores']);
         $logInfo = createLogInfo($cid, $us, $assessmentName, $grade, $score);
 
-        if (LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
+        if (empty($us['sourcedid'])) {
+            $logInfo['failReason'] = 'Assessment record does not have a sourcedid.'
+                . ' Did the LMS provide a sourcedid? Are sourcedids enabled from the LMS (course and LMS-wide)?';
+            error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
+            $errorLogIds[] = $logInfo['debugId'];
+            $totalNotQueued++;
+        }
+        elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
             error_log('Queued LMS grade. ' . json_encode($logInfo));
             $totalQueued++;
         } else {
+            $logInfo['failReason'] = 'LTI::addToLTIQueue did not insert a new row into imas_ltiqueue.'
+                . ' Possible hash collision?';
             error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
@@ -96,6 +112,23 @@ function resyncGrades(): void
     if (0 < $totalNotQueued) {
         dumpErrors($totalNotQueued, $errorLogIds);
     }
+}
+
+/**
+ * Get the user IDs for students enrolled in a course.
+ *
+ * @param int $courseId The course ID.
+ * @return array An array of user IDs from imas_users.
+ */
+function getStudentIdsInCourse(int $courseId): array {
+    $stm = $GLOBALS['DBH']->prepare("SELECT userid FROM `imas_students` WHERE courseid = :courseId");
+    $stm->execute([':courseId' => $courseId]);
+
+    $userIds = [];
+    while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+        $userIds[] = $row['userid'];
+    }
+    return $userIds;
 }
 
 /**

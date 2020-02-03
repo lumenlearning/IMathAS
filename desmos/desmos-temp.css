@@ -25,15 +25,19 @@ body {
   }
 
 .button.--button-secondary {
-    background: #e6ebf0;
-    background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
+    background: #f2f3f4;
+    background: linear-gradient(0deg, rgba(242,243,244,1) 0%, rgba(255,255,255,1) 100%);
     border: 1px solid #C4CDD5;
+    margin-left: 0;
 }
 
 .button.--button-secondary:hover {
     background: #e6ebf0;
     background: linear-gradient(0deg, rgba(230,235,240,1) 0%, rgba(245,246,247,1) 100%);
     border: 1px solid #C4CDD5;
+}
+.button-group .button:not(:first-child) {
+    margin-left: -5px;
 }
 /* End overriding Lux button styles */
 
@@ -47,10 +51,6 @@ body {
 
 .desmos-header img {
     vertical-align: middle;
-}
-
-.desmos-header p {
-    margin-left: 32px;
 }
 
 .desmos-steps {
@@ -108,9 +108,35 @@ body {
     height: 510px;
     min-height: 100%;
     min-width: 100%;
-} 
+}
+
+.step-items .mce-edit-area {
+    min-height: 500px;
+}
 
 /* DESMOS TEACHER VIEW */
+
+#desmos_save_buttons {
+    position: relative;
+}
+
+#desmos_save_status {
+    position: absolute;
+    top: 50%;
+    margin-left: 0.5em;
+}
+
+.desmos_save_status_saving {
+    color: #606060;
+}
+
+.desmos_save_status_success {
+    color: #1E74D1;
+}
+
+.desmos_save_status_failed {
+    color: #ff2222;
+}
 
 /* Overriding tiny mce */
 .step-items .mce-panel {
@@ -135,19 +161,36 @@ body {
 	padding: .5em, 1em;
 	width: 10em;
 }
+
+.desmos .controls + .controls {
+    margin-left: 1em;
+    margin-top: 0; /* overriding lux */
+}
 /* End Lux overwrite */
+
+.desmos #import {
+    clear: both;
+    width: 100%;
+    height: 30px;
+    margin-top: 0.4em;
+}
+
+.mce-i-desmos {
+    background: url('../ohm/img/desmos.png') no-repeat;
+    background-size: 16px 16px;
+}
 
 .desmos .form-group {
     display: flex;
     padding-bottom: 1em;
 }
 
-.desmos .form-group input {
+.desmos .form-group input, .desmos .controls .mce-tinymce {
     margin-top: 0.4em;
 }
 
-.desmos .form-group > div:first-child {
-	margin-right: 2em;
+.desmos .controls .mce-tinymce {
+    max-width: 1220px;
 }
 
 .desmos .teacher-view {
@@ -169,20 +212,33 @@ body {
 }
 
 .teacher-view .step-li {
-    padding-left:36px;
+    border-bottom: 2px solid transparent;
+    padding-left: 40px;
 }
 
-.step-li[draggable=true].is-selected {
+.teacher-view .step-li:first-child {
+    border-top: 2px solid transparent;
+}
+
+.step-li[aria-grabbed=true].is-selected {
     opacity: 0.4;
 }
 
-.step-li.is-over {
-    border-bottom: 2px solid #1e74d1;
-} 
+.step-li.is-target {
+    border-bottom-color: #1e74d1;
+}
+
+.step-li:first-child:not(.is-target).is-over {
+    border-top-color: #1e74d1;
+}
 
 .step-li input {
     margin: 0!important; /* overriding lux */
     width: calc(100% - 50px);
+}
+
+.step-li button:focus {
+    background-color: unset;
 }
 
 .step-li button svg {
@@ -204,6 +260,7 @@ body {
 }
 
 .delete-trigger {
+    cursor: pointer;
     padding: 10px;
     min-height: 100%;
     right: 0;
@@ -211,21 +268,25 @@ body {
 }
 
 .delete-trigger svg {
-    height: 20px;
-    width: 20px;
+    height: 16px;
+    width: 16px;
 }
 
 .move-trigger {
-    cursor: move;
-    left: 0;  
+    left: 0;
 }
 
 .move-trigger button {
+    cursor: move;
     min-height: 100%;
     margin: auto;
-    pointer-events: none;
     text-align: center;
     width: 40px;
+}
+
+.move-trigger button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .move-trigger svg {
@@ -260,7 +321,6 @@ body {
     background-color: #EBEFF2;
 }
 
-
 #desmos_preview_warning {
     background-color: #ffffff;
     border: 2px #FACAA6 solid;
@@ -283,43 +343,112 @@ body {
 }
 
 /* DESMOS STUDENT VIEW */
-.desmos-student-view {
-    display: flex;
-    width: 1000px;
-}
-
-.desmos-student-view .steps-navigation {
-    border: none;
-    margin-right: 1.5em;
-    width: 30%; 
-}
-
-.desmos-student-view .step-li {
-    list-style: decimal inside;
-    margin-bottom: 1px;
-    padding: 1em;
+.desmos-header p:empty, .desmos-student-view .step-item p:empty {
+    /* TinyMCE sometimes enters in blank p tags and this makes them less likely to be apparent */
+    margin: 0;
+    padding: 0;
 }
 
 .desmos-student-view .step-items {
     border: #dadada 1px solid;
     border-radius: 4px;
-    padding: 2em 2em 0 2em;
-    width: 256px;
+    padding: 0.75em;
 }
 
 /* Overide button style from imasscore.css */
 .desmos-nav-btns .button {
     background-color: #fff;
-    margin-top: 1em;
-    padding: .75em 2em;
 }
 
-.desmos-nav-btns .button:hover {
-    background-color: #F9FAFB;
+@media (max-width: 1023px) {
+    .desmos-student-view {
+        margin-top: 0;
+    }
+
+    .desmos-student-view #mobile_nav {
+        display: flex;
+        margin-bottom: 8px;
+    }
+
+    .desmos-student-view .step-nav {
+        flex: 1 0 auto;
+    }
+
+    .desmos-student-view #step_list {
+        display: none;
+    }
+
+    .desmos-student-view .steps-navigation select {
+        -webkit-appearance: menulist; /* Overriding lux */
+        appearance: menulist; /* Overriding lux */
+        margin-right: 8px;
+        max-width: calc(100% - 96px);
+    }
+
+    .desmos-student-view .steps-navigation .button {
+        min-width: unset;
+        padding: 8px;
+    }
+
+    .desmos-student-view .steps-navigation svg {
+        display: inline-block;
+        height: 24px;
+        opacity: 0.5;
+        pointer-events: none;
+        transition: opacity 0.1s;
+        vertical-align: middle;
+        width: 24px;
+    }
+
+    .desmos-student-view #mobile_nav button:hover svg,
+    .desmos-student-view #mobile_nav button:focus svg {
+        opacity: 1;
+    }
+
+    .desmos-student-view .step-items {
+        min-width: 100%;
+        width: 100%;
+    }
+
 }
 
-.desmos-nav-btns .button:hover {
-    background-color: #EBEFF2;
+@media (min-width: 1024px) {
+    .desmos-student-view {
+        display: flex;
+        width: 100%;
+    }
+    
+    .desmos-student-view .steps-navigation {
+        border: none;
+        margin-right: 1.5em;
+        max-width: 360px;
+        width: 30%; 
+    }
+
+    .desmos-student-view .steps-details {
+        min-width: 640px;
+        width: 70%;
+    }
+
+    .desmos-student-view #mobile_nav {
+        display: none;
+    }
+    
+    .desmos-student-view .step-li {
+        list-style: decimal inside;
+        margin-bottom: 1px;
+        padding: 1em;
+    }
+    
+    .desmos-student-view .step-items {
+        min-width: 256px;
+        padding: 2em 2em 0 2em;
+        width: 100%;
+    }
+
+    .desmos-nav-btns .button {
+        margin-top: 16px;
+    }    
 }
 
 #desmos_preview_content {
@@ -329,22 +458,28 @@ body {
     padding: 0 1em 1em 1em;
 }
 
-.js-desmos {
+.js-desmos, .desmos-fig {
+    height: 400px;
     margin: 0;
     padding: 0;
-    width:600px;
-    height: 400px;
+    width: 100%;
 }
 
-#tinymce .js-desmos {
+@media (min-height:800px) {
+    .js-desmos, .desmos-fig {
+        height: 600px;
+    }
+}
+
+#tinymce .desmos-edit-button, #tinymce .js-desmos {
     background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
     display: block;
     cursor: pointer;
-    height: 75px;
-    width: 452px;
+    height: 36px;
+    width: 190px;
 }
 
-#editdesmos.js-desmos {
+#editdesmos.desmos-fig, #editdesmos.js-desmos {
     width: 100%;
 }
 
@@ -357,3 +492,7 @@ body {
     font-weight: normal;
 }
 
+/* Overriding desmos stylesheet to fix button icon alignment issues  */
+#editdesmos [class*="dcg-icon-"] {
+    line-height: 38px;
+}

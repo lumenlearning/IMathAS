@@ -1934,7 +1934,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		$stm->execute(array(':id'=>$userid));
 		$groupid = $stm->fetchColumn();
 		if ($myrights == 100 || ($groupid==11 && $myrights >= 40)) {
-			$html .= "<option value=\"desmos\">" . _('Add Desmos') . "</option>\n";
+			$html .= "<option value=\"desmos\">" . _('Add Desmos Interactive') . "</option>\n";
 		}
 		// #### End OHM-specific code #####################################################
 		// #### End OHM-specific code #####################################################

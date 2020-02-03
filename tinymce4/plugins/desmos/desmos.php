@@ -1,3 +1,4 @@
+<?php require_once(__DIR__ . '/../../../init.php'); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -5,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=7" />
     <![endif]-->
     <title>Desmos Interactive Editor</title>
-    <script type="text/javascript" src="https://desmos.lumenlearning.com/desmos/js/calculator.js"></script>
+    <script type="text/javascript" src="<?php echo $GLOBALS['CFG']['desmos_calculator']; ?>"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
 
     <link rel="stylesheet" href="/themes/lumen.css?v=112019" type="text/css" />
@@ -16,11 +17,8 @@
 <body onload="desmosDialog.init();">
 
 <form onsubmit="return false;" action="#" style="margin:10px;">
-    <figure id="editdesmos" class="js-desmos" data-json=""></figure>
-    <div class="mceActionPanel">
+    <figure id="editdesmos" class="js-desmos desmos-fig" data-json=""></figure>
         <div class="desmos-nav-btns"  style="float: right">
-            URL: <input type="text" id="import" name="import" size="60" value="" />
-            <button id="desmos_form_submit_button" class="button -offset" type="submit" onclick="desmosDialog.import();">Import</button>
             <button id="desmos_preview_button" class="button -offset" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
             <button id="desmos_form_submit_button" class="button -offset" type="submit" name="submitbtn" value="Submit" style="clear:both" onclick="desmosDialog.insert();">Add</button>
         </div>

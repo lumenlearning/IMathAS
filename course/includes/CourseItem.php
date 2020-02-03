@@ -89,6 +89,7 @@ abstract class CourseItem
         }
         $newtypeid = $this->insertItem($fields);
         if ($newtypeid) {
+            $this->saveOriginId($newtypeid, $fields);
             $fields['id'] = $newtypeid;
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
@@ -97,6 +98,36 @@ abstract class CourseItem
         }
         return $this;
     }
+
+    /**
+     * Add an origin item ID to a newly saved CourseItem. Used only by $this->addItem().
+     *
+     * @param int $originId The CourseItem's origin ID. (Top-most ancestor)
+     * @param array $fields The CourseItem's fields.
+     * @return CourseItem $this
+     */
+    protected function saveOriginId(int $originId, array $fields) {
+        $need_update = false;
+        foreach (['origin_itemid','itemid_chain'] as $key) {
+            if (in_array($key, $this->valid_fields)) {
+                if (empty($fields[$key])) {
+                    $fields[$key] = $originId;
+                    $need_update = true;
+                }
+                if ('itemid_chain' == $key
+                    && in_array('itemid_chain_size', $this->valid_fields)
+                ) {
+                    $fields['itemid_chain_size'] = count(explode(',', $fields['itemid_chain']));
+                    $need_update = true;
+                }
+            }
+        }
+        if ($need_update) {
+            $this->updateItemType($originId, $fields);
+        }
+        return $this;
+    }
+
     /**
      * Update course item data
      *
@@ -135,14 +166,39 @@ abstract class CourseItem
             if ($key == 'title' || $key == 'name') {
                 $fields[$key] = $this->$key.$append;
             }
+            if (in_array($key, ['origin_itemid','itemid_chain']) && empty($this->$key)) {
+                $fields[$key] = $typeid;
+            }
         }
         $newtypeid = $this->insertItem($fields);
         if ($newtypeid) {
+            $this->addAncestorNode($newtypeid, $fields);
             $fields['id'] = $newtypeid;
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
             $this->track('copy', $typeid);
         }
+        return $this;
+    }
+
+    /**
+     * Update this CourseItem's ancestor list. Used by $this->copyItem();
+     *
+     * @param int $newtypeid The new CourseItem's ID to add.
+     * @param array $fields This CourseItem's data.
+     * @return CourseItem $this
+     */
+    protected function addAncestorNode(int $newtypeid, array $fields) {
+        if (!in_array('itemid_chain', $this->valid_fields)) {
+            return $this;
+        }
+
+        $fields['itemid_chain'] .= ',' . $newtypeid;
+        if (in_array('itemid_chain_size', $this->valid_fields)) {
+            $fields['itemid_chain_size'] = count(explode(',', $fields['itemid_chain']));
+        }
+        $this->updateItemType($newtypeid, $fields);
+
         return $this;
     }
 
@@ -203,6 +259,7 @@ abstract class CourseItem
         $stm->execute();
         if ($stm->rowCount()>0) {
             $this->itemid = $stm->fetchColumn(0);
+            $this->block = $this->_findItemBlock($this->itemid);
         }
         return $this;
     }
@@ -223,7 +280,7 @@ abstract class CourseItem
             $this->_deleteCourseGrade();
         }
         $this->deleteItem();
-        $this->setItemOrder(true);
+        $this->setItemOrder($typeid);
         $this->dbh->commit();
         return $this;
     }
@@ -252,24 +309,7 @@ abstract class CourseItem
     {
         // Delete the item from imas_items
         $stm = $this->dbh->prepare("DELETE FROM imas_items WHERE id=:id");
-        $stm->execute(array(':id'=>$this->itemid));
-
-        // Delete the item from imas_courses
-        $stm = $this->dbh->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-        $stm->execute([':id' => $this->courseid]);
-
-        $allItems = unserialize($stm->fetchColumn(0)); // contains ALL blocks in the course
-        $blockItems = $allItems[$this->block]['items'];
-
-        $key = array_search($this->itemid, $blockItems); // get the key for the item being deleted
-        unset($allItems[$this->block]['items'][$key]);
-
-        // Save the course items array with the deleted item removed
-        $stm = $this->dbh->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-        $stm->execute([
-            ':id' => $this->courseid,
-            ':itemorder' => serialize($allItems),
-        ]);
+        $stm->execute(array(':id' => $this->itemid));
 
         return $this;
     }
@@ -287,15 +327,16 @@ abstract class CourseItem
         $blocktree = explode('-', $this->block);
         $sub =& $order;
         for ($i=1;$i<count($blocktree);$i++) {
-            $sub =& $sub[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
+            $sub =& $sub[$blocktree[$i]-1]['items'];
         }
         if ($delete) {
             $key = array_search($this->itemid, $sub);
             if ($key!==false) {
                 array_splice($sub, $key, 1);
             }
+
         } elseif ($this->totb=='b') {
-                $sub[] = $this->itemid;
+            $sub[] = $this->itemid;
         } else if ($this->totb=='t') {
             array_unshift($sub, $this->itemid);
         }
@@ -309,7 +350,6 @@ abstract class CourseItem
         }
         return false;
     }
-
 
     /**
      * Unserialized json data of the order and hierarchy of course items
@@ -325,6 +365,29 @@ abstract class CourseItem
         $stm->execute();
         $json = $stm->fetch(PDO::FETCH_ASSOC);
         return unserialize($json['itemorder']);
+    }
+
+    /**
+     * Find the block for the item
+     *
+     * @param int $item id of item from imas_items.id
+     *
+     * @return string for block, 0 would be main level
+     */
+    function _findItemBlock($item) {
+        $array = $this->findItemOrder();
+        foreach ($array as $key=>$value) {
+            if ($value == $item) {
+                return '0';
+            }
+            if (is_array($value)) {
+                foreach ($array[$key]['items'] as $v2) {
+                    if ($v2 == $item) {
+                        return '0-'.$key;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -549,11 +612,7 @@ abstract class CourseItem
             && $this->startdate < $now
             && $this->enddate > $now)
         ) {
-            if ($settings['faded']) {
-                $class = "item itemgrey";
-            } else {
-                $class = "item";
-            }
+            $class = "item";
             if ($this->itemid != '') {
                 $out .= "<div class=\"$class\" id=\"$this->itemid\">\n";
             } else {
@@ -696,7 +755,9 @@ abstract class CourseItem
     public function setItem(array $items)
     {
         foreach ($items as $key=>$value) {
-            $this->$key = $value;
+            if ($key != 'courseid' OR !isset($this->courseid)) {
+                $this->$key = $value;
+            }
         }
         $this->setId();
         $this->setName();

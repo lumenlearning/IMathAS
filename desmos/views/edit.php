@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
+<link rel="stylesheet" href="/desmos/ohm-modal.css" type="text/css" />
+
+<script type="text/javascript" src="<?php echo $imasroot; ?>/desmos/js/ohmModal.js"></script>
 <script type="text/javascript">
     window.onload = ()=> {
         <?php if (count($item->steps) < 1) {
@@ -15,29 +18,27 @@
         <img src="../ohm/img/desmos.png" alt=""/>
         <?php echo $pagetitle ?>
     </h1>
-
     <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
-            <div class="form-left">
-                <div class="controls">
-                    <label for="title">Title:</label>
-                    <input type="text" id="title" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
-                </div>
-                <div class="controls">
-                    <label for="summary">Summary:</label>
-                    <input type="text" id="summary" name="summary" value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" />
-                </div>
+            <div class="controls">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
             </div>
-            <div class="form-right">
-                <div class="controls">
-                    <label for="sdate">Start Date:</label>
-                    <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
-                </div>
-                <div class="controls">
-                    <label for="edate">End Date:</label>
-                    <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
-                </div>
+            <div class="controls">
+                <label for="sdate">Start Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
             </div>
+            <div class="controls">
+                <label for="edate">End Date:</label>
+                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
+            </div>
+        </div>
+        <div class="controls">
+            <label for="summary">Summary:</label>
+            <!-- <input type="text" id="summary" name="summary" value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" /> -->
+            <textarea name="summary" id="summary" rows="5">
+                <?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>
+            </textarea>
         </div>
         <div id="step_box" class="desmos desmos-steps -offset --exlarge">
             <div class="steps-navigation teacher-view">
@@ -51,10 +52,8 @@
                     <?php
                     $action = '';
                     $numsteps = 0;
-                    if (count($item->steps)>1) {
-                        $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
-                        $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
-                    }
+                    $action = "onClick=\"showSteps('desmos_edit_container', this)\"";
+                    $keyaction = "onkeydown=\"javascript: if(event.keyCode == 9) showSteps('desmos_edit_container', this);\"";
                     foreach ($item->steporder as $i) {
                         $selected = '';
                         if ($numsteps==0) {
@@ -97,8 +96,11 @@
                 } ?>
             </div>
         </div>
-        <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save and Exit</button>
-        <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
+        <div id="desmos_save_buttons">
+            <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save</button>
+            <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
+            <span id="desmos_save_status"></span>
+        </div>
     </form>
     <?php include 'icons.svg'; ?>
 </div>

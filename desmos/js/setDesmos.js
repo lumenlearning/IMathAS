@@ -16,9 +16,12 @@ loadDesmos();
 function showSteps(parent, el){
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
+	var listIndex = el.getAttribute("data-num");
+
 	for (var i = 0; i < listItems.length; i++) {
 		var num = listItems[i].getAttribute("data-num");
 		var stepItem = document.getElementById(parent).getElementsByClassName("step-item-display-" + num)[0];
+
 		if (!(listItems[i] == el)) {
 			listItems[i].classList.remove("is-selected");
 			listItems[i].setAttribute("aria-selected", false);
@@ -28,6 +31,9 @@ function showSteps(parent, el){
 			listItems[i].setAttribute("aria-selected", true);
 			stepItem.style.display = "block";
 		}
+	}
+	if (document.getElementById('step_box').classList.contains('desmos-student-view')) {
+		syncBtnNavigation(listItems, listIndex);
 	}
 }
 
@@ -40,7 +46,6 @@ function addStep(){
     step.setAttribute("onclick", "showSteps('"+parent+"', this)");
 	step.setAttribute("onkeydown", "javascript: if(event.keyCode == 9) showSteps('"+parent+"', this)");
     step.setAttribute("draggable", false);
-	step.setAttribute("aria-grabbed", false);
 
     // Create a <span> wrapper for the drag button
     var buttonDragWrapper = document.createElement("span");
@@ -70,20 +75,19 @@ function addStep(){
     buttonDelete.setAttribute("aria-label", "Delete this item.");
     buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
 
-
     // Wrap the drag <button> in the <span> wrapper;
     buttonDragWrapper.appendChild(buttonDrag);
     // Append the new elements to <li>
     step.appendChild(buttonDragWrapper);
     step.appendChild(label);
     step.appendChild(input);
-    step.appendChild(buttonDelete);
+	step.appendChild(buttonDelete);
+	
+	var draggableList = document.getElementById("step_list");
+	var listDescription = draggableList.dataset.description;
+	addDnDAttributes(step, listDescription);
     
-	document.getElementById("step_list").appendChild(step);
-
-	// Add textarea
-	// echo  "<div id=\"step_text_$i\">";
-	// echo "<textarea name=\"step_text[$i]\" class=\"step-item\" editor";
+	draggableList.appendChild(step);
 
 	var textareaWrapper = document.createElement("div");
 	textareaWrapper.id = "step_text_" + numsteps;
@@ -93,101 +97,126 @@ function addStep(){
 	textarea.name = "step_text["+numsteps+"]";
 	textarea.className = "step-item editor";
 
-
 	textareaWrapper.appendChild(textarea);
 
-	//document.getElementById(parent).getElementsByClassName("step-items")[0];
 	document.getElementById("step_items").appendChild(textareaWrapper);
 
-	//var newItem = document.querySelectorAll("[data-num='"+num+"']")[0];
-
-	//var draggableList = document.getElementById("step_list");
-	//var listDescription = draggableList.dataset.description;
-
-
-	//var num = document.getElementById('desmos_edit_container').getElementsByClassName('step-li').length;
-
 	numsteps++;
-	initeditor("selector","textarea");
+	initeditor("textareas","step-item");
 	showSteps(parent, step);
 	setupDnD();
 }
 
-function removeStep(event){
-    if(confirm("Permanently delete this item?")){
-        var parent = this.parentElement;
-        var itemNum = parent.dataset.num;
-        var relatedItems = document.getElementById('desmos_edit_container').getElementsByClassName("step-item-display-" + itemNum);
-        parent.remove();
-        for (let i = 0; i < relatedItems.length; i++) {
-            relatedItems[i].remove();
-		}
-        showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
-    }
+function confirmDelete(event){
+	event.preventDefault();
+	var itemNum = $(this).parent().attr("data-num");
+	
+	$.get("../desmos/views/ConfirmDesmosDelete.php", function(data){
+		ohmModal.open({
+			content: data,
+			height: "auto",
+			width: "50%",
+			// set element to focus when modal opens
+			focusEl: ".js-cancel-modal"
+		});
+
+		//add event listeners once modal is on page
+		$(".js-ohm-modal").on("click", ".js-confirm-delete", removeStep);
+		$(".js-ohm-modal").on("click", ".js-cancel-modal", ohmModal.close);
+
+		// pass id of target element to delete button 
+		$(".js-confirm-delete").data("num", itemNum);
+	});	
 }
 
-// function handleStudentViewNav(event){
-//     var listItems = document.querySelectorAll('.step-li');
-//     var listItem;
-//     var stepIndex; 
+function removeStep(event){
+	var itemNum = $(".js-confirm-delete").data("num");
+	var desmosItem = $(".step-item-display-" + itemNum);
+	var listItem  = $(".js-step-list").find("[data-num='" + itemNum + "']"); 
 
-//     document.querySelector('.prev').disabled = false;
-//     document.querySelector('.next').disabled = false;
+	desmosItem.remove(); 
+	listItem.remove(); 
+	ohmModal.close();
 
-//     function handleNext(){
-//         for (let i = 0; i < listItems.length; i++) {
-//             if (listItems[i].classList.contains('is-selected')) {
-//                 listItem = listItems[i];
-//                 stepIndex = i+1;
-//             }
-//         }
-        
-//         if(stepIndex > listItems.length - 2){
-//             event.target.disabled = true;
-//             document.querySelector('.prev').disabled = false;
-//         } 
-    
-//         listItem.classList.remove('is-selected');
-//         listItem.nextSibling.classList.add('is-selected');
-//     }
+	if($("#step_list li").length === 0){
+		addStep();
+	} else if($("#step_list li").length === 1){
+		var trigger = document.querySelector(".js-drag-trigger");
+		reorderList.init(trigger);
+	}
 
-//     function handlePrev(){
-//         for (let i = 0; i < listItems.length; i++) {
-//             if (listItems[i].classList.contains('is-selected')) {
-//                 listItem = listItems[i];
-//                 stepIndex = i-1;
-//             }
-//         }
-    
-//         if(stepIndex === 0){
-//             event.target.disabled = true;
-//             document.querySelector('.next').disabled = false;
-//         }
-//         listItem.classList.remove('select');
-//         listItem.previousSibling.classList.add('is-selected');
-//     }
+	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
+}
 
-//     event.target.classList.contains("next") ? 
-//     handleNext() : handlePrev();
+function handleStudentViewNav(event){
+    var listItems = document.querySelectorAll('.step-li');
+	var selectEl = document.getElementById('js-step-nav');
+	var prevButtons = document.querySelectorAll('.js-prev');
+	var nextButtons = document.querySelectorAll('.js-next');
+    var listItem;
+	var stepIndex;
+	
+	if (event.target.classList.contains("js-next")){
+		for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+				stepIndex = i + 1;
+            }
+        }
+		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+			prevButtons[buttons].disabled = false;
+		}
+		if(stepIndex > listItems.length - 2){
+			for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+				nextButtons[buttons].disabled = true;
+			}
+        }
+		listItem.classList.remove('is-selected');
+		listItem.nextSibling.classList.add('is-selected');
+		selectEl.value = stepIndex;
+	} else if (event.target.classList.contains("js-prev")) {
+		for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].classList.contains('is-selected')) {
+                listItem = listItems[i];
+                stepIndex = i - 1;
+            }
+        }
+		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+			nextButtons[buttons].disabled = false;
+		}
+        if(stepIndex === 0){
+			for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+				prevButtons[buttons].disabled = true;
+			}
+        }
+		listItem.classList.remove('is-selected');
+		listItem.previousSibling.classList.add('is-selected');
+		selectEl.value = stepIndex;
+	}
+	showSteps('desmos_view_container', document.getElementById("step_list").children[stepIndex]);
+}
 
-//     showSteps();
-// }
+// Used by showSteps function to disabled next/prev button if first or last items are clicked 
+function syncBtnNavigation(listItems, listIndex){
+	var listIndex = parseInt(listIndex);
+	var navButtons = document.querySelectorAll('.js-prev, .js-next');
+	var prevButtons = document.querySelectorAll('.js-prev');
+	var nextButtons = document.querySelectorAll('.js-next');
 
-// Disable "Previous" and "Next" buttons when first and last list items selected with spacebar 
-// function syncNavButtons(event){
-//     var listItems = document.querySelectorAll('.step-li');
+	for (let buttons = 0; buttons < navButtons.length; buttons++) {
+		navButtons[buttons].disabled = false;
+	}
 
-//     $('.prev').prop('disabled', false);
-//     $('.next').prop('disabled', false);
-
-//     if(event.code === "Space" || event.code === "Tab"){
-//         if($(this).index() === 0){
-//             $('.prev').prop('disabled', true);
-//         } else if($(this).index() === listItems.length - 1){
-//             $('.next').prop('disabled', true);
-//         }
-//     }
-// }
+	if(listIndex === listItems.length - 1){
+		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
+			nextButtons[buttons].disabled = true;
+		}
+	} else if(listIndex === 0){
+		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
+			prevButtons[buttons].disabled = true;
+		}
+	}
+}
 
 function index(el) {
 	if (!el) return -1;
@@ -202,10 +231,26 @@ var reorderList = {
 	listItems: null,
 	objCurrent: null,
 	objParent: null,
+	lastTarget: null,
+	currentTarget: null,
 	originalPosition: null,
 	currentPosition: null,
 	objTrigger: null,
 	init: function(objNode) {
+		var trigger = objNode.querySelector("button");
+		reorderList.listItems = document.querySelectorAll("#step_list [draggable]");
+		var listLength = reorderList.listItems.length;
+		if (listLength > 1) {
+			reorderList.setListeners(objNode);
+			for (var i = 0; i < listLength; i++) {
+				trigger.removeAttribute("disabled");
+			}
+		} else {
+			trigger.setAttribute("disabled", true);
+			reorderList.removeListeners(objNode);
+		}
+	},
+	setListeners: function(objNode) {
 		var trigger = objNode.querySelector("button");
 		objNode.onmousedown = reorderList.mouseStart;
 		objNode.parentNode.ondragstart = reorderList.dragStart;
@@ -216,6 +261,18 @@ var reorderList = {
 		objNode.parentNode.ondrop = reorderList.dragDrop;
 		objNode.onkeydown = reorderList.keyboardNav;
 		trigger.onfocus = reorderList.focus;
+	},
+	removeListeners: function(objNode) {
+		var trigger = objNode.querySelector("button");
+		objNode.onmousedown = null;
+		objNode.parentNode.ondragstart = null;
+		objNode.parentNode.ondragover = null;
+		objNode.parentNode.ondragleave = null;
+		objNode.parentNode.ondragend = null;
+		objNode.onmouseup = null;
+		objNode.parentNode.ondrop = null;
+		objNode.onkeydown = null;
+		trigger.onfocus = null;
 	},
 	keyboardNav: function(objEvent) {
 		var key = objEvent.code;
@@ -270,34 +327,70 @@ var reorderList = {
 	},
 	dragOver: function(objEvent) {
 		var target;
+		reorderList.currentTarget = objEvent.target.closest(".step-li");
+		reorderList.currentPosition = index(reorderList.currentTarget);
 		objEvent.preventDefault(); // prevent default to allow drop
-		objEvent.target.classList.add("is-over");
-		if (reorderList.originalPosition > index(objEvent.target)) {
-			target = index(objEvent.target) + 1;
+		reorderList.currentTarget.classList.add("is-target");
+		if (index(reorderList.currentTarget) == 1) {
+			// this class only ever gets applied to the first item to create a
+			// visible indicator for the top of the list
+			reorderList.currentTarget.classList.add("is-over");
+		}
+		if (reorderList.originalPosition > index(reorderList.currentTarget)) {
+			target = index(reorderList.currentTarget) + 1;
 		} else {
-			target = index(objEvent.target);
+			target = index(reorderList.currentTarget);
 		}
 		reorderList.update("You have moved the item to position " + target + ".");
 	},
 	dragLeave: function(objEvent) {
-		event.target.classList.remove("is-over");
+		reorderList.currentTarget.classList.remove("is-target");
+		if (index(reorderList.currentTarget) !== 1 && reorderList.lastTarget !== null) {
+			// we need the conditional b/c dragging to the top of the list often triggers
+			// the dragLeave, so this class would never get applied in the first place
+			reorderList.lastTarget.classList.remove("is-over");
+		}
+		reorderList.lastTarget = reorderList.currentTarget;
+		reorderList.currentTarget = null;
+		if ((index(reorderList.currentTarget) == -1) && index(reorderList.lastTarget) == 1) {
+			reorderList.update("You have moved the item to position 1.");
+		}
 	},
-	// dragEnd: function() {
-	// },
-	dragDrop: function(objEvent) {
-		objEvent.preventDefault(); // prevent default action (open as link for some elements)
-		objEvent.target.classList.remove("is-over");
-		reorderList.objCurrent.classList.remove("is-selected");
-		if (
-			objEvent.target.parentNode.id == "step_list" ||
-			objEvent.target.id == "step_list"
-		) {
-			// move dragged elem to the selected drop target
+	dragEnd: function(objEvent) {
+		reorderList.objCurrent.setAttribute("aria-grabbed", false);
+		reorderList.objCurrent.setAttribute("aria-selected", false);
+		var num = reorderList.objCurrent.getAttribute("data-num");
+		var relatedContent = document.getElementById("step_text_" + num);
+		// remove selected styles from an element if its content isn't currently showing
+		if (relatedContent.style.display === 'none') {
+			reorderList.objCurrent.classList.remove("is-selected");
+		}
+		// handle attempts to move an item to the top of the list
+		if ((index(reorderList.currentTarget) == -1) && index(reorderList.lastTarget) == 1) {
 			reorderList.objParent.removeChild(reorderList.objCurrent);
 			reorderList.objParent.insertBefore(
 				reorderList.objCurrent,
-				objEvent.target.nextSibling
+				reorderList.objParent.children[0]
 			);
+			reorderList.drop();
+		}
+	},
+	dragDrop: function(objEvent) {
+		objEvent.preventDefault(); // prevent default action (open as link for some elements)
+		reorderList.currentTarget.classList.remove("is-target", "is-over");
+		reorderList.objCurrent.classList.remove("is-selected");
+		if (
+			reorderList.currentTarget.parentNode.id == "step_list" ||
+			reorderList.currentTarget.id == "step_list"
+		) {
+			if (reorderList.currentPosition != reorderList.originalPosition) {
+				// move dragged elem to the selected drop target
+				reorderList.objParent.removeChild(reorderList.objCurrent);
+				reorderList.objParent.insertBefore(
+					reorderList.objCurrent,
+					reorderList.currentTarget.nextSibling
+				);
+			}
 			reorderList.drop();
 		}
 		// ignore; item doesn't move
@@ -428,7 +521,7 @@ var reorderList = {
 			listItems[i].setAttribute("aria-grabbed", false);
 			listItems[i].setAttribute("aria-selected", false);
 			listItems[i].setAttribute("draggable", false);
-			// listItems[i].classList.remove("is-selected");
+			listItems[i].classList.remove("is-target", "is-over");
 		}
 	}
 };
@@ -453,7 +546,11 @@ function setupDnD() {
 
 setupDnD();
 
-// $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
 // $('.js-step-list li').on("keydown", syncNavButtons);
-$('.js-add').on("click", addStep);
-$('.js-step-list').on("click", ".js-delete", removeStep);
+$(".js-add").on("click", addStep);
+$(".js-step-list").on("click", ".js-delete", confirmDelete);
+$('.js-desmos-nav').on("click", "button", handleStudentViewNav);
+document.getElementById('js-step-nav').onchange = function() {
+	var activeItem = this.value;
+	showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
+};

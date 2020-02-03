@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="../themes/lux-temp.css" type="text/css" />
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
 <script type="text/javascript">
     window.onload = ()=> {
@@ -29,12 +30,34 @@ if ($shownav) {
 ?>
 <div id="desmos_view_container">
     <div class="desmos-header">
-        <h1><img src="../ohm/img/desmos.png" alt=""/> <?php echo $pagetitle ?></h1>
+        <h1 class="-small-type desmos-header"><img src="../ohm/img/desmos.png" alt=""/> <?php echo $pagetitle ?></h1>
         <p><?php echo $item->summary; ?></p>
     </div>
 
     <div id="step_box" class="desmos desmos-student-view -offset --xlarge">
         <div class="steps-navigation">
+            <nav id="mobile_nav">
+                <select name="step_nav" id="js-step-nav" class="step-nav">
+                <?php
+                    $numsteps = 0;
+                    foreach ($item->steporder as $i) {
+                        $selected = '';
+                        if ($i==$item->steporder[0]) {
+                            $selected = "selected";
+                        }
+                        $title = ($numsteps + 1) . ". " . $item->steps[$i]['title'];
+                        printf("<option $selected value=\"$numsteps\" data-num=\"$numsteps\">", $i, $i);
+                        echo $title;
+                        echo "</option>";
+                        $numsteps++;
+                    }
+                ?>
+                </select>
+                <div class="js-desmos-nav button-group">
+                    <button aria-label="Previous" type="button" class="button --button-secondary js-prev" disabled><svg aria-hidden="true"><use xlink:href="#lux-icon-caret-left"></use></svg></button>
+                    <button aria-label="Next" type="button" class="button --button-secondary js-next"><svg aria-hidden="true"><use xlink:href="#lux-icon-caret-right"></use></svg></button>
+                </div>
+            </nav>
             <ol id="step_list" class="js-step-list step-list" role="listbox">
                 <?php
                 $numsteps = 0;
@@ -71,6 +94,10 @@ if ($shownav) {
                     echo "</div>";
                     $numsteps++;
                 } ?>
+            </div>
+            <div class="js-desmos-nav desmos-nav-btns -inset">
+                <button type="button" class="button --button-secondary js-prev" disabled>Previous</button>
+                <button type="button" class="button --button-secondary js-next">Next</button>
             </div>
         </div>
     </div>
