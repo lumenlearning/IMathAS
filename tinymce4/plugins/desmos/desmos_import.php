@@ -17,11 +17,11 @@
 <body onload="desmosDialog.init();">
 
 <form onsubmit="return false;" action="#" style="margin:10px;" class="desmos">
-    URL: <input type="text" id="import" name="import" value="" />
+    Desmos URL: <input type="text" id="import" name="import" value="" onkeyup="importToggle()" placeholder="https://www.desmos.com/calculator/example" />
     <div class="mceActionPanel">
         <div class="desmos-nav-btns"  style="float: right">
             <button id="desmos_preview_button" class="button -offset" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
-            <button id="desmos_form_submit_button" class="button -offset" type="submit" onclick="desmosDialog.import();">Import</button>
+            <button id="desmos_form_submit_button" class="button -offset" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
         </div>
     </div>
 </form>
