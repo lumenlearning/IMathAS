@@ -280,7 +280,7 @@ abstract class CourseItem
             $this->_deleteCourseGrade();
         }
         $this->deleteItem();
-        $this->setItemOrder($typeid);
+        $this->setItemOrder($this->itemid);
         $this->dbh->commit();
         return $this;
     }
@@ -324,21 +324,19 @@ abstract class CourseItem
     public function setItemOrder($delete = false)
     {
         $order = $this->findItemOrder();
-        $blocktree = explode('-', $this->block);
-        $sub =& $order;
-        for ($i=1;$i<count($blocktree);$i++) {
-            $sub =& $sub[$blocktree[$i]-1]['items'];
-        }
         if ($delete) {
-            $key = array_search($this->itemid, $sub);
-            if ($key!==false) {
-                array_splice($sub, $key, 1);
+            $order = $this->recursiveItem($order, $delete);
+        } else {
+            $blocktree = explode('-', $this->block);
+            $sub =& $order;
+            for ($i=1;$i<count($blocktree);$i++) {
+                $sub =& $sub[$blocktree[$i]-1]['items'];
             }
-
-        } elseif ($this->totb=='b') {
-            $sub[] = $this->itemid;
-        } else if ($this->totb=='t') {
-            array_unshift($sub, $this->itemid);
+            if ($this->totb=='b') {
+                $sub[] = $this->itemid;
+            } else if ($this->totb=='t') {
+                array_unshift($sub, $this->itemid);
+            }
         }
         $itemorder = serialize($order);
         $stm = $this->dbh->prepare(
@@ -349,6 +347,29 @@ abstract class CourseItem
             return $itemorder;
         }
         return false;
+    }
+
+    /**
+     * Find and remove item from imas_courses.itemorder
+     *
+     * @param array  $itemorder passed by reference so the function can modify the array
+     * @param string $item      item id (as string) to remove
+     *
+     * @return array
+     */
+    private function recursiveItem(&$itemorder, $item)
+    {
+        if(is_array($itemorder)) {
+            foreach($itemorder as $key=>&$element){
+                if(isset($element['items'])){
+                    $this->recursiveItem($element['items'], $item);
+                } elseif($element == $item){
+                    unset($itemorder[$key]);
+                    $itemorder = array_values($itemorder);
+                }
+            }
+        }
+        return $itemorder;
     }
 
     /**
@@ -377,9 +398,6 @@ abstract class CourseItem
     function _findItemBlock($item) {
         $array = $this->findItemOrder();
         foreach ($array as $key=>$value) {
-            if ($value == $item) {
-                return '0';
-            }
             if (is_array($value)) {
                 foreach ($array[$key]['items'] as $v2) {
                     if ($v2 == $item) {
@@ -388,6 +406,7 @@ abstract class CourseItem
                 }
             }
         }
+        return '0';
     }
 
     /**
