@@ -352,10 +352,10 @@ abstract class CourseItem
     /**
      * Find and remove item from imas_courses.itemorder
      *
-     * @param array  $itemorder passed by reference so the function can modify the array
-     * @param string $item      item id (as string) to remove
+     * @param array $itemorder passed by reference so the function can modify the array
+     * @param int   $remove    item to remove
      *
-     * @return array
+     * @return array|string
      */
     private function recursiveItem(&$itemorder, $item)
     {
