@@ -2,7 +2,6 @@
 
 namespace OHM\Tests;
 
-require_once(__DIR__ . '/../../../vendor/autoload.php');
 require_once(__DIR__ . '/../../../includes/OAuth.php');
 require_once(__DIR__ . '/../../../includes/ltioauthstore.php');
 require_once(__DIR__ . '/../../../includes/ltiroles.php');
