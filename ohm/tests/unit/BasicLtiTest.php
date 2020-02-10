@@ -42,6 +42,7 @@ final class BasicLtiTest extends TestCase
             'context_id' => 'c743af80219d32673225edc80d87cf4b3a3ddb66',
             'roles' => 'Instructor,urn:lti:instrole:ims/lis/Administrator',
             'oauth_consumer_key' => 'lumenltitest',
+            'lis_outcome_service_url' => 'http://127.0.01/',
         ];
 
         $this->basicLti = new BasicLti($this->request, $this->dbh);
@@ -67,7 +68,7 @@ final class BasicLtiTest extends TestCase
     {
         foreach (self::REQUIRED_LTI_DATA as $requiredParam) {
             $request = $this->request;
-            unset($request[$requiredParam]);
+            $request[$requiredParam] = '';
             $this->basicLti->setRequest($request);
 
             $result = $this->basicLti->hasValidLtiData();
@@ -79,7 +80,9 @@ final class BasicLtiTest extends TestCase
 
     public function testHasValidLtiData_EmptyData(): void
     {
-        $this->request = [];
+        foreach (self::REQUIRED_LTI_DATA as $requiredLtiData) {
+            $this->request[$requiredLtiData] = '';
+        }
         $this->basicLti->setRequest($this->request);
 
         $result = $this->basicLti->hasValidLtiData();
@@ -146,7 +149,7 @@ final class BasicLtiTest extends TestCase
 
     public function testAssignRoleFromRequest_Missing(): void
     {
-        unset($this->request['roles']);
+        $this->request['roles'] = '';
         $this->basicLti->setRequest($this->request);
 
         $this->basicLti->getRoleFromRequest();
@@ -175,7 +178,7 @@ final class BasicLtiTest extends TestCase
 
     public function testSetOrgFromRequest_TypeG_Unknown(): void
     {
-        unset($this->request['tool_consumer_instance_guid']);
+        $this->request['tool_consumer_instance_guid'] = '';
         $this->basicLti->setRequest($this->request);
         $expected = 'lumenltitest:Unknown';
 
