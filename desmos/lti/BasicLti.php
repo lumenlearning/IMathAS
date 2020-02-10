@@ -24,10 +24,19 @@ use PDO;
  */
 class BasicLti
 {
+    /* @var PDO */
+    private $dbh;
     /* @var $_REQUEST */
     private $request;
     /* @var OAuthConsumer */
     private $oauthRequestInfo;
+
+    /* @var IMathASLTIOAuthDataStore */
+    private $iMathASLTIOAuthDataStore;
+    /* @var OAuthServer */
+    private $oAuthServer;
+    /* @var OAuthSignatureMethod_HMAC_SHA1 */
+    private $oAuthSignatureMethod_HMAC_SHA1;
 
     /*
      * LTI launch data
@@ -46,26 +55,73 @@ class BasicLti
     private $ohmCourseGroupId;
     private $ohmUserId;
 
-    public function __construct(array $request)
+    public function __construct(array $request, PDO $dbh)
     {
-        $this->request = $request;
-        $this->userid = $request['user_id'];
-        $this->ltikey = $request['oauth_consumer_key'];
-        $this->org = $this->formatOrgFromRequest(); // This needs to happen after $ltikey is set.
-        $this->userRole = $this->assignRoleFromRequest();
-        $this->gradePassbackUrl = $request['lis_outcome_service_url'];
+        $this->dbh = $dbh;
+        $this->setRequest($request);
     }
 
     public function debugOutput()
     {
+        if ('production' == getenv('CONFIG_ENV')) {
+            return;
+        }
+
         $classVars = get_object_vars($this);
         // remove sensitive info
+        unset($classVars['dbh']);
         unset($classVars['request']);
         unset($classVars['oauthRequestInfo']);
+        // this is just noisy
+        unset($classVars['iMathASLTIOAuthDataStore']);
+        unset($classVars['oAuthServer']);
+        unset($classVars['oAuthSignatureMethod_HMAC_SHA1']);
 
         echo '<pre>';
         print_r($classVars);
         echo '</pre>';
+    }
+
+    /**
+     * Set the OAuth objects this class depends on.
+     * If null values are passed in, a new instance will be instantiated.
+     *
+     * Use this method with null values in normal usage.
+     * This method allows for easier test writing.
+     *
+     * @param IMathASLTIOAuthDataStore|null $iMathASLTIOAuthDataStore
+     * @param OAuthServer|null $oAuthServer
+     * @param OAuthSignatureMethod_HMAC_SHA1|null $oAuthSignatureMethod_HMAC_SHA1
+     */
+    public function setOauthDependencies(
+        IMathASLTIOAuthDataStore $iMathASLTIOAuthDataStore = null,
+        OAuthServer $oAuthServer = null,
+        OAuthSignatureMethod_HMAC_SHA1 $oAuthSignatureMethod_HMAC_SHA1 = null
+    ): void
+    {
+        $this->iMathASLTIOAuthDataStore = !is_null($iMathASLTIOAuthDataStore) ?
+            $iMathASLTIOAuthDataStore : new IMathASLTIOAuthDataStore();
+        $this->oAuthServer = !is_null($oAuthServer) ?
+            $oAuthServer : new OAuthServer($this->iMathASLTIOAuthDataStore);
+        $this->oAuthSignatureMethod_HMAC_SHA1 = !is_null($oAuthSignatureMethod_HMAC_SHA1) ?
+            $oAuthSignatureMethod_HMAC_SHA1 : new OAuthSignatureMethod_HMAC_SHA1();
+    }
+
+    /**
+     * Set the $_REQUEST data for this instance.
+     *
+     * This is extracted to a method for easier test writing.
+     *
+     * @param array $request An array of $_REQUEST data.
+     */
+    public function setRequest(array $request)
+    {
+        $this->request = $request;
+        $this->userid = $request['user_id'];
+        $this->ltikey = $request['oauth_consumer_key'];
+        $this->org = $this->setOrgFromRequest(); // This needs to happen after $ltikey is set.
+        $this->userRole = $this->getRoleFromRequest();
+        $this->gradePassbackUrl = $request['lis_outcome_service_url'];
     }
 
     /**
@@ -76,9 +132,11 @@ class BasicLti
      */
     public function authenticate(): bool
     {
-        $store = new IMathASLTIOAuthDataStore();
-        $server = new OAuthServer($store);
-        $method = new OAuthSignatureMethod_HMAC_SHA1();
+        $this->setOauthDependencies();
+        $store = $this->iMathASLTIOAuthDataStore;
+        $server = $this->oAuthServer;
+        $method = $this->oAuthSignatureMethod_HMAC_SHA1;
+
         $server->add_signature_method($method);
         $request = OAuthRequest::from_request(); // Sadface: uses apache_request_headers() :(
         $base = $request->get_signature_base_string();
@@ -100,21 +158,21 @@ class BasicLti
     {
         $errors = [];
 
-        if (empty($_REQUEST['lti_version'])) {
+        if (empty($this->request['lti_version'])) {
             $errors[] = "Missing LTI request data: lti_version"
                 . " -- This might indicate your browser is set to restrict third-party cookies."
                 . " Check your browser settings and try again";
         }
-        if (empty($_REQUEST['user_id'])) {
+        if (empty($this->request['user_id'])) {
             $errors[] = "Missing LTI request data: user_id -- user information was not provided";
         }
-        if (empty($_REQUEST['context_id'])) {
+        if (empty($this->request['context_id'])) {
             $errors[] = "Missing LTI request data: context_id -- course information was not provided";
         }
-        if (empty($_REQUEST['roles'])) {
-            $errors[] = "Missing LTI request data: roles";
+        if (empty($this->request['roles'])) {
+            $errors[] = "Missing LTI request data: roles -- role information was not provided";
         }
-        if (empty($_REQUEST['oauth_consumer_key'])) {
+        if (empty($this->request['oauth_consumer_key'])) {
             $errors[] = "Missing LTI request data: oauth_consumer_key -- resource key was not provided";
         }
 
@@ -124,13 +182,11 @@ class BasicLti
     /**
      * Look up the OHM user associated with this LTI launch.
      *
-     * @return bool True on success.
+     * @return int The OHM user ID.
      * @throws \Exception Thrown if OHM user is not found.
      */
-    public function assignOhmUserFromLaunch(): bool
+    public function assignOhmUserFromLaunch(): int
     {
-        global $DBH;
-
         $orgparts = explode(':', $this->org);  //THIS was added to avoid issues when LMS GUID change, while still storing it
         $shortorg = $orgparts[0];       //we'll only use the part from the lti key
 
@@ -146,7 +202,7 @@ class BasicLti
         //if multiple accounts, use student one first (if not $ltirole of teacher) then higher rights.
         //if there was a mixup and multiple records were created, use the first one
         $query .= "ORDER BY iu.rights, lti.id";
-        $stm = $DBH->prepare($query);
+        $stm = $this->dbh->prepare($query);
         $stm->execute(array(':org' => "$shortorg:%", ':ltiuserid' => $this->userid));
 
         if ($stm->rowCount() > 0) { //yup, we know them
@@ -156,7 +212,7 @@ class BasicLti
             throw new \Exception("OHM user not found.");
         }
 
-        return true;
+        return $this->ohmUserId;
     }
 
     /**
@@ -164,7 +220,7 @@ class BasicLti
      *
      * @return string An org value as found in the imas_ltiusers table.
      */
-    protected function formatOrgFromRequest(): string
+    public function setOrgFromRequest(): string
     {
         if (empty($this->request['tool_consumer_instance_guid'])) {
             $ltiorg = 'Unknown';
@@ -192,13 +248,49 @@ class BasicLti
      *
      * @return string 'instructor' or 'learner'.
      */
-    protected function assignRoleFromRequest(): string
+    public function getRoleFromRequest(): string
     {
         $ltiroles = new LTIRoles($this->request['roles']);
         if ($ltiroles->isInstructorForOurPurposes()) {
             return 'instructor';
         } else {
-            return 'learner';
+            return 'student';
         }
+    }
+
+    /**
+     * Get the OHM course group ID associated with this launch.
+     * This is only useful after calling authenticate() at least once.
+     *
+     * @return int|null
+     * @see authenticate
+     */
+    public function getOhmCourseGroupId(): ?int
+    {
+        return $this->ohmCourseGroupId;
+    }
+
+    /**
+     * Get the OHM user ID associated with this launch.
+     * This is only useful after calling assignOhmUserFromLaunch() at least once.
+     *
+     * @return int|null
+     * @see assignOhmUserFromLaunch
+     */
+    public function getOhmUserId(): ?int
+    {
+        return $this->ohmUserId;
+    }
+
+    /**
+     * Get the org string associated with this launch.
+     * This is only useful after calling setOrgFromRequest() at least once.
+     *
+     * @return string|null
+     * @see setOrgFromRequest
+     */
+    public function getOrg(): ?string
+    {
+        return $this->org;
     }
 }

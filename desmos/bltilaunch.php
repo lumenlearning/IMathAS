@@ -10,10 +10,10 @@ use Desmos\Lti\ErrorHandler;
 header('P3P: CP="ALL CUR ADM OUR"');
 set_exception_handler(array('Desmos\Lti\ErrorHandler', 'exceptionHandler'));
 $init_skip_csrfp = true;
-require(__DIR__ . "/../init_without_validate.php");
+require_once(__DIR__ . "/../init_without_validate.php");
 unset($init_skip_csrfp);
 
-$blti = new BasicLti($_REQUEST);
+$blti = new BasicLti($_REQUEST, $GLOBALS['DBH']);
 
 // Ensure all required LTI data was provided.
 $launchDataErrors = $blti->hasValidLtiData();
