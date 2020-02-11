@@ -48,7 +48,8 @@
             "Desmos\\": "desmos/",
             "Desmos\\Models\\": "desmos/models/",
             "Desmos\\Controlers\\": "desmos/controlers/",
-            "Desmos\\Views\\": "desmos/views/"
+            "Desmos\\Views\\": "desmos/views/",
+            "Desmos\\Lti\\": "desmos/lti/"
         }
     },
     "config": {
