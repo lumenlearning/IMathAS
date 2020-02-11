@@ -52,7 +52,9 @@ class BasicLti
     /*
      * OHM data
      */
-    private $ohmAssessmentId;
+    private $ohmItemId;
+    private $desmosItemId;
+    private $desmosItemTitle;
     private $ohmCourseId;
     private $ohmCourseName;
     private $ohmCourseGroupId;
@@ -125,7 +127,7 @@ class BasicLti
         $this->org = $this->setOrgFromRequest(); // This needs to happen after $ltikey is set.
         $this->userRole = $this->getRoleFromRequest();
         $this->gradePassbackUrl = $request['lis_outcome_service_url'];
-        $this->ohmAssessmentId = intval($request['custom_place_aid']);
+        $this->ohmItemId = intval($request['custom_item_id']);
     }
 
     /**
@@ -192,7 +194,7 @@ class BasicLti
     public function assignOhmDataFromLaunch(): bool
     {
         $this->assignOhmUserFromLaunch();
-        $this->assignOhmCourseFromLaunch();
+        $this->assignDesmosItemDataFromLaunch();
 
         return true;
     }
@@ -235,26 +237,36 @@ class BasicLti
     }
 
     /**
-     * Look up the OHM course associated with this LTI launch.
+     * Look up the Desmos item data associated with this LTI launch.
      * Used by assignOhmDataFromLaunch().
      *
-     * @return int The course ID.
+     * @return int The Desmos item ID.
      * @throws \Exception Thrown if no course was found.
      */
-    public function assignOhmCourseFromLaunch(): int
+    public function assignDesmosItemDataFromLaunch(): int
     {
-        $query = "SELECT courseid, name FROM myopenmathdb.imas_assessments WHERE id = :assessmentId";
+        $query = 'SELECT
+                it.courseid,
+                c.name AS course_name,
+                di.id AS desmos_id,
+                di.title AS desmos_title
+            FROM imas_items AS it
+                JOIN imas_courses AS c ON c.id = it.courseid
+                JOIN desmos_items AS di ON di.id = it.typeid
+            WHERE it.id = :id';
         $stm = $this->dbh->prepare($query);
-        $stm->execute([':assessmentId' => $this->ohmAssessmentId]);
+        $stm->execute([':id' => $this->ohmItemId]);
         if (1 > $stm->rowCount()) {
-            throw new \Exception("OHM course not found for assessment ID " . $this->ohmAssessmentId);
+            throw new \Exception("Unable to locate Desmos item using item ID: " . $this->ohmItemId);
         }
 
         $row = $stm->fetch(PDO::FETCH_ASSOC);
         $this->ohmCourseId = $row['courseid'];
-        $this->ohmCourseName = $row['name'];
+        $this->ohmCourseName = $row['course_name'];
+        $this->desmosItemId = $row['desmos_id'];
+        $this->desmosItemTitle = $row['desmos_title'];
 
-        return $this->ohmCourseId;
+        return $this->desmosItemId;
     }
 
     /**
@@ -338,7 +350,7 @@ class BasicLti
 
     /**
      * Get the course ID associated with this launch.
-     * This is only useful after calling assignOhmCourseFromLaunch() at least once.
+     * This is only useful after calling assignDesmosItemDataFromLaunch() at least once.
      *
      * @return int|null
      */
@@ -349,7 +361,7 @@ class BasicLti
 
     /**
      * Get the course name associated with this launch.
-     * This is only useful after calling assignOhmCourseFromLaunch() at least once.
+     * This is only useful after calling assignDesmosItemDataFromLaunch() at least once.
      *
      * @return string|null
      */
@@ -359,12 +371,36 @@ class BasicLti
     }
 
     /**
-     * Get the OHM assessment ID associated with this launch.
+     * Get the OHM item ID associated with this launch.
+     * This is only useful after calling assignDesmosItemDataFromLaunch() at least once.
+     *
+     * @return int|null
+     * @see getDesmosItemId
+     */
+    public function getItemId(): ?int
+    {
+        return $this->ohmItemId;
+    }
+
+    /**
+     * Get the Desmos item ID associated with this launch.
+     * This is only useful after calling assignDesmosItemDataFromLaunch() at least once.
      *
      * @return int|null
      */
-    public function getAssessmentId(): ?int
+    public function getDesmosItemId(): ?int
     {
-        return $this->ohmAssessmentId;
+        return $this->desmosItemId;
+    }
+
+    /**
+     * Get the Desmos item title associated with this launch.
+     * This is only useful after calling assignDesmosItemDataFromLaunch() at least once.
+     *
+     * @return int|null
+     */
+    public function getDesmosTitle(): ?string
+    {
+        return $this->desmosItemTitle;
     }
 }

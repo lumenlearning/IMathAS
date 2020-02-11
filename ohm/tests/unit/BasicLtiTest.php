@@ -43,7 +43,7 @@ final class BasicLtiTest extends TestCase
             'roles' => 'Instructor,urn:lti:instrole:ims/lis/Administrator',
             'oauth_consumer_key' => 'lumenltitest',
             'lis_outcome_service_url' => 'http://127.0.01/',
-            'custom_place_aid' => '2983925',
+            'custom_item_id' => '2983925',
         ];
 
         $this->basicLti = new BasicLti($this->request, $this->dbh);
@@ -60,8 +60,8 @@ final class BasicLtiTest extends TestCase
 
     public function testSetRequest(): void
     {
-        $this->assertEquals($this->request['custom_place_aid'], $this->basicLti->getAssessmentId(),
-            'LTI user ID should be set');
+        $this->assertEquals($this->request['custom_item_id'], $this->basicLti->getItemId(),
+            'Custom item ID (from imas_items) should be set for the Desmos item');
     }
 
     /*
@@ -261,29 +261,33 @@ final class BasicLtiTest extends TestCase
     }
 
     /*
-     * assignOhmCourseFromLaunch
+     * assignDesmosItemDataFromLaunch
      */
 
-    public function testAssignOhmCourseFromLaunch(): void
+    public function testAssignDesmosItemDataFromLaunch(): void
     {
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('rowCount')->willReturn(1);
         $pdoStatement->method('fetch')->willReturn([
             'courseid' => 1234,
-            'name' => 'Cats are cute!',
+            'course_name' => 'Cats are cute!',
+            'desmos_id' => 84,
+            'desmos_title' => 'Desmos Meow',
         ]);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
-        $result = $this->basicLti->assignOhmCourseFromLaunch();
+        $result = $this->basicLti->assignDesmosItemDataFromLaunch();
 
         // test the returned value.
-        $this->assertEquals(1234, $result, 'the OHM course ID should be set.');
+        $this->assertEquals(84, $result, 'the Desmos ID should be set.');
         // test the class fields.
         $this->assertEquals(1234, $this->basicLti->getOhmCourseId(), 'the OHM course ID should be set.');
         $this->assertEquals('Cats are cute!', $this->basicLti->getOhmCourseName(), 'the OHM course name should be set.');
+        $this->assertEquals(84, $this->basicLti->getDesmosItemId(), 'the Desmos ID should be set.');
+        $this->assertEquals('Desmos Meow', $this->basicLti->getDesmosTitle(), 'the Desmos item title should be set');
     }
 
-    public function testAssignOhmCourseFromLaunch_CourseNotFound(): void
+    public function testAssignDesmosItemDataFromLaunch_CourseNotFound(): void
     {
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('rowCount')->willReturn(0);
@@ -291,7 +295,7 @@ final class BasicLtiTest extends TestCase
 
         $this->expectException(\Exception::class);
 
-        $this->basicLti->assignOhmCourseFromLaunch();
+        $this->basicLti->assignDesmosItemDataFromLaunch();
     }
 
     /*
@@ -304,9 +308,11 @@ final class BasicLtiTest extends TestCase
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('rowCount')->willReturn(1);
         $pdoStatement->method('fetch')->willReturn([
-            'courseid' => 1234,          // for assignOhmCourseFromLaunch()
-            'name' => 'Cats are cute!',  // for assignOhmCourseFromLaunch()
-            'userid' => 42,              // for assignOhmUserFromLaunch()
+            'courseid' => 1234,                 // for assignOhmCourseFromLaunch()
+            'course_name' => 'Cats are cute!',  // for assignOhmCourseFromLaunch()
+            'desmos_id' => 84,                  // for assignOhmCourseFromLaunch()
+            'desmos_title' => 'Desmos Meow',    // for assignOhmCourseFromLaunch()
+            'userid' => 42,                     // for assignOhmUserFromLaunch()
         ]);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
@@ -315,6 +321,8 @@ final class BasicLtiTest extends TestCase
         $this->assertEquals(42, $this->basicLti->getOhmUserId(), 'the OHM user ID should be 42.');
         $this->assertEquals(1234, $this->basicLti->getOhmCourseId(), 'the OHM course ID should be set.');
         $this->assertEquals('Cats are cute!', $this->basicLti->getOhmCourseName(), 'the OHM course name should be set.');
+        $this->assertEquals(84, $this->basicLti->getDesmosItemId(), 'the Desmos item ID should be set.');
+        $this->assertEquals('Desmos Meow', $this->basicLti->getDesmosTitle(), 'the Desmos item title should be set');
     }
 }
 

@@ -27,14 +27,22 @@ $blti->authenticate();
 $blti->assignOhmDataFromLaunch();
 
 
+/*
+ * DEBUG BEGIN
+ * FIXME: Delete this after dev / testing!
+ */
 ?>
     <h1>LTI launch successful!</h1>
 
-    <li>You are requesting assessment
-        ID: <?php echo $blti->getAssessmentId(); ?></li>
+    <li>You are requesting assessment item
+        ID: <?php echo $blti->getItemId(); ?></li>
+    <li>Desmos ID: <?php echo $blti->getDesmosItemId(); ?></li>
+    <li>Desmos item: <?php echo $blti->getDesmosTitle(); ?></li>
     <li>Course ID: <?php echo $blti->getOhmCourseId(); ?></li>
     <li>Course Name: <?php echo $blti->getOhmCourseName(); ?></li>
     <?php
 
-// FIXME: Delete this after dev/testing!
 $blti->debugOutput();
+/*
+ * DEBUG END
+ */
