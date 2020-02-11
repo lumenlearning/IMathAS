@@ -7,7 +7,6 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 use Desmos\Lti\BasicLti;
 use Desmos\Lti\ErrorHandler;
 
-header('P3P: CP="ALL CUR ADM OUR"');
 set_exception_handler(array('Desmos\Lti\ErrorHandler', 'exceptionHandler'));
 $init_skip_csrfp = true;
 require_once(__DIR__ . "/../init_without_validate.php");
@@ -25,6 +24,12 @@ if (!empty($launchDataErrors)) {
 // Authenticate LTI credentials, get OHM user info.
 $blti->authenticate();
 $blti->assignOhmDataFromLaunch();
+
+header(
+    sprintf('Location: %s/course/itemview.php?type=Desmos&cid=%d&id=%d',
+        $GLOBALS['basesiteurl'], $blti->getOhmCourseId(), $blti->getDesmosItemId())
+);
+exit;
 
 
 /*
