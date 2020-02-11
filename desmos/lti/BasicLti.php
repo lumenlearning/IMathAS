@@ -52,6 +52,9 @@ class BasicLti
     /*
      * OHM data
      */
+    private $ohmAssessmentId;
+    private $ohmCourseId;
+    private $ohmCourseName;
     private $ohmCourseGroupId;
     private $ohmUserId;
 
@@ -122,6 +125,7 @@ class BasicLti
         $this->org = $this->setOrgFromRequest(); // This needs to happen after $ltikey is set.
         $this->userRole = $this->getRoleFromRequest();
         $this->gradePassbackUrl = $request['lis_outcome_service_url'];
+        $this->ohmAssessmentId = intval($request['custom_place_aid']);
     }
 
     /**
@@ -180,7 +184,22 @@ class BasicLti
     }
 
     /**
+     * Look up OHM data associated with this LTI launch.
+     *
+     * @return bool True on success.
+     * @throws \Exception Thrown on look up errors.
+     */
+    public function assignOhmDataFromLaunch(): bool
+    {
+        $this->assignOhmUserFromLaunch();
+        $this->assignOhmCourseFromLaunch();
+
+        return true;
+    }
+
+    /**
      * Look up the OHM user associated with this LTI launch.
+     * Used by assignOhmDataFromLaunch().
      *
      * @return int The OHM user ID.
      * @throws \Exception Thrown if OHM user is not found.
@@ -213,6 +232,29 @@ class BasicLti
         }
 
         return $this->ohmUserId;
+    }
+
+    /**
+     * Look up the OHM course associated with this LTI launch.
+     * Used by assignOhmDataFromLaunch().
+     *
+     * @return int The course ID.
+     * @throws \Exception Thrown if no course was found.
+     */
+    public function assignOhmCourseFromLaunch(): int
+    {
+        $query = "SELECT courseid, name FROM myopenmathdb.imas_assessments WHERE id = :assessmentId";
+        $stm = $this->dbh->prepare($query);
+        $stm->execute([':assessmentId' => $this->ohmAssessmentId]);
+        if (1 > $stm->rowCount()) {
+            throw new \Exception("OHM course not found for assessment ID " . $this->ohmAssessmentId);
+        }
+
+        $row = $stm->fetch(PDO::FETCH_ASSOC);
+        $this->ohmCourseId = $row['courseid'];
+        $this->ohmCourseName = $row['name'];
+
+        return $this->ohmCourseId;
     }
 
     /**
@@ -254,7 +296,7 @@ class BasicLti
         if ($ltiroles->isInstructorForOurPurposes()) {
             return 'instructor';
         } else {
-            return 'student';
+            return 'learner';
         }
     }
 
@@ -292,5 +334,37 @@ class BasicLti
     public function getOrg(): ?string
     {
         return $this->org;
+    }
+
+    /**
+     * Get the course ID associated with this launch.
+     * This is only useful after calling assignOhmCourseFromLaunch() at least once.
+     *
+     * @return int|null
+     */
+    public function getOhmCourseId(): ?int
+    {
+        return $this->ohmCourseId;
+    }
+
+    /**
+     * Get the course name associated with this launch.
+     * This is only useful after calling assignOhmCourseFromLaunch() at least once.
+     *
+     * @return string|null
+     */
+    public function getOhmCourseName(): ?string
+    {
+        return $this->ohmCourseName;
+    }
+
+    /**
+     * Get the OHM assessment ID associated with this launch.
+     *
+     * @return int|null
+     */
+    public function getAssessmentId(): ?int
+    {
+        return $this->ohmAssessmentId;
     }
 }

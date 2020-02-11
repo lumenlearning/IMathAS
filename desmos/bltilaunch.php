@@ -24,14 +24,16 @@ if (!empty($launchDataErrors)) {
 
 // Authenticate LTI credentials, get OHM user info.
 $blti->authenticate();
-$blti->assignOhmUserFromLaunch();
+$blti->assignOhmDataFromLaunch();
 
 
 ?>
     <h1>LTI launch successful!</h1>
 
     <li>You are requesting assessment
-        ID: <?php echo $_REQUEST['custom_place_aid']; ?></li>
+        ID: <?php echo $blti->getAssessmentId(); ?></li>
+    <li>Course ID: <?php echo $blti->getOhmCourseId(); ?></li>
+    <li>Course Name: <?php echo $blti->getOhmCourseName(); ?></li>
     <?php
 
 // FIXME: Delete this after dev/testing!

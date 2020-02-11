@@ -43,6 +43,7 @@ final class BasicLtiTest extends TestCase
             'roles' => 'Instructor,urn:lti:instrole:ims/lis/Administrator',
             'oauth_consumer_key' => 'lumenltitest',
             'lis_outcome_service_url' => 'http://127.0.01/',
+            'custom_place_aid' => '2983925',
         ];
 
         $this->basicLti = new BasicLti($this->request, $this->dbh);
@@ -51,6 +52,16 @@ final class BasicLtiTest extends TestCase
             $this->oAuthServerMock,
             $this->oAuthSignatureMethod_HMAC_SHA1_mock
         );
+    }
+
+    /*
+     * setRequest
+     */
+
+    public function testSetRequest(): void
+    {
+        $this->assertEquals($this->request['custom_place_aid'], $this->basicLti->getAssessmentId(),
+            'LTI user ID should be set');
     }
 
     /*
@@ -132,8 +143,8 @@ final class BasicLtiTest extends TestCase
 
         $this->basicLti->getRoleFromRequest();
 
-        $this->assertEquals('student', $this->basicLti->getRoleFromRequest(),
-            'should get role "student" based on request data');
+        $this->assertEquals('learner', $this->basicLti->getRoleFromRequest(),
+            'should get role "learner" based on request data');
     }
 
     public function testAssignRoleFromRequest_Unknown(): void
@@ -143,8 +154,8 @@ final class BasicLtiTest extends TestCase
 
         $this->basicLti->getRoleFromRequest();
 
-        $this->assertEquals('student', $this->basicLti->getRoleFromRequest(),
-            'should get role "student" role is unknown');
+        $this->assertEquals('learner', $this->basicLti->getRoleFromRequest(),
+            'should get role "learner" role is unknown');
     }
 
     public function testAssignRoleFromRequest_Missing(): void
@@ -154,8 +165,8 @@ final class BasicLtiTest extends TestCase
 
         $this->basicLti->getRoleFromRequest();
 
-        $this->assertEquals('student', $this->basicLti->getRoleFromRequest(),
-            'should get role "student" if role data is missing in request');
+        $this->assertEquals('learner', $this->basicLti->getRoleFromRequest(),
+            'should get role "learner" if role data is missing in request');
     }
 
     /*
@@ -247,6 +258,63 @@ final class BasicLtiTest extends TestCase
         $this->expectException(\Exception::class);
 
         $this->basicLti->assignOhmUserFromLaunch();
+    }
+
+    /*
+     * assignOhmCourseFromLaunch
+     */
+
+    public function testAssignOhmCourseFromLaunch(): void
+    {
+        $pdoStatement = $this->createMock(\PDOStatement::class);
+        $pdoStatement->method('rowCount')->willReturn(1);
+        $pdoStatement->method('fetch')->willReturn([
+            'courseid' => 1234,
+            'name' => 'Cats are cute!',
+        ]);
+        $this->dbh->method('prepare')->willReturn($pdoStatement);
+
+        $result = $this->basicLti->assignOhmCourseFromLaunch();
+
+        // test the returned value.
+        $this->assertEquals(1234, $result, 'the OHM course ID should be set.');
+        // test the class fields.
+        $this->assertEquals(1234, $this->basicLti->getOhmCourseId(), 'the OHM course ID should be set.');
+        $this->assertEquals('Cats are cute!', $this->basicLti->getOhmCourseName(), 'the OHM course name should be set.');
+    }
+
+    public function testAssignOhmCourseFromLaunch_CourseNotFound(): void
+    {
+        $pdoStatement = $this->createMock(\PDOStatement::class);
+        $pdoStatement->method('rowCount')->willReturn(0);
+        $this->dbh->method('prepare')->willReturn($pdoStatement);
+
+        $this->expectException(\Exception::class);
+
+        $this->basicLti->assignOhmCourseFromLaunch();
+    }
+
+    /*
+     * assignOhmDataFromLaunch
+     */
+
+    // Error cases are tested in assignOhmCourseFromLaunch and assignOhmUserFromLaunch.
+    public function testAssignOhmDataFromLaunch(): void
+    {
+        $pdoStatement = $this->createMock(\PDOStatement::class);
+        $pdoStatement->method('rowCount')->willReturn(1);
+        $pdoStatement->method('fetch')->willReturn([
+            'courseid' => 1234,          // for assignOhmCourseFromLaunch()
+            'name' => 'Cats are cute!',  // for assignOhmCourseFromLaunch()
+            'userid' => 42,              // for assignOhmUserFromLaunch()
+        ]);
+        $this->dbh->method('prepare')->willReturn($pdoStatement);
+
+        $this->basicLti->assignOhmDataFromLaunch();
+
+        $this->assertEquals(42, $this->basicLti->getOhmUserId(), 'the OHM user ID should be 42.');
+        $this->assertEquals(1234, $this->basicLti->getOhmCourseId(), 'the OHM course ID should be set.');
+        $this->assertEquals('Cats are cute!', $this->basicLti->getOhmCourseName(), 'the OHM course name should be set.');
     }
 }
 
