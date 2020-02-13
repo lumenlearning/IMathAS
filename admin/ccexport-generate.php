@@ -260,8 +260,12 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                         fwrite($fp, '<blti:custom><lticm:property name="place_aid">' . $iteminfo[$item][1] . '</lticm:property></blti:custom>');
                         $urladd = '';
                     }
-                    fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
-                    if ($urlmode == 'https://') {fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');}
+                    if ($urlmode == 'https://') {
+                        fwrite($fp,'<blti:launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                        fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');
+                    } else {
+                        fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                    }
                     fwrite($fp,'<blti:vendor><lticp:code>IMathAS</lticp:code><lticp:name>'.$installname.'</lticp:name></blti:vendor>');
                     fwrite($fp,'</cartridge_basiclti_link>');
                     fclose($fp);
