@@ -1,9 +1,11 @@
 $(document).ready(function() {
     let formIsSubmitting = false;
+    let enteringPreviewMode = false;
     let formDataBeforeChanges = $('#desmos_item').serialize();
 
     window.onbeforeunload = function () {
         if (formIsSubmitting) {
+            enteringPreviewMode = false;
             formIsSubmitting = false;
             return;
         }
@@ -19,6 +21,8 @@ $(document).ready(function() {
      */
     $.urlParam = function(name){
         var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (null === results) return 0;
+
         return results[1] || 0;
     };
 
@@ -36,8 +40,10 @@ $(document).ready(function() {
                 tempSerializedPreviewData: formData,
             },
             success: function(data) {
+                enteringPreviewMode = true;
+                let id = Number($.urlParam('id'));
                 let courseId = Number($.urlParam('cid'));
-                $(location).attr('href', '/course/itempreview.php?cid=' + courseId + '&type=desmos');
+                $(location).attr('href', '/course/itempreview.php?cid=' + courseId + '&type=desmos&id=' + id);
             },
             error: function(data) {
                 console.log("Failed to temporarily store serialized form data for Desmos interactive.");
@@ -51,12 +57,11 @@ $(document).ready(function() {
      * Unserialize form data from browser local storage, populate
      */
     $("#desmos_return_to_edit_button").click(function() {
-        $("#desmos_preview_container").hide();
-        $("#desmos_preview_content").empty();
-        $("div.mainbody").css("background-color", "#FFFFFF");
-        $("div.breadcrumb").css("background-color", "#FFFFFF");
-        $("#desmos_edit_container").show();
-        $('link[title=lux]')[0].disabled=false;
+        let id = Number($.urlParam('id'));
+        let idParam = 0 === id ? '' : '&id=' + id;
+        let courseId = Number($.urlParam('cid'));
+        $(location).attr('href', '/course/itemadd.php?mode=returning_from_preview&cid='
+          + courseId + '&type=desmos' + idParam);
     });
 
     $("#desmos_form_submit_button").click(function(e) {

@@ -40,6 +40,29 @@ if (isset($_GET['id'])) {
         require __DIR__ . "/views/layout.php";
         exit;
     }
+
+    if (isset($_GET['mode']) && 'returning_from_preview' == $_GET['mode']) {
+        // This was stored by /desmos/js/editItem.js.
+        $serializedData = $_SESSION['tempSerializedPreviewData'];
+        parse_str($serializedData, $desmosFormData);
+
+        $item->title = $desmosFormData['title'];
+        $item->setName($desmosFormData['title']);
+        $item->setSummary($desmosFormData['summary']);
+        // Build steps array
+        $steps = [];
+        foreach ($desmosFormData['step_title'] as $key => $title) {
+            $steps[$key] = [
+                "title" => $title,
+                "text" => $desmosFormData['step_text'][$key],
+                "id" => $desmosFormData['step'][$key],
+            ];
+        }
+        $item->setSteps($steps);
+        $item->setStartDate(strtotime($desmosFormData['sdate']));
+        $item->setEndDate(strtotime($desmosFormData['edate']));
+        $pagetitle = Sanitize::encodeStringForDisplay($item->name);
+    }
 }
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters

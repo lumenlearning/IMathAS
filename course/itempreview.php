@@ -67,5 +67,6 @@ if ($item->typename=='desmos') {
     $placeinhead = "<script src=\"".$CFG['desmos_calculator']."\"></script>";
 }
 $placeinfooter = "<script src=\"$imasroot/desmos/js/setDesmos.js\"></script>";
+$placeinfooter .= "<script src=\"$imasroot/desmos/js/editItem.js\"></script>";
 $body = __DIR__ . "/../" . $item->typename . "/views/preview.php";
 require __DIR__ . "/views/layout.php";
