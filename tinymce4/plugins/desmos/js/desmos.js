@@ -94,3 +94,10 @@ var desmosDialog = {
         this.calculator.setState(desmosjson);
     }
 };
+function importToggle() {
+    if(document.getElementById("import").value==="") {
+        document.getElementById('desmos_form_submit_button').disabled = true;
+    } else {
+        document.getElementById('desmos_form_submit_button').disabled = false;
+    }
+}
