@@ -308,6 +308,7 @@ body {
 /* The action buttons displayed on the preview page. */
 #desmos_previewmode_buttons {
     margin: 0;
+    padding-top: 1em;
     padding-bottom: 1em;
 }
 
