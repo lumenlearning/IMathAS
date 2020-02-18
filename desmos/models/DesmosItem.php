@@ -415,6 +415,36 @@ class DesmosItem extends CourseItem
     }
 
     /**
+     * Set class fields from form data.
+     *
+     * This is used to re-populate forms when jumping between
+     * edit and preview pages in:
+     *   - /course/itemadd.php
+     *   - /desmos/views/preview.php
+     *
+     * @param array $formData Associative array of form data.
+     * @return DesmosItem
+     */
+    public function fromFormData(array $formData): DesmosItem
+    {
+        $this->title = $formData['title'];
+        $this->setName($formData['title']);
+        $this->setSummary($formData['summary']);
+        // Build steps array
+        $steps = [];
+        foreach ($formData['step_title'] as $key => $title) {
+            $steps[$key] = [
+                "title" => $title,
+                "text" => $formData['step_text'][$key],
+                "id" => $formData['step'][$key],
+            ];
+        }
+        $this->setSteps($steps);
+        $this->setStartDate(strtotime($formData['sdate']));
+        $this->setEndDate(strtotime($formData['edate']));
+        return $this;
+
+    /*
      * Format a date for SQL.
      *
      * @param DateTime $dateTime A DateTime object.

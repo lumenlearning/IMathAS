@@ -48,21 +48,7 @@ if ($returningFromPreview) {
     $serializedData = $_SESSION['tempSerializedPreviewData'];
     parse_str($serializedData, $desmosFormData);
 
-    $item->title = $desmosFormData['title'];
-    $item->setName($desmosFormData['title']);
-    $item->setSummary($desmosFormData['summary']);
-    // Build steps array
-    $steps = [];
-    foreach ($desmosFormData['step_title'] as $key => $title) {
-        $steps[$key] = [
-            "title" => $title,
-            "text" => $desmosFormData['step_text'][$key],
-            "id" => $desmosFormData['step'][$key],
-        ];
-    }
-    $item->setSteps($steps);
-    $item->setStartDate(strtotime($desmosFormData['sdate']));
-    $item->setEndDate(strtotime($desmosFormData['edate']));
+    $item->fromFormData($desmosFormData);
     $pagetitle = Sanitize::encodeStringForDisplay($item->name);
 }
 
