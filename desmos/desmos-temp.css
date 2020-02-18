@@ -72,6 +72,8 @@ body {
 .steps-navigation .step-list {
     margin-top: 0;
     padding-left: 0;
+    /* Makes step list height equal to parent container so list can overflow. 
+    533px is approx. the height of the step box minus the height of the box around the add button */
     height: 533px;
     overflow-y: scroll;
 }
@@ -429,6 +431,22 @@ body {
 
 }
 
+@media (max-width: 800px){
+    .desmos .form-group {
+        display: block;
+    }
+    .desmos .form-group .controls + .controls {
+        margin-left: 0;
+        display: inline-block;
+        padding-top: 8px;
+    }
+    #desmos_preview_warning {
+        display: block;
+        margin: 8px 0 0 0;
+    }
+    
+}
+
 @media (min-width: 1024px) {
     .desmos-student-view {
         display: flex;
@@ -485,17 +503,6 @@ body {
 @media (min-height:800px) {
     .js-desmos, .desmos-fig {
         height: 600px;
-    }
-}
-
-@media (max-width: 800px){
-    .desmos .form-group {
-        display: block;
-    }
-    .desmos .form-group .controls + .controls {
-        margin-left: 0;
-        display: inline-block;
-        padding-top: 8px;
     }
 }
 
