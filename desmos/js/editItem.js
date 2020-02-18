@@ -4,7 +4,7 @@ $(document).ready(function() {
     let formDataBeforeChanges = $('#desmos_item').serialize();
 
     window.onbeforeunload = function () {
-        if (formIsSubmitting) {
+        if (formIsSubmitting || enteringPreviewMode) {
             enteringPreviewMode = false;
             formIsSubmitting = false;
             return;
@@ -48,7 +48,7 @@ $(document).ready(function() {
             error: function(data) {
                 console.log("Failed to temporarily store serialized form data for Desmos interactive.");
                 console.log(data.responseText);
-                $("#preview_button").html('Preview');
+                $("#desmos_preview_button").html('Preview');
             }
         });
     });
