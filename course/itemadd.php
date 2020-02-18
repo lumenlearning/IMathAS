@@ -30,6 +30,7 @@ if (isset($_GET['tb'])) {
 } else {
     $totb = 'b';
 }
+$returningFromPreview = (isset($_GET['mode']) && 'returning_from_preview' == $_GET['mode']);
 
 $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid, $block, $totb);
@@ -40,30 +41,31 @@ if (isset($_GET['id'])) {
         require __DIR__ . "/views/layout.php";
         exit;
     }
-
-    if (isset($_GET['mode']) && 'returning_from_preview' == $_GET['mode']) {
-        // This was stored by /desmos/js/editItem.js.
-        $serializedData = $_SESSION['tempSerializedPreviewData'];
-        parse_str($serializedData, $desmosFormData);
-
-        $item->title = $desmosFormData['title'];
-        $item->setName($desmosFormData['title']);
-        $item->setSummary($desmosFormData['summary']);
-        // Build steps array
-        $steps = [];
-        foreach ($desmosFormData['step_title'] as $key => $title) {
-            $steps[$key] = [
-                "title" => $title,
-                "text" => $desmosFormData['step_text'][$key],
-                "id" => $desmosFormData['step'][$key],
-            ];
-        }
-        $item->setSteps($steps);
-        $item->setStartDate(strtotime($desmosFormData['sdate']));
-        $item->setEndDate(strtotime($desmosFormData['edate']));
-        $pagetitle = Sanitize::encodeStringForDisplay($item->name);
-    }
 }
+
+if ($returningFromPreview) {
+    // This was stored by /desmos/js/editItem.js.
+    $serializedData = $_SESSION['tempSerializedPreviewData'];
+    parse_str($serializedData, $desmosFormData);
+
+    $item->title = $desmosFormData['title'];
+    $item->setName($desmosFormData['title']);
+    $item->setSummary($desmosFormData['summary']);
+    // Build steps array
+    $steps = [];
+    foreach ($desmosFormData['step_title'] as $key => $title) {
+        $steps[$key] = [
+            "title" => $title,
+            "text" => $desmosFormData['step_text'][$key],
+            "id" => $desmosFormData['step'][$key],
+        ];
+    }
+    $item->setSteps($steps);
+    $item->setStartDate(strtotime($desmosFormData['sdate']));
+    $item->setEndDate(strtotime($desmosFormData['edate']));
+    $pagetitle = Sanitize::encodeStringForDisplay($item->name);
+}
+
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters
 //if the form has been submitted
@@ -151,8 +153,10 @@ if (isset($typeid)) {
 } else {
     //set defaults
     $item->setAvail(1);
-    $item->setStartDate(time());
-    $item->setEndDate(time() + 7*24*60*60);
+    if (!$returningFromPreview) {
+        $item->setStartDate(time());
+        $item->setEndDate(time() + 7*24*60*60);
+    }
     $altoncal = 0;
     $hidetitle = false;
     $gradeoutcomes = array();
@@ -180,7 +184,7 @@ if ($item->enddate!=2000000000) {
     $edate = tzdate("m/d/Y", time()+7*24*60*60);
     $etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 }
-if (!isset($typeid)) {
+if (!isset($typeid) && !$returningFromPreview) {
     $stime = $defstime;
     $etime = $deftime;
 }
