@@ -150,8 +150,7 @@ body {
     padding-bottom: 8px;
 }
 
-.step-naviation.teacher-view {
-    /* overflow: scroll;  */
+.step-navigation.teacher-view {
     position: relative;
 }
 
