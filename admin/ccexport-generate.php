@@ -219,7 +219,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $fp = fopen($newdir.'/desmos'.$iteminfo[$item][1].'.xml','w');
                     fwrite($fp,'<desmos xmlns="http://www.imsglobal.org/xsd/imsccv1p1/imswl_v1p1">');
                     fwrite($fp,' <title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n");
-                    fwrite($fp,' <url href="'.$GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_item_id='.$courseItem->itemid.'"/>');
+                    fwrite($fp,' <url href="'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'"/>');
                     fwrite($fp,'</desmos>');
                     fclose($fp);
 
@@ -228,7 +228,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $canvout .= '<workflow_state>'.($courseItem->avail==0?'unpublished':'active').'</workflow_state>'."\n";
                     $canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>'."\n";
                     $canvout .= '<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
-                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/bltilaunch.php?custom_item_id='.$courseItem->itemid.'</url>';
+                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'</url>';
                     $canvout .= "<position>$ccnt</position> <indent>".max($mod_depth-1,0)."</indent> </item>";
                     $ccnt++;
 
@@ -248,10 +248,10 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                         $urladd = '';
                     }
                     if ($urlmode == 'https://') {
-                        fwrite($fp,'<blti:launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
-                        fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');
+                        fwrite($fp,'<blti:launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                        fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');
                     } else {
-                        fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                        fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php'.$urladd.'</blti:launch_url>');
                     }
                     fwrite($fp,'<blti:vendor><lticp:code>IMathAS</lticp:code><lticp:name>'.$installname.'</lticp:name></blti:vendor>');
                     fwrite($fp,'</cartridge_basiclti_link>');
