@@ -41,16 +41,16 @@ body {
 }
 /* End overriding Lux button styles */
 
-.desmos-header {
-    padding-bottom: 1em;
+.desmos-heading {
+    display: flex; 
+    align-items: center;
+    font-size: 1.5em;
 }
 
-.desmos-header h1 {
-    margin-bottom: 0;
-}
-
-.desmos-header img {
-    vertical-align: middle;
+.desmos-heading svg {
+    height: 24px;
+    width: 24px;
+    margin-right: 8px;
 }
 
 .desmos-steps {
@@ -182,7 +182,7 @@ body {
 
 .desmos .form-group {
     display: flex;
-    padding-bottom: 1em;
+    padding: 1em 0 1em 0;
 }
 
 .desmos .form-group input, .desmos .controls .mce-tinymce {
