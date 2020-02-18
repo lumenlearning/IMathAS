@@ -435,8 +435,8 @@ body {
         display: block;
     }
     .desmos .form-group .controls + .controls {
-        margin-left: 0;
         display: inline-block;
+        margin-left: 0;
         padding-top: 8px;
     }
     #desmos_preview_warning {
