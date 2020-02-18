@@ -36,20 +36,21 @@ $(document).ready(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
 
+        let courseId = Number($.urlParam('cid'));
         // Allow multiple preview tabs
         let previewId = $.urlParam('preview_id');
         if (0 === previewId) previewId = Date.now();
 
         $.ajax({
             type: "POST",
-            url: "/course/itempreview.php?mode=store_temp_preview_data&preview_id=" + previewId,
+            url: "/course/itempreview.php?mode=store_temp_preview_data&preview_id="
+              + previewId + '&cid=' + cid,
             data: {
                 tempSerializedPreviewData: formData,
             },
             success: function(data) {
                 enteringPreviewMode = true;
                 let id = Number($.urlParam('id'));
-                let courseId = Number($.urlParam('cid'));
 
                 $(location).attr('href', '/course/itempreview.php?cid='
                     + courseId + '&type=desmos&id=' + id + '&preview_id=' + previewId);
