@@ -42,34 +42,38 @@ body {
 /* End overriding Lux button styles */
 
 .desmos-heading {
-    display: flex; 
     align-items: center;
+    display: flex; 
     font-size: 1.5em;
 }
 
 .desmos-heading svg {
     height: 24px;
-    width: 24px;
     margin-right: 8px;
+    width: 24px;
 }
 
 .desmos-steps {
     box-sizing: border-box;
     display: flex; 
     height: 600px;
-    width: 1220px;
+    position: relative;
+    width: 100%;
 }
 
 /* Step Navigation */
 .desmos-steps .steps-navigation {
     border: 1px solid #dadada;
     border-right: none;
+    min-width: 256px;
     width: 30%;
 }
 
 .steps-navigation .step-list {
     margin-top: 0;
     padding-left: 0;
+    height: 533px;
+    overflow-y: scroll;
 }
 
 .step-li  {
@@ -145,12 +149,24 @@ body {
 }
 
 .step-naviation.teacher-view {
-    overflow: scroll; 
+    /* overflow: scroll;  */
+    position: relative;
 }
 
 /* Overwriting Lux */
 .desmos input {
-	padding: .25em .5em; 
+    padding: 0 4px;
+    line-height: 2;
+}
+
+.desmos.form input, .form textarea, .form select {
+    -web-kit-box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.02) inset, 0 1px 2px 0 rgba(0, 0, 0, 0.09) inset;
+    box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.02) inset, 0 1px 2px 0 rgba(0, 0, 0, 0.09) inset;
+}
+
+.desmos.form input:focus, .form textarea:focus, .form select:focus {
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
 .desmos .form-group input {
@@ -194,7 +210,7 @@ body {
 }
 
 .desmos .teacher-view {
-    overflow-y: scroll;
+    position: relative;
 }
 
 .desmos-steps button:not(.button):hover {
@@ -205,6 +221,8 @@ body {
     background: #f2f2f2;
     border-bottom: #dadada solid 1px;
     padding: 8px;
+    position: relative;
+    z-index: 1;
 }
 
 .step-controls .button {
@@ -245,7 +263,6 @@ body {
     display: inline-block;
     opacity: 0.5;
     transition: opacity 0.1s;
-    vertical-align: middle;
 }
 
 .step-li button:hover svg,
@@ -471,6 +488,17 @@ body {
     }
 }
 
+@media (max-width: 800px){
+    .desmos .form-group {
+        display: block;
+    }
+    .desmos .form-group .controls + .controls {
+        margin-left: 0;
+        display: inline-block;
+        padding-top: 8px;
+    }
+}
+
 #tinymce .desmos-edit-button, #tinymce .js-desmos {
     background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
     display: block;
@@ -481,6 +509,10 @@ body {
 
 #editdesmos.desmos-fig, #editdesmos.js-desmos {
     width: 100%;
+}
+
+.mce-edit-area {
+    padding: 8px;
 }
 
 .mce-window-head {
