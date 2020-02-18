@@ -10,8 +10,10 @@ $(document).ready(function() {
             return;
         }
 
+        let id = $.urlParam('id');
+
         let formDataBeforeUnload = $('#desmos_item').serialize();
-        if (formDataBeforeUnload !== formDataBeforeChanges) {
+        if (formDataBeforeUnload !== formDataBeforeChanges || 0 === id) {
             return 'Data has been modified. Are you sure you want to abandon changes?';
         }
     };
