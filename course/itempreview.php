@@ -11,6 +11,10 @@ require "../includes/htmlutil.php";
 require_once(__DIR__ . '/../vendor/autoload.php');
 require_once(__DIR__ . '/../includes/sanitize.php');
 
+// This is set by /desmos/js/editItem.js and is used to allow multiple
+// item previews at the same time.
+$previewId = $_GET['preview_id'];
+
 /*
  * This is used by /desmos/views/edit.php to temporarily store serialized
  * Desmos form data for preview mode in /desmos/views/view.php.
@@ -20,7 +24,7 @@ require_once(__DIR__ . '/../includes/sanitize.php');
  */
 if ('store_temp_preview_data' == $_GET['mode']) {
     if (isset($_POST['tempSerializedPreviewData']) && !empty($_POST['tempSerializedPreviewData'])) {
-        $_SESSION['tempSerializedPreviewData'] = $_POST['tempSerializedPreviewData'];
+        $_SESSION['tempSerializedPreviewData-' . $previewId] = $_POST['tempSerializedPreviewData'];
     }
     exit;
 }

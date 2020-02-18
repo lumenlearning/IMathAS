@@ -30,14 +30,19 @@ $(document).ready(function() {
 
     /*
      * Serialize the form on the edit page, save in the user's PHP session,
-     * and redirect to the view page in preview mode.
+     * and redirect to the preview page.
      */
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
+
+        // Allow multiple preview tabs
+        let previewId = $.urlParam('preview_id');
+        if (0 === previewId) previewId = Date.now();
+
         $.ajax({
             type: "POST",
-            url: "/course/itempreview.php?mode=store_temp_preview_data",
+            url: "/course/itempreview.php?mode=store_temp_preview_data&preview_id=" + previewId,
             data: {
                 tempSerializedPreviewData: formData,
             },
@@ -45,7 +50,9 @@ $(document).ready(function() {
                 enteringPreviewMode = true;
                 let id = Number($.urlParam('id'));
                 let courseId = Number($.urlParam('cid'));
-                $(location).attr('href', '/course/itempreview.php?cid=' + courseId + '&type=desmos&id=' + id);
+
+                $(location).attr('href', '/course/itempreview.php?cid='
+                    + courseId + '&type=desmos&id=' + id + '&preview_id=' + previewId);
             },
             error: function(data) {
                 console.log("Failed to temporarily store serialized form data for Desmos interactive.");
@@ -56,14 +63,15 @@ $(document).ready(function() {
     });
 
     /*
-     * Unserialize form data from browser local storage, populate
+     * Return to the edit page. OHM will re-populate the form using session data.
      */
     $("#desmos_return_to_edit_button").click(function() {
         let id = Number($.urlParam('id'));
         let idParam = 0 === id ? '' : '&id=' + id;
         let courseId = Number($.urlParam('cid'));
+        let previewId = $.urlParam('preview_id');
         $(location).attr('href', '/course/itemadd.php?mode=returning_from_preview&cid='
-          + courseId + '&type=desmos' + idParam);
+          + courseId + '&type=desmos' + idParam + '&preview_id=' + previewId);
     });
 
     $("#desmos_form_submit_button").click(function(e) {

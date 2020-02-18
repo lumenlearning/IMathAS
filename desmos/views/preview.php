@@ -11,7 +11,8 @@ if ($shownav) {
 }
 
 // This was stored by /desmos/js/editItem.js.
-$serializedData = $_SESSION['tempSerializedPreviewData'];
+$previewId = $_GET['preview_id'];
+$serializedData = $_SESSION['tempSerializedPreviewData-' . $previewId];
 parse_str($serializedData, $desmosFormData);
 
 $item = new \Desmos\Models\DesmosItem();
