@@ -82,7 +82,7 @@ function resyncGrades(): void
             $assessmentName = $assessment['name'];
         }
 
-        $grade = LTI::reCalcandupdateLTIgrade((int)$us['aid'], $us['scores']);
+        $grade = LTI::reCalcandupdateLTIgrade((int)$us['aid'], $us['scores'], $us['ver']);
         $score = Assessments::getpts($us['scores']);
         $logInfo = createLogInfo($cid, $us, $assessmentName, $grade, $score);
 
@@ -106,7 +106,7 @@ function resyncGrades(): void
     }
 
     echo '<ul>';
-    printf('<li>Queued %d grades for LMS resync.</li>', $totalQueued);
+    printf('<li>Queued %d grade(s) for LMS resync.</li>', $totalQueued);
     echo '</ul>';
     echo '<p>Please allow up to 30 minutes for grades to sync.</p>';
     if (0 < $totalNotQueued) {
@@ -142,7 +142,7 @@ function dumpErrors(int $totalNotQueued, array $errorLogIds): void
 {
     ?>
     <ul>
-        <li>Failed to queue <?php echo $totalNotQueued; ?> grades for LMS
+        <li>Failed to queue <?php echo $totalNotQueued; ?> grade(s) for LMS
             resync.
         </li>
         <li>Please provide the following information in your support ticket:

@@ -80,18 +80,18 @@ follow [these instructions](docs/ohm_deployment.md).
 In the `imas_users` table, each user record has one of these values in the
 `rights` column to define their role and access level within OHM.
 
-```
-switch ($rights) {
-    case 5: return _("Guest"); break;
-    case 10: return _("Student"); break;
-    case 12: return _("Pending"); break;
-    case 15: return _("Tutor/TA/Proctor"); break;
-    case 20: return _("Teacher"); break;
-    case 40: return _("LimCourseCreator"); break;
-    case 75: return _("GroupAdmin"); break;
-    case 100: return _("Admin"); break;
-}
-```
+
+| Value      | Meaning          |
+|------------|------------------|
+| 5          | Guest            |
+| 10         | Student          |
+| 12         | Pending          |
+| 15         | Tutor/TA/Proctor |
+| 20         | Teacher          |
+| 40         | LimCourseCreator |
+| 75         | GroupAdmin       |
+| 100        | Admin            |
+| 11, 76, 77 | LTI credentials  |
 
 # Additional documentation
 

@@ -45,7 +45,7 @@ class LTI
             return "Unable to lookup secret";
         }
     }
-    public static function reCalcandupdateLTIgrade(int $aid, $scores)
+    public static function reCalcandupdateLTIgrade(int $aid, $scores, $ver)
     {
         global $DBH;
         $stm = $DBH->prepare("SELECT ptsposs,itemorder,defpoints FROM imas_assessments WHERE id=:id");
@@ -56,16 +56,14 @@ class LTI
         }
         $aidposs = $line['ptsposs'];
         $allans = true;
-        if (is_array($scores)) {
+        if (1 == $ver) {
             // old assesses
+            // Calculation reference: /course/isolateassessgrade.php, line ~283 (as of 2020 Feb 05)
+            $sp = explode(';', $scores);
+            $scores = explode(',', $sp[0]);
             $total = 0;
-            for ($i = 0; $i < count($scores); $i++) {
-                if ($allans && strpos($scores[$i], '-1') !== false) {
-                    $allans = false;
-                }
-                if (Assessments::getpts($scores[$i]) > 0) {
-                    $total += self::getpts($scores[$i]);
-                }
+            for ($i=0;$i<count($scores);$i++) {
+                $total += Assessments::getpts($scores[$i]);
             }
         } else {
             // new assesses
