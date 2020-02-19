@@ -445,7 +445,42 @@ for ($i=0; $i<3; $i++) {
 			echo '<div id="leftcolumn">';
 		} else if ($i==2) {
 			echo '<div id="rightcolumn">';
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+
+			require_once(__DIR__ . '/ohm/includes/OhmBanner.php');
+
+			$ohmBanner = new Ohm\Includes\OhmBanner($GLOBALS['myrights']);
+			$ohmBanner->showTeacherBannerForTeachersOnly();
+			$ohmBanner->showStudentBannerForStudentsOnly();
+
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
 		}
+	} else {
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+		// #### Begin OHM-specific code #####################################################
+
+		require_once(__DIR__ . '/ohm/includes/OhmBanner.php');
+
+		$ohmBanner = new Ohm\Includes\OhmBanner($GLOBALS['myrights']);
+		$ohmBanner->showTeacherBannerForTeachersOnly();
+		$ohmBanner->showStudentBannerForStudentsOnly();
+
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
+		// #### End OHM-specific code #######################################################
 	}
 	for ($j=0; $j<count($pagelayout[$i]); $j++) {
 		switch ($pagelayout[$i][$j]) {
