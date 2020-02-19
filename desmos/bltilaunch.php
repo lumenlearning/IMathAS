@@ -25,10 +25,16 @@
 //    lis_person_name_given
 //    lis_person_name_family
 //    lis_person_contact_email_primary
+require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . "/../includes/sanitize.php");
+require_once(__DIR__ . "/../config.php");
+foreach ($CFG['hooks'] as $hook => $value) {
+    $CFG['hooks'][$hook] = __DIR__ . '/../' . $value;
+}
 
 header('P3P: CP="ALL CUR ADM OUR"');
 $init_skip_csrfp = true;
-include("init_without_validate.php");
+include("../init_without_validate.php");
 unset($init_skip_csrfp);
 
 // #### Begin OHM-specific code #####################################################
@@ -36,7 +42,7 @@ unset($init_skip_csrfp);
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
-require_once(__DIR__ . '/includes/ltiroles.php');
+require_once(__DIR__ . '/../includes/ltiroles.php');
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
@@ -62,9 +68,9 @@ if ($enablebasiclti!=true) {
 
 function reporterror($err) {
     global $imasroot;
-    require("header.php");
+    require("../header.php");
     printf('<p>%s</p>', Sanitize::encodeStringForDisplay($err));
-    require("footer.php");
+    require("../footer.php");
     exit;
 }
 
@@ -152,7 +158,7 @@ if (
             $sessiondata['logintzname'] = $_POST['tzname'];
         }
 
-        require_once("$curdir/includes/userprefs.php");
+        require_once("$curdir/../includes/userprefs.php");
         generateuserprefs();
 
         $enc = base64_encode(serialize($sessiondata));
@@ -178,8 +184,8 @@ if (
             $itemid = $sessiondata['ltiitemid'];
             $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
             if (empty($course_item)) {
-                $diaginfo = "(Debug info: 31-$itemid)";
-                reporterror("This assignment does not appear to exist anymore. $diaginfo");
+                $diaginfo = "(Debug info: 30-$itemid)";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
             }
             $cid = $course_item['courseid'];
             if ($sessiondata['ltirole'] == 'learner') {
@@ -241,9 +247,9 @@ if (
         $flexwidth = true;
         $nologo = true;
         $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
-        require("header.php");
+        require("../header.php");
         echo "<h3>Connecting to $installname</h3>";
-        echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/bltilaunch.php?launch=true\" ";
+        echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/desmos/bltilaunch.php?launch=true\" ";
         if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltitlwrds'] != '') {
             echo "onsubmit='return confirm(\"This assessment has a time limit of "
                 .Sanitize::encodeStringForJavascript($sessiondata['ltitlwrds'])
@@ -279,7 +285,7 @@ if (
         </script>
         </form>
         <?php
-        require("footer.php");
+        require("../footer.php");
         exit;
 
     } else if (isset($_GET['userinfo']) && isset($_SESSION['ltiuserid'])) {
@@ -301,7 +307,7 @@ if (
         }
         if ($_GET['userinfo']=='set') {
             if (isset($CFG['GEN']['newpasswords'])) {
-                require_once("includes/password.php");
+                require_once("../includes/password.php");
             }
             //check input
             $infoerr = '';
@@ -334,7 +340,7 @@ if (
                     if (!$allow_acctcreation) {
                         $infoerr = 'Must link to an existing account';
                     } else {
-                        require_once(__DIR__.'/includes/newusercommon.php');
+                        require_once(__DIR__.'/../includes/newusercommon.php');
                         $infoerr = checkNewUserValidation();
                         //new info
                         if (isset($_POST['msgnot'])) {
@@ -405,12 +411,12 @@ if (
             $flexwidth = true;
             $nologo = true;
             $placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
-            require("header.php");
+            require("../header.php");
             if (isset($infoerr)) {
                 echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
             }
 
-            echo "<form method=\"post\" id=\"pageform\" class=\"limitaftervalidate\" action=\"".$imasroot."/bltilaunch.php?userinfo=set\" ";
+            echo "<form method=\"post\" id=\"pageform\" class=\"limitaftervalidate\" action=\"".$imasroot."/desmos/bltilaunch.php?userinfo=set\" ";
             if ($name_only) {
                 //using LTI for authentication; don't need username/password
                 //only request name
@@ -479,7 +485,7 @@ if (
                     echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
                     echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
                     echo "<div class=submit><input type=submit value='Create Account'></div>\n";
-                    require_once(__DIR__.'/includes/newusercommon.php');
+                    require_once(__DIR__.'/../includes/newusercommon.php');
                     $requiredrules = array(
                         'curSID'=>'{depends: function(element) {return $("#SID").val()==""}}',
                         'curPW'=>'{depends: function(element) {return $("#SID").val()==""}}',
@@ -506,7 +512,7 @@ if (
                 }
             }
             echo "</form>\n";
-            require("footer.php");
+            require("../footer.php");
             exit;
 
         }
@@ -612,8 +618,8 @@ if (
         }
 
         //check OAuth Signature!
-        require_once 'includes/OAuth.php';
-        require_once 'includes/ltioauthstore.php';
+        require_once '../includes/OAuth.php';
+        require_once '../includes/ltioauthstore.php';
 
         //set up OAuth
         $store = new IMathASLTIOAuthDataStore();
@@ -865,7 +871,7 @@ if (
         if (!empty($_REQUEST['tool_consumer_instance_description'])) {
             $_SESSION['ltiorgname'] = $_REQUEST['tool_consumer_instance_description'];
         }
-        header('Location: ' . $GLOBALS['basesiteurl'] . "/bltilaunch.php?userinfo=ask");
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/desmos/bltilaunch.php?userinfo=ask");
         exit;
 
     }
@@ -896,19 +902,33 @@ if (
     $stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':org'=>"$shortorg:%"));
     if ($stm->rowCount()==0) {
         if (isset($_SESSION['place_aid']) || isset($_SESSION['place_item_id'])) {
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
             if (isset($_SESSION['place_item_id'])) {
                 $course_item = \Course\Includes\CourseItem::findCourseItem($_SESSION['place_item_id']);
-                $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-                $item = new $itemObject($course_item['courseid']);
-
-                if (!$item->findItem($course_item['typeid'])) {
-                    $diaginfo = "(Debug info: 3-".$_SESSION['place_item_id'].")";
+                if (empty($course_item)) {
+                    $diaginfo = "(Debug info: 31-$itemid)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
-                $aidsourcecid = $item->courseid;
+                $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+                $item = new $itemObject($cid);
+
+                if (!$item->findItem($course_item['typeid'])) {
+                    $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
+                    reporterror("This item does not appear to exist anymore. $diaginfo");
+                }
+                $aidsourcecid = $course_item['courseid'];
                 $aidsourcename = $item->title;
                 $aid = $item->typeid;
-            }
+            } else
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
             if (isset($_SESSION['place_aid'])) {
                 $stm = $DBH->prepare('SELECT courseid,name FROM imas_assessments WHERE id=:aid');
                 $stm->execute(array(':aid'=>$_SESSION['place_aid']));
@@ -957,7 +977,7 @@ if (
                         $nologo = true;
                         $flexwidth = true;
                         $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
-                        require("header.php");
+                        require("../header.php");
 
                         if ($_SESSION['place_aid']) {
                             $query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
@@ -986,7 +1006,7 @@ if (
                             $advuseother .= '</select>';
                             $advuseother .= '<br/>Using this option means students in this LMS course will show up in the Roster and Gradebook of the '.$installname.' course you associate it with.</span></li>';
                         }
-                        echo "<form method=\"post\" action=\"".$imasroot."/bltilaunch.php\">";
+                        echo "<form method=\"post\" action=\"".$imasroot."/desmos/bltilaunch.php\">";
                         if ($copycourse=="ask") {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
 							link is located in a $installname course you are already a teacher of (course ID $aidsourcecid).
@@ -1039,7 +1059,7 @@ if (
                             echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
                         }
                         echo "</form>";
-                        require("footer.php");
+                        require("../footer.php");
                         exit;
                     }
                 } else {
@@ -1198,7 +1218,7 @@ if (
                     $usereplaceby = "all";
                     $newitems = array();
                     $cid = $destcid; //needed for copyiteminc
-                    require_once("includes/copyiteminc.php");
+                    require_once("../includes/copyiteminc.php");
                     copyallsub($items,'0',$newitems,$gbcats);
                     doaftercopy($sourcecid);
 
@@ -1334,6 +1354,10 @@ if (
                 if (!$foundaid) {
                     if ($_SESSION['place_item_id']) {
                         $course_item = \Course\Includes\CourseItem::findCourseItem($_SESSION['place_item_id']);
+                        if (empty($course_item)) {
+                            $diaginfo = "(Debug info: 33-$itemid)";
+                            reporterror("This item does not appear to exist anymore. $diaginfo");
+                        }
                         $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
                         $item = new $itemObject($course_item['courseid']);
 
@@ -1361,7 +1385,7 @@ if (
                     }
                     if ($stm->rowCount() == 0) {
                         // no assessment with same title - need to copy assessment from destination to source course
-                        require_once("includes/copyiteminc.php");
+                        require_once("../includes/copyiteminc.php");
                         $cid = $destcid;
 
                         $stm = $DBH->prepare("SELECT itemorder,dates_by_lti,UIver FROM imas_courses WHERE id=:id");
@@ -1384,12 +1408,25 @@ if (
             $query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
             $query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
             $stm = $DBH->prepare($query);
-            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'assess', ':typeid'=>$aid));
-
+            $linkparts = array('aid',$aid);
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            $placementtype='assess';
+            $typeid = $aid;
             if (isset($_SESSION['place_item_id'])) {
-                $linkparts = array('itemid',$_SESSION['place_item_id']);
-            } else
-                $linkparts = array('aid',$aid);
+                $linkparts = array('itemid', $_SESSION['place_item_id']);
+                $placementtype = 'DesmosItem';
+                $typeid = $_SESSION['place_item_id'];
+            }
+            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
 
         } else if ($_SESSION['ltirole']=='instructor') {
             //don't need to do anything - will prompt for linking
@@ -1473,7 +1510,7 @@ if (
         $itemid = intval($linkparts[1]);
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
         if (empty($course_item)) {
-            $diaginfo = "(Debug info: 32-$itemid)";
+            $diaginfo = "(Debug info: 34-$itemid)";
             reporterror("This item does not appear to exist anymore. $diaginfo");
         }
         $cid = $course_item['courseid'];
@@ -1553,7 +1590,7 @@ if (
                                 ':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
                         }
                     }
-                    require_once("./includes/exceptionfuncs.php");
+                    require_once("../includes/exceptionfuncs.php");
                     $exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
                     $useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
                 } else if ($line['date_by_lti']==3 && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
@@ -1689,7 +1726,7 @@ if (
             $sessiondata = unserialize(base64_decode($row['sessiondata']));
             if (!isset($sessiondata['mathdisp'])) {
                 //for some reason settings are not set, so reload from user prefs
-                require_once("$curdir/includes/userprefs.php");
+                require_once("$curdir/../includes/userprefs.php");
                 generateuserprefs(true);
             }
             $createnewsession = false;
@@ -1755,7 +1792,7 @@ if (
                 $stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
                 $stm->execute(array(':id'=>$cid));
                 $latepasshrs = $stm->fetchColumn(0);
-                require_once("./includes/exceptionfuncs.php");
+                require_once("../includes/exceptionfuncs.php");
                 $exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
                 list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
                 $sessiondata['lticanuselatepass'] = $canuselatepass;
@@ -1823,13 +1860,18 @@ if (
         // #### Begin OHM-specific code #####################################################
         if ($linkparts[0]=='itemid') { //is itemid
             $course_item = \Course\Includes\CourseItem::findCourseItem($linkparts[1]);
+            if (empty($course_item)) {
+                $diaginfo = "(Debug info: 35-$placeaid)";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
+            }
+            $cid = $course_item['courseid'];
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $course_item['courseid'], ':typeid' => $course_item['typeid'], ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
                 ."?type=".str_replace('Item', '', $course_item['itemtype'])
-                ."&cid=".$course_item['courseid']
+                ."&cid=".$cid
                 ."&id=".$course_item['typeid']
             );
         } else
@@ -1857,7 +1899,7 @@ if (
             }
         exit;
     } else {
-        header('Location: ' . $GLOBALS['basesiteurl'] . "/bltilaunch.php?accessibility=ask");
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/desmos/bltilaunch.php?accessibility=ask");
         exit;
     }
 
@@ -1885,7 +1927,7 @@ if (
             $sessiondata['logintzname'] = $_POST['tzname'];
         }
 
-        require_once("$curdir/includes/userprefs.php");
+        require_once("$curdir/../includes/userprefs.php");
         generateuserprefs();
 
         $enc = base64_encode(serialize($sessiondata));
@@ -1912,16 +1954,17 @@ if (
             $itemid = $sessiondata['ltiitemid'];
             $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
             if (empty($course_item)) {
-                $diaginfo = "(Debug info: 33-$itemid)";
-                reporterror("This assignment does not appear to exist anymore. $diaginfo");
+                $diaginfo = "(Debug info: 36-$itemid)";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
             }
+            $cid = $course_item['courseid'];
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $course_item['courseid'], ':typeid' => $course_item['typeid'], ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
                 ."?type=".str_replace('Item', '', $course_item['itemtype'])
-                ."&cid=".$course_item['courseid']
+                ."&cid=".$cid
                 ."&id=".$course_item['typeid']
             );
         } else
@@ -1984,9 +2027,9 @@ if (
         $flexwidth = true;
         $nologo = true;
         $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
-        require("header.php");
+        require("../header.php");
         echo "<h3>Connecting to $installname</h3>";
-        echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/bltilaunch.php?launch=true\" ";
+        echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/desmos/bltilaunch.php?launch=true\" ";
         if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltitlwrds'] != '') {
             echo "onsubmit='return confirm(\"This assessment has a time limit of ".Sanitize::encodeStringForDisplay($sessiondata['ltitlwrds']).".  Click OK to start or continue working on the assessment.\")' >";
             echo "<p class=noticetext>This assessment has a time limit of ".Sanitize::encodeStringForDisplay($sessiondata['ltitlwrds']).".</p>";
@@ -2020,7 +2063,7 @@ if (
         </script>
         </form>
         <?php
-        require("footer.php");
+        require("../footer.php");
         exit;
 
     } else if (isset($_GET['userinfo']) && isset($_SESSION['ltiuserid'])) {
@@ -2042,7 +2085,7 @@ if (
         }
         if ($_GET['userinfo']=='set') {
             if (isset($CFG['GEN']['newpasswords'])) {
-                require_once("includes/password.php");
+                require_once("../includes/password.php");
             }
             //check input
             $infoerr = '';
@@ -2076,7 +2119,7 @@ if (
                         if (!$allow_acctcreation) {
                             $infoerr = 'Must link to an existing account';
                         } else {
-                            require_once(__DIR__.'/includes/newusercommon.php');
+                            require_once(__DIR__.'/../includes/newusercommon.php');
                             $infoerr = checkNewUserValidation();
                             //new info
                             if (isset($_POST['msgnot'])) {
@@ -2134,12 +2177,12 @@ if (
             $nologo = true;
             $flexwidth = true;
             $placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
-            require("header.php");
+            require("../header.php");
             if (isset($infoerr)) {
                 echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
             }
 
-            echo "<form method=\"post\" id=\"pageform\" class=\"limitaftervalidate\" action=\"".$imasroot."/bltilaunch.php?userinfo=set\" ";
+            echo "<form method=\"post\" id=\"pageform\" class=\"limitaftervalidate\" action=\"".$imasroot."/desmos/bltilaunch.php?userinfo=set\" ";
             if ($name_only) {
                 //using LTI for authentication; don't need username/password
                 //only request name
@@ -2208,7 +2251,7 @@ if (
                     echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
                     echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
                     echo "<div class=submit><input type=submit value='Create Account'></div>\n";
-                    require_once(__DIR__.'/includes/newusercommon.php');
+                    require_once(__DIR__.'/../includes/newusercommon.php');
                     $requiredrules = array(
                         'curSID'=>'{depends: function(element) {return $("#SID").val()==""}}',
                         'curPW'=>'{depends: function(element) {return $("#SID").val()==""}}',
@@ -2234,7 +2277,7 @@ if (
                 }
             }
             echo "</form>\n";
-            require("footer.php");
+            require("../footer.php");
             exit;
 
         }
@@ -2340,11 +2383,11 @@ if (
                 $place_item_id = intval($_REQUEST['custom_item_id']);
                 $keytype = 'cc-g';
                 $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
-                $sourcecid = $course_item['courseid'];
-                if ($sourcecid===false) {
-                    $diaginfo = "(Debug info: 34-$place_item_id)";
+                if (empty($course_item)) {
+                    $diaginfo = "(Debug info: 37-$place_item_id)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
+                $sourcecid = $course_item['courseid'];
                 if ($keyparts[1]==$sourcecid) { //is key is for source course; treat like aid_### placement
                     $keyparts[0] = 'itemid';
                     $keyparts[1] = $place_item_id;
@@ -2408,11 +2451,11 @@ if (
                 $place_item_id = intval($_REQUEST['custom_item_id']);
                 $keytype = 'cc-g';
                 $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
-                $sourcecid = $course_item['courseid'];
-                if ($sourcecid===false) {
-                    $diaginfo = "(Debug info: 35-$place_item_id)";
+                if (empty($course_item)) {
+                    $diaginfo = "(Debug info: 38-$place_item_id)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
+                $sourcecid = $course_item['courseid'];
                 $_SESSION['place_item_id'] = array($sourcecid,$place_item_id);
             } else
                 // #### End OHM-specific code #####################################################
@@ -2584,7 +2627,7 @@ if (
         if (!empty($_REQUEST['tool_consumer_instance_description'])) {
             $_SESSION['ltiorgname'] = $_REQUEST['tool_consumer_instance_description'];
         }
-        header('Location: ' . $GLOBALS['basesiteurl'] . "/bltilaunch.php?userinfo=ask");
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/desmos/bltilaunch.php?userinfo=ask");
         exit;
 
     }
@@ -2658,6 +2701,10 @@ if (
                 }
                 $itemid = $_SESSION['place_item_id'][1];
                 $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
+                if (empty($course_item)) {
+                    $diaginfo = "(Debug info: 39-$placeaid)";
+                    reporterror("This item does not appear to exist anymore. $diaginfo");
+                }
 
                 $query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid)";
                 $query .= " VALUES (:org, :contextid, :linkid, :placementtype, :typeid)";
@@ -2858,7 +2905,7 @@ if (
         $itemid = intval($keyparts[1]);
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
         if (empty($course_item)) {
-            $diaginfo = "(Debug info: 36-$placeaid)";
+            $diaginfo = "(Debug info: 301-$placeaid)";
             reporterror("This item does not appear to exist anymore. $diaginfo");
         }
         $cid = $course_item['courseid'];
@@ -3178,7 +3225,13 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         if ($keyparts[0]=='itemid') { //is itemid
-            $course_item = \Course\Includes\CourseItem::findCourseItem($keyparts[1]);
+            $placeid = $keyparts[1];
+            $course_item = \Course\Includes\CourseItem::findCourseItem($placeid);
+            if (empty($course_item)) {
+                $diaginfo = "(Debug info: 302-$placeaid)";
+                reporterror("This item does not appear to exist anymore. $diaginfo");
+            }
+            $cid = $course_item['courseid'];
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare(
                     'INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info)'
@@ -3195,7 +3248,7 @@ if (
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
                 ."?type=".str_replace('Item', '', $course_item['itemtype'])
-                ."&cid=".$course_item['courseid']
+                ."&cid=".$cid
                 ."&id=".$course_item['typeid']
             );
         } else
@@ -3227,7 +3280,7 @@ if (
             }
         exit;
     } else {
-        header('Location: ' . $GLOBALS['basesiteurl'] . "/bltilaunch.php?accessibility=ask");
+        header('Location: ' . $GLOBALS['basesiteurl'] . "/desmos/bltilaunch.php?accessibility=ask");
         exit;
     }
 
