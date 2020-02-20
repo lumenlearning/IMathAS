@@ -134,15 +134,15 @@
 	//PROCESS ANY TODOS
 	if (isset($_REQUEST['clearattempt']) && $isteacher) {
 		if (isset($_POST['clearattempt']) && $_POST['clearattempt']=='confirmed') {
-			$query = "SELECT ias.assessmentid,ias.lti_sourcedid FROM imas_assessment_sessions AS ias ";
+			$query = "SELECT ias.assessmentid,ias.lti_sourcedid,ias.userid FROM imas_assessment_sessions AS ias ";
 			$query .= "JOIN imas_assessments AS ia ON ias.assessmentid=ia.id WHERE ias.id=:id AND ia.courseid=:courseid";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':id'=>$asid, ':courseid'=>$cid));
 			if ($stm->rowCount()>0) {
-				list($aid, $ltisourcedid) = $stm->fetch(PDO::FETCH_NUM);
+				list($aid, $ltisourcedid, $uid) = $stm->fetch(PDO::FETCH_NUM);
 				if (strlen($ltisourcedid)>1) {
 					require_once("../includes/ltioutcomes.php");
-					updateLTIgrade('delete',$ltisourcedid,$aid);
+					updateLTIgrade('delete',$ltisourcedid,$aid,$uid);
 				}
 
 				$qp = getasidquery($asid);
