@@ -25,12 +25,6 @@
 //    lis_person_name_given
 //    lis_person_name_family
 //    lis_person_contact_email_primary
-require_once(__DIR__ . '/../vendor/autoload.php');
-require_once(__DIR__ . "/../includes/sanitize.php");
-require_once(__DIR__ . "/../config.php");
-foreach ($CFG['hooks'] as $hook => $value) {
-    $CFG['hooks'][$hook] = __DIR__ . '/../' . $value;
-}
 
 header('P3P: CP="ALL CUR ADM OUR"');
 $init_skip_csrfp = true;
@@ -50,7 +44,7 @@ require_once(__DIR__ . '/../includes/ltiroles.php');
 // #### End OHM-specific code #######################################################
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['bltilaunch'])) {
-    require($CFG['hooks']['bltilaunch']);
+    require(__DIR__ . '/../' . $CFG['hooks']['bltilaunch']);
 }
 
 $curdir = rtrim(dirname(__FILE__), '/\\');
