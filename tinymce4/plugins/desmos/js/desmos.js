@@ -38,13 +38,13 @@ var desmosDialog = {
             type: "GET",
             url: document.getElementById("import").value,
             success: function (data) {
-                console.log(data);
-                theResponse = data;
+                console.log(JSON.stringify(data.state).replace(/'/g, "&#8217;"));
+                theResponse = JSON.stringify(data.state).replace(/'/g, "&#8217;");
             },
             async: false,
             dataType: "json"
         });
-        this.addDesmos(JSON.stringify(theResponse.state));
+        this.addDesmos(theResponse);
         top.tinymce.activeEditor.windowManager.close();
     },
 
