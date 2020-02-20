@@ -7,6 +7,22 @@
 require("./init.php");
 $now = time();
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+if (isset($CFG['hooks']['banner'])) {
+	require($CFG['hooks']['banner']);
+}
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 //0: classes you're teaching
 //1: classes you're tutoring
 //2: classes you're taking
@@ -451,11 +467,10 @@ for ($i=0; $i<3; $i++) {
 			// #### Begin OHM-specific code #####################################################
 			// #### Begin OHM-specific code #####################################################
 
-			require_once(__DIR__ . '/ohm/includes/OhmBanner.php');
-
-			$ohmBanner = new Ohm\Includes\OhmBanner($GLOBALS['myrights']);
-			$ohmBanner->showTeacherBannerForTeachersOnly();
-			$ohmBanner->showStudentBannerForStudentsOnly();
+			//call hook, if defined
+			if (function_exists('displayBanner')) {
+				displayBanner($myrights);
+			}
 
 			// #### End OHM-specific code #######################################################
 			// #### End OHM-specific code #######################################################
@@ -470,11 +485,10 @@ for ($i=0; $i<3; $i++) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 
-		require_once(__DIR__ . '/ohm/includes/OhmBanner.php');
-
-		$ohmBanner = new Ohm\Includes\OhmBanner($GLOBALS['myrights']);
-		$ohmBanner->showTeacherBannerForTeachersOnly();
-		$ohmBanner->showStudentBannerForStudentsOnly();
+		//call hook, if defined
+		if (function_exists('displayBanner')) {
+			displayBanner($myrights);
+		}
 
 		// #### End OHM-specific code #######################################################
 		// #### End OHM-specific code #######################################################
