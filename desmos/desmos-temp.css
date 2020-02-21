@@ -1,54 +1,57 @@
-/* Overriding imascore.css */
+/* imascore.css OVERRIDES */
 .lux-component button {
 	margin: 0;
 }
 
 .lux-component input[class^="icon-"],
 .lux-component input[class*=" icon-"] {
-    font-family: inherit!important;
-    speak: unset;
+	font-family: inherit !important;
+	speak: unset;
 }
-/* End imascore.css overrides */
+/* END imascore.css OVERRIDES */
 
-/* Lux tweaks */
+/* LUX TWEAKS */
 .lux-component .button-group .button + .button {
 	margin-left: -4px;
 }
-/* End Lux tweaks */
+/* END LUX TWEAKS */
 
-.desmos-header {
-	padding-bottom: 1em;
+/* SHARED DESMOS STYLES */
+.desmos-heading {
+	align-items: center;
+	display: flex;
+	font-size: 1.5em;
 }
 
-.desmos-header h1 {
-	margin-bottom: 0;
-}
-
-.desmos .controls + .controls {
-    margin-left: 1em;
-}
-
-.desmos-header img {
-	vertical-align: middle;
+.desmos-heading svg {
+	height: 24px;
+	margin-right: 8px;
+	width: 24px;
 }
 
 .desmos-steps {
 	box-sizing: border-box;
 	display: flex;
 	height: 600px;
-	width: 1220px;
+	position: relative;
+	width: 100%;
 }
 
 /* Step Navigation */
 .desmos-steps .steps-navigation {
 	border: 1px solid #dadada;
 	border-right: none;
+	min-width: 256px;
 	width: 30%;
 }
 
 .steps-navigation .step-list {
 	margin-top: 0;
 	padding-left: 0;
+	/* Makes step list height equal to parent container so list can overflow. */
+	/* 533px is approx. height of the step box minus the height of the box around the add button */
+	height: 533px;
+	overflow-y: scroll;
 }
 
 .step-li {
@@ -90,8 +93,22 @@
 	min-width: 100%;
 }
 
-.step-items .mce-edit-area {
-	min-height: 500px;
+.js-desmos,
+.desmos-fig {
+	height: 400px;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+
+#editdesmos.desmos-fig,
+#editdesmos.js-desmos {
+	width: 100%;
+}
+
+/* Overriding desmos stylesheet to fix button icon alignment issues  */
+#editdesmos [class*="dcg-icon-"] {
+	line-height: 38px;
 }
 
 .desmos-nav-btns {
@@ -103,46 +120,36 @@
 		margin-top: 32px;
 	}
 }
+/* END SHARED DESMOS STYLES */
 
 /* DESMOS TEACHER VIEW */
-
-#desmos_save_buttons {
-	position: relative;
+/* TinyMCE overrides */
+.mce-window-head {
+	background-color: #336699;
 }
 
-#desmos_save_status {
-	position: absolute;
-	top: 50%;
-	margin-left: 0.5em;
+.mce-window-head .mce-title {
+	color: #ffffff;
+	font-size: 14px;
+	font-weight: normal;
 }
 
-.desmos_save_status_saving {
-	color: #606060;
-}
-
-.desmos_save_status_success {
-	color: #1e74d1;
-}
-
-.desmos_save_status_failed {
-	color: #ff2222;
-}
-
-/* Overriding tiny mce */
 .step-items .mce-panel {
 	border: 0;
 	padding-bottom: 8px;
 }
 
-.step-naviation.teacher-view {
-	overflow: scroll;
+.mce-edit-area {
+	padding: 8px;
 }
 
-.desmos #import {
-	clear: both;
-	width: 100%;
-	height: 30px;
+.step-items .mce-edit-area {
+	min-height: 500px;
+}
+
+.desmos .controls .mce-tinymce {
 	margin-top: 0.4em;
+	max-width: 1220px;
 }
 
 .mce-i-desmos {
@@ -150,32 +157,47 @@
 	background-size: 16px 16px;
 }
 
-.desmos .form-group {
-	display: flex;
-	padding-bottom: 1em;
+#tinymce .desmos-edit-button,
+#tinymce .js-desmos {
+	background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
+	cursor: pointer;
+	display: block;
+	height: 36px;
+	width: 190px;
+}
+/* End TinyMCE overrides */
+
+.desmos .teacher-view {
+	position: relative;
 }
 
-.desmos .form-group input,
-.desmos .controls .mce-tinymce {
+.desmos .form-group {
+	display: flex;
+	padding-bottom: 1em 0;
+}
+
+.desmos .controls + .controls {
+	margin-left: 1em;
+}
+
+.desmos .form-group input {
 	margin-top: 0.4em;
 }
 
-.desmos .controls .mce-tinymce {
-	max-width: 1220px;
-}
-
-.desmos .teacher-view {
-	overflow-y: scroll;
-}
-
-.desmos-steps button:not(.button):hover {
-	background-color: transparent;
+.step-navigation.teacher-view {
+	position: relative;
 }
 
 .step-controls {
 	background: #f2f2f2;
 	border-bottom: #dadada solid 1px;
 	padding: 8px;
+	position: relative;
+	z-index: 1;
+}
+
+.desmos-steps button:not(.button):hover {
+	background-color: transparent;
 }
 
 .step-controls .button {
@@ -216,7 +238,6 @@
 	display: inline-block;
 	opacity: 0.5;
 	transition: opacity 0.1s;
-	vertical-align: middle;
 }
 
 .step-li button:hover svg,
@@ -266,7 +287,37 @@
 	width: 5px;
 }
 
-/* The "Preview" button on the Desmos edit screen. */
+#desmos_save_buttons {
+	position: relative;
+}
+
+#desmos_save_status {
+	margin-left: 0.5em;
+	position: absolute;
+	top: 50%;
+}
+
+.desmos_save_status_saving {
+	color: #606060;
+}
+
+.desmos_save_status_success {
+	color: #1e74d1;
+}
+
+.desmos_save_status_failed {
+	color: #ff2222;
+}
+
+.desmos #import {
+	clear: both;
+	width: 100%;
+	height: 30px;
+	margin-top: 0.4em;
+}
+/* END DESMOS TEACHER VIEW */
+
+/* DESMOS TEACHER PREVIEW */
 #desmos_preview_button {
 	margin-left: 0.5em;
 }
@@ -313,6 +364,7 @@
 	margin: 0;
 	padding: 0 1em 1em 1em;
 }
+/* END DESMOS TEACHER PREVIEW */
 
 /* DESMOS STUDENT VIEW */
 .desmos-header p:empty,
@@ -326,6 +378,23 @@
 	border: #dadada 1px solid;
 	border-radius: 4px;
 	padding: 0.75em;
+}
+/* END DESMOS STUDENT VIEW */
+
+/* ALL MEDIA QUERIES */
+@media (max-width: 800px) {
+	.desmos .form-group {
+		display: block;
+	}
+	.desmos .form-group .controls + .controls {
+		display: inline-block;
+		margin-left: 0;
+		padding-top: 8px;
+	}
+	#desmos_preview_warning {
+		display: block;
+		margin: 8px 0 0 0;
+	}
 }
 
 @media (max-width: 1023px) {
@@ -379,6 +448,13 @@
 	}
 }
 
+@media (min-height: 800px) {
+	.js-desmos,
+	.desmos-fig {
+		height: 600px;
+	}
+}
+
 @media (min-width: 1024px) {
 	.desmos-student-view {
 		display: flex;
@@ -412,54 +488,4 @@
 		padding: 2em 2em 0 2em;
 		width: 100%;
 	}
-}
-
-#desmos_preview_content {
-	border: 2px solid #e2e7ea;
-	border-radius: 5px;
-	margin: 0px;
-	padding: 0 1em 1em 1em;
-}
-
-.js-desmos,
-.desmos-fig {
-	height: 400px;
-	margin: 0;
-	padding: 0;
-	width: 100%;
-}
-
-@media (min-height: 800px) {
-	.js-desmos,
-	.desmos-fig {
-		height: 600px;
-	}
-}
-
-#tinymce .desmos-edit-button,
-#tinymce .js-desmos {
-	background-image: url("/tinymce4/plugins/desmos/img/ed_edit_desmos_overlay.png");
-	display: block;
-	cursor: pointer;
-	height: 36px;
-	width: 190px;
-}
-
-#editdesmos.desmos-fig,
-#editdesmos.js-desmos {
-	width: 100%;
-}
-
-.mce-window-head {
-	background-color: #336699;
-}
-.mce-window-head .mce-title {
-	color: #ffffff;
-	font-size: 14px;
-	font-weight: normal;
-}
-
-/* Overriding desmos stylesheet to fix button icon alignment issues  */
-#editdesmos [class*="dcg-icon-"] {
-	line-height: 38px;
 }
