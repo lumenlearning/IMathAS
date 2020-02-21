@@ -16,9 +16,9 @@
 </head>
 <body onload="desmosDialog.init();" class="lux-component">
 
-<form onsubmit="return false;" action="#" style="margin:10px;" class="desmos lux-form">
+<form onsubmit="return false;" action="#" class="desmos lux-form u-margin-xs">
     <label for="import" class="form-label">Desmos URL</label>
-    <input type="text" id="import" class="form-input form-input--fw" name="import" value="" onkeyup="importToggle()" placeholder="https://www.desmos.com/calculator/example" />
+    <input type="text" id="import" class="form-input form-input--fw" name="import" value="" onchange="importToggle()" placeholder="https://www.desmos.com/calculator/example" />
     <div class="mceActionPanel">
         <div class="desmos-nav-btns u-margin-top-sm"  style="float: right">
             <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>

@@ -1254,6 +1254,11 @@ switch($_POST['action']) {
 	case "modltidomaincred":
 		if ($myrights <100) { echo "You don't have the authority for this action"; break;}
 		if ($_GET['id']=='new') {
+			// check for existing LTI Key (SID
+			$stm = $DBH->prepare("SELECT SID FROM imas_users WHERE SID=:ltikey");
+			$stm->execute(array(':ltikey'=>$_POST['ltikey']));
+			if ($stm->rowCount() > 0) { echo "LTI Key already exists"; break;}
+
 			$query = "INSERT INTO imas_users (email,FirstName,LastName,SID,password,rights,groupid,created_at) VALUES ";
 			$query .= "(:email, :FirstName, :LastName, :SID, :password, :rights, :groupid, :created_at)";
 			$stm = $DBH->prepare($query);
