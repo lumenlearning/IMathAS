@@ -38,14 +38,19 @@ var desmosDialog = {
             type: "GET",
             url: document.getElementById("import").value,
             success: function (data) {
-                console.log(data);
-                theResponse = data;
+                console.log(JSON.stringify(data.state).replace(/'/g, "&#8217;"));
+                theResponse = JSON.stringify(data.state).replace(/'/g, "&#8217;");
+            },
+            error: function () {
+                alert('Unable to import Desmos Graph. Please Try Again');
             },
             async: false,
             dataType: "json"
         });
-        this.addDesmos(JSON.stringify(theResponse.state));
-        top.tinymce.activeEditor.windowManager.close();
+        if (theResponse != false) {
+            this.addDesmos(theResponse);
+            top.tinymce.activeEditor.windowManager.close();
+        }
     },
 
     addDesmos : function(json) {
