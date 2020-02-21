@@ -14,6 +14,10 @@
 .lux-component .button-group .button + .button {
 	margin-left: -4px;
 }
+.lux-component .controls + .controls .form-input {
+	width: 8.5em; /* controls width of datepicker inputs */
+}
+
 /* END LUX TWEAKS */
 
 /* SHARED DESMOS STYLES */
@@ -25,7 +29,6 @@
 
 .desmos-heading svg {
 	height: 24px;
-	margin-right: 8px;
 	width: 24px;
 }
 
@@ -173,15 +176,16 @@
 
 .desmos .form-group {
 	display: flex;
-	padding-bottom: 1em 0;
+	max-width: 1220px;
+}
+
+.desmos .controls:first-of-type {
+	flex-grow: 1;
+	max-width: 400px;
 }
 
 .desmos .controls + .controls {
-	margin-left: 1em;
-}
-
-.desmos .form-group input {
-	margin-top: 0.4em;
+	margin-left: 16px;
 }
 
 .step-navigation.teacher-view {
@@ -191,17 +195,12 @@
 .step-controls {
 	background: #f2f2f2;
 	border-bottom: #dadada solid 1px;
-	padding: 8px;
 	position: relative;
 	z-index: 1;
 }
 
 .desmos-steps button:not(.button):hover {
 	background-color: transparent;
-}
-
-.step-controls .button {
-	margin: 8px;
 }
 
 .teacher-view .step-li {
@@ -226,7 +225,6 @@
 }
 
 .step-li input {
-	margin: 0 !important; /* overriding lux */
 	width: calc(100% - 50px);
 }
 
@@ -311,9 +309,6 @@
 
 .desmos #import {
 	clear: both;
-	width: 100%;
-	height: 30px;
-	margin-top: 0.4em;
 }
 /* END DESMOS TEACHER VIEW */
 
@@ -388,8 +383,7 @@
 	}
 	.desmos .form-group .controls + .controls {
 		display: inline-block;
-		margin-left: 0;
-		padding-top: 8px;
+		margin: 16px 16px 0 0;
 	}
 	#desmos_preview_warning {
 		display: block;

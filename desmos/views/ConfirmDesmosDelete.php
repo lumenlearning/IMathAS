@@ -4,9 +4,9 @@
 <div id="dialog-description" class="ohm-modal-body">
     <p>Deleting this will remove all of the content in this item. Are you sure you want to delete?</p>
 </div>
-<div class="ohm-modal-footer">
+<div class="ohm-modal-footer lux-component">
     <button type="button" class="js-cancel-modal button">Cancel</button>
-    <button type="button" class="js-confirm-delete button">Delete</button>
+    <button type="button" class="js-confirm-delete button u-margin-left-xs">Delete</button>
 </div>
 
 

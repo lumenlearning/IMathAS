@@ -87,15 +87,17 @@ function outputDateForm(DateTime $startDate, DateTime $endDate): void
                         name="startDate"
                         type="text"
                         class="form-input has-icon icon--suffix icon--calendar"
+                        style="width: 8.5em;"
                         onClick="displayDatePicker('startDate', this); return false"
                         value="<?php echo $startDate->format('m/d/Y'); ?>"/>
                 </div>
-                <div class="controls">
+                <div class="controls u-margin-vertical-sm">
                     <label for="endDate" class="form-label">End Date:</label>
                     <input id="endDate"
                         name="endDate"
                         type="text"
                         class="form-input has-icon icon--suffix icon--calendar"
+                        style="width: 8.5em;"
                         onClick="displayDatePicker('endDate', this); return false"
                         value="<?php echo $endDate->format('m/d/Y'); ?>"/>
                 </div>

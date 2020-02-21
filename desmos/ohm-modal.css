@@ -44,7 +44,3 @@
   justify-content: flex-end;
   padding: 16px; 
 }
-
-.ohm-modal-footer button + button {
-  margin-left: 8px;
-}

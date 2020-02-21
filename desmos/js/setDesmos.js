@@ -71,7 +71,7 @@ function addStep(){
     //Create a delete <button> element
     var buttonDelete = document.createElement("button");
     buttonDelete.type = "button";
-    buttonDelete.classList.add("js-delete", "delete-trigger");
+    buttonDelete.classList.add("js-delete", "u-button-reset", "delete-trigger");
     buttonDelete.setAttribute("aria-label", "Delete this item.");
     buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
 
