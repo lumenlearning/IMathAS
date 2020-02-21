@@ -10,7 +10,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
 
     <link rel="stylesheet" href="/themes/lumen.css?v=112019" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="https://lux.lumenlearning.com/use-lux/1.0.0/lux-components.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://lux.lumenlearning.com/use-lux/1.0.1/lux-components.min.css" />
     <link rel="stylesheet" type="text/css" href="/desmos/desmos-temp.css" />
     <script type="text/javascript" src="js/desmos.js"></script>
 </head>
