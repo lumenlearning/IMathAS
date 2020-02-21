@@ -1929,7 +1929,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		if ($myrights >= 40) {
+		if ($myrights >= 20) {
 			$html .= "<option value=\"desmos\">" . _('Add Desmos Interactive') . "</option>\n";
 		}
 		// #### End OHM-specific code #####################################################
