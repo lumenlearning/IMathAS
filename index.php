@@ -7,6 +7,22 @@
 require("./init.php");
 $now = time();
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+if (isset($CFG['hooks']['banner'])) {
+	require($CFG['hooks']['banner']);
+}
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 //0: classes you're teaching
 //1: classes you're tutoring
 //2: classes you're taking
@@ -440,11 +456,41 @@ for ($i=0; $i<3; $i++) {
 	if ($i==0) {
 		echo '<div id="homefullwidth">';
 	}
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	//call hook, if defined
+	if (!$twocolumn && function_exists('displayBanner')) {
+		displayBanner($myrights);
+	}
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
+	// #### End OHM-specific code #######################################################
 	if ($twocolumn) {
 		if ($i==1) {
 			echo '<div id="leftcolumn">';
 		} else if ($i==2) {
 			echo '<div id="rightcolumn">';
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+			// #### Begin OHM-specific code #####################################################
+
+			//call hook, if defined
+			if (function_exists('displayBanner')) {
+				displayBanner($myrights);
+			}
+
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
+			// #### End OHM-specific code #######################################################
 		}
 	}
 	for ($j=0; $j<count($pagelayout[$i]); $j++) {
