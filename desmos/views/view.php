@@ -34,7 +34,7 @@ if ($shownav) {
         <p><?php echo $item->summary; ?></p>
     </div>
 
-    <div id="step_box" class="desmos desmos-student-view -offset --xlarge">
+    <div id="step_box" class="desmos desmos-student-view">
         <div class="lux-component steps-navigation">
             <nav id="mobile_nav" class="lux-form">
                 <select name="step_nav" id="js-step-nav" class="form-input step-nav">

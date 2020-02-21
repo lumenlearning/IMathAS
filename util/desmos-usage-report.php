@@ -103,7 +103,7 @@ function outputDateForm(DateTime $startDate, DateTime $endDate): void
                     <button id="desmos_form_submit_button"
                             name="submitbtn"
                             type="submit"
-                            class="button button--primary -offset"
+                            class="button button--primary"
                             value="Submit">Update
                     </button>
                 </div>
