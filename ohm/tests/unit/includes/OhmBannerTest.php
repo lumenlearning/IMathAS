@@ -50,6 +50,20 @@ final class OhmBannerTest extends TestCase
         }
     }
 
+    public function testShowTeacherBannerForTeachersOnly_OnlyOnce(): void
+    {
+        $this->ohmBanner
+            ->setEnv([OhmBanner::ENV_TEACHER_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  '])
+            ->setUserRights(20)
+            ->setDisplayOnlyOncePerBanner(true);
+
+        $result = $this->ohmBanner->showTeacherBannerForTeachersOnly();
+        $this->assertTrue($result, 'the banner should be displayed on the first method call.');
+
+        $result = $this->ohmBanner->showTeacherBannerForTeachersOnly();
+        $this->assertFalse($result, 'the banner should be displayed only once.');
+    }
+
     /*
      * showStudentBannerForStudentsOnly
      */
@@ -78,6 +92,20 @@ final class OhmBannerTest extends TestCase
 
             $this->assertFalse($result, 'banner should not be displayed for teachers. (user rights > 15)');
         }
+    }
+
+    public function testShowStudentBannerForStudentsOnly_OnlyOnce(): void
+    {
+        $this->ohmBanner
+            ->setEnv([OhmBanner::ENV_STUDENT_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  '])
+            ->setUserRights(10)
+            ->setDisplayOnlyOncePerBanner(true);
+
+        $result = $this->ohmBanner->showStudentBannerForStudentsOnly();
+        $this->assertTrue($result, 'the banner should be displayed on the first method call.');
+
+        $result = $this->ohmBanner->showStudentBannerForStudentsOnly();
+        $this->assertFalse($result, 'the banner should be displayed only once.');
     }
 
     /*

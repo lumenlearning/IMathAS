@@ -11,6 +11,10 @@ class OhmBanner
     private $env;
     private $userRights;
 
+    private $displayOnlyOncePerBanner; // only show the teacher and student banners once each.
+    private $teacherBannerDisplayed;
+    private $studentBannerDisplayed;
+
     /**
      * OhmBanner constructor.
      *
@@ -26,13 +30,17 @@ class OhmBanner
      * Show the teacher banner if the user is a teacher.
      *
      * @return bool True if a banner was displayed. False if not.
-     * @see alwaysShowTeacher Class field override; always show teacher banner
+     * @see displayOnlyOncePerBanner
      */
     public function showTeacherBannerForTeachersOnly(): bool
     {
         if (15 >= $this->userRights) {
             return false;
         }
+        if ($this->displayOnlyOncePerBanner && $this->teacherBannerDisplayed) {
+            return false;
+        }
+        $this->teacherBannerDisplayed = true;
         return $this->showTeacherBanner();
     }
 
@@ -40,13 +48,17 @@ class OhmBanner
      * Show the student banner if the user is a student.
      *
      * @return bool True if a banner was displayed. False if not.
-     * @see alwaysShowStudent Class field override; always show student banner
+     * @see displayOnlyOncePerBanner
      */
     public function showStudentBannerForStudentsOnly(): bool
     {
         if (15 < $this->userRights) {
             return false;
         }
+        if ($this->displayOnlyOncePerBanner && $this->studentBannerDisplayed) {
+            return false;
+        }
+        $this->studentBannerDisplayed = true;
         return $this->showStudentBanner();
     }
 
@@ -127,6 +139,18 @@ class OhmBanner
     public function setUserRights(int $rights): OhmBanner
     {
         $this->userRights = $rights;
+        return $this;
+    }
+
+    /**
+     * Set whether each banner is displayed only once or not.
+     *
+     * @param bool $displayOnlyOncePerBanner Set to true to display each banner only once.
+     * @return OhmBanner
+     */
+    public function setDisplayOnlyOncePerBanner(bool $displayOnlyOncePerBanner): OhmBanner
+    {
+        $this->displayOnlyOncePerBanner = $displayOnlyOncePerBanner;
         return $this;
     }
 }

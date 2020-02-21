@@ -452,17 +452,6 @@ if (isset($tzname) && isset($sessiondata['logintzname']) && $tzname!=$sessiondat
 }
 
 
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-$bannerDisplayed = false;
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
 for ($i=0; $i<3; $i++) {
 	if ($i==0) {
 		echo '<div id="homefullwidth">';
@@ -472,12 +461,9 @@ for ($i=0; $i<3; $i++) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	if (!$twocolumn && !$bannerDisplayed) {
-		//call hook, if defined
-		if (function_exists('displayBanner')) {
-			displayBanner($myrights);
-		}
-		$bannerDisplayed = true;
+	//call hook, if defined
+	if (!$twocolumn && function_exists('displayBanner')) {
+		displayBanner($myrights);
 	}
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################
