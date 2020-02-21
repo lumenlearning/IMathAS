@@ -13,37 +13,37 @@
 </script>
 
 <div class="breadcrumb"><?php echo $curBreadcrumb  ?></div>
-<div id="desmos_edit_container">
+<div id="desmos_edit_container" class="lux-component">
     <h1 class="-small-type desmos-header">
         <img src="../ohm/img/desmos.png" alt=""/>
         <?php echo $pagetitle ?>
     </h1>
-    <form id="desmos_item" class="desmos form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
+    <form id="desmos_item" class="desmos form lux-form" enctype="multipart/form-data" method="post" action="<?php echo $page_formActionTag ?>">
         <div class="form-group">
             <div class="controls">
-                <label for="title">Title:</label>
-                <input type="text" id="title" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" id="title" class="form-input" name="title" value="<?php echo str_replace('"','&quot;',$item->title);?>" required />
             </div>
             <div class="controls">
-                <label for="sdate">Start Date:</label>
-                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
+                <label for="sdate" class="form-label">Start Date:</label>
+                <input type="text" class="form-input has-icon icon--suffix icon--calendar" onClick="displayDatePicker('sdate', this); return false" id="sdate" name="sdate" value="<?php echo $sdate;?>"/>
             </div>
             <div class="controls">
-                <label for="edate">End Date:</label>
-                <input type="text" class="--input-icon --icon-calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
+                <label for="edate" class="form-label">End Date:</label>
+                <input type="text" class="form-input has-icon icon--suffix icon--calendar" onClick="displayDatePicker('edate', this); return false" id="edate" name="edate" value="<?php echo $edate;?>"/>
             </div>
         </div>
         <div class="controls">
-            <label for="summary">Summary:</label>
+            <label for="summary" class="form-label">Summary:</label>
             <!-- <input type="text" id="summary" name="summary" value="<?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>" /> -->
             <textarea name="summary" id="summary" rows="5">
                 <?php echo \Sanitize::encodeStringForDisplay($item->summary, true);?>
             </textarea>
         </div>
-        <div id="step_box" class="desmos desmos-steps -offset --exlarge">
+        <div id="step_box" class="u-margin-top-sm desmos desmos-steps">
             <div class="steps-navigation teacher-view">
                 <div class="step-controls">
-                    <button class="button --button-secondary js-add" type="button">Add</button>
+                    <button class="button js-add" type="button">Add</button>
                 </div>
                 <span id="step-notifications" aria-live="assertive" class="u-sr-only"></span>
                 <span id="step-directions" class="u-sr-only">Press spacebar to toggle drag-and-drop mode, use arrow keys to move selected elements.</span>
@@ -76,7 +76,7 @@
                             $numsteps,
                             $item->steps[$i]['id']
                         );
-                        echo "<button class='js-delete delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
+                        echo "<button class='js-delete u-button-reset delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
                         echo "</li>";
                         $numsteps++;
                     }
@@ -96,9 +96,9 @@
                 } ?>
             </div>
         </div>
-        <div id="desmos_save_buttons">
-            <button id="desmos_form_submit_button" class="button --button-primary -offset" type="submit" name="submitbtn" value="Submit">Save</button>
-            <button id="desmos_preview_button" class="desmos button --button-secondary -offset" type="button">Preview</button>
+        <div id="desmos_save_buttons" class="u-margin-top-sm">
+            <button id="desmos_form_submit_button" class="button button--primary" type="submit" name="submitbtn" value="Submit">Save</button>
+            <button id="desmos_preview_button" class="desmos button" type="button">Preview</button>
             <span id="desmos_save_status"></span>
         </div>
     </form>

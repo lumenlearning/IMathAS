@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="../themes/lux-temp.css" type="text/css" />
+<link rel="stylesheet" href="https://lux.lumenlearning.com/use-lux/1.0.0/lux-components.min.css" type="text/css" />
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
 <script type="text/javascript">
     window.onload = ()=> {
@@ -35,9 +35,9 @@ if ($shownav) {
     </div>
 
     <div id="step_box" class="desmos desmos-student-view -offset --xlarge">
-        <div class="steps-navigation">
-            <nav id="mobile_nav">
-                <select name="step_nav" id="js-step-nav" class="step-nav">
+        <div class="lux-component steps-navigation">
+            <nav id="mobile_nav" class="lux-form">
+                <select name="step_nav" id="js-step-nav" class="form-input step-nav">
                 <?php
                     $numsteps = 0;
                     foreach ($item->steporder as $i) {
@@ -54,8 +54,8 @@ if ($shownav) {
                 ?>
                 </select>
                 <div class="js-desmos-nav button-group">
-                    <button aria-label="Previous" type="button" class="button --button-secondary js-prev" disabled><svg aria-hidden="true"><use xlink:href="#lux-icon-caret-left"></use></svg></button>
-                    <button aria-label="Next" type="button" class="button --button-secondary js-next"><svg aria-hidden="true"><use xlink:href="#lux-icon-caret-right"></use></svg></button>
+                    <button aria-label="Previous" type="button" class="u-padding-xs button js-prev" disabled><svg aria-hidden="true"><use xlink:href="#lux-icon-caret-left"></use></svg></button>
+                    <button aria-label="Next" type="button" class="u-padding-xs button js-next"><svg aria-hidden="true"><use xlink:href="#lux-icon-caret-right"></use></svg></button>
                 </div>
             </nav>
             <ol id="step_list" class="js-step-list step-list" role="listbox">
@@ -95,9 +95,9 @@ if ($shownav) {
                     $numsteps++;
                 } ?>
             </div>
-            <div class="js-desmos-nav desmos-nav-btns -inset">
-                <button type="button" class="button --button-secondary js-prev" disabled>Previous</button>
-                <button type="button" class="button --button-secondary js-next">Next</button>
+            <div class="js-desmos-nav desmos-nav-btns lux-component">
+                <button type="button" class="button js-prev" disabled>Previous</button>
+                <button type="button" class="button js-next">Next</button>
             </div>
         </div>
     </div>
