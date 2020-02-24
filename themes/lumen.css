@@ -1005,22 +1005,30 @@ div#ohmEditGroup {
 }
 
 div#ohm_course_banner {
-	border: 2px solid #1E74D1;
+	border: 1px solid #1E74D1;
+	border-radius: 4px;
 	margin: 1em 0em;
-	padding: 0px;
+	padding: 0;
+}
+
+#ohm_course_banner p {
+	font-weight: bold;
+	padding-bottom: 0;
+}
+
+#ohm_course_banner ul {
+	margin: 0;
 }
 
 div#ohm_course_banner_header {
-	border: 2px solid #1E74D1;
 	margin: 0px;
     padding: 0.5em 1em;
-    background-color: #1E74D1;
+	background-color: #1E74D1;
 	color: #fff;
-    font-weight: bold;
 }
 
 div#ohm_course_banner_content {
-	padding: 0.5em 1em;
+	padding: 0 1em 1em 1em;
 }
 
 /* MEDIA QUERIES */
