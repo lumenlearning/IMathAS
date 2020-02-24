@@ -2378,15 +2378,17 @@ if (
                 $place_item_id = intval($_REQUEST['custom_item_id']);
                 $place_item_type = $_REQUEST['custom_item_type'];
                 $keytype = 'cc-g';
-                $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
-                if (empty($course_item)) {
+                $itemObject = str_replace('Item','', $place_item_type) . "\\Models\\" . $place_item_type;
+                $item = new $itemObject();
+                if (!$item->findItem($place_item_id)) {
                     $diaginfo = "(Debug info: 37-$place_item_id)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
-                $sourcecid = $course_item['courseid'];
+                $sourcecid = $item->courseid;
                 if ($keyparts[1]==$sourcecid) { //is key is for source course; treat like aid_### placement
                     $keyparts[0] = 'itemid';
                     $keyparts[1] = $place_item_id;
+                    $keyparts[2] = $place_item_type;
                     $ltikey = implode('_',$keyparts);
                     $keytype = 'i';
                 } else {  //key is for a different course; mark as cc placement
