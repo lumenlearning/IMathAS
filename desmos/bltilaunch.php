@@ -176,21 +176,21 @@ if (
         // #### Begin OHM-specific code #####################################################
         if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $itemObject = str_replace('Item','', $sessiondata['ltiitemtype']) . "\\Models\\" . $sessiondata['ltiitemtype'];
+            $itemtype = $sessiondata['ltiitemtype']
+            $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
-            if (!$item->findItem($_SESSION['place_item_id'])) {
-                $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
+            if (!$item->findItem($itemid)) {
+                $diaginfo = "(Debug info: 32-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            $cid = $item->courseid;
 
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
-                $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
+                $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
                 ."?type=".str_replace('Item', '', $item->itemtype)
-                ."&cid=".$cid
+                ."&cid=".$item->courseid
                 ."&id=".$item->typeid
             );
         } else
@@ -1850,20 +1850,23 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         if ($linkparts[0]=='itemid') { //is itemid
-            $course_item = \Course\Includes\CourseItem::findCourseItem($linkparts[1]);
-            if (empty($course_item)) {
-                $diaginfo = "(Debug info: 35-$placeaid)";
+            $itemid = $linkparts[1];
+            $itemtype = $linkparts[2];
+            $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
+            $item = new $itemObject();
+            if (!$item->findItem($itemid)) {
+                $diaginfo = "(Debug info: 35-".$item->itemid].")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            $cid = $course_item['courseid'];
+
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
-                $stm->execute(array(':userid' => $userid, ':courseid' => $course_item['courseid'], ':typeid' => $course_item['typeid'], ':viewtime' => $now));
+                $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-                ."?type=".str_replace('Item', '', $course_item['itemtype'])
-                ."&cid=".$cid
-                ."&id=".$course_item['typeid']
+                ."?type=".str_replace('Item', '', $item->itemtype)
+                ."&cid=".$item->courseid
+                ."&id=".$item->typeid
             );
         } else
             // #### End OHM-specific code #####################################################
@@ -3222,31 +3225,23 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         if ($keyparts[0]=='itemid') { //is itemid
-            $placeid = $keyparts[1];
-            $course_item = \Course\Includes\CourseItem::findCourseItem($placeid);
-            if (empty($course_item)) {
-                $diaginfo = "(Debug info: 302-$placeaid)";
+            $itemid = $keyparts[1];
+            $itemtype = $keyparts[2];
+            $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
+            $item = new $itemObject();
+            if (!$item->findItem($itemid)) {
+                $diaginfo = "(Debug info: 35-".$item->itemid].")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            $cid = $course_item['courseid'];
+
             if ($sessiondata['ltirole'] == 'learner') {
-                $stm = $DBH->prepare(
-                    'INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info)'
-                    .' VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')'
-                );
-                $stm->execute(
-                    [
-                        ':userid' => $userid,
-                        ':courseid' => $course_item['courseid'],
-                        ':typeid' => $course_item['typeid'],
-                        ':viewtime' => $now
-                    ]
-                );
+                $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
+                $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-                ."?type=".str_replace('Item', '', $course_item['itemtype'])
-                ."&cid=".$cid
-                ."&id=".$course_item['typeid']
+                ."?type=".str_replace('Item', '', $item->itemtype)
+                ."&cid=".$item->courseid
+                ."&id=".$item->typeid
             );
         } else
             // #### End OHM-specific code #####################################################
