@@ -115,8 +115,48 @@ class DesmosItem extends CourseItem
     public function findItem(int $typeid)
     {
         $query = "SELECT * FROM desmos_items WHERE id=:id";
-        $stm = $this->dbh->prepare($query);
-        $stm->execute(array(':id' => $typeid));
+        if ($this->courseid) {
+            $query .= " AND courseid=:courseid";
+            $stm = $this->dbh->prepare($query);
+            $stm->bindValue(":courseid", $this->courseid);
+        } else {
+            $stm = $this->dbh->prepare($query);
+        }
+        $stm->bindValue(":id", $typeid);
+
+        $stm->execute();
+        $item = $stm->fetch(PDO::FETCH_ASSOC);
+        if (!$item) {
+            return false;
+        }
+
+        $this->setItem($item);
+        $this->steps = DesmosSteps::findSteps($this->typeid);
+        $this->setStepOrder();
+        $this->findTags();
+        return $this;
+    }
+
+    /**
+     * Find desmos_items item by title
+     *
+     * @param string $title desmos_items.title
+     *
+     * @return $this|CourseItem
+     */
+    public function findItemByTitle(string $title)
+    {
+        $query = "SELECT * FROM desmos_items WHERE title=:title";
+        if ($this->courseid) {
+            $query .= " AND courseid=:courseid";
+            $stm = $this->dbh->prepare($query);
+            $stm->bindValue(":courseid", $this->courseid);
+        } else {
+            $stm = $this->dbh->prepare($query);
+        }
+        $stm->bindValue(":title", $title);
+
+        $stm->execute();
         $item = $stm->fetch(PDO::FETCH_ASSOC);
         if (!$item) {
             return false;

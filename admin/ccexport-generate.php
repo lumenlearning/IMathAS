@@ -219,7 +219,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $fp = fopen($newdir.'/desmos'.$iteminfo[$item][1].'.xml','w');
                     fwrite($fp,'<desmos xmlns="http://www.imsglobal.org/xsd/imsccv1p1/imswl_v1p1">');
                     fwrite($fp,' <title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n");
-                    fwrite($fp,' <url href="'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'"/>');
+                    fwrite($fp,' <url href="'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$iteminfo[$item][1].'&custom_item_type='.$iteminfo[$item][0].'"/>');
                     fwrite($fp,'</desmos>');
                     fclose($fp);
 
@@ -228,7 +228,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $canvout .= '<workflow_state>'.($courseItem->avail==0?'unpublished':'active').'</workflow_state>'."\n";
                     $canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>'."\n";
                     $canvout .= '<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
-                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'</url>';
+                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$iteminfo[$item][1].'&custom_item_type='.$iteminfo[$item][0].'</url>';
                     $canvout .= "<position>$ccnt</position> <indent>".max($mod_depth-1,0)."</indent> </item>";
                     $ccnt++;
 
@@ -242,9 +242,9 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     fwrite($fp,'<blti:title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</blti:title>');
                     fwrite($fp,'<blti:description>'.htmlentities(html_entity_decode($courseItem->summary),ENT_XML1,'UTF-8',false).'</blti:description>');
                     if ($linktype=='url') {
-                        $urladd = '?custom_item_id='.$courseItem->itemid;
+                        $urladd = '?custom_item_id='.$courseItem->itemid.'&custom_item_type='.$iteminfo[$item][0];
                     } else {
-                        fwrite($fp, '<blti:custom><lticm:property name="place_aid">' . $iteminfo[$item][1] . '</lticm:property></blti:custom>');
+                        fwrite($fp, '<blti:custom><lticm:property name="custom_item_id">' . $iteminfo[$item][1] . '</lticm:property><lticm:property name="custom_item_type">' . $iteminfo[$item][0] . '</lticm:property></blti:custom>');
                         $urladd = '';
                     }
                     if ($urlmode == 'https://') {

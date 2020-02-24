@@ -651,8 +651,10 @@ if (
         // #### Begin OHM-specific code #####################################################
         if (isset($_REQUEST['custom_item_id'])) { //common catridge lti placement, or Canvas LTI selection
             $place_item_id = intval($_REQUEST['custom_item_id']);
+            $place_item_type = $_REQUEST['custom_item_type'];
             $keytype = 'cc-a';
             $_SESSION['place_item_id'] = $_REQUEST['custom_item_id'];
+            $_SESSION['place_item_type'] = $_REQUEST['custom_item_type'];
             unset($_SESSION['place_aid']);
         } else
             // #### End OHM-specific code #######################################################
@@ -664,7 +666,7 @@ if (
                 $placeaid = intval($_REQUEST['custom_place_aid']);
                 $keytype = 'cc-a';
                 $_SESSION['place_aid'] = $_REQUEST['custom_place_aid'];
-                unset($_SESSION['place_item_id']);
+                unset($_SESSION['place_item_id'],$_SESSION['place_item_type']);
             } else if (isset($_REQUEST['custom_open_folder'])) {
                 $keytype = 'cc-of';
                 $parts = explode('-',$_REQUEST['custom_open_folder']);
@@ -902,19 +904,14 @@ if (
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             if (isset($_SESSION['place_item_id'])) {
-                $course_item = \Course\Includes\CourseItem::findCourseItem($_SESSION['place_item_id']);
-                if (empty($course_item)) {
-                    $diaginfo = "(Debug info: 31-$itemid)";
-                    reporterror("This item does not appear to exist anymore. $diaginfo");
-                }
-                $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
+                $itemObject = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
                 $item = new $itemObject($cid);
 
-                if (!$item->findItem($course_item['typeid'])) {
+                if (!$item->findItem($_SESSION['place_item_id'])) {
                     $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
-                $aidsourcecid = $course_item['courseid'];
+                $aidsourcecid = $cid;
                 $aidsourcename = $item->title;
                 $aid = $item->typeid;
             } else
@@ -1347,19 +1344,15 @@ if (
                 }
                 if (!$foundaid) {
                     if ($_SESSION['place_item_id']) {
-                        $course_item = \Course\Includes\CourseItem::findCourseItem($_SESSION['place_item_id']);
-                        if (empty($course_item)) {
-                            $diaginfo = "(Debug info: 33-$itemid)";
-                            reporterror("This item does not appear to exist anymore. $diaginfo");
-                        }
-                        $itemObject = str_replace('Item','', $course_item['itemtype']) . "\\Models\\" . $course_item['itemtype'];
-                        $item = new $itemObject($course_item['courseid']);
+                        $itemObject = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                        $item = new $itemObject($destcid);
 
-                        if (!$item->findItem($course_item['typeid'])) {
+                        if (!$item->findItemByTitle($aidsourcename)) {
                             reporterror("Error.  DesmosItem ID '{$_SESSION['place_item_id']}' not found.");
                         }
                         $aid = $item->typeid;
-                        $sourceitemid = $_SESSION['place_item_id'];
+                        $typeid = $_SESSION['place_item_id'];
+                        $itemtype = $_SESSION['place_item_type'];
                     } else {
                         //aid is in source course.  Let's look and see if there's an assessment in destination with the same title.
                         //this handles cases where an assessment was linked in from elsewhere and manually copied
@@ -1370,16 +1363,18 @@ if (
                             $aid = $stm->fetchColumn(0);
                             //echo "here 7: $aid";
                         }
-                        $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
-                        $stm->execute(array(':typeid'=>$_SESSION['place_aid']));
+                        $typeid = $_SESSION['place_aid'];
+                        $itemtype = 'Assessment';
+                    }
+                    if (!$aid) {
+                        // no assessment with same title - need to copy assessment from destination to source course
+                        require_once("../includes/copyiteminc.php");
+                        $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
+                        $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$typeid));
                         if ($stm->rowCount()==0) {
                             reporterror("Error.  Assessment ID '{$_SESSION['place_aid']}' not found.");
                         }
                         $sourceitemid = $stm->fetchColumn(0);
-                    }
-                    if ($stm->rowCount() == 0) {
-                        // no assessment with same title - need to copy assessment from destination to source course
-                        require_once("../includes/copyiteminc.php");
                         $cid = $destcid;
 
                         $stm = $DBH->prepare("SELECT itemorder,dates_by_lti,UIver FROM imas_courses WHERE id=:id");
@@ -1412,7 +1407,7 @@ if (
             $typeid = $aid;
             if (isset($_SESSION['place_item_id'])) {
                 $linkparts = array('itemid', $_SESSION['place_item_id']);
-                $placementtype = 'DesmosItem';
+                $placementtype = $_SESSION['place_item_type'];
                 $typeid = $_SESSION['place_item_id'];
             }
             $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
@@ -2375,6 +2370,7 @@ if (
             // #### Begin OHM-specific code #####################################################
             if (isset($_REQUEST['custom_item_id'])) {
                 $place_item_id = intval($_REQUEST['custom_item_id']);
+                $place_item_type = $_REQUEST['custom_item_type'];
                 $keytype = 'cc-g';
                 $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
                 if (empty($course_item)) {
@@ -2443,6 +2439,7 @@ if (
             // #### Begin OHM-specific code #####################################################
             if (isset($_REQUEST['custom_item_id'])) {
                 $place_item_id = intval($_REQUEST['custom_item_id']);
+                $place_item_type = $_REQUEST['custom_item_type'];
                 $keytype = 'cc-g';
                 $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
                 if (empty($course_item)) {
@@ -2450,7 +2447,7 @@ if (
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
                 $sourcecid = $course_item['courseid'];
-                $_SESSION['place_item_id'] = array($sourcecid,$place_item_id);
+                $_SESSION['place_item_id'] = array($sourcecid,$place_item_id,$place_item_type);
             } else
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################
