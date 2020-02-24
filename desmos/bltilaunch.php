@@ -905,13 +905,13 @@ if (
             // #### Begin OHM-specific code #####################################################
             if (isset($_SESSION['place_item_id'])) {
                 $itemObject = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                $item = new $itemObject($cid);
+                $item = new $itemObject();
 
                 if (!$item->findItem($_SESSION['place_item_id'])) {
                     $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
-                $aidsourcecid = $cid;
+                $aidsourcecid = $item->courseid;
                 $aidsourcename = $item->title;
                 $aid = $item->typeid;
             } else
