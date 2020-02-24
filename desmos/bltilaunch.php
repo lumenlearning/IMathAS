@@ -653,8 +653,8 @@ if (
             $place_item_id = intval($_REQUEST['custom_item_id']);
             $place_item_type = $_REQUEST['custom_item_type'];
             $keytype = 'cc-a';
-            $_SESSION['place_item_id'] = $_REQUEST['custom_item_id'];
-            $_SESSION['place_item_type'] = $_REQUEST['custom_item_type'];
+            $_SESSION['place_item_id'] = $place_item_id;
+            $_SESSION['place_item_type'] = $place_item_type;
             unset($_SESSION['place_aid']);
         } else
             // #### End OHM-specific code #######################################################
@@ -2385,7 +2385,7 @@ if (
                     $keytype = 'i';
                 } else {  //key is for a different course; mark as cc placement
                     $keytype = 'cc-c';
-                    $_SESSION['place_item_id'] = array($sourcecid, $place_item_id);
+                    $_SESSION['place_item_id'] = array($sourcecid, $place_item_id, $place_item_type);
                 }
             } else
                 // #### End OHM-specific code #####################################################
@@ -2691,9 +2691,12 @@ if (
                     $destcid = $stm->fetchColumn(0);
                 }
                 $itemid = $_SESSION['place_item_id'][1];
-                $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-                if (empty($course_item)) {
-                    $diaginfo = "(Debug info: 39-$placeaid)";
+                $itemtype = $_SESSION['place_item_id'][2];
+                $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
+                $item = new $itemObject($destcid);
+
+                if (!$item->findItem($itemid)) {
+                    $diaginfo = "(Debug info: 39-$itemid)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
 
@@ -2705,7 +2708,7 @@ if (
                         ':org'=>$_SESSION['ltiorg'],
                         ':contextid'=>$_SESSION['lti_context_id'],
                         ':linkid'=>$_SESSION['lti_resource_link_id'],
-                        ':placementtype'=>$course_item['itemtype'],
+                        ':placementtype'=>$itemtype,
                         ':typeid'=>$itemid
                     ]
                 );
