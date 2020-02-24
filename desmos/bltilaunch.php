@@ -176,7 +176,7 @@ if (
         // #### Begin OHM-specific code #####################################################
         if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $itemtype = $sessiondata['ltiitemtype']
+            $itemtype = $sessiondata['ltiitemtype'];
             $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
             if (!$item->findItem($itemid)) {
@@ -1855,7 +1855,7 @@ if (
             $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
             if (!$item->findItem($itemid)) {
-                $diaginfo = "(Debug info: 35-".$item->itemid].")";
+                $diaginfo = "(Debug info: 35-".$item->itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
@@ -1946,20 +1946,20 @@ if (
         // #### Begin OHM-specific code #####################################################
         if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $itemObject = str_replace('Item','', $sessiondata['ltiitemtype']) . "\\Models\\" . $sessiondata['ltiitemtype'];
+            $itemtype = $sessiondata['ltiitemtype'];
+            $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
-            if (!$item->findItem($_SESSION['place_item_id'])) {
-                $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
+            if (!$item->findItem($itemid)) {
+                $diaginfo = "(Debug info: 32-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            $cid = $item->courseid;
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
-                $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $item->typeid, ':viewtime' => $now));
+                $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->typeid, ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
                 ."?type=".str_replace('Item', '', $item->itemtype)
-                ."&cid=".$cid
+                ."&cid=".$item->courseid
                 ."&id=".$item->typeid
             );
         } else
@@ -3230,7 +3230,7 @@ if (
             $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
             if (!$item->findItem($itemid)) {
-                $diaginfo = "(Debug info: 35-".$item->itemid].")";
+                $diaginfo = "(Debug info: 35-".$item->itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
