@@ -260,11 +260,11 @@ class DesmosItem extends CourseItem
     /**
      * Set required parameter
      *
-     * @param null $value or use $this->summary
+     * @param string $value or use $this->summary
      *
      * @return $this|CourseItem
      */
-    public function setSummary($value = null)
+    public function setSummary($value = '')
     {
         if ($value) {
             $this->summary = $value;
