@@ -1408,7 +1408,11 @@ if (
             $placementtype='assess';
             $typeid = $aid;
             if (isset($_SESSION['place_item_id'])) {
-                $linkparts = array('itemid', $_SESSION['place_item_id']);
+                $linkparts = [
+                    'itemid',
+                    $_SESSION['place_item_id'],
+                    $_SESSION['place_item_type']
+                ];
                 $placementtype = $_SESSION['place_item_type'];
                 $typeid = $_SESSION['place_item_id'];
             }
@@ -1434,7 +1438,7 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         if (substr($row[0], -4)=='Item') {
-            $linkparts = array('itemid', $row[1]);
+            $linkparts = ['itemid', $row[1], $row[0]];
         } else
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
@@ -1499,12 +1503,14 @@ if (
 // #### Begin OHM-specific code #####################################################
     if ($linkparts[0]=='itemid') {   //is assessment level placement
         $itemid = intval($linkparts[1]);
-        $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-        if (empty($course_item)) {
+        $itemtype = $linkparts[2];
+        $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
+        $item = new $itemObject();
+        if (!$item->findItem($itemid)) {
             $diaginfo = "(Debug info: 34-$itemid)";
             reporterror("This item does not appear to exist anymore. $diaginfo");
         }
-        $cid = $course_item['courseid'];
+        $cid = $item->courseid;
     } else
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
