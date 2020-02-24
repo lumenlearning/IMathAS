@@ -174,22 +174,24 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($sessiondata['ltiitemtype']==38) { //is item
+        if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-            if (empty($course_item)) {
-                $diaginfo = "(Debug info: 30-$itemid)";
+            $itemObject = str_replace('Item','', $sessiondata['ltiitemtype']) . "\\Models\\" . $sessiondata['ltiitemtype'];
+            $item = new $itemObject();
+            if (!$item->findItem($_SESSION['place_item_id'])) {
+                $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            $cid = $course_item['courseid'];
+            $cid = $item->courseid;
+
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $itemid, ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-                ."?type=".str_replace('Item', '', $course_item['itemtype'])
+                ."?type=".str_replace('Item', '', $item->itemtype)
                 ."&cid=".$cid
-                ."&id=".$course_item['typeid']
+                ."&id=".$item->typeid
             );
         } else
             // #### End OHM-specific code #####################################################
@@ -1730,7 +1732,7 @@ if (
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
     if ($linkparts[0]=='itemid') {
-        $sessiondata['ltiitemtype']=38;
+        $sessiondata['ltiitemtype']=$linkparts[2];
         $sessiondata['ltiitemid'] = $linkparts[1];
     } else
 // #### End OHM-specific code #####################################################
@@ -1939,22 +1941,23 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($sessiondata['ltiitemtype']==38) { //is item
+        if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-            if (empty($course_item)) {
-                $diaginfo = "(Debug info: 36-$itemid)";
+            $itemObject = str_replace('Item','', $sessiondata['ltiitemtype']) . "\\Models\\" . $sessiondata['ltiitemtype'];
+            $item = new $itemObject();
+            if (!$item->findItem($_SESSION['place_item_id'])) {
+                $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            $cid = $course_item['courseid'];
+            $cid = $item->courseid;
             if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
-                $stm->execute(array(':userid' => $userid, ':courseid' => $course_item['courseid'], ':typeid' => $course_item['typeid'], ':viewtime' => $now));
+                $stm->execute(array(':userid' => $userid, ':courseid' => $cid, ':typeid' => $item->typeid, ':viewtime' => $now));
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-                ."?type=".str_replace('Item', '', $course_item['itemtype'])
+                ."?type=".str_replace('Item', '', $item->itemtype)
                 ."&cid=".$cid
-                ."&id=".$course_item['typeid']
+                ."&id=".$item->typeid
             );
         } else
             // #### End OHM-specific code #####################################################
@@ -3096,8 +3099,8 @@ if (
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
     if ($keyparts[0]=='itemid') { //is cid
-        $sessiondata['ltiitemtype']=38;
         $sessiondata['ltiitemid'] = $keyparts[1];
+        $sessiondata['ltiitemtype'] = $keyparts[2];
     } else
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
