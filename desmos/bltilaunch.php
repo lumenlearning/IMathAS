@@ -1347,9 +1347,9 @@ if (
                 if (!$foundaid) {
                     if ($_SESSION['place_item_id']) {
                         $itemObject = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                        $item = new $itemObject($destcid);
+                        $item = new $itemObject();
 
-                        if (!$item->findItemByTitle($aidsourcename)) {
+                        if (!$item->findItemByTitle($aidsourcename, $destcid)) {
                             reporterror("Error.  DesmosItem ID '{$_SESSION['place_item_id']}' not found.");
                         }
                         $aid = $item->typeid;
@@ -2727,9 +2727,9 @@ if (
                 $itemid = $_SESSION['place_item_id'][1];
                 $itemtype = $_SESSION['place_item_id'][2];
                 $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
-                $item = new $itemObject($destcid);
+                $item = new $itemObject();
 
-                if (!$item->findItem($itemid)) {
+                if (!$item->findItem($itemid, $destcid)) {
                     $diaginfo = "(Debug info: 39-$itemid)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }

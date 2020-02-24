@@ -112,13 +112,13 @@ class DesmosItem extends CourseItem
      *
      * @return $this|CourseItem
      */
-    public function findItem(int $typeid)
+    public function findItem(int $typeid, int $courseid = null)
     {
         $query = "SELECT * FROM desmos_items WHERE id=:id";
-        if ($this->courseid) {
+        if ($courseid != null) {
             $query .= " AND courseid=:courseid";
             $stm = $this->dbh->prepare($query);
-            $stm->bindValue(":courseid", $this->courseid);
+            $stm->bindValue(":courseid", $courseid);
         } else {
             $stm = $this->dbh->prepare($query);
         }
@@ -144,13 +144,13 @@ class DesmosItem extends CourseItem
      *
      * @return $this|CourseItem
      */
-    public function findItemByTitle(string $title)
+    public function findItemByTitle(string $title, int $courseid = null)
     {
         $query = "SELECT * FROM desmos_items WHERE title=:title";
-        if ($this->courseid) {
+        if ($courseid != null) {
             $query .= " AND courseid=:courseid";
             $stm = $this->dbh->prepare($query);
-            $stm->bindValue(":courseid", $this->courseid);
+            $stm->bindValue(":courseid", $courseid);
         } else {
             $stm = $this->dbh->prepare($query);
         }
@@ -192,7 +192,7 @@ class DesmosItem extends CourseItem
 
     public static function deleteCourse(int $cid)
     {
-        $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_steps WHERE desmosid IN (SELECT id FROM desmos_interactives WHERE courseid=:id)");
+        $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_steps WHERE desmosid IN (SELECT id FROM desmos_items WHERE courseid=:id)");
         $stm->execute(array(':id'=>$cid));
         $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_items WHERE courseid=:id");
         $stm->execute(array(':id'=>$cid));
