@@ -17,6 +17,10 @@
 .lux-component .controls + .controls .form-input {
 	width: 8.5em; /* controls width of datepicker inputs */
 }
+.step-li.lux-component .form-input {
+	display: inline-block;
+	width: calc(100% - 50px);
+}
 
 /* END LUX TWEAKS */
 
@@ -224,16 +228,13 @@
 	border-top-color: #1e74d1;
 }
 
-.step-li input {
-	width: calc(100% - 50px);
-}
-
 .step-li button:focus {
 	background-color: unset;
 }
 
 .step-li button svg {
-	display: inline-block;
+	display: block;
+	margin: auto;
 	opacity: 0.5;
 	transition: opacity 0.1s;
 }
