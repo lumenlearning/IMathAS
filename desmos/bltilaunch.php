@@ -2377,7 +2377,6 @@ if (
             if (isset($_REQUEST['custom_item_id'])) {
                 $place_item_id = intval($_REQUEST['custom_item_id']);
                 $place_item_type = $_REQUEST['custom_item_type'];
-                $keytype = 'cc-g';
                 $itemObject = str_replace('Item','', $place_item_type) . "\\Models\\" . $place_item_type;
                 $item = new $itemObject();
                 if (!$item->findItem($place_item_id)) {
@@ -2425,7 +2424,28 @@ if (
                     $sourcecid = $parts[0];
                     $_SESSION['view_folder'] = array($sourcecid,$parts[1]);
                 }
-        } else if ($keyparts[0]=='aid') {   //also cid:org
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        } else if ($keyparts[0]=='itemid') {   //also cid:org
+            $_SESSION['ltilookup'] = 'i';
+            $itemObject = str_replace('Item','', $keyparts[2]) . "\\Models\\" . $keyparts[2];
+            $item = new $itemObject();
+            if (!$item->findItem($keyparts[1])) {
+                $diaginfo = "(Debug info: 37b-".$keyparts[1].")";
+                reporterror("This assignment does not appear to exist anymore. $diaginfo");
+
+            }
+            $ltiorg = $item->courseid . ':' . $ltiorg;
+            $keytype = 'i';
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        } else  if ($keyparts[0]=='aid') {   //also cid:org
             $_SESSION['ltilookup'] = 'a';
             $aid = intval($keyparts[1]);
             $stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
