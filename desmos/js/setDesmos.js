@@ -551,7 +551,9 @@ setupDnD();
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
-document.getElementById('js-step-nav').onchange = function () {
-	var activeItem = this.value;
-	showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
-};
+if (document.getElementById('desmos_view_container')) {
+	document.getElementById('js-step-nav').onchange = function () {
+		var activeItem = this.value;
+		showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
+	};	
+}
