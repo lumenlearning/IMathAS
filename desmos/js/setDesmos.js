@@ -41,7 +41,7 @@ function addStep() {
 	var parent = "desmos_edit_container";
 	// Create a <li> node
 	var step = document.createElement("li");
-	step.className = "step-li lux-component";
+	step.className = "step-li";
 	step.dataset.num = numsteps;
 	step.setAttribute("onclick", "showSteps('" + parent + "', this)");
 	step.setAttribute("onkeydown", "javascript: if(event.keyCode == 9) showSteps('" + parent + "', this)");

@@ -59,7 +59,7 @@
                         if ($numsteps==0) {
                             $selected = "is-selected";
                         }
-                        echo "<li class=\"step-li lux-component $selected\" $action $keyaction draggable=\"false\" data-num=\"$numsteps\">";
+                        echo "<li class=\"step-li $selected\" $action $keyaction draggable=\"false\" data-num=\"$numsteps\">";
                         echo "<span class=\"js-drag-trigger move-trigger\"><button class=\"u-button-reset\" aria-label=\"Move this item.\" type=\"button\"><svg aria-hidden=\"true\"><use xlink:href=\"#lux-icon-drag\"></use></svg></button></span>";
                         printf(
                             "<label for='step_title[%d]' class='u-sr-only'>%s</label>",
