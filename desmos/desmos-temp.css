@@ -15,12 +15,12 @@
 	min-width: 80px;
 }
 .lux-component .button-group .button + .button {
-	margin-left: -4px;
+	margin-left: -4px !important; /* Important flag necessary b/c sometimes Lux loads after this file */
 }
 .lux-component .controls + .controls .form-input {
 	width: 8.5em; /* controls width of datepicker inputs */
 }
-.step-li.lux-component .form-input {
+.lux-component .step-li .form-input {
 	display: inline-block;
 	width: calc(100% - 50px);
 }
@@ -116,6 +116,7 @@
 	width: 100%;
 }
 
+#import + .button-wrapper,
 #editdesmos + .button-wrapper {
 	text-align: right;
 }
@@ -146,6 +147,21 @@
 	color: #ffffff;
 	font-size: 14px;
 	font-weight: normal;
+}
+
+.mce-window-head button.mce-close {
+	background: transparent !important;
+	opacity: 0.8;
+	transition: opacity 0.1s;
+}
+
+.mce-window-head button.mce-close:hover,
+.mce-window-head button.mce-close:focus {
+	opacity: 1;
+}
+
+.mce-window-head button.mce-close i {
+	color: white;
 }
 
 .step-items .mce-panel {
@@ -321,10 +337,6 @@
 /* END DESMOS TEACHER VIEW */
 
 /* DESMOS TEACHER PREVIEW */
-#desmos_preview_button {
-	margin-left: 0.5em;
-}
-
 #desmos_preview_container {
 	background-color: #f9fafb;
 	margin: 0;
