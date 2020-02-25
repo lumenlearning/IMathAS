@@ -8,6 +8,22 @@ require("courseshowitems.php");
 require("../includes/htmlutil.php");
 require("../includes/calendardisp.php");
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+
+if (isset($CFG['hooks']['banner'])) {
+    require(__DIR__ . '/../' . $CFG['hooks']['banner']);
+}
+
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 
 /*** pre-html data manipulation, including function code *******/
 function buildBlockLeftNav($items, $parent, &$blocklist) {
@@ -638,16 +654,9 @@ if ($overwriteBody==1) {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
 
-    $courseBannerForStudents = getCourseBannerForStudents();
-    $courseBannerForTeachers = getCourseBannerForTeachers();
-
-    // Display a message on the course page to all students only.
-    if (20 > $GLOBALS['myrights'] && !empty($courseBannerForStudents)) {
-        display_course_banner($courseBannerForStudents);
-    }
-    // Display a message on the course page to all teachers only.
-    if (19 < $GLOBALS['myrights'] && !empty($courseBannerForTeachers)) {
-		display_course_banner($courseBannerForTeachers);
+    //call hook, if defined
+    if (function_exists('displayBanner')) {
+        displayBanner($myrights);
     }
 
     // #### End OHM-specific code #######################################################
@@ -765,73 +774,6 @@ function makeTopMenu() {
 }
 
 
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-
-/**
- * Get the message to display to all students on the course page, if available.
- *
- * @return string|null
- */
-function getCourseBannerForStudents(): ?string
-{
-    // In a better world...
-//	$stm = $GLOBALS['DBH']->prepare("SELECT config_value FROM ohm_config WHERE config_name = :cname");
-//	$stm->execute(array(':config_name' => 'course_banner_message_students'));
-//	return $stm->fetchColumn(0);
-
-	// For now :(
-    return trim($_ENV['COURSE_BANNER_STUDENTS']);
-}
-
-/**
- * Get the message to display to all teachers on the course page, if available.
- *
- * @return string|null
- */
-function getCourseBannerForTeachers(): ?string
-{
-	// In a better world...
-//	$stm = $GLOBALS['DBH']->prepare("SELECT config_value FROM ohm_config WHERE config_name = :cname");
-//	$stm->execute(array(':config_name' => 'course_banner_message_teachers'));
-//	return $stm->fetchColumn(0);
-
-	// For now :(
-	return trim($_ENV['COURSE_BANNER_TEACHERS']);
-}
-
-/**
- * Output (as HTML) a div containing a message for the user.
- *
- * @param string $message The message to be displayed to the user.
- */
-function display_course_banner(string $message): void
-{
-    $messageAsHtml = trim($message);
-	$messageAsHtml = preg_replace(array('/\n/', '/\\n/', '/\[br\]/'),
-        '<br/>', $messageAsHtml);
-
-	$bannerHeader = isset($_ENV['COURSE_BANNER_HEADER']) ?
-		$_ENV['COURSE_BANNER_HEADER'] : 'Important Notice:';
-
-    ?>
-        <div id="ohm_course_banner">
-        <div id="ohm_course_banner_header"><?php echo $bannerHeader; ?></div>
-        <div id="ohm_course_banner_content">
-            <p><?php echo $messageAsHtml; ?></p>
-        </div>
-        </div>
-    <?php
-}
-
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
 
 
 ?>
