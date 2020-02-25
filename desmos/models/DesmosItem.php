@@ -372,26 +372,24 @@ class DesmosItem extends CourseItem
         }
         //add steps
         foreach (array_keys($steps) as $key) {
-            if (!empty($steps[$key]['title'])) {
-                if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
-                    //update step
-                    DesmosSteps::updateStep(
-                        $steps[$key]['id'],
-                        [
-                            'title' => $steps[$key]['title'],
-                            'text' => $steps[$key]['text']
-                        ]
-                    );
-                } else {
-                    //add step
-                    $steps[$key]['id'] = DesmosSteps::insertStep(
-                        [
-                            'desmosid' => $this->typeid,
-                            'title' => $steps[$key]['title'],
-                            'text' => $steps[$key]['text']
-                        ]
-                    );
-                }
+            if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
+                //update step
+                DesmosSteps::updateStep(
+                    $steps[$key]['id'],
+                    [
+                        'title' => $steps[$key]['title'],
+                        'text' => $steps[$key]['text']
+                    ]
+                );
+            } else {
+                //add step
+                $steps[$key]['id'] = DesmosSteps::insertStep(
+                    [
+                        'desmosid' => $this->typeid,
+                        'title' => $steps[$key]['title'],
+                        'text' => $steps[$key]['text']
+                    ]
+                );
             }
         }
         $this->steps = $steps;
