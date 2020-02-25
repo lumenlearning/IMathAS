@@ -11,6 +11,9 @@
 /* END imascore.css OVERRIDES */
 
 /* LUX TWEAKS */
+.lux-component .button {
+	min-width: 80px;
+}
 .lux-component .button-group .button + .button {
 	margin-left: -4px;
 }
