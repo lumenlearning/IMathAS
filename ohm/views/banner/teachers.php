@@ -1,5 +1,5 @@
 <div class="ohm-course-banner">
-    <div class="ohm-course-banner-header">OHM Updates</div>
+    <h2 class="ohm-course-banner-header">OHM Updates</h2>
     <div class="ohm-course-banner-content">
         <h3>What's New</h3>
         <ul>
