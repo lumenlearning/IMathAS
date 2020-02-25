@@ -1,53 +1,78 @@
 $(document).ready(function() {
     let formIsSubmitting = false;
+    let enteringPreviewMode = false;
     let formDataBeforeChanges = $('#desmos_item').serialize();
 
     window.onbeforeunload = function () {
-        if (formIsSubmitting) {
+        if (formIsSubmitting || enteringPreviewMode) {
+            enteringPreviewMode = false;
             formIsSubmitting = false;
             return;
         }
 
+        let id = $.urlParam('id');
+
         let formDataBeforeUnload = $('#desmos_item').serialize();
-        if (formDataBeforeUnload !== formDataBeforeChanges) {
+        if (formDataBeforeUnload !== formDataBeforeChanges || 0 === id) {
             return 'Data has been modified. Are you sure you want to abandon changes?';
         }
     };
 
+    /*
+     * Helper function to get a URL query parameter.
+     */
+    $.urlParam = function(name){
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (null === results) return 0;
+
+        return results[1] || 0;
+    };
+
+    /*
+     * Serialize the form on the edit page, save in the user's PHP session,
+     * and redirect to the preview page.
+     */
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
         let formData = $("#desmos_item").serialize();
+
+        let courseId = Number($.urlParam('cid'));
+        // Allow multiple preview tabs
+        let previewId = $.urlParam('preview_id');
+        if (0 === previewId) previewId = Date.now();
+
         $.ajax({
             type: "POST",
-            url: "/desmos/views/view.php?mode=preview",
-            data: formData,
+            url: "/course/itempreview.php?mode=store_temp_preview_data&preview_id="
+              + previewId + '&cid=' + cid,
+            data: {
+                tempSerializedPreviewData: formData,
+            },
             success: function(data) {
-                $("#desmos_edit_container").hide();
-                $("#desmos_preview_button").html("Preview");
-                $("#desmos_preview_content").html(data);
-                window.rendermathnode();
-                $("div.mainbody").css("background-color", "#F9FAFB");
-                $("div.breadcrumb").css("background-color", "#F9FAFB");
-                $("#desmos_preview_container").show();
-                $('link[title=lux]')[0].disabled=true;
-                $('html, body').animate({ scrollTop: 0 }, "slow");
-                loadDesmos();
+                enteringPreviewMode = true;
+                let id = Number($.urlParam('id'));
+
+                $(location).attr('href', '/course/itempreview.php?cid='
+                    + courseId + '&type=desmos&id=' + id + '&preview_id=' + previewId);
             },
             error: function(data) {
-                console.log("Failed to get view page content for Desmos item.");
+                console.log("Failed to temporarily store serialized form data for Desmos interactive.");
                 console.log(data.responseText);
-                $("#preview_button").html('Preview');
+                $("#desmos_preview_button").html('Preview');
             }
         });
     });
 
+    /*
+     * Return to the edit page. OHM will re-populate the form using session data.
+     */
     $("#desmos_return_to_edit_button").click(function() {
-        $("#desmos_preview_container").hide();
-        $("#desmos_preview_content").empty();
-        $("div.mainbody").css("background-color", "#FFFFFF");
-        $("div.breadcrumb").css("background-color", "#FFFFFF");
-        $("#desmos_edit_container").show();
-        $('link[title=lux]')[0].disabled=false;
+        let id = Number($.urlParam('id'));
+        let idParam = 0 === id ? '' : '&id=' + id;
+        let courseId = Number($.urlParam('cid'));
+        let previewId = $.urlParam('preview_id');
+        $(location).attr('href', '/course/itemadd.php?mode=returning_from_preview&cid='
+          + courseId + '&type=desmos' + idParam + '&preview_id=' + previewId);
     });
 
     $("#desmos_form_submit_button").click(function(e) {

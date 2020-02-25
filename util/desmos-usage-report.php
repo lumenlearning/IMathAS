@@ -17,7 +17,7 @@ $curBreadcrumb = $breadcrumbbase
 
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>\n";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
-$placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/themes/lux-temp.css\">\n";
+$placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.1/lux-components.min.css\">\n";
 require("../header.php");
 echo '<div class=breadcrumb>', $curBreadcrumb, '</div>';
 echo '<div id="headeradmin" class="pagetitle"><h1>', $pagetitle, '</h1></div>';
@@ -77,37 +77,41 @@ function getDateTime(?string $unsafeDateString, bool $isEndDate): DateTime
 function outputDateForm(DateTime $startDate, DateTime $endDate): void
 {
     ?>
-    <form method="POST" class="form" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="generate_report"/>
-        <div class="form-group">
-            <div class="controls">
-                <label for="startDate">Start Date:</label>
-                <input id="startDate"
-                       name="startDate"
-                       type="text"
-                       class="--input-icon --icon-calendar"
-                       onClick="displayDatePicker('startDate', this); return false"
-                       value="<?php echo $startDate->format('m/d/Y'); ?>"/>
+    <div class="lux-component">
+        <form method="POST" class="form lux-form" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="generate_report"/>
+            <div class="form-group">
+                <div class="controls">
+                    <label for="startDate" class="form-label">Start Date:</label>
+                    <input id="startDate"
+                        name="startDate"
+                        type="text"
+                        class="form-input has-icon icon--suffix icon--calendar"
+                        style="width: 8.5em;"
+                        onClick="displayDatePicker('startDate', this); return false"
+                        value="<?php echo $startDate->format('m/d/Y'); ?>"/>
+                </div>
+                <div class="controls u-margin-vertical-sm">
+                    <label for="endDate" class="form-label">End Date:</label>
+                    <input id="endDate"
+                        name="endDate"
+                        type="text"
+                        class="form-input has-icon icon--suffix icon--calendar"
+                        style="width: 8.5em;"
+                        onClick="displayDatePicker('endDate', this); return false"
+                        value="<?php echo $endDate->format('m/d/Y'); ?>"/>
+                </div>
+                <div class="controls">
+                    <button id="desmos_form_submit_button"
+                            name="submitbtn"
+                            type="submit"
+                            class="button button--primary"
+                            value="Submit">Update
+                    </button>
+                </div>
             </div>
-            <div class="controls">
-                <label for="endDate">End Date:</label>
-                <input id="endDate"
-                       name="endDate"
-                       type="text"
-                       class="--input-icon --icon-calendar"
-                       onClick="displayDatePicker('endDate', this); return false"
-                       value="<?php echo $endDate->format('m/d/Y'); ?>"/>
-            </div>
-            <div class="controls">
-                <button id="desmos_form_submit_button"
-                        name="submitbtn"
-                        type="submit"
-                        class="button --button-primary -offset"
-                        value="Submit">Update
-                </button>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
     <?php
 }
 

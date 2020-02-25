@@ -1,19 +1,19 @@
-function loadDesmos(){
-    //loop through js-desmos class items
-    var elt = document.getElementsByClassName("js-desmos");
-    if (elt.length>0) {
-        for (i = 0; i < elt.length; i++) {
-            var calculator = Desmos.GraphingCalculator(elt[i]);
-            json = elt[i].getAttribute("data-json");
-            if (json!="") {
-                calculator.setState(json);
-            }
-        }
-    }
+function loadDesmos() {
+	//loop through js-desmos class items
+	var elt = document.getElementsByClassName("js-desmos");
+	if (elt.length > 0) {
+		for (i = 0; i < elt.length; i++) {
+			var calculator = Desmos.GraphingCalculator(elt[i]);
+			json = elt[i].getAttribute("data-json");
+			if (json != "") {
+				calculator.setState(json);
+			}
+		}
+	}
 }
 loadDesmos();
 
-function showSteps(parent, el){
+function showSteps(parent, el) {
 	//showThis(el);
 	var listItems = document.getElementById(parent).getElementsByClassName('step-li');
 	var listIndex = el.getAttribute("data-num");
@@ -37,64 +37,65 @@ function showSteps(parent, el){
 	}
 }
 
-function addStep(){
+function addStep() {
 	var parent = "desmos_edit_container";
-    // Create a <li> node
-    var step = document.createElement("li");
-    step.className = "step-li";
-    step.dataset.num = numsteps;
-    step.setAttribute("onclick", "showSteps('"+parent+"', this)");
-	step.setAttribute("onkeydown", "javascript: if(event.keyCode == 9) showSteps('"+parent+"', this)");
-    step.setAttribute("draggable", false);
+	// Create a <li> node
+	var step = document.createElement("li");
+	step.className = "step-li lux-component";
+	step.dataset.num = numsteps;
+	step.setAttribute("onclick", "showSteps('" + parent + "', this)");
+	step.setAttribute("onkeydown", "javascript: if(event.keyCode == 9) showSteps('" + parent + "', this)");
+	step.setAttribute("draggable", false);
 
-    // Create a <span> wrapper for the drag button
-    var buttonDragWrapper = document.createElement("span");
-    buttonDragWrapper.classList.add("js-drag-trigger", "move-trigger");
+	// Create a <span> wrapper for the drag button
+	var buttonDragWrapper = document.createElement("span");
+	buttonDragWrapper.classList.add("js-drag-trigger", "move-trigger");
 	buttonDragWrapper.setAttribute("aria-discribedby", 'step-directions');
 
-    // Create a drag <button> element
-    var buttonDrag = document.createElement("button");
-    buttonDrag.type = "button";
-    buttonDrag.classList.add("u-button-reset");
-    buttonDrag.setAttribute("aria-label", "Move this item.");
-    buttonDrag.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-drag"></use></svg>';
+	// Create a drag <button> element
+	var buttonDrag = document.createElement("button");
+	buttonDrag.type = "button";
+	buttonDrag.classList.add("u-button-reset");
+	buttonDrag.setAttribute("aria-label", "Move this item.");
+	buttonDrag.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-drag"></use></svg>';
 
-    // Create a <label> and <input> set
-    var label = document.createElement("label");
-    label.setAttribute("for", "step_title["+numsteps+"]");
-    label.classList.add("u-sr-only");
-    var input = document.createElement("input");
-    input.type = "text";
-	input.name = "step_title["+numsteps+"]";
+	// Create a <label> and <input> set
+	var label = document.createElement("label");
+	label.setAttribute("for", "step_title[" + numsteps + "]");
+	label.classList.add("u-sr-only");
+	var input = document.createElement("input");
+	input.type = "text";
+	input.name = "step_title[" + numsteps + "]";
+	input.classList.add("form-input");
 	input.setAttribute("maxlength", "100");
 
-    //Create a delete <button> element
-    var buttonDelete = document.createElement("button");
-    buttonDelete.type = "button";
-    buttonDelete.classList.add("js-delete", "delete-trigger");
-    buttonDelete.setAttribute("aria-label", "Delete this item.");
-    buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
+	//Create a delete <button> element
+	var buttonDelete = document.createElement("button");
+	buttonDelete.type = "button";
+	buttonDelete.classList.add("js-delete", "u-button-reset", "delete-trigger");
+	buttonDelete.setAttribute("aria-label", "Delete this item.");
+	buttonDelete.innerHTML = '<svg aria-hidden="true"><use xlink:href="#lux-icon-x"></use></svg>';
 
-    // Wrap the drag <button> in the <span> wrapper;
-    buttonDragWrapper.appendChild(buttonDrag);
-    // Append the new elements to <li>
-    step.appendChild(buttonDragWrapper);
-    step.appendChild(label);
-    step.appendChild(input);
+	// Wrap the drag <button> in the <span> wrapper;
+	buttonDragWrapper.appendChild(buttonDrag);
+	// Append the new elements to <li>
+	step.appendChild(buttonDragWrapper);
+	step.appendChild(label);
+	step.appendChild(input);
 	step.appendChild(buttonDelete);
-	
+
 	var draggableList = document.getElementById("step_list");
 	var listDescription = draggableList.dataset.description;
 	addDnDAttributes(step, listDescription);
-    
+
 	draggableList.appendChild(step);
 
 	var textareaWrapper = document.createElement("div");
 	textareaWrapper.id = "step_text_" + numsteps;
-	textareaWrapper.className = 'step-item-display-'+numsteps;
+	textareaWrapper.className = 'step-item-display-' + numsteps;
 
 	var textarea = document.createElement("textarea");
-	textarea.name = "step_text["+numsteps+"]";
+	textarea.name = "step_text[" + numsteps + "]";
 	textarea.className = "step-item editor";
 
 	textareaWrapper.appendChild(textarea);
@@ -102,16 +103,16 @@ function addStep(){
 	document.getElementById("step_items").appendChild(textareaWrapper);
 
 	numsteps++;
-	initeditor("textareas","step-item");
+	initeditor("textareas", "step-item");
 	showSteps(parent, step);
 	setupDnD();
 }
 
-function confirmDelete(event){
+function confirmDelete(event) {
 	event.preventDefault();
 	var itemNum = $(this).parent().attr("data-num");
-	
-	$.get("../desmos/views/ConfirmDesmosDelete.php", function(data){
+
+	$.get("../desmos/views/ConfirmDesmosDelete.php", function (data) {
 		ohmModal.open({
 			content: data,
 			height: "auto",
@@ -126,21 +127,21 @@ function confirmDelete(event){
 
 		// pass id of target element to delete button 
 		$(".js-confirm-delete").data("num", itemNum);
-	});	
+	});
 }
 
-function removeStep(event){
+function removeStep(event) {
 	var itemNum = $(".js-confirm-delete").data("num");
 	var desmosItem = $(".step-item-display-" + itemNum);
-	var listItem  = $(".js-step-list").find("[data-num='" + itemNum + "']"); 
+	var listItem = $(".js-step-list").find("[data-num='" + itemNum + "']");
 
-	desmosItem.remove(); 
-	listItem.remove(); 
+	desmosItem.remove();
+	listItem.remove();
 	ohmModal.close();
 
-	if($("#step_list li").length === 0){
+	if ($("#step_list li").length === 0) {
 		addStep();
-	} else if($("#step_list li").length === 1){
+	} else if ($("#step_list li").length === 1) {
 		var trigger = document.querySelector(".js-drag-trigger");
 		reorderList.init(trigger);
 	}
@@ -148,47 +149,47 @@ function removeStep(event){
 	showSteps('desmos_edit_container', document.getElementById("step_list").children[0]);
 }
 
-function handleStudentViewNav(event){
-    var listItems = document.querySelectorAll('.step-li');
+function handleStudentViewNav(event) {
+	var listItems = document.querySelectorAll('.step-li');
 	var selectEl = document.getElementById('js-step-nav');
 	var prevButtons = document.querySelectorAll('.js-prev');
 	var nextButtons = document.querySelectorAll('.js-next');
-    var listItem;
+	var listItem;
 	var stepIndex;
-	
-	if (event.target.classList.contains("js-next")){
+
+	if (event.target.classList.contains("js-next")) {
 		for (let i = 0; i < listItems.length; i++) {
-            if (listItems[i].classList.contains('is-selected')) {
-                listItem = listItems[i];
+			if (listItems[i].classList.contains('is-selected')) {
+				listItem = listItems[i];
 				stepIndex = i + 1;
-            }
-        }
+			}
+		}
 		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
 			prevButtons[buttons].disabled = false;
 		}
-		if(stepIndex > listItems.length - 2){
+		if (stepIndex > listItems.length - 2) {
 			for (let buttons = 0; buttons < nextButtons.length; buttons++) {
 				nextButtons[buttons].disabled = true;
 			}
-        }
+		}
 		listItem.classList.remove('is-selected');
 		listItem.nextSibling.classList.add('is-selected');
 		selectEl.value = stepIndex;
 	} else if (event.target.classList.contains("js-prev")) {
 		for (let i = 0; i < listItems.length; i++) {
-            if (listItems[i].classList.contains('is-selected')) {
-                listItem = listItems[i];
-                stepIndex = i - 1;
-            }
-        }
+			if (listItems[i].classList.contains('is-selected')) {
+				listItem = listItems[i];
+				stepIndex = i - 1;
+			}
+		}
 		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
 			nextButtons[buttons].disabled = false;
 		}
-        if(stepIndex === 0){
+		if (stepIndex === 0) {
 			for (let buttons = 0; buttons < prevButtons.length; buttons++) {
 				prevButtons[buttons].disabled = true;
 			}
-        }
+		}
 		listItem.classList.remove('is-selected');
 		listItem.previousSibling.classList.add('is-selected');
 		selectEl.value = stepIndex;
@@ -197,7 +198,7 @@ function handleStudentViewNav(event){
 }
 
 // Used by showSteps function to disabled next/prev button if first or last items are clicked 
-function syncBtnNavigation(listItems, listIndex){
+function syncBtnNavigation(listItems, listIndex) {
 	var listIndex = parseInt(listIndex);
 	var navButtons = document.querySelectorAll('.js-prev, .js-next');
 	var prevButtons = document.querySelectorAll('.js-prev');
@@ -207,11 +208,11 @@ function syncBtnNavigation(listItems, listIndex){
 		navButtons[buttons].disabled = false;
 	}
 
-	if(listIndex === listItems.length - 1){
+	if (listIndex === listItems.length - 1) {
 		for (let buttons = 0; buttons < nextButtons.length; buttons++) {
 			nextButtons[buttons].disabled = true;
 		}
-	} else if(listIndex === 0){
+	} else if (listIndex === 0) {
 		for (let buttons = 0; buttons < prevButtons.length; buttons++) {
 			prevButtons[buttons].disabled = true;
 		}
@@ -236,7 +237,7 @@ var reorderList = {
 	originalPosition: null,
 	currentPosition: null,
 	objTrigger: null,
-	init: function(objNode) {
+	init: function (objNode) {
 		var trigger = objNode.querySelector("button");
 		reorderList.listItems = document.querySelectorAll("#step_list [draggable]");
 		var listLength = reorderList.listItems.length;
@@ -250,7 +251,7 @@ var reorderList = {
 			reorderList.removeListeners(objNode);
 		}
 	},
-	setListeners: function(objNode) {
+	setListeners: function (objNode) {
 		var trigger = objNode.querySelector("button");
 		objNode.onmousedown = reorderList.mouseStart;
 		objNode.parentNode.ondragstart = reorderList.dragStart;
@@ -262,7 +263,7 @@ var reorderList = {
 		objNode.onkeydown = reorderList.keyboardNav;
 		trigger.onfocus = reorderList.focus;
 	},
-	removeListeners: function(objNode) {
+	removeListeners: function (objNode) {
 		var trigger = objNode.querySelector("button");
 		objNode.onmousedown = null;
 		objNode.parentNode.ondragstart = null;
@@ -274,7 +275,7 @@ var reorderList = {
 		objNode.onkeydown = null;
 		trigger.onfocus = null;
 	},
-	keyboardNav: function(objEvent) {
+	keyboardNav: function (objEvent) {
 		var key = objEvent.code;
 		switch (key) {
 			case "Space":
@@ -297,7 +298,7 @@ var reorderList = {
 				break;
 		}
 	},
-	focus: function() {
+	focus: function () {
 		if (!reorderList.objCurrent) {
 			// we only want the focus action and update to happen if there isn't a currently grabbed item
 			// otherwise, this would constantly override our drag-and-drop instructions
@@ -309,7 +310,7 @@ var reorderList = {
 			);
 		}
 	},
-	mouseStart: function(objEvent) {
+	mouseStart: function (objEvent) {
 		reorderList.reset();
 		reorderList.objCurrent = this.parentNode;
 		reorderList.objParent = reorderList.objCurrent.parentNode;
@@ -321,11 +322,11 @@ var reorderList = {
 		dataTransfer.setData("text", "");
 		reorderList.objCurrent.dispatchEvent(new DragEvent("dragstart", { dataTransfer: dataTransfer }));
 	},
-	dragStart: function(objEvent) {
+	dragStart: function (objEvent) {
 		objEvent.dataTransfer.setData("text", "");  // drag and drop fails on moz w/o this
 		reorderList.select();
 	},
-	dragOver: function(objEvent) {
+	dragOver: function (objEvent) {
 		var target;
 		reorderList.currentTarget = objEvent.target.closest(".step-li");
 		reorderList.currentPosition = index(reorderList.currentTarget);
@@ -343,7 +344,7 @@ var reorderList = {
 		}
 		reorderList.update("You have moved the item to position " + target + ".");
 	},
-	dragLeave: function(objEvent) {
+	dragLeave: function (objEvent) {
 		reorderList.currentTarget.classList.remove("is-target");
 		if (index(reorderList.currentTarget) !== 1 && reorderList.lastTarget !== null) {
 			// we need the conditional b/c dragging to the top of the list often triggers
@@ -356,7 +357,7 @@ var reorderList = {
 			reorderList.update("You have moved the item to position 1.");
 		}
 	},
-	dragEnd: function(objEvent) {
+	dragEnd: function (objEvent) {
 		reorderList.objCurrent.setAttribute("aria-grabbed", false);
 		reorderList.objCurrent.setAttribute("aria-selected", false);
 		var num = reorderList.objCurrent.getAttribute("data-num");
@@ -375,7 +376,7 @@ var reorderList = {
 			reorderList.drop();
 		}
 	},
-	dragDrop: function(objEvent) {
+	dragDrop: function (objEvent) {
 		objEvent.preventDefault(); // prevent default action (open as link for some elements)
 		reorderList.currentTarget.classList.remove("is-target", "is-over");
 		reorderList.objCurrent.classList.remove("is-selected");
@@ -395,7 +396,7 @@ var reorderList = {
 		}
 		// ignore; item doesn't move
 	},
-	toggleSelect: function() {
+	toggleSelect: function () {
 		var grabbed = reorderList.objCurrent.getAttribute("aria-grabbed");
 		if (grabbed === "false") {
 			reorderList.select();
@@ -403,7 +404,7 @@ var reorderList = {
 			reorderList.drop();
 		}
 	},
-	select: function() {
+	select: function () {
 		reorderList.listItems = reorderList.objParent.children.length;
 		reorderList.originalPosition = index(reorderList.objCurrent);
 		reorderList.currentPosition = reorderList.originalPosition;
@@ -414,13 +415,13 @@ var reorderList = {
 		reorderList.objTrigger.focus();
 		reorderList.update(
 			"You have lifted an item. It is in position " +
-				reorderList.originalPosition +
-				" of " +
-				reorderList.listItems +
-				" in the list. Use the arrow keys to move, spacebar to drop, and escape key to cancel."
+			reorderList.originalPosition +
+			" of " +
+			reorderList.listItems +
+			" in the list. Use the arrow keys to move, spacebar to drop, and escape key to cancel."
 		);
 	},
-	move: function(key) {
+	move: function (key) {
 		if (
 			reorderList.objCurrent == null ||
 			reorderList.objCurrent.getAttribute("aria-grabbed") === "false"
@@ -453,7 +454,7 @@ var reorderList = {
 			reorderList.objTrigger.focus();
 		}
 	},
-	drop: function(objEvent) {
+	drop: function (objEvent) {
 		if (reorderList.objCurrent) {
 			reorderList.currentPosition = index(reorderList.objCurrent);
 			if (reorderList.currentPosition === reorderList.originalPosition) {
@@ -464,18 +465,18 @@ var reorderList = {
 			} else {
 				reorderList.update(
 					"You have dropped the item. It has moved from position " +
-						reorderList.originalPosition +
-						" to " +
-						reorderList.currentPosition +
-						"."
-                );
+					reorderList.originalPosition +
+					" to " +
+					reorderList.currentPosition +
+					"."
+				);
 			}
 			setTimeout("reorderList.reset()", 350); // this is not my fave thing, but will do in a pinch
 		}
 		showSteps("desmos_edit_container", reorderList.objCurrent);
 		// ignore; no item currently grabbed
 	},
-	cancel: function(objEvent) {
+	cancel: function (objEvent) {
 		if (reorderList.objCurrent) {
 			if (reorderList.originalPosition === reorderList.currentPosition) {
 				// nothing moved!
@@ -494,18 +495,18 @@ var reorderList = {
 			reorderList.objTrigger.focus();
 			reorderList.update(
 				"Movement cancelled. The item has returned to its starting position of " +
-					reorderList.originalPosition +
-					"."
+				reorderList.originalPosition +
+				"."
 			);
 			setTimeout("reorderList.reset()", 350);
 		}
 	},
-	update: function(message) {
+	update: function (message) {
 		var draggableList = document.getElementById("step_list");
 		var liveRegion = document.getElementById(draggableList.dataset.liveregion);
 		liveRegion.innerHTML = message;
 	},
-	reset: function() {
+	reset: function () {
 		if (reorderList.objParent) {
 			reorderList.objParent.removeAttribute("aria-dropeffect");
 		}
@@ -550,7 +551,7 @@ setupDnD();
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
-document.getElementById('js-step-nav').onchange = function() {
+document.getElementById('js-step-nav').onchange = function () {
 	var activeItem = this.value;
 	showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
 };

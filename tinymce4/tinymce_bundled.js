@@ -26833,6 +26833,121 @@
 
 }(window));
 })();
+(function() {
+    tinymce.create('tinymce.plugins.desmos', {
+        /**
+         * Initializes the plugin, this will be executed after the plugin has been created.
+         * This call is done before the editor instance has finished it's initialization so use the onInit event
+         * of the editor instance to intercept that event.
+         *
+         * @param {tinymce.Editor} ed Editor instance that the plugin is initialized in.
+         * @param {string} url Absolute URL to where the plugin is located.
+         */
+        init : function(ed, url) {isnew = true;
+            var isnew = true;
+            var desmosjson = '';
+            var elwidth = 300;
+            var elheight = 200;
+            ed.addCommand('mceDesmos', function(el) {
+                desmosjson = '';
+                if (ed.dom.getAttrib(el,"data-json")!='') {
+                    desmosjson = ed.dom.getAttrib(el, "data-json");
+                }
+                isnew = false;
+                elwidth = parseInt(ed.dom.getStyle(el,"width"));
+                elheight = parseInt(ed.dom.getStyle(el,"height"));
+                // Open window
+                ed.windowManager.open({
+                    title: "Desmos Graph",
+                    file : url + '/desmos.php',
+                    width : 800,
+                    height : 470,
+                    inline : 1
+                }, {
+                    isnew : isnew, // Custom argument
+                    desmosjson : desmosjson,
+                    width : elwidth,
+                    height : elheight
+                });
+            });
+            ed.addCommand('mceDesmosNew', function() {
+                // Open window
+                ed.windowManager.open({
+                    title: "Add New Desmos Graph",
+                    file : url + '/desmos.php',
+                    width : 800,
+                    height : 470,
+                    inline : 1
+                }, {
+                    isnew : isnew, // Custom argument
+                    desmosjson : desmosjson,
+                    width : elwidth,
+                    height : elheight
+                });
+            });
+            ed.addCommand('mceDesmosImport', function() {
+                // Open window
+                ed.windowManager.open({
+                    title: "Import by URL",
+                    file : url + '/desmos_import.php',
+                    width : 600,
+                    height : 130,
+                    inline : 1
+                });
+            });
+            // Add a dropdown that opens one of two windows
+            ed.addButton('desmos', {
+                type: 'menubutton',
+                text: 'Add Desmos',
+                icon: 'desmos',
+                menu: [{
+                    tooltip: "New Desmos Graph",
+                    text: 'New',
+                    stateSelector: 'figure[data-json]',
+                    onclick: function() {
+                        ed.execCommand('mceDesmosNew');
+                    }
+                },
+                {
+                    tooltip: "Import Desmos Graph by URL",
+                    text: 'Import by URL',
+                    onclick: function() {
+                        ed.execCommand('mceDesmosImport');
+                    }
+                }]
+            });
+            //may use setContent for after adding, this should work with a saved desmos
+            ed.on('loadcontent', function (e) {
+                ed.dom.doc.getElementById("tinymce").addEventListener("click", function(e) {
+                    if(e.target && e.target.nodeName == "FIGURE") {
+                        var parentId = e.target.parentNode.getAttribute("data-id");
+                        tinyMCE.get(parentId).focus();
+                        top.tinymce.activeEditor.execCommand('mceDesmos', e.target);
+                    }
+                });
+            });
+        },
+
+        /**
+         * Returns information about the plugin as a name/value array.
+         * The current keys are name, url, author and version.
+         *
+         * @return {Object} Name/value array containing information about the plugin.
+         */
+        getInfo : function() {
+            return  {
+                name: "desmos plugin",
+                url: "http://ohm.lumenlearning.com",
+                author : 'Alena Holligan',
+                infourl : '',
+                version : "1.0"
+            };
+        },
+    });
+
+    // Register plugin
+    tinymce.PluginManager.add('desmos', tinymce.plugins.desmos);
+})();
 !function(){"use strict";var t=tinymce.util.Tools.resolve("tinymce.PluginManager"),c=tinymce.util.Tools.resolve("tinymce.util.Tools"),l=function(t){return t.getParam("noneditable_noneditable_class","mceNonEditable")},u=function(t){return t.getParam("noneditable_editable_class","mceEditable")},f=function(t){var n=t.getParam("noneditable_regexp",[]);return n&&n.constructor===RegExp?[n]:n},s=function(n){return function(t){return-1!==(" "+t.attr("class")+" ").indexOf(n)}},d=function(i,o,c){return function(t){var n=arguments,e=n[n.length-2],r=0<e?o.charAt(e-1):"";if('"'===r)return t;if(">"===r){var a=o.lastIndexOf("<",e);if(-1!==a&&-1!==o.substring(a,e).indexOf('contenteditable="false"'))return t}return'<span class="'+c+'" data-mce-content="'+i.dom.encode(n[0])+'">'+i.dom.encode("string"==typeof n[1]?n[1]:n[0])+"</span>"}},n=function(n){var t,e,r="contenteditable";t=" "+c.trim(u(n))+" ",e=" "+c.trim(l(n))+" ";var a=s(t),i=s(e),o=f(n);n.on("PreInit",function(){0<o.length&&n.on("BeforeSetContent",function(t){!function(t,n,e){var r=n.length,a=e.content;if("raw"!==e.format){for(;r--;)a=a.replace(n[r],d(t,a,l(t)));e.content=a}}(n,o,t)}),n.parser.addAttributeFilter("class",function(t){for(var n,e=t.length;e--;)n=t[e],a(n)?n.attr(r,"true"):i(n)&&n.attr(r,"false")}),n.serializer.addAttributeFilter(r,function(t){for(var n,e=t.length;e--;)n=t[e],(a(n)||i(n))&&(0<o.length&&n.attr("data-mce-content")?(n.name="#text",n.type=3,n.raw=!0,n.value=n.attr("data-mce-content")):n.attr(r,null))})})};t.add("noneditable",function(t){n(t)})}();(function () {
 var lists = (function (domGlobals) {
     'use strict';
@@ -57278,4 +57393,4 @@ var modern = (function (domGlobals) {
 
 }(window));
 })();
-tinymce.each("tinymce,plugins/noneditable/plugin,plugins/lists/plugin,plugins/advlist/plugin,plugins/attach/plugin,plugins/autolink/plugin,plugins/image/plugin,plugins/charmap/plugin,plugins/anchor/plugin,plugins/searchreplace/plugin,plugins/code/plugin,plugins/link/plugin,plugins/textcolor/plugin,plugins/media/plugin,plugins/table/plugin,plugins/paste/plugin,plugins/asciimath/plugin,plugins/asciisvg/plugin,plugins/rollups/plugin,plugins/colorpicker/plugin,plugins/snippet/plugin,themes/modern/theme".split(","),function(f){tinymce.ScriptLoader.markDone(tinyMCE.baseURL+"/"+f+".js");});
+tinymce.each("tinymce,plugins/desmos/plugin,plugins/noneditable/plugin,plugins/lists/plugin,plugins/advlist/plugin,plugins/attach/plugin,plugins/autolink/plugin,plugins/image/plugin,plugins/charmap/plugin,plugins/anchor/plugin,plugins/searchreplace/plugin,plugins/code/plugin,plugins/link/plugin,plugins/textcolor/plugin,plugins/media/plugin,plugins/table/plugin,plugins/paste/plugin,plugins/asciimath/plugin,plugins/asciisvg/plugin,plugins/rollups/plugin,plugins/colorpicker/plugin,plugins/snippet/plugin,themes/modern/theme".split(","),function(f){tinymce.ScriptLoader.markDone(tinyMCE.baseURL+"/"+f+".js");});

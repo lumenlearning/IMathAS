@@ -306,26 +306,24 @@ class DesmosItem extends CourseItem
         }
         //add steps
         foreach (array_keys($steps) as $key) {
-            if (!empty($steps[$key]['title'])) {
-                if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
-                    //update step
-                    DesmosSteps::updateStep(
-                        $steps[$key]['id'],
-                        [
-                            'title' => $steps[$key]['title'],
-                            'text' => $steps[$key]['text']
-                        ]
-                    );
-                } else {
-                    //add step
-                    $steps[$key]['id'] = DesmosSteps::insertStep(
-                        [
-                            'desmosid' => $this->typeid,
-                            'title' => $steps[$key]['title'],
-                            'text' => $steps[$key]['text']
-                        ]
-                    );
-                }
+            if (empty($steps[$key]['desmosid']) && isset($steps[$key]['id']) ) {
+                //update step
+                DesmosSteps::updateStep(
+                    $steps[$key]['id'],
+                    [
+                        'title' => $steps[$key]['title'],
+                        'text' => $steps[$key]['text']
+                    ]
+                );
+            } else {
+                //add step
+                $steps[$key]['id'] = DesmosSteps::insertStep(
+                    [
+                        'desmosid' => $this->typeid,
+                        'title' => $steps[$key]['title'],
+                        'text' => $steps[$key]['text']
+                    ]
+                );
             }
         }
         $this->steps = $steps;
@@ -415,6 +413,37 @@ class DesmosItem extends CourseItem
     }
 
     /**
+     * Set class fields from form data.
+     *
+     * This is used to re-populate forms when jumping between
+     * edit and preview pages in:
+     *   - /course/itemadd.php
+     *   - /desmos/views/preview.php
+     *
+     * @param array $formData Associative array of form data.
+     * @return DesmosItem
+     */
+    public function fromFormData(array $formData): DesmosItem
+    {
+        $this->title = $formData['title'];
+        $this->setName($formData['title']);
+        $this->setSummary($formData['summary']);
+        // Build steps array
+        $steps = [];
+        foreach ($formData['step_title'] as $key => $title) {
+            $steps[$key] = [
+                "title" => $title,
+                "text" => $formData['step_text'][$key],
+                "id" => $formData['step'][$key],
+            ];
+        }
+        $this->setSteps($steps);
+        $this->setStartDate(strtotime($formData['sdate']));
+        $this->setEndDate(strtotime($formData['edate']));
+        return $this;
+    }
+
+    /*
      * Format a date for SQL.
      *
      * @param DateTime $dateTime A DateTime object.

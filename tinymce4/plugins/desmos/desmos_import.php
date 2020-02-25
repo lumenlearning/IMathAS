@@ -10,21 +10,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
 
     <link rel="stylesheet" href="/themes/lumen.css?v=112019" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="/themes/lux-temp.css" />
+    <link rel="stylesheet" type="text/css" href="https://lux.lumenlearning.com/use-lux/1.0.1/lux-components.min.css" />
     <link rel="stylesheet" type="text/css" href="/desmos/desmos-temp.css" />
     <script type="text/javascript" src="js/desmos.js"></script>
 </head>
-<body onload="desmosDialog.init();">
+<body>
 
 <form onsubmit="return false;" action="#" style="margin:10px;" class="desmos">
-    Desmos URL <input type="text" id="import" name="import" value="" onkeyup="importToggle()" placeholder="https://www.desmos.com/calculator/example" />
+    Desmos URL <input type="text" id="import" name="import" value="" placeholder="https://www.desmos.com/calculator/example" />
     <div class="mceActionPanel">
-        <div class="desmos-nav-btns"  style="float: right">
-            <button id="desmos_preview_button" class="button -offset" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
-            <button id="desmos_form_submit_button" class="button -offset" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
+        <div class="desmos-nav-btns u-margin-top-sm"  style="float: right">
+            <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
+            <button id="desmos_form_submit_button" class="button" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
         </div>
     </div>
 </form>
-
+<script type="text/javascript" src="js/desmos_import.js"></script>
 </body>
 </html>
