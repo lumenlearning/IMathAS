@@ -108,13 +108,14 @@ class DesmosItem extends CourseItem
     /**
      * Find desmos_items item by id
      *
-     * @param int $typeid desmos_items.id
+     * @param int $typeid    desmos_items.id
+     * @param int $courseid  null | desmos_item.courseid
      *
      * @return $this|CourseItem
      */
     public function findItem(int $typeid, int $courseid = null)
     {
-        $query = "SELECT * FROM desmos_items WHERE id=:id";
+        $query = "SELECT * FROM desmos_items WHERE id=:typeid";
         if ($courseid != null) {
             $query .= " AND courseid=:courseid";
             $stm = $this->dbh->prepare($query);
@@ -122,7 +123,7 @@ class DesmosItem extends CourseItem
         } else {
             $stm = $this->dbh->prepare($query);
         }
-        $stm->bindValue(":id", $typeid);
+        $stm->bindValue(":typeid", $typeid);
 
         $stm->execute();
         $item = $stm->fetch(PDO::FETCH_ASSOC);
@@ -135,6 +136,31 @@ class DesmosItem extends CourseItem
         $this->setStepOrder();
         $this->findTags();
         return $this;
+    }
+
+    /**
+     * Find desmos_items items by id in ancestors
+     *
+     * @param int $typeid   desmos_items.id
+     * @param int $courseid desmos_item.courseid
+     * @param string $where desmos_item.ancestors
+     *
+     * @return array
+     */
+    public static function findAncestors(int $typeid, int $courseid, string $where = 'start')
+    {
+        $query = "SELECT id,title,ancestors FROM desmos_items WHERE ancestors REGEXP :typeid AND courseid=:courseid";
+        if ($where == 'all') {
+            $typeid = '[[:<:]]' . $typeid . '[[:>:]]';
+        } else {
+            $typeid = '^([0-9]+:)?' . $typeid . '[[:>:]]';
+        }
+        $stm = $GLOBALS['DBH']->prepare($query);
+        $stm->bindValue(":courseid", $courseid);
+        $stm->bindValue(":typeid", $typeid);
+
+        $stm->execute();
+        return $stm->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

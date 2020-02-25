@@ -1343,19 +1343,7 @@ if (
                             //exit;
                         }
                     }
-                }
-                if (!$foundaid) {
-                    if ($_SESSION['place_item_id']) {
-                        $itemObject = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                        $item = new $itemObject();
-
-                        if (!$item->findItemByTitle($aidsourcename, $destcid)) {
-                            reporterror("Error.  DesmosItem ID '{$_SESSION['place_item_id']}' not found.");
-                        }
-                        $aid = $item->typeid;
-                        $typeid = $_SESSION['place_item_id'];
-                        $itemtype = $_SESSION['place_item_type'];
-                    } else {
+                    if (!$foundaid) {
                         //aid is in source course.  Let's look and see if there's an assessment in destination with the same title.
                         //this handles cases where an assessment was linked in from elsewhere and manually copied
 
@@ -1368,6 +1356,80 @@ if (
                         $typeid = $_SESSION['place_aid'];
                         $itemtype = 'Assessment';
                     }
+                }
+                if (isset($_SESSION['place_item_id'])) {
+                    $aidtolookfor = intval($_SESSION['place_item_id']);
+                    //aid is in original source course.  Let's see if we already copied it.
+                    if ($copiedfromcid == $aidsourcecid) {
+                        $ancestor_array = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type']::findAncestors($aidtolookfor, $destcid);
+                        if (count($ancestor_array) == 1) {
+                            $aid = $ancestor_array[0]['id'];
+                            $foundaid = true;
+                        }
+                    }
+                    if (!$foundaid) { //do course ancestor walk-back
+                        //need to look up ancestor depth
+                        $stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
+                        $stm->execute(array($destcid));
+                        $ancestors = explode(',', $stm->fetchColumn(0));
+                        $ciddepth = array_search($aidsourcecid, $ancestors);  //so if we're looking for 23, "20,24,23,26" would give 2 here.
+                        if ($ciddepth !== false) {
+                            array_unshift($ancestors, $destcid);  //add current course to front
+                            $foundsubaid = true;
+                            for ($i = $ciddepth; $i >= 0; $i--) {  //starts one course back from aidsourcecid because of the unshift
+                                $ancestor_array = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type']::findAncestors($aidtolookfor, $destcid);
+                                if (count($ancestor_array) == 1) {
+                                    $aidtolookfor = $ancestor_array[0]['id'];
+                                } else {
+                                    $foundsubaid = false;
+                                    break;
+                                }
+                            }
+                            if ($foundsubaid) {
+                                $aid = $aidtolookfor;
+                                $foundaid = true;
+                            }
+                        }
+                    }
+                    if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
+                        $res = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type']::findAncestors($aidtolookfor, $destcid);
+                        if (count($res) == 1) {  //only one result - we found it
+                            $aid = $res[0]['id'];
+                            $foundaid = true;
+                        }
+                        if (!$foundaid && count($res) > 0) { //multiple results - look for the identical name
+                            foreach ($res as $k => $row) {
+                                $res[$k]['loc'] = strpos($row['ancestors'], $aidtolookfor);
+                                if ($row['title'] == $aidsourcename) {
+                                    $aid = $row['id'];
+                                    $foundaid = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!$foundaid && count($res) > 0) { //no name match. pick the one with the assessment closest to the start
+                            usort($res, function ($a, $b) {
+                                return $a['loc'] - $b['loc'];
+                            });
+                            $aid = $res[0]['id'];
+                            $foundaid = true;
+                        }
+                    }
+                    if (!$foundaid) {
+                        if ($_SESSION['place_item_id']) {
+                            $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                            $item = new $itemObject();
+
+                            if (!$item->findItemByTitle($aidsourcename, $destcid)) {
+                                reporterror("Error.  DesmosItem ID '{$_SESSION['place_item_id']}' not found.");
+                            }
+                            $aid = $item->typeid;
+                            $typeid = $_SESSION['place_item_id'];
+                            $itemtype = $_SESSION['place_item_type'];
+                        }
+                    }
+                }
+                if (!$foundaid) {
                     if (!$aid) {
                         // no assessment with same title - need to copy assessment from destination to source course
                         require_once("../includes/copyiteminc.php");
