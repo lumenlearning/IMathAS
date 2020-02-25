@@ -104,16 +104,3 @@
     </form>
     <?php include 'icons.svg'; ?>
 </div>
-
-<div id="desmos_preview_container" style="display: none;">
-    <div id="desmos_previewmode_buttons">
-        <button id="desmos_return_to_edit_button" class="desmos button" type="button">Back to Edit</button>
-        <span id="desmos_preview_warning">
-            <img id="desmos_preview_warning_image" src="/ohm/img/warning.svg"
-                 onerror="this.src='/ohm/img/warning.png'" alt="Warning">
-            Desmos graph changes in the preview are not saved for students.
-        </span>
-    </div>
-
-    <div id="desmos_preview_content"></div>
-</div>
