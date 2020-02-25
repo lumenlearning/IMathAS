@@ -16,13 +16,12 @@
 </head>
 <body>
 
-<form onsubmit="return false;" action="#" style="margin:10px;" class="desmos">
-    Desmos URL <input type="text" id="import" name="import" value="" placeholder="https://www.desmos.com/calculator/example" />
-    <div class="mceActionPanel">
-        <div class="u-margin-top-sm button-wrapper">
-            <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
-            <button id="desmos_form_submit_button" class="button" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
-        </div>
+<form onsubmit="return false;" action="#" class="desmos lux-form u-margin-xs">
+    <label for="import" class="form-label">Desmos URL</label>
+    <input type="text" id="import" class="form-input form-input--fw" name="import" value="" placeholder="https://www.desmos.com/calculator/example" />
+    <div class="u-margin-top-sm button-wrapper">
+        <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
+        <button id="desmos_form_submit_button" class="button" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
     </div>
 </form>
 <script type="text/javascript" src="js/desmos_import.js"></script>
