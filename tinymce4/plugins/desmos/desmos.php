@@ -14,14 +14,13 @@
     <link rel="stylesheet" type="text/css" href="/desmos/desmos-temp.css" />
     <script type="text/javascript" src="js/desmos.js"></script>
 </head>
-<body onload="desmosDialog.init();">
+<body onload="desmosDialog.init();" class="lux-component">
 
-<form onsubmit="return false;" action="#" style="margin:10px;">
+<form onsubmit="return false;" action="#" class="u-padding-xs">
     <figure id="editdesmos" class="js-desmos desmos-fig" data-json=""></figure>
-        <div class="desmos-nav-btns lux-component"  style="float: right">
-            <button id="desmos_preview_button" class="u-margin-top-sm button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
-            <button id="desmos_form_submit_button" class="u-margin-top-sm button" type="submit" name="submitbtn" value="Submit" style="clear:both" onclick="desmosDialog.insert();">Add</button>
-        </div>
+    <div class="u-margin-top-sm button-wrapper">
+        <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
+        <button id="desmos_form_submit_button" class="button" type="submit" name="submitbtn" value="Submit" style="clear:both" onclick="desmosDialog.insert();">Add</button>
     </div>
 </form>
 

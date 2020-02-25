@@ -113,6 +113,10 @@
 	width: 100%;
 }
 
+#editdesmos + .button-wrapper {
+	text-align: right;
+}
+
 /* Overriding desmos stylesheet to fix button icon alignment issues  */
 #editdesmos [class*="dcg-icon-"] {
 	line-height: 38px;
