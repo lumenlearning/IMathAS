@@ -1469,17 +1469,15 @@ if (
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             $placementtype='assess';
-            $typeid = $aid;
             if (isset($_SESSION['place_item_id'])) {
                 $linkparts = [
                     'itemid',
-                    $_SESSION['place_item_id'],
+                    $aid,
                     $_SESSION['place_item_type']
                 ];
                 $placementtype = $_SESSION['place_item_type'];
-                $typeid = $_SESSION['place_item_id'];
             }
-            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
+            $stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$aid));
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
