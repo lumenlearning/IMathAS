@@ -149,7 +149,7 @@ class DesmosItem extends CourseItem
      */
     public static function findAncestors(int $typeid, int $courseid, string $where = 'start')
     {
-        $query = "SELECT id,title,ancestors FROM desmos_items WHERE ancestors REGEXP :typeid AND courseid=:courseid";
+        $query = "SELECT id,title,itemid_chain as ancestors FROM desmos_items WHERE itemid_chain REGEXP :typeid AND courseid=:courseid";
         if ($where == 'all') {
             $typeid = '[[:<:]]' . $typeid . '[[:>:]]';
         } else {
