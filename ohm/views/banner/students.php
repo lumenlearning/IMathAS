@@ -1,6 +1,7 @@
 <div class="ohm-course-banner">
-    <div class="ohm-course-banner-header">OHM Updates</div>
+    <h2 class="ohm-course-banner-header">OHM Updates</h2>
     <div class="ohm-course-banner-content">
-        <p>Hello, student user!</p>
+        <h3>Hello, student user!</h3>
+        <p>Here is an important announcement!</p>
     </div>
 </div>
