@@ -17,7 +17,7 @@ $curBreadcrumb = $breadcrumbbase
 
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>\n";
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/tablesorter.js\"></script>\n";
-$placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.1/lux-components.min.css\">\n";
+$placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.2/lux-components.min.css\">\n";
 require("../header.php");
 echo '<div class=breadcrumb>', $curBreadcrumb, '</div>';
 echo '<div id="headeradmin" class="pagetitle"><h1>', $pagetitle, '</h1></div>';
