@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="https://lux.lumenlearning.com/use-lux/1.0.1/lux-components.min.css" type="text/css" />
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
 <script type="text/javascript">
     window.onload = ()=> {

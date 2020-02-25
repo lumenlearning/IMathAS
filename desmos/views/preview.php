@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="../themes/lux-temp.css" type="text/css" />
 <link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
 <script type="text/javascript">
     window.onload = ()=> {
