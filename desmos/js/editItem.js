@@ -66,7 +66,7 @@ $(document).ready(function() {
     /*
      * Return to the edit page. OHM will re-populate the form using session data.
      */
-    $("#desmos_return_to_edit_button").click(function() {
+    $("#js-return-to-edit").click(function() {
         let id = Number($.urlParam('id'));
         let idParam = 0 === id ? '' : '&id=' + id;
         let courseId = Number($.urlParam('cid'));
