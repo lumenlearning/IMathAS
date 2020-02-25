@@ -6,7 +6,7 @@
 </div>
 <div class="u-padding-sm ohm-modal-footer">
     <button type="button" class="js-cancel-modal button">Cancel</button>
-    <button type="button" class="js-confirm-delete button u-margin-left-xs">Delete</button>
+    <button type="button" class="js-confirm-delete button">Delete</button>
 </div>
 
 
