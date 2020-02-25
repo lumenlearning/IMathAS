@@ -443,6 +443,7 @@ class DesmosItem extends CourseItem
         $this->setStartDate(strtotime($formData['sdate']));
         $this->setEndDate(strtotime($formData['edate']));
         return $this;
+    }
 
     /*
      * Format a date for SQL.
