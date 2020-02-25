@@ -337,12 +337,6 @@
 /* END DESMOS TEACHER VIEW */
 
 /* DESMOS TEACHER PREVIEW */
-#desmos_preview_container {
-	background-color: #f9fafb;
-	margin: 0;
-	padding: 1em;
-}
-
 #desmos_preview_warning {
 	background-color: #ffffff;
 	border: 2px #facaa6 solid;
