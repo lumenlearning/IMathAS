@@ -337,17 +337,13 @@
 /* END DESMOS TEACHER VIEW */
 
 /* DESMOS TEACHER PREVIEW */
-#desmos_preview_warning {
-	background-color: #ffffff;
+.preview-header {
+	margin-top: 8px;
+}
+.preview-warning {
+	align-items: flex-start;
 	border: 2px #facaa6 solid;
 	border-radius: 5px;
-	margin: 0 0 0 1em;
-	padding: 0.75em 1em 0.75em 0.75em;
-}
-
-#desmos_preview_warning_image {
-	margin-right: 0.5em;
-	vertical-align: middle;
 }
 
 #desmos_preview_content {
@@ -383,11 +379,23 @@
 		display: inline-block;
 		margin: 16px 16px 0 0;
 	}
-	#desmos_preview_warning {
-		display: block;
-		margin: 8px 0 0 0;
+	.preview-warning {
+		display: flex;
+		margin-bottom: 16px;
+		margin-top: 16px;
 	}
 }
+
+@media (min-width: 801px) {
+	.preview-header {
+		display: flex;
+	}
+	.preview-warning {
+		display: inline-flex;
+		margin-left: 16px;	
+	}
+}
+
 
 @media (max-width: 1023px) {
 	.desmos-student-view {
