@@ -30,6 +30,7 @@ if (isset($_GET['tb'])) {
 } else {
     $totb = 'b';
 }
+$returningFromPreview = (isset($_GET['mode']) && 'returning_from_preview' == $_GET['mode']);
 
 $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid, $block, $totb);
@@ -41,6 +42,17 @@ if (isset($_GET['id'])) {
         exit;
     }
 }
+
+if ($returningFromPreview) {
+    // This was stored by /desmos/js/editItem.js.
+    $previewId = $_GET['preview_id'];
+    $serializedData = $_SESSION['tempSerializedPreviewData-' . $previewId];
+    parse_str($serializedData, $desmosFormData);
+
+    $item->fromFormData($desmosFormData);
+    $pagetitle = Sanitize::encodeStringForDisplay($item->name);
+}
+
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 //set some page specific variables and counters
 //if the form has been submitted
@@ -128,8 +140,10 @@ if (isset($typeid)) {
 } else {
     //set defaults
     $item->setAvail(1);
-    $item->setStartDate(time());
-    $item->setEndDate(time() + 7*24*60*60);
+    if (!$returningFromPreview) {
+        $item->setStartDate(time());
+        $item->setEndDate(time() + 7*24*60*60);
+    }
     $altoncal = 0;
     $hidetitle = false;
     $gradeoutcomes = array();
@@ -157,7 +171,7 @@ if ($item->enddate!=2000000000) {
     $edate = tzdate("m/d/Y", time()+7*24*60*60);
     $etime = $deftime; //tzdate("g:i a",time()+7*24*60*60);
 }
-if (!isset($typeid)) {
+if (!isset($typeid) && !$returningFromPreview) {
     $stime = $defstime;
     $etime = $deftime;
 }
