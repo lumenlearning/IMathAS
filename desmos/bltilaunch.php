@@ -1361,7 +1361,8 @@ if (
                     $aidtolookfor = intval($_SESSION['place_item_id']);
                     //aid is in original source course.  Let's see if we already copied it.
                     if ($copiedfromcid == $aidsourcecid) {
-                        $ancestor_array = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type']::findAncestors($aidtolookfor, $destcid);
+                        $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                        $ancestor_array = $itemObject::findAncestors($aidtolookfor, $destcid);
                         if (count($ancestor_array) == 1) {
                             $aid = $ancestor_array[0]['id'];
                             $foundaid = true;
