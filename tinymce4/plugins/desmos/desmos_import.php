@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="/desmos/desmos-temp.css" />
     <script type="text/javascript" src="js/desmos.js"></script>
 </head>
-<body>
+<body class="lux-component">
 
 <form onsubmit="return false;" action="#" class="desmos lux-form u-margin-xs">
     <label for="import" class="form-label">Desmos URL</label>
