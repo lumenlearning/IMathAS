@@ -1,6 +1,6 @@
-<div id="ohm_course_banner">
-    <div id="ohm_course_banner_header">OHM Updates</div>
-    <div id="ohm_course_banner_content">
+<div id="ohm-course-banner">
+    <div id="ohm-course-banner-header">OHM Updates</div>
+    <div id="ohm-course-banner-content">
         <h3>OHM Desmos Interactives are here!</h3>
 
         <p>
