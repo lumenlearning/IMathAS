@@ -19,7 +19,7 @@
 <form onsubmit="return false;" action="#" style="margin:10px;" class="desmos">
     Desmos URL <input type="text" id="import" name="import" value="" placeholder="https://www.desmos.com/calculator/example" />
     <div class="mceActionPanel">
-        <div class="desmos-nav-btns u-margin-top-sm"  style="float: right">
+        <div class="u-margin-top-sm button-wrapper">
             <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
             <button id="desmos_form_submit_button" class="button" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
         </div>
