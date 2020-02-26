@@ -20,11 +20,6 @@
   z-index: 100;
 }
 
-.ohm-modal-header,
-.ohm-modal-body {
-  padding: 8px 16px;
-}
-
 .ohm-modal-content {
   background: #fff;
   width: auto;
@@ -35,6 +30,11 @@
   color: #fff;
 }
 
+.ohm-modal-title {
+  font-size: 14px;
+  font-weight: 400;
+}
+
 .ohm-modal-body {
   height: 160px;
 }
@@ -42,9 +42,4 @@
 .ohm-modal-footer {
   display: flex;
   justify-content: flex-end;
-  padding: 16px; 
-}
-
-.ohm-modal-footer button + button {
-  margin-left: 8px;
 }
