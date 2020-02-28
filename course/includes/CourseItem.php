@@ -177,6 +177,7 @@ abstract class CourseItem
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
             $this->track('copy', $typeid);
+            $this->setItemOrder();
         }
         return $this;
     }
