@@ -174,11 +174,9 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
+        if ($sessiondata['ltiitemtype']==38) { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $itemtype = $sessiondata['ltiitemtype'];
-            $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
-            $item = new $itemObject();
+            $item = new Desmos\Models\DesmosItem();
             if (!$item->findItem($itemid)) {
                 $diaginfo = "(Debug info: 32-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
@@ -1799,8 +1797,8 @@ if (
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
     if ($linkparts[0]=='itemid') {
-        $sessiondata['ltiitemtype']=$linkparts[2];
-        $sessiondata['ltiitemid'] = $linkparts[1];
+        $sessiondata['ltiitemid'] = intval($linkparts[1]);
+        $sessiondata['ltiitemtype'] = 38;
     } else
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
@@ -2011,11 +2009,9 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($sessiondata['ltiitemtype']=='DesmosItem') { //is item
+        if ($sessiondata['ltiitemtype']==38) { //is item
             $itemid = $sessiondata['ltiitemid'];
-            $itemtype = $sessiondata['ltiitemtype'];
-            $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
-            $item = new $itemObject();
+            $item = new Desmos\Models\DesmosItem();
             if (!$item->findItem($itemid)) {
                 $diaginfo = "(Debug info: 32-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
@@ -3191,8 +3187,8 @@ if (
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
     if ($keyparts[0]=='itemid') { //is cid
-        $sessiondata['ltiitemid'] = $keyparts[1];
-        $sessiondata['ltiitemtype'] = $keyparts[2];
+        $sessiondata['ltiitemid'] = intval($keyparts[1]);
+        $sessiondata['ltiitemtype'] = 38;
     } else
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################

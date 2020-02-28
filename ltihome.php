@@ -23,9 +23,11 @@ if ($sessiondata['ltiitemtype']==38) {
 	$hascourse = true;
 	$hasplacement = true;
 	$itemid = $sessiondata['ltiitemid'];
-	$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-	$cid = $course_item['courseid'];
-	$placementtype = $course_item['itemtype'];
+	$placementtype = 'DesmosItem';
+	$itemObject = str_replace('Item','', $placementtype) . "\\Models\\" . $placementtype;
+	$item = new $itemObject();
+	$item->findItem($itemid);
+	$cid = $item->courseid;
 	$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 	$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
 	if ($stm->rowCount()==0) {
