@@ -562,7 +562,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	if ($role == 'teacher') {
 		echo "<p><a href=\"course/itemview.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Preview Item</a> | ";
 		echo "<a href=\"course/itemadd.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Modify Item</a>";
-		if ($myright == 100) {
+		if ($myrights == 100) {
 			echo " | <a href=\"course/contentstats.php?cid=" . $item->courseid . "&type=E&id=" . $item->typeid . "\">View Stats</a>";
 		}
 		echo "</p>";
