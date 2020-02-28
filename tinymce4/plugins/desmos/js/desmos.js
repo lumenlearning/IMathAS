@@ -9,10 +9,10 @@ var desmosDialog = {
         var f = document.forms[0];
 
         // Get the selected contents as text and place it in the input
-        this.width = top.tinymce.activeEditor.windowManager.getParams().width;
-        this.height = top.tinymce.activeEditor.windowManager.getParams().height;
-        this.isnew = top.tinymce.activeEditor.windowManager.getParams().isnew;
-        this.desmosjson = top.tinymce.activeEditor.windowManager.getParams().desmosjson;
+        this.width = parent.tinymce.activeEditor.windowManager.getParams().width;
+        this.height = parent.tinymce.activeEditor.windowManager.getParams().height;
+        this.isnew = parent.tinymce.activeEditor.windowManager.getParams().isnew;
+        this.desmosjson = parent.tinymce.activeEditor.windowManager.getParams().desmosjson;
         document.getElementById("editdesmos").setAttribute("data-json",this.desmosjson);
         this.loadDesmos();
     },
@@ -24,12 +24,12 @@ var desmosDialog = {
         if (this.isnew) {
             this.addDesmos(this.desmosjson);
         } else {
-            var ed = top.tinymce.activeEditor;
+            var ed = parent.tinymce.activeEditor;
             el = ed.selection.getNode();
             ed.dom.setAttrib(el,"data-json",this.desmosjson);
 
         }
-        top.tinymce.activeEditor.windowManager.close();
+        parent.tinymce.activeEditor.windowManager.close();
     },
 
     import : function() {
@@ -49,12 +49,12 @@ var desmosDialog = {
         });
         if (theResponse != false) {
             this.addDesmos(theResponse);
-            top.tinymce.activeEditor.windowManager.close();
+            parent.tinymce.activeEditor.windowManager.close();
         }
     },
 
     addDesmos : function(json) {
-        var ed = top.tinymce.activeEditor;
+        var ed = parent.tinymce.activeEditor;
         ed.execCommand(
             'mceInsertContent',
             false,
@@ -63,7 +63,7 @@ var desmosDialog = {
         elt = ed.dom.doc.getElementsByClassName("js-desmos");
         if (elt.length>0) {
             for (i = 0; i < elt.length; i++) {
-                elt[i].setAttribute("onClick", "top.tinymce.activeEditor.execCommand('mceDesmos')");
+                elt[i].setAttribute("onClick", "parent.tinymce.activeEditor.execCommand('mceDesmos')");
             }
         }
     },
