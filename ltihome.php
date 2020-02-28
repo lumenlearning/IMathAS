@@ -28,6 +28,7 @@ if ($sessiondata['ltiitemtype']==38) {
 	$item = new $itemObject();
 	$item->findItem($itemid);
 	$cid = $item->courseid;
+	$itemtype = $item->itemtype;
 	$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 	$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
 	if ($stm->rowCount()==0) {
@@ -415,11 +416,11 @@ if ($hasplacement && $placementtype=='course') {
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
-if ($hasplacement && $placementtype==$course_item['itemtype']) {
+if ($hasplacement && $placementtype==$itemtype) {
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-		."?type=".str_replace('Item', '', $course_item['itemtype'])
-		."&cid=".$course_item['courseid']
-		."&id=".$course_item['typeid']
+		."?type=".str_replace('Item', '', $itemtype)
+		."&cid=".$cid
+		."&id=".$typeid
 		."&r=" .Sanitize::randomQueryStringParam()
 	);
 }
