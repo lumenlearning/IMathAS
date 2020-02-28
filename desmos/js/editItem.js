@@ -41,18 +41,6 @@ $(document).ready(function() {
         $("#desmos_preview_form").submit();
     });
 
-    /*
-     * Return to the edit page. OHM will re-populate the form using session data.
-     */
-    $("#js-return-to-edit").click(function() {
-        let id = Number($.urlParam('id'));
-        let idParam = 0 === id ? '' : '&id=' + id;
-        let courseId = Number($.urlParam('cid'));
-        let previewId = $.urlParam('preview_id');
-        $(location).attr('href', '/course/itemadd.php?mode=returning_from_preview&cid='
-          + courseId + '&type=desmos' + idParam + '&preview_id=' + previewId);
-    });
-
     $("#desmos_form_submit_button").click(function(e) {
         formIsSubmitting = true;
     });
