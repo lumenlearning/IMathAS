@@ -29,38 +29,16 @@ $(document).ready(function() {
     };
 
     /*
-     * Serialize the form on the edit page, save in the user's PHP session,
-     * and redirect to the preview page.
+     * Serialize the form on the edit page, update the form hidden input with
+     * the serialized data, and submit the preview form.
      */
     $("#desmos_preview_button").click(function() {
         $("#desmos_preview_button").html('Loading preview...');
-        let formData = $("#desmos_item").serialize();
 
-        let courseId = Number($.urlParam('cid'));
-        // Allow multiple preview tabs
-        let previewId = $.urlParam('preview_id');
-        if (0 === previewId) previewId = Date.now();
-
-        $.ajax({
-            type: "POST",
-            url: "/course/itempreview.php?mode=store_temp_preview_data&preview_id="
-              + previewId + '&cid=' + cid,
-            data: {
-                tempSerializedPreviewData: formData,
-            },
-            success: function(data) {
-                enteringPreviewMode = true;
-                let id = Number($.urlParam('id'));
-
-                $(location).attr('href', '/course/itempreview.php?cid='
-                    + courseId + '&type=desmos&id=' + id + '&preview_id=' + previewId);
-            },
-            error: function(data) {
-                console.log("Failed to temporarily store serialized form data for Desmos interactive.");
-                console.log(data.responseText);
-                $("#desmos_preview_button").html('Preview');
-            }
-        });
+        let formData = btoa( $("#desmos_item").serialize() );
+        $("#desmos_edit_form_data").val(formData);
+        enteringPreviewMode = true;
+        $("#desmos_preview_form").submit();
     });
 
     /*

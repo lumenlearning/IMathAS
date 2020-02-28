@@ -98,9 +98,16 @@
         </div>
         <div id="desmos_save_buttons" class="u-margin-top-sm">
             <button id="desmos_form_submit_button" class="button button--primary" type="submit" name="submitbtn" value="Submit">Save</button>
-            <button id="desmos_preview_button" class="desmos button" type="button">Preview</button>
+            </form>
+            <?php
+            $previewUrl = sprintf('%s/course/itempreview.php?cid=%d&type=%s&id=%d',
+                $basesiteurl, $cid, $type, intval($_GET['id']));
+            ?>
+            <form id="desmos_preview_form" method="POST" action="<?php echo $previewUrl; ?>">
+                <input id="desmos_edit_form_data" type="hidden" name="desmos_form_data"/>
+                <button id="desmos_preview_button" class="desmos button" type="button">Preview</button>
+            </form>
             <span id="desmos_save_status"></span>
         </div>
-    </form>
     <?php include 'icons.svg'; ?>
 </div>

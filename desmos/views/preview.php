@@ -9,9 +9,8 @@ if ($shownav) {
     echo '<div class="breadcrumb">'.$curBreadcrumb.'</div>';
 }
 
-// This was stored by /desmos/js/editItem.js.
-$previewId = $_GET['preview_id'];
-$serializedData = $_SESSION['tempSerializedPreviewData-' . $previewId];
+// De-serialize Desmos edit form data.
+$serializedData = base64_decode($_POST['desmos_form_data']);
 parse_str($serializedData, $desmosFormData);
 
 $item = new \Desmos\Models\DesmosItem();
