@@ -913,7 +913,6 @@ if (
                 }
                 $aidsourcecid = $item->courseid;
                 $aidsourcename = $item->title;
-                $aid = $item->typeid;
             } else
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
