@@ -215,15 +215,20 @@ $page_formActionTag = "itemadd.php?" . \Sanitize::generateQueryStringFromMap(
     $page_actionArray
 );
 
-$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
-    .\Sanitize::encodeStringForDisplay($coursename)."</a> ";
 if (isset($_GET['id'])) {  //already have id; update
-    $curBreadcrumb .= "&gt; Modify " . $item->itemname . "\n";
     $pagetitle = "Modify " . $item->itemname;
 } else {
-    $curBreadcrumb .= "&gt; Add " . $item->itemname . "\n";
     $pagetitle = "Add " . $item->itemname;
 }
+$curBreadcrumb = $breadcrumbbase;
+if (!isset($sessiondata['ltiitemtype'])) {
+    $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
+        . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
+}
+if ($curBreadcrumb != '') {
+    $curBreadcrumb .= $pagetitle;
+}
+
 /******* begin html output ********/
 // Use TinyMCE for Desmos items.
 $useeditor = 'noinit';

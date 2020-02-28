@@ -61,9 +61,14 @@ $item = new $itemObject($cid);
 $now = time();
 
 $pagetitle = $item->name;
-$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
-    . Sanitize::encodeStringForDisplay($coursename)."</a>"
-    . " &gt; " . $item->itemname;
+$curBreadcrumb = $breadcrumbbase;
+if (!isset($sessiondata['ltiitemtype'])) {
+    $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
+        . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
+}
+if ($curBreadcrumb != '') {
+    $curBreadcrumb .= $pagetitle;
+}
 
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/
