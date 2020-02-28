@@ -1376,7 +1376,8 @@ if (
                             array_unshift($ancestors, $destcid);  //add current course to front
                             $foundsubaid = true;
                             for ($i = $ciddepth; $i >= 0; $i--) {  //starts one course back from aidsourcecid because of the unshift
-                                $ancestor_array = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type']::findAncestors($aidtolookfor, $destcid);
+                                $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                                $ancestor_array = $itemObject::findAncestors($aidtolookfor, $destcid);
                                 if (count($ancestor_array) == 1) {
                                     $aidtolookfor = $ancestor_array[0]['id'];
                                 } else {
@@ -1391,7 +1392,8 @@ if (
                         }
                     }
                     if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
-                        $res = str_replace('Item','', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type']::findAncestors($aidtolookfor, $destcid);
+                        $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                        $res = $itemObject::findAncestors($aidtolookfor, $destcid);
                         if (count($res) == 1) {  //only one result - we found it
                             $aid = $res[0]['id'];
                             $foundaid = true;
