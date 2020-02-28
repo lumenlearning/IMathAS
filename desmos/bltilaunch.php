@@ -1443,6 +1443,22 @@ if (
                     if (!$aid) {
                         // no assessment with same title - need to copy assessment from destination to source course
                         require_once("../includes/copyiteminc.php");
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        if ($itemtype == 'DesmosItem') {
+                            $cid = $destcid;
+                            $item = new \Desmos\Models\DesmosItem($cid);
+                            $item->copyItem($typeid);
+                            $aid = $item->typeid;
+                        } else {
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
                         $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
                         $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$typeid));
                         if ($stm->rowCount()==0) {
@@ -1465,6 +1481,7 @@ if (
                         $stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
                         $stm->execute(array(':itemorder'=>$items, ':id'=>$cid));
                         //echo "here 8: $aid";
+                        }
                     }
                 }
             }
