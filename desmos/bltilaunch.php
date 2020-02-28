@@ -1355,6 +1355,11 @@ if (
                         $itemtype = 'Assessment';
                     }
                 }
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
                 if (isset($_SESSION['place_item_id'])) {
                     $aidtolookfor = intval($_SESSION['place_item_id']);
                     //aid is in original source course.  Let's see if we already copied it.
@@ -1421,15 +1426,19 @@ if (
                             $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
                             $item = new $itemObject();
 
-                            if (!$item->findItemByTitle($aidsourcename, $destcid)) {
-                                reporterror("Error.  DesmosItem ID '{$_SESSION['place_item_id']}' not found.");
+                            if ($item->findItemByTitle($aidsourcename, $destcid)) {
+                                $aid = $item->typeid;
                             }
-                            $aid = $item->typeid;
                             $typeid = $_SESSION['place_item_id'];
                             $itemtype = $_SESSION['place_item_type'];
                         }
                     }
                 }
+                // #### End OHM-specific code #####################################################
+                // #### End OHM-specific code #####################################################
+                // #### End OHM-specific code #####################################################
+                // #### End OHM-specific code #####################################################
+                // #### End OHM-specific code #####################################################
                 if (!$foundaid) {
                     if (!$aid) {
                         // no assessment with same title - need to copy assessment from destination to source course
