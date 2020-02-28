@@ -560,7 +560,8 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	}
 	echo '</p>';
 	if ($role == 'teacher') {
-		echo "<p><a href=\"course/itemadd.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Modify Item</a></p>";
+		echo "<p><a href=\"course/itemview.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Preview Iten</a> | ";
+		echo "<a href=\"course/itemadd.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Modify Item</a></p>";
 		if ($sessiondata['ltiitemtype']==-1) {
 			echo '<p><a href="ltihome.php?chgplacement=true">Change placement</a></p>';
 		}
