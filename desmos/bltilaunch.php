@@ -1450,7 +1450,7 @@ if (
                         if ($itemtype == 'DesmosItem') {
                             $cid = $destcid;
                             $item = new \Desmos\Models\DesmosItem($cid);
-                            $item->copyItem($typeid);
+                            $item->copyItem($typeid, '');
                             $aid = $item->typeid;
                         } else {
                         // #### End OHM-specific code #####################################################
