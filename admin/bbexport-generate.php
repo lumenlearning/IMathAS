@@ -262,7 +262,7 @@ function getorg($it,$parent,&$res,$ind, $parentid) {
 
 
                 $extended = '<ENTRY key="customParameters"/>';
-                $extended .= '<ENTRY key="alternateUrl">http://'.Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php?custom_item_id='.$iteminfo[$item][1].'&amp;custom_item_type='.$iteminfo[$item][0].'</ENTRY>';
+                $extended .= '<ENTRY key="alternateUrl">http://'.Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'&amp;custom_item_type='.$courseItem->itemtype.'</ENTRY>';
                 $extended .= '<ENTRY key="vendorInfo">name='.$installname.'&amp;code=IMathAS</ENTRY>';
 
                 createbbitem($resid, $parentid, 'basicitem', $courseItem->name, array(
@@ -272,7 +272,7 @@ function getorg($it,$parent,&$res,$ind, $parentid) {
                     '{{created}}' => $bbnow,
                     '{{avail}}' => $courseItem->avail==0?'false':'true',
                     '{{newwindow}}' => "false",
-                    '{{launchurl}}' => $urlmode.Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'&amp;custom_item_type='.$iteminfo[$item][0],
+                    '{{launchurl}}' => $urlmode.Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'&amp;custom_item_type='.$courseItem->itemtype,
                     '{{extendeddata}}' => $extended
                 ), 'lti', $res);
 

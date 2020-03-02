@@ -178,7 +178,7 @@ if (
             $itemid = $sessiondata['ltiitemid'];
             $item = new Desmos\Models\DesmosItem();
             if (!$item->findItem($itemid)) {
-                $diaginfo = "(Debug info: 32-".$itemid.")";
+                $diaginfo = "(Debug info: 30-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
@@ -908,7 +908,7 @@ if (
                 $item = new $itemObject();
 
                 if (!$item->findItem($_SESSION['place_item_id'])) {
-                    $diaginfo = "(Debug info: 32-".$_SESSION['place_item_id'].")";
+                    $diaginfo = "(Debug info: 31-".$_SESSION['place_item_id'].")";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
                 $aidsourcecid = $item->courseid;
@@ -1593,7 +1593,7 @@ if (
         $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
         $item = new $itemObject();
         if (!$item->findItem($itemid)) {
-            $diaginfo = "(Debug info: 34-$itemid)";
+            $diaginfo = "(Debug info: 32-$itemid)";
             reporterror("This item does not appear to exist anymore. $diaginfo");
         }
         $cid = $item->courseid;
@@ -1947,7 +1947,7 @@ if (
             $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
             if (!$item->findItem($itemid)) {
-                $diaginfo = "(Debug info: 35-".$item->itemid.")";
+                $diaginfo = "(Debug info: 33-".$item->itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
@@ -2040,7 +2040,7 @@ if (
             $itemid = $sessiondata['ltiitemid'];
             $item = new Desmos\Models\DesmosItem();
             if (!$item->findItem($itemid)) {
-                $diaginfo = "(Debug info: 32-".$itemid.")";
+                $diaginfo = "(Debug info: 34-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
             if ($sessiondata['ltirole'] == 'learner') {
@@ -2470,7 +2470,7 @@ if (
                 $itemObject = str_replace('Item','', $place_item_type) . "\\Models\\" . $place_item_type;
                 $item = new $itemObject();
                 if (!$item->findItem($place_item_id)) {
-                    $diaginfo = "(Debug info: 37-$place_item_id)";
+                    $diaginfo = "(Debug info: 35-$place_item_id)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
                 $sourcecid = $item->courseid;
@@ -2524,7 +2524,7 @@ if (
             $itemObject = str_replace('Item','', $keyparts[2]) . "\\Models\\" . $keyparts[2];
             $item = new $itemObject();
             if (!$item->findItem($keyparts[1])) {
-                $diaginfo = "(Debug info: 37b-".$keyparts[1].")";
+                $diaginfo = "(Debug info: 36-".$keyparts[1].")";
                 reporterror("This assignment does not appear to exist anymore. $diaginfo");
 
             }
@@ -2561,7 +2561,7 @@ if (
                 $keytype = 'cc-g';
                 $course_item = \Course\Includes\CourseItem::findCourseItem($place_item_id);
                 if (empty($course_item)) {
-                    $diaginfo = "(Debug info: 38-$place_item_id)";
+                    $diaginfo = "(Debug info: 37-$place_item_id)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
                 $sourcecid = $course_item['courseid'];
@@ -2814,7 +2814,7 @@ if (
                 $item = new $itemObject();
 
                 if (!$item->findItem($itemid, $destcid)) {
-                    $diaginfo = "(Debug info: 39-$itemid)";
+                    $diaginfo = "(Debug info: 38-$itemid)";
                     reporterror("This item does not appear to exist anymore. $diaginfo");
                 }
 
@@ -3017,7 +3017,7 @@ if (
         $itemid = intval($keyparts[1]);
         $course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
         if (empty($course_item)) {
-            $diaginfo = "(Debug info: 301-$placeaid)";
+            $diaginfo = "(Debug info: 39-$placeaid)";
             reporterror("This item does not appear to exist anymore. $diaginfo");
         }
         $cid = $course_item['courseid'];
@@ -3342,7 +3342,7 @@ if (
             $itemObject = str_replace('Item','', $itemtype) . "\\Models\\" . $itemtype;
             $item = new $itemObject();
             if (!$item->findItem($itemid)) {
-                $diaginfo = "(Debug info: 35-".$item->itemid.")";
+                $diaginfo = "(Debug info: 301-".$item->itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
