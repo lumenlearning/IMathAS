@@ -220,7 +220,7 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     $canvout .= '<workflow_state>'.($courseItem->avail==0?'unpublished':'active').'</workflow_state>'."\n";
                     $canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>'."\n";
                     $canvout .= '<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
-                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->itemid.'&amp;custom_item_type='.$courseItem->itemtype.'</url>';
+                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->typeid.'&amp;custom_item_type='.$courseItem->itemtype.'</url>';
                     $canvout .= "<position>$ccnt</position> <indent>".max($mod_depth-1,0)."</indent>\n";
                     $canvout .= "</item>";
                     $ccnt++;
@@ -230,11 +230,11 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
                     fwrite($fp,'<blti:title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</blti:title>');
                     fwrite($fp,'<blti:description>'.htmlentities(html_entity_decode($courseItem->summary),ENT_XML1,'UTF-8',false).'</blti:description>');
                     if ($linktype=='url') {
-                        $urladd = '?custom_item_id='.$courseItem->itemid.'&amp;custom_item_type='.$courseItem->itemtype;
+                        $urladd = '?custom_item_id='.$courseItem->typeid.'&amp;custom_item_type='.$courseItem->itemtype;
                     } else {
                         fwrite(
                             $fp,
-                            '<blti:custom><lticm:property name="custom_item_id">' . $courseItem->itemid
+                            '<blti:custom><lticm:property name="custom_item_id">' . $courseItem->typeid
                             . '</lticm:property><lticm:property name="custom_item_type">' . $courseItem->itemtype
                             . '</lticm:property></blti:custom>'
                         );
