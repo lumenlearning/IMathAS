@@ -107,7 +107,7 @@
             ?>
             <form id="desmos_preview_form" method="POST" action="<?php echo $previewUrl; ?>">
                 <input id="desmos_edit_form_data" type="hidden" name="desmos_form_data"/>
-                <button id="desmos_preview_button" class="desmos button" type="button">Preview</button>
+                <button id="desmos_preview_button" class="u-margin-left-xs button" type="button">Preview</button>
             </form>
             <span id="desmos_save_status"></span>
         </div>
