@@ -126,14 +126,6 @@
 	line-height: 38px;
 }
 
-#desmos_preview_button {
-	margin-left: 0.8em;
-}
-
-div#desmos_save_buttons *{
-	display: inline;
-}
-
 .desmos-nav-btns {
 	margin-top: 16px;
 }
