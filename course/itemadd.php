@@ -44,9 +44,7 @@ if (isset($_GET['id'])) {
 }
 
 if ($returningFromPreview) {
-    // This was stored by /desmos/js/editItem.js.
-    $previewId = $_GET['preview_id'];
-    $serializedData = $_SESSION['tempSerializedPreviewData-' . $previewId];
+    $serializedData = $_POST['desmos_form_data'];
     parse_str($serializedData, $desmosFormData);
 
     $item->fromFormData($desmosFormData);
