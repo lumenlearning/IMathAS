@@ -12,7 +12,7 @@
           <div>
             <icons name="lock" size="small"/>
           </div>
-          <password-entry v-model="password"/>
+          <password-entry v-model="password" @onenter="startAssess"/>
         </div>
         <div class="flexrow" v-if="aInfo.isgroup > 0">
           <div>
@@ -176,19 +176,29 @@ export default {
   },
   methods: {
     startAssess () {
+      if (!this.okToLaunch) { return; }
       let timelimit = this.aInfo.timelimit;
       if (this.aInfo.has_password) {
         // hacky fix for when the password is entered programatically
-        let v = document.getElementById('assmpass');
-        if (v && v.value != this.password) {
+        let v = document.getElementById('password');
+        if (v && v.value !== this.password) {
           this.password = v.value;
         }
       }
-      if (timelimit === 0 || confirm(this.$t('launch.timewarning'))) {
-        let pwval = this.password;
-        this.password = '';
-        actions.startAssess(false, pwval, this.newGroupMembers);
+      if (timelimit === 0) {
+        this.reallyStartAssess();
+      } else {
+        store.confirmObj = {
+          body: 'launch.timewarning',
+          ok: 'launch.start_assess',
+          action: () => this.reallyStartAssess()
+        };
       }
+    },
+    reallyStartAssess () {
+      let pwval = this.password;
+      this.password = '';
+      actions.startAssess(false, pwval, this.newGroupMembers);
     },
     endAssess () {
       actions.endAssess();

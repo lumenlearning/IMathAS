@@ -212,7 +212,7 @@ switch($_GET['action']) {
 			echo 'value="'.Sanitize::encodeStringForDisplay($line['LastName']).'"';
 		}
 		echo "><BR class=form>\n";
-		echo "<span class=form>Email:</span> <input class=form type=text size=40 name=email ";
+		echo "<span class=form>Email:</span> <input class=form type=email size=40 name=email ";
 		if ($_GET['action'] != "newadmin") {
 			echo 'value="'.Sanitize::encodeStringForDisplay($line['email']).'"';
 		}
@@ -711,7 +711,7 @@ switch($_GET['action']) {
 			echo '<span class=formright><input type=checkbox name="copystickyposts" id="copystickyposts" value="1" checked/>';
 			echo '</span><br class=form>';
 			if ($sourceUIver < 2) {
-				echo '<span class=form>'._('Upgrade assessment version (Beta - use with caution)').'</span>';
+				echo '<span class=form>'._('Upgrade assessment version').'</span>';
 				echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
 				echo _('The source course is using an older format of assessments. Select this option to set your new course to use the new version of assessments, and convert copied assessments to the new format. You will want to review the settings after the copy.');
 				echo '</label></span><br class=form>';
@@ -871,7 +871,7 @@ switch($_GET['action']) {
 		if ($_GET['action']=='addcourse' && $ctc == 0) {
 			echo '<span class=form>'._('Use new assessment version').'</span>';
 			echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
-			echo _('Select this option to set your new course to use the new version of assessments. This feature is still in Beta - use with caution.');
+			echo _('Select this option to set your new course to use the new version of assessments.');
 			echo '</label></span><br class=form>';
 		}
 		if (!isset($CFG['CPS']['deflatepass']) || $CFG['CPS']['deflatepass'][1]==1) {

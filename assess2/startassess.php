@@ -42,7 +42,7 @@ $now = time();
 
 // load settings including question info
 $assess_info = new AssessInfo($DBH, $aid, $cid, 'all');
-$assess_info->loadException($uid, $isstudent, $studentinfo['latepasses'] , $latepasshrs, $courseenddate);
+$assess_info->loadException($uid, $isstudent);
 if ($isstudent) {
   $assess_info->applyTimelimitMultiplier($studentinfo['timelimitmult']);
 }
@@ -253,9 +253,8 @@ $assess_info->processIntro();
 $include_from_assess_info = array(
   'available', 'startdate', 'enddate', 'original_enddate', 'submitby',
   'extended_with', 'timelimit', 'timelimit_type', 'allowed_attempts',
-  'latepasses_avail', 'latepass_extendto', 'showscores', 'intro',
-  'interquestion_text', 'resources', 'category_urls', 'help_features',
-  'points_possible', 'showcat'
+  'showscores', 'intro', 'interquestion_text', 'resources', 'category_urls',
+  'help_features', 'points_possible', 'showcat', 'enddate_in'
 );
 if ($in_practice) {
   array_push($include_from_assess_info, 'displaymethod', 'showscores',
@@ -277,6 +276,8 @@ $assessInfoOut['show_results'] = !$assess_info->getSetting('istutorial');
 $assessInfoOut['has_active_attempt'] = $assess_record->hasActiveAttempt();
 //get time limit expiration of current attempt, if appropriate
 if ($assessInfoOut['has_active_attempt'] && $assessInfoOut['timelimit'] > 0) {
+  // These values are adjusted for timelimit multiplier, but are not limited
+  // by the due date
   $assessInfoOut['timelimit_expiresin'] = $assess_record->getTimeLimitExpires() - $now;
   $assessInfoOut['timelimit_gracein'] = max($assess_record->getTimeLimitGrace() - $now, 0);
 }
@@ -325,7 +326,7 @@ if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0) {
 
 // grab question settings data
 $showscores = $assess_info->showScoresDuring();
-$generate_html = ($assess_info->getSetting('displaymethod') == 'full');
+$generate_html = ($assess_info->getSetting('displaymethod') == 'full' || $_POST['in_print'] == 1);
 $assessInfoOut['questions'] = $assess_record->getAllQuestionObjects($showscores, $generate_html, $generate_html);
 
 // if practice, add that
