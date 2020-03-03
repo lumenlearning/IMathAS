@@ -105,7 +105,7 @@
             $previewUrl = sprintf('%s/course/itempreview.php?cid=%d&type=%s&id=%d%s%s',
                 $basesiteurl, $cid, $type, $typeid, $block, $tb);
             ?>
-            <form id="desmos_preview_form" method="POST" action="<?php echo $previewUrl; ?>">
+            <form id="desmos_preview_form" method="POST" action="<?php echo $previewUrl; ?>" class="u-inline-block">
                 <input id="desmos_edit_form_data" type="hidden" name="desmos_form_data"/>
                 <button id="desmos_preview_button" class="u-margin-left-xs button" type="button">Preview</button>
             </form>
