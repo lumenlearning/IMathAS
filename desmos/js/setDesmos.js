@@ -545,13 +545,15 @@ function setupDnD() {
 	}
 }
 
-setupDnD();
+if (document.getElementById("desmos_edit_container")) {
+	setupDnD(); // Drag and drop is only active for teacher view
+}
 
 // $('.js-step-list li').on("keydown", syncNavButtons);
 $(".js-add").on("click", addStep);
 $(".js-step-list").on("click", ".js-delete", confirmDelete);
 $('.js-desmos-nav').on("click", "button", handleStudentViewNav);
-if (document.getElementById('desmos_view_container')) {
+if (document.querySelector('#desmos_view_container #step_list')) {
 	document.getElementById('js-step-nav').onchange = function () {
 		var activeItem = this.value;
 		showSteps('desmos_view_container', document.getElementById("step_list").children[activeItem]);
