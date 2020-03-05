@@ -969,6 +969,30 @@ if (
                         $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
                         require("../header.php");
 
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        // #### Start OHM-specific code #####################################################
+                        if ($_SESSION['place_item_id']) {
+                            $query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
+                            $query .= "AND imt.userid=:userid JOIN desmos_items AS ia ON ic.id=ia.courseid ";
+                            $query .= "WHERE ic.available<4 AND ic.ancestors REGEXP :cregex AND ia.itemid_chain REGEXP :aregex ORDER BY ic.name";
+                            $stm = $DBH->prepare($query);
+                            $stm->execute(array(
+                                ':userid' => $userid,
+                                ':cregex' => '[[:<:]]' . $aidsourcecid . '[[:>:]]',
+                                ':aregex' => '[[:<:]]' . $_SESSION['place_item_id'] . '[[:>:]]'));
+                            $othercourses = array();
+                            while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+                                $othercourses[$row[0]] = $row[1];
+                            }
+                        }
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
+                        // #### End OHM-specific code #####################################################
                         if ($_SESSION['place_aid']) {
                             $query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
                             $query .= "AND imt.userid=:userid JOIN imas_assessments AS ia ON ic.id=ia.courseid ";
