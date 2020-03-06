@@ -177,6 +177,7 @@ abstract class CourseItem
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
             $this->track('copy', $typeid);
+            $this->setItemOrder();
         }
         return $this;
     }
@@ -810,11 +811,11 @@ abstract class CourseItem
     /**
      * Required parameter for all items: maybe in database as summary, text or description
      *
-     * @param int|null $value default to this->summary
+     * @param string $value default to this->summary
      *
      * @return CourseItem compatible object
      */
-    abstract function setSummary($value = null);
+    abstract function setSummary($value = '');
 
     /**
      * Required parameter for all items

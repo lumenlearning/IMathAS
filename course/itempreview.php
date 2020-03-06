@@ -15,6 +15,7 @@ require_once(__DIR__ . '/../includes/sanitize.php');
 //set some page specific variables and counters
 $cid = Sanitize::courseId($_GET['cid']);
 $type = Sanitize::encodeStringForDisplay($_GET['type']);
+$itemId = Sanitize::onlyInt($_GET['id']);
 
 if (isset($_GET['framed'])) {
     $flexwidth = true;
@@ -37,33 +38,20 @@ if (!isset($teacherid)) {
     require __DIR__ . "/views/layout.php";
 }
 
-// This is set by /desmos/js/editItem.js and is used to allow multiple
-// item previews at the same time.
-$previewId = $_GET['preview_id'];
-
-/*
- * This is used by /desmos/views/edit.php to temporarily store serialized
- * Desmos form data for preview mode in /desmos/views/view.php.
- *
- * TODO: Ensure multiple browser preview tabs don't overwrite each others'
- *       temp_preview_data in $_SESSION. Need some kind of unique ID! (and cleanup?)
- */
-if ('store_temp_preview_data' == $_GET['mode']) {
-    if (isset($_POST['tempSerializedPreviewData']) && !empty($_POST['tempSerializedPreviewData'])) {
-        $_SESSION['tempSerializedPreviewData-' . $previewId] = $_POST['tempSerializedPreviewData'];
-    }
-    exit;
-}
-
 // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid);
 $now = time();
 
 $pagetitle = $item->name;
-$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
-    . Sanitize::encodeStringForDisplay($coursename)."</a>"
-    . " &gt; " . $item->itemname;
+$curBreadcrumb = $breadcrumbbase;
+if (!isset($sessiondata['ltiitemtype'])) {
+    $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
+        . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
+}
+if ($curBreadcrumb != '') {
+    $curBreadcrumb .= $pagetitle;
+}
 
 //BEGIN DISPLAY BLOCK
 /******* begin html output ********/

@@ -23,9 +23,12 @@ if ($sessiondata['ltiitemtype']==38) {
 	$hascourse = true;
 	$hasplacement = true;
 	$itemid = $sessiondata['ltiitemid'];
-	$course_item = \Course\Includes\CourseItem::findCourseItem($itemid);
-	$cid = $course_item['courseid'];
-	$placementtype = $course_item['itemtype'];
+	$placementtype = 'DesmosItem';
+	$itemObject = str_replace('Item','', $placementtype) . "\\Models\\" . $placementtype;
+	$item = new $itemObject();
+	$item->findItem($itemid);
+	$cid = $item->courseid;
+	$itemtype = $item->itemtype;
 	$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=:courseid AND userid=:userid");
 	$stm->execute(array(':courseid'=>$cid, ':userid'=>$userid));
 	if ($stm->rowCount()==0) {
@@ -202,7 +205,7 @@ if (!empty($createcourse)) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
-	if (substr($_POST['setplacement'],0, 4) =='item') {
+	if (substr($_POST['setplacement'],0, 4) =='Item') {
 		$typeid = substr($_POST['setplacement'],4);
 		$course_item = \Course\Includes\CourseItem::findCourseItem($typeid);
 		$placementtype = $course_item['itemtype'];
@@ -408,25 +411,6 @@ if ($hasplacement && $placementtype=='course') {
 	}
 }
 
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-if ($hasplacement && $placementtype==$course_item['itemtype']) {
-	header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
-		."?type=".str_replace('Item', '', $course_item['itemtype'])
-		."&cid=".$course_item['courseid']
-		."&id=".$course_item['typeid']
-		."&r=" .Sanitize::randomQueryStringParam()
-	);
-}
-// #### End OHM-specific code #####################################################
-// #### End OHM-specific code #####################################################
-// #### End OHM-specific code #####################################################
-// #### End OHM-specific code #####################################################
-// #### End OHM-specific code #####################################################
-
 //HTML Output
 $pagetitle = "LTI Home";
 require("header.php");
@@ -557,6 +541,41 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	echo '<h2>LTI Placement of whole course</h2>';
 	echo "<p><a href=\"course/course.php?cid=" . Sanitize::courseId($cid) . "\">Enter course</a></p>";
 	echo '<p><a href="ltihome.php?chgplacement=true">Change placement</a></p>';
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+	// #### Begin OHM-specific code #####################################################
+} else if ($hasplacement && $placementtype=='DesmosItem') {
+	echo "<h2>LTI Placement of " . Sanitize::encodeStringForDisplay($item->title) . "</h2>";
+	$now = time();
+	echo '<p>';
+	if ($item->avail==0) {
+		echo 'Currently unavailable to students.';
+	} else if ($item->avail==1 && $item->startdate < $now && $item->enddate > $now) { //regular show
+		echo "Currently available to students.  ";
+		echo "Available until " . formatdate($item->enddate);
+	} else {
+		echo 'Currently unavailable to students. Available '.formatdate($item->startdate).' until '.formatdate($item->enddate);
+	}
+	echo '</p>';
+	if ($role == 'teacher') {
+		echo "<p><a href=\"course/itemview.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Preview Item</a> | ";
+		echo "<a href=\"course/itemadd.php?type=".$item->typename.'&id='.$item->typeid.'&cid='.$item->courseid ."\">Modify Item</a>";
+		if ($myrights == 100) {
+			echo " | <a href=\"course/contentstats.php?cid=" . $item->courseid . "&type=E&id=" . $item->typeid . "\">View Stats</a>";
+		}
+		echo "</p>";
+		if ($sessiondata['ltiitemtype']==-1) {
+			echo '<p><a href="ltihome.php?chgplacement=true">Change placement</a></p>';
+		}
+		echo '<p>&nbsp;</p><p class=small>This item is housed in course ID '.Sanitize::courseId($item->courseid).'</p>';
+	}
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
+	// #### End OHM-specific code #####################################################
 } else if ($placementtype=='assess') {
 	$stm = $DBH->prepare("SELECT name,avail,startdate,enddate,date_by_lti,ver FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$typeid));

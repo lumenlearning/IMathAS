@@ -253,7 +253,29 @@ function getorg($it,$parent,&$res,$ind, $parentid) {
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             if ($iteminfo[$item][0]=='DesmosItem') {
-                // DO NOT EXPORT DESMOS ITEMS
+                //$stm = $DBH->prepare("SELECT name,summary,defpoints,itemorder,enddate,gbcategory,avail,startdate,ptsposs FROM imas_assessments WHERE id=:id");
+                $courseItem = new \Desmos\Models\DesmosItem();
+                $courseItem->findItem($iteminfo[$item][1]);
+                $out .= $ind.'<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'" identifierref="'.$resid.'">'."\n";
+                $out .= $ind.'  <title>'.xmlstr($courseItem->name).'</title>'."\n";
+                $out .= $ind.'</item>'."\n";
+
+
+                $extended = '<ENTRY key="customParameters"/>';
+                $extended .= '<ENTRY key="alternateUrl">http://'.Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->typeid.'&amp;custom_item_type='.$courseItem->itemtype.'</ENTRY>';
+                $extended .= '<ENTRY key="vendorInfo">name='.$installname.'&amp;code=IMathAS</ENTRY>';
+
+                createbbitem($resid, $parentid, 'basicitem', $courseItem->name, array(
+                    '{{id}}' => '_7'.$item.'_1',
+                    '{{title}}' => xmlstr($courseItem->name),
+                    '{{summary}}' => xmlstr(filtercapture($courseItem->summary)),
+                    '{{created}}' => $bbnow,
+                    '{{avail}}' => $courseItem->avail==0?'false':'true',
+                    '{{newwindow}}' => "false",
+                    '{{launchurl}}' => $urlmode.Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->typeid.'&amp;custom_item_type='.$courseItem->itemtype,
+                    '{{extendeddata}}' => $extended
+                ), 'lti', $res);
+
             } else
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################

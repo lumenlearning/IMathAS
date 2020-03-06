@@ -6,6 +6,7 @@
     </h1>
     <p><?php echo $item->summary; ?></p>
     <div id="step_box" class="desmos desmos-student-view">
+    <?php if (count($item->steps) > 1) { ?>
         <div class="steps-navigation">
             <nav id="mobile_nav" class="lux-form">
                 <select name="step_nav" id="js-step-nav" class="step-nav form-input">
@@ -54,6 +55,7 @@
                 ?>
             </ol>
         </div>
+    <?php } ?>
         <div class="steps-details">
             <div class="step-items">
                 <?php
@@ -66,10 +68,12 @@
                     $numsteps++;
                 } ?>
             </div>
+            <?php if (count($item->steps) > 1) { ?>        
             <div class="js-desmos-nav desmos-nav-btns">
                 <button type="button" class="button js-prev" disabled>Previous</button>
                 <button type="button" class="button js-next">Next</button>
             </div>
+            <?php } ?>
         </div>
     </div>
 
