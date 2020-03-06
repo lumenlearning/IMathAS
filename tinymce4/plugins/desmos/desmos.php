@@ -19,7 +19,7 @@
 <form onsubmit="return false;" action="#" class="u-padding-xs">
     <figure id="editdesmos" class="js-desmos desmos-fig" data-json=""></figure>
     <div class="u-margin-top-sm button-wrapper">
-        <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
+        <button id="desmos_preview_button" class="button" type="button" onclick="parent.tinymce.activeEditor.windowManager.close();">Cancel</button>
         <button id="desmos_form_submit_button" class="button" type="submit" name="submitbtn" value="Submit" style="clear:both" onclick="desmosDialog.insert();">Add</button>
     </div>
 </form>

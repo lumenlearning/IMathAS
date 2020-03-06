@@ -209,7 +209,51 @@ function getorg($it,$parent,&$res,$ind,$mod_depth) {
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             if ($iteminfo[$item][0]=='DesmosItem') {
-                // DO NOT EXPORT DESMOS ITEMS
+                $courseItem = new \Desmos\Models\DesmosItem();
+                $courseItem->findItem($iteminfo[$item][1]);
+                $out .= $ind.'<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'" identifierref="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
+                $out .= $ind.'  <title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
+                $out .= $ind.'</item>'."\n";
+                if ($linktype=='canvas') {
+                    $canvout .= '<item identifier="'.$iteminfo[$item][0].$iteminfo[$item][1].'">'."\n";
+                    $canvout .= '<content_type>ContextExternalTool</content_type>'."\n";
+                    $canvout .= '<workflow_state>'.($courseItem->avail==0?'unpublished':'active').'</workflow_state>'."\n";
+                    $canvout .= '<identifierref>RES'.$iteminfo[$item][0].$iteminfo[$item][1].'</identifierref>'."\n";
+                    $canvout .= '<title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</title>'."\n";
+                    $canvout .= '<url>'.$GLOBALS['basesiteurl'] . '/desmos/bltilaunch.php?custom_item_id='.$courseItem->typeid.'&amp;custom_item_type='.$courseItem->itemtype.'</url>';
+                    $canvout .= "<position>$ccnt</position> <indent>".max($mod_depth-1,0)."</indent>\n";
+                    $canvout .= "</item>";
+                    $ccnt++;
+                } else {
+                    $fp = fopen($newdir.'/blti'.$iteminfo[$item][1].'.xml','w');
+                    fwrite($fp,'<cartridge_basiclti_link xmlns="http://www.imsglobal.org/xsd/imslticc_v1p0" xmlns:blti="http://www.imsglobal.org/xsd/imsbasiclti_v1p0" xmlns:lticm ="http://www.imsglobal.org/xsd/imslticm_v1p0" xmlns:lticp ="http://www.imsglobal.org/xsd/imslticp_v1p0">');
+                    fwrite($fp,'<blti:title>'.htmlentities($courseItem->name,ENT_XML1,'UTF-8',false).'</blti:title>');
+                    fwrite($fp,'<blti:description>'.htmlentities(html_entity_decode($courseItem->summary),ENT_XML1,'UTF-8',false).'</blti:description>');
+                    if ($linktype=='url') {
+                        $urladd = '?custom_item_id='.$courseItem->typeid.'&amp;custom_item_type='.$courseItem->itemtype;
+                    } else {
+                        fwrite(
+                            $fp,
+                            '<blti:custom><lticm:property name="custom_item_id">' . $courseItem->typeid
+                            . '</lticm:property><lticm:property name="custom_item_type">' . $courseItem->itemtype
+                            . '</lticm:property></blti:custom>'
+                        );
+                        $urladd = '';
+                    }
+                    if ($urlmode == 'https://') {
+                        fwrite($fp,'<blti:launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                        fwrite($fp,'<blti:secure_launch_url>https://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php'.$urladd.'</blti:secure_launch_url>');
+                    } else {
+                        fwrite($fp,'<blti:launch_url>http://' . Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']) . $imasroot . '/desmos/bltilaunch.php'.$urladd.'</blti:launch_url>');
+                    }
+                    fwrite($fp,'<blti:vendor><lticp:code>IMathAS</lticp:code><lticp:name>'.$installname.'</lticp:name></blti:vendor>');
+                    fwrite($fp,'</cartridge_basiclti_link>');
+                    fclose($fp);
+                    $resitem =  '<resource identifier="RES'.$iteminfo[$item][0].$iteminfo[$item][1].'" type="imsbasiclti_xmlv1p0">'."\n";
+                    $resitem .= '  <file href="blti'.$iteminfo[$item][1].'.xml" />'."\n";
+                    $resitem .= '</resource>';
+                    $res[] = $resitem;
+                }
             } else
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################

@@ -26922,7 +26922,7 @@
                     if(e.target && e.target.nodeName == "FIGURE") {
                         var parentId = e.target.parentNode.getAttribute("data-id");
                         tinyMCE.get(parentId).focus();
-                        top.tinymce.activeEditor.execCommand('mceDesmos', e.target);
+                        tinymce.activeEditor.execCommand('mceDesmos', e.target);
                     }
                 });
             });
