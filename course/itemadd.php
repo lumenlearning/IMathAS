@@ -36,7 +36,7 @@ $itemObject = ucfirst($type) . "\\Models\\" . ucfirst($type) ."Item";
 $item = new $itemObject($cid, $block, $totb);
 if (isset($_GET['id'])) {
     $typeid = \Sanitize::onlyInt($_GET['id']);
-    if (!$item->findItem($typeid)) {
+    if (!empty($typeid) && !$item->findItem($typeid)) {
         $body = "Invalid ID";
         require __DIR__ . "/views/layout.php";
         exit;
