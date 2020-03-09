@@ -100,10 +100,11 @@
             <button id="desmos_form_submit_button" class="button button--primary" type="submit" name="submitbtn" value="Submit">Save</button>
             </form>
             <?php
-            $block = 0 == strlen($_GET['block']) ? '' : '&block=' . intval($_GET['block']);
-            $tb = 0 == strlen($_GET['rb']) ? '' : '&tb=' . Sanitize::encodeUrlParam($_GET['tb']);
-            $previewUrl = sprintf('%s/course/itempreview.php?cid=%d&type=%s&id=%d%s%s',
-                $basesiteurl, $cid, $type, $typeid, $block, $tb);
+            $blockParam = 0 == strlen($_GET['block']) ? '' : '&block=' . intval($_GET['block']);
+            $tbParam = 0 == strlen($_GET['rb']) ? '' : '&tb=' . Sanitize::encodeUrlParam($_GET['tb']);
+            $typeIdParam = empty($typeid) ? '' : '&id=' . intval($typeid);
+            $previewUrl = sprintf('%s/course/itempreview.php?cid=%d&type=%s&id=%d%s%s%s',
+                $basesiteurl, $cid, $type, $typeid, $typeIdParam, $blockParam, $tbParam);
             ?>
             <form id="desmos_preview_form" method="POST" action="<?php echo $previewUrl; ?>" class="u-inline-block">
                 <input id="desmos_edit_form_data" type="hidden" name="desmos_form_data"/>
