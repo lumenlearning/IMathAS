@@ -71,11 +71,17 @@
                             $numsteps, $numsteps,
                             $item->steps[$i]['title']
                         );
-                        printf(
-                            "<input type='hidden' name='step[%d]' value='%d'>",
-                            $numsteps,
-                            $item->steps[$i]['id']
-                        );
+                        if (!empty($item->steps[$i]['id'])) {
+                            // If we're returning from previewing a new Desmos item
+                            // that is not saved in the DB yet, this will add IDs
+                            // of "0" to every item, resulting in data loss.
+                            // JIRA: OHM-463
+                            printf(
+                                "<input type='hidden' name='step[%d]' value='%d'>",
+                                $numsteps,
+                                $item->steps[$i]['id']
+                            );
+                        }
                         echo "<button class='js-delete u-button-reset delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
                         echo "</li>";
                         $numsteps++;
