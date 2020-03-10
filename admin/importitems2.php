@@ -182,14 +182,22 @@ if ($_FILES['userfile']['name']=='' || strlen($page_fileErrorMsg)>1) {
 } else {
 	echo $page_fileHiddenInput;
 	echo '<h2>'._('Course').': '.$data['course']['name'].'</h2>';
-
   if ($data['course']['UIver'] > $courseUIver) {
-    echo '<p class=noticetext>'._('The import file is for a more recent assessment version than this course - cannot import.').'</p>';
-    require("../footer.php");
-    exit;
+      // #### Begin OHM-specific code #####################################################
+      // #### Begin OHM-specific code #####################################################
+      // #### Begin OHM-specific code #####################################################
+      // #### Begin OHM-specific code #####################################################
+      // #### Begin OHM-specific code #####################################################
+      echo '<p class=noticetext>'._('The course you are copying from uses the new assessment format which cannot be used in an old assessment format course. Only non-assessment items are displayed below for copy.').'</p>';
+      //require("../footer.php");
+      //exit;
+      // #### End OHM-specific code #####################################################
+      // #### End OHM-specific code #####################################################
+      // #### End OHM-specific code #####################################################
+      // #### End OHM-specific code #####################################################
+      // #### End OHM-specific code #####################################################
   } else if ($data['course']['UIver'] < $courseUIver) {
     echo '<p class=noticetext>'._('The import file is for an older assessment version than this course - assessments will be upgraded.').'</p>';
-  }
 
 	if ($myrights==100) {
 		echo '<p><input type="checkbox" name="importasteacher" id="importasteacher" checked /> Import as course owner (for ownership when updating or adding questions).</p>';
@@ -219,6 +227,7 @@ if ($_FILES['userfile']['name']=='' || strlen($page_fileErrorMsg)>1) {
 	<span id="libnames">Unassigned</span>
 	<input type=hidden name="libs" id="libs"  value="0">
 	<input type=button value="Select Libraries" onClick="libselect()"><br>
+<?php } // #### OHM-specific code ##################################################### ?>
 
 	Check: <a href="#" onclick="return chkAllNone('qform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('qform','checked[]',false)">None</a>
 <?php
@@ -232,6 +241,7 @@ if ($_FILES['userfile']['name']=='' || strlen($page_fileErrorMsg)>1) {
 <?php
 		$alt=0;
 		for ($i = 0 ; $i<(count($ids)); $i++) {
+            if (($data['course']['UIver'] <= $courseUIver) || strpos($types[$i],'Assessment') === false) { // #### OHM-specific code #####################################################
 			if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
 			echo '<td>';
 			if (strpos($types[$i],'Block')!==false) {
@@ -249,12 +259,16 @@ if ($_FILES['userfile']['name']=='' || strlen($page_fileErrorMsg)>1) {
 			</tr>
 
 <?php
+            } // #### OHM-specific code #####################################################
 		}
 ?>
 		</tbody>
 		</table>
 <?php
-		if ($hascourseopts || $hasgbsetup || $hasoffline || $hascalitems || $hasstickyposts) {
+        /* #### OHM-specific code #####################################################
+        if adding options with non-assessments, make sure that we don't upgrade the course UIver
+        */
+		if ($data['course']['UIver'] <= $courseUIver && ($hascourseopts || $hasgbsetup || $hasoffline || $hascalitems || $hasstickyposts)) {
 			echo '<fieldset><legend>Options</legend>';
 			echo '<table><tbody>';
 			if ($hascourseopts) {
