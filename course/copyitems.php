@@ -581,6 +581,17 @@ if ($sourceUIver > $destUIver) {
 					case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
 					case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
 					case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    case 'DesmosItem': echo $CFG['CPS']['miniicons']['desmos']; break;
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
 				}
 				echo '" class="floatleft"/><div style="margin-left:21px">'.$names[$i].'</div></td>';
 			} else {
@@ -592,7 +603,7 @@ if ($sourceUIver > $destUIver) {
 			<td><?php echo $sums[$i] ?></td>
 		</tr>
 <?php
-        }
+        } // #### OHM-specific code #####################################################
 		}
 ?>
 
