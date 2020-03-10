@@ -26843,8 +26843,7 @@
          * @param {tinymce.Editor} ed Editor instance that the plugin is initialized in.
          * @param {string} url Absolute URL to where the plugin is located.
          */
-        init : function(ed, url) {isnew = true;
-            var isnew = true;
+        init : function(ed, url) {
             var desmosjson = '';
             var elwidth = 300;
             var elheight = 200;
@@ -26853,7 +26852,6 @@
                 if (ed.dom.getAttrib(el,"data-json")!='') {
                     desmosjson = ed.dom.getAttrib(el, "data-json");
                 }
-                isnew = false;
                 elwidth = parseInt(ed.dom.getStyle(el,"width"));
                 elheight = parseInt(ed.dom.getStyle(el,"height"));
                 // Open window
@@ -26864,7 +26862,7 @@
                     height : 470,
                     inline : 1
                 }, {
-                    isnew : isnew, // Custom argument
+                    isnew : false, // Custom argument
                     desmosjson : desmosjson,
                     width : elwidth,
                     height : elheight
@@ -26879,7 +26877,7 @@
                     height : 470,
                     inline : 1
                 }, {
-                    isnew : isnew, // Custom argument
+                    isnew : true, // Custom argument
                     desmosjson : desmosjson,
                     width : elwidth,
                     height : elheight
