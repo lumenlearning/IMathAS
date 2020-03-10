@@ -20,7 +20,7 @@ var desmosDialog = {
     insert : function() {
         // Insert the contents from the input into the document
         this.desmosjson = JSON.stringify(this.calculator.getState());
-        console.log(desmosjson);
+        console.log(this.desmosjson);
         if (this.isnew) {
             this.addDesmos(this.desmosjson);
         } else {
@@ -55,17 +55,15 @@ var desmosDialog = {
 
     addDesmos : function(json) {
         var ed = parent.tinymce.activeEditor;
+        if (ed.selection.getNode().nodeName == "FIGURE") {
+            console.log("collapse figure");
+            ed.selection.collapse(false);
+        }
         ed.execCommand(
             'mceInsertContent',
             false,
             '<figure class="js-desmos desmos-fig" data-json=\''+json+'\'></figure>'
         );
-        elt = ed.dom.doc.getElementsByClassName("js-desmos");
-        if (elt.length>0) {
-            for (i = 0; i < elt.length; i++) {
-                elt[i].setAttribute("onClick", "parent.tinymce.activeEditor.execCommand('mceDesmos')");
-            }
-        }
     },
 
     loadDesmos : function() {
