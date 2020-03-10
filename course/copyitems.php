@@ -611,7 +611,7 @@ if ($sourceUIver > $destUIver) {
 	</table>
 </div>
 	<p> </p>
-<div id="copyoptions" style="display:none;">
+<div id="copyoptions" <?php if ($sourceUIver <= $destUIver) { echo 'style="display:none;"'; } ?>>>
 	<fieldset><legend>Options</legend>
 	<table>
 	<tbody>
