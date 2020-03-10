@@ -58,7 +58,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 	if ($itemtype == "DesmosItem") {
 		$item = new \Desmos\Models\DesmosItem($cid);
 		$item->copyItem($typeid, $_POST['append'], $sethidden);
-		return $item->itemid;
+		return;// do not return item because it has already been added to imas_courses.itemorder
 	} else
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
