@@ -26918,10 +26918,13 @@
             });
             //may use setContent for after adding, this should work with a saved desmos
             ed.on('loadcontent', function (e) {
-                ed.dom.doc.getElementById("tinymce").addEventListener("click", function(e) {
+                ed.dom.doc.getElementById("tinymce").addEventListener("click", function(e){
+                    var parentId = e.path.filter(function(p) {
+                        return p.nodeName == "BODY";
+                    })[0].getAttribute("data-id");
+                    console.log(parentId);
+                    tinyMCE.get(parentId).focus();
                     if(e.target && e.target.nodeName == "FIGURE") {
-                        var parentId = e.target.parentNode.getAttribute("data-id");
-                        tinyMCE.get(parentId).focus();
                         tinymce.activeEditor.execCommand('mceDesmos', e.target);
                     }
                 });
