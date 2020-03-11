@@ -611,7 +611,8 @@ if ($sourceUIver > $destUIver) {
 	</table>
 </div>
 	<p> </p>
-<div id="copyoptions" <?php if ($sourceUIver <= $destUIver) { echo 'style="display:none;"'; } ?>>>
+<?php if ($sourceUIver <= $destUIver) { ?>
+<div id="copyoptions" style="display:none;">
 	<fieldset><legend>Options</legend>
 	<table>
 	<tbody>
@@ -646,6 +647,7 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 	</tbody>
 	</table>
 	</fieldset>
+<?php } ?>
 	</div>
 <?php
 	if ($sourceUIver < $destUIver) {
