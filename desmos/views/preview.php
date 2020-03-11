@@ -19,10 +19,11 @@ $item = new \Desmos\Models\DesmosItem();
 $item->fromFormData($desmosFormData);
 $pagetitle = Sanitize::encodeStringForDisplay($item->name);
 
-$block = 0 == strlen($_GET['block']) ? '' : '&block=' . intval($_GET['block']);
-$tb = 0 == strlen($_GET['rb']) ? '' : '&tb=' . Sanitize::encodeUrlParam($_GET['tb']);
-$editUrl = sprintf('%s/course/itemadd.php?mode=returning_from_preview&type=%s&id=%d&cid=%d%s%s',
-    $basesiteurl, $type, $itemId, $cid, $block, $tb);
+$blockParam = 0 == strlen($_GET['block']) ? '' : '&block=' . intval($_GET['block']);
+$tbParam = 0 == strlen($_GET['rb']) ? '' : '&tb=' . Sanitize::encodeUrlParam($_GET['tb']);
+$itemIdParam = empty($itemId) ? '' : '&id=' . intval($itemId);
+$editUrl = sprintf('%s/course/itemadd.php?mode=returning_from_preview&type=%s&cid=%d%s%s%s',
+    $basesiteurl, $type, $cid, $itemIdParam, $blockParam, $tbParam);
 ?>
 <div class="lux-component preview-header">
     <form method="POST" action="<?php echo $editUrl ?>">
