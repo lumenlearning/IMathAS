@@ -83,7 +83,7 @@ function resyncGrades(): void
         }
 
         $grade = LTI::reCalcandupdateLTIgrade((int)$us['aid'], $us['scores'], $us['ver']);
-        $score = Assessments::getpts($us['scores']);
+        $score = Assessments::getScoreForDisplay($us['scores']);
         $logInfo = createLogInfo($cid, $us, $assessmentName, $grade, $score);
 
         if (empty($us['sourcedid'])) {
@@ -163,7 +163,8 @@ function dumpErrors(int $totalNotQueued, array $errorLogIds): void
  * @param array $assessmentRecord The assessment record being queued for LMS sending.
  * @param string $assessmentName The assessment's name.
  * @param mixed $grade The grade being sent to the LMS.
- * @param mixed $score The rounded scores.
+ * @param mixed $score The student's score for the assessment. This should
+ *                     be calculated from the student's "bestscores" data.
  * @return array An associative array of useful info.
  */
 function createLogInfo(int $courseId, array $assessmentRecord,

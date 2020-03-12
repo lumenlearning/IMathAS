@@ -116,6 +116,35 @@ class Assessments
             return round($tot, 1);
         }
     }
+
+    /**
+     * Get the total score for an assessment. This is NOT a grade.
+     *
+     * This code taken from isolateassessgrade.php, around
+     * line 283, as of 2020 Mar 12.
+     *
+     * @param string $bestscores The student's "bestscores" column data from
+     *                           imas_assessment_sessions or imas_assessment_records.
+     * @return int The total score for the assessment.
+     */
+    public static function getScoreForDisplay(string $bestscores): int
+    {
+        // Code from MyOpenMath.
+        $total = 0;
+        $sp = explode(';', $bestscores);
+        $scores = explode(",", $sp[0]);
+        if (in_array(-1, $scores)) {
+            $IP = 1;
+        } else {
+            $IP = 0;
+        }
+        for ($i = 0; $i < count($scores); $i++) {
+            $total += self::getpts($scores[$i]);
+        }
+
+        return $total;
+    }
+
     /**
      * Function for calculating points possible for an assessment
      * (c) IMathAS 2018
