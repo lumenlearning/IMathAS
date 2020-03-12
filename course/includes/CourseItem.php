@@ -100,6 +100,30 @@ abstract class CourseItem
     }
 
     /**
+     * Import item and related data
+     *
+     * @param array $fields data for item
+     *
+     * @return $this|bool
+     */
+    public function importItem(array $fields)
+    {
+        $invalid = array_diff(array_keys($fields), $this->valid_fields);
+        if ($invalid) {
+            echo __CLASS__ . " invalid fields: " . implode(', ', $invalid);
+            return false;
+        }
+        $newtypeid = $this->insertItem($fields);
+        if ($newtypeid) {
+            $this->saveOriginId($newtypeid, $fields);
+            $fields['id'] = $newtypeid;
+            $this->setItem($fields);
+            $this->track('import');
+        }
+        return $this;
+    }
+
+    /**
      * Add an origin item ID to a newly saved CourseItem. Used only by $this->addItem().
      *
      * @param int $originId The CourseItem's origin ID. (Top-most ancestor)
@@ -177,7 +201,6 @@ abstract class CourseItem
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
             $this->track('copy', $typeid);
-            $this->setItemOrder();
         }
         return $this;
     }
