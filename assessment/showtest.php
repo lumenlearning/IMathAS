@@ -1307,7 +1307,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 					echo "<img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a>";
 				} else {
 					echo "<a href=\"#\" onclick=\"GB_show('"._('User Preferences')."','$imasroot/admin/ltiuserprefs.php?cid=$cid&greybox=true',800,'auto');return false;\">";
-					echo "<span id=\"myname\">".('User Preferences')."</span>";
+					echo "<span id=\"myname\">".('User Preferences')."</span></a>";
 				}
 				echo '</span>';
 			}
@@ -1327,7 +1327,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			echo "<img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a></p>";
 		} else {
 			echo "<p><a href=\"#\" onclick=\"GB_show('"._('User Preferences')."','$imasroot/admin/ltiuserprefs.php?cid=$cid&greybox=true',800,'auto');return false;\">";
-			echo "<span id=\"myname\">".('User Preferences')."</span></p>";
+			echo "<span id=\"myname\">".('User Preferences')."</span></a></p>";
 		}
 		$out = '';
 		if ($testsettings['msgtoinstr']==1 && $coursemsgset<4) {
@@ -1366,7 +1366,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 			echo "<img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a></p>";
 		} else {
 			echo "<p><a href=\"#\" onclick=\"GB_show('"._('User Preferences')."','$imasroot/admin/ltiuserprefs.php?cid=$cid&greybox=true',800,'auto');return false;\">";
-			echo "<span id=\"myname\">".('User Preferences')."</span></p>";
+			echo "<span id=\"myname\">".('User Preferences')."</span></a></p>";
 		}
 		echo '</div>';
 	}
@@ -2621,7 +2621,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				$stm = $DBH->prepare("UPDATE imas_livepoll_status SET curquestion=:curquestion,curstate=1 WHERE assessmentid=:assessmentid");
 				$stm->execute(array(':curquestion'=>$qn, ':assessmentid'=>$testsettings['id']));
 
-				echo json_encode($out);
+				echo json_encode($out, JSON_INVALID_UTF8_IGNORE);
 			} else {
 				displayq($qn,$qi[$questions[$qn]]['questionsetid'],$seeds[$qn],0,$thisshowhints,$attempts[$qn],false,$clearla,false,array());
 			}
@@ -3215,7 +3215,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 						$LPdata[$qn][$row[0]]["ans"] = $arv[count($arv)-1];
 					}
 				}
-				$LPjson = json_encode($LPdata);
+				$LPjson = json_encode($LPdata, JSON_INVALID_UTF8_IGNORE);
 				echo '<script type="text/javascript">$(function(){livepoll.loadResults('.$LPjson.');});</script>';
 
 			} else {//stu view
@@ -3656,7 +3656,7 @@ if (!isset($_REQUEST['embedpostback']) && empty($_POST['backgroundsaveforlater']
 				if ($outmsg=='') {
 					$outmsg = $endmsg['def'];
 				}
-				if (!isset($endmsg['commonmsg'])) {$endmsg['commonmsg']='';}
+				if (!isset($endmsg['commonmsg'])) {$endmsg['commonmsg']='';} else {$outmsg .= ' ';}
 
 				if (strpos($outmsg,'redirectto:')!==false) {
 					$redirecturl = trim(substr($outmsg,11));
