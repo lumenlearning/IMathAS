@@ -223,7 +223,7 @@ switch($_GET['action']) {
 			echo 'value="'.Sanitize::encodeStringForDisplay($line['LastName']).'"';
 		}
 		echo "><BR class=form>\n";
-		echo "<span class=form>Email:</span> <input class=form type=text size=40 name=email ";
+		echo "<span class=form>Email:</span> <input class=form type=email size=40 name=email ";
 		if ($_GET['action'] != "newadmin") {
 			echo 'value="'.Sanitize::encodeStringForDisplay($line['email']).'"';
 		}
@@ -680,13 +680,13 @@ switch($_GET['action']) {
 				echo '</span><br class=form>';
 			}
 		}
-		
+
 		#### Begin OHM-specific code #####################################################################
 		#### Begin OHM-specific code #####################################################################
 		#### Begin OHM-specific code #####################################################################
 		#### Begin OHM-specific code #####################################################################
 		#### Begin OHM-specific code #####################################################################
-		
+
 		// Putting script specific to this form here because file contains forms for multiple pages
 		printf('<script type="text/javascript" src="%s/ohm/js/newPlayerDefault.js"></script>', $imasroot);
 
@@ -700,7 +700,7 @@ switch($_GET['action']) {
 		#### End OHM-specific code #####################################################################
 		#### End OHM-specific code #####################################################################
 
-		
+
 		if ($_GET['action']=="modify" && $line['cleanupdate']>0) {
 			$courseid = Sanitize::courseId($_GET['id']);
 			echo '<p>This class has been scheduled for data cleanup, on ';
@@ -724,6 +724,12 @@ switch($_GET['action']) {
 		}
 		//Start grouping: copy options
 		if ($_GET['action']=='addcourse' && $ctc>0) {
+			if ($sourceUIver < 2) {
+				echo '<span class=form>'._('Upgrade assessment version').'</span>';
+				echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
+				echo _('The source course is using an older format of assessments. Select this option to set your new course to use the new version of assessments, and convert copied assessments to the new format. You will want to review the settings after the copy.');
+				echo '</label></span><br class=form>';
+			}
 			echo '<div class="block grouptoggle">';
 			echo '<img class="mida" src="../img/expand.gif" /> ';
 			echo _('Course Copy Options');
@@ -747,6 +753,9 @@ switch($_GET['action']) {
 				#### Begin OHM-specific code #####################################################################
 				#### Begin OHM-specific code #####################################################################
 				#### Begin OHM-specific code #####################################################################
+				####
+				#### FIXME: This may or may not work with dlippman's "newassessver" checkbox.
+				####
 				echo '<span class="form">'._('Assessment Player Version').'</span>';
 				echo '<span class="js-version-inputs version-inputs">';
 				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
@@ -760,7 +769,11 @@ switch($_GET['action']) {
 				#### End OHM-specific code #####################################################################
 			}
 			echo '</div>';
-			//TODO:  FINISH ME ****
+		} else if ($_GET['action']=='addcourse' && $ctc == 0) {
+			echo '<span class=form>'._('Use new assessment version').'</span>';
+			echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
+			echo _('Select this option to set your new course to use the new version of assessments.');
+			echo '</label></span><br class=form>';
 		}
 		//Start grouping: Availability and Access
 		echo '<div class="block grouptoggle">';
@@ -911,6 +924,7 @@ switch($_GET['action']) {
 		echo 'Additional Options';
 		echo '</div>';
 		echo '<div class="blockitems hidden">';
+
 		if ($_GET['action']=='addcourse' && $ctc == 0) {
 			if ($sourceUIver < 2) {
 				#### Begin OHM-specific code #####################################################################
