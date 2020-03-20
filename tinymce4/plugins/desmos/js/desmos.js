@@ -13,14 +13,16 @@ var desmosDialog = {
         this.height = parent.tinymce.activeEditor.windowManager.getParams().height;
         this.isnew = parent.tinymce.activeEditor.windowManager.getParams().isnew;
         this.desmosjson = parent.tinymce.activeEditor.windowManager.getParams().desmosjson;
-        document.getElementById("editdesmos").setAttribute("data-json",this.desmosjson);
+        if (this.isnew == false) {
+            document.getElementById("editdesmos").setAttribute("data-json", this.desmosjson);
+        }
         this.loadDesmos();
     },
 
     insert : function() {
         // Insert the contents from the input into the document
         this.desmosjson = JSON.stringify(this.calculator.getState());
-        console.log(desmosjson);
+        console.log(this.desmosjson);
         if (this.isnew) {
             this.addDesmos(this.desmosjson);
         } else {
@@ -55,17 +57,15 @@ var desmosDialog = {
 
     addDesmos : function(json) {
         var ed = parent.tinymce.activeEditor;
+        if (ed.selection.getNode().nodeName == "FIGURE") {
+            console.log("collapse figure");
+            ed.selection.collapse(false);
+        }
         ed.execCommand(
             'mceInsertContent',
             false,
             '<figure class="js-desmos desmos-fig" data-json=\''+json+'\'></figure>'
         );
-        elt = ed.dom.doc.getElementsByClassName("js-desmos");
-        if (elt.length>0) {
-            for (i = 0; i < elt.length; i++) {
-                elt[i].setAttribute("onClick", "parent.tinymce.activeEditor.execCommand('mceDesmos')");
-            }
-        }
     },
 
     loadDesmos : function() {

@@ -500,8 +500,10 @@ class DesmosItem extends CourseItem
             $steps[$key] = [
                 "title" => $title,
                 "text" => $formData['step_text'][$key],
-                "id" => $formData['step'][$key],
             ];
+            if (!empty($formData['step'][$key])) {
+                $steps[$key]['id'] = $formData['step'][$key];
+            }
         }
         $this->setSteps($steps);
         $this->setStartDate(strtotime($formData['sdate']));

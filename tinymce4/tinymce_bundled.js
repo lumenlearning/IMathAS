@@ -26843,8 +26843,7 @@
          * @param {tinymce.Editor} ed Editor instance that the plugin is initialized in.
          * @param {string} url Absolute URL to where the plugin is located.
          */
-        init : function(ed, url) {isnew = true;
-            var isnew = true;
+        init : function(ed, url) {
             var desmosjson = '';
             var elwidth = 300;
             var elheight = 200;
@@ -26853,7 +26852,6 @@
                 if (ed.dom.getAttrib(el,"data-json")!='') {
                     desmosjson = ed.dom.getAttrib(el, "data-json");
                 }
-                isnew = false;
                 elwidth = parseInt(ed.dom.getStyle(el,"width"));
                 elheight = parseInt(ed.dom.getStyle(el,"height"));
                 // Open window
@@ -26864,7 +26862,7 @@
                     height : 470,
                     inline : 1
                 }, {
-                    isnew : isnew, // Custom argument
+                    isnew : false, // Custom argument
                     desmosjson : desmosjson,
                     width : elwidth,
                     height : elheight
@@ -26879,7 +26877,7 @@
                     height : 470,
                     inline : 1
                 }, {
-                    isnew : isnew, // Custom argument
+                    isnew : true, // Custom argument
                     desmosjson : desmosjson,
                     width : elwidth,
                     height : elheight
@@ -26918,13 +26916,15 @@
             });
             //may use setContent for after adding, this should work with a saved desmos
             ed.on('loadcontent', function (e) {
-                ed.dom.doc.getElementById("tinymce").addEventListener("click", function(e) {
+                element = ed.dom.doc.getElementById("tinymce");
+                element.addEventListener("click", function(e){
                     if(e.target && e.target.nodeName == "FIGURE") {
-                        var parentId = e.target.parentNode.getAttribute("data-id");
+                        var parentId = e.target.offsetParent.getAttribute("data-id");
+                        console.log(parentId);
                         tinyMCE.get(parentId).focus();
                         tinymce.activeEditor.execCommand('mceDesmos', e.target);
                     }
-                });
+                }, false);
             });
         },
 
@@ -26947,8 +26947,7 @@
 
     // Register plugin
     tinymce.PluginManager.add('desmos', tinymce.plugins.desmos);
-})();
-!function(){"use strict";var t=tinymce.util.Tools.resolve("tinymce.PluginManager"),c=tinymce.util.Tools.resolve("tinymce.util.Tools"),l=function(t){return t.getParam("noneditable_noneditable_class","mceNonEditable")},u=function(t){return t.getParam("noneditable_editable_class","mceEditable")},f=function(t){var n=t.getParam("noneditable_regexp",[]);return n&&n.constructor===RegExp?[n]:n},s=function(n){return function(t){return-1!==(" "+t.attr("class")+" ").indexOf(n)}},d=function(i,o,c){return function(t){var n=arguments,e=n[n.length-2],r=0<e?o.charAt(e-1):"";if('"'===r)return t;if(">"===r){var a=o.lastIndexOf("<",e);if(-1!==a&&-1!==o.substring(a,e).indexOf('contenteditable="false"'))return t}return'<span class="'+c+'" data-mce-content="'+i.dom.encode(n[0])+'">'+i.dom.encode("string"==typeof n[1]?n[1]:n[0])+"</span>"}},n=function(n){var t,e,r="contenteditable";t=" "+c.trim(u(n))+" ",e=" "+c.trim(l(n))+" ";var a=s(t),i=s(e),o=f(n);n.on("PreInit",function(){0<o.length&&n.on("BeforeSetContent",function(t){!function(t,n,e){var r=n.length,a=e.content;if("raw"!==e.format){for(;r--;)a=a.replace(n[r],d(t,a,l(t)));e.content=a}}(n,o,t)}),n.parser.addAttributeFilter("class",function(t){for(var n,e=t.length;e--;)n=t[e],a(n)?n.attr(r,"true"):i(n)&&n.attr(r,"false")}),n.serializer.addAttributeFilter(r,function(t){for(var n,e=t.length;e--;)n=t[e],(a(n)||i(n))&&(0<o.length&&n.attr("data-mce-content")?(n.name="#text",n.type=3,n.raw=!0,n.value=n.attr("data-mce-content")):n.attr(r,null))})})};t.add("noneditable",function(t){n(t)})}();(function () {
+})();!function(){"use strict";var t=tinymce.util.Tools.resolve("tinymce.PluginManager"),c=tinymce.util.Tools.resolve("tinymce.util.Tools"),l=function(t){return t.getParam("noneditable_noneditable_class","mceNonEditable")},u=function(t){return t.getParam("noneditable_editable_class","mceEditable")},f=function(t){var n=t.getParam("noneditable_regexp",[]);return n&&n.constructor===RegExp?[n]:n},s=function(n){return function(t){return-1!==(" "+t.attr("class")+" ").indexOf(n)}},d=function(i,o,c){return function(t){var n=arguments,e=n[n.length-2],r=0<e?o.charAt(e-1):"";if('"'===r)return t;if(">"===r){var a=o.lastIndexOf("<",e);if(-1!==a&&-1!==o.substring(a,e).indexOf('contenteditable="false"'))return t}return'<span class="'+c+'" data-mce-content="'+i.dom.encode(n[0])+'">'+i.dom.encode("string"==typeof n[1]?n[1]:n[0])+"</span>"}},n=function(n){var t,e,r="contenteditable";t=" "+c.trim(u(n))+" ",e=" "+c.trim(l(n))+" ";var a=s(t),i=s(e),o=f(n);n.on("PreInit",function(){0<o.length&&n.on("BeforeSetContent",function(t){!function(t,n,e){var r=n.length,a=e.content;if("raw"!==e.format){for(;r--;)a=a.replace(n[r],d(t,a,l(t)));e.content=a}}(n,o,t)}),n.parser.addAttributeFilter("class",function(t){for(var n,e=t.length;e--;)n=t[e],a(n)?n.attr(r,"true"):i(n)&&n.attr(r,"false")}),n.serializer.addAttributeFilter(r,function(t){for(var n,e=t.length;e--;)n=t[e],(a(n)||i(n))&&(0<o.length&&n.attr("data-mce-content")?(n.name="#text",n.type=3,n.raw=!0,n.value=n.attr("data-mce-content")):n.attr(r,null))})})};t.add("noneditable",function(t){n(t)})}();(function () {
 var lists = (function (domGlobals) {
     'use strict';
 
