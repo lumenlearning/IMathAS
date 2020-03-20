@@ -49,6 +49,7 @@ $vueData = array(
 	'overtimepenalty' => $line['overtime_penalty'],
 	'assmpassword' => $line['password'],
 	'revealpw' => false,
+    'showcalculator' => $line['showcalculator'],
 	'showhints' => ($line['showhints']&1) > 0,
 	'showextrefs' => ($line['showhints']&2) > 0,
 	'msgtoinstr' => $line['msgtoinstr'] > 0,
@@ -574,6 +575,21 @@ $vueData = array(
 					<option value="2">Yes, under answerbox (strongly recommended)</option>
 				</select>
 			</span><br class=form />
+
+            <?php if (isset($CFG['showcalculator'])) : ?>
+            <label for="showcalculator" class=form>Calculator</label>
+            <span class=formright>
+				<select name="showcalculator" id="showcalculator" v-model="showcalculator">
+					<option value="">None</option>
+                    <?php
+                    foreach ($CFG['showcalculator'] as $key=>$value) {
+                        echo "<option value=\"$key\"";
+                        echo ">$value</option>\n";
+                    }
+                    ?>
+				</select>
+			</span><br class=form />
+            <?php endif; ?>
 
 		</div>
 
