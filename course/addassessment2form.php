@@ -576,8 +576,8 @@ $vueData = array(
 				</select>
 			</span><br class=form />
 
-            <?php if (isset($CFG['showcalculator'])) : ?>
-            <label for="showcalculator" class=form>Calculator</label>
+            <?php if (isset($CFG['showcalculator']) && ($groupid==11 || $myrights == 100 || $userid == 541991)) : ?>
+            <label for="showcalculator" class=form>Embedded Calculator</label>
             <span class=formright>
 				<select name="showcalculator" id="showcalculator" v-model="showcalculator">
 					<option value="">None</option>
