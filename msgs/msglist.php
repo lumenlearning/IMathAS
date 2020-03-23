@@ -145,12 +145,58 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 	}
 	if (isset($_GET['add'])) {
 		if (isset($_POST['subject']) && isset($_POST['to']) && $_POST['to']!='0') {
+			$msgToPost = Sanitize::onlyInt($_POST['to']);
+
+			// validate message settings allow this
+			$stm = $DBH->prepare("SELECT msgset FROM imas_courses WHERE id=:id");
+			$stm->execute(array(':id'=>$cidP));
+			$msgset = ($stm->fetchColumn(0))%5;
+			$stm = $DBH->prepare("SELECT userid FROM imas_teachers WHERE courseid=?");
+			$stm->execute(array($cidP));
+			$teacherList = $stm->fetchAll(PDO::FETCH_COLUMN, 0);
+			$stm = $DBH->prepare("SELECT userid FROM imas_tutors WHERE courseid=?");
+			$stm->execute(array($cidP));
+			$tutorList = $stm->fetchAll(PDO::FETCH_COLUMN, 0);
+			$stm = $DBH->prepare("SELECT userid FROM imas_students WHERE courseid=?");
+			$stm->execute(array($cidP));
+			$studentList = $stm->fetchAll(PDO::FETCH_COLUMN, 0);
+
+			$isvalid = false;
+			if (in_array($userid, $studentList)) { // sender is student
+				if ($msgset == 2 && in_array($msgToPost, $studentList)) { //only can send to student
+					$isvalid = true;
+				} else if ($msgset == 1 && // only can send to teacher
+					(in_array($msgToPost, $teacherList) || in_array($msgToPost, $tutorList))
+				) {
+					$isvalid = true;
+				} else if ($msgset == 0 && (
+					in_array($msgToPost, $studentList) ||
+					in_array($msgToPost, $teacherList) ||
+					in_array($msgToPost, $tutorList)
+				)) {
+					$isvalid = true;
+				}
+			} else if (in_array($userid, $teacherList) || in_array($userid, $tutorList)) { // sender is teacher or tutor
+				if ($msgset < 4 && (
+					in_array($msgToPost, $studentList) ||
+					in_array($msgToPost, $teacherList) ||
+					in_array($msgToPost, $tutorList)
+				)) {
+					$isvalid = true;
+				}
+			}
+			if (!$isvalid) {
+				require("../header.php");
+				echo 'You are not permitted to send a message to that user in this course.';
+				require("../footer.php");
+				exit;
+			}
+
       $messagePost = Sanitize::incomingHtml($_POST['message']);
 			$subjectPost = Sanitize::stripHtmlTags($_POST['subject']);
 			if (trim($subjectPost)=='') {
 				$subjectPost = '('._('none').')';
 			}
-			$msgToPost = Sanitize::onlyInt($_POST['to']);
 
       $now = time();
 			$query = "INSERT INTO imas_msgs (title,message,msgto,msgfrom,senddate,isread,courseid) VALUES ";
@@ -485,7 +531,7 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 			echo "<span class=formright><input type=text size=50 name=subject id=subject value=\"".Sanitize::encodeStringForDisplay($title)."\"></span><br class=form>\n";
 			echo "<span class=form><label for=\"message\">Message:</label></span>";
 			echo "<span class=left><div class=editor><textarea id=message name=message style=\"width: 100%;\" rows=20 cols=70>";
-			echo Sanitize::encodeStringForDisplay($message);
+			echo Sanitize::encodeStringForDisplay($message, true);
 			echo "</textarea></div></span><br class=form>\n";
 			if ($replyto>0) {
 				echo '<span class="form"></span><span class="formright"><input type="checkbox" name="sendunread" id="sendunread" value="1"/> <label for="sendunread">'._('Mark original message unread').'</label></span><br class="form"/>';
@@ -503,21 +549,21 @@ If (isread&2)==2 && (isread&4)==4  then should be deleted
 		}
 	}
 	if (isset($_POST['unread'])) {
-		if (count($_POST['checked'])>0) {
+		if (!empty($_POST['checked'])) {
       $checklist = implode(',', array_map('intval', $_POST['checked']));
   		$query = "UPDATE imas_msgs SET isread=(isread&~1) WHERE id IN ($checklist) AND (isread&1)=1";
       $DBH->query($query);
 	 }
 	}
 	if (isset($_POST['markread'])) {
-		if (count($_POST['checked'])>0) {
+		if (!empty($_POST['checked'])) {
       $checklist = implode(',', array_map('intval', $_POST['checked']));
       $query = "UPDATE imas_msgs SET isread=(isread|1) WHERE id IN ($checklist) AND (isread&1)=0";
       $DBH->query($query);
 	  }
 	}
 	if (isset($_POST['remove'])) {
-		if (count($_POST['checked'])>0) {
+		if (!empty($_POST['checked'])) {
       $checklist = implode(',', array_map('intval', $_POST['checked']));
   		$query = "DELETE FROM imas_msgs WHERE id IN ($checklist) AND (isread&4)=4";
       $DBH->query($query);

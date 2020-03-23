@@ -429,7 +429,9 @@ function GB_doneload() {
 }
 function GB_hide() {
 	document.getElementById("GB_window").style.display = "none";
-	document.getElementById("GB_overlay").style.display = "none";
+	if (document.getElementById("GB_overlay")) {
+		document.getElementById("GB_overlay").style.display = "none";
+	}
 	$(document).off('keydown.GB');
 }
 
@@ -687,6 +689,7 @@ function togglevideoembed() {
 	} else {
 		var href = jQuery(this).prev().attr('href');
 		var qsconn = '?';
+		href = href.replace(/%3F/g,'?').replace(/%3D/g,'=');
 		if (href.match(/youtube\.com/)) {
 			if (href.indexOf('playlist?list=')>-1) {
 				var vidid = href.split('list=')[1].split(/[#&]/)[0];
@@ -1092,7 +1095,7 @@ jQuery(document).ready(function($) {
 		}
 	});
 	$(document).on("keydown", function (e) {
-	    if (e.which === 8 && !$(e.target).is("input[type='text']:not([readonly]),input[type='number']:not([readonly]),input:not([type]):not([readonly]),input[type='password']:not([readonly]), textarea, [contenteditable='true']")) {
+	    if (e.which === 8 && !$(e.target).is("input[type='text']:not([readonly]),input[type='number']:not([readonly]),input:not([type]):not([readonly]),input[type='password']:not([readonly]),input[type='url']:not([readonly]),input[type='email']:not([readonly]), textarea, [contenteditable='true']")) {
 		e.preventDefault();
 	    }
 	});
@@ -1216,6 +1219,8 @@ function setActiveTab(el) {
   var toggle   = '[data-toggle="dropdown"]'
   var Dropdown = function (element) {
     $(element).on('click.bs.dropdown', this.toggle)
+		var $parent = getParent($(element));
+		$parent.find('[role=menu].dropdown-menu li:not(.disabled) a').attr('role','menuitem');
   }
 
   Dropdown.VERSION = '3.3.5'
@@ -1285,6 +1290,7 @@ function setActiveTab(el) {
       $parent
         .toggleClass('open')
         .trigger('shown.bs.dropdown', relatedTarget)
+
     }
 
     return false
@@ -1360,5 +1366,9 @@ function setActiveTab(el) {
     .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
     .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
     .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
+
+	$(function() {
+		$('[role=menu].dropdown-menu li:not(.disabled) a').attr('role','menuitem');
+	});
 
 }(jQuery);

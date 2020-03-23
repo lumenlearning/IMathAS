@@ -31,9 +31,9 @@ if (isset($CFG['hooks']['banner'])) {
 
 //pagelayout:  array of arrays.  pagelayout[0] = fullwidth header, [1] = left bar 25%, [2] = rigth bar 75%
 //[3]: 0 for newmsg note next to courses, 1 for newpost note next to courses
-$stm = $DBH->prepare("SELECT homelayout,hideonpostswidget,jsondata FROM imas_users WHERE id=:id");
+$stm = $DBH->prepare("SELECT homelayout,hideonpostswidget,jsondata,email FROM imas_users WHERE id=:id");
 $stm->execute(array(':id'=>$userid));
-list($homelayout,$hideonpostswidget,$jsondata) = $stm->fetch(PDO::FETCH_NUM);
+list($homelayout,$hideonpostswidget,$jsondata,$myemail) = $stm->fetch(PDO::FETCH_NUM);
 $jsondata = json_decode($jsondata, true);
 $courseListOrder = isset($jsondata['courseListOrder'])?$jsondata['courseListOrder']:null;
 
@@ -203,7 +203,7 @@ if ($myrights>10) {
 				} else {
 					$page_teacherCourseData[] = $line;
 				}
-				
+
 				$page_coursenames[$line['id']] = $line['name'];
 				if (!in_array($line['id'],$hideonpostswidget)) {
 					$postcheckcids[] = $line['id'];
@@ -261,9 +261,10 @@ if ($showpostsgadget && count($postcheckcids)>0) {
 	$query .= "AND imas_forums.courseid IN ($postcidlist) ";  //is int's from DB - safe
 	$query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid=:userid ";
 	$query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) AND imas_forum_threads.lastposttime<:now ";
-	$query .= "ORDER BY imas_forum_threads.lastposttime DESC";
+	$query .= "AND imas_forum_threads.lastposttime>:old ORDER BY imas_forum_threads.lastposttime DESC";
+
 	$stm = $DBH->prepare($query);
-	$stm->execute(array(':userid'=>$userid, ':now'=>$now));
+	$stm->execute(array(':userid'=>$userid, ':now'=>$now, ':old'=>$now - 365*24*60*60));
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if (!isset($newpostcnt[$line['courseid']])) {
 			$newpostcnt[$line['courseid']] = 1;
@@ -312,11 +313,12 @@ if ($showpostsgadget && count($postcheckstucids)>0) {
 	$query .= "AND (imas_forums.avail=2 OR (imas_forums.avail=1 AND imas_forums.startdate<$now && imas_forums.enddate>$now)) ";
 	$query .= "AND imas_forums.courseid IN ($poststucidlist) "; //is int's from DB - safe
 	$query .= "LEFT JOIN imas_forum_views as mfv ON mfv.threadid=imas_forum_threads.id AND mfv.userid=:userid ";
-	$query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) AND imas_forum_threads.lastposttime<:now ";
+	$query .= "WHERE (imas_forum_threads.lastposttime>mfv.lastview OR (mfv.lastview IS NULL)) ";
+	$query .= "AND imas_forum_threads.lastposttime<:now AND imas_forum_threads.lastposttime>:old ";
 	$query .= "AND (imas_forum_threads.stugroupid=0 OR imas_forum_threads.stugroupid IN (SELECT stugroupid FROM imas_stugroupmembers WHERE userid=:useridB)) ";
 	$query .= "ORDER BY imas_forum_threads.lastposttime DESC";
 	$stm = $DBH->prepare($query);
-	$stm->execute(array(':userid'=>$userid, ':useridB'=>$userid, ':now'=>$now));
+	$stm->execute(array(':userid'=>$userid, ':useridB'=>$userid, ':now'=>$now, ':old'=>$now - 365*24*60*60));
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
 		if (!isset($newpostcnt[$line['courseid']])) {
 			$newpostcnt[$line['courseid']] = 1;
@@ -450,6 +452,12 @@ if ($myrights==100 || ($myspecialrights&64)!=0) {
 if (isset($tzname) && isset($sessiondata['logintzname']) && $tzname!=$sessiondata['logintzname']) {
 	echo '<div class="sysnotice">'.sprintf(_('Notice: You have requested that times be displayed based on the <b>%s</b> time zone, and your computer is reporting you are currently in a different time zone. Be aware that times will display based on the %s timezone as requested, not your local time'),$tzname,$tzname).'</div>';
 }
+if (substr($myemail,0,7)==='BOUNCED') {
+	echo '<div class="sysnotice">';
+	echo _('We have been unable to send emails to the address you have listed. Please update the email address in your profile.').' ';
+	echo '<a href="forms.php?action=chguserinfo">'._('Edit Now').'</a>.';
+	echo '</div>';
+}
 
 
 for ($i=0; $i<3; $i++) {
@@ -524,7 +532,7 @@ require('./footer.php');
 function printCourses($data,$title,$type=null,$hashiddencourses=false) {
 	global $myrights, $shownewmsgnote, $shownewpostnote, $imasroot, $userid, $courseListOrder;
 	if (count($data)==0 && $type=='tutor' && !$hashiddencourses) {return;}
-	
+
 	echo '<div role="navigation" aria-label="'.$title.'">';
 	echo '<div class="block"><h2>'.$title.'</h2></div>';
 	echo '<div class="blockitems"><ul class="courselist courselist-'.$type.'">';
@@ -593,14 +601,14 @@ function printCourseOrder($order, $data, $type, &$printed) {
 			printCourseLine($data[$item], $type);
 			$printed[] = $item;
 		}
-	}		
+	}
 }
 
 function printCourseLine($data, $type=null) {
 	global $shownewmsgnote, $shownewpostnote, $userid;
 	global $myrights, $newmsgcnt, $newpostcnt;
 	$now = time();
-	
+
 	echo '<li';
 	if ($type=='teach' && $myrights>19) {
 		echo ' data-isowner="'.($data['ownerid']==$userid?'true':'false').'"';
@@ -614,7 +622,7 @@ function printCourseLine($data, $type=null) {
 		echo Sanitize::encodeStringForDisplay($data['name']);
 	}
 	if ($type=='teach' && $data['cleanupdate']>1) {
-		echo ' <span style="color:orange;" title="'._('course is scheduled for cleanup').'">**</span>';	
+		echo ' <span style="color:orange;" title="'._('course is scheduled for cleanup').'">**</span>';
 	}
 	if (isset($data['available']) && (($data['available']&1)==1)) {
 		echo ' <em style="color:green;" class=small>', _('Unavailable'), '</em>';
@@ -628,7 +636,7 @@ function printCourseLine($data, $type=null) {
 		echo _('Ended ').tzdate('m/d/Y', $data['enddate']);
 		echo '</em>';
 	}
-	
+
 	if (isset($data['lockaid']) && $data['lockaid']>0) {
 		echo ' <em style="color:green;">', _('Lockdown'), '</em>';
 	}
@@ -644,7 +652,7 @@ function printCourseLine($data, $type=null) {
 		echo '<div class="delx"><a href="#" onclick="return hidefromcourselist(this,'.$data['id'].',\''.$type.'\');" title="'._("Hide from course list").'" aria-label="'._("Hide from course list").'">x</a></div>';
 	}
 	echo '</li>';
-	
+
 }
 
 function printMessagesGadget() {
