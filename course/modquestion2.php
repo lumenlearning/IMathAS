@@ -33,6 +33,7 @@ if (!(isset($teacherid))) {
 			$regen = 0;
 			$showans = 0;
 			$rubric = 0;
+            $showcalculator = 'default';
 			$showhints = -1;
 			$fixedseeds = null;
 			$_POST['copies'] = 1;
