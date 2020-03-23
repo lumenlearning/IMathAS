@@ -60,20 +60,21 @@ if (!(isset($teacherid))) {
 			$showans = $_POST['showans'];
 			$rubric = intval($_POST['rubric']);
 			$showhints = intval($_POST['showhints']);
+            $showcalculator = $_POST['showcalculator'];
 		}
 		if (isset($_GET['id'])) { //already have id - updating
 			if (isset($_POST['replacementid']) && $_POST['replacementid']!='' && intval($_POST['replacementid'])!=0) {
-				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,rubric=:rubric,showhints=:showhints,fixedseeds=:fixedseeds";
+				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,rubric=:rubric,showcalculator=:showcalculator,showhints=:showhints,fixedseeds=:fixedseeds";
 				$query .= ',questionsetid=:questionsetid WHERE id=:id';
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen, ':showans'=>$showans, ':rubric'=>$rubric,
-					':showhints'=>$showhints,  ':fixedseeds'=>$fixedseeds, ':questionsetid'=>$_POST['replacementid'], ':id'=>$_GET['id']));
+					'showcalculator'=>$showcalculator, ':showhints'=>$showhints,  ':fixedseeds'=>$fixedseeds, ':questionsetid'=>$_POST['replacementid'], ':id'=>$_GET['id']));
 			} else {
-				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,rubric=:rubric,showhints=:showhints,fixedseeds=:fixedseeds";
+				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,rubric=:rubric,showcalculator=:showcalculator,showhints=:showhints,fixedseeds=:fixedseeds";
 				$query .= " WHERE id=:id";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen, ':showans'=>$showans,
-					':rubric'=>$rubric, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds, ':id'=>$_GET['id']));
+					':rubric'=>$rubric, ':showcalculator'=>$showcalculator, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds, ':id'=>$_GET['id']));
 			}
 			if (isset($_POST['copies']) && $_POST['copies']>0) {
 				$stm = $DBH->prepare("SELECT questionsetid FROM imas_questions WHERE id=:id");
@@ -87,11 +88,11 @@ if (!(isset($teacherid))) {
 			$stm->execute(array(':id'=>$aid));
 			list($itemorder,$defpoints) = $stm->fetch(PDO::FETCH_NUM);
 			for ($i=0;$i<$_POST['copies'];$i++) {
-				$query = "INSERT INTO imas_questions (assessmentid,points,attempts,penalty,regen,showans,questionsetid,rubric,showhints,fixedseeds) ";
-				$query .= "VALUES (:assessmentid, :points, :attempts, :penalty, :regen, :showans, :questionsetid, :rubric, :showhints, :fixedseeds)";
+				$query = "INSERT INTO imas_questions (assessmentid,points,attempts,penalty,regen,showans,questionsetid,rubric,showcalculator,showhints,fixedseeds) ";
+				$query .= "VALUES (:assessmentid, :points, :attempts, :penalty, :regen, :showans, :questionsetid, :rubric, :showcalculator, :showhints, :fixedseeds)";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':assessmentid'=>$aid, ':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen,
-					':showans'=>$showans, ':questionsetid'=>$_GET['qsetid'], ':rubric'=>$rubric, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds));
+					':showans'=>$showans, ':questionsetid'=>$_GET['qsetid'], ':rubric'=>$rubric, ':showcalculator'=>$showcalculator, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds));
 				$qid = $DBH->lastInsertId();
 
 				//add to itemorder
@@ -133,7 +134,7 @@ if (!(isset($teacherid))) {
 	} else { //DEFAULT DATA MANIPULATION
 
 		if (isset($_GET['id'])) {
-			$stm = $DBH->prepare("SELECT points,attempts,penalty,regen,showans,rubric,showhints,questionsetid,fixedseeds FROM imas_questions WHERE id=:id");
+			$stm = $DBH->prepare("SELECT points,attempts,penalty,regen,showans,rubric,showcalculator,showhints,questionsetid,fixedseeds FROM imas_questions WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			$line = $stm->fetch(PDO::FETCH_ASSOC);
 			if ($line['penalty']{0}==='S') {
@@ -158,6 +159,7 @@ if (!(isset($teacherid))) {
 			$line['regen']=0;
 			$line['showans']='0';
 			$line['rubric']=0;
+            $line['showcalculator']='default';
 			$line['showhints']=-1;
 			$qsetid = $_GET['qsetid'];
 		}
@@ -193,7 +195,7 @@ if (!(isset($teacherid))) {
 
 		//get defaults
 		$query = "SELECT defpoints,defattempts,defpenalty,defregens,";
-    $query .= "showans,submitby,showhints,shuffle FROM imas_assessments ";
+    $query .= "showans,submitby,showcalculator,showhints,shuffle FROM imas_assessments ";
 		$query .= "WHERE id=:id";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$aid));
@@ -215,6 +217,14 @@ if (!(isset($teacherid))) {
 		} else if (substr($defaults['showans'],0,5)=='after') {
 			$defaults['showans'] = sprintf(_('After %d tries'), substr($defaults['showans'], 6));
 		}
+
+        if ($defaults['showcalculator'] == 'default') {
+            $defaults['showcalculator'] = _('Default');
+        } else if ($defaults['showcalculator'] == 'none') {
+            $defaults['showcalculator'] = _('None');
+        } else if (isset($CFG['showcalculator'][$defaults['showcalculator']])) {
+            $defaults['showcalculator'] = _($CFG['showcalculator'][$defaults['showcalculator']]);
+        }
     if ($defaults['showhints'] == 0) {
       $defaults['showhints'] = _('No');
     } else if ($defaults['showhints'] == 1) {
@@ -309,6 +319,22 @@ if ($defaults['submitby'] == 'by_question' && $defaults['defregens'] > 1) {
      <option value="3" <?php if ($line['showhints']==3) { echo 'selected="1"';}?>>Hints and Video/text buttons</option>
     </select><br/><i class="grey">Default: <?php echo $defaults['showhints'];?></i></span><br class="form"/>
 
+<?php if (isset($CFG['showcalculator']) && ($groupid==11 || $myrights == 100 || $userid == 541991)) : ?>
+    <span class=form>Show Embedded Calculator?</span><span class=formright>
+        <select name="showcalculator">
+            <option value="default" <?php if ($line['showcalculator']=='default') { echo 'selected="1"';}?>>Use Default</option>
+            <option value="none" <?php if ($line['showcalculator']=='none') { echo 'selected="1"';}?>>No</option>
+            <?php
+            foreach ($CFG['showcalculator'] as $key=>$value) {
+                echo "<option value=\"$key\"";
+                if ($line['showcalculator'] == $key) {
+                    echo 'selected="1"';
+                }
+                echo ">$value</option>\n";
+            }
+            ?>
+        </select><br/><i class="grey">Default: <?php echo $defaults['showcalculator'];?></i></span><br class="form"/>
+<?php endif; ?>
 <span class=form>Use Scoring Rubric</span><span class=formright>
 <?php
     writeHtmlSelect('rubric',$rubric_vals,$rubric_names,$line['rubric']);
