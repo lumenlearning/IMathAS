@@ -75,11 +75,12 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		} else {
 			$checked = $_POST['nchecked'];
 			foreach ($checked as $qsetid) {
-				$query = "INSERT INTO imas_questions (assessmentid,points,attempts,penalty,questionsetid,showhints) ";
-				$query .= "VALUES (:assessmentid, :points, :attempts, :penalty, :questionsetid, :showhints);";
+				$query = "INSERT INTO imas_questions (assessmentid,points,attempts,penalty,questionsetid,showcalculator,showhints) ";
+				$query .= "VALUES (:assessmentid, :points, :attempts, :penalty, :questionsetid, :showcalculator, :showhints);";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':assessmentid'=>$aid, ':points'=>9999, ':attempts'=>9999,
 					':penalty'=>9999, ':questionsetid'=>$qsetid,
+                    ':showcalculator' => 'default',
 					':showhints' => ($aver > 1) ? -1 : 0
 				));
 				$qids[] = $DBH->lastInsertId();
@@ -456,9 +457,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	} else {
 		$beentaken = false;
 	}
-	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showhints,intro FROM imas_assessments WHERE id=:id");
+	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showcalculator,showhints,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
-	list($itemorder,$page_assessmentName,$defpoints,$displaymethod,$showhintsdef, $assessintro) = $stm->fetch(PDO::FETCH_NUM);
+	list($itemorder,$page_assessmentName,$defpoints,$displaymethod,$showcalculatordef, $showhintsdef, $assessintro) = $stm->fetch(PDO::FETCH_NUM);
 	$ln = 1;
 
 	// Format of imas_assessments.intro is a JSON representation like
@@ -499,7 +500,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 	$questionjsarr = array();
 	$existingq = array();
-	$query = "SELECT imas_questions.id,imas_questions.questionsetid,imas_questionset.description,imas_questionset.userights,imas_questionset.ownerid,imas_questionset.qtype,imas_questions.points,imas_questions.withdrawn,imas_questionset.extref,imas_users.groupid,imas_questions.showhints,imas_questionset.solution,imas_questionset.solutionopts,imas_questionset.avgtime FROM imas_questions ";
+	$query = "SELECT imas_questions.id,imas_questions.questionsetid,imas_questionset.description,imas_questionset.userights,imas_questionset.ownerid,imas_questionset.qtype,imas_questions.points,imas_questions.withdrawn,imas_questionset.extref,imas_users.groupid,imas_questions.showcalculator,imas_questions.showhints,imas_questionset.solution,imas_questionset.solutionopts,imas_questionset.avgtime FROM imas_questions ";
 	$query .= "JOIN imas_questionset ON imas_questionset.id=imas_questions.questionsetid JOIN imas_users ON imas_questionset.ownerid=imas_users.id ";
 	$query .= "WHERE imas_questions.assessmentid=:aid";
 	$stm = $DBH->prepare($query);
