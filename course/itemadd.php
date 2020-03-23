@@ -44,9 +44,7 @@ if (isset($_GET['id'])) {
 }
 
 if ($returningFromPreview) {
-    // This was stored by /desmos/js/editItem.js.
-    $previewId = $_GET['preview_id'];
-    $serializedData = $_SESSION['tempSerializedPreviewData-' . $previewId];
+    $serializedData = $_POST['desmos_form_data'];
     parse_str($serializedData, $desmosFormData);
 
     $item->fromFormData($desmosFormData);
@@ -215,15 +213,20 @@ $page_formActionTag = "itemadd.php?" . \Sanitize::generateQueryStringFromMap(
     $page_actionArray
 );
 
-$curBreadcrumb = "$breadcrumbbase <a href=\"$imasroot/course/course.php?cid=$cid\">"
-    .\Sanitize::encodeStringForDisplay($coursename)."</a> ";
 if (isset($_GET['id'])) {  //already have id; update
-    $curBreadcrumb .= "&gt; Modify " . $item->itemname . "\n";
     $pagetitle = "Modify " . $item->itemname;
 } else {
-    $curBreadcrumb .= "&gt; Add " . $item->itemname . "\n";
     $pagetitle = "Add " . $item->itemname;
 }
+$curBreadcrumb = $breadcrumbbase;
+if (!isset($sessiondata['ltiitemtype'])) {
+    $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
+        . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
+}
+if ($curBreadcrumb != '') {
+    $curBreadcrumb .= $pagetitle;
+}
+
 /******* begin html output ********/
 // Use TinyMCE for Desmos items.
 $useeditor = 'noinit';

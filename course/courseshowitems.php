@@ -1933,11 +1933,7 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
-		$query = "SELECT groupid FROM imas_users WHERE id=:id";
-		$stm = $DBH->prepare($query);
-		$stm->execute(array(':id'=>$userid));
-		$groupid = $stm->fetchColumn();
-		if ($myrights == 100 || ($groupid==11 && $myrights >= 40)) {
+		if ($myrights >= 20) {
 			$html .= "<option value=\"desmos\">" . _('Add Desmos Interactive') . "</option>\n";
 		}
 		// #### End OHM-specific code #####################################################

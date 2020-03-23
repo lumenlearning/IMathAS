@@ -20,7 +20,7 @@
     <label for="import" class="form-label">Desmos URL</label>
     <input type="text" id="import" class="form-input form-input--fw" name="import" value="" placeholder="https://www.desmos.com/calculator/example" />
     <div class="u-margin-top-sm button-wrapper">
-        <button id="desmos_preview_button" class="button" type="button" onclick="top.tinymce.activeEditor.windowManager.close();">Cancel</button>
+        <button id="desmos_preview_button" class="button" type="button" onclick="parent.tinymce.activeEditor.windowManager.close();">Cancel</button>
         <button id="desmos_form_submit_button" class="button" type="submit" onclick="desmosDialog.import();" disabled>Import</button>
     </div>
 </form>

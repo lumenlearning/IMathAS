@@ -71,11 +71,17 @@
                             $numsteps, $numsteps,
                             $item->steps[$i]['title']
                         );
-                        printf(
-                            "<input type='hidden' name='step[%d]' value='%d'>",
-                            $numsteps,
-                            $item->steps[$i]['id']
-                        );
+                        if (!empty($item->steps[$i]['id'])) {
+                            // If we're returning from previewing a new Desmos item
+                            // that is not saved in the DB yet, this will add IDs
+                            // of "0" to every item, resulting in data loss.
+                            // JIRA: OHM-463
+                            printf(
+                                "<input type='hidden' name='step[%d]' value='%d'>",
+                                $numsteps,
+                                $item->steps[$i]['id']
+                            );
+                        }
                         echo "<button class='js-delete u-button-reset delete-trigger' type='button' aria-label='Delete this item.'><svg aria-hidden='true'><use xlink:href='#lux-icon-x'></use></svg></button>";
                         echo "</li>";
                         $numsteps++;
@@ -98,9 +104,19 @@
         </div>
         <div id="desmos_save_buttons" class="u-margin-top-sm">
             <button id="desmos_form_submit_button" class="button button--primary" type="submit" name="submitbtn" value="Submit">Save</button>
-            <button id="desmos_preview_button" class="desmos button" type="button">Preview</button>
+            </form>
+            <?php
+            $blockParam = 0 == strlen($_GET['block']) ? '' : '&block=' . intval($_GET['block']);
+            $tbParam = 0 == strlen($_GET['rb']) ? '' : '&tb=' . Sanitize::encodeUrlParam($_GET['tb']);
+            $typeIdParam = empty($typeid) ? '' : '&id=' . intval($typeid);
+            $previewUrl = sprintf('%s/course/itempreview.php?cid=%d&type=%s&id=%d%s%s%s',
+                $basesiteurl, $cid, $type, $typeid, $typeIdParam, $blockParam, $tbParam);
+            ?>
+            <form id="desmos_preview_form" method="POST" action="<?php echo $previewUrl; ?>" class="u-inline-block">
+                <input id="desmos_edit_form_data" type="hidden" name="desmos_form_data"/>
+                <button id="desmos_preview_button" class="u-margin-left-xs button" type="button">Preview</button>
+            </form>
             <span id="desmos_save_status"></span>
         </div>
-    </form>
     <?php include 'icons.svg'; ?>
 </div>

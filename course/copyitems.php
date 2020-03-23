@@ -483,10 +483,21 @@ if ($overwriteBody==1) {
 
 // if source is using assess2 and dest is not, bail
 if ($sourceUIver > $destUIver) {
-	echo '<p>The course you selected is using a newer version of assessments than
-	your course. It is not possible to convert assessment back to an older format, sorry.</p>';
-	require("../footer.php");
-	exit;
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    echo '<p class=noticetext>'._('The course you are copying from uses the new assessment format which cannot be used in an old assessment format course. Only non-assessment items are displayed below for copy.').'</p>';
+    /* echo '<p>The course you selected is using a newer version of assessments than
+    your course. It is not possible to convert assessment back to an older format, sorry.</p>';
+    require("../footer.php");
+    exit; */
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 }
 
 ?>
@@ -507,6 +518,7 @@ if ($sourceUIver > $destUIver) {
 	<form id="qform" method=post action="copyitems.php?cid=<?php echo $cid ?>&action=copy" onsubmit="return copyitemsonsubmit();">
 	<input type=hidden name=ekey id=ekey value="<?php echo Sanitize::encodeStringForDisplay($_POST['ekey']); ?>">
 	<input type=hidden name=ctc id=ctc value="<?php echo Sanitize::encodeStringForDisplay($ctc); ?>">
+<?php if ($sourceUIver <= $destUIver) { ?>
 	<p>What to copy:
 	<?php
 		if ($_POST['ekey']=='') { echo ' <a class="small" target="_blank" href="course.php?cid='.Sanitize::onlyInt($ctc).'">Preview source course</a>';}
@@ -521,6 +533,7 @@ if ($sourceUIver > $destUIver) {
 		values </p>
 	</div>
 	<div id="selectitemstocopy" style="display:none;">
+<?php } ?>
 	<h3>Select Items to Copy</h3>
 
 	Check: <a href="#" onclick="return chkAllNone('qform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('qform','checked[]',false)">None</a>
@@ -541,7 +554,8 @@ if ($sourceUIver > $destUIver) {
 		$alt=0;
 
 		for ($i = 0 ; $i<(count($ids)); $i++) {
-			if ($alt==0) {echo "		<tr class=even>"; $alt=1;} else {echo "		<tr class=odd>"; $alt=0;}
+            if ($sourceUIver <= $destUIver || strpos($types[$i],'Assessment') === false) { // #### OHM-specific code #####################################################
+            if ($alt==0) {echo "		<tr class=even>"; $alt=1;} else {echo "		<tr class=odd>"; $alt=0;}
 			echo '<td>';
 			if (strpos($types[$i],'Block')!==false) {
 				echo "<input type=checkbox name='checked[]' value='{$ids[$i]}' id='{$parents[$i]}' ";
@@ -568,6 +582,17 @@ if ($sourceUIver > $destUIver) {
 					case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
 					case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
 					case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    // #### Begin OHM-specific code #####################################################
+                    case 'DesmosItem': echo $CFG['CPS']['miniicons']['desmos']; break;
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
+                    // #### End OHM-specific code #####################################################
 				}
 				echo '" class="floatleft"/><div style="margin-left:21px">'.$names[$i].'</div></td>';
 			} else {
@@ -579,6 +604,7 @@ if ($sourceUIver > $destUIver) {
 			<td><?php echo $sums[$i] ?></td>
 		</tr>
 <?php
+        } // #### OHM-specific code #####################################################
 		}
 ?>
 
@@ -586,6 +612,7 @@ if ($sourceUIver > $destUIver) {
 	</table>
 </div>
 	<p> </p>
+<?php if ($sourceUIver <= $destUIver) { ?>
 <div id="copyoptions" style="display:none;">
 	<fieldset><legend>Options</legend>
 	<table>
@@ -621,6 +648,7 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 	</tbody>
 	</table>
 	</fieldset>
+<?php } ?>
 	</div>
 <?php
 	if ($sourceUIver < $destUIver) {

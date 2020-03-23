@@ -108,15 +108,81 @@ class DesmosItem extends CourseItem
     /**
      * Find desmos_items item by id
      *
-     * @param int $typeid desmos_items.id
+     * @param int $typeid    desmos_items.id
+     * @param int $courseid  null | desmos_item.courseid
      *
      * @return $this|CourseItem
      */
-    public function findItem(int $typeid)
+    public function findItem(int $typeid, int $courseid = null)
     {
-        $query = "SELECT * FROM desmos_items WHERE id=:id";
-        $stm = $this->dbh->prepare($query);
-        $stm->execute(array(':id' => $typeid));
+        $query = "SELECT * FROM desmos_items WHERE id=:typeid";
+        if ($courseid != null) {
+            $query .= " AND courseid=:courseid";
+            $stm = $this->dbh->prepare($query);
+            $stm->bindValue(":courseid", $courseid);
+        } else {
+            $stm = $this->dbh->prepare($query);
+        }
+        $stm->bindValue(":typeid", $typeid);
+
+        $stm->execute();
+        $item = $stm->fetch(PDO::FETCH_ASSOC);
+        if (!$item) {
+            return false;
+        }
+
+        $this->setItem($item);
+        $this->steps = DesmosSteps::findSteps($this->typeid);
+        $this->setStepOrder();
+        $this->findTags();
+        return $this;
+    }
+
+    /**
+     * Find desmos_items items by id in ancestors
+     *
+     * @param int $typeid   desmos_items.id
+     * @param int $courseid desmos_item.courseid
+     * @param string $where desmos_item.ancestors
+     *
+     * @return array
+     */
+    public static function findAncestors(int $typeid, int $courseid, string $where = 'start')
+    {
+        $query = "SELECT id,title,itemid_chain as ancestors FROM desmos_items WHERE itemid_chain REGEXP :typeid AND courseid=:courseid";
+        if ($where == 'all') {
+            $typeid = '[[:<:]]' . $typeid . '[[:>:]]';
+        } else {
+            $typeid = '^([0-9]+:)?' . $typeid . '[[:>:]]';
+        }
+        $stm = $GLOBALS['DBH']->prepare($query);
+        $stm->bindValue(":courseid", $courseid);
+        $stm->bindValue(":typeid", $typeid);
+
+        $stm->execute();
+        return $stm->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Find desmos_items item by title
+     *
+     * @param string $title desmos_items.title
+     *
+     * @return $this|CourseItem
+     */
+    public function findItemByTitle(string $title, int $courseid = null)
+    {
+        $query = "SELECT * FROM desmos_items WHERE title=:title";
+        if ($courseid != null) {
+            $query .= " AND courseid=:courseid";
+            $stm = $this->dbh->prepare($query);
+            $stm->bindValue(":courseid", $courseid);
+        } else {
+            $stm = $this->dbh->prepare($query);
+        }
+        $stm->bindValue(":title", $title);
+
+        $stm->execute();
         $item = $stm->fetch(PDO::FETCH_ASSOC);
         if (!$item) {
             return false;
@@ -152,7 +218,7 @@ class DesmosItem extends CourseItem
 
     public static function deleteCourse(int $cid)
     {
-        $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_steps WHERE desmosid IN (SELECT id FROM desmos_interactives WHERE courseid=:id)");
+        $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_steps WHERE desmosid IN (SELECT id FROM desmos_items WHERE courseid=:id)");
         $stm->execute(array(':id'=>$cid));
         $stm = $GLOBALS['DBH']->prepare("DELETE FROM desmos_items WHERE courseid=:id");
         $stm->execute(array(':id'=>$cid));
@@ -220,11 +286,11 @@ class DesmosItem extends CourseItem
     /**
      * Set required parameter
      *
-     * @param null $value or use $this->summary
+     * @param string $value or use $this->summary
      *
      * @return $this|CourseItem
      */
-    public function setSummary($value = null)
+    public function setSummary($value = '')
     {
         if ($value) {
             $this->summary = $value;
@@ -434,8 +500,10 @@ class DesmosItem extends CourseItem
             $steps[$key] = [
                 "title" => $title,
                 "text" => $formData['step_text'][$key],
-                "id" => $formData['step'][$key],
             ];
+            if (!empty($formData['step'][$key])) {
+                $steps[$key]['id'] = $formData['step'][$key];
+            }
         }
         $this->setSteps($steps);
         $this->setStartDate(strtotime($formData['sdate']));
