@@ -463,7 +463,7 @@ for ($i=0; $i<3; $i++) {
 	// #### Begin OHM-specific code #####################################################
 	//call hook, if defined
 	if (!$twocolumn && function_exists('displayBanner')) {
-		displayBanner($myrights);
+		displayBanner($myrights, 1);
 	}
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################
@@ -483,7 +483,7 @@ for ($i=0; $i<3; $i++) {
 
 			//call hook, if defined
 			if (function_exists('displayBanner')) {
-				displayBanner($myrights);
+				displayBanner($myrights, 1);
 			}
 
 			// #### End OHM-specific code #######################################################
