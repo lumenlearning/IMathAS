@@ -3,7 +3,7 @@
 namespace OHM\Exceptions;
 
 /**
- * Class DatabaseSaveException
+ * Class DatabaseWriteException
  *
  * Thrown when attempting INSERT or UPDATE.
  */
