@@ -32,6 +32,17 @@
       v-if = "showHelps"
       :qn = "qn"
     />
+
+    <button @click="toggleDesmosCalc">
+      Calculator
+      <span v-if="showDesmos">X</span>
+    </button>
+    <div v-show="showDesmos">
+      <figure :id="'test-calc' + qn" class="js-desmos desmos-fig" ref="figure" style="width: 600px; height: 400px;">
+      </figure>
+    </div>
+
+
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
         type = "button"
@@ -71,7 +82,9 @@ export default {
   data: function () {
     return {
       timeActivated: null,
-      timeActive: 0
+      timeActive: 0,
+      showDesmos: false,
+      uniqueId: 'test-calc' + this.qn
     };
   },
   computed: {
@@ -150,6 +163,9 @@ export default {
     }
   },
   methods: {
+    toggleDesmosCalc(){
+      this.showDesmos = !this.showDesmos;
+    },
     loadQuestionIfNeeded (skiprender) {
       if (!this.questionContentLoaded && this.active && store.errorMsg === null) {
         actions.loadQuestion(this.qn, false, false);
@@ -314,6 +330,7 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
+      Desmos.ScientificCalculator(this.$refs.figure);
     }
   },
   watch: {

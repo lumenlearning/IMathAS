@@ -52,7 +52,6 @@ if ($isltilimited || $inTreeReader) {
 } else {
   $placeinhead .= '<script>var exiturl = "'.$GLOBALS['basesiteurl'].'/course/course.php?cid='.$cid.'";</script>';
 }
-$placeinhead .= "<script src=\"".$CFG['desmos_calculator']."\"></script>";
 $nologo = true;
 $useeditor = 1;
 require('../header.php');
