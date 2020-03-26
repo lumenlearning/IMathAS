@@ -10,6 +10,7 @@ class OhmBanner
 
     private $env;
     private $userRights;
+    private $bannerId;
 
     private $displayOnlyOncePerBanner; // only show the teacher and student banners once each.
     private $teacherBannerDisplayed;
@@ -19,11 +20,13 @@ class OhmBanner
      * OhmBanner constructor.
      *
      * @param int $userRights The user's rights from imas_users.
+     * @param int $bannerId The banner ID to be displayed.
      */
-    public function __construct(int $userRights)
+    public function __construct(int $userRights, int $bannerId)
     {
         $this->setEnv($_ENV);
         $this->setUserRights($userRights);
+        $this->setBannerId($bannerId);
     }
 
     /**
@@ -83,6 +86,9 @@ class OhmBanner
             return false;
         }
 
+        // Make the banner ID available to the view.
+        $bannerId = $this->bannerId;
+
         include($viewFullPath);
 
         return true;
@@ -109,6 +115,9 @@ class OhmBanner
             return false;
         }
 
+        // Make the banner ID available to the view.
+        $bannerId = $this->bannerId;
+
         include($viewFullPath);
 
         return true;
@@ -131,7 +140,7 @@ class OhmBanner
     }
 
     /**
-     * Set the user's rights. Used during testing.
+     * Set the user's rights.
      *
      * @param int $rights The user's rights from imas_users.
      * @return OhmBanner
@@ -139,6 +148,18 @@ class OhmBanner
     public function setUserRights(int $rights): OhmBanner
     {
         $this->userRights = $rights;
+        return $this;
+    }
+
+    /**
+     * Set the banner ID to be displayed.
+     *
+     * @param int $bannerId The banner ID.
+     * @return OhmBanner
+     */
+    public function setBannerId(int $bannerId): OhmBanner
+    {
+        $this->bannerId = $bannerId;
         return $this;
     }
 

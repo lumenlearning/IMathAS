@@ -17,7 +17,7 @@ final class OhmBannerTest extends TestCase
 
     function setUp(): void
     {
-        $this->ohmBanner = new OhmBanner(0);
+        $this->ohmBanner = new OhmBanner(0, 0);
     }
 
     /*

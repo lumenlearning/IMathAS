@@ -1020,15 +1020,29 @@ div#ohmEditGroup {
 	margin: 0;
 }
 
-.ohm-course-banner-header {
+.ohm-course-banner-header-container {
 	background-color: #1E74D1;
 	border-radius: 4px 4px 0 0;
+	margin: -1px;
+	padding: 0 1em;
+}
+
+.ohm-course-banner-header h2 {
 	color: #fff;
 	font-size: initial;
 	font-weight: normal;
 	line-height: 40px;
-	margin: -1px;
-    padding: 0 1em;
+    display: inline;
+}
+
+.ohm-course-banner-dismiss {
+	color: #fff;
+	line-height: 40px;
+	float: right;
+}
+
+.ohm-course-banner-dismiss #dismiss-banner {
+	cursor: pointer;
 }
 
 .ohm-course-banner-content {
