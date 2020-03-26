@@ -332,7 +332,11 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      if (store.assessInfo.showcalculator) {
+      if (store.assessInfo.showcalculator === 'basic') {
+        Desmos.FourFunctionCalculator(this.$refs.figure);
+      } else if (store.assessInfo.showcalculator === 'graphing') {
+        Desmos.GraphingCalculator(this.$refs.figure);
+      } else if (store.assessInfo.showcalculator) {
         Desmos.ScientificCalculator(this.$refs.figure);
       }
     }
