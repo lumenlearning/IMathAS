@@ -33,15 +33,16 @@
       :qn = "qn"
     />
 
-    <button @click="toggleDesmosCalc">
-      Calculator
-      <span v-if="showDesmos">X</span>
-    </button>
-    <div v-show="showDesmos">
-      <figure :id="'test-calc' + qn" class="js-desmos desmos-fig" ref="figure" style="width: 600px; height: 400px;">
-      </figure>
+    <div v-if="hasCalculator" class="submitbtnwrap">
+      <button @click="toggleEmbeddedCalc">
+        Calculator
+        <span v-if="showCalculator">X</span>
+      </button>
+      <div v-show="showCalculator">
+        <figure :id="'test-calc' + qn" ref="figure" style="width: 600px; height: 400px;">
+        </figure>
+      </div>
     </div>
-
 
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
@@ -83,8 +84,9 @@ export default {
     return {
       timeActivated: null,
       timeActive: 0,
-      showDesmos: false,
-      uniqueId: 'test-calc' + this.qn
+      showCalculator: false,
+      uniqueId: 'test-calc' + this.qn,
+      hasCalculator: store.assessInfo.showcalculator
     };
   },
   computed: {
@@ -106,13 +108,13 @@ export default {
         !store.inPrintView &&
         this.questionData.withdrawn === 0 &&
         this.questionData.canretry && (
-        store.assessInfo.submitby === 'by_question' ||
+          store.assessInfo.submitby === 'by_question' ||
           this.questionData.tries_max > 1
-      ) && (
-      // if livepoll, only show if state is 2
-        store.assessInfo.displaymethod !== 'livepoll' ||
+        ) && (
+          // if livepoll, only show if state is 2
+          store.assessInfo.displaymethod !== 'livepoll' ||
           this.state === 2
-      )
+        )
       );
     },
     submitClass () {
@@ -123,7 +125,7 @@ export default {
       return (store.inProgress &&
         !store.inPrintView &&
         (this.questionData.hasOwnProperty('score') ||
-         this.questionData.status === 'attempted'
+          this.questionData.status === 'attempted'
         ) &&
         store.assessInfo.show_results &&
         (this.questionData.try > 0 ||
@@ -163,8 +165,8 @@ export default {
     }
   },
   methods: {
-    toggleDesmosCalc(){
-      this.showDesmos = !this.showDesmos;
+    toggleEmbeddedCalc(){
+      this.showCalculator = !this.showCalculator;
     },
     loadQuestionIfNeeded (skiprender) {
       if (!this.questionContentLoaded && this.active && store.errorMsg === null) {
@@ -330,7 +332,9 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      Desmos.ScientificCalculator(this.$refs.figure);
+      if (store.assessInfo.showcalculator) {
+        Desmos.ScientificCalculator(this.$refs.figure);
+      }
     }
   },
   watch: {
@@ -340,8 +344,8 @@ export default {
     },
     state: function (newVal, oldVal) {
       if ((newVal > 1 && oldVal <= 1) ||
-          (newVal === 4 && oldVal < 4) ||
-          (newVal === 3 && oldVal === 4)
+        (newVal === 4 && oldVal < 4) ||
+        (newVal === 3 && oldVal === 4)
       ) {
         // force reload
         actions.loadQuestion(this.qn, false, false);
@@ -437,3 +441,4 @@ input[type=text].ansyel, .mq-editable-field.ansyel {
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigyNTUsMTg3LDApIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0gNS4zLDEwLjYgOSwxNC4yIDE4LjUsNC42IDIxLjQsNy40IDksMTkuOCAyLjcsMTMuNSB6IiAvPjwvc3ZnPg==");
 }
 </style>
+

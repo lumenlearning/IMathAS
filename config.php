@@ -50,10 +50,6 @@ ini_set("post_max_size", "10485760");
 
 $CFG['GEN']['useSESmail'] = true;
 
-//SET VUE TO DEVELOPMENT 
-$CFG['assess2-use-vue-dev'] = true;
-$CFG['use_csrfp'] = false;
-
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
