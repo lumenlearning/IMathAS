@@ -9,7 +9,7 @@ function dismissNotice(id) {
   $.ajax({
     method: "POST",
     url: "/ohm/dismiss_notice.php",
-    data: {"notice-id": id}
+    data: { "notice-id": id }
   })
     .done(function (msg) {
       $(".course-banner").slideUp();
