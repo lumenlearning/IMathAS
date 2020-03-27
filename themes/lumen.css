@@ -1045,12 +1045,19 @@ div#ohmEditGroup {
 	color: #fff;
 	font-size: initial;
 	font-weight: normal;
-	line-height: 40px;
 }
 
 .course-banner-close-button {
 	min-width: 42px;
+	opacity: 0.8;
 	text-align: center;
+	transition: opacity 0.1s;
+}
+
+.course-banner-close-button:hover,
+.course-banner-close-button:focus {
+	background-color: transparent;
+	opacity: 1;
 }
 
 .course-banner-content {
