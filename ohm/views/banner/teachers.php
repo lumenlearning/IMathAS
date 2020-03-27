@@ -1,8 +1,9 @@
-<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>">
+<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>" id="course-banner-teacher">
     <header class="course-banner-header">
         <h2>OHM Updates</h2>
         <button
             aria-label="Close this banner."
+            aria-controls="course-banner-teacher"
             class="u-button-reset course-banner-close-button"
             id="js-dismiss-banner"
             type="button">
