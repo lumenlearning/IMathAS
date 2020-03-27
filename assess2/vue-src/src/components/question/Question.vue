@@ -321,6 +321,9 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
+      if (store.assessInfo.showcalculator) {
+        Desmos.ScientificCalculator(this.$refs.figure);
+      }
     } else {
       this.loadQuestionIfNeeded();
     }
@@ -332,9 +335,6 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      if (store.assessInfo.showcalculator) {
-        Desmos.ScientificCalculator(this.$refs.figure);
-      }
     }
   },
   watch: {
