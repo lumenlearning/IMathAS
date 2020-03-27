@@ -33,7 +33,7 @@
       :qn = "qn"
     />
 
-    <div v-if="questionHasCaclulator" class="submitbtnwrap">
+    <div v-if="questionHasCalculator" class="submitbtnwrap">
       <button @click="toggleEmbeddedCalc">
         Calculator
         <span v-if="showCalculator">X</span>
@@ -101,7 +101,7 @@ export default {
     questionContentLoaded () {
       return (this.questionData.html !== null);
     },
-    questionHasCaclulator () {
+    questionHasCalculator () {
       return this.questionData.showcalculator;
     },
     showSubmit () {
@@ -323,11 +323,11 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      if (this.questionHasCaclulator === 'basic') {
+      if (this.questionHasCalculator === 'basic') {
         Desmos.FourFunctionCalculator(this.$refs.figure);
-      } else if (this.questionHasCaclulator === 'graphing') {
+      } else if (this.questionHasCalculator === 'graphing') {
         Desmos.GraphingCalculator(this.$refs.figure);
-      } else if (this.questionHasCaclulator) {
+      } else if (this.questionHasCalculator) {
         Desmos.ScientificCalculator(this.$refs.figure);
       }
     } else {
