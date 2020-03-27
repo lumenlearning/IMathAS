@@ -64,7 +64,7 @@
 		</script>';
 	require("../header.php");
 	echo "<div class=breadcrumb>$breadcrumbbase ";
-	if ($cid>0 && (!isset($sessiondata['ltiitemtype']) || ($sessiondata['ltiitemtype']!=0 && $sessiondata['ltiitemtype']!=4))) {
+	if ($cid>0 && (!isset($_SESSION['ltiitemtype']) || ($_SESSION['ltiitemtype']!=0 && $_SESSION['ltiitemtype']!=4))) {
 		echo " <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
 	}
 	if ($type=='sent') {
@@ -236,6 +236,7 @@
 			. Sanitize::generateQueryStringFromMap(array('cid' => $cid, 'filtercid' => $filtercid, 'page' => $page,
 				'removeid' => $msgid, 'type' => $type))
 			. "'}\">"._('Delete')."</button>";
+
 		echo " | <button type=\"button\" onclick=\"window.location.href='viewmsg.php?"
 			. Sanitize::generateQueryStringFromMap(array('markunread' => 'true', 'cid' => $cid,
 				'filtercid' => $filtercid, 'page' => $page, 'msgid' => $msgid, 'type' => $type))

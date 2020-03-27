@@ -3,7 +3,7 @@
 //(c) 2011 David Lippman
 
 require("init.php");
-if (!isset($sessiondata['ltirole']) || $sessiondata['ltirole']!='instructor') {
+if (!isset($_SESSION['ltirole']) || $_SESSION['ltirole']!='instructor') {
 	echo "Not authorized to view this page";
 	exit;
 }
@@ -19,10 +19,10 @@ if (isset($CFG['hooks']['ltihome'])) {
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
-if ($sessiondata['ltiitemtype']==38) {
+if ($_SESSION['ltiitemtype']==38) {
 	$hascourse = true;
 	$hasplacement = true;
-	$itemid = $sessiondata['ltiitemid'];
+	$itemid = $_SESSION['ltiitemid'];
 	$placementtype = 'DesmosItem';
 	$itemObject = str_replace('Item','', $placementtype) . "\\Models\\" . $placementtype;
 	$item = new $itemObject();
@@ -42,11 +42,11 @@ if ($sessiondata['ltiitemtype']==38) {
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
-if ($sessiondata['ltiitemtype']==0) {
+if ($_SESSION['ltiitemtype']==0) {
 	$hascourse = true;
 	$hasplacement = true;
 	$placementtype = 'assess';
-	$typeid = $sessiondata['ltiitemid'];
+	$typeid = $_SESSION['ltiitemid'];
 	$stm = $DBH->prepare("SELECT courseid FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$typeid));
 	$cid = $stm->fetchColumn(0);
@@ -59,14 +59,14 @@ if ($sessiondata['ltiitemtype']==0) {
 	}
 } else {
 	$stm = $DBH->prepare("SELECT courseid FROM imas_lti_courses WHERE contextid=:contextid AND org=:org");
-	$stm->execute(array(':contextid'=>$sessiondata['lti_context_id'], ':org'=>$sessiondata['ltiorg']));
+	$stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':org'=>$_SESSION['ltiorg']));
 	if ($stm->rowCount()==0) {
 		$hascourse = false;
-		if (isset($sessiondata['lti_launch_get']) && isset($sessiondata['lti_launch_get']['cid'])) {
-			$cid = intval($sessiondata['lti_launch_get']['cid']);
+		if (isset($_SESSION['lti_launch_get']) && isset($_SESSION['lti_launch_get']['cid'])) {
+			$cid = intval($_SESSION['lti_launch_get']['cid']);
 			if ($cid>0) {
 				$stm = $DBH->prepare("INSERT INTO imas_lti_courses (org,contextid,courseid) VALUES (:org, :contextid, :courseid)");
-				$stm->execute(array(':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id'], ':courseid'=>$cid));
+				$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':courseid'=>$cid));
 				$hascourse = true;
 			}
 		}
@@ -78,18 +78,18 @@ if ($sessiondata['ltiitemtype']==0) {
 		$query = "SELECT id,placementtype,typeid FROM imas_lti_placements WHERE contextid=:contextid ";
 		$query .= "AND org=:org AND linkid=:linkid";
 		$stm = $DBH->prepare($query);
-		$stm->execute(array(':contextid'=>$sessiondata['lti_context_id'], ':org'=>$sessiondata['ltiorg'], ':linkid'=>$sessiondata['lti_resource_link_id']));
+		$stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':org'=>$_SESSION['ltiorg'], ':linkid'=>$_SESSION['lti_resource_link_id']));
 		if ($stm->rowCount()==0) {
 			$hasplacement = false;
-			if (isset($sessiondata['lti_launch_get']) && isset($sessiondata['lti_launch_get']['aid'])) {
-				$aid = intval($sessiondata['lti_launch_get']['aid']);
+			if (isset($_SESSION['lti_launch_get']) && isset($_SESSION['lti_launch_get']['aid'])) {
+				$aid = intval($_SESSION['lti_launch_get']['aid']);
 				if ($aid>0) {
 					$placementtype = 'assess';
 					$typeid = $aid;
 					$query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
 					$query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id'], ':linkid'=>$sessiondata['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
+					$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
 					$placementid = $DBH->lastInsertId();
 					$hasplacement = true;
 				}
@@ -141,7 +141,7 @@ if (!empty($createcourse)) {
 		$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
 		$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt, :created_at);";
 		$stm = $DBH->prepare($query);
-		$stm->execute(array(':name'=>$sessiondata['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
+		$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
 			':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 			':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 		$cid = $DBH->lastInsertId();
@@ -192,10 +192,10 @@ if (!empty($createcourse)) {
 		}
 	}
 	$stm = $DBH->prepare("UPDATE imas_lti_courses SET courseid=:courseid WHERE org=:org AND contextid=:contextid");
-	$stm->execute(array(':courseid'=>$cid, ':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id']));
+	$stm->execute(array(':courseid'=>$cid, ':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id']));
 	if ($stm->rowCount()==0) {
 		$stm = $DBH->prepare("INSERT INTO imas_lti_courses (org,contextid,courseid) VALUES (:org, :contextid, :courseid)");
-		$stm->execute(array(':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id'], ':courseid'=>$cid));
+		$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':courseid'=>$cid));
 	}
 	$hascourse = true;
 
@@ -222,7 +222,7 @@ if (!empty($createcourse)) {
 		$placementtype = 'assess';
 		$typeid = $_POST['setplacement'];
 	}
-	if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "Canvas") {
+	if (isset($_SESSION['lti_selection_return']) && $_SESSION['lti_selection_return_format'] == "Canvas") {
 		//Canvas custom LTI selection return or IMS deeplink LTI selection return
 		// #### Begin OHM-specific code #####################################################
 		// #### Begin OHM-specific code #####################################################
@@ -237,7 +237,7 @@ if (!empty($createcourse)) {
 
 			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_item_id=".$item->itemid;
 
-			header('Location: '.$sessiondata['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($atitle).'&text='.Sanitize::encodeUrlParam($atitle). '&r=' .Sanitize::randomQueryStringParam());
+			header('Location: '.$_SESSION['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($atitle).'&text='.Sanitize::encodeUrlParam($atitle). '&r=' .Sanitize::randomQueryStringParam());
 			exit;
 
 		} else
@@ -252,7 +252,7 @@ if (!empty($createcourse)) {
 			$atitle = $stm->fetchColumn(0);
 			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_place_aid=$typeid";
 
-			header('Location: '.$sessiondata['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($atitle).'&text='.Sanitize::encodeUrlParam($atitle). '&r=' .Sanitize::randomQueryStringParam());
+			header('Location: '.$_SESSION['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($atitle).'&text='.Sanitize::encodeUrlParam($atitle). '&r=' .Sanitize::randomQueryStringParam());
 			exit;
 
 		} else {
@@ -260,10 +260,10 @@ if (!empty($createcourse)) {
 			$stm->execute(array(':id'=>$typeid));
 			$cname = $stm->fetchColumn(0);
 			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_open_folder=$typeid-0";
-			header('Location: '.$sessiondata['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($cname).'&text='.Sanitize::encodeUrlParam($cname). '&r=' .Sanitize::randomQueryStringParam());
+			header('Location: '.$_SESSION['lti_selection_return'].'?embed_type=basic_lti&url='.Sanitize::encodeUrlParam($url).'&title='.Sanitize::encodeUrlParam($cname).'&text='.Sanitize::encodeUrlParam($cname). '&r=' .Sanitize::randomQueryStringParam());
 			exit;
 		}
-	} else if (isset($sessiondata['lti_selection_return']) && $sessiondata['lti_selection_return_format'] == "IMSdeeplink") {
+	} else if (isset($_SESSION['lti_selection_return']) && $_SESSION['lti_selection_return_format'] == "IMSdeeplink") {
 		require_once 'includes/OAuth.php';
 		require_once 'includes/ltioauthstore.php';
 		// #### Begin OHM-specific code #####################################################
@@ -297,8 +297,8 @@ if (!empty($createcourse)) {
 			$url = $GLOBALS['basesiteurl'] . "/bltilaunch.php?custom_open_folder=$typeid-0";
 		}
 		$target = 'iframe';
-		if (!empty($sessiondata['lti_selection_targets'])) {
-			$allowedtargets = explode(',',$sessiondata['lti_selection_targets']);
+		if (!empty($_SESSION['lti_selection_targets'])) {
+			$allowedtargets = explode(',',$_SESSION['lti_selection_targets']);
 			$desiredtargets = array('iframe','frame','window');
 			foreach ($desiredtargets as $t) {
 				if (in_array($t, $allowedtargets)) {
@@ -368,19 +368,19 @@ if (!empty($createcourse)) {
 		$params = array(
 			'lti_message_type' => 'ContentItemSelection',
 			'lti_version' => 'LTI-1p0',
-			'content_items' => json_encode($contentitems)
+			'content_items' => json_encode($contentitems, JSON_INVALID_UTF8_IGNORE)
 		);
-		if (!empty($sessiondata['lti_selection_data'])) {
-			$params['data'] = $sessiondata['lti_selection_data'];
+		if (!empty($_SESSION['lti_selection_data'])) {
+			$params['data'] = $_SESSION['lti_selection_data'];
 		}
 		$store = new IMathASLTIOAuthDataStore();
-		$consumer = $store->lookup_consumer($sessiondata['lti_origkey']);
+		$consumer = $store->lookup_consumer($_SESSION['lti_origkey']);
 		$hmac_method = new OAuthSignatureMethod_HMAC_SHA1();
-		$acc_req = OAuthRequest::from_consumer_and_token($consumer, false, 'POST', $sessiondata['lti_selection_return'], $params);
+		$acc_req = OAuthRequest::from_consumer_and_token($consumer, false, 'POST', $_SESSION['lti_selection_return'], $params);
 		$acc_req->sign_request($hmac_method, $consumer, false);
 		$newparms = $acc_req->get_parameters();
 
-		echo '<body><form id="theform" method="post" action="'.Sanitize::encodeStringForDisplay($sessiondata['lti_selection_return']).'">';
+		echo '<body><form id="theform" method="post" action="'.Sanitize::encodeStringForDisplay($_SESSION['lti_selection_return']).'">';
 		//output form fields
 		foreach($newparms as $key => $value ) {
 			$key = Sanitize::encodeStringForDisplay($key);
@@ -398,7 +398,7 @@ if (!empty($createcourse)) {
 		$query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
 		$query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
 		$stm = $DBH->prepare($query);
-		$stm->execute(array(':org'=>$sessiondata['ltiorg'], ':contextid'=>$sessiondata['lti_context_id'], ':linkid'=>$sessiondata['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
+		$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>$placementtype, ':typeid'=>$typeid));
 		$placementid = $DBH->lastInsertId();
 		$hasplacement = true;
 	}
@@ -474,16 +474,16 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	echo "<p>If you want to create a new course, log directly into $installname to create new courses</p>";
 	echo '</form>';
 } else if (!$hasplacement || isset($_GET['chgplacement'])) {
-	if (isset($sessiondata['lti_selection_type']) && $sessiondata['lti_selection_type']=='assn') {
+	if (isset($_SESSION['lti_selection_type']) && $_SESSION['lti_selection_type']=='assn') {
 		echo '<h2>Link Assignment</h2>';
 	} else {
 		echo '<h2>Link Resource</h2>';
 	}
 	echo '<form method="post" action="ltihome.php">';
 	echo "<p>This placement on your LMS has not yet been linked to content on $installname. ";
-	if (isset($sessiondata['lti_selection_type']) && $sessiondata['lti_selection_type']=='assn') {
+	if (isset($_SESSION['lti_selection_type']) && $_SESSION['lti_selection_type']=='assn') {
 		echo 'Select the assessment you\'d like to use: ';
-	} else if (isset($sessiondata['lti_selection_type']) && $sessiondata['lti_selection_type']=='link') {
+	} else if (isset($_SESSION['lti_selection_type']) && $_SESSION['lti_selection_type']=='link') {
 		echo 'You can either do a full course placement, in which case all content of the course is available from this one placement, or ';
 		echo 'you can place an individual assessment. In both cases, grades will not be returned if you set up the link in this way. ';
 		echo 'For grade return, you need to create a new assignment link instead.</p>';
@@ -495,7 +495,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 
 	echo '<br/> <select name="setplacement"> ';
 
-	if (isset($sessiondata['lti_selection_type']) && $sessiondata['lti_selection_type']=='link') {
+	if (isset($_SESSION['lti_selection_type']) && $_SESSION['lti_selection_type']=='link') {
 		echo '<option value="course">Whole Course Placement</option>';
 	}
 	$stm = $DBH->prepare("SELECT id,name FROM imas_assessments WHERE courseid=:courseid ORDER BY name");
@@ -526,7 +526,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
-	if (!isset($sessiondata['lti_selection_type']) || $sessiondata['lti_selection_type']=='all') {
+	if (!isset($_SESSION['lti_selection_type']) || $_SESSION['lti_selection_type']=='all') {
 		echo '<optgroup label="Course">';
 		echo '<option value="course">Whole Course Placement</option>';
 		echo '</optgroup>';
@@ -566,7 +566,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 			echo " | <a href=\"course/contentstats.php?cid=" . $item->courseid . "&type=E&id=" . $item->typeid . "\">View Stats</a>";
 		}
 		echo "</p>";
-		if ($sessiondata['ltiitemtype']==-1) {
+		if ($_SESSION['ltiitemtype']==-1) {
 			echo '<p><a href="ltihome.php?chgplacement=true">Change placement</a></p>';
 		}
 		echo '<p>&nbsp;</p><p class=small>This item is housed in course ID '.Sanitize::courseId($item->courseid).'</p>';
@@ -629,7 +629,7 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 		}
 		echo "<p><a href=\"course/$addassess?cid=" . Sanitize::courseId($cid) . "&id=" . Sanitize::encodeUrlParam($typeid) . "&from=lti\">Settings</a> | ";
 		echo "<a href=\"course/addquestions.php?cid=" . Sanitize::courseId($cid) . "&aid=" . Sanitize::encodeUrlParam($typeid) . "&from=lti\">Questions</a></p>";
-		if ($sessiondata['ltiitemtype']==-1) {
+		if ($_SESSION['ltiitemtype']==-1) {
 			echo '<p><a href="ltihome.php?chgplacement=true">Change placement</a></p>';
 		}
 		echo '<p>&nbsp;</p><p class=small>This assessment is housed in course ID '.Sanitize::courseId($cid).'</p>';

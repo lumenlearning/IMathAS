@@ -1,11 +1,9 @@
 <?php
 
 require("../init.php");
-if (isset($sessiondata['emulateuseroriginaluser']) && isset($_GET['unemulateuser'])) {
-	$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
-	$stm->execute(array(':userid'=>$sessiondata['emulateuseroriginaluser'], ':sessionid'=>$sessionid));
-	unset($sessiondata['emulateuseroriginaluser']);
-	writesessiondata();
+if (isset($_SESSION['emulateuseroriginaluser']) && isset($_GET['unemulateuser'])) {
+	$_SESSION['userid'] = $_SESSION['emulateuseroriginaluser'];
+	unset($_SESSION['emulateuseroriginaluser']);
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" .Sanitize::randomQueryStringParam());
 	exit;
 }
@@ -20,10 +18,8 @@ if ($myrights >= 75 && isset($_GET['emulateuser'])) {
 			exit;
 		}
 	}
-	$sessiondata['emulateuseroriginaluser'] = $userid;
-	writesessiondata();
-	$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
-	$stm->execute(array(':userid'=>$emu_id, ':sessionid'=>$sessionid));
+	$_SESSION['emulateuseroriginaluser'] = $userid;
+	$_SESSION['userid'] = $emu_id;
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" .Sanitize::randomQueryStringParam());
 	exit;
 }
@@ -106,20 +102,20 @@ if (isset($_POST['updatecaption'])) {
 	echo '<p>Updated '.$chg.' records.</p><p><a href="utils.php">Utils</a></p>';
 	exit;
 }
-	
+
 if (isset($_GET['fixdupgrades'])) {
 	$query = 'DELETE imas_grades FROM imas_grades JOIN ';
 	$query .= "(SELECT min(id) as minid,refid FROM imas_grades WHERE gradetype='forum' AND refid>0 GROUP BY refid having count(id)>1) AS duplic ";
 	$query .= "ON imas_grades.refid=duplic.refid AND imas_grades.gradetype='forum' WHERE imas_grades.id > duplic.minid";
 	$stm = $DBH->query($query);
 	echo "Removed ".($stm->rowCount())." duplicate forum grade records.<br/>";
-	
+
 	$query = 'DELETE imas_grades FROM imas_grades JOIN ';
 	$query .= "(SELECT min(id) as minid,gradetypeid,userid FROM imas_grades WHERE gradetype='offline' GROUP BY gradetypeid,userid having count(id)>1) AS duplic ";
 	$query .= "ON imas_grades.gradetypeid=duplic.gradetypeid AND imas_grades.userid=duplic.userid AND imas_grades.gradetype='offline' WHERE imas_grades.id > duplic.minid";
 	$stm = $DBH->query($query);
 	echo "Removed ".($stm->rowCount())." duplicate offline grade records.<br/>";
-	
+
 	$stm = $DBH->query("DELETE imas_grades FROM imas_grades LEFT JOIN imas_forum_posts ON imas_grades.refid=imas_forum_posts.id WHERE imas_grades.gradetype='forum' AND imas_forum_posts.userid IS NULL");
 	echo "Removed ".($stm->rowCount())." orphaned forum grade records without a corresponding post.<br/>";
 
