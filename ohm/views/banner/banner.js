@@ -1,9 +1,9 @@
-$(document).ready(function () {
+window.onload = function () {
   $("#js-dismiss-banner").click(function () {
     let bannerId = $(".course-banner").attr('data-banner-id');
     dismissNotice(bannerId);
   });
-});
+}
 
 function dismissNotice(id) {
   $.ajax({
