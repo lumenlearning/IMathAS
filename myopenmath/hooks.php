@@ -5,7 +5,7 @@
 function getModGroupForm($grpid, $grptype, $myrights) {
 	echo '<input type="checkbox" id="iscust" name="iscust" ';
 	if ($grptype==1) { echo 'checked';}
-	echo '> <label for="istcust">'._('Lumen Customer').'</label><br/>';
+	echo '> <label for="iscust">'._('Lumen Customer').'</label><br/>';
 }
 
 //$CFG['hooks']['admin/actions']

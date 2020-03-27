@@ -23,6 +23,16 @@ $CFG['GEN']['newpasswords'] = "only";
 //hide Email button on Roster and GB pages
 $CFG['GEN']['noEmailButton'] = true;
 
+// rate limit page access
+$CFG['GEN']['ratelimit'] = 0.1;
+
+// set email handler
+$CFG['GEN']['useSESmail'] = true;
+$CFG['email']['handlerpriority'] = 0;
+
+// temporary, for testing impact on IOPS
+$use_local_sessions = true;
+
 //$CFG['use_csrfp'] = 'log';
 
 //log LTI updates
@@ -35,11 +45,12 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && filter_var($_SERVER['HTTP_X_FORWA
 }
 
 $CFG['cleanup']['authcode'] = getenv('SES_KEY_ID');
+$CFG['email']['authcode'] = getenv('SES_KEY_ID');
 //$CFG['cleanup']['delay'] = 30;
 
 $CFG['LTI']['authcode'] = getenv('SES_KEY_ID');
 $CFG['LTI']['logltiqueue'] = true;
-$CFG['LTI']['usequeue'] = true; 
+$CFG['LTI']['usequeue'] = true;
 
 $CFG['hooks']['admin/forms'] = "myopenmath/hooks.php";
 $CFG['hooks']['admin/actions'] = "myopenmath/hooks.php";
