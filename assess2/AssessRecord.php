@@ -1613,6 +1613,7 @@ class AssessRecord
         ->setQuestionId($qver['qid'])
         ->setAssessmentId($this->assess_info->getSetting('id'))
         ->setQuestionSeed($qver['seed'])
+        ->setShowCalculator($this->assess_info->getQuestionSetting($qver['qid'], 'showcalculator'))
         ->setShowHints($this->assess_info->getQuestionSetting($qver['qid'], 'showhints'))
         ->setShowAnswer($showans)
         ->setShowAnswerParts($showansparts)

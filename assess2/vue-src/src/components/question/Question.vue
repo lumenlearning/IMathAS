@@ -33,7 +33,7 @@
       :qn = "qn"
     />
 
-    <div v-if="hasCalculator" class="submitbtnwrap">
+    <div v-if="questionHasCaclulator" class="submitbtnwrap">
       <button @click="toggleEmbeddedCalc">
         Calculator
         <span v-if="showCalculator">X</span>
@@ -85,8 +85,7 @@ export default {
       timeActivated: null,
       timeActive: 0,
       showCalculator: false,
-      uniqueId: 'test-calc' + this.qn,
-      hasCalculator: store.assessInfo.showcalculator
+      uniqueId: 'test-calc' + this.qn
     };
   },
   computed: {
@@ -101,6 +100,9 @@ export default {
     },
     questionContentLoaded () {
       return (this.questionData.html !== null);
+    },
+    questionHasCaclulator () {
+      return this.questionData.showcalculator;
     },
     showSubmit () {
       return (store.inProgress &&
@@ -332,11 +334,11 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      if (store.assessInfo.showcalculator === 'basic') {
+      if (this.questionHasCaclulator === 'basic') {
         Desmos.FourFunctionCalculator(this.$refs.figure);
-      } else if (store.assessInfo.showcalculator === 'graphing') {
+      } else if (this.questionHasCaclulator === 'graphing') {
         Desmos.GraphingCalculator(this.$refs.figure);
-      } else if (store.assessInfo.showcalculator) {
+      } else if (this.questionHasCaclulator) {
         Desmos.ScientificCalculator(this.$refs.figure);
       }
     }

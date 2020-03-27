@@ -30,6 +30,7 @@ class QuestionParams
 
     // Orig: $showhints - boolean, from displayq2.php
     private $showHints;
+    private $showCalculator;
 
     // These must made available to the question code to be eval'd.
     // Orig: $scorenonzero - hashmap, from macros.php:getscorenonzero() - Used in question eval.
@@ -419,6 +420,30 @@ class QuestionParams
     public function setShowHints(?int $showHints): QuestionParams
     {
         $this->showHints = $showHints;
+        return $this;
+    }
+
+    /**
+     * Show question calculator?
+     * ENUM('default', 'none', 'basic', 'scientific', 'graphing', 'geometry')
+     *
+     * @return string
+     */
+    public function getShowCalculator(): ?string
+    {
+        return $this->showCalculator;
+    }
+
+    /**
+     * Show question calculator?
+     * ENUM('default', 'none', 'basic', 'scientific', 'graphing', 'geometry')
+     *
+     * @param  string $showCalculator
+     * @return QuestionParams
+     */
+    public function setShowCalculator(?string $showCalculator): QuestionParams
+    {
+        $this->showCalculator = $showCalculator;
         return $this;
     }
 

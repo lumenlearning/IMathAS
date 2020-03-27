@@ -296,7 +296,7 @@ class AssessInfo
    * @return array        Associative array of extracted settings
    */
   public function getQuestionSettings($id) {
-    $by_q = array('regens_max','regen_penalty','regen_penalty_after');
+    $by_q = array('regens_max','regen_penalty','regen_penalty_after', 'showcalculator');
     $base = array('tries_max','retry_penalty','retry_penalty_after',
       'showans','showans_aftern','points_possible','questionsetid',
       'category', 'withdrawn', 'jump_to_answer');
@@ -908,6 +908,10 @@ class AssessInfo
 
     if ($settings['showhints'] == -1) {
       $settings['showhints'] = $defaults['showhints'];
+    }
+
+    if ($settings['showcalculator'] == 'default') {
+      $settings['showcalculator'] = $defaults['showcalculator'];
     }
 
     if (!empty($settings['fixedseeds'])) {
