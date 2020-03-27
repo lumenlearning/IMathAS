@@ -1,9 +1,9 @@
-<div class="ohm-course-banner" data-banner-id="<?php echo $bannerId; ?>">
-    <header class="ohm-course-banner-header">
+<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>">
+    <header class="course-banner-header">
         <h2>OHM Updates</h2>
-        <span id="js-dismiss-banner">[x]</span>
+        <button aria-label="Close this banner." class="u-button-reset course-banner-close-button" id="js-dismiss-banner">[x]</button>
     </header>
-    <div class="ohm-course-banner-content">
+    <div class="course-banner-content">
         <p>
             We’re excited to announce the release of Desmos Interactives,
             a new item type to support student learning and mastery of graphing concepts.

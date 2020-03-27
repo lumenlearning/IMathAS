@@ -1,9 +1,9 @@
-<div class="ohm-course-banner" data-banner-id="<?php echo $bannerId; ?>">
-    <div class="ohm-course-banner-header-container">
-        <span class="ohm-course-banner-header"><h2>OHM Updates</h2></span>
-        <span class="ohm-course-banner-dismiss"><span id="js-dismiss-banner">[x]</span></span>
-    </div>
-    <div class="ohm-course-banner-content">
+<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>">
+    <header class="course-banner-header">
+        <h2>OHM Updates</h2>
+        <button aria-label="Close this banner." class="u-button-reset course-banner-close-button" id="js-dismiss-banner">[x]</button>
+    </header>
+    <div class="course-banner-content">
         <h3>Hello, student user!</h3>
         <p>Here is an important announcement!</p>
     </div>
