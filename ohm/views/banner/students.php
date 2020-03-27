@@ -15,7 +15,7 @@
                        <use xlink:href="#icon-close-a"/>
                     </mask>
                     <use fill="#637381" xlink:href="#icon-close-a"/>
-                    <g mask="url(#icon-close-b)" fill="#212B36">
+                    <g mask="url(#icon-close-b)" fill="#fff">
                        <path d="M0 0h12v12H0z"/>
                     </g>
                 </g>
