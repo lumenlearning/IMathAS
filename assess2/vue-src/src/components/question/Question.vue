@@ -323,6 +323,13 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
+      if (this.questionHasCaclulator === 'basic') {
+        Desmos.FourFunctionCalculator(this.$refs.figure);
+      } else if (this.questionHasCaclulator === 'graphing') {
+        Desmos.GraphingCalculator(this.$refs.figure);
+      } else if (this.questionHasCaclulator) {
+        Desmos.ScientificCalculator(this.$refs.figure);
+      }
     } else {
       this.loadQuestionIfNeeded();
     }
@@ -334,13 +341,6 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      if (this.questionHasCaclulator === 'basic') {
-        Desmos.FourFunctionCalculator(this.$refs.figure);
-      } else if (this.questionHasCaclulator === 'graphing') {
-        Desmos.GraphingCalculator(this.$refs.figure);
-      } else if (this.questionHasCaclulator) {
-        Desmos.ScientificCalculator(this.$refs.figure);
-      }
     }
   },
   watch: {
