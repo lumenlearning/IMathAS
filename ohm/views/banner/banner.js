@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  $("#dismiss-banner").click(function () {
+  $("#js-dismiss-banner").click(function () {
     let bannerId = $(".ohm-course-banner").attr('data-banner-id');
     dismissNotice(bannerId);
   });

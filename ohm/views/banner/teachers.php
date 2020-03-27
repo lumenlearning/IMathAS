@@ -1,8 +1,8 @@
 <div class="ohm-course-banner" data-banner-id="<?php echo $bannerId; ?>">
-    <div class="ohm-course-banner-header-container">
-        <span class="ohm-course-banner-header"><h2>OHM Updates</h2></span>
-        <span class="ohm-course-banner-dismiss"><span id="dismiss-banner">[x]</span></span>
-    </div>
+    <header class="ohm-course-banner-header">
+        <h2>OHM Updates</h2>
+        <span id="js-dismiss-banner">[x]</span>
+    </header>
     <div class="ohm-course-banner-content">
         <p>
             We’re excited to announce the release of Desmos Interactives,
