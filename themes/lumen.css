@@ -15,6 +15,18 @@ body {
 	margin: 0;
 }
 
+.u-button-reset {
+	/* Lux reset class */
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	padding: 0;
+	text-align: inherit;
+}
+
 h1, h2, h3 {
   margin-top: 21px;
   margin-bottom: 15px;
