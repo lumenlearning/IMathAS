@@ -36,7 +36,7 @@
 					if ($points==9999 && isset($_POST['pointsforparts']) && $_POST['qparts'.$qsetid]>1 && !isset($_POST['addasgroup'])) {
 						$points = intval($_POST['qparts'.$qsetid]);
 					}
-					$query = "INSERT INTO imas_questions (assessmentid,points,attempts,showhints,penalty,regen,showans,questionsetid) ";
+					$query = "INSERT INTO imas_questions (assessmentid,points,attempts,showcalculator,showhints,penalty,regen,showans,questionsetid) ";
 					$query .= "VALUES (:assessmentid, :points, :attempts, :showcalculator, :showhints, :penalty, :regen, :showans, :questionsetid)";
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':assessmentid'=>$aid, ':points'=>$points, ':attempts'=>$attempts, ':showcalculator'=>$showcalculator, ':showhints'=>$showhints, ':penalty'=>9999, ':regen'=>0, ':showans'=>0, ':questionsetid'=>$qsetid));
