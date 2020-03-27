@@ -35,6 +35,7 @@ $placeinhead .= '</script>';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/index.css?v='.$lastupdate.'" />';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/chunk-common.css?v='.$lastupdate.'" />';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/print.css?v='.$lastupdate.'" media="print">';
+$placeinhead .= '<script src="https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/drawing_min.js?v=100219" type="text/javascript"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/AMhelpers2_min.js?v=110419" type="text/javascript"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/eqntips_min.js" type="text/javascript"></script>';
