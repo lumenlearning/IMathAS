@@ -8,11 +8,11 @@
       :qdata = "questionData"
       :qn = "qn"
     />
-    <p v-if="questionData.withdrawn !== 0" class="noticetext">
-      <icons 
-        name="alert" 
-        color="warn" 
-        size="medium" />
+    <p
+      v-if="questionData.withdrawn !== 0"
+      class="noticetext"
+    >
+      <icons name="alert" color="warn" size="medium" />
       {{ $t('question.withdrawn') }}
     </p>
     <div v-if = "errorsToShow.length > 0" class="small">
@@ -33,78 +33,98 @@
       :qn = "qn"
     />
 
-      <div 
-        v-if="questionHasCalculator" 
-        class="calculator" 
-        :id="'qa-' + calcType + '-' + qn"
-        aria-label="Use calculator">
-        <button 
-          type="button" 
-          @click="openCalc" 
-          v-show="!showCalculator || calcIsPoppedOut"
-          :disabled="calcIsPoppedOut">
-            <icon-calc :calc-type="calcType"></icon-calc>
-            Calculator
-        </button>
-        <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
-          <vue-draggable-resizeable 
-            v-show="showCalculator" 
-            class-name-active="calculator-active"
-            ref="calcResize"
-            @resizing="getCalcDimensions"
-            :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
-            :style="{position: calcPosition}"
-            :draggable="calcIsPoppedOut"
-            :resizable="calcIsPoppedOut"
-            :handles="['br']"
-            :drag-handle="'.calc-header'"
-            :h="500"
-            :w="calcType === 'graphing' ? 600 : 500"
-            :x="400"
-            :y="-32"
-            :min-width="calcType === 'graphing' ? 500 : 400"
-            :min-height="400"
-          >
-            <div slot="br">
-              <icon-drag></icon-drag>
-            </div>
-            <div class="calc-header">
-              <span v-if="!calcIsPoppedOut"> 
-                <icon-calc :calc-type="calcType"></icon-calc> Calculator
-              </span>
-              <span v-else> Question {{qn + 1}} Calculator</span>
-              <div>
-                <button
-                    type="button"
-                    :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
-                    class="button popout"
-                    @click="toggleCalcPopOut">
-                
-                    <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
-                    <icon-pop-in v-else></icon-pop-in>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Close calculator"
-                    class="button"
-                    @click="closeCalc"
-                  >
-                    <icon-close></icon-close>
-                  </button>
-                </div>
-            </div>
-            <div class="calc-body">
-              <figure 
-                :id="'calc' + qn" 
-                ref="figure"
-                :class="{ 'graphing' : calcType === 'graphing', }"
-                :style="{'height': (calcHeight - 84) + 'px'}">
-              </figure>
-            </div>
-          </vue-draggable-resizeable>
-        </div>
+    <div v-if="showWork && questionContentLoaded">
+      <button
+        v-if = "getwork !== 2"
+        @click = "showWorkInput = !showWorkInput"
+      >
+        {{ showWorkInput ? $t('work.hide') : $t('work.add') }}
+      </button>
+      <div v-show="getwork === 2 || showWorkInput">
+        {{ $t("question.showwork") }}
+        <showwork-input
+          :id="'sw' + qn"
+          :value = "questionData.work"
+          rows = "3"
+          @input = "updateWork"
+          @blur = "workChanged"
+          @focus = "workFocused"
+        />
       </div>
-    
+    </div>
+
+    <div
+      v-if="questionHasCalculator"
+      class="calculator"
+      :id="'qa-' + calcType + '-' + qn"
+      aria-label="Use calculator">
+      <button
+        type="button"
+        @click="openCalc"
+        v-show="!showCalculator || calcIsPoppedOut"
+        :disabled="calcIsPoppedOut">
+          <icon-calc :calc-type="calcType"></icon-calc>
+          Calculator
+      </button>
+      <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
+        <vue-draggable-resizeable
+          v-show="showCalculator"
+          class-name-active="calculator-active"
+          ref="calcResize"
+          @resizing="getCalcDimensions"
+          :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
+          :style="{position: calcPosition}"
+          :draggable="calcIsPoppedOut"
+          :resizable="calcIsPoppedOut"
+          :handles="['br']"
+          :drag-handle="'.calc-header'"
+          :h="500"
+          :w="calcType === 'graphing' ? 600 : 500"
+          :x="400"
+          :y="-32"
+          :min-width="calcType === 'graphing' ? 500 : 400"
+          :min-height="400"
+        >
+          <div slot="br">
+            <icon-drag></icon-drag>
+          </div>
+          <div class="calc-header">
+            <span v-if="!calcIsPoppedOut">
+              <icon-calc :calc-type="calcType"></icon-calc> Calculator
+            </span>
+            <span v-else> Question {{qn + 1}} Calculator</span>
+            <div>
+              <button
+                  type="button"
+                  :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
+                  class="button popout"
+                  @click="toggleCalcPopOut">
+
+                  <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
+                  <icon-pop-in v-else></icon-pop-in>
+                </button>
+                <button
+                  type="button"
+                  aria-label="Close calculator"
+                  class="button"
+                  @click="closeCalc"
+                >
+                  <icon-close></icon-close>
+                </button>
+              </div>
+          </div>
+          <div class="calc-body">
+            <figure
+              :id="'calc' + qn"
+              ref="figure"
+              :class="{ 'graphing' : calcType === 'graphing', }"
+              :style="{'height': (calcHeight - 84) + 'px'}">
+            </figure>
+          </div>
+        </vue-draggable-resizeable>
+      </div>
+    </div>
+
 
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
@@ -133,6 +153,7 @@ import { store, actions } from '../../basicstore';
 import ScoreResult from '@/components/question/ScoreResult.vue';
 import Icons from '@/components/widgets/Icons.vue';
 import QuestionHelps from '@/components/question/QuestionHelps.vue';
+import ShowworkInput from '@/components/ShowworkInput.vue';
 import IconCalc from '../icons/Calculators.vue';
 import IconClose from "../icons/Close.vue";
 import IconPopOut from "../icons/PopOut.vue";
@@ -143,10 +164,11 @@ import VueDraggableResizeable from 'vue-draggable-resizable';
 
 export default {
   name: 'Question',
-  props: ['qn', 'active', 'state', 'seed', 'disabled'],
+  props: ['qn', 'active', 'state', 'seed', 'disabled', 'getwork'],
   components: {
     ScoreResult,
     QuestionHelps,
+    ShowworkInput,
     Icons,
     IconCalc,
     IconClose,
@@ -159,6 +181,9 @@ export default {
     return {
       timeActivated: null,
       timeActive: 0,
+      work: '',
+      lastWorkVal: '',
+      showWorkInput: false,
       showCalculator: false,
       calcType: this.getCalcType(),
       calcHasAlreadyLoaded: false,
@@ -245,6 +270,10 @@ export default {
         errors = errors.concat(this.questionData.errors);
       }
       return errors;
+    },
+    showWork () {
+      return ((this.getwork === 1 && store.assessInfo.questions[this.qn].showwork & 1) ||
+        (this.getwork === 2 && store.assessInfo.questions[this.qn].showwork & 2));
     }
   },
   methods: {
@@ -259,7 +288,7 @@ export default {
       this.calcIsPoppedOut = false;
     },
     toggleCalcPopOut(){
-      this.calcIsPoppedOut = !this.calcIsPoppedOut; 
+      this.calcIsPoppedOut = !this.calcIsPoppedOut;
     },
     getCalcDimensions(left, top, width, height){
       this.calcHeight = height;
@@ -368,6 +397,8 @@ export default {
       // add in timeactive from autosave, if exists
       this.timeActive += actions.getInitTimeactive(this.qn);
       this.addDirtyTrackers();
+      // set work
+      this.work = this.questionData.work;
 
       let svgchk = '<svg class="scoremarker" viewBox="0 0 24 24" width="16" height="16" stroke="green" stroke-width="3" fill="none" role="img" aria-label="' + this.$t('icons.correct') + '">';
       svgchk += '<polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -411,13 +442,38 @@ export default {
             }
           }
         });
+      if (this.showWork) {
+        actions.setInitValue(thisqn, 'sw' + this.qn, this.questionData.work);
+        this.work = this.questionData.work;
+      }
+    },
+    updateWork (val) {
+      this.work = val;
+    },
+    workChanged () {
+      // changed - cue for autosave
+      if (this.work !== this.lastWorkVal) {
+        store.work[this.qn] = this.work;
+        // autosave value
+        if (this.getwork === 1) {
+          let now = new Date();
+          let timeactive = self.timeActive + (now - self.timeActivated);
+          actions.doAutosave(this.qn, 'sw', timeactive);
+        } else if (this.getwork === 2) {
+          this.$emit('workchanged', this.work);
+        }
+      }
+    },
+    workFocused () {
+      actions.clearAutosaveTimer();
+      this.lastWorkVal = this.work;
     }
   },
   updated () {
     if (this.questionContentLoaded) {
       this.disableOutOfTries();
-      this.renderAndTrack(); 
-      
+      this.renderAndTrack();
+
       if(!this.calcHasAlreadyLoaded){
         if (this.questionHasCalculator === 'basic') {
           Desmos.FourFunctionCalculator(this.$refs.figure);
@@ -425,9 +481,9 @@ export default {
           Desmos.ScientificCalculator(this.$refs.figure);
         } if (this.questionHasCalculator === 'graphing') {
           Desmos.GraphingCalculator(this.$refs.figure);
-        } 
-        this.calcHasAlreadyLoaded = true; 
-      } 
+        }
+        this.calcHasAlreadyLoaded = true;
+      }
     } else {
       this.loadQuestionIfNeeded();
     }
@@ -674,7 +730,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 .handle-br {
   bottom: 5px;
-  right: 5px; 
+  right: 5px;
 }
 
 .handle svg {
@@ -690,7 +746,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 @media (max-width: 768px){
   .calculator {
-    width: 100%; 
+    width: 100%;
   }
 
   .calc-header .popout {
@@ -698,4 +754,3 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   }
 }
 </style>
-
