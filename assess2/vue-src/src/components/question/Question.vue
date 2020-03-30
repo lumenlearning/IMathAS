@@ -33,12 +33,13 @@
       :qn = "qn"
     />
 
-    <button @click="toggleDesmosCalc">
-      Calculator
-      <span v-if="showDesmos">X</span>
-    </button>
+    <button type="button" @click="openCalc" v-show="!showDesmos">Calculator</button>
     <div v-show="showDesmos">
-      <figure :id="'test-calc' + qn" class="js-desmos desmos-fig" ref="figure" style="width: 600px; height: 400px;">
+      Calculator
+      <button type="button" @click="closeCalc">X</button>
+    </div>
+    <div v-show="showDesmos">
+      <figure :id="'calc' + qn" class="js-desmos desmos-fig" ref="figure" style="width: 600px; height: 400px;">
       </figure>
     </div>
 
@@ -163,8 +164,11 @@ export default {
     }
   },
   methods: {
-    toggleDesmosCalc(){
-      this.showDesmos = !this.showDesmos;
+    openCalc(){
+      this.showDesmos = true;
+    },
+    closeCalc(){
+      this.showDesmos = false; 
     },
     loadQuestionIfNeeded (skiprender) {
       if (!this.questionContentLoaded && this.active && store.errorMsg === null) {
@@ -319,9 +323,11 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
+      Desmos.ScientificCalculator(this.$refs.figure);
     } else {
       this.loadQuestionIfNeeded();
     }
+    
   },
   created () {
     this.loadQuestionIfNeeded(true);
@@ -330,7 +336,6 @@ export default {
     if (this.questionContentLoaded) {
       this.renderAndTrack();
       this.disableOutOfTries();
-      Desmos.ScientificCalculator(this.$refs.figure);
     }
   },
   watch: {
