@@ -1232,7 +1232,7 @@ if (
                     $usereplaceby = "all";
                     $newitems = array();
                     $cid = $destcid; //needed for copyiteminc
-                    require_once("../includes/copyiteminc.php");
+                    require_once(__DIR__ . "/copyiteminc.php");
                     copyallsub($items,'0',$newitems,$gbcats);
                     doaftercopy($sourcecid);
 
@@ -1465,7 +1465,7 @@ if (
                 if (!$foundaid) {
                     if (!$aid) {
                         // no assessment with same title - need to copy assessment from destination to source course
-                        require_once("../includes/copyiteminc.php");
+                        require_once(__DIR__ . "/copyiteminc.php");
                         // #### Start OHM-specific code #####################################################
                         // #### Start OHM-specific code #####################################################
                         // #### Start OHM-specific code #####################################################
@@ -2970,7 +2970,7 @@ if (
                                 $aid = $stm->fetchColumn(0);
                             } else {
                                 // no assessment with same title - need to copy assessment from destination to source course
-                                require_once("includes/copyiteminc.php");
+                                require_once(__DIR__ . "/copyiteminc.php");
                                 $cid = $destcid;
                                 $stm = $DBH->prepare("SELECT itemorder,dates_by_lti,UIver FROM imas_courses WHERE id=:id");
                                 $stm->execute(array(':id'=>$cid));
