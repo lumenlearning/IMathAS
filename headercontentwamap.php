@@ -48,10 +48,10 @@ echo '</div>'; //headerbarlogo
 echo '</div>'; //headercontent
 ?>
 <div class="headermobilemenu">
-    <ul id="headermobilemenulist" role="menu" aria-labelledby="topnavmenu" aria-hidden="true">
+    <ul id="headermobilemenulist" role="navigation" aria-labelledby="topnavmenu" aria-hidden="true">
       <?php
     	if ($myrights > 5) {
-		echo "<li><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\">Account Settings</a></li>";
+		echo "<li><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\">Account Settings</a></li>";
 	}
 	/*
 	echo '<li><a href="'.$imasroot.'/index.php">Home</a></li>';

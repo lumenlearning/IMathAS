@@ -17,13 +17,19 @@
  *          object, but may also update some assessInfo fields
  */
 
-
+$st = microtime(true);
 $no_session_handler = 'json_error';
 require_once("../init.php");
+$tm1 = microtime(true);
 require_once("./common_start.php");
+$tm2 = microtime(true);
 require_once("./AssessInfo.php");
+$tm3 = microtime(true);
 require_once("./AssessRecord.php");
+$tm4 = microtime(true);
 require_once('./AssessUtils.php');
+$tm5 = microtime(true);
+
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -45,7 +51,8 @@ $now = time();
 
 // load settings including question info
 $assess_info = new AssessInfo($DBH, $aid, $cid, false);
-$assess_info->loadException($uid, $isstudent, $studentinfo['latepasses'] , $latepasshrs, $courseenddate);
+
+$assess_info->loadException($uid, $isstudent);
 if ($isstudent) {
   $assess_info->applyTimelimitMultiplier($studentinfo['timelimitmult']);
 }
@@ -101,6 +108,11 @@ if (!$isteacher && $assess_info->getSetting('displaymethod') === 'livepoll') {
     echo '{"error": "livepoll_wrongquestion"}';
     exit;
   }
+  // override showscores value to prevent score marks
+  if ($livepollStatus['curstate'] != 4) {
+    $assess_info->overrideSetting('showscores', 'at_end');
+    $assess_info->overrideSetting('showans', 'never');
+  }
 }
 
 // If in practice, now we overwrite settings
@@ -115,8 +127,7 @@ if ($in_practice) {
 // help_features, intro, resources, video_id, category_urls
 $include_from_assess_info = array(
   'available', 'startdate', 'enddate', 'original_enddate', 'submitby',
-  'extended_with', 'allowed_attempts', 'latepasses_avail', 'latepass_extendto',
-  'showscores'
+  'extended_with', 'allowed_attempts', 'showscores', 'enddate_in'
 );
 $assessInfoOut = $assess_info->extractSettings($include_from_assess_info);
 //get attempt info
@@ -132,7 +143,7 @@ list($qid, $qidstoload) = $assess_record->getQuestionId($qn);
 
 // load question settings and code
 $assess_info->loadQuestionSettings($qidstoload, true);
-
+$tm6 = microtime(true);
 // For livepoll, verify seed and generate new question version if needed
 if (!$isteacher && $assess_info->getSetting('displaymethod') === 'livepoll') {
   $curQuestionObject = $assess_record->getQuestionObject($qn, false, false, false);
@@ -185,10 +196,7 @@ if ($jumpToAnswer) {
 // grab question settings data with HTML
 if ($assess_info->getSetting('displaymethod') === 'livepoll') {
   $showscores = ($livepollStatus['curstate'] == 4);
-  // override showscores value to prevent score marks
-  if (!$showscores) {
-    $assessInfoOut['showscores'] = 'at_end';
-  }
+
   if ($isteacher) {
     // trigger additional jsParams for livepoll results display
     $GLOBALS['capturedrawinit'] = true;
@@ -197,15 +205,28 @@ if ($assess_info->getSetting('displaymethod') === 'livepoll') {
 } else {
   $showscores = $assess_info->showScoresDuring();
 }
+$tm7 = microtime(true);
 $assessInfoOut['questions'] = array(
   $qn => $assess_record->getQuestionObject($qn, $showscores, true, true)
 );
-
+$tm8 = microtime(true);
 // save record if needed
 $assess_record->saveRecordIfNeeded();
-
+$tm9 = microtime(true);
 //prep date display
 prepDateDisp($assessInfoOut);
 
+$et = microtime(true);
+if ($et - $st > .6) {
+  error_log('loadquestion took '.($et-$st).' for '.
+    $assessInfoOut['questions'][$qn]['questionsetid'].
+    ' breaks: '.
+    ($tm1 - $st).','.
+    ($tm2 - $tm1).','.
+    ($tm3 - $tm2).','.
+    ($tm4 - $tm3).','.
+    ($tm5 - $tm4)
+  );
+}
 //output JSON object
 echo json_encode($assessInfoOut);

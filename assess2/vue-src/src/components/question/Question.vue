@@ -103,8 +103,8 @@ export default {
       );
     },
     submitClass () {
-      return (store.assessInfo.submitby === 'by_assessment') ?
-        'secondary' : 'primary';
+      return (store.assessInfo.submitby === 'by_assessment')
+        ? 'secondary' : 'primary';
     },
     showScore () {
       return (store.inProgress &&
@@ -153,9 +153,8 @@ export default {
     loadQuestionIfNeeded (skiprender) {
       if (!this.questionContentLoaded && this.active && store.errorMsg === null) {
         actions.loadQuestion(this.qn, false, false);
-      } else if (this.questionContentLoaded && this.active
-        && !this.questionData.rendered && skiprender !== true)
-      {
+      } else if (this.questionContentLoaded && this.active &&
+        !this.questionData.rendered && skiprender !== true) {
         this.renderAndTrack();
       }
     },
@@ -164,9 +163,10 @@ export default {
       actions.submitQuestion(this.qn, false, this.timeActive);
     },
     jumpToAnswer () {
-      if (confirm(this.$t('question.jump_warn'))) {
-        actions.loadQuestion(this.qn, false, true);
-      }
+      store.confirmObj = {
+        body: 'question.jump_warn',
+        action: () => actions.loadQuestion(this.qn, false, true)
+      };
     },
     updateTime (goingActive) {
       if (this.timeActivated === null || goingActive) {
@@ -248,6 +248,7 @@ export default {
       }
       setTimeout(window.drawPics, 100);
       window.rendermathnode(document.getElementById('questionwrap' + this.qn));
+      window.initSageCell(document.getElementById('questionwrap' + this.qn));
       this.updateTime(true);
       this.setInitValues();
       // add in timeactive from autosave, if exists
@@ -280,7 +281,6 @@ export default {
       window.$('#questionwrap' + this.qn).find('select.ansred').after(svgx);
 
       actions.setRendered(this.qn);
-
     },
     setInitValues () {
       var regex = new RegExp('^(qn|tc|qs)\\d');
@@ -301,8 +301,8 @@ export default {
   },
   updated () {
     if (this.questionContentLoaded) {
-      this.renderAndTrack();
       this.disableOutOfTries();
+      this.renderAndTrack();
     } else {
       this.loadQuestionIfNeeded();
     }
@@ -312,8 +312,8 @@ export default {
   },
   mounted () {
     if (this.questionContentLoaded) {
-      this.renderAndTrack();
       this.disableOutOfTries();
+      this.renderAndTrack();
     }
   },
   watch: {
@@ -407,15 +407,15 @@ input.red {
 div.ansgrn, div.ansred, div.ansyel {
   margin: -1px;
 }
-input[type=text].ansgrn, .mq-editable-field.ansgrn {
+input[type=text].ansgrn, .mathquill-math-field.ansgrn {
   padding-right: 17px;
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9ImdyZWVuIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiPjxwb2x5bGluZSBwb2ludHM9IjIwIDYgOSAxNyA0IDEyIj48L3BvbHlsaW5lPjwvc3ZnPg==");
 }
-input[type=text].ansred, .mq-editable-field.ansred {
+input[type=text].ansred, .mathquill-math-field.ansred {
   padding-right: 17px;
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigxNTMsMCwwKSIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIj48cGF0aCBkPSJNMTggNiBMNiAxOCBNNiA2IEwxOCAxOCIgLz48L3N2Zz4=");
 }
-input[type=text].ansyel, .mq-editable-field.ansyel {
+input[type=text].ansyel, .mathquill-math-field.ansyel {
   padding-right: 17px;
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigyNTUsMTg3LDApIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0gNS4zLDEwLjYgOSwxNC4yIDE4LjUsNC42IDIxLjQsNy40IDksMTkuOCAyLjcsMTMuNSB6IiAvPjwvc3ZnPg==");
 }

@@ -1,5 +1,8 @@
-<div class="ohm-course-banner">
-    <h2 class="ohm-course-banner-header">OHM Desmos Interactives are here!</h2>
+<div class="ohm-course-banner" data-banner-id="<?php echo $bannerId; ?>">
+    <div class="ohm-course-banner-header-container">
+        <span class="ohm-course-banner-header"><h2>OHM Updates</h2></span>
+        <span class="ohm-course-banner-dismiss"><span id="dismiss-banner">[x]</span></span>
+    </div>
     <div class="ohm-course-banner-content">
         <p>
             We’re excited to announce the release of Desmos Interactives,
@@ -13,3 +16,4 @@
         </p>
     </div>
 </div>
+<script src="/ohm/views/banner/banner.js"></script>
