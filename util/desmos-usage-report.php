@@ -124,18 +124,20 @@ function outputDateForm(DateTime $startDate, DateTime $endDate): void
  */
 function generateReport(DateTime $startDate, DateTime $endDate): void
 {
+    $dbh = $GLOBALS['DBH_REPLICA'];
+
     // $totalDesmosItems includes copies (itemid_chain_size > 1)
-    $totalDesmosItemsByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, false);
+    $totalDesmosItemsByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, false, $dbh);
 
     // $totalDesmosItems only includes items that are not copies (itemid_chain_size == 1)
-    $totalDesmosItemsAuthoredByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, true);
+    $totalDesmosItemsAuthoredByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, true, $dbh);
 
-    $uniqueStudentViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, false, null);
-    $uniqueStudentLtiViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, true, null);
-    $uniqueTeacherViewsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosview", $startDate, $endDate, false, null);
-    $uniqueTeacherAddsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosadd", $startDate, $endDate, false, null);
-    $uniqueTeacherCopiesByGroup = ContentTracker::countUniqueTeachersByGroup("desmoscopy", $startDate, $endDate, false, null);
-    $uniqueTeacherEditsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosedit", $startDate, $endDate, false, null);
+    $uniqueStudentViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, false, null,  $dbh);
+    $uniqueStudentLtiViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, true, null, $dbh);
+    $uniqueTeacherViewsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosview", $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherAddsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosadd", $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherCopiesByGroup = ContentTracker::countUniqueTeachersByGroup("desmoscopy", $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherEditsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosedit", $startDate, $endDate, false, null, $dbh);
     outputSummaryTable($totalDesmosItemsByGroup, $uniqueStudentViewsByGroup, $uniqueTeacherViewsByGroup);
     outputGroupReportTable($totalDesmosItemsByGroup, $totalDesmosItemsAuthoredByGroup, $uniqueStudentViewsByGroup,
         $uniqueStudentLtiViewsByGroup, $uniqueTeacherAddsByGroup, $uniqueTeacherCopiesByGroup, $uniqueTeacherEditsByGroup);
