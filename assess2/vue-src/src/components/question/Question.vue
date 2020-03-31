@@ -33,13 +33,21 @@
       :qn = "qn"
     />
 
-    <div v-if="hasCalculator" class="submitbtnwrap">
-      <button @click="toggleEmbeddedCalc">
-        Calculator
-        <span v-if="showCalculator">X</span>
-      </button>
-      <div v-show="showCalculator">
-        <figure :id="'test-calc' + qn" ref="figure" style="width: 600px; height: 400px;">
+    <div v-if="hasCalculator" class="calculator">
+      <button type="button" @click="openCalc" v-show="!showDesmos">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><rect fill="#212B36" x="6" y="3" width="13" height="18" rx="1"/><path fill="#DDE3E9" d="M7 9h2v2H7z"/><path fill="#F49342" d="M13 9h2v2h-2zM16 9h2v2h-2z"/><path fill="#DDE3E9" d="M10 9h2v2h-2zM7 12h2v2H7zM7 15h2v2H7z"/><path fill="#F49342" d="M13 12h2v2h-2zM16 12h2v2h-2z"/><path fill="#DDE3E9" d="M10 12h2v2h-2z"/><path fill="#2DCF77" d="M13 15h2v2h-2zM13 18h2v2h-2z"/><path fill="#DDE3E9" d="M10 15h2v2h-2zM10 18h2v2h-2zM7 18h2v2H8a1 1 0 01-1-1v-1z"/><path d="M16 15h2v4a1 1 0 01-1 1h-1v-5z" fill="#2DCF77"/><path d="M8 4h9a1 1 0 011 1v3H7V5a1 1 0 011-1z" fill="#FFF"/></g></svg>
+        Calculator</button>
+      <div class="calc-header" v-show="showDesmos">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><rect fill="#212B36" x="6" y="3" width="13" height="18" rx="1"/><path fill="#DDE3E9" d="M7 9h2v2H7z"/><path fill="#F49342" d="M13 9h2v2h-2zM16 9h2v2h-2z"/><path fill="#DDE3E9" d="M10 9h2v2h-2zM7 12h2v2H7zM7 15h2v2H7z"/><path fill="#F49342" d="M13 12h2v2h-2zM16 12h2v2h-2z"/><path fill="#DDE3E9" d="M10 12h2v2h-2z"/><path fill="#2DCF77" d="M13 15h2v2h-2zM13 18h2v2h-2z"/><path fill="#DDE3E9" d="M10 15h2v2h-2zM10 18h2v2h-2zM7 18h2v2H8a1 1 0 01-1-1v-1z"/><path d="M16 15h2v4a1 1 0 01-1 1h-1v-5z" fill="#2DCF77"/><path d="M8 4h9a1 1 0 011 1v3H7V5a1 1 0 011-1z" fill="#FFF"/></g></svg>
+          Calculator
+        </span>
+        <button type="button" class="close" @click="closeCalc">
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><defs><path d="M13.414 12l8.293-8.293a.999.999 0 10-1.414-1.414L12 10.586 3.707 2.293a.999.999 0 10-1.414 1.414L10.586 12l-8.293 8.293a.999.999 0 101.414 1.414L12 13.414l8.293 8.293a.997.997 0 001.414 0 .999.999 0 000-1.414L13.414 12z" id="a"/></defs><use fill="#212B36" xlink:href="#a" fill-rule="evenodd"/></svg>
+        </button>
+      </div>
+      <div v-show="showDesmos">
+        <figure :id="'calc' + qn" class="js-desmos desmos-fig" ref="figure" style="width: 100%; height: 400px;">
         </figure>
       </div>
     </div>
@@ -108,13 +116,13 @@ export default {
         !store.inPrintView &&
         this.questionData.withdrawn === 0 &&
         this.questionData.canretry && (
-          store.assessInfo.submitby === 'by_question' ||
+        store.assessInfo.submitby === 'by_question' ||
           this.questionData.tries_max > 1
-        ) && (
-          // if livepoll, only show if state is 2
-          store.assessInfo.displaymethod !== 'livepoll' ||
+      ) && (
+      // if livepoll, only show if state is 2
+        store.assessInfo.displaymethod !== 'livepoll' ||
           this.state === 2
-        )
+      )
       );
     },
     submitClass () {
@@ -125,7 +133,7 @@ export default {
       return (store.inProgress &&
         !store.inPrintView &&
         (this.questionData.hasOwnProperty('score') ||
-          this.questionData.status === 'attempted'
+         this.questionData.status === 'attempted'
         ) &&
         store.assessInfo.show_results &&
         (this.questionData.try > 0 ||
@@ -165,8 +173,11 @@ export default {
     }
   },
   methods: {
-    toggleEmbeddedCalc(){
-      this.showCalculator = !this.showCalculator;
+    openCalc(){
+      this.showCalculator = true;
+    },
+    closeCalc() {
+      this.showCalculator = false;
     },
     loadQuestionIfNeeded (skiprender) {
       if (!this.questionContentLoaded && this.active && store.errorMsg === null) {
@@ -344,8 +355,8 @@ export default {
     },
     state: function (newVal, oldVal) {
       if ((newVal > 1 && oldVal <= 1) ||
-        (newVal === 4 && oldVal < 4) ||
-        (newVal === 3 && oldVal === 4)
+          (newVal === 4 && oldVal < 4) ||
+          (newVal === 3 && oldVal === 4)
       ) {
         // force reload
         actions.loadQuestion(this.qn, false, false);
@@ -440,5 +451,59 @@ input[type=text].ansyel, .mq-editable-field.ansyel {
   padding-right: 17px;
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigyNTUsMTg3LDApIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0gNS4zLDEwLjYgOSwxNC4yIDE4LjUsNC42IDIxLjQsNy40IDksMTkuOCAyLjcsMTMuNSB6IiAvPjwvc3ZnPg==");
 }
-</style>
 
+.calculator {
+  width: 50%;
+}
+.calculator button {
+  background-color: #fff;
+}
+.calculator button:hover {
+  background: linear-gradient(180deg, white 0%, #e9edf1 100%);
+}
+.calculator > button {
+  padding-left: 8px;
+}
+.calculator figure {
+  margin: 0;
+}
+.calculator svg {
+  height: 20px;
+  vertical-align: text-bottom;
+  width: 20px;
+}
+.calc-header {
+  border: 1px solid #ccc;
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  display: flex;
+  justify-content: space-between;
+}
+.calc-header .close {
+  border: none;
+  border-radius: 0 2px 0 0;
+  margin: 0;
+  padding: 0 8px;
+  /* Bring focus border forward so bottom isn't clipped  */
+  position: relative;
+  z-index: 1;
+}
+
+.calc-header .close:hover {
+  background: linear-gradient(180deg, white 0%, #e9edf1 100%);
+  border-left: 1px solid #ccc;
+}
+
+.calc-header .close svg {
+  height: 14px;
+  vertical-align: middle;
+  width: 14px;
+}
+
+.calc-header span {
+  border: none;
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 0;
+}
+</style>
