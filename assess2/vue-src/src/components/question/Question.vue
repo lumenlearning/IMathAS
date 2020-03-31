@@ -34,10 +34,10 @@
     />
 
     <div v-if="hasCalculator" class="calculator">
-      <button type="button" @click="openCalc" v-show="!showDesmos">
+      <button type="button" @click="openCalc" v-show="!showCalculator">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><rect fill="#212B36" x="6" y="3" width="13" height="18" rx="1"/><path fill="#DDE3E9" d="M7 9h2v2H7z"/><path fill="#F49342" d="M13 9h2v2h-2zM16 9h2v2h-2z"/><path fill="#DDE3E9" d="M10 9h2v2h-2zM7 12h2v2H7zM7 15h2v2H7z"/><path fill="#F49342" d="M13 12h2v2h-2zM16 12h2v2h-2z"/><path fill="#DDE3E9" d="M10 12h2v2h-2z"/><path fill="#2DCF77" d="M13 15h2v2h-2zM13 18h2v2h-2z"/><path fill="#DDE3E9" d="M10 15h2v2h-2zM10 18h2v2h-2zM7 18h2v2H8a1 1 0 01-1-1v-1z"/><path d="M16 15h2v4a1 1 0 01-1 1h-1v-5z" fill="#2DCF77"/><path d="M8 4h9a1 1 0 011 1v3H7V5a1 1 0 011-1z" fill="#FFF"/></g></svg>
         Calculator</button>
-      <div class="calc-header" v-show="showDesmos">
+      <div class="calc-header" v-show="showCalculator">
         <span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><rect fill="#212B36" x="6" y="3" width="13" height="18" rx="1"/><path fill="#DDE3E9" d="M7 9h2v2H7z"/><path fill="#F49342" d="M13 9h2v2h-2zM16 9h2v2h-2z"/><path fill="#DDE3E9" d="M10 9h2v2h-2zM7 12h2v2H7zM7 15h2v2H7z"/><path fill="#F49342" d="M13 12h2v2h-2zM16 12h2v2h-2z"/><path fill="#DDE3E9" d="M10 12h2v2h-2z"/><path fill="#2DCF77" d="M13 15h2v2h-2zM13 18h2v2h-2z"/><path fill="#DDE3E9" d="M10 15h2v2h-2zM10 18h2v2h-2zM7 18h2v2H8a1 1 0 01-1-1v-1z"/><path d="M16 15h2v4a1 1 0 01-1 1h-1v-5z" fill="#2DCF77"/><path d="M8 4h9a1 1 0 011 1v3H7V5a1 1 0 011-1z" fill="#FFF"/></g></svg>
           Calculator
@@ -46,8 +46,8 @@
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><defs><path d="M13.414 12l8.293-8.293a.999.999 0 10-1.414-1.414L12 10.586 3.707 2.293a.999.999 0 10-1.414 1.414L10.586 12l-8.293 8.293a.999.999 0 101.414 1.414L12 13.414l8.293 8.293a.997.997 0 001.414 0 .999.999 0 000-1.414L13.414 12z" id="a"/></defs><use fill="#212B36" xlink:href="#a" fill-rule="evenodd"/></svg>
         </button>
       </div>
-      <div v-show="showDesmos">
-        <figure :id="'calc' + qn" class="js-desmos desmos-fig" ref="figure" style="width: 100%; height: 400px;">
+      <div v-show="showCalculator">
+        <figure :id="'calc' + qn" ref="figure" style="width: 100%; height: 400px;">
         </figure>
       </div>
     </div>
