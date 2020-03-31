@@ -44,7 +44,7 @@ ul {
 	} else {
 		$skipcid = array();
 	}
-	$stm = $DBH->query("SELECT id FROM imas_courses WHERE (istemplate&4)=4");
+	$stm = $DBH_REPLICA->query("SELECT id FROM imas_courses WHERE (istemplate&4)=4");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$skipcid[] = $row[0];
 	}
@@ -58,7 +58,7 @@ ul {
 	$query .= "JOIN imas_courses AS c ON t.courseid=c.id ";
 	$query .= "JOIN imas_users as u ";
 	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
-	$stm = $DBH->query($query);
+	$stm = $DBH_REPLICA->query($query);
 	$lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = ''; $grpinstrcnt = 0;
 	$lastemail = '';
 	$seencid = array();
