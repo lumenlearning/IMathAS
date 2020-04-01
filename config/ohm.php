@@ -210,27 +210,3 @@ $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
 
 $CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4/calculator.js';
-
-/*
- * Connect to DB read replica for report generation.
- */
-$replicaDbHostname = getenv('REPLICA_DB_SERVER');
-$replicaDbUsername = getenv('REPLICA_DB_USERNAME');
-$replicaDbPassword = getenv('REPLICA_DB_PASSWORD');
-$replicaDbName = getenv('REPLICA_DB_NAME');
-
-try {
-    $DBH_REPLICA = new PDO(sprintf('mysql:host=%s;dbname=%s',
-        $replicaDbHostname, $replicaDbName), $replicaDbUsername, $replicaDbPassword);
-    $DBH_REPLICA->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $GLOBALS["DBH_REPLICA"] = $DBH_REPLICA;
-} catch (PDOException $e) {
-    die("<p>Could not connect to replica database: <b>" . $e->getMessage()
-        . "</b></p></div></body></html>");
-}
-$DBH_REPLICA->query("set session sql_mode=''");
-
-unset($replicaDbHostname);
-unset($replicaDbUsername);
-unset($replicaDbPassword);
-unset($replicaDbName);
