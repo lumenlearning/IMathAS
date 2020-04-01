@@ -209,4 +209,8 @@ $CFG['hooks']['validate'] = 'ohm-hooks/validate.php';
 $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
 
-$CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4/calculator.js';
+$CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js';
+
+$CFG['showcalculator'] = [
+    'scientific' => 'Scientific Calculator'
+];
