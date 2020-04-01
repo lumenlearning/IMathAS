@@ -490,7 +490,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 }
 .calc-header {
   background-color: #f2f2f2;
-  border: 1px solid #ccc;
+  border: 1px solid #C4CDD5;
   border-bottom: none;
   border-radius: 3px 3px 0 0;
   display: flex;
