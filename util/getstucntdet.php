@@ -14,8 +14,21 @@ ul {
 		exit;
 	}
 	$now = time();
-	
-	
+
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    use OHM\Includes\ReadReplicaDb;
+    require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
+    $DBH = ReadReplicaDb::getPdoInstance();
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+
 	$start = $now - 60*60*24*30; 
 	$end = $now; 
 	if (isset($_GET['start'])) {
@@ -55,7 +68,7 @@ ul {
 	} else {
 		$skipcid = array();
 	}
-	$stm = $DBH_REPLICA->query("SELECT id FROM imas_courses WHERE (istemplate&4)=4");
+	$stm = $DBH->query("SELECT id FROM imas_courses WHERE (istemplate&4)=4");
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		$skipcid[] = $row[0];
 	}
@@ -69,7 +82,7 @@ ul {
 	$query .= "JOIN imas_courses AS c ON t.courseid=c.id ";
 	$query .= "JOIN imas_users as u ";
 	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
-	$stm = $DBH_REPLICA->query($query);
+	$stm = $DBH->query($query);
 	$lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = ''; $grpinstrcnt = 0;
 	$lastemail = '';
 	$seencid = array();

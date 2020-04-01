@@ -114,34 +114,3 @@ mysql_query("set session sql_mode=''");
 unset($dbserver);
 unset($dbusername);
 unset($dbpassword);
-
-
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-
-// Connect to DB read replica for report generation.
-try {
-    $DBH_REPLICA = new PDO(
-        sprintf('mysql:host=%s;dbname=%s',
-            getenv('REPLICA_DB_SERVER'),
-            getenv('REPLICA_DB_NAME')
-        ),
-        getenv('REPLICA_DB_USERNAME'),
-        getenv('REPLICA_DB_PASSWORD')
-    );
-    $DBH_REPLICA->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $GLOBALS["DBH_REPLICA"] = $DBH_REPLICA;
-} catch (PDOException $e) {
-    die("<p>Could not connect to replica database: <b>" . $e->getMessage()
-        . "</b></p></div></body></html>");
-}
-$DBH_REPLICA->query("set session sql_mode=''");
-
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################

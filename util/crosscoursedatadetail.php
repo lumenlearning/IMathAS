@@ -12,6 +12,19 @@ if ($myrights<75) {
 	echo 'You do not have the authority for this action';
 	exit;
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+use OHM\Includes\ReadReplicaDb;
+require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
+$DBH = ReadReplicaDb::getPdoInstance();
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 
 $curBreadcrumb = $breadcrumbbase;
 $curBreadcrumb .= ' <a href="../admin/admin2.php">Admin</a>';
@@ -60,7 +73,7 @@ if (empty($_REQUEST['baseassess'])) {
 $baseassess = Sanitize::onlyInt($_REQUEST['baseassess']);
 
 //get assessment course
-$stm = $DBH_REPLICA->prepare('SELECT name,courseid,itemorder,ptsposs,defpoints FROM imas_assessments WHERE id=?');
+$stm = $DBH->prepare('SELECT name,courseid,itemorder,ptsposs,defpoints FROM imas_assessments WHERE id=?');
 $stm->execute(array($baseassess));
 list($assessname,$basecourse,$itemorder,$ptsposs,$defpoints) = $stm->fetch(PDO::FETCH_NUM);
 if ($ptsposs==-1) {
@@ -93,7 +106,7 @@ $qmap = array_flip($qarr);
 //get course groupid
 $query = 'SELECT iu.groupid FROM imas_courses AS ic JOIN imas_users AS iu ';
 $query .= 'ON ic.ownerid=iu.id WHERE ic.id=?';
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array($basecourse));
 $lookupgroup = $stm->fetchColumn(0);
 if ($myrights < 100 && $lookupgroup != $groupid) {
@@ -116,7 +129,7 @@ $query .= 'JOIN imas_users AS iu ON ic.ownerid=iu.id ';
 $query .= 'JOIN imas_assessment_sessions AS ias ON ia.id=ias.assessmentid ';
 $query .= 'WHERE iu.groupid=? AND (ia.ancestors REGEXP ? OR ia.ancestors REGEXP ?)';
 $query .= 'GROUP BY ia.id HAVING MAX(ias.endtime)>?';
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array($lookupgroup, $anregex1, $anregex2, $old));
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$row['itemorder'] = explode(',', str_replace('~',',',preg_replace('/\d+\|\d+~/','',$row['itemorder'])));
@@ -143,7 +156,7 @@ $allaids[] = $baseassess;
 $locationqsetid = array();
 $possible = array();
 $phaids = Sanitize::generateQueryPlaceholders($allaids);
-$stm = $DBH_REPLICA->prepare("SELECT id,assessmentid,questionsetid,points FROM imas_questions WHERE assessmentid IN ($phaids) ORDER BY assessmentid");
+$stm = $DBH->prepare("SELECT id,assessmentid,questionsetid,points FROM imas_questions WHERE assessmentid IN ($phaids) ORDER BY assessmentid");
 $stm->execute($allaids);
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$loc = $qmap[$row['id']];
@@ -185,7 +198,7 @@ if (count($courses)==0) {
 
 //pull question titles
 $qsids = Sanitize::generateQueryPlaceholders($locationqsetid);
-$stm = $DBH_REPLICA->prepare("SELECT id,description FROM imas_questionset WHERE id IN ($qsids)");
+$stm = $DBH->prepare("SELECT id,description FROM imas_questionset WHERE id IN ($qsids)");
 $stm->execute(array_values($locationqsetid));
 $questiontitles = array();
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
@@ -194,7 +207,7 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 
 //pull courses names
 $phcids = Sanitize::generateQueryPlaceholders($courses);
-$stm = $DBH_REPLICA->prepare("SELECT id,name FROM imas_courses WHERE id IN ($phcids)");
+$stm = $DBH->prepare("SELECT id,name FROM imas_courses WHERE id IN ($phcids)");
 $stm->execute(array_values($courses));
 $coursenames = array();
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
@@ -207,7 +220,7 @@ $teachers = array();
 $query = "SELECT it.courseid,GROUP_CONCAT(CONCAT(iu.LastName, ' ', SUBSTR(iu.FirstName,1,1)) SEPARATOR ', ') as teachers ";
 $query .= "FROM imas_teachers AS it JOIN imas_users AS iu ON it.userid=iu.id ";
 $query .= "WHERE it.courseid IN ($phcids) GROUP BY it.courseid";
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array_values($courses));
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$teachers[$row['courseid']] = $row['teachers'];	
@@ -219,7 +232,7 @@ $phcopyaids = Sanitize::generateQueryPlaceholders($assessdata);
 $assessresults = array_fill(0, $qcnt, array());
 $query = 'SELECT assessmentid,questions,bestscores FROM imas_assessment_sessions WHERE ';
 $query .= "assessmentid IN ($phcopyaids)";
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array_keys($assessdata));
 //echo "Assess data lookup done: ".(microtime(true)-$ts).'<br>';
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {

@@ -13,6 +13,20 @@ if ($myrights<100) {
 	exit;
 }
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+use OHM\Includes\ReadReplicaDb;
+require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
+$DBH = ReadReplicaDb::getPdoInstance();
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 $curBreadcrumb = $breadcrumbbase;
 $curBreadcrumb .= ' <a href="../admin/admin2.php">Admin</a>';
 if ($myrights == 100) {
@@ -68,7 +82,7 @@ $basecourse = Sanitize::onlyInt($_REQUEST['basecourse']);
 //get course groupid
 $query = 'SELECT iu.groupid FROM imas_courses AS ic JOIN imas_users AS iu ';
 $query .= 'ON ic.ownerid=iu.id WHERE ic.id=?';
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array($basecourse));
 $lookupgroup = $stm->fetchColumn(0);
 if ($myrights < 100 && $lookupgroup != $groupid) {
@@ -87,7 +101,7 @@ $query = 'SELECT ic.id,ic.ancestors,ic.name FROM imas_courses AS ic JOIN imas_us
 	  iu.groupid=? AND ic.ancestors REGEXP ?
 	  GROUP BY istu.courseid
 	  HAVING AVG(istu.lastaccess)>? ORDER BY ic.name';
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array($lookupgroup, $anregex, $old));
 
 //echo "Ancestor lookup done: ".(microtime(true)-$ts).'<br>';
@@ -114,7 +128,7 @@ $teachers = array();
 $query = "SELECT it.courseid,GROUP_CONCAT(CONCAT(iu.LastName, ' ', SUBSTR(iu.FirstName,1,1)) SEPARATOR ', ') as teachers ";
 $query .= "FROM imas_teachers AS it JOIN imas_users AS iu ON it.userid=iu.id ";
 $query .= "WHERE it.courseid IN ($phcids) GROUP BY it.courseid";
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute($courses);
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$teachers[$row['courseid']] = $row['teachers'];
@@ -124,7 +138,7 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 
 //pull assessment names
 $assessdata = array();
-$stm = $DBH_REPLICA->prepare('SELECT id,name,ptsposs,itemorder FROM imas_assessments WHERE courseid=? ORDER BY name');
+$stm = $DBH->prepare('SELECT id,name,ptsposs,itemorder FROM imas_assessments WHERE courseid=? ORDER BY name');
 $stm->execute(array($basecourse));
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$row['qcnt'] = substr_count($row['itemorder'], ',');
@@ -139,7 +153,7 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 
 //find assessment copies
 $assesscopies = array();
-$stm = $DBH_REPLICA->prepare("SELECT id,courseid,ancestors,itemorder,ptsposs FROM imas_assessments WHERE courseid IN ($phcids)");
+$stm = $DBH->prepare("SELECT id,courseid,ancestors,itemorder,ptsposs FROM imas_assessments WHERE courseid IN ($phcids)");
 $stm->execute($courses);
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	//see if one of our assessments is at the proper depth of ancestors
@@ -179,7 +193,7 @@ $phcopyaids = Sanitize::generateQueryPlaceholders($assesscopies);
 $assessresults = array();
 $query = 'SELECT assessmentid,bestscores FROM imas_assessment_sessions WHERE ';
 $query .= "assessmentid IN ($phcopyaids)";
-$stm = $DBH_REPLICA->prepare($query);
+$stm = $DBH->prepare($query);
 $stm->execute(array_keys($assesscopies));
 //echo "Assess data lookup done: ".(microtime(true)-$ts).'<br>';
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {

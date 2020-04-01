@@ -6,6 +6,20 @@ if ($myrights<100 && ($myspecialrights&(32+64))==0) {
 	exit;
 }
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+use OHM\Includes\ReadReplicaDb;
+require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
+$DBH = ReadReplicaDb::getPdoInstance();
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 $outputFormat = isset($_GET['format']) ? strtolower($_GET['format']) : 'html';
 
 $now = time();
@@ -29,14 +43,14 @@ if (isset($_GET['end'])) {
 
 
 //pull template courses
-$stm = $DBH_REPLICA->query("SELECT id,name FROM imas_courses WHERE (istemplate&1)=1 OR (istemplate&2)=2 ORDER BY name");
+$stm = $DBH->query("SELECT id,name FROM imas_courses WHERE (istemplate&1)=1 OR (istemplate&2)=2 ORDER BY name");
 $templates = array();
 while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	$templates[$row[0]] = $row[1];
 }
 $templateids = array_keys($templates);
 
-$stm = $DBH_REPLICA->prepare("SELECT time,log FROM imas_log WHERE log LIKE :log AND time>:start AND time<:end");
+$stm = $DBH->prepare("SELECT time,log FROM imas_log WHERE log LIKE :log AND time>:start AND time<:end");
 $stm->execute(array(':log'=>"New Instructor Request%",':start'=>$start,':end'=>$end));
 $reqdates = array();
 while ($reqdata = $stm->fetch(PDO::FETCH_ASSOC)) {
@@ -44,7 +58,7 @@ while ($reqdata = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$reqdates[Sanitize::onlyInt($log[0])] = $reqdata['time'];
 }
 
-$stm = $DBH_REPLICA->prepare("SELECT * FROM imas_instr_acct_reqs WHERE reqdate>:start AND reqdate<:end");
+$stm = $DBH->prepare("SELECT * FROM imas_instr_acct_reqs WHERE reqdate>:start AND reqdate<:end");
 $stm->execute(array(':start'=>$start,':end'=>$end));
 $reqdates = array();
 $reqappdates = array();
@@ -92,7 +106,7 @@ if (count($reqdates)==0) {
 	$query .= "LEFT JOIN imas_courses AS t ON u.id=t.ownerid ";
 	$query .= "LEFT JOIN imas_students AS s ON s.courseid=t.id ";
 	$query .= "WHERE u.id IN ($ph) GROUP BY u.id ORDER BY g.name,u.LastName";
-	$stm = $DBH_REPLICA->prepare($query);
+	$stm = $DBH->prepare($query);
 	$stm->execute(array_keys($reqdates));
 
 	if ('html' == $outputFormat) {

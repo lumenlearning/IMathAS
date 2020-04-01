@@ -21,7 +21,7 @@ $dbname = getenv('DB_NAME') ?? 'myopenmath';
 $dbusername = getenv('DB_USERNAME') ?? 'username';
 $dbpassword = getenv('DB_PASSWORD') ?? 'password';
 
-// Database - read replica (env vars used in /config.php)
+// Database - read replica (env vars used in /ohm/includes/ReadReplicaDb.php)
 putenv('REPLICA_DB_SERVER=' . $dbserver);
 putenv('REPLICA_DB_USERNAME=' . $dbusername);
 putenv('REPLICA_DB_PASSWORD=' . $dbpassword);

@@ -2,6 +2,7 @@
 
 use Course\Includes\ContentTracker;
 use Desmos\Models\DesmosItem;
+use OHM\Includes\ReadReplicaDb;
 
 require_once(__DIR__ . '/../init.php');
 
@@ -122,10 +123,11 @@ function outputDateForm(DateTime $startDate, DateTime $endDate): void
  *
  * @param DateTime $startDate
  * @param DateTime $endDate
+ * @throws Exception Thrown if unable to connect to the database.
  */
 function generateReport(DateTime $startDate, DateTime $endDate): void
 {
-    $dbh = $GLOBALS['DBH_REPLICA'];
+    $dbh = ReadReplicaDb::getPdoInstance();
 
     // $totalDesmosItems includes copies (itemid_chain_size > 1)
     $totalDesmosItemsByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, false, $dbh);
