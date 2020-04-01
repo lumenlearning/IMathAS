@@ -427,7 +427,7 @@ export default {
       window.$(this.$refs.thisqwrap).find('select.ansyel').after(svgychk);
       window.$(this.$refs.thisqwrap).find('select.ansred').after(svgx);
 
-      actions.setRendered(this.qn);
+      actions.setRendered(this.qn, true);
     },
     setInitValues () {
       var regex = new RegExp('^(qn|tc|qs)\\d');
@@ -498,6 +498,9 @@ export default {
       this.disableOutOfTries();
       this.renderAndTrack();
     }
+  },
+  beforeDestroy () {
+    actions.setRendered(this.qn, false);
   },
   watch: {
     active: function (newVal, oldVal) {
