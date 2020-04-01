@@ -97,7 +97,7 @@ class ContentTracker
      * @param DateTime $endTimestamp The ending date range.
      * @param bool $ltiOnly True to count LTI users. False to count all users.
      * @param int|null $groupId A school's group ID. If null, all schools are returned.
-     * @param PDO|null $dbh A database connection.
+     * @param PDO|null $dbhOverride A database connection.
      * @return array Associative array of groupIds and counts.
      */
     protected static function countUniqueUsersByGroup(string $type,
@@ -106,10 +106,10 @@ class ContentTracker
                                                       DateTime $endTimestamp,
                                                       bool $ltiOnly,
                                                       ?int $groupId,
-                                                      ?PDO $dbh
+                                                      ?PDO $dbhOverride
     ): array
     {
-        $actualDbh = is_null($dbh) ? $GLOBALS['DBH'] : $dbh;
+        $dbh = is_null($dbhOverride) ? $GLOBALS['DBH'] : $dbhOverride;
 
         $rightsList = implode(',', array_map('intval', $rights));
         $groupIdSql = is_null($groupId) ? '' : 'AND tu.groupid = ' . intval($groupId);
@@ -136,7 +136,7 @@ class ContentTracker
             ':endTimestamp' => $endTimestamp->getTimestamp()
         ];
 
-        $stm = $actualDbh->prepare($query);
+        $stm = $dbh->prepare($query);
         $stm->execute($params);
 
         $totalCounts = [];

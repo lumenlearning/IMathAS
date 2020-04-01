@@ -54,7 +54,17 @@ function reporterror($err) {
 	require("../header.php");
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Results</h1>';
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
     displayReadReplicaNotice();
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
 	echo '<p class=noticetext>'.$err.'</p>';
 	require("../footer.php");
 	exit;
@@ -64,7 +74,17 @@ if (empty($_REQUEST['basecourse'])) {
 	require("../header.php");
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Results</h1>';
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
     displayReadReplicaNotice();
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
 	echo '<p>This utility allows you to output assessment averages from all copies of the specified course ID.</p>';
 	echo '<p>All scores are averages reported as percents.  The average only includes students who took the assessment.</p>';
 	echo '<form method=post>';
@@ -245,7 +265,17 @@ if ($_REQUEST['output']=='html') {
 	require("../header.php");
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Results</h1>';
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
     displayReadReplicaNotice();
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
 	echo '<p>All scores are averages reported as percents.  The average only includes students who took the assessment.</p>';
 	echo '<table class=gb><thead><tr><th>';
 	echo implode('</th><th>', array_map('Sanitize::encodeStringForDisplay', $headerrow));
