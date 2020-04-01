@@ -7,7 +7,7 @@ $query = 'CREATE TABLE `imas_teacher_audit_log` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `userid` int(10) unsigned NOT NULL,
   `courseid` int(10) unsigned NOT NULL,
-  `action` ENUM("Assessment Settings Change","Mass Assessment Setting Change","Mass Assessment Date Change","Question Settings Change","Clear Attempts","Clear Scores","Delete Item", "Unenroll","Grade Override"),
+  `action` ENUM("Assessment Settings Change","Mass Assessment Settings Change","Mass Assessment Date Change","Question Settings Change","Clear Attempts","Clear Scores","Delete Item", "Unenroll","Grade Override"),
   `itemid` int(10) unsigned NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
   `metadata` json NOT NULL,
