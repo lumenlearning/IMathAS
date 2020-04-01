@@ -21,6 +21,7 @@ $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"h
 require("../header.php");
 echo '<div class=breadcrumb>', $curBreadcrumb, '</div>';
 echo '<div id="headeradmin" class="pagetitle"><h1>', $pagetitle, '</h1></div>';
+echo '<p><u>Note</u>: Data is queried from the OHM read replica DB.</p>';
 
 // FIXME: Remove this after creating indexes on imas_content_track in prod.
 echo "<p style='color: red;'>This report is DISABLED in production until indexes are created. See OHM-119.<br/>";
