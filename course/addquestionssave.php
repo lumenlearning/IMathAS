@@ -2,6 +2,7 @@
 //IMathAS:  Save changes to addquestions submitted through AHAH
 //(c) 2007 IMathAS/WAMAP Project
 	require("../init.php");
+	require_once("../includes/TeacherAuditLog.php");
 	$cid = Sanitize::courseId($_GET['cid']);
 	$aid = Sanitize::onlyInt($_GET['aid']);
 	if (!isset($teacherid)) {
@@ -151,6 +152,12 @@
 	$stm = $DBH->prepare($query);
 	$stm->execute($qarr);
 	if ($stm->rowCount()>0 || $ptschanged) {
+		$result = TeacherAuditLog::addTracking(
+			$cid,
+			"Assessment Settings Change",
+			$aid,
+			$qarr
+		);
 		//delete any removed questions
 		if (count($toremove)>0) {
 			$toremove = implode(',', array_map('intval', $toremove));

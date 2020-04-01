@@ -6,6 +6,7 @@
 	//single grade edit
 	require("../init.php");
 	require("../includes/htmlutil.php");
+    require_once("../includes/TeacherAuditLog.php");
 
 	$istutor = false;
 	$isteacher = false;
@@ -45,6 +46,15 @@
 			if ($stm->rowCount()>0) {
 				$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetype='offline' AND gradetypeid=:gradetypeid");
 				$stm->execute(array(':gradetypeid'=>$delItem));
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Clear Scores",
+                    $delItem,
+                    [
+                        'type' => 'offline',
+                        'action' => 'Delete Offline Grade Book Item and Grades'
+                    ]
+                );
 			}
 			if ($from == 'gbtesting') {
 				header(sprintf('Location: %s/course/gb-testing.php?stu=%s&cid=%s&r=' .Sanitize::randomQueryStringParam(), $GLOBALS['basesiteurl'],
@@ -225,17 +235,37 @@
 				}
 				if ($sc!='') {
 					$stm = $DBH->prepare("UPDATE imas_grades SET score=:score,feedback=:feedback WHERE userid=:userid AND gradetype='offline' AND gradetypeid=:gradetypeid");
-					$stm->execute(array(':score'=>$sc, ':feedback'=>$_POST['feedback'.$k], ':userid'=>$k, ':gradetypeid'=>$gbItem));
+					$update = array(':score'=>$sc, ':feedback'=>$_POST['feedback'.$k], ':userid'=>$k, ':gradetypeid'=>$gbItem);
+					$stm->execute($update);
+                    if ($stm->rowCount() > 0) {
+                        $update['type'] = 'offline';
+                        $result = TeacherAuditLog::addTracking(
+                            $cid,
+                            "Change Grades",
+                            $gbItem,
+                            $update
+                        );
+                    }
 				} else {
 					if ($_POST['feedback'.$k] == '') {
 						$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetype='offline' AND gradetypeid=:gradetypeid AND userid=:userid");
-						$stm->execute(array(':userid'=>$k, ':gradetypeid'=>$gbItem));
+						$update = array(':userid'=>$k, ':gradetypeid'=>$gbItem);
 					} else {
-					$stm = $DBH->prepare("UPDATE imas_grades SET score=NULL,feedback=:feedback WHERE userid=:userid AND gradetype='offline' AND gradetypeid=:gradetypeid");
-					$stm->execute(array(':feedback'=>$_POST['feedback'.$k], ':userid'=>$k, ':gradetypeid'=>$gbItem));
-				}
-			}
-		}
+                        $stm = $DBH->prepare("UPDATE imas_grades SET score=NULL,feedback=:feedback WHERE userid=:userid AND gradetype='offline' AND gradetypeid=:gradetypeid");
+                        $update = array(':feedback'=>$_POST['feedback'.$k], ':userid'=>$k, ':gradetypeid'=>$gbItem);
+                        $stm->execute($update);
+                    }
+                    if ($stm->rowCount() > 0) {
+                        $update['type'] = 'offline';
+                        $result = TeacherAuditLog::addTracking(
+                            $cid,
+                            "Clear Scores",
+                            $gbItem,
+                            $update
+                        );
+                    }
+                }
+            }
 		}
 
 		if (isset($_POST['newscore'])) {

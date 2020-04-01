@@ -11,6 +11,7 @@ require_once(__DIR__ . '/questions/models/QuestionParams.php');
 require_once(__DIR__ . '/questions/models/ShowAnswer.php');
 require_once(__DIR__ . '/questions/ScoreEngine.php');
 require_once(__DIR__ . '/questions/models/ScoreQuestionParams.php');
+require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
 
 use IMathAS\assess2\questions\QuestionGenerator;
 use IMathAS\assess2\questions\models\QuestionParams;
@@ -180,6 +181,23 @@ class AssessRecord
       }
       $stm = $this->DBH->prepare($query);
       $stm->execute($qarr);
+      if ($stm->rowCount()>0 && $this->data['scoreoverride']==true) {
+          $this->loadRecord($this->curUid);
+              //do we want to keep the score data? if so we need to decode or else unset
+          $this->assessRecord['scoreddata'] = json_decode(gzdecode($this->assessRecord['scoreddata']), true);
+          $qarr[':scoreddata'] = json_decode(gzdecode($qarr[':scoreddata']), true);
+          $result = TeacherAuditLog::addTracking(
+              $this->assess_info->getCourseId(),
+              "Change Grades",
+              $this->curAid,
+              array(
+                  'Assessment Ver' => 2,
+                  'studentid' => $this->curUid,
+                  'old score' => $this->assessRecord['score'],
+                  'new score' => $qarr[':score']
+              )
+          );
+      }
 
       $this->need_to_record = false;
     }
@@ -2942,6 +2960,18 @@ class AssessRecord
       $replacedDeleted = true;
     }
     $this->updateStatus();
+    $result = TeacherAuditLog::addTracking(
+        $this->assess_info->getCourseId(),
+          "Clear Attempts",
+
+          $this->curAid,
+          array(
+              'Assessment Ver' => 2,
+              'studentid' => $this->curUid,
+              'type'=>$type,
+              'keepver' => $this->assessRecord,
+          )
+      );
     return $replacedDeleted;
   }
 

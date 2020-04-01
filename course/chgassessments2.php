@@ -7,6 +7,7 @@ require("../init.php");
 require("../includes/htmlutil.php");
 require("../includes/copyiteminc.php");
 require("../includes/loaditemshowdata.php");
+require_once("../includes/TeacherAuditLog.php");
 
 /*** pre-html data manipulation, including function code *******/
 
@@ -407,7 +408,11 @@ if (!(isset($teacherid))) {
 			$setslist = implode(',',$sets);
 			$stm = $DBH->prepare("UPDATE imas_assessments SET $setslist WHERE id IN ($checkedlist)");
 			$stm->execute($qarr);
+            if ($stm->rowCount()>0) {
+                $updated_settings = true;
+            }
 		}
+        $metadata = array("assessmentids" => $checkedlist) + $qarr;
 		if ($_POST['intro'] !== 'DNC') {
 			$stm = $DBH->prepare("SELECT intro FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>Sanitize::onlyInt($_POST['intro'])));
@@ -427,12 +432,26 @@ if (!(isset($teacherid))) {
 					$outintro = $newintro;
 				}
 				$stmupd->execute(array(':id'=>$row['id'], ':intro'=>$outintro));
+                if ($stmupd->rowCount()>0) {
+                    $updated_settings = true;
+                }
 			}
 		}
 
 		if (isset($_POST['removeperq'])) {
 			$stm = $DBH->query("UPDATE imas_questions SET points=9999,attempts=9999,penalty=9999,regen=0,showans=0,showhints=-1,fixedseeds=NULL WHERE assessmentid IN ($checkedlist)");
+            $metadata[] = "Removed per-question settings";
 		}
+
+        if ($updated_settings === true) {
+            $result = TeacherAuditLog::addTracking(
+                $cid,
+                "Mass Assessment Settings Change",
+                null,
+                $metadata
+            );
+        }
+
 		if ($_POST['copyopts'] != 'DNC' || $_POST['defpoints'] !== '' || isset($_POST['removeperq'])) {
 			//update points possible
 			require_once("../includes/updateptsposs.php");

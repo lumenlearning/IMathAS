@@ -118,16 +118,53 @@
 						$query = "UPDATE imas_assessment_sessions SET scores=:scores,attempts=:attempts,seeds=:seeds,lastanswers=:lastanswers,";
 						$query .= "reattempting=:reattempting WHERE id=:id";
 						$stm = $DBH->prepare($query);
-						$stm->execute(array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
-							':reattempting'=>$reattemptinglist, ':id'=>$row[0]));
+						$update = array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
+							':reattempting'=>$reattemptinglist, ':id'=>$row[0]);
+						$stm->execute($update);
+
+						$result = TeacherAuditLog::addTracking(
+							$cid,
+							"Clear Scores",
+							$row[0],
+							array(
+								'clear_type'=>'user assessment',
+								'studentid'=>$stu,
+								'old_attempt'=>$row,
+								'new_attempt'=>$update
+							)
+						);
 					}
 
 				} else if (isset($_POST['forceclear'])) {
+					//get old grades
+					$stm = $DBH->prepare("SELECT userid, bestscores FROM imas_assessment_sessions WHERE userid=? AND assessmentid=$aid");
+					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
+					while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+						$sp = explode(';', $row['bestscores']);
+						$as = str_replace(array('-1','-2','~'), array('0','0',','), $sp[0]);
+						$total = array_sum(explode(',', $as));
+						$grade = $total;
+					}
+					$stm = $DBH->prepare("SELECT userid,score FROM imas_assessment_records WHERE userid=? AND assessmentid=?");
+					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
+					while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+						$grade=$row["score"];
+					}
 					//this is not group-safe
 					$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE userid=:userid AND assessmentid=:assessmentid");
 					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
 					$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE userid=:userid AND assessmentid=:assessmentid");
 					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
+
+					$result = TeacherAuditLog::addTracking(
+						$cid,
+						"Clear Attempts",
+						$aid,
+						array(
+							'studentid' => $stu,
+							'grade' => $grade
+						)
+					);
 				}
 
 			}

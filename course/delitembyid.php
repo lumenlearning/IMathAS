@@ -1,5 +1,6 @@
 <?php
 require_once("../includes/filehandler.php");
+require_once('../includes/TeacherAuditLog.php');
 
 function delitembyid($itemid) {
 	global $DBH, $cid;
@@ -9,6 +10,20 @@ function delitembyid($itemid) {
 	$typeid = Sanitize::simpleString($typeid);
 
 	if ($itemtype == "InlineText") {
+		//TeacherAuditLog
+		$stm = $DBH->query("SELECT title FROM imas_inlinetext WHERE id=".$typeid);
+		$item_name = $stm->fetchColumn(0);
+		$result = TeacherAuditLog::addTracking(
+			$cid,
+			"Delete Item",
+			$itemid,
+			array(
+				'itemtype'=>$itemtype,
+				'typeid'=>$typeid,
+				'item_name'=>$item_name
+			)
+		);
+
 		$stm = $DBH->prepare("DELETE FROM imas_inlinetext WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
 		$stm = $DBH->prepare("SELECT filename FROM imas_instr_files WHERE itemid=:itemid");
@@ -29,9 +44,20 @@ function delitembyid($itemid) {
 
 
 	} else if ($itemtype == "LinkedText") {
-		$stm = $DBH->prepare("SELECT text,points,fileid FROM imas_linkedtext WHERE id=:id");
+		$stm = $DBH->prepare("SELECT text,points,fileid,title FROM imas_linkedtext WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
-		list($text,$points,$fileid) = $stm->fetch(PDO::FETCH_NUM);
+		list($text,$points,$fileid,$item_name) = $stm->fetch(PDO::FETCH_NUM);
+		//TeacherAuditLog
+		$result = TeacherAuditLog::addTracking(
+			$cid,
+			"Delete Item",
+			$itemid,
+			array(
+				'itemtype'=>$itemtype,
+				'typeid'=>$typeid,
+				'item_name'=>$item_name
+			)
+		);
 		if ($fileid > 0) { // has file id - can use that approach
 			$stm = $DBH->prepare("SELECT count(id) FROM imas_linkedtext WHERE fileid=?");
 			$stm->execute(array($fileid));
@@ -58,6 +84,25 @@ function delitembyid($itemid) {
 		$stm = $DBH->prepare("DELETE FROM imas_linkedtext WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
 	} else if ($itemtype == "Forum") {
+		//TeacherAuditLog
+		$stm = $DBH->query("SELECT name FROM imas_forums WHERE id=".$typeid);
+		$item_name = $stm->fetchColumn(0);
+		$stm = $DBH->prepare("SELECT userid, score FROM imas_grades WHERE gradetype='forum' AND gradetypeid=:forumid");
+		$stm->execute(array(':forumid'=>$typeid));
+		$grades = $stm->fetchAll(PDO::FETCH_ASSOC);
+		$result = TeacherAuditLog::addTracking(
+			$cid,
+			"Delete Item",
+			$itemid,
+			array(
+				'itemtype'=>$itemtype,
+				'typeid'=>$typeid,
+				'item_name'=>$item_name,
+				'grades'=>$grades
+			)
+		);
+
+		//Delete Forum Items
 		$stm = $DBH->prepare("DELETE FROM imas_forums WHERE id=:id");
 		$stm->execute(array(':id'=>$typeid));
 		$stm = $DBH->prepare("SELECT id FROM imas_forum_posts WHERE forumid=:forumid AND files<>''");
@@ -84,7 +129,6 @@ function delitembyid($itemid) {
 
 		$stm = $DBH->prepare("DELETE FROM imas_grades WHERE gradetype='forum' AND gradetypeid=:forumid");
 		$stm->execute(array(':forumid'=>$typeid));
-
 	} else if ($itemtype == "Assessment") {
 
 		deleteallaidfiles($typeid);

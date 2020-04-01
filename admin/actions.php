@@ -3,6 +3,7 @@
 //(c) 2006 David Lippman
 require("../init.php");
 require_once("../includes/password.php");
+require_once("../includes/TeacherAuditLog.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/actions'])) {
@@ -662,6 +663,12 @@ switch($_POST['action']) {
 			}
 
 			if ($stm->rowCount()>0) {
+				$result = TeacherAuditLog::addTracking(
+					$cid,
+					"Mass Assessment Settings Change",
+					null,
+					$qarr
+				);
 				if ($setdatesbylti==1) {
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
 					$stm->execute(array(':cid'=>$_GET['id']));

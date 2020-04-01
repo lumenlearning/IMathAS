@@ -6,6 +6,7 @@
 require("../init.php");
 require("../includes/htmlutil.php");
 require_once("../includes/parsedatetime.php");
+require_once("../includes/TeacherAuditLog.php");
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -105,7 +106,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute(array(':id'=>$aid));
 			list($shuffle) = $stm->fetch(PDO::FETCH_NUM);
 			$allqsameseed = (($shuffle&2)==2);
-			$stm = $DBH->prepare("SELECT id,questions,lastanswers,scores FROM imas_assessment_sessions WHERE userid=:userid AND assessmentid=:assessmentid");
+			$stm = $DBH->prepare("SELECT id,questions,lastanswers,scores,bestscores FROM imas_assessment_sessions WHERE userid=:userid AND assessmentid=:assessmentid");
 			$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
 			if ($stm->rowCount()>0) {
 				$row = $stm->fetch(PDO::FETCH_NUM);
@@ -151,8 +152,26 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$query = "UPDATE imas_assessment_sessions SET scores=:scores,attempts=:attempts,seeds=:seeds,lastanswers=:lastanswers,";
 				$query .= "reattempting=:reattempting WHERE id=:id";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
-					':reattempting'=>$reattemptinglist, ':id'=>$row[0]));
+				$update = array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
+                    ':reattempting'=>$reattemptinglist, ':id'=>$row[0]);
+				$stm->execute($update);
+
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Clear Scores",
+                    $row[0],
+                    array(
+                        'clear_type'=>'duedates',
+                        'studentid'=>$stu,
+                        'old_attempt'=>[
+                            'questions'=>$row[1],
+                            'lastanswers'=>$row[2],
+                            'scores'=>$row[3],
+                            'bestscores'=>$row[4]
+                        ],
+                        'update'=>$update
+                    )
+                );
 			}
 
 		}
