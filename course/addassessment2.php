@@ -156,7 +156,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 									'viewingb','scoresingb','ansingb','gbcategory','caltag','shuffle',
 									'istutorial','noprint','showcat','allowlate','LPcutoff',
 									'timelimit','overtime_grace','overtime_penalty','password',
-									'reqscore','reqscoretype','reqscoreaid','showhints',
+									'reqscore','reqscoretype','reqscoreaid','showcalculator','showhints',
 									'msgtoinstr','eqnhelper','posttoforum','extrefs','showtips',
 									'cntingb','minscore','deffeedbacktext','tutoredit','exceptionpenalty',
 									'defoutcome','isgroup','groupsetid','groupmax');
@@ -268,6 +268,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			// help and hints
 			$toset['showhints'] = empty($_POST['showhints']) ? 0 : 1;
 			$toset['showhints'] |= empty($_POST['showextrefs']) ? 0 : 2;
+
+            $toset['showcalculator'] = empty($_POST['showcalculator']) ? '' : $_POST['showcalculator'];
 
 			$toset['msgtoinstr'] = empty($_POST['msgtoinstr']) ? 0 : 1;
 
@@ -591,6 +593,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$line['overtime_grace'] = 0;
 					$line['overtime_penalty'] = 0;
           $line['password'] = '';
+                    $line['showcalculator'] = '';
 					$line['showhints']=isset($CFG['AMS2']['showhints'])?$CFG['AMS2']['showhints']:3;
 					$line['msgtoinstr'] = isset($CFG['AMS']['msgtoinstr'])?$CFG['AMS']['msgtoinstr']:0;
 					$line['posttoforum'] = 0;
