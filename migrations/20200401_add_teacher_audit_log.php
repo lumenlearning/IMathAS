@@ -9,12 +9,12 @@ $query = 'CREATE TABLE `imas_teacher_audit_log` (
   `courseid` int(10) unsigned NOT NULL,
   `action` ENUM("Assessment Settings Change","Mass Assessment Setting Change","Mass Assessment Date Change","Question Settings Change","Clear Attempts","Clear Scores","Delete Item", "Unenroll","Grade Override"),
   `itemid` int(10) unsigned NOT NULL,
-  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
   `metadata` json NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `courseuser` (`courseid`,`userid`),
   INDEX `actionid` (`action`, `itemid`),
-  INDEX `timestamp` (`timestamp`)
+  INDEX `created_at` (`created_at`)
 ) ENGINE=InnoDB;';
 $res = $DBH->query($query);
 if ($res===false) {
