@@ -304,7 +304,3 @@ if (isset($_GET['getsid'])) {
 
 	require("footer.php");
 	}
-
-
-
-?>

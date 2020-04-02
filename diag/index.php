@@ -16,7 +16,8 @@
 
 	if (!isset($_GET['id'])) {
 		//echo "<html><body><h1>Diagnostics</h1><ul>";
-		$nologo = true; $loadinginfoheader = true;
+		$nologo = true;
+        $loadinginfoheader = true;;
 		$infopath = isset($CFG['GEN']['directaccessincludepath'])?$CFG['GEN']['directaccessincludepath']:'';
 		$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/{$infopath}infopages.css\" type=\"text/css\">\n";
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";

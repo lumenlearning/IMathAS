@@ -21,7 +21,7 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		// Record custom data about this web transaction
 		newrelic_add_custom_parameter ('cur_qsid', $qidx);
 	}
-	
+
 	$qnidx = Sanitize::onlyInt($qnidx);
 	$qidx = Sanitize::onlyInt($qidx);
 	$seed = Sanitize::onlyInt($seed);
@@ -2413,9 +2413,6 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		if (!isset($sz)) { $sz = 20;}
 		if (isset($ansprompt)) {$out .= "<label for=\"qn$qn\">$ansprompt</label>";}
-		
-		$la = preg_replace('/%(\w+;)/',"&$1",$la);
-		$la = str_replace('&tilde;', '~', $la);
 
 		$la = preg_replace('/%(\w+;)/',"&$1",$la);
 		$la = str_replace('&tilde;', '~', $la);
