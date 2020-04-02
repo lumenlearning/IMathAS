@@ -22,7 +22,7 @@ if ($res===false) {
     $DBH->rollBack();
     return false;
 }
-echo '<p>table imas_user_prefs created</p>';
+echo '<p>table imas_teacher_audit_log created</p>';
 
 return true;
 
