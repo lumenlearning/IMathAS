@@ -12,6 +12,7 @@ $query = "CREATE TABLE `ohm_notices` (
   `end_at` TIMESTAMP NULL,
   `display_student` TINYINT(1) NOT NULL,
   `display_teacher` TINYINT(1) NOT NULL,
+  `description` VARCHAR(254) NOT NULL,
   `student_title` VARCHAR(127) NULL,
   `student_content` TEXT NULL,
   `teacher_title` VARCHAR(127) NULL,
