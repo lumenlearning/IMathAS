@@ -112,7 +112,8 @@ function list_banners()
 
 function view()
 {
-    $ohmBanner = new OhmBanner($GLOBALS['myrights']);
+    $bannerId = intval($_GET['id']);
+    $ohmBanner = new OhmBanner($GLOBALS['myrights'], $bannerId);
     $ohmBanner->setDisplayOnlyOncePerBanner(false);
 
     echo '<h1>Teacher Banner</h1>';
