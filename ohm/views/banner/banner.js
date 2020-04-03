@@ -11,13 +11,13 @@ window.onload = function () {
 function dismissNotice(id, el) {
   $.ajax({
     method: "POST",
-    url: "/ohm/dismiss_notice.php",
-    data: { "notice-id": id }
+    url: "/ohm/dismiss_banner.php",
+    data: { "banner-id": id }
   })
     .done(function (msg) {
       el.slideUp();
     })
     .fail(function (xhr, status) {
-      console.log("Failed to dismiss notice. Error status: " + status);
+      console.log("Failed to dismiss banner. Error status: " + status);
     });
 }

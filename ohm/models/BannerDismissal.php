@@ -7,14 +7,14 @@ use OHM\Exceptions\DatabaseWriteException;
 use PDO;
 
 /**
- * Class NoticeDismissal Represents a single row in ohm_notice_dismissals.
+ * Class BannerDismissal Represents a single row in ohm_notice_dismissals.
  * @package OHM\Models
  */
-class NoticeDismissal
+class BannerDismissal
 {
     private $id;
     private $userId;
-    private $noticeId;
+    private $bannerId;
     /* @var DateTime */
     private $dismissedAt;
 
@@ -48,20 +48,20 @@ class NoticeDismissal
     }
 
     /**
-     * Find a row by user ID and notice ID.
+     * Find a row by user ID and banner ID.
      *
      * @param int $userId The user's ID from imas_users.
-     * @param int $noticeId The notice UUID.
+     * @param int $bannerId The banner UUID.
      * @return bool True if found. False if not.
      */
-    public function findByUserIdAndNoticeId(int $userId, int $noticeId): bool
+    public function findByUserIdAndBannerId(int $userId, int $bannerId): bool
     {
         $query = "SELECT * FROM ohm_notice_dismissals
                     WHERE userid = :userid
-                        AND noticeid = :noticeid
+                        AND noticeid = :bannerid
                     LIMIT 1";
         $stm = $this->dbh->prepare($query);
-        $stm->execute([':userid' => $userId, ':noticeid' => $noticeId]);
+        $stm->execute([':userid' => $userId, ':bannerid' => $bannerId]);
 
         if (1 > $stm->rowCount()) {
             return false;
@@ -83,7 +83,7 @@ class NoticeDismissal
     {
         $params = [
             ':userid' => $this->userId,
-            ':noticeid' => $this->noticeId,
+            ':bannerid' => $this->bannerId,
             ':dismissed_at' => is_null($this->dismissedAt) ? null :
                 $this->dismissedAt->format('Y-m-d H:i:s'),
         ];
@@ -92,11 +92,11 @@ class NoticeDismissal
             $action = 'create new';
             $stm = $this->dbh->prepare("INSERT INTO ohm_notice_dismissals
                     (userid, noticeid, dismissed_at) VALUES
-                    (:userid, :noticeid, :dismissed_at)");
+                    (:userid, :bannerid, :dismissed_at)");
         } else {
             $action = 'update ID ' . $this->id;
             $stm = $this->dbh->prepare("UPDATE ohm_notice_dismissals SET
-                    userid = :userid, noticeid = :noticeid, dismissed_at = :dismissed_at
+                    userid = :userid, noticeid = :bannerid, dismissed_at = :dismissed_at
                 WHERE id = :id");
             $params[':id'] = $this->id;
         }
@@ -104,7 +104,7 @@ class NoticeDismissal
         $result = $stm->execute($params);
         if (false == $result) {
             $dbErrors = implode(' ', $stm->errorInfo());
-            throw new DatabaseWriteException(sprintf('Failed to %s NoticeDismissed . %s',
+            throw new DatabaseWriteException(sprintf('Failed to %s BannerDismissal . %s',
                 $action, $dbErrors));
         }
 
@@ -116,18 +116,18 @@ class NoticeDismissal
     }
 
     /**
-     * Dismissed the notice immediately with the current time and date.
+     * Dismiss the banner immediately with the current time and date.
      *
      * Note: This convenience function will also SAVE to the database.
      *
      * @return bool True on success. False on failure.
      * @throws DatabaseWriteException Thrown if unable to write to the database.
-     * @throws \Exception Thrown if a user ID or notice ID are not set.
+     * @throws \Exception Thrown if a user ID or banner ID are not set.
      */
-    public function dismissNoticeNow(): bool
+    public function dismissBannerNow(): bool
     {
-        if (empty($this->userId) || empty($this->noticeId)) {
-            throw new \Exception("Unable to dismiss a null notice for a null user."
+        if (empty($this->userId) || empty($this->bannerId)) {
+            throw new \Exception("Missing user ID or banner ID."
              . " Please set a user ID and banner ID first!");
         }
         $this->setDismissedAt(DateTime::createFromFormat('U', time()));
@@ -147,7 +147,7 @@ class NoticeDismissal
     {
         $this->id = $rowData['id'];
         $this->userId = $rowData['userid'];
-        $this->noticeId = $rowData['noticeid'];
+        $this->bannerId = $rowData['noticeid'];
         $this->dismissedAt = empty($rowData['dismissed_at']) ? null :
             DateTime::createFromFormat('Y-m-d H:i:s', $rowData['dismissed_at']);
     }
@@ -170,9 +170,9 @@ class NoticeDismissal
 
     /**
      * @param int $userId
-     * @return NoticeDismissal
+     * @return BannerDismissal
      */
-    public function setUserId(int $userId): NoticeDismissal
+    public function setUserId(int $userId): BannerDismissal
     {
         $this->userId = $userId;
         return $this;
@@ -181,18 +181,18 @@ class NoticeDismissal
     /**
      * @return int
      */
-    public function getNoticeId(): ?string
+    public function getBannerId(): ?string
     {
-        return $this->noticeId;
+        return $this->bannerId;
     }
 
     /**
-     * @param int $noticeId
-     * @return NoticeDismissal
+     * @param int $bannerId
+     * @return BannerDismissal
      */
-    public function setNoticeId(int $noticeId): NoticeDismissal
+    public function setBannerId(int $bannerId): BannerDismissal
     {
-        $this->noticeId = $noticeId;
+        $this->bannerId = $bannerId;
         return $this;
     }
 
@@ -206,9 +206,9 @@ class NoticeDismissal
 
     /**
      * @param DateTime $dismissedAt
-     * @return NoticeDismissal
+     * @return BannerDismissal
      */
-    public function setDismissedAt(DateTime $dismissedAt): NoticeDismissal
+    public function setDismissedAt(DateTime $dismissedAt): BannerDismissal
     {
         $this->dismissedAt = $dismissedAt;
         return $this;

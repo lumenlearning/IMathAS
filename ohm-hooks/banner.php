@@ -14,9 +14,9 @@
  *   - https://github.com/lumenlearning/ohm/pull/272
  */
 
-use OHM\Models\NoticeDismissal;
+use OHM\Models\BannerDismissal;
 
-require_once(__DIR__ . '/../ohm/models/NoticeDismissal.php');
+require_once(__DIR__ . '/../ohm/models/BannerDismissal.php');
 require_once(__DIR__ . '/../ohm/services/OhmBannerService.php');
 // This allows us to keep state and display banners only once per page.
 $ohmBannerService = new Ohm\Services\OhmBannerService(0, 0);
@@ -31,9 +31,9 @@ $ohmBannerService->setDisplayOnlyOncePerBanner(true);
 function displayBanner(int $userRights, int $bannerId): void
 {
     // Determine if the user has already dismissed this banner.
-    $noticeDismissal = new NoticeDismissal($GLOBALS['DBH']);
-    $noticeDismissal->findByUserIdAndNoticeId($GLOBALS['userid'], $bannerId);
-    if (!is_null($noticeDismissal->getDismissedAt())) {
+    $bannerDismissal = new BannerDismissal($GLOBALS['DBH']);
+    $bannerDismissal->findByUserIdAndBannerId($GLOBALS['userid'], $bannerId);
+    if (!is_null($bannerDismissal->getDismissedAt())) {
         return;
     }
 
