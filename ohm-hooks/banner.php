@@ -19,7 +19,7 @@ use OHM\Models\BannerDismissal;
 require_once(__DIR__ . '/../ohm/models/BannerDismissal.php');
 require_once(__DIR__ . '/../ohm/services/OhmBannerService.php');
 // This allows us to keep state and display banners only once per page.
-$ohmBannerService = new Ohm\Services\OhmBannerService(0, 0);
+$ohmBannerService = new Ohm\Services\OhmBannerService($GLOBALS['DBH'], 0, 0);
 $ohmBannerService->setDisplayOnlyOncePerBanner(true);
 
 /**

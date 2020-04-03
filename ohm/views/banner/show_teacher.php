@@ -1,6 +1,7 @@
 <div class="course-banner" data-banner-id="<?php echo $bannerId; ?>" id="course-banner-teacher">
     <header class="course-banner-header">
-        <h2>OHM Updates</h2>
+        <h2><?php echo $bannerTitle; ?></h2>
+        <?php if ($bannerDismissible) { ?>
         <button
             aria-label="Close this banner."
             aria-controls="course-banner-teacher"
@@ -22,18 +23,10 @@
                 </g>
             </svg>
         </button>
+        <?php } ?>
     </header>
     <div class="course-banner-content">
-        <p>
-            We’re excited to announce the release of Desmos Interactives,
-            a new item type to support student learning and mastery of graphing concepts.
-            Along with this platform feature release,
-            we’re sharing a complete collection of College Algebra Desmos Interactives.
-        </p>
-        <p>
-            For more details, check out our
-            <a target="_blank" href="https://info.lumenlearning.com/ohmdesmos">info page</a>.
-        </p>
+        <?php echo $bannerContent; ?>
     </div>
 </div>
-<script src="/ohm/views/banner/banner.js"></script>
+<script src="/ohm/views/banner/dismiss_banner.js"></script>

@@ -61,7 +61,31 @@ class Banner
     }
 
     /**
-     * Persist a row.
+     * Delete this banner.
+     *
+     * @return bool True on success. False on failure.
+     * @throws DatabaseWriteException Thrown if unable to write to the database.
+     */
+    public function delete(): bool
+    {
+        if (empty($this->id)) {
+            return false;
+        }
+
+        $stm = $this->dbh->prepare("DELETE FROM ohm_notices WHERE id = :id");
+        $result = $stm->execute([':id' => $this->id]);
+
+        if (false == $result) {
+            $dbErrors = implode(' ', $stm->errorInfo());
+            throw new DatabaseWriteException(
+                sprintf('Failed to delete Banner. %s', $dbErrors));
+        }
+
+        return true;
+    }
+
+    /**
+     * Save this banner.
      *
      * @return bool True on success. False on failure.
      * @throws DatabaseWriteException Thrown if unable to write to the database.
@@ -110,8 +134,8 @@ class Banner
         $result = $stm->execute($params);
         if (false == $result) {
             $dbErrors = implode(' ', $stm->errorInfo());
-            throw new DatabaseWriteException(sprintf('Failed to %s Banner . %s',
-                $action, $dbErrors));
+            throw new DatabaseWriteException(
+                sprintf('Failed to %s Banner. %s', $action, $dbErrors));
         }
 
         if ('create new' == $action) {
@@ -281,10 +305,10 @@ class Banner
     /**
      * The banner title displayed to students.
      *
-     * @param string $studentTitle
+     * @param string|null $studentTitle
      * @return Banner
      */
-    public function setStudentTitle(string $studentTitle): Banner
+    public function setStudentTitle(?string $studentTitle): Banner
     {
         $this->studentTitle = $studentTitle;
         return $this;
@@ -303,10 +327,10 @@ class Banner
     /**
      * The banner content displayed to students.
      *
-     * @param string $studentContent
+     * @param string|null $studentContent
      * @return Banner
      */
-    public function setStudentContent(string $studentContent): Banner
+    public function setStudentContent(?string $studentContent): Banner
     {
         $this->studentContent = $studentContent;
         return $this;
@@ -325,10 +349,10 @@ class Banner
     /**
      * The banner title displayed to teachers.
      *
-     * @param string $teacherTitle
+     * @param string|null $teacherTitle
      * @return Banner
      */
-    public function setTeacherTitle(string $teacherTitle): Banner
+    public function setTeacherTitle(?string $teacherTitle): Banner
     {
         $this->teacherTitle = $teacherTitle;
         return $this;
@@ -347,10 +371,10 @@ class Banner
     /**
      * The banner content displayed to teachers.
      *
-     * @param string $teacherContent
+     * @param string|null $teacherContent
      * @return Banner
      */
-    public function setTeacherContent(string $teacherContent): Banner
+    public function setTeacherContent(?string $teacherContent): Banner
     {
         $this->teacherContent = $teacherContent;
         return $this;
@@ -371,10 +395,10 @@ class Banner
      * If enabled, when to start displaying this banner.
      * Null = Display immediately.
      *
-     * @param DateTime $startAt
+     * @param DateTime|null $startAt
      * @return Banner
      */
-    public function setStartAt(DateTime $startAt): Banner
+    public function setStartAt(?DateTime $startAt): Banner
     {
         $this->startAt = $startAt;
         return $this;
@@ -395,10 +419,10 @@ class Banner
      * If enabled, when to stop displaying this banner.
      * Null = never stop.
      *
-     * @param DateTime $endAt
+     * @param DateTime|null $endAt
      * @return Banner
      */
-    public function setEndAt(DateTime $endAt): Banner
+    public function setEndAt(?DateTime $endAt): Banner
     {
         $this->endAt = $endAt;
         return $this;

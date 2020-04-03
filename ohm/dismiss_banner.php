@@ -1,6 +1,6 @@
 <?php
 /**
- * This is used by /ohm/views/banner/banner.js to permanently dismiss banners
+ * This is used by /ohm/views/banner/dismiss_banner.js to permanently dismiss banners
  * displayed on the home and course pages.
  */
 

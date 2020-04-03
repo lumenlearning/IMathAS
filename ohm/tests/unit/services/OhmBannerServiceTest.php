@@ -17,7 +17,27 @@ final class OhmBannerServiceTest extends TestCase
 
     function setUp(): void
     {
-        $this->ohmBanner = new OhmBannerService(0, 0);
+        $this->dbh = $this->createMock(\PDO::class);
+        $pdoStatement = $this->createMock(\PDOStatement::class);
+        $pdoStatement->method('rowCount')->willReturn(1);
+        $pdoStatement->method('fetch')->willReturn([
+            'id' => 42,
+            'is_enabled' => 1,
+            'is_dismissible' => 1,
+            'display_student' => 1,
+            'display_teacher' => 1,
+            'description' => 'Sample description',
+            'student_title' => 'Student Title',
+            'student_content' => 'Student Content',
+            'teacher_title' => 'Teacher Title',
+            'teacher_content' => 'Teacher Content',
+            'start_at' => '2020-09-01 00:00:00',
+            'end_at' => '2020-09-28 12:00:00',
+            'created_at' => '2020-01-02 18:41:17',
+        ]);
+        $this->dbh->method('prepare')->willReturn($pdoStatement);
+
+        $this->ohmBanner = new OhmBannerService($this->dbh, 0, 0);
     }
 
     /*
@@ -26,8 +46,6 @@ final class OhmBannerServiceTest extends TestCase
 
     public function testShowTeacherBannerForTeachersOnly_UserIsTeacher(): void
     {
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_TEACHER_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  ']);
-
         foreach ([20, 40, 75, 100] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
@@ -39,8 +57,6 @@ final class OhmBannerServiceTest extends TestCase
 
     public function testShowTeacherBannerForTeachersOnly_UserIsNotTeacher(): void
     {
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_TEACHER_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  ']);
-
         foreach ([0, 5, 10, 12, 15] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
@@ -53,7 +69,6 @@ final class OhmBannerServiceTest extends TestCase
     public function testShowTeacherBannerForTeachersOnly_OnlyOnce(): void
     {
         $this->ohmBanner
-            ->setEnv([OhmBannerService::ENV_TEACHER_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  '])
             ->setUserRights(20)
             ->setDisplayOnlyOncePerBanner(true);
 
@@ -70,8 +85,6 @@ final class OhmBannerServiceTest extends TestCase
 
     public function testShowStudentBannerForStudentsOnly_UserIsStudent(): void
     {
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_STUDENT_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  ']);
-
         foreach ([0, 5, 10, 12, 15] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
@@ -83,8 +96,6 @@ final class OhmBannerServiceTest extends TestCase
 
     public function testShowStudentBannerForStudentsOnly_UserIsNotStudent(): void
     {
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_STUDENT_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  ']);
-
         foreach ([20, 40, 75, 100] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
@@ -97,7 +108,6 @@ final class OhmBannerServiceTest extends TestCase
     public function testShowStudentBannerForStudentsOnly_OnlyOnce(): void
     {
         $this->ohmBanner
-            ->setEnv([OhmBannerService::ENV_STUDENT_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  '])
             ->setUserRights(10)
             ->setDisplayOnlyOncePerBanner(true);
 
@@ -112,79 +122,7 @@ final class OhmBannerServiceTest extends TestCase
      * showTeacherBanner
      */
 
-    public function testShowTeacherBanner_ViewFileExists(): void
-    {
-        // Surrounding empty spaces should be trimmed by method under test.
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_TEACHER_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  ']);
-
-        $result = $this->ohmBanner->showTeacherBanner();
-
-        $this->assertTrue($result, 'banner should be displayed if view file exists.');
-    }
-
-    public function testShowTeacherBanner_ViewFileMissing(): void
-    {
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_TEACHER_FILENAME_KEY => 'f56d30ce']);
-
-        $result = $this->ohmBanner->showTeacherBanner();
-
-        $this->assertFalse($result, 'banner should not be displayed if view file is missing.');
-    }
-
-    public function testShowTeacherBanner_ViewFileNotSpecified(): void
-    {
-        $result = $this->ohmBanner->showTeacherBanner();
-
-        $this->assertFalse($result, 'banner should not be displayed if view file is not specified.');
-    }
-
-    public function testShowTeacherBanner_ViewFilenameIsEmptyString(): void
-    {
-        // Surrounding empty spaces should be trimmed by method under test.
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_TEACHER_FILENAME_KEY => '   ']);
-
-        $result = $this->ohmBanner->showTeacherBanner();
-
-        $this->assertFalse($result, 'banner should not be displayed if view filename is an empty string.');
-    }
-
     /*
      * showStudentBanner
      */
-
-    public function testShowStudentBanner_ViewFileExists(): void
-    {
-        // Surrounding empty spaces should be trimmed by method under test.
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_STUDENT_FILENAME_KEY => '  ' . self::EMPTY_VIEW_FILE . '  ']);
-
-        $result = $this->ohmBanner->showStudentBanner();
-
-        $this->assertTrue($result, 'banner should be displayed if view file exists.');
-    }
-
-    public function testShowStudentBanner_ViewFileMissing(): void
-    {
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_STUDENT_FILENAME_KEY => 'f56d30ce']);
-
-        $result = $this->ohmBanner->showStudentBanner();
-
-        $this->assertFalse($result, 'banner should not be displayed if view file is missing.');
-    }
-
-    public function testShowStudentBanner_ViewFileNotSpecified(): void
-    {
-        $result = $this->ohmBanner->showStudentBanner();
-
-        $this->assertFalse($result, 'banner should not be displayed if view file is not specified.');
-    }
-
-    public function testShowStudentBanner_ViewFilenameIsEmptyString(): void
-    {
-        // Surrounding empty spaces should be trimmed by method under test.
-        $this->ohmBanner->setEnv([OhmBannerService::ENV_STUDENT_FILENAME_KEY => '   ']);
-
-        $result = $this->ohmBanner->showStudentBanner();
-
-        $this->assertFalse($result, 'banner should not be displayed if view filename is an empty string.');
-    }
 }

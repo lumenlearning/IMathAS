@@ -1,8 +1,10 @@
 <?php
 
+use OHM\Models\Banner;
 use OHM\Services\OhmBannerService;
 
 require_once(__DIR__ . '/../init.php');
+$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
 require_once("../header.php");
 
 ?>
@@ -19,26 +21,25 @@ switch ($_REQUEST['action']) {
     case "view":
         view();
         break;
-    case "modify_form":
-        modify_form('modify');
+    case "create_form":
+        modify_form('Create');
         break;
-    case "modify":
-        modify();
+    case "modify_form":
+        modify_form('Modify');
+        break;
+    case "save":
+        save();
         break;
     case "delete":
         delete();
-        break;
-    case "create_form":
-        modify_form('create');
-        break;
-    case "create":
-        create();
         break;
     case "index":
     default:
         list_banners();
         break;
 }
+
+include(__DIR__ . '/../footer.php');
 
 return;
 
@@ -59,7 +60,6 @@ function list_banners()
         <tr>
             <th>ID</th>
             <th>Enabled?</th>
-            <th>Active?</th>
             <th>Description</th>
             <th>Start At</th>
             <th>End At</th>
@@ -83,10 +83,8 @@ function list_banners()
         }
 
         $isEnabled = $row['is_enabled'] ? 'Yes' : 'No';
-        $isActive = '🤷';
-
-        $startAt = '¯\_(ツ)_/¯';
-        $endAt = '¯\_(ツ)_/¯';
+        $startAt = is_null($row['start_at']) ? 'Immediately' : $row['start_at'];
+        $endAt = is_null($row['end_at']) ? 'Never' : $row['end_at'];
 
         $confirmJs = sprintf('onClick="return confirm(\'Are you sure you want to delete the banner: %s?\')"',
             Sanitize::encodeStringForDisplay($row['description']));
@@ -95,10 +93,9 @@ function list_banners()
         $modifyLink = sprintf('<a href="?action=modify_form&id=%s">Modify</a>', $row['id']);
         $deleteLink = sprintf('<a href="?action=delete&id=%s" %s>Delete</a>', $row['id'], $confirmJs);
 
-        printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
+        printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
             $row['id'],
             $isEnabled,
-            $isActive,
             Sanitize::encodeStringForDisplay($row['description']),
             $startAt,
             $endAt,
@@ -112,12 +109,129 @@ function list_banners()
 
 function view()
 {
+    global $DBH, $myrights;
+
     $bannerId = intval($_GET['id']);
-    $ohmBannerService = new OhmBannerService($GLOBALS['myrights'], $bannerId);
+    $ohmBannerService = new OhmBannerService($DBH, $myrights, $bannerId);
     $ohmBannerService->setDisplayOnlyOncePerBanner(false);
 
     echo '<h1>Teacher Banner</h1>';
     $ohmBannerService->showTeacherBanner();
     echo '<h1>Student Banner</h1>';
-    $ohmBannerService->showStudentBannerForStudentsOnly();
+    $ohmBannerService->showStudentBanner();
+}
+
+function delete()
+{
+    global $DBH;
+
+    $bannerId = intval($_GET['id']);
+    $banner = new Banner($DBH);
+    if (!$banner->find($bannerId)) {
+        printf('Banner ID %d not found.', $bannerId);
+        return;
+    }
+    $banner->delete();
+
+    printf('<p>Deleted banner: %s</p>', $banner->getDescription());
+    echo '<a href="?">&lt;&lt; Return to OHM banner listing</a>';
+}
+
+function save()
+{
+    global $DBH;
+
+    $banner = new Banner($DBH);
+    $bannerId = intval($_POST['id']);
+    if (!empty($bannerId)) {
+        $banner->find($bannerId);
+    }
+    $banner
+        ->setEnabled($_POST['is_enabled'] ? true : false)
+        ->setDismissible($_POST['is_dismissible'] ? true : false)
+        ->setDisplayStudent($_POST['display_student'] ? true : false)
+        ->setDisplayTeacher($_POST['display_teacher'] ? true : false)
+        ->setDescription($_POST['description'])
+        ->setTeacherTitle($_POST['teacher_title'])
+        ->setTeacherContent($_POST['teacher_content'])
+        ->setStudentTitle($_POST['student_title'])
+        ->setStudentContent($_POST['student_content']);
+
+    if ('1' != $_POST['has_start_at']) {
+        $banner->setStartAt(null);
+    } else {
+        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime']);
+        $banner->setStartAt($dateTime);
+    }
+
+    if ('1' != $_POST['has_end_at']) {
+        $banner->setEndAt(null);
+    } else {
+        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime']);
+        $banner->setEndAt($dateTime);
+    }
+
+    $banner->save();
+
+    printf('<p>Saved banner: %s</p>', $banner->getDescription());
+    echo '<a href="?">&lt;&lt; Return to OHM banner listing</a>';
+}
+
+function modify_form($action)
+{
+    global $DBH;
+
+    $bannerId = intval($_GET['id']);
+
+    // Make variables available for the view.
+    $action = Sanitize::simpleString($action);
+
+    if ('modify' == strtolower($action)) {
+        $banner = new Banner($DBH);
+        $banner->find($bannerId);
+        $id = $banner->getId();
+        $isEnabled = $banner->getEnabled();
+        $isDismissible = $banner->getDismissible();
+        $displayTeacher = $banner->getDisplayTeacher();
+        $displayStudent = $banner->getDisplayStudent();
+        $description = $banner->getDescription();
+        $teacherTitle = $banner->getTeacherTitle();
+        $teacherContent = $banner->getTeacherContent();
+        $studentTitle = $banner->getStudentTitle();
+        $studentContent = $banner->getStudentContent();
+        $startAt = is_null($banner->getStartAt()) ? null : $banner->getStartAt()->getTimestamp();
+        $endAt = is_null($banner->getEndAt()) ? null : $banner->getEndAt()->getTimestamp();
+
+        if (is_null($banner->getStartAt())) {
+            $hasStartAt = false;
+        } else {
+            $hasStartAt = true;
+            $startDate = $banner->getStartAt()->format('m/d/Y');
+            $startTime = $banner->getStartAt()->format('h:m:s');
+        }
+        if (is_null($banner->getEndAt())) {
+            $hasEndAt = false;
+        } else {
+            $hasEndAt = true;
+            $endDate = $banner->getEndAt()->format('m/d/Y');
+            $endTime = $banner->getEndAt()->format('h:m:s');
+        }
+    } else {
+        $id = '';
+        $isEnabled = true;
+        $isDismissible = true;
+        $displayTeacher = true;
+        $displayStudent = true;
+        $description = '';
+        $teacherTitle = '';
+        $teacherContent = '';
+        $studentTitle = '';
+        $studentContent = '';
+        $hasStartAt = false;
+        $hasEndAt = false;
+        $startTime = '23:59:59';
+        $endTime = '23:59:59';
+    }
+
+    include(__DIR__ . '/views/banner/edit_banner.php');
 }

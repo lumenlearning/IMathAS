@@ -2,13 +2,12 @@
 
 namespace OHM\Services;
 
+use OHM\Models\Banner;
+use PDO;
+
 class OhmBannerService
 {
-    // These define the ENV variables we'll look for.
-    const ENV_TEACHER_FILENAME_KEY = 'BANNER_TEACHER_FILENAME';
-    const ENV_STUDENT_FILENAME_KEY = 'BANNER_STUDENT_FILENAME';
-
-    private $env;
+    private $dbh;
     private $userRights;
     private $bannerId;
 
@@ -19,12 +18,13 @@ class OhmBannerService
     /**
      * OhmBanner constructor.
      *
+     * @param PDO $dbh A database connection.
      * @param int $userRights The user's rights from imas_users.
      * @param int $bannerId The banner ID to be displayed.
      */
-    public function __construct(int $userRights, int $bannerId)
+    public function __construct(PDO $dbh, int $userRights, int $bannerId)
     {
-        $this->setEnv($_ENV);
+        $this->dbh = $dbh;
         $this->setUserRights($userRights);
         $this->setBannerId($bannerId);
     }
@@ -66,59 +66,57 @@ class OhmBannerService
     }
 
     /**
-     * Show the teacher banner. User rights are not checked.
+     * Show teacher banners. User rights are not checked.
      *
+     * // FIXME: Implement these!
      * This happens only if:
-     * - Environment variable contains a valid filename.
+     * - The banner is enabled.
+     * - The current time falls between banner start and end times.
+     * - The user has never dismissed the banner.
      *
      * @return bool True if a banner was displayed. False if not.
      * @see showTeacherBannerForTeachersOnly
      */
     public function showTeacherBanner(): bool
     {
-        if (!isset($this->env[self::ENV_TEACHER_FILENAME_KEY])) {
-            return false;
-        }
+        $banner = new Banner($this->dbh);
+        $banner->find($this->bannerId);
 
-        $bannerFilename = trim($this->env[self::ENV_TEACHER_FILENAME_KEY]);
-        $viewFullPath = __DIR__ . '/../../' . $bannerFilename;
-        if (empty($bannerFilename) || !file_exists($viewFullPath)) {
-            return false;
-        }
+        // Make the banner data available to the view.
+        $bannerId = $banner->getId();
+        $bannerTitle = $banner->getTeacherTitle();
+        $bannerContent = $banner->getTeacherContent();
+        $bannerDismissible = $banner->getDismissible();
 
-        // Make the banner ID available to the view.
-        $bannerId = $this->bannerId;
-
-        include($viewFullPath);
+        include(__DIR__ . '/../views/banner/show_teacher.php');
 
         return true;
     }
 
     /**
-     * Show the student banner. User rights are not checked.
+     * Show student banners. User rights are not checked.
      *
+     * // FIXME: Implement these!
      * This happens only if:
-     * - Environment variable contains a valid filename.
+     * - The banner is enabled.
+     * - The current time falls between banner start and end times.
+     * - The user has never dismissed the banner.
      *
      * @return bool True if a banner was displayed. False if not.
      * @see showStudentBannerForStudentsOnly
      */
     public function showStudentBanner(): bool
     {
-        if (!isset($this->env[self::ENV_STUDENT_FILENAME_KEY])) {
-            return false;
-        }
-
-        $bannerFilename = trim($this->env[self::ENV_STUDENT_FILENAME_KEY]);
-        $viewFullPath = __DIR__ . '/../../' . $bannerFilename;
-        if (empty($bannerFilename) || !file_exists($viewFullPath)) {
-            return false;
-        }
+        $banner = new Banner($this->dbh);
+        $banner->find($this->bannerId);
 
         // Make the banner ID available to the view.
-        $bannerId = $this->bannerId;
+        $bannerId = $banner->getId();
+        $bannerTitle = $banner->getStudentTitle();
+        $bannerContent = $banner->getStudentContent();
+        $bannerDismissible = $banner->getDismissible();
 
-        include($viewFullPath);
+        include(__DIR__ . '/../views/banner/show_student.php');
 
         return true;
     }
@@ -126,18 +124,6 @@ class OhmBannerService
     /*
      * Getters, setters
      */
-
-    /**
-     * Set ALL environment variables for this object. Used during testing.
-     *
-     * @param array $env An associative array of environment variables.
-     * @return OhmBannerService
-     */
-    public function setEnv(array $env): OhmBannerService
-    {
-        $this->env = $env;
-        return $this;
-    }
 
     /**
      * Set the user's rights.
