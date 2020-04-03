@@ -15,7 +15,7 @@ if($_GET['cid'] && $_GET['ekey']  ){
   $_POST['courseid']  = $_GET['cid'];
   $_POST['ekey']      = $_GET['ekey'] ;
 }
-if($_POST['courseid'] && $_POST['ekey']){
+if($_POST['courseid']){
   $stm = $DBH->prepare("SELECT name,enrollkey,allowunenroll,deflatepass,msgset,id FROM imas_courses WHERE id = :cid AND (available=0 OR available=2)");
   $stm->execute(array(':cid'=>$_POST['courseid']));
   $line = $stm->fetch(PDO::FETCH_ASSOC);
