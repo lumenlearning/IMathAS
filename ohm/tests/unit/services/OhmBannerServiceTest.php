@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers OhmBannerService
  */
-final class OhmBannerTest extends TestCase
+final class OhmBannerServiceTest extends TestCase
 {
     const EMPTY_VIEW_FILE = '/ohm/tests/fixtures/empty.php';
 
