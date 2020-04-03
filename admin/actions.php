@@ -6,8 +6,7 @@ require_once("../includes/password.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/actions'])) {
-	$prepend = '/' == substr($CFG['hooks']['admin/actions'], 0, 1) ? '' : __DIR__ . '/../';
-	require($prepend . $CFG['hooks']['admin/actions']);
+	require($CFG['hooks']['admin/actions']);
 }
 
 $from = 'admin';

@@ -5,8 +5,7 @@ require("../init.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/forms'])) {
-    $prepend = '/' == substr($CFG['hooks']['admin/forms'], 0, 1) ? '' : __DIR__ . '/../';
-	require($prepend . $CFG['hooks']['admin/forms']);
+	require($CFG['hooks']['admin/forms']);
 }
 
 $placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
@@ -770,7 +769,7 @@ switch($_GET['action']) {
 				#### End OHM-specific code #####################################################################
 			}
 			echo '</div>';
-	
+
 		} else if ($_GET['action']=='addcourse' && $ctc == 0) {
 			echo '<span class=form>'._('Use new assessment version').'</span>';
 			echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
