@@ -1,6 +1,6 @@
 <?php
 
-use OHM\Includes\OhmBanner;
+use OHM\Services\OhmBannerService;
 
 require_once(__DIR__ . '/../init.php');
 require_once("../header.php");
@@ -113,11 +113,11 @@ function list_banners()
 function view()
 {
     $bannerId = intval($_GET['id']);
-    $ohmBanner = new OhmBanner($GLOBALS['myrights'], $bannerId);
-    $ohmBanner->setDisplayOnlyOncePerBanner(false);
+    $ohmBannerService = new OhmBannerService($GLOBALS['myrights'], $bannerId);
+    $ohmBannerService->setDisplayOnlyOncePerBanner(false);
 
     echo '<h1>Teacher Banner</h1>';
-    $ohmBanner->showTeacherBanner();
+    $ohmBannerService->showTeacherBanner();
     echo '<h1>Student Banner</h1>';
-    $ohmBanner->showStudentBannerForStudentsOnly();
+    $ohmBannerService->showStudentBannerForStudentsOnly();
 }

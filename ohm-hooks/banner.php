@@ -17,10 +17,10 @@
 use OHM\Models\NoticeDismissal;
 
 require_once(__DIR__ . '/../ohm/models/NoticeDismissal.php');
-require_once(__DIR__ . '/../ohm/includes/OhmBanner.php');
+require_once(__DIR__ . '/../ohm/services/OhmBannerService.php');
 // This allows us to keep state and display banners only once per page.
-$ohmBanner = new Ohm\Includes\OhmBanner(0, 0);
-$ohmBanner->setDisplayOnlyOncePerBanner(true);
+$ohmBannerService = new Ohm\Services\OhmBannerService(0, 0);
+$ohmBannerService->setDisplayOnlyOncePerBanner(true);
 
 /**
  * Display a banner specific to teachers and/or users.
@@ -37,10 +37,10 @@ function displayBanner(int $userRights, int $bannerId): void
         return;
     }
 
-    global $ohmBanner; // This allows us to keep state and display banners only once per page.
-    $ohmBanner->setUserRights($userRights);
-    $ohmBanner->setBannerId($bannerId);
+    global $ohmBannerService; // This allows us to keep state and display banners only once per page.
+    $ohmBannerService->setUserRights($userRights);
+    $ohmBannerService->setBannerId($bannerId);
 
-    $ohmBanner->showTeacherBannerForTeachersOnly();
-    $ohmBanner->showStudentBannerForStudentsOnly();
+    $ohmBannerService->showTeacherBannerForTeachersOnly();
+    $ohmBannerService->showStudentBannerForStudentsOnly();
 }

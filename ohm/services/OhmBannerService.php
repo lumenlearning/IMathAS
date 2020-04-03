@@ -1,8 +1,8 @@
 <?php
 
-namespace OHM\Includes;
+namespace OHM\Services;
 
-class OhmBanner
+class OhmBannerService
 {
     // These define the ENV variables we'll look for.
     const ENV_TEACHER_FILENAME_KEY = 'BANNER_TEACHER_FILENAME';
@@ -131,9 +131,9 @@ class OhmBanner
      * Set ALL environment variables for this object. Used during testing.
      *
      * @param array $env An associative array of environment variables.
-     * @return OhmBanner
+     * @return OhmBannerService
      */
-    public function setEnv(array $env): OhmBanner
+    public function setEnv(array $env): OhmBannerService
     {
         $this->env = $env;
         return $this;
@@ -143,9 +143,9 @@ class OhmBanner
      * Set the user's rights.
      *
      * @param int $rights The user's rights from imas_users.
-     * @return OhmBanner
+     * @return OhmBannerService
      */
-    public function setUserRights(int $rights): OhmBanner
+    public function setUserRights(int $rights): OhmBannerService
     {
         $this->userRights = $rights;
         return $this;
@@ -155,9 +155,9 @@ class OhmBanner
      * Set the banner ID to be displayed.
      *
      * @param int $bannerId The banner ID.
-     * @return OhmBanner
+     * @return OhmBannerService
      */
-    public function setBannerId(int $bannerId): OhmBanner
+    public function setBannerId(int $bannerId): OhmBannerService
     {
         $this->bannerId = $bannerId;
         return $this;
@@ -167,9 +167,9 @@ class OhmBanner
      * Set whether each banner is displayed only once or not.
      *
      * @param bool $displayOnlyOncePerBanner Set to true to display each banner only once.
-     * @return OhmBanner
+     * @return OhmBannerService
      */
-    public function setDisplayOnlyOncePerBanner(bool $displayOnlyOncePerBanner): OhmBanner
+    public function setDisplayOnlyOncePerBanner(bool $displayOnlyOncePerBanner): OhmBannerService
     {
         $this->displayOnlyOncePerBanner = $displayOnlyOncePerBanner;
         return $this;
