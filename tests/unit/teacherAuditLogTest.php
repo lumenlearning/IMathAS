@@ -8,10 +8,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class TeacherAuditLogTest extends TestCase
 {
-    public $userid = 1;
-    public $courseid = 3;
-    public $itemid = 1;
-    public $metadata = '{"source": "filename"}';
     public static $course1 = array(
         array(
             'userid'=>1,
@@ -72,7 +68,7 @@ final class TeacherAuditLogTest extends TestCase
      */
     public function testFindActionsByCourse()
     {
-        $result = TeacherAuditLog::findActionsByCourse($this->courseid);
+        $result = TeacherAuditLog::findActionsByCourse(3);
         unset($result[0]['id'], $result[0]['created_at']);
         $this->assertEquals(self::$course3[0], $result[0]);
     }
@@ -89,12 +85,24 @@ final class TeacherAuditLogTest extends TestCase
     }
 
     /*
+     * AssessmentSettingsChangeRecorded
+     */
+    public function testFindCourseAction()
+    {
+        $item = self::$course3[0];
+        $result = TeacherAuditLog::findCourseAction($item['courseid'], $item['action']);
+        unset($result[0]['id'], $result[0]['created_at']);
+        $this->assertEquals(self::$course3[0], $result[0]);
+    }
+
+    /*
      * Invalid Action Not Recorded
      */
     public function testInvalidActionNotRecorded()
     {
         $action = 'Invalid Action';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertFalse($result);
     }
 
@@ -104,8 +112,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testAssessmentSettingsChangeRecorded()
     {
         $action = 'Assessment Settings Change';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
-
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -115,7 +123,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testMassAssessmentSettingsChangeRecorded()
     {
         $action = 'Mass Assessment Settings Change';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -125,7 +134,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testMassAssessmentDateChangeRecorded()
     {
         $action = 'Mass Assessment Date Change';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -135,7 +145,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testQuestionSettingsChangeRecorded()
     {
         $action = 'Question Settings Change';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -145,7 +156,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testClearAttemptsRecorded()
     {
         $action = 'Clear Attempts';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -155,7 +167,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testClearScoresRecorded()
     {
         $action = 'Clear Scores';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -165,7 +178,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testDeleteItemRecorded()
     {
         $action = 'Delete Item';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -175,7 +189,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testUnenrollRecorded()
     {
         $action = 'Unenroll';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -185,7 +200,8 @@ final class TeacherAuditLogTest extends TestCase
     public function testGradeOverrideRecorded()
     {
         $action = 'Grade Override';
-        $result = TeacherAuditLog::addTracking($this->userid, $this->courseid, $action, $this->itemid, $this->metadata);
+        $item = self::$course1[0];
+        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 

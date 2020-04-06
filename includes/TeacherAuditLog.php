@@ -56,4 +56,15 @@ class TeacherAuditLog
         ]);
         return $stm->fetchAll(\PDO::FETCH_ASSOC);
     }
+    public static function findCourseAction($cid, $action)
+    {
+        $query = "SELECT id, userid, courseid, action, itemid, metadata, created_at FROM imas_teacher_audit_log "
+            . "WHERE courseid=? AND action=? ORDER BY created_at DESC";
+        $stm = $GLOBALS['DBH']->prepare($query);
+        $stm->execute([
+            $cid,
+            $action
+        ]);
+        return $stm->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }
