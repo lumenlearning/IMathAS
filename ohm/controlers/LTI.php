@@ -1,5 +1,6 @@
 <?php
 namespace OHM\Controlers;
+require(__DIR__ . '/../../includes/ltioutcomes.php');
 use \PDO;
 class LTI
 {
