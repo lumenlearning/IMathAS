@@ -38,12 +38,12 @@
         type="button" 
         @click="openCalc" 
         v-show="!showCalculator">
-          <calc-icons :calc-type="this.questionData.showcalculator"></calc-icons>
+          <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
           Calculator
       </button>
       <div class="calc-header" v-show="showCalculator">
         <span>
-          <calc-icons :calc-type="this.questionData.showcalculator"></calc-icons>
+          <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
           Calculator
         </span>
         <button
@@ -87,7 +87,7 @@ import { store, actions } from '../../basicstore';
 import ScoreResult from '@/components/question/ScoreResult.vue';
 import Icons from '@/components/widgets/Icons.vue';
 import QuestionHelps from '@/components/question/QuestionHelps.vue';
-import CalcIcons from '../icons/CalcIcons.vue';
+import IconCalc from '../icons/Calculators.vue';
 import IconClose from "../icons/Close.vue";
 
 export default {
@@ -97,7 +97,7 @@ export default {
     ScoreResult,
     QuestionHelps,
     Icons,
-    CalcIcons,
+    IconCalc,
     IconClose
   },
   data: function () {
