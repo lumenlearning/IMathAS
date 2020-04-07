@@ -49,6 +49,7 @@ ini_set("upload_max_filesize", "10485760");
 ini_set("post_max_size", "10485760");
 
 $CFG['GEN']['useSESmail'] = true;
+
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################

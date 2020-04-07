@@ -309,7 +309,19 @@ if (!(isset($teacherid))) {
 				} else {
 					copysub($items,'0',$newitems,$gbcats,isset($_POST['copyhidden']));
 				}
-				doaftercopy($ctc, $newitems);
+                doaftercopy($ctc, $newitems);
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				// #### Begin OHM-specific code #####################################################
+				$newitems = array_filter($newitems);
+				if (!empty($newitems)) {
+				// #### End OHM-specific code #####################################################
+				// #### End OHM-specific code #####################################################
+				// #### End OHM-specific code #####################################################
+				// #### End OHM-specific code #####################################################
+				// #### End OHM-specific code #####################################################
 				$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 				$stm->execute(array(':id'=>$cid));
 				$items = unserialize($stm->fetchColumn(0));
@@ -328,6 +340,7 @@ if (!(isset($teacherid))) {
 					$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder,blockcnt=:blockcnt WHERE id=:id");
 					$stm->execute(array(':itemorder'=>$itemorder, ':blockcnt'=>$blockcnt, ':id'=>$cid));
 				}
+				} // #### OHM-specific code #####################################################
 			}
 			$offlinerubrics = array();
 			if (isset($_POST['copyoffline'])) {
