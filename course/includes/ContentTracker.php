@@ -56,8 +56,8 @@ class ContentTracker
                                                       DateTime $startTimestamp,
                                                       DateTime $endTimestamp,
                                                       bool $ltiOnly,
-                                                      ?int $groupId,
-                                                      ?PDO $dbh
+                                                      ?int $groupId = null,
+                                                      ?PDO $dbh = null
     ): array
     {
         return ContentTracker::countUniqueUsersByGroup($type, self::STUDENTS,
@@ -80,8 +80,8 @@ class ContentTracker
                                                       DateTime $startTimestamp,
                                                       DateTime $endTimestamp,
                                                       bool $ltiOnly,
-                                                      ?int $groupId,
-                                                      ?PDO $dbh
+                                                      ?int $groupId = null,
+                                                      ?PDO $dbh = null
     ): array
     {
         return ContentTracker::countUniqueUsersByGroup($type, self::TEACHERS,
@@ -105,8 +105,8 @@ class ContentTracker
                                                       DateTime $startTimestamp,
                                                       DateTime $endTimestamp,
                                                       bool $ltiOnly,
-                                                      ?int $groupId,
-                                                      ?PDO $dbhOverride
+                                                      ?int $groupId = null,
+                                                      ?PDO $dbhOverride = null
     ): array
     {
         $dbh = is_null($dbhOverride) ? $GLOBALS['DBH'] : $dbhOverride;
