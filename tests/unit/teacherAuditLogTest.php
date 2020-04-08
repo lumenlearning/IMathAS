@@ -37,13 +37,12 @@ final class TeacherAuditLogTest extends TestCase
     public function setUp()
     {
         try {
-            $GLOBALS['DBH'] = new PDO("sqlite::memory");
+            $GLOBALS['DBH'] = new PDO("sqlite::memory:");
             $GLOBALS['DBH']->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
         } catch(PDOException $e) {
             die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
         }
         //set initialization data model
-        $GLOBALS['DBH']->query('DROP TABLE IF EXISTS imas_teacher_audit_log');
         $query = 'CREATE TABLE `imas_teacher_audit_log` (
           `id` int(10) PRIMARY KEY,
           `userid` int(10),
