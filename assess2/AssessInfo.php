@@ -918,6 +918,10 @@ class AssessInfo
       $settings['showcalculator'] = $defaults['showcalculator'];
     }
 
+    if ($settings['showcalculator'] == 'none') {
+        $settings['showcalculator'] = '';
+    }
+
     if (!empty($settings['fixedseeds'])) {
       $settings['fixedseeds'] = array_map('intval', explode(',', $settings['fixedseeds']));
     } else {
