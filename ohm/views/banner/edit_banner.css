@@ -1,0 +1,17 @@
+.edit-banner-form {
+    width: 80%;
+}
+
+.edit-banner-form textarea {
+    display: block;
+    resize: both;
+}
+
+.banner-timestamp-entry {
+    display: flex;
+}
+
+.banner-timestamp-entry input:first-child {
+    margin-right: 0.5em;
+}
+

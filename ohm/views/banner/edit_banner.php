@@ -1,73 +1,97 @@
+<link rel="stylesheet" href="views/banner/edit_banner.css" type="text/css"/>
+
 <h1><?php echo $action; ?> OHM Banner</h1>
 
-<form method="post" action="?action=save">
-    <input type="hidden" name="id" value="<?php echo $id; ?>"/>
-    <div>
-        <input type="checkbox" id="is_enabled" name="is_enabled" value="1"
-            <?php echo ($isEnabled ? 'checked' : ''); ?>/>
-        <label for="is_enabled">Enabled? (will be displayed between the specified start/end times)</label>
-    </div>
-    <div>
-        <input type="checkbox" id="is_dismissible" name="is_dismissible" value="1"
-               <?php echo ($isDismissible ? 'checked' : ''); ?>/>
-        <label for="is_dismissible">Dismissible? (user can permanently dismiss this banner)</label>
-    </div>
-    <div>
-        <input type="checkbox" id="has_start_at" name="has_start_at" value="1"
-            <?php echo ($hasStartAt ? 'checked' : ''); ?>/>
-        <label for="start_at">Start At</label>
-        <span id="start_at">
-            <input id="sdate" name="sdate" size="10" value="<?php echo $startDate; ?>"
-                   onClick="displayDatePicker('sdate', this); return false"/>
-            <input id="stime" name="stime" size="10" value="<?php echo $startTime; ?>"/>
-        </span>
-    </div>
-    <div>
-        <input type="checkbox" id="has_end_at" name="has_end_at" value="1"
-            <?php echo ($hasEndAt ? 'checked' : ''); ?>/>
-        <label for="end_at">End At</label>
-        <span id="end_at">
-            <input id="edate" name="edate" size="10" value="<?php echo $endDate; ?>"
-                   onClick="displayDatePicker('edate', this); return false"/>
-            <input id="etime" name="etime" size="10" value="<?php echo $endTime; ?>"/>
-        </span>
-    </div>
-    <br/>
-    <div>
-        <label for="description">Banner description (for admin use only; this is not user-facing)</label><br/>
-        <input id="description" name="description" size="60" value="<?php echo $description; ?>" required/>
-    </div>
-    <br/>
-    <div>
-        <input type="checkbox" id="display_teacher" name="display_teacher" value="1"
-            <?php echo ($displayTeacher ? 'checked' : ''); ?>/>
-        <label for="display_teacher">Display teacher banner?</label>
-    </div>
-    <div>
-        <label for="teacher_title">Teacher banner title</label>
-        <input id="teacher_title" name="teacher_title" size="60" value="<?php echo $teacherTitle; ?>"/>
-    </div>
-    <div>
-        <label for="teacher_content">Teacher banner content</label><br/>
-        <textarea id="teacher_content" name="teacher_content" rows="10" cols="80"
-                  style="resize: both;"><?php echo $teacherContent; ?></textarea>
-    </div>
-    <br/>
-    <div>
-        <input type="checkbox" id="display_student" name="display_student" value="1"
-            <?php echo ($displayStudent ? 'checked' : ''); ?>/>
-        <label for="display_student">Display student banner?</label>
-    </div>
-    <div>
-        <label for="student_title">Student banner title</label>
-        <input id="student_title" name="student_title" size="60" value="<?php echo $studentTitle; ?>"/>
-    </div>
-    <div>
-        <label for="student_content">Student banner content</label><br/>
-        <textarea id="student_content" name="student_content" rows="10" cols="80"
-                  style="resize: both;"><?php echo $studentContent; ?></textarea>
-    </div>
-    <div>
-        <input type="submit" value="<?php echo $action; ?>"/>
-    </div>
-</form>
+<div class="lux-component edit-banner-form">
+    <form method="post" action="?action=save" class="lux-form">
+        <input type="hidden" name="id" value="<?php echo $id; ?>"/>
+
+        <div class="banner-properties">
+            <div>
+                <input type="checkbox" id="is-enabled" name="is-enabled" value="1"
+                    <?php echo ($isEnabled ? 'checked' : ''); ?>/>
+                <label for="is-enabled">Enabled? (will be displayed between the specified start/end times)</label>
+            </div>
+            <div>
+                <input type="checkbox" id="is-dismissible" name="is-dismissible" value="1"
+                    <?php echo ($isDismissible ? 'checked' : ''); ?>/>
+                <label for="is-dismissible">Dismissible? (user can permanently dismiss this banner)</label>
+            </div>
+        </div>
+
+        <div class="banner-timestamps">
+            <div class="u-margin-top">
+                <input type="checkbox" id="has-start-at" name="has-start-at" value="1"
+                    <?php echo ($hasStartAt ? 'checked' : ''); ?>/>
+                <label for="start-at">Start At</label>
+                <div class="banner-timestamp-entry">
+                    <input id="sdate" class="form-input form-input--fw" name="sdate"
+                           value="<?php echo $startDate; ?>"
+                           onClick="displayDatePicker('sdate', this); return false"/>
+                    <input id="stime" class="form-input form-input--fw" name="stime"
+                           value="<?php echo $startTime; ?>"/>
+                </div>
+            </div>
+            <div>
+                <input type="checkbox" id="has-end-at" name="has-end-at" value="1"
+                    <?php echo ($hasEndAt ? 'checked' : ''); ?>/>
+                <label for="end-at">End At</label>
+                <div class="banner-timestamp-entry">
+                    <input id="edate" class="form-input form-input--fw" name="edate"
+                           value="<?php echo $endDate; ?>"
+                           onClick="displayDatePicker('edate', this); return false"/>
+                    <input id="etime" class="form-input form-input--fw" name="etime"
+                           value="<?php echo $endTime; ?>"/>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="banner-description u-margin-top">
+            <label for="description">Short banner description (for admin use only; this is not user-facing)</label>
+            <input id="description" class="form-input form-input--fw" name="description" size="60"
+                   value="<?php echo $description; ?>" required/>
+        </div>
+
+
+        <div class="teacher-banner">
+            <div class="u-margin-top">
+                <input type="checkbox" id="display-teacher" name="display-teacher" value="1"
+                    <?php echo ($displayTeacher ? 'checked' : ''); ?>/>
+                <label for="display-teacher">Display teacher banner?</label>
+            </div>
+            <div class="u-margin-top-xs">
+                <label for="teacher-title">Teacher banner title</label>
+                <input id="teacher-title" class="form-input form-input--fw" name="teacher-title"
+                       size="60" value="<?php echo $teacherTitle; ?>"/>
+            </div>
+            <div class="u-margin-top-xs">
+                <label for="teacher-content">Teacher banner content</label>
+                <textarea id="teacher-content" class="form-input form-input--fw" name="teacher-content"
+                          rows="10" cols="80"><?php echo $teacherContent; ?></textarea>
+            </div>
+        </div>
+
+
+        <div class="student-banner">
+            <div class="u-margin-top">
+                <input type="checkbox" id="display-student" name="display-student" value="1"
+                    <?php echo ($displayStudent ? 'checked' : ''); ?>/>
+                <label for="display-student">Display student banner?</label>
+            </div>
+            <div class="u-margin-top-xs">
+                <label for="student-title">Student banner title</label>
+                <input id="student-title" class="form-input form-input--fw" name="student-title"
+                       size="60" value="<?php echo $studentTitle; ?>"/>
+            </div>
+            <div class="u-margin-top-xs">
+                <label for="student-content">Student banner content</label>
+                <textarea id="student-content" class="form-input form-input--fw" name="student-content"
+                          rows="10" cols="80"><?php echo $studentContent; ?></textarea>
+            </div>
+        </div>
+
+
+        <button type="submit" class="button u-margin-top"><?php echo $action; ?></button>
+    </form>
+</div>
