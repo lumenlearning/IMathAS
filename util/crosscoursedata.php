@@ -18,9 +18,9 @@ if ($myrights<100) {
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
-use OHM\Includes\ReadReplicaDb;
-require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
-$DBH = ReadReplicaDb::getPdoInstance();
+if (isset($CFG['hooks']['use_replica_db'])) {
+    require(__DIR__ . '/../' . $CFG['hooks']['use_replica_db']);
+}
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
@@ -34,21 +34,6 @@ if ($myrights == 100) {
 }
 $curBreadcrumb .= ' &gt; Cross-Course Results';
 
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-// #### Begin OHM-specific code #####################################################
-function displayReadReplicaNotice()
-{
-    echo '<p><u>Note</u>: Data is queried from the OHM read replica DB.</p>';
-}
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-// #### End OHM-specific code #######################################################
-
 function reporterror($err) {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS);
 	require("../header.php");
@@ -59,7 +44,9 @@ function reporterror($err) {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
-    displayReadReplicaNotice();
+    if (function_exists('displayReportNotice')) {
+        displayReportNotice();
+    }
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
@@ -79,7 +66,9 @@ if (empty($_REQUEST['basecourse'])) {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
-    displayReadReplicaNotice();
+    if (function_exists('displayReportNotice')) {
+        displayReportNotice();
+    }
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
@@ -270,7 +259,9 @@ if ($_REQUEST['output']=='html') {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
-    displayReadReplicaNotice();
+    if (function_exists('displayReportNotice')) {
+        displayReportNotice();
+    }
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################

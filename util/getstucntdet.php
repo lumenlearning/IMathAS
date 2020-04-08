@@ -20,9 +20,9 @@ ul {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
-    use OHM\Includes\ReadReplicaDb;
-    require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
-    $DBH = ReadReplicaDb::getPdoInstance();
+    if (isset($CFG['hooks']['use_replica_db'])) {
+        require(__DIR__ . '/../' . $CFG['hooks']['use_replica_db']);
+    }
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
@@ -53,7 +53,9 @@ ul {
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
-    echo '<p><u>Note</u>: Data is queried from the OHM read replica DB.</p>';
+    if (function_exists('displayReportNotice')) {
+        displayReportNotice();
+    }
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
