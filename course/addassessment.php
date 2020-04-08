@@ -5,6 +5,7 @@
 /*** master php includes *******/
 require("../init.php");
 require("../includes/htmlutil.php");
+require_once("../includes/TeacherAuditLog.php");
 
 if ($courseUIver > 1) {
 	if (!isset($_GET['id'])) {
@@ -402,6 +403,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $qarr[':cid'] = $cid;
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
+			if ($stm->rowCount()>0) {
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Assessment Settings Change",
+                    $assessmentId,
+                    $qarr
+                );
+            }
 
 			//update ptsposs field
 			if ($stm->rowCount()>0 && isset($_POST['defpoints'])) {
