@@ -19,12 +19,15 @@ class TeacherAuditLog
         "Grade Override"
     ];
 
-    public static function addTracking($courseid, $action, $itemid, $metadata = '')
+    public static function addTracking($courseid, $action, $itemid, $metadata = array())
     {
         if (!in_array($action, self::ACTIONS)) {
             //log exception
             return false;
         }
+        //always include calling file as source to metadata
+        $metadata = ['source'=>basename(debug_backtrace()[0]['file'])]+$metadata;
+
         $query = "INSERT INTO imas_teacher_audit_log (userid,courseid,action,itemid,metadata) VALUES "
             . "(:userid, :courseid, :action, :itemid, :metadata)";
         $stm = $GLOBALS['DBH']->prepare($query);
@@ -33,7 +36,7 @@ class TeacherAuditLog
             ':courseid'=>$courseid,
             ':action'=>$action,
             ':itemid'=>$itemid,
-            ':metadata' => $metadata
+            ':metadata' => json_encode($metadata)
         ));
     }
     public static function findActionsByCourse($cid)
