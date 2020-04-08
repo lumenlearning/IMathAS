@@ -33,7 +33,7 @@
       :qn = "qn"
     />
 
-    <div v-if="hasCalculator" class="calculator">
+    <div v-if="questionHasCalculator" class="calculator">
       <button type="button" @click="openCalc" v-show="!showCalculator">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><rect fill="#212B36" x="6" y="3" width="13" height="18" rx="1"/><path fill="#DDE3E9" d="M7 9h2v2H7z"/><path fill="#F49342" d="M13 9h2v2h-2zM16 9h2v2h-2z"/><path fill="#DDE3E9" d="M10 9h2v2h-2zM7 12h2v2H7zM7 15h2v2H7z"/><path fill="#F49342" d="M13 12h2v2h-2zM16 12h2v2h-2z"/><path fill="#DDE3E9" d="M10 12h2v2h-2z"/><path fill="#2DCF77" d="M13 15h2v2h-2zM13 18h2v2h-2z"/><path fill="#DDE3E9" d="M10 15h2v2h-2zM10 18h2v2h-2zM7 18h2v2H8a1 1 0 01-1-1v-1z"/><path d="M16 15h2v4a1 1 0 01-1 1h-1v-5z" fill="#2DCF77"/><path d="M8 4h9a1 1 0 011 1v3H7V5a1 1 0 011-1z" fill="#FFF"/></g></svg>
         Calculator
@@ -98,8 +98,7 @@ export default {
       timeActivated: null,
       timeActive: 0,
       showCalculator: false,
-      uniqueId: 'test-calc' + this.qn,
-      hasCalculator: store.assessInfo.showcalculator
+      uniqueId: 'test-calc' + this.qn
     };
   },
   computed: {
@@ -114,6 +113,9 @@ export default {
     },
     questionContentLoaded () {
       return (this.questionData.html !== null);
+    },
+    questionHasCalculator () {
+      return this.questionData.showcalculator;
     },
     showSubmit () {
       return (store.inProgress &&
@@ -337,7 +339,11 @@ export default {
     if (this.questionContentLoaded) {
       this.disableOutOfTries();
       this.renderAndTrack();
-      if (store.assessInfo.showcalculator) {
+      if (this.questionHasCalculator === 'basic') {
+        Desmos.FourFunctionCalculator(this.$refs.figure);
+      } else if (this.questionHasCalculator === 'graphing') {
+        Desmos.GraphingCalculator(this.$refs.figure);
+      } else if (this.questionHasCalculator) {
         Desmos.ScientificCalculator(this.$refs.figure);
       }
     } else {
