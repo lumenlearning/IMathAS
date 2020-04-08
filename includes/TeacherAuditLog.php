@@ -19,7 +19,7 @@ class TeacherAuditLog
         "Grade Override"
     ];
 
-    public static function addTracking($userid, $courseid, $action, $itemid, $metadata = '')
+    public static function addTracking($courseid, $action, $itemid, $metadata = '')
     {
         if (!in_array($action, self::ACTIONS)) {
             //log exception
@@ -29,7 +29,7 @@ class TeacherAuditLog
             . "(:userid, :courseid, :action, :itemid, :metadata)";
         $stm = $GLOBALS['DBH']->prepare($query);
         return $stm->execute(array(
-            ':userid'=>$userid,
+            ':userid'=>$GLOBALS['userid'],
             ':courseid'=>$courseid,
             ':action'=>$action,
             ':itemid'=>$itemid,

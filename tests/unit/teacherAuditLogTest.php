@@ -43,6 +43,7 @@ final class TeacherAuditLogTest extends TestCase
             die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
         }
         //set initialization data model
+        $GLOBALS['userid'] = 1;
         $query = 'CREATE TABLE `imas_teacher_audit_log` (
           `id` int(10) PRIMARY KEY,
           `userid` int(10),
@@ -101,7 +102,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Invalid Action';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertFalse($result);
     }
 
@@ -112,7 +113,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Assessment Settings Change';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -123,7 +124,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Mass Assessment Settings Change';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -134,7 +135,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Mass Assessment Date Change';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -145,7 +146,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Question Settings Change';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -156,7 +157,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Clear Attempts';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -167,7 +168,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Clear Scores';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -178,7 +179,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Delete Item';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -189,7 +190,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Unenroll';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
@@ -200,7 +201,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Grade Override';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['userid'], $item['courseid'], $action, $item['itemid'], $item['metadata']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid'], $item['metadata']);
         $this->assertTrue($result);
     }
 
