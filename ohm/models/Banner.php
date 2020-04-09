@@ -102,10 +102,10 @@ class Banner
             ':student_content' => $this->studentContent,
             ':teacher_title' => $this->teacherTitle,
             ':teacher_content' => $this->teacherContent,
-            ':start_at' => is_null($this->dismissedAt) ? null :
-                $this->dismissedAt->format('Y-m-d H:i:s'),
-            ':end_at' => is_null($this->dismissedAt) ? null :
-                $this->dismissedAt->format('Y-m-d H:i:s'),
+            ':start_at' => is_null($this->startAt) ? null :
+                $this->startAt->format('Y-m-d H:i:s'),
+            ':end_at' => is_null($this->endAt) ? null :
+                $this->endAt->format('Y-m-d H:i:s'),
         ];
 
         // lastInsertId() does not work with "ON DUPLICATE KEY UPDATE" :(

@@ -130,7 +130,6 @@ function view(int $bannerId): void
 {
     global $DBH, $myrights;
 
-    $bannerId = intval($bannerId);
     $ohmBannerService = new OhmBannerService($DBH, $myrights, $bannerId);
     $ohmBannerService->setDisplayOnlyOncePerBanner(false);
 
