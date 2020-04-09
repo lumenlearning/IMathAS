@@ -15,6 +15,8 @@ class OhmBannerService
     private $teacherBannerDisplayed;
     private $studentBannerDisplayed;
 
+    private $bannerForTesting; // Used during unit testing.
+
     /**
      * OhmBanner constructor.
      *
@@ -79,7 +81,7 @@ class OhmBannerService
      */
     public function showTeacherBanner(): bool
     {
-        $banner = new Banner($this->dbh);
+        $banner = $this->getNewBannerInstance();
         $banner->find($this->bannerId);
 
         // Make the banner data available to the view.
@@ -107,7 +109,7 @@ class OhmBannerService
      */
     public function showStudentBanner(): bool
     {
-        $banner = new Banner($this->dbh);
+        $banner = $this->getNewBannerInstance();
         $banner->find($this->bannerId);
 
         // Make the banner ID available to the view.
@@ -124,6 +126,34 @@ class OhmBannerService
     /*
      * Getters, setters
      */
+
+    /**
+     * Get a new Banner instance.
+     *
+     * This method allows for easier unit testing.
+     *
+     * @return Banner
+     */
+    public function getNewBannerInstance(): Banner
+    {
+        if (!is_null($this->bannerForTesting)) {
+            return $this->bannerForTesting;
+        }
+
+        return new Banner($this->dbh);
+    }
+
+    /**
+     * Set the Banner model instance. Used during testing.
+     *
+     * @param Banner $bannerForTesting
+     * @return OhmBannerService
+     */
+    public function setBannerForTesting(Banner $bannerForTesting): OhmBannerService
+    {
+        $this->bannerForTesting = $bannerForTesting;
+        return $this;
+    }
 
     /**
      * Set the user's rights.
