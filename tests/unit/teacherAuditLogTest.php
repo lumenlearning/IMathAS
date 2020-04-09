@@ -21,7 +21,7 @@ final class TeacherAuditLogTest extends TestCase
         array(
             'userid'=>1,
             'courseid'=>3,
-            'action'=>"Mass Assessment Settings Change",
+            'action'=>"Assessment Settings Change",
             'itemid'=>1,
             'metadata'=>'{"source":"TeacherAuditLogTest.php"}',
         ),
@@ -124,7 +124,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Mass Assessment Settings Change';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action);
         $this->assertTrue($result);
     }
 
@@ -135,7 +135,7 @@ final class TeacherAuditLogTest extends TestCase
     {
         $action = 'Mass Assessment Date Change';
         $item = self::$course1[0];
-        $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid']);
+        $result = TeacherAuditLog::addTracking($item['courseid'], $action);
         $this->assertTrue($result);
     }
 

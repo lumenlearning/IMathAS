@@ -19,7 +19,7 @@ class TeacherAuditLog
         "Grade Override"
     ];
 
-    public static function addTracking($courseid, $action, $itemid, $metadata = array())
+    public static function addTracking($courseid, $action, $itemid = null, $metadata = array())
     {
         if (!in_array($action, self::ACTIONS)) {
             //log exception
