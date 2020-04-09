@@ -208,6 +208,7 @@ $CFG['hooks']['bltilaunch'] = 'ohm-hooks/bltilaunch.php';
 $CFG['hooks']['validate'] = 'ohm-hooks/validate.php';
 $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
+$CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
 
 $CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js';
 

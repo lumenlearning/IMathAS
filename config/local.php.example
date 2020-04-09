@@ -21,6 +21,12 @@ $dbname = getenv('DB_NAME') ?? 'myopenmath';
 $dbusername = getenv('DB_USERNAME') ?? 'username';
 $dbpassword = getenv('DB_PASSWORD') ?? 'password';
 
+// Database - read replica (env vars used in /ohm/includes/ReadReplicaDb.php)
+putenv('REPLICA_DB_SERVER=' . $dbserver);
+putenv('REPLICA_DB_USERNAME=' . $dbusername);
+putenv('REPLICA_DB_PASSWORD=' . $dbpassword);
+putenv('REPLICA_DB_NAME=' . $dbname);
+
 // Lumen student payment authorization API
 $GLOBALS['student_pay_api']['enabled'] = false;
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/studentpay_api/v1'; // No trailing slash!
