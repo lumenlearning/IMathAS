@@ -154,24 +154,24 @@ function save()
         $banner->find($bannerId);
     }
     $banner
-        ->setEnabled($_POST['is_enabled'] ? true : false)
-        ->setDismissible($_POST['is_dismissible'] ? true : false)
-        ->setDisplayStudent($_POST['display_student'] ? true : false)
-        ->setDisplayTeacher($_POST['display_teacher'] ? true : false)
+        ->setEnabled($_POST['is-enabled'] ? true : false)
+        ->setDismissible($_POST['is-dismissible'] ? true : false)
+        ->setDisplayStudent($_POST['display-student'] ? true : false)
+        ->setDisplayTeacher($_POST['display-teacher'] ? true : false)
         ->setDescription($_POST['description'])
-        ->setTeacherTitle($_POST['teacher_title'])
-        ->setTeacherContent($_POST['teacher_content'])
-        ->setStudentTitle($_POST['student_title'])
-        ->setStudentContent($_POST['student_content']);
+        ->setTeacherTitle($_POST['teacher-title'])
+        ->setTeacherContent($_POST['teacher-content'])
+        ->setStudentTitle($_POST['student-title'])
+        ->setStudentContent($_POST['student-content']);
 
-    if ('1' != $_POST['has_start_at']) {
+    if ('1' != $_POST['has-start-at']) {
         $banner->setStartAt(null);
     } else {
         $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime']);
         $banner->setStartAt($dateTime);
     }
 
-    if ('1' != $_POST['has_end_at']) {
+    if ('1' != $_POST['has-end-at']) {
         $banner->setEndAt(null);
     } else {
         $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime']);
