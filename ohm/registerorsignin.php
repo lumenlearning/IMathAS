@@ -21,7 +21,7 @@ $username_placeholder ='"Enter a username (letters, numbers, _ )"';
 $confirm_password='"Confirm Password"';
 $choose_password ='"Choose a Password"';
 
-if(($_POST['courseid'] && $_POST['ekey'] && $_POST['verified'] || $_GET['cid'] && $_GET['ekey'])){
+if(($_POST['courseid'] && $_POST['verified'] || $_GET['cid'] && $_GET['ekey'])){
   echo "
   <div class='lumensignupforms'>
   <ol class='wizard-progress clearfix'>
