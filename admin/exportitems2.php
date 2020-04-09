@@ -261,28 +261,6 @@ if (!(isset($teacherid))) {   //NO PERMISSIONS
         }
     }
 
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    //get desmos_items
-    if (isset($itemtypebackref['DesmosItem'])) {
-        $toget = array_keys($itemtypebackref['DesmosItem']);
-        //$ph = Sanitize::generateQueryPlaceholders($toget);
-        foreach ($toget as $typeid) {
-            $desmos = new \Desmos\Models\DesmosItem($cid);
-            $desmos->findItem($typeid);
-            $output_item_id = $itemtypebackref['DesmosItem'][$typeid];
-            $output['items'][$output_item_id] = array('type'=>'DesmosItem', 'data'=>$desmos->asArray(true));
-        }
-    }
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-
 	//get imas_questions
 	if (isset($itemtypebackref['Assessment'])) {
 		$toget = array_keys($itemtypebackref['Assessment']);
@@ -601,6 +579,17 @@ if ($overwriteBody==1) {
 <?php
 	$alt=0;
 	for ($i = 0 ; $i<(count($ids)); $i++) {
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        if ($types[$i] == "DesmosItem") continue;
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
 		if ($alt==0) {echo "<tr class=even>"; $alt=1;} else {echo "<tr class=odd>"; $alt=0;}
 ?>
 				<td>
