@@ -24,21 +24,25 @@ if ($GLOBALS['myrights'] < 100) {
 <?php
 
 
+// Sanitize inputs
+$id = !empty($_REQUEST['id']) ? intval($_REQUEST['id']) : null;
+
+
 switch ($_REQUEST['action']) {
     case "view":
-        view();
+        view($id);
         break;
     case "create_form":
-        modify_form('Create');
+        modify_form('Create', null);
         break;
     case "modify_form":
-        modify_form('Modify');
+        modify_form('Modify', $id);
         break;
     case "save":
-        save();
+        save($id);
         break;
     case "delete":
-        delete();
+        delete($id);
         break;
     case "index":
     default:
@@ -51,7 +55,10 @@ include(__DIR__ . '/../footer.php');
 return;
 
 
-function list_banners()
+/**
+ * Display all banners. This is not paginated.
+ */
+function list_banners(): void
 {
     global $DBH;
 
@@ -114,11 +121,16 @@ function list_banners()
     }
 }
 
-function view()
+/**
+ * View a banner.
+ *
+ * @param int $bannerId The banner ID.
+ */
+function view(int $bannerId): void
 {
     global $DBH, $myrights;
 
-    $bannerId = intval($_GET['id']);
+    $bannerId = intval($bannerId);
     $ohmBannerService = new OhmBannerService($DBH, $myrights, $bannerId);
     $ohmBannerService->setDisplayOnlyOncePerBanner(false);
 
@@ -128,11 +140,16 @@ function view()
     $ohmBannerService->showStudentBanner();
 }
 
-function delete()
+/**
+ * Delete a banner.
+ *
+ * @param int $bannerId The banner ID.
+ * @throws \OHM\Exceptions\DatabaseWriteException
+ */
+function delete(int $bannerId): void
 {
     global $DBH;
 
-    $bannerId = intval($_GET['id']);
     $banner = new Banner($DBH);
     if (!$banner->find($bannerId)) {
         printf('Banner ID %d not found.', $bannerId);
@@ -144,12 +161,17 @@ function delete()
     echo '<a href="?">&lt;&lt; Return to OHM banner listing</a>';
 }
 
-function save()
+/**
+ * Save a new or existing banner.
+ *
+ * @param int|null $bannerId The banner ID, if saving an existing banner.
+ * @throws \OHM\Exceptions\DatabaseWriteException
+ */
+function save(?int $bannerId): void
 {
     global $DBH;
 
     $banner = new Banner($DBH);
-    $bannerId = intval($_POST['id']);
     if (!empty($bannerId)) {
         $banner->find($bannerId);
     }
@@ -180,15 +202,19 @@ function save()
 
     $banner->save();
 
-    printf('<p>Saved banner: %s</p>', $banner->getDescription());
+    view($banner->getId());
     echo '<a href="?">&lt;&lt; Return to OHM banner listing</a>';
 }
 
-function modify_form($action)
+/**
+ * Display the HTML form for editing or creating a Banner.
+ *
+ * @param string $action One of: "Modify" or "Create"
+ * @param int|null $bannerId The banner ID, if modifying a banner.
+ */
+function modify_form(string $action, ?int $bannerId): void
 {
     global $DBH;
-
-    $bannerId = intval($_GET['id']);
 
     // Make variables available for the view.
     $action = Sanitize::simpleString($action);
