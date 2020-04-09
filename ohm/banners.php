@@ -8,6 +8,12 @@ $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/Dat
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.2/lux-components.min.css\">";
 require_once("../header.php");
 
+if ($GLOBALS['myrights'] < 100) {
+    echo "You're not authorized to view this page.";
+    include(__DIR__ . '/../footer.php');
+    exit;
+}
+
 ?>
     <div class="breadcrumb">
         <?php echo $breadcrumbbase; ?>
