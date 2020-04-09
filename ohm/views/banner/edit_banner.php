@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="views/banner/edit_banner.css" type="text/css"/>
+<script src="views/banner/edit_banner.js"></script>
+
 
 <h1><?php echo $action; ?> OHM Banner</h1>
 
