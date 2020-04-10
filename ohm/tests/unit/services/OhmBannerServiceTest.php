@@ -20,21 +20,23 @@ final class OhmBannerServiceTest extends TestCase
         $this->dbh = $this->createMock(\PDO::class);
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('rowCount')->willReturn(1);
-        $pdoStatement->method('fetch')->willReturn([
-            'id' => 42,
-            'is_enabled' => 1,
-            'is_dismissible' => 1,
-            'display_student' => 1,
-            'display_teacher' => 1,
-            'description' => 'Sample description',
-            'student_title' => 'Student Title',
-            'student_content' => 'Student Content',
-            'teacher_title' => 'Teacher Title',
-            'teacher_content' => 'Teacher Content',
-            'start_at' => '2020-09-01 00:00:00',
-            'end_at' => '2020-09-28 12:00:00',
-            'created_at' => '2020-01-02 18:41:17',
-        ]);
+        $pdoStatement->method('fetch')
+            ->willReturn([
+                'id' => 42,
+                'is_enabled' => 1,
+                'is_dismissible' => 1,
+                'display_student' => 1,
+                'display_teacher' => 1,
+                'description' => 'Sample description',
+                'student_title' => 'Student Title',
+                'student_content' => 'Student Content',
+                'teacher_title' => 'Teacher Title',
+                'teacher_content' => 'Teacher Content',
+                'start_at' => '2020-09-01 00:00:00',
+                'end_at' => '2020-09-28 12:00:00',
+                'created_at' => '2020-01-02 18:41:17',
+            ])
+            ->willReturnOnConsecutiveCalls(false);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
         $this->ohmBanner = new OhmBannerService($this->dbh, 1, 0);
@@ -117,12 +119,4 @@ final class OhmBannerServiceTest extends TestCase
         $result = $this->ohmBanner->showStudentBannersForStudentsOnly();
         $this->assertFalse($result, 'the banner should be displayed only once.');
     }
-
-    /*
-     * showTeacherBanners
-     */
-
-    /*
-     * showStudentBanners
-     */
 }
