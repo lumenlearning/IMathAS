@@ -1,7 +1,7 @@
 window.onload = function () {
-  $("#js-dismiss-banner").click(function (event) {
+  $(".course-banner-close-button").click(function (event) {
     event.preventDefault();
-    let bannerType = $(this).attr("aria-controls"); // "course-banner-teacher" or "course-banner-student"
+    let bannerType = $(this).attr("aria-controls"); // "course-banner-teacher-{id}" or "course-banner-student-{id}"
     let bannerEl = $('#' + bannerType);
     let bannerId = bannerEl.attr("data-banner-id"); // DB banner ID
     dismissNotice(bannerId, bannerEl);

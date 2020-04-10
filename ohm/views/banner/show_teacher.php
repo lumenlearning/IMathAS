@@ -1,12 +1,12 @@
-<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>" id="course-banner-teacher">
+<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>"
+     id="course-banner-teacher-<?php echo $bannerId; ?>">
     <header class="course-banner-header">
         <h2><?php echo Sanitize::encodeStringForDisplay($bannerTitle); ?></h2>
         <?php if ($bannerDismissible) { ?>
         <button
             aria-label="Close this banner."
-            aria-controls="course-banner-teacher"
+            aria-controls="course-banner-teacher-<?php echo $bannerId; ?>"
             class="u-button-reset course-banner-close-button"
-            id="js-dismiss-banner"
             type="button">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12" role="img" aria-hidden="true">
                 <defs>
