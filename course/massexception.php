@@ -120,6 +120,21 @@
 						$stm = $DBH->prepare($query);
 						$stm->execute(array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
 							':reattempting'=>$reattemptinglist, ':id'=>$row[0]));
+
+						$result = TeacherAuditLog::addTracking(
+							$cid,
+							"Clear Scores",
+							$row[0],
+							array(
+								'question'=>'all',
+								'studentid'=>$stu,
+								'old_attempt'=>[
+									'questions'=>$row[1],
+									'lastanswers'=>$row[2],
+									'scores'=>$row[3]
+								]
+							)
+						);
 					}
 
 				} else if (isset($_POST['forceclear'])) {

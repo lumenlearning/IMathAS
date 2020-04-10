@@ -3,6 +3,7 @@
 //(c) 2007 David Lippman
 	require("../init.php");
 	require_once("../includes/filehandler.php");
+	require_once("../includes/TeacherAuditLog.php");
 
 
 	$isteacher = isset($teacherid);
@@ -134,12 +135,13 @@
 	//PROCESS ANY TODOS
 	if (isset($_REQUEST['clearattempt']) && $isteacher) {
 		if (isset($_POST['clearattempt']) && $_POST['clearattempt']=='confirmed') {
-			$query = "SELECT ias.assessmentid,ias.lti_sourcedid,ias.userid FROM imas_assessment_sessions AS ias ";
+			$query = "SELECT ias.assessmentid,ias.lti_sourcedid,ias.userid,ias.bestscores FROM imas_assessment_sessions AS ias ";
 			$query .= "JOIN imas_assessments AS ia ON ias.assessmentid=ia.id WHERE ias.id=:id AND ia.courseid=:courseid";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':id'=>$asid, ':courseid'=>$cid));
 			if ($stm->rowCount()>0) {
-				list($aid, $ltisourcedid, $uid) = $stm->fetch(PDO::FETCH_NUM);
+				$old_attempts = $stm->fetch(PDO::FETCH_NUM);
+				list($aid, $ltisourcedid, $uid) = $old_attempts;
 				if (strlen($ltisourcedid)>1) {
 					require_once("../includes/ltioutcomes.php");
 					updateLTIgrade('delete',$ltisourcedid,$aid,$uid);
@@ -152,6 +154,17 @@
 				$query .= " WHERE {$qp[0]}=:qval AND assessmentid=:assessmentid"; //$qp[0] is "id" or "agroupid" from getasidquery
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':assessmentid'=>$qp[2], ':qval'=>$qp[1]));
+				$result = TeacherAuditLog::addTracking(
+					$cid,
+					"Clear Attempts",
+					$qp[2],
+					array(
+						'old_attempts'=>[
+							'studentid'=>$old_attempts[2],
+							'bestscores'=>$old_attempts[3]
+						]
+					)
+				);
 			}
 			if ($from=='isolate') {
 				header('Location: ' . $GLOBALS['basesiteurl'] . "/course/isolateassessgrade.php?stu=$stu&cid=".Sanitize::courseId($_GET['cid'])."&aid=$aid&gbmode=$gbmode");
@@ -224,9 +237,10 @@
 				$qp = getasidquery($asid);
 				//deleteasidfilesbyquery(array($qp[0]=>$qp[1]),1);
 				deleteasidfilesbyquery2($qp[0],$qp[1],$qp[2],1);
-				$stm = $DBH->prepare("SELECT seeds,lti_sourcedid,userid FROM imas_assessment_sessions WHERE {$qp[0]}=:qval AND assessmentid=:assessmentid");
+				$stm = $DBH->prepare("SELECT seeds,lti_sourcedid,userid,bestscores FROM imas_assessment_sessions WHERE {$qp[0]}=:qval AND assessmentid=:assessmentid");
 				$stm->execute(array(':assessmentid'=>$qp[2], ':qval'=>$qp[1]));
-				list($seeds, $ltisourcedid, $uid) = $stm->fetch(PDO::FETCH_NUM);
+				$old_attempts = $stm->fetch(PDO::FETCH_NUM);
+				list($seeds, $ltisourcedid, $uid) = $old_attempts;
 				$seeds = explode(',', $seeds);
 				if (strlen($ltisourcedid)>1) {
 					require_once("../includes/ltioutcomes.php");
@@ -250,6 +264,22 @@
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':assessmentid'=>$qp[2], ':qval'=>$qp[1], ':attempts'=>$attemptslist, ':lastanswers'=>$lalist, ':scores'=>"$scorelist;$scorelist",
 					':bestattempts'=>$bestattemptslist, ':bestseeds'=>$bestseedslist, ':bestlastanswers'=>$bestlalist, ':bestscores'=>"$bestscorelist;$bestscorelist;$bestscorelist"));
+
+				if ($stm->rowCount()>0) {
+					$result = TeacherAuditLog::addTracking(
+						$cid,
+						"Clear Scores",
+						$asid,
+						array(
+							'question'=>'all',
+							'studentid'=>$old_attempts[2],
+							'assessmentid'=>$qp[2],
+							'old_attempt'=>[
+								'bestscores'=>$old_attempts[3]
+							]
+						)
+					);
+				}
 			}
 			header('Location: ' . $GLOBALS['basesiteurl'] ."/course/gb-viewasid.php?stu=$stu&asid=$asid&from=$from&cid=$cid&uid=$get_uid");
 		} else {
@@ -350,6 +380,16 @@
           $stm2 = $DBH->prepare($query);
           $stm2->execute(array(':id'=>$line['id'], ':scores'=>$scorelist, ':attempts'=>$attemptslist, ':lastanswers'=>$lalist, ':seeds'=>$seedlist,
             ':bestscores'=>$bestscorelist, ':bestattempts'=>$bestattemptslist, ':bestlastanswers'=>$bestlalist, ':bestseeds'=>$bestseedlist, ':reattempting'=>$reattemptinglist));
+			$result = TeacherAuditLog::addTracking(
+				$cid,
+				"Clear Scores",
+				$line['id'],
+				array(
+					'question'=>$qp[1],
+					'studentid'=>$stu,
+					'old_attempt'=>$line
+				)
+			);
           if (strlen($line['lti_sourcedid'])>1) {
             require_once("../includes/ltioutcomes.php");
             calcandupdateLTIgrade($line['lti_sourcedid'],$aid,$line['userid'],$bestscores,true);
@@ -403,9 +443,10 @@
 		if (isset($_GET['update']) && ($isteacher || $istutor)) {
 			$haderror = false;
 			if (isoktorec($asid)) {
-				$stm = $DBH->prepare("SELECT bestscores FROM imas_assessment_sessions WHERE id=:id");
+				$stm = $DBH->prepare("SELECT bestscores,userid,feedback FROM imas_assessment_sessions WHERE id=:id");
 				$stm->execute(array(':id'=>$asid));
-				$bestscores = $stm->fetchColumn(0);
+				$metadata = $stm->fetchAll(PDO::FETCH_ASSOC);
+				$bestscores = $metadata['bestscores'];
 				$bsp = explode(';',$bestscores);
 				$oldScores = explode(',', $bsp[0]);
 
@@ -463,12 +504,26 @@
 					$query = "UPDATE imas_assessment_sessions SET bestscores=:bestscores,feedback=:feedback";
 					$query .=  " WHERE {$qp[0]}=:qval AND assessmentid=:assessmentid";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':bestscores'=>$scorelist, ':feedback'=>$feedbackout, ':assessmentid'=>$qp[2], ':qval'=>$qp[1]));
+					$update = array(':bestscores'=>$scorelist, ':feedback'=>$feedbackout, ':assessmentid'=>$qp[2], ':qval'=>$qp[1]);
+					$stm->execute($update);
 					//$query .= getasidquery($_GET['asid']);
 				} else {
 					$query = "UPDATE imas_assessment_sessions SET bestscores=:bestscores,feedback=:feedback WHERE id=:id";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':bestscores'=>$scorelist, ':feedback'=>$feedbackout, ':id'=>$asid));
+					$update = array(':bestscores'=>$scorelist, ':feedback'=>$feedbackout, ':id'=>$asid);
+					$stm->execute($update);
+				}
+				if ($stm->rowCount()>0) {
+					$result = TeacherAuditLog::addTracking(
+						$cid,
+						"Clear Scores",
+						$asid,
+						array(
+							'question'=>'all',
+							'old_attempts' => $metadata,
+							'updated' => $update
+						)
+					);
 				}
 				$stm = $DBH->prepare("SELECT assessmentid,lti_sourcedid,userid FROM imas_assessment_sessions WHERE id=:id");
 				$stm->execute(array(':id'=>$asid));
