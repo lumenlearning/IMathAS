@@ -118,21 +118,19 @@
 						$query = "UPDATE imas_assessment_sessions SET scores=:scores,attempts=:attempts,seeds=:seeds,lastanswers=:lastanswers,";
 						$query .= "reattempting=:reattempting WHERE id=:id";
 						$stm = $DBH->prepare($query);
-						$stm->execute(array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
-							':reattempting'=>$reattemptinglist, ':id'=>$row[0]));
+						$update = array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
+							':reattempting'=>$reattemptinglist, ':id'=>$row[0]);
+						$stm->execute($update);
 
 						$result = TeacherAuditLog::addTracking(
 							$cid,
 							"Clear Scores",
 							$row[0],
 							array(
-								'question'=>'all',
+								'clear_type'=>'user assessment',
 								'studentid'=>$stu,
-								'old_attempt'=>[
-									'questions'=>$row[1],
-									'lastanswers'=>$row[2],
-									'scores'=>$row[3]
-								]
+								'old_attempt'=>$row,
+								'new_attempt'=>$update
 							)
 						);
 					}

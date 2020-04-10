@@ -271,7 +271,7 @@
 						"Clear Scores",
 						$asid,
 						array(
-							'question'=>'all',
+							'clear_type'=>'user assessment',
 							'studentid'=>$old_attempts[2],
 							'assessmentid'=>$qp[2],
 							'old_attempt'=>[
@@ -385,6 +385,7 @@
 				"Clear Scores",
 				$line['id'],
 				array(
+					'clear_type'=>'question',
 					'question'=>$qp[1],
 					'studentid'=>$stu,
 					'old_attempt'=>$line
@@ -443,7 +444,7 @@
 		if (isset($_GET['update']) && ($isteacher || $istutor)) {
 			$haderror = false;
 			if (isoktorec($asid)) {
-				$stm = $DBH->prepare("SELECT bestscores,userid,feedback FROM imas_assessment_sessions WHERE id=:id");
+				$stm = $DBH->prepare("SELECT bestscores,userid,assessmentid,feedback FROM imas_assessment_sessions WHERE id=:id");
 				$stm->execute(array(':id'=>$asid));
 				$metadata = $stm->fetchAll(PDO::FETCH_ASSOC);
 				$bestscores = $metadata['bestscores'];
@@ -519,7 +520,9 @@
 						"Clear Scores",
 						$asid,
 						array(
-							'question'=>'all',
+							'clear_type'=>'user assessment',
+							'studentid'=>$metadata['userid'],
+							'assessmentid'=>$metadata['assessmentid'],
 							'old_attempts' => $metadata,
 							'updated' => $update
 						)
