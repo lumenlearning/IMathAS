@@ -5,6 +5,7 @@
 /*** master php includes *******/
 require("../init.php");
 require("../includes/htmlutil.php");
+require_once("../includes/TeacherAuditLog.php");
 
 
  //set some page specific variables and counters
@@ -58,15 +59,25 @@ if (!(isset($teacherid))) {
 				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,rubric=:rubric,showhints=:showhints,fixedseeds=:fixedseeds";
 				$query .= ',questionsetid=:questionsetid WHERE id=:id';
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen, ':showans'=>$showans, ':rubric'=>$rubric,
-					':showhints'=>$showhints,  ':fixedseeds'=>$fixedseeds, ':questionsetid'=>$_POST['replacementid'], ':id'=>$_GET['id']));
+				$settings = array(':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen, ':showans'=>$showans, ':rubric'=>$rubric,
+                    ':showhints'=>$showhints,  ':fixedseeds'=>$fixedseeds, ':questionsetid'=>$_POST['replacementid'], ':id'=>$_GET['id']);
+				$stm->execute($settings);
 			} else {
 				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,rubric=:rubric,showhints=:showhints,fixedseeds=:fixedseeds";
 				$query .= " WHERE id=:id";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen, ':showans'=>$showans,
-					':rubric'=>$rubric, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds, ':id'=>$_GET['id']));
+				$settings = array(':points'=>$points, ':attempts'=>$attempts, ':penalty'=>$penalty, ':regen'=>$regen, ':showans'=>$showans,
+                    ':rubric'=>$rubric, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds, ':id'=>$_GET['id']);
+				$stm->execute($settings);
 			}
+			if ($stm->rowCount()>0) {
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Question Settings Change",
+                    $_GET['id'],
+                    $settings
+                );
+            }
 			if (isset($_POST['copies']) && $_POST['copies']>0) {
 				$stm = $DBH->prepare("SELECT questionsetid FROM imas_questions WHERE id=:id");
 				$stm->execute(array(':id'=>$_GET['id']));
@@ -102,6 +113,14 @@ if (!(isset($teacherid))) {
 			}
 			$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$aid));
+            if ($stm->rowCount()>0 || $ptschanged) {
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Assessment Settings Change",
+                    $aid,
+                    array(':itemorder'=>$itemorder)+$defpoints
+                );
+            }
 
 			updatePointsPossible($aid, $itemorder, $defpoints);
 		} else {

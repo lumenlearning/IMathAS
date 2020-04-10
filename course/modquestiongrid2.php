@@ -11,6 +11,7 @@
 
 	if ($_GET['process']== true) {
 		require_once("../includes/updateptsposs.php");
+        require_once("../includes/TeacherAuditLog.php");
 		if (isset($_POST['add'])) { //adding new questions
 			$stm = $DBH->prepare("SELECT itemorder,viddata,defpoints FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
@@ -81,6 +82,14 @@
 			}
 			$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder,viddata=:viddata WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':viddata'=>$viddata, ':id'=>$aid));
+            if ($stm->rowCount()>0 || $ptschanged) {
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Assessment Settings Change",
+                    $aid,
+                    array(':itemorder'=>$itemorder, ':viddata'=>$viddata)+$defpoints
+                );
+            }
 
 			updatePointsPossible($aid, $itemorder, $defpoints);
 
@@ -112,6 +121,14 @@
 				if ($attempts=='' || intval($attempts)==0) {$attempts = 9999;}
 				$stm = $DBH->prepare("UPDATE imas_questions SET attempts=:attempts,showhints=:showhints WHERE id=:id");
 				$stm->execute(array(':attempts'=>$attempts, ':showhints'=>$showhints, ':id'=>$qid));
+                if ($stm->rowCount()>0) {
+                    $result = TeacherAuditLog::addTracking(
+                        $cid,
+                        "Question Settings Change",
+                        $qid,
+                        array(':attempts'=>$attempts, ':showhints'=>$showhints)
+                    );
+                }
 				if (intval($_POST['copies'.$qid])>0 && intval($qid)>0) {
 					for ($i=0;$i<intval($_POST['copies'.$qid]);$i++) {
 						$qsetid = $qidtoqsetid[$qid];
@@ -134,6 +151,14 @@
 			}
 			$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$aid));
+            if ($stm->rowCount()>0 || $ptschanged) {
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Assessment Settings Change",
+                    $aid,
+                    array(':itemorder'=>$itemorder)+$defpoints
+                );
+            }
 
 			updatePointsPossible($aid, $itemorder, $defpoints);
 		}
