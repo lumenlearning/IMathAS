@@ -29,11 +29,11 @@
                 <div class="banner-timestamp-entry">
                     <input id="sdate" class="form-input form-input--fw" name="sdate"
                            value="<?php echo $startDate; ?>"
-                           onClick="displayDatePicker('sdate', this); return false"
-                           <?php echo ($hasEndAt) ? 'required' : 'disabled'; ?>/>
+                           onClick="displayDatePicker('sdate', this); return false;"
+                           <?php echo ($hasStartAt) ? 'required' : 'disabled'; ?>/>
                     <input id="stime" class="form-input form-input--fw" name="stime"
                            value="<?php echo $startTime; ?>"
-                           <?php echo ($hasEndAt) ? 'required' : 'disabled'; ?>/>
+                           <?php echo ($hasStartAt) ? 'required' : 'disabled'; ?>/>
                 </div>
             </div>
             <div>
@@ -43,7 +43,7 @@
                 <div class="banner-timestamp-entry">
                     <input id="edate" class="form-input form-input--fw" name="edate"
                            value="<?php echo $endDate; ?>"
-                           onClick="displayDatePicker('edate', this); return false"
+                           onClick="displayDatePicker('edate', this); return false;"
                            <?php echo ($hasEndAt) ? 'required' : 'disabled'; ?>/>
                     <input id="etime" class="form-input form-input--fw" name="etime"
                            value="<?php echo $endTime; ?>"

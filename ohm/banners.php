@@ -1,5 +1,6 @@
 <?php
 
+use OHM\Exceptions\DatabaseWriteException;
 use OHM\Models\Banner;
 use OHM\Services\OhmBannerService;
 
@@ -128,22 +129,21 @@ function list_banners(): void
  */
 function view(int $bannerId): void
 {
-    global $DBH, $myrights;
+    global $DBH, $userid, $myrights;
 
-    $ohmBannerService = new OhmBannerService($DBH, $myrights, $bannerId);
-    $ohmBannerService->setDisplayOnlyOncePerBanner(false);
+    $ohmBannerService = new OhmBannerService($DBH, $userid, $myrights);
 
     echo '<h1>Teacher Banner</h1>';
-    $ohmBannerService->showTeacherBanner();
+    $ohmBannerService->previewBanner($bannerId, OhmBannerService::TEACHER);
     echo '<h1>Student Banner</h1>';
-    $ohmBannerService->showStudentBanner();
+    $ohmBannerService->previewBanner($bannerId, OhmBannerService::STUDENT);
 }
 
 /**
  * Delete a banner.
  *
  * @param int $bannerId The banner ID.
- * @throws \OHM\Exceptions\DatabaseWriteException
+ * @throws DatabaseWriteException
  */
 function delete(int $bannerId): void
 {
@@ -164,7 +164,7 @@ function delete(int $bannerId): void
  * Save a new or existing banner.
  *
  * @param int|null $bannerId The banner ID, if saving an existing banner.
- * @throws \OHM\Exceptions\DatabaseWriteException
+ * @throws DatabaseWriteException
  */
 function save(?int $bannerId): void
 {
@@ -250,7 +250,7 @@ function modify_form(string $action, ?int $bannerId): void
         }
     } else {
         $id = '';
-        $isEnabled = true;
+        $isEnabled = false;
         $isDismissible = true;
         $displayTeacher = true;
         $displayStudent = true;

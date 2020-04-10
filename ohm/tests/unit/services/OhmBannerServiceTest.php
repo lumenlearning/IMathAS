@@ -37,11 +37,11 @@ final class OhmBannerServiceTest extends TestCase
         ]);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
-        $this->ohmBanner = new OhmBannerService($this->dbh, 0, 0);
+        $this->ohmBanner = new OhmBannerService($this->dbh, 1, 0);
     }
 
     /*
-     * showTeacherBannerForTeachersOnly
+     * showTeacherBannersForTeachersOnly
      */
 
     public function testShowTeacherBannerForTeachersOnly_UserIsTeacher(): void
@@ -49,7 +49,7 @@ final class OhmBannerServiceTest extends TestCase
         foreach ([20, 40, 75, 100] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
-            $result = $this->ohmBanner->showTeacherBannerForTeachersOnly();
+            $result = $this->ohmBanner->showTeacherBannersForTeachersOnly();
 
             $this->assertTrue($result, 'banner should be displayed for teachers. (user rights > 15)');
         }
@@ -60,7 +60,7 @@ final class OhmBannerServiceTest extends TestCase
         foreach ([0, 5, 10, 12, 15] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
-            $result = $this->ohmBanner->showTeacherBannerForTeachersOnly();
+            $result = $this->ohmBanner->showTeacherBannersForTeachersOnly();
 
             $this->assertFalse($result, 'banner should not be displayed for students. (user rights <= 15)');
         }
@@ -72,15 +72,15 @@ final class OhmBannerServiceTest extends TestCase
             ->setUserRights(20)
             ->setDisplayOnlyOncePerBanner(true);
 
-        $result = $this->ohmBanner->showTeacherBannerForTeachersOnly();
+        $result = $this->ohmBanner->showTeacherBannersForTeachersOnly();
         $this->assertTrue($result, 'the banner should be displayed on the first method call.');
 
-        $result = $this->ohmBanner->showTeacherBannerForTeachersOnly();
+        $result = $this->ohmBanner->showTeacherBannersForTeachersOnly();
         $this->assertFalse($result, 'the banner should be displayed only once.');
     }
 
     /*
-     * showStudentBannerForStudentsOnly
+     * showStudentBannersForStudentsOnly
      */
 
     public function testShowStudentBannerForStudentsOnly_UserIsStudent(): void
@@ -88,7 +88,7 @@ final class OhmBannerServiceTest extends TestCase
         foreach ([0, 5, 10, 12, 15] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
-            $result = $this->ohmBanner->showStudentBannerForStudentsOnly();
+            $result = $this->ohmBanner->showStudentBannersForStudentsOnly();
 
             $this->assertTrue($result, 'banner should be displayed for students. (user rights <= 15)');
         }
@@ -99,7 +99,7 @@ final class OhmBannerServiceTest extends TestCase
         foreach ([20, 40, 75, 100] as $userRights) {
             $this->ohmBanner->setUserRights($userRights);
 
-            $result = $this->ohmBanner->showStudentBannerForStudentsOnly();
+            $result = $this->ohmBanner->showStudentBannersForStudentsOnly();
 
             $this->assertFalse($result, 'banner should not be displayed for teachers. (user rights > 15)');
         }
@@ -111,18 +111,18 @@ final class OhmBannerServiceTest extends TestCase
             ->setUserRights(10)
             ->setDisplayOnlyOncePerBanner(true);
 
-        $result = $this->ohmBanner->showStudentBannerForStudentsOnly();
+        $result = $this->ohmBanner->showStudentBannersForStudentsOnly();
         $this->assertTrue($result, 'the banner should be displayed on the first method call.');
 
-        $result = $this->ohmBanner->showStudentBannerForStudentsOnly();
+        $result = $this->ohmBanner->showStudentBannersForStudentsOnly();
         $this->assertFalse($result, 'the banner should be displayed only once.');
     }
 
     /*
-     * showTeacherBanner
+     * showTeacherBanners
      */
 
     /*
-     * showStudentBanner
+     * showStudentBanners
      */
 }

@@ -2,7 +2,6 @@
 
 namespace OHM\Models;
 
-use Cassandra\Date;
 use DateTime;
 use OHM\Exceptions\DatabaseWriteException;
 use PDO;
@@ -34,6 +33,9 @@ class Banner
     /* @var PDO */
     private $dbh;
 
+    // Used during testing.
+    private $bannerForTesting;
+
     public function __construct(PDO $dbh)
     {
         $this->dbh = $dbh;
@@ -55,7 +57,7 @@ class Banner
         }
 
         $row = $stm->fetch(PDO::FETCH_ASSOC);
-        $this->assignFields($row);
+        $this->assignFields($row, $this);
 
         return true;
     }
@@ -145,33 +147,88 @@ class Banner
         return true;
     }
 
+    /**
+     * Find all banners that are: enabled and fall between availability timestamps.
+     *
+     * @return array An array of Banner objects.
+     */
+    public function findEnabledAndAvailable(): array
+    {
+        $stm = $this->dbh->prepare("SELECT b.*
+                    FROM ohm_notices AS b
+                    WHERE b.is_enabled = 1
+                        AND (NOW() > b.start_at OR b.start_at IS NULL)
+                        AND (NOW() < b.end_at OR b.end_at IS NULL)");
+        $stm->execute();
+
+        $banners = [];
+        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+            $banner = $this->getNewBannerInstance();
+            $this->assignFields($row, $banner);
+            $banners[] = $banner;
+        }
+
+        return $banners;
+    }
+
     /*
      * Getters, setters
      */
 
     /**
-     * Assign class fields from a DB row from ohm_notice_dismissals.
+     * Assign fields to a class from a DB row from ohm_notice_dismissals.
+     *
+     * Note: This method mutates the given Banner object in-place.
      *
      * @param array $rowData An associative array containing a single DB row of data.
+     * @param Banner $target The Banner instance to assign variables into.
      */
-    private function assignFields(array $rowData): void
+    private function assignFields(array $rowData, Banner $target): void
     {
-        $this->id = $rowData['id'];
-        $this->enabled = $rowData['is_enabled'];
-        $this->dismissible = $rowData['is_dismissible'];
-        $this->displayStudent = $rowData['display_student'];
-        $this->displayTeacher = $rowData['display_teacher'];
-        $this->description = $rowData['description'];
-        $this->studentTitle = $rowData['student_title'];
-        $this->studentContent = $rowData['student_content'];
-        $this->teacherTitle = $rowData['teacher_title'];
-        $this->teacherContent = $rowData['teacher_content'];
-        $this->startAt = empty($rowData['start_at']) ? null :
+        $target->id = $rowData['id'];
+        $target->enabled = $rowData['is_enabled'];
+        $target->dismissible = $rowData['is_dismissible'];
+        $target->displayStudent = $rowData['display_student'];
+        $target->displayTeacher = $rowData['display_teacher'];
+        $target->description = $rowData['description'];
+        $target->studentTitle = $rowData['student_title'];
+        $target->studentContent = $rowData['student_content'];
+        $target->teacherTitle = $rowData['teacher_title'];
+        $target->teacherContent = $rowData['teacher_content'];
+        $target->startAt = empty($rowData['start_at']) ? null :
             DateTime::createFromFormat('Y-m-d H:i:s', $rowData['start_at']);
-        $this->endAt = empty($rowData['end_at']) ? null :
+        $target->endAt = empty($rowData['end_at']) ? null :
             DateTime::createFromFormat('Y-m-d H:i:s', $rowData['end_at']);
-        $this->createdAt = empty($rowData['created_at']) ? null :
+        $target->createdAt = empty($rowData['created_at']) ? null :
             DateTime::createFromFormat('Y-m-d H:i:s', $rowData['created_at']);
+    }
+
+    /**
+     * Get a new Banner instance.
+     *
+     * This method allows for easier unit testing.
+     *
+     * @return Banner
+     */
+    protected function getNewBannerInstance(): Banner
+    {
+        if (!is_null($this->bannerForTesting)) {
+            return $this->bannerForTesting;
+        }
+
+        return new Banner($this->dbh);
+    }
+
+    /**
+     * Set the Banner model instance. Used during testing.
+     *
+     * @param Banner $bannerForTesting
+     * @return Banner
+     */
+    public function setBannerForTesting(Banner $bannerForTesting): Banner
+    {
+        $this->bannerForTesting = $bannerForTesting;
+        return $this;
     }
 
     /**

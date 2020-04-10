@@ -3,124 +3,173 @@
 namespace OHM\Services;
 
 use OHM\Models\Banner;
+use OHM\Models\BannerDismissal;
 use PDO;
 
 class OhmBannerService
 {
+    const TEACHER = 1;
+    const STUDENT = 2;
+
     private $dbh;
+    private $userId;
     private $userRights;
-    private $bannerId;
 
-    private $displayOnlyOncePerBanner; // only show the teacher and student banners once each.
-    private $teacherBannerDisplayed;
-    private $studentBannerDisplayed;
+    private $displayOnlyOncePerBanner = true; // only show the teacher and student banners once per page.
+    private $displayedBannerIds = []; // track which banner IDs have been displayed.
 
-    private $bannerForTesting; // Used during unit testing.
+    // Used during unit testing.
+    private $bannerForTesting;
+    private $bannerDismissalForTesting;
 
     /**
      * OhmBanner constructor.
      *
      * @param PDO $dbh A database connection.
+     * @param int $userId The user's ID from imas_users.
      * @param int $userRights The user's rights from imas_users.
-     * @param int $bannerId The banner ID to be displayed.
      */
-    public function __construct(PDO $dbh, int $userRights, int $bannerId)
+    public function __construct(PDO $dbh, int $userId, int $userRights)
     {
         $this->dbh = $dbh;
+        $this->userId = $userId;
         $this->setUserRights($userRights);
-        $this->setBannerId($bannerId);
     }
 
     /**
-     * Show the teacher banner if the user is a teacher.
+     * Show teacher banners if the user is a teacher.
      *
      * @return bool True if a banner was displayed. False if not.
      * @see displayOnlyOncePerBanner
      */
-    public function showTeacherBannerForTeachersOnly(): bool
+    public function showTeacherBannersForTeachersOnly(): bool
     {
         if (15 >= $this->userRights) {
             return false;
         }
-        if ($this->displayOnlyOncePerBanner && $this->teacherBannerDisplayed) {
-            return false;
-        }
-        $this->teacherBannerDisplayed = true;
-        return $this->showTeacherBanner();
+        return $this->showBanners(self::TEACHER);
     }
 
     /**
-     * Show the student banner if the user is a student.
+     * Show student banners if the user is a student.
      *
      * @return bool True if a banner was displayed. False if not.
      * @see displayOnlyOncePerBanner
      */
-    public function showStudentBannerForStudentsOnly(): bool
+    public function showStudentBannersForStudentsOnly(): bool
     {
         if (15 < $this->userRights) {
             return false;
         }
-        if ($this->displayOnlyOncePerBanner && $this->studentBannerDisplayed) {
-            return false;
-        }
-        $this->studentBannerDisplayed = true;
-        return $this->showStudentBanner();
+        return $this->showBanners(self::STUDENT);
     }
 
     /**
-     * Show teacher banners. User rights are not checked.
+     * Show banners. User rights are not checked.
      *
-     * // FIXME: Implement these!
-     * This happens only if:
-     * - The banner is enabled.
-     * - The current time falls between banner start and end times.
-     * - The user has never dismissed the banner.
-     *
+     * @param int $userRole 1 for teacher, 2 for student.
      * @return bool True if a banner was displayed. False if not.
-     * @see showTeacherBannerForTeachersOnly
      */
-    public function showTeacherBanner(): bool
+    public function showBanners(int $userRole): bool
+    {
+        $bannerDbHelper = $this->getNewBannerInstance();
+        $banners = $bannerDbHelper->findEnabledAndAvailable();
+
+        $bannerDismissal = $this->getNewBannerDismissalInstance();
+        $dismissedBannerIds = $bannerDismissal->getDismissedBannerIds($this->userId);
+
+        $allBannerIds = [];
+        foreach ($banners as $banner) {
+            $allBannerIds[] = $banner->getId();
+        }
+
+        $bannerDisplayed = false;
+        foreach ($banners as $banner) {
+            // Teacher banner is disabled.
+            if (self::TEACHER == $userRole && !$banner->getDisplayTeacher()) {
+                continue;
+            }
+            // Student banner is disabled.
+            if (self::STUDENT == $userRole && !$banner->getDisplayStudent()) {
+                continue;
+            }
+            // User has dismissed this banner.
+            if (in_array($banner->getId(), $dismissedBannerIds)) {
+                continue;
+            }
+            // User has already seen this banner. (displayed multiple times on same page)
+            if ($this->displayOnlyOncePerBanner &&
+                in_array($banner->getId(), $this->displayedBannerIds)) {
+                continue;
+            }
+
+            // Make the banner data available to the view.
+            $bannerData = $this->getViewDataByRole($banner, $userRole);
+            $bannerId = $bannerData['id'];
+            $bannerTitle = $bannerData['title'];
+            $bannerContent = $bannerData['content'];
+            $bannerDismissible = $bannerData['dismissible'];
+
+            include(__DIR__ . '/../views/banner/show_teacher.php');
+            $this->displayedBannerIds[] = $banner->getId();
+            $bannerDisplayed = true;
+        }
+
+        return $bannerDisplayed;
+    }
+
+    /**
+     * Preview a banner.
+     *
+     * @param int $bannerId The Banner ID to display.
+     * @param int $userRole 1 for teacher, 2 for student.
+     * @return bool True if a banner was displayed.
+     */
+    public function previewBanner(int $bannerId, int $userRole): bool
     {
         $banner = $this->getNewBannerInstance();
-        $banner->find($this->bannerId);
+        $banner->find($bannerId);
 
         // Make the banner data available to the view.
-        $bannerId = $banner->getId();
-        $bannerTitle = $banner->getTeacherTitle();
-        $bannerContent = $banner->getTeacherContent();
-        $bannerDismissible = $banner->getDismissible();
+        $bannerData = $this->getViewDataByRole($banner, $userRole);
+        $bannerId = $bannerData['id'];
+        $bannerTitle = $bannerData['title'];
+        $bannerContent = $bannerData['content'];
+        $bannerDismissible = $bannerData['dismissible'];
 
-        include(__DIR__ . '/../views/banner/show_teacher.php');
-
-        return true;
+        if (self::TEACHER == $userRole) {
+            include(__DIR__ . '/../views/banner/show_teacher.php');
+            return true;
+        }
+        if (self::STUDENT == $userRole) {
+            include(__DIR__ . '/../views/banner/show_student.php');
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Show student banners. User rights are not checked.
+     * Get a Banner's content by user role, for a view.
      *
-     * // FIXME: Implement these!
-     * This happens only if:
-     * - The banner is enabled.
-     * - The current time falls between banner start and end times.
-     * - The user has never dismissed the banner.
-     *
-     * @return bool True if a banner was displayed. False if not.
-     * @see showStudentBannerForStudentsOnly
+     * @param Banner $banner A Banner instance.
+     * @param int $userRole 1 for teacher, 2 for student.
+     * @return array An array of variables for a view.
      */
-    public function showStudentBanner(): bool
+    protected function getViewDataByRole(Banner $banner, int $userRole): array
     {
-        $banner = $this->getNewBannerInstance();
-        $banner->find($this->bannerId);
+        $data = [];
+        if (self::TEACHER == $userRole) {
+            $data['title'] = $banner->getTeacherTitle();
+            $data['content'] = $banner->getTeacherContent();
+        }
+        if (self::STUDENT == $userRole) {
+            $data['title'] = $banner->getStudentTitle();
+            $data['content'] = $banner->getStudentContent();
+        }
+        $data['id'] = $banner->getId();
+        $data['dismissible'] = $banner->getDismissible();
 
-        // Make the banner ID available to the view.
-        $bannerId = $banner->getId();
-        $bannerTitle = $banner->getStudentTitle();
-        $bannerContent = $banner->getStudentContent();
-        $bannerDismissible = $banner->getDismissible();
-
-        include(__DIR__ . '/../views/banner/show_student.php');
-
-        return true;
+        return $data;
     }
 
     /*
@@ -134,13 +183,29 @@ class OhmBannerService
      *
      * @return Banner
      */
-    public function getNewBannerInstance(): Banner
+    protected function getNewBannerInstance(): Banner
     {
         if (!is_null($this->bannerForTesting)) {
             return $this->bannerForTesting;
         }
 
         return new Banner($this->dbh);
+    }
+
+    /**
+     * Get a new BannerDismissal instance.
+     *
+     * This method allows for easier unit testing.
+     *
+     * @return BannerDismissal
+     */
+    public function getNewBannerDismissalInstance(): BannerDismissal
+    {
+        if (!is_null($this->bannerDismissalForTesting)) {
+            return $this->bannerDismissalForTesting;
+        }
+
+        return new BannerDismissal($this->dbh);
     }
 
     /**
@@ -156,6 +221,18 @@ class OhmBannerService
     }
 
     /**
+     * Set the BannerDismissal model instance. Used during testing.
+     *
+     * @param BannerDismissal $bannerDismissalForTesting
+     * @return OhmBannerService
+     */
+    public function setBannerDismissalForTesting(BannerDismissal $bannerDismissalForTesting): OhmBannerService
+    {
+        $this->bannerDismissalForTesting = $bannerDismissalForTesting;
+        return $this;
+    }
+
+    /**
      * Set the user's rights.
      *
      * @param int $rights The user's rights from imas_users.
@@ -164,18 +241,6 @@ class OhmBannerService
     public function setUserRights(int $rights): OhmBannerService
     {
         $this->userRights = $rights;
-        return $this;
-    }
-
-    /**
-     * Set the banner ID to be displayed.
-     *
-     * @param int $bannerId The banner ID.
-     * @return OhmBannerService
-     */
-    public function setBannerId(int $bannerId): OhmBannerService
-    {
-        $this->bannerId = $bannerId;
         return $this;
     }
 

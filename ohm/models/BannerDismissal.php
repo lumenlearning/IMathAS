@@ -134,6 +134,27 @@ class BannerDismissal
         return $this->save();
     }
 
+    /**
+     * Get all dismissed banner IDs for a user.
+     *
+     * @param int $userId The user ID to search for.
+     * @return array An array of banner IDs.
+     */
+    public function getDismissedBannerIds(int $userId): array
+    {
+        $stm = $this->dbh->prepare("SELECT noticeid
+                                FROM ohm_notice_dismissals
+                                WHERE userid = :userId");
+        $stm->execute([':userId' => $userId]);
+
+        $bannerIds = [];
+        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+            $bannerIds[] = $row['noticeid'];
+        }
+
+        return $bannerIds;
+    }
+
     /*
      * Getters, setters
      */
@@ -179,7 +200,7 @@ class BannerDismissal
     }
 
     /**
-     * @return int
+     * @return string|null
      */
     public function getBannerId(): ?string
     {
