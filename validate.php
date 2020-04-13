@@ -367,6 +367,11 @@
 		 exit;
 	}
 
+	 //call hook function in validate hook, if defined
+	 if (function_exists('alreadyLoggededIn')) {
+		alreadyLoggededIn();
+	 }
+
 	$basephysicaldir = rtrim(dirname(__FILE__), '/\\');
 	if ($myrights==100 && (isset($_GET['debug']) || isset($_SESSION['debugmode']))) {
 		ini_set('display_errors',1);
