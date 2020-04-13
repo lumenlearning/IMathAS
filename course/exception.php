@@ -169,9 +169,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                             'scores'=>$row[3],
                             'bestscores'=>$row[4]
                         ],
-                        'new_attempt'=>[
-
-                        ]
+                        'update'=>$update
                     )
                 );
 			}
