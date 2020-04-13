@@ -56,7 +56,11 @@
         </button>
       </div>
       <div v-show="showCalculator">
-        <figure :id="'calc' + qn" ref="figure"></figure>
+        <figure 
+          :id="'calc' + qn" 
+          ref="figure"
+          :class="{ 'graphing' : this.questionData.showcalculator === 'graphing'}"
+        ></figure>
       </div>
     </div>
 
@@ -504,6 +508,10 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   height: 400px;
   margin: 0;
   width: 100%;
+}
+
+.calculator figure.graphing {
+  height: 550px;
 }
 .calculator svg {
   height: 20px;
