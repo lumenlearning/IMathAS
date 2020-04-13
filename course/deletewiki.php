@@ -23,22 +23,24 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 } elseif (isset($_REQUEST['remove'])) { // a valid delete request loaded the page
 	$cid = Sanitize::courseId($_GET['cid']);
 	$block = Sanitize::stripHtmlTags($_GET['block']);
-    $wikiid = Sanitize::onlyInt($_GET['id']);
+    $typeid = Sanitize::onlyInt($_GET['id']);
 	if ($_POST['remove']=="really") {
-
+        $stm = $DBH->query("SELECT name FROM imas_wikis WHERE id=$typeid");
+        $item_name = $stm->fetchColumn(0);
+        $itemtype = 'Wiki';
 		$DBH->beginTransaction();
-		$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype='Wiki' AND courseid=:courseid");
-		$stm->execute(array(':typeid'=>$wikiid, ':courseid'=>$cid));
+		$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype=$itemtype AND courseid=:courseid");
+		$stm->execute(array(':typeid'=>$typeid, ':courseid'=>$cid));
 		if ($stm->rowCount()>0) {
 			$itemid = $stm->fetchColumn(0);
 			$stm = $DBH->prepare("DELETE FROM imas_items WHERE id=:id");
 			$stm->execute(array(':id'=>$itemid));
 			$stm = $DBH->prepare("DELETE FROM imas_wikis WHERE id=:id");
-			$stm->execute(array(':id'=>$wikiid));
+			$stm->execute(array(':id'=>$typeid));
 			$stm = $DBH->prepare("DELETE FROM imas_wiki_revisions WHERE wikiid=:wikiid");
-			$stm->execute(array(':wikiid'=>$wikiid));
+			$stm->execute(array(':wikiid'=>$typeid));
 			$stm = $DBH->prepare("DELETE FROM imas_wiki_views WHERE wikiid=:wikiid");
-			$stm->execute(array(':wikiid'=>$wikiid));
+			$stm->execute(array(':wikiid'=>$typeid));
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$cid));
 			$items = unserialize($stm->fetchColumn(0));
@@ -57,12 +59,22 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 			}
 		}
 		$DBH->commit();
+        $result = TeacherAuditLog::addTracking(
+            $cid,
+            "Delete Item",
+            $itemid,
+            array(
+                'itemtype'=>$itemtype,
+                'typeid'=>$typeid,
+                'item_name'=>$item_name
+            )
+        );
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".$cid . "&r=" . Sanitize::randomQueryStringParam());
 
 		exit;
 	} else {
 		$stm = $DBH->prepare("SELECT name FROM imas_wikis WHERE id=:id AND courseid=:cid");
-		$stm->execute(array(':id'=>$wikiid, ':cid'=>$cid));
+		$stm->execute(array(':id'=>$typeid, ':cid'=>$cid));
 		$itemname = $stm->fetchColumn(0);
 	}
 }
