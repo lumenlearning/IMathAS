@@ -7,6 +7,26 @@
     resize: both;
 }
 
+.teacher-banner {
+    margin-top: 1.5em;
+}
+
+.student-banner {
+    margin-top: 1.5em;
+}
+
+.has-start-at {
+    white-space: nowrap;
+}
+
+.banner-timestamps {
+    margin-top: 1em;
+}
+
+.date-input, .time-input {
+    margin-right: 1em;
+}
+
 .banner-timestamp-entry {
     display: flex;
 }
@@ -15,3 +35,15 @@
     margin-right: 0.5em;
 }
 
+label.banner-settings {
+    margin-top: 1em;
+    font-size: 120%;
+}
+
+.banner-settings {
+    margin-top: 1.5em;
+}
+
+.display-toggles {
+    margin-top: 1em;
+}

@@ -20,7 +20,7 @@ if ($GLOBALS['myrights'] < 100) {
         <?php echo $breadcrumbbase; ?>
         <a href="../admin/admin2.php">Admin</a> &gt;
         <a href="../util/utils.php">Utilities</a> &gt;
-        <a href="?">OHM Banners</a>
+        <a href="?">Notifications</a>
     </div>
 <?php
 
@@ -64,20 +64,25 @@ function list_banners(): void
     global $DBH;
 
     ?>
-    <h1>OHM Banners</h1>
+    <link rel="stylesheet" type="text/css" href="views/banner/admin.css">
 
     <p>
-        <a href="?action=create_form">Create new OHM Banner</a>
+        It is recommended that only one notification is scheduled per day for
+        display purposes.
     </p>
 
-    <table class="gb">
+    <form method="GET" action="?action=create_form" class="add-button">
+        <button type="submit">Add</button>
+    </form>
+
+    <label for="banner-list" class="banner-list-title">Banner Notifications</label>
+    <table class="banner-list gb" id="banner-list">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Enabled?</th>
             <th>Description</th>
-            <th>Start At</th>
-            <th>End At</th>
+            <th>Status</th>
+            <th>Start</th>
+            <th>End</th>
             <th colspan="3">Actions</th>
         </tr>
         </thead>
@@ -97,21 +102,20 @@ function list_banners(): void
             $alt = 0;
         }
 
-        $isEnabled = $row['is_enabled'] ? 'Yes' : 'No';
-        $startAt = is_null($row['start_at']) ? 'Immediately' : $row['start_at'];
-        $endAt = is_null($row['end_at']) ? 'Never' : $row['end_at'];
+        $isEnabled = $row['is_enabled'] ? 'Enabled' : '<span class="status-disabled">Disabled</span>';
+        $startAt = is_null($row['start_at']) ? 'Immediately' : sqlTimestampToDisplayFormat($row['start_at']);
+        $endAt = is_null($row['end_at']) ? 'None' : sqlTimestampToDisplayFormat($row['end_at']);
 
         $confirmJs = sprintf('onClick="return confirm(\'Are you sure you want to delete the banner: %s?\')"',
             Sanitize::encodeStringForDisplay($row['description']));
 
-        $viewLink = sprintf('<a href="?action=view&id=%s">View</a>', $row['id']);
-        $modifyLink = sprintf('<a href="?action=modify_form&id=%s">Modify</a>', $row['id']);
-        $deleteLink = sprintf('<a href="?action=delete&id=%s" %s>Delete</a>', $row['id'], $confirmJs);
+        $viewLink = sprintf('<a href="?action=view&id=%s" class="view-link">View</a>', $row['id']);
+        $modifyLink = sprintf('<a href="?action=modify_form&id=%s" class="modify-link">Modify</a>', $row['id']);
+        $deleteLink = sprintf('<a href="?action=delete&id=%s" class="delete-link" %s>Delete</a>', $row['id'], $confirmJs);
 
-        printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
-            $row['id'],
-            $isEnabled,
+        printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
             Sanitize::encodeStringForDisplay($row['description']),
+            $isEnabled,
             $startAt,
             $endAt,
             $viewLink,
@@ -133,9 +137,10 @@ function view(int $bannerId): void
 
     $ohmBannerService = new OhmBannerService($DBH, $userid, $myrights);
 
-    echo '<h1>Teacher Banner</h1>';
+    echo '<h1>Banner Preview</h1>';
+    echo '<h2>Teacher Banner</h2>';
     $ohmBannerService->previewBanner($bannerId, OhmBannerService::TEACHER);
-    echo '<h1>Student Banner</h1>';
+    echo '<h2>Student Banner</h2>';
     $ohmBannerService->previewBanner($bannerId, OhmBannerService::STUDENT);
 }
 
@@ -266,4 +271,14 @@ function modify_form(string $action, ?int $bannerId): void
     }
 
     include(__DIR__ . '/views/banner/edit_banner.php');
+}
+
+
+function sqlTimestampToDisplayFormat(string $sqlTimestring): string
+{
+    $unixtime = strtotime($sqlTimestring);
+    $datetime = new DateTime();
+    $datetime->setTimestamp($unixtime);
+
+    return $datetime->format('n/j/Y, g:i:s A');
 }

@@ -1,0 +1,26 @@
+.add-button {
+    margin-top: 1em;
+}
+
+.view-link, .edit-link, .delete-link {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+.banner-list-title {
+    margin-top: 1em;
+    font-weight: bold;
+}
+
+.banner-list thead>tr>th {
+    justify-content: left;
+}
+
+.banner-list tbody>tr>td {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.status-disabled {
+    color: #999;
+}
