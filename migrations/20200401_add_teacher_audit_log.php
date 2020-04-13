@@ -10,7 +10,7 @@ $query = 'CREATE TABLE `imas_teacher_audit_log` (
   `action` ENUM("Assessment Settings Change","Mass Assessment Settings Change","Mass Assessment Date Change","Question Settings Change","Clear Attempts","Clear Scores","Delete Item", "Unenroll","Grade Override"),
   `itemid` int(10) unsigned,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-  `metadata` json NOT NULL,
+  `metadata` BLOB NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `courseuser` (`courseid`,`userid`),
   INDEX `actionid` (`action`, `itemid`),
@@ -25,5 +25,3 @@ if ($res===false) {
 echo '<p>table imas_teacher_audit_log created</p>';
 
 return true;
-
-?>
