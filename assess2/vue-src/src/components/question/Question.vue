@@ -104,6 +104,7 @@ export default {
     return {
       timeActivated: null,
       timeActive: 0,
+      calcHasAlreadyLoaded: false,
       showCalculator: false,
       uniqueId: 'test-calc' + this.qn
     };
@@ -345,14 +346,18 @@ export default {
   updated () {
     if (this.questionContentLoaded) {
       this.disableOutOfTries();
-      this.renderAndTrack();
-      if (this.questionHasCalculator === 'basic') {
-        Desmos.FourFunctionCalculator(this.$refs.figure);
-      } else if (this.questionHasCalculator === 'graphing') {
-        Desmos.GraphingCalculator(this.$refs.figure);
-      } else if (this.questionHasCalculator) {
-        Desmos.ScientificCalculator(this.$refs.figure);
-      }
+      this.renderAndTrack(); 
+
+      if(!this.calcHasAlreadyLoaded){
+        if (this.questionHasCalculator === 'basic') {
+          Desmos.FourFunctionCalculator(this.$refs.figure);
+        } else if (this.questionHasCalculator === 'scientific') {
+          Desmos.ScientificCalculator(this.$refs.figure);
+        } if (this.questionHasCalculator === 'graphing') {
+          Desmos.GraphingCalculator(this.$refs.figure);
+        } 
+        this.calcHasAlreadyLoaded = true; 
+      } 
     } else {
       this.loadQuestionIfNeeded();
     }
@@ -473,6 +478,10 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .calculator {
   margin: 0px 3px;
   width: 50%;
+}
+
+.calculator * {
+  box-sizing: border-box;
 }
 .calculator button {
   background: linear-gradient(180deg, white 0%, #f9fafb 100%);
