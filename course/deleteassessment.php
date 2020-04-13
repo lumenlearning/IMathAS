@@ -30,7 +30,7 @@ if (!(isset($teacherid))) {
         $stm->execute(array(':id'=>$aid, ':courseid'=>$cid));
         $assessment_name = $stm->fetchColumn(0);
         //version > 1
-        $stm = $DBH->query("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=:assessmentid");
+        $stm = $DBH->query("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=$aid");
         while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
             $grades[$row['userid']]=$row["score"];
         }

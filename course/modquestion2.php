@@ -128,7 +128,7 @@ if (!(isset($teacherid))) {
                     $cid,
                     "Assessment Settings Change",
                     $aid,
-                    array(':itemorder'=>$itemorder)+$defpoints
+                    array(':itemorder'=>$itemorder, 'defpoints'=>$defpoints)
                 );
             }
 

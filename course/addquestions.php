@@ -175,7 +175,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $cid,
                     "Clear Attempts",
                     $aid,
-                    array(':itemorder'=>$itemorder, ':viddata'=>$viddata, 'user_grades'=>$grades)
+                    array('user_grades'=>$grades)
                 );
             }
 			$stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");

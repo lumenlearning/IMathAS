@@ -86,7 +86,7 @@
                     $cid,
                     "Assessment Settings Change",
                     $aid,
-                    array(':itemorder'=>$itemorder, ':viddata'=>$viddata)+$defpoints
+                    array(':itemorder'=>$itemorder, ':viddata'=>$viddata, 'defpoint'=>$defpoints)
                 );
             }
 			
@@ -155,7 +155,7 @@
                     $cid,
                     "Assessment Settings Change",
                     $aid,
-                    array(':itemorder'=>$itemorder)+$defpoints
+                    array(':itemorder'=>$itemorder,'defpoint'=>$defpoints)
                 );
             }
 			
