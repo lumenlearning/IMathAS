@@ -71,7 +71,7 @@ function list_banners(): void
         display purposes.
     </p>
 
-    <form method="GET" action="?action=create_form" class="add-button">
+    <form method="POST" action="?action=create_form" class="add-button">
         <button type="submit">Add</button>
     </form>
 
@@ -190,18 +190,18 @@ function save(?int $bannerId): void
         ->setStudentTitle($_POST['student-title'])
         ->setStudentContent($_POST['student-content']);
 
-    if ('1' != $_POST['has-start-at']) {
-        $banner->setStartAt(null);
-    } else {
+    if ('1' != $_POST['start-immediately']) {
         $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime']);
         $banner->setStartAt($dateTime);
+    } else {
+        $banner->setStartAt(null);
     }
 
-    if ('1' != $_POST['has-end-at']) {
-        $banner->setEndAt(null);
-    } else {
+    if ('1' != $_POST['never-ending']) {
         $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime']);
         $banner->setEndAt($dateTime);
+    } else {
+        $banner->setEndAt(null);
     }
 
     $banner->save();
@@ -240,16 +240,16 @@ function modify_form(string $action, ?int $bannerId): void
         $endAt = is_null($banner->getEndAt()) ? null : $banner->getEndAt()->getTimestamp();
 
         if (is_null($banner->getStartAt())) {
-            $hasStartAt = false;
+            $startImmediately = true;
         } else {
-            $hasStartAt = true;
+            $startImmediately = false;
             $startDate = $banner->getStartAt()->format('m/d/Y');
             $startTime = $banner->getStartAt()->format('h:m:s');
         }
         if (is_null($banner->getEndAt())) {
-            $hasEndAt = false;
+            $neverEnding = true;
         } else {
-            $hasEndAt = true;
+            $neverEnding = false;
             $endDate = $banner->getEndAt()->format('m/d/Y');
             $endTime = $banner->getEndAt()->format('h:m:s');
         }
@@ -264,8 +264,8 @@ function modify_form(string $action, ?int $bannerId): void
         $teacherContent = '';
         $studentTitle = '';
         $studentContent = '';
-        $hasStartAt = false;
-        $hasEndAt = false;
+        $startImmediately = false;
+        $neverEnding = false;
         $startTime = '23:59:59';
         $endTime = '23:59:59';
     }

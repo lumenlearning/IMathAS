@@ -22,14 +22,14 @@
                 <input id="sdate" class="form-input form-input--fw has-icon icon--suffix icon--calendar date-input"
                        name="sdate" value="<?php echo $startDate; ?>"
                        onClick="displayDatePicker('sdate', this); return false;"
-                       <?php echo ($hasStartAt) ? 'required' : 'disabled'; ?>/>
+                       <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
                 <input id="stime" class="form-input form-input--fw time-input"
                        name="stime" value="<?php echo $startTime; ?>"
-                       <?php echo ($hasStartAt) ? 'required' : 'disabled'; ?>/>
-                <input type="checkbox" id="has-start-at" class="has-start-at-checkbox"
-                       name="has-start-at" value="1"
-                    <?php echo ($hasStartAt ? 'checked' : ''); ?>/>
-                <label class="has-start-at" for="has-start-at">Start immediately</label>
+                       <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
+                <input type="checkbox" id="start-immediately" class="start-immediately-checkbox"
+                       name="start-immediately" value="1"
+                    <?php echo ($startImmediately ? 'checked' : ''); ?>/>
+                <label class="start-immediately" for="start-immediately">Start immediately</label>
             </div>
         </div>
         <div class="banner-timestamps">
@@ -38,13 +38,13 @@
                 <input id="edate" class="form-input form-input--fw has-icon icon--suffix icon--calendar"
                        name="edate" value="<?php echo $endDate; ?>"
                        onClick="displayDatePicker('edate', this); return false;"
-                       <?php echo ($hasEndAt) ? 'required' : 'disabled'; ?>/>
+                       <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
                 <input id="etime" class="form-input form-input--fw"
                        name="etime" value="<?php echo $endTime; ?>"
-                       <?php echo ($hasEndAt) ? 'required' : 'disabled'; ?>/>
-                <input type="checkbox" id="has-end-at" name="has-end-at" value="1"
-                    <?php echo ($hasEndAt ? 'checked' : ''); ?>/>
-                <label class="has-start-at" for="has-start-at">None</label>
+                       <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
+                <input type="checkbox" id="never-ending" name="never-ending" value="1"
+                    <?php echo ($neverEnding ? 'checked' : ''); ?>/>
+                <label class="never-ending" for="never-ending">None</label>
             </div>
         </div>
 
