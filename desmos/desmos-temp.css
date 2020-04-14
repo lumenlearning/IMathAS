@@ -468,7 +468,8 @@
 		width: 30%;
 	}
 
-	.desmos-student-view .steps-navigation .step-list {
+	.desmos-student-view .steps-navigation .step-list,
+	.desmos-student-view .steps-details .step-items {
 		height: 650px;
 		overflow-y: scroll;
 	}
@@ -476,11 +477,6 @@
 	.desmos-student-view .steps-details {
 		min-width: 640px;
 		width: 70%;
-	}
-
-	.desmos-student-view .steps-details .step-items {
-		height: 650px;
-		overflow-y: scroll;
 	}
 
 	.desmos-student-view #mobile_nav {
