@@ -232,9 +232,9 @@ function modify_form(string $action, ?int $bannerId): void
         $displayTeacher = $banner->getDisplayTeacher();
         $displayStudent = $banner->getDisplayStudent();
         $description = $banner->getDescription();
-        $teacherTitle = $banner->getTeacherTitle();
+        $teacherTitle = Sanitize::encodeStringForDisplay($banner->getTeacherTitle());
         $teacherContent = $banner->getTeacherContent();
-        $studentTitle = $banner->getStudentTitle();
+        $studentTitle = Sanitize::encodeStringForDisplay($banner->getStudentTitle());
         $studentContent = $banner->getStudentContent();
         $startAt = is_null($banner->getStartAt()) ? null : $banner->getStartAt()->getTimestamp();
         $endAt = is_null($banner->getEndAt()) ? null : $banner->getEndAt()->getTimestamp();

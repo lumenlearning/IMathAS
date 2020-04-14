@@ -240,6 +240,16 @@ class Banner
     }
 
     /**
+     * @param int $id
+     * @return Banner
+     */
+    public function setId(int $id): Banner
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    /**
      * Determine if this banner is enabled for display to users.
      *
      * @return bool

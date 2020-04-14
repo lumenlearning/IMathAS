@@ -66,7 +66,7 @@ final class BannerTest extends TestCase
         $this->assertEquals($this->banner->getTeacherTitle(), 'Teacher Title', 'should return the correct value from the DB');
         $this->assertEquals($this->banner->getTeacherContent(), 'Teacher Content', 'should return the correct value from the DB');
         $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2020-09-01 00:00:00'), $this->banner->getStartAt(), 'should return the correct value from the DB');
-        $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2020-09-28-12:00:00'), $this->banner->getEndAt(), 'should return the correct value from the DB');
+        $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2020-09-28 12:00:00'), $this->banner->getEndAt(), 'should return the correct value from the DB');
         $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2020-01-02 18:41:17'), $this->banner->getCreatedAt(), 'should return the correct value from the DB');
     }
 

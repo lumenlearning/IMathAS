@@ -1,7 +1,7 @@
 <div class="course-banner" data-banner-id="<?php echo $bannerId; ?>"
      id="course-banner-student-<?php echo $bannerId; ?>">
     <header class="course-banner-header">
-        <h2><?php echo Sanitize::encodeStringForDisplay($bannerTitle); ?></h2>
+        <h2><?php echo $bannerTitle; ?></h2>
         <?php if ($bannerDismissible) { ?>
         <button
             aria-label="Close this banner."
