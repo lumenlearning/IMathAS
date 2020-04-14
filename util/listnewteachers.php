@@ -6,6 +6,20 @@ if ($myrights<100 && ($myspecialrights&(32+64))==0) {
 	exit;
 }
 
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+use OHM\Includes\ReadReplicaDb;
+require_once(__DIR__ . '/../ohm/includes/ReadReplicaDb.php');
+$DBH = ReadReplicaDb::getPdoInstance();
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+
 $outputFormat = isset($_GET['format']) ? strtolower($_GET['format']) : 'html';
 
 $now = time();
@@ -116,6 +130,17 @@ function htmlHeader() {
 
 	echo '<h1>New Instructor Account Requests from ';
 	echo date('M j, Y',$GLOBALS['start']).' to '.date('M j, Y',$GLOBALS['end']).'</h1>';
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    echo '<p><u>Note</u>: Data is queried from the OHM read replica DB.</p>';
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
 ?>
 	<a style="float: right; padding-bottom: 10px;"
        href="<?php echo $GLOBALS['basesiteurl']; ?>/util/listnewteachers.php?<?php echo generateCsvQueryArgs(); ?>">Download

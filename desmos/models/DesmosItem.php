@@ -230,11 +230,13 @@ class DesmosItem extends CourseItem
      * @param DateTime $startTimestamp Limit search by this starting timestamp.
      * @param DateTime $endTimestamp Limit search by this ending timestamp.
      * @param bool $authoredOnly Only count Desmos Items with itemid_chain_size of 1.
+     * @param PDO|null $dbhOverride A database connection.
      * @return array An associative array.
      */
     public static function getTotalItemsCreatedByAllGroups(DateTime $startTimestamp,
                                                            DateTime $endTimestamp,
-                                                           bool $authoredOnly = false
+                                                           bool $authoredOnly = false,
+                                                           PDO $dbhOverride = null
     ): array
     {
         $authoredOnlySql = '';
@@ -242,7 +244,8 @@ class DesmosItem extends CourseItem
             $authoredOnlySql = 'AND itemid_chain_size = 1';
         }
 
-        $stm = $GLOBALS['DBH']->prepare("SELECT
+        $dbh = is_null($dbhOverride) ? $GLOBALS['DBH'] : $dbhOverride;
+        $stm = $dbh->prepare("SELECT
                 g.id AS group_id,
                 g.name AS group_name,
                 COUNT(di.id) AS total_items

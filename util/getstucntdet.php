@@ -14,8 +14,21 @@ ul {
 		exit;
 	}
 	$now = time();
-	
-	
+
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if (isset($CFG['hooks']['use_replica_db'])) {
+        require(__DIR__ . '/../' . $CFG['hooks']['use_replica_db']);
+    }
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+
 	$start = $now - 60*60*24*30; 
 	$end = $now; 
 	if (isset($_GET['start'])) {
@@ -35,6 +48,19 @@ ul {
 	}
 
 	echo '<h1>Enrollments from '.date('M j, Y',$start).' to '.date('M j, Y',$end).'</h1>';
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if (function_exists('displayReportNotice')) {
+        displayReportNotice();
+    }
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
 	echo '<p>This will list all students who last accessed the course between those dates.</p>';
 	
 	echo '<p>Courses marked with <sup>*</sup> have more than one instructor, and the enrollments have already been counted earlier so will be omitted</p>';

@@ -34,7 +34,7 @@ if (($myrights >= 75 || ($myspecialrights&32)==32) && isset($_GET['for']) && $_G
 	}
 }
 echo '<p>'._('How would you like to start this course?').'</p>';
-echo '<p><button type=submit name=copytype value=0>';
+echo '<p><button id="qa-button-add-blank-course" type="submit" name="copytype" value=0>';
 if (isset($CFG['addcourse']['blankbutton'])) {
 	echo $CFG['addcourse']['blankbutton'];
 } else {
@@ -43,7 +43,7 @@ if (isset($CFG['addcourse']['blankbutton'])) {
 echo '</button></p>';
 if (isset($CFG['coursebrowser'])) {
 		//use the course browser
-		echo '<p><button type="button" onclick="showCourseBrowser('.Sanitize::encodeStringForDisplay($dispgroup).')">';
+		echo '<p><button id="qa-button-copy-template" type="button" onclick="showCourseBrowser('.Sanitize::encodeStringForDisplay($dispgroup).')">';
 		if (isset($CFG['coursebrowsermsg'])) {
 			echo $CFG['coursebrowsermsg'];
 		} else {
@@ -53,7 +53,7 @@ if (isset($CFG['coursebrowser'])) {
 		echo '<input type=hidden name=coursebrowserctc id=coursebrowserctc />';
 		echo '</p>';
 }
-echo '<p><button type=button onclick="showCopyOpts()">';
+echo '<p><button id="qa-button-copyfrom-existing-course" type="button" onclick="showCopyOpts()">';
 if (isset($CFG['addcourse']['copybutton'])) {
 	echo $CFG['addcourse']['copybutton'];
 } else if (isset($CFG['coursebrowser'])) {

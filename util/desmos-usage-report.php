@@ -2,6 +2,7 @@
 
 use Course\Includes\ContentTracker;
 use Desmos\Models\DesmosItem;
+use OHM\Includes\ReadReplicaDb;
 
 require_once(__DIR__ . '/../init.php');
 
@@ -21,6 +22,7 @@ $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"h
 require("../header.php");
 echo '<div class=breadcrumb>', $curBreadcrumb, '</div>';
 echo '<div id="headeradmin" class="pagetitle"><h1>', $pagetitle, '</h1></div>';
+echo '<p><u>Note</u>: Data is queried from the OHM read replica DB.</p>';
 
 // FIXME: Remove this after creating indexes on imas_content_track in prod.
 echo "<p style='color: red;'>This report is DISABLED in production until indexes are created. See OHM-119.<br/>";
@@ -121,21 +123,24 @@ function outputDateForm(DateTime $startDate, DateTime $endDate): void
  *
  * @param DateTime $startDate
  * @param DateTime $endDate
+ * @throws Exception Thrown if unable to connect to the database.
  */
 function generateReport(DateTime $startDate, DateTime $endDate): void
 {
+    $dbh = ReadReplicaDb::getPdoInstance();
+
     // $totalDesmosItems includes copies (itemid_chain_size > 1)
-    $totalDesmosItemsByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, false);
+    $totalDesmosItemsByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, false, $dbh);
 
     // $totalDesmosItems only includes items that are not copies (itemid_chain_size == 1)
-    $totalDesmosItemsAuthoredByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, true);
+    $totalDesmosItemsAuthoredByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, true, $dbh);
 
-    $uniqueStudentViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, false, null);
-    $uniqueStudentLtiViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, true, null);
-    $uniqueTeacherViewsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosview", $startDate, $endDate, false, null);
-    $uniqueTeacherAddsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosadd", $startDate, $endDate, false, null);
-    $uniqueTeacherCopiesByGroup = ContentTracker::countUniqueTeachersByGroup("desmoscopy", $startDate, $endDate, false, null);
-    $uniqueTeacherEditsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosedit", $startDate, $endDate, false, null);
+    $uniqueStudentViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, false, null,  $dbh);
+    $uniqueStudentLtiViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, true, null, $dbh);
+    $uniqueTeacherViewsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosview", $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherAddsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosadd", $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherCopiesByGroup = ContentTracker::countUniqueTeachersByGroup("desmoscopy", $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherEditsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosedit", $startDate, $endDate, false, null, $dbh);
     outputSummaryTable($totalDesmosItemsByGroup, $uniqueStudentViewsByGroup, $uniqueTeacherViewsByGroup);
     outputGroupReportTable($totalDesmosItemsByGroup, $totalDesmosItemsAuthoredByGroup, $uniqueStudentViewsByGroup,
         $uniqueStudentLtiViewsByGroup, $uniqueTeacherAddsByGroup, $uniqueTeacherCopiesByGroup, $uniqueTeacherEditsByGroup);

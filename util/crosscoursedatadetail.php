@@ -12,6 +12,19 @@ if ($myrights<75) {
 	echo 'You do not have the authority for this action';
 	exit;
 }
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+// #### Begin OHM-specific code #####################################################
+if (isset($CFG['hooks']['use_replica_db'])) {
+    require(__DIR__ . '/../' . $CFG['hooks']['use_replica_db']);
+}
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
+// #### End OHM-specific code #######################################################
 
 $curBreadcrumb = $breadcrumbbase;
 $curBreadcrumb .= ' <a href="../admin/admin2.php">Admin</a>';
@@ -34,7 +47,20 @@ if (empty($_REQUEST['baseassess'])) {
 	require("../header.php");
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Question Results</h1>';
-	echo '<p>This utility allows you to output question averages from all copies of the specified assessment.</p>';
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    if (function_exists('displayReportNotice')) {
+        displayReportNotice();
+    }
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    // #### End OHM-specific code #######################################################
+    echo '<p>This utility allows you to output question averages from all copies of the specified assessment.</p>';
 	echo '<p>All scores are averages reported as percents.  The average only includes students who took the assessment, but will include students who did not attempt the question.</p>';
 	echo '<form method=post>';
 	echo '<p>Base Assessment ID: <input name=baseassess size=10 /></p>';
