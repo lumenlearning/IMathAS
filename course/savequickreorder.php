@@ -67,20 +67,9 @@
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
 	// #### End OHM-specific code #####################################################
-	 } else if ($type=="B") {
-		$blocktree = explode('-',$typeid);
-		$existingid = array_pop($blocktree) - 1; //-1 adjust for 1-index
-		$sub =& $items;
-		if (count($blocktree)>1) {
-			for ($i=1;$i<count($blocktree);$i++) {
-				$sub =& $sub[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
-			}
-		}
-		$sub[$existingid]['name'] = $val;
 	 }
  }
- // do it again to capture block name changes
- $newitems = additems2($order);
+
  $itemlist = serialize($newitems);
  $stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
  $stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
@@ -109,7 +98,11 @@ function additems2($arr) {
       for ($i=1;$i<count($blocktree)-1;$i++) {
         $sub = $sub[$blocktree[$i]-1]['items'];
       }
+
       $block = $sub[$blocktree[count($blocktree)-1]-1];
+      if (!empty($_POST['B' . $item['id']])) {
+        $block['name'] = $_POST['B' . $item['id']];
+      }
       if (!empty($item['children'])) {
         $block['items'] = additems2($item['children']);
       } else {

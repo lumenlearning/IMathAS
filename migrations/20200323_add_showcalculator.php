@@ -1,7 +1,7 @@
 <?php
 /**
- * OHM: Desmos Interactive
- * Change step column text to longblob
+ * OHM: Desmos Calculator
+ * Add showcalculator column imas_assessments table
  */
 $DBH->beginTransaction();
 

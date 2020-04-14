@@ -589,9 +589,12 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 			}
 			for ($i=0;$i<count($extref);$i++) {
 				$extrefpt = explode('!!',$extref[$i]);
-				if ($extrefpt[0]=='video' || strpos($extrefpt[1],'youtube.com/watch')!==false) {
+				if ($extrefpt[0]=='video') {$extrefpt[0]='Video';}
+				if (strpos($extrefpt[1],'youtube.com/watch')!==false ||
+					strpos($extrefpt[1],'youtu.be/')!==false ||
+					strpos($extrefpt[1],'vimeo.com/')!==false
+				) {
 					$extrefpt[1] = $GLOBALS['basesiteurl'] . "/assessment/watchvid.php?url=" . Sanitize::encodeUrlParam($extrefpt[1]);
-					if ($extrefpt[0]=='video') {$extrefpt[0]='Video';}
 					echo formpopup($extrefpt[0],$extrefpt[1],$vidextrefwidth,$vidextrefheight,"button",true,"video",$qref);
 				} else if ($extrefpt[0]=='read') {
 					echo formpopup("Read",$extrefpt[1],$extrefwidth,$extrefheight,"button",true,"text",$qref);
@@ -1213,10 +1216,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper && !(isset($scoremethod) && $scoremethod=='acct') ) {
 			$out .= "onfocus=\"showeebasicdd('qn$qn',0)\" onblur=\"hideebasice();hideebasicedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 
 		$out .= "class=\"text $colorbox$addlclass\" type=\"text\"  size=\"$sz\" name=qn$qn id=qn$qn value=\"$la\" autocomplete=\"off\" />$rightb";
 		$out .= getcolormark($colorbox);
@@ -1359,7 +1363,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					}
 					$out .= '<div class="match"><ul class=nomark>';
 				}
-				$out .= "<li><input type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
+				$out .= "<li><input class=\"unind\" type=radio name=qn$qn value=$i id=\"qn$qn-$i\" ";
 				if (($la!='') && ($la == $i)) { $out .= "CHECKED";}
 				$out .= " /><label for=\"qn$qn-$i\">{$questions[$randkeys[$i]]}</label></li> \n";
 			} else {
@@ -1580,7 +1584,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= '<li>';
 			}
-			$out .= "<select name=\"qn$qn-$i\">";
+			$out .= "<select name=\"qn$qn-$i\" id=\"qn$qn-$i\">";
 			$out .= '<option value="-" ';
 			if ($las[$i]=='-' || strcmp($las[$i],'')==0) {
 				$out .= 'selected="1"';
@@ -1605,7 +1609,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 					$out .= ">$v</option>";
 				}
 			}
-			$out .= "</select>&nbsp;{$questions[$randqkeys[$i]]}</li>\n";
+			$out .= "</select>&nbsp;<label for=\"qn$qn-$i\">{$questions[$randqkeys[$i]]}</label></li>\n";
 		}
 		$out .= "</ul>\n";
 		$out .= "</div>";
@@ -1742,10 +1746,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		if (!isset($hidepreview) && $GLOBALS['sessiondata']['userprefs']['livepreview']==1) {
 			$out .= 'onKeyUp="updateLivePreview(this)" ';
 		}
@@ -1832,6 +1837,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						}
 						$out .= "onfocus=\"showehdd('qn$qn-$count','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn-$count')\" ";
 					}
+					$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 					$out .= "/></td>\n";
 					$count++;
 				}
@@ -1848,14 +1854,17 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$qnref = ($multi-1).'-'.($qn%1000);
 			}
 			if (!isset($sz)) { $sz = 20;}
-			$tip = _('Enter your answer as a matrix filled with numbers, like ((2,3,4),(3,4,5))');
+			$shorttip = _('Enter your answer as a matrix filled with numbers, like ((2,3,4),(3,4,5))');
+			$tip = $shorttip;
 			if (isset($reqdecimals)) {
 				$tip .= "<br/>" . sprintf(_('Your numbers should be accurate to %d decimal places.'), $reqdecimals);
 			}
 			$out .= "<input class=\"text $colorbox\" type=\"text\" size=\"$sz\" name=qn$qn id=qn$qn value=\"".Sanitize::encodeStringForDisplay($la)."\" autocomplete=\"off\" ";
 			if ($showtips==2) {
-				$out .= "onfocus=\"showehdd('qn$qn','$tip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
+				$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
 			}
+			$out .= 'aria-describedby="tips'.$qnref.'" ';
+			$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 			$out .= "/>\n";
 			$out .= getcolormark($colorbox);
 			$out .= "<input type=button class=btn value=\"" . _('Preview') . "\" onclick=\"AMmathpreview('qn$qn','p$qn')\" /> &nbsp;\n";
@@ -1914,6 +1923,7 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 						} else {
 							$qnref = ($multi-1).'-'.($qn%1000);
 						}
+						$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 						$out .= "onfocus=\"showehdd('qn$qn-$count','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn-$count')\" ";
 					}
 					$out .= "/></td>\n";
@@ -1940,6 +1950,8 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			if ($showtips==2) {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
+			$out .= 'aria-describedby="tips'.$qnref.'" ';
+			$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 			$out .= "/>\n";
 			$out .= getcolormark($colorbox);
 			if (!isset($hidepreview)) {
@@ -2002,10 +2014,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		if (!isset($hidepreview) && $GLOBALS['sessiondata']['userprefs']['livepreview']==1) {
 			$out .= 'onKeyUp="updateLivePreview(this)" ';
 		}
@@ -2184,8 +2197,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$qnref = ($multi-1).'-'.($qn%1000);
 			}
 			$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" ";
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		$out .= '/>';
 		$out .= getcolormark($colorbox);
 
@@ -2253,10 +2267,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		if (!isset($hidepreview) && $GLOBALS['sessiondata']['userprefs']['livepreview']==1) {
 			$out .= 'onKeyUp="updateLivePreview(this)" ';
 		}
@@ -2310,8 +2325,9 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				$qnref = ($multi-1).'-'.($qn%1000);
 			}
 			$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" ";
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		$out .= '/>';
 		$out .= getcolormark($colorbox);
 		if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
@@ -2359,10 +2375,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		if (!isset($hidepreview) && $GLOBALS['sessiondata']['userprefs']['livepreview']==1) {
 			$out .= 'onKeyUp="updateLivePreview(this)" ';
 		}
@@ -2468,10 +2485,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 				} else {
 					$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
 				}
-				$out .= 'aria-describedby="tips'.$qnref.'" ';
 			} else if ($useeqnhelper && $displayformat == 'usepreview') {
 				$out .= "onfocus=\"showeedd('qn$qn',$useeqnhelper)\" onblur=\"hideee();hideeedd();\" ";
 			}
+			$out .= 'aria-describedby="tips'.$qnref.'" ';
+			$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 			if ($displayformat == 'usepreview' && $GLOBALS['sessiondata']['userprefs']['livepreview']==1) {
 				$out .= 'onKeyUp="updateLivePreview(this)" ';
 			}
@@ -2692,10 +2710,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('qn$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('qn$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeebasicdd('qn$qn',1)\" onblur=\"hideebasice();hideebasicedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		$out .= '/>';
 		$out .= getcolormark($colorbox);
 		if (in_array('nosoln',$ansformats))  {
@@ -2770,10 +2789,11 @@ function makeanswerbox($anstype, $qn, $la, $options,$multi,$colorbox='') {
 			} else {
 				$out .= "onfocus=\"showehdd('tc$qn','$shorttip','$qnref')\" onblur=\"hideeh()\" onclick=\"reshrinkeh('tc$qn')\" ";
 			}
-			$out .= 'aria-describedby="tips'.$qnref.'" ';
 		} else if ($useeqnhelper) {
 			$out .= "onfocus=\"showeedd('tc$qn',$useeqnhelper,". (in_array('inequality',$ansformats)?"'ineq'":"'int'") .")\" onblur=\"hideee();hideeedd();\" ";
 		}
+		$out .= 'aria-describedby="tips'.$qnref.'" ';
+		$out .= 'aria-label="'.Sanitize::encodeStringForDisplay($shorttip).'" ';
 		if (!isset($hidepreview) && $GLOBALS['sessiondata']['userprefs']['livepreview']==1) {
 			$out .= 'onKeyUp="updateLivePreview(this)" ';
 		}
@@ -3958,9 +3978,10 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$GLOBALS['partlastanswer'] = implode("|",$givenanslist);
 		} else {
 			$givenans = preg_replace('/\)\s*,\s*\(/','),(',$givenans);
+			$answer = preg_replace('/\)\s*,\s*\(/','),(',$answer);
 			$GLOBALS['partlastanswer'] = $givenans;
 			$givenanslist = explode(",",preg_replace('/[^\d,\.\-]/','',$givenans));
-			if (substr_count($answer,'),(')!=substr_count($_POST["qn$qn"],'),(')) {$correct = false;}
+			if (substr_count($answer,'),(')!=substr_count($givenans,'),(')) {$correct = false;}
 		}
 
 		//handle nosolninf case
@@ -4963,12 +4984,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					return 0;
 				}
 				$answer = preg_replace('/(.*)=(.*)/','$1-($2)',$answer);
-				unset($ratios);
-			} else if (in_array('toconst',$ansformats)) {
-				unset($diffs);
-				unset($realanss);
 			}
-
 
 			if ($answer == '') {
 				return 0;
@@ -4986,6 +5002,9 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$stunan = 0;
 			$ysqrtot = 0;
 			$reldifftot = 0;
+			$ratios = array();
+			$diffs = array();
+			$realanss = array();
 			for ($i = 0; $i < 20; $i++) {
 				$varvals = array();
 				for($j=0; $j < count($variables); $j++) {
@@ -7106,7 +7125,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					//if there are more ans pts than drawn, want to match up better than this;
 					//mark it for coming back to
 					//if less ans pts than drawn, that's already accounted for in $percentoffpts
-					if ($anslineptcnt[$k]>count($linedata[$k])) {
+					if (!isset($linedata[$k]) || $anslineptcnt[$k]>count($linedata[$k])) {
 						$unmatchedanspts[$k] = 1;
 						continue;
 					}
@@ -7125,6 +7144,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			//go back and match up drawn points with unmatched answer points
 			//we have more answer points than drawn points here
 			foreach (array_keys($unmatchedanspts) as $k) {
+				if (!isset($linedata[$k])) {continue;}
 				for ($i=0; $i<count($linedata[$k]); $i++) {
 					$minerr = $settings[7];
 					$minerrkey = -1;
@@ -7552,7 +7572,10 @@ function getallqsetid($questions) {
 }
 
 function isNaN( $var ) {
-     return !preg_match('/^[-]?[0-9]+([\.][0-9]+)?([eE][+\-]?[0-9]+)?$/', $var);
+		// is_numeric catches most things, but not php-generated NAN or INF
+		// is_finite catches those
+		return (!is_numeric($var) || !is_finite($var));
+     //return !preg_match('/^[-]?[0-9]+([\.][0-9]+)?([eE][+\-]?[0-9]+)?$/', $var);
      //possible alternative:
      //return ($var!==$var || $var*2==$var);
 }
@@ -8121,6 +8144,7 @@ function normalizemathunicode($str) {
 	//these are the slim vector unicodes: u2329 and u232a
 	$str = str_replace(array('⟨','⟩'), array('<','>'), $str);
 	$str = str_replace(array('²','³','₀','₁','₂','₃'), array('^2','^3','_0','_1','_2','_3'), $str);
+	$str = str_replace(array('√','∛'),array('sqrt','root(3)'), $str);
 	$str = preg_replace('/\bOO\b/i','oo', $str);
 	return $str;
 }

@@ -5,7 +5,7 @@
 By default, the production build files from /assess2/vue/ are used, with
 /assess2/index.php as the start page.
 
-For development, add to your /config.php the line
+For development, add to your /config/local.php the line
 `$CFG['assess2-use-vue-dev'] = true;`
 which will adjust course page links to assessments to use the Vue dev
 server at localhost:8080.
@@ -29,6 +29,12 @@ npm run serve
 ### Compiles and minifies for production
 ```
 npm run build
+```
+If you modify any of the external javascript, be sure to also run this to
+rebuild minified javascript files.  You may want to edit index.php to change
+the v= date to force reload.
+```
+./buildmin.sh
 ```
 
 ### Run your tests

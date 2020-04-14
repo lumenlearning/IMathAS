@@ -743,7 +743,7 @@ private function insertDesmos() {
             $exarr[$field] = $this->data['items'][$toimport]['data'][$field];
         }
         $desmos = new \Desmos\Models\DesmosItem($this->cid);
-        $desmos->addItem($exarr);
+        $desmos->importItem($exarr);
         $this->typemap['DesmosItem'][$toimport] = $desmos->typeid+0;
     }
 }
