@@ -28,7 +28,6 @@
 
 header('P3P: CP="ALL CUR ADM OUR"');
 $init_skip_csrfp = true;
-$init_session_start = true;
 include("init_without_validate.php");
 unset($init_skip_csrfp);
 
@@ -55,20 +54,9 @@ if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTT
     $urlmode = 'https://';
 } else {
     $urlmode = 'http://';
-    $errormsg = _('This launch was made insecurely (using http instead of https). ');
-    $errormsg .= sprintf(_('%s requires secure launches to protect student data. '),$installname);
-    $ltirole = strtolower($_REQUEST['roles']);
-    if (strpos($ltirole,'instructor')!== false || strpos($ltirole,'administrator')!== false || strpos($ltirole,'contentdeveloper')!== false) {
-        $errormsg .= _('Please update the links or tool in the LMS to use https (aka SSL). ');
-        if ($_REQUEST['tool_consumer_info_product_family_code'] == 'moodle') {
-            $errormsg .= _('In Moodle, you can do this by clicking the "Edit preconfigured tool" icon, scrolling down to Privacy, and clicking the Force SSL checkbox. ');
-            $errormsg .= _('If you do not have access to do this, you might need to ask your LMS administrator to enable the Force SSL option. ');
-        }
-    }
-    reporterror($errormsg);
 }
 if ($enablebasiclti!=true) {
-    echo _("BasicLTI not enabled");
+    echo "BasicLTI not enabled";
     exit;
 }
 
@@ -101,7 +89,7 @@ function generateToolState() {
 }
 function do112relaunch() {
     if (!isset($_REQUEST['platform_state'])) {
-        reporterror(_("Missing platform_state"));
+        reporterror("Missing platform_state");
     }
 
     $_SESSION['lti_tool_state'] = generateToolState();
@@ -114,7 +102,7 @@ function do112relaunch() {
 
 function verify112relaunch() {
     if ($_REQUEST['tool_state'] != $_SESSION['lti_tool_state']) {
-        reporterror(_("Invalid tool_state"));
+        reporterror("Invalid tool_state");
         exit;
     }
 }
@@ -138,17 +126,22 @@ if (
 
 //check to see if accessiblity page is posting back
     if (isset($_GET['launch'])) {
-        if (empty($_SESSION['userid'])) {
-            reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+        $stm = $DBH->prepare('SELECT sessiondata,userid FROM imas_sessions WHERE sessionid=:sessionid');
+        $stm->execute(array(':sessionid'=>$sessionid));
+        if ($stm->rowCount()==0) {
+            reporterror("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again.");
         }
-        $userid = $_SESSION['userid'];
+        list($enc,$userid) = $stm->fetch(PDO::FETCH_NUM);
+        $sessiondata = unserialize(base64_decode($enc));
 
         if (isset($_POST['tzname'])) {
-            $_SESSION['logintzname'] = $_POST['tzname'];
+            $sessiondata['logintzname'] = $_POST['tzname'];
         }
 
         require_once("$curdir/includes/userprefs.php");
         generateuserprefs();
+
+        $enc = base64_encode(serialize($sessiondata));
 
         $stm = $DBH->prepare('UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id');
         $stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
@@ -158,20 +151,20 @@ if (
         } else {
             $tzname = '';
         }
-        $_SESSION['tzoffset'] = $_POST['tzoffset'];
-        $_SESSION['tzname'] = $tzname;
+        $stm = $DBH->prepare('UPDATE imas_sessions SET sessiondata=:sessiondata,tzoffset=:tzoffset,tzname=:tzname WHERE sessionid=:sessionid');
+        $stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessionid'=>$sessionid));
 
         $keyparts = explode('_',$_SESSION['ltikey']);
-        if ($_SESSION['ltiitemtype']==0) { //is aid
-            $aid = $_SESSION['ltiitemid'];
+        if ($sessiondata['ltiitemtype']==0) { //is aid
+            $aid = $sessiondata['ltiitemid'];
             $stm = $DBH->prepare('SELECT courseid,ver FROM imas_assessments WHERE id=:aid');
             $stm->execute(array(':aid'=>$aid));
             list($cid,$aver) = $stm->fetch(PDO::FETCH_NUM);
             if ($cid===false) {
                 $diaginfo = "(Debug info: 1-$aid)";
-                reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+                reporterror("This assignment does not appear to exist anymore. $diaginfo");
             }
-            if ($_SESSION['ltirole'] == 'learner') {
+            if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'assesslti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid'=>$userid,':courseid'=>$cid,':typeid'=>$aid,':viewtime'=>$now));
             }
@@ -180,25 +173,27 @@ if (
             } else {
                 header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id=$aid");
             }
-        } else if ($_SESSION['ltiitemtype']==1) { //is cid
-            $cid = $_SESSION['ltiitemid'];
+        } else if ($sessiondata['ltiitemtype']==1) { //is cid
+            $cid = $sessiondata['ltiitemid'];
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid");
-        } else if ($_SESSION['ltiitemtype']==2) {
+        } else if ($sessiondata['ltiitemtype']==2) {
             header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
-        } else if ($_SESSION['ltiitemtype']==3) {
-            $cid = $_SESSION['ltiitemid'][2];
-            $folder = $_SESSION['ltiitemid'][1];
+        } else if ($sessiondata['ltiitemtype']==3) {
+            $cid = $sessiondata['ltiitemid'][2];
+            $folder = $sessiondata['ltiitemid'][1];
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid&folder=".$folder);
         } else { //will only be instructors hitting this option
             header('Location: ' . $GLOBALS['basesiteurl'] . "/ltihome.php");
         }
         exit;
     } else if (isset($_GET['accessibility'])) {
-        if (empty($_SESSION['userid'])) {
-            reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+        $stm = $DBH->prepare('SELECT sessiondata,userid FROM imas_sessions WHERE sessionid=:sessionid');
+        $stm->execute(array(':sessionid'=>$sessionid));
+        if ($stm->rowCount()==0) {
+            reporterror("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again.");
         }
-        $userid = $_SESSION['userid'];
-
+        list($enc,$userid) = $stm->fetch(PDO::FETCH_NUM);
+        $sessiondata = unserialize(base64_decode($enc));
         //time to output a postback to capture tzname
         $pref = 0;
         $flexwidth = true;
@@ -207,15 +202,15 @@ if (
         require("header.php");
         echo "<h3>Connecting to $installname</h3>";
         echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/bltilaunch.php?launch=true\" ";
-        if ($_SESSION['ltiitemtype']==0 && $_SESSION['ltitlwrds'] != '') {
+        if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltitlwrds'] != '') {
             echo "onsubmit='return confirm(\"This assessment has a time limit of "
-                .Sanitize::encodeStringForJavascript($_SESSION['ltitlwrds'])
+                .Sanitize::encodeStringForJavascript($sessiondata['ltitlwrds'])
                 .".  Click OK to start or continue working on the assessment.\")' >";
-            echo "<p class=noticetext>This assessment has a time limit of ".Sanitize::encodeStringForDisplay($_SESSION['ltitlwrds']).".</p>";
+            echo "<p class=noticetext>This assessment has a time limit of ".Sanitize::encodeStringForDisplay($sessiondata['ltitlwrds']).".</p>";
             echo '<div class="textright"><input type="submit" value="Continue" /></div>';
 
-            if ($_SESSION['lticanuselatepass']) {
-                echo "<p><a href=\"$imasroot/course/redeemlatepass.php?from=ltitimelimit&cid=".Sanitize::encodeUrlParam($_SESSION['ltiitemcid'])."&aid=".Sanitize::encodeUrlParam($_SESSION['ltiitemid'])."\">", _('Use LatePass'), "</a></p>";
+            if ($sessiondata['lticanuselatepass']) {
+                echo "<p><a href=\"$imasroot/course/redeemlatepass.php?from=ltitimelimit&cid=".Sanitize::encodeUrlParam($sessiondata['ltiitemcid'])."&aid=".Sanitize::encodeUrlParam($sessiondata['ltiitemid'])."\">", _('Use LatePass'), "</a></p>";
             }
 
         } else {
@@ -233,7 +228,7 @@ if (
                 var tz = jstz.determine();
                 document.getElementById("tzname").value = tz.name();
                 <?php
-                if ($_SESSION['ltiitemtype']!=0 || $_SESSION['ltitlwrds'] == '') {
+                if ($sessiondata['ltiitemtype']!=0 || $sessiondata['ltitlwrds'] == '') {
                     //auto submit the form
                     echo 'document.getElementById("postbackform").submit();';
                 }
@@ -378,8 +373,8 @@ if (
                 //using LTI for authentication; don't need username/password
                 //only request name
                 echo "<p>Please provide a little information about yourself:</p>";
-                echo "<span class=form><label for=\"firstname\">Enter First Name (given name):</label></span> <input class=form type=text size=20 id=firstname name=firstname autocomplete=\"given-name\"><BR class=form>\n";
-                echo "<span class=form><label for=\"lastname\">Enter Last Name (surname):</label></span> <input class=form type=text size=20 id=lastname name=lastname autocomplete=\"family-name\"><BR class=form>\n";
+                echo "<span class=form><label for=\"firstname\">Enter First Name (given name):</label></span> <input class=form type=text size=20 id=firstname name=firstname><BR class=form>\n";
+                echo "<span class=form><label for=\"lastname\">Enter Last Name (surname):</label></span> <input class=form type=text size=20 id=lastname name=lastname><BR class=form>\n";
                 echo "<div class=submit><input type=submit value='Submit'></div>\n";
                 echo '<script type="text/javascript"> $(function() {
 				$("#pageform").validate({
@@ -422,23 +417,26 @@ if (
                 //tying LTI to IMAthAS account
                 //give option to provide existing account info, or provide full new student info
                 if ($allow_acctcreation) {
-                    echo "<p>".sprintf(_("If you already have an account on %s, enter your username and password below to enable automated signon from %s"),$installname,Sanitize::encodeStringForDisplay($ltiorgname))."</p>";
+                    echo "<p>If you already have an account on $installname, enter your username and ";
+                    echo "password below to enable automated signon from ".Sanitize::encodeStringForDisplay($ltiorgname)."</p>";
                 } else {
-                    echo "<p>".sprintf(_("Enter your username and password for %s below to enable automated signon from %s"),$installname,Sanitize::encodeStringForDisplay($ltiorgname))."</p>";
+                    echo "<p>Enter your username and ";
+                    echo "password for $installname below to enable automated signon from ".Sanitize::encodeStringForDisplay($ltiorgname)."</p>";
                 }
                 echo "<span class=form><label for=\"curSID\">".Sanitize::encodeStringForDisplay($loginprompt).":</label></span> <input class=form type=text size=12 id=\"curSID\" name=\"curSID\"><BR class=form>\n";
-                echo "<span class=form><label for=\"curPW\">"._("Password:")."</label></span><input class=form type=password size=20 id=\"curPW\" name=\"curPW\"><BR class=form>\n";
-                echo "<div class=submit><input type=submit value='"._("Sign In")."'></div>\n";
+                echo "<span class=form><label for=\"curPW\">Password:</label></span><input class=form type=password size=20 id=\"curPW\" name=\"curPW\"><BR class=form>\n";
+                echo "<div class=submit><input type=submit value='Sign In'></div>\n";
                 if ($allow_acctcreation) {
-                    echo "<p>".sprintf(_("If you do not already have an account on %s, provide the information below to create an account and enable automated signon from %s"),$installname,Sanitize::encodeStringForDisplay($ltiorgname))."</p>";
+                    echo "<p>If you do not already have an account on $installname, provide the information below to create an account ";
+                    echo "and enable automated signon from ".Sanitize::encodeStringForDisplay($ltiorgname)."</p>";
                     echo "<span class=form><label for=\"SID\">".Sanitize::encodeStringForDisplay($longloginprompt).":</label></span> <input class=form type=text size=12 id=SID name=SID><BR class=form>\n";
-                    echo "<span class=form><label for=\"pw1\">"._("Choose a password:")."</label></span><input class=form type=password size=20 id=pw1 name=pw1><BR class=form>\n";
-                    echo "<span class=form><label for=\"pw2\">"._("Confirm password:")."</label></span> <input class=form type=password size=20 id=pw2 name=pw2><BR class=form>\n";
-                    echo "<span class=form><label for=\"firstname\">"._("Enter First Name:")."</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deffirst)."\" size=20 id=firstname name=firstname autocomplete=\"given-name\"><BR class=form>\n";
-                    echo "<span class=form><label for=\"lastname\">"._("Enter Last Name:")."</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deflast)."\" size=20 id=lastname name=lastname autocomplete=\"family-name\"><BR class=form>\n";
-                    echo "<span class=form><label for=\"email\">"._("Enter E-mail address:")."</label></span>  <input class=form type=email value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email autocomplete=\"email\"><BR class=form>\n";
-                    echo "<span class=form><label for=\"msgnot\">"._("Notify me by email when I receive a new message:")."</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
-                    echo "<div class=submit><input type=submit value='"._("Create Account")."'></div>\n";
+                    echo "<span class=form><label for=\"pw1\">Choose a password:</label></span><input class=form type=password size=20 id=pw1 name=pw1><BR class=form>\n";
+                    echo "<span class=form><label for=\"pw2\">Confirm password:</label></span> <input class=form type=password size=20 id=pw2 name=pw2><BR class=form>\n";
+                    echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deffirst)."\" size=20 id=firstnam name=firstname><BR class=form>\n";
+                    echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deflast)."\" size=20 id=lastname name=lastname><BR class=form>\n";
+                    echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
+                    echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
+                    echo "<div class=submit><input type=submit value='Create Account'></div>\n";
                     require_once(__DIR__.'/includes/newusercommon.php');
                     $requiredrules = array(
                         'curSID'=>'{depends: function(element) {return $("#SID").val()==""}}',
@@ -453,7 +451,7 @@ if (
                     showNewUserValidation('pageform',array('curSID','curPW'), $requiredrules);
 
                 } else {
-                    echo "<p>".sprintf(_("If you do not already have an account on %s, please visit the site to request an account."),$installname)."</p>";
+                    echo "<p>If you do not already have an account on $installname, please visit the site to request an account.</p>";
                     echo '<script type="text/javascript"> $(function() {
 					$("#pageform").validate({
 						rules: {
@@ -478,7 +476,13 @@ if (
         if (isset($_SESSION['userid'])) {
             $userid = $_SESSION['userid'];
         } else {
-            reporterror(_("No session recorded"));
+            $stm = $DBH->prepare('SELECT userid FROM imas_sessions WHERE sessionid=:sessionid');
+            $stm->execute(array(':sessionid'=>$sessionid));
+            if ($stm->rowCount()==0) {
+                reporterror("No session recorded");
+            } else {
+                $userid = $stm->fetchColumn(0); //DB mysql_result($result,0,0);
+            }
         }
 
         $keyparts = explode('_',$_SESSION['ltikey']);
@@ -488,7 +492,7 @@ if (
         $stm = $DBH->prepare('SELECT itemorder FROM imas_courses WHERE id=:cid');
         $stm->execute(array(':cid'=>$linkparts[0]));
         if ($stm->rowCount()==0) {
-            reporterror(_("invalid course identifier in folder view launch"));
+            reporterror("invalid course identifier in folder view launch");
         } else {
             $cid = intval($linkparts[0]);
             $row = $stm->fetch(PDO::FETCH_ASSOC); //DB mysql_fetch_row($result2);
@@ -510,7 +514,7 @@ if (
             }
             $loc = findfolder($items, $linkparts[1], '0');
             if ($loc=='') {
-                reporterror(_("invalid folder identifier in folder view launch"));
+                reporterror("invalid folder identifier in folder view launch");
             }
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/public.php?cid=".$linkparts[0]."&folder=".$loc);
         }
@@ -521,13 +525,13 @@ if (
 
         //verify necessary POST values for LTI.  OAuth specific will be checked later
         if (empty($_REQUEST['lti_version'])) {
-            reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again"));
+            reporterror("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again");
         }
         if (empty($_REQUEST['user_id'])) {
             if (isset($_REQUEST['relaunch_url'])) {
                 do112relaunch();
             }
-            reporterror(_("Unable to launch - User information not provided (user_id is required)"));
+            reporterror("Unable to launch - User information not provided (user_id is required)");
         } else {
             $ltiuserid = $_REQUEST['user_id'];
         }
@@ -536,7 +540,7 @@ if (
         }
 
         if (empty($_REQUEST['context_id'])) {
-            reporterror(_("Unable to launch - Course information not provided (context_id is required)"));
+            reporterror("Unable to launch - Course information not provided (context_id is required)");
         }
 
         if (isset($_SESSION['ltiuserid']) && $_SESSION['ltiuserid']!=$ltiuserid) {
@@ -560,7 +564,7 @@ if (
             $ltiorg = $_REQUEST['tool_consumer_instance_guid'];
         }
         if (empty($_REQUEST['oauth_consumer_key'])) {
-            reporterror(_("Unable to launch - oauth_consumer_key (resource key) is required"));
+            reporterror("Unable to launch - oauth_consumer_key (resource key) is required");
         } else {
             $ltikey = $_REQUEST['oauth_consumer_key'];
         }
@@ -837,7 +841,7 @@ if (
             list($aidsourcecid,$aidsourcename) = $stm->fetch(PDO::FETCH_NUM);
             if ($aidsourcecid===false) {
                 $diaginfo = "(Debug info: 2-{$_SESSION['place_aid']})";
-                reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+                reporterror("This assignment does not appear to exist anymore. $diaginfo");
             }
 
             //look to see if we've already linked this context_id with a course
@@ -962,7 +966,7 @@ if (
                         exit;
                     }
                 } else {
-                    reporterror(_("Course link not established yet.  Notify your instructor they need to click this assignment to set it up."));
+                    reporterror("Course link not established yet.  Notify your instructor they need to click this assignment to set it up.");
                 }
                 if ($copycourse == "yes") {
                     //create a course
@@ -1223,7 +1227,7 @@ if (
                     }
                     if (!$foundaid && count($res)>0) { //multiple results - look for the identical name
                         foreach ($res as $k=>$row) {
-                            $res[$k]['loc'] = strpos($row['ancestors'], (string) $aidtolookfor);
+                            $res[$k]['loc'] = strpos($row['ancestors'], $aidtolookfor);
                             if ($row['name']==$aidsourcename) {
                                 $aid = $row['id'];
                                 $foundaid = true;
@@ -1258,7 +1262,7 @@ if (
                         $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
                         $stm->execute(array(':typeid'=>$_SESSION['place_aid']));
                         if ($stm->rowCount()==0) {
-                            reporterror(sprintf("Error.  Assessment ID %s not found."),"'{$_SESSION['place_aid']}'");
+                            reporterror("Error.  Assessment ID '{$_SESSION['place_aid']}' not found.");
                         }
                         $sourceitemid = $stm->fetchColumn(0);
                         $cid = $destcid;
@@ -1292,7 +1296,7 @@ if (
         } else if ($_SESSION['lti_keytype']=='cc-of') {
             //do later
         } else {
-            reporterror(_("This placement is not yet set up"));
+            reporterror("This placement is not yet set up");
         }
     } else {
         $row = $stm->fetch(PDO::FETCH_NUM);
@@ -1307,7 +1311,7 @@ if (
 		$pts = explode('-', $row[1]);
 		$linkparts = array('folder',$row[1]);
 	}*/ else {
-            reporterror(_("Invalid placement type"));
+            reporterror("Invalid placement type");
         }
 
     }
@@ -1334,15 +1338,15 @@ if (
                         ':courseid'=>$linkcid,
                         ':contextlabel'=>$_SESSION['lti_context_label']));
                 } else {
-                    reporterror(_("You are not an instructor on the course and folder this link is pointing to. Auto-copying is not currently supported for folder-level links."));
+                    reporterror("You are not an instructor on the course and folder this link is pointing to. Auto-copying is not currently supported for folder-level links.");
                 }
             } else {
-                reporterror(_("Course connection not established yet.  Notify your instructor they need to click this link to set it up."));
+                reporterror("Course connection not established yet.  Notify your instructor they need to click this link to set it up.");
             }
         } else {
             $courselinkcid = $stm->fetchColumn(0);
             if ($courselinkcid != $linkcid) {
-                reporterror(_("This course in the LMS is not associated with the course this link is pointing to."));
+                reporterror("This course in the LMS is not associated with the course this link is pointing to.");
             }
         }
     }
@@ -1355,7 +1359,7 @@ if (
         $line = $stm->fetch(PDO::FETCH_ASSOC);
         if ($_SESSION['ltirole']!='instructor') {
             if (!($line['avail']==0 || $line['avail']==2)) {
-                reporterror(_("This course is not available"));
+                reporterror("This course is not available");
             }
         }
     } else if ($linkparts[0]=='aid') {   //is assessment level placement
@@ -1365,7 +1369,7 @@ if (
         $line = $stm->fetch(PDO::FETCH_ASSOC);
         if ($line===false) {
             $diaginfo = "(Debug info: 3-$aid)";
-            reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+            reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         $cid = $line['courseid'];
         if (isset($_SESSION['lti_duedate']) && ($line['date_by_lti']==1 || $line['date_by_lti']==2)) {
@@ -1456,7 +1460,7 @@ if (
         $stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
         $stm->execute(array(':id'=>$linkparts[1]));
         if ($stm->rowCount()==0) {
-            reporterror(_("invalid course identifier in folder view launch"));
+            reporterror("invalid course identifier in folder view launch");
         } else {
             $cid = intval($linkparts[1]);
             $row = $stm->fetch(PDO::FETCH_NUM);
@@ -1478,12 +1482,12 @@ if (
             }
             $loc = findfolder($items, $linkparts[2], '0');
             if ($loc=='') {
-                reporterror(_("invalid folder identifier in folder view launch"));
+                reporterror("invalid folder identifier in folder view launch");
             }
             $linkparts[3] = $loc;
         }
     } else if ($_SESSION['ltirole']!='instructor') {
-        reporterror(_("invalid key. unknown action type"));
+        reporterror("invalid key. unknown action type");
     }
 
 //see if student is enrolled, if appropriate to action type
@@ -1533,21 +1537,24 @@ if (
 //check if db session entry exists for session
     $promptforsettings = false;
     $SESS = $_SESSION;
-    if (!empty($_SESSION['userid'])) {	//check that same userid, and that we're not jumping on someone else's
+    $stm = $DBH->prepare("SELECT userid,sessiondata FROM imas_sessions WHERE sessionid=:sessionid");
+    $stm->execute(array(':sessionid'=>$sessionid));
+    if ($stm->rowCount()>0) {	//check that same userid, and that we're not jumping on someone else's
         //existing session.  If so, then we need to create a new session.
         //also, if session did not have ltiuserid already, must be jumping non-LTI to LTI
-
-        if ($_SESSION['userid'] != $userid || !$atstarthasltiuserid) {
+        $row = $stm->fetch(PDO::FETCH_ASSOC);
+        if ($row['userid']!=$userid || !$atstarthasltiuserid) {
             session_destroy();
             session_start();
             session_regenerate_id();
             $sessionid = session_id();
             //setcookie(session_name(),session_id(),0,'','',false,true );
-            $_SESSION = array();
+            $sessiondata = array();
             $createnewsession = true;
         } else {
             //already have session.  Don't need to create one
-            if (!isset($_SESSION['mathdisp'])) {
+            $sessiondata = unserialize(base64_decode($row['sessiondata']));
+            if (!isset($sessiondata['mathdisp'])) {
                 //for some reason settings are not set, so reload from user prefs
                 require_once("$curdir/includes/userprefs.php");
                 generateuserprefs(true);
@@ -1555,7 +1562,7 @@ if (
             $createnewsession = false;
         }
     } else {
-        $_SESSION = array();
+        $sessiondata = array();
         $createnewsession = true;
     }
 
@@ -1592,12 +1599,12 @@ if (
         }
         //this sessiondata tells WAMAP to limit access to the specific resouce requested
 
-        $_SESSION['ltitlwrds'] = $tlwrds;
-        $_SESSION['ltiitemtype']=0;
-        $_SESSION['ltiitemver']=$aver;
-        $_SESSION['ltiitemid'] = $aid;
+        $sessiondata['ltitlwrds'] = $tlwrds;
+        $sessiondata['ltiitemtype']=0;
+        $sessiondata['ltiitemver']=$aver;
+        $sessiondata['ltiitemid'] = $aid;
 
-        $_SESSION['lticanuselatepass'] = false;
+        $sessiondata['lticanuselatepass'] = false;
         if ($_SESSION['ltirole']!='instructor' && $line['allowlate']>0) {
             $stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
             $stm->execute(array(':id'=>$cid));
@@ -1605,53 +1612,56 @@ if (
             require_once("./includes/exceptionfuncs.php");
             $exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
             list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
-            $_SESSION['lticanuselatepass'] = $canuselatepass;
+            $sessiondata['lticanuselatepass'] = $canuselatepass;
         }
 
     }  else if ($linkparts[0]=='cid') { //is cid
-        $_SESSION['ltiitemtype']=1;
-        $_SESSION['ltiitemid'] = $cid;
+        $sessiondata['ltiitemtype']=1;
+        $sessiondata['ltiitemid'] = $cid;
     } else if ($linkparts[0]=='folder') { //is folder content view
-        $_SESSION['ltiitemtype']=3;
-        $_SESSION['ltiitemid'] = array($linkparts[2],$linkparts[3],$cid);
+        $sessiondata['ltiitemtype']=3;
+        $sessiondata['ltiitemid'] = array($linkparts[2],$linkparts[3],$cid);
     } else {
-        $_SESSION['ltiitemtype']=-1;
+        $sessiondata['ltiitemtype']=-1;
     }
-    $_SESSION['ltiorg'] = $SESS['ltiorg'];
-    $_SESSION['ltirole'] = $SESS['ltirole'];
-    $_SESSION['lti_context_id']  = $SESS['lti_context_id'];
-    $_SESSION['lti_resource_link_id']  = $SESS['lti_resource_link_id'];
+    $sessiondata['ltiorg'] = $SESS['ltiorg'];
+    $sessiondata['ltirole'] = $SESS['ltirole'];
+    $sessiondata['lti_context_id']  = $SESS['lti_context_id'];
+    $sessiondata['lti_resource_link_id']  = $SESS['lti_resource_link_id'];
     if ($linkparts[0]=='aid') {
-        $_SESSION['lti_lis_result_sourcedid'.$aid]  = $SESS['lti_lis_result_sourcedid'];
+        $sessiondata['lti_lis_result_sourcedid'.$aid]  = $SESS['lti_lis_result_sourcedid'];
     }
-    $_SESSION['lti_outcomeurl']  = $SESS['lti_outcomeurl'];
-    $_SESSION['lti_context_label'] = $SESS['lti_context_label'];
-    $_SESSION['lti_launch_get'] = $SESS['lti_launch_get'];
-    $_SESSION['lti_key'] = $SESS['lti_key'];
-    $_SESSION['lti_keytype'] = $SESS['lti_keytype'];
-    $_SESSION['lti_keylookup'] = $SESS['ltilookup'];
-    $_SESSION['lti_origkey'] = $SESS['ltiorigkey'];
-    if (isset($SESS['lti_duedate'])) {
-        $_SESSION['lti_duedate'] = $SESS['lti_duedate'];
-    }
+    $sessiondata['lti_outcomeurl']  = $SESS['lti_outcomeurl'];
+    $sessiondata['lti_context_label'] = $SESS['lti_context_label'];
+    $sessiondata['lti_launch_get'] = $SESS['lti_launch_get'];
+    $sessiondata['lti_key'] = $SESS['lti_key'];
+    $sessiondata['lti_keytype'] = $SESS['lti_keytype'];
+    $sessiondata['lti_keylookup'] = $SESS['ltilookup'];
+    $sessiondata['lti_origkey'] = $SESS['ltiorigkey'];
     if (isset($SESS['selection_return'])) {
-        $_SESSION['lti_selection_return'] = $SESS['selection_return'];
-        $_SESSION['lti_selection_targets'] = $SESS['selection_targets'];
-        $_SESSION['lti_selection_return_format'] = $SESS['selection_return_format'];
-        $_SESSION['lti_selection_type'] = $SESS['selection_type'];
-        $_SESSION['lti_selection_data'] = $SESS['selection_data'];
+        $sessiondata['lti_selection_return'] = $SESS['selection_return'];
+        $sessiondata['lti_selection_targets'] = $SESS['selection_targets'];
+        $sessiondata['lti_selection_return_format'] = $SESS['selection_return_format'];
+        $sessiondata['lti_selection_type'] = $SESS['selection_type'];
+        $sessiondata['lti_selection_data'] = $SESS['selection_data'];
     }
 
     if (isset($setstuviewon) && $setstuviewon==true) {
-        $_SESSION['stuview'] = 0;
+        $sessiondata['stuview'] = 0;
     }
 
     if ($_SESSION['lti_keytype']=='gc') {
-        $_SESSION['lti_launch_get']['cid'] = $linkparts[1];
+        $sessiondata['lti_launch_get']['cid'] = $linkparts[1];
     }
 
-    $_SESSION['userid'] = $userid;
-    $_SESSION['time'] = $now;
+    $enc = base64_encode(serialize($sessiondata));
+    if ($createnewsession) {
+        $stm = $DBH->prepare("INSERT INTO imas_sessions (sessionid,userid,sessiondata,time) VALUES (:sessionid, :userid, :sessiondata, :time)");
+        $stm->execute(array(':sessionid'=>$sessionid, ':userid'=>$userid, ':sessiondata'=>$enc, ':time'=>$now));
+    } else {
+        $stm = $DBH->prepare("UPDATE imas_sessions SET sessiondata=:sessiondata,userid=:userid WHERE sessionid=:sessionid");
+        $stm->execute(array(':sessiondata'=>$enc, ':userid'=>$userid, ':sessionid'=>$sessionid));
+    }
 
     if (!$promptforsettings && !$createnewsession && !($linkparts[0]=='aid' && $tlwrds != '')) {
 
@@ -1661,7 +1671,7 @@ if (
         $stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 
         if ($linkparts[0]=='aid') { //is aid
-            if ($_SESSION['ltirole'] == 'learner') {
+            if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare("INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid, :courseid, :type, :typeid, :viewtime, :info)");
                 $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':type'=>'assesslti', ':typeid'=>$aid, ':viewtime'=>$now, ':info'=>''));
             }
@@ -1695,17 +1705,22 @@ if (
 
 //check to see if accessiblity page is posting back
     if (isset($_GET['launch'])) {
-        if (empty($_SESSION['userid'])) {
-            reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+        $stm = $DBH->prepare("SELECT sessiondata,userid FROM imas_sessions WHERE sessionid=:sessionid");
+        $stm->execute(array(':sessionid'=>$sessionid));
+        if ($stm->rowCount()==0) {
+            reporterror("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again.");
         }
-        $userid = $_SESSION['userid'];
+        list($enc,$userid) = $stm->fetch(PDO::FETCH_NUM);
+        $sessiondata = unserialize(base64_decode($enc));
 
         if (isset($_POST['tzname'])) {
-            $_SESSION['logintzname'] = $_POST['tzname'];
+            $sessiondata['logintzname'] = $_POST['tzname'];
         }
 
         require_once("$curdir/includes/userprefs.php");
         generateuserprefs();
+
+        $enc = base64_encode(serialize($sessiondata));
 
         $now = time();
         $stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id");
@@ -1716,20 +1731,20 @@ if (
         } else {
             $tzname = '';
         }
-        $_SESSION['tzoffset'] = $_POST['tzoffset'];
-        $_SESSION['tzname'] = $tzname;
+        $stm = $DBH->prepare("UPDATE imas_sessions SET sessiondata=:sessiondata,tzoffset=:tzoffset,tzname=:tzname WHERE sessionid=:sessionid");
+        $stm->execute(array(':sessiondata'=>$enc, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessionid'=>$sessionid));
 
         $keyparts = explode('_',$_SESSION['ltikey']);
-        if ($_SESSION['ltiitemtype']==0) { //is aid
-            $aid = $_SESSION['ltiitemid'];
+        if ($sessiondata['ltiitemtype']==0) { //is aid
+            $aid = $sessiondata['ltiitemid'];
             $stm = $DBH->prepare("SELECT courseid,ver FROM imas_assessments WHERE id=:id");
             $stm->execute(array(':id'=>$aid));
             list($cid, $aver) = $stm->fetch(PDO::FETCH_NUM);
             if ($cid===false) {
                 $diaginfo = "(Debug info: 4-$aid)";
-                reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+                reporterror("This assignment does not appear to exist anymore. $diaginfo");
             }
-            if ($_SESSION['ltirole'] == 'learner') {
+            if ($sessiondata['ltirole'] == 'learner') {
                 $stm = $DBH->prepare("INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid, :courseid, :type, :typeid, :viewtime, :info)");
                 $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':type'=>'assesslti', ':typeid'=>$aid, ':viewtime'=>$now, ':info'=>''));
             }
@@ -1738,25 +1753,27 @@ if (
             } else {
                 header('Location: ' . $GLOBALS['basesiteurl'] . "/assessment/showtest.php?cid=$cid&id=$aid");
             }
-        } else if ($_SESSION['ltiitemtype']==1) { //is cid
-            $cid = $_SESSION['ltiitemid'];
+        } else if ($sessiondata['ltiitemtype']==1) { //is cid
+            $cid = $sessiondata['ltiitemid'];
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid");
-        } else if ($_SESSION['ltiitemtype']==2) {
+        } else if ($sessiondata['ltiitemtype']==2) {
             header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php");
-        } else if ($_SESSION['ltiitemtype']==3) {
-            $cid = $_SESSION['ltiitemid'][2];
-            $folder = $_SESSION['ltiitemid'][1];
+        } else if ($sessiondata['ltiitemtype']==3) {
+            $cid = $sessiondata['ltiitemid'][2];
+            $folder = $sessiondata['ltiitemid'][1];
             header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid&folder=".$folder);
         } else { //will only be instructors hitting this option
             header('Location: ' . $GLOBALS['basesiteurl'] . "/ltihome.php");
         }
         exit;
     } else if (isset($_GET['accessibility'])) {
-        if (empty($_SESSION['userid'])) {
-            reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+        $stm = $DBH->prepare("SELECT sessiondata,userid FROM imas_sessions WHERE sessionid=:sessionid");
+        $stm->execute(array(':sessionid'=>$sessionid));
+        if ($stm->rowCount()==0) {
+            reporterror("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again.");
         }
-        $userid = $_SESSION['userid'];
-
+        list($enc,$userid) = $stm->fetch(PDO::FETCH_NUM);
+        $sessiondata = unserialize(base64_decode($enc));
         //time to output a postback to capture tzoffset and math/graph settings
         $pref = 0;
         /*if (isset($_COOKIE['mathgraphprefs'])) {
@@ -1775,13 +1792,13 @@ if (
         require("header.php");
         echo "<h3>Connecting to $installname</h3>";
         echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/bltilaunch.php?launch=true\" ";
-        if ($_SESSION['ltiitemtype']==0 && $_SESSION['ltitlwrds'] != '') {
-            echo "onsubmit='return confirm(\"This assessment has a time limit of ".Sanitize::encodeStringForDisplay($_SESSION['ltitlwrds']).".  Click OK to start or continue working on the assessment.\")' >";
-            echo "<p class=noticetext>This assessment has a time limit of ".Sanitize::encodeStringForDisplay($_SESSION['ltitlwrds']).".</p>";
+        if ($sessiondata['ltiitemtype']==0 && $sessiondata['ltitlwrds'] != '') {
+            echo "onsubmit='return confirm(\"This assessment has a time limit of ".Sanitize::encodeStringForDisplay($sessiondata['ltitlwrds']).".  Click OK to start or continue working on the assessment.\")' >";
+            echo "<p class=noticetext>This assessment has a time limit of ".Sanitize::encodeStringForDisplay($sessiondata['ltitlwrds']).".</p>";
             echo '<div class="textright"><input type="submit" value="Continue" /></div>';
 
-            if ($_SESSION['lticanuselatepass']) {
-                echo "<p><a href=\"$imasroot/course/redeemlatepass.php?from=ltitimelimit&cid=".Sanitize::encodeUrlParam($_SESSION['ltiitemcid'])."&aid=".Sanitize::encodeUrlParam($_SESSION['ltiitemid'])."\">", _('Use LatePass'), "</a></p>";
+            if ($sessiondata['lticanuselatepass']) {
+                echo "<p><a href=\"$imasroot/course/redeemlatepass.php?from=ltitimelimit&cid=".Sanitize::encodeUrlParam($sessiondata['ltiitemcid'])."&aid=".Sanitize::encodeUrlParam($sessiondata['ltiitemid'])."\">", _('Use LatePass'), "</a></p>";
             }
         } else {
             echo ">";
@@ -1799,7 +1816,7 @@ if (
                 var tz = jstz.determine();
                 document.getElementById("tzname").value = tz.name();
                 <?php
-                if ($_SESSION['ltiitemtype']!=0 || $_SESSION['ltitlwrds'] == '') {
+                if ($sessiondata['ltiitemtype']!=0 || $sessiondata['ltitlwrds'] == '') {
                     //auto submit the form
                     echo 'document.getElementById("postbackform").submit();';
                 }
@@ -1932,8 +1949,8 @@ if (
                 //using LTI for authentication; don't need username/password
                 //only request name
                 echo "<p>Please provide a little information about yourself:</p>";
-                echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname autocomplete=\"given-name\"><BR class=form>\n";
-                echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname autocomplete=\"family-name\"><BR class=form>\n";
+                echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname><BR class=form>\n";
+                echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname><BR class=form>\n";
                 echo "<div class=submit><input type=submit value='Submit'></div>\n";
                 echo '<script type="text/javascript"> $(function() {
 				$("#pageform").validate({
@@ -1991,9 +2008,9 @@ if (
                     echo "<span class=form><label for=\"SID\">".Sanitize::encodeStringForDisplay($longloginprompt).":</label></span> <input class=form type=text size=12 id=SID name=SID><BR class=form>\n";
                     echo "<span class=form><label for=\"pw1\">Choose a password:</label></span><input class=form type=password size=20 id=pw1 name=pw1><BR class=form>\n";
                     echo "<span class=form><label for=\"pw2\">Confirm password:</label></span> <input class=form type=password size=20 id=pw2 name=pw2><BR class=form>\n";
-                    echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text autocomplete=\"given-name\" value=\"".Sanitize::encodeStringForDisplay($deffirst)."\" size=20 id=firstnam name=firstname><BR class=form>\n";
-                    echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text autocomplete=\"family-name\" value=\"".Sanitize::encodeStringForDisplay($deflast)."\" size=20 id=lastname name=lastname><BR class=form>\n";
-                    echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=email autocomplete=\"email\" value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
+                    echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deffirst)."\" size=20 id=firstnam name=firstname><BR class=form>\n";
+                    echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($deflast)."\" size=20 id=lastname name=lastname><BR class=form>\n";
+                    echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
                     echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
                     echo "<div class=submit><input type=submit value='Create Account'></div>\n";
                     require_once(__DIR__.'/includes/newusercommon.php');
@@ -2031,10 +2048,12 @@ if (
         //refreshed this page from accessibility options page so session already exists
         // (if user_id is set, then is new LTI request, so want to pass down to OAuth)
         //pull necessary info and continue
-        if (empty($_SESSION['userid'])) {
-            reporterror(_("No session recorded"));
+        $stm = $DBH->prepare("SELECT userid FROM imas_sessions WHERE sessionid=:sessionid");
+        $stm->execute(array(':sessionid'=>$sessionid));
+        if ($stm->rowCount()==0) {
+            reporterror("No session recorded");
         } else {
-            $userid = $_SESSION['userid'];
+            $userid = $stm->fetchColumn(0);
         }
 
         $keyparts = explode('_',$_SESSION['ltikey']);
@@ -2043,13 +2062,13 @@ if (
 
         //verify necessary POST values for LTI.  OAuth specific will be checked later
         if (empty($_REQUEST['lti_version'])) {
-            reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again"));
+            reporterror("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again");
         }
         if (empty($_REQUEST['user_id'])) {
             if (isset($_REQUEST['relaunch_url'])) {
                 do112relaunch();
             }
-            reporterror(_("Unable to launch - User information not provided (user_id is required)"));
+            reporterror("Unable to launch - User information not provided (user_id is required)");
         } else {
             $ltiuserid = $_REQUEST['user_id'];
         }
@@ -2058,7 +2077,7 @@ if (
         }
 
         if (empty($_REQUEST['context_id'])) {
-            reporterror(_("Unable to launch - Course information not provided (context_id is required)"));
+            reporterror("Unable to launch - Course information not provided (context_id is required)");
         }
 
         if (isset($_SESSION['ltiuserid']) && $_SESSION['ltiuserid']!=$ltiuserid) {
@@ -2082,7 +2101,7 @@ if (
             $ltiorg = $_REQUEST['tool_consumer_instance_guid'];
         }
         if (empty($_REQUEST['oauth_consumer_key'])) {
-            reporterror(_("Unable to launch - oauth_consumer_key (resource key) is required"));
+            reporterror("Unable to launch - oauth_consumer_key (resource key) is required");
         } else {
             $ltikey = $_REQUEST['oauth_consumer_key'];
         }
@@ -2124,7 +2143,7 @@ if (
                 $sourcecid = $stm->fetchColumn(0);
                 if ($sourcecid===false) {
                     $diaginfo = "(Debug info: 5-$placeaid)";
-                    reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+                    reporterror("This assignment does not appear to exist anymore. $diaginfo");
                 }
                 if ($keyparts[1]==$sourcecid) { //is key is for source course; treat like aid_### placement
                     $keyparts[0] = 'aid';
@@ -2164,7 +2183,7 @@ if (
                 $sourcecid = $stm->fetchColumn(0);
                 if ($sourcecid===false) {
                     $diaginfo = "(Debug info: 6-$placeaid)";
-                    reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+                    reporterror("This assignment does not appear to exist anymore. $diaginfo");
                 }
                 $_SESSION['place_aid'] = array($sourcecid,$_REQUEST['custom_place_aid']);
             } else if (isset($_REQUEST['custom_view_folder'])) {
@@ -2367,7 +2386,7 @@ if (
                                 $destcid = intval($_SESSION['place_aid'][0]);
                             }
                         } else {
-                            reporterror(_("Course link not established yet"));
+                            reporterror("Course link not established yet");
                         }
                         if ($copycourse) {
                             //create a course
@@ -2470,7 +2489,7 @@ if (
                             $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
                             $stm->execute(array(':typeid'=>$_SESSION['place_aid'][1]));
                             if ($stm->rowCount()==0) {
-                                reporterror(sprintf(_("Error.  Assessment ID %s not found."),"'{$_SESSION['place_aid'][1]}'"));
+                                reporterror("Error.  Assessment ID '{$_SESSION['place_aid'][1]}' not found.");
                             }
 
                             $newitem = copyitem($stm->fetchColumn(0),array());
@@ -2492,7 +2511,7 @@ if (
                 $keyparts = array('aid',$aid);
 
             } else {
-                reporterror(_("This placement is not yet set up"));
+                reporterror("This placement is not yet set up");
             }
         } else {
             $row = $stm->fetch(PDO::FETCH_NUM);
@@ -2501,7 +2520,7 @@ if (
             } else if ($row[0]=='assess') {
                 $keyparts = array('aid',$row[1]);
             } else {
-                reporterror(_("Invalid placement type"));
+                reporterror("Invalid placement type");
             }
 
         }
@@ -2517,7 +2536,7 @@ if (
         $line = $stm->fetch(PDO::FETCH_ASSOC);
         if ($_SESSION['ltirole']!='instructor') {
             if (!($line['avail']==0 || $line['avail']==2)) {
-                reporterror(_("This course is not available"));
+                reporterror("This course is not available");
             }
         }
     } else if ($keyparts[0]=='aid') {   //is assessment level placement
@@ -2527,7 +2546,7 @@ if (
         $line = $stm->fetch(PDO::FETCH_ASSOC);
         if ($line===false) {
             $diaginfo = "(Debug info: 7-$aid)";
-            reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+            reporterror("This assignment does not appear to exist anymore. $diaginfo");
         }
         $cid = $line['courseid'];
         if ($_SESSION['ltirole']!='instructor') {
@@ -2574,7 +2593,7 @@ if (
         $stm2 = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
         $stm2->execute(array(':id'=>$keyparts[1]));
         if ($stm2->rowCount()==0) {
-            reporterror(_("invalid course identifier in folder view launch"));
+            reporterror("invalid course identifier in folder view launch");
         } else {
             $cid = intval($keyparts[1]);
             if ($_SESSION['lti_keytype']=='cc-vf') {
@@ -2584,7 +2603,7 @@ if (
                 $stm3 = $DBH->prepare($query);
                 $stm3->execute(array(':courseid'=>$cid, ':SID'=>$usid[0]));
                 if ($stm3->rowCount()==0) {
-                    reporterror(_("not authorized to view folders in this course"));
+                    reporterror("not authorized to view folders in this course");
                 }
             }
             $row = $stm2->fetch(PDO::FETCH_NUM);
@@ -2610,12 +2629,12 @@ if (
                 $loc = findfolder($items, $keyparts[2], '0');
             }
             if ($loc=='') {
-                reporterror(_("invalid folder identifier in folder view launch"));
+                reporterror("invalid folder identifier in folder view launch");
             }
             $keyparts[3] = $loc;
         }
     } else if ($keyparts[0]!='sso' && $_SESSION['ltirole']!='instructor') {
-        reporterror(_("invalid key. unknown action type"));
+        reporterror("invalid key. unknown action type");
     }
 
 //see if student is enrolled, if appropriate to action type
@@ -2661,22 +2680,26 @@ if (
 
 //check if db session entry exists for session
     $promptforsettings = false;
-    $SESS = $_SESSION; // store values in case we need to clear existing session
-    if (!empty($_SESSION['userid'])) {
+    $SESS = $_SESSION;
+    $stm = $DBH->prepare("SELECT userid,sessiondata FROM imas_sessions WHERE sessionid=:sessionid");
+    $stm->execute(array(':sessionid'=>$sessionid));
+    if ($stm->rowCount()>0) {
         //check that same userid, and that we're not jumping on someone else's
         //existing session.  If so, then we need to create a new session.
         //also, if session did not have ltiuserid already, must be jumping non-LTI to LTI
-        if ($_SESSION['userid'] != $userid || !$atstarthasltiuserid) {
+        list($sessionuserid, $sessiondata) = $stm->fetch(PDO::FETCH_NUM);
+        if ($sessionuserid!=$userid || !$atstarthasltiuserid) {
             session_destroy();
             session_start();
             session_regenerate_id();
             $sessionid = session_id();
             //setcookie(session_name(),session_id(),0,'','',false,true );
-            $_SESSION = array();
+            $sessiondata = array();
             $createnewsession = true;
         } else {
             //already have session.  Don't need to create one
-            if (!isset($_SESSION['mathdisp'])) {
+            $sessiondata = unserialize(base64_decode($sessiondata));
+            if (!isset($sessiondata['mathdisp'])) {
                 //for some reason settings are not set, so reload from user prefs
                 require_once("$curdir/includes/userprefs.php");
                 generateuserprefs(true);
@@ -2684,7 +2707,7 @@ if (
             $createnewsession = false;
         }
     } else {
-        $_SESSION = array();
+        $sessiondata = array();
         $createnewsession = true;
     }
 
@@ -2720,12 +2743,12 @@ if (
             $tlwrds = '';
         }
         //this sessiondata tells WAMAP to limit access to the specific resouce requested
-        $_SESSION['ltitlwrds'] = $tlwrds;
-        $_SESSION['ltiitemtype']=0;
-        $_SESSION['ltiitemver']=$aver;
-        $_SESSION['ltiitemid'] = $aid;
+        $sessiondata['ltitlwrds'] = $tlwrds;
+        $sessiondata['ltiitemtype']=0;
+        $sessiondata['ltiitemver']=$aver;
+        $sessiondata['ltiitemid'] = $aid;
 
-        $_SESSION['lticanuselatepass'] = false;
+        $sessiondata['lticanuselatepass'] = false;
         if ($_SESSION['ltirole']!='instructor' && $line['allowlate']>0) {
             $stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
             $stm->execute(array(':id'=>$cid));
@@ -2733,60 +2756,63 @@ if (
             require_once("./includes/exceptionfuncs.php");
             $exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
             list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
-            $_SESSION['lticanuselatepass'] = $canuselatepass;
+            $sessiondata['lticanuselatepass'] = $canuselatepass;
         }
     }  else if ($keyparts[0]=='cid') { //is cid
-        $_SESSION['ltiitemtype']=1;
-        $_SESSION['ltiitemid'] = $cid;
+        $sessiondata['ltiitemtype']=1;
+        $sessiondata['ltiitemid'] = $cid;
     } else if ($keyparts[0]=='sso') { //is sso
-        $_SESSION['ltiitemtype']=2;
+        $sessiondata['ltiitemtype']=2;
     } else if ($keyparts[0]=='folder') { //is folder content view
-        $_SESSION['ltiitemtype']=3;
-        $_SESSION['ltiitemid'] = array($keyparts[2],$keyparts[3],$cid);
+        $sessiondata['ltiitemtype']=3;
+        $sessiondata['ltiitemid'] = array($keyparts[2],$keyparts[3],$cid);
     } else {
-        $_SESSION['ltiitemtype']=-1;
+        $sessiondata['ltiitemtype']=-1;
     }
-    $_SESSION['ltiorg'] = $SESS['ltiorg'];
-    $_SESSION['ltirole'] = $SESS['ltirole'];
-    $_SESSION['lti_context_id']  = $SESS['lti_context_id'];
-    $_SESSION['lti_resource_link_id']  = $SESS['lti_resource_link_id'];
+    $sessiondata['ltiorg'] = $SESS['ltiorg'];
+    $sessiondata['ltirole'] = $SESS['ltirole'];
+    $sessiondata['lti_context_id']  = $SESS['lti_context_id'];
+    $sessiondata['lti_resource_link_id']  = $SESS['lti_resource_link_id'];
 // record it with aid for safety
     if ($keyparts[0]=='aid') {
-        $_SESSION['lti_lis_result_sourcedid'.$aid]  = $SESS['lti_lis_result_sourcedid'];
+        $sessiondata['lti_lis_result_sourcedid'.$aid]  = $SESS['lti_lis_result_sourcedid'];
     }
-    $_SESSION['lti_outcomeurl']  = $SESS['lti_outcomeurl'];
-    $_SESSION['lti_context_label'] = $SESS['lti_context_label'];
-    $_SESSION['lti_launch_get'] = $SESS['lti_launch_get'];
-    $_SESSION['lti_key'] = $SESS['lti_key'];
-    $_SESSION['lti_keytype'] = $SESS['lti_keytype'];
-    $_SESSION['lti_keylookup'] = $SESS['ltilookup'];
-    $_SESSION['lti_origkey'] = $SESS['ltiorigkey'];
-    if (isset($SESS['lti_duedate'])) {
-        $_SESSION['lti_duedate'] = $SESS['lti_duedate'];
-    }
+    $sessiondata['lti_outcomeurl']  = $SESS['lti_outcomeurl'];
+    $sessiondata['lti_context_label'] = $SESS['lti_context_label'];
+    $sessiondata['lti_launch_get'] = $SESS['lti_launch_get'];
+    $sessiondata['lti_key'] = $SESS['lti_key'];
+    $sessiondata['lti_keytype'] = $SESS['lti_keytype'];
+    $sessiondata['lti_keylookup'] = $SESS['ltilookup'];
+    $sessiondata['lti_origkey'] = $SESS['ltiorigkey'];
     if (isset($SESS['selection_return'])) {
-        $_SESSION['lti_selection_return'] = $SESS['selection_return'];
-        $_SESSION['lti_selection_targets'] = $SESS['selection_targets'];
-        $_SESSION['lti_selection_return_format'] = $SESS['selection_return_format'];
-        $_SESSION['lti_selection_type'] = $SESS['selection_type'];
-        $_SESSION['lti_selection_data'] = $SESS['selection_data'];
+        $sessiondata['lti_selection_return'] = $SESS['selection_return'];
+        $sessiondata['lti_selection_targets'] = $SESS['selection_targets'];
+        $sessiondata['lti_selection_return_format'] = $SESS['selection_return_format'];
+        $sessiondata['lti_selection_type'] = $SESS['selection_type'];
+        $sessiondata['lti_selection_data'] = $SESS['selection_data'];
     }
 
     if (isset($setstuviewon) && $setstuviewon==true) {
-        $_SESSION['stuview'] = 0;
+        $sessiondata['stuview'] = 0;
     }
 
     if ($_SESSION['lti_keytype']=='gc') {
-        $_SESSION['lti_launch_get']['cid'] = $keyparts[1];
+        $sessiondata['lti_launch_get']['cid'] = $keyparts[1];
     }
     if ($_SESSION['lti_keytype']=='cc-vf') {
-        $_SESSION['mathdisp'] = 0;
-        $_SESSION['graphdisp'] = 2;
-        $_SESSION['tzoffset'] = 0;
+        $sessiondata['mathdisp'] = 0;
+        $sessiondata['graphdisp'] = 2;
+        $sessiondata['tzoffset'] = 0;
     }
 
-    $_SESSION['userid'] = $userid;
-    $_SESSION['time'] = $now;
+    $enc = base64_encode(serialize($sessiondata));
+    if ($createnewsession) {
+        $stm = $DBH->prepare("INSERT INTO imas_sessions (sessionid,userid,sessiondata,time) VALUES (:sessionid, :userid, :sessiondata, :time)");
+        $stm->execute(array(':sessionid'=>$sessionid, ':userid'=>$userid, ':sessiondata'=>$enc, ':time'=>$now));
+    } else {
+        $stm = $DBH->prepare("UPDATE imas_sessions SET sessiondata=:sessiondata,userid=:userid WHERE sessionid=:sessionid");
+        $stm->execute(array(':sessiondata'=>$enc, ':userid'=>$userid, ':sessionid'=>$sessionid));
+    }
 
     if ($_SESSION['lti_keytype']=='cc-vf' || (!$promptforsettings && !$createnewsession && !($keyparts[0]=='aid' && $tlwrds != ''))) {
         //redirect now if already have session and no timelimit
@@ -2795,7 +2821,7 @@ if (
         $stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
 
         if ($keyparts[0]=='aid') { //is aid
-            if ($_SESSION['ltirole'] == 'learner') {
+            if ($sessiondata['ltirole'] == 'learner') {
                 $query = "INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES ";
                 $query .= "(:userid, :courseid, :type, :typeid, :viewtime, :info)";
                 $stm = $DBH->prepare($query);
