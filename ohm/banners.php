@@ -51,7 +51,6 @@ switch ($_REQUEST['action']) {
         break;
 }
 
-include(__DIR__ . '/../footer.php');
 
 return;
 
@@ -71,9 +70,11 @@ function list_banners(): void
         display purposes.
     </p>
 
-    <form method="POST" action="?action=create_form" class="add-button">
-        <button type="submit">Add</button>
-    </form>
+    <div class="lux-component">
+        <form method="POST" action="?action=create_form">
+            <button type="submit" class="add-button button">Add</button>
+        </form>
+    </div>
 
     <label for="banner-list" class="banner-list-title">Banner Notifications</label>
     <table class="banner-list gb" id="banner-list">

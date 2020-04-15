@@ -8,6 +8,10 @@ $(document).ready(function () {
     let checked = $(this).is(":checked");
     toggleTimestampFields('#edate', '#etime', checked);
   });
+
+  $('#cancel-button').click(function () {
+    window.location.href = "?";
+  });
 });
 
 function toggleTimestampFields(dateId, timeId, checked) {

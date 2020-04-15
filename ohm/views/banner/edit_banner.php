@@ -16,30 +16,32 @@
         </div>
 
 
-        <div class="banner-timestamps">
+        <div class="banner-timestamps u-margin-top-sm">
             <label for="start-at">Start date and time</label>
             <div class="banner-timestamp-entry" id="start-at">
-                <input id="sdate" class="form-input form-input--fw has-icon icon--suffix icon--calendar date-input"
+                <input id="sdate" class="form-input has-icon icon--suffix icon--calendar date-input"
                        name="sdate" value="<?php echo $startDate; ?>"
                        onClick="displayDatePicker('sdate', this); return false;"
                        <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
-                <input id="stime" class="form-input form-input--fw time-input"
+                <input id="stime" class="form-input time-input"
                        name="stime" value="<?php echo $startTime; ?>"
                        <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
                 <input type="checkbox" id="start-immediately" class="start-immediately-checkbox"
                        name="start-immediately" value="1"
                     <?php echo ($startImmediately ? 'checked' : ''); ?>/>
-                <label class="start-immediately" for="start-immediately">Start immediately</label>
+                <label class="start-immediately" for="start-immediately">
+                    Start immediately
+                </label>
             </div>
         </div>
-        <div class="banner-timestamps">
+        <div class="banner-timestamps u-margin-top-sm">
             <label for="end-at">End date and time</label>
             <div class="banner-timestamp-entry">
-                <input id="edate" class="form-input form-input--fw has-icon icon--suffix icon--calendar"
+                <input id="edate" class="form-input has-icon icon--suffix icon--calendar date-input"
                        name="edate" value="<?php echo $endDate; ?>"
                        onClick="displayDatePicker('edate', this); return false;"
                        <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
-                <input id="etime" class="form-input form-input--fw"
+                <input id="etime" class="form-input time-input"
                        name="etime" value="<?php echo $endTime; ?>"
                        <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
                 <input type="checkbox" id="never-ending" name="never-ending" value="1"
@@ -49,7 +51,7 @@
         </div>
 
 
-        <div class="teacher-banner">
+        <div class="teacher-banner u-margin-top-sm">
             <div class="u-margin-top-xs">
                 <label for="teacher-title">Teacher Title</label>
                 <input id="teacher-title" class="form-input form-input--fw" name="teacher-title"
@@ -63,7 +65,7 @@
         </div>
 
 
-        <div class="student-banner">
+        <div class="student-banner u-margin-top-sm">
             <div class="u-margin-top-xs">
                 <label for="student-title">Student Title</label>
                 <input id="student-title" class="form-input form-input--fw" name="student-title"
@@ -103,12 +105,10 @@
         </div>
 
 
-        <div class="form-action-buttons">
-            <button type="submit" class="button u-margin-top"><?php
+        <div class="form-action-buttons u-margin-bottom">
+            <button type="submit" class="button button--primary u-margin-top"><?php
                 echo ('modify' == strtolower($action)) ? 'Save' : $action; ?></button>
-    </form>
-    <form method="GET" action="?">
-        <button type="submit" class="button u-martin-top">Cancel</button>
-    </form>
+            <button type="submit" id="cancel-button" class="button">Cancel</button>
         </div>
+    </form>
 </div>

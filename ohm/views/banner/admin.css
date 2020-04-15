@@ -1,5 +1,6 @@
 .add-button {
     margin-top: 1em;
+    margin-bottom: 1em;
 }
 
 .view-link, .edit-link, .delete-link {
@@ -8,7 +9,8 @@
 }
 
 .banner-list-title {
-    margin-top: 1em;
+    display: block;
+    padding-bottom: 0.5em;
     font-weight: bold;
 }
 

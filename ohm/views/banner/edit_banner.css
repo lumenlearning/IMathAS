@@ -7,24 +7,14 @@
     resize: both;
 }
 
-.teacher-banner {
-    margin-top: 1.5em;
-}
-
-.student-banner {
-    margin-top: 1.5em;
-}
-
 .start-immediately {
     white-space: nowrap;
 }
 
-.banner-timestamps {
-    margin-top: 1em;
-}
-
-.date-input, .time-input {
-    margin-right: 1em;
+.lux-component .lux-form .form-input.date-input,
+.lux-component .lux-form .form-input.time-input {
+    margin-right: 0.75em;
+    width: 10em;
 }
 
 .banner-timestamp-entry {
