@@ -139,9 +139,9 @@ function view(int $bannerId): void
 
     echo '<h1>Banner Preview</h1>';
     echo '<h2>Teacher Banner</h2>';
-    $ohmBannerService->previewBanner($bannerId, OhmBannerService::TEACHER);
+    $ohmBannerService->previewBanner($bannerId, OhmBannerService::TEACHER_ROLE);
     echo '<h2>Student Banner</h2>';
-    $ohmBannerService->previewBanner($bannerId, OhmBannerService::STUDENT);
+    $ohmBannerService->previewBanner($bannerId, OhmBannerService::STUDENT_ROLE);
 }
 
 /**

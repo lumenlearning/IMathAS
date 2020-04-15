@@ -8,8 +8,8 @@ use PDO;
 
 class OhmBannerService
 {
-    const TEACHER = 1;
-    const STUDENT = 2;
+    const TEACHER_ROLE = 1;
+    const STUDENT_ROLE = 2;
 
     private $dbh;
     private $userId;
@@ -47,7 +47,7 @@ class OhmBannerService
         if (15 >= $this->userRights) {
             return false;
         }
-        return $this->showBanners(self::TEACHER);
+        return $this->showBanners(self::TEACHER_ROLE);
     }
 
     /**
@@ -61,16 +61,16 @@ class OhmBannerService
         if (15 < $this->userRights) {
             return false;
         }
-        return $this->showBanners(self::STUDENT);
+        return $this->showBanners(self::STUDENT_ROLE);
     }
 
     /**
      * Show banners. User rights are not checked.
      *
-     * @param int $userRole 1 for teacher, 2 for student.
+     * @param int $role 1 for teacher, 2 for student.
      * @return bool True if a banner was displayed. False if not.
      */
-    public function showBanners(int $userRole): bool
+    public function showBanners(int $role): bool
     {
         $bannerDbHelper = $this->getNewBannerInstance();
         $banners = $bannerDbHelper->findEnabledAndAvailable();
@@ -86,11 +86,11 @@ class OhmBannerService
         $bannerDisplayed = false;
         foreach ($banners as $banner) {
             // Teacher banner is disabled.
-            if (self::TEACHER == $userRole && !$banner->getDisplayTeacher()) {
+            if (self::TEACHER_ROLE == $role && !$banner->getDisplayTeacher()) {
                 continue;
             }
             // Student banner is disabled.
-            if (self::STUDENT == $userRole && !$banner->getDisplayStudent()) {
+            if (self::STUDENT_ROLE == $role && !$banner->getDisplayStudent()) {
                 continue;
             }
             // User has dismissed this banner.
@@ -104,7 +104,7 @@ class OhmBannerService
             }
 
             // Make the banner data available to the view.
-            $bannerData = $this->getViewDataByRole($banner, $userRole);
+            $bannerData = $this->getViewDataByRole($banner, $role);
             $bannerId = $bannerData['id'];
             $bannerTitle = $bannerData['title'];
             $bannerContent = $bannerData['content'];
@@ -122,26 +122,30 @@ class OhmBannerService
      * Preview a banner.
      *
      * @param int $bannerId The Banner ID to display.
-     * @param int $userRole 1 for teacher, 2 for student.
+     * @param int $role 1 for teacher, 2 for student.
      * @return bool True if a banner was displayed.
      */
-    public function previewBanner(int $bannerId, int $userRole): bool
+    public function previewBanner(int $bannerId, int $role): bool
     {
         $banner = $this->getNewBannerInstance();
-        $banner->find($bannerId);
+        $found = $banner->find($bannerId);
+
+        if (!$found) {
+            return false;
+        }
 
         // Make the banner data available to the view.
-        $bannerData = $this->getViewDataByRole($banner, $userRole);
+        $bannerData = $this->getViewDataByRole($banner, $role);
         $bannerId = $bannerData['id'];
         $bannerTitle = $bannerData['title'];
         $bannerContent = $bannerData['content'];
         $bannerDismissible = $bannerData['dismissible'];
 
-        if (self::TEACHER == $userRole) {
+        if (self::TEACHER_ROLE == $role) {
             include(__DIR__ . '/../views/banner/show_teacher.php');
             return true;
         }
-        if (self::STUDENT == $userRole) {
+        if (self::STUDENT_ROLE == $role) {
             include(__DIR__ . '/../views/banner/show_student.php');
             return true;
         }
@@ -152,17 +156,17 @@ class OhmBannerService
      * Get a Banner's content by user role, for a view.
      *
      * @param Banner $banner A Banner instance.
-     * @param int $userRole 1 for teacher, 2 for student.
+     * @param int $role 1 for teacher, 2 for student.
      * @return array An array of variables for a view.
      */
-    protected function getViewDataByRole(Banner $banner, int $userRole): array
+    protected function getViewDataByRole(Banner $banner, int $role): array
     {
         $data = [];
-        if (self::TEACHER == $userRole) {
+        if (self::TEACHER_ROLE == $role) {
             $data['title'] = $banner->getTeacherTitle();
             $data['content'] = $banner->getTeacherContent();
         }
-        if (self::STUDENT == $userRole) {
+        if (self::STUDENT_ROLE == $role) {
             $data['title'] = $banner->getStudentTitle();
             $data['content'] = $banner->getStudentContent();
         }

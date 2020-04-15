@@ -113,4 +113,36 @@ final class BannerTest extends TestCase
 
         $this->banner->save();
     }
+
+    /*
+     * findEnabledAndAvailable
+     */
+
+    public function testFindEnabledAndAvailable(): void
+    {
+        $pdoStatement = $this->createMock(\PDOStatement::class);
+        $pdoStatement->method('rowCount')->willReturn(1);
+        $pdoStatement->method('fetch')
+            ->willReturn([
+                'id' => 42,
+                'is_enabled' => 1,
+                'is_dismissible' => 1,
+                'display_student' => 1,
+                'display_teacher' => 1,
+                'description' => 'Sample description',
+                'student_title' => 'Student Title',
+                'student_content' => 'Student Content',
+                'teacher_title' => 'Teacher Title',
+                'teacher_content' => 'Teacher Content',
+                'start_at' => '2020-09-01 00:00:00',
+                'end_at' => '2020-09-28 12:00:00',
+                'created_at' => '2020-01-02 18:41:17',
+            ]);
+        $this->dbh->method('prepare')->willReturn($pdoStatement);
+
+        $result = $this->banner->findEnabledAndAvailable();
+
+        $this->assertCount(1, $result, 'array should contain one Banner object.');
+        $this->assertEquals(42, $result[0]->getId(), 'Banner ID should match DB value.');
+    }
 }

@@ -162,7 +162,9 @@ class Banner
         $stm->execute();
 
         $banners = [];
-        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+        for ($i = 0; $i < $stm->rowCount(); $i++) {
+            $row = $stm->fetch(PDO::FETCH_ASSOC);
+
             $banner = $this->getNewBannerInstance();
             $this->assignFields($row, $banner);
             $banners[] = $banner;
