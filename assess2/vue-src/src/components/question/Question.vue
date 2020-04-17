@@ -33,36 +33,52 @@
       :qn = "qn"
     />
 
-    <div v-if="questionHasCalculator" class="calculator">
-      <button 
-        type="button" 
-        @click="openCalc" 
-        v-show="!showCalculator">
-          <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
-          Calculator
-      </button>
-      <div class="calc-header" v-show="showCalculator">
-        <span>
-          <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
-          Calculator
-        </span>
-        <button
-          type="button"
-          aria-label="Close calculator"
-          class="close"
-          @click="closeCalc"
-        >
-          <icon-close></icon-close>
+      <div v-if="questionHasCalculator" class="calculator">
+        <button 
+          type="button" 
+          @click="openCalc" 
+          v-show="!showCalculator">
+            <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
+            Calculator
         </button>
+        <vue-draggable-resizeable 
+          v-show="showCalculator" 
+          :lock-aspect-ratio="true"
+          :draggable="this.calcIsPoppedOut"
+          :resizable="this.calcIsPoppedOut"
+        >
+          <div class="calc-header" v-show="showCalculator">
+            <span>
+              <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
+              Calculator
+            </span>
+            <button
+              type="button"
+              aria-label="Close calculator"
+              class="close"
+              @click="this.togglePopOut"
+            >
+              O
+            </button>
+            <button
+              type="button"
+              aria-label="Close calculator"
+              class="close"
+              @click="closeCalc"
+            >
+              <icon-close></icon-close>
+            </button>
+          </div>
+          <div v-show="showCalculator">
+            <figure 
+              :id="'calc' + qn" 
+              ref="figure"
+              :class="{ 'graphing' : this.questionData.showcalculator === 'graphing'}">
+            </figure>
+          </div>
+        </vue-draggable-resizeable>
       </div>
-      <div v-show="showCalculator">
-        <figure 
-          :id="'calc' + qn" 
-          ref="figure"
-          :class="{ 'graphing' : this.questionData.showcalculator === 'graphing'}"
-        ></figure>
-      </div>
-    </div>
+    
 
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
@@ -94,6 +110,8 @@ import QuestionHelps from '@/components/question/QuestionHelps.vue';
 import IconCalc from '../icons/Calculators.vue';
 import IconClose from "../icons/Close.vue";
 
+import VueDraggableResizeable from 'vue-draggable-resizable';
+
 export default {
   name: 'Question',
   props: ['qn', 'active', 'state', 'seed', 'disabled'],
@@ -102,14 +120,16 @@ export default {
     QuestionHelps,
     Icons,
     IconCalc,
-    IconClose
+    IconClose,
+    VueDraggableResizeable
   },
   data: function () {
     return {
       timeActivated: null,
       timeActive: 0,
-      calcHasAlreadyLoaded: false,
       showCalculator: false,
+      calcHasAlreadyLoaded: false,
+      calcIsPoppedOut: false,
       uniqueId: 'test-calc' + this.qn
     };
   },
@@ -197,6 +217,10 @@ export default {
     },
     closeCalc() {
       this.showCalculator = false;
+      this.calcIsPoppedOut = false;
+    },
+    togglePopOut(){
+      this.calcIsPoppedOut = !this.calcIsPoppedOut; 
     },
     loadQuestionIfNeeded (skiprender) {
       if (!this.questionContentLoaded && this.active && store.errorMsg === null) {
@@ -481,6 +505,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 .calculator {
   margin: 0px 3px;
+  position: relative;
   width: 50%;
 }
 
