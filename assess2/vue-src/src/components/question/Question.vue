@@ -43,7 +43,6 @@
         </button>
         <vue-draggable-resizeable 
           v-show="showCalculator" 
-          :lock-aspect-ratio="true"
           :draggable="this.calcIsPoppedOut"
           :resizable="this.calcIsPoppedOut"
         >
@@ -54,11 +53,12 @@
             </span>
             <button
               type="button"
-              aria-label="Close calculator"
+              aria-label="Pop out calculator"
               class="close"
               @click="this.togglePopOut"
             >
-              O
+              <span v-show="!this.calcIsPoppedOut">Pop Out</span>
+              <span v-show="this.calcIsPoppedOut">Pop In</span>
             </button>
             <button
               type="button"
