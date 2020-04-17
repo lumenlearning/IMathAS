@@ -10,13 +10,13 @@ class TeacherAuditLog
     const ACTIONS = [
         "Assessment Settings Change",
         "Mass Assessment Settings Change",
-        "Mass Assessment Date Change",
+        "Mass Date Change",
         "Question Settings Change",
         "Clear Attempts",
         "Clear Scores",
         "Delete Item",
         "Unenroll",
-        "Grade Override"
+        "Change Grades"
     ];
 
     public static function addTracking($courseid, $action, $itemid = null, $metadata = array())

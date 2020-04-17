@@ -129,11 +129,11 @@ final class TeacherAuditLogTest extends TestCase
     }
 
     /*
-     * MassAssessmentDateChangeRecorded
+     * MassDateChangeRecorded
      */
-    public function testMassAssessmentDateChangeRecorded()
+    public function testMassDateChangeRecorded()
     {
-        $action = 'Mass Assessment Date Change';
+        $action = 'Mass Date Change';
         $item = self::$course1[0];
         $result = TeacherAuditLog::addTracking($item['courseid'], $action);
         $this->assertTrue($result);
@@ -195,11 +195,11 @@ final class TeacherAuditLogTest extends TestCase
     }
 
     /*
-     * GradeOverrideRecorded
+     * ChangeGradesRecorded
      */
-    public function testGradeOverrideRecorded()
+    public function testChangeGradesRecorded()
     {
-        $action = 'Grade Override';
+        $action = 'Change Grades';
         $item = self::$course1[0];
         $result = TeacherAuditLog::addTracking($item['courseid'], $action, $item['itemid']);
         $this->assertTrue($result);

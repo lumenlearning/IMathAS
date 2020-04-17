@@ -372,7 +372,13 @@ if (!(isset($teacherid))) {
                 }
 			}
 		}
-		if ($updated_settings === true) {
+
+		if (isset($_POST['removeperq'])) {
+		    $stm = $DBH->query("UPDATE imas_questions SET points=9999,attempts=9999,penalty=9999,regen=0,showans=0,fixedseeds=NULL WHERE assessmentid IN ($checkedlist)");
+            $metadata[] = "Removed per-question settings";
+		}
+
+        if ($updated_settings === true) {
             $result = TeacherAuditLog::addTracking(
                 $cid,
                 "Mass Assessment Settings Change",
@@ -381,29 +387,6 @@ if (!(isset($teacherid))) {
             );
         }
 
-		if (isset($_POST['removeperq'])) {
-		    $stm = $DBH->query("UPDATE imas_questions SET points=9999,attempts=9999,penalty=9999,regen=0,showans=0,fixedseeds=NULL WHERE assessmentid IN ($checkedlist)");
-            /*if ($stm->rowCount()>0) {
-                $metadata = array(
-                    "assessmentids" => $checkedlist,
-                    "points"=>9999,
-                    "attempts"=>9999,
-                    "penalty"=>9999,
-                    "regen"=>0,
-                    "showans"=>0,
-                    "showhints"=>-1,
-                    "fixedseeds"=>NULL
-                );
-                $result = TeacherAuditLog::addTracking(
-                    $cid,
-                    "Mass Question Settings Change",
-                    null,
-                    $metadata
-                );
-                var_dump($result);
-            }
-            var_dump($metadata);*/
-		}
 		if (isset($_POST['docopyopt']) || isset($_POST['chgdefpoints']) || isset($_POST['removeperq'])) {
 			//update points possible
 			require_once("../includes/updateptsposs.php");
