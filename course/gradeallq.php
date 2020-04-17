@@ -206,6 +206,18 @@
 			$query .= "ON DUPLICATE KEY UPDATE bestscores=VALUES(bestscores),feedback=VALUES(feedback)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($updatedata);
+			if ($stm->rowCount()>0) {
+				$result = TeacherAuditLog::addTracking(
+					$this->assess_info->getCourseId(),
+					"Change Grades",
+					$updatedata['id'],
+					array(
+						'Assessment Ver' => 1,
+						'old_attempt' => $line,
+						'updated' => $updatedata
+					)
+				);
+			}
 		}
 
 		if (isset($_GET['quick'])) {
