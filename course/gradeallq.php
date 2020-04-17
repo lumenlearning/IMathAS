@@ -2,6 +2,7 @@
 //IMathAS:  Grade all of one question for an assessment
 //(c) 2007 David Lippman
 	require("../init.php");
+	require_once("../includes/TeacherAuditLog.php");
 
 	$isteacher = isset($teacherid);
 	$istutor = isset($tutorid);

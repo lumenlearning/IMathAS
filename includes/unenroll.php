@@ -1,6 +1,7 @@
 <?php
 
 require(__DIR__.'/migratesettings.php');
+require_once(__DIR__."/TeacherAuditLog.php");
 
 //util function for unenrolling students
 //$cid = courseid

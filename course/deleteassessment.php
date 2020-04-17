@@ -4,6 +4,7 @@
 
 /*** master php includes *******/
 require("../init.php");
+require_once("../includes/TeacherAuditLog.php");
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -47,7 +48,6 @@ if (!(isset($teacherid))) {
 		$stm = $DBH->prepare("DELETE FROM imas_assessments WHERE id=:id AND courseid=:courseid");
 		$stm->execute(array(':id'=>$aid, ':courseid'=>$cid));
 		if ($stm->rowCount()>0) {
-		    require_once('../includes/TeacherAuditLog.php');
             $result = TeacherAuditLog::addTracking(
                 $cid,
                 "Delete Item",

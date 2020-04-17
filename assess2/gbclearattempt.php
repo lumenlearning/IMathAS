@@ -26,7 +26,7 @@ require_once("./common_start.php");
 require_once("./AssessInfo.php");
 require_once("./AssessRecord.php");
 require_once('./AssessUtils.php');
-require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
+require_once("../includes/TeacherAuditLog.php");
 
 header('Content-Type: application/json; charset=utf-8');
 

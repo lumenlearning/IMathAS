@@ -4,6 +4,7 @@
 
 /*** master php includes *******/
 require("../init.php");
+require_once("../includes/TeacherAuditLog.php");
 
 
 /*** pre-html data manipulation, including function code *******/
