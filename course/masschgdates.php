@@ -191,7 +191,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($assessbasictoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Basic Assessment" => $assessbasictoupdate);
+				$metadata["Basic Assessment"] = $assessbasictoupdate;
 			}
 		}
 		if (count($assessfulltoupdate)>0) {
@@ -202,16 +202,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($assessfulltoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Full Assessment" => $assessfulltoupdate);
+				$metadata["Full Assessment"] = $assessfulltoupdate;
 			}
-		}
-		if ($updated_settings === true) {
-			$result = TeacherAuditLog::addTracking(
-				$cid,
-				"Mass Assessment Date Change",
-				null,
-				$metadata
-			);
 		}
 		if (count($inlinetoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($inlinetoupdate, 4);
@@ -221,7 +213,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($inlinetoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Inline Text" => $inlinetoupdate);
+				$metadata["Inline Text"] = $inlinetoupdate;
 			}
 		}
 		if (count($linktoupdate)>0) {
@@ -232,7 +224,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($linktoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Inline Text" => $inlinetoupdate);
+				$metadata["Linked Text"] = $linktoupdate;
 			}
 		}
 		if (count($wikitoupdate)>0) {
@@ -243,7 +235,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($wikitoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Inline Text" => $inlinetoupdate);
+				$metadata["Wikis"] = $wikitoupdate;
 			}
 		}
 		if (count($forumbasictoupdate)>0) {
@@ -254,7 +246,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($forumbasictoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Inline Text" => $inlinetoupdate);
+				$metadata["Forums Basic"] = $forumbasictoupdate);
 			}
 		}
 		if (count($forumfulltoupdate)>0) {
@@ -265,7 +257,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm->execute($forumfulltoupdate);
 			if ($stm->rowCount()>0) {
 				$updated_settings = true;
-				$metadata += array("Inline Text" => $inlinetoupdate);
+				$metadata["Forums Full"] = $forumfulltoupdate;
 			}
 		}
 		if ($blockchg>0) {
@@ -273,15 +265,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
 		}
-		//record all dates changed
-		/*if ($updated_settings === true) {
+		if ($updated_settings === true) {
 			$result = TeacherAuditLog::addTracking(
 				$cid,
 				"Mass Date Change",
 				null,
 				$metadata
 			);
-		}*/
+		}
 
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
 
