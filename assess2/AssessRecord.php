@@ -11,6 +11,7 @@ require_once(__DIR__ . '/questions/models/QuestionParams.php');
 require_once(__DIR__ . '/questions/models/ShowAnswer.php');
 require_once(__DIR__ . '/questions/ScoreEngine.php');
 require_once(__DIR__ . '/questions/models/ScoreQuestionParams.php');
+require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
 
 use IMathAS\assess2\questions\QuestionGenerator;
 use IMathAS\assess2\questions\models\QuestionParams;
@@ -39,6 +40,7 @@ class AssessRecord
   private $need_to_record = false;
   private $penalties = array();
   private $dispqn = null;
+  private $oldattempt = array();
 
   /**
    * Construct object
@@ -141,6 +143,7 @@ class AssessRecord
                     'score', 'status');
     foreach ($fields as $field) {
       $qarr[':'.$field] = $this->assessRecord[$field];
+      $oldattempt[$field] = $this->assessRecord[$field];
     }
     if (!$this->is_practice && !empty($this->data)) {
       $fields[] = 'scoreddata';
@@ -180,6 +183,17 @@ class AssessRecord
       }
       $stm = $this->DBH->prepare($query);
       $stm->execute($qarr);
+      if ($stm->rowCount()>0) {
+          $result = TeacherAuditLog::addTracking(
+              $this->assess_info->getCourseId(),
+              "Change Grades",
+              $this->curAid,
+              array(
+                  'Assessment Ver' => 2,
+                  'studentid' => $this->curUid
+              )
+          );
+      }
 
       $this->need_to_record = false;
     }
