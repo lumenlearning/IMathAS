@@ -108,7 +108,7 @@
 
 			foreach(explode(',',$_POST['qids']) as $qid) {
 				$attempts = trim($_POST['attempts'.$qid]);
-                $showcalculator = $_POST['showcalculator'.$qid];
+                $showcalculator = $_POST['showcalculator'.$qid]??'default';
 				$showhints = intval($_POST['showhints'.$qid]);
 				if ($points=='') { $points = 9999;}
 				if ($attempts=='' || intval($attempts)==0) {$attempts = 9999;}
