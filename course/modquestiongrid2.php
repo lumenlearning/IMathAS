@@ -29,7 +29,7 @@
 						$points = trim($_POST['points'.$qsetid]);
 					}
 					$attempts = trim($_POST['attempts'.$qsetid]);
-                    $showcalculator = $_POST['showcalculator'.$qsetid];
+                    $showcalculator = $_POST['showcalculator'.$qsetid]??'default';
 					$showhints = intval($_POST['showhints'.$qsetid]);
 					if ($points=='' || $points==$defpoints) { $points = 9999;}
 					if ($attempts=='' || intval($attempts)==0) {$attempts = 9999;}
