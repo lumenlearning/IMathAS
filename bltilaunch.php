@@ -334,7 +334,9 @@ if (isset($_GET['launch'])) {
 					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:groupid)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
 						':msgnotify'=>$msgnot,':groupid'=>$newgroupid));
 				} else {
 					$rights = 10;
@@ -342,7 +344,9 @@ if (isset($_GET['launch'])) {
 					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
 						':msgnotify'=>$msgnot));
 				}
 				$userid = $DBH->lastInsertId(); //DB mysql_insert_id();
@@ -710,7 +714,9 @@ if (isset($_GET['launch'])) {
 				$query .= '(:userid,:SID,:password,:rights,:FirstName,:LastName,:email,0)';
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':userid'=>$userid, ':SID'=>'lti-'.$userrow['id'], ':password'=>'pass' ,':rights'=>10,
-					':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email));
+					':FirstName'=>Sanitize::stripHtmlTags($firstname),
+					':LastName'=>Sanitize::stripHtmlTags($lastname),
+					':email'=>Sanitize::emailAddress($email)));
 			} else if ($firstname != $userrow['FirstName'] || $lastname != $userrow['LastName'] || $email != $userrow['email']) {
 				//update imas_users record
 				$stm2 = $DBH->prepare("UPDATE imas_users SET FirstName=?,LastName=?,email=? WHERE id=?");
@@ -757,7 +763,10 @@ if (isset($_GET['launch'])) {
 					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:groupid)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':groupid'=>$newgroupid));
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),
+						':groupid'=>$newgroupid));
 
 				} else {
 					$rights = 10;
@@ -765,7 +774,9 @@ if (isset($_GET['launch'])) {
 					$query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0)';
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-						':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email));
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email)));
 				}
 				$userid = $DBH->lastInsertId(); //DB $userid = mysql_insert_id();
 				if ($rights>=20) {
@@ -1930,13 +1941,21 @@ if (isset($_GET['launch'])) {
 					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
 					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':groupid'=>$newgroupid));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
+						':msgnotify'=>$msgnot, ':groupid'=>$newgroupid));
 				} else {
 					$rights = 10;
 					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
 					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
+						':msgnotify'=>$msgnot));
 				}
 				$userid = $DBH->lastInsertId();
 			}
@@ -2316,13 +2335,21 @@ if (isset($_GET['launch'])) {
 					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid) VALUES ";
 					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':groupid'=>$newgroupid));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),
+						':msgnotify'=>0, ':groupid'=>$newgroupid));
 				} else {
 					$rights = 10;
 					$query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify) VALUES ";
 					$query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify)";
 					$stm = $DBH->prepare($query);
-					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),
+						':msgnotify'=>0));
 				}
 				$userid = $DBH->lastInsertId();
 			}
