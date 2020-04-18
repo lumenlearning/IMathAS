@@ -43,8 +43,12 @@
         </button>
         <vue-draggable-resizeable 
           v-show="showCalculator" 
-          :draggable="this.calcIsPoppedOut"
-          :resizable="this.calcIsPoppedOut"
+          class-name-active="calculator-active"
+          :style="{position: relative}"
+          :draggable="calcIsPoppedOut"
+          :resizable="calcIsPoppedOut"
+          :h="450"
+          :w="300"
         >
           <div class="calc-header" v-show="showCalculator">
             <span>
@@ -57,8 +61,8 @@
               class="close"
               @click="this.togglePopOut"
             >
-              <span v-show="!this.calcIsPoppedOut">Pop Out</span>
-              <span v-show="this.calcIsPoppedOut">Pop In</span>
+              <span v-show="!calcIsPoppedOut">Pop Out</span>
+              <span v-show="calcIsPoppedOut">Pop In</span>
             </button>
             <button
               type="button"
@@ -506,7 +510,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .calculator {
   margin: 0px 3px;
   position: relative;
-  width: 50%;
+  width: 300px;
 }
 
 .calculator * {
@@ -576,6 +580,14 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   display: inline-block;
   margin-left: 8px;
   padding: 4px 0;
+}
+
+.draggable-parent {
+  position: relative;
+}
+
+.calculator-active {
+  position: absolute;
 }
 
 </style>
