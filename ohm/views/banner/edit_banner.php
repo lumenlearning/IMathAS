@@ -106,7 +106,7 @@
         <div class="form-action-buttons u-margin-vertical">
             <button type="submit" class="button button--primary"><?php
                 echo ('modify' == strtolower($action)) ? 'Save' : $action; ?></button>
-            <button type="submit" id="cancel-button" class="button">Cancel</button>
+            <button id="js-cancel-button" class="button">Cancel</button>
         </div>
     </form>
 </div>

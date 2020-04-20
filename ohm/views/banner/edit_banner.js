@@ -9,7 +9,8 @@ $(document).ready(function () {
     toggleTimestampFields('#edate', '#etime', checked);
   });
 
-  $('#cancel-button').click(function () {
+  $('#js-cancel-button').click(function (e) {
+    e.preventDefault();
     window.location.href = "?";
   });
 });
