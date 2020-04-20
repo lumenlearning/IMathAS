@@ -5,6 +5,7 @@ namespace OHM\Models;
 use DateTime;
 use OHM\Exceptions\DatabaseWriteException;
 use PDO;
+use PDOStatement;
 
 /**
  * Class Banner Represents a single row in ohm_notices.
@@ -32,6 +33,8 @@ class Banner
 
     /* @var PDO */
     private $dbh;
+    /* @var PDOStatement */
+    private $stm;
 
     // Used during testing.
     private $bannerForTesting;
@@ -145,6 +148,44 @@ class Banner
         }
 
         return true;
+    }
+
+    /**
+     * Get all Banner objects. Use next() to get individual Banners.
+     *
+     * @return int The number of Banners found.
+     * @see next()
+     */
+    public function findAll(): int
+    {
+        $this->stm = $this->dbh->query(
+            "SELECT id, is_enabled, description, start_at, end_at FROM ohm_notices");
+        $this->stm->execute();
+
+        return $this->stm->rowCount();
+    }
+
+    /**
+     * Get the next Banner object after using findAll().
+     *
+     * @return Banner|null
+     * @see findAll()
+     */
+    public function next(): ?Banner
+    {
+        if (is_null($this->stm)) {
+            return null;
+        }
+
+        $row = $this->stm->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+
+        $banner = new Banner($this->dbh);
+        $banner->assignFields($row, $banner);
+
+        return $banner;
     }
 
     /**

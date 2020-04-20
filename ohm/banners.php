@@ -90,11 +90,11 @@ function list_banners(): void
         <tbody>
     <?php
 
-    $stm = $DBH->query("SELECT id, is_enabled, description, start_at, end_at FROM ohm_notices");
-    $stm->execute();
+    $bannerRepository = new Banner($DBH);
+    $bannerRepository->findAll();
 
     $alt = 1;
-    while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+    while ($banner = $bannerRepository->next()) {
         if ($alt == 0) {
             echo "<tr class=\"even\">";
             $alt = 1;
@@ -103,19 +103,19 @@ function list_banners(): void
             $alt = 0;
         }
 
-        $isEnabled = $row['is_enabled'] ? 'Enabled' : '<span class="status-disabled">Disabled</span>';
-        $startAt = is_null($row['start_at']) ? 'Immediately' : sqlTimestampToDisplayFormat($row['start_at']);
-        $endAt = is_null($row['end_at']) ? 'None' : sqlTimestampToDisplayFormat($row['end_at']);
+        $isEnabled = $banner->getEnabled() ? 'Enabled' : '<span class="status-disabled">Disabled</span>';
+        $startAt = is_null($banner->getStartAt()) ? 'Immediately' : indexTimestampFormat($banner->getStartAt());
+        $endAt = is_null($banner->getEndAt()) ? 'None' : indexTimestampFormat($banner->getEndAt());
 
         $confirmJs = sprintf('onClick="return confirm(\'Are you sure you want to delete the banner: %s?\')"',
-            Sanitize::encodeStringForDisplay($row['description']));
+            Sanitize::encodeStringForDisplay($banner->getDescription()));
 
-        $viewLink = sprintf('<a href="?action=view&id=%s" class="view-link">View</a>', $row['id']);
-        $modifyLink = sprintf('<a href="?action=modify_form&id=%s" class="modify-link">Modify</a>', $row['id']);
-        $deleteLink = sprintf('<a href="?action=delete&id=%s" class="delete-link" %s>Delete</a>', $row['id'], $confirmJs);
+        $viewLink = sprintf('<a href="?action=view&id=%s" class="view-link">View</a>', $banner->getId());
+        $modifyLink = sprintf('<a href="?action=modify_form&id=%s" class="modify-link">Modify</a>', $banner->getId());
+        $deleteLink = sprintf('<a href="?action=delete&id=%s" class="delete-link" %s>Delete</a>', $banner->getId(), $confirmJs);
 
         printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
-            Sanitize::encodeStringForDisplay($row['description']),
+            Sanitize::encodeStringForDisplay($banner->getDescription()),
             $isEnabled,
             $startAt,
             $endAt,
@@ -275,11 +275,7 @@ function modify_form(string $action, ?int $bannerId): void
 }
 
 
-function sqlTimestampToDisplayFormat(string $sqlTimestring): string
+function indexTimestampFormat(DateTime $dateTime): string
 {
-    $unixtime = strtotime($sqlTimestring);
-    $datetime = new DateTime();
-    $datetime->setTimestamp($unixtime);
-
-    return $datetime->format('n/j/Y, g:i:s A');
+    return $dateTime->format('n/j/Y, g:i:s A');
 }
