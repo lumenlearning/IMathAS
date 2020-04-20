@@ -38,30 +38,36 @@
           type="button" 
           @click="openCalc" 
           v-show="!showCalculator">
-            <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
+            <icon-calc :calc-type="calcType"></icon-calc>
             Calculator
         </button>
         <div :class="{'calc-fixed-container': calcIsPoppedOut}">
           <vue-draggable-resizeable 
             v-show="showCalculator" 
+            ref="calculator"
             class-name-active="calculator-active"
-            :style="{position: this.calcPosition}"
+            :class="{'reset-heightwidth': !calcIsPoppedOut}"
+            :style="{position: calcPosition}"
             :draggable="calcIsPoppedOut"
             :resizable="calcIsPoppedOut"
+            :handles="['br']"
             :h="450"
-            :w="350"
+            :w="400"
+            :x="350"
+            :min-width="350"
+            :min-height="450"
           >
             <div :class="{'calc-draggable-container': calcIsPoppedOut}">
               <div class="calc-header" v-show="showCalculator">
                 <span>
-                  <icon-calc :calc-type="this.questionData.showcalculator"></icon-calc>
+                  <icon-calc :calc-type="calcType"></icon-calc>
                   Calculator
                 </span>
                 <button
                   type="button"
                   aria-label="Pop out calculator"
                   class="close"
-                  @click="this.togglePopOut"
+                  @click="togglePopOut"
                 >
                   <span v-if="!calcIsPoppedOut">Pop Out</span>
                   <span v-else>Pop In</span>
@@ -79,7 +85,7 @@
                 <figure 
                   :id="'calc' + qn" 
                   ref="figure"
-                  :class="{ 'graphing' : this.questionData.showcalculator === 'graphing'}">
+                  :class="{ 'graphing' : calcType === 'graphing'}">
                 </figure>
               </div>
             </div>
@@ -136,8 +142,11 @@ export default {
       timeActivated: null,
       timeActive: 0,
       showCalculator: false,
+      calcType: this.getCalcType(),
       calcHasAlreadyLoaded: false,
       calcIsPoppedOut: false,
+      calcHeight: 450,
+      calcWidth: 550,
       uniqueId: 'test-calc' + this.qn
     };
   },
@@ -223,6 +232,9 @@ export default {
     }
   },
   methods: {
+    getCalcType(){
+      return store.assessInfo.questions[this.qn].showcalculator;
+    },
     openCalc(){
       this.showCalculator = true;
     },
@@ -230,7 +242,7 @@ export default {
       this.showCalculator = false;
       this.calcIsPoppedOut = false;
     },
-    togglePopOut(){
+    togglePopOut(left){
       this.calcIsPoppedOut = !this.calcIsPoppedOut; 
     },
     loadQuestionIfNeeded (skiprender) {
@@ -592,20 +604,27 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .calc-draggable-container {
   border-radius: 4px;
   padding: 8px;
-  position: absolute;
   background: blue;
-  left: 100%;
-  width: 375px;
-  height: 475px;
 }
 
 .calc-draggable-container .calc-header {
   background: blue; 
   color: white;
 }
+
+/* maintain height when calculator is popped out */
 .calc-fixed-container {
   position: relative;
   height: 450px;
 }
+.handle-br {
+  padding: 10px;
+  background: black;
+}
 
+/* reset calc size when popped in -- override vue-draggable-resizeable inline styles */
+.reset-heightwidth {
+  height: initial !important;
+  width: initial !important;
+}
 </style>
