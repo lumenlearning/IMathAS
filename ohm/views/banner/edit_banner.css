@@ -3,7 +3,6 @@
 }
 
 .edit-banner-form textarea {
-    display: block;
     resize: both;
 }
 
@@ -11,29 +10,19 @@
     white-space: nowrap;
 }
 
-.lux-component .lux-form .form-input.date-input,
+.lux-component .lux-form .form-input.date-input {
+    width: calc(11ch + 24px);
+}
+
 .lux-component .lux-form .form-input.time-input {
-    margin-right: 0.75em;
-    width: 10em;
+    width: 10ch;
 }
 
 .banner-timestamp-entry {
+    align-items: center;
     display: flex;
 }
 
-.banner-timestamp-entry input:first-child {
-    margin-right: 0.5em;
-}
-
-label.banner-settings {
-    margin-top: 1em;
+.banner-settings-title {
     font-size: 120%;
-}
-
-.banner-settings {
-    margin-top: 1.5em;
-}
-
-.display-toggles {
-    margin-top: 1em;
 }

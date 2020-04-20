@@ -1,26 +1,24 @@
-.add-button {
-    margin-top: 1em;
-    margin-bottom: 1em;
-}
-
-.view-link, .edit-link, .delete-link {
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+.action-link {
+    margin-left: 0.1em;
+    margin-right: 0.1em;
 }
 
 .banner-list-title {
-    display: block;
     padding-bottom: 0.5em;
     font-weight: bold;
 }
 
 .banner-list thead>tr>th {
-    justify-content: left;
+    text-align: left;
 }
 
 .banner-list tbody>tr>td {
     margin-left: 1em;
     margin-right: 1em;
+}
+
+.banner-list caption {
+    text-align: left;
 }
 
 .status-disabled {

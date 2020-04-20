@@ -70,14 +70,12 @@ function list_banners(): void
         display purposes.
     </p>
 
-    <div class="lux-component">
-        <form method="POST" action="?action=create_form">
-            <button type="submit" class="add-button button">Add</button>
-        </form>
-    </div>
+    <form method="POST" action="?action=create_form" class="lux-component">
+        <button type="submit" class="button u-margin-vertical-sm">Add</button>
+    </form>
 
-    <label for="banner-list" class="banner-list-title">Banner Notifications</label>
     <table class="banner-list gb" id="banner-list">
+        <caption class="banner-list-title">Banner Notifications</caption>
         <thead>
         <tr>
             <th>Description</th>
@@ -110,9 +108,9 @@ function list_banners(): void
         $confirmJs = sprintf('onClick="return confirm(\'Are you sure you want to delete the banner: %s?\')"',
             Sanitize::encodeStringForDisplay($banner->getDescription()));
 
-        $viewLink = sprintf('<a href="?action=view&id=%s" class="view-link">View</a>', $banner->getId());
-        $modifyLink = sprintf('<a href="?action=modify_form&id=%s" class="modify-link">Modify</a>', $banner->getId());
-        $deleteLink = sprintf('<a href="?action=delete&id=%s" class="delete-link" %s>Delete</a>', $banner->getId(), $confirmJs);
+        $viewLink = sprintf('<a href="?action=view&id=%s" class="action-link">View</a>', $banner->getId());
+        $modifyLink = sprintf('<a href="?action=modify_form&id=%s" class="action-link">Modify</a>', $banner->getId());
+        $deleteLink = sprintf('<a href="?action=delete&id=%s" class="action-link" %s>Delete</a>', $banner->getId(), $confirmJs);
 
         printf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>\n",
             Sanitize::encodeStringForDisplay($banner->getDescription()),
