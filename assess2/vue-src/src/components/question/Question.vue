@@ -41,7 +41,7 @@
             <icon-calc :calc-type="calcType"></icon-calc>
             Calculator
         </button>
-        <div :class="{'calc-fixed-container': calcIsPoppedOut}">
+        <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
           <vue-draggable-resizeable 
             v-show="showCalculator" 
             class-name-active="calculator-active"
@@ -52,13 +52,14 @@
             :draggable="calcIsPoppedOut"
             :resizable="calcIsPoppedOut"
             :handles="['br']"
+            :drag-handle="'.calc-header'"
             :h="calcType === 'graphing' ? 550 : 450"
             :w="calcType === 'graphing' ? 550 : 400"
             :x="350"
-            :min-width="350"
-            :min-height="450"
+            :min-width="300"
+            :min-height="400"
           >
-            <div :class="{'calc-draggable-container': calcIsPoppedOut}">
+            <div :class="{'calc-popout': calcIsPoppedOut}">
               <div class="calc-header" v-show="showCalculator">
                 <span>
                   <icon-calc :calc-type="calcType"></icon-calc>
@@ -68,7 +69,7 @@
                   <button
                     type="button"
                     aria-label="Pop out calculator"
-                    class="close"
+                    class="button"
                     @click="toggleCalcPopOut"
                   >
                     <icon-pop-out v-if="!calcIsPoppedOut">Pop Out</icon-pop-out>
@@ -77,22 +78,19 @@
                   <button
                     type="button"
                     aria-label="Close calculator"
-                    class="close"
+                    class="button"
                     @click="closeCalc"
                   >
                     <icon-close></icon-close>
                   </button>
                 </span>
               </div>
-              <div 
-                class="calc-container" 
-                v-show="showCalculator"
-                :style="{'height': calcHeight + 'px'}"
-                >
+              <div class="calc-body" v-show="showCalculator">
                 <figure 
                   :id="'calc' + qn" 
                   ref="figure"
-                  :class="{ 'graphing' : calcType === 'graphing'}">
+                  :class="{ 'graphing' : calcType === 'graphing', }"
+                  :style="{'height': calcHeight + 'px'}">
                 </figure>
               </div>
             </div>
@@ -156,7 +154,7 @@ export default {
       calcType: this.getCalcType(),
       calcHasAlreadyLoaded: false,
       calcIsPoppedOut: false,
-      calcHeight: "",
+      calcHeight: this.calcType === 'graphing' ? 550 : 450,
       uniqueId: 'test-calc' + this.qn
     };
   },
@@ -558,6 +556,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   line-height: 1;
   text-align: center;
 }
+
 .calculator button:hover {
   background: linear-gradient(180deg, white 0%, #e9edf1 100%);
 }
@@ -586,7 +585,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   display: flex;
   justify-content: space-between;
 }
-.calc-header .close {
+.calc-header .button {
   border: none;
   border-radius: 0 3px 0 0;
   margin: 0;
@@ -595,12 +594,12 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   z-index: 1;
 }
 
-.calc-header .close:hover {
+.calc-header .button {
   background: linear-gradient(180deg, white 0%, #e9edf1 100%);
   border-left: 1px solid #ccc;
 }
 
-.calc-header .close svg {
+.calc-header .button svg {
   height: 14px;
   vertical-align: middle;
   width: 14px;
@@ -613,19 +612,31 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   padding: 4px 0;
 }
 
-/* .calc-container {
-  height: 500px;
-} */
-
-.calc-draggable-container {
+.calc-popout {
+  background: #fff;
+  border: 1px solid #C4CDD5;
   border-radius: 4px;
-  padding: 8px;
-  background: #1e74d1;
 }
 
-.calc-draggable-container .calc-header {
-  background:#1e74d1; 
+.calc-popout .calc-header {
+  background-color: #1e74d1;
   color: white;
+}
+
+.calc-popout .calc-header .button {
+  background: #1e74d1;
+  border-left: none;
+  color: white;
+}
+
+.calc-popout .calc-header svg {
+  background-color: #1e74d1;
+  color: white;
+}
+
+.calc-popout .calc-body {
+  margin: 16px;
+  margin-bottom: 32px;
 }
 
 /* maintain height of question section when calculator is popped out */
@@ -633,6 +644,11 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   position: relative;
   height: 450px;
 }
+
+.calc-fixed-container.graphing {
+  height: 550px;
+}
+
 .handle {
   box-sizing: border-box;
   position: absolute;
@@ -642,9 +658,9 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 }
 
 .handle-br {
-  bottom: -10px;
-  right: -10px; 
+  bottom: -75px;
   cursor: se-resize;
+  right: 6px; 
 }
 /* reset calc size when popped in -- override vue-draggable-resizeable inline styles */
 .reset-heightwidth {
