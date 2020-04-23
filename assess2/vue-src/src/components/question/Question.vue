@@ -53,10 +53,10 @@
             :resizable="calcIsPoppedOut"
             :handles="['br']"
             :drag-handle="'.calc-header'"
-            :h="calcType === 'graphing' ? 550 : 450"
-            :w="calcType === 'graphing' ? 550 : 400"
-            :x="350"
-            :min-width="300"
+            :h="500"
+            :w="calcType === 'graphing' ? 600 : 500"
+            :x="400"
+            :min-width="calcType === 'graphing' ? 500 : 400"
             :min-height="400"
           >
             <div slot="br">
@@ -66,7 +66,8 @@
               <div class="calc-header" v-show="showCalculator">
                 <span>
                   <icon-calc :calc-type="calcType"></icon-calc>
-                  Calculator
+                  <span v-if="!calcIsPoppedOut">Calculator</span>
+                  <span v-else> Question {{qn + 1}} Calculator</span>
                 </span>
                 <span>
                   <button
@@ -75,8 +76,8 @@
                     class="button"
                     @click="toggleCalcPopOut"
                   >
-                    <icon-pop-out v-if="!calcIsPoppedOut">Pop Out</icon-pop-out>
-                    <icon-pop-in v-else>Pop In</icon-pop-in>
+                    <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
+                    <icon-pop-in v-else></icon-pop-in>
                   </button>
                   <button
                     type="button"
@@ -159,7 +160,7 @@ export default {
       calcType: this.getCalcType(),
       calcHasAlreadyLoaded: false,
       calcIsPoppedOut: false,
-      calcHeight: this.calcType === 'graphing' ? 550 : 450,
+      calcHeight: 500,
       uniqueId: 'test-calc' + this.qn
     };
   },
@@ -545,7 +546,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .calculator {
   margin: 0px 3px;
   position: relative;
-  width: 400px;
+  width: 500px;
 }
 
 .calculator * {
@@ -573,9 +574,6 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   height: 100%;
   margin: 0;
   width: 100%;
-}
-.calculator figure.graphing {
-  height: inherit;
 }
 .calculator svg {
   height: 20px;
@@ -625,18 +623,22 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 .calc-popout .calc-header {
   background-color: #1e74d1;
-  color: white;
+  color:#fff;
 }
 
 .calc-popout .calc-header .button {
   background: #1e74d1;
   border-left: none;
-  color: white;
+  color: #fff;
+}
+
+.calc-popout .calc-header .button:hover {
+  background: #1e74d1;
 }
 
 .calc-popout .calc-header svg {
   background-color: #1e74d1;
-  color: white;
+  fill: #fff;
 }
 
 .calc-popout .calc-body {
@@ -647,11 +649,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 /* maintain height of question section when calculator is popped out */
 .calc-fixed-container {
   position: relative;
-  height: 450px;
-}
-
-.calc-fixed-container.graphing {
-  height: 550px;
+  height: 530px;
 }
 
 .handle {
@@ -660,7 +658,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 }
 
 .handle-br {
-  bottom: -75px;
+  bottom: -73px;
   cursor: se-resize;
   right: 6px; 
 }
