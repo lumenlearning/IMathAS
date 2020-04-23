@@ -19,7 +19,6 @@ require_once("./common_start.php");
 require_once("./AssessInfo.php");
 require_once("./AssessRecord.php");
 require_once('./AssessUtils.php');
-require_once('../includes/TeacherAuditLog.php');
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -39,21 +38,8 @@ $now = time();
 if ($isActualTeacher && $uid == $userid && isset($_GET['reset'])) {
   require_once(__DIR__ . '/../includes/filehandler.php');
   deleteAssess2FilesOnUnenroll(array($uid), array($aid), array());
-    $stm = $DBH->prepare("SELECT userid,score FROM imas_assessment_records WHERE userid=? AND assessmentid=?");
-    $stm->execute(array($uid, $aid));
-    while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-        $grades[$row['userid']]=$row["score"];
-    }
   $stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE userid=? AND assessmentid=?");
   $stm->execute(array($uid, $aid));
-    if ($stm->rowCount()>0) {
-        $result = TeacherAuditLog::addTracking(
-            $cid,
-            "Clear Attempts",
-            $aid,
-            array('user_grades'=>$grades)
-        );
-    }
 }
 
 //load settings without questions
