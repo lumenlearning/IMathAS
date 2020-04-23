@@ -73,7 +73,7 @@
               <div>
                 <button
                     type="button"
-                    aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
+                    :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
                     class="button"
                     @click="toggleCalcPopOut">
                 
@@ -665,8 +665,8 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 /* maintain height of question section when calculator is popped out */
 .calc-fixed-container {
-  position: relative;
   height: 530px;
+  position: relative;
 }
 
 .handle {
