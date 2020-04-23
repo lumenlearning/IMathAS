@@ -37,7 +37,7 @@
         <button 
           type="button" 
           @click="openCalc" 
-          v-show="!showCalculator">
+          v-show="!showCalculator || calcIsPoppedOut">
             <icon-calc :calc-type="calcType"></icon-calc>
             Calculator
         </button>
@@ -59,6 +59,9 @@
             :min-width="300"
             :min-height="400"
           >
+            <div slot="br">
+              <icon-drag></icon-drag>
+            </div>
             <div :class="{'calc-popout': calcIsPoppedOut}">
               <div class="calc-header" v-show="showCalculator">
                 <span>
@@ -129,7 +132,8 @@ import QuestionHelps from '@/components/question/QuestionHelps.vue';
 import IconCalc from '../icons/Calculators.vue';
 import IconClose from "../icons/Close.vue";
 import IconPopOut from "../icons/PopOut.vue";
-import IconPopIn from "../icons/PopIn.vue"
+import IconPopIn from "../icons/PopIn.vue";
+import IconDrag from "../icons/DragHandle.vue";
 
 import VueDraggableResizeable from 'vue-draggable-resizable';
 
@@ -144,6 +148,7 @@ export default {
     IconClose,
     IconPopOut,
     IconPopIn,
+    IconDrag,
     VueDraggableResizeable
   },
   data: function () {
@@ -652,9 +657,6 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .handle {
   box-sizing: border-box;
   position: absolute;
-  height: 10px; 
-  width: 10px;
-  background: black;
 }
 
 .handle-br {
