@@ -40,7 +40,6 @@ class AssessRecord
   private $need_to_record = false;
   private $penalties = array();
   private $dispqn = null;
-  private $oldattempt = array();
 
   /**
    * Construct object
@@ -143,7 +142,6 @@ class AssessRecord
                     'score', 'status');
     foreach ($fields as $field) {
       $qarr[':'.$field] = $this->assessRecord[$field];
-      $oldattempt[$field] = $this->assessRecord[$field];
     }
     if (!$this->is_practice && !empty($this->data)) {
       $fields[] = 'scoreddata';
@@ -183,14 +181,20 @@ class AssessRecord
       }
       $stm = $this->DBH->prepare($query);
       $stm->execute($qarr);
-      if ($stm->rowCount()>0) {
+      if ($stm->rowCount()>0 && $this->data['scoreoverride']==true) {
+          $this->loadRecord($this->curUid);
+              //do we want to keep the score data? if so we need to decode or else unset
+          $this->assessRecord['scoreddata'] = json_decode(gzdecode($this->assessRecord['scoreddata']), true);
+          $qarr[':scoreddata'] = json_decode(gzdecode($qarr[':scoreddata']), true);
           $result = TeacherAuditLog::addTracking(
               $this->assess_info->getCourseId(),
               "Change Grades",
               $this->curAid,
               array(
                   'Assessment Ver' => 2,
-                  'studentid' => $this->curUid
+                  'studentid' => $this->curUid,
+                  'oldattempt' => $this->assessRecord,
+                  'newattempt' => $qarr
               )
           );
       }
