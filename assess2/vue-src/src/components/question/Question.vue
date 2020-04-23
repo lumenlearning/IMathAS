@@ -74,7 +74,7 @@
                 <button
                     type="button"
                     :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
-                    class="button"
+                    class="button popout"
                     @click="toggleCalcPopOut">
                 
                     <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
@@ -689,6 +689,16 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .reset-heightwidth {
   height: initial !important;
   width: initial !important;
+}
+
+@media (max-width: 768px){
+  .calculator {
+    width: 100%; 
+  }
+
+  .calc-header .popout {
+    display: none;
+  }
 }
 </style>
 
