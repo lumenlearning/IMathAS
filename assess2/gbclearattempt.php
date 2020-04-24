@@ -71,11 +71,6 @@ if (!$assess_record->hasRecord()) {
 }
 
 if ($type == 'all' && $keepver == 0) {
-    $stm = $DBH->prepare("SELECT userid,score FROM imas_assessment_records WHERE userid=? AND assessmentid=?");
-    $stm->execute(array($uid, $aid));
-    while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-        $grades[$row['userid']]=$row["score"];
-    }
   $stm = $DBH->prepare('DELETE FROM imas_assessment_records WHERE assessmentid=? AND userid=?');
   $stm->execute(array($aid, $uid));
     if ($stm->rowCount()>0) {
@@ -83,7 +78,7 @@ if ($type == 'all' && $keepver == 0) {
             $cid,
             "Clear Attempts",
             $aid,
-            array('user_grades'=>$grades)
+            array('grades'=>$assess_record->getGbScore())
         );
     }
   // update LTI grade

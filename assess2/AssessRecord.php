@@ -2960,6 +2960,19 @@ class AssessRecord
       $replacedDeleted = true;
     }
     $this->updateStatus();
+    $result = TeacherAuditLog::addTracking(
+        $this->assess_info->getCourseId(),
+          "Clear Attempts",
+
+          $this->curAid,
+          array(
+              'Assessment Ver' => 2,
+              'studentid' => $this->curUid,
+              'type'=>$type,
+              'keepver' => $this->assessRecord,
+              'scoreddata' => $this->data
+          )
+      );
     return $replacedDeleted;
   }
 
