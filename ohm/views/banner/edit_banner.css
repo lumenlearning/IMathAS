@@ -1,0 +1,28 @@
+.edit-banner-form {
+    width: 80%;
+}
+
+.edit-banner-form textarea {
+    resize: both;
+}
+
+.start-immediately {
+    white-space: nowrap;
+}
+
+.lux-component .lux-form .form-input.date-input {
+    width: calc(11ch + 24px);
+}
+
+.lux-component .lux-form .form-input.time-input {
+    width: 10ch;
+}
+
+.banner-timestamp-entry {
+    align-items: center;
+    display: flex;
+}
+
+.banner-settings-title {
+    font-size: 120%;
+}

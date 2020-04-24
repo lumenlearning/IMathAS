@@ -655,8 +655,8 @@ if ($overwriteBody==1) {
     // #### Begin OHM-specific code #####################################################
 
     //call hook, if defined
-    if (function_exists('displayBanner')) {
-        displayBanner($myrights, 1);
+    if (function_exists('displayBanners')) {
+        displayBanners($myrights, 1);
     }
 
     // #### End OHM-specific code #######################################################

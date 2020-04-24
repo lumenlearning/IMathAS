@@ -470,8 +470,8 @@ for ($i=0; $i<3; $i++) {
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 	//call hook, if defined
-	if (!$twocolumn && function_exists('displayBanner')) {
-		displayBanner($myrights, 1);
+	if (!$twocolumn && function_exists('displayBanners')) {
+		displayBanners($myrights);
 	}
 	// #### End OHM-specific code #######################################################
 	// #### End OHM-specific code #######################################################
@@ -490,8 +490,8 @@ for ($i=0; $i<3; $i++) {
 			// #### Begin OHM-specific code #####################################################
 
 			//call hook, if defined
-			if (function_exists('displayBanner')) {
-				displayBanner($myrights, 1);
+			if (function_exists('displayBanners')) {
+				displayBanners($myrights);
 			}
 
 			// #### End OHM-specific code #######################################################
