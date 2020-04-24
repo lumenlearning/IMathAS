@@ -26,6 +26,7 @@ require_once("./common_start.php");
 require_once("./AssessInfo.php");
 require_once("./AssessRecord.php");
 require_once('./AssessUtils.php');
+require_once("../includes/TeacherAuditLog.php");
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -72,6 +73,14 @@ if (!$assess_record->hasRecord()) {
 if ($type == 'all' && $keepver == 0) {
   $stm = $DBH->prepare('DELETE FROM imas_assessment_records WHERE assessmentid=? AND userid=?');
   $stm->execute(array($aid, $uid));
+    if ($stm->rowCount()>0) {
+        $result = TeacherAuditLog::addTracking(
+            $cid,
+            "Clear Attempts",
+            $aid,
+            array('grades'=>$assess_record->getGbScore())
+        );
+    }
   // update LTI grade
   $lti_sourcedid = $assess_record->getLTIsourcedId();
   if (strlen($lti_sourcedid) > 1) {

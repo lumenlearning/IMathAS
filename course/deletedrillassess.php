@@ -4,6 +4,7 @@
 
 /*** master php includes *******/
 require("../init.php");
+require_once("../includes/TeacherAuditLog.php");
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -13,7 +14,8 @@ $overwriteBody = 0;
 $body = "";
 $pagetitle = "Delete Drill";
 $curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=". Sanitize::courseId($_GET['cid']) ."\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; Delete Drill";
-$daid = Sanitize::onlyInt($_GET['id']);
+$typeid = Sanitize::onlyInt($_GET['id']);
+$itemtype = 'Drill';
 if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missing go back to the index page
 	$overwriteBody = 1;
 	$body = "You need to access this page from the link on the course page";
@@ -25,17 +27,19 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 	$block = Sanitize::stripHtmlTags($_GET['block']);
 
 	if ($_POST['remove']=="really") {
-		$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype='Drill' AND courseid=:courseid");
-		$stm->execute(array(':typeid'=>$daid, ':courseid'=>$cid));
+        $stm = $DBH->query("SELECT name FROM imas_drillassess WHERE id=$typeid");
+        $item_name = $stm->fetchColumn(0);
+		$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype=$itemtype AND courseid=:courseid");
+		$stm->execute(array(':typeid'=>$typeid, ':courseid'=>$cid));
 		if ($stm->rowCount()>0) {
 			$itemid = $stm->fetchColumn(0);
-			$DBH->beginTransaction();
+            $DBH->beginTransaction();
 			$stm = $DBH->prepare("DELETE FROM imas_items WHERE id=:id");
 			$stm->execute(array(':id'=>$itemid));
 			$stm = $DBH->prepare("DELETE FROM imas_drillassess WHERE id=:id");
-			$stm->execute(array(':id'=>$daid));
+			$stm->execute(array(':id'=>$typeid));
 			$stm = $DBH->prepare("DELETE FROM imas_drillassess_sessions WHERE drillassessid=:drillassessid");
-			$stm->execute(array(':drillassessid'=>$daid));
+			$stm->execute(array(':drillassessid'=>$typeid));
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$cid));
 			$items = unserialize($stm->fetchColumn(0));
@@ -54,12 +58,22 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 			}
 		}
 		$DBH->commit();
+        $result = TeacherAuditLog::addTracking(
+            $cid,
+            "Delete Item",
+            $itemid,
+            array(
+                'itemtype'=>$itemtype,
+                'typeid'=>$typeid,
+                'item_name'=>$item_name
+            )
+        );
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
 
 		exit;
 	} else {
 		$stm = $DBH->prepare("SELECT name FROM imas_drillassess WHERE id=:id AND courseid=:cid");
-		$stm->execute(array(':id'=>$daid, ':cid'=>$cid));
+		$stm->execute(array(':id'=>$typeid, ':cid'=>$cid));
 		$itemname = $stm->fetchColumn(0);
 	}
 }

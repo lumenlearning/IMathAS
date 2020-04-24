@@ -2,6 +2,7 @@
 //IMathAS:  Grade all of one question for an assessment
 //(c) 2007 David Lippman
 	require("../init.php");
+	require_once("../includes/TeacherAuditLog.php");
 
 	$isteacher = isset($teacherid);
 	$istutor = isset($tutorid);
@@ -206,6 +207,18 @@
 			$query .= "ON DUPLICATE KEY UPDATE bestscores=VALUES(bestscores),feedback=VALUES(feedback)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($updatedata);
+			if ($stm->rowCount()>0) {
+				$result = TeacherAuditLog::addTracking(
+					$this->assess_info->getCourseId(),
+					"Change Grades",
+					$updatedata['id'],
+					array(
+						'Assessment Ver' => 1,
+						'old_attempt' => $line,
+						'updated' => $updatedata
+					)
+				);
+			}
 		}
 
 		if (isset($_GET['quick'])) {

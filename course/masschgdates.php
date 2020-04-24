@@ -4,6 +4,7 @@
 
 /*** master php includes *******/
 require("../init.php");
+require_once("../includes/TeacherAuditLog.php");
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -181,12 +182,17 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 
 		}
+		$metadata = array();
 		if (count($assessbasictoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($assessbasictoupdate, 4);
 			$query = "INSERT INTO imas_assessments (id,startdate,enddate,avail) VALUES $placeholders ";
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($assessbasictoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Basic Assessment"] = $assessbasictoupdate;
+			}
 		}
 		if (count($assessfulltoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($assessfulltoupdate, 6);
@@ -194,6 +200,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),reviewdate=VALUES(reviewdate),LPcutoff=VALUES(LPcutoff),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($assessfulltoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Full Assessment"] = $assessfulltoupdate;
+			}
 		}
 		if (count($inlinetoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($inlinetoupdate, 4);
@@ -201,6 +211,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($inlinetoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Inline Text"] = $inlinetoupdate;
+			}
 		}
 		if (count($linktoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($linktoupdate, 4);
@@ -208,6 +222,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($linktoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Linked Text"] = $linktoupdate;
+			}
 		}
 		if (count($wikitoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($wikitoupdate, 4);
@@ -215,6 +233,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($wikitoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Wikis"] = $wikitoupdate;
+			}
 		}
 		if (count($forumbasictoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($forumbasictoupdate, 4);
@@ -222,6 +244,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($forumbasictoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Forums Basic"] = $forumbasictoupdate);
+			}
 		}
 		if (count($forumfulltoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($forumfulltoupdate, 6);
@@ -229,11 +255,23 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail),postby=VALUES(postby),replyby=VALUES(replyby)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($forumfulltoupdate);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata["Forums Full"] = $forumfulltoupdate;
+			}
 		}
 		if ($blockchg>0) {
 			$itemorder = serialize($items);
 			$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
+		}
+		if ($updated_settings === true) {
+			$result = TeacherAuditLog::addTracking(
+				$cid,
+				"Mass Date Change",
+				null,
+				$metadata
+			);
 		}
 
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
