@@ -33,7 +33,10 @@
       :qn = "qn"
     />
 
-      <div v-if="questionHasCalculator" class="calculator">
+      <div 
+        v-if="questionHasCalculator" 
+        class="calculator" 
+        aria-label="Use calculator">
         <button 
           type="button" 
           @click="openCalc" 
@@ -64,12 +67,11 @@
             <div slot="br">
               <icon-drag></icon-drag>
             </div>
-            <div class="calc-header" v-show="showCalculator">
-              <span>
-                <icon-calc v-show="!calcIsPoppedOut" :calc-type="calcType"></icon-calc>
-                <span v-if="!calcIsPoppedOut">Calculator</span>
-                <span v-else> Question {{qn + 1}} Calculator</span>
+            <div class="calc-header">
+              <span v-if="!calcIsPoppedOut"> 
+                <icon-calc :calc-type="calcType"></icon-calc> Calculator
               </span>
+              <span v-else> Question {{qn + 1}} Calculator</span>
               <div>
                 <button
                     type="button"
@@ -90,7 +92,7 @@
                   </button>
                 </div>
             </div>
-            <div class="calc-body" v-show="showCalculator">
+            <div class="calc-body">
               <figure 
                 :id="'calc' + qn" 
                 ref="figure"
