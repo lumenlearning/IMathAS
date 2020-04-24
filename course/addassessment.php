@@ -5,7 +5,6 @@
 /*** master php includes *******/
 require("../init.php");
 require("../includes/htmlutil.php");
-require_once("../includes/TeacherAuditLog.php");
 
 if ($courseUIver > 1) {
 	if (!isset($_GET['id'])) {
@@ -103,24 +102,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
             	$DBH->beginTransaction();
                 require_once('../includes/filehandler.php');
                 deleteallaidfiles($assessmentId);
-                $query = "SELECT userid, bestscores FROM imas_assessment_sessions WHERE assessmentid=$aid";
-                $stm = $DBH->query($query);
-                while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-                    $sp = explode(';', $row['bestscores']);
-                    $as = str_replace(array('-1','-2','~'), array('0','0',','), $sp[0]);
-                    $total = array_sum(explode(',', $as));
-                    $grades[$row['userid']][$row["assessmentid"]] = $total;
-                }
                 $stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
                 $stm->execute(array(':assessmentid'=>$assessmentId));
-                if ($stm->rowCount()>0 || $ptschanged) {
-                    $result = TeacherAuditLog::addTracking(
-                        $cid,
-                        "Clear Attempts",
-                        $aid,
-                        array(':itemorder'=>$itemorder, ':viddata'=>$viddata, 'user_grades'=>$grades)
-                    );
-                }
                 $stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
                 $stm->execute(array(':assessmentid'=>$assessmentId));
                 $stm = $DBH->prepare("UPDATE imas_questions SET withdrawn=0 WHERE assessmentid=:assessmentid");
@@ -419,14 +402,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $qarr[':cid'] = $cid;
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
-			if ($stm->rowCount()>0) {
-                $result = TeacherAuditLog::addTracking(
-                    $cid,
-                    "Assessment Settings Change",
-                    $assessmentId,
-                    $qarr
-                );
-            }
 
 			//update ptsposs field
 			if ($stm->rowCount()>0 && isset($_POST['defpoints'])) {
