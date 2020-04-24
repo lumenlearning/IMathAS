@@ -61,7 +61,7 @@ if (!(isset($teacherid))) {
 			$showans = $_POST['showans'];
 			$rubric = intval($_POST['rubric']);
 			$showhints = intval($_POST['showhints']);
-            $showcalculator = $_POST['showcalculator'];
+            $showcalculator = $_POST['showcalculator']??'default';
 		}
 		if (isset($_GET['id'])) { //already have id - updating
 			if (isset($_POST['replacementid']) && $_POST['replacementid']!='' && intval($_POST['replacementid'])!=0) {
@@ -225,6 +225,8 @@ if (!(isset($teacherid))) {
             $defaults['showcalculator'] = _('None');
         } else if (isset($CFG['showcalculator'][$defaults['showcalculator']])) {
             $defaults['showcalculator'] = _($CFG['showcalculator'][$defaults['showcalculator']]);
+        } else {
+            $defaults['showcalculator'] = 'No';
         }
     if ($defaults['showhints'] == 0) {
       $defaults['showhints'] = _('No');

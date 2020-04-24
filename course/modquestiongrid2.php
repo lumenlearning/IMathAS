@@ -29,7 +29,7 @@
 						$points = trim($_POST['points'.$qsetid]);
 					}
 					$attempts = trim($_POST['attempts'.$qsetid]);
-                    $showcalculator = $_POST['showcalculator'.$qsetid];
+                    $showcalculator = $_POST['showcalculator'.$qsetid]??'default';
 					$showhints = intval($_POST['showhints'.$qsetid]);
 					if ($points=='' || $points==$defpoints) { $points = 9999;}
 					if ($attempts=='' || intval($attempts)==0) {$attempts = 9999;}
@@ -108,7 +108,7 @@
 
 			foreach(explode(',',$_POST['qids']) as $qid) {
 				$attempts = trim($_POST['attempts'.$qid]);
-                $showcalculator = $_POST['showcalculator'.$qid];
+                $showcalculator = $_POST['showcalculator'.$qid]??'default';
 				$showhints = intval($_POST['showhints'.$qid]);
 				if ($points=='') { $points = 9999;}
 				if ($attempts=='' || intval($attempts)==0) {$attempts = 9999;}
@@ -153,6 +153,8 @@
             $defaults['showcalculator'] = _('None');
         } else if (isset($CFG['showcalculator'][$defaults['showcalculator']])) {
             $defaults['showcalculator'] = _($CFG['showcalculator'][$defaults['showcalculator']]);
+        } else {
+            $defaults['showcalculator'] = 'No';
         }
 		if ($defaults['showhints'] == 0) {
       $defaults['showhints'] = _('No');

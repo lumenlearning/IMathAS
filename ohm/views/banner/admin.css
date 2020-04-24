@@ -1,0 +1,26 @@
+.action-link {
+    margin-left: 0.1em;
+    margin-right: 0.1em;
+}
+
+.banner-list-title {
+    padding-bottom: 0.5em;
+    font-weight: bold;
+}
+
+.banner-list thead>tr>th {
+    text-align: left;
+}
+
+.banner-list tbody>tr>td {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.banner-list caption {
+    text-align: left;
+}
+
+.status-disabled {
+    color: #999;
+}

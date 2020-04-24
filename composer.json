@@ -29,6 +29,7 @@
             "OHM\\Api\\": "ohm/api/src/",
             "OHM\\Includes\\": "ohm/includes/",
             "OHM\\Exceptions\\": "ohm/exceptions/",
+            "OHM\\Services\\": "ohm/services/",
             "Desmos\\": "desmos/",
             "Desmos\\Models\\": "desmos/models/",
             "Desmos\\Controlers\\": "desmos/controlers/",
