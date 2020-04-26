@@ -1742,7 +1742,7 @@ class AssessRecord
           $showans = false;
         }
       }
-      if ($showscores && $partattemptn[$pn] > 0) {
+      if ($showscores && $partattemptn[$pn] > 0 && !isset($autosave['stuans'][$pn])) {
         $qcolors[$pn] = $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'];
       }
     }
