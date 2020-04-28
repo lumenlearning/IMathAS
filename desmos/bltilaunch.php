@@ -2143,6 +2143,7 @@ if (
         $flexwidth = true;
         $nologo = true;
         $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
+        $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
         require("../header.php");
         echo "<h3>Connecting to $installname</h3>";
         echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/desmos/bltilaunch.php?launch=true\" ";
