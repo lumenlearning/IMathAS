@@ -1066,6 +1066,15 @@ div#ohmEditGroup {
 	padding: 0.6em 1em 1em 1em;
 }
 
+/* Add New Course Assessment Player  */
+.version-inputs label {
+	display: block;
+}
+
+.version-warning {
+	font-style: italic;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {
