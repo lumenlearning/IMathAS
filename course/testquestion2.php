@@ -4,9 +4,10 @@
 
 /*** master php includes *******/
 require("../init.php");
-require("../assessment/displayq2.php");
-require("../assessment/testutil.php");
+require_once('../assess2/AssessStandalone.php');
+
 $assessver = 2;
+$courseUIver = 2;
 
  //set some page specific variables and counters
 $overwriteBody = 0;
@@ -21,22 +22,13 @@ if ($myrights<20) {
 } else {
 	//data manipulation here
 	$useeditor = 1;
-  $qsetid = Sanitize::onlyInt($_GET['qsetid']);
-	if (isset($_GET['seed'])) {
-		$seed = Sanitize::onlyInt($_GET['seed']);
-		$attempt = 0;
-	} else if (!isset($_POST['seed']) || isset($_POST['regen'])) {
-		$seed = rand(0,10000);
-		$attempt = 0;
-	} else {
-		$seed = Sanitize::onlyInt($_POST['seed']);
-		$attempt = $_POST['attempt']+1;
-	}
+
 	if (isset($_GET['onlychk']) && $_GET['onlychk']==1) {
 		$onlychk = 1;
 	} else {
 		$onlychk = 0;
 	}
+  $qsetid = sanitize::onlyInt($_GET['qsetid']);
 	if (isset($_GET['formn']) && isset($_GET['loc'])) {
 		$formn = Sanitize::encodeStringForJavascript($_GET['formn']);
 		$loc = Sanitize::encodeStringForJavascript($_GET['loc']);
@@ -52,25 +44,55 @@ if ($myrights<20) {
 		}
 	}
 
+  $query = "SELECT imas_users.email,imas_questionset.* ";
+	$query .= "FROM imas_users,imas_questionset WHERE imas_users.id=imas_questionset.ownerid AND imas_questionset.id=:id";
+	$stm = $DBH->prepare($query);
+	$stm->execute(array(':id'=>$qsetid));
+	$line = $stm->fetch(PDO::FETCH_ASSOC);
 
-	$lastanswers = array();
-	$scores = array();
-	$rawscores = array();
-	$qn = 27;  //question number to use during testing
-	$lastanswers[$qn] = '';
-	$rawscores[$qn] = -1;
-	$scores[$qn] = -1;
+  $a2 = new AssessStandalone($DBH);
+  $a2->setQuestionData($line['id'], $line);
 
-	if (isset($_POST['seed'])) {
-		list($score,$rawscores[$qn]) = scoreq($qn,$qsetid,$_POST['seed'],$_POST['qn'.$qn],$attempt-1);
-		$scores[$qn] = $score;
+  $qn = 27;  //question number to use during testing
+  if (isset($_POST['state'])) {
+    $state = json_decode($_POST['state'], true);
+  } else {
+    if (isset($_GET['seed'])) {
+  		$seed = Sanitize::onlyInt($_GET['seed']);
+  	} else {
+  		$seed = rand(0,10000);
+  	}
+    $state = array(
+      'seeds' => array($qn => $seed),
+      'qsid' => array($qn => $qsetid),
+      'stuanswers' => array(),
+      'stuanswersval' => array(),
+      'scorenonzero' => array(($qn+1) => false),
+      'scoreiscorrect' => array(($qn+1) => false),
+      'partattemptn' => array($qn => array()),
+      'rawscores' => array($qn => array())
+    );
+  }
+  $a2->setState($state);
+
+	if (isset($_POST['toscoreqn'])) {
+    $toscoreqn = json_decode($_POST['toscoreqn'], true);
+    $parts_to_score = array();
+    if (isset($toscoreqn[$qn])) {
+      foreach ($toscoreqn[$qn] as $pn) {
+        $parts_to_score[$pn] = true;
+      };
+    }
+    $scores = $a2->scoreQuestion($qn, $parts_to_score);
+
+		$score = implode('~', $scores);
 		$page_scoreMsg =  "<p>"._("Score on last answer: ").Sanitize::encodeStringForDisplay($score)."/1</p>\n";
 	} else {
 		$page_scoreMsg = "";
 		$_SESSION['choicemap'] = array();
 	}
   $cid = Sanitize::courseId($_GET['cid']);
-	$page_formAction = "testquestion.php?cid=$cid&qsetid=".Sanitize::encodeUrlParam($qsetid);
+	$page_formAction = "testquestion2.php?cid=$cid&qsetid=".Sanitize::encodeUrlParam($qsetid);
 
 	if (isset($_POST['usecheck'])) {
 		$page_formAction .=  "&checked=".Sanitize::encodeUrlParam($_GET['usecheck']);
@@ -87,11 +109,6 @@ if ($myrights<20) {
 	if (isset($_GET['fixedseeds'])) {
 		$page_formAction .=  "&fixedseeds=1";
 	}
-	$query = "SELECT imas_users.email,imas_questionset.* ";
-	$query .= "FROM imas_users,imas_questionset WHERE imas_users.id=imas_questionset.ownerid AND imas_questionset.id=:id";
-	$stm = $DBH->prepare($query);
-	$stm->execute(array(':id'=>$qsetid));
-	$line = $stm->fetch(PDO::FETCH_ASSOC);
 
 	$lastmod = date("m/d/y g:i a",$line['lastmoddate']);
 
@@ -112,11 +129,20 @@ if ($myrights<20) {
 /******* begin html output ********/
 $_SESSION['coursetheme'] = $coursetheme;
 $flexwidth = true; //tells header to use non _fw stylesheet
+$nologo = true;
 
 $useeqnhelper = $eqnhelper;
-$useOldassessUI = true;
-
-require("../assessment/header.php");
+$lastupdate = '20200422';
+$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/index.css?v='.$lastupdate.'" />';
+$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/chunk-common.css?v='.$lastupdate.'" />';
+$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/print.css?v='.$lastupdate.'" media="print">';
+$placeinhead .= '<script src="'.$imasroot.'/mathquill/mathquill.min.js?v=022720" type="text/javascript"></script>';
+$placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=041920" type="text/javascript"></script>';
+$placeinhead .= '<script src="'.$imasroot.'/javascript/assess2supp.js?v=041920" type="text/javascript"></script>';
+$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mathquill-basic.css">
+  <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mqeditor.css">';
+$placeinhead .= '<style>form > hr { border: 0; border-bottom: 1px solid #ddd;}</style>';
+require("../header.php");
 
 if ($overwriteBody==1) {
 	echo $body;
@@ -256,35 +282,25 @@ if ($overwriteBody==1) {
 	echo $page_scoreMsg;
 	echo '<script type="text/javascript"> function whiteout() { e=document.getElementsByTagName("div");';
 	echo 'for (i=0;i<e.length;i++) { if (e[i].className=="question") {e[i].style.backgroundColor="#fff";}}}</script>';
-	echo "<form method=post enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"doonsubmit(this,true,true)\">\n";
+	echo "<form method=post enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"return dopresubmit($qn,false)\">\n";
 	echo "<input type=hidden name=seed value=\"$seed\">\n";
-	echo "<input type=hidden name=attempt value=\"" . Sanitize::onlyInt($attempt) . "\">\n";
 
-	if (isset($rawscores)) {
-		if (strpos($rawscores[$qn],'~')!==false) {
-			$colors = explode('~',$rawscores[$qn]);
-		} else {
-			$colors = array($rawscores[$qn]); //scorestocolors($rawscores,1,0,false);
-		}
-	} else {
-		$colors = array();
-	}
-	if ($_GET['cid']=="admin") { //trigger debug messages
-		$teacherid = "admin";
-	}
-	displayq($qn,$qsetid,$seed,true,true,$attempt,false,false,false,$colors);
-	echo "<input type=submit value=\""._("Submit")."\"><input type=submit name=\"regen\" value=\""._("Submit and Regen")."\">\n";
-	echo "<input type=button value=\""._("White Background")."\" onClick=\"whiteout()\"/>";
-	echo "<input type=button value=\""._("Show HTML")."\" onClick=\"document.getElementById('qhtml').style.display='';\"/>";
+  // DO DISPLAY
+  $disp = $a2->displayQuestion($qn, true);
+  echo '<hr/>';
+  echo '<div class="questionwrap questionpane">';
+  echo '<div class="question" id="questionwrap'.$qn.'">';
+  echo $disp['html'];
+  echo '</div></div>';
+  echo '<script>$(function() {
+    initq('.$qn.','.json_encode($disp['jsparams']).');
+  });</script>';
+  echo '<input type=hidden name=toscoreqn value=""/>';
+  echo '<input type=hidden name=state value="'. Sanitize::encodeStringForDisplay(json_encode($a2->getState())) .'" />';
+	echo '<hr/>';
+  echo "<input type=submit value=\""._("Submit")."\">";
+  echo '<button type=button onclick="location.href = location.href">'._('New Version').'</button>';
 	echo "</form>\n";
-
-	echo '<code id="qhtml" style="display:none">';
-	$message = displayq($qn,$qsetid,$seed,false,false,0,true);
-	$message = printfilter($message);
-	$message = preg_replace('/(`[^`]*`)/',"<span class=\"AM\">$1</span>",$message);
-	$message = str_replacE('`','\`',$message);
-	echo htmlentities($message);
-	echo '</code>';
 
 	if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
 		$sendtype = 'msg';
@@ -355,10 +371,15 @@ if ($overwriteBody==1) {
 	if ($myrights==100) {
 		echo '<p>'._('UniqueID: ').Sanitize::encodeStringForDisplay($line['uniqueid']).'</p>';
 	}
-  echo '<p>'._('Testing using the old interface.');
-  echo ' <a href="testquestion2.php?cid='.$cid.'&qsetid='.$qsetid.'">';
-  echo _('Test in new interface').'</a></p>';
+  echo '<p>'._('Testing using the new interface.');
+  echo ' <a href="testquestion.php?cid='.$cid.'&qsetid='.$qsetid.'">';
+  echo _('Test in old interface').'</a></p>';
 }
+$placeinfooter = '<div id="ehdd" class="ehdd" style="display:none;">
+  <span id="ehddtext"></span>
+  <span onclick="showeh(curehdd);" style="cursor:pointer;">'._('[more..]').'</span>
+</div>
+<div id="eh" class="eh"></div>';
 require("../footer.php");
 
 ?>
