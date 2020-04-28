@@ -2,9 +2,14 @@ window.onload = function () {
   $(".course-banner-close-button").click(function (event) {
     event.preventDefault();
     let bannerType = $(this).attr("aria-controls"); // "course-banner-teacher-{id}" or "course-banner-student-{id}"
+    let previewMode = $(this).attr("data-preview-mode");
     let bannerEl = $('#' + bannerType);
     let bannerId = bannerEl.attr("data-banner-id"); // DB banner ID
-    dismissNotice(bannerId, bannerEl);
+    if (previewMode) {
+      bannerEl.slideUp();
+    } else {
+      dismissNotice(bannerId, bannerEl);
+    }
   });
 }
 

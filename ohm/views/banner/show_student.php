@@ -7,6 +7,7 @@
             aria-label="Close this banner."
             aria-controls="course-banner-student-<?php echo $bannerId; ?>"
             class="u-button-reset course-banner-close-button"
+            data-preview-mode="<?php echo $previewMode; ?>"
             type="button">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12" role="img" aria-hidden="true">
                 <defs>
