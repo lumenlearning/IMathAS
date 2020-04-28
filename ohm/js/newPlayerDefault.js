@@ -5,4 +5,13 @@ $(document).ready(function(){
     $('.js-version-inputs').on('change', 'input', function(event){
         $('.js-assessmentVersionText').text(event.target.value);
     });
+
+    $('.js-change-default-link').on('click', function(event){
+        //enable
+        $('#versionNew').removeAttr("disabled");
+        //hide
+        $('.js-change-default-link').hide();
+        //show
+        $('#versionOld').show();
+    });
 });

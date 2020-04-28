@@ -1046,8 +1046,15 @@ if (
                             }
                             echo "<p>The first option is best if this is your first time using this $installname course.  The second option
 							may be preferrable if you have copied the course in your LMS and want your students records to
-							show in a separate $installname course.</p>
-							<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
+							show in a separate $installname course.</p>";
+                            echo '<span class="form">'._('Assessment Player Version').'</span>';
+                            echo '<span class="js-version-inputs version-inputs">';
+                            echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" disabled checked/>'._('Newest Version (Recommended)').'</label>';
+                            echo '<button class="js-change-default-link" type="button">'._('Change default version').'</button>';
+                            echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld" hidden />'._("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>").'</label></span>';
+                            echo '</span>';
+                            echo '<br class="form"/>';
+							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
                         } else {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
 							link is located in a $installname course you are not a teacher of (course ID $aidsourcecid).
