@@ -692,7 +692,7 @@ switch($_GET['action']) {
 
 		echo '<span class="form">Assessment Player:</span>';
 		echo '<span class="formright js-assessmentVersionText"></span>';
-		echo '<br class=form>';
+		echo '<br class="form">';
 		#### End OHM-specific code #####################################################################
 		#### End OHM-specific code #####################################################################
 		#### End OHM-specific code #####################################################################
