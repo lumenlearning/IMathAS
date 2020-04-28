@@ -243,14 +243,14 @@ function modify_form(string $action, ?int $bannerId): void
         } else {
             $startImmediately = false;
             $startDate = $banner->getStartAt()->format('m/d/Y');
-            $startTime = $banner->getStartAt()->format('h:m:s');
+            $startTime = $banner->getStartAt()->format('h:i:s');
         }
         if (is_null($banner->getEndAt())) {
             $neverEnding = true;
         } else {
             $neverEnding = false;
             $endDate = $banner->getEndAt()->format('m/d/Y');
-            $endTime = $banner->getEndAt()->format('h:m:s');
+            $endTime = $banner->getEndAt()->format('h:i:s');
         }
     } else {
         $id = '';
