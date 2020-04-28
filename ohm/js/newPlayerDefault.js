@@ -7,6 +7,7 @@ $(document).ready(function(){
     });
 
     $('.js-change-default-link').on('click', function(event){
+        console.log('button clicked');
         //enable
         $('#versionNew').removeAttr("disabled");
         //hide

@@ -967,6 +967,7 @@ if (
                         $nologo = true;
                         $flexwidth = true;
                         $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
+                        $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
                         require("../header.php");
 
                         // #### Start OHM-specific code #####################################################
@@ -2143,7 +2144,6 @@ if (
         $flexwidth = true;
         $nologo = true;
         $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
-        $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
         require("../header.php");
         echo "<h3>Connecting to $installname</h3>";
         echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/desmos/bltilaunch.php?launch=true\" ";
