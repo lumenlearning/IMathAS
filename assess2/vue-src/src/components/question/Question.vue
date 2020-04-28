@@ -147,6 +147,17 @@
         {{ $t('question.jump_to_answer') }}
       </button>
     </div>
+    <div v-else-if="showNext"  class="submitbtnwrap">
+      <router-link
+        :to="'/skip/'+ (this.qn + 2)"
+        tag="button"
+        class="secondarybtn"
+        :disabled = "!canSubmit"
+      >
+        <icons name="right" />
+        {{ $t('question.next') }}
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -207,6 +218,10 @@ export default {
     questionContentLoaded () {
       return (this.questionData.html !== null);
     },
+    hasSeqNext () {
+      return (this.questionData.jsparams &&
+        this.questionData.jsparams.hasseqnext);
+    },
     questionHasCalculator () {
       return this.questionData.showcalculator;
     },
@@ -217,13 +232,18 @@ export default {
         this.questionData.withdrawn === 0 &&
         this.questionData.canretry && (
         store.assessInfo.submitby === 'by_question' ||
-          this.questionData.tries_max > 1
+          this.questionData.tries_max > 1 ||
+          this.hasSeqNext
       ) && (
       // if livepoll, only show if state is 2
         store.assessInfo.displaymethod !== 'livepoll' ||
           this.state === 2
       )
       );
+    },
+    showNext () {
+      return (!this.showSubmit && store.assessInfo.displaymethod === 'skip' &&
+        this.qn < store.assessInfo.questions.length - 1);
     },
     submitClass () {
       return (store.assessInfo.submitby === 'by_assessment')
@@ -232,6 +252,7 @@ export default {
     showScore () {
       return (store.inProgress &&
         !store.inPrintView &&
+        this.questionData.hadSeqNext !== true &&
         (this.questionData.hasOwnProperty('score') ||
          this.questionData.status === 'attempted'
         ) &&
@@ -242,16 +263,21 @@ export default {
       );
     },
     submitLabel () {
+      let label = 'question.';
       if (store.assessInfo.submitby === 'by_question') {
         // by question submission
-        return this.$t('question.submit');
+        label += 'submit';
       } else if (this.questionData.tries_max === 1) {
         // by assessment, with one try
-        return this.$t('question.saveans');
+        label += 'saveans';
       } else {
         // by assessment, can retry
-        return this.$t('question.checkans');
+        label += 'checkans';
       }
+      if (this.hasSeqNext) {
+        label += '_seqnext';
+      }
+      return this.$t(label);
     },
     showHelps () {
       return ((store.assessInfo.hasOwnProperty('help_features') && (
