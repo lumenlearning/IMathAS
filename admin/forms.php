@@ -748,7 +748,7 @@ switch($_GET['action']) {
 				#### Begin OHM-specific code #####################################################################
 				echo '<span class="form">'._('Assessment Player Version').'</span>';
 				echo '<span class="js-version-inputs version-inputs">';
-				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version').'</label>';
+				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
 				echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld"/>'._("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>").'</label></span>';
 				echo '</span>';
 				echo '<br class="form"/>';
