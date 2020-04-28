@@ -691,7 +691,7 @@ switch($_GET['action']) {
 		printf('<script type="text/javascript" src="%s/ohm/js/newPlayerDefault.js"></script>', $imasroot);
 
 		echo '<span class="form">Assessment Player:</span>';
-		echo '<span class="formright js-assessmentVersionText"></span>';
+		echo '<span class="formright js-assessmentVersionText">Newest Version</span>';
 		echo '<br class="form">';
 		#### End OHM-specific code #####################################################################
 		#### End OHM-specific code #####################################################################
