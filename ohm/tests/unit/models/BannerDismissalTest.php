@@ -5,17 +5,17 @@ namespace OHM\Tests;
 use DateTime;
 use Exception;
 use OHM\Exceptions\DatabaseWriteException;
-use OHM\Models\NoticeDismissal;
+use OHM\Models\BannerDismissal;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
 
 /**
- * @covers NoticeDismissal
+ * @covers BannerDismissal
  */
-final class NoticeDismissalTest extends TestCase
+final class BannerDismissalTest extends TestCase
 {
-    private $noticeDismissal;
+    private $bannerDismissal;
 
     /* @var PDO */
     private $dbh;
@@ -24,7 +24,7 @@ final class NoticeDismissalTest extends TestCase
     {
         $this->dbh = $this->createMock(\PDO::class);
 
-        $this->noticeDismissal = new NoticeDismissal($this->dbh);
+        $this->bannerDismissal = new BannerDismissal($this->dbh);
     }
 
     /*
@@ -43,13 +43,13 @@ final class NoticeDismissalTest extends TestCase
         ]);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
-        $result = $this->noticeDismissal->find(42);
+        $result = $this->bannerDismissal->find(42);
 
-        $this->assertTrue($result, 'should return true if NoticeDismissal was found.');
-        $this->assertEquals(42, $this->noticeDismissal->getId(), 'should return the correct value from the DB');
-        $this->assertEquals(1234, $this->noticeDismissal->getUserId(), 'should return the correct value from the DB');
-        $this->assertEquals(589, $this->noticeDismissal->getNoticeId(), 'should return the correct value from the DB');
-        $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2019-10-02 18:41:17'), $this->noticeDismissal->getDismissedAt(), 'should return the correct value from the DB');
+        $this->assertTrue($result, 'should return true if BannerDismissal was found.');
+        $this->assertEquals(42, $this->bannerDismissal->getId(), 'should return the correct value from the DB');
+        $this->assertEquals(1234, $this->bannerDismissal->getUserId(), 'should return the correct value from the DB');
+        $this->assertEquals(589, $this->bannerDismissal->getBannerId(), 'should return the correct value from the DB');
+        $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2019-10-02 18:41:17'), $this->bannerDismissal->getDismissedAt(), 'should return the correct value from the DB');
     }
 
     public function testFind_NotFound(): void
@@ -58,16 +58,16 @@ final class NoticeDismissalTest extends TestCase
         $pdoStatement->method('rowCount')->willReturn(0);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
-        $result = $this->noticeDismissal->find(42);
+        $result = $this->bannerDismissal->find(42);
 
         $this->assertFalse($result, 'should return false if ID was not found.');
     }
 
     /*
-     * findByUserIdAndNoticeId
+     * findByUserIdAndBannerId
      */
 
-    public function testFindByUserIdAndNoticeId(): void
+    public function testFindByUserIdAndBannerId(): void
     {
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('rowCount')->willReturn(1);
@@ -79,53 +79,53 @@ final class NoticeDismissalTest extends TestCase
         ]);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
-        $result = $this->noticeDismissal->findByUserIdAndNoticeId(42, 589);
+        $result = $this->bannerDismissal->findByUserIdAndBannerId(42, 589);
 
-        $this->assertTrue($result, 'should return true if NoticeDismissal was found.');
-        $this->assertEquals(42, $this->noticeDismissal->getId(), 'should return the correct value from the DB');
-        $this->assertEquals(1234, $this->noticeDismissal->getUserId(), 'should return the correct value from the DB');
-        $this->assertEquals(589, $this->noticeDismissal->getNoticeId(), 'should return the correct value from the DB');
-        $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2019-10-02 18:41:17'), $this->noticeDismissal->getDismissedAt(), 'should return the correct value from the DB');
+        $this->assertTrue($result, 'should return true if BannerDismissal was found.');
+        $this->assertEquals(42, $this->bannerDismissal->getId(), 'should return the correct value from the DB');
+        $this->assertEquals(1234, $this->bannerDismissal->getUserId(), 'should return the correct value from the DB');
+        $this->assertEquals(589, $this->bannerDismissal->getBannerId(), 'should return the correct value from the DB');
+        $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2019-10-02 18:41:17'), $this->bannerDismissal->getDismissedAt(), 'should return the correct value from the DB');
     }
 
-    public function testFindByUserIdAndNoticeId_NotFound(): void
+    public function testFindByUserIdAndBannerId_NotFound(): void
     {
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('rowCount')->willReturn(0);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
 
-        $result = $this->noticeDismissal->findByUserIdAndNoticeId(42, 589);
+        $result = $this->bannerDismissal->findByUserIdAndBannerId(42, 589);
 
         $this->assertFalse($result, 'should return false if ID was not found.');
     }
 
     /*
-     * dismissNoticeNow
+     * dismissBannerNow
      */
 
-    public function testDismissNoticeNow_MissingUserId(): void
+    public function testDismissBannerNow_MissingUserId(): void
     {
-        $this->noticeDismissal->setNoticeId(589);
+        $this->bannerDismissal->setBannerId(589);
 
         $this->expectException(Exception::class);
 
-        $this->noticeDismissal->dismissNoticeNow();
+        $this->bannerDismissal->dismissBannerNow();
     }
 
-    public function testDismissNoticeNow_MissingBannerId(): void
+    public function testDismissBannerNow_MissingBannerId(): void
     {
-        $this->noticeDismissal->setUserId(42);
+        $this->bannerDismissal->setUserId(42);
 
         $this->expectException(Exception::class);
 
-        $this->noticeDismissal->dismissNoticeNow();
+        $this->bannerDismissal->dismissBannerNow();
     }
 
-    public function testDismissNoticeNow_MissingAll(): void
+    public function testDismissBannerNow_MissingAll(): void
     {
         $this->expectException(Exception::class);
 
-        $this->noticeDismissal->dismissNoticeNow();
+        $this->bannerDismissal->dismissBannerNow();
     }
 
     /*
@@ -142,10 +142,10 @@ final class NoticeDismissalTest extends TestCase
         // A light check for a DB write.
         $pdoStatement->expects($this->once())->method('execute');
 
-        $result = $this->noticeDismissal->save();
+        $result = $this->bannerDismissal->save();
 
         $this->assertTrue($result, 'should return true on successful save.');
-        $this->assertEquals(43, $this->noticeDismissal->getId(), 'the last inserted row ID should be set.');
+        $this->assertEquals(43, $this->bannerDismissal->getId(), 'the last inserted row ID should be set.');
     }
 
     public function testSave_Failed(): void
@@ -158,6 +158,6 @@ final class NoticeDismissalTest extends TestCase
         // An exception should be thrown if we can't write to the DB.
         $this->expectException(DatabaseWriteException::class);
 
-        $this->noticeDismissal->save();
+        $this->bannerDismissal->save();
     }
 }

@@ -225,6 +225,8 @@ if (!(isset($teacherid))) {
             $defaults['showcalculator'] = _('None');
         } else if (isset($CFG['showcalculator'][$defaults['showcalculator']])) {
             $defaults['showcalculator'] = _($CFG['showcalculator'][$defaults['showcalculator']]);
+        } else {
+            $defaults['showcalculator'] = 'No';
         }
     if ($defaults['showhints'] == 0) {
       $defaults['showhints'] = _('No');

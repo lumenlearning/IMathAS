@@ -1,11 +1,12 @@
-<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>" id="course-banner-student">
+<div class="course-banner" data-banner-id="<?php echo $bannerId; ?>"
+     id="course-banner-student-<?php echo $bannerId; ?>">
     <header class="course-banner-header">
-        <h2>OHM Updates</h2>
+        <h2><?php echo $bannerTitle; ?></h2>
+        <?php if ($bannerDismissible) { ?>
         <button
             aria-label="Close this banner."
-            aria-controls="course-banner-student"
+            aria-controls="course-banner-student-<?php echo $bannerId; ?>"
             class="u-button-reset course-banner-close-button"
-            id="js-dismiss-banner"
             type="button">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12" role="img" aria-hidden="true">
                 <defs>
@@ -22,10 +23,10 @@
                 </g>
             </svg>
         </button>
+        <?php } ?>
     </header>
     <div class="course-banner-content">
-        <h3>Hello, student user!</h3>
-        <p>Here is an important announcement!</p>
+        <?php echo $bannerContent; ?>
     </div>
 </div>
-<script src="/ohm/views/banner/banner.js"></script>
+<script src="/ohm/views/banner/dismiss_banner.js"></script>
