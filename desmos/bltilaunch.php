@@ -1056,9 +1056,6 @@ if (
                                 echo $advuseother;
                             }
                             echo "	</ul>";
-                            if ($sourceUIver == 1) {
-                                echo '<p id="usenew" style="display:none;"><input type="checkbox" name="usenewassess" /> Use new assessment interface (only applies if copying)</p>';
-                            }
                             echo "<p>The first option is best if this is your first time using this $installname course.  The second option
 							may be preferrable if you have copied the course in your LMS and want your students records to
 							show in a separate $installname course.</p>";
