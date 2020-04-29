@@ -1048,12 +1048,16 @@ if (
                             echo "<p>The first option is best if this is your first time using this $installname course.  The second option
 							may be preferrable if you have copied the course in your LMS and want your students records to
 							show in a separate $installname course.</p>";
-                            echo '<p class="assess-player-title>'._('Assessment Player Version').'</p>';
-                            echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
-                            echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
-                            echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
-                            echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld" hidden />'._("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>").'</label></span>';
-                            echo '</span>';
+                            if ($sourceUIver == 1) {
+                                echo '<div id="usenew" style="display:none;">';
+                                echo '<p class="assess-player-title>'._('Assessment Player Version').'</p>';
+                                echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
+                                echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
+                                echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
+                                echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
+                                echo '</span>';
+                                echo '</div>';
+                            }
 							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
                         } else {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
@@ -1075,10 +1079,10 @@ if (
                                 echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
                             }
                             if ($sourceUIver == 1) {
-                                echo '<span class="form">' . _('Assessment Player Version') . '</span>';
-                                echo '<span class="js-version-inputs version-inputs">';
-                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" checked/>' . _('Newest Version (Recommended)') . '</label>';
-                                echo '<button class="js-change-default-link" type="button">' . _('Change default version') . '</button>';
+                                echo '<p class="assess-player-title>'._('Assessment Player Version').'</p>';
+                                echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
+                                echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
+                                echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
                                 echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
                                 echo '</span>';
                             }
