@@ -930,13 +930,20 @@ if (
                                 echo $advuseother;
                             }
                             echo "	</ul>";
-                            if ($sourceUIver == 1) {
-                                echo '<p id="usenew" style="display:none;"><input type="checkbox" name="usenewassess" /> Use new assessment interface (only applies if copying)</p>';
-                            }
                             echo "<p>The first option is best if this is your first time using this $installname course.  The second option
 							may be preferrable if you have copied the course in your LMS and want your students records to
-							show in a separate $installname course.</p>
-							<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
+							show in a separate $installname course.</p>";
+                            if ($sourceUIver == 1) {
+                                echo '<div id="usenew" style="display:none;">';
+                                echo '<span class="form">' . _('Assessment Player Version') . '</span>';
+                                echo '<span class="js-version-inputs version-inputs">';
+                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" checked/>' . _('Newest Version (Recommended)') . '</label>';
+                                echo '<button class="js-change-default-link" type="button">' . _('Change default version') . '</button>';
+                                echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
+                                echo '</span>';
+                                echo '</div>';
+                            }
+							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
                         } else {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
 							link is located in a $installname course you are not a teacher of (course ID $aidsourcecid).
@@ -957,7 +964,12 @@ if (
                                 echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
                             }
                             if ($sourceUIver == 1) {
-                                echo '<p><input type="checkbox" name="usenewassess" /> Use new assessment interface (only applies if copying)</p>';
+                                echo '<span class="form">' . _('Assessment Player Version') . '</span>';
+                                echo '<span class="js-version-inputs version-inputs">';
+                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" checked/>' . _('Newest Version (Recommended)') . '</label>';
+                                echo '<button class="js-change-default-link" type="button">' . _('Change default version') . '</button>';
+                                echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
+                                echo '</span>';
                             }
                             echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
                         }
@@ -1063,7 +1075,7 @@ if (
                     $deflatepass = $r[5];
                     $sourceUIver = $r[6];
                     $courselevel = $r[7];
-                    if (isset($_POST['usenewassess'])) {
+                    if ($_POST['assess-version'] == 2) {
                         $destUIver = 2;
                         $convertAssessVer = 2;
                     } else {
