@@ -690,8 +690,9 @@ switch($_GET['action']) {
 		// Putting script specific to this form here because file contains forms for multiple pages
 		printf('<script type="text/javascript" src="%s/ohm/js/newPlayerDefault.js"></script>', $imasroot);
 
+		$assessVerOnLoad = $courseUIver == 1 ? 'Old Version' : 'Newest Version';
 		echo '<span class="form">Assessment Player:</span>';
-		echo '<span class="formright js-assessmentVersionText">Newest Version</span>';
+		printf('<span class="formright js-assessmentVersionText">%s</span>', $assessVerOnLoad);
 		echo '<br class="form">';
 		#### End OHM-specific code #####################################################################
 		#### End OHM-specific code #####################################################################
