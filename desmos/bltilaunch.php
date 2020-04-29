@@ -966,7 +966,21 @@ if (
                         $_SESSION['userid'] = $userid; //remember me
                         $nologo = true;
                         $flexwidth = true;
-                        $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
+                        $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;} 
+                            /* LTI New Assessment Player */
+                            .assess-player-title {
+                                font-weight: bold;
+                            }
+                            .version-inputs-lti button {
+                                font-size: .75em;
+                                margin-left: 18px;
+                                text-decoration-line: underline;
+                            }
+                            
+                            .disable-input {
+                                opacity: 0.5;
+                                pointer-events: none;
+                            }</style>';
                         $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
                         require("../header.php");
 
