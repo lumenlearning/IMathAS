@@ -1050,9 +1050,9 @@ if (
 							show in a separate $installname course.</p>";
                             echo '<span class="form">'._('Assessment Player Version').'</span>';
                             echo '<span class="js-version-inputs version-inputs">';
-                            echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" disabled checked/>'._('Newest Version (Recommended)').'</label>';
+                            echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" disabled checked/>'._('Newest Version (Recommended)').'</label>';
                             echo '<button class="js-change-default-link" type="button">'._('Change default version').'</button>';
-                            echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld" hidden />'._("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>").'</label></span>';
+                            echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />'._("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>").'</label></span>';
                             echo '</span>';
                             echo '<br class="form"/>';
 							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
@@ -1182,7 +1182,7 @@ if (
                     $deflatepass = $r[5];
                     $sourceUIver = $r[6];
                     $courselevel = $r[7];
-                    if (isset($_POST['usenewassess'])) {
+                    if (isset($_POST['usenewassess']) || $_POST['assess-version'] == 2) {
                         $destUIver = 2;
                         $convertAssessVer = 2;
                     } else {
