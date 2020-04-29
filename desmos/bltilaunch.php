@@ -1049,7 +1049,7 @@ if (
                                 echo '<div id="usenew" style="display:none;">';
                                 echo '<span class="form">' . _('Assessment Player Version') . '</span>';
                                 echo '<span class="js-version-inputs version-inputs">';
-                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" disabled checked/>' . _('Newest Version (Recommended)') . '</label>';
+                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" checked/>' . _('Newest Version (Recommended)') . '</label>';
                                 echo '<button class="js-change-default-link" type="button">' . _('Change default version') . '</button>';
                                 echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
                                 echo '</span>';
@@ -1079,7 +1079,7 @@ if (
                             if ($sourceUIver == 1) {
                                 echo '<span class="form">' . _('Assessment Player Version') . '</span>';
                                 echo '<span class="js-version-inputs version-inputs">';
-                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" disabled checked/>' . _('Newest Version (Recommended)') . '</label>';
+                                echo '<label for="versionNew"><input type="radio" name="assess-version" value="2" id="versionNew" checked/>' . _('Newest Version (Recommended)') . '</label>';
                                 echo '<button class="js-change-default-link" type="button">' . _('Change default version') . '</button>';
                                 echo '<label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" hidden />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
                                 echo '</span>';

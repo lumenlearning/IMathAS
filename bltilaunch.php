@@ -882,6 +882,7 @@ if (
                         $nologo = true;
                         $flexwidth = true;
                         $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
+                        $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
                         require("header.php");
 
                         $query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
