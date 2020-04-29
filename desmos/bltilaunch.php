@@ -1061,7 +1061,7 @@ if (
 							show in a separate $installname course.</p>";
                             if ($sourceUIver == 1) {
                                 echo '<div id="usenew" style="display:none;">';
-                                echo '<p class="assess-player-title>'._('Assessment Player Version').'</p>';
+                                echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
                                 echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
                                 echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
                                 echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
@@ -1090,7 +1090,7 @@ if (
                                 echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
                             }
                             if ($sourceUIver == 1) {
-                                echo '<p class="assess-player-title>'._('Assessment Player Version').'</p>';
+                                echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
                                 echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
                                 echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
                                 echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
