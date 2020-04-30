@@ -102,8 +102,8 @@ function list_banners(): void
         }
 
         $isEnabled = $banner->getEnabled() ? 'Enabled' : '<span class="status-disabled">Disabled</span>';
-        $startAt = is_null($banner->getStartAt()) ? 'Immediately' : indexTimestampFormat($banner->getStartAt());
-        $endAt = is_null($banner->getEndAt()) ? 'None' : indexTimestampFormat($banner->getEndAt());
+        $startAt = is_null($banner->getStartAt()) ? 'Immediately' : getTimestampForList($banner->getStartAt());
+        $endAt = is_null($banner->getEndAt()) ? 'None' : getTimestampForList($banner->getEndAt());
 
         $confirmJs = sprintf('onClick="return confirm(\'Are you sure you want to delete the banner: %s?\')"',
             Sanitize::encodeStringForDisplay($banner->getDescription()));
@@ -123,6 +123,10 @@ function list_banners(): void
         );
         echo "</tr>\n";
     }
+    ?>
+        </tbody>
+    </table>
+<?php
 }
 
 /**
@@ -189,15 +193,17 @@ function save(?int $bannerId): void
         ->setStudentTitle($_POST['student-title'])
         ->setStudentContent($_POST['student-content']);
 
+    $userTimezone = new DateTimeZone(getUserTimezoneName());
+
     if ('1' != $_POST['start-immediately']) {
-        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime']);
+        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime'], $userTimezone);
         $banner->setStartAt($dateTime);
     } else {
         $banner->setStartAt(null);
     }
 
     if ('1' != $_POST['never-ending']) {
-        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime']);
+        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime'], $userTimezone);
         $banner->setEndAt($dateTime);
     } else {
         $banner->setEndAt(null);
@@ -240,15 +246,15 @@ function modify_form(string $action, ?int $bannerId): void
             $startImmediately = true;
         } else {
             $startImmediately = false;
-            $startDate = $banner->getStartAt()->format('m/d/Y');
-            $startTime = $banner->getStartAt()->format('H:i:s');
+            $startDate = date('m/d/Y', $banner->getStartAt()->getTimestamp());
+            $startTime = date('H:i:s', $banner->getStartAt()->getTimestamp());
         }
         if (is_null($banner->getEndAt())) {
             $neverEnding = true;
         } else {
             $neverEnding = false;
-            $endDate = $banner->getEndAt()->format('m/d/Y');
-            $endTime = $banner->getEndAt()->format('H:i:s');
+            $endDate = date('m/d/Y', $banner->getEndAt()->getTimestamp());
+            $endTime = date('H:i:s', $banner->getEndAt()->getTimestamp());
         }
     } else {
         $id = '';
@@ -271,7 +277,14 @@ function modify_form(string $action, ?int $bannerId): void
 }
 
 
-function indexTimestampFormat(DateTime $dateTime): string
+function getTimestampForList(DateTime $dateTime): string
 {
-    return $dateTime->format('n/j/Y, g:i:s A');
+    return date('n/j/Y, g:i:s A', $dateTime->getTimestamp());
+}
+
+
+function getUserTimezoneName(): string
+{
+    global $tzname;
+    return (!isset($tzname) || empty($tzname)) ? 'America/Los_Angeles' : $tzname;
 }

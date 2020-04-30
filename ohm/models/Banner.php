@@ -3,6 +3,7 @@
 namespace OHM\Models;
 
 use DateTime;
+use DateTimeZone;
 use OHM\Exceptions\DatabaseWriteException;
 use PDO;
 use PDOStatement;
@@ -107,10 +108,8 @@ class Banner
             ':student_content' => $this->studentContent,
             ':teacher_title' => $this->teacherTitle,
             ':teacher_content' => $this->teacherContent,
-            ':start_at' => is_null($this->startAt) ? null :
-                $this->startAt->format('Y-m-d H:i:s'),
-            ':end_at' => is_null($this->endAt) ? null :
-                $this->endAt->format('Y-m-d H:i:s'),
+            ':start_at' => $this->datetimeToUtcTimestamp($this->startAt),
+            ':end_at' => $this->datetimeToUtcTimestamp($this->endAt),
         ];
 
         // lastInsertId() does not work with "ON DUPLICATE KEY UPDATE" :(
@@ -214,6 +213,31 @@ class Banner
         return $banners;
     }
 
+    /**
+     * Get MySQL timestamp string in UTC time zone from any DateTime object.
+     *
+     * Note: The DateTime object MUST have a DateTimeZone set.
+     *
+     * @param DateTime|null $dateTime A DateTime object, any time zone.
+     * @return string|null A timestamp string in UTC for use in MySQL statements.
+     * @throws \Exception
+     */
+    private function datetimeToUtcTimestamp(?DateTime $dateTime): ?string
+    {
+        if (is_null($dateTime)) {
+            return null;
+        }
+
+        $unixtime = $dateTime->getTimestamp(); // "unix timestamps" are always UTC
+
+        $utcDateTime = new DateTime();
+        $utcDateTime->setTimezone(new DateTimeZone('UTC'));
+        $utcDateTime->setTimestamp($unixtime);
+
+        // format() does not output in local time zones.
+        return $utcDateTime->format('Y-m-d H:i:s');
+    }
+
     /*
      * Getters, setters
      */
@@ -238,12 +262,15 @@ class Banner
         $target->studentContent = $rowData['student_content'];
         $target->teacherTitle = $rowData['teacher_title'];
         $target->teacherContent = $rowData['teacher_content'];
+
+        // The database in prod, staging, and Docker all run in UTC.
+        $utc = new DateTimeZone('UTC');
         $target->startAt = empty($rowData['start_at']) ? null :
-            DateTime::createFromFormat('Y-m-d H:i:s', $rowData['start_at']);
+            DateTime::createFromFormat('Y-m-d H:i:s', $rowData['start_at'], $utc);
         $target->endAt = empty($rowData['end_at']) ? null :
-            DateTime::createFromFormat('Y-m-d H:i:s', $rowData['end_at']);
+            DateTime::createFromFormat('Y-m-d H:i:s', $rowData['end_at'], $utc);
         $target->createdAt = empty($rowData['created_at']) ? null :
-            DateTime::createFromFormat('Y-m-d H:i:s', $rowData['created_at']);
+            DateTime::createFromFormat('Y-m-d H:i:s', $rowData['created_at'], $utc);
     }
 
     /**
