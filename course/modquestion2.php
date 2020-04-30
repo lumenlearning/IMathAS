@@ -322,7 +322,11 @@ if ($defaults['submitby'] == 'by_question' && $defaults['defregens'] > 1) {
      <option value="3" <?php if ($line['showhints']==3) { echo 'selected="1"';}?>>Hints and Video/text buttons</option>
     </select><br/><i class="grey">Default: <?php echo $defaults['showhints'];?></i></span><br class="form"/>
 
-<?php if (isset($CFG['showcalculator']) && ($groupid==11 || $myrights == 100 || $userid == 541991)) : ?>
+<?php if (isset($CFG['showcalculator']) &&
+    ($groupid==11 || $myrights == 100 ||
+        in_array($userid,[541991, 11836, 651, 34995, 358648, 540549, 606380])
+    )
+) : ?>
     <span class=form>Show Embedded Calculator?</span><span class=formright>
         <select name="showcalculator">
             <option value="default" <?php if ($line['showcalculator']=='default') { echo 'selected="1"';}?>>Use Default</option>
