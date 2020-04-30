@@ -911,11 +911,25 @@ switch($_GET['action']) {
 		echo 'Additional Options';
 		echo '</div>';
 		echo '<div class="blockitems hidden">';
-		if ($_GET['action']=='addcourse' && $ctc == 0 && 'Old Version' == $assessVerOnLoad) {
-			echo '<span class=form>'._('Use new assessment version').'</span>';
-			echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
-			echo _('Select this option to set your new course to use the new version of assessments.');
-			echo '</label></span><br class=form>';
+		if ($_GET['action']=='addcourse' && $ctc == 0) {
+			if ($sourceUIver < 2) {
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				#### Begin OHM-specific code #####################################################################
+				echo '<span class="form">'._('Assessment Player Version').'</span>';
+				echo '<span class="js-version-inputs version-inputs">';
+				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
+				echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld"/>'._("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>").'</label></span>';
+				echo '</span>';
+				echo '<br class="form"/>';
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+				#### End OHM-specific code #####################################################################
+			}
 		}
 		if (!isset($CFG['CPS']['deflatepass']) || $CFG['CPS']['deflatepass'][1]==1) {
 			echo '<span class="form">Auto-assign LatePasses on course enroll:</span><span class="formright">';
