@@ -65,7 +65,7 @@ final class StudentPaymentApiTest extends TestCase
 	const INVALID_CODE_CHARACTERS_RESPONSE = '{"status":"invalid_code","errors":["Only numbers and letters are used in access codes. We also don\'t use confusing letters or numbers like l 1 0 o, etc."]}';
 
 
-	function setUp()
+	function setUp(): void
 	{
 		$this->studentPaymentDbMock = $this->createMock(StudentPaymentDb::class);
 		$this->curlMock = $this->createMock(HttpRequest::class);

@@ -28,7 +28,7 @@ final class StudentPaymentTest extends TestCase
 	private $studentPaymentDbMock;
 
 
-	function setUp()
+	function setUp(): void
 	{
 		$this->studentPaymentApiMock = $this->createMock(StudentPaymentApi::class);
 		$this->studentPaymentDbMock = $this->createMock(StudentPaymentDb::class);
