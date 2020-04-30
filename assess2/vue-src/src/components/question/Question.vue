@@ -36,6 +36,7 @@
       <div 
         v-if="questionHasCalculator" 
         class="calculator" 
+        :id="'qa-' + calcType + '-' + qn"
         aria-label="Use calculator">
         <button 
           type="button" 
@@ -162,8 +163,7 @@ export default {
       calcType: this.getCalcType(),
       calcHasAlreadyLoaded: false,
       calcIsPoppedOut: false,
-      calcHeight: 500,
-      uniqueId: 'test-calc' + this.qn
+      calcHeight: 500
     };
   },
   computed: {
