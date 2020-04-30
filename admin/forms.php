@@ -911,7 +911,7 @@ switch($_GET['action']) {
 		echo 'Additional Options';
 		echo '</div>';
 		echo '<div class="blockitems hidden">';
-		if ($_GET['action']=='addcourse' && $ctc == 0) {
+		if ($_GET['action']=='addcourse' && $ctc == 0 && 'Old Version' == $assessVerOnLoad) {
 			echo '<span class=form>'._('Use new assessment version').'</span>';
 			echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
 			echo _('Select this option to set your new course to use the new version of assessments.');
