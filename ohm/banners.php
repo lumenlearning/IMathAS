@@ -235,22 +235,20 @@ function modify_form(string $action, ?int $bannerId): void
         $teacherContent = $banner->getTeacherContent();
         $studentTitle = Sanitize::encodeStringForDisplay($banner->getStudentTitle());
         $studentContent = $banner->getStudentContent();
-        $startAt = is_null($banner->getStartAt()) ? null : $banner->getStartAt()->getTimestamp();
-        $endAt = is_null($banner->getEndAt()) ? null : $banner->getEndAt()->getTimestamp();
 
         if (is_null($banner->getStartAt())) {
             $startImmediately = true;
         } else {
             $startImmediately = false;
             $startDate = $banner->getStartAt()->format('m/d/Y');
-            $startTime = $banner->getStartAt()->format('h:i:s');
+            $startTime = $banner->getStartAt()->format('H:i:s');
         }
         if (is_null($banner->getEndAt())) {
             $neverEnding = true;
         } else {
             $neverEnding = false;
             $endDate = $banner->getEndAt()->format('m/d/Y');
-            $endTime = $banner->getEndAt()->format('h:i:s');
+            $endTime = $banner->getEndAt()->format('H:i:s');
         }
     } else {
         $id = '';
