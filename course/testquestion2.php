@@ -53,12 +53,10 @@ if ($myrights<20) {
 
   $a2 = new AssessStandalone($DBH);
   $a2->setQuestionData($line['id'], $line);
-  $hasSeqParts = preg_match('~(<p[^>]*>|\\n\s*\\n)\s*///+\s*(</p[^>]*>|\\n\s*\\n)~', $line['qtext']);
 
   $qn = 27;  //question number to use during testing
   if (isset($_POST['state'])) {
     $state = json_decode($_POST['state'], true);
-    $seed = $state['seeds'][$qn];
   } else {
     if (isset($_GET['seed'])) {
   		$seed = Sanitize::onlyInt($_GET['seed']);
@@ -148,15 +146,6 @@ $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/asse
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/print.css?v='.$lastupdate.'" media="print">';
 $placeinhead .= '<script src="'.$imasroot.'/mathquill/mathquill.min.js?v=022720" type="text/javascript"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=052920" type="text/javascript"></script>';
-/*
-$placeinhead .= '<script src="'.$imasroot.'/javascript/drawing.js?v=041920" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/javascript/eqntips.js?v=041920" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/javascript/mathjs.js?v=041920" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/mathquill/AMtoMQ.js?v=052120" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
-*/
 $placeinhead .= '<script src="'.$imasroot.'/javascript/assess2supp.js?v=050120" type="text/javascript"></script>';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mathquill-basic.css">
   <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mqeditor.css">';
@@ -220,6 +209,7 @@ if ($overwriteBody==1) {
 		echo "if (window.opener && !window.opener.closed && window.opener.sethighlightrow && window.opener.getnextprev) {";
 		echo " window.opener.sethighlightrow(\"$loc\"); ";
 		echo $page_onlyChkMsg;
+    echo 'console.log(prevnext);';
     echo 'var next = document.getElementById("next");';
     echo 'var prev = document.getElementById("prev");';
     echo 'var remaining = document.getElementById("remaining");';
@@ -306,7 +296,7 @@ if ($overwriteBody==1) {
 	echo $page_scoreMsg;
 	echo '<script type="text/javascript"> function whiteout() { e=document.getElementsByTagName("div");';
 	echo 'for (i=0;i<e.length;i++) { if (e[i].className=="question") {e[i].style.backgroundColor="#fff";}}}</script>';
-	echo "<form method=post class=\"questionwrap\" enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"return dopresubmit($qn,false)\">\n";
+	echo "<form method=post enctype=\"multipart/form-data\" action=\"$page_formAction\" onsubmit=\"return dopresubmit($qn,false)\">\n";
 	echo "<input type=hidden name=seed value=\"$seed\">\n";
 
   // DO DISPLAY
