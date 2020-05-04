@@ -276,7 +276,11 @@ if (isset($_POST['checked'])) { //modifying existing
 			echo "<th>Q#<br/>&nbsp;</th><th>Description<br/>&nbsp;</th><th></th><th></th>";
 			echo '<th>Tries<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
             echo '<th>Show hints &amp; video buttons?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
-            if (isset($CFG['showcalculator']) && ($groupid == 11 || $myrights == 100 || $userid == 541991)) {
+            if (isset($CFG['showcalculator']) &&
+                ($groupid==11 || $myrights == 100 ||
+                    in_array($userid,[541991, 11836, 651, 34995, 358648, 540549, 606380])
+                )
+            ) {
                 echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
             }
 			echo "<th>Additional Copies to Add<br/>&nbsp;</th></tr></thead>";

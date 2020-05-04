@@ -1066,6 +1066,31 @@ div#ohmEditGroup {
 	padding: 0.6em 1em 1em 1em;
 }
 
+/* Add New Course Assessment Player  */
+.version-inputs label {
+	display: block;
+}
+
+.version-warning {
+	font-style: italic;
+}
+
+/* LTI New Assessment Player */
+
+.assess-player-title {
+	font-weight: bold;
+}
+.version-inputs-lti button {
+	font-size: .75em;
+	margin-left: 18px;
+	text-decoration-line: underline;
+}
+
+.disable-input {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {

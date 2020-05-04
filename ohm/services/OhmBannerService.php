@@ -109,6 +109,7 @@ class OhmBannerService
             $bannerTitle = $bannerData['title'];
             $bannerContent = $bannerData['content'];
             $bannerDismissible = $bannerData['dismissible'];
+            $previewMode = false;
 
             include(__DIR__ . '/../views/banner/show_teacher.php');
             $this->displayedBannerIds[] = $banner->getId();
@@ -140,6 +141,7 @@ class OhmBannerService
         $bannerTitle = $bannerData['title'];
         $bannerContent = $bannerData['content'];
         $bannerDismissible = $bannerData['dismissible'];
+        $previewMode = true;
 
         if (self::TEACHER_ROLE == $role) {
             include(__DIR__ . '/../views/banner/show_teacher.php');

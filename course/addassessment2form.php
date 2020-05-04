@@ -576,7 +576,7 @@ $vueData = array(
             <?php if (
                     isset($CFG['showcalculator']) &&
                     ($groupid==11 || $myrights == 100 ||
-                        in_array($userid,[541991, 11836, 651,34995, 540549, 606380])
+                        in_array($userid,[541991, 11836, 651, 34995, 358648, 540549, 606380])
                     )
             ) : ?>
             <label for="showcalculator" class=form>Embedded Calculator</label>

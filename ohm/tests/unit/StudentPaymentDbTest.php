@@ -23,7 +23,7 @@ final class StudentPaymentDbTest extends TestCase
 	private $pdoStatementMock;
 
 
-	function setUp()
+	function setUp(): void
 	{
 		$this->pdoMock = $this->createMock(PDOMock::class);
 		$this->pdoStatementMock = $this->createMock(PDOStatementMock::class);
