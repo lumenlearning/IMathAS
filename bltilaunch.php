@@ -955,12 +955,12 @@ if ($stm->rowCount()==0) {
 							echo $advuseother;
 						}
 						echo "	</ul>";
-						if ($sourceUIver == 1) {
-							echo '<p id="usenew" style="display:none;"><input type="checkbox" name="usenewassess" /> Use new assessment interface (only applies if copying)</p>';
-						}
-						echo "<p>The first option is best if this is your first time using this $installname course.  The second option
-							may be preferrable if you have copied the course in your LMS and want your students records to
-							show in a separate $installname course.</p>"                       if ($sourceUIver == 1) {
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            if ($sourceUIver == 1) {
                                 echo '<div id="usenew" style="display:none;">';
                                 echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
                                 echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
@@ -970,6 +970,11 @@ if ($stm->rowCount()==0) {
                                 echo '</span>';
                                 echo '</div>';
                             }
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
 							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
                         } else {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
@@ -1102,7 +1107,17 @@ if ($stm->rowCount()==0) {
 				$deflatepass = $r[5];
 				$sourceUIver = $r[6];
 				$courselevel = $r[7];
-				if (isset($_POST['usenewassess'])) {
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                if ($_POST['assess-version'] == 2) {
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
 					$destUIver = 2;
 					$convertAssessVer = 2;
 				} else {
