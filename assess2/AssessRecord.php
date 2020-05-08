@@ -1902,6 +1902,13 @@ class AssessRecord
     //foreach ($rawparts as $k=>$v) {
     foreach ($partla as $k=>$v) {
       if ($parts_to_score === true || !empty($parts_to_score[$k])) {
+        if (!empty($qver['tries'][$k])) {
+          $lasttry = $qver['tries'][$k][count($qver['tries'][$k])-1];
+          if (trim($lasttry['stuans']) == trim($v)) {
+            // same answer submitted.  Shouldn't happen, but skip it
+            continue;
+          }
+        }
         $data[$k] = array(
           'sub' => $submission,
           'time' => round($timeactive/1000),
@@ -1920,7 +1927,9 @@ class AssessRecord
     //$singlescore = ((count($partla) > 1 || count($answeights) > 1) && count($scores) == 1);
     $singlescore = empty($scoreResult['scoreMethod']) ? false : $scoreResult['scoreMethod'];
 
-    $this->recordTry($qn, $data, $singlescore);
+    if (!empty($data)) {
+      $this->recordTry($qn, $data, $singlescore);
+    }
 
     return $scoreResult['errors'];
   }
