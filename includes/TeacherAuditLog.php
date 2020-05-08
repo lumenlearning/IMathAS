@@ -109,10 +109,10 @@ class TeacherAuditLog
         $query = "SELECT g.name, u.FirstName, u.LastName, l.userid, l.action, count(l.action) as itemcount 
             FROM imas_teacher_audit_log as l JOIN imas_users as u ON l.userid = u.id
             LEFT JOIN imas_groups AS g ON u.groupid=g.id
-            WHERE l.action in ($ph) AND l.created_at >= FROM_UNIXTIME(?) AND l.created_at <= FROM_UNIXTIME(?) 
+            WHERE l.action in ($ph) AND l.created_at >= ? AND l.created_at <= ? 
             GROUP BY l.userid, l.action";
         $stm = $dbh->prepare($query);
-        $params = array_merge($actions, [$startTimestamp->getTimestamp(),$endTimestamp->getTimestamp()]);
+        $params = array_merge($actions, [$startTimestamp->format("Y-m-d H:i:s"),$endTimestamp->format("Y-m-d H:i:s")]);
 
         $stm = $dbh->prepare($query);
         $stm->execute($params);
