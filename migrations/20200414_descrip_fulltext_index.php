@@ -1,9 +1,16 @@
 <?php
+/**
+ * OHM-specific changes: Create index in non-blocking mode.
+ * OHM-594: Make the MOM changes not have any downtime
+ */
 
 //Add additional indexes
 $DBH->beginTransaction();
 
- $query = "CREATE FULLTEXT INDEX descidx ON imas_questionset(description)";
+ $query = "ALTER TABLE `imas_questionset`
+    ADD FULLTEXT INDEX `descidx` (`description`),
+    ALGORITHM=INPLACE,
+    LOCK=SHARED";
  $res = $DBH->query($query);
  if ($res===false) {
  	 echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";

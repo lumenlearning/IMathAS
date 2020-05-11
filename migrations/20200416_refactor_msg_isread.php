@@ -1,4 +1,8 @@
 <?php
+/**
+ * OHM-specific changes: Create indexes in non-blocking mode.
+ * OHM-594: Make the MOM changes not have any downtime
+ */
 
 //Add better meantime, meanscore columns
 $DBH->beginTransaction();
@@ -6,7 +10,9 @@ $DBH->beginTransaction();
  $query = "ALTER TABLE `imas_msgs`
   ADD COLUMN `deleted` TINYINT(1) NOT NULL DEFAULT '0',
   ADD COLUMN `tagged` TINYINT(1) NOT NULL DEFAULT '0',
-  ADD COLUMN `viewed` TINYINT(1) NOT NULL DEFAULT '0'";
+  ADD COLUMN `viewed` TINYINT(1) NOT NULL DEFAULT '0',
+  ALGORITHM=INPLACE,
+  LOCK=NONE";
  $res = $DBH->query($query);
  if ($res===false) {
     echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
@@ -27,28 +33,40 @@ $DBH->beginTransaction();
  }
 
  // most common query is to get unread messages, so need combo index for that
- $query = "CREATE INDEX tocombo ON imas_msgs(msgto,viewed,courseid)";
+ $query = "ALTER TABLE `imas_msgs`
+    ADD INDEX `tocombo` (`msgto`, `viewed`, `courseid`),
+    ALGORITHM=INPLACE,
+    LOCK=NONE";
  $res = $DBH->query($query);
  if ($res===false) {
  	 echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
 	$DBH->rollBack();
 	return false;
  }
- $query = "CREATE INDEX fromcombo ON imas_msgs(msgfrom,deleted,courseid)";
+ $query = "ALTER TABLE `imas_msgs`
+    ADD INDEX `fromcombo` (`msgfrom`, `deleted`, `courseid`),
+    ALGORITHM=INPLACE,
+    LOCK=NONE";
  $res = $DBH->query($query);
  if ($res===false) {
  	 echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
 	$DBH->rollBack();
 	return false;
  }
- $query = "CREATE INDEX tagged ON imas_msgs(tagged)";
+ $query = "ALTER TABLE `imas_msgs`
+    ADD INDEX `tagged` (`tagged`),
+    ALGORITHM=INPLACE,
+    LOCK=NONE";
  $res = $DBH->query($query);
  if ($res===false) {
     echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
  $DBH->rollBack();
  return false;
  }
- $query = "CREATE INDEX deleted ON imas_msgs(deleted)";
+ $query = "ALTER TABLE `imas_msgs`
+    ADD INDEX `deleted` (`deleted`),
+    ALGORITHM=INPLACE,
+    LOCK=NONE";
  $res = $DBH->query($query);
  if ($res===false) {
     echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";

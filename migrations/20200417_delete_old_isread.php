@@ -1,4 +1,8 @@
 <?php
+/**
+ * OHM-specific changes: Don't DROP anything.
+ * OHM-594: Make the MOM changes not have any downtime
+ */
 
 $DBH->beginTransaction();
 
@@ -15,17 +19,18 @@ $DBH->beginTransaction();
   return false;
   }
 
+  // OHM-594: Commented this out to allow for rollbacks.
   // drop old columns
-  $query = "ALTER TABLE `imas_msgs` DROP COLUMN isread, DROP INDEX msgfrom";
-  $res = $DBH->query($query);
-  if ($res===false) {
-    echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
-  $DBH->rollBack();
-  return false;
-  }
+//  $query = "ALTER TABLE `imas_msgs` DROP COLUMN isread, DROP INDEX msgfrom";
+//  $res = $DBH->query($query);
+//  if ($res===false) {
+//    echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
+//  $DBH->rollBack();
+//  return false;
+//  }
 
 $DBH->commit();
 
-echo "<p style='color: green;'>✓ Deleted old imas_msgs.isread column</p>";
+echo "<p style='color: green;'>✓ Updated imas_msgs.{viewed,deleted,tagged} columns</p>";
 
 return true;
