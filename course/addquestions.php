@@ -153,7 +153,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			require_once('../includes/filehandler.php');
 			deleteallaidfiles($aid);
 			if ($aver > 1) {
-                $stm = $DBH->query("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=:assessmentid");
+                $stm = $DBH->prepare("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=:assessmentid");
+                $stm->execute(array(':assessmentid'=>$aid));
                 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
                     $grades[$row['userid']]=$row["score"];
                 }
@@ -167,7 +168,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $total = array_sum(explode(',', $as));
                     $grades[$row['userid']][$row["assessmentid"]] = $total;
                 }
-				$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=$aid");
+				$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
 			}
 			$stm->execute(array(':assessmentid'=>$aid));
             if ($stm->rowCount()>0 || $ptschanged) {
