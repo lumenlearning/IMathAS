@@ -160,8 +160,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 }
 				$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid=:assessmentid");
 			} else {
-                $query = "SELECT userid, bestscores FROM imas_assessment_sessions WHERE assessmentid=$aid";
-                $stm = $DBH->query($query);
+                $query = "SELECT userid, bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid";
+                $stm->execute(array(':assessmentid'=>$aid));
                 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
                     $sp = explode(';', $row['bestscores']);
                     $as = str_replace(array('-1','-2','~'), array('0','0',','), $sp[0]);
