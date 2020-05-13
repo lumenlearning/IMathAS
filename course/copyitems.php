@@ -99,7 +99,8 @@ if (!(isset($teacherid))) {
 				$stm = $DBH->prepare($query);
 				$stm->execute($qarr);
 			}
-			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid&r=" . Sanitize::randomQueryStringParam());
+			$btf = isset($_GET['btf']) ? '&folder=' . Sanitize::encodeUrlParam($_GET['btf']) : '';
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid$btf&r=" . Sanitize::randomQueryStringParam());
 			exit;
 		} else if (isset($_GET['action']) && $_GET['action']=="copy") {
 			if ($_POST['whattocopy']=='all') {
@@ -309,7 +310,7 @@ if (!(isset($teacherid))) {
 				} else {
 					copysub($items,'0',$newitems,$gbcats,isset($_POST['copyhidden']));
 				}
-                doaftercopy($ctc, $newitems);
+				doaftercopy($ctc, $newitems);
 				// #### Begin OHM-specific code #####################################################
 				// #### Begin OHM-specific code #####################################################
 				// #### Begin OHM-specific code #####################################################
@@ -384,7 +385,8 @@ if (!(isset($teacherid))) {
 					$calitems[] = $row;
 				}
 			} else {
-			  header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid&r=" . Sanitize::randomQueryStringParam());
+				$btf = isset($_GET['btf']) ? '&folder=' . Sanitize::encodeUrlParam($_GET['btf']) : '';
+				header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid$btf&r=" . Sanitize::randomQueryStringParam());
 
 				exit;
 			}
@@ -566,7 +568,7 @@ if ($sourceUIver > $destUIver) {
 
 		for ($i = 0 ; $i<(count($ids)); $i++) {
             if ($sourceUIver <= $destUIver || strpos($types[$i],'Assessment') === false) { // #### OHM-specific code #####################################################
-            if ($alt==0) {echo "		<tr class=even>"; $alt=1;} else {echo "		<tr class=odd>"; $alt=0;}
+			if ($alt==0) {echo "		<tr class=even>"; $alt=1;} else {echo "		<tr class=odd>"; $alt=0;}
 			echo '<td>';
 			if (strpos($types[$i],'Block')!==false) {
 				echo "<input type=checkbox name='checked[]' value='{$ids[$i]}' id='{$parents[$i]}' ";
