@@ -724,12 +724,11 @@ switch($_GET['action']) {
 		}
 		//Start grouping: copy options
 		if ($_GET['action']=='addcourse' && $ctc>0) {
-			if ($sourceUIver < 2) {
-				echo '<span class=form>'._('Upgrade assessment version').'</span>';
-				echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
-				echo _('The source course is using an older format of assessments. Select this option to set your new course to use the new version of assessments, and convert copied assessments to the new format. You will want to review the settings after the copy.');
-				echo '</label></span><br class=form>';
-			}
+			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
+			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
+			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
+			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
+			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
 			echo '<div class="block grouptoggle">';
 			echo '<img class="mida" src="../img/expand.gif" /> ';
 			echo _('Course Copy Options');
@@ -753,9 +752,6 @@ switch($_GET['action']) {
 				#### Begin OHM-specific code #####################################################################
 				#### Begin OHM-specific code #####################################################################
 				#### Begin OHM-specific code #####################################################################
-				####
-				#### FIXME: This may or may not work with dlippman's "newassessver" checkbox.
-				####
 				echo '<span class="form">'._('Assessment Player Version').'</span>';
 				echo '<span class="js-version-inputs version-inputs">';
 				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
@@ -770,11 +766,11 @@ switch($_GET['action']) {
 			}
 			echo '</div>';
 
-		} else if ($_GET['action']=='addcourse' && $ctc == 0) {
-			echo '<span class=form>'._('Use new assessment version').'</span>';
-			echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1"/>';
-			echo _('Select this option to set your new course to use the new version of assessments.');
-			echo '</label></span><br class=form>';
+		### OHM-specific change: Removed "Use new assessment version" checkbox.
+		### OHM-specific change: Removed "Use new assessment version" checkbox.
+		### OHM-specific change: Removed "Use new assessment version" checkbox.
+		### OHM-specific change: Removed "Use new assessment version" checkbox.
+		### OHM-specific change: Removed "Use new assessment version" checkbox.
 		}
 		//Start grouping: Availability and Access
 		echo '<div class="block grouptoggle">';
