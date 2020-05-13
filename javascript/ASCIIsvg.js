@@ -74,6 +74,12 @@ function chop(x,n) {
   return Math.floor(x*Math.pow(10,n))/Math.pow(10,n);
 }
 
+function prepWithMath(str) {
+	str = str.replace(/\b(abs|acos|asin|atan|ceil|floor|cos|sin|tan|sqrt|exp|max|min|pow)\(/g, 'Math.$1(');
+	str = str.replace(/\(E\)/g,'(Math.E)');
+	str = str.replace(/\((PI|pi)\)/g,'(Math.PI)');
+	return str;
+}
 
 function ran(a,b,n) {
   if (n==null) n=0;
@@ -244,7 +250,7 @@ function updatePicture(obj) {
   src = src.replace(/\)([\(0-9a-zA-Z])/g,"\)*$1");
 //alert(src);
   try {
-    with (Math) eval(src);
+    eval(prepWithMath(src));
   } catch(err) {alert(err+"\n"+src)}
 }
 
@@ -357,7 +363,13 @@ function initPicture(x_min,x_max,y_min,y_max) {
       	      qnode.setAttribute("width",picture.getAttribute("width"));
       	      qnode.setAttribute("height",picture.getAttribute("height"));
       }
-      qnode.setAttribute("alt",picture.getAttribute("alt"));
+      if (picture.hasAttribute("data-nomag")) {
+        qnode.setAttribute("data-nomag",1);
+      }
+
+      qnode.setAttribute("alt", picture.getAttribute("alt") || '');
+      qnode.setAttribute("role", "img");
+
       if (picture.parentNode!=null) {
         //picture.parentNode.replaceChild(qnode,picture);
 				picture.parentNode.insertBefore(qnode,picture);
@@ -375,6 +387,15 @@ function initPicture(x_min,x_max,y_min,y_max) {
       }
 
       svgpicture = qnode;
+
+      if (picture.getAttribute("alt") != '' && picture.getAttribute("alt") != null) {
+        var title = document.createElement("title");
+        svgpicture.appendChild(title);
+        title.innerText = picture.getAttribute("alt");
+        title.id = picid+"-label";
+        svgpicture.setAttribute("aria-labelledby", picid+"-label");
+      }
+
       doc = document;
       pointerpos = doc.getElementById("pointerpos");
       if (pointerpos==null) {
@@ -910,6 +931,11 @@ function chopZ(st) {
   if (i==k) i--;
   return st.slice(0,i+1);
 }
+function rounddec(v,dec) {
+  dec = 2 + Math.max(0,dec-2);
+  var m = Math.pow(10,dec);
+  return Math.round(v*m)/m;
+}
 
 
 function grid(dx,dy) { // for backward compatibility
@@ -1035,31 +1061,31 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
 	      if (y<=winymax) st += " M"+(origin[0]+ticklength)+","+y+" "+(origin[0]-ticklength)+","+y;
 
   }
-  if (labels!=null) with (Math) {
+  if (labels!=null) {
     ldx = dx/xunitlength;
     ldy = dy/yunitlength;
     lx = (xmin>0 || xmax<0?xmin:0);
     ly = (ymin>0 || ymax<0?ymin:0);
     lxp = (ly==0?"below":"above");
     lyp = (lx==0?"left":"right");
-    var ddx = floor(1.1-log(ldx)/log(10))+1;
-    var ddy = floor(1.1-log(ldy)/log(10))+1;
+    var ddx = Math.floor(1-Math.log(ldx)/Math.log(10))+1;
+    var ddy = Math.floor(1-Math.log(ldy)/Math.log(10))+1;
     if (ddy<0) { ddy = 0;}
     if (ddx<0) { ddx = 0;}
     if (dox && dx>0) {
 	    for (x = (doy?ldx:0); x<=xmax; x = x+ldx)
-	      if (x>=xmin) text([x,ly],chopZ(x.toFixed(ddx)),lxp);
+	      if (x>=xmin) text([x,ly], rounddec(x, ddx),lxp);
 	    if (!fqonlyx) {
 	      for (x = -ldx; xmin<=x; x = x-ldx)
-	        if (x<=xmax) text([x,ly],chopZ(x.toFixed(ddx)),lxp);
+	        if (x<=xmax) text([x,ly], rounddec(x, ddx),lxp);
 	    }
     }
     if (doy && dy>0) {
 	    for (y = (dox?ldy:0); y<=ymax; y = y+ldy)
-	      if (y>=ymin) text([lx,y],chopZ(y.toFixed(ddy)),lyp);
+	      if (y>=ymin) text([lx,y], rounddec(y, ddy), lyp);
       	    if (!fqonlyy) {
 	      for (y = -ldy; ymin<=y; y = y-ldy)
-	        if (y<=ymax) text([lx,y],chopZ(y.toFixed(ddy)),lyp);
+	        if (y<=ymax) text([lx,y], rounddec(y, ddy), lyp);
 	    }
     }
   }
@@ -1074,7 +1100,7 @@ function axes(dx,dy,labels,gdx,gdy,dox,doy,smallticks) {
 function slopefield(fun,dx,dy) {
   var g = fun;
   if (typeof fun=="string")
-    eval("g = function(x,y){ with(Math) return "+mathjs(fun,"x|y")+" }");
+    eval("g = function(x,y){ return "+prepWithMath(mathjs(fun,"x|y"))+" }");
   var gxy,x,y,u,v,dz;
   if (dx==null) dx=1;
   if (dy==null) dy=1;
@@ -1204,7 +1230,7 @@ function parseShortScript(sscript,gw,gh) {
 
 		try {
 			eval(commands);
-			if (!svgpicture.hasAttribute("viewBox")) {
+			if (!svgpicture.hasAttribute("viewBox") && !svgpicture.hasAttribute("data-nomag")) {
 				addMagGlass();
 			}
 		} catch (e) {
@@ -1233,9 +1259,10 @@ function parseShortScript(sscript,gw,gh) {
 
 
 
-function drawPics() {
+function drawPics(base) {
   var index, nd;
-  pictures = document.getElementsByTagName("embed");
+  base = base || document;
+  pictures = base.getElementsByTagName("embed");
  // might be needed if setTimeout on parseShortScript isn't working
 
  	if (!ASnoSVG && isOldIE) {
@@ -1276,8 +1303,8 @@ function drawPics() {
 			  src = picture.hasAttribute("data-script")?picture.getAttribute("data-script"):picture.getAttribute("script"); //script from showplot
 			  if ((src!=null) && (src != "")) {
 				  try {
-					  with (Math) eval(src);
-					  if (!picture.hasAttribute("data-enlarged")) {
+					  eval(prepWithMath(src));
+					  if (!picture.hasAttribute("data-enlarged") && !picture.hasAttribute("data-nomag")) {
 					  	  addMagGlass();
 					  }
 				  } catch(err) {alert(err+"\n"+src)}
@@ -1303,10 +1330,10 @@ function plot(fun,x_min,x_max,points,id,min_type,max_type) {
   var f = function(x) { return x }, g = fun;
   var name = null;
   if (typeof fun=="string")
-    eval("g = function(x){ with(Math) return "+mathjs(fun,"x")+" }");
+    eval("g = function(x){ return "+prepWithMath(mathjs(fun,"x"))+" }");
   else if (typeof fun=="object") {
-    eval("f = function(t){ with(Math) return "+mathjs(fun[0],"t")+" }");
-    eval("g = function(t){ with(Math) return "+mathjs(fun[1],"t")+" }");
+    eval("f = function(t){ return "+prepWithMath(mathjs(fun[0],"t"))+" }");
+    eval("g = function(t){ return "+prepWithMath(mathjs(fun[1],"t"))+" }");
   }
   if (typeof x_min=="string") { name = x_min; x_min = xmin }
   else name = id;

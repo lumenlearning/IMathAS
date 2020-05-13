@@ -83,25 +83,20 @@
 	$(function() {$("#exttoolframe").css("height",$(window).height() - $(".midwrapper").position().top - ($(".midwrapper").height()-500) - ($("body").outerHeight(true) - $("body").innerHeight()));});
 	</script>';
 	require("../header.php");
-	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3)) {
+	if ((isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==3)) {
 		$fixbc = 'style="position:fixed;top:0;width:100%"';
 		$pad = 'padding-top: 25px;';
 	} else {
 		$fixbc = '';  $pad = '';
 	}
 	if ($shownav) {
-		if (isset($_SESSION['backtrack'])) {
-			echo '<div class="breadcrumb" '.$fixbc.'>'.$_SESSION['backtrack'][0];
-			echo " &gt; ".Sanitize::encodeStringForDisplay($titlesimp)."</div>";
-		} else {
-			echo "<div class=breadcrumb $fixbc>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-			echo "&gt; ".Sanitize::encodeStringForDisplay($titlesimp)."</div>";
-			echo '<div id="headershowlinkedtext" class="pagetitle"><h1>'.Sanitize::encodeStringForDisplay($titlesimp).'</h1></div>';
-		}
+		echo "<div class=breadcrumb $fixbc>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
+		echo "&gt; ".Sanitize::encodeStringForDisplay($titlesimp)."</div>";
+		echo '<div id="headershowlinkedtext" class="pagetitle"><h1>'.Sanitize::encodeStringForDisplay($titlesimp).'</h1></div>';
 	}
 	echo '<div class="linkedtextholder" style="padding-left:10px; padding-right: 10px;'.$pad.'">';
 	$navbuttons = '';
-	if ((isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) || $coursetheme=='otbsreader.css') {
+	if ((isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==3) || isset($_SESSION['readernavon']) || $coursetheme=='otbsreader.css') {
 		$now = time();
 		$query = "SELECT il.id,il.title,il.avail,il.startdate,il.enddate,ii.id AS itemid ";
 		$query .= "FROM imas_linkedtext as il JOIN imas_items AS ii ON il.id=ii.typeid AND ii.itemtype='LinkedText' ";
@@ -146,7 +141,7 @@
 		$navbuttons .= '<p>&nbsp;</p>';
 		if ($thisitemloc>0) {
 			$p = $itemdata[$flatlist[$thisitemloc-1]];
-			if (isset($studentid) && !isset($sessiondata['stuview'])) {
+			if (isset($studentid) && !isset($_SESSION['stuview'])) {
 				$rec = "data-base=\"linkedlink-".Sanitize::onlyInt($p['id'])."\" ";
 			} else {
 				$rec = '';
@@ -157,7 +152,7 @@
 		}
 		if ($thisitemloc<count($flatlist)-2) {
 			$p = $itemdata[$flatlist[$thisitemloc+1]];
-			if (isset($studentid) && !isset($sessiondata['stuview'])) {
+			if (isset($studentid) && !isset($_SESSION['stuview'])) {
 				$rec = "data-base=\"linkedlink-".Sanitize::onlyInt($p['id'])."\" ";
 			} else {
 				$rec = '';
@@ -178,11 +173,7 @@
 	echo Sanitize::outgoingHtml(filter($text));
 	echo '</div>';
 	if ($shownav) {
-		if (isset($_SESSION['backtrack'])) {
-			echo "<div class=right><a href=\"course.php?cid=$cid&folder=".$_SESSION['backtrack'][1]."\">Back</a></div>\n";
-		} else {
-			echo "<div class=right><a href=\"course.php?cid=$cid\">Return to Course Page</a></div>\n";
-		}
+		echo "<div class=right><a href=\"course.php?cid=$cid\">Return to Course Page</a></div>\n";
 	}
 	require("../footer.php");
 

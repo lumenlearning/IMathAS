@@ -118,7 +118,7 @@ if (!(isset($teacherid))) {
 
 
 			if (isset($_POST['chgtimelimit'])) {
-				$timelimit = Sanitize::onlyInt($_POST['timelimit'])*60;
+				$timelimit = round(Sanitize::onlyFloat($_POST['timelimit'])*60);
 				if (isset($_POST['timelimitkickout'])) {
 					$timelimit = -1*$timelimit;
 				}
@@ -339,7 +339,8 @@ if (!(isset($teacherid))) {
 
 		if (count($sets)>0) {
 			$setslist = implode(',',$sets);
-			$stm = $DBH->prepare("UPDATE imas_assessments SET $setslist WHERE id IN ($checkedlist)");
+			$qarr[':cid'] = $cid;
+			$stm = $DBH->prepare("UPDATE imas_assessments SET $setslist WHERE id IN ($checkedlist) AND courseid=:cid");
 			$stm->execute($qarr);
 		}
 		if (isset($_POST['chgintro'])) {

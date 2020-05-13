@@ -14,19 +14,17 @@ require("../init.php");
 $cid = Sanitize::courseId($_GET['cid']);
 if (isset($_GET['secfilter'])) {
 	$secfilter = $_GET['secfilter'];
-	$sessiondata[$cid.'secfilter'] = $secfilter;
-	writesessiondata();
-} else if (isset($sessiondata[$cid.'secfilter'])) {
-	$secfilter = $sessiondata[$cid.'secfilter'];
+	$_SESSION[$cid.'secfilter'] = $secfilter;
+} else if (isset($_SESSION[$cid.'secfilter'])) {
+	$secfilter = $_SESSION[$cid.'secfilter'];
 } else {
 	$secfilter = -1;
 }
 if (isset($_GET['rmode'])) {
 	$rmode = $_GET['rmode'];
-	$sessiondata[$cid.'rmode'] = $rmode;
-	writesessiondata();
-} else if (isset($sessiondata[$cid.'rmode'])) {
-	$rmode = $sessiondata[$cid.'rmode'];
+	$_SESSION[$cid.'rmode'] = $rmode;
+} else if (isset($_SESSION[$cid.'rmode'])) {
+	$rmode = $_SESSION[$cid.'rmode'];
 } else {
 	$rmode = 0;
 }
@@ -164,7 +162,11 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, 1, :created_at);";
 				$stm = $DBH->prepare($query);
 				$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>10,
-					':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>0, ':created_at'=>time()));
+					':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+					':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+					':email'=>Sanitize::emailAddress($_POST['email']),
+					':msgnotify'=>0,
+                    ':created_at'=>time()));
 				$newuserid = $DBH->lastInsertId();
 				//$query = "INSERT INTO imas_students (userid,courseid) VALUES ($newuserid,'$cid')";
 				$stm = $DBH->prepare("SELECT deflatepass FROM imas_courses WHERE id=:id");
@@ -561,7 +563,7 @@ if ($overwriteBody==1) {
 	<form method=post id=pageform class=limitaftervalidate action="listusers.php?cid=<?php echo $cid ?>&newstu=new">
 		<span class=form><label for="SID"><?php echo $loginprompt;?>:</label></span> <input class=form type=text size=12 id=SID name=SID><BR class=form>
 	<span class=form><label for="pw1">Choose a password:</label></span><input class=form type=text size=20 id=pw1 name=pw1><BR class=form>
-	<span class=form><label for="firstname">Enter First Name:</label></span> <input class=form type=text size=20 id=firstnam name=firstname><BR class=form>
+	<span class=form><label for="firstname">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname><BR class=form>
 	<span class=form><label for="lastname">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname><BR class=form>
 	<span class=form><label for="email">Enter E-mail address:</label></span>  <input class=form type=text size=60 id=email name=email><BR class=form>
 	<span class=form>Section (optional):</span>

@@ -86,9 +86,9 @@
 			$tolist = explode(',',$_POST['tolist']);
 
 			if (isset($_POST['savesent'])) {
-				$isread = 0;
+				$deleted = 0;
 			} else {
-				$isread = 4;
+				$deleted = 4;
 			}
 			$stm = $DBH->prepare("SELECT FirstName,LastName FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$userid));
@@ -100,11 +100,11 @@
 			foreach ($tolist as $msgto) {
 				if (!in_array($msgto,$toignore)) {
 					$message = str_replace(array('LastName','FirstName'),array($lastnames[$msgto],$firstnames[$msgto]), $messagePost);
-					$query = "INSERT INTO imas_msgs (title,message,msgto,msgfrom,senddate,isread,courseid) VALUES ";
-					$query .= "(:title, :message, :msgto, :msgfrom, :senddate, :isread, :courseid)";
+					$query = "INSERT INTO imas_msgs (title,message,msgto,msgfrom,senddate,deleted,courseid) VALUES ";
+					$query .= "(:title, :message, :msgto, :msgfrom, :senddate, :deleted, :courseid)";
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':title'=>$subjectPost, ':message'=>$message, ':msgto'=>$msgto, ':msgfrom'=>$userid,
-						':senddate'=>$now, ':isread'=>$isread, ':courseid'=>$cid));
+						':senddate'=>$now, ':deleted'=>$deleted, ':courseid'=>$cid));
 					$msgid = $DBH->lastInsertId();
 					if (isset($emailaddys[$msgto])) {
 						//email address is sanitized above
@@ -140,10 +140,10 @@
 				}
 			}
 			foreach ($tolist as $msgto) {
-				$query = "INSERT INTO imas_msgs (title,message,msgto,msgfrom,senddate,isread,courseid) VALUES ";
-				$query .= "(:title, :message, :msgto, :msgfrom, :senddate, :isread, :courseid)";
+				$query = "INSERT INTO imas_msgs (title,message,msgto,msgfrom,senddate,courseid) VALUES ";
+				$query .= "(:title, :message, :msgto, :msgfrom, :senddate, :courseid)";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':title'=>$subjectPost, ':message'=>$message, ':msgto'=>$msgto, ':msgfrom'=>$userid, ':senddate'=>$now, ':isread'=>0, ':courseid'=>$cid));
+				$stm->execute(array(':title'=>$subjectPost, ':message'=>$message, ':msgto'=>$msgto, ':msgfrom'=>$userid, ':senddate'=>$now, ':courseid'=>$cid));
 			}
 
 		} else {
@@ -163,8 +163,11 @@
 				}
 			}
 
-			$sessiondata['mathdisp']=2;
-			$sessiondata['graphdisp']=2;
+			$origmathdisp = $_SESSION['mathdisp'];
+			$origgraphdisp = $_SESSION['graphdisp'];
+			$_SESSION['mathdisp']=2;
+			$_SESSION['graphdisp']=2;
+
 			require("../filter/filter.php");
 			$message = filter($messagePost);
 			$message = preg_replace('/<img([^>])*src="\//','<img $1 src="'.$GLOBALS['basesiteurl'] .'/',$message);
@@ -221,6 +224,9 @@
 			foreach ($teacheraddys as $addy) {
 				send_email($addy, $sendfrom, $subjectPost, $message, array($self), array(), 5);
 			}
+
+			$_SESSION['mathdisp'] = $origmathdisp;
+			$_SESSION['graphdisp'] = $origgraphdisp;
 		}
 		if ($calledfrom=='lu') {
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid&r=" . Sanitize::randomQueryStringParam());

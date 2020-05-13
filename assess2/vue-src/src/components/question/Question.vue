@@ -8,11 +8,11 @@
       :qdata = "questionData"
       :qn = "qn"
     />
-    <p v-if="questionData.withdrawn !== 0" class="noticetext">
-      <icons 
-        name="alert" 
-        color="warn" 
-        size="medium" />
+    <p
+      v-if="questionData.withdrawn !== 0"
+      class="noticetext"
+    >
+      <icons name="alert" color="warn" size="medium" />
       {{ $t('question.withdrawn') }}
     </p>
     <div v-if = "errorsToShow.length > 0" class="small">
@@ -27,84 +27,106 @@
       v-html="questionData.html"
       class = "question"
       :id="'questionwrap' + qn"
+      ref = "thisqwrap"
     />
     <question-helps
       v-if = "showHelps"
       :qn = "qn"
     />
 
-      <div 
-        v-if="questionHasCalculator" 
-        class="calculator" 
-        :id="'qa-' + calcType + '-' + qn"
-        aria-label="Use calculator">
-        <button 
-          type="button" 
-          @click="openCalc" 
-          v-show="!showCalculator || calcIsPoppedOut"
-          :disabled="calcIsPoppedOut">
-            <icon-calc :calc-type="calcType"></icon-calc>
-            Calculator
-        </button>
-        <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
-          <vue-draggable-resizeable 
-            v-show="showCalculator" 
-            class-name-active="calculator-active"
-            ref="calcResize"
-            @resizing="getCalcDimensions"
-            :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
-            :style="{position: calcPosition}"
-            :draggable="calcIsPoppedOut"
-            :resizable="calcIsPoppedOut"
-            :handles="['br']"
-            :drag-handle="'.calc-header'"
-            :h="500"
-            :w="calcType === 'graphing' ? 600 : 500"
-            :x="400"
-            :y="-32"
-            :min-width="calcType === 'graphing' ? 500 : 400"
-            :min-height="400"
-          >
-            <div slot="br">
-              <icon-drag></icon-drag>
-            </div>
-            <div class="calc-header">
-              <span v-if="!calcIsPoppedOut"> 
-                <icon-calc :calc-type="calcType"></icon-calc> Calculator
-              </span>
-              <span v-else> Question {{qn + 1}} Calculator</span>
-              <div>
-                <button
-                    type="button"
-                    :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
-                    class="button popout"
-                    @click="toggleCalcPopOut">
-                
-                    <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
-                    <icon-pop-in v-else></icon-pop-in>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Close calculator"
-                    class="button"
-                    @click="closeCalc"
-                  >
-                    <icon-close></icon-close>
-                  </button>
-                </div>
-            </div>
-            <div class="calc-body">
-              <figure 
-                :id="'calc' + qn" 
-                ref="figure"
-                :class="{ 'graphing' : calcType === 'graphing', }"
-                :style="{'height': (calcHeight - 84) + 'px'}">
-              </figure>
-            </div>
-          </vue-draggable-resizeable>
-        </div>
+    <div v-if="showWork && questionContentLoaded">
+      <button
+        v-if = "getwork !== 2"
+        @click = "showWorkInput = !showWorkInput"
+      >
+        {{ showWorkInput ? $t('work.hide') : $t('work.add') }}
+      </button>
+      <div v-show="getwork === 2 || showWorkInput">
+        {{ $t("question.showwork") }}
+        <showwork-input
+          :id="'sw' + qn"
+          :value = "questionData.work"
+          rows = "3"
+          :active = "getwork === 2 || showWorkInput"
+          @input = "updateWork"
+          @blur = "workChanged"
+          @focus = "workFocused"
+        />
       </div>
-    
+    </div>
+
+    <div
+      v-if="questionHasCalculator"
+      class="calculator"
+      :id="'qa-' + calcType + '-' + qn"
+      aria-label="Use calculator">
+      <button
+        type="button"
+        @click="openCalc"
+        v-show="!showCalculator || calcIsPoppedOut"
+        :disabled="calcIsPoppedOut">
+          <icon-calc :calc-type="calcType"></icon-calc>
+          Calculator
+      </button>
+      <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
+        <vue-draggable-resizeable
+          v-show="showCalculator"
+          class-name-active="calculator-active"
+          ref="calcResize"
+          @resizing="getCalcDimensions"
+          :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
+          :style="{position: calcPosition}"
+          :draggable="calcIsPoppedOut"
+          :resizable="calcIsPoppedOut"
+          :handles="['br']"
+          :drag-handle="'.calc-header'"
+          :h="500"
+          :w="calcType === 'graphing' ? 600 : 500"
+          :x="400"
+          :y="-32"
+          :min-width="calcType === 'graphing' ? 500 : 400"
+          :min-height="400"
+        >
+          <div slot="br">
+            <icon-drag></icon-drag>
+          </div>
+          <div class="calc-header">
+            <span v-if="!calcIsPoppedOut">
+              <icon-calc :calc-type="calcType"></icon-calc> Calculator
+            </span>
+            <span v-else> Question {{qn + 1}} Calculator</span>
+            <div>
+              <button
+                  type="button"
+                  :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
+                  class="button popout"
+                  @click="toggleCalcPopOut">
+
+                  <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
+                  <icon-pop-in v-else></icon-pop-in>
+                </button>
+                <button
+                  type="button"
+                  aria-label="Close calculator"
+                  class="button"
+                  @click="closeCalc"
+                >
+                  <icon-close></icon-close>
+                </button>
+              </div>
+          </div>
+          <div class="calc-body">
+            <figure
+              :id="'calc' + qn"
+              ref="figure"
+              :class="{ 'graphing' : calcType === 'graphing', }"
+              :style="{'height': (calcHeight - 84) + 'px'}">
+            </figure>
+          </div>
+        </vue-draggable-resizeable>
+      </div>
+    </div>
+
 
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
@@ -125,6 +147,17 @@
         {{ $t('question.jump_to_answer') }}
       </button>
     </div>
+    <div v-else-if="showNext"  class="submitbtnwrap">
+      <router-link
+        :to="'/skip/'+ (this.qn + 2)"
+        tag="button"
+        class="secondarybtn"
+        :disabled = "!canSubmit"
+      >
+        <icons name="right" />
+        {{ $t('question.next') }}
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -133,6 +166,7 @@ import { store, actions } from '../../basicstore';
 import ScoreResult from '@/components/question/ScoreResult.vue';
 import Icons from '@/components/widgets/Icons.vue';
 import QuestionHelps from '@/components/question/QuestionHelps.vue';
+import ShowworkInput from '@/components/ShowworkInput.vue';
 import IconCalc from '../icons/Calculators.vue';
 import IconClose from "../icons/Close.vue";
 import IconPopOut from "../icons/PopOut.vue";
@@ -143,10 +177,11 @@ import VueDraggableResizeable from 'vue-draggable-resizable';
 
 export default {
   name: 'Question',
-  props: ['qn', 'active', 'state', 'seed', 'disabled'],
+  props: ['qn', 'active', 'state', 'seed', 'disabled', 'getwork'],
   components: {
     ScoreResult,
     QuestionHelps,
+    ShowworkInput,
     Icons,
     IconCalc,
     IconClose,
@@ -157,8 +192,9 @@ export default {
   },
   data: function () {
     return {
-      timeActivated: null,
-      timeActive: 0,
+      work: '',
+      lastWorkVal: '',
+      showWorkInput: false,
       showCalculator: false,
       calcType: this.getCalcType(),
       calcHasAlreadyLoaded: false,
@@ -185,20 +221,33 @@ export default {
     questionHasCalculator () {
       return this.questionData.showcalculator;
     },
-    showSubmit () {
+    hasSeqNext () {
+      return (this.questionData.jsparams &&
+        this.questionData.jsparams.hasseqnext);
+    },
+    buttonsOk () {
       return (store.inProgress &&
         this.questionContentLoaded &&
         !store.inPrintView &&
         this.questionData.withdrawn === 0 &&
-        this.questionData.canretry && (
+        this.questionData.canretry);
+    },
+    showSubmit () {
+      return (this.buttonsOk && (
         store.assessInfo.submitby === 'by_question' ||
-          this.questionData.tries_max > 1
+          this.questionData.tries_max > 1 ||
+          this.hasSeqNext
       ) && (
       // if livepoll, only show if state is 2
         store.assessInfo.displaymethod !== 'livepoll' ||
           this.state === 2
       )
       );
+    },
+    showNext () {
+      return (this.buttonsOk && !this.showSubmit &&
+        store.assessInfo.displaymethod === 'skip' &&
+        this.qn < store.assessInfo.questions.length - 1);
     },
     submitClass () {
       return (store.assessInfo.submitby === 'by_assessment')
@@ -207,6 +256,7 @@ export default {
     showScore () {
       return (store.inProgress &&
         !store.inPrintView &&
+        this.questionData.hadSeqNext !== true &&
         (this.questionData.hasOwnProperty('score') ||
          this.questionData.status === 'attempted'
         ) &&
@@ -217,16 +267,21 @@ export default {
       );
     },
     submitLabel () {
+      let label = 'question.';
       if (store.assessInfo.submitby === 'by_question') {
         // by question submission
-        return this.$t('question.submit');
+        label += 'submit';
       } else if (this.questionData.tries_max === 1) {
         // by assessment, with one try
-        return this.$t('question.saveans');
+        label += 'saveans';
       } else {
         // by assessment, can retry
-        return this.$t('question.checkans');
+        label += 'checkans';
       }
+      if (this.hasSeqNext) {
+        label += '_seqnext';
+      }
+      return this.$t(label);
     },
     showHelps () {
       return ((store.assessInfo.hasOwnProperty('help_features') && (
@@ -245,6 +300,10 @@ export default {
         errors = errors.concat(this.questionData.errors);
       }
       return errors;
+    },
+    showWork () {
+      return ((this.getwork === 1 && store.assessInfo.questions[this.qn].showwork & 1) ||
+        (this.getwork === 2 && store.assessInfo.questions[this.qn].showwork & 2));
     }
   },
   methods: {
@@ -259,7 +318,7 @@ export default {
       this.calcIsPoppedOut = false;
     },
     toggleCalcPopOut(){
-      this.calcIsPoppedOut = !this.calcIsPoppedOut; 
+      this.calcIsPoppedOut = !this.calcIsPoppedOut;
     },
     getCalcDimensions(left, top, width, height){
       this.calcHeight = height;
@@ -273,8 +332,10 @@ export default {
       }
     },
     submitQuestion () {
-      this.updateTime(false);
-      actions.submitQuestion(this.qn, false, this.timeActive);
+      actions.submitQuestion(this.qn, false);
+      // reset timeactive counter
+      store.timeActive[this.qn] = 0;
+      store.timeActivated[this.qn] = new Date();
     },
     jumpToAnswer () {
       store.confirmObj = {
@@ -283,15 +344,15 @@ export default {
       };
     },
     updateTime (goingActive) {
-      if (this.timeActivated === null || goingActive) {
-        this.timeActivated = new Date();
-      } else if (this.timeActivated !== null) {
-        let now = new Date();
-        this.timeActive += (now - this.timeActivated);
+      if (!store.timeActivated.hasOwnProperty(this.qn) || goingActive) {
+        store.timeActivated[this.qn] = new Date();
+      } else if (store.timeActivated.hasOwnProperty(this.qn)) {
+        const now = new Date();
+        store.timeActive[this.qn] += (now - store.timeActivated[this.qn]);
+        delete store.timeActivated[this.qn]; // so it doesn't add more on submitall
       }
     },
     addDirtyTrackers () {
-      var self = this;
       window.$('#questionwrap' + this.qn).find('input[name],select[name],textarea[name]')
         .off('focus.dirtytrack').off('change.dirtytrack').off('input.dirtytrack')
         .on('focus.dirtytrack', function () {
@@ -306,7 +367,7 @@ export default {
           store.somethingDirty = true;
         })
         .on('change.dirtytrack', function () {
-          let val = window.$(this).val().trim();
+          const val = window.$(this).val().trim();
           let changed = false;
           if (this.type === 'radio' || this.type === 'checkbox') {
             changed = true;
@@ -315,8 +376,8 @@ export default {
           }
           if (changed) {
             store.somethingDirty = true;
-            let name = window.$(this).attr('name');
-            let m = name.match(/^(qs|qn|tc)(\d+)/);
+            const name = window.$(this).attr('name');
+            const m = name.match(/^(qs|qn|tc)(\d+)/);
             if (m !== null) {
               var qn = m[2] * 1;
               var pn = 0;
@@ -326,16 +387,16 @@ export default {
               }
 
               // autosave value
-              let now = new Date();
-              let timeactive = self.timeActive + (now - self.timeActivated);
+              const now = new Date();
+              const timeactive = store.timeActive[qn] + (now - store.timeActivated[qn]);
               actions.doAutosave(qn, pn, timeactive);
             }
           }
         });
     },
     disableOutOfTries () {
-      let trymax = this.questionData.tries_max;
-      for (let pn in this.questionData.parts) {
+      const trymax = this.questionData.tries_max;
+      for (const pn in this.questionData.parts) {
         var regex;
         if (this.questionData.parts[pn].try >= trymax) {
           // out of tries - disable inputs
@@ -361,13 +422,16 @@ export default {
         return;
       }
       setTimeout(window.drawPics, 100);
-      window.rendermathnode(document.getElementById('questionwrap' + this.qn));
-      window.initSageCell(document.getElementById('questionwrap' + this.qn));
+      window.rendermathnode(this.$refs.thisqwrap);
+      window.initSageCell(this.$refs.thisqwrap);
+      window.initlinkmarkup(this.$refs.thisqwrap);
       this.updateTime(true);
       this.setInitValues();
       // add in timeactive from autosave, if exists
-      this.timeActive += actions.getInitTimeactive(this.qn);
+      store.timeActive[this.qn] += actions.getInitTimeactive(this.qn);
       this.addDirtyTrackers();
+      // set work
+      this.work = this.questionData.work;
 
       let svgchk = '<svg class="scoremarker" viewBox="0 0 24 24" width="16" height="16" stroke="green" stroke-width="3" fill="none" role="img" aria-label="' + this.$t('icons.correct') + '">';
       svgchk += '<polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -375,10 +439,10 @@ export default {
       svgychk += '<path d="M 5.3,10.6 9,14.2 18.5,4.6 21.4,7.4 9,19.8 2.7,13.5 z" /></svg>';
       let svgx = '<svg class="scoremarker" viewBox="0 0 24 24" width="16" height="16" stroke="rgb(153,0,0)" stroke-width="3" fill="none" role="img" aria-label="' + this.$t('icons.incorrect') + '">';
       svgx += '<path d="M18 6 L6 18 M6 6 L18 18" /></svg>';
-      window.$('#questionwrap' + this.qn).find('.scoremarker').remove();
-      window.$('#questionwrap' + this.qn).find('div.ansgrn,table.ansgrn').append(svgchk);
-      window.$('#questionwrap' + this.qn).find('div.ansyel,table.ansyel').append(svgychk);
-      window.$('#questionwrap' + this.qn).find('div.ansred,table.ansred').append(svgx);
+      window.$(this.$refs.thisqwrap).find('.scoremarker').remove();
+      window.$(this.$refs.thisqwrap).find('div.ansgrn,table.ansgrn').append(svgchk);
+      window.$(this.$refs.thisqwrap).find('div.ansyel,table.ansyel').append(svgychk);
+      window.$(this.$refs.thisqwrap).find('div.ansred,table.ansred').append(svgx);
 
       if (this.disabled) {
         window.$('#questionwrap' + this.qn).find('input,select,textarea').each(function (i, el) {
@@ -390,11 +454,11 @@ export default {
 
       window.imathasAssess.init(this.questionData.jsparams, store.enableMQ);
 
-      window.$('#questionwrap' + this.qn).find('select.ansgrn').after(svgchk);
-      window.$('#questionwrap' + this.qn).find('select.ansyel').after(svgychk);
-      window.$('#questionwrap' + this.qn).find('select.ansred').after(svgx);
+      window.$(this.$refs.thisqwrap).find('select.ansgrn').after(svgchk);
+      window.$(this.$refs.thisqwrap).find('select.ansyel').after(svgychk);
+      window.$(this.$refs.thisqwrap).find('select.ansred').after(svgx);
 
-      actions.setRendered(this.qn);
+      actions.setRendered(this.qn, true);
     },
     setInitValues () {
       var regex = new RegExp('^(qn|tc|qs)\\d');
@@ -411,13 +475,38 @@ export default {
             }
           }
         });
+      if (this.showWork) {
+        actions.setInitValue(thisqn, 'sw' + this.qn, this.questionData.work);
+        this.work = this.questionData.work;
+      }
+    },
+    updateWork (val) {
+      this.work = val;
+    },
+    workChanged () {
+      // changed - cue for autosave
+      if (this.work !== this.lastWorkVal) {
+        store.work[this.qn] = this.work;
+        // autosave value
+        if (this.getwork === 1) {
+          const now = new Date();
+          const timeactive = store.timeActive[this.qn] + (now - store.timeActivated[this.qn]);
+          actions.doAutosave(this.qn, 'sw', timeactive);
+        } else if (this.getwork === 2) {
+          this.$emit('workchanged', this.work);
+        }
+      }
+    },
+    workFocused () {
+      actions.clearAutosaveTimer();
+      this.lastWorkVal = this.work;
     }
   },
   updated () {
     if (this.questionContentLoaded) {
       this.disableOutOfTries();
-      this.renderAndTrack(); 
-      
+      this.renderAndTrack();
+
       if(!this.calcHasAlreadyLoaded){
         if (this.questionHasCalculator === 'basic') {
           Desmos.FourFunctionCalculator(this.$refs.figure);
@@ -425,21 +514,27 @@ export default {
           Desmos.ScientificCalculator(this.$refs.figure);
         } if (this.questionHasCalculator === 'graphing') {
           Desmos.GraphingCalculator(this.$refs.figure);
-        } 
-        this.calcHasAlreadyLoaded = true; 
-      } 
+        }
+        this.calcHasAlreadyLoaded = true;
+      }
     } else {
       this.loadQuestionIfNeeded();
     }
   },
   created () {
     this.loadQuestionIfNeeded(true);
+    if (!store.timeActive.hasOwnProperty(this.qn)) {
+      store.timeActive[this.qn] = 0;
+    }
   },
   mounted () {
     if (this.questionContentLoaded) {
       this.disableOutOfTries();
       this.renderAndTrack();
     }
+  },
+  beforeDestroy () {
+    actions.setRendered(this.qn, false);
   },
   watch: {
     active: function (newVal, oldVal) {
@@ -511,11 +606,6 @@ input.red {
 .scoremark.green {
   border-color: #090;
   color: #090;
-}
-.questionwrap .question {
-  border: 0;
-  background-color: #fff;
-  margin: 12px 0;
 }
 .submitbtnwrap {
   margin: 16px 0;
@@ -679,7 +769,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 .handle-br {
   bottom: 5px;
-  right: 5px; 
+  right: 5px;
 }
 
 .handle svg {
@@ -695,7 +785,7 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 
 @media (max-width: 768px){
   .calculator {
-    width: 100%; 
+    width: 100%;
   }
 
   .calc-header .popout {
@@ -703,4 +793,3 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   }
 }
 </style>
-

@@ -4,9 +4,9 @@ require_once(__DIR__."/updateptsposs.php");
 require_once(__DIR__."/migratesettings.php");
 //boost operation time
 
-ini_set("max_input_time", "900");
+
 ini_set("max_execution_time", "900");
-ini_set("memory_limit", "104857600");
+
 
 //IMathAS:  Copy Items utility functions
 //(c) 2008 David Lippman
@@ -157,7 +157,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 			$row['gbcategory'] = 0;
 		}
 		$rubric = $row['rubric']; //array_pop($row);
-		$row[0] .= $_POST['append'];
+		$row['name'] .= $_POST['append'];
 		if ($row['outcomes']!='') {
 			$curoutcomes = explode(',',$row['outcomes']);
 			$newoutcomes = array();
@@ -245,7 +245,8 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 			deffeedbacktext,eqnhelper,caltag,calrtag,tutoredit,posttoforum,msgtoinstr,
 			istutorial,viddata,reqscore,reqscoreaid,reqscoretype,ancestors,defoutcome,
 			posttoforum,ptsposs,extrefs,submitby,showscores,showans,viewingb,scoresingb,
-			ansingb,defregens,defregenpenalty,ver,keepscore,overtime_grace,overtime_penalty
+			ansingb,defregens,defregenpenalty,ver,keepscore,overtime_grace,overtime_penalty,
+			showwork
 			FROM imas_assessments WHERE id=:id";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$typeid));
@@ -356,7 +357,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 			$flat = implode(',', $goodqs);
 			//$flat is santized above
 			$query = "SELECT id,questionsetid,points,attempts,penalty,category,regen,
-				showans,showcalculator,showhints,rubric,withdrawn,fixedseeds FROM imas_questions
+				showans,showcalculator,showhints,rubric,withdrawn,fixedseeds,showwork FROM imas_questions
 				WHERE id IN ($flat)";
 			$stm = $DBH->query($query);
 			$inssph = array(); $inss = array();
@@ -383,8 +384,8 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 						$row['category'] = 0;
 					}
 				}
-				$inssph[] = "(?,?,?,?,?,?,?,?,?,?,?)";
-				array_push($inss, $newtypeid, $row['questionsetid'],$row['points'],$row['attempts'],$row['penalty'],$row['category'],$row['regen'],$row['showans'],$row['showcalculator'],$row['showhints'],$row['fixedseeds']);
+				$inssph[] = "(?,?,?,?,?,?,?,?,?,?,?,?)";
+				array_push($inss, $newtypeid, $row['questionsetid'],$row['points'],$row['attempts'],$row['penalty'],$row['category'],$row['regen'],$row['showans'],$row['showcalculator'],$row['showhints'],$row['fixedseeds'],$row['showwork']);
 				$rubric[$row['id']] = $row['rubric'];
 				//check for a category that's set to an assessment e.g. AID-1234
 				if (0==strncmp($row['category'],"AID-",4)) {
@@ -396,7 +397,7 @@ function copyitem($itemid,$gbcats=false,$sethidden=false) {
 			$idtoorder = array_flip($insorder);
 
 			if (count($inss)>0) {
-				$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans,showcalculator,showhints,fixedseeds) ";
+				$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans,showcalculator,showhints,fixedseeds,showwork) ";
 				$query .= "VALUES ".implode(',',$inssph);
 				$stm = $DBH->prepare($query);
 				$stm->execute($inss);

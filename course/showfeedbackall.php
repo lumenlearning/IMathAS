@@ -19,25 +19,24 @@ if ($isteacher || $istutor) {
 }
 
 if ($canviewall) {
-	if (isset($sessiondata[$cid.'gbmode']) && !isset($_GET['refreshdef'])) {
-		$gbmode =  $sessiondata[$cid.'gbmode'];
+	if (isset($_SESSION[$cid.'gbmode']) && !isset($_GET['refreshdef'])) {
+		$gbmode =  $_SESSION[$cid.'gbmode'];
 	} else {
 		$stm = $DBH->prepare("SELECT defgbmode FROM imas_gbscheme WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
 		$gbmode = $stm->fetchColumn(0);
-		$sessiondata[$cid.'gbmode'] = $gbmode;
-		writesessiondata();
+		$_SESSION[$cid.'gbmode'] = $gbmode;
 	}
-	if (isset($sessiondata[$cid.'catfilter'])) {
-		$catfilter = $sessiondata[$cid.'catfilter'];
+	if (isset($_SESSION[$cid.'catfilter'])) {
+		$catfilter = $_SESSION[$cid.'catfilter'];
 	} else {
 		$catfilter = -1;
 	}
 	if (isset($tutorsection) && $tutorsection!='') {
 		$secfilter = $tutorsection;
 	} else {
-		if (isset($sessiondata[$cid.'secfilter'])) {
-			$secfilter = $sessiondata[$cid.'secfilter'];
+		if (isset($_SESSION[$cid.'secfilter'])) {
+			$secfilter = $_SESSION[$cid.'secfilter'];
 		} else {
 			$secfilter = -1;
 		}
@@ -49,7 +48,7 @@ if ($canviewall) {
 	$secfilter = -1;
 	$catfilter = -1;
 	$hidenc = 1;
-	$availshow = 1;	
+	$availshow = 1;
 }
 $showpics = 0;
 $lastlogin = false;
@@ -72,7 +71,7 @@ require("gbtable2.php");
 
 $includecomments = true;
 
-$gbt = gbtable($stu); 
+$gbt = gbtable($stu);
 
 $flexwidth = true;
 $nologo = true;
@@ -82,6 +81,9 @@ echo '<h1>'.sprintf(_('All Feedback For %s'), $gbt[1][0][0]).'</h1>';
 
 for ($i=0;$i<count($gbt[0][1]);$i++) {
 	if ($gbt[1][1][$i][1] == '' || $gbt[1][1][$i][1]=='<p></p>') {
+		continue;
+	}
+	if (isset($gbt[1][1][$i][0]) && $gbt[1][1][$i][0]=='N/A') {
 		continue;
 	}
 	if (!$isteacher && !$istutor && $gbt[0][1][$i][4]==0) { //skip if hidden
@@ -106,6 +108,5 @@ for ($i=0;$i<count($gbt[0][1]);$i++) {
 	echo Sanitize::outgoingHtml($gbt[1][1][$i][1]);
 	echo '</div>';
 }
-	
-require("../footer.php");
 
+require("../footer.php");

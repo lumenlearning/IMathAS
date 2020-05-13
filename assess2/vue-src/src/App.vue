@@ -66,8 +66,8 @@ export default {
       var unanswered = true;
       if (store.assessInfo.hasOwnProperty('questions')) {
         let qAnswered = 0;
-        let nQuestions = store.assessInfo.questions.length;
-        for (let i in store.assessInfo.questions) {
+        const nQuestions = store.assessInfo.questions.length;
+        for (const i in store.assessInfo.questions) {
           if (store.assessInfo.questions[i].try > 0) {
             qAnswered++;
           }
@@ -77,6 +77,12 @@ export default {
         }
       }
       if (store.noUnload) {
+
+      } else if (!store.inProgress && Object.keys(store.work).length > 0 && !this.prewarned) {
+        evt.preventDefault();
+        this.prewarned = false;
+        return this.$t('unload.unsubmitted_work');
+      } else if (!store.inProgress) {
 
       } else if (Object.keys(actions.getChangedQuestions()).length > 0 &&
         !this.prewarned
@@ -115,6 +121,16 @@ export default {
         e.preventDefault();
         store.confirmObj = {
           body: 'unload.unsubmitted_assessment',
+          action: () => {
+            self.prewarned = true;
+            window.location = e.target.href;
+          }
+        };
+        return false;
+      } else if (!store.inProgress && Object.keys(store.work).length > 0) {
+        e.preventDefault();
+        store.confirmObj = {
+          body: 'unload.unsubmitted_work',
           action: () => {
             self.prewarned = true;
             window.location = e.target.href;

@@ -16,6 +16,16 @@
           {{ $t('closed.submit_now') }}
         </button>
       </p>
+      <p v-else-if="canAddWork">
+        {{ $t('work.add_prev') }}<br/>
+        <button
+          type="button"
+          class="secondary"
+          @click="$router.push('/showwork')"
+        >
+          {{ $t('work.add') }}
+        </button>
+      </p>
 
       <p v-if="settings.can_use_latepass > 0 && showLatePassOffer">
         {{ $tc('closed.latepassn', settings.latepasses_avail) }}
@@ -148,7 +158,7 @@ export default {
     },
     hasActiveMsg () {
       if (this.settings.hasOwnProperty('timelimit_expiresin')) {
-        let expires = this.settings.timelimit_expiresin * 1000;
+        const expires = this.settings.timelimit_expiresin * 1000;
         if (expires < 0) {
           return this.$t('closed.unsubmitted_overtime');
         } else {
@@ -232,6 +242,9 @@ export default {
           store.assessInfo.has_unsubmitted_scored
         )
       );
+    },
+    canAddWork () {
+      return (store.assessInfo.showwork_after);
     }
   },
   methods: {

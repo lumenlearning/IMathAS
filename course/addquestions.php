@@ -12,23 +12,23 @@ include("../includes/htmlutil.php");
 //set some page specific variables and counters
 $overwriteBody = 0;
 $body = "";
-$pagetitle = "Add/Remove Questions";
+$pagetitle = _("Add/Remove Questions");
 
 $curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=" . Sanitize::courseId($_GET['cid']) . "\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 if (isset($_GET['clearattempts']) || isset($_GET['clearqattempts']) || isset($_GET['withdraw'])) {
-	$curBreadcrumb .= "&gt; <a href=\"addquestions.php?cid=" . Sanitize::courseId($_GET['cid']) . "&aid=" . Sanitize::onlyInt($_GET['aid']) . "\">Add/Remove Questions</a> &gt; Confirm\n";
+	$curBreadcrumb .= "&gt; <a href=\"addquestions.php?cid=" . Sanitize::courseId($_GET['cid']) . "&aid=" . Sanitize::onlyInt($_GET['aid']) . "\">"._("Add/Remove Questions")."</a> &gt; Confirm\n";
 	//$pagetitle = "Modify Inline Text";
 } else {
-	$curBreadcrumb .= "&gt; Add/Remove Questions\n";
+	$curBreadcrumb .= "&gt; "._("Add/Remove Questions")."\n";
 	//$pagetitle = "Add Inline Text";
 }
 
 if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$overwriteBody=1;
-	$body = "You need to log in as a teacher to access this page";
+	$body = _("You need to log in as a teacher to access this page");
 } elseif (!(isset($_GET['cid'])) || !(isset($_GET['aid']))) {
 	$overwriteBody=1;
-	$body = "You need to access this page from the course page menu";
+	$body = _("You need to access this page from the course page menu");
 } else { // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 
 	$cid = Sanitize::courseId($_GET['cid']);
@@ -37,7 +37,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$stm->execute(array($aid));
 	$row = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($row === null || $row['courseid'] != $cid) {
-		echo "Invalid ID";
+		echo _("Invalid ID");
 		exit;
 	} else if ($row['ver'] > 1) {
 		$addassess = 'addassessment2.php';
@@ -47,21 +47,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$aver = $row['ver'];
 	$modquestion = ($aver > 1) ? 'modquestion2' : 'modquestion';
 
-	if (isset($_GET['grp'])) { $sessiondata['groupopt'.$aid] = Sanitize::onlyInt($_GET['grp']); writesessiondata();}
+	if (isset($_GET['grp'])) { $_SESSION['groupopt'.$aid] = Sanitize::onlyInt($_GET['grp']);}
 	if (isset($_GET['selfrom'])) {
-		$sessiondata['selfrom'.$aid] = Sanitize::stripHtmlTags($_GET['selfrom']);
-		writesessiondata();
+		$_SESSION['selfrom'.$aid] = Sanitize::stripHtmlTags($_GET['selfrom']);
 	} else {
-		if (!isset($sessiondata['selfrom'.$aid])) {
-			$sessiondata['selfrom'.$aid] = 'lib';
-			writesessiondata();
+		if (!isset($_SESSION['selfrom'.$aid])) {
+			$_SESSION['selfrom'.$aid] = 'lib';
 		}
 	}
 
 	if (isset($teacherid) && isset($_GET['addset'])) {
 		if (!isset($_POST['nchecked']) && !isset($_POST['qsetids'])) {
 			$overwriteBody = 1;
-			$body = "No questions selected.  <a href=\"addquestions.php?cid=$cid&aid=$aid\">Go back</a>\n";
+			$body = _("No questions selected").".  <a href=\"addquestions.php?cid=$cid&aid=$aid\">"._("Go back")."</a>\n";
 		} else if (isset($_POST['add'])) {
 			if ($aver > 1) {
 				include("modquestiongrid2.php");
@@ -96,10 +94,16 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 			$viddata = $row[1];
 			if ($viddata != '') {
-				if ($row[0]=='') {
-					$nextnum = 0;
-				} else {
-					$nextnum = substr_count($row[0],',')+1;
+				$nextnum = 0;
+				if ($row[0]!='') {
+					foreach (explode(',', $row[0]) as $iv) {
+						if (strpos($iv,'|')!==false) {
+							$choose = explode('|', $iv);
+							$nextnum += $choose[0];
+						} else {
+							$nextnum++;
+						}
+					}
 				}
 				$numnew= count($checked);
 				$viddata = unserialize($viddata);
@@ -129,7 +133,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	if (isset($_GET['modqs'])) {
 		if (!isset($_POST['checked']) && !isset($_POST['qids'])) {
 			$overwriteBody = 1;
-			$body = "No questions selected.  <a href=\"addquestions.php?cid=$cid&aid=$aid\">Go back</a>\n";
+			$body = _("No questions selected").".  <a href=\"addquestions.php?cid=$cid&aid=$aid\">"._("Go back")."</a>\n";
 		} else {
 			if ($aver > 1) {
 				include("modquestiongrid2.php");
@@ -165,7 +169,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$assessmentname = $stm->fetchColumn(0);
 			$body = "<div class=breadcrumb>$curBreadcrumb</div>\n";
 			$body .= "<h2>".Sanitize::encodeStringForDisplay($assessmentname)."</h2>";
-			$body .= "<p>Are you SURE you want to delete all attempts (grades) for this assessment?</p>";
+			$body .= "<p>"._("Are you SURE you want to delete all attempts (grades) for this assessment?")."</p>";
 			$body .= '<form method="POST" action="'.sprintf('addquestions.php?cid=%s&aid=%d',$cid, $aid).'">';
 			$body .= '<p><button type=submit name=clearattempts value=confirmed>'._('Yes, Clear').'</button>';
 			$body .= "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addquestions.php?cid=$cid&aid=$aid';\"></p>\n";
@@ -330,7 +334,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				require_once('../assess2/AssessRecord.php');
 				$assess_info = new AssessInfo($DBH, $aid, $cid, false);
 				$assess_info->loadQuestionSettings();
-				$stm = $DBH->prepare("SELECT * FROM imas_assessment_records WHERE assessmentid=?");
+				$DBH->beginTransaction();
+				$stm = $DBH->prepare("SELECT * FROM imas_assessment_records WHERE assessmentid=? FOR UPDATE");
 		    $stm->execute(array($aid));
 				while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 					$assess_record = new AssessRecord($DBH, $assess_info, false);
@@ -349,6 +354,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 						calcandupdateLTIgrade($row['lti_sourcedid'], $aid, $row['userid'], $updatedScore, true);
 					}
 				}
+				$DBH->commit();
 			} else {
 				$stm = $DBH->prepare("SELECT id,questions,bestscores,lti_sourcedid,userid FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
 				$stm->execute(array(':assessmentid'=>$aid));
@@ -404,18 +410,18 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 			$overwriteBody = 1;
 			$body = "<div class=breadcrumb>$curBreadcrumb</div>\n";
-			$body .= "<h2>Withdraw Question</h2>";
+			$body .= "<h2>"._("Withdraw Question")."</h2>";
 			$body .= "<form method=post action=\"addquestions.php?cid=$cid&aid=$aid&withdraw=".Sanitize::encodeStringForDisplay($_GET['withdraw'])."\">";
 			if ($isingroup) {
-				$body .= '<p><b>This question is part of a group of questions</b>.  </p>';
-				$body .= '<input type=radio name="withdrawtype" value="groupzero" > Set points possible and all student scores to zero <b>for all questions in group</b><br/>';
-				$body .= '<input type=radio name="withdrawtype" value="groupfull" checked="1"> Set all student scores to points possible <b>for all questions in group</b><br/>';
-				$body .= '<input type=radio name="withdrawtype" value="full" > Set all student scores to points possible <b>for this question only</b>';
+				$body .= '<p><b>'._('This question is part of a group of questions').'</b>.  </p>';
+				$body .= '<input type=radio name="withdrawtype" value="groupzero" > '._('Set points possible and all student scores to zero <b>for all questions in group</b>').'<br/>';
+				$body .= '<input type=radio name="withdrawtype" value="groupfull" checked="1"> '._('Set all student scores to points possible <b>for all questions in group</b>').'<br/>';
+				$body .= '<input type=radio name="withdrawtype" value="full" > '._('Set all student scores to points possible <b>for this question only</b>');
 			} else {
-				$body .= '<input type=radio name="withdrawtype" value="zero" > Set points possible and all student scores to zero<br/>';
-				$body .= '<input type=radio name="withdrawtype" value="full" checked="1"> Set all student scores to points possible';
+				$body .= '<input type=radio name="withdrawtype" value="zero" > '._('Set points possible and all student scores to zero').'<br/>';
+				$body .= '<input type=radio name="withdrawtype" value="full" checked="1"> '._('Set all student scores to points possible');
 			}
-			$body .= '<p>This action can <b>not</b> be undone.</p>';
+			$body .= '<p>'._('This action can <b>not</b> be undone').'.</p>';
 			$body .= '<p><input type=submit value="Withdraw Question">';
 			$body .= "<input type=button value=\"Nevermind\" class=\"secondarybtn\" onClick=\"window.location='addquestions.php?cid=$cid&aid=$aid'\"></p>\n";
 
@@ -425,14 +431,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	}
 
 	$address = $GLOBALS['basesiteurl'] . "/course/$addassess?cid=$cid&aid=$aid";
-
+	$testqpage = ($courseUIver>1) ? 'testquestion2.php' : 'testquestion.php';
 	$placeinhead = "<script type=\"text/javascript\">
-		var previewqaddr = '$imasroot/course/testquestion.php?cid=$cid';
+		var previewqaddr = '$imasroot/course/$testqpage?cid=$cid';
 		var addqaddr = '$address';
 		var assessver = '$aver';
 		</script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=030818\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=010420\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=042220\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=041120\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=100517\" type=\"text/css\" />";
@@ -490,8 +496,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	}
 
 	$grp0Selected = "";
-	if (isset($sessiondata['groupopt'.$aid])) {
-		$grp = $sessiondata['groupopt'.$aid];
+	if (isset($_SESSION['groupopt'.$aid])) {
+		$grp = $_SESSION['groupopt'.$aid];
 		$grp1Selected = ($grp==1) ? " selected" : "";
 	} else {
 		$grp = 0;
@@ -500,9 +506,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 	$questionjsarr = array();
 	$existingq = array();
-	$query = "SELECT imas_questions.id,imas_questions.questionsetid,imas_questionset.description,imas_questionset.userights,imas_questionset.ownerid,imas_questionset.qtype,imas_questions.points,imas_questions.withdrawn,imas_questionset.extref,imas_users.groupid,imas_questions.showcalculator,imas_questions.showhints,imas_questionset.solution,imas_questionset.solutionopts,imas_questionset.avgtime FROM imas_questions ";
-	$query .= "JOIN imas_questionset ON imas_questionset.id=imas_questions.questionsetid JOIN imas_users ON imas_questionset.ownerid=imas_users.id ";
-	$query .= "WHERE imas_questions.assessmentid=:aid";
+	$query = "SELECT iq.id,iq.questionsetid,iqs.description,iqs.userights,iqs.ownerid,";
+	$query .= "iqs.qtype,iq.points,iq.withdrawn,iqs.extref,imas_users.groupid,iq.showcalculator,iq.showhints,";
+	$query .= "iqs.solution,iqs.solutionopts,iqs.meantime,iqs.meanscore,iqs.meantimen FROM imas_questions AS iq ";
+	$query .= "JOIN imas_questionset AS iqs ON iqs.id=iq.questionsetid JOIN imas_users ON iqs.ownerid=imas_users.id ";
+	$query .= "WHERE iq.assessmentid=:aid";
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':aid'=>$aid));
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
@@ -553,19 +561,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		if ($line['solution']!='' && ($line['solutionopts']&2)==2) {
 			$extrefval += 8;
 		}
-		$avgtimepts = array_map('Sanitize::onlyFloat', explode(',', $line['avgtime']));
-		if ($avgtimepts[0]>0) {
-			$timeout = array(round($avgtimepts[0]/60,1));
-		} else if (isset($avgtimepts[1]) && isset($avgtimepts[3]) && $avgtimepts[3]>10) {
-			$timeout = array(round($avgtimepts[1]/60,1));
-		} else {
-			$timeout = array(0);
-		}
-		if (isset($avgtimepts[3]) && $avgtimepts[3]>10) {
-			$timeout[1] = round($avgtimepts[2]); //score
-			$timeout[2] = round($avgtimepts[1]/60,1); //time first try
-			$timeout[3] = Sanitize::onlyInt($avgtimepts[3]); //# of data
-		}
+
+		$timeout = array();
+		$timeout[0] = round($line['meantime']/60, 1);
+		$timeout[1] = round($line['meanscore'], 1);
+		$timeout[2] = round($line['meantime']/60, 1);
+		$timeout[3] = intval($line['meantimen']);
+
 		$questionjsarr[$line['id']] = array((int)$line['id'],
 			(int)$line['questionsetid'],
 			Sanitize::encodeStringForDisplay($line['description']),
@@ -643,7 +645,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	unset($questionjsarr);
 
 	//DATA MANIPULATION FOR POTENTIAL QUESTIONS
-	if ($sessiondata['selfrom'.$aid]=='lib') { //selecting from libraries
+	if ($_SESSION['selfrom'.$aid]=='lib') { //selecting from libraries
 
 		//remember search
 		if (isset($_POST['search'])) {
@@ -651,33 +653,32 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$safesearch = str_replace(' and ', ' ',$safesearch);
 			$search = $safesearch;
 			$search = str_replace('"','&quot;',$search);
-			$sessiondata['lastsearch'.$cid] = $safesearch; ///str_replace(" ","+",$safesearch);
+			$_SESSION['lastsearch'.$cid] = $safesearch; ///str_replace(" ","+",$safesearch);
 			if (isset($_POST['searchall'])) {
 				$searchall = 1;
 			} else {
 				$searchall = 0;
 			}
-			$sessiondata['searchall'.$cid] = $searchall;
+			$_SESSION['searchall'.$cid] = $searchall;
 			if (isset($_POST['searchmine'])) {
 				$searchmine = 1;
 			} else {
 				$searchmine = 0;
 			}
-			$sessiondata['searchmine'.$cid] = $searchmine;
+			$_SESSION['searchmine'.$cid] = $searchmine;
 			if (isset($_POST['newonly'])) {
 				$newonly = 1;
 			} else {
 				$newonly = 0;
 			}
-			$sessiondata['searchnewonly'.$cid] = $newonly;
-			writesessiondata();
-		} else if (isset($sessiondata['lastsearch'.$cid])) {
-			$safesearch = trim($sessiondata['lastsearch'.$cid]); //str_replace("+"," ",$sessiondata['lastsearch'.$cid]);
+			$_SESSION['searchnewonly'.$cid] = $newonly;
+		} else if (isset($_SESSION['lastsearch'.$cid])) {
+			$safesearch = trim($_SESSION['lastsearch'.$cid]); //str_replace("+"," ",$_SESSION['lastsearch'.$cid]);
 			$search = $safesearch;
 			$search = str_replace('"','&quot;',$search);
-			$searchall = $sessiondata['searchall'.$cid];
-			$searchmine = $sessiondata['searchmine'.$cid];
-			$newonly = $sessiondata['searchnewonly'.$cid];
+			$searchall = $_SESSION['searchall'.$cid];
+			$searchmine = $_SESSION['searchmine'.$cid];
+			$newonly = $_SESSION['searchnewonly'.$cid];
 		} else {
 			$search = '';
 			$searchall = 0;
@@ -708,12 +709,27 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 						unset($searchterms[$k]);
 					}
 				}
-				if (count($searchterms)>0) {
-					$searchlikes .= "((imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
-					foreach ($searchterms as $t) {
-						$searchlikevals[] = "%$t%";
+				$wholewords = array();
+				foreach ($searchterms as $k=>$v) {
+					if (ctype_alnum($v) && strlen($v)>3) {
+						$wholewords[] = '+'.$v.'*';
+						unset($searchterms[$k]);
 					}
-
+				}
+				if (count($wholewords)>0 || count($searchterms)>0) {
+					$searchlikes .= '(';
+					if (count($wholewords)>0) {
+						$searchlikes .= 'MATCH(imas_questionset.description) AGAINST(\''.implode(' ', $wholewords).'\' IN BOOLEAN MODE) ';
+					}
+					if (count($searchterms)>0) {
+						if (count($wholewords)>0) {
+							$searchlikes .= 'AND ';
+						}
+						$searchlikes .= "(imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
+						foreach ($searchterms as $t) {
+							$searchlikevals[] = "%$t%";
+						}
+					}
 					if (ctype_digit($safesearch)) {
 						$searchlikes .= "OR imas_questionset.id=?) AND ";
 						$searchlikevals[] = $safesearch;
@@ -730,23 +746,21 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$_POST['libs'] = $userdeflib;
 			}
 			$searchlibs = $_POST['libs'];
-			//$sessiondata['lastsearchlibs'] = implode(",",$searchlibs);
-			$sessiondata['lastsearchlibs'.$aid] = $searchlibs;
-			writesessiondata();
+			//$_SESSION['lastsearchlibs'] = implode(",",$searchlibs);
+			$_SESSION['lastsearchlibs'.$aid] = $searchlibs;
 		} else if (isset($_GET['listlib'])) {
 			$searchlibs = $_GET['listlib'];
-			$sessiondata['lastsearchlibs'.$aid] = $searchlibs;
+			$_SESSION['lastsearchlibs'.$aid] = $searchlibs;
 			$searchall = 0;
-			$sessiondata['searchall'.$aid] = $searchall;
-			$sessiondata['lastsearch'.$aid] = '';
+			$_SESSION['searchall'.$aid] = $searchall;
+			$_SESSION['lastsearch'.$aid] = '';
 			$searchlikes = '';
 			$searchlikevals = array();
 			$search = '';
 			$safesearch = '';
-			writesessiondata();
-		}else if (isset($sessiondata['lastsearchlibs'.$aid])) {
-			//$searchlibs = explode(",",$sessiondata['lastsearchlibs']);
-			$searchlibs = $sessiondata['lastsearchlibs'.$aid];
+		}else if (isset($_SESSION['lastsearchlibs'.$aid])) {
+			//$searchlibs = explode(",",$_SESSION['lastsearchlibs']);
+			$searchlibs = $_SESSION['lastsearchlibs'.$aid];
 		} else {
 			if (isset($CFG['AMS']['guesslib']) && count($existingq)>0) {
 				$maj = count($existingq)/2;
@@ -789,7 +803,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 			if (isset($search) && ($searchall==0 || $searchlikes!='' || $searchmine==1)) {
 				$qarr = $searchlikevals;
-				$query = "SELECT DISTINCT imas_questionset.id,imas_questionset.description,imas_questionset.userights,imas_questionset.qtype,imas_questionset.extref,imas_library_items.libid,imas_questionset.ownerid,imas_questionset.avgtime,imas_questionset.solution,imas_questionset.solutionopts,imas_library_items.junkflag, imas_questionset.broken, imas_library_items.id AS libitemid,imas_users.groupid ";
+				$query = "SELECT imas_questionset.id,imas_questionset.description,imas_questionset.userights,imas_questionset.qtype,imas_questionset.extref,imas_library_items.libid,imas_questionset.ownerid,imas_questionset.meantime,imas_questionset.meanscore,imas_questionset.meantimen,imas_questionset.solution,imas_questionset.solutionopts,imas_library_items.junkflag, imas_questionset.broken, imas_library_items.id AS libitemid,imas_users.groupid ";
 				$query .= "FROM imas_questionset JOIN imas_library_items ON imas_library_items.qsetid=imas_questionset.id AND imas_library_items.deleted=0 ";
 				$query .= "JOIN imas_users ON imas_questionset.ownerid=imas_users.id WHERE imas_questionset.deleted=0 AND imas_questionset.replaceby=0 AND $searchlikes ";
 				$query .= " (imas_questionset.ownerid=? OR imas_questionset.userights>0)";
@@ -812,7 +826,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					}
 
 				}
-				$query .= " ORDER BY FIELD(imas_library_items.libid,$llist),imas_questionset.broken,imas_library_items.junkflag,imas_questionset.id";
 				if ($searchall==1) {
 					$query .= " LIMIT 300";
 					$offset = 0;
@@ -842,6 +855,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				} else {
 					$stm = $DBH->prepare($query);
 					$stm->execute($qarr);
+					//echo preg_replace(array_fill(0,count($qarr),'/[?]/'), $qarr, $query, 1);
 				}
 				if ($stm->rowCount()==0) {
 					$noSearchResults = true;
@@ -849,7 +863,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$searchlimited = ($stm->rowCount()==300);
 
 					$alt=0;
-					$lastlib = -1;
 					$i=0;
 					$page_questionTable = array();
 					$page_libstouse = array();
@@ -862,32 +875,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 						if (isset($page_questionTable[$line['id']])) {
 							continue;
 						}
-						if ($lastlib!=$line['libid'] && isset($lnamesarr[$line['libid']])) {
-							/*$page_questionTable[$i]['checkbox'] = "";
-							$page_questionTable[$i]['desc'] = "<b>".$lnamesarr[$line['libid']]."</b>";
-							$page_questionTable[$i]['preview'] = "";
-							$page_questionTable[$i]['type'] = "";
-							if ($searchall==1)
-								$page_questionTable[$i]['lib'] = "";
-							$page_questionTable[$i]['times'] = "";
-							$page_questionTable[$i]['mine'] = "";
-							$page_questionTable[$i]['add'] = "";
-							$page_questionTable[$i]['src'] = "";
-							$page_questionTable[$i]['templ'] = "";
-							$lastlib = $line['libid'];
-							$i++;
-							*/
+						if (!isset($page_libqids[$line['libid']]) && isset($lnamesarr[$line['libid']])) {
 							$page_libstouse[] = $line['libid'];
-							$lastlib = $line['libid'];
 							$page_libqids[$line['libid']] = array();
-
 						}
 
-						if (isset($libsortorder[$line['libid']]) && $libsortorder[$line['libid']]==1) { //alpha
-							$page_libqids[$line['libid']][$line['id']] = $line['description'];
-						} else { //id
-							$page_libqids[$line['libid']][] = $line['id'];
-						}
+						$page_libqids[$line['libid']][] = $line['id'];
+
 						$i = $line['id'];
 						$page_questionTable[$i]['checkbox'] = "<input type=checkbox name='nchecked[]' value='" . Sanitize::onlyInt($line['id']) . "' id='qo$ln'>";
 						if ($line['broken'] > 0) {
@@ -900,39 +894,23 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 						} else {
 							$page_questionTable[$i]['desc'] = filter(Sanitize::encodeStringForDisplay($line['description']));
 						}
-						$page_questionTable[$i]['preview'] = "<input type=button value=\"Preview\" onClick=\"previewq('selq','qo$ln',".Sanitize::onlyInt($line['id']).",true,false)\"/>";
+						$page_questionTable[$i]['preview'] = "<button type=\"button\" onClick=\"previewq('selq','qo$ln',".Sanitize::onlyInt($line['id']).",true,false)\">"._("Preview")."</button>";
 						$page_questionTable[$i]['type'] = $line['qtype'];
 						//avgtime, avgtimefirst, avgscorefirst, ndatapoints
 						//initial avgtime might be 0 if not populated
-						$avgtimepts = explode(',', $line['avgtime']);
-						if ($avgtimepts[0]>0) {
+						if ($line['meantimen'] > 100) {
 							$page_useavgtimes = true;
-							$page_questionTable[$i]['avgtime'] = round($avgtimepts[0]/60,1);
-						} else if (isset($avgtimepts[1]) && isset($avgtimepts[3]) && $avgtimepts[3]>10) {
-							$page_useavgtimes = true;
-							$page_questionTable[$i]['avgtime'] = round($avgtimepts[1]/60,1);
-						} else {
-							$page_questionTable[$i]['avgtime'] = '';
+							$page_questionTable[$i]['meantime'] = round($line['meantime']/60,1);
+							$page_questionTable[$i]['qdata'] = array($line['meanscore'],$line['meantime'],$line['meantimen']);
 						}
-						if (isset($avgtimepts[3]) && $avgtimepts[3]>10) {
-							$page_questionTable[$i]['qdata'] = array($avgtimepts[2],$avgtimepts[1],$avgtimepts[3]);
-						}
-						/*
-						//pull firstscores data
-						$query = "SELECT qsetid,count(id),AVG(score),AVG(timespent) FROM imas_firstscores WHERE qsetid IN ($allusedqids) AND timespent>1 AND timespent<600 GROUP BY qsetid";
-						$result = mysql_query($query) or die("Query failed : " . mysql_error());
-						while ($row = mysql_fetch_row($result)) {
-							if ($row[1]>10) {
-								$page_questionTable[$row[0]]['qdata'] = array($row[2],$row[3]);
-							}
-						}
-						*/
+
+						$page_questionTable[$i]['broken'] = intval($line['broken']);
+
 						if ($searchall==1) {
-							$page_questionTable[$i]['lib'] = "<a href=\"addquestions.php?cid=$cid&aid=$aid&listlib=".Sanitize::encodeUrlParam($line['libid'])."\">List lib</a>";
+							$page_questionTable[$i]['lib'] = "<a href=\"addquestions.php?cid=$cid&aid=$aid&listlib=".Sanitize::encodeUrlParam($line['libid'])."\">"._("List lib")."</a>";
 						} else {
-							$page_questionTable[$i]['junkflag'] = Sanitize::encodeStringForDisplay($line['junkflag']);
-							$page_questionTable[$i]['broken'] = intval($line['broken']);
 							$page_questionTable[$i]['libitemid'] = Sanitize::encodeStringForDisplay($line['libitemid']);
+							$page_questionTable[$i]['junkflag'] = Sanitize::encodeStringForDisplay($line['junkflag']);
 						}
 						$page_questionTable[$i]['extref'] = '';
 						$page_questionTable[$i]['cap'] = 0;
@@ -953,14 +931,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 								}
 							}
 							if ($hasvid) {
-								$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/video_tiny.png\" alt=\"{$altcap}Video\"/>";
+								$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/video_tiny.png\" alt=\"{$altcap}"._("Video")."\"/>";
 							}
 							if ($hasother) {
-								$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/html_tiny.png\" alt=\"Help Resource\"/>";
+								$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/html_tiny.png\" alt=\""._("Help Resource")."\"/>";
 							}
 						}
 						if ($line['solution']!='' && ($line['solutionopts']&2)==2) {
-							$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/assess_tiny.png\" alt=\"Detailed Solution\"/>";
+							$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/assess_tiny.png\" alt=\""._("Detailed Solution")."\"/>";
 						}
 						/*$query = "SELECT COUNT(id) FROM imas_questions WHERE questionsetid='{$line['id']}'";
 						$result2 = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -971,24 +949,24 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 						if ($line['ownerid']==$userid) {
 							if ($line['userights']==0) {
-								$page_questionTable[$i]['mine'] = "Private";
+								$page_questionTable[$i]['mine'] = _("Private");
 							} else {
-								$page_questionTable[$i]['mine'] = "Yes";
+								$page_questionTable[$i]['mine'] = _("Yes");
 							}
 						} else {
 							$page_questionTable[$i]['mine'] = "";
 						}
 
 
-						$page_questionTable[$i]['add'] = "<a href=\"$modquestion.php?qsetid=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid\">Add</a>";
+						$page_questionTable[$i]['add'] = "<a href=\"$modquestion.php?qsetid=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid\">"._("Add")."</a>";
 
 						if ($line['userights']>3 || ($line['userights']==3 && $line['groupid']==$groupid) || $line['ownerid']==$userid) {
-							$page_questionTable[$i]['src'] = "<a href=\"moddataset.php?id=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid&frompot=1\">Edit</a>";
+							$page_questionTable[$i]['src'] = "<a href=\"moddataset.php?id=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid&frompot=1\">"._("Edit")."</a>";
 						} else {
-							$page_questionTable[$i]['src'] = "<a href=\"moddataset.php?id=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid\">View Code</a>";
+							$page_questionTable[$i]['src'] = "<a href=\"moddataset.php?id=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid\">"._("View Code")."</a>";
 						}
 
-						$page_questionTable[$i]['templ'] = "<a href=\"moddataset.php?id=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid&template=true\">Template</a>";
+						$page_questionTable[$i]['templ'] = "<a href=\"moddataset.php?id=".Sanitize::onlyInt($line['id'])."&aid=$aid&cid=$cid&template=true\">"._("Template")."</a>";
 						//$i++;
 						$ln++;
 
@@ -1004,37 +982,52 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					}
 
 
-
-					//sort alpha sorted libraries
-					foreach ($page_libstouse as $libid) {
-						if ($libsortorder[$libid]==1) {
-							natcasesort($page_libqids[$libid]);
-							$page_libqids[$libid] = array_keys($page_libqids[$libid]);
+					if ($searchall==1) { // consolidate all
+						uksort($page_questionTable, function($qA,$qB) use ($page_questionTable) {
+							if ($page_questionTable[$qA]['broken'] != $page_questionTable[$qB]['broken']) {
+								return $page_questionTable[$qA]['broken'] - $page_questionTable[$qB]['broken'];
+							} else {
+								return $qA - $qB;
+							}
+						});
+						$page_libstouse = array(0);
+						$page_libqids = array(0=>array_keys($page_questionTable));
+					} else {
+						//sort alpha sorted libraries
+						foreach ($page_libstouse as $libid) {
+							usort($page_libqids[$libid], function($qA,$qB) use ($libsortorder,$page_questionTable,$page_libqids,$libid) {
+								if ($page_questionTable[$qA]['broken'] != $page_questionTable[$qB]['broken']) {
+									return $page_questionTable[$qA]['broken'] - $page_questionTable[$qB]['broken'];
+								} else if ($page_questionTable[$qA]['junkflag'] != $page_questionTable[$qB]['junkflag']) {
+									return $page_questionTable[$qA]['junkflag'] - $page_questionTable[$qB]['junkflag'];
+								} else if ($libsortorder[$libid]==1) {
+									return strnatcasecmp($page_questionTable[$qA]['desc'], $page_questionTable[$qB]['desc']);
+								} else {
+									return $qA - $qB;
+								}
+							});
 						}
 					}
-					if ($searchall==1) {
-						$page_libstouse = array_keys($page_libqids);
-					}
+
 
 				}
 			}
 
 		}
 
-	} else if ($sessiondata['selfrom'.$aid]=='assm') { //select from assessments
+	} else if ($_SESSION['selfrom'.$aid]=='assm') { //select from assessments
 
 		if (isset($_GET['clearassmt'])) {
-			unset($sessiondata['aidstolist'.$aid]);
+			unset($_SESSION['aidstolist'.$aid]);
 		}
 		if (isset($_POST['achecked'])) {
 			if (count($_POST['achecked'])!=0) {
 				$aidstolist = $_POST['achecked'];
-				$sessiondata['aidstolist'.$aid] = $aidstolist;
-				writesessiondata();
+				$_SESSION['aidstolist'.$aid] = $aidstolist;
 			}
 		}
-		if (isset($sessiondata['aidstolist'.$aid])) { //list questions
-			$aidlist = implode(',', array_map('intval', $sessiondata['aidstolist'.$aid]));
+		if (isset($_SESSION['aidstolist'.$aid])) { //list questions
+			$aidlist = implode(',', array_map('intval', $_SESSION['aidstolist'.$aid]));
 			$stm = $DBH->query("SELECT id,name,itemorder FROM imas_assessments WHERE id IN ($aidlist)");
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				$aidnames[$row[0]] = $row[1];
@@ -1047,7 +1040,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 			$x=0;
 			$page_assessmentQuestions = array();
-			foreach ($sessiondata['aidstolist'.$aid] as $aidq) {
+			foreach ($_SESSION['aidstolist'.$aid] as $aidq) {
 				$query = "SELECT imas_questions.id,imas_questionset.id,imas_questionset.description,imas_questionset.qtype,imas_questionset.ownerid,imas_questionset.userights,imas_questionset.extref,imas_users.groupid FROM imas_questionset,imas_questions,imas_users";
 				$query .= " WHERE imas_questionset.id=imas_questions.questionsetid AND imas_questionset.ownerid=imas_users.id AND imas_questions.assessmentid=:assessmentid";
 				$stm = $DBH->prepare($query);
@@ -1086,13 +1079,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					}
 					//$page_assessmentQuestions[$x]['desc'][$y] = $descr[$qid];
 					$page_assessmentQuestions[$x]['qsetid'][$y] = $qsetid[$qid];
-					$page_assessmentQuestions[$x]['preview'][$y] = "<input type=button value=\"Preview\" onClick=\"previewq('selq','qo$ln',".Sanitize::onlyFloat($qsetid[$qid]).",true)\"/>";
+					$page_assessmentQuestions[$x]['preview'][$y] = "<button type=\"button\" onClick=\"previewq('selq','qo$ln',".Sanitize::onlyFloat($qsetid[$qid]).",true)\"/>"._("Preview")."</button>";
 					$page_assessmentQuestions[$x]['type'][$y] = $qtypes[$qid];
 					$page_assessmentQuestions[$x]['times'][$y] = $qsetusecnts[$qsetid[$qid]];
 					$page_assessmentQuestions[$x]['mine'][$y] = ($owner[$qid]==$userid) ? "Yes" : "" ;
 					$page_assessmentQuestions[$x]['add'][$y] = "<a href=\"$modquestion.php?qsetid=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid\">Add</a>";
-					$page_assessmentQuestions[$x]['src'][$y] = ($userights[$qid]>3 || ($userights[$qid]==3 && $qgroupid[$qid]==$groupid) || $owner[$qid]==$userid) ? "<a href=\"moddataset.php?id=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid&frompot=1\">Edit</a>" : "<a href=\"moddataset.php?id=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid\">View Code</a>" ;
-					$page_assessmentQuestions[$x]['templ'][$y] = "<a href=\"moddataset.php?id=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid&template=true\">Template</a>";
+					$page_assessmentQuestions[$x]['src'][$y] = ($userights[$qid]>3 || ($userights[$qid]==3 && $qgroupid[$qid]==$groupid) || $owner[$qid]==$userid) ? "<a href=\"moddataset.php?id=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid&frompot=1\">Edit</a>" : "<a href=\"moddataset.php?id=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid\">"._("View Code")."</a>" ;
+					$page_assessmentQuestions[$x]['templ'][$y] = "<a href=\"moddataset.php?id=".Sanitize::onlyFloat($qsetid[$qid])."&aid=$aid&cid=$cid&template=true\">"._("Template")."</a>";
 					$page_assessmentQuestions[$x]['extref'][$y] = '';
 					$page_assessmentQuestions[$x]['cap'][$y] = 0;
 					if ($extref[$qid]!='') {
@@ -1165,7 +1158,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 /******* begin html output ********/
 //hack to prevent the page breaking on accessible mode
-$sessiondata['useed'] = 1;
+$_SESSION['useed'] = 1;
  require("../header.php");
 
 if ($overwriteBody==1) {
@@ -1185,54 +1178,50 @@ if ($overwriteBody==1) {
 
 	<div class="breadcrumb"><?php echo $curBreadcrumb ?></div>
 
-	<div id="headeraddquestions" class="pagetitle"><h1>Add/Remove Questions
+	<div id="headeraddquestions" class="pagetitle"><h1><?php echo _('Add/Remove Questions'); ?>
 		<img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=addingquestionstoanassessment','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/>
 	</h1></div>
 <?php
 	echo '<div class="cp"><a href="'.$addassess.'?id='.Sanitize::onlyInt($_GET['aid']).'&amp;cid='.$cid.'">'._('Assessment Settings').'</a></div>';
 	if ($beentaken) {
 ?>
-	<h2>Warning</h2>
-	<p>This assessment has already been taken.  Adding or removing questions, or changing a
-		question's settings (point value, penalty, attempts) now would majorly mess things up.
-		If you want to make these changes, you need to clear all existing assessment attempts
+	<h2><?php echo _("Warning") ?></h2>
+	<p><?php echo _("This assessment has already been taken.  Adding or removing questions, or changing a	question's settings (point value, penalty, attempts) now would majorly mess things up. If you want to make these changes, you need to clear all existing assessment attempts") ?>
 	</p>
 	<p><input type=button value="Clear Assessment Attempts" onclick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&clearattempts=ask'">
 	</p>
 <?php
 	}
 ?>
-	<h2>Questions in Assessment - <?php echo Sanitize::encodeStringForDisplay($page_assessmentName); ?></h2>
+	<h2><?php echo _('Questions in Assessment'),' - ',Sanitize::encodeStringForDisplay($page_assessmentName); ?></h2>
 
 <?php
 	if ($itemorder == '') {
-		echo "<p>No Questions currently in assessment</p>\n";
+		echo "<p>"._("No Questions currently in assessment")."</p>\n";
 
 		echo '<a href="#" onclick="this.style.display=\'none\';document.getElementById(\'helpwithadding\').style.display=\'block\';return false;">';
 		echo "<img src=\"$imasroot/img/help.gif\" alt=\"Help\"/> ";
-		echo 'How do I find questions to add?</a>';
+		echo _('How do I find questions to add?'),'</a>';
 		echo '<div id="helpwithadding" style="display:none">';
-		if ($sessiondata['selfrom'.$aid]=='lib') {
-			echo "<p>You are currently set to select questions from the question libraries.  If you would like to select questions from ";
-			echo "assessments you've already created, click the <b>Select From Assessments</b> button below</p>";
-			echo "<p>To find questions to add from the question libraries:";
-			echo "<ol><li>Click the <b>Select Libraries</b> button below to pop open the library selector</li>";
-			echo " <li>In the library selector, open up the topics of interest, and click the checkbox to select libraries to use</li>";
-			echo " <li>Scroll down in the library selector, and click the <b>Use Libraries</b> button</li> ";
-			echo " <li>On this page, click the <b>Search</b> button to list the questions in the libraries selected.<br/>  You can limit the listing by entering a sepecific search term in the box provided first, or leave it blank to view all questions in the chosen libraries</li>";
+		if ($_SESSION['selfrom'.$aid]=='lib') {
+			echo "<p>",_("You are currently set to select questions from the question libraries.  If you would like to select questions from assessments you've already created, click the <b>Select From Assessments</b> button below"),"</p>";
+			echo "<p>",_("To find questions to add from the question libraries:");
+			echo "<ol><li>",_("Click the <b>Select Libraries</b> button below to pop open the library selector"),"</li>";
+			echo " <li>",_("In the library selector, open up the topics of interest, and click the checkbox to select libraries to use"),"</li>";
+			echo " <li>",_("Scroll down in the library selector, and click the <b>Use Libraries</b> button"),"</li> ";
+			echo " <li>",_("On this page, click the <b>Search</b> button to list the questions in the libraries selected.<br/>  You can limit the listing by entering a sepecific search term in the box provided first, or leave it blank to view all questions in the chosen libraries"),"</li>";
 			echo "</ol>";
-		} else if ($sessiondata['selfrom'.$aid]=='assm') {
-			echo "<p>You are currently set to select questions existing assessments.  If you would like to select questions from ";
-			echo "the question libraries, click the <b>Select From Libraries</b> button below</p>";
-			echo "<p>To find questions to add from existing assessments:";
-			echo "<ol><li>Use the checkboxes to select the assessments you want to pull questions from</li>";
-			echo " <li>Click <b>Use these Assessments</b> button to list the questions in the assessments selected</li>";
+		} else if ($_SESSION['selfrom'.$aid]=='assm') {
+			echo "<p>",_("You are currently set to select questions existing assessments.  If you would like to select questions from the question libraries, click the <b>Select From Libraries</b> button below"),"</p>";
+			echo "<p>",_("To find questions to add from existing assessments:");
+			echo "<ol><li>",_("Use the checkboxes to select the assessments you want to pull questions from"),"</li>";
+			echo " <li>",_("Click <b>Use these Assessments</b> button to list the questions in the assessments selected"),"</li>";
 			echo "</ol>";
 		}
-		echo "<p>To select questions and add them:</p><ul>";
-		echo " <li>Click the <b>Preview</b> button after the question description to view an example of the question</li>";
-		echo " <li>Use the checkboxes to mark the questions you want to use</li>";
-		echo " <li>Click the <b>Add</b> button above the question list to add the questions to your assessment</li> ";
+		echo "<p>",_("To select questions and add them:"),"</p><ul>";
+		echo " <li>",_("Click the <b>Preview</b> button after the question description to view an example of the question"),"</li>";
+		echo " <li>",_("Use the checkboxes to mark the questions you want to use"),"</li>";
+		echo " <li>",_("Click the <b>Add</b> button above the question list to add the questions to your assessment"),"</li> ";
 		echo "  </ul>";
 		echo '</div>';
 
@@ -1251,11 +1240,11 @@ if ($overwriteBody==1) {
 		*/
 ?>
 
-		Check: <a href="#" onclick="return chkAllNone('curqform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('curqform','checked[]',false)">None</a>
+		<?php echo _('Check:') ?> <a href="#" onclick="return chkAllNone('curqform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('curqform','checked[]',false)"><?php echo _('None') ?></a>
 
-		With Selected: <input type=button value="Remove" onclick="removeSelected()" />
-				<input type=button value="Group" onclick="groupSelected()" />
-				<input type="submit" value="Change Settings" onclick="return confirm_textseg_dirty()"/>
+		<?php echo _('With Selected:') ?> <button type="button" onclick="removeSelected()"><?php echo _('Remove'); ?></button>
+				<button type="button" onclick="groupSelected()" ><?php echo _('Group'); ?></button>
+				<button type="submit" onclick="return confirm_textseg_dirty()"><?php echo _("Change Settings"); ?></button>
 
 <?php
 		}
@@ -1264,10 +1253,10 @@ if ($overwriteBody==1) {
 		<div id="curqtbl"></div>
 
 	</form>
-	<p>Assessment points total: <span id="pttotal"></span></p>
+	<p><?php echo _('Assessment points total:') ?> <span id="pttotal"></span></p>
 	<?php if (isset($introconvertmsg)) {echo $introconvertmsg;}?>
 	<script>
-		var itemarray = <?php echo json_encode($jsarr, JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS); ?>;
+		var itemarray = <?php echo json_encode($jsarr, JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_INVALID_UTF8_IGNORE); ?>;
 		var beentaken = <?php echo ($beentaken) ? 1:0; ?>;
 		var displaymethod = "<?php echo Sanitize::encodeStringForDisplay($displaymethod); ?>";
 		//$(refreshTable);
@@ -1276,88 +1265,88 @@ if ($overwriteBody==1) {
 <?php
 	}
 	if ($displaymethod=='VideoCue' || $displaymethod == 'video_cued') {
-		echo '<p><input type=button value="Define Video Cues" onClick="window.location=\'addvideotimes.php?cid='.$cid.'&aid='.$aid.'\'"/></p>';
+		echo '<p><input type=button value="'._('Define Video Cues').'" onClick="window.location=\'addvideotimes.php?cid='.$cid.'&aid='.$aid.'\'"/></p>';
 	} else if ($displaymethod == 'full') {
 		echo '<p>'._('You can break your assessment into pages by using the +Text button and selecting the New Page option.').'</p>';
 	}
 ?>
 	<p>
-		<input type=button value="Done" title="Exit back to course page" onClick="window.location='course.php?cid=<?php echo $cid ?>'">
-		<input type=button value="Assessment Settings" title="Modify assessment settings" onClick="window.location='<?php echo $address;?>?cid=<?php echo $cid ?>&id=<?php echo $aid ?>'">
-		<input type=button value="Categorize Questions" title="Categorize questions by outcome or other groupings" onClick="window.location='categorize.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'">
-		<input type=button value="Create Print Version" onClick="window.location='<?php
+		<button type="button" title=<?php echo '"'._("Exit back to course page"),'"'; ?> onClick="window.location='course.php?cid=<?php echo $cid ?>'"><?php echo _("Done"); ?></button>
+		<button type="button" title=<?php echo '"'._("Modify assessment settings").'"'; ?> onClick="window.location='<?php echo $address;?>?cid=<?php echo $cid ?>&id=<?php echo $aid ?>'"><?php echo _("Assessment Settings"); ?></button>
+		<button type="button" title=<?php echo '"'._("Categorize questions by outcome or other groupings").'"'; ?> onClick="window.location='categorize.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'"><?php echo _("Categorize Questions"); ?></button>
+		<button type="button" onClick="window.location='<?php
 		if (isset($CFG['GEN']['pandocserver'])) {
 			echo 'printlayoutword.php?cid='.$cid.'&aid='.$aid;
 		} else {
 			echo 'printtest.php?cid='.$cid.'&aid='.$aid;
 		}
-		?>'">
+		?>'"><?php echo _("Create Print Version"); ?></button>
 
-		<input type=button value="Define End Messages" title="Customize messages to display based on the assessment score" onClick="window.location='assessendmsg.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'">
-		<input type=button value="Preview" title="Preview this assessment" onClick="window.open('<?php
+		<button type="button" title=<?php echo '"'._("Customize messages to display based on the assessment score").'"'; ?> onClick="window.location='assessendmsg.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>'"><?php echo _("Define End Messages"); ?></button>
+		<button type="button" title=<?php echo '"'._("Preview this assessment").'"'; ?> onClick="window.open('<?php
 			if ($aver > 1) {
 				echo $imasroot . '/assess2/?cid=' . $cid . '&aid=' . $aid;
 			} else {
 				echo $imasroot . '/assessment/showtest.php?cid=' . $cid . '&id=' . $aid;
 			}
-		?>','Testing','width='+(.4*screen.width)+',height='+(.8*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(.6*screen.width-20))">
+		?>','Testing','width='+(.4*screen.width)+',height='+(.8*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(.6*screen.width-20))"><?php echo _("Preview"); ?></button>
 	</p>
 
 <?php
 //<input type=button value="Select Libraries" onClick="libselect()">
 
 	//POTENTIAL QUESTIONS
-	if ($sessiondata['selfrom'.$aid]=='lib') { //selecting from libraries
+	if ($_SESSION['selfrom'.$aid]=='lib') { //selecting from libraries
 		if (!$beentaken) {
 ?>
 
-	<h2>Potential Questions</h2>
+	<h2><?php echo _('Potential Questions') ?></h2>
 	<form method=post action="addquestions.php?aid=<?php echo $aid ?>&cid=<?php echo $cid ?>">
 
-		In Libraries:
+		<?php echo _('In Libraries'); ?>:
 		<span id="libnames"><?php echo Sanitize::encodeStringForDisplay($lnames); ?></span>
 		<input type=hidden name="libs" id="libs"  value="<?php echo Sanitize::encodeStringForDisplay($searchlibs); ?>">
-		<input type="button" value="Select Libraries" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" />
-		or <input type=button value="Select From Assessments" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=assm'">
+		<button type="button" onClick="GB_show('Library Select','libtree2.php?libtree=popup&libs='+curlibs,500,500)" ><?php echo _("Select Libraries"); ?></button>
+		<?php echo _("or"); ?> <button type="button" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=assm'"><?php echo _("Select From Assessments"); ?></button>
 		<br>
-		Search:
+		<?php echo _('Search') ?>:
 		<input type=text size=15 name=search value="<?php echo $search ?>">
 		<span tabindex="0" data-tip="Search all libraries, not just selected ones" onmouseenter="tipshow(this)" onfocus="tipshow(this)" onmouseleave="tipout()" onblur="tipout()">
 		<input type=checkbox name="searchall" value="1" <?php writeHtmlChecked($searchall,1,0) ?> />
-		Search all libs</span>
+		<?php echo _('Search all libs'); ?></span>
 		<span tabindex="0" data-tip="List only questions I own" onmouseenter="tipshow(this)" onfocus="tipshow(this)" onmouseleave="tipout()" onblur="tipout()">
 		<input type=checkbox name="searchmine" value="1" <?php writeHtmlChecked($searchmine,1,0) ?> />
-		Mine only</span>
+		<?php echo _('Mine only'); ?></span>
 		<span tabindex="0" data-tip="Exclude questions already in assessment" onmouseenter="tipshow(this)" onfocus="tipshow(this)" onmouseleave="tipout()" onblur="tipout()">
 		<input type=checkbox name="newonly" value="1" <?php writeHtmlChecked($newonly,1,0) ?> />
-		Exclude added</span>
-		<input type=submit value=Search>
-		<input type=button value="Add New Question" onclick="window.location='moddataset.php?aid=<?php echo $aid ?>&cid=<?php echo $cid ?>'">
+		<?php echo _('Exclude added'); ?></span>
+		<button type="submit"><?php echo _("Search"); ?></button>
+		<button type="button" onclick="window.location='moddataset.php?aid=<?php echo $aid ?>&cid=<?php echo $cid ?>'"><?php echo _("Add New Question") ?></button>
 
 	</form>
 <?php
 			if ($searchall==1 && trim($search)=='' && $searchmine==0) {
-				echo "Must provide a search term when searching all libraries";
+				echo _("Must provide a search term when searching all libraries");
 			} elseif (isset($search)) {
 				if ($noSearchResults) {
-					echo "<p>No Questions matched search</p>\n";
+					echo "<p>",_("No Questions matched search"),"</p>\n";
 				} else {
 ?>
 		<form id="selq" method=post action="addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&addset=true">
 
-		Check: <a href="#" onclick="return chkAllNone('selq','nchecked[]',true)">All</a> <a href="#" onclick="return chkAllNone('selq','nchecked[]',false)">None</a>
-		<input name="add" type=submit value="Add" />
-		<input name="addquick" type=submit value="Add (using defaults)">
-		<input type=button value="Preview Selected" onclick="previewsel('selq')" />
+		<?php echo _('Check:'); ?> <a href="#" onclick="return chkAllNone('selq','nchecked[]',true)"><?php echo _('All'); ?></a> <a href="#" onclick="return chkAllNone('selq','nchecked[]',false)"><?php echo _('None'); ?></a>
+		<button name="add" type=submit ><?php echo _("Add") ?></button>
+		<button name="addquick" type=submit ><?php echo _("Add (using defaults)") ?></button>
+		<button type="button" onclick="previewsel('selq')" ><?php echo _("Preview Selected" ); ?></button>
 
 		<table cellpadding="5" id="myTable" class="gb" style="clear:both; position:relative;">
 			<thead>
-				<tr><th>&nbsp;</th><th>Description</th><th>&nbsp;</th><th>ID</th><th>Preview</th><th>Type</th>
+				<tr><th>&nbsp;</th><th><?php echo _('Description'); ?></th><th>&nbsp;</th><th>ID</th><th><?php echo _('Preview'); ?></th><th><?php echo _('Type'); ?></th>
 					<?php echo $page_libRowHeader ?>
-					<th>Times Used</th>
-					<?php if ($page_useavgtimes) {?><th><span onmouseenter="tipshow(this,'Average time, in minutes, this question has taken students')" onmouseleave="tipout()">Avg Time</span></th><?php } ?>
-					<th>Mine</th><th>Actions</th>
-					<?php if ($searchall==0) { echo '<th><span onmouseenter="tipshow(this,\'Flag a question if it is in the wrong library\')" onmouseleave="tipout()">Wrong Lib</span></th>';} ?>
+					<th><?php echo _('Times Used'); ?></th>
+					<?php if ($page_useavgtimes) {?><th><span onmouseenter=<?php echo "\"tipshow(this,'". _('Average time, in minutes, this question has taken students')."')\""; ?> onmouseleave="tipout()"><?php echo _('Avg Time'); ?></span></th><?php } ?>
+					<th><?php echo _('Mine'); ?></th><th><?php echo _('Actions'); ?></th>
+					<?php if ($searchall==0) { echo '<th><span onmouseenter="tipshow(this,\''._('Flag a question if it is in the wrong library').'\')" onmouseleave="tipout()">'._('Wrong Lib').'</span></th>';} ?>
 				</tr>
 			</thead>
 			<tbody>
@@ -1400,16 +1389,16 @@ if ($overwriteBody==1) {
 					</td>
 					<?php if ($page_useavgtimes) {?><td class="c"><?php
 					if (isset($page_questionTable[$qid]['qdata'])) {
-						echo '<span onmouseenter="tipshow(this,\'Avg score on first try: '.round($page_questionTable[$qid]['qdata'][0]).'%';
-						echo '<br/>Avg time on first try: '.round($page_questionTable[$qid]['qdata'][1]/60,1).' min<br/>N='.$page_questionTable[$qid]['qdata'][2].'\')" onmouseleave="tipout()">';
+						echo '<span onmouseenter="tipshow(this,\''._('Avg score on first try: ').round($page_questionTable[$qid]['qdata'][0]).'%';
+						echo '<br/>'._('Avg time on first try: ').round($page_questionTable[$qid]['qdata'][1]/60,1).' min<br/>N='.$page_questionTable[$qid]['qdata'][2].'\')" onmouseleave="tipout()">';
 					} else {
 						echo '<span>';
 					}
-					echo $page_questionTable[$qid]['avgtime'].'</span>'; ?></td> <?php }?>
+					echo $page_questionTable[$qid]['meantime'].'</span>'; ?></td> <?php }?>
 					<td><?php echo $page_questionTable[$qid]['mine'] ?></td>
 					<td><div class="dropdown">
 					  <a role="button" tabindex=0 class="dropdown-toggle arrow-down" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					    Action</a>
+					    <?php echo _('Action'); ?></a>
 					  <ul role="menu" class="dropdown-menu dropdown-menu-right">
 					   <li><?php echo $page_questionTable[$qid]['add']; ?></li>
 					   <li><?php echo $page_questionTable[$qid]['src']; ?></li>
@@ -1432,18 +1421,18 @@ if ($overwriteBody==1) {
 					echo '<br>'._('Showing ').($offset+1).'-'.($offset + 300).'. ';
 					if ($offset>0) {
 						$prevoffset = max($offset-300, 0);
-						echo "<a href=\"addquestions.php?cid=$cid&aid=$aid&offset=$prevoffset\">"._('Previous').'</a> ';
+						echo "<a href=\"addquestions.php?cid=$cid&aid=$aid&offset=$prevoffset\" onclick=\"return prePageChange()\">"._('Previous').'</a> ';
 					}
 					if ($searchlimited) {
 						$nextoffset = $offset+300;
-						echo "<a href=\"addquestions.php?cid=$cid&aid=$aid&offset=$nextoffset\">"._('Next').'</a> ';
+						echo "<a href=\"addquestions.php?cid=$cid&aid=$aid&offset=$nextoffset\" onclick=\"return prePageChange()\">"._('Next').'</a> ';
 					}
 					echo '</i></td></tr>';
 				}
 ?>
 			</tbody>
 		</table>
-		<p>Questions <span style="color:#999">in gray</span> have been added to the assessment.</p>
+		<p><?php echo sprintf(_('Questions %s in gray %s have been added to the assessment.'),'<span style="color:#999">','</span>'); ?></p>
 		<script type="text/javascript">
 			initSortTable('myTable',[false,'S','S','N',false,'S',<?php echo ($searchall==1) ? "false, " : ""; ?>'N','N','S',false<?php echo ($searchall==0) ? ",false" : ""; ?>],true);
 		    $(".dropdown-toggle").dropdown();
@@ -1455,31 +1444,31 @@ if ($overwriteBody==1) {
 			}
 		}
 
-	} else if ($sessiondata['selfrom'.$aid]=='assm') { //select from assessments
+	} else if ($_SESSION['selfrom'.$aid]=='assm') { //select from assessments
 ?>
 
-	<h2>Potential Questions</h2>
+	<h2><?php echo _('Potential Questions'); ?></h2>
 
 <?php
 		if (isset($_POST['achecked']) && (count($_POST['achecked'])==0)) {
-			echo "<p>No Assessments Selected.  Select at least one assessment.</p>";
-		} elseif (isset($sessiondata['aidstolist'.$aid])) { //list questions
+			echo "<p>",_("No Assessments Selected.  Select at least one assessment."),"</p>";
+		} elseif (isset($_SESSION['aidstolist'.$aid])) { //list questions
 ?>
 	<form id="selq" method=post action="addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&addset=true">
 
-		<input type=button value="Select Assessments" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&clearassmt=1'">
-		or <input type=button value="Select From Libraries" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=lib'">
+		<button type="button" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&clearassmt=1'"><?php echo _("Select Assessments"); ?></button>
+		<?php echo _("or") ?> <button type="button" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=lib'"><?php echo _("Select From Libraries"); ?></button>
 		<br/>
 
-		Check: <a href="#" onclick="return chkAllNone('selq','nchecked[]',true)">All</a> <a href="#" onclick="return chkAllNone('selq','nchecked[]',false)">None</a>
-		<input name="add" type=submit value="Add" />
-		<input name="addquick" type=submit value="Add Selected (using defaults)">
-		<input type=button value="Preview Selected" onclick="previewsel('selq')" />
+		<?php echo _('Check'); ?>: <a href="#" onclick="return chkAllNone('selq','nchecked[]',true)"><?php echo _('All'); ?></a> <a href="#" onclick="return chkAllNone('selq','nchecked[]',false)"><?php echo _('None'); ?></a>
+		<button name="add" type="submit" /><?php echo _("Add") ?></button>
+		<button name="addquick" type="submit" ><?php echo _("Add Selected (using defaults)"); ?></button>
+		<button type="button" onclick="previewsel('selq')" ><?php echo _("Preview Selected") ?></button>
 
 		<table cellpadding=5 id=myTable class=gb>
 			<thead>
 				<tr>
-					<th> </th><th>Description</th><th></th><th>ID</td><th>Preview</th><th>Type</th><th>Times Used</th><th>Mine</th><th>Add</th><th>Source</th><th>Use as Template</th>
+					<th> </th><th><?php echo _('Description'); ?></th><th></th><th>ID</td><th><?php echo _('Preview'); ?></th><th><?php echo _('Type'); ?></th><th><?php echo _('Times Used'); ?></th><th><?php echo _('Mine'); ?></th><th><?php echo _('Add'); ?></th><th><?php echo _('Source'); ?></th><th><?php echo _('Use as Template'); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -1533,15 +1522,15 @@ if ($overwriteBody==1) {
 <?php
 		} else {  //choose assessments
 ?>
-		<h3>Choose assessments to take questions from</h3>
+		<h3><?php echo _('Choose assessments to take questions from'); ?></h3>
 		<form id="sela" method=post action="addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>">
-		Check: <a href="#" onclick="return chkAllNone('sela','achecked[]',true)">All</a> <a href="#" onclick="return chkAllNone('sela','achecked[]',false)">None</a>
-		<input type=submit value="Use these Assessments" /> or
+		<?php echo _('Check'); ?>: <a href="#" onclick="return chkAllNone('sela','achecked[]',true)"><?php echo _('All'); ?></a> <a href="#" onclick="return chkAllNone('sela','achecked[]',false)"><?php echo _('None'); ?></a>
+		<input type=submit value="Use these Assessments" /> <?php echo _('or'); ?>
 		<input type=button value="Select From Libraries" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=lib'">
 
 		<table cellpadding=5 id=myTable class=gb>
 			<thead>
-			<tr><th></th><th>Assessment</th><th>Summary</th></tr>
+			<tr><th></th><th><?php echo _('Assessment'); ?></th><th><?php echo _('Summary'); ?></th></tr>
 			</thead>
 			<tbody>
 <?php
