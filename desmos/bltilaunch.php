@@ -184,15 +184,15 @@ if (
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($sessiondata['ltiitemtype']==38) { //is item
-            $itemid = $sessiondata['ltiitemid'];
+        if ($_SESSION['ltiitemtype']==38) { //is item
+            $itemid = $_SESSION['ltiitemid'];
             $item = new Desmos\Models\DesmosItem();
             if (!$item->findItem($itemid)) {
                 $diaginfo = "(Debug info: 30-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
-            if ($sessiondata['ltirole'] == 'learner') {
+            if ($_SESSION['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => $now));
             }
@@ -207,8 +207,8 @@ if (
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
-            if ($sessiondata['ltiitemtype']==0) { //is aid
-                $aid = $sessiondata['ltiitemid'];
+            if ($_SESSION['ltiitemtype']==0) { //is aid
+                $aid = $_SESSION['ltiitemid'];
                 $stm = $DBH->prepare('SELECT courseid,ver FROM imas_assessments WHERE id=:aid');
                 $stm->execute(array(':aid'=>$aid));
                 list($cid,$aver) = $stm->fetch(PDO::FETCH_NUM);
@@ -379,16 +379,21 @@ if (
                         $query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:groupid,:created_at)';
                         $stm = $DBH->prepare($query);
                         $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-                            ':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
-                            ':msgnotify'=>$msgnot,':groupid'=>$newgroupid, ':created_at'=>time()));
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
+						':msgnotify'=>$msgnot,':groupid'=>$newgroupid,
+                        ':created_at' => time()));
                     } else {
                         $rights = 10;
                         $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
                         $query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,:msgnotify,:created_at)';
                         $stm = $DBH->prepare($query);
                         $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-                            ':FirstName'=>$_POST['firstname'],':LastName'=>$_POST['lastname'],':email'=>$_POST['email'],
-                            ':msgnotify'=>$msgnot,':created_at'=>time()));
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
+						':msgnotify'=>$msgnot, ':created_at' => time()));
                     }
                     $userid = $DBH->lastInsertId(); //DB mysql_insert_id();
 
@@ -823,8 +828,10 @@ if (
                         $query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:groupid,:created_at)';
                         $stm = $DBH->prepare($query);
                         $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-                            ':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':groupid'=>$newgroupid,
-                            ':created_at'=>time()));
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),
+						':groupid'=>$newgroupid, ':created_at' => time()));
 
                     } else {
                         $rights = 10;
@@ -832,7 +839,9 @@ if (
                         $query .= '(:SID,:password,:rights,:FirstName,:LastName,:email,0,:created_at)';
                         $stm = $DBH->prepare($query);
                         $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw,':rights'=>$rights,
-                            ':FirstName'=>$firstname,':LastName'=>$lastname,':email'=>$email,':created_at'=>time()));
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),':created_at' => time()));
                     }
                     $userid = $DBH->lastInsertId(); //DB $userid = mysql_insert_id();
                     if ($rights>=20) {
@@ -1057,9 +1066,11 @@ if (
                                 echo $advuseother;
                             }
                             echo "	</ul>";
-                            echo "<p>The first option is best if this is your first time using this $installname course.  The second option
-							may be preferrable if you have copied the course in your LMS and want your students records to
-							show in a separate $installname course.</p>";
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
+                            // #### Begin OHM-specific code #####################################################
                             if ($sourceUIver == 1) {
                                 echo '<div id="usenew" style="display:none;">';
                                 echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
@@ -1070,6 +1081,11 @@ if (
                                 echo '</span>';
                                 echo '</div>';
                             }
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
+                            // #### End OHM-specific code #######################################################
 							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
                         } else {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
@@ -1202,7 +1218,17 @@ if (
                     $deflatepass = $r[5];
                     $sourceUIver = $r[6];
                     $courselevel = $r[7];
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
+                // #### Begin OHM-specific code #####################################################
                     if ($_POST['assess-version'] == 2) {
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
+                // #### End OHM-specific code #######################################################
                         $destUIver = 2;
                         $convertAssessVer = 2;
                     } else {
@@ -1504,8 +1530,8 @@ if (
                         // #### End OHM-specific code #####################################################
                         // #### End OHM-specific code #####################################################
                         // #### End OHM-specific code #####################################################
-                        $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
-                        $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$typeid));
+                            $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
+                            $stm->execute(array(':typeid'=>$_SESSION['place_aid']));
                         if ($stm->rowCount()==0) {
 						reporterror(sprintf("Error.  Assessment ID %s not found."),"'{$_SESSION['place_aid']}'");
                         }
@@ -1868,8 +1894,8 @@ if (!empty($_SESSION['userid'])) {	//check that same userid, and that we're not 
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
     if ($linkparts[0]=='itemid') {
-        $sessiondata['ltiitemid'] = intval($linkparts[1]);
-        $sessiondata['ltiitemtype'] = 38;
+        $_SESSION['ltiitemid'] = intval($linkparts[1]);
+        $_SESSION['ltiitemtype'] = 38;
     } else
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
@@ -1992,7 +2018,7 @@ $_SESSION['time'] = $now;
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
-            if ($sessiondata['ltirole'] == 'learner') {
+            if ($_SESSION['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => $now));
             }
@@ -2075,14 +2101,14 @@ $_SESSION['time'] = $now;
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        if ($sessiondata['ltiitemtype']==38) { //is item
-            $itemid = $sessiondata['ltiitemid'];
+        if ($_SESSION['ltiitemtype']==38) { //is item
+            $itemid = $_SESSION['ltiitemid'];
             $item = new Desmos\Models\DesmosItem();
             if (!$item->findItem($itemid)) {
                 $diaginfo = "(Debug info: 34-".$itemid.")";
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
-            if ($sessiondata['ltirole'] == 'learner') {
+            if ($_SESSION['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->typeid, ':viewtime' => $now));
             }
@@ -2097,8 +2123,8 @@ $_SESSION['time'] = $now;
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
-            if ($sessiondata['ltiitemtype']==0) { //is aid
-                $aid = $sessiondata['ltiitemid'];
+            if ($_SESSION['ltiitemtype']==0) { //is aid
+                $aid = $_SESSION['ltiitemid'];
                 $stm = $DBH->prepare("SELECT courseid,ver FROM imas_assessments WHERE id=:id");
                 $stm->execute(array(':id'=>$aid));
                 list($cid, $aver) = $stm->fetch(PDO::FETCH_NUM);
@@ -2278,13 +2304,22 @@ $_SESSION['time'] = $now;
                         $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
                         $query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid, :created_at)";
                         $stm = $DBH->prepare($query);
-                        $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':groupid'=>$newgroupid, ':created_at'=>time()));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
+						':msgnotify'=>$msgnot, ':groupid'=>$newgroupid,
+                        ':created_at'=>time()));
                     } else {
                         $rights = 10;
                         $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
                         $query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at)";
                         $stm = $DBH->prepare($query);
-                        $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':created_at'=>time()));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+						':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+						':email'=>Sanitize::emailAddress($_POST['email']),
+						':msgnotify'=>$msgnot,':created_at'=>time()));
                     }
                     $userid = $DBH->lastInsertId();
                 }
@@ -2738,13 +2773,22 @@ $_SESSION['time'] = $now;
                         $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,groupid,created_at) VALUES ";
                         $query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :groupid, :created_at)";
                         $stm = $DBH->prepare($query);
-                        $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':groupid'=>$newgroupid, ':created_at'=>time()));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),
+						':msgnotify'=>0, ':groupid'=>$newgroupid,
+                        ':created_at'=>time()));
                     } else {
                         $rights = 10;
                         $query = "INSERT INTO imas_users (SID,password,rights,FirstName,LastName,email,msgnotify,created_at) VALUES ";
                         $query .= "(:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :created_at)";
                         $stm = $DBH->prepare($query);
-                        $stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights, ':FirstName'=>$firstname, ':LastName'=>$lastname, ':email'=>$email, ':msgnotify'=>0, ':created_at'=>time()));
+					$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$rights,
+						':FirstName'=>Sanitize::stripHtmlTags($firstname),
+						':LastName'=>Sanitize::stripHtmlTags($lastname),
+						':email'=>Sanitize::emailAddress($email),
+						':msgnotify'=>0,':created_at'=>time()));
                     }
                     $userid = $DBH->lastInsertId();
                 }
@@ -3246,8 +3290,8 @@ if (!empty($_SESSION['userid'])) {
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
     if ($keyparts[0]=='itemid') { //is cid
-        $sessiondata['ltiitemid'] = intval($keyparts[1]);
-        $sessiondata['ltiitemtype'] = 38;
+        $_SESSION['ltiitemid'] = intval($keyparts[1]);
+        $_SESSION['ltiitemtype'] = 38;
     } else
 // #### End OHM-specific code #####################################################
 // #### End OHM-specific code #####################################################
@@ -3375,7 +3419,7 @@ $_SESSION['time'] = $now;
                 reporterror("This item does not appear to exist anymore. $diaginfo");
             }
 
-            if ($sessiondata['ltirole'] == 'learner') {
+            if ($_SESSION['ltirole'] == 'learner') {
                 $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
                 $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => $now));
             }
