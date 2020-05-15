@@ -15,9 +15,8 @@ Right now the configs are the same for staging/production, but you should use th
 When running the local Vue server, you will need to modify your
 `/config/local.php` file.
 
-1. Uncomment the following lines.
+1. Uncomment the two lines shown below.
 1. Set `$CFG['assess2-use-vue-dev']` to `true`.
-1. Set `$CFG['assess2-use-vue-dev-address']` if using something like ngrok.
 
 ```
 $CFG['assess2-use-vue-dev'] = false;
@@ -27,5 +26,15 @@ $CFG['assess2-use-vue-dev-address'] = 'http://localhost:8080'; // no trailing sl
 ## Using ngrok or similar tool
 
 If you will be using something like ngrok to forward localhost to another
-machine, set `$CFG['assess2-use-vue-dev-address']` to the address provided
+machine:
+
+1. Set `$CFG['assess2-use-vue-dev-address']` to the address provided
 by ngrok for the Vue server.
+1. You will also need to create the file: `assess2/vue-src/.env.local` with
+the following contents:
+
+```
+VUE_APP_IMASROOT=https://9e3f6be7.ngrok.io
+```
+
+Replace the above URL with the one provided by ngrok for the Vue local server.
