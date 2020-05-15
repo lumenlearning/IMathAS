@@ -663,19 +663,20 @@ switch($_POST['action']) {
 			}
 
 			if ($stm->rowCount()>0) {
-				$result = TeacherAuditLog::addTracking(
-					$cid,
-					"Mass Assessment Settings Change",
-					null,
-					$qarr
-				);
+				$metadata = array();
 				if ($setdatesbylti==1) {
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
 					$stm->execute(array(':cid'=>$_GET['id']));
+					if ($stm->rowCount()>0) {
+						$metadata['date_by_lti'] = 1;
+					}
 				} else {
 					//undo it - doesn't restore dates
 					$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=0 WHERE date_by_lti>0 AND courseid=:cid");
 					$stm->execute(array(':cid'=>$_GET['id']));
+					if ($stm->rowCount()>0) {
+						$metadata['date_by_lti'] = 0;
+					}
 					//remove is_lti from exceptions with latepasses
 					$query = "UPDATE imas_exceptions JOIN imas_assessments ";
 					$query .= "ON imas_exceptions.assessmentid=imas_assessments.id ";
@@ -683,12 +684,26 @@ switch($_POST['action']) {
 					$query .= "WHERE imas_exceptions.is_lti>0 AND imas_exceptions.islatepass>0 AND imas_assessments.courseid=:cid";
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':cid'=>$_GET['id']));
+					if ($stm->rowCount()>0) {
+						$metadata['imas_exceptions.is_lti'] = 0;
+					}
 					//delete any other is_lti exceptions
 					$query = "DELETE imas_exceptions FROM imas_exceptions JOIN imas_assessments ";
 					$query .= "ON imas_exceptions.assessmentid=imas_assessments.id ";
 					$query .= "WHERE imas_exceptions.is_lti>0 AND imas_exceptions.islatepass=0 AND imas_assessments.courseid=:cid";
 					$stm = $DBH->prepare($query);
 					$stm->execute(array(':cid'=>$_GET['id']));
+					if ($stm->rowCount()>0) {
+						$metadata['imas_exceptions.is_lti'] = 'deleted';
+					}
+				}
+				if (!empty($metadata)) {
+					$result = TeacherAuditLog::addTracking(
+						$cid,
+						"Mass Assessment Settings Change",
+						null,
+						$metadata
+					);
 				}
 			}
 		} else { //new course
@@ -888,6 +903,14 @@ switch($_POST['action']) {
 			if ($setdatesbylti==1) {
 				$stm = $DBH->prepare("UPDATE imas_assessments SET date_by_lti=1 WHERE date_by_lti=0 AND courseid=:cid");
 				$stm->execute(array(':cid'=>$cid));
+				if ($stm->rowCount()>0) {
+					$result = TeacherAuditLog::addTracking(
+						$cid,
+						"Mass Assessment Settings Change",
+						null,
+						['date_by_lti'=>1]
+					);
+				}
 			}
 			/*
 			//add to top of course list (skip until we can do it consistently)

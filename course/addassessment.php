@@ -5,6 +5,7 @@
 /*** master php includes *******/
 require("../init.php");
 require("../includes/htmlutil.php");
+require("../includes/TeacherAuditLog.php");
 
 if ($courseUIver > 1) {
 	if (!isset($_GET['id'])) {
@@ -340,7 +341,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		}
 
 		if (isset($_GET['id'])) {  //already have id; update
-			$stm = $DBH->prepare("SELECT isgroup,intro,itemorder,deffeedbacktext FROM imas_assessments WHERE id=:id");
+			$stm = $DBH->prepare("SELECT * FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
 			$curassess = $stm->fetch(PDO::FETCH_ASSOC);
 
@@ -403,10 +404,26 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm = $DBH->prepare($query);
 			$stm->execute($qarr);
 
-			//update ptsposs field
-			if ($stm->rowCount()>0 && isset($_POST['defpoints'])) {
-				require_once("../includes/updateptsposs.php");
-				updatePointsPossible($_GET['id'], $curassess['itemorder'], $_POST['defpoints']);
+			if ($stm->rowCount()>0) {
+                //compare changes from $curassess to $qarr
+                $metadata = array();
+                foreach ($qarr as $qikey => $qivalue) {
+                    if ($qikey != ":cid" && $curassess[trim($qikey,':')] != $qivalue) {
+                        $metadata['old_settings'][trim($qikey,':')] = $curassess[trim($qikey,':')];
+                        $metadata['new_settings'][trim($qikey,':')] = $qivalue;
+                    }
+                }
+                $result = TeacherAuditLog::addTracking(
+                    $cid,
+                    "Assessment Settings Change",
+                    $assessmentId,
+                    $metadata
+                );
+                //update ptsposs field
+                if (isset($_POST['defpoints'])) {
+                    require_once("../includes/updateptsposs.php");
+                    updatePointsPossible($_GET['id'], $curassess['itemorder'], $_POST['defpoints']);
+                }
 			}
 
 			if ($deffb!=$curassess['deffeedbacktext']) {
