@@ -48,7 +48,8 @@ if (isset($sessionpath)) { session_save_path($sessionpath);}
 ini_set('session.gc_maxlifetime',86400);
 ini_set('auto_detect_line_endings',true);
 $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
-if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
+// OHM-specific change: Added ngrok domain for remote VM development during development
+if (allowNgrok() && $_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
 	$sess_cookie_domain = '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2));
 	if (disallowsSameSiteNone()) {
 		session_set_cookie_params(0, '/', $sess_cookie_domain);
