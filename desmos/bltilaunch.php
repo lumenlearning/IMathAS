@@ -251,7 +251,7 @@ if (isset($_GET['launch'])) {
 	$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 	require("../header.php");
 	echo "<h3>Connecting to $installname</h3>";
-	echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/bltilaunch.php?launch=true\" ";
+	echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/desmos/bltilaunch.php?launch=true\" ";
 	if ($_SESSION['ltiitemtype']==0 && $_SESSION['ltitlwrds'] != '') {
 		echo "onsubmit='return confirm(\"This assessment has a time limit of "
             .Sanitize::encodeStringForJavascript($_SESSION['ltitlwrds'])
@@ -1066,6 +1066,9 @@ $now = time();
 							echo $advuseother;
 						}
 						echo "	</ul>";
+                            echo "<p>The first option is best if this is your first time using this $installname course.  The second option
+                                                        may be preferrable if you have copied the course in your LMS and want your students records to
+                                                        show in a separate $installname course.</p>";
                             // #### Begin OHM-specific code #####################################################
                             // #### Begin OHM-specific code #####################################################
                             // #### Begin OHM-specific code #####################################################
@@ -1332,10 +1335,24 @@ $now = time();
 		}
 		if ($destcid==$aidsourcecid) {
 			//aid is in destination course - just make placement
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            if ($_SESSION['place_item_id']) {
+                $aid = $_SESSION['place_item_id'];
+            } else
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
 			$aid = $_SESSION['place_aid'];
 			//echo "here 1: $aid";
 		} else {
 			$foundaid = false;
+            if (isset($_SESSION['place_aid'])) {
 			$aidtolookfor = intval($_SESSION['place_aid']);
 			//aid is in original source course.  Let's see if we already copied it.
 			if ($copiedfromcid == $aidsourcecid) {
@@ -1530,10 +1547,10 @@ $now = time();
                         // #### End OHM-specific code #####################################################
                         // #### End OHM-specific code #####################################################
                         // #### End OHM-specific code #####################################################
-                            $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
-                            $stm->execute(array(':typeid'=>$_SESSION['place_aid']));
+                            $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
+                            $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$_SESSION['place_aid']));
                         if ($stm->rowCount()==0) {
-						reporterror(sprintf("Error.  Assessment ID %s not found."),"'{$_SESSION['place_aid']}'");
+						reporterror(sprintf("Error.  Assessment ID %s not found.","'{$_SESSION['place_aid']}'"));
 					}
 					$sourceitemid = $stm->fetchColumn(0);
 					$cid = $destcid;
@@ -2177,7 +2194,7 @@ if (isset($_GET['launch'])) {
 	$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 	require("../header.php");
 	echo "<h3>Connecting to $installname</h3>";
-	echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/bltilaunch.php?launch=true\" ";
+	echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/desmos/bltilaunch.php?launch=true\" ";
 	if ($_SESSION['ltiitemtype']==0 && $_SESSION['ltitlwrds'] != '') {
 		echo "onsubmit='return confirm(\"This assessment has a time limit of ".Sanitize::encodeStringForDisplay($_SESSION['ltitlwrds']).".  Click OK to start or continue working on the assessment.\")' >";
 		echo "<p class=noticetext>This assessment has a time limit of ".Sanitize::encodeStringForDisplay($_SESSION['ltitlwrds']).".</p>";

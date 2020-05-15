@@ -955,6 +955,9 @@ if ($stm->rowCount()==0) {
 							echo $advuseother;
 						}
 						echo "	</ul>";
+                            echo "<p>The first option is best if this is your first time using this $installname course.  The second option
+                                                        may be preferrable if you have copied the course in your LMS and want your students records to
+                                                        show in a separate $installname course.</p>";
                             // #### Begin OHM-specific code #####################################################
                             // #### Begin OHM-specific code #####################################################
                             // #### Begin OHM-specific code #####################################################
