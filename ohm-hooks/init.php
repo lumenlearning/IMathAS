@@ -12,7 +12,11 @@ if (isset($GLOBALS['configEnvironment']) && 'development' == $GLOBALS['configEnv
 }
 
 
-function allowNgrok(): bool
+/**
+ * If we are in a development environment, allow ngrok usage.
+ * @return bool True if running in development.
+ */
+function isDevEnvironment(): bool
 {
     if (isset($GLOBALS['configEnvironment'])
         && 'development' == $GLOBALS['configEnvironment']
