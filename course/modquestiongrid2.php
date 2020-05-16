@@ -51,6 +51,7 @@
 						}
 					}
 				}
+                $metadata['added_questions'] = $newitemorder;
 			}
 
 			if ($viddata != '') {
@@ -87,7 +88,7 @@
                     $cid,
                     "Assessment Settings Change",
                     $aid,
-                    array(':itemorder'=>$itemorder, 'defpoint'=>$defpoints)
+                    $metadata
                 );
             }
 

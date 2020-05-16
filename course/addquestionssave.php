@@ -2,7 +2,7 @@
 //IMathAS:  Save changes to addquestions submitted through AHAH
 //(c) 2007 IMathAS/WAMAP Project
 	require("../init.php");
-	require_once("../includes/TeacherAuditLog.php");
+	require("../includes/TeacherAuditLog.php");
 	$cid = Sanitize::courseId($_GET['cid']);
 	$aid = Sanitize::onlyInt($_GET['aid']);
 	if (!isset($teacherid)) {
@@ -134,6 +134,14 @@
 				continue;  //shouldn't happen
 			}
 			if ($row['points'] != $newpts['qn'.$row['id']]) {
+				$metadata['old_settings']['update_points'] = [
+					'question_number' => $row['id'],
+					'points' => $row['points']
+				];
+				$metadata['new_settings']['update_points'] = [
+					'question_number' => $row['id'],
+					'points' => $newpts['qn'.$row['id']]
+				];
 				$upd_pts->execute(array($newpts['qn'.$row['id']], $row['id']));
 				$ptschanged = true;
 			}
@@ -152,14 +160,9 @@
 	$stm = $DBH->prepare($query);
 	$stm->execute($qarr);
 	if ($stm->rowCount()>0 || $ptschanged) {
-		$result = TeacherAuditLog::addTracking(
-			$cid,
-			"Assessment Settings Change",
-			$aid,
-			$qarr
-		);
 		//delete any removed questions
 		if (count($toremove)>0) {
+			$metadata['removed_questions'] = implode(',', array_map('intval', $toremove));
 			$toremove = implode(',', array_map('intval', $toremove));
 			$stm = $DBH->query("DELETE FROM imas_questions WHERE id IN ($toremove)");
 		}
@@ -178,6 +181,23 @@
 			WHERE iar.assessmentid=?';
 		$stm = $DBH->prepare($query);
 		$stm->execute(array($cid, $aid));
+
+		if ($newitems != $curitems && empty($toremove)) {
+			$metadata['old_settings']['itemorder'] = implode(',', $curitems);
+			$metadata['new_settings']['itemorder'] = implode(',', $newitems);
+		}
+		if ($new_intro != $current_intro) {
+			$metadata['old_settings']['intro'] = $current_intro;
+			$metadata['new_settings']['intro'] = $new_intro;
+		}
+		if (!empty($metadata)) {
+			$result = TeacherAuditLog::addTracking(
+				$cid,
+				"Assessment Settings Change",
+				$aid,
+				$metadata
+			);
+		}
 
 		echo "OK";
 	} else {

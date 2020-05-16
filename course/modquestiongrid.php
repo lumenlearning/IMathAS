@@ -12,9 +12,9 @@
 		require_once("../includes/updateptsposs.php");
         require_once("../includes/TeacherAuditLog.php");
 		if (isset($_POST['add'])) { //adding new questions
-			$stm = $DBH->prepare("SELECT itemorder,viddata,defpoints FROM imas_assessments WHERE id=:id");
-			$stm->execute(array(':id'=>$aid));
-			list($itemorder, $viddata, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
+            $stm = $DBH->prepare("SELECT itemorder,viddata,defpoints FROM imas_assessments WHERE id=:id");
+            $stm->execute(array(':id'=>$aid));
+            list($itemorder, $viddata, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
 
 			$newitemorder = '';
 			if (isset($_POST['addasgroup'])) {
@@ -50,6 +50,7 @@
 						}
 					}
 				}
+                $metadata['added_questions'] = $newitemorder;
 			}
 
 			if ($viddata != '') {
@@ -73,20 +74,19 @@
 				}
 				$viddata = serialize($viddata);
 			}
-
-			if ($itemorder == '') {
+            if ($itemorder == '') {
 				$itemorder = $newitemorder;
 			} else {
 				$itemorder .= ','.$newitemorder;
 			}
-			$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder,viddata=:viddata WHERE id=:id");
+            $stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder,viddata=:viddata WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':viddata'=>$viddata, ':id'=>$aid));
-            if ($stm->rowCount()>0 || $ptschanged) {
+            if ($stm->rowCount()>0 ) {
                 $result = TeacherAuditLog::addTracking(
                     $cid,
                     "Assessment Settings Change",
                     $aid,
-                    array(':itemorder'=>$itemorder, 'defpoint'=>$defpoints)
+                    $metadata
                 );
             }
 			

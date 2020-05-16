@@ -83,6 +83,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				));
 				$qids[] = $DBH->lastInsertId();
 			}
+            $metadata['added_questions'] = implode(',', $qids);
 			//add to itemorder
 			$stm = $DBH->prepare("SELECT itemorder,viddata,defpoints FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
@@ -121,7 +122,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                     $cid,
                     "Assessment Settings Change",
                     $aid,
-                    array('itemorder'=>$itemorder)
+                    $metadata
                 );
             }
 
@@ -160,7 +161,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 }
 				$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid=:assessmentid");
 			} else {
-                $query = "SELECT userid, bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid";
+                $stm = $DBH->prepare("SELECT userid, bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
                 $stm->execute(array(':assessmentid'=>$aid));
                 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
                     $sp = explode(';', $row['bestscores']);
