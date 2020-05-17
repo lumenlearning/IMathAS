@@ -496,23 +496,8 @@ if ($overwriteBody==1) {
 
 //DISPLAY BLOCK FOR SECOND STEP - selecting course item
 
-// if source is using assess2 and dest is not, bail
-if ($sourceUIver > $destUIver) {
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    // #### Begin OHM-specific code #####################################################
-    echo '<p class=noticetext>'._('The course you are copying from uses the new assessment format which cannot be used in an old assessment format course. Only non-assessment items are displayed below for copy.').'</p>';
-    /* echo '<p>'._('The course you selected is using a newer version of assessments than your course. It is not possible to convert assessment back to an older format, sorry.').'</p>';
-	require("../footer.php");
-	exit; */
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-    // #### End OHM-specific code #####################################################
-}
+// if source is using assess2 and dest is not, exclude assessments
+$excludeAssess = ($sourceUIver > $destUIver);
 
 ?>
 	<script type="text/javascript">
@@ -529,6 +514,21 @@ if ($sourceUIver > $destUIver) {
 	</script>
 	<p>Copying course: <b><?php echo Sanitize::encodeStringForDisplay($ctcname);?></b></p>
 
+<?php
+	if ($excludeAssess) {
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        echo '<p class=noticetext>'._('The course you are copying from uses the new assessment format which cannot be used in an old assessment format course. Only non-assessment items are displayed below for copy.').'</p>';
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+        // #### End OHM-specific code #####################################################
+	}
+?>
 	<form id="qform" method=post action="copyitems.php?cid=<?php echo $cid ?>&action=copy" onsubmit="return copyitemsonsubmit();">
 	<input type=hidden name=ekey id=ekey value="<?php echo Sanitize::encodeStringForDisplay($_POST['ekey']); ?>">
 	<input type=hidden name=ctc id=ctc value="<?php echo Sanitize::encodeStringForDisplay($ctc); ?>">
@@ -538,14 +538,17 @@ if ($sourceUIver > $destUIver) {
 		if ($_POST['ekey']=='') { echo ' <a class="small" target="_blank" href="course.php?cid='.Sanitize::onlyInt($ctc).'">'._('Preview source course').'</a>';}
 	?>
 	<br/>
-	<input type=radio name=whattocopy value="all" id=whattocopy1 onchange="updatetocopy(this)"> <label for=whattocopy1>Copy whole course</label><br/>
-	<input type=radio name=whattocopy value="select" id=whattocopy2 onchange="updatetocopy(this)"> <label for=whattocopy2>Select items to copy</label></p>
-
+	<?php
+	if (!$excludeAssess) {
+		echo '<input type=radio name=whattocopy value="all" id=whattocopy1 onchange="updatetocopy(this)"> <label for=whattocopy1>'._('Copy whole course').'</label><br/>';
+	}
+	echo '<input type=radio name=whattocopy value="select" id=whattocopy2 onchange="updatetocopy(this)"'.($excludeAssess?' checked':'').'> <label for=whattocopy2>'._('Select items to copy').'</label></p>';
+	?>
 	<div id="allitemsnote" style="display:none;">
 	<p class="noticetext"><?php echo _('You are about to copy ALL items in this course.'); ?></p>
 	<p><?php echo _("In most cases, you'll want to leave the options below set to their default	values"); ?> </p>
 	</div>
-	<div id="selectitemstocopy" style="display:none;">
+    <div id="selectitemstocopy" <?php echo $excludeAssess?'':'style="display:none"';?>>
 <?php } ?>
 	<h3><?php _('Select Items to Copy'); ?></h3>
 
@@ -567,6 +570,9 @@ if ($sourceUIver > $destUIver) {
 		$alt=0;
 
 		for ($i = 0 ; $i<(count($ids)); $i++) {
+			if ($excludeAssess && $types[$i]=='Assessment') {
+				continue;
+			}
             if ($sourceUIver <= $destUIver || strpos($types[$i],'Assessment') === false) { // #### OHM-specific code #####################################################
 			if ($alt==0) {echo "		<tr class=even>"; $alt=1;} else {echo "		<tr class=odd>"; $alt=0;}
 			echo '<td>';
