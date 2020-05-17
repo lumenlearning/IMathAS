@@ -500,14 +500,16 @@
 				$GLOBALS['questionscoreref'] = array("scorebox$cnt",$points);
 			}
 			*/
-			echo '<div class="questionwrap" id="qwrap'.$cnt.'">';
+			echo '<div class=scrollpane>';
+			echo '<div class="questionwrap questionpane">';
+			echo '<div class="question" id="questionwrap'.$cnt.'">';
 			echo $qdata['html'];
 			echo '<script type="text/javascript">
 				$(function() {
-					imathasAssess.init('.json_encode($qdata['jsparams'], JSON_INVALID_UTF8_IGNORE).', false, document.getElementById("qwrap'.$cnt.'"));
+					imathasAssess.init('.json_encode($qdata['jsparams'], JSON_INVALID_UTF8_IGNORE).', false, document.getElementById("questionwrap'.$cnt.'"));
 				});
 				</script>';
-			echo '</div>';
+			echo '</div></div></div>';
 
 			if (!empty($qdata['work'])) {
 				echo '<div class="questionpane">';
