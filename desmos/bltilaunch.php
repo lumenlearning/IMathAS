@@ -1573,8 +1573,7 @@ $now = time();
 		$query = "INSERT INTO imas_lti_placements (org,contextid,linkid,placementtype,typeid) VALUES ";
 		$query .= "(:org, :contextid, :linkid, :placementtype, :typeid)";
 		$stm = $DBH->prepare($query);
-		$stm->execute(array(':org'=>$_SESSION['ltiorg'], ':contextid'=>$_SESSION['lti_context_id'], ':linkid'=>$_SESSION['lti_resource_link_id'], ':placementtype'=>'assess', ':typeid'=>$aid));
-
+		
             $linkparts = array('aid',$aid);
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
