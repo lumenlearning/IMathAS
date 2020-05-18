@@ -1352,7 +1352,88 @@ $now = time();
 			//echo "here 1: $aid";
 		} else {
 			$foundaid = false;
-            if (isset($_SESSION['place_aid'])) {
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            // #### Begin OHM-specific code #####################################################
+            if (isset($_SESSION['place_item_id'])) {
+                $aidtolookfor = intval($_SESSION['place_item_id']);
+                //aid is in original source course.  Let's see if we already copied it.
+                if ($copiedfromcid == $aidsourcecid) {
+                    $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                    $ancestor_array = $itemObject::findAncestors($aidtolookfor, $destcid);
+                    if (count($ancestor_array) == 1) {
+                        $aid = $ancestor_array[0]['id'];
+                        $foundaid = true;
+                    }
+                }
+                if (!$foundaid) { //do course ancestor walk-back
+                    //need to look up ancestor depth
+                    $stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
+                    $stm->execute(array($destcid));
+                    $ancestors = explode(',', $stm->fetchColumn(0));
+                    $ciddepth = array_search($aidsourcecid, $ancestors);  //so if we're looking for 23, "20,24,23,26" would give 2 here.
+                    if ($ciddepth !== false) {
+                        array_unshift($ancestors, $destcid);  //add current course to front
+                        $foundsubaid = true;
+                        for ($i = $ciddepth; $i >= 0; $i--) {  //starts one course back from aidsourcecid because of the unshift
+                            $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                            $ancestor_array = $itemObject::findAncestors($aidtolookfor, $destcid);
+                            if (count($ancestor_array) == 1) {
+                                $aidtolookfor = $ancestor_array[0]['id'];
+                            } else {
+                                $foundsubaid = false;
+                                break;
+                            }
+                        }
+                        if ($foundsubaid) {
+                            $aid = $aidtolookfor;
+                            $foundaid = true;
+                        }
+                    }
+                }
+                if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
+                    $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                    $res = $itemObject::findAncestors($aidtolookfor, $destcid);
+                    if (count($res) == 1) {  //only one result - we found it
+                        $aid = $res[0]['id'];
+                        $foundaid = true;
+                    }
+                    if (!$foundaid && count($res) > 0) { //multiple results - look for the identical name
+                        foreach ($res as $k => $row) {
+                            $res[$k]['loc'] = strpos($row['ancestors'], $aidtolookfor);
+                            if ($row['title'] == $aidsourcename) {
+                                $aid = $row['id'];
+                                $foundaid = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!$foundaid && count($res) > 0) { //no name match. pick the one with the assessment closest to the start
+                        usort($res, function ($a, $b) {
+                            return $a['loc'] - $b['loc'];
+                        });
+                        $aid = $res[0]['id'];
+                        $foundaid = true;
+                    }
+                }
+                if (!$foundaid) {
+                    $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
+                    $item = new $itemObject();
+
+                    if ($item->findItemByTitle($aidsourcename, $destcid)) {
+                        $aid = $item->typeid;
+                    }
+                    $typeid = $_SESSION['place_item_id'];
+                    $itemtype = $_SESSION['place_item_type'];
+                }
+            } else {
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
+            // #### End OHM-specific code #####################################################
 			$aidtolookfor = intval($_SESSION['place_aid']);
 			//aid is in original source course.  Let's see if we already copied it.
 			if ($copiedfromcid == $aidsourcecid) {
@@ -1441,92 +1522,8 @@ $now = time();
                         }
                         $typeid = $_SESSION['place_aid'];
                         $itemtype = 'Assessment';
-                    }
                 }
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                if (isset($_SESSION['place_item_id'])) {
-                    $aidtolookfor = intval($_SESSION['place_item_id']);
-                    //aid is in original source course.  Let's see if we already copied it.
-                    if ($copiedfromcid == $aidsourcecid) {
-                        $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                        $ancestor_array = $itemObject::findAncestors($aidtolookfor, $destcid);
-                        if (count($ancestor_array) == 1) {
-                            $aid = $ancestor_array[0]['id'];
-                            $foundaid = true;
-                        }
-                    }
-                    if (!$foundaid) { //do course ancestor walk-back
-                        //need to look up ancestor depth
-                        $stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
-                        $stm->execute(array($destcid));
-                        $ancestors = explode(',', $stm->fetchColumn(0));
-                        $ciddepth = array_search($aidsourcecid, $ancestors);  //so if we're looking for 23, "20,24,23,26" would give 2 here.
-                        if ($ciddepth !== false) {
-                            array_unshift($ancestors, $destcid);  //add current course to front
-                            $foundsubaid = true;
-                            for ($i = $ciddepth; $i >= 0; $i--) {  //starts one course back from aidsourcecid because of the unshift
-                                $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                                $ancestor_array = $itemObject::findAncestors($aidtolookfor, $destcid);
-                                if (count($ancestor_array) == 1) {
-                                    $aidtolookfor = $ancestor_array[0]['id'];
-                                } else {
-                                    $foundsubaid = false;
-                                    break;
-                                }
-                            }
-                            if ($foundsubaid) {
-                                $aid = $aidtolookfor;
-                                $foundaid = true;
-                            }
-                        }
-                    }
-                    if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
-                        $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                        $res = $itemObject::findAncestors($aidtolookfor, $destcid);
-                        if (count($res) == 1) {  //only one result - we found it
-                            $aid = $res[0]['id'];
-                            $foundaid = true;
-                        }
-                        if (!$foundaid && count($res) > 0) { //multiple results - look for the identical name
-                            foreach ($res as $k => $row) {
-                                $res[$k]['loc'] = strpos($row['ancestors'], $aidtolookfor);
-                                if ($row['title'] == $aidsourcename) {
-                                    $aid = $row['id'];
-                                    $foundaid = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!$foundaid && count($res) > 0) { //no name match. pick the one with the assessment closest to the start
-                            usort($res, function ($a, $b) {
-                                return $a['loc'] - $b['loc'];
-                            });
-                            $aid = $res[0]['id'];
-                            $foundaid = true;
-                        }
-                    }
-                    if (!$foundaid) {
-                        if ($_SESSION['place_item_id']) {
-                            $itemObject = str_replace('Item', '', $_SESSION['place_item_type']) . "\\Models\\" . $_SESSION['place_item_type'];
-                            $item = new $itemObject();
-
-                            if ($item->findItemByTitle($aidsourcename, $destcid)) {
-                                $aid = $item->typeid;
-                            }
-                            $typeid = $_SESSION['place_item_id'];
-                            $itemtype = $_SESSION['place_item_type'];
-                        }
-                    }
-                }
-                // #### End OHM-specific code #####################################################
-                // #### End OHM-specific code #####################################################
-                // #### End OHM-specific code #####################################################
-                // #### End OHM-specific code #####################################################
-                // #### End OHM-specific code #####################################################
+            }// #### OHM-specific endif #####################################################
                 if (!$foundaid) {
                     if (!$aid) {
                         // no assessment with same title - need to copy assessment from destination to source course
@@ -1547,11 +1544,12 @@ $now = time();
                         // #### End OHM-specific code #####################################################
                         // #### End OHM-specific code #####################################################
                         // #### End OHM-specific code #####################################################
-                            $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
-                            $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$_SESSION['place_aid']));
+                        $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
+                        $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$typeid));
                         if ($stm->rowCount()==0) {
 						reporterror(sprintf("Error.  Assessment ID %s not found.","'{$_SESSION['place_aid']}'"));
-					}
+                        }
+					    }// #### OHM-specific endif #####################################################
 					$sourceitemid = $stm->fetchColumn(0);
 					$cid = $destcid;
 
