@@ -2291,6 +2291,7 @@ class AssessRecord
 
           $scoreQuestionParams = new ScoreQuestionParams();
           $scoreQuestionParams
+              ->setIsRescore(true)
               ->setUserRights($GLOBALS['myrights'])
               ->setRandWrapper($GLOBALS['RND'])
               ->setQuestionNumber($qn)
