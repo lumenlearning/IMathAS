@@ -668,7 +668,7 @@ abstract class CourseItem
                 || ($this->avail == 1
                 && $this->startdate < $now && $this->enddate > $now)
             ) {
-                if (isset($studentid) && !isset($sessiondata['stuview'])) {
+                if (isset($studentid) && !isset($_SESSION['stuview'])) {
                     $rec = "data-base=\"". $this->typename . "-$this->typeid\"";
                 } else {
                     $rec = '';
