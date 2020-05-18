@@ -52,7 +52,7 @@ if (!isset($teacherid)
 }
 $pagetitle = $item->name;
 $curBreadcrumb = $breadcrumbbase;
-if (!isset($sessiondata['ltiitemtype'])) {
+if (!isset($_SESSION['ltiitemtype'])) {
     $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
     . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
 }
@@ -60,7 +60,7 @@ if ($curBreadcrumb != '') {
     $curBreadcrumb .= $pagetitle;
 }
 // log access
-$isRealStudent = (isset($studentid) && !isset($sessiondata['stuview']));
+$isRealStudent = (isset($studentid) && !isset($_SESSION['stuview']));
 //if ($isRealStudent) {
     $item->track('view');
 //}

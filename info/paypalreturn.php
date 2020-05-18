@@ -7,7 +7,7 @@ require("../init.php");
 //DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
 //DB $row = mysql_fetch_row($result);
 $stm = $DBH->prepare("SELECT id,custominfo FROM imas_students WHERE userid=:userid AND courseid=:courseid");
-$stm->execute(array(':userid'=>$userid, ':courseid'=>$sessiondata['paypromptcourse']));
+$stm->execute(array(':userid'=>$userid, ':courseid'=>$_SESSION['paypromptcourse']));
 $row = $stm->fetch(PDO::FETCH_NUM);
 $stuid = $row[0];
 $custominfo = unserialize($row[1]);
@@ -23,7 +23,7 @@ if (isset($_GET['cancel'])) {
 	$stm = $DBH->prepare("UPDATE imas_students SET custominfo=:custominfo WHERE id=:id");
 	$stm->execute(array(':custominfo'=>$ci, ':id'=>$stuid));
 
-	header('Location: ' . $GLOBALS['basesiteurl'] . '/course/course.php?cid='.$sessiondata['paypromptcourse']);
+	header('Location: ' . $GLOBALS['basesiteurl'] . '/course/course.php?cid='.$_SESSION['paypromptcourse']);
 	exit;
 } else if (isset($_GET['done'])) {
 	$custominfo['payprompttime'] = 2000000000;
@@ -36,7 +36,7 @@ if (isset($_GET['cancel'])) {
 	$stm = $DBH->prepare("UPDATE imas_students SET custominfo=:custominfo,stutype=1 WHERE id=:id");
 	$stm->execute(array(':custominfo'=>$ci, ':id'=>$stuid));
 
-	echo '<html><body><div style="text-align:center"><h1>Thanks so much!</h1><p>Have a great rest of your term!</p><p><a href="../course/course.php?cid='.$sessiondata['paypromptcourse'].'">Back to your course</a></p></div></body></html>';
+	echo '<html><body><div style="text-align:center"><h1>Thanks so much!</h1><p>Have a great rest of your term!</p><p><a href="../course/course.php?cid='.$_SESSION['paypromptcourse'].'">Back to your course</a></p></div></body></html>';
 	exit;
 } else if (isset($_GET['later'])) {
 	$custominfo['payprompttime'] += 7*24*60*60;
