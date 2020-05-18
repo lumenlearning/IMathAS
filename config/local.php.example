@@ -43,7 +43,7 @@ $GLOBALS['student_pay_api']['debug'] = true;
 
 //$CFG['coursebrowser'] = 'coursebrowserprops.js';
 //$CFG['coursebrowsermsg'] = 'Copy a template course';
-//$CFG['assess2-use-vue-dev'] = false;
+//$CFG['assess2-use-vue-dev'] = true;
 //$CFG['assess2-use-vue-dev-address'] = 'http://localhost:8080'; // no trailing slash
 
 //zendesk stuff
