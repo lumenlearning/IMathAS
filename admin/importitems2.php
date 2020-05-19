@@ -197,7 +197,6 @@ if ($_FILES['userfile']['name']=='' || strlen($page_fileErrorMsg)>1) {
       // #### End OHM-specific code #####################################################
   } else if ($data['course']['UIver'] < $courseUIver) {
     echo '<p class=noticetext>'._('The import file is for an older assessment version than this course - assessments will be upgraded.').'</p>';
-  }
 
 	if ($myrights==100) {
 		echo '<p><input type="checkbox" name="importasteacher" id="importasteacher" checked /> '._('Import as course owner (for ownership when updating or adding questions).').'</p>';
