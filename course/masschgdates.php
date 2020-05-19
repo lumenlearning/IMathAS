@@ -23,6 +23,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$cid = Sanitize::courseId($_GET['cid']);
 
 	if (isset($_POST['chgcnt'])) {
+		$metadata = array();
 		$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$items = unserialize($stm->fetchColumn(0));
@@ -39,6 +40,38 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		$forumfulltoupdate = array();
 		$fullassess = false;
 		$fullforum = false;
+
+		$select = "SELECT id, startdate, enddate, avail ";
+		// imas_assessments
+		$stm = $DBH->prepare($select . ", reviewdate, LPcutoff FROM imas_assessments WHERE courseid=:id");
+		$stm->execute(array(':id'=>$cid));
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$imas_assessments[$row['id']] = $row;
+		}
+		// imas_forums
+		$stm = $DBH->prepare($select . ", postby, replyby FROM imas_forums WHERE courseid=:id");
+		$stm->execute(array(':id'=>$cid));
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$imas_forums[$row['id']] = $row;
+		}
+		// imas_wikis
+		$stm = $DBH->prepare($select . " FROM imas_wikis WHERE courseid=:id");
+		$stm->execute(array(':id'=>$cid));
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$imas_wikis[$row['id']] = $row;
+		}
+		// imas_inlinetext
+		$stm = $DBH->prepare($select . " FROM imas_inlinetext WHERE courseid=:id");
+		$stm->execute(array(':id'=>$cid));
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$imas_inlinetext[$row['id']] = $row;
+		}
+		// imas_linkedtext
+		$stm = $DBH->prepare($select . " FROM imas_linkedtext WHERE courseid=:id");
+		$stm->execute(array(':id'=>$cid));
+		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+			$imas_linkedtext[$row['id']] = $row;
+		}
 		for ($i=0; $i<$cnt; $i++) {
 			require_once("../includes/parsedatetime.php");
 
@@ -126,47 +159,102 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$type = $data[6]; // $_POST['type'.$i];
 			$id = $data[7]; // $_POST['id'.$i];
 			$avail = intval($data[8]);
-			if ($type=='Assessment') {
-				if ($id>0) {
-					//$stm = $DBH->prepare("UPDATE imas_assessments SET startdate=:startdate,enddate=:enddate,reviewdate=:reviewdate,avail=:avail WHERE id=:id");
-					//$stm->execute(array(':startdate'=>$startdate, ':enddate'=>$enddate, ':reviewdate'=>$reviewdate, ':avail'=>$avail, ':id'=>$id));
+
+			$new = [
+				'id' => $id,
+				'startdate' => $startdate,
+				'enddate' => $enddate,
+				'avail' =>$avail
+			];
+			if ($id > 0 && ($startdate != null || $enddate != null || $avail != null)) {
+				if ($type == 'Assessment') {
+					$old = $imas_assessments[$id];
 					if ($data[2] != 'NA' && $data[5] != 'NA') {
-						array_push($assessfulltoupdate, $id, $startdate, $enddate, $reviewdate, $lpdate, $avail);
+						$new['reviewdate'] = $reviewdate;
+						$new['LPcutoff'] = $lpdate;
+						if ($old != $new) {
+							array_push($assessfulltoupdate, $id, $startdate, $enddate, $avail, $reviewdate, $lpdate);
+							foreach ($old as $column => $value) {
+								if ($old[$column] != $new[$column]) {
+									$metadata["Assessment"][$id]['old_settings'][$column] = $old[$column];
+									$metadata["Assessment"][$id]['new_settings'][$column] = $new[$column];
+								}
+							}
+						}
 					} else {
-						array_push($assessbasictoupdate, $id, $startdate, $enddate, $avail);
+						unset($old['reviewdate'], $old['LPcutoff']);
+						if ($old != $new) {
+							array_push($assessbasictoupdate, $id, $startdate, $enddate, $avail);
+							foreach ($old as $column => $value) {
+								if ($old[$column] != $new[$column]) {
+									$metadata["Assessment"][$id]['old_settings'][$column] = $old[$column];
+									$metadata["Assessment"][$id]['new_settings'][$column] = $new[$column];
+								}
+							}
+						}
 					}
-				}
-			} else if ($type=='Forum') {
-				if ($id>0) {
+				} else if ($type == 'Forum') {
+					$old = $imas_forums[$id];
 					if ($data[3] != 'NA' && $data[4] != 'NA') {
-						//$stm = $DBH->prepare("UPDATE imas_forums SET startdate=:startdate,enddate=:enddate,postby=:postby,replyby=:replyby,avail=:avail WHERE id=:id");
-						//$stm->execute(array(':startdate'=>$startdate, ':enddate'=>$enddate, ':postby'=>$fpdate, ':replyby'=>$frdate, ':avail'=>$avail, ':id'=>$id));
-						array_push($forumfulltoupdate, $id, $startdate, $enddate, $avail, $fpdate, $frdate);
+						$new['postby'] = $fpdate;
+						$new['replyby'] = $frdate;
+						if ($old != $new) {
+							array_push($forumfulltoupdate, $id, $startdate, $enddate, $avail, $fpdate, $frdate);
+							foreach ($old as $column => $value) {
+								if ($old[$column] != $new[$column]) {
+									$metadata["Assessment"][$id]['old_settings'][$column] = $old[$column];
+									$metadata["Assessment"][$id]['new_settings'][$column] = $new[$column];
+								}
+							}
+						}
 					} else {
-						//$stm = $DBH->prepare("UPDATE imas_forums SET startdate=:startdate,enddate=:enddate,avail=:avail WHERE id=:id");
-						//$stm->execute(array(':startdate'=>$startdate, ':enddate'=>$enddate, ':avail'=>$avail, ':id'=>$id));
-						array_push($forumbasictoupdate, $id, $startdate, $enddate, $avail);
+						unset($old['postby'], $old['replyby']);
+						if ($old != $new) {
+							array_push($forumbasictoupdate, $id, $startdate, $enddate, $avail);
+							foreach ($old as $column => $value) {
+								if ($old[$column] != $new[$column]) {
+									$metadata["Assessment"][$id]['old_settings'][$column] = $old[$column];
+									$metadata["Assessment"][$id]['new_settings'][$column] = $new[$column];
+								}
+							}
+						}
+					}
+				} else if ($type == 'Wiki') {
+					$old = $imas_wikis[$id];
+					if ($old != $new) {
+						array_push($wikitoupdate, $id, $startdate, $enddate, $avail);
+						foreach ($old as $column => $value) {
+							if ($old[$column] != $new[$column]) {
+								$metadata["Wikis"][$id]['old_settings'][$column] = $old[$column];
+								$metadata["Wikis"][$id]['new_settings'][$column] = $new[$column];
+							}
+						}
+					}
+				} else if ($type == 'InlineText') {
+					$old = $imas_inlinetext[$id];
+					if ($old != $new) {
+						array_push($inlinetoupdate, $id, $startdate, $enddate, $avail);
+						foreach ($old as $column => $value) {
+							if ($old[$column] != $new[$column]) {
+								$metadata["Inline Text"][$id]['old_settings'][$column] = $old[$column];
+								$metadata["Inline Text"][$id]['new_settings'][$column] = $new[$column];
+							}
+						}
+					}
+				} else if ($type == 'Link') {
+					$old = $imas_linkedtext[$id];
+					if ($old != $new) {
+						array_push($linktoupdate, $id, $startdate, $enddate, $avail);
+						foreach ($old as $column => $value) {
+							if ($old[$column] != $new[$column]) {
+								$metadata["Linked Text"][$id]['old_settings'][$column] = $old[$column];
+								$metadata["Linked Text"][$id]['new_settings'][$column] = $new[$column];
+							}
+						}
 					}
 				}
-			} else if ($type=='Wiki') {
-				if ($id>0) {
-					//$stm = $DBH->prepare("UPDATE imas_wikis SET startdate=:startdate,enddate=:enddate,avail=:avail WHERE id=:id");
-					//$stm->execute(array(':startdate'=>$startdate, ':enddate'=>$enddate, ':avail'=>$avail, ':id'=>$id));
-					array_push($wikitoupdate, $id, $startdate, $enddate, $avail);
-				}
-			} else if ($type=='InlineText') {
-				if ($id>0) {
-					//$stm = $DBH->prepare("UPDATE imas_inlinetext SET startdate=:startdate,enddate=:enddate,avail=:avail WHERE id=:id");
-					//$stm->execute(array(':startdate'=>$startdate, ':enddate'=>$enddate, ':avail'=>$avail, ':id'=>$id));
-					array_push($inlinetoupdate, $id, $startdate, $enddate, $avail);
-				}
-			} else if ($type=='Link') {
-				if ($id>0) {
-					//$stm = $DBH->prepare("UPDATE imas_linkedtext SET startdate=:startdate,enddate=:enddate,avail=:avail WHERE id=:id");
-					//$stm->execute(array(':startdate'=>$startdate, ':enddate'=>$enddate, ':avail'=>$avail, ':id'=>$id));
-					array_push($linktoupdate, $id, $startdate, $enddate, $avail);
-				}
-			} else if ($type=='Block') {
+			}
+			if ($type=='Block') {
 				$blocktree = explode('-',$id);
 				$sub =& $items;
 				if (count($blocktree)>1) {
@@ -182,28 +270,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			}
 
 		}
-		$metadata = array();
 		if (count($assessbasictoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($assessbasictoupdate, 4);
 			$query = "INSERT INTO imas_assessments (id,startdate,enddate,avail) VALUES $placeholders ";
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($assessbasictoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Basic Assessment"] = $assessbasictoupdate;
-			}
 		}
 		if (count($assessfulltoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($assessfulltoupdate, 6);
-			$query = "INSERT INTO imas_assessments (id,startdate,enddate,reviewdate,LPcutoff,avail) VALUES $placeholders ";
+			$query = "INSERT INTO imas_assessments (id,startdate,enddate,avail,reviewdate,LPcutoff) VALUES $placeholders ";
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),reviewdate=VALUES(reviewdate),LPcutoff=VALUES(LPcutoff),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($assessfulltoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Full Assessment"] = $assessfulltoupdate;
-			}
 		}
 		if (count($inlinetoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($inlinetoupdate, 4);
@@ -211,10 +290,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($inlinetoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Inline Text"] = $inlinetoupdate;
-			}
 		}
 		if (count($linktoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($linktoupdate, 4);
@@ -222,10 +297,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($linktoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Linked Text"] = $linktoupdate;
-			}
 		}
 		if (count($wikitoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($wikitoupdate, 4);
@@ -233,10 +304,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($wikitoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Wikis"] = $wikitoupdate;
-			}
 		}
 		if (count($forumbasictoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($forumbasictoupdate, 4);
@@ -244,10 +311,6 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($forumbasictoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Forums Basic"] = $forumbasictoupdate);
-			}
 		}
 		if (count($forumfulltoupdate)>0) {
 			$placeholders = Sanitize::generateQueryPlaceholdersGrouped($forumfulltoupdate, 6);
@@ -255,17 +318,13 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$query .= "ON DUPLICATE KEY UPDATE startdate=VALUES(startdate),enddate=VALUES(enddate),avail=VALUES(avail),postby=VALUES(postby),replyby=VALUES(replyby)";
 			$stm = $DBH->prepare($query);
 			$stm->execute($forumfulltoupdate);
-			if ($stm->rowCount()>0) {
-				$updated_settings = true;
-				$metadata["Forums Full"] = $forumfulltoupdate;
-			}
 		}
 		if ($blockchg>0) {
 			$itemorder = serialize($items);
 			$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
 		}
-		if ($updated_settings === true) {
+		if (!empty($metadata) === true) {
 			$result = TeacherAuditLog::addTracking(
 				$cid,
 				"Mass Date Change",
