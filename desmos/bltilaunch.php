@@ -1528,28 +1528,11 @@ $now = time();
                     if (!$aid) {
                         // no assessment with same title - need to copy assessment from destination to source course
                         require_once(__DIR__ . "/copyiteminc.php");
-                        // #### Start OHM-specific code #####################################################
-                        // #### Start OHM-specific code #####################################################
-                        // #### Start OHM-specific code #####################################################
-                        // #### Start OHM-specific code #####################################################
-                        // #### Start OHM-specific code #####################################################
-                        if ($itemtype == 'DesmosItem') {
-                            $cid = $destcid;
-                            $item = new \Desmos\Models\DesmosItem($cid);
-                            $item->copyItem($typeid, '');
-                            $aid = $item->typeid;
-                        } else {
-                        // #### End OHM-specific code #####################################################
-                        // #### End OHM-specific code #####################################################
-                        // #### End OHM-specific code #####################################################
-                        // #### End OHM-specific code #####################################################
-                        // #### End OHM-specific code #####################################################
                         $stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype=:itemtype AND typeid=:typeid");
                         $stm->execute(array(':itemtype'=>$itemtype,':typeid'=>$typeid));
                         if ($stm->rowCount()==0) {
 						reporterror(sprintf("Error.  Assessment ID %s not found.","'{$_SESSION['place_aid']}'"));
                         }
-					    }// #### OHM-specific endif #####################################################
 					$sourceitemid = $stm->fetchColumn(0);
 					$cid = $destcid;
 
