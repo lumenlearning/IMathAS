@@ -1,6 +1,6 @@
 <?php
 //any extra CSS, javascript, etc needed for login page
-	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/ohm/login.css\" type=\"text/css\" />\n";
+	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/ohm/login.css?v=20200520\" type=\"text/css\" />\n";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 

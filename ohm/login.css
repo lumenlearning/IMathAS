@@ -15,6 +15,7 @@ a:hover {
 	color: #FFD600 !important;
 }
 div.mainbody {
+	background-color: #1E74D1;
 	height:100%;
 }
 .headerwrapper {
@@ -31,7 +32,6 @@ div.mainbody {
   display: block;
 }
 .footerwrapper {
-	background-color: #1E74D1;
 }
 
 .login-wrapper {
