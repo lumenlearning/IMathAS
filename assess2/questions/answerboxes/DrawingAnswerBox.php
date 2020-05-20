@@ -81,7 +81,11 @@ class DrawingAnswerBox implements AnswerBox
     		$answers = array_map('clean', $answers);
     		if (!isset($snaptogrid)) {
     			$snaptogrid = 0;
-    		}
+    		} else {
+          $snapparts = explode(':', $snaptogrid);
+          $snapparts = array_map('evalbasic', $snapparts);
+          $snaptogrid = implode(':', $snapparts);
+        }
         if ($multi) { $qn = ($qn+1)*1000+$partnum; }
     		$imgborder = 5;
 
@@ -203,10 +207,10 @@ class DrawingAnswerBox implements AnswerBox
     				$settings[7] = $newheight;
     			}
     		}
-    		if ($GLOBALS['sessiondata']['userprefs']['drawentry']==1 && $GLOBALS['sessiondata']['graphdisp']==0) {
+    		if ($_SESSION['userprefs']['drawentry']==1 && $_SESSION['graphdisp']==0) {
     			//can't imagine why someone would pick this, but if they do, need to set graphdisp to 2 temporarily
     			$revertgraphdisp = true;
-    			$GLOBALS['sessiondata']['graphdisp']=2;
+    			$_SESSION['graphdisp']=2;
     		} else {
     			$revertgraphdisp = false;
     		}
@@ -240,7 +244,7 @@ class DrawingAnswerBox implements AnswerBox
     		if (isset($GLOBALS['hidedrawcontrols'])) {
     			$out .= $plot;
     		} else {
-    			if ($GLOBALS['sessiondata']['userprefs']['drawentry']==0) { //accessible entry
+    			if ($_SESSION['userprefs']['drawentry']==0) { //accessible entry
     				$bg = 'a11ydraw:'.implode(',', $answerformat);
     				$out .= '<p>'._('Graph to add drawings to:').'</p>';
     				$out .= '<p>'.$plot.'</p>';
@@ -254,15 +258,15 @@ class DrawingAnswerBox implements AnswerBox
     					$dotline = 2;
     				}
     			} else {
-    				$bg = getgraphfilename($plot);
-    				/*
-    				someday: overlay canvas over SVG.  Sizing not working in mobile and don't feel like figuring it out yet
-    				$out .= '<div class="drawcanvas" style="position:relative;background-color:#fff;width:'.$settings[6].'px;height:'.$settings[7].'px;">';
-    				$out .= '<div class="canvasbg" style="position:absolute;top:0;left:0;">'.$plot.'</div><div class="drawcanvasholder" style="position:absolute;top:0;left:0;z-index:2">';
+    				//$bg = getgraphfilename($plot);
+            $bg = preg_replace('/.*script=\'(.*?[^\\\\])\'.*/', '$1', $plot);
+    				$plot = str_replace('<embed','<embed data-nomag=1',$plot); //hide mag
+    				//overlay canvas over SVG.
+    				$out .= '<div class="drawcanvas" style="position:relative;width:'.$settings[6].'px;height:'.$settings[7].'px">';
+    				$out .= '<div class="canvasbg" style="position:absolute;top:0px;left:0px;">'.$plot.'</div>';
+    				$out .= '<div class="drawcanvasholder" style="position:relative;top:0;left:0;z-index:2">';
     				$out .= "<canvas id=\"canvas$qn\" width=\"{$settings[6]}\" height=\"{$settings[7]}\"></canvas>";
     				$out .= '</div></div>';
-    				*/
-    				$out .= "<canvas class=\"drawcanvas\" id=\"canvas$qn\" width=\"{$settings[6]}\" height=\"{$settings[7]}\"></canvas>";
 
     				$out .= "<div><span id=\"drawtools$qn\" class=\"drawtools\">";
     				$out .= "<span data-drawaction=\"clearcanvas\" data-qn=\"$qn\">" . _('Clear All') . "</span> ";
@@ -477,7 +481,7 @@ class DrawingAnswerBox implements AnswerBox
     				'autocomplete' => 'off'
     			];
 
-                $settings = array_map('floatval', $settings);
+          $settings = array_map('floatval', $settings);
     			$params['canvas'] = [$qn,$bg,$settings[0],$settings[1],$settings[2],$settings[3],5,$settings[6],$settings[7],$def,$dotline,$locky,$snaptogrid];
 
     			$out .= '<input ' .
@@ -486,13 +490,14 @@ class DrawingAnswerBox implements AnswerBox
 
     			if (isset($GLOBALS['capturedrawinit'])) {
             $GLOBALS['drawinitdata'][$qn] = [$bg,$settings[0],$settings[1],$settings[2],$settings[3],5,$settings[6],$settings[7],$def,$dotline,$locky,$snaptogrid];
-    				$params['livepoll_drawinit'] = "'$bg',{$settings[0]},{$settings[1]},{$settings[2]},{$settings[3]},5,{$settings[6]},{$settings[7]},$def,$dotline,$locky,$snaptogrid";
+    				//$params['livepoll_drawinit'] = "'$bg',{$settings[0]},{$settings[1]},{$settings[2]},{$settings[3]},5,{$settings[6]},{$settings[7]},$def,$dotline,$locky,$snaptogrid";
+    			  $params['livepoll_drawinit'] = $GLOBALS['drawinitdata'][$qn];
     			}
     		}
         if ($colorbox!='') { $out .= '</div>';}
 
     		if ($revertgraphdisp) {
-    			$GLOBALS['sessiondata']['graphdisp']=0;
+    			$_SESSION['graphdisp']=0;
     		}
     		$tip = _('Enter your answer by drawing on the graph.');
     		if (isset($answers)) {
@@ -567,6 +572,10 @@ class DrawingAnswerBox implements AnswerBox
     							$saarr[$k] = '['.substr(str_replace('y','t',$function[0]),2).',t],blue,'.($settings[2]-1).','.($settings[3]+1);
     						}
     					} else { //is function
+                			if (preg_match('/(sin[^\(]|cos[^\(]|sqrt[^\(]|log[^\(_]|log_\d+[^(]|ln[^\(]|root[^\(]|root\(.*?\)[^\(])/', $function[0])) {
+    							echo "Invalid notation on ".Sanitize::encodeStringForDisplay($function[0]).": missing function parens";
+    							continue;
+    						}
     						$saarr[$k] = $function[0].',blue';
     						if (count($function)>2) {
     							if ($function[1] == '-oo') { $function[1] = $settings[0]-.1*($settings[1]-$settings[0]);}

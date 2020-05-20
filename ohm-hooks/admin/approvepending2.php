@@ -1,5 +1,11 @@
 <?php
 
+$reqFields = array(
+    'school' => 'School',
+    'phone' => 'Phone',
+    'url' => 'Verification URL',
+    'search' => 'Search'
+);
 
 /**
  * Get the email message to be used for new account denials.

@@ -7,12 +7,13 @@
 	 if (!file_exists("$curdir/config.php")) {
 		 header('Location: ' . $GLOBALS['basesiteurl'] . "/install.php?r=" . Sanitize::randomQueryStringParam());
 	 }
+
  	require_once(__DIR__ . "/init_without_validate.php");
 	require_once(__DIR__ ."/includes/newusercommon.php");
 	$cid = Sanitize::courseId($_GET['cid']);
 
  	if (!isset($_GET['cid'])) {
-		echo "Invalid address.  Address must be directaccess.php?cid=###, where ### is your courseid";
+		echo _("Invalid address.  Address must be directaccess.php?cid=###, where ### is your courseid");
 		exit;
 	}
 	 if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
@@ -34,11 +35,11 @@
 		$stm->execute(array(':id'=>$_GET['cid']));
 		list($enrollkey,$deflatepass) = $stm->fetch(PDO::FETCH_NUM);
 		if (strlen($enrollkey)>0 && trim($_POST['ekey2'])=='') {
-			$page_newaccounterror .= "Please provide the enrollment key";
+			$page_newaccounterror .= _("Please provide the enrollment key");
 		} else if (strlen($enrollkey)>0) {
 			$keylist = array_map('trim',explode(';',$enrollkey));
 			if (!in_array($_POST['ekey2'], $keylist)) {
-				$page_newaccounterror .= "Enrollment key is invalid.";
+				$page_newaccounterror .= _("Enrollment key is invalid.");
 			} else {
 				$_POST['ekey'] = $_POST['ekey2'];
 			}
@@ -70,7 +71,11 @@
 			$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout, created_at) ";
 			$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout, :created_at)";
 			$stm = $DBH->prepare($query);
-			$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$initialrights, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':homelayout'=>$homelayout, ':created_at'=>time()));
+			$stm->execute(array(':SID'=>$_POST['SID'], ':password'=>$md5pw, ':rights'=>$initialrights,
+				':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+				':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+				':email'=>Sanitize::emailAddress($_POST['email']),
+				':msgnotify'=>$msgnot, ':homelayout'=>$homelayout, ':created_at'=>time()));
 			$newuserid = $DBH->lastInsertId();
 			if (strlen($enrollkey)>0 && count($keylist)>1) {
 				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,gbcomment,latepass,created_at) VALUES (:userid, :courseid, :section, :gbcomment, :latepass, :created_at)");
@@ -83,18 +88,17 @@
 			if ($emailconfirmation) {
 				$id = $DBH->lastInsertId();
 
-				$message  = "<h3>This is an automated message from $installname.  Do not respond to this email</h3>\r\n";
-				$message .= "<p>To complete your $installname registration, please click on the following link, or copy ";
-				$message .= "and paste it into your webbrowser:</p>\r\n";
+				$message  = "<h3>".sprintf(_("This is an automated message from %s.  Do not respond to this email."),$installname)."</h3>\r\n";
+				$message .= "<p>".sprintf(_("To complete your %s registration, please click on the following link, or copy and paste it into your webbrowser:"),$installname)."</p>\r\n";
 				$message .= "<a href=\"" . $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id\">";
 				$message .= $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id</a>\r\n";
 
 				require_once("./includes/email.php");
-				send_email($_POST['email'], $sendfrom, $installname.' Confirmation', $message, array(), array(), 10);
+				send_email($_POST['email'], $sendfrom, $installname._(' Confirmation'), $message, array(), array(), 10);
 
 				echo "<html><body>\n";
-				echo "Registration recorded.  You should shortly receive an email with confirmation instructions.";
-				echo "<a href=\"$imasroot/directaccess.php?cid=$cid\">Back to login page</a>\n";
+				echo _("Registration recorded.  You should shortly receive an email with confirmation instructions.");
+				echo "<a href=\"$imasroot/directaccess.php?cid=$cid\">",_("Back to login page"),"</a>\n";
 				echo "</body></html>\n";
 				exit;
 			} else {
@@ -108,9 +112,11 @@
 	if ($_POST['ekey']!='') {
 		$addtoquerystring = "ekey=".Sanitize::encodeUrlParam($_POST['ekey']);
 	}
+	$init_session_start = true;
 	require("init.php");
-	$nocoursenav = true;
-	if ($verified) { //already have session
+	$flexwidth = true;
+    $nocoursenav = true;
+    if ($verified) { //already have session
 		if (!isset($studentid) && !isset($teacherid) && !isset($tutorid)) {  //have account, not a student
 			$stm = $DBH->prepare("SELECT name,enrollkey,deflatepass FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['cid']));
@@ -131,9 +137,9 @@
 				require("header.php");
 				echo "<h1>" . Sanitize::encodeStringForDisplay($coursename) . "</h1>";
 				echo '<form method="post" action="directaccess.php?cid='.$cid.'">';
-				echo '<p>Incorrect enrollment key.  Try again.</p>';
-				echo "<p>Course Enrollment Key:  <input type=text name=\"ekey\"></p>";
-				echo "<p><input type=\"submit\" value=\"Submit\"></p>";
+				echo '<p>',_('Incorrect enrollment key.  Try again.'),'</p>';
+				echo "<p>",_("Course Enrollment Key:"),"  <input type=text name=\"ekey\"></p>";
+				echo "<p><input type=\"submit\" value=\"",_("Submit"),"\"></p>";
 				echo "</form>";
 				require("footer.php");
 				exit;
@@ -187,7 +193,7 @@
 <?php
 if ($enrollkey!='closed') {
 ?>
-<h2>Do you already have an account on <?php echo $installname;?>?</h2>
+<h2><?php echo sprintf(_("Do you already have an account on %s?"), $installname);?></h2>
 <p>
 <input type=radio name="curornew" value="0" onclick="setlogintype(0)" <?php if ($page_newaccounterror=='') {echo 'checked';}?> /> I already have an account on <?php echo $installname;?><br/>
 <input type=radio name="curornew" value="1" onclick="setlogintype(1)" <?php if ($page_newaccounterror!='') {echo 'checked';}?> /> I need to create a new account
@@ -197,22 +203,22 @@ if ($enrollkey!='closed') {
 ?>
 
 <fieldset id="curuser" <?php if ($page_newaccounterror!='') {echo 'style="display:none"';}?>>
-<legend>Already have an account</legend>
-<p><b>Login</b>.  If you have an account on <?php echo $installname;?> but are not enrolled in this course, logging in below will enroll you in this course.</p>
+<legend><?php echo _("Already have an account"); ?></legend>
+<p><b><?php echo _("Login"); ?></b>.  <?php echo sprintf(_("If you have an account on %s but are not enrolled in this course, logging in below will enroll you in this course."),$installname) ?></p>
 <?php
-	if ($haslogin) {echo '<p style="color: red;">Login Error.  Try Again</p>';}
+	if ($haslogin) {echo '<p style="color: red;">',_('Login Error.  Try Again'),'</p>';}
 ?>
 <span class=form><?php echo $loginprompt;?>:</span><input class="form" type="text" size="15" id="username" name="username"><br class="form">
-<span class=form>Password:</span><input class="form" type="password" size="15" id="password" name="password"><br class="form">
+<span class=form><?php echo _('Password'); ?>:</span><input class="form" type="password" size="15" id="password" name="password"><br class="form">
 <?php
 if (strlen($enrollkey)>0) {
-	echo '<span class=form><label for="ekey">Course Enrollment Key:</label></span><input class=form type=text size=12 name="ekey" id="ekey" value="' . (isset($_REQUEST['ekey']) ? Sanitize::encodeStringForDisplay($_REQUEST['ekey']) : "") . '"/><BR class=form>';
+	echo '<span class=form><label for="ekey">',_('Course Enrollment Key'),':</label></span><input class=form type=text size=12 name="ekey" id="ekey" value="' . (isset($_REQUEST['ekey']) ? Sanitize::encodeStringForDisplay($_REQUEST['ekey']) : "") . '"/><BR class=form>';
 }
 ?>
-<div class=submit><input type="submit" value="Login and Enroll"></div>
-<span class=form> </span><span class=formright><a href="<?php echo $imasroot; ?>/forms.php?action=resetpw">Forgot Password</a></span><br class="form">
+<div class=submit><input type="submit" value=<?php echo "\"",_("Login and Enroll"),"\"" ?>></div>
+<span class=form> </span><span class=formright><a href="<?php echo $imasroot; ?>/forms.php?action=resetpw"><?php echo _("Forgot Password") ?></a></span><br class="form">
 </table>
-<div><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</noscript></div>
+<div><noscript><?php echo sprintf(_("JavaScript is not enabled.  JavaScript is required for %s.  Please enable JavaScript and reload this page"),$installname) ?></noscript></div>
 
 <input type="hidden" id="tzoffset" name="tzoffset" value="">
 <input type="hidden" id="tzname" name="tzname" value="">
@@ -253,28 +259,28 @@ function setlogintype(n) {
 <fieldset id="newuser" <?php if ($page_newaccounterror=='') {echo 'style="display:none"';}?>>
 <legend>New to <?php echo $installname; ?></legend>
 
-<p><b>New Student Enrollment</b></p>
+<p><b><?php echo _("New Student Enrollment") ?></b></p>
 <?php
 if ($page_newaccounterror!='') {
 	echo '<p class=noticetext>' . Sanitize::encodeStringForDisplay($page_newaccounterror) . '</p>';
 }
 ?>
 <span class=form><label for="SID"><?php echo $longloginprompt;?>:</label></span> <input class=form type=text size=12 id=SID name=SID <?php if (isset($_POST['SID'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['SID'])); } ?>><BR class=form>
-<span class=form><label for="pw1">Choose a password:</label></span><input class=form type=password size=20 id=pw1 name=pw1 <?php if (isset($_POST['pw1'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['pw1'])); } ?>><BR class=form>
-<span class=form><label for="pw2">Confirm password:</label></span> <input class=form type=password size=20 id=pw2 name=pw2 <?php if (isset($_POST['pw2'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['pw2'])); } ?>><BR class=form>
-<span class=form><label for="firstname">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname <?php if (isset($_POST['firstname'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['firstname'])); } ?>><BR class=form>
-<span class=form><label for="lastname">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname <?php if (isset($_POST['lastname'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['lastname'])); } ?>><BR class=form>
-<span class=form><label for="email">Enter E-mail address:</label></span>  <input class=form type=text size=60 id=email name=email <?php if (isset($_POST['email'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['email'])); } ?>><BR class=form>
+<span class=form><label for="pw1"><?php echo _("Choose a password:"); ?></label></span><input class=form type=password size=20 id=pw1 name=pw1 <?php if (isset($_POST['pw1'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['pw1'])); } ?>><BR class=form>
+<span class=form><label for="pw2"><?php echo _("Confirm password:"); ?></label></span> <input class=form type=password size=20 id=pw2 name=pw2 <?php if (isset($_POST['pw2'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['pw2'])); } ?>><BR class=form>
+<span class=form><label for="firstname"><?php echo _("Enter First Name:"); ?></label></span> <input class=form type=text size=20 id=firstname name=firstname autocomplete="given-name" <?php if (isset($_POST['firstname'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['firstname'])); } ?>><BR class=form>
+<span class=form><label for="lastname"><?php echo _("Enter Last Name:"); ?></label></span> <input class=form type=text size=20 id=lastname name=lastname autocomplete="family-name" <?php if (isset($_POST['lastname'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['lastname'])); } ?>><BR class=form>
+<span class=form><label for="email"><?php echo _("Enter E-mail address:"); ?></label></span>  <input class=form type=text size=60 id=email name=email autocomplete="email" <?php if (isset($_POST['email'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['email'])); } ?>><BR class=form>
 <?php
 if (isset($_GET['getsid'])) {
-	echo '<span class="form"><label for="code">If you are registered at a Washington Community College, enter your Student ID Number:</label></span><input class="form" type="text" size="20" id="code" name="code"><BR class=form>';
+	echo '<span class="form"><label for="code">',_('If you are registered at a Washington Community College, enter your Student ID Number:'),'</label></span><input class="form" type="text" size="20" id="code" name="code"><BR class=form>';
 }
 ?>
-<span class=form><label for="msgnot">Notify me by email when I receive a new message:</label></span><span class=formright><input type=checkbox id=msgnot name=msgnot /></span><BR class=form>
+<span class=form><label for="msgnot"><?php echo _("Notify me by email when I receive a new message:"); ?></label></span><span class=formright><input type=checkbox id=msgnot name=msgnot /></span><BR class=form>
 <?php
 	if (strlen($enrollkey)>0) {
 ?>
-<span class=form><label for="ekey">Course Enrollment Key:</label></span><input class=form type=text size=12 name="ekey2" id="ekey2" <?php if (isset($_POST['ekey2'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['ekey2'])); } ?>/><BR class=form>
+<span class=form><label for="ekey"><?php echo _("Course Enrollment Key:"); ?></label></span><input class=form type=text size=12 name="ekey2" id="ekey2" <?php if (isset($_POST['ekey2'])) { printf('value="%s"', Sanitize::encodeStringForDisplay($_POST['ekey2'])); } ?>/><BR class=form>
 <?php
 	}
 ?>
@@ -302,7 +308,3 @@ if (isset($_GET['getsid'])) {
 
 	require("footer.php");
 	}
-
-
-
-?>

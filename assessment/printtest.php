@@ -1,7 +1,7 @@
 <?php
 	require("../init.php");
-	$isteacher = (isset($teacherid) || $sessiondata['isteacher']==true);
-	if (!isset($sessiondata['sessiontestid']) && !$isteacher) {
+	$isteacher = (isset($teacherid) || $_SESSION['isteacher']==true);
+	if (!isset($_SESSION['sessiontestid']) && !$isteacher) {
 		echo "<html><body>Error. </body></html>\n";
 		exit;
 	}
@@ -24,7 +24,7 @@
 			});
 			</script>';
 	}
-	$sessiondata['coursetheme'] = $coursetheme;
+	$_SESSION['coursetheme'] = $coursetheme;
 	require("header.php");
 	echo "<style type=\"text/css\" media=\"print\">.hideonprint {display:none;} p.tips {display: none;}\n input.btn, button.btn {display: none;}\n textarea {display: none;}\n .question, .review {background-color:#fff;}</style>\n";
 	echo "<style type=\"text/css\">p.tips {	display: none;} input.sabtn,input.dsbtn {display: none;}</style>\n";
@@ -59,18 +59,18 @@
 	if ($isteacher && isset($_GET['asid'])) {
 		$testid = Sanitize::onlyInt($_GET['asid']);
 	} else {
-		$testid = $sessiondata['sessiontestid'];
+		$testid = $_SESSION['sessiontestid'];
 	}
 	$stm = $DBH->prepare("SELECT * FROM imas_assessment_sessions WHERE id=:id");
 	$stm->execute(array(':id'=>$testid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
-	
+
 	if (extension_loaded('newrelic')) { // Ensure PHP agent is available
 		// Record custom data about this web transaction
 		newrelic_add_custom_parameter ('printtest_aid', $line['assessmentid']);
 		newrelic_add_custom_parameter ('printtest_asid', $line['id']);
 	}
-	
+
 	$GLOBALS['assessver'] = $line['ver'];
 	if (strpos($line['questions'],';')===false) {
 		$questions = explode(",",$line['questions']);

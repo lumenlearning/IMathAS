@@ -38,6 +38,7 @@ $vueData = array(
 	'showcat' => 'DNC',
 	'samever' => 'DNC',
 	'noprint' => 'DNC',
+	'showwork' => 'DNC',
 	'allowlate' => 'DNC',
 	'timelimit' => '',
 	'allowovertime' => false,
@@ -371,6 +372,19 @@ $vueData = array(
 				</span><br class=form />
 			</div>
 
+			<div :class="{highlight:showwork != 'DNC'}">
+				<label class=form for="showwork"><?php echo _('Provide "Show Work" boxes');?>:</label>
+				<span class=formright>
+					<select name="showwork" id="showwork" v-model="showwork">
+						<option value="DNC"><?php echo _('Do not change'); ?></option>
+						<option value="0"><?php echo _('No');?></option>
+						<option value="1"><?php echo _('During assessment');?></option>
+						<option value="2"><?php echo _('After assessment');?></option>
+						<option value="3"><?php echo _('During or after assessment');?></option>
+					</select>
+				</span><br class=form />
+			</div>
+
 			<div :class="{highlight:noprint != 'DNC'}">
 				<label class=form for="noprint"><?php echo _('Make hard to print'); ?></label>
 				<span class=formright>
@@ -694,7 +708,7 @@ var app = new Vue({
 				(this.defregens === '' ? 0 : 1) +
 				(this.defregens > 1 && this.defregenpenalty === '' ? 0 : 1) +
 				(this.defregens > 1 && this.defregenpenalty > 0 && this.defregenpenaltyaftern === '' ? 0 : 1) +
-				(this.subtype === 'by_assessment' && this.keepscore === 'DNC' ? 0 : 1) +
+				(this.subtype === 'by_assessment' && this.defregens > 1 && this.keepscore === 'DNC' ? 0 : 1) +
 				(this.defattempts === '' ? 0 : 1) +
 				(this.defattempts > 1 && this.defattemptpenalty === '' ? 0 : 1) +
 				(this.defattempts > 1 && this.defattemptpenalty > 0 && this.defattemptpenaltyaftern === '' ? 0 : 1) +
@@ -702,7 +716,7 @@ var app = new Vue({
 				(this.showansOptions.length > 0 && this.showans === 'DNC' ? 0 : 1) +
 				(this.viewingb === 'DNC' ? 0 : 1) +
 				(this.scoresingb === 'DNC' ? 0 : 1) +
-				(this.ansingb === 'DNC' ? 0 : 1);
+				(this.ansInGbOptions.length > 0 && this.ansingb === 'DNC' ? 0 : 1);
 			return tot;
 		},
 		changingCore: function () {

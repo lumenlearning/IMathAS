@@ -28,7 +28,7 @@ use OHM\Assessments\PaymentLib;
 // problems checking access codes. This includes failure to interact with the payment API.
 
 $userId = $GLOBALS['userid'];
-$courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $sessiondata['courseid'];
+$courseId = isset($_GET['cid']) ? intval($_GET['cid']) : $_SESSION['courseid'];
 
 $assessmentVersion = PaymentLib::getAssessmentVersion($courseId);
 switch ($assessmentVersion) {

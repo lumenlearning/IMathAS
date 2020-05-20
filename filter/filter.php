@@ -6,19 +6,20 @@
 	//load in filters as needed
 	$filterdir = rtrim(dirname(__FILE__), '/\\');
 	//include("$filterdir/simplelti/simplelti.php");
-	if ((isset($sessiondata['mathdisp']) && $sessiondata['mathdisp']==2 ) || isset($loadmathfilter)) { //use image fallback for math
+	if ((isset($_SESSION['mathdisp']) && $_SESSION['mathdisp']==2 ) || isset($loadmathfilter)) { //use image fallback for math
 		include("$filterdir/math/ASCIIMath2TeX.php");
 		$AMT = new AMtoTeX;
 	}
-	if ((isset($sessiondata['graphdisp']) && $sessiondata['graphdisp']==2) || isset($loadgraphfilter)) { //use image fallback for graphs
+	if ((isset($_SESSION['graphdisp']) && $_SESSION['graphdisp']==2) || isset($loadgraphfilter)) { //use image fallback for graphs
 		include("$filterdir/graph/asciisvgimg.php");
 		$AS = new AStoIMG;
+		require_once("$filterdir/../includes/filehandler.php");
 	}
-	if ((!isset($sessiondata['graphdisp']) || $sessiondata['graphdisp']==0)) {
+	if ((!isset($_SESSION['graphdisp']) || $_SESSION['graphdisp']==0)) {
 		include_once("$filterdir/graph/sscrtotext.php");
 	}
 	function mathfiltercallback($arr) {
-		global $AMT,$mathimgurl,$coursetheme,$sessiondata;
+		global $AMT,$mathimgurl,$coursetheme;
 		//$arr[1] = str_replace(array('&ne;','&quot;','&lt;','&gt;','&le;','&ge;'),array('ne','"','lt','gt','le','ge'),$arr[1]);
 		$arr[1] = str_replace(array('&ne;','&quot;','&le;','&ge;','<','>'),array('ne','"','le','ge','&lt;','&gt;'),$arr[1]);
 		$tex = $AMT->convert($arr[1]);
@@ -28,8 +29,8 @@
 			if (isset($coursetheme) && strpos($coursetheme,'_dark')!==false) {
 				$tex = '\\reverse '.$tex;
 			}
-			if ($sessiondata['texdisp']==true) {
-				if (isset($sessiondata['texdoubleescape'])) {
+			if ($GLOBALS['texdisp']==true) {
+				if (isset($GLOBALS['texdoubleescape'])) {
 					return ' \\\\('.htmlentities($tex).'\\\\) ';
 				} else {
 					return ' '.htmlentities($tex).' ';
@@ -58,12 +59,15 @@
 			$sty = "vertical-align: middle;";
 		}
 		$fn = md5($arr[2]);
-		if (!file_exists($filterdir.'/graph/imgs/'.$fn.'.png')) {
+		if (!doesfileexist('graphimg', $fn.'.png')) {
 			$AS->AStoIMG(300,300);
 			$AS->processShortScript($arr[2]);
 			$AS->outputimage($filterdir.'/graph/imgs/'.$fn.'.png');
+			$gurl = relocategraphfileifneeded($filterdir.'/graph/imgs/'.$fn.'.png', $fn.'.png');
+		} else {
+			$gurl = getgraphfileurl($fn.'.png');
 		}
-		return ('<img src="'.$imasroot.'/filter/graph/imgs/'.$fn.'.png" style="'.$sty.'" alt="Graphs"/>');
+		return ('<img src="'.$gurl.'" style="'.$sty.'" alt="Graphs"/>');
 	}
 	function svgfilterscriptcallback($arr) {
 		global $filterdir, $AS, $imasroot;
@@ -84,38 +88,40 @@
 		}
 		$fn = md5($arr[2].$w.$h);
 
-		if (!file_exists($filterdir.'/graph/imgs/'.$fn.'.png')) {
+		if (!doesfileexist('graphimg', $fn.'.png')) {
 			$AS->AStoIMG($w+0,$h+0);
 			$AS->processScript($arr[2]);
-			//echo $arr[2];
 			$AS->outputimage($filterdir.'/graph/imgs/'.$fn.'.png');
+			$gurl = relocategraphfileifneeded($filterdir.'/graph/imgs/'.$fn.'.png', $fn.'.png');
+		} else {
+			$gurl = getgraphfileurl($fn.'.png');
 		}
-		return ('<img src="'.$imasroot.'/filter/graph/imgs/'.$fn.'.png" style="'.$sty.'" alt="Graphs"/>');
+		return ('<img src="'.$gurl.'" style="'.$sty.'" alt="Graphs"/>');
 	}
 
 	function filter($str) {
-		global $sessiondata,$userfullname,$urlmode,$imasroot;
+		global $userfullname,$urlmode,$imasroot;
 		if ($urlmode == 'https://') {
 			$str = str_replace(array('http://www.youtube.com','http://youtu.be'),array('https://www.youtube.com','https://youtu.be'), $str);
 		}
 		if (strip_tags($str)==$str) {
 			$str = str_replace("\n","<br/>\n",$str);
 		}
-		if ($sessiondata['graphdisp']==0) {
+		if ($_SESSION['graphdisp']==0) {
 			if (strpos($str,'embed')!==FALSE) {
 				$str = preg_replace('/<embed[^>]*alt="([^"]*)"[^>]*>/',"[$1]", $str);
 				//$str = preg_replace('/<embed[^>]*sscr[^>]*>/',"[Graph with no description]", $str);
 				$str = preg_replace_callback('/<\s*embed[^>]*?sscr=(.)(.+?)\1.*?>/s','svgsscrtotextcallback',$str);
 			}
 		}
-		if ($sessiondata['mathdisp']==2) {
+		if ($_SESSION['mathdisp']==2) {
 			$str = str_replace('\\`','&grave;',$str);
 			if (strpos($str,'`')!==FALSE) {
 				$str = preg_replace_callback('/`(.*?)`/s', 'mathfiltercallback', $str);
 			}
 			$str = str_replace('&grave;','`',$str);
 		}
-		if ($sessiondata['graphdisp']==2) {
+		if ($_SESSION['graphdisp']==2) {
 			if (strpos($str,'embed')!==FALSE) {
 				$str = preg_replace_callback('/<\s*embed[^>]*?sscr=(.)(.+?)\1.*?>/s','svgfiltersscrcallback',$str);
 				$str = preg_replace_callback('/<\s*embed[^>]*?script=(.)(.+?)\1.*?>/s','svgfilterscriptcallback',$str);
@@ -212,8 +218,7 @@
 		return $str;
 	}
 	function filtergraph($str) {
-		global $sessiondata;
-		if ($sessiondata['graphdisp']==2) {
+		if ($_SESSION['graphdisp']==2) {
 			if (strpos($str,'embed')!==FALSE) {
 				$str = preg_replace_callback('/<\s*embed.*?sscr=(.)(.+?)\1.*?>/','svgfiltersscrcallback',$str);
 				$str = preg_replace_callback('/<\s*embed.*?script=(.)(.+?)\1.*?>/','svgfilterscriptcallback',$str);
@@ -239,11 +244,11 @@
 	}
 	function getgraphfilename($str) {
 		$str = forcefiltergraph($str);
-		preg_match('/(\w+\.png)/',$str,$matches);
+		preg_match('/\/graph\/imgs\/(\w+\.png)/',$str,$matches);
 		return ($matches[1]);
 	}
 	function getgraphfilenames($str) {
-		preg_match_all('/(\w+\.png)/',$str,$matches,PREG_PATTERN_ORDER);
+		preg_match_all('/\/graph\/imgs\/(\w+\.png)/',$str,$matches,PREG_PATTERN_ORDER);
 		return ($matches[1]);
 	}
 	function mathentitycleanup($arr) {

@@ -305,7 +305,7 @@ class AssessInfo
     $by_q = array('regens_max','showcalculator');
     $base = array('tries_max','retry_penalty','retry_penalty_after',
       'showans','showans_aftern','points_possible','questionsetid',
-      'category', 'withdrawn', 'jump_to_answer','showcalculator');
+      'category', 'withdrawn', 'jump_to_answer','showwork','showcalculator');
     $out = array();
     foreach ($base as $field) {
       $out[$field] = $this->questionData[$id][$field];
@@ -448,6 +448,10 @@ class AssessInfo
     Override the "available" setting
    */
   public function overrideAvailable($val) {
+    if ($this->assessData['available'] !== 'yes') {
+      // necessary to override to prevent due date timer from causing problems
+      $this->assessData['enddate'] = 2000000000;
+    }
     $this->assessData['available'] = $val;
   }
 
@@ -531,12 +535,15 @@ class AssessInfo
   }
 
   /**
-   * Determine whether we are reshowing scored questions at end
-   * @return boolean  true if showing scores during
+   * Determine whether we are reshowing questions at end
+   * @return boolean  true if showing question at end
    */
   public function reshowQuestionsAtEnd() {
-    $showscores = $this->assessData['showscores'];
-    return ($showscores == 'at_end' || $showscores == 'during');
+    //$showscores = $this->assessData['showscores'];
+    //return ($showscores == 'at_end' || $showscores == 'during');
+    $viewingb = $this->assessData['viewingb'];
+    return ($viewingb == 'immediately' || $viewingb == 'after_take' ||
+      ($viewingb == 'after_due' && time() > $this->assessData['enddate']));
   }
 
 
@@ -847,6 +854,7 @@ class AssessInfo
   * @return array            Normalized $settings array.
   */
   static function normalizeQuestionSettings($settings, $defaults) {
+
     if ($settings['points'] == 9999) {
       $settings['points_possible'] = $defaults['defpoints'];
     } else {
@@ -873,7 +881,7 @@ class AssessInfo
         $settings['retry_penalty'] = intval($settings['penalty']);
       }
     }
-    
+
     if ($settings['regen'] == 1 || $defaults['submitby'] == 'by_assessment') {
       $settings['regens_max'] = 1;
     } else {
@@ -912,6 +920,10 @@ class AssessInfo
 
     if ($settings['showhints'] == -1) {
       $settings['showhints'] = $defaults['showhints'];
+    }
+
+    if ($settings['showwork'] == -1) {
+      $settings['showwork'] = $defaults['showwork'];
     }
 
     if ($settings['showcalculator'] == 'default') {

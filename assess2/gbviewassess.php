@@ -2,7 +2,7 @@
 // IMathAS: Assess2 gradebook details page
 // (c) 2019 David Lippman
 
-$lastupdate = '20200216';
+$lastupdate = '20200428b';
 
 require('../init.php');
 if (empty($_GET['cid']) || empty($_GET['aid'])) {
@@ -30,11 +30,11 @@ if ($from=='isolate') {
   $exitUrl = $GLOBALS['basesiteurl'] . "/course/gradebook.php?stu=$stu&cid=$cid";
 }
 
-$isltilimited = (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==0);
+$isltilimited = (isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==0);
 $inTreeReader = (strpos($_SERVER['HTTP_REFERER'],'treereader') !== false);
-$isdiag = isset($sessiondata['isdiag']);
+$isdiag = isset($_SESSION['isdiag']);
 if ($isdiag) {
-  $diagid = Sanitize::onlyInt($sessiondata['isdiag']);
+  $diagid = Sanitize::onlyInt($_SESSION['isdiag']);
   $hideAllHeaderNav = true;
 }
 
@@ -49,9 +49,9 @@ $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/asse
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/chunk-common.css?v='.$lastupdate.'" />';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/print.css?v='.$lastupdate.'" media="print">';
 $placeinhead .= '<script src="'.$imasroot.'/mathquill/mathquill.min.js" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=121419" type="text/javascript"></script>';
+$placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=042920" type="text/javascript"></script>';
 $placeinhead .= '<script src="'.$imasroot.'/javascript/rubric_min.js?v=090619" type="text/javascript"></script>';
-$placeinhead .= '<script src="'.$imasroot.'/javascript/gb-scoretools.js?v=120419" type="text/javascript"></script>';
+$placeinhead .= '<script src="'.$imasroot.'/javascript/gb-scoretools.js?v=042920" type="text/javascript"></script>';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mathquill-basic.css">
   <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mqeditor.css">';
 if ($isltilimited || $inTreeReader) {
@@ -63,7 +63,7 @@ $nologo = true;
 $useeditor = 1;
 require('../header.php');
 
-if ((!$isltilimited || $sessiondata['ltirole']!='learner') && !$inTreeReader && !$isdiag) {
+if ((!$isltilimited || $_SESSION['ltirole']!='learner') && !$inTreeReader && !$isdiag) {
   echo "<div class=breadcrumb>";
   if ($isltilimited) {
     echo "$breadcrumbbase ";

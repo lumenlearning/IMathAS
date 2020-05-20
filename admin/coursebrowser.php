@@ -44,7 +44,7 @@ function getCourseBrowserJSON() {
 
   $query = "SELECT ic.id,ic.name,ic.jsondata,iu.FirstName,iu.LastName,ig.name AS groupname,ig.parent,ic.istemplate,iu.groupid ";
   $query .= "FROM imas_courses AS ic JOIN imas_users AS iu ON ic.ownerid=iu.id JOIN imas_groups AS ig ON iu.groupid=ig.id ";
-  $query .= "WHERE ((ic.istemplate&17)>0 OR ((ic.istemplate&2)>0 AND iu.groupid=?)";
+  $query .= "WHERE ic.istemplate > 0 AND ((ic.istemplate&17)>0 OR ((ic.istemplate&2)>0 AND iu.groupid=?)";
   $qarr = array($dispgroupid);
   if ($supergroupid>0) {
   	  $query .= " OR ((ic.istemplate&32)>0 AND ig.parent=?)";
@@ -188,7 +188,7 @@ if (!isset($_GET['embedded'])) {
 </div>
 <div style="position: relative" id="card-deck-wrap">
 <transition-group name="fade" tag="div" class="card-deck">
-<div v-if="filteredCourses.length==0" key="none">No matches found</div>
+<div v-if="filteredCourses.length==0" key="none"><?php echo _('No matches found'); ?></div>
 <div v-for="(course,index) in filteredCourses" :key="course.id" class="card">
   <div class="card-body">
   	<div class="card-header" :class="'coursetype'+course.coursetype">

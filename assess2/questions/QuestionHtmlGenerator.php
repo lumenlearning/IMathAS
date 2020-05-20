@@ -285,6 +285,37 @@ class QuestionHtmlGenerator
             }
 
             /*
+             *  For sequenial multipart, skip answerbox generation for parts
+             *  that won't be shown.
+             *
+             */
+            $skipAnswerboxGeneration = array();
+            $seqGroupDone = array();
+            if ($quesData['qtype'] == "multipart") {
+              $_seqParts = preg_split('~(<p[^>]*>|<br\s*/?><br\s*/?>)\s*///+\s*(</p[^>]*>|<br\s*/?><br\s*/?>)~', $toevalqtxt);
+
+              if (count($_seqParts) > 1) {
+                $_seqPartDone = $this->questionParams->getSeqPartDone();
+                $_lastGroupDone = true;
+                foreach ($_seqParts as $kidx=>$_seqPart) {
+                  $_thisGroupDone = true;
+                  preg_match_all('/(\$answerbox\[|\[AB)(\d+)\]/', $_seqPart, $iidx);
+
+                  foreach ($iidx[2] as $_pnidx) {
+                    if (!$_lastGroupDone) { // not ready for it - unset stuff
+                      $skipAnswerboxGeneration[$_pnidx] = true;
+                      $jsParams['hasseqnext'] = true;
+                    }
+                    if (empty($_seqPartDone[$_pnidx])) {
+                      $_thisGroupDone = false;
+                    }
+                  }
+                  $seqGroupDone[$kidx] = $_thisGroupDone;
+                  $_lastGroupDone = $_thisGroupDone;
+                }
+              }
+            }
+            /*
 			 * Original displayq2.php notes:
 			 *
 			 * $questionColor   // Orig: $qcol in displayq2.php
@@ -308,6 +339,9 @@ class QuestionHtmlGenerator
 
             // Generate answer boxes. (multipart question)
             foreach ($anstypes as $atIdx => $anstype) {
+                if (!empty($skipAnswerboxGeneration[$atIdx])) {
+                  continue;
+                }
                 $questionColor = ($quesData['qtype'] == "multipart")
                     ? $this->getAnswerColorFromRawScore(
                         $this->questionParams->getLastRawScores(), $atIdx, $answeights[$atIdx])
@@ -329,7 +363,15 @@ class QuestionHtmlGenerator
                     ->setStudentLastAnswers($lastAnswersAllParts[$atIdx])
                     ->setColorboxKeyword($questionColor);
 
-                $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
+                try {
+                  $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
+                } catch (\Throwable $t) {
+                  $this->addError(
+                       _('Caught error while generating this question: ')
+                       . $t->getMessage());
+                  continue;
+                }
+
                 $answerBoxGenerator->generate();
 
                 $answerbox[$atIdx] = $answerBoxGenerator->getAnswerBox();
@@ -359,8 +401,10 @@ class QuestionHtmlGenerator
                 $this->questionParams->getLastRawScores(), 0, 1);
 
             $lastAnswer = $stuanswers[$thisq];
+
             if (is_array($lastAnswer)) { // happens with autosaves
-              $lastAnswer = $lastAnswer[0];
+              //  appears to be resolved before getting here now
+              //  $lastAnswer = $lastAnswer[0];
             }
 
             if (isset($requestclearla)) {
@@ -513,8 +557,48 @@ class QuestionHtmlGenerator
             }
         }
 
+        /*
+         *  Handle sequenial multipart, now that all answerboxes have been inserted
+         *
+         *  TODO: look earlier as well, and prevent answerbox generation in obvious
+         *  cases where $answerbox or [AB#] is already in the question text
+         */
+        if ($quesData['qtype'] == "multipart") {
+          $seqParts = preg_split('~(<p[^>]*>|<br\s*/?><br\s*/?>)\s*///+\s*(</p[^>]*>|<br\s*/?><br\s*/?>)~', $evaledqtext);
+
+          if (count($seqParts) > 1) {
+            $seqPartDone = $this->questionParams->getSeqPartDone();
+            $newqtext = '';
+            $lastGroupDone = true;
+            foreach ($seqParts as $k=>$seqPart) {
+              $thisGroupDone = $seqGroupDone[$k];
+              preg_match_all('/<(input|select|textarea)[^>]*name="?qn(\d+)/', $seqPart, $matches);
+              foreach ($matches[2] as $qnrefnum) {
+                $pn = $qnrefnum % 1000;
+                if (!$lastGroupDone) { // not ready for it - unset stuff
+                  unset($jsParams[$qnrefnum]);
+                  unset($answerbox[$pn]);
+                  unset($showanswerloc[$pn]);
+                  $jsParams['hasseqnext'] = true;
+                }
+                if (empty($seqPartDone[$pn])) {
+                  $thisGroupDone = false;
+                }
+              }
+              if ($lastGroupDone) { // add html to output
+                $newqtext .= '<p class="seqsep">';
+                $newqtext .= sprintf(_('Part %d/%d'), $k+1, count($seqParts));
+                $newqtext .= '</p>' . $seqPart;
+              }
+              $lastGroupDone = $thisGroupDone;
+            }
+            $evaledqtext = $newqtext;
+          }
+        }
+
         $evaledqtext = "<div class=\"question\" role=region aria-label=\"" . _('Question') . "\">\n"
             . filter($evaledqtext);
+
 
         /*
          * Disable answer box inputs
@@ -545,7 +629,7 @@ class QuestionHtmlGenerator
           $sadiv .= '<div>'.$showanswerloc.'</div>';
         } else if (is_array($showanswerloc)) {
           foreach ($showanswerloc as $iidx => $saloc) {
-            if (is_array($doShowAnswerParts) && $doShowAnswerParts[$iidx] &&
+            if (($doShowAnswer || (is_array($doShowAnswerParts) && $doShowAnswerParts[$iidx])) &&
               strpos($toevalqtxt,'$showanswerloc['.$iidx.']')===false
             ) {
               $sadiv .= '<div>'.$saloc.'</div>';
@@ -597,7 +681,7 @@ class QuestionHtmlGenerator
         $question = new Question(
             $evaledqtext,
             $jsParams,
-            isset($answeights) ? $answeights : array(1),
+            ($quesData['qtype'] == "multipart" && isset($answeights)) ? $answeights : array(1),
             $evaledsoln,
             $detailedSolutionContent,
             $displayedAnswersForParts,
@@ -888,8 +972,8 @@ class QuestionHtmlGenerator
             if ($qdata['extref'] != '') {
                 $extref = explode('~~', $qdata['extref']);
 
-                if ($qid > 0 && (!isset($GLOBALS['sessiondata']['isteacher'])
-                        || $GLOBALS['sessiondata']['isteacher'] == false) && !isset($GLOBALS['sessiondata']['stuview'])) {
+                if ($qid > 0 && (!isset($_SESSION['isteacher'])
+                        || $_SESSION['isteacher'] == false) && !isset($_SESSION['stuview'])) {
                     $qref = $qid . '-' . ($qnidx + 1);
                 } else {
                     $qref = '';
@@ -922,7 +1006,7 @@ class QuestionHtmlGenerator
                 }
             }
             if (($qdata['solutionopts'] & 2) == 2 && $qdata['solution'] != '') {
-                $addr = $GLOBALS['basesiteurl'] . "/assessment/showsoln.php?id=" . $qidx . '&sig=' . md5($qidx . $GLOBALS['sessiondata']['secsalt']);
+                $addr = $GLOBALS['basesiteurl'] . "/assessment/showsoln.php?id=" . $qidx . '&sig=' . md5($qidx . $_SESSION['secsalt']);
                 $addr .= '&t=' . ($qdata['solutionopts'] & 1) . '&cid=' . $GLOBALS['cid'];
                 if ($GLOBALS['cid'] == 'embedq' && isset($GLOBALS['theme'])) {
                     $addr .= '&theme=' . Sanitize::encodeUrlParam($GLOBALS['theme']);

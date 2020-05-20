@@ -13,6 +13,7 @@ if (!file_exists(__DIR__ . "/config.php")) {
 
 require_once(__DIR__ . "/config.php");
 
+require_once(__DIR__ . "/i18n/i18n.php");
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['init'])) {
@@ -45,7 +46,7 @@ function disallowsSameSiteNone () {
 }
 }
 if (isset($sessionpath)) { session_save_path($sessionpath);}
-ini_set('session.gc_maxlifetime',86400);
+ini_set('session.gc_maxlifetime',432000);
 ini_set('auto_detect_line_endings',true);
 $hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
 if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostparts)-1])) {
@@ -65,11 +66,52 @@ if ($_SERVER['HTTP_HOST'] != 'localhost' && !is_numeric($hostparts[count($hostpa
 		));
   }
 }
+if (!function_exists('setsecurecookie')) {
+function setsecurecookie($name, $value, $expires=0) {
+	global $imasroot;
+	if ($_SERVER['HTTP_HOST'] == 'localhost' || disallowsSameSiteNone()) {
+		setcookie($name, $value, $expires);
+	} else if (PHP_VERSION_ID < 70300) {
+		setcookie($name, $value, $expires, '/; samesite=none;', '', true);
+	} else {
+		setcookie($name, $value, array(
+			'expires' => $expires,
+			'secure' => true,
+			'samesite'=>'None',
+			'path' => $imasroot.'/'
+		));
+	}
+	$_COOKIE[$name] = $value;
+}
+}
+
+// prevent errors in PHP < 7.2
+if (!defined('JSON_INVALID_UTF8_IGNORE')) {
+	define('JSON_INVALID_UTF8_IGNORE', 0);
+}
 
 // Store PHP sessions in the database.
-require_once(__DIR__ . "/includes/session.php");
 if (!isset($use_local_sessions)) {
+  if (!empty($CFG['redis'])) {
+		$redispath = $CFG['redis'] . ((strpos($CFG['redis'], '?')===false)?'?':'&')
+			. 'prefix='.preg_replace('/\W/','',$installname);
+  	ini_set('session.save_handler', 'redis');
+  	ini_set('session.save_path', $redispath);
+	} else if (!empty($CFG['dynamodb'])) {
+  	require_once(__DIR__ . "/includes/dynamodb/DynamoDbSessionHandler.php");
+  	(new Idealstack\DynamoDbSessionsDependencyFree\DynamoDbSessionHandler([
+  		'region' => $CFG['dynamodb']['region'],
+  		'table_name' => $CFG['dynamodb']['table'],
+  		'credentials' => [
+  			'key' => $CFG['dynamodb']['key'],
+  			'secret' => $CFG['dynamodb']['secret']
+  		],
+  		'base64' => false
+  	]))->register();
+  } else {
+	require_once(__DIR__ . "/includes/session.php");
 	session_set_save_handler(new SessionDBHandler(), true);
+  }
 }
 
 // Load validate.php?
@@ -80,7 +122,7 @@ if (!isset($init_skip_validate) || (isset($init_skip_validate) && false == $init
 		require_once(__DIR__ . "/csrfp/simplecsrfp.php");
 		csrfProtector::init();
 	}
-} else {
+} else if (!empty($init_session_start)) {
 	session_start();
 }
 /*

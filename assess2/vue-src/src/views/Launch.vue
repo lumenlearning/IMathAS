@@ -3,7 +3,7 @@
     <div style="flex-grow: 1">
       <h1>{{ aInfo.name }}</h1>
 
-      <div class="med-below" v-html="aInfo.summary"></div>
+      <div class="med-below" v-html="aInfo.summary" ref="summary"></div>
 
       <settings-list />
 
@@ -45,6 +45,16 @@
         </button>
       </p>
 
+      <p v-if="canAddWork">
+        {{ $t('work.add_prev') }}<br/>
+        <button
+          type="button"
+          class="secondary"
+          @click="$router.push('/showwork')"
+        >
+          {{ $t('work.add') }}
+        </button>
+      </p>
       <p v-if="showReset">
         {{ $t('launch.resetmsg') }}
         <br/>
@@ -68,6 +78,12 @@
         >
           {{ startLabel }}
         </button>
+        <input
+          type="submit"
+          style="display:none;"
+          @click="startAssess"
+          value="Submit"
+        />
         <button
           v-if="hasExit"
           type="button"
@@ -137,7 +153,7 @@ export default {
       if (store.timelimit_expired && store.timelimit_grace_expired &&
           this.aInfo.has_active_attempt
       ) {
-        let expires = this.aInfo.timelimit_expires_disp;
+        const expires = this.aInfo.timelimit_expires_disp;
         return this.$t('setlist.time_expired', { date: expires });
       } else {
         return '';
@@ -172,15 +188,21 @@ export default {
     },
     hasExit () {
       return (window.exiturl && window.exiturl !== '');
+    },
+    canAddWork () {
+      return ((!this.aInfo.has_active_attempt ||
+        this.aInfo.submitby === 'by_question') &&
+        this.aInfo.showwork_after
+      );
     }
   },
   methods: {
     startAssess () {
       if (!this.okToLaunch) { return; }
-      let timelimit = this.aInfo.timelimit;
+      const timelimit = this.aInfo.timelimit;
       if (this.aInfo.has_password) {
         // hacky fix for when the password is entered programatically
-        let v = document.getElementById('password');
+        const v = document.getElementById('password');
         if (v && v.value !== this.password) {
           this.password = v.value;
         }
@@ -196,7 +218,7 @@ export default {
       }
     },
     reallyStartAssess () {
-      let pwval = this.password;
+      const pwval = this.password;
       this.password = '';
       actions.startAssess(false, pwval, this.newGroupMembers);
     },
@@ -220,6 +242,8 @@ export default {
       script.src = 'https://' + this.aInfo.livepoll_server + ':3000/socket.io/socket.io.js';
       document.getElementsByTagName('head')[0].appendChild(script);
     }
+    setTimeout(window.drawPics, 50);
+    window.rendermathnode(this.$refs.summary);
   }
 };
 </script>

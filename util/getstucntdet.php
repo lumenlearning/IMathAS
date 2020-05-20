@@ -29,8 +29,8 @@ ul {
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
 
-	$start = $now - 60*60*24*30; 
-	$end = $now; 
+	$start = $now - 60*60*24*30;
+	$end = $now;
 	if (isset($_GET['start'])) {
 		$parts = explode('-',$_GET['start']);
 		if (count($parts)==3) {
@@ -39,12 +39,12 @@ ul {
 	} else if (isset($_GET['days'])) {
 		$start = $now - 60*60*24*intval($_GET['days']);
 	}
-	
+
 	if (isset($_GET['end'])) {
 		$parts = explode('-',$_GET['end']);
 		if (count($parts)==3) {
 			$end = mktime(0,0,0,$parts[0],$parts[1],$parts[2]);
-		} 	 
+		}
 	}
 
 	echo '<h1>Enrollments from '.date('M j, Y',$start).' to '.date('M j, Y',$end).'</h1>';
@@ -62,9 +62,9 @@ ul {
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
 	echo '<p>This will list all students who last accessed the course between those dates.</p>';
-	
+
 	echo '<p>Courses marked with <sup>*</sup> have more than one instructor, and the enrollments have already been counted earlier so will be omitted</p>';
-	
+
 	/*if (isset($CFG['GEN']['guesttempaccts'])) {
 		$skipcid = $CFG['GEN']['guesttempaccts'];
 	} else {
@@ -76,8 +76,8 @@ ul {
 	}
 	$skipcids = implode(',',$skipcid);
 	*/
-	$query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email FROM imas_students AS s JOIN imas_teachers AS t ";
-	$query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
+    $query = "SELECT g.name,u.LastName,u.FirstName,c.id,c.name AS cname,COUNT(DISTINCT s.id),u.email FROM imas_students AS s JOIN imas_teachers AS t ";
+    $query .= "ON s.courseid=t.courseid AND s.lastaccess>$start ";
 	if ($end != $now) {
 		$query .= "AND s.lastaccess<$end ";
 	}
@@ -85,8 +85,8 @@ ul {
 	$query .= "JOIN imas_users as u ";
 	$query .= "ON u.id=t.userid JOIN imas_groups AS g ON g.id=u.groupid GROUP BY u.id,c.id ORDER BY g.name,u.LastName,u.FirstName,c.name";
 	$stm = $DBH->query($query);
-	$lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = ''; $grpinstrcnt = 0;
-	$lastemail = '';
+    $lastgroup = '';  $grpcnt = 0; $grpdata = '';  $lastuser = ''; $userdata = '';
+    $grpinstrcnt = 0; $lastemail = '';
 	$seencid = array();
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 		if ($row[1].', '.$row[2]!=$lastuser) {
@@ -97,8 +97,8 @@ ul {
 			}
 			$userdata = '';
 			$lastuser = $row[1].', '.$row[2];
-			$lastemail = $row[6];
-			$grpinstrcnt++;
+            $lastemail = $row[6];
+            $grpinstrcnt++;
 		}
 		if ($row[0] != $lastgroup) {
 			if ($lastgroup != '') {
@@ -120,10 +120,10 @@ ul {
 	$grpdata .= '<li><b>'.Sanitize::encodeStringForDisplay($lastuser).'</b><ul>';
 	$grpdata .= $userdata;
 	$grpdata .= '</ul></li>';
-	$grpinstrcnt++;
-	echo "<p><b>" . Sanitize::encodeStringForDisplay($lastgroup) . "</b>: " . Sanitize::encodeStringForDisplay($grpcnt) . " students, " . Sanitize::encodeStringForDisplay($grpinstrcnt) . " instructors";
-	echo '<ul>'.$grpdata.'</ul></p>';
-	
+    $grpinstrcnt++;
+    echo "<p><b>" . Sanitize::encodeStringForDisplay($lastgroup) . "</b>: " . Sanitize::encodeStringForDisplay($grpcnt) . " students, " . Sanitize::encodeStringForDisplay($grpinstrcnt) . " instructors";
+    echo '<ul>'.$grpdata.'</ul></p>';
+
 ?>
 </body>
 </html>

@@ -42,7 +42,7 @@ if ($typeid==0 || !in_array($stype,array('I','L','A','W','F','D','E'))) { // ###
 		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type IN ('linkedsum','linkedlink','linkedintext','linkedvviacal') AND typeid=:typeid");
 		$stm2 = $DBH->prepare("SELECT title FROM imas_linkedtext WHERE id=:id");
 	} else if ($stype=='A') {
-		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type IN ('assessintro','assessum','assess') AND typeid=:typeid");
+		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type IN ('assessintro','assesssum','assess') AND typeid=:typeid");
 		$stm2 = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
 	} else if ($stype=='W') {
 		$stm = $DBH->prepare("SELECT userid,type,info FROM imas_content_track WHERE courseid=:courseid AND type IN ('wiki','wikiintext') AND typeid=:typeid");
@@ -129,7 +129,10 @@ require("../header.php");
 if ($overwritebody) {
 	echo $body;
 } else {
-	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=".Sanitize::courseId($_GET['cid'])."\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
+	echo "<div class=breadcrumb>$breadcrumbbase";
+	if (!isset($_SESSION['ltiitemtype'])) {
+		echo "<a href=\"course.php?cid=" . Sanitize::courseId($_GET['cid']) . "\">" . Sanitize::encodeStringForDisplay($coursename) . "</a> ";
+	}
 	echo " &gt; Content Stats</div>";
 
 	echo '<div id="headermoddataset" class="pagetitle">';

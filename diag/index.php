@@ -1,6 +1,7 @@
 <?php
+  $init_session_start = true;
 	require("../init_without_validate.php");
-	require("../i18n/i18n.php");
+
 	if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
 		 $urlmode = 'https://';
 	 } else {
@@ -16,7 +17,8 @@
 
 	if (!isset($_GET['id'])) {
 		//echo "<html><body><h1>Diagnostics</h1><ul>";
-		$nologo = true; $loadinginfoheader = true;
+		$nologo = true;
+        $loadinginfoheader = true;;
 		$infopath = isset($CFG['GEN']['directaccessincludepath'])?$CFG['GEN']['directaccessincludepath']:'';
 		$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/{$infopath}infopages.css\" type=\"text/css\">\n";
 		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
@@ -88,13 +90,8 @@
 			}
 		}
 	}
-	$stm = $DBH->prepare("SELECT sessiondata FROM imas_sessions WHERE sessionid=:sessionid");
-	$stm->execute(array(':sessionid'=>$sessionid));
-	//if (isset($sessiondata['mathdisp'])) {
-	if ($stm->rowCount()>0) {
-	   $stm = $DBH->prepare("DELETE FROM imas_sessions WHERE sessionid=:sessionid");
-	   $stm->execute(array(':sessionid'=>$sessionid));
-	   $sessiondata = array();
+	if (!empty($_SESSION)) {
+	   $_SESSION = array();
 	   if (isset($_COOKIE[session_name()])) {
 		   setcookie(session_name(), '', time()-42000, '/', '', false, true);
 	   }
@@ -269,22 +266,23 @@ if (isset($_POST['SID'])) {
 		}
 		//if ($allowreentry) {
 
-			$sessiondata['mathdisp'] = $_POST['mathdisp'];//1;
-			$sessiondata['graphdisp'] = $_POST['graphdisp'];//1;
-			//$sessiondata['mathdisp'] = 1;
-			//$sessiondata['graphdisp'] = 1;
-			$sessiondata['useed'] = 1;
-			$sessiondata['isdiag'] = $diagid;
-			$sessiondata['diag_aver'] = $aVer;
+			$_SESSION['mathdisp'] = $_POST['mathdisp'];//1;
+			$_SESSION['graphdisp'] = $_POST['graphdisp'];//1;
+			//$_SESSION['mathdisp'] = 1;
+			//$_SESSION['graphdisp'] = 1;
+			$_SESSION['useed'] = 1;
+			$_SESSION['isdiag'] = $diagid;
+			$_SESSION['diag_aver'] = $aVer;
 
-			$enc = base64_encode(serialize($sessiondata));
 			if (!empty($_POST['tzname'])) {
 				$tzname = $_POST['tzname'];
 			} else {
 				$tzname = '';
 			}
-			$stm = $DBH->prepare("INSERT INTO imas_sessions (sessionid,userid,time,tzoffset,tzname,sessiondata) VALUES (:sessionid, :userid, :time, :tzoffset, :tzname, :sessiondata)");
-			$stm->execute(array(':sessionid'=>$sessionid, ':userid'=>$userid, ':time'=>$now, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessiondata'=>$enc));
+			$_SESSION['userid'] = $userid;
+			$_SESSION['time'] = $now;
+			$_SESSION['tzoffset'] = $_POST['tzoffset'];
+			$_SESSION['tzname'] = $tzname;
 
 			if ((intval($line['forceregen']) & (1<<intval($_POST['course'])))>0) {
 				$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE userid=:userid AND assessmentid=:assessmentid LIMIT 1");
@@ -318,7 +316,12 @@ if (isset($_POST['SID'])) {
 	if (!isset($_POST['passwd'])) {
 		$_POST['passwd'] = "none";
 	}
-	$stm->execute(array(':SID'=>$diagSID, ':password'=>$_POST['passwd'], ':rights'=>10, ':FirstName'=>$_POST['firstname'], ':LastName'=>$_POST['lastname'], ':email'=>$eclass, ':lastaccess'=>$now, ':created_at'=>time()));
+	$stm->execute(array(':SID'=>$diagSID, ':password'=>$_POST['passwd'], ':rights'=>10,
+    ':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
+    ':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
+    ':email'=>Sanitize::stripHtmlTags($eclass),
+    ':lastaccess'=>$now,
+    ':created_at'=>time()));
 	$userid = $DBH->lastInsertId();
 	if (!isset($_POST['timelimitmult'])) {
 		$_POST['timelimitmult'] = 1;
@@ -326,18 +329,21 @@ if (isset($_POST['SID'])) {
 	$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,timelimitmult,created_at) VALUES (:userid, :courseid, :section, :timelimitmult, :created_at);");
 	$stm->execute(array(':userid'=>$userid, ':courseid'=>$pcid, ':section'=>$_POST['teachers'], ':timelimitmult'=>$_POST['timelimitmult'], ':created_at'=>time()));
 
-	$sessiondata['mathdisp'] = $_POST['mathdisp'];//1;
-	$sessiondata['graphdisp'] = $_POST['graphdisp'];//1;
-	$sessiondata['useed'] = 1;
-	$sessiondata['isdiag'] = $diagid;
-	$enc = base64_encode(serialize($sessiondata));
+	$_SESSION['mathdisp'] = $_POST['mathdisp'];//1;
+	$_SESSION['graphdisp'] = $_POST['graphdisp'];//1;
+	$_SESSION['useed'] = 1;
+	$_SESSION['isdiag'] = $diagid;
+	$enc = base64_encode(serialize($_SESSION));
 	if (!empty($_POST['tzname'])) {
 		$tzname = $_POST['tzname'];
 	} else {
 		$tzname = '';
 	}
-	$stm = $DBH->prepare("INSERT INTO imas_sessions (sessionid,userid,time,tzoffset,tzname,sessiondata) VALUES (:sessionid, :userid, :time, :tzoffset, :tzname, :sessiondata)");
-	$stm->execute(array(':sessionid'=>$sessionid, ':userid'=>$userid, ':time'=>$now, ':tzoffset'=>$_POST['tzoffset'], ':tzname'=>$tzname, ':sessiondata'=>$enc));
+	$_SESSION['userid'] = $userid;
+	$_SESSION['time'] = $now;
+	$_SESSION['tzoffset'] = $_POST['tzoffset'];
+	$_SESSION['tzname'] = $tzname;
+
 	$aids = explode(',',$line['aidlist']);
 	$paid = $aids[$_POST['course']];
 	if ($aVer > 1) {

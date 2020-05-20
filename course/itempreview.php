@@ -45,7 +45,7 @@ $now = time();
 
 $pagetitle = $item->name;
 $curBreadcrumb = $breadcrumbbase;
-if (!isset($sessiondata['ltiitemtype'])) {
+if (!isset($_SESSION['ltiitemtype'])) {
     $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
         . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
 }

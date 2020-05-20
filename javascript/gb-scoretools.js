@@ -54,12 +54,23 @@ function previewall() {
 }
 function previewallfiles() {
 	$("span.clickable").trigger("click");
+	$(".question span[id^=fileembedbtn]").trigger("click");
 }
 function allvisfullcred() {
 	$(".fullcredlink").not(function() {return !$(this).closest(".bigquestionwrap").is(":visible")}).trigger("click");
 }
 function allvisnocred() {
 	$("input[name^=ud]").not(function() {return !$(this).closest(".bigquestionwrap").is(":visible")}).val("0");
+}
+function toggleWork(el) {
+	var next = $(el).next();
+	if (next.is(':hidden')) {
+		el.innerText = _('Hide Work');
+		next.show();
+	} else {
+		el.innerText = _('Show Work');
+		next.hide();
+	}
 }
 function preprint() {
 	$("span[id^='ans']").removeClass("hidden");
@@ -130,8 +141,11 @@ function cleardeffeedback() {
 }
 
 function showgraphtip(el, la, init) {
-	var initpts = init.replace(/"|'/g,'').split(",");
-	for (var j=1;j<initpts.length;j++) {
+	var initpts = init;
+	if (typeof init == 'string') {
+		init = init.replace(/"|'/g,'').split(",");
+	}
+	for (var j=1;j<Math.max(initpts.length,11);j++) {
 		initpts[j] *= 1;  //convert to number
 	}
 	var drawwidth = initpts[6];
