@@ -21,9 +21,6 @@
                        name="sdate" value="<?php echo $startDate; ?>"
                        onClick="displayDatePicker('sdate', this); return false;"
                        <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
-                <input id="stime" class="form-input time-input u-margin-horizontal-xs"
-                       name="stime" value="<?php echo $startTime; ?>"
-                       <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
                 <input type="checkbox" id="start-immediately"
                        name="start-immediately" value="1"
                     <?php echo ($startImmediately ? 'checked' : ''); ?>/>
@@ -38,9 +35,6 @@
                 <input id="edate" class="form-input has-icon icon--suffix icon--calendar date-input"
                        name="edate" value="<?php echo $endDate; ?>"
                        onClick="displayDatePicker('edate', this); return false;"
-                       <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
-                <input id="etime" class="form-input time-input u-margin-horizontal-xs"
-                       name="etime" value="<?php echo $endTime; ?>"
                        <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
                 <input type="checkbox" id="never-ending" name="never-ending" value="1"
                     <?php echo ($neverEnding ? 'checked' : ''); ?>/>

@@ -5,8 +5,9 @@ use OHM\Models\Banner;
 use OHM\Services\OhmBannerService;
 
 require_once(__DIR__ . '/../init.php');
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
+$placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>';
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.2/lux-components.min.css\">";
+$placeinhead .= '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">';
 require_once("../header.php");
 
 if ($GLOBALS['myrights'] < 100) {

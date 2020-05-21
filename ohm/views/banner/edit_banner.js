@@ -13,6 +13,11 @@ $(document).ready(function () {
     e.preventDefault();
     window.location.href = "?";
   });
+
+  $(".date-input").flatpickr({
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+  });
 });
 
 function toggleTimestampFields(dateId, timeId, checked) {
