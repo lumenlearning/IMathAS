@@ -76,7 +76,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
   if (isset($_REQUEST['clearattempts'])) { //FORM POSTED WITH CLEAR ATTEMPTS FLAG
       if (isset($_POST['clearattempts']) && $_POST['clearattempts']=="confirmed") {
-      	$DBH->beginTransaction();
+          // grab student grades
+          $stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id");
+          $stm->execute(array(':id'=>$assessmentId));
+          $item_name = $stm->fetchColumn(0);
+          //version > 1
+          $stm = $DBH->prepare("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=:aid");
+          $stm->execute(array(':aid'=>$assessmentId));
+          $metadata = array();
+          while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+              $metadata['grades'][$row['userid']]=$row["score"];
+          }
+
+          $DBH->beginTransaction();
           require_once('../includes/filehandler.php');
           deleteallaidfiles($assessmentId);
           $stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid=:assessmentid");
@@ -85,9 +97,19 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
           $stm->execute(array(':assessmentid'=>$assessmentId));
           $stm = $DBH->prepare("UPDATE imas_questions SET withdrawn=0 WHERE assessmentid=:assessmentid");
           $stm->execute(array(':assessmentid'=>$assessmentId));
-          $DBH->commit();
-          header(sprintf('Location: %s/course/addassessment2.php?cid=%s&id=%d&r=' .Sanitize::randomQueryStringParam() , $GLOBALS['basesiteurl'],
-                  $cid, $assessmentId));
+          if ($DBH->commit()) {
+              TeacherAuditLog::addTracking(
+                  $cid,
+                  "Clear Attempts",
+                  $assessmentId,
+                  $metadata
+              );
+          }
+          header(sprintf(
+                  'Location: %s/course/addassessment2.php?cid=%s&id=%d&r=' .Sanitize::randomQueryStringParam(),
+                  $GLOBALS['basesiteurl'],
+                  $cid, $assessmentId
+          ));
           exit;
       } else {
           $overwriteBody = 1;
