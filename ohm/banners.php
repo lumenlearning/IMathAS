@@ -197,14 +197,14 @@ function save(?int $bannerId): void
     $userTimezone = new DateTimeZone(getUserTimezoneName());
 
     if ('1' != $_POST['start-immediately']) {
-        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime'], $userTimezone);
+        $dateTime = DateTime::createFromFormat('Y-m-d g:i A', $_POST['sdate'], $userTimezone);
         $banner->setStartAt($dateTime);
     } else {
         $banner->setStartAt(null);
     }
 
     if ('1' != $_POST['never-ending']) {
-        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime'], $userTimezone);
+        $dateTime = DateTime::createFromFormat('Y-m-d g:i A', $_POST['edate'], $userTimezone);
         $banner->setEndAt($dateTime);
     } else {
         $banner->setEndAt(null);
@@ -247,15 +247,13 @@ function modify_form(string $action, ?int $bannerId): void
             $startImmediately = true;
         } else {
             $startImmediately = false;
-            $startDate = date('m/d/Y', $banner->getStartAt()->getTimestamp());
-            $startTime = date('H:i:s', $banner->getStartAt()->getTimestamp());
+            $startDateTime = date('Y-m-d g:i A', $banner->getStartAt()->getTimestamp());
         }
         if (is_null($banner->getEndAt())) {
             $neverEnding = true;
         } else {
             $neverEnding = false;
-            $endDate = date('m/d/Y', $banner->getEndAt()->getTimestamp());
-            $endTime = date('H:i:s', $banner->getEndAt()->getTimestamp());
+            $endDateTime = date('Y-m-d g:i A', $banner->getEndAt()->getTimestamp());
         }
     } else {
         $id = '';
@@ -270,8 +268,8 @@ function modify_form(string $action, ?int $bannerId): void
         $studentContent = '';
         $startImmediately = false;
         $neverEnding = false;
-        $startTime = '23:59:59';
-        $endTime = '23:59:59';
+        $startDateTime = strftime('%Y-%m-%d 12:00 AM', time());
+        $endDateTime = strftime('%Y-%m-%d 11:59 PM', time() + (86400 * 7));
     }
 
     include(__DIR__ . '/views/banner/edit_banner.php');

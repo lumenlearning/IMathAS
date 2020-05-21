@@ -18,8 +18,7 @@
             <label for="start-at">Start date and time</label>
             <div class="banner-timestamp-entry" id="start-at">
                 <input id="sdate" class="form-input has-icon icon--suffix icon--calendar date-input"
-                       name="sdate" value="<?php echo $startDate; ?>"
-                       onClick="displayDatePicker('sdate', this); return false;"
+                       name="sdate" value="<?php echo $startDateTime; ?>"
                        <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
                 <input type="checkbox" id="start-immediately"
                        name="start-immediately" value="1"
@@ -33,8 +32,7 @@
             <label for="end-at">End date and time</label>
             <div class="banner-timestamp-entry">
                 <input id="edate" class="form-input has-icon icon--suffix icon--calendar date-input"
-                       name="edate" value="<?php echo $endDate; ?>"
-                       onClick="displayDatePicker('edate', this); return false;"
+                       name="edate" value="<?php echo $endDateTime; ?>"
                        <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
                 <input type="checkbox" id="never-ending" name="never-ending" value="1"
                     <?php echo ($neverEnding ? 'checked' : ''); ?>/>
