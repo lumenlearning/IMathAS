@@ -65,6 +65,7 @@
 		}
 		foreach($toarr as $stu) {
 			foreach($addexcarr as $aid) {
+				$metadata = array();
 				if (isset($_POST['forceregen'])) {
 					//this is not group-safe
 					$stm = $DBH->prepare("SELECT shuffle,ver FROM imas_assessments WHERE id=:id");
@@ -121,23 +122,11 @@
 						$update = array(':scores'=>$scorelist, ':attempts'=>$attemptslist, ':seeds'=>$seedslist, ':lastanswers'=>$lalist,
 							':reattempting'=>$reattemptinglist, ':id'=>$row[0]);
 						$stm->execute($update);
-
-						$result = TeacherAuditLog::addTracking(
-							$cid,
-							"Clear Scores",
-							$row[0],
-							array(
-								'clear_type'=>'user assessment',
-								'studentid'=>$stu,
-								'old_attempt'=>$row,
-								'new_attempt'=>$update
-							)
-						);
 					}
 
 				} else if (isset($_POST['forceclear'])) {
 					//get old grades
-					$stm = $DBH->prepare("SELECT userid, bestscores FROM imas_assessment_sessions WHERE userid=? AND assessmentid=$aid");
+					$stm = $DBH->prepare("SELECT userid, bestscores FROM imas_assessment_sessions WHERE userid=? AND assessmentid=:assessmentid");
 					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
 					while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 						$sp = explode(';', $row['bestscores']);
@@ -156,17 +145,16 @@
 					$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE userid=:userid AND assessmentid=:assessmentid");
 					$stm->execute(array(':userid'=>$stu, ':assessmentid'=>$aid));
 
-					$result = TeacherAuditLog::addTracking(
+					$metadata['student'][$stu]['grade'] = $grade;
+				}
+				if (!empty($metadata)) {
+					TeacherAuditLog::addTracking(
 						$cid,
 						"Clear Attempts",
 						$aid,
-						array(
-							'studentid' => $stu,
-							'grade' => $grade
-						)
+						$metadata
 					);
 				}
-
 			}
 			/* work in progress
 			$existingForumExceptions = array();
