@@ -269,12 +269,17 @@
 		}
 	}
 
-	$notstarted = $totstucnt - $studentsStartedAssessment;
-	$nonstartedper = round(100*$notstarted/$totstucnt,1);
-	if ($notstarted==0) {
-		echo '<p>All students have started this assessment. ';
+	echo '<p>';
+	if ($totstucnt == 0) {
+		echo 'No students in course. ';
 	} else {
-		echo "<p><a href=\"#\" onclick=\"GB_show('Not Started','gb-itemanalysisdetail2.php?cid=$cid&aid=$aid&qid=$qid&type=notstart',500,300);return false;\">$notstarted student".($notstarted>1?'s':'')."</a> ($nonstartedper%) ".($notstarted>1?'have':'has')." not started this assessment.  They are not included in the numbers below. ";
+		$notstarted = $totstucnt - $studentsStartedAssessment;
+		if ($notstarted==0) {
+			echo 'All students have started this assessment. ';
+		} else {
+			$nonstartedper = round(100 * $notstarted / $totstucnt, 1);
+			echo "<a href=\"#\" onclick=\"GB_show('Not Started','gb-itemanalysisdetail2.php?cid=$cid&aid=$aid&qid=$qid&type=notstart',500,300);return false;\">$notstarted student" . ($notstarted > 1 ? 's' : '') . "</a> ($nonstartedper%) " . ($notstarted > 1 ? 'have' : 'has') . " not started this assessment.  They are not included in the numbers below. ";
+		}
 	}
 	echo '</p>';
 	//echo '<a href="isolateassessgrade.php?cid='.$cid.'&aid='.$aid.'">View Score List</a>.</p>';
