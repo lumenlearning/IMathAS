@@ -374,7 +374,7 @@ switch($_POST['action']) {
 		if (isset($_POST['specialrights64']) && $myrights==100) {
 			$specialrights += 64;
 		}
-		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :created_at);");
+		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights,created_at) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :created_at);");
 		$stm->execute(array(':SID'=>$_POST['SID'],
 			':password'=>$md5pw,
 			':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
