@@ -20,6 +20,7 @@ var MQeditor = (function($) {
     layout: []
   };
   var MQconfig = {};
+  var initialized = false;
   var curMQfield = null;
   var blurTimer = null;
   var keyRepeatInterval = null;
@@ -110,6 +111,17 @@ var MQeditor = (function($) {
         } else {
           mqfield = MQ.MathField(span[0], thisMQconfig).config(MQconfig);
           attachEditor(span);
+          // if original input has input changed programmatically and change
+          // event triggered, update mathquill.
+          $(el).on('change', function(e, fromblur) {
+            if (!fromblur) {
+              var val = el.value;
+              if (config.hasOwnProperty('toMQ')) {
+                val = config.toMQ(val);
+              }
+              mqfield.latex(val);
+            }
+          });
         }
 
       } else { // has existing MQ input
@@ -170,11 +182,12 @@ var MQeditor = (function($) {
   function showEditor(event) {
     clearTimeout(blurTimer);
     var mqel = $(event.target).closest(".mathquill-math-field");
-    if (curMQfield === null) {
+    if (initialized === false) {
       // first time through: inject the mqeditor div
       $("body").append($("<div/>", {id:"mqeditor", class:"mqeditor"}));
       // prevent clicks in editor from triggering blur in MQ field
       $("#mqeditor").on("mousedown touchstart", function(evt) {evt.preventDefault();});
+      initialized = true;
     }
     // update layoutStyle if needed
     var lastlayoutstyle = config.curlayoutstyle;
@@ -204,7 +217,7 @@ var MQeditor = (function($) {
       rebuild = true;
       // trigger change on last field
       if (curMQfield !== null) {
-        $("#"+curMQfield.el().id.substring(8)).trigger('change');
+        $("#"+curMQfield.el().id.substring(8)).trigger('change', true);
       }
 
       // new field; need to build the panel
@@ -258,7 +271,8 @@ var MQeditor = (function($) {
     } else {
       $("#mqeditor").hide();
     }
-    $("#"+curMQfield.el().id.substring(8)).trigger('change');
+    $("#"+curMQfield.el().id.substring(8)).trigger('change', true);
+    curMQfield = null;
   }
 
   /*
@@ -278,10 +292,12 @@ var MQeditor = (function($) {
     	var mqfield = $(ref).closest(".mathquill-math-field");
     	var offset = mqfield.offset();
     	var height = mqfield.outerHeight();
-      var editorWidth = document.getElementById("mqeditor").offsetWidth;
       var editorLeft = offset.left;
-      if (editorLeft + editorWidth > document.documentElement.clientWidth) {
-        editorLeft = document.documentElement.clientWidth - editorWidth-5;
+      if (document.getElementById("mqeditor")) {
+        var editorWidth = document.getElementById("mqeditor").offsetWidth;
+        if (editorLeft + editorWidth > document.documentElement.clientWidth) {
+          editorLeft = document.documentElement.clientWidth - editorWidth-5;
+        }
       }
     	$("#mqeditor").css("top", offset.top + height + 3).css("left", editorLeft);
     } else {
