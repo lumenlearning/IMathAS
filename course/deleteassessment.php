@@ -5,6 +5,7 @@
 /*** master php includes *******/
 require("../init.php");
 require_once("../includes/TeacherAuditLog.php");
+require_once("delitembyid.php");
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -27,74 +28,14 @@ if (!(isset($teacherid))) {
 	$aid = Sanitize::onlyInt($_GET['id']);
 
 	if ($_POST['remove']=="really") {
-        $stm = $DBH->prepare("SELECT name FROM imas_assessments WHERE id=:id AND courseid=:courseid");
-        $stm->execute(array(':id'=>$aid, ':courseid'=>$cid));
-        $assessment_name = $stm->fetchColumn(0);
-        //version > 1
-        $stm = $DBH->query("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=$aid");
-        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-            $grades[$row['userid']]=$row["score"];
-        }
-        //version 1
-        $query = "SELECT userid, bestscores FROM imas_assessment_sessions WHERE assessmentid=$aid";
-        $stm = $DBH->query($query);
-        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-            $sp = explode(';', $row['bestscores']);
-            $as = str_replace(array('-1','-2','~'), array('0','0',','), $sp[0]);
-            $total = array_sum(explode(',', $as));
-            $grades[$row['userid']][$row["assessmentid"]] = $total;
-        }
-		$DBH->beginTransaction();
-		$stm = $DBH->prepare("DELETE FROM imas_assessments WHERE id=:id AND courseid=:courseid");
-		$stm->execute(array(':id'=>$aid, ':courseid'=>$cid));
-		if ($stm->rowCount()>0) {
-            $result = TeacherAuditLog::addTracking(
-                $cid,
-                "Delete Item",
-                $aid,
-                array(
-                    'item_type'=>'Assessment',
-                    'item_name'=>$assessment_name,
-                    'grades'=>$grades
-                )
-            );
-			require_once('../includes/filehandler.php');
-			deleteallaidfiles($aid);
-			$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
-			$stm->execute(array(':assessmentid'=>$aid));
-			$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid=:assessmentid");
-			$stm->execute(array(':assessmentid'=>$aid));
+        $DBH->beginTransaction();
+        $stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype='Assessment' AND courseid=:courseid");
+        $stm->execute(array(':typeid'=>$aid, ':courseid'=>$cid));
+        if ($stm->rowCount()>0) {
+            $itemid = $stm->fetchColumn(0);
 
-			$stm = $DBH->prepare("DELETE FROM imas_exceptions WHERE assessmentid=:assessmentid AND itemtype='A'");
-			$stm->execute(array(':assessmentid'=>$aid));
-			$stm = $DBH->prepare("DELETE FROM imas_questions WHERE assessmentid=:assessmentid");
-			$stm->execute(array(':assessmentid'=>$aid));
-			$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype='Assessment'");
-			$stm->execute(array(':typeid'=>$aid));
-			$itemid = $stm->fetchColumn(0);
-			$stm = $DBH->prepare("DELETE FROM imas_items WHERE id=:id");
-			$stm->execute(array(':id'=>$itemid));
-			$stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
-			$stm->execute(array(':assessmentid'=>$aid));
-			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$cid));
-			$items = unserialize($stm->fetchColumn(0));
-
-			$blocktree = explode('-',$block);
-			$sub =& $items;
-			for ($i=1;$i<count($blocktree);$i++) {
-				$sub =& $sub[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
-			}
-			$key = array_search($itemid,$sub);
-			if ($key!==false) {
-				array_splice($sub,$key,1);
-				$itemorder = serialize($items);
-				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-				$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
-			}
-
-			$stm = $DBH->prepare("UPDATE imas_assessments SET reqscoreaid=0 WHERE reqscoreaid=:assessmentid AND courseid=:courseid");
-			$stm->execute(array(':assessmentid'=>$aid, ':courseid'=>$cid));
+            delitembyid($itemid);
+            delitemeorderbyid($itemid, $block);
 		}
 		$DBH->commit();
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());

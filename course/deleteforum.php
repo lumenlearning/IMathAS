@@ -34,23 +34,7 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 			$itemid = $stm->fetchColumn(0);
 
 			delitembyid($itemid);
-			
-			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$cid));
-			$items = unserialize($stm->fetchColumn(0));
-
-			$blocktree = explode('-',$block);
-			$sub =& $items;
-			for ($i=1;$i<count($blocktree);$i++) {
-				$sub =& $sub[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
-			}
-			$key = array_search($itemid,$sub);
-			if ($key!==false) {
-				array_splice($sub,$key,1);
-				$itemorder = serialize($items);
-				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-				$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
-			}
+            delitemeorderbyid($itemid, $block);
 
 		}
 		$DBH->commit();
