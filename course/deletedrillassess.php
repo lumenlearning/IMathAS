@@ -33,41 +33,10 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 		$stm->execute(array(':typeid'=>$typeid, ':courseid'=>$cid));
 		if ($stm->rowCount()>0) {
 			$itemid = $stm->fetchColumn(0);
-            $DBH->beginTransaction();
-			$stm = $DBH->prepare("DELETE FROM imas_items WHERE id=:id");
-			$stm->execute(array(':id'=>$itemid));
-			$stm = $DBH->prepare("DELETE FROM imas_drillassess WHERE id=:id");
-			$stm->execute(array(':id'=>$typeid));
-			$stm = $DBH->prepare("DELETE FROM imas_drillassess_sessions WHERE drillassessid=:drillassessid");
-			$stm->execute(array(':drillassessid'=>$typeid));
-			$stm = $DBH->prepare("SELECT itemorder FROM imas_courses WHERE id=:id");
-			$stm->execute(array(':id'=>$cid));
-			$items = unserialize($stm->fetchColumn(0));
-
-			$blocktree = explode('-',$block);
-			$sub =& $items;
-			for ($i=1;$i<count($blocktree);$i++) {
-				$sub =& $sub[$blocktree[$i]-1]['items']; //-1 to adjust for 1-indexing
-			}
-			$key = array_search($itemid,$sub);
-			if ($key!==false) {
-				array_splice($sub,$key,1);
-				$itemorder = serialize($items);
-				$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
-				$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
-			}
+            delitembyid($itemid);
+            delitemeorderbyid($itemid, $block);
 		}
 		$DBH->commit();
-        $result = TeacherAuditLog::addTracking(
-            $cid,
-            "Delete Item",
-            $itemid,
-            array(
-                'itemtype'=>$itemtype,
-                'typeid'=>$typeid,
-                'item_name'=>$item_name
-            )
-        );
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
 
 		exit;

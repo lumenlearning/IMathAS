@@ -253,8 +253,8 @@
 					} else {
                         $stm = $DBH->prepare("UPDATE imas_grades SET score=NULL,feedback=:feedback WHERE userid=:userid AND gradetype='offline' AND gradetypeid=:gradetypeid");
                         $update = array(':feedback'=>$_POST['feedback'.$k], ':userid'=>$k, ':gradetypeid'=>$gbItem);
-                        $stm->execute($update);
                     }
+                    $stm->execute($update);
                     if ($stm->rowCount() > 0) {
                         $update['type'] = 'offline';
                         $result = TeacherAuditLog::addTracking(
