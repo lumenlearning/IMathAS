@@ -181,20 +181,18 @@ class AssessRecord
       }
       $stm = $this->DBH->prepare($query);
       $stm->execute($qarr);
-      if ($stm->rowCount()>0 && $this->data['scoreoverride']==true) {
-          $this->loadRecord($this->curUid);
-              //do we want to keep the score data? if so we need to decode or else unset
+      if ($stm->rowCount()>0 && isset( $qarr[':scoreddata'])) {
           $this->assessRecord['scoreddata'] = json_decode(gzdecode($this->assessRecord['scoreddata']), true);
           $qarr[':scoreddata'] = json_decode(gzdecode($qarr[':scoreddata']), true);
-          $result = TeacherAuditLog::addTracking(
+          $override = $this->array_diff_assoc_recursive($this->assessRecord['scoreddata'],$qarr[':scoreddata']);
+          TeacherAuditLog::addTracking(
               $this->assess_info->getCourseId(),
               "Change Grades",
               $this->curAid,
               array(
                   'Assessment Ver' => 2,
                   'studentid' => $this->curUid,
-                  'old score' => $this->assessRecord['score'],
-                  'new score' => $qarr[':score']
+                  'override' => $override
               )
           );
       }
@@ -202,8 +200,26 @@ class AssessRecord
       $this->need_to_record = false;
     }
   }
+  private function array_diff_assoc_recursive($firstArray, $secondArray) {
+      $aReturn = array();
+      foreach ($firstArray as $mKey => $mValue) {
+          if (array_key_exists($mKey, $secondArray)) {
+              if (is_array($mValue)) {
+                  $aRecursiveDiff = $this->array_diff_assoc_recursive($mValue, $secondArray[$mKey]);
+                  if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
+              } else {
+                  if ($mValue != $secondArray[$mKey]) {
+                      $aReturn[$mKey] = $mValue;
+                  }
+              }
+          } else {
+              $aReturn[$mKey] = $mValue;
+          }
+      }
+      return $aReturn;
+  }
 
-  /**
+    /**
    * Create a new record in the database.  Call after loadRecord.
    *
    * @param  array   $users         Array of users to create record for.
