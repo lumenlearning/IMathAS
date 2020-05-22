@@ -197,14 +197,14 @@ function save(?int $bannerId): void
     $userTimezone = new DateTimeZone(getUserTimezoneName());
 
     if ('1' != $_POST['start-immediately']) {
-        $dateTime = DateTime::createFromFormat('Y-m-d g:i A', $_POST['sdate'], $userTimezone);
+        $dateTime = DateTime::createFromFormat('m/d/Y g:i A', $_POST['sdate'], $userTimezone);
         $banner->setStartAt($dateTime);
     } else {
         $banner->setStartAt(null);
     }
 
     if ('1' != $_POST['never-ending']) {
-        $dateTime = DateTime::createFromFormat('Y-m-d g:i A', $_POST['edate'], $userTimezone);
+        $dateTime = DateTime::createFromFormat('m/d/Y g:i A', $_POST['edate'], $userTimezone);
         $banner->setEndAt($dateTime);
     } else {
         $banner->setEndAt(null);
@@ -247,13 +247,13 @@ function modify_form(string $action, ?int $bannerId): void
             $startImmediately = true;
         } else {
             $startImmediately = false;
-            $startDateTime = date('Y-m-d g:i A', $banner->getStartAt()->getTimestamp());
+            $startDateTime = date('m/d/Y g:i A', $banner->getStartAt()->getTimestamp());
         }
         if (is_null($banner->getEndAt())) {
             $neverEnding = true;
         } else {
             $neverEnding = false;
-            $endDateTime = date('Y-m-d g:i A', $banner->getEndAt()->getTimestamp());
+            $endDateTime = date('m/d/Y g:i A', $banner->getEndAt()->getTimestamp());
         }
     } else {
         $id = '';
@@ -268,8 +268,8 @@ function modify_form(string $action, ?int $bannerId): void
         $studentContent = '';
         $startImmediately = false;
         $neverEnding = false;
-        $startDateTime = strftime('%Y-%m-%d 12:00 AM', time());
-        $endDateTime = strftime('%Y-%m-%d 11:59 PM', time() + (86400 * 7));
+        $startDateTime = strftime('%m/%d/%Y 12:00 AM', time());
+        $endDateTime = strftime('%m/%d/%Y 12:00 AM', time() + (86400 * 8));
     }
 
     include(__DIR__ . '/views/banner/edit_banner.php');

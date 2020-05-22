@@ -16,7 +16,7 @@ $(document).ready(function () {
 
   $(".date-input").flatpickr({
     enableTime: true,
-    dateFormat: "Y-m-d h:i K",
+    dateFormat: "m/d/Y h:i K",
   });
 });
 
