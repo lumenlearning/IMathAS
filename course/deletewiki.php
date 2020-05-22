@@ -4,7 +4,7 @@
 
 /*** master php includes *******/
 require("../init.php");
-require_once("../includes/TeacherAuditLog.php");
+require("delitembyid.php");
 
 /*** pre-html data manipulation, including function code *******/
 
@@ -25,8 +25,6 @@ if (!(isset($_GET['cid'])) || !(isset($_GET['block']))) { //if the cid is missin
 	$block = Sanitize::stripHtmlTags($_GET['block']);
     $typeid = Sanitize::onlyInt($_GET['id']);
 	if ($_POST['remove']=="really") {
-        $stm = $DBH->query("SELECT name FROM imas_wikis WHERE id=$typeid");
-        $item_name = $stm->fetchColumn(0);
         $itemtype = 'Wiki';
 		$DBH->beginTransaction();
 		$stm = $DBH->prepare("SELECT id FROM imas_items WHERE typeid=:typeid AND itemtype=$itemtype AND courseid=:courseid");
