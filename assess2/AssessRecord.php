@@ -1556,6 +1556,8 @@ class AssessRecord
         if (isset($overrides[$pn])) {
           $partrawscores[$pn] = $overrides[$pn];
           $partscores[$pn] = round($overrides[$pn] * $qsettings['points_possible'] * $answeights[$pn]/$answeightTot,3);
+          $parts[$pn]['rawscore'] = $partrawscores[$pn];
+          $parts[$pn]['score'] = $partscores[$pn];
         }
         continue;
       }
