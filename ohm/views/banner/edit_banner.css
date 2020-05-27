@@ -23,10 +23,6 @@
     display: flex;
 }
 
-.banner-timestamp-entry input[type="checkbox"] {
-    margin-left: 8px;
-}
-
 .banner-settings-title {
     font-size: 120%;
 }
