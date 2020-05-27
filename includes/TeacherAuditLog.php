@@ -64,12 +64,12 @@ class TeacherAuditLog
     }
 
     /**
-     * @param  int $cid    resolves to imas_courses.id
-     * @param  int $itemid depends on the "action" of tracking
-     * @param  int $action must match the ACTIONS const
+     * @param  int    $cid    resolves to imas_courses.id
+     * @param  int    $itemid depends on the "action" of tracking
+     * @param  string $action must match the ACTIONS const
      * @return array associative array of logs
      */
-    public static function findCourseItemAction(int $cid, int $itemid, int $action): array
+    public static function findCourseItemAction(int $cid, int $itemid, string $action): array
     {
         $query = "SELECT id, userid, courseid, action, itemid, metadata, created_at FROM imas_teacher_audit_log "
             . "WHERE courseid=? AND itemid=? AND action=? ORDER BY created_at DESC";
