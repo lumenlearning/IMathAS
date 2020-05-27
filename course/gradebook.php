@@ -18,7 +18,6 @@
 
 
 require("../init.php");
-require_once("../includes/TeacherAuditLog.php");
 $cid = Sanitize::courseId($_GET['cid']);
 if (isset($teacherid)) {
 	$isteacher = true;
