@@ -1075,7 +1075,18 @@ if (isset($CFG['hooks']['course/gb-viewasid'])) {
 					echo ' Seed: '.Sanitize::onlyInt($seeds[$i]);
 					if (isset($CFG['GEN']['sendquestionproblemsthroughcourse'])) {
 						$quoteq = 'quoteq='.Sanitize::encodeUrlParam("0-$qsetid-{$seeds[$i]}-reperr-{$GLOBALS['assessver']}");
-						echo ". <a href=\"$imasroot/msgs/msglist.php?add=new&cid={$CFG['GEN']['sendquestionproblemsthroughcourse']}&to={$owners[$questions[$i]]}&title=Problem%20with%20question%20id%20$qsetid&$quoteq\" target=\"_blank\">Message owner</a> to report problems.";
+						// ####### Begin OHM-specific changes ##################################################################
+						// ####### Begin OHM-specific changes ##################################################################
+						// ####### Begin OHM-specific changes ##################################################################
+						// ####### Begin OHM-specific changes ##################################################################
+						// ####### Begin OHM-specific changes ##################################################################
+                        // OHM-specific changes: Changed anchor text.
+						echo ". <a href=\"$imasroot/msgs/msglist.php?add=new&cid={$CFG['GEN']['sendquestionproblemsthroughcourse']}&to={$owners[$questions[$i]]}&title=Problem%20with%20question%20id%20$qsetid&$quoteq\" target=\"_blank\">Report Question Bug</a>.";
+						// ####### End OHM-specific changes ####################################################################
+						// ####### End OHM-specific changes ####################################################################
+						// ####### End OHM-specific changes ####################################################################
+						// ####### End OHM-specific changes ####################################################################
+						// ####### End OHM-specific changes ####################################################################
 					}
 					echo ')';
 

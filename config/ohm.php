@@ -175,6 +175,11 @@ $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY');
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL');
 $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
 
+$questionErrorMsgToUserid = getenv('QUESTION_ERROR_MSG_USERID') ?
+    getenv('QUESTION_ERROR_MSG_USERID') : 718166;
+$CFG['GEN']['qerrorsendto'] = [$questionErrorMsgToUserid, 'msg',
+    'Report Question Bug', true];
+
 $CFG['coursebrowser'] = 'coursebrowserprops.js';
 $CFG['coursebrowsermsg'] = 'Copy a template course';
 
