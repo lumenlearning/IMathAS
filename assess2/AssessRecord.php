@@ -2862,16 +2862,22 @@ class AssessRecord
   /**
    * Save score overrides
    * @param array $scores array with keys av-qn-qv-pn, or gen, or scored-qn-pn
+   * @return array $changes array with av-qn-qv-pn, with old and new values
    */
   public function setGbScoreOverrides($scores) {
     $this->parseData();
     $by_question = ($this->assess_info->getSetting('submitby') == 'by_question');
     $doRetotal = false;
+    $changes = array();
     if (isset($scores['gen'])) { // general score override
       if ($scores['gen'] === '') {
+        if (isset($this->data['scoreoverride'])) {
+          $changes['gen'] = ['old'=>$this->data['scoreoverride'], 'new'=>''];
+        }
         unset($this->data['scoreoverride']);
         $doRetotal = true;
       } else {
+        $changes['gen'] = ['old'=>$this->data['scoreoverride'], 'new'=>$scores['gen']];
         $this->data['scoreoverride'] = floatval($scores['gen']);
         $this->assessRecord['score'] = floatval($scores['gen']);
         // mark assessment as having a submitted take, so grade will show in GB
@@ -2896,11 +2902,18 @@ class AssessRecord
       } else {
         list($av,$qn,$qv,$pn) = array_map('intval', $keyparts);
       }
+      $chgkey = "$av-$qn-$qv-$pn";
       $qdata = &$this->data['assess_versions'][$av]['questions'][$qn]['question_versions'][$qv];
       if (!empty($qdata['singlescore'])) {
         if ($score === '') {
+          if (isset($qdata['scoreoverride'])) {
+            $changes[$chgkey] = ['old'=>$qdata['scoreoverride'], 'new'=>''];
+          }
           unset($qdata['scoreoverride']);
         } else {
+          if (floatval($score) != $qdata['scoreoverride']) {
+            $changes[$chgkey] = ['old'=>$qdata['scoreoverride'], 'new'=>$score];
+          }
           $qdata['scoreoverride'] = floatval($score);
         }
       } else {
@@ -2908,8 +2921,14 @@ class AssessRecord
           $qdata['scoreoverride'] = array();
         }
         if ($score === '') {
+          if (isset($qdata['scoreoverride'][$pn])) {
+            $changes[$chgkey] = ['old'=>$qdata['scoreoverride'][$pn], 'new'=>''];
+          }
           unset($qdata['scoreoverride'][$pn]);
         } else {
+          if (floatval($score) != $qdata['scoreoverride'][$pn]) {
+            $changes[$chgkey] = ['old'=>$qdata['scoreoverride'][$pn], 'new'=>$score];
+          }
           $qdata['scoreoverride'][$pn] = floatval($score);
         }
       }
@@ -2920,6 +2939,7 @@ class AssessRecord
     if (!empty($scores) || $doRetotal) {
       $this->reTotalAssess();
     }
+    return $changes;
   }
 
   /**
@@ -3011,6 +3031,7 @@ class AssessRecord
     $this->parseData();
     $replacedDeleted = false;
     $scoresToLog = array();
+    $qScoresToLog = array();
     $origtype = $type;
     $origScore = $this->assessRecord['score'];
     $islogged = false;
@@ -3072,6 +3093,11 @@ class AssessRecord
       // delete question version entirely
       $aver = &$this->data['assess_versions'][$av];
       $qvers = &$aver['questions'][$qn]['question_versions'];
+      // only log if it's scored version
+      if ($aver['questions'][$qn]['scored_version'] == $qv) {
+        $qScoresToLog = ['av'=>$av, 'qv'=>$qv, 'qn'=>$qn,
+          'score'=>$aver['questions'][$qn]['score']];
+      }
       if (count($qvers) == 1) { // only 1 ver, so will need to rebuild it
         list($oldquestions, $oldseeds) = $this->getOldQuestions();
         list($question, $seed) = $this->assess_info->regenQuestionAndSeed($qvers[0]['qid'], $oldseeds, $oldquestions);
@@ -3087,6 +3113,11 @@ class AssessRecord
     } else if ($type == 'qver' && $keepver == 1) {
       $aver = &$this->data['assess_versions'][$av];
       $qver = &$aver['questions'][$qn]['question_versions'][$qv];
+      // only log if it's scored version
+      if ($aver['questions'][$qn]['scored_version'] == $qv) {
+        $qScoresToLog = ['av'=>$av, 'qv'=>$qv, 'qn'=>$qn,
+          'score'=>$aver['questions'][$qn]['score']];
+      }
       // clear out tries
       $qver = array(
         'qid' => $qver['qid'],
@@ -3101,11 +3132,24 @@ class AssessRecord
         "Clear Attempts",
         $this->curAid,
         array(
-          'studentid'=>$this->curUid,
+          'stu'=>$this->curUid,
           'grade'=>$origScore,
           'type'=>$origtype,
           'keepver'=>$keepver,
           'attempt_scores'=>$scoresToLog
+        )
+      );
+    }
+    if (!empty($qScoresToLog)) {
+      TeacherAuditLog::addTracking(
+        $this->assess_info->getCourseId(),
+        "Clear Attempts",
+        $this->curAid,
+        array(
+          'stu'=>$this->curUid,
+          'type'=>$origtype,
+          'keepver'=>$keepver,
+          'qattempt'=>$qScoresToLog
         )
       );
     }
