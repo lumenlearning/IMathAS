@@ -226,6 +226,10 @@ export default {
       return (this.questionData.jsparams &&
         this.questionData.jsparams.hasseqnext);
     },
+    hasSubmitAll () {
+      return (this.questionData.jsparams &&
+        this.questionData.jsparams.submitall === 1);
+    },
     buttonsOk () {
       return (store.inProgress &&
         this.questionContentLoaded &&
@@ -281,6 +285,8 @@ export default {
       }
       if (this.hasSeqNext) {
         label += '_seqnext';
+      } else if (this.hasSubmitAll) {
+        label += '_submitall';
       }
       return this.$t(label);
     },
