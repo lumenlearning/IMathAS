@@ -2,7 +2,7 @@
 // IMathAS: Main launch page for assess2 assessment player
 // (c) 2019 David Lippman
 
-$lastupdate = '20200501';
+$lastupdate = '20200528';
 
 require('../init.php');
 if (empty($_GET['cid']) || empty($_GET['aid'])) {
@@ -39,7 +39,7 @@ $placeinhead .= '<script src="'.$imasroot.'/mathquill/mathquill.min.js?v=022720"
 $placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=042920" type="text/javascript"></script>';
 $placeinhead .= '<script src="https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js"></script>';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mathquill-basic.css">
-  <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mqeditor.css">';
+  <link rel="stylesheet" type="text/css" href="'.$imasroot.'/mathquill/mqeditor.css?v=052920">';
 if ($isltilimited || $inTreeReader) {
   $placeinhead .= '<script>var exiturl = "";</script>';
 } else if ($isdiag) {
