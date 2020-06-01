@@ -1091,6 +1091,26 @@ div#ohmEditGroup {
 	pointer-events: none;
 }
 
+/* Override imascore.css to reposition gear icon dropdown menu on course syllabus  */
+.itemhdr {
+	display: flex;
+}
+
+/* div required to override imasscore.css */
+div.itemhdr div.title {
+	margin-right: 0; 
+	margin-left: 16px; 
+}
+
+.itemhdr .itemhdricon {
+	position: relative;
+}
+
+.itemhdr .itemhdrdd {
+	position: relative;
+	margin-left: 16px;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1023px) {
 	.modal-inner-columns h2 {
