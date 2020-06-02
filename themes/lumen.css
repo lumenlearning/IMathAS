@@ -1098,8 +1098,8 @@ div#ohmEditGroup {
 
 /* div required to override imasscore.css */
 div.itemhdr div.title {
-	margin-right: 0; 
 	margin-left: 16px; 
+	margin-right: 0; 
 }
 
 .itemhdr .itemhdricon {
@@ -1107,8 +1107,8 @@ div.itemhdr div.title {
 }
 
 .itemhdr .itemhdrdd {
-	position: relative;
 	margin-left: 16px;
+	position: relative;
 }
 
 /* MEDIA QUERIES */
