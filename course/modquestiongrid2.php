@@ -263,7 +263,7 @@ if (isset($_POST['checked'])) { //modifying existing
 				$qrows[$row['id']] .= '<option value="2" '.(($row['showhints']==2)?'selected="selected"':'').'>'._('Video buttons').'</option>';
 				$qrows[$row['id']] .= '<option value="3" '.(($row['showhints']==3)?'selected="selected"':'').'>'._('Hints and Video buttons').'</option>';
 				$qrows[$row['id']] .= '</select></td>';
-                if (isset($CFG['showcalculator']) && ($groupid == 11 || $myrights == 100 || $userid == 541991)) {
+                if (isset($CFG['showcalculator'])) {
                     $qrows[$row['id']] .= "<td><select name=\"showcalculator{$row['id']}\">";
                     $qrows[$row['id']] .= '<option value="default" '.(($row['showcalculator']=='default')?'selected="selected"':'').'>'._('Use Default').'</option>';
                     $qrows[$row['id']] .= '<option value="none" '.(($row['showcalculator']=='none')?'selected="selected"':'').'>'._('No').'</option>';
@@ -282,11 +282,7 @@ if (isset($_POST['checked'])) { //modifying existing
 			echo "<th>Q#<br/>&nbsp;</th><th>Description<br/>&nbsp;</th><th></th><th></th>";
 			echo '<th>Tries<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
             echo '<th>Show hints &amp; video buttons?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
-            if (isset($CFG['showcalculator']) &&
-                ($groupid==11 || $myrights == 100 ||
-                    in_array($userid,[541991, 11836, 651, 34995, 358648, 540549, 606380])
-                )
-            ) {
+            if (isset($CFG['showcalculator'])) {
                 echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
             }
 			echo "<th>Additional Copies to Add<br/>&nbsp;</th></tr></thead>";
@@ -321,7 +317,7 @@ if (isset($_POST['checked'])) { //modifying existing
 			echo '<th>Points<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defpoints']).'</i></th>';
 			echo '<th>Tries (0 for unlimited)<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
 			echo '<th>Show hints &amp; video buttons?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
-            if (isset($CFG['showcalculator']) && ($groupid == 11 || $myrights == 100 || $userid == 541991)) {
+            if (isset($CFG['showcalculator'])) {
                 echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
             }
 			echo "<th>Number of Copies to Add</th></tr></thead>";
@@ -371,7 +367,7 @@ if (isset($_POST['checked'])) { //modifying existing
 				echo '<option value="1">'._('Hints').'</option>';
 				echo '<option value="2">'._('Video buttons').'</option>';
 				echo '<option value="3">'._('Hints and Video buttons').'</option></select></td>';
-                if (isset($CFG['showcalculator']) && ($groupid == 11 || $myrights == 100 || $userid == 541991)) {
+                if (isset($CFG['showcalculator'])) {
                     echo "<td><select name=\"showcalculator" . Sanitize::encodeStringForDisplay($row[0]) . "\">";
                     echo '<option value="default" selected="selected">' . _('Use Default') . '</option>';
                     echo '<option value="none">' . _('No') . '</option>';
