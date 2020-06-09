@@ -68,7 +68,7 @@
           <icon-calc :calc-type="calcType"></icon-calc>
           Calculator
       </button>
-      <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
+      <!-- <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}"> -->
         <vue-draggable-resizeable
           v-show="showCalculator"
           class-name-active="calculator-active"
@@ -84,6 +84,7 @@
           :w="calcType === 'graphing' ? 600 : 500"
           :x="400"
           :y="-32"
+          :z="2"
           :min-width="calcType === 'graphing' ? 500 : 400"
           :min-height="400"
         >
@@ -124,7 +125,7 @@
             </figure>
           </div>
         </vue-draggable-resizeable>
-      </div>
+      <!-- </div> -->
     </div>
 
 
