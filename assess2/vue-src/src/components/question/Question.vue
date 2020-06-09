@@ -68,67 +68,63 @@
           <icon-calc :calc-type="calcType"></icon-calc>
           Calculator
       </button>
-      <!-- <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}"> -->
-        <vue-draggable-resizeable
-          v-show="showCalculator"
-          class-name-active="calculator-active"
-          ref="calcResize"
-          @resizing="getCalcDimensions"
-          :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
-          :style="{position: calcPosition}"
-          :draggable="calcIsPoppedOut"
-          :resizable="calcIsPoppedOut"
-          :handles="['br']"
-          :drag-handle="'.calc-header'"
-          :h="500"
-          :w="calcType === 'graphing' ? 600 : 500"
-          :x="400"
-          :y="-32"
-          :z="2"
-          :min-width="calcType === 'graphing' ? 500 : 400"
-          :min-height="400"
-        >
-          <div slot="br">
-            <icon-drag></icon-drag>
-          </div>
-          <div class="calc-header">
-            <span v-if="!calcIsPoppedOut">
-              <icon-calc :calc-type="calcType"></icon-calc> Calculator
-            </span>
-            <span v-else> Question {{qn + 1}} Calculator</span>
-            <div>
+      <vue-draggable-resizeable
+        v-show="showCalculator"
+        class-name-active="calculator-active"
+        ref="calcResize"
+        @resizing="getCalcDimensions"
+        :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
+        :style="{position: calcPosition}"
+        :draggable="calcIsPoppedOut"
+        :resizable="calcIsPoppedOut"
+        :handles="['br']"
+        :drag-handle="'.calc-header'"
+        :h="500"
+        :w="calcType === 'graphing' ? 600 : 500"
+        :x="400"
+        :y="-32"
+        :z="2"
+        :min-width="calcType === 'graphing' ? 500 : 400"
+        :min-height="400"
+      >
+        <div slot="br">
+          <icon-drag></icon-drag>
+        </div>
+        <div class="calc-header">
+          <span v-if="!calcIsPoppedOut">
+            <icon-calc :calc-type="calcType"></icon-calc> Calculator
+          </span>
+          <span v-else> Question {{qn + 1}} Calculator</span>
+          <div>
+            <button
+                type="button"
+                :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
+                class="button popout"
+                @click="toggleCalcPopOut">
+
+                <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
+                <icon-pop-in v-else></icon-pop-in>
+              </button>
               <button
-                  type="button"
-                  :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
-                  class="button popout"
-                  @click="toggleCalcPopOut">
-
-                  <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
-                  <icon-pop-in v-else></icon-pop-in>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Close calculator"
-                  class="button"
-                  @click="closeCalc"
-                >
-                  <icon-close></icon-close>
-                </button>
-              </div>
-          </div>
-          <div class="calc-body">
-            <figure
-              :id="'calc' + qn"
-              ref="figure"
-              :class="{ 'graphing' : calcType === 'graphing', }"
-              :style="{'height': (calcHeight - 84) + 'px'}">
-            </figure>
-          </div>
-        </vue-draggable-resizeable>
-      <!-- </div> -->
+                type="button"
+                aria-label="Close calculator"
+                class="button"
+                @click="closeCalc"
+              >
+                <icon-close></icon-close>
+              </button>
+            </div>
+        </div>
+        <div class="calc-body">
+          <figure
+            :id="'calc' + qn"
+            ref="figure"
+            :class="{ 'graphing' : calcType === 'graphing', }"
+            :style="{'height': (calcHeight - 84) + 'px'}">
+          </figure>
+        </div>
+      </vue-draggable-resizeable>
     </div>
-
-
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
         type = "button"
@@ -754,12 +750,6 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .calc-popout .calc-body {
   margin: 16px;
   margin-bottom: 32px;
-}
-
-/* maintain height of question section when calculator is popped out */
-.calc-fixed-container {
-  height: 530px;
-  position: relative;
 }
 
 .handle {
