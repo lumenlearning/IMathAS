@@ -43,8 +43,37 @@ $GLOBALS['student_pay_api']['debug'] = true;
 
 //$CFG['coursebrowser'] = 'coursebrowserprops.js';
 //$CFG['coursebrowsermsg'] = 'Copy a template course';
+//$CFG['assess2-use-vue-dev'] = true;
+//$CFG['assess2-use-vue-dev-address'] = 'http://localhost:8080'; // no trailing slash
 
 //zendesk stuff
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY') ?? 'api_key_goes_here';
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL') ?? 'api_url_goes_here';
 $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER') ?? 'ohmsupport@lumenlearning.com';
+
+/*
+ * Handle CORS stuff in local development.
+ * This is INSECURE and SHOULD NOT BE USED IN PRODUCTION.
+ */
+$allowedCorsOrigins = [
+    'https://localhost', // Apache serving OHM.
+    'http://localhost:8080' // vue-cli-service serving assessment player frontend.
+];
+$httpOrigin = $_SERVER['HTTP_ORIGIN'];
+if (!empty($httpOrigin) && in_array($httpOrigin, $allowedCorsOrigins)) {
+    header("Access-Control-Allow-Origin: $httpOrigin", true);
+    header('Access-Control-Allow-Credentials: true', true);
+}
+
+/*
+ * Handle CORS stuff for ngrok
+ */
+$allowedCorsDomains = [
+    'ngrok.io'
+];
+foreach ($allowedCorsDomains as $allowedCorsDomain) {
+    if (!empty($httpOrigin) && 0 != strpos($httpOrigin, $allowedCorsDomain)) {
+        header("Access-Control-Allow-Origin: $httpOrigin", true);
+        header('Access-Control-Allow-Credentials: true', true);
+    }
+}
