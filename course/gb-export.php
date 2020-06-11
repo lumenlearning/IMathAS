@@ -248,6 +248,8 @@ function gbInstrCatHdrs(&$gbt, &$pointsrow) {
 					} else {
 						echo '<br/>'.$gbt[0][2][$i][11].'%';
 					}
+				} else if ($pointsln==1) {
+					$pointsrow .= '<th></th>';
 				}
 			}
 

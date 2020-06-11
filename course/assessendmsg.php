@@ -40,7 +40,8 @@ require_once("../includes/sanitize.php");
 			$stm->execute(array(':endmsg'=>$msgstr));
 
 		}
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
+		$btf = isset($_GET['btf']) ? '&folder=' . Sanitize::encodeUrlParam($_GET['btf']) : '';
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=$cid" .$btf. "&r=" . Sanitize::randomQueryStringParam());
 
 		exit;
 	}
