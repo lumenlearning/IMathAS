@@ -1093,10 +1093,10 @@ switch($_GET['action']) {
 				#### End OHM-specific code #####################################################################
 				#### End OHM-specific code #####################################################################
 				#### End OHM-specific code #####################################################################
-				echo '<span class="form">'._('Promote Course').'</span>';
-				echo '<span class=formright><label><input type=checkbox name=promote value=1 onchange="changepromote()" ';
-				if (($istemplate&16)==16) {echo 'checked="checked"';};
-				echo ' /> '._('Promote in Course Browser').'</label></span><br class="form">';
+			echo '<span class="form">'._('Promote Course').'</span>';
+			echo '<span class=formright><label><input type=checkbox name=promote value=1 onchange="changepromote()" ';
+			if (($istemplate&16)==16) {echo 'checked="checked"';};
+			echo ' /> '._('Promote in Course Browser').'</label></span><br class="form">';
 				#### Begin OHM-specific code #####################################################################
 				#### Begin OHM-specific code #####################################################################
 				#### Begin OHM-specific code #####################################################################
@@ -1616,7 +1616,7 @@ switch($_GET['action']) {
 			} else if (count($words)==1) {
 				$query .= "(iu.LastName LIKE ? OR iu.FirstName Like ? OR iu.SID LIKE ?)";
 				array_push($qarr, $words[0].'%', $words[0].'%', '%'.$words[0].'%');
-			} else if (count($words)==2) {
+			} else if (count($words)>1) {
 				$query .= "((iu.LastName LIKE ? AND iu.FirstName Like ?) OR (iu.LastName LIKE ? AND iu.FirstName Like ?))";
 				array_push($qarr, $words[0].'%', $words[1].'%', $words[1].'%', $words[0].'%');
 			}
