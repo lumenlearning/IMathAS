@@ -75,11 +75,11 @@
           ref="calcResize"
           @resizing="getCalcDimensions"
           :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
+          :drag-cancel="'.drag-cancel'"
           :style="{position: calcPosition}"
           :draggable="calcIsPoppedOut"
           :resizable="calcIsPoppedOut"
           :handles="['br']"
-          :drag-handle="'.calc-header'"
           :h="500"
           :w="calcType === 'graphing' ? 600 : 500"
           :x="400"
@@ -117,6 +117,7 @@
           </div>
           <div class="calc-body">
             <figure
+              class="drag-cancel"
               :id="'calc' + qn"
               ref="figure"
               :class="{ 'graphing' : calcType === 'graphing', }"
