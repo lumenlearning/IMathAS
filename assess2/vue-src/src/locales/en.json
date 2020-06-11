@@ -367,6 +367,7 @@
     "clear_qwork": "Delete work on question",
     "question_id": "Question ID",
     "seed": "Seed",
+    "msg_owner_question_bug": "Report Question Bug",
     "msg_owner": "Message owner to report problems",
     "had_help": "Had help available",
     "save": "Save Changes",

@@ -192,6 +192,34 @@ If deleted on both ends, delete from DB
         ':msgfrom'=>$userid, ':senddate'=>$now, ':courseid'=>$cidP));
 			$msgid = $DBH->lastInsertId();
 
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            if (
+                isset($CFG['GEN']['qerrorsendto'])
+                && !empty($CFG['GEN']['qerrorsendto'][3])
+                && isset($_POST['is-error-report'])
+            ) {
+                $stm = $DBH->prepare("INSERT INTO imas_msgs
+                    (title,message,msgto,msgfrom,senddate,courseid) VALUES
+                    (:title, :message, :msgto, :msgfrom, :senddate, :courseid)");
+                $stm->execute([
+                    ':title' => $subjectPost,
+                    ':message' => $messagePost,
+                    ':msgto' => $CFG['GEN']['qerrorsendto'][3],
+                    ':msgfrom' => $userid,
+                    ':senddate' => $now,
+                    ':courseid' => $cidP
+                ]);
+            }
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+
 			if ($_GET['replyto']>0) {
 				$query = "UPDATE imas_msgs SET replied=1";
 				if (isset($_POST['sendunread'])) {
@@ -369,6 +397,19 @@ If deleted on both ends, delete from DB
 				echo " onsubmit=\"return checkrecipient();\"";
 			}
 			echo ">\n";
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            // ####### Begin OHM-specific changes ##################################################################
+            if (isset($_GET['quoteq']) && 0 != strpos($_GET['quoteq'], 'reperr')) {
+                echo '<input type="hidden" name="is-error-report" value="true"/>' . "\n";
+            }
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
+            // ####### End OHM-specific changes ####################################################################
 			echo "<span class=form>To:</span><span class=formright>\n";
 			if (isset($_GET['to'])) {
 				$to = Sanitize::onlyInt($_GET['to']);
