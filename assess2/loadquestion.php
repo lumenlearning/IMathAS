@@ -60,6 +60,9 @@ if ($isstudent) {
 // reject if not available
 if ($assess_info->getSetting('available') === 'practice' && !empty($_POST['practice'])) {
   $in_practice = true;
+} else if ($assess_info->getSetting('available') === 'yes' && !empty($_POST['practice'])) {
+  echo '{"error": "not_practice"}';
+  exit;
 } else if ($assess_info->getSetting('available') === 'yes' || $canViewAll) {
   $in_practice = false;
   if ($canViewAll) {
@@ -155,30 +158,29 @@ if (!$isteacher && $assess_info->getSetting('displaymethod') === 'livepoll') {
 
 // Try a Similar Question, if requested
 if ($doRegen) {
-  if (!isset($sessiondata['regendelay'])) {
-    $sessiondata['regendelay'] = 2;
+  if (!isset($_SESSION['regendelay'])) {
+    $_SESSION['regendelay'] = 2;
   }
-  if (isset($sessiondata['lastregen'])) {
-    if ($now-$sessiondata['lastregen']<$sessiondata['regendelay']) {
-      $sessiondata['regendelay'] = 5;
-      if (!isset($sessiondata['regenwarnings'])) {
-        $sessiondata['regenwarnings'] = 1;
+  if (isset($_SESSION['lastregen'])) {
+    if ($now-$_SESSION['lastregen']<$_SESSION['regendelay']) {
+      $_SESSION['regendelay'] = 5;
+      if (!isset($_SESSION['regenwarnings'])) {
+        $_SESSION['regenwarnings'] = 1;
       } else {
-        $sessiondata['regenwarnings']++;
+        $_SESSION['regenwarnings']++;
       }
-      if ($sessiondata['regenwarnings']>10) {
+      if ($_SESSION['regenwarnings']>10) {
         $stm = $DBH->prepare("INSERT INTO imas_log (time,log) VALUES (:time, :log)");
         $stm->execute(array(':time'=>$now, ':log'=>"Over 10 regen warnings triggered by $userid"));
       }
       echo '{"error": "fast_regen"}';
       exit;
     }
-    if ($now - $sessiondata['lastregen'] > 20) {
-      $sessiondata['regendelay'] = 2;
+    if ($now - $_SESSION['lastregen'] > 20) {
+      $_SESSION['regendelay'] = 2;
     }
   }
-  $sessiondata['lastregen'] = $now;
-  writesessiondata();
+  $_SESSION['lastregen'] = $now;
   if ($assess_record->canRegenQuestion($qn, $qid)) {
     $qid = $assess_record->buildNewQuestionVersion($qn, $qid);
     $assess_info->loadQuestionSettings(array($qid), true);

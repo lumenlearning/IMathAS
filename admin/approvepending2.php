@@ -6,7 +6,7 @@ if ($myrights<100 && ($myspecialrights&64)!=64) {exit;}
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/approvepending'])) {
-	require(__DIR__.'/../'.$CFG['hooks']['admin/approvepending']);
+	require($CFG['hooks']['admin/approvepending']);
 }
 
 $newStatus = Sanitize::onlyInt($_POST['newstatus']);
@@ -95,7 +95,7 @@ if (!empty($newStatus)) {
 			$message = getApproveMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
 		} else {
 			$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
-			$message .= '<p>Welcome to '.$installname.'.  Your account has been activated, and you\'re all set to log in as an instructor using the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b> and the password you provided.</p>';
+			$message .= '<p>'.sprintf(_('Welcome to %s.  Your account has been activated, and you\'re all set to log in as an instructor using the username %s and the password you provided.'),$installname,'<b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b>').'</p>';
 		}
 
 		//call hook, if defined
@@ -183,13 +183,14 @@ function getGroups() {
 
 //add fields based on your new instructor request form
 //and then add the "search" entry
-$reqFields = array(
-	'school' => 'School',
-	'phone' => 'Phone',
-	'url' => 'Verification URL',
-	'search' => 'Search'
-);
-
+if (empty($reqFields)) {
+    $reqFields = array(
+        'school' => 'School',
+        'phone' => 'Phone',
+        'url' => 'Verification URL',
+        'search' => 'Search'
+    );
+}
 
 $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/vue@2.5.6/dist/vue.min.js"></script>';
 $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/fuse.min.js\"></script>";

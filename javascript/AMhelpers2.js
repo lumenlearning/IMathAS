@@ -169,7 +169,23 @@ function init(paramarr, enableMQ) {
       initMultAns(qn);
     }
     if (params.usetinymce) {
-      initeditor("textareas","mceEditor");
+      if (document.getElementById("qn"+qn).disabled &&
+        !document.getElementById("tinyprev"+qn)
+      ) {
+        var html = $("#qn"+qn).val();
+        var div = $("<div>", {"id": "tinyprev"+qn, "class": "intro"});
+        div.html(html);
+        $("#qn"+qn).hide().after(div);
+      } else {
+        initeditor("textareas","mceEditor",null,false,function(ed) {
+          ed.on('blur', function (e) {
+            tinymce.triggerSave();
+            jQuery(e.target.targetElm).triggerHandler('change');
+          }).on('focus', function (e) {
+            jQuery(e.target.targetElm).triggerHandler('focus');
+          })
+        });
+      }
     }
     initEnterHandler(qn);
   }
@@ -324,7 +340,7 @@ function initShowAnswer2() {
         wrap.append(key);
         return;
       }
-      var inbox = $("#mqinput-qn"+inref+",input[type=text]#qn"+inref+",select#qn"+inref);
+      var inbox = $("#mqinput-qn"+inref+",input[type=text]#qn"+inref+",select#qn"+inref+",textarea#qn"+inref);
       if (inbox.length > 0) {
         $(el).prev(".sabtn").remove();
         key.append($(el).hide().removeClass("hidden"));
@@ -404,19 +420,22 @@ function setupDraw(qn) {
   window.drawla[qn] = todraw;
   window.canvases[qn] = allParams[qn].canvas;
   imathasDraw.initCanvases(qn);
-  document.getElementById('drawtools'+qn).addEventListener('click', function(event) {
-    var target = event.target;
-    if (target.hasAttribute('data-drawaction')) {
-      var action = target.getAttribute('data-drawaction');
-      var qn = target.getAttribute('data-qn');
-      if (action === 'clearcanvas') {
-        imathasDraw.clearcanvas(qn);
-      } else if (action === 'settool') {
-        var val = target.getAttribute('data-val');
-        imathasDraw.settool(target, qn, val);
+  var drawtools = document.getElementById('drawtools'+qn);
+  if (drawtools) {
+    drawtools.addEventListener('click', function(event) {
+      var target = event.target;
+      if (target.hasAttribute('data-drawaction')) {
+        var action = target.getAttribute('data-drawaction');
+        var qn = target.getAttribute('data-qn');
+        if (action === 'clearcanvas') {
+          imathasDraw.clearcanvas(qn);
+        } else if (action === 'settool') {
+          var val = target.getAttribute('data-val');
+          imathasDraw.settool(target, qn, val);
+        }
       }
-    }
-  });
+    });
+  }
   var a11ydrawbtn = document.getElementById("qn"+qn).parentNode.querySelector(".a11ydrawadd");
   if (a11ydrawbtn) {
     a11ydrawbtn.addEventListener('click', function(event) {
@@ -1043,6 +1062,9 @@ function processCalcInterval(fullstr, format, ineqvar) {
       break;
     }
     for (j=0; j<2; j++) {
+      if (format.indexOf('decimal')!=-1 && vals[j].match(/[\d\.]e\-?\d/)) {
+        vals[j] = vals[j].replace(/e/,"E"); // allow 3e-4 in place of 3E-4 for decimal answers
+      }
       err += singlevalsyntaxcheck(vals[j], format);
       err += syntaxcheckexpr(vals[j], format);
       if (vals[j].match(/^\s*\-?oo\s*$/)) {
@@ -1371,7 +1393,7 @@ function ineqtointerval(strw, intendedvar) {
       if (pat[2].charAt(0)=='<') {
         interval = (pat[2]=='<'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='<'?')':']');
       } else {
-        interval = (pat[2]=='>'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='>'?')':']');
+        interval = (pat[4]=='>'?'(':'[') + pat[5] + ',' + pat[1] + (pat[2]=='>'?')':']');
       }
       out.push(interval);
     } else if (pat = str.match(/^(.*?)(<=?|>=?)(.*?)$/)) {
@@ -1556,7 +1578,7 @@ function singlevalsyntaxcheck(str,format) {
 		  	}
 		  }
 	} else if (format.indexOf('decimal')!=-1 && format.indexOf('nodecimal')==-1) {
-		if (!str.match(/^\-?(\d+|\d+\.\d*|\d*\.\d+)$/)) {
+		if (!str.match(/^\-?(\d+|\d+\.\d*|\d*\.\d+)([eE]\-?\d+)?$/)) {
 			return (_(" not a valid integer or decimal number")+". ");
 		}
 	} else if (!onlyAscii.test(str)) {

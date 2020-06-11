@@ -199,16 +199,17 @@ $CFG['email']['new_acct_bcclist_ohm_hook'] = array('paul@lumenlearning.com');
 $CFG['GEN']['useSESmail'] = true;
 
 $CFG['hooks']['init'] = 'ohm-hooks/init.php';
-$CFG['hooks']['util/batchcreateinstr'] = 'ohm-hooks/util/batchcreateinstr.php';
+$CFG['hooks']['util/batchcreateinstr'] = '../ohm-hooks/util/batchcreateinstr.php';
 $CFG['hooks']['actions'] = 'ohm-hooks/actions.php';
-$CFG['hooks']['admin/actions'] = 'ohm-hooks/admin/actions.php';
-$CFG['hooks']['admin/approvepending'] = 'ohm-hooks/admin/approvepending2.php';
-$CFG['hooks']['admin/forms'] = 'ohm-hooks/admin/forms.php';
+$CFG['hooks']['admin/actions'] = '../ohm-hooks/admin/actions.php';
+$CFG['hooks']['admin/approvepending'] = '../ohm-hooks/admin/approvepending2.php';
+$CFG['hooks']['admin/forms'] = '../ohm-hooks/admin/forms.php';
 $CFG['hooks']['bltilaunch'] = 'ohm-hooks/bltilaunch.php';
 $CFG['hooks']['validate'] = 'ohm-hooks/validate.php';
 $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
 $CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
+$CFG['hooks']['util/utils'] = '../ohm-hooks/util/utils.php';
 
 $CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js';
 

@@ -219,7 +219,7 @@ if (isset($_GET['id'])) {  //already have id; update
     $pagetitle = "Add " . $item->itemname;
 }
 $curBreadcrumb = $breadcrumbbase;
-if (!isset($sessiondata['ltiitemtype'])) {
+if (!isset($_SESSION['ltiitemtype'])) {
     $curBreadcrumb .= " <a href = \"$imasroot/course/course.php?cid=$cid\">"
         . Sanitize::encodeStringForDisplay($coursename) . "</a> &gt; ";
 }

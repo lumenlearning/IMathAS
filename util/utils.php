@@ -1,13 +1,16 @@
 <?php
 
 require("../init.php");
-if (isset($sessiondata['emulateuseroriginaluser']) && isset($_GET['unemulateuser'])) {
-	$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
-	$stm->execute(array(':userid'=>$sessiondata['emulateuseroriginaluser'], ':sessionid'=>$sessionid));
-	unset($sessiondata['emulateuseroriginaluser']);
-	writesessiondata();
+if (isset($_SESSION['emulateuseroriginaluser']) && isset($_GET['unemulateuser'])) {
+	$_SESSION['userid'] = $_SESSION['emulateuseroriginaluser'];
+	unset($_SESSION['emulateuseroriginaluser']);
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" .Sanitize::randomQueryStringParam());
 	exit;
+}
+
+//Look to see if a hook file is defined, and include if it is
+if (isset($CFG['hooks']['util/utils'])) {
+	require($CFG['hooks']['util/utils']);
 }
 
 if ($myrights >= 75 && isset($_GET['emulateuser'])) {
@@ -20,10 +23,8 @@ if ($myrights >= 75 && isset($_GET['emulateuser'])) {
 			exit;
 		}
 	}
-	$sessiondata['emulateuseroriginaluser'] = $userid;
-	writesessiondata();
-	$stm = $DBH->prepare("UPDATE imas_sessions SET userid=:userid WHERE sessionid=:sessionid");
-	$stm->execute(array(':userid'=>$emu_id, ':sessionid'=>$sessionid));
+	$_SESSION['emulateuseroriginaluser'] = $userid;
+	$_SESSION['userid'] = $emu_id;
 	header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" .Sanitize::randomQueryStringParam());
 	exit;
 }
@@ -106,20 +107,20 @@ if (isset($_POST['updatecaption'])) {
 	echo '<p>Updated '.$chg.' records.</p><p><a href="utils.php">Utils</a></p>';
 	exit;
 }
-	
+
 if (isset($_GET['fixdupgrades'])) {
 	$query = 'DELETE imas_grades FROM imas_grades JOIN ';
 	$query .= "(SELECT min(id) as minid,refid FROM imas_grades WHERE gradetype='forum' AND refid>0 GROUP BY refid having count(id)>1) AS duplic ";
 	$query .= "ON imas_grades.refid=duplic.refid AND imas_grades.gradetype='forum' WHERE imas_grades.id > duplic.minid";
 	$stm = $DBH->query($query);
 	echo "Removed ".($stm->rowCount())." duplicate forum grade records.<br/>";
-	
+
 	$query = 'DELETE imas_grades FROM imas_grades JOIN ';
 	$query .= "(SELECT min(id) as minid,gradetypeid,userid FROM imas_grades WHERE gradetype='offline' GROUP BY gradetypeid,userid having count(id)>1) AS duplic ";
 	$query .= "ON imas_grades.gradetypeid=duplic.gradetypeid AND imas_grades.userid=duplic.userid AND imas_grades.gradetype='offline' WHERE imas_grades.id > duplic.minid";
 	$stm = $DBH->query($query);
 	echo "Removed ".($stm->rowCount())." duplicate offline grade records.<br/>";
-	
+
 	$stm = $DBH->query("DELETE imas_grades FROM imas_grades LEFT JOIN imas_forum_posts ON imas_grades.refid=imas_forum_posts.id WHERE imas_grades.gradetype='forum' AND imas_forum_posts.userid IS NULL");
 	echo "Removed ".($stm->rowCount())." orphaned forum grade records without a corresponding post.<br/>";
 
@@ -136,7 +137,7 @@ if (isset($_POST['action']) && $_POST['action']=='jumptoitem') {
 		$destcid = $stm->fetchColumn(0);
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/addassessment.php?cid=".Sanitize::onlyInt($destcid)."&id=".$aid."&r=".Sanitize::randomQueryStringParam());
 	} else if (!empty($_POST['pqid'])) {
-		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/testquestion.php?qsetid=".Sanitize::onlyInt($_POST['pqid'])."&r=".Sanitize::randomQueryStringParam());
+		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/testquestion2.php?qsetid=".Sanitize::onlyInt($_POST['pqid'])."&r=".Sanitize::randomQueryStringParam());
 	} else if (!empty($_POST['eqid'])) {
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/moddataset.php?cid=admin&id=".Sanitize::onlyInt($_POST['eqid'])."&r=".Sanitize::randomQueryStringParam());
 	}
@@ -256,8 +257,9 @@ if (isset($_GET['form'])) {
 					echo '<li>ID: '.$row['id'].'</li>';
 					if ($row['name']!=null) {
 						echo '<li>Group: '.Sanitize::encodeStringForDisplay($row['name']);
-						if ($row['grouptype']==1) {
-							echo ' (Lumen Customer)';
+						//call hook, if defined
+						if (function_exists('onUserLookup')) {
+							echo onUserLookup($row['grouptype']);
 						}
 						echo '</li>';
 						if ($row['parent']>0) {
@@ -342,7 +344,6 @@ if (isset($_GET['form'])) {
 	}
 	echo '<a href="utils.php?form=lookup">User lookup</a><br/>';
 	echo '<a href="'.$imasroot.'/admin/approvepending2.php">Approve Pending Instructor Accounts</a><br/>';
-	echo '<a href="'.$imasroot.'/admin/approvepending.php">Approve Pending Instructor Accounts (old version)</a><br/>';
 	echo '<a href="utils.php?form=jumptoitem">Jump to Item</a><br/>';
 	echo '<a href="batchcreateinstr.php">Batch Create Instructor Accounts</a><br/>';
 	echo '<a href="batchanon.php">Batch Anonymize Old Accounts</a><br/>';

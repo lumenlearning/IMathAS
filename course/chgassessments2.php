@@ -48,7 +48,7 @@ if (!(isset($teacherid))) {
 		$sets = array();
 		$qarr = array();
 		if ($_POST['copyopts'] != 'DNC') {
-			$tocopy = 'displaymethod,submitby,defregens,defregenpenalty,keepscore,defattempts,defpenalty,showscores,showans,viewingb,scoresingb,ansingb,gbcategory,caltag,shuffle,noprint,istutorial,showcat,allowlate,timelimit,password,reqscoretype,showhints,msgtoinstr,posttoforum,extrefs,showtips,cntingb,minscore,deffeedbacktext,tutoredit,exceptionpenalty,defoutcome';
+			$tocopy = 'displaymethod,submitby,defregens,defregenpenalty,keepscore,defattempts,defpenalty,showscores,showans,viewingb,scoresingb,ansingb,gbcategory,caltag,shuffle,showwork,noprint,istutorial,showcat,allowlate,timelimit,password,reqscoretype,showhints,msgtoinstr,posttoforum,extrefs,showtips,cntingb,minscore,deffeedbacktext,tutoredit,exceptionpenalty,defoutcome';
 			$stm = $DBH->prepare("SELECT $tocopy FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>Sanitize::onlyInt($_POST['copyopts'])));
 			$qarr = $stm->fetch(PDO::FETCH_ASSOC);
@@ -77,6 +77,11 @@ if (!(isset($teacherid))) {
 				} else {
 					$turnoffshuffle +=4;
 				}
+			}
+
+			if ($_POST['showwork'] !== 'DNC') {
+				$sets[] = "showwork=:showwork";
+				$qarr[':showwork'] = Sanitize::onlyInt($_POST['showwork']);
 			}
 
 			if ($_POST['displaymethod'] !== 'DNC') {
@@ -120,7 +125,7 @@ if (!(isset($teacherid))) {
 					$defregenpenalty = 0;
 				}
 			}
-			if ($submitby == 'by_assessment') {
+			if ($submitby == 'by_assessment' && $defregens > 1) {
 				if ($_POST['keepscore'] === 'DNC') {
 					$coreOK = false;
 				} else {
@@ -161,7 +166,11 @@ if (!(isset($teacherid))) {
 			}
 			$viewingb = Sanitize::simpleASCII($_POST['viewingb']);
 			$scoresingb = Sanitize::simpleASCII($_POST['scoresingb']);
-			$ansingb = Sanitize::simpleASCII($_POST['ansingb']);
+			if (!isset($_POST['ansingb'])) {
+				$ansingb = 'never';
+			} else {
+				$ansingb = Sanitize::simpleASCII($_POST['ansingb']);
+			}
 			if ($showscores === 'DNC' || $showans === 'DNC' || $viewingb === 'DNC' ||
 				$scoresingb === 'DNC' || $ansingb === 'DNC'
 			) {
@@ -400,7 +409,8 @@ if (!(isset($teacherid))) {
 
 		if (count($sets)>0) {
 			$setslist = implode(',',$sets);
-			$stm = $DBH->prepare("UPDATE imas_assessments SET $setslist WHERE id IN ($checkedlist)");
+			$qarr[':cid'] = $cid;
+			$stm = $DBH->prepare("UPDATE imas_assessments SET $setslist WHERE id IN ($checkedlist) AND courseid=:cid");
 			$stm->execute($qarr);
 		}
 		if ($_POST['intro'] !== 'DNC') {
@@ -437,7 +447,8 @@ if (!(isset($teacherid))) {
 			// re-total existing assessment attempts to adjust scores
 			require("../assess2/AssessInfo.php");
 			require("../assess2/AssessRecord.php");
-			$stm = $DBH->query("SELECT * FROM imas_assessment_records WHERE assessmentid IN ($checkedlist) ORDER BY assessmentid");
+			$DBH->beginTransaction();
+			$stm = $DBH->query("SELECT * FROM imas_assessment_records WHERE assessmentid IN ($checkedlist) ORDER BY assessmentid FOR UPDATE");
 			$lastAid = 0;
 			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 				if ($row['assessmentid'] != $lastAid) {
@@ -454,6 +465,7 @@ if (!(isset($teacherid))) {
 				$assess_record->reTotalAssess();
 				$assess_record->saveRecord();
 			}
+			$DBH->commit();
 		}
 		if (isset($_POST['chgendmsg'])) {
 			include("assessendmsg.php");

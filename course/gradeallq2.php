@@ -24,8 +24,8 @@
 	$stu = $_GET['stu'];
 	if (isset($_GET['gbmode']) && $_GET['gbmode']!='') {
 	$gbmode = $_GET['gbmode'];
-	} else if (isset($sessiondata[$cid.'gbmode'])) {
-		$gbmode =  $sessiondata[$cid.'gbmode'];
+	} else if (isset($_SESSION[$cid.'gbmode'])) {
+		$gbmode =  $_SESSION[$cid.'gbmode'];
 	} else {
 		$stm = $DBH->prepare("SELECT defgbmode FROM imas_gbscheme WHERE courseid=:courseid");
 		$stm->execute(array(':courseid'=>$cid));
@@ -48,10 +48,9 @@
 		$secfilter = $tutorsection;
 	} else if (isset($_GET['secfilter'])) {
 		$secfilter = $_GET['secfilter'];
-		$sessiondata[$cid.'secfilter'] = $secfilter;
-		writesessiondata();
-	} else if (isset($sessiondata[$cid.'secfilter'])) {
-		$secfilter = $sessiondata[$cid.'secfilter'];
+		$_SESSION[$cid.'secfilter'] = $secfilter;
+	} else if (isset($_SESSION[$cid.'secfilter'])) {
+		$secfilter = $_SESSION[$cid.'secfilter'];
 	} else {
 		$secfilter = -1;
 	}
@@ -100,7 +99,7 @@
 						if ($v=='N/A') {
 							$allscores[$kp[1]][$kp[2]][$kp[3]] = -1;
 						} else {
-							$allscores[$kp[1]][$kp[2]][$kp[3]] = $v;
+							$allscores[$kp[1]][$kp[2]][$kp[3]] = floatval($v);
 						}
 					}
 				} else if ($kp[0]=='fb') {
@@ -121,9 +120,10 @@
 		} else {
 			$onepergroup = false;
 		}
+		$DBH->beginTransaction();
 		$query = "SELECT imas_users.LastName,imas_users.FirstName,imas_assessment_records.* FROM imas_users,imas_assessment_records ";
 		$query .= "WHERE imas_assessment_records.userid=imas_users.id AND imas_assessment_records.assessmentid=:assessmentid ";
-		$query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
+		$query .= "ORDER BY imas_users.LastName,imas_users.FirstName FOR UPDATE";
 		if ($page != -1 && isset($_GET['userid'])) {
 			$query .= " AND userid=:userid";
 		}
@@ -203,6 +203,7 @@
 				}
 			}
 		}
+		$DBH->commit();
 
 		if (isset($_GET['quick'])) {
 			echo "saved";
@@ -263,9 +264,11 @@
 		$points = $defpoints;
 	}
 
+	$lastupdate = '032320';
+
 	$useeditor='review';
 	$placeinhead = '<script type="text/javascript" src="'.$imasroot.'/javascript/rubric_min.js?v=071219"></script>';
-	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/gb-scoretools.js?v=082519"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/gb-scoretools.js?v=042220"></script>';
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/index.css?v='.$lastupdate.'" />';
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/gbviewassess.css?v='.$lastupdate.'" />';
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$imasroot.'/assess2/vue/css/chunk-common.css?v='.$lastupdate.'" />';
@@ -294,13 +297,23 @@
 		var toopen = "'.$address.'&secfilter=" + encodeURIComponent(sec);
 		window.location = toopen;
 		}';
+	$placeinhead .= 'function togglealltries(n) {
+		$("#alltries"+n).toggle();
+		if (!$("#alltries"+n).hasClass("rendered")) {
+			$("#alltries"+n).find("canvas[id^=canvasGBR]").each(function(i,el) {
+				window.imathasDraw.initCanvases(el.id.substr(6));
+			});
+			$("#alltries"+n).addClass("rendered");
+			window.drawPics(document.getElementById("alltries"+n));
+		}
+	}';
 	$placeinhead .= '</script>';
-	if ($sessiondata['useed']!=0) {
+	if ($_SESSION['useed']!=0) {
 		$placeinhead .= '<script type="text/javascript"> initeditor("divs","fbbox",1,true);</script>';
 	}
 	$placeinhead .= '<style type="text/css"> .fixedbottomright {position: fixed; right: 10px; bottom: 10px; z-index:10;}</style>';
 	require("../includes/rubric.php");
-	$sessiondata['coursetheme'] = $coursetheme;
+	$_SESSION['coursetheme'] = $coursetheme;
 	require("../header.php");
 	echo "<style type=\"text/css\">p.tips {	display: none;}\n .hideongradeall { display: none;} .pseudohidden {visibility:hidden;position:absolute;}</style>\n";
 	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=".Sanitize::courseId($_GET['cid'])."\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
@@ -453,6 +466,7 @@
 		$lockeys = array_keys($questions,$qid);
 		foreach ($lockeys as $loc) {
 			$qdata = $assess_record->getGbQuestionVersionData($loc, true, 'scored', $cnt);
+
 			$answeightTot = array_sum($qdata['answeights']);
 			$qdata['answeights'] = array_map(function($v) use ($answeightTot) { return $v/$answeightTot;}, $qdata['answeights']);
 			if ($groupdup) {
@@ -499,6 +513,12 @@
 				});
 				</script>';
 			echo '</div>';
+
+			if (!empty($qdata['work'])) {
+				echo '<div class="questionpane">';
+				echo '<button type="button" onclick="toggleWork(this)">'._('View Work').'</button>';
+				echo '<div class="introtext" style="display:none;">' . $qdata['work'].'</div></div>';
+			}
 
 			echo "<div class=scoredetails>";
 			echo '<span class="person">'.Sanitize::encodeStringForDisplay($line['LastName']).', '.Sanitize::encodeStringForDisplay($line['FirstName']).': </span>';
@@ -568,6 +588,43 @@
 				echo '<br/>Quick grade: <a href="#" class="fullcredlink" onclick="quicksetscore(\'scorebox' . $cnt .'\','.Sanitize::onlyInt($qdata['points_possible']).',this);return false;">Full credit</a> <span class=quickfb></span>';
 			}
 
+			if (!empty($qdata['other_tries'])) {
+
+				echo ' &nbsp; <button type=button onclick="togglealltries('.$cnt.')">'._('Show all tries').'</button>';
+				echo '<div id="alltries'.$cnt.'" style="display:none;">';
+				foreach ($qdata['other_tries'] as $pn=>$tries) {
+					if (count($qdata['other_tries']) > 1) {
+						echo '<div><strong>'._('Part').' '.($pn+1).'</strong></div>';
+					}
+					foreach ($tries as $tn=>$try) {
+						echo '<div>'._('Try').' '.($tn+1).': ';
+						if (is_array($try) && $try[0] === 'draw') {
+							$id = $cnt.'-'.$pn.'-'.$tn;
+							if ($try[2][0]===null) {
+								$try[2][0] = "";
+							}
+							echo '<canvas id="canvasGBR'.$id.'" ';
+							echo 'width='.$try[2][6].' height='.$try[2][7].'></canvas>';
+							echo '<input type=hidden id="qnGBR'.$id.'"/>';
+							$la = explode(';;', str_replace(array('(',')'), array('[',']'), $try[1]));
+							if ($la[0] !== '') {
+								$la[0] = '[' . str_replace(';', '],[', $la[0]) . ']';
+							}
+							$la = '[[' . implode('],[', $la) . ']]';
+							echo '<script>';
+							array_unshift($try[2], 'GBR'.$id);
+							echo 'canvases["GBR'.$id.'"] = ' . json_encode($try[2]) . ';';
+							echo 'drawla["GBR'.$id.'"] = ' . json_encode(json_decode($la)) . ';';
+							echo '</script>';
+						} else {
+							echo $try;
+						}
+						echo '</div>';
+					}
+				}
+				echo '</div>';
+			}
+
 			// TODO: Add Previous Tries display here
 
 			echo "<br/>"._("Question Feedback").": ";
@@ -575,7 +632,7 @@
 				echo '<div>';
 				echo Sanitize::outgoingHtml($qdata['feedback']);
 				echo '</div>';
-			} else if ($sessiondata['useed']==0) {
+			} else if ($_SESSION['useed']==0) {
 				echo '<br/><textarea cols="60" rows="2" class="fbbox" id="fb-'.$loc.'-'.Sanitize::onlyInt($line['userid']).'" name="fb-'.$loc.'-'.Sanitize::onlyInt($line['userid']).'">';
 				echo Sanitize::encodeStringForDisplay($qdata['feedback'], true);
 				echo '</textarea>';
@@ -595,6 +652,7 @@
 			}
 			$cnt++;
 		}
+		$assess_record->saveRecordIfNeeded();
 	}
 	if ($canedit) {
 		echo "<input type=\"submit\" value=\"Save Changes\"/> ";

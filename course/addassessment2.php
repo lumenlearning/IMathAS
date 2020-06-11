@@ -159,7 +159,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 									'reqscore','reqscoretype','reqscoreaid','showcalculator','showhints',
 									'msgtoinstr','eqnhelper','posttoforum','extrefs','showtips',
 									'cntingb','minscore','deffeedbacktext','tutoredit','exceptionpenalty',
-									'defoutcome','isgroup','groupsetid','groupmax');
+									'defoutcome','isgroup','groupsetid','groupmax','showwork');
 			$fieldlist = implode(',', $fields);
 			$stm = $DBH->prepare("SELECT $fieldlist FROM imas_assessments WHERE id=:id AND courseid=:cid");
 			$stm->execute(array(':id'=>intval($_POST['copyfrom']), ':cid'=>$cid));
@@ -167,6 +167,31 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			if ($row !== false) {
 				foreach ($row as $k=>$v) {
 					$toset[$k] = $v;
+				}
+			}
+			if (isset($_POST['copysummary']) || isset($_POST['copyinstr']) ||
+				isset($_POST['copydates']) || isset($_POST['copyendmsg'])
+			) {
+				$stm = $DBH->prepare("SELECT summary,intro,startdate,enddate,reviewdate,avail,endmsg FROM imas_assessments WHERE id=:id AND courseid=:cid");
+				$stm->execute(array(':id'=>intval($_POST['copyfrom']), ':cid'=>$cid));
+				$row = $stm->fetch(PDO::FETCH_ASSOC);
+				if (isset($_POST['copysummary'])) {
+					$toset['summary'] = $row['summary'];
+				}
+				if (isset($_POST['copyinstr'])) {
+					if (($introjson=json_decode($row['intro']))!==null) { //is json intro
+							$toset['intro'] = $introjson[0];
+					} else {
+							$toset['intro'] = $row['intro'];
+					}
+				}
+				if (isset($_POST['copydates'])) {
+					$toset['startdate'] = $row['startdate'];
+					$toset['enddate'] = $row['enddate'];
+					$toset['reviewdate'] = $row['reviewdate'];
+				}
+				if (isset($_POST['copyendmsg'])) {
+					$toset['endmsg'] = $row['endmsg'];
 				}
 			}
 		} else { // set using values selected
@@ -220,6 +245,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$toset['istutorial'] = empty($_POST['istutorial']) ? 0 : 1;
 			$toset['noprint'] = empty($_POST['noprint']) ? 0 : 1;
 			$toset['showcat'] = empty($_POST['showcat']) ? 0 : 1;
+			$toset['showwork'] = Sanitize::onlyInt($_POST['showwork']);
 
 			// time limit and access control
 			$toset['allowlate'] = Sanitize::onlyInt($_POST['allowlate']);
@@ -452,7 +478,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			require_once('../assess2/AssessRecord.php');
 			$assess_info = new AssessInfo($DBH, $assessmentId, $cid, false);
 			$assess_info->loadQuestionSettings();
-			$stm = $DBH->prepare("SELECT * FROM imas_assessment_records WHERE assessmentid=?");
+			$stm = $DBH->prepare("SELECT * FROM imas_assessment_records WHERE assessmentid=? FOR UPDATE");
 			$stm->execute(array($assessmentId));
 			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 				$assess_record = new AssessRecord($DBH, $assess_info, false);
@@ -586,6 +612,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$line['caltag'] = isset($CFG['AMS']['caltag'])?$CFG['AMS']['caltag']:'?';
 					$line['shuffle'] = isset($CFG['AMS']['shuffle'])?$CFG['AMS']['shuffle']:0;
 					$line['noprint'] = isset($CFG['AMS']['noprint'])?$CFG['AMS']['noprint']:0;
+					$line['showwork'] = isset($CFG['AMS']['showwork'])?$CFG['AMS']['showwork']:0;
           $line['istutorial'] = 0;
 					$line['allowlate'] = isset($CFG['AMS']['allowlate'])?$CFG['AMS']['allowlate']:11;
           $line['LPcutoff'] = 0;
@@ -765,7 +792,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 										$outcomeOptions[] = array(
 											'value' => '',
 											'text' => $v['name'],
-											'isgroup' => true 
+											'isgroup' => true
 										);
                     flattenarr($v['outcomes']);
                   } else {

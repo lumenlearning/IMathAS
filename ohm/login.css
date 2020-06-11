@@ -1,5 +1,4 @@
 html, body {
-	height: 100%;
 	background-color: #1E74D1;
 	background-image: none;
 }
@@ -16,6 +15,7 @@ a:hover {
 	color: #FFD600 !important;
 }
 div.mainbody {
+	background-color: #1E74D1;
 	height:100%;
 }
 .headerwrapper {
@@ -30,6 +30,8 @@ div.mainbody {
 .midwrapper:after {
   content: "";
   display: block;
+}
+.footerwrapper {
 }
 
 .login-wrapper {

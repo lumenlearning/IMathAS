@@ -50,13 +50,13 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 } else { // PERMISSIONS ARE OK, PROCEED WITH PROCESSING
 	$cid = Sanitize::courseId($_GET['cid']);
 
-	if (isset($teacherid) && isset($sessiondata['sessiontestid']) && !isset($sessiondata['actas']) && $sessiondata['courseid']==$cid) {
+	if (isset($teacherid) && isset($_SESSION['sessiontestid']) && !isset($_SESSION['actas']) && $_SESSION['courseid']==$cid) {
 		//clean up coming out of an assessment
 		require_once("../includes/filehandler.php");
-		//deleteasidfilesbyquery(array('id'=>$sessiondata['sessiontestid']),1);
-		deleteasidfilesbyquery2('id',$sessiondata['sessiontestid'],null,1);
+		//deleteasidfilesbyquery(array('id'=>$_SESSION['sessiontestid']),1);
+		deleteasidfilesbyquery2('id',$_SESSION['sessiontestid'],null,1);
 		$stm = $DBH->prepare("DELETE FROM imas_assessment_sessions WHERE id=:id LIMIT 1");
-		$stm->execute(array(':id'=>$sessiondata['sessiontestid']));
+		$stm->execute(array(':id'=>$_SESSION['sessiontestid']));
 	}
 	//TODO-assessver: figure out how to delete instructor attempts for new version
 
@@ -148,37 +148,49 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
 		$stm->execute(array(':itemorder'=>$itemlist, ':id'=>$cid));
 	}
+	if ((isset($teacherid) || isset($tutorid)) && isset($_GET['inlinetoggle'])) {
+		$inlineid = Sanitize::onlyInt($_GET['inlinetoggle']);
+		$val = Sanitize::onlyInt($_GET['val']);
+		$stm = $DBH->prepare("SELECT text FROM imas_inlinetext WHERE id=? AND courseid=?");
+		$stm->execute(array($inlineid, $cid));
+		$text = $stm->fetchColumn(0);
+		if ($text !== null) {
+			$text = str_replace(' (Active)','',$text);
+			$toggleParts = preg_split('/(<p.*?###[^<>]+?###.*\/p>)/', $text, 0, PREG_SPLIT_DELIM_CAPTURE);
+			$toggleParts[2*$val+1] = preg_replace('/###/', '### (Active)', $toggleParts[2*$val+1], 1);
+			$stm = $DBH->prepare("UPDATE imas_inlinetext SET text=? WHERE id=?");
+			$stm->execute(array(implode('',$toggleParts), $inlineid));
+			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/course.php?cid=".Sanitize::courseId($_GET['cid']) . "&r=" . Sanitize::randomQueryStringParam());
+		}
+	}
 
 	//enable teacher guest access
 	if (isset($instrPreviewId)) {
 		$tutorid = $instrPreviewId;
 	}
 
-	if ((!isset($_GET['folder']) || $_GET['folder']=='') && !isset($sessiondata['folder'.$cid])) {
+	if ((!isset($_GET['folder']) || $_GET['folder']=='') && !isset($_SESSION['folder'.$cid])) {
 		$_GET['folder'] = '0';
-		$sessiondata['folder'.$cid] = '0';
-		writesessiondata();
-	} else if ((isset($_GET['folder']) && $_GET['folder']!='') && (!isset($sessiondata['folder'.$cid]) || $sessiondata['folder'.$cid]!=$_GET['folder'])) {
-		$sessiondata['folder'.$cid] = $_GET['folder'];
-		writesessiondata();
-	} else if ((!isset($_GET['folder']) || $_GET['folder']=='') && isset($sessiondata['folder'.$cid])) {
-		$_GET['folder'] = $sessiondata['folder'.$cid];
+		$_SESSION['folder'.$cid] = '0';
+	} else if ((isset($_GET['folder']) && $_GET['folder']!='') && (!isset($_SESSION['folder'.$cid]) || $_SESSION['folder'.$cid]!=$_GET['folder'])) {
+		$_SESSION['folder'.$cid] = $_GET['folder'];
+	} else if ((!isset($_GET['folder']) || $_GET['folder']=='') && isset($_SESSION['folder'.$cid])) {
+		$_GET['folder'] = $_SESSION['folder'.$cid];
 	}
-	if (!isset($_GET['quickview']) && !isset($sessiondata['quickview'.$cid])) {
+	if (!isset($_GET['quickview']) && !isset($_SESSION['quickview'.$cid])) {
 		$quickview = false;
 	} else if (isset($_GET['quickview'])) {
 		$quickview = $_GET['quickview'];
-		$sessiondata['quickview'.$cid] = $quickview;
-		writesessiondata();
-	} else if (isset($sessiondata['quickview'.$cid])) {
-		$quickview = $sessiondata['quickview'.$cid];
+		$_SESSION['quickview'.$cid] = $quickview;
+	} else if (isset($_SESSION['quickview'.$cid])) {
+		$quickview = $_SESSION['quickview'.$cid];
 	}
 	if ($quickview=="on") {
 		$_GET['folder'] = '0';
 		//$useleftnav = false;
 	}
-	if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) { //folder view
-		if ($sessiondata['lti_keytype']!='cc-of') {
+	if (isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==3) { //folder view
+		if ($_SESSION['lti_keytype']!='cc-of') {
 			$useleftnav = false;
 		}
 		$nocoursenav = true;
@@ -241,10 +253,10 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 
 	$curBreadcrumb = $breadcrumbbase;
 	if (isset($backtrack) && count($backtrack)>0) {
-		if (isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
+		if (isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==3) {
 			array_unshift($backtrack, array($coursename, '0'));
 			$sendcrumb = '';
-			$depth = substr_count($sessiondata['ltiitemid'][1],'-');
+			$depth = substr_count($_SESSION['ltiitemid'][1],'-');
 			for ($i=$depth;$i<count($backtrack);$i++) {
 				if ($i>$depth) {
 					$curBreadcrumb .= " &gt; ";
@@ -263,8 +275,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 			if (count($backtrack)>$depth) {
 				$backlink = "<span class=right><a href=\"course.php?cid=$cid&folder=".Sanitize::encodeUrlParam($backtrack[count($backtrack)-2][1])."\">" . _('Back') . "</a></span><br class=\"form\" />";
 			}
-			$_SESSION['backtrack'] = array($sendcrumb,$backtrack[count($backtrack)-1][1]);
-
 		} else {
 			$curBreadcrumb .= "<a href=\"course.php?cid=$cid&folder=0\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 			for ($i=0;$i<count($backtrack);$i++) {
@@ -291,7 +301,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 
 
 	if ($msgset<4) {
-	   $stm = $DBH->prepare("SELECT COUNT(id) FROM imas_msgs WHERE msgto=:msgto AND courseid=:courseid AND (isread=0 OR isread=4)");
+	   $stm = $DBH->prepare("SELECT COUNT(id) FROM imas_msgs WHERE msgto=:msgto AND courseid=:courseid AND viewed=0 AND deleted<2");
 	   $stm->execute(array(':msgto'=>$userid, ':courseid'=>$cid));
 	   $msgcnt = $stm->fetchColumn(0);
 	   if ($msgcnt>0) {
@@ -351,31 +361,6 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$newpostscnt = '';
 	}
 
-	//get items with content views, for enabling stats link
-	/*
-	//removed - always showing stats link now.
-	if (isset($teacherid) || isset($tutorid)) {
-		$hasstats = array();
-		$query = "SELECT DISTINCT(CONCAT(SUBSTRING(type,1,1),typeid)) FROM imas_content_track WHERE courseid='$cid' AND type IN ('inlinetext','linkedsum','linkedlink','linkedintext','linkedviacal','assessintro','assess','assesssum','wiki','wikiintext') ";
-		//not sure this is useful information, since this is in the list posts by name page, and we don't track forum views in content tracking
-		//$query .= "UNION SELECT DISTINCT(CONCAT(SUBSTRING(type,1,1),info)) FROM imas_content_track WHERE courseid='$cid' AND type in ('forumpost','forumreply')";
-		$result = mysql_query($query) or die("Query failed : " . mysql_error());
-		while ($row = mysql_fetch_row($result)) {
-			$hasstats[$row[0]] = true;
-		}
-	}
-	*/
-
-	//get read linked items
-	$readlinkeditems = array();
-	if ($coursetheme=='otbsreader.css' && isset($studentid)) {
-		$stm = $DBH->prepare("SELECT DISTINCT typeid FROM imas_content_track WHERE userid=:userid AND type='linkedlink' AND courseid=:courseid");
-		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
-		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
-			$readlinkeditems[$row[0]] = true;
-		}
-	}
-
 	//get latepasses
 	if (!isset($teacherid) && !isset($tutorid) && !$inInstrStuView && isset($studentinfo)) {
 	   //$query = "SELECT latepass FROM imas_students WHERE userid='$userid' AND courseid='$cid'";
@@ -388,7 +373,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 }
 
 $placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/course.js?v=061019\"></script>";
-if (isset($tutorid) && isset($sessiondata['ltiitemtype']) && $sessiondata['ltiitemtype']==3) {
+if (isset($tutorid) && isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==3) {
 	$placeinhead .= '<script type="text/javascript">$(function(){$(".instrdates").hide();});</script>';
 }
 
@@ -441,6 +426,10 @@ if ($overwriteBody==1) {
 				window.location = toopen;
 			}
 		}
+		function chgInlineToggler(el,id) {
+			var toopen = '<?php echo $jsAddress2 ?>course.php?inlinetoggle='+id+'&val='+el.value+'&cid=<?php echo $cid; ?>';
+			window.location = toopen;
+		}
 	</script>
 
 <?php
@@ -475,7 +464,7 @@ if ($overwriteBody==1) {
 		if (isset($instrPreviewId)) {
 			echo '<span class="noticetext">', _('Instructor Preview'), '</span> ';
 		}
-		if (isset($sessiondata['ltiitemtype'])) {
+		if (isset($_SESSION['ltiitemtype'])) {
 			echo "<a href=\"#\" onclick=\"GB_show('"._('User Preferences')."','$imasroot/admin/ltiuserprefs.php?cid=$cid&greybox=true',800,'auto');return false;\" title=\""._('User Preferences')."\" aria-label=\""._('Edit User Preferences')."\">";
 			echo "<span id=\"myname\">".Sanitize::encodeStringForDisplay($userfullname)."</span>";
 			echo "<img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a>";
@@ -555,7 +544,7 @@ if ($overwriteBody==1) {
 		<p><b><?php echo _('Course Items'); ?></b><br/>
 			<a href="copyitems.php?cid=<?php echo $cid ?>"><?php echo _('Copy'); ?></a><br/>
 			<a href="../admin/ccexport.php?cid=<?php echo $cid ?>"><?php echo _('Export'); ?></a>
-		<?php if (!isset($CFG['GEN']['noimathasimportfornonadmins']) || $myrights>=75) { ?>
+		<?php if (!isset($CFG['GEN']['noimathasimportfornonadmins']) || $myrights>=100) { ?>
 			<br/><a href="../admin/importitems2.php?cid=<?php echo $cid ?>"><?php echo _('Import'); ?></a>
 		<?php } ?>
 		</p>
@@ -629,7 +618,7 @@ if ($overwriteBody==1) {
 			echo '</p>';
 		}
 
-		if (!isset($sessiondata['ltiitemtype'])) { //don't show in LTI embed
+		if (!isset($_SESSION['ltiitemtype'])) { //don't show in LTI embed
 	?>
 			<p>
 			<a href="../actions.php?action=logout"><?php echo _('Log Out'); ?></a><br/>
@@ -689,9 +678,9 @@ if ($overwriteBody==1) {
    } else {
 	   if (isset($teacherid) && $quickview!='on') {
 	   	   if ($_GET['folder']=='0') {
-			echo '<p><b>Welcome to your course!</b></p>';
-			echo '<p>To start by copying from another course, use the <a href="copyitems.php?cid='.$cid.'">Course Items: Copy</a> ';
-			echo 'link along the left side of the screen.</p><p>If you want to build from scratch, use the "Add An Item" pulldown below to get started.</p><p>&nbsp;</p>';
+			echo '<p><b>',_('Welcome to your course'),'!</b></p>';
+			echo '<p>',sprintf(_('To start by copying from another course, use the %s Course Items: Copy %s link along the left side of the screen.'),'<a href="copyitems.php?cid='.$cid.'">','</a>'),'</p>';
+			echo '<p>',_('If you want to build from scratch, use the "Add An Item" pulldown below to get started.'),'</p><p>&nbsp;</p>';
 	   	   }
 	   	// $_GET['folder'] is sanitized in generateadditem()
 	   	echo generateadditem($_GET['folder'],'t');

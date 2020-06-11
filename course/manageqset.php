@@ -305,8 +305,8 @@ if ($myrights<20) {
 							$ins_stm->execute(array(':libid'=>$libid, ':qsetid'=>$qsetid, ':ownerid'=>$userid, ':now'=>$now));
 						}
 						//determine which libraries to remove from; my lib assignments - newlibs
-						if ($sessiondata['lastsearchlibs'.$cid]!='') {
-							$listedlibs = explode(',', $sessiondata['lastsearchlibs'.$cid]);
+						if ($_SESSION['lastsearchlibs'.$cid]!='') {
+							$listedlibs = explode(',', $_SESSION['lastsearchlibs'.$cid]);
 						} else {
 							$listedlibs = array();
 						}
@@ -595,19 +595,19 @@ if ($myrights<20) {
 			$safesearch = str_replace(' and ', ' ',$safesearch);
 			$search = $safesearch;
 			$search = str_replace('"','&quot;',$search);
-			$sessiondata['lastsearch'.$cid] = $safesearch; //str_replace(" ","+",$safesearch);
+			$_SESSION['lastsearch'.$cid] = $safesearch; //str_replace(" ","+",$safesearch);
 			if (isset($_POST['searchall'])) {
 				$searchall = 1;
 			} else {
 				$searchall = 0;
 			}
-			$sessiondata['searchall'.$cid] = $searchall;
+			$_SESSION['searchall'.$cid] = $searchall;
 			if (isset($_POST['searchmine'])) {
 				$searchmine = 1;
 			} else {
 				$searchmine = 0;
 			}
-			$sessiondata['searchmine'.$cid] = $searchmine;
+			$_SESSION['searchmine'.$cid] = $searchmine;
 
 
 			if ($searchall==1 && trim($search)=='' && $searchmine==0) {
@@ -623,26 +623,24 @@ if ($myrights<20) {
 				} else {
 					$hidepriv = 0;
 				}
-				$sessiondata['hidepriv'.$cid] = $hidepriv;
+				$_SESSION['hidepriv'.$cid] = $hidepriv;
 				if (isset($_POST['skipfederated'])) {
 					$skipfederated = 1;
 				} else {
 					$skipfederated = 0;
 				}
-				$sessiondata['skipfederated'.$cid] = $skipfederated;
+				$_SESSION['skipfederated'.$cid] = $skipfederated;
 			}
-
-			writesessiondata();
-		} else if (isset($sessiondata['lastsearch'.$cid])) {
-			$safesearch = trim($sessiondata['lastsearch'.$cid]); //str_replace("+"," ",$sessiondata['lastsearch'.$cid]);
+		} else if (isset($_SESSION['lastsearch'.$cid])) {
+			$safesearch = trim($_SESSION['lastsearch'.$cid]); //str_replace("+"," ",$_SESSION['lastsearch'.$cid]);
 			$search = $safesearch;
 			$search = str_replace('"','&quot;',$search);
-			$searchall = $sessiondata['searchall'.$cid];
-			$searchmine = $sessiondata['searchmine'.$cid];
+			$searchall = $_SESSION['searchall'.$cid];
+			$searchmine = $_SESSION['searchmine'.$cid];
 			$hidepriv = 0; $skipfederated = 0;
 			if ($isadmin) {
-				$hidepriv = $sessiondata['hidepriv'.$cid];
-				$skipfederated = $sessiondata['skipfederated'.$cid];
+				$hidepriv = $_SESSION['hidepriv'.$cid];
+				$skipfederated = $_SESSION['skipfederated'.$cid];
 			}
 		} else {
 			$search = '';
@@ -653,7 +651,7 @@ if ($myrights<20) {
 			$safesearch = '';
 		}
     $searchlikevals = array();
-		$isIDsearch = false;
+		$isIDsearch = 0;
 		if (trim($safesearch)=='') {
 			$searchlikes = '';
 		} else {
@@ -670,7 +668,7 @@ if ($myrights<20) {
 			} else if (substr($safesearch,0,3)=='id=') {
 				$searchlikes = "imas_questionset.id=? AND ";
 				$searchlikevals = array(substr($safesearch,3));
-				$isIDsearch = true;
+				$isIDsearch = substr($safesearch,3);
 			} else {
 				$searchterms = explode(" ",$safesearch);
 				$searchlikes = '';
@@ -681,20 +679,35 @@ if ($myrights<20) {
 						unset($searchterms[$k]);
 					}
 				}
-				if (count($searchterms)>0) {
-					$searchlikes .= "((imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
-					foreach ($searchterms as $t) {
-						$searchlikevals[] = "%$t%";
-					}
-
-					if (ctype_digit($safesearch)) {
-						$searchlikes .= "OR imas_questionset.id=?) AND ";
-						$searchlikevals[] = $safesearch;
-						$isIDsearch = true;
-					} else {
-						$searchlikes .= ") AND";
+        $wholewords = array();
+				foreach ($searchterms as $k=>$v) {
+					if (ctype_alnum($v) && strlen($v)>3) {
+						$wholewords[] = '+'.$v.'*';
+						unset($searchterms[$k]);
 					}
 				}
+        if (count($wholewords)>0 || count($searchterms)>0) {
+  				$searchlikes .= '(';
+  				if (count($wholewords)>0) {
+  					$searchlikes .= 'MATCH(imas_questionset.description) AGAINST(\''.implode(' ', $wholewords).'\' IN BOOLEAN MODE) ';
+  				}
+  				if (count($searchterms)>0) {
+  					if (count($wholewords)>0) {
+  						$searchlikes .= 'AND ';
+  					}
+  					$searchlikes .= "(imas_questionset.description LIKE ?".str_repeat(" AND imas_questionset.description LIKE ?",count($searchterms)-1).") ";
+  					foreach ($searchterms as $t) {
+  						$searchlikevals[] = "%$t%";
+  					}
+  				}
+  				if (ctype_digit($safesearch)) {
+  					$searchlikes .= "OR imas_questionset.id=?) AND ";
+  					$searchlikevals[] = $safesearch;
+  					$isIDsearch = $safesearch;
+  				} else {
+  					$searchlikes .= ") AND";
+  				}
+        }
 			}
 		}
 
@@ -703,23 +716,21 @@ if ($myrights<20) {
 		    $_POST['libs'] = $userdeflib;
 		  }
 		  $searchlibs = $_POST['libs'];
-			//$sessiondata['lastsearchlibs'] = implode(",",$searchlibs);
-			$sessiondata['lastsearchlibs'.$cid] = $searchlibs;
-			writesessiondata();
+			//$_SESSION['lastsearchlibs'] = implode(",",$searchlibs);
+			$_SESSION['lastsearchlibs'.$cid] = $searchlibs;
 		} else if (isset($_GET['listlib'])) {
 			$searchlibs = $_GET['listlib'];
-			$sessiondata['lastsearchlibs'.$cid] = $searchlibs;
+			$_SESSION['lastsearchlibs'.$cid] = $searchlibs;
 			$searchall = 0;
-			$sessiondata['searchall'.$cid] = $searchall;
-			$sessiondata['lastsearch'.$cid] = '';
+			$_SESSION['searchall'.$cid] = $searchall;
+			$_SESSION['lastsearch'.$cid] = '';
 			$searchlikes = '';
 			$searchlikevals = array();
 			$search = '';
 			$safesearch = '';
-			writesessiondata();
-		}else if (isset($sessiondata['lastsearchlibs'.$cid])) {
-			//$searchlibs = explode(",",$sessiondata['lastsearchlibs']);
-			$searchlibs = $sessiondata['lastsearchlibs'.$cid];
+		}else if (isset($_SESSION['lastsearchlibs'.$cid])) {
+			//$searchlibs = explode(",",$_SESSION['lastsearchlibs']);
+			$searchlibs = $_SESSION['lastsearchlibs'.$cid];
 		} else {
 			$searchlibs = $userdeflib;
 		}
@@ -746,8 +757,8 @@ if ($myrights<20) {
 		}
 		*/
     $qarr = $searchlikevals;
-		$query = "SELECT DISTINCT imas_questionset.id,imas_questionset.ownerid,imas_questionset.description,imas_questionset.userights,imas_questionset.lastmoddate,imas_questionset.extref,imas_questionset.replaceby,";
-		$query .= "imas_questionset.qtype,imas_users.firstName,imas_users.lastName,imas_users.groupid,imas_library_items.libid,imas_library_items.junkflag, imas_library_items.id AS libitemid ";
+		$query = "SELECT imas_questionset.id,imas_questionset.ownerid,imas_questionset.description,imas_questionset.userights,imas_questionset.lastmoddate,imas_questionset.extref,imas_questionset.replaceby,";
+		$query .= "imas_questionset.qtype,imas_users.firstName,imas_users.lastName,imas_users.groupid,imas_library_items.libid,imas_library_items.junkflag, imas_questionset.broken, imas_library_items.id AS libitemid ";
 		$query .= "FROM imas_questionset,imas_library_items,imas_users WHERE imas_questionset.deleted=0 AND imas_library_items.deleted=0 AND $searchlikes ";
 		$query .= "imas_library_items.qsetid=imas_questionset.id AND imas_questionset.ownerid=imas_users.id ";
 
@@ -758,10 +769,10 @@ if ($myrights<20) {
 		} else if ($isgrpadmin) {
 			$query .= "AND (imas_users.groupid=? OR imas_questionset.userights>0) ";
 			$qarr[] = $groupid;
-			if ($isIDsearch) {
+			if ($isIDsearch>0) {
 				$query .= "AND (imas_library_items.libid > 0 OR imas_users.groupid=? OR imas_questionset.id=?)";
 				$qarr[] = $groupid;
-				$qarr[] = $safesearch;
+				$qarr[] = $isIDsearch;
 			} else {
 				$query .= "AND (imas_library_items.libid > 0 OR imas_users.groupid=?)";
 				$qarr[] = $groupid;
@@ -769,10 +780,10 @@ if ($myrights<20) {
 		} else {
 			$query .= "AND (imas_questionset.ownerid=? OR imas_questionset.userights>0) ";
 			$qarr[] = $userid;
-			if ($isIDsearch) {
+			if ($isIDsearch>0) {
 				$query .= "AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=? OR imas_questionset.id=?)";
 				$qarr[] = $userid;
-				$qarr[] = $safesearch;
+				$qarr[] = $isIDsearch;
 			} else {
 				$query .= "AND (imas_library_items.libid > 0 OR imas_questionset.ownerid=?)";
 				$qarr[] = $userid;
@@ -789,7 +800,6 @@ if ($myrights<20) {
 			$query .= " AND imas_questionset.id NOT IN (SELECT iq.id FROM imas_questionset AS iq JOIN imas_library_items as ili on ili.qsetid=iq.id AND ili.deleted=0";
 			$query .= " JOIN imas_libraries AS il ON ili.libid=il.id AND il.deleted=0 WHERE il.federationlevel>0)";
 		}
-		$query.= " ORDER BY imas_library_items.libid,imas_library_items.junkflag,imas_questionset.replaceby,imas_questionset.id ";
 		if ($searchall==1 || (($isadmin || $isgrpadmin) && $llist{0}=='0')) {
 			$query .= " LIMIT 300";
 		}
@@ -799,28 +809,28 @@ if ($myrights<20) {
 		$page_questionTable = array();
 		$page_libstouse = array();
 		$page_libqids = array();
-		$lastlib = -1;
 		$ln=1;
 		while ($line = $resultLibs->fetch(PDO::FETCH_ASSOC)) {
 			if (isset($page_questionTable[$line['id']])) {
 				continue;
 			}
-			if ($lastlib!=$line['libid'] && (isset($lnamesarr[$line['libid']]) || $searchall==1)) {
+      if (!isset($page_libqids[$line['libid']]) && isset($lnamesarr[$line['libid']])) {
 				$page_libstouse[] = $line['libid'];
-				$lastlib = $line['libid'];
 				$page_libqids[$line['libid']] = array();
 			}
-			if ($libsortorder[$line['libid']]==1) { //alpha
-				$page_libqids[$line['libid']][$line['id']] = trim($line['description']);
-			} else { //id
-				$page_libqids[$line['libid']][] = $line['id'];
-			}
+			$page_libqids[$line['libid']][] = $line['id'];
+
 			$i = $line['id'];
 
 			$page_questionTable[$i]['checkbox'] = "<input type=checkbox name='nchecked[]' value='" . Sanitize::onlyInt($line['id']) . "' id='qo$ln'>";
-			if ($line['userights']==0) {
+      if ($line['broken'] > 0) {
+        $line['description'] = '('._('Reported Broken').') '.$line['description'];
+      }
+      if ($line['userights']==0) {
 				$page_questionTable[$i]['desc'] = '<span class="noticetext">'.filter(Sanitize::encodeStringForDisplay($line['description'])).'</span>';
-			} else if ($line['replaceby']>0 || $line['junkflag']>0) {
+			} else if ($line['broken'] > 0) {
+        $page_questionTable[$i]['desc'] = '<span style="color: #f66"><i>'.filter(Sanitize::encodeStringForDisplay($line['description'])).'</i></span>';
+      } else if ($line['replaceby']>0 || $line['junkflag']>0) {
 				$page_questionTable[$i]['desc'] = '<span class="grey"><i>'.filter(Sanitize::encodeStringForDisplay($line['description'])).'</i></span>';
 			} else {
 				$page_questionTable[$i]['desc'] = filter(Sanitize::encodeStringForDisplay($line['description']));
@@ -852,6 +862,8 @@ if ($myrights<20) {
 
 			$page_questionTable[$i]['preview'] = "<input type=button value=\"Preview\" onClick=\"previewq('selform',$ln,".Sanitize::onlyInt($line['id']).")\"/>";
 			$page_questionTable[$i]['type'] = $line['qtype'];
+      $page_questionTable[$i]['broken'] = intval($line['broken']);
+
 			if ($searchall==1) {
 				$page_questionTable[$i]['lib'] = "<a href=\"manageqset.php?cid=$cid&listlib={$line['libid']}\">List lib</a>";
 			} else {
@@ -901,16 +913,32 @@ if ($myrights<20) {
 			}
 		}
 
-		//sort alpha sorted libraries
-		foreach ($page_libstouse as $libid) {
-			if ($libsortorder[$libid]==1) {
-				natcasesort($page_libqids[$libid]);
-				$page_libqids[$libid] = array_keys($page_libqids[$libid]);
-			}
-		}
-		if ($searchall==1) {
-			$page_libstouse = array_keys($page_libqids);
-		}
+    if ($searchall==1) { // consolidate all
+      uksort($page_questionTable, function($qA,$qB) use ($page_questionTable) {
+        if ($page_questionTable[$qA]['broken'] != $page_questionTable[$qB]['broken']) {
+          return $page_questionTable[$qA]['broken'] - $page_questionTable[$qB]['broken'];
+        } else {
+          return $qA - $qB;
+        }
+      });
+      $page_libstouse = array(0);
+      $page_libqids = array(0=>array_keys($page_questionTable));
+    } else {
+      //sort alpha sorted libraries
+      foreach ($page_libstouse as $libid) {
+        usort($page_libqids[$libid], function($qA,$qB) use ($libsortorder,$page_questionTable,$page_libqids,$libid) {
+          if ($page_questionTable[$qA]['broken'] != $page_questionTable[$qB]['broken']) {
+            return $page_questionTable[$qA]['broken'] - $page_questionTable[$qB]['broken'];
+          } else if ($page_questionTable[$qA]['junkflag'] != $page_questionTable[$qB]['junkflag']) {
+            return $page_questionTable[$qA]['junkflag'] - $page_questionTable[$qB]['junkflag'];
+          } else if ($libsortorder[$libid]==1) {
+            return strnatcasecmp($page_questionTable[$qA]['desc'], $page_questionTable[$qB]['desc']);
+          } else {
+            return $qA - $qB;
+          }
+        });
+      }
+    }
 	}
 
 }
@@ -930,16 +958,18 @@ $address = $GLOBALS['basesiteurl'] . '/course';
 if ($overwriteBody==1) {
 	echo $body;
 } else {
+  $testqpage = ($courseUIver>1) ? 'testquestion2.php' : 'testquestion.php';
+
 ?>
 <script type="text/javascript">
 function previewq(formn,loc,qn) {
-	var addr = '<?php echo $imasroot ?>/course/testquestion.php?cid=<?php echo $cid ?>&checked=0&qsetid='+qn+'&loc=qo'+loc+'&formn='+formn;
+	var addr = '<?php echo $imasroot ?>/course/<?php echo $testqpage;?>?cid=<?php echo $cid ?>&checked=0&qsetid='+qn+'&loc=qo'+loc+'&formn='+formn;
 	previewpop = window.open(addr,'Testing','width='+(.4*screen.width)+',height='+(.8*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(.6*screen.width-20));
 	previewpop.focus();
 }
 function sethighlightrow(loc) {
 	$("tr.highlight").removeClass("highlight");
-	$("#"+loc).closest("tr").addClass("highlight");	
+	$("#"+loc).closest("tr").addClass("highlight");
 }
 var baseaddr = '<?php echo $address ?>';
 
@@ -1060,7 +1090,7 @@ function getnextprev(formn,loc) {
 			<input type=radio name="action" value="0" onclick="chglibtoggle(this)" checked="checked"/> Add to libraries, keeping any existing library assignments<br/>
 			<input type=radio name="action" value="1" onclick="chglibtoggle(this)"/> Add to libraries, removing existing library assignments<br/>
 			<?php
-			if ($sessiondata['searchall'.$cid]==0 && $sessiondata['lastsearchlibs'.$cid]!='0') {
+			if ($_SESSION['searchall'.$cid]==0 && $_SESSION['lastsearchlibs'.$cid]!='0') {
 				echo '<input type=radio name="action" value="3" onclick="chglibtoggle(this)"/> Add to libraries, removing library assignment in currently listed libraries<br/>';
 			}
 			?>
