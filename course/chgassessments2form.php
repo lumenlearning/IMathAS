@@ -51,7 +51,8 @@ $vueData = array(
 	'reqscore' => 1,
 	'reqscorecalctype' => 0,
 	'chgreqscore' => false,
-	'showhints' => 'DNC',
+    'showcalculator' => 'DNC',
+    'showhints' => 'DNC',
 	'msgtoinstr' => 'DNC',
 	'posttoforum' => 'DNC',
 	'dochgextref' => false,
@@ -606,6 +607,21 @@ $vueData = array(
 					</select>
 				</span><br class=form />
 			</div>
+
+            <div :class="{highlight:showcalculator !== 'DNC'}">
+                <label for="showcalculator" class=form><?php echo _('Embedded Calculator'); ?></label>
+                <span class=formright>
+					<select name="showcalculator" id="showcalculator" v-model="showcalculator">
+						<option value="DNC"><?php echo _('Do not change'); ?></option>
+                        <?php
+                        foreach ($CFG['showcalculator'] as $key => $value) {
+                            printf('<option value="%s"', $key);
+                            printf(">%s</option>\n", _($value));
+                        }
+                        ?>
+					</select>
+				</span><br class=form />
+            </div>
 
 		</div>
 
