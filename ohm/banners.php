@@ -5,8 +5,9 @@ use OHM\Models\Banner;
 use OHM\Services\OhmBannerService;
 
 require_once(__DIR__ . '/../init.php');
-$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/DatePicker.js\"></script>";
+$placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>';
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.2/lux-components.min.css\">";
+$placeinhead .= '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">';
 require_once("../header.php");
 
 if ($GLOBALS['myrights'] < 100) {
@@ -196,14 +197,14 @@ function save(?int $bannerId): void
     $userTimezone = new DateTimeZone(getUserTimezoneName());
 
     if ('1' != $_POST['start-immediately']) {
-        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['sdate'] . ' ' . $_POST['stime'], $userTimezone);
+        $dateTime = DateTime::createFromFormat('m/d/Y g:i A', $_POST['sdate'], $userTimezone);
         $banner->setStartAt($dateTime);
     } else {
         $banner->setStartAt(null);
     }
 
     if ('1' != $_POST['never-ending']) {
-        $dateTime = DateTime::createFromFormat('m/d/Y H:i:s', $_POST['edate'] . ' ' . $_POST['etime'], $userTimezone);
+        $dateTime = DateTime::createFromFormat('m/d/Y g:i A', $_POST['edate'], $userTimezone);
         $banner->setEndAt($dateTime);
     } else {
         $banner->setEndAt(null);
@@ -246,15 +247,13 @@ function modify_form(string $action, ?int $bannerId): void
             $startImmediately = true;
         } else {
             $startImmediately = false;
-            $startDate = date('m/d/Y', $banner->getStartAt()->getTimestamp());
-            $startTime = date('H:i:s', $banner->getStartAt()->getTimestamp());
+            $startDateTime = date('m/d/Y g:i A', $banner->getStartAt()->getTimestamp());
         }
         if (is_null($banner->getEndAt())) {
             $neverEnding = true;
         } else {
             $neverEnding = false;
-            $endDate = date('m/d/Y', $banner->getEndAt()->getTimestamp());
-            $endTime = date('H:i:s', $banner->getEndAt()->getTimestamp());
+            $endDateTime = date('m/d/Y g:i A', $banner->getEndAt()->getTimestamp());
         }
     } else {
         $id = '';
@@ -269,8 +268,8 @@ function modify_form(string $action, ?int $bannerId): void
         $studentContent = '';
         $startImmediately = false;
         $neverEnding = false;
-        $startTime = '23:59:59';
-        $endTime = '23:59:59';
+        $startDateTime = strftime('%m/%d/%Y 12:00 AM', time());
+        $endDateTime = strftime('%m/%d/%Y 12:00 AM', time() + (86400 * 8));
     }
 
     include(__DIR__ . '/views/banner/edit_banner.php');

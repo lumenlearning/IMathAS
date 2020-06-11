@@ -14,17 +14,13 @@
                value="<?php echo $description; ?>" required/>
 
 
-        <div class="banner-timestamps u-margin-top-sm">
+        <div class="u-margin-top-sm">
             <label for="start-at">Start date and time</label>
             <div class="banner-timestamp-entry" id="start-at">
-                <input id="sdate" class="form-input has-icon icon--suffix icon--calendar date-input"
-                       name="sdate" value="<?php echo $startDate; ?>"
-                       onClick="displayDatePicker('sdate', this); return false;"
+                <input id="sdate" class="form-input has-icon icon--suffix icon--calendar date-input js-flatpickr"
+                       name="sdate" value="<?php echo $startDateTime; ?>"
                        <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
-                <input id="stime" class="form-input time-input u-margin-horizontal-xs"
-                       name="stime" value="<?php echo $startTime; ?>"
-                       <?php echo ($startImmediately) ? 'disabled' : 'required'; ?>/>
-                <input type="checkbox" id="start-immediately"
+                <input class="u-margin-left-xs" type="checkbox" id="start-immediately"
                        name="start-immediately" value="1"
                     <?php echo ($startImmediately ? 'checked' : ''); ?>/>
                 <label class="start-immediately" for="start-immediately">
@@ -32,17 +28,13 @@
                 </label>
             </div>
         </div>
-        <div class="banner-timestamps u-margin-top-sm">
+        <div class="u-margin-top-sm">
             <label for="end-at">End date and time</label>
             <div class="banner-timestamp-entry">
-                <input id="edate" class="form-input has-icon icon--suffix icon--calendar date-input"
-                       name="edate" value="<?php echo $endDate; ?>"
-                       onClick="displayDatePicker('edate', this); return false;"
+                <input id="edate" class="form-input has-icon icon--suffix icon--calendar date-input js-flatpickr"
+                       name="edate" value="<?php echo $endDateTime; ?>"
                        <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
-                <input id="etime" class="form-input time-input u-margin-horizontal-xs"
-                       name="etime" value="<?php echo $endTime; ?>"
-                       <?php echo ($neverEnding) ? 'disabled' : 'required'; ?>/>
-                <input type="checkbox" id="never-ending" name="never-ending" value="1"
+                <input class="u-margin-left-xs" type="checkbox" id="never-ending" name="never-ending" value="1"
                     <?php echo ($neverEnding ? 'checked' : ''); ?>/>
                 <label class="never-ending" for="never-ending">None</label>
             </div>
