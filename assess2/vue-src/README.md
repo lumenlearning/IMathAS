@@ -20,8 +20,8 @@ You will also need to create the file: `assess2/vue-src/.env.local` with
 the following contents:
 
 ```
-VUE_APP_IMASROOT=http://localhost
-VUE_APP_PROXY=http://localhost
+VUE_APP_IMASROOT=https://localhost
+VUE_APP_PROXY=https://localhost
 ```
 
 If you have an `imasroot` set in your config.php other than the root directory,
