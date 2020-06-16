@@ -84,6 +84,7 @@
           :w="calcType === 'graphing' ? 600 : 500"
           :x="400"
           :y="-32"
+          :z="2"
           :min-width="calcType === 'graphing' ? 500 : 400"
           :min-height="400"
         >
