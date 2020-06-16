@@ -49,6 +49,17 @@ if (!(isset($teacherid))) {
 		$qarr = array();
 		if ($_POST['copyopts'] != 'DNC') {
 			$tocopy = 'displaymethod,submitby,defregens,defregenpenalty,keepscore,defattempts,defpenalty,showscores,showans,viewingb,scoresingb,ansingb,gbcategory,caltag,shuffle,showwork,noprint,istutorial,showcat,allowlate,timelimit,password,reqscoretype,showhints,msgtoinstr,posttoforum,extrefs,showtips,cntingb,minscore,deffeedbacktext,tutoredit,exceptionpenalty,defoutcome';
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            $tocopy .= ',showcalculator';
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 			$stm = $DBH->prepare("SELECT $tocopy FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>Sanitize::onlyInt($_POST['copyopts'])));
 			$qarr = $stm->fetch(PDO::FETCH_ASSOC);
@@ -289,6 +300,11 @@ if (!(isset($teacherid))) {
 				$qarr[':showhints'] = Sanitize::onlyInt($_POST['showhints']);
 			}
 
+            if ($_POST['showcalculator'] !== 'DNC') {
+                $sets[] = "showcalculator=:showcalculator";
+                $qarr[':showcalculator'] = Sanitize::stripHtmlTags($_POST['showcalculator']);
+            }
+
 			if ($_POST['msgtoinstr'] !== 'DNC') {
 				$sets[] = "msgtoinstr=:msgtoinstr";
 				$qarr[':msgtoinstr'] = Sanitize::onlyInt($_POST['msgtoinstr']);
@@ -440,7 +456,20 @@ if (!(isset($teacherid))) {
 		}
 
 		if (isset($_POST['removeperq'])) {
-			$stm = $DBH->query("UPDATE imas_questions SET points=9999,attempts=9999,penalty=9999,regen=0,showans=0,showhints=-1,fixedseeds=NULL WHERE assessmentid IN ($checkedlist)");
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #
+            # The OHM-specific change: Added showcalculator='' to the SQL query.
+            #
+			$stm = $DBH->query("UPDATE imas_questions SET points=9999,attempts=9999,penalty=9999,regen=0,showans=0,showhints=-1,showcalculator='',fixedseeds=NULL WHERE assessmentid IN ($checkedlist)");
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 		}
 		if ($_POST['copyopts'] != 'DNC' || $_POST['defpoints'] !== '' || isset($_POST['removeperq'])) {
 			//update points possible
