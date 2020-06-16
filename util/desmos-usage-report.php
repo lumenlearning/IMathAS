@@ -80,38 +80,34 @@ function outputDateForm(DateTime $startDate, DateTime $endDate): void
 {
     ?>
     <div class="lux-component">
-        <form method="POST" class="form lux-form" enctype="multipart/form-data">
+        <form method="POST" class="lux-form" enctype="multipart/form-data">
             <input type="hidden" name="action" value="generate_report"/>
-            <div class="form-group">
-                <div class="controls">
-                    <label for="startDate" class="form-label">Start Date:</label>
-                    <input id="startDate"
-                        name="startDate"
-                        type="text"
-                        class="form-input has-icon icon--suffix icon--calendar"
-                        style="width: 8.5em;"
-                        onClick="displayDatePicker('startDate', this); return false"
-                        value="<?php echo $startDate->format('m/d/Y'); ?>"/>
-                </div>
-                <div class="controls u-margin-vertical-sm">
-                    <label for="endDate" class="form-label">End Date:</label>
-                    <input id="endDate"
-                        name="endDate"
-                        type="text"
-                        class="form-input has-icon icon--suffix icon--calendar"
-                        style="width: 8.5em;"
-                        onClick="displayDatePicker('endDate', this); return false"
-                        value="<?php echo $endDate->format('m/d/Y'); ?>"/>
-                </div>
-                <div class="controls">
-                    <button id="desmos_form_submit_button"
-                            name="submitbtn"
-                            type="submit"
-                            class="button button--primary"
-                            value="Submit">Update
-                    </button>
-                </div>
+            <div>
+                <label for="startDate" class="form-label">Start Date:</label>
+                <input id="startDate"
+                    name="startDate"
+                    type="text"
+                    class="form-input has-icon icon--suffix icon--calendar"
+                    style="width: 8.5em;"
+                    onClick="displayDatePicker('startDate', this); return false"
+                    value="<?php echo $startDate->format('m/d/Y'); ?>"/>
             </div>
+            <div class="u-margin-vertical-sm">
+                <label for="endDate" class="form-label">End Date:</label>
+                <input id="endDate"
+                    name="endDate"
+                    type="text"
+                    class="form-input has-icon icon--suffix icon--calendar"
+                    style="width: 8.5em;"
+                    onClick="displayDatePicker('endDate', this); return false"
+                    value="<?php echo $endDate->format('m/d/Y'); ?>"/>
+            </div>
+            <button id="desmos_form_submit_button"
+                    name="submitbtn"
+                    type="submit"
+                    class="button button--primary u-margin-vertical-sm"
+                    value="Submit">Update
+            </button>
         </form>
     </div>
     <?php
