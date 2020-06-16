@@ -68,6 +68,7 @@
           <icon-calc :calc-type="calcType"></icon-calc>
           Calculator
       </button>
+      <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calcType === 'graphing'}">
         <vue-draggable-resizeable
           v-show="showCalculator"
           class-name-active="calculator-active"
@@ -83,7 +84,7 @@
           :w="calcType === 'graphing' ? 600 : 500"
           :x="400"
           :y="-32"
-        :z="2"
+          :z="2"
           :min-width="calcType === 'graphing' ? 500 : 400"
           :min-height="400"
         >
@@ -126,6 +127,9 @@
           </div>
         </vue-draggable-resizeable>
       </div>
+    </div>
+
+
     <div v-if="showSubmit" class="submitbtnwrap">
       <button
         type = "button"
@@ -736,6 +740,12 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
 .calc-popout .calc-body {
   margin: 16px;
   margin-bottom: 32px;
+}
+
+/* maintain height of question section when calculator is popped out */
+.calc-fixed-container {
+  height: 530px;
+  position: relative;
 }
 
 .handle {
