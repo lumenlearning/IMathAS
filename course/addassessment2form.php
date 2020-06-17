@@ -593,12 +593,7 @@ $vueData = array(
 				</select>
 			</span><br class=form />
 
-            <?php if (
-                    isset($CFG['showcalculator']) &&
-                    ($groupid==11 || $myrights == 100 ||
-                        in_array($userid,[541991, 11836, 651, 34995, 358648, 540549, 606380])
-                    )
-            ) : ?>
+            <?php if (isset($CFG['showcalculator'])) : ?>
             <label for="showcalculator" class=form>Embedded Calculator</label>
             <span class=formright>
 				<select name="showcalculator" id="showcalculator" v-model="showcalculator">
