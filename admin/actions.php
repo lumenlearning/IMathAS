@@ -672,7 +672,7 @@ switch($_POST['action']) {
 			}
 			if (!empty($changesToLog)) {
 				TeacherAuditLog::addTracking(
-						$cid,
+						intval($_GET['id']),
 						"Course Settings Change",
 						null,
 						$changesToLog
