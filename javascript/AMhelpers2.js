@@ -80,6 +80,14 @@ function clearparams(paramarr) {
 }
 
 function init(paramarr, enableMQ, baseel) {
+  if ($("#arialive").length==0) {
+    $('body').append($('<p>', {
+      id: "arialive",
+      "aria-live": "assertive",
+      "aria-atomic": "true",
+      class: "sr-only"
+    }));
+  }
   var qn, params, i, el, str;
   for (qn in paramarr) {
     if (isNaN(parseInt(qn))) { continue; }
@@ -710,6 +718,10 @@ function normalizemathunicode(str) {
 	return str;
 }
 
+function htmlEntities(str) {
+  return str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/&/g,'&amp;');
+}
+
 /**
  * Called on preview button click on livepreview timeout
  * Displays rendered preview, along with
@@ -719,10 +731,10 @@ function showPreview(qn) {
   var outstr = '';
   var res = processByType(qn);
   if (res.str) {
-    outstr = '`' + res.str + '`';
+    outstr = '`' + htmlEntities(res.str) + '`';
   }
   if (res.dispvalstr && res.dispvalstr != '' && params.calcformat.indexOf('showval')!=-1) {
-    outstr += (outstr==''?'':' = ') + '`' + res.dispvalstr + '`';
+    outstr += (outstr==''?'':' = ') + '`' + htmlEntities(res.dispvalstr) + '`';
   }
   if (res.err && res.err != '' && res.str != '') {
     outstr += (outstr=='``')?'':'. ' + '<span class=noticetext>' + res.err + '</span>';
@@ -735,6 +747,21 @@ function showPreview(qn) {
     previewel.innerHTML = outstr;
     rendermathnode(previewel);
   }
+  a11ypreview(outstr);
+}
+
+function a11ypreview(str) {
+  var el = $("<div>",{class:"inactive"}).html(str).appendTo("body")[0];
+  rendermathnode(el, function () {
+    var arialiveel = document.getElementById('arialive');
+    arialiveel.innerHTML = '';
+    el.className = '';
+    // replace mathjax spans with aria-label
+    $(el).find("[aria-label]").each(function(i,e) {
+      $(e).html($(e).attr("aria-label"));
+    })
+    arialiveel.appendChild(el);
+  });
 }
 
 var MQsyntaxtimer = null;
@@ -764,6 +791,7 @@ function showSyntaxCheckMQ(qn) {
     var previewel = document.getElementById('p'+qn);
     previewel.innerHTML = outstr;
   }
+  a11ypreview('`'+htmlEntities(document.getElementById("qn"+qn).value)+'` ' + outstr);
 }
 
 /**
@@ -1140,6 +1168,7 @@ function processCalcInterval(fullstr, format, ineqvar) {
         calcvals[j] = res[0];
       }
     }
+
     submitstrarr[i] = sm + calcvals[0] + ',' + calcvals[1] + em;
     if (format.indexOf('inequality')!=-1) {
       // reformat as inequality
@@ -1455,6 +1484,8 @@ function ineqtointerval(strw, intendedvar) {
         return ['', 'wrongvar'];
       } else if (pat[2].charAt(0) != pat[4].charAt(0)) { // mixes > and <
         return ['', 'invalid'];
+      } else if (pat[1].trim()=='' || pat[5].trim()=='') {
+        return ['', 'invalid'];
       }
       if (pat[2].charAt(0)=='<') {
         interval = (pat[2]=='<'?'(':'[') + pat[1] + ',' + pat[5] + (pat[4]=='<'?')':']');
@@ -1715,9 +1746,9 @@ function syntaxcheckexpr(str,format,vl) {
 
 // returns [numval, errmsg]
 function singlevaleval(evalstr, format) {
-  evalstr = evalstr.replace(/,/, '');
+  evalstr = evalstr.replace(/,/g, '');
   if (evalstr.match(/^\s*[+-]?\s*((\d+(\.\d*)?)|(\.\d+))\s*%\s*$/)) {//single percent
-    evalstr = evalstr.replace(/%/,'') + '/100';
+    evalstr = evalstr.replace(/%/g,'') + '/100';
   }
   if (format.indexOf('mixed')!=-1) {
     evalstr = evalstr.replace(/(\d+)\s+(\d+|\(\d+\))\s*\/\s*(\d+|\(\d+\))/g,"($1+$2/$3)");

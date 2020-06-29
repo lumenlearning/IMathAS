@@ -125,6 +125,7 @@ class QuestionHtmlGenerator
         // The following variables are expected by the question writer's code in interpret().
         $stuanswers = $this->questionParams->getAllQuestionAnswers();  // Contains ALL question answers.
         $stuanswersval = $this->questionParams->getAllQuestionAnswersAsNum();
+        $autosaves = $this->questionParams->getAllQuestionAutosaves();
         $scorenonzero = $this->questionParams->getScoreNonZero();
         $scoreiscorrect = $this->questionParams->getScoreIsCorrect();
         $attemptn = $this->questionParams->getStudentAttemptNumber();
@@ -133,18 +134,28 @@ class QuestionHtmlGenerator
         $showHints = ($this->questionParams->getShowHints()&1)==1;
         $thisq = $this->questionParams->getQuestionNumber() + 1;
 
+        if ($quesData['qtype'] == "multipart" || $quesData['qtype'] == 'conditional') {
+          // if multipart/condition only has one part, the stuanswers script will
+          // un-array it
+          if (isset($stuanswers[$thisq]) && !is_array($stuanswers[$thisq])) {
+            $stuanswers[$thisq] = array($stuanswers[$thisq]);
+            if (isset($stuanswersval[$thisq])) {
+              $stuanswersval[$thisq] = array($stuanswersval[$thisq]);
+            }
+          }
+        }
         if ($attemptn == 0) {
           $GLOBALS['assess2-curq-iscorrect'] = -1;
         } else {
           if (count($partattemptn) == 1) {
-            $GLOBALS['assess2-curq-iscorrect'] = $scoreiscorrect[$thisq-1] ? 1 : 0;
+            $GLOBALS['assess2-curq-iscorrect'] = $scoreiscorrect[$thisq] ? 1 : 0;
           } else {
             $GLOBALS['assess2-curq-iscorrect'] = array();
             foreach ($partattemptn as $kidx=>$iidx) {
               if ($iidx==0) {
                 $GLOBALS['assess2-curq-iscorrect'][$kidx] = -1;
               } else {
-                $GLOBALS['assess2-curq-iscorrect'][$kidx] = $scoreiscorrect[$thisq-1][$kidx] ? 1 : 0;
+                $GLOBALS['assess2-curq-iscorrect'][$kidx] = $scoreiscorrect[$thisq][$kidx] ? 1 : 0;
               }
             }
           }
@@ -278,11 +289,21 @@ class QuestionHtmlGenerator
 
             // Get the answers to all parts of this question.
             $lastAnswersAllParts = $stuanswers[$thisq];
+            if (isset($autosaves[$thisq])) {
+              if (is_array($autosaves[$thisq])) {
+                foreach ($autosaves[$thisq] as $iidx=>$kidx) {
+                  $lastAnswersAllParts[$iidx] = $kidx;
+                }
+              } else {
+                $lastAnswersAllParts = $autosaves[$thisq];
+              }
+            }
             if (!is_array($lastAnswersAllParts)) {
               // multipart questions with one part get stored as single value;
               // turn back into an array
               $lastAnswersAllParts = array($lastAnswersAllParts);
             }
+
 
             /*
              *  For sequenial multipart, skip answerbox generation for parts
@@ -294,7 +315,7 @@ class QuestionHtmlGenerator
             if ($quesData['qtype'] == "multipart" ||
               ($quesData['qtype'] == "conditional" && isset($seqPartDone))
             ) {
-              $_seqParts = preg_split('~(<p[^>]*>|<br\s*/?><br\s*/?>)\s*///+\s*(</p[^>]*>|<br\s*/?><br\s*/?>)~', $toevalqtxt);
+              $_seqParts = preg_split('~(<p[^>]*>(<[^>]*>)*|<br\s*/?><br\s*/?>)\s*///+\s*((<[^>]*>)*</p[^>]*>|<br\s*/?><br\s*/?>)~', $toevalqtxt);
 
               if (count($_seqParts) > 1) {
                 if ($quesData['qtype'] != "conditional") {
@@ -309,6 +330,7 @@ class QuestionHtmlGenerator
                     if (!$_lastGroupDone) { // not ready for it - unset stuff
                       $skipAnswerboxGeneration[$_pnidx] = true;
                       $jsParams['hasseqnext'] = true;
+                      $_thisGroupDone = false;
                     }
                     if ($seqPartDone !== true && empty($seqPartDone[$_pnidx])) {
                       $_thisGroupDone = false;
@@ -321,6 +343,7 @@ class QuestionHtmlGenerator
             } else {
               unset($seqPartDone);
             }
+
             /*
 			 * Original displayq2.php notes:
 			 *
@@ -407,6 +430,9 @@ class QuestionHtmlGenerator
                 $this->questionParams->getLastRawScores(), 0, 1);
 
             $lastAnswer = $stuanswers[$thisq];
+            if (isset($autosaves[$thisq])) {
+              $lastAnswer = $autosaves[$thisq];
+            }
 
             if (is_array($lastAnswer)) { // happens with autosaves
               //  appears to be resolved before getting here now
@@ -548,7 +574,7 @@ class QuestionHtmlGenerator
          *  cases where $answerbox or [AB#] is already in the question text
          */
         if (isset($seqPartDone)) {
-          $seqParts = preg_split('~(<p[^>]*>|<br\s*/?><br\s*/?>)\s*///+\s*(</p[^>]*>|<br\s*/?><br\s*/?>)~', $evaledqtext);
+          $seqParts = preg_split('~(<p[^>]*>(<[^>]*>)*|<br\s*/?><br\s*/?>)\s*///+\s*((<[^>]*>)*</p[^>]*>|<br\s*/?><br\s*/?>)~', $evaledqtext);
 
           if (count($seqParts) > 1) {
             $newqtext = '';
@@ -563,6 +589,7 @@ class QuestionHtmlGenerator
                   unset($answerbox[$pn]);
                   unset($showanswerloc[$pn]);
                   $jsParams['hasseqnext'] = true;
+                  $thisGroupDone = false;
                 }
                 if ($seqPartDone !== true && empty($seqPartDone[$pn])) {
                   $thisGroupDone = false;

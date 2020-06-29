@@ -274,18 +274,21 @@ export default {
           link: this.questionEditUrl
         },
         {
+          label: (store.assessInfo.hasOwnProperty('qerrortitle')
+            ? store.assessInfo.qerrortitle :
           // ####### Begin OHM-specific changes ##################################################################
           // ####### Begin OHM-specific changes ##################################################################
           // ####### Begin OHM-specific changes ##################################################################
           // ####### Begin OHM-specific changes ##################################################################
           // ####### Begin OHM-specific changes ##################################################################
           // OHM-specific change: Use "msg_owner_question_bug" for custom words.
-          label: this.$t('gradebook.msg_owner_question_bug'),
+          this.$t('gradebook.msg_owner_question_bug')
           // ####### End OHM-specific changes ####################################################################
           // ####### End OHM-specific changes ####################################################################
           // ####### End OHM-specific changes ####################################################################
           // ####### End OHM-specific changes ####################################################################
           // ####### End OHM-specific changes ####################################################################
+          ),
           link: this.questionErrorUrl
         }
       ];

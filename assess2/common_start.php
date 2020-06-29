@@ -66,7 +66,7 @@ if (!empty($_POST['practice']) && $_POST['practice'] === 'false') {
 if ($_SERVER['HTTP_HOST'] == 'localhost') {
   //to help with development, while vue runs on 8080
   if (!empty($CFG['assess2-use-vue-dev'])) {
-    header(sprintf('Access-Control-Allow-Origin: %s', $CFG['assess2-use-vue-dev-address']));
+    header('Access-Control-Allow-Origin: '. $CFG['assess2-use-vue-dev-address']);
   }
   header("Access-Control-Allow-Credentials: true");
   header("Access-Control-Allow-Methods: POST, GET, OPTIONS");

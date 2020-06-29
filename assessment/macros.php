@@ -1333,9 +1333,14 @@ function nonzerorrand($min,$max,$p=0) {
 	}
 
 	$rn = max(0, getRoundNumber($p), getRoundNumber($min));
-
+  $cnt = 0;
 	do {
 		$ret = round($min + $p*$GLOBALS['RND']->rand(0,$maxi), $rn);
+    $cnt++;
+    if ($cnt > 1000) {
+      echo "Error in nonzerorrand - not able to find valid value";
+      break;
+    }
 	} while (abs($ret)< 1e-14);
 	if ($rn==0) { $ret = (int) $ret;}
 	return $ret;
@@ -1375,9 +1380,15 @@ function nonzerorrands($min,$max,$p=0,$n=0,$ord='def') {
 	$rn = max(0, getRoundNumber($p), getRoundNumber($min));
 
 	for ($i = 0; $i < $n; $i++) {
+    $cnt = 0;
 		do {
 			$r[$i] = round($min + $p*$GLOBALS['RND']->rand(0,$maxi), $rn);
 			if ($rn==0) { $r[$i] = (int) $r[$i];}
+      $cnt++;
+      if ($cnt > 1000) {
+        echo "Error in nonzerorrands - not able to find valid value";
+        break;
+      }
 		} while (abs($r[$i]) <1e-14);
 	}
   if ($ord == 'inc') {
@@ -1402,11 +1413,17 @@ function diffrands($min,$max,$n=0,$ord='def') {
 	$n = floor($n);
 	if ($n<.1*($max-$min)) {
 		$out = array();
+    $cnt = 0;
 		while (count($out)<$n) {
 			$x = $GLOBALS['RND']->rand($min,$max);
 			if (!in_array($x,$out)) {
 				$out[] = $x;
 			}
+      $cnt++;
+      if ($cnt > 2000) {
+        echo "Error in diffrands - not able to find valid values";
+        break;
+      }
 		}
 	} else {
 		$r = range($min,$max);
@@ -1442,13 +1459,18 @@ function diffrrands($min,$max,$p=0,$n=0, $nonzero=false,$ord='def') {
 
 	if ($n<.1*$maxi) {
 		$out = array();
-
+    $cnt = 0;
 		while (count($out)<$n) {
 			$x = round($min + $p*$GLOBALS['RND']->rand(0,$maxi), $rn);
 			if ($rn==0) { $x = (int) $x;}
 			if (!in_array($x,$out) && (!$nonzero || abs($x)>1e-14)) {
 				$out[] = $x;
 			}
+      $cnt++;
+      if ($cnt > 2000) {
+        echo "Error in diffrrands - not able to find valid values";
+        break;
+      }
 		}
     $r = $out;
 	} else {
@@ -1489,11 +1511,17 @@ function nonzerodiffrands($min,$max,$n=0,$ord='def') {
 
 	if ($n<.1*($max-$min)) {
 		$out = array();
+    $cnt = 0;
 		while (count($out)<$n) {
 			$x = $GLOBALS['RND']->rand($min,$max);
 			if ($x!=0 && !in_array($x,$out)) {
 				$out[] = $x;
 			}
+      $cnt++;
+      if ($cnt > 2000) {
+        echo "Error in nonzerodiffrrands - not able to find valid values";
+        break;
+      }
 		}
 	} else {
 		$r = range($min,$max);
@@ -2358,10 +2386,18 @@ function definefunc($func,$varlist) {
 	return array($func,$varlist);
 }
 
-function getstuans($v,$q,$i=0) {
+function getstuans($v,$q,$i=0,$blankasnull=true) {
 	if (is_array($v[$q])) {
+    if (!isset($v[$q][$i])) {
+      return null;
+    } else if ($blankasnull && ($v[$q][$i]==='' || $v[$q][$i]==='NA')) {
+      return null;
+    }
 		return $v[$q][$i];
 	} else {
+    if ($blankasnull && ($v[$q]==='' || $v[$q]==='NA')) {
+      return null;
+    }
 		return $v[$q];
 	}
 }
@@ -2558,7 +2594,7 @@ function decimaltofraction($d,$format="fraction",$maxden = 5000) {
 
 		$d2 = 1/($d2-$L2);
 	}
-	if (abs($numerators[$i]/$denominators[$i] - $d)>1e-9) {
+	if (abs($numerators[$i]/$denominators[$i] - $d)>1e-10) {
 		return $d;
 	}
 	if ($format=="mixednumber") {
@@ -4097,6 +4133,7 @@ function evalReturnValue($str,$errordispstr='',$vars=array()) {
 
 function getRoundNumber($val) {
 	$str = (string) $val;
+  $str = str_replace('e','E',$str);
 	if (($s = strpos($str,'.'))===false) { //no decimal places
 		return 0;
 	} else if (($p = strpos($str,'E'))!==false) { //scientific notation

@@ -6,21 +6,21 @@
   To use the LTI queue, you'll need to either set up a cron job to call this
   script, or call it using a scheduled web call with the authcode option.
   It should be called every minute.
-  
+
   Config options (in config.php):
   To enable using LTI queue:
-     $CFG['LTI']['usequeue'] = true; 
-     
+     $CFG['LTI']['usequeue'] = true;
+
   The delay between getting an update request and sending it on (def: 5min)
      $CFG['LTI']['queuedelay'] = (# of minutes);
-     
+
   The number of simultaneous curl calls to make (def: 10)
   	 $CFG['LTI']['queuebatch'] = (# of calls);
-  
+
   Authcode to pass in query string if calling as scheduled web service;
   Call processltiqueue.php?authcode=thiscode
      $CFG['LTI']['authcode'] = "thecode";
-     
+
   To log results in /admin/import/ltiqueue.log:
      $CFG['LTI']['logltiqueue'] = true;
 */
@@ -29,7 +29,7 @@ require("../init_without_validate.php");
 require("../includes/rollingcurl.php");
 require_once('../includes/ltioutcomes.php');
 
-if (php_sapi_name() == "cli") { 
+if (php_sapi_name() == "cli") {
 	//running command line - no need for auth code
 } else if (!isset($CFG['LTI']['authcode'])) {
 	echo 'You need to set $CFG[\'LTI\'][\'authcode\'] in config.php';
@@ -57,7 +57,7 @@ if (isset($_SERVER['HTTP_X_AMZ_SNS_MESSAGE_TYPE'])) {
   table imas_ltiqueue
      hash, sourcedid, grade, sendon
      index sendon
-     
+
   Pull all the items from the queue with sendon < now
 */
 
@@ -127,7 +127,7 @@ if (!empty($CFG['LTI']['logltiqueue'])) {
 
 function LTIqueuePostdataCallback($data) {
 	global $DBH, $LTIsecrets;
-	
+
 	$secret = '';
 	if (isset($LTIsecrets[$data['key']])) {
 		$secret = $LTIsecrets[$data['key']];
@@ -149,10 +149,10 @@ function LTIqueuePostdataCallback($data) {
 	}
 	//echo 'prepping w grade '.$data['grade'].'<br/>';
 	return prepLTIOutcomePost(
-		$data['action'], 
-		$data['key'], 
-		$secret, 
-		$data['url'], 
+		$data['action'],
+		$data['key'],
+		$secret,
+		$data['url'],
 		$data['sourcedid'],
 		$data['grade']
 	);
@@ -213,6 +213,32 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 		$setfailed->execute(array($user_data['hash']));
 		if ($user_data['lasttry']===true) {
 			$cntgiveup++;
+			// Get the LTI request data for debugging.
+			$post_data = $request_info['post_data'];
+			// Don't log LTI secrets!
+			unset($post_data['key']);
+			unset($post_data['keytype']);
+			
+			error_log("LTI update giving up:\n"
+			. "POST data\n"
+			. "---------\n"
+			. print_r($post_data, true) . "\n"
+			. "---------\n"
+			. "user_data \n"
+			. "---------\n"
+			. print_r($user_data, true) . "\n"
+			. "-----------------\n"
+			. "Response metadata\n"
+			. "-----------------\n"
+			. "http_code: " . $request_info['http_code'] . "\n"
+			. "content_type: " . $request_info['content_type'] . "\n"
+			. "ssl_verify_result: " . $request_info['ssl_verify_result'] . "\n"
+			. "total_time: " . $request_info['total_time'] . "\n"
+			. "redirect_url: " . $request_info['redirect_url'] . "\n"
+			. "--------\n"
+			. "Response \n"
+			. "--------\n"
+			. $response);
 		} else {
 			$cntfailure++;
 		}
