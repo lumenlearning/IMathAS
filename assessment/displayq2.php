@@ -147,6 +147,18 @@ function displayq($qnidx,$qidx,$seed,$doshowans,$showhints,$attemptn,$returnqtxt
 		}
 		$thisq = $qnidx+1;
 	}
+
+	if ($qdata['qtype'] == "multipart" || $qdata['qtype'] == 'conditional') {
+		// if multipart/condition only has one part, the stuanswers script will
+		// un-array it
+		if (isset($stuanswers[$thisq]) && !is_array($stuanswers[$thisq])) {
+			$stuanswers[$thisq] = array($stuanswers[$thisq]);
+			if (isset($stuanswersval[$thisq])) {
+				$stuanswersval[$thisq] = array($stuanswersval[$thisq]);
+			}
+		}
+	}
+
 	if (isset($GLOBALS['scores'])) {
 		$scorenonzero = getscorenonzero();
 	}
@@ -894,7 +906,7 @@ function scoreq($qnidx,$qidx,$seed,$givenans,$attemptn=0,$qnpointval=1) {
 	}
 	unset($ar); unset($arv); unset($arvp); unset($tmp); unset($postk);
 	unset($postv); unset($spc); unset($k); unset($v); unset($stuav);
-	
+
 	$preevalerror = error_get_last();
 	try {
 		$res1 = eval(interpret('control',$qdata['qtype'],$qdata['control']));
@@ -3688,7 +3700,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				$gaarr[$k] = 'DNE';
 			} else if ($gaarr[$k]=='oo' || $gaarr[$k]=='-oo' || $gaarr[$k]=='-oo') {
 				//leave alone
-			} else if (preg_match('/\d\s*(x|y|z|r|t|i|X|Y|Z|I)([^a-zA-Z]|$)/', $gaarr[$k])) {
+			} else if (preg_match('/\d\s*(x|y|z|r|t|i|X|Y|Z|I|pi)([^a-zA-Z]|$)/', $gaarr[$k])) {
 				//has a variable - don't strip
 			} else {
 				$gaarr[$k] = preg_replace('/^((-|\+)?(\d+\.?\d*|\.\d+)[Ee]?[+\-]?\d*)[^+\-]*$/','$1',$gaarr[$k]); //strip out units
@@ -3986,6 +3998,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if (isset($options['answersize'])) {if (is_array($options['answersize'])) {$answersize = $options['answersize'][$qn];} else {$answersize = $options['answersize'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['scoremethod'])) {if (is_array($options['scoremethod'])) {$scoremethod = $options['scoremethod'][$partnum];} else {$scoremethod = $options['scoremethod'];}}
+		if (!isset($scoremethod)) {	$scoremethod = 'whole';	}
 		if (!isset($answerformat)) { $answerformat = '';}
 		$ansformats = array_map('trim',explode(',',$answerformat));
 
@@ -4059,26 +4073,30 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 				}
 			}
 		}
-
+		$incorrect = 0;
 		for ($i=0; $i<count($answerlist); $i++) {
 			if (!is_numeric($givenanslist[$i])) {
-				$correct = false;
-				break;
+				$incorrect++;
+				continue;
 			} else if (isset($abstolerance)) {
 				if (abs($answerlist[$i] - $givenanslist[$i]) > $abstolerance-1E-12) {
-					$correct = false;
-					break;
+					$incorrect++;
+					continue;
 				}
 			} else {
 				if (abs($answerlist[$i] - $givenanslist[$i])/(abs($answerlist[$i])+.0001) > $reltolerance-1E-12) {
-					$correct = false;
-					break;
+					$incorrect++;
+					continue;
 				}
 
 			}
 		}
 
-		if ($correct) {return 1;} else {return 0;}
+		if ($correct && $incorrect == 0) {
+			return 1;
+		} else if ($correct && $scoremethod == 'byelement') {
+			return (count($answerlist) - $incorrect)/count($answerlist);
+		} else {return 0;}
 	} else if ($anstype=="calcmatrix") {
 		if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}
 		if (isset($options['reltolerance'])) {if (is_array($options['reltolerance'])) {$reltolerance = $options['reltolerance'][$qn];} else {$reltolerance = $options['reltolerance'];}}
@@ -4086,6 +4104,8 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (!isset($reltolerance) && !isset($abstolerance)) { $reltolerance = $defaultreltol;}
 		if (isset($options['answersize'])) {if (is_array($options['answersize'])) {$answersize = $options['answersize'][$qn];} else {$answersize = $options['answersize'];}}
 		if (isset($options['answerformat'])) {if (is_array($options['answerformat'])) {$answerformat = $options['answerformat'][$qn];} else {$answerformat = $options['answerformat'];}}
+		if (isset($options['scoremethod'])) {if (is_array($options['scoremethod'])) {$scoremethod = $options['scoremethod'][$partnum];} else {$scoremethod = $options['scoremethod'];}}
+		if (!isset($scoremethod)) {	$scoremethod = 'whole';	}
 
 		if ($multi>0) { $qn = $multi*1000+$qn;}
 		if (!isset($answerformat)) { $answerformat = '';}
@@ -4121,6 +4141,7 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		}
 
 		$correct = true;
+		$incorrect = array();
 
 		$ansr = substr($answer,2,-2);
 		$ansr = preg_replace('/\)\s*\,\s*\(/',',',$ansr);
@@ -4133,7 +4154,11 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		if (isset($answersize)) {
 			for ($i=0; $i<count($answerlist); $i++) {
 				if (!checkanswerformat($givenanslist[$i],$ansformats)) {
-					return 0; //perhaps should just elim bad answer rather than all?
+					if ($scoremethod == 'byelement') {
+						$incorrect[$i] = 1;
+					} else {
+						return 0; //perhaps should just elim bad answer rather than all?
+					}
 				}
 			}
 
@@ -4145,7 +4170,11 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 			$tocheck = explode(',',$tocheck);
 			foreach($tocheck as $chkme) {
 				if (!checkanswerformat($chkme,$ansformats)) {
-					return 0; //perhaps should just elim bad answer rather than all?
+					if ($scoremethod == 'byelement') {
+						$incorrect[$i] = 1;
+					} else {
+						return 0; //perhaps should just elim bad answer rather than all?
+					}
 				}
 			}
 		}
@@ -4183,17 +4212,21 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 		for ($i=0; $i<count($answerlist); $i++) {
 			if (isset($abstolerance)) {
 				if (abs($answerlist[$i] - $givenanslist[$i]) > $abstolerance-1E-12) {
-					$correct = false;
-					break;
+					$incorrect[$i] = 1;
+					continue;
 				}
 			} else {
 				if (abs($answerlist[$i] - $givenanslist[$i])/(abs($answerlist[$i])+.0001) > $reltolerance-1E-12) {
-					$correct = false;
-					break;
+					$incorrect[$i] = 1;
+					continue;
 				}
 			}
 		}
-		if ($correct) {return 1;} else {return 0;}
+		if ($correct && count($incorrect)==0) {
+			return 1;
+		} else if ($correct && $scoremethod == 'byelement') {
+			return (count($answerlist) - count($incorrect))/count($answerlist);
+		} else {return 0;}
 	} else if ($anstype == "ntuple" || $anstype== 'calcntuple') {
 		if (is_array($options['answer'])) {$answer = $options['answer'][$qn];} else {$answer = $options['answer'];}
 		if (isset($options['reltolerance'])) {if (is_array($options['reltolerance'])) {$reltolerance = $options['reltolerance'][$qn];} else {$reltolerance = $options['reltolerance'];}}
@@ -5245,12 +5278,12 @@ function scorepart($anstype,$qn,$givenans,$options,$multi) {
 					if ($flags['remove_whitespace']===true) {
 						$anans = trim(preg_replace('/\s+/','',$anans));
 					}
-					if ($flags['partial_credit']===true && $answerformat!='list') {
+					if ($flags['partial_credit']===true && $answerformat!='list' && strlen($givenans)<250) {
 						$poss = strlen($anans);
 						$dist = levenshtein($anans,$givenans);
 						$score = ($poss - $dist)/$poss;
 						if ($score>$correct) { $correct = $score;}
-					} else if (isset($flags['allow_diff'])) {
+					} else if (isset($flags['allow_diff']) && strlen($givenans)<250) {
 						if (levenshtein($anans,$givenans) <= 1*$flags['allow_diff']) {
 							$correct += 1;
 							$foundloc = $j;

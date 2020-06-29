@@ -204,13 +204,32 @@ class AssessStandalone {
           $this->state['stuanswers'][$qn+1] = $v;
           $this->state['stuanswersval'][$qn+1] = $partlaNum[$k];
         }
+      }
+      if ($parts_to_score === true || !empty($parts_to_score[$k]) ||
+        (isset($this->state['rawscores'][$qn][$k]) &&
+        $this->state['rawscores'][$qn][$k] >= 0)
+      ) { // rec if scored, and update existing
         $this->state['rawscores'][$qn][$k] = $rawparts[$k];
       }
     }
 
     $score = array_sum($scores);
-    $this->state['scorenonzero'][$qn+1] = ($score > 0);
-    $this->state['scoreiscorrect'][$qn+1] = ($score > .98);
+    if (count($partla) > 1) {
+      $this->state['scorenonzero'][$qn+1] = array();
+      $this->state['scoreiscorrect'][$qn+1] = array();
+      foreach ($partla as $k=>$v) {
+        if (!isset($this->state['rawscores'][$qn][$k])) {
+          $this->state['scorenonzero'][$qn+1][$k] = -1;
+          $this->state['scoreiscorrect'][$qn+1][$k] = -1;
+        } else {
+          $this->state['scorenonzero'][$qn+1][$k] = ($this->state['rawscores'][$qn][$k]>0);
+          $this->state['scoreiscorrect'][$qn+1][$k] = ($this->state['rawscores'][$qn][$k]>.98);
+        }
+      }
+    } else {
+      $this->state['scorenonzero'][$qn+1] = ($score > 0);
+      $this->state['scoreiscorrect'][$qn+1] = ($score > .98);
+    }
     return array('scores'=>$scores, 'raw'=>$rawparts, 'errors'=>$scoreResult['errors']);
   }
 

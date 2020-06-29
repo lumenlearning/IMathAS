@@ -90,6 +90,9 @@ div.match {
   padding: 5px;
   padding-right: 30px;
 }
+div.match li img, div.match li [role=img] {
+  vertical-align: middle;
+}
 div[role=radiogroup].clearfix .match {
 	padding-right: 5px;
 }
@@ -186,17 +189,22 @@ td.barslefttop {
   border-left: 1px solid #000;
   border-top: 1px solid #000;
 }
-td.matrixleft {
+td.matrixleft, td.matrixright, td.matrixdetleft, td.matrixdetright {
   border: 1px solid #000;
-  border-width: 1px 0px 1px 1px;
   margin: 0px;
   padding: 0px;
 }
+td.matrixleft {
+  border-width: 1px 0px 1px 1px;
+}
 td.matrixright {
-  border: 1px solid #000;
   border-width: 1px 1px 1px 0px;
-  margin: 0px;
-  padding: 0px;
+}
+td.matrixdetleft {
+  border-width: 0px 0px 0px 1px;
+}
+td.matrixdetright {
+  border-width: 0px 1px 0px 0px;
 }
 table.paddedtable tr.onepixel { line-height: 1px;}
 table.paddedtable td.matrixtopborder {border-top:1px solid black;padding:0;}
@@ -356,7 +364,7 @@ input[type=text]:disabled, .mathquill-math-field.disabled {
   padding: 1px;
 }
 
-div.question img, div.intro img {
+div.question img, div.intro img, div.sidepreview img {
 	max-width: 90%;
 	height: auto;
 }
@@ -475,4 +483,9 @@ span.inlinebtn:hover {
 }
 .feedbackwrap.incorrect {
 	background: #fee;
+}
+
+.inlineheader {
+  font-size: 1em;
+  display: inline;
 }

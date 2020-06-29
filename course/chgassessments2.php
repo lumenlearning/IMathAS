@@ -7,6 +7,7 @@ require("../init.php");
 require("../includes/htmlutil.php");
 require("../includes/copyiteminc.php");
 require("../includes/loaditemshowdata.php");
+require_once("../includes/TeacherAuditLog.php");
 
 /*** pre-html data manipulation, including function code *******/
 
@@ -427,11 +428,17 @@ if (!(isset($teacherid))) {
 			$qarr[':endmsg'] = $stm->fetchColumn(0);
 		}
 
+		$metadata = array('assessments'=>$checkedlist);
 		if (count($sets)>0) {
 			$setslist = implode(',',$sets);
 			$qarr[':cid'] = $cid;
 			$stm = $DBH->prepare("UPDATE imas_assessments SET $setslist WHERE id IN ($checkedlist) AND courseid=:cid");
 			$stm->execute($qarr);
+			if ($stm->rowCount()>0) {
+				$updated_settings = true;
+				$metadata = $metadata + $qarr;
+				unset($metadata[':cid']);
+			}
 		}
 		if ($_POST['intro'] !== 'DNC') {
 			$stm = $DBH->prepare("SELECT intro FROM imas_assessments WHERE id=:id");
@@ -442,6 +449,7 @@ if (!(isset($teacherid))) {
 			} else {
 				$newintro = $cpintro;
 			}
+			$metadata['intro'] = $newintro;
 			$stm = $DBH->query("SELECT id,intro FROM imas_assessments WHERE id IN ($checkedlist)");
 			$stmupd = $DBH->prepare("UPDATE imas_assessments SET intro=:intro WHERE id=:id");
 			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
@@ -452,6 +460,9 @@ if (!(isset($teacherid))) {
 					$outintro = $newintro;
 				}
 				$stmupd->execute(array(':id'=>$row['id'], ':intro'=>$outintro));
+				if ($stmupd->rowCount()>0) {
+					$updated_settings = true;
+				}
 			}
 		}
 
@@ -470,6 +481,16 @@ if (!(isset($teacherid))) {
             #### End OHM-specific changes ############################################################
             #### End OHM-specific changes ############################################################
             #### End OHM-specific changes ############################################################
+			$metadata['perq'] = "Removed per-question settings";
+			$updated_settings = true;
+		}
+		if ($updated_settings === true) {
+			TeacherAuditLog::addTracking(
+				$cid,
+				"Mass Assessment Settings Change",
+				null,
+				$metadata
+			);
 		}
 		if ($_POST['copyopts'] != 'DNC' || $_POST['defpoints'] !== '' || isset($_POST['removeperq'])) {
 			//update points possible

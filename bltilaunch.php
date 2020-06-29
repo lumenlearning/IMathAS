@@ -617,10 +617,10 @@ if (isset($_GET['launch'])) {
 	}
 
 
-    //Store all LTI request data in session variable for reuse on submit
-    //if we got this far, secret has already been verified
-    $_SESSION['ltiuserid'] = $ltiuserid;
-    $_SESSION['ltiorg'] = $ltiorg;
+	//Store all LTI request data in session variable for reuse on submit
+	//if we got this far, secret has already been verified
+	$_SESSION['ltiuserid'] = $ltiuserid;
+	$_SESSION['ltiorg'] = $ltiorg;
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
@@ -633,10 +633,10 @@ if (isset($_GET['launch'])) {
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
-        $ltirole = 'instructor';
-    } else {
-        $ltirole = 'learner';
-    }
+		$ltirole = 'instructor';
+	} else {
+		$ltirole = 'learner';
+	}
 
 	$_SESSION['ltirole'] = $ltirole;
 	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
@@ -869,6 +869,7 @@ if ($stm->rowCount()==0) {
 					if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="useexisting") {
 						$destcid = $aidsourcecid;
 						$copycourse = "no";
+						$ltilog = ['copy'=>'useorig', 'cid'=>$destcid];
 					}
 				}
 				$stm = $DBH->prepare('SELECT jsondata,UIver FROM imas_courses WHERE id=:aidsourcecid');
@@ -877,21 +878,30 @@ if ($stm->rowCount()==0) {
 				$aidsourcejsondata = json_decode($aidsourcejsondata, true);
 				$blockLTICopyOfCopies = ($aidsourcejsondata!==null && !empty($aidsourcejsondata['blockLTICopyOfCopies']));
 
-                if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="useother" && !empty($_POST['useothercoursecid'])) {
-                    $destcid = $_POST['useothercoursecid'];
-                    $copycourse = "no";
-                } else if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="makecopy") {
-                    $copycourse = "yes";
-                    $sourcecid = $aidsourcecid;
-                } else if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="copyother" && $_POST['othercoursecid']>0) {
-                    $copycourse = "yes";
-                    $sourcecid = Sanitize::onlyInt($_POST['othercoursecid']);
-                }
-                if ($copycourse=="notify" || $copycourse=="ask") {
-                    $_SESSION['userid'] = $userid; //remember me
-                    $nologo = true;
-                    $flexwidth = true;
-                    $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}
+				if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="useother" && !empty($_POST['useothercoursecid'])) {
+					$destcid = $_POST['useothercoursecid'];
+					$copycourse = "no";
+					$ltilog = ['copy'=>'useother', 'cid'=>$destcid];
+				} else if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="makecopy") {
+					$copycourse = "yes";
+					$sourcecid = $aidsourcecid;
+					$ltilog = ['copy'=>'copyorig', 'cid'=>$sourcecid];
+				} else if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="copyother" && $_POST['othercoursecid']>0) {
+					$copycourse = "yes";
+					$sourcecid = Sanitize::onlyInt($_POST['othercoursecid']);
+					$ltilog = ['copy'=>'copyother', 'cid'=>$sourcecid];
+				}
+				if ($copycourse=="notify" || $copycourse=="ask") {
+					$_SESSION['userid'] = $userid; //remember me
+					$nologo = true;
+					$flexwidth = true;
+					$placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    $placeinhead .= '<style type="text/css">
                         /* LTI New Assessment Player */
                         .assess-player-title {
                             font-weight: bold;
@@ -907,7 +917,12 @@ if ($stm->rowCount()==0) {
                             pointer-events: none;
                         }</style>';
                     $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
-                    require("header.php");
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+					require("header.php");
 
 					$query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
 					$query .= "AND imt.userid=:userid JOIN imas_assessments AS ia ON ic.id=ia.courseid ";
@@ -955,8 +970,8 @@ if ($stm->rowCount()==0) {
 							echo $advuseother;
 						}
 						echo "	</ul>";
-                            echo "<p>The first option is best if this is your first time using this $installname course.  The second option
-                                                        may be preferrable if you have copied the course in your LMS and want your students records to
+						echo "<p>The first option is best if this is your first time using this $installname course.  The second option
+							may be preferrable if you have copied the course in your LMS and want your students records to
                                                         show in a separate $installname course.</p>";
                             // #### Begin OHM-specific code #####################################################
                             // #### Begin OHM-specific code #####################################################
@@ -979,58 +994,58 @@ if ($stm->rowCount()==0) {
                             // #### End OHM-specific code #######################################################
                             // #### End OHM-specific code #######################################################
 							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
-                        } else {
-                            echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
+					} else {
+						echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
 							link is located in a $installname course you are not a teacher of (course ID $aidsourcecid).
 							To use this content, a copy of the assignments will be made for you automatically,
 							and this LMS course will be associated with that copy in $installname.  This will allow you to make changes to the assignments
 							without affecting the original course, and will ensure your student records are housed in your own
 							$installname course.</p>";
-                        if (count($othercourses)>0 && !$blockLTICopyOfCopies) {
-                            echo "<ul class=nomark><li><input name=\"docoursecopy\" type=\"radio\" value=\"makecopy\" />Create a copy of the original course (ID $aidsourcecid) on $installname</li>";
-                            echo '<li><input name="docoursecopy" type="radio" value="copyother" />Create a copy of another course: <select name="othercoursecid">';
-                            foreach ($othercourses as $k=>$v) {
-                                echo '<option value="'.$k.'">'.Sanitize::encodeStringForDisplay($v).'</option>';
-                            }
-                            echo '</select></li>';
-                            echo $advuseother;
-                            echo '</ul>';
-                        } else {
-                            echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
-                        }
-                        if ($sourceUIver == 1) {
+						if (count($othercourses)>0 && !$blockLTICopyOfCopies) {
+							echo "<ul class=nomark><li><input name=\"docoursecopy\" type=\"radio\" value=\"makecopy\" />Create a copy of the original course (ID $aidsourcecid) on $installname</li>";
+							echo '<li><input name="docoursecopy" type="radio" value="copyother" />Create a copy of another course: <select name="othercoursecid">';
+							foreach ($othercourses as $k=>$v) {
+								echo '<option value="'.$k.'">'.Sanitize::encodeStringForDisplay($v).'</option>';
+							}
+							echo '</select></li>';
+							echo $advuseother;
+							echo '</ul>';
+						} else {
+							echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
+						}
+						if ($sourceUIver == 1) {
                             echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
                             echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
                             echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
                             echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
                             echo '<span class="js-versionOld-input"><label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
                             echo '</span>';
-                        }
-                        echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
-                    }
-                    echo "</form>";
-                    require("footer.php");
-                    exit;
-                }
-            } else {
-                reporterror(_("Course link not established yet.  Notify your instructor they need to click this assignment to set it up."));
-            }
-            if ($copycourse == "yes") {
-                //create a course
-                //creating a copy of a template course
-                $blockcnt = 1;
-                $itemorder = serialize(array());
-                $randkey = uniqid();
-                $hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
-                $picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
-                $allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
-                $copyrights = isset($CFG['CPS']['copyrights'])?$CFG['CPS']['copyrights'][0]:0;
-                $msgset = isset($CFG['CPS']['msgset'])?$CFG['CPS']['msgset'][0]:0;
-                $msgmonitor = (floor($msgset/5))&1;
-                $msgset = $msgset%5;
-                if (!isset($defaultcoursetheme)) {$defaultcoursetheme = "modern.css";}
-                $theme = isset($CFG['CPS']['theme'])?$CFG['CPS']['theme'][0]:$defaultcoursetheme;
-                $showlatepass = isset($CFG['CPS']['showlatepass'])?$CFG['CPS']['showlatepass'][0]:0;
+						}
+						echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
+					}
+					echo "</form>";
+					require("footer.php");
+					exit;
+				}
+			} else {
+				reporterror(_("Course link not established yet.  Notify your instructor they need to click this assignment to set it up."));
+			}
+			if ($copycourse == "yes") {
+				//create a course
+				//creating a copy of a template course
+				$blockcnt = 1;
+				$itemorder = serialize(array());
+				$randkey = uniqid();
+				$hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
+				$picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
+				$allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
+				$copyrights = isset($CFG['CPS']['copyrights'])?$CFG['CPS']['copyrights'][0]:0;
+				$msgset = isset($CFG['CPS']['msgset'])?$CFG['CPS']['msgset'][0]:0;
+				$msgmonitor = (floor($msgset/5))&1;
+				$msgset = $msgset%5;
+				if (!isset($defaultcoursetheme)) {$defaultcoursetheme = "modern.css";}
+				$theme = isset($CFG['CPS']['theme'])?$CFG['CPS']['theme'][0]:$defaultcoursetheme;
+				$showlatepass = isset($CFG['CPS']['showlatepass'])?$CFG['CPS']['showlatepass'][0]:0;
 
 				$avail = 0;
 				$lockaid = 0;
@@ -1219,6 +1234,16 @@ if ($stm->rowCount()==0) {
 				':courseid'=>$destcid,
 				':copiedfrom'=>($copycourse == "yes")?$sourcecid:0,
 				':contextlabel'=>$_SESSION['lti_context_label']));
+
+			$ltilog['contextid'] = $_SESSION['lti_context_id'];
+			$ltilog['action'] = 'Establish LTI course connection';
+			require_once('includes/TeacherAuditLog.php');
+			TeacherAuditLog::addTracking(
+				$destcid,
+				"Course Settings Change",
+				$destcid,
+				$ltilog
+			);
 		} else {
 			list($destcid, $copiedfromcid) = $stm->fetch(PDO::FETCH_NUM);
 		}
@@ -1394,6 +1419,17 @@ if ($_SESSION['lti_keytype']=='cc-of') {
 					':contextid'=>$_SESSION['lti_context_id'],
 					':courseid'=>$linkcid,
 					':contextlabel'=>$_SESSION['lti_context_label']));
+				require_once('includes/TeacherAuditLog.php');
+				TeacherAuditLog::addTracking(
+					$linkcid,
+					"Course Settings Change",
+					$linkcid,
+					[
+						'action'=>'Establish LTI course connection',
+						'type'=>'cc-of',
+						'contextid'=>$_SESSION['lti_context_id']
+					]
+				);
 			} else {
 				reporterror(_("You are not an instructor on the course and folder this link is pointing to. Auto-copying is not currently supported for folder-level links."));
 			}
@@ -2253,10 +2289,10 @@ if (isset($_GET['launch'])) {
 	}
 
 
-    //Store all LTI request data in session variable for reuse on submit
-    //if we got this far, secret has already been verified
-    $_SESSION['ltiuserid'] = $ltiuserid;
-    $_SESSION['ltiorg'] = $ltiorg;
+	//Store all LTI request data in session variable for reuse on submit
+	//if we got this far, secret has already been verified
+	$_SESSION['ltiuserid'] = $ltiuserid;
+	$_SESSION['ltiorg'] = $ltiorg;
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
     // #### Begin OHM-specific code #####################################################
@@ -2269,10 +2305,10 @@ if (isset($_GET['launch'])) {
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
-        $ltirole = 'instructor';
-    } else {
-        $ltirole = 'learner';
-    }
+		$ltirole = 'instructor';
+	} else {
+		$ltirole = 'learner';
+	}
 
 	$_SESSION['ltirole'] = $ltirole;
 	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
@@ -2503,6 +2539,19 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						':contextid'=>$_SESSION['lti_context_id'],
 						':courseid'=>$destcid,
 						':contextlabel'=>$_SESSION['lti_context_label']));
+					require_once('includes/TeacherAuditLog.php');
+					TeacherAuditLog::addTracking(
+						$destcid,
+						"Course Settings Change",
+						$destcid,
+						[
+							'action'=>'Establish LTI course connection',
+							'type'=>'2',
+							'contextid'=>$_SESSION['lti_context_id'],
+							'copycourse'=>$copycourse,
+							'orig'=>$_SESSION['place_aid'][0]
+						]
+					);
 
 				} else if ($_SESSION['lti_keytype']=='cc-c') {
 					$copyaid = true;
@@ -2514,7 +2563,17 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						':contextid'=>$_SESSION['lti_context_id'],
 						':courseid'=>$destcid,
 						':contextlabel'=>$_SESSION['lti_context_label']));
-
+					require_once('includes/TeacherAuditLog.php');
+					TeacherAuditLog::addTracking(
+						$destcid,
+						"Course Settings Change",
+						$destcid,
+						[
+							'action'=>'Establish LTI course connection',
+							'type'=>'3',
+							'contextid'=>$_SESSION['lti_context_id'],
+						]
+					);
 				}
 			} else {
 				$destcid = $stm->fetchColumn(0);
