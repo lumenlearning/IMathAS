@@ -706,7 +706,8 @@ foreach ($itemsimporder as $item) {
 				$names[$k] = $byid['F'.$datetype.$itemsassoc[$item][1]][4];
 				if ($byid['F'.$datetype.$itemsassoc[$item][1]][5]>0 && !isset($teacherid)) {
 					$colors[$k] = '#ccc';
-					$assess[$moday][$k]['color'] = '#ccc';
+                    $assess[$moday][$k]['color'] = '#ccc';
+                    $assess[$moday][$k]['inactive'] = true;
 				}
 				$k++;
 			}
@@ -813,7 +814,7 @@ foreach ($dates as $moday=>$val) {
 
 echo '<script type="text/javascript">';
 echo "cid = $cid;";
-echo "caleventsarr = ".json_encode($jsarr, JSON_HEX_TAG).";";
+echo "caleventsarr = ".json_encode($jsarr, JSON_HEX_TAG|JSON_INVALID_UTF8_IGNORE).";";
 echo '$(function() {
 	$(".cal td").off("click.cal").on("click.cal", function() { showcalcontents(this); })
 	 .off("keyup.cal").on("keyup.cal", function(e) { if(e.which==13) {showcalcontents(this);} })
