@@ -65,7 +65,6 @@
         'comment' => array(
           'body'=> $arr['z_description'] . ' Requester email: ' . $arr['z_email']
         ),
-        'priority' => $arr['z_priority']
       )
     )
   );
