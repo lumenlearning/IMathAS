@@ -62,9 +62,10 @@
     array(
       'request' => array(
         'requester:'=> $arr['z_email'], 
+        // 'custom_fields:'=> '{"name: " ' . '$arr['z_name'] .,
         'subject' => $arr['z_subject'],
         'comment' => array(
-          'body'=> $arr['z_description'],
+          'body'=> $arr['z_description'] . ' Requester name: ' . $arr['z_name'] . ' Requester email: ' . $arr['z_email']
         ),
         'course_id:'=> $arr['z_cid'], 
         

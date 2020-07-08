@@ -733,32 +733,17 @@ div#guides-button-container {
 	border: 1px solid #aaa;
 	border-bottom: 0;
 }
-#z_subject {
-	border-radius: 6px 6px 0 0;
-	margin-bottom: 0;
+
+/* Zen desk "Ask Lumen" form */
+
+.zd-help input[name="z_name"]{
+	border-radius: 6px 6px 0 0; 
 }
-#z_description {
-	margin-top: 0;
+
+.zd-help textarea[name="z_description"] {
 	border-radius: 0 0 6px 6px;
-	margin-bottom: 6px;
 }
-#z_email {
-	border-radius: 6px;
-	margin-bottom: 6px;
-}
-#z_priority {
-	width: 300px;
-	border: 1px solid #aaa;
-	border-bottom: 0;
-	border-radius: 6px;
-	background-color: #fff;
-	height: 35px;
-	left: 10px;
-	right: 10px;
-}
-#z_priority:first-child {
-	color: #aaa;
-}
+
 .modal-buttons {
 	background-color: #fff;
 	border-color: #FFD600;

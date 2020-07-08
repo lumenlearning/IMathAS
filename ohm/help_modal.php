@@ -42,7 +42,14 @@
       Get personal assistance from Lumen's support team.
     </p>
     <div id="ticket_form">
-      <form id="zd-help-form">
+      <form id="zd-help-form" class="zd-help">
+
+        <label for="z_name" class="u-sr-only">Name</label>
+        <input type="text" placeholder="name" name="z_name" id="z_name" class="field" />
+
+        <label for="z_email" class="u-sr-only">Email</label>
+        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
+
         <label for="z_cid" class="u-sr-only">Course Id</label>
         <input type="text" placeholder="course id" name="z_cid" id="z_cid" class="field" />
 
@@ -51,9 +58,6 @@
 
         <label for="z_description" class="u-sr-only">Description</label>
         <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
-
-        <label for="z_email" class="u-sr-only">Email</label>
-        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
        
         <div id="lumen-button-container">
           <button id="lumen-button" type="submit">Submit</button>
