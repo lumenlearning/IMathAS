@@ -43,6 +43,7 @@
     </p>
     <div id="ticket_form">
       <form id="zd-help-form">
+        <input type="text" placeholder="course id" name="z_cid" id="z_cid" class="field" />
         <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
         <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
         <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />

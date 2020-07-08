@@ -61,10 +61,13 @@
   $create = json_encode(
     array(
       'request' => array(
+        'requester:'=> $arr['z_email'], 
         'subject' => $arr['z_subject'],
         'comment' => array(
-          'body'=> $arr['z_description'] . ' Requester email: ' . $arr['z_email']
+          'body'=> $arr['z_description'],
         ),
+        'course_id:'=> $arr['z_cid'], 
+        
       )
     )
   );
