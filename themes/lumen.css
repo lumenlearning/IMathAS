@@ -27,6 +27,17 @@ body {
 	text-align: inherit;
 }
 
+.u-sr-only {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: 1px;
+	overflow: hidden;
+	margin: -1px;
+	padding: 0;
+	position: absolute !important;
+	width: 1px;
+}
+
 h1, h2, h3 {
   margin-top: 21px;
   margin-bottom: 15px;
