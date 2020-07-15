@@ -61,7 +61,6 @@
   $create = json_encode(
     array(
       'request' => array(
-        'requester:'=> $arr['z_email'], 
         'subject' => $arr['z_subject'],
         'comment' => array(
           'body'=> $arr['z_description'] . ' Requester Name: ' . $arr['z_name'] . ' Email: ' . $arr['z_email'] . ' Course ID: ' . $arr['z_cid']
