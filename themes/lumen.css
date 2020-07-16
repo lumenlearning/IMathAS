@@ -736,13 +736,22 @@ div#guides-button-container {
 
 /* Zen desk "Ask Lumen" form */
 
-.zd-help input[name="z_name"]{
-	border-radius: 6px 6px 0 0; 
-}
-
 .zd-help textarea[name="z_description"] {
 	border-radius: 0 0 6px 6px;
+} 
+
+.zd-help input[name="z_subject"] {
+	border-radius: 6px 6px 0 0;
+} 
+
+.zd-info {
+	margin-bottom: 12px;
 }
+
+.zd-info input {
+	margin-bottom: 4px;
+	border-radius: 6px;
+} 
 
 .modal-buttons {
 	background-color: #fff;

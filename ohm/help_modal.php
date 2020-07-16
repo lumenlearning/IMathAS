@@ -43,15 +43,16 @@
     </p>
     <div id="ticket_form">
       <form id="zd-help-form" class="zd-help">
+        <div class="zd-info">
+          <label for="z_name" class="u-sr-only">Name</label>
+          <input type="text" placeholder="name" name="z_name" id="z_name" class="field" />
 
-        <label for="z_name" class="u-sr-only">Name</label>
-        <input type="text" placeholder="name" name="z_name" id="z_name" class="field" />
+          <label for="z_email" class="u-sr-only">Email</label>
+          <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
 
-        <label for="z_email" class="u-sr-only">Email</label>
-        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
-
-        <label for="z_cid" class="u-sr-only">Course Id</label>
-        <input type="text" placeholder="course id" name="z_cid" id="z_cid" class="field" />
+          <label for="z_cid" class="u-sr-only">Course Id</label>
+          <input type="text" placeholder="course id" name="z_cid" id="z_cid" class="field" />
+        </div>
 
         <label for="z_subject" class="u-sr-only">Subject</label>
         <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
