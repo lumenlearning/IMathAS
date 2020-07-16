@@ -58,17 +58,21 @@
    *
    * @var JSON encoded Array $create
    */
-  $create = json_encode(
-    array(
-      'request' => array(
-        'subject' => $arr['z_subject'],
-        'comment' => array(
-          'body'=> $arr['z_description'] . ' Requester Name: ' . $arr['z_name'] . ' Email: ' . $arr['z_email'] . ' Course ID: ' . $arr['z_cid']
-        ),
-      )
-    )
-  );
+
+   $create = json_encode([
+      "ticket" => [
+          "subject" => $arr['z_subject'],
+          "comment" => [
+              'body' => $arr['z_description'] . ' Requester Name: ' . $arr['z_name'] . ' Email: ' . $arr['z_email'] . ' Course ID: ' . $arr['z_cid']
+          ],
+          "requester" => [
+              "name" => $arr['z_name'],
+              "email" => "ohmsupport@lumenlearning.com"
+          ]
+      ]
+  ]);
+
 var_export($create);
-  $return = curlWrap("/requests.json", $create);
+  $return = curlWrap("/tickets.json", $create);
 
 ?>
