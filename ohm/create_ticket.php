@@ -67,7 +67,7 @@
           ],
           "requester" => [
               "name" => $arr['z_name'],
-              "email" => "ohmsupport@lumenlearning.com"
+              "email" => $arr['z_email'],
           ]
       ]
   ]);
