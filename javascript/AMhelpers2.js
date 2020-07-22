@@ -248,7 +248,6 @@ function setupTips(id, tip, longtip) {
   if (!document.getElementById("tips"+ref)) {
     $("body").append($("<div>", {class:"hidden", id:"tips"+ref}).html(longtip));
   }
-  el.setAttribute('aria-label', tip);
   el.setAttribute('aria-describedby', 'tips'+ref);
   el.addEventListener('focus', function() {
     showehdd(id, tip, ref);
@@ -373,9 +372,13 @@ function initShowAnswer2() {
 
     var qref = el.id.substring(3);
     var inref = qref;
+    var label;
     if (inref.indexOf('-') !== -1) {
       var pts = inref.split('-');
       inref = (pts[0]*1 + 1)*1000 + pts[1]*1;
+      label = _('Question ') + (pts[0]*1+1) + _(' Part ') + (pts[1]*1 + 1);
+    } else {
+      label = _('Question ') + (inref*1+1);
     }
     var key = $('<span>', {'class': 'keywrap'}).append(
       $('<button>', {
@@ -383,7 +386,7 @@ function initShowAnswer2() {
         'aria-controls': 'ans'+qref,
         'aria-expanded': 'false',
         'class': 'keybtn',
-        'aria-label': _('View Key'),
+        'aria-label': _('View Key for ') + label,
         title: _('View Key')
       }).on('click', function(e) {
           var curstate = (e.currentTarget.getAttribute('aria-expanded') == 'true');
