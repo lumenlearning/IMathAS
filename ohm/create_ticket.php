@@ -72,7 +72,11 @@
       ]
   ]);
 
-var_export($create);
   $return = curlWrap("/tickets.json", $create);
 
-?>
+  if (array_key_exists('error', $return)) {
+    // Returning a status 500 beacuse there's no reliable way to determine
+    // if we failed due to client input or an API issue. (Zendesk down, etc)
+    http_response_code(500);
+    echo json_encode($return);
+  }
