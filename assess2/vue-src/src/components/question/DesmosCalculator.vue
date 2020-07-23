@@ -75,19 +75,17 @@
 
 <script>
 import { store } from '../../basicstore';
-import Icons from '@/components/widgets/Icons.vue';
 import IconCalc from '../icons/Calculators.vue';
-import IconClose from "../icons/Close.vue";
-import IconPopOut from "../icons/PopOut.vue";
-import IconPopIn from "../icons/PopIn.vue";
-import IconDrag from "../icons/DragHandle.vue";
+import IconClose from '../icons/Close.vue';
+import IconPopOut from '../icons/PopOut.vue';
+import IconPopIn from '../icons/PopIn.vue';
+import IconDrag from '../icons/DragHandle.vue';
 import VueDraggableResizeable from 'vue-draggable-resizable';
 
 export default {
   name: 'DesmosCalculator',
   props: ['qn', 'calctype'],
   components: {
-    Icons,
     IconCalc,
     IconClose,
     IconPopOut,
@@ -98,50 +96,46 @@ export default {
   data: function () {
     return {
       showCalculator: false,
-      calcHasAlreadyLoaded: false,
       calcIsPoppedOut: false,
       calcHeight: 500,
       calcObj: null,
-      firstOpen: false
+      hadFirstOpen: false
     };
   },
   computed: {
-    calcPosition (){
-      return this.calcIsPoppedOut ? "absolute" : "initial";
+    calcPosition () {
+      return this.calcIsPoppedOut ? 'absolute' : 'initial';
     }
   },
   methods: {
-    openCalc(){
-      this.showCalculator = true;
-      if (!this.firstOpen && !store.assessInfo.can_view_all) {
-        window.recclick('desmoscalc', store.aid, this.qn, this.calctype);
+    openCalc () {
+      if (!this.hadFirstOpen) {
+        this.initCalc();
+        if (!store.assessInfo.can_view_all) {
+          window.recclick('desmoscalc', store.aid, this.qn, this.calctype);
+        }
       }
-      this.firstOpen = true;
+      this.hadFirstOpen = true;
+      this.showCalculator = true;
     },
-    closeCalc() {
+    closeCalc () {
       this.showCalculator = false;
       this.calcIsPoppedOut = false;
     },
-    toggleCalcPopOut(){
+    toggleCalcPopOut () {
       this.calcIsPoppedOut = !this.calcIsPoppedOut;
     },
-    getCalcDimensions(left, top, width, height){
+    getCalcDimensions (left, top, width, height) {
       this.calcHeight = height;
     },
-    initCalc() {
+    initCalc () {
       if (this.calctype === 'basic') {
-        this.calcObj = Desmos.FourFunctionCalculator(this.$refs.figure);
+        this.calcObj = window.Desmos.FourFunctionCalculator(this.$refs.figure);
       } else if (this.calctype === 'scientific') {
-        this.calcObj = Desmos.ScientificCalculator(this.$refs.figure);
+        this.calcObj = window.Desmos.ScientificCalculator(this.$refs.figure);
       } if (this.calctype === 'graphing') {
-        this.calcObj = Desmos.GraphingCalculator(this.$refs.figure);
+        this.calcObj = window.Desmos.GraphingCalculator(this.$refs.figure);
       }
-      this.calcHasAlreadyLoaded = true;
-    }
-  },
-  mounted () {
-    if(!this.calcHasAlreadyLoaded){
-      this.initCalc();
     }
   },
   beforeDestroy () {
@@ -151,8 +145,15 @@ export default {
   },
   watch: {
     calctype: function (newVal, oldVal) {
-      if (newVal != oldVal) {
-        this.initCalc();
+      // if calctype has changed, and we already have one loaded, destroy it
+      if (newVal !== oldVal && this.calcObj) {
+        this.calcObj.destroy();
+        // if calculator is open, load new one. Otherwise reset to wait for first click
+        if (this.showCalculator) {
+          this.initCalc();
+        } else {
+          this.hadFirstOpen = false;
+        }
       }
     }
   }
