@@ -294,10 +294,25 @@ require_once("includes/sanitize.php");
 				send_email($email, $sendfrom, $installname._(' Password Reset Request'), $message, array(), array(), 10);
 
 				require("header.php");
-				echo '<p>',_('An email with a password reset link has been sent your email address on record'),': <b>'.Sanitize::emailAddress($email).'.</b><br/> ';
-				echo _('If you do not see it in a few minutes, check your spam or junk box to see if the email ended up there.'),'<br/>';
-				echo sprintf(_('It may help to add %s to your contacts list.'),'<b>'.Sanitize::encodeStringForDisplay($sendfrom).'</b>'),'</p>';
-				echo '<p>',_('If you still have trouble or the wrong email address is on file, contact your instructor - they can reset your password for you.'),'</p>';
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+                #
+				# Changed wording. See OHM-722.
+				#
+				echo sprintf('
+An email with a password reset link has been sent.<br/>
+If you do not receive it in a few minutes, check your spam or junk box.<br/>
+It may help to add %s to your contacts list.<br/>
+If you still have trouble or the wrong email address is on file, contact your instructor - they can reset your password for you.
+				', Sanitize::encodeStringForDisplay($sendfrom));
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
+				#### End OHM-specific changes ############################################################
 				if (function_exists('getInstructorSupport')) {
 					getInstructorSupport($rights);
 				}
