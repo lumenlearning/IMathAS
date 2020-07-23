@@ -74,6 +74,7 @@
 </template>
 
 <script>
+import { store } from '../../basicstore';
 import Icons from '@/components/widgets/Icons.vue';
 import IconCalc from '../icons/Calculators.vue';
 import IconClose from "../icons/Close.vue";
@@ -100,7 +101,8 @@ export default {
       calcHasAlreadyLoaded: false,
       calcIsPoppedOut: false,
       calcHeight: 500,
-      calcObj: null
+      calcObj: null,
+      firstOpen: false
     };
   },
   computed: {
@@ -111,6 +113,10 @@ export default {
   methods: {
     openCalc(){
       this.showCalculator = true;
+      if (!this.firstOpen && !store.assessInfo.can_view_all) {
+        window.recclick('desmoscalc', store.aid, this.qn, this.calctype);
+      }
+      this.firstOpen = true;
     },
     closeCalc() {
       this.showCalculator = false;
