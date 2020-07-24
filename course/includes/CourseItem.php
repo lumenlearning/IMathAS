@@ -6,6 +6,7 @@
 namespace Course\Includes;
 use PDO;
 use Sanitize;
+use \Includes\TeacherAuditLog;
 
 /**
  * Class CourseItem
@@ -34,6 +35,8 @@ abstract class CourseItem
     protected $startdate;
     protected $enddate;
     protected $avail;
+    protected $trackview = true;
+    protected $trackedit = true;
 
     /**
      * CourseItem constructor.
@@ -59,7 +62,6 @@ abstract class CourseItem
         if (isset($GLOBALS['CFG']['CPS']['miniicons'])) {
             $this->miniicon = $GLOBALS['CFG']['CPS']['miniicons'][$this->typename];
         }
-        //if ($this->trackview === true || $this->trackedit === true)
     }
 
     public function track($track_type, $info = '')
@@ -69,7 +71,16 @@ abstract class CourseItem
                 ContentTracker::addTracking($this, $this->typename . 'view', $info);
             }
         } else if ($this->trackedit === true) {
-            ContentTracker::addTracking($this, $this->typename . $track_type, $info);
+            $customtype = $this->getCustomType();
+            TeacherAuditLog::addTracking(
+                $this->courseid,
+                $customtype . ' Settings Change',
+                $this->typeid,
+                [
+                    'action' => $track_type,
+                    'info' => $info
+                ]      
+            );
         }
     }
 

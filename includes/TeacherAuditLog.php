@@ -33,7 +33,13 @@ class TeacherAuditLog
         "Offline Grade Settings Change",
         "Change Offline Grades",
         "Change Forum Grades",
-        "Change External Tool Grades"
+        "Change External Tool Grades",
+        "Custom1 Settings Change",
+        "Mass Custom1 Settings Change",
+        "Custom2 Settings Change",
+        "Mass Custom2 Settings Change",
+        "Custom3 Settings Change",
+        "Mass Custom3 Settings Change"
     ];
 
     public static function addTracking($courseid, $action, $itemid = null, $metadata = array(), ?PDO $dbhOverride = null)
