@@ -524,13 +524,5 @@ class DesmosItem extends CourseItem
     {
         return $dateTime->format('Y-m-d H:i:s');
     }
-
-    /*
-     * Returns the custom# type we're using for this item
-     * in the teacher audit log
-    */
-    public static function getCustomType(): string 
-    {
-        return 'Custom1';
-    }
+    
 }
