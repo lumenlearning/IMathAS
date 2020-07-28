@@ -63,7 +63,7 @@ class FunctionExpressionAnswerBox implements AnswerBox
     		$ansformats = array_map('trim',explode(',',$answerformat));
 
     		if (isset($ansprompt) && !in_array('nosoln',$ansformats) && !in_array('nosolninf',$ansformats))  {
-    			$out .= "<label for=\"qn$qn\">$ansprompt</label>";
+    			$out .= $ansprompt;
     		}
     		if (in_array('equation',$ansformats)) {
     			$shorttip = _('Enter an algebraic equation');
@@ -145,7 +145,8 @@ class FunctionExpressionAnswerBox implements AnswerBox
     		$params['domain'] = $newdomain;
 
     		$out .= '<input ' .
-    						Sanitize::generateAttributeString($attributes) .
+    						'aria-label="'.$this->answerBoxParams->getQuestionIdentifierString().'" ' .
+                Sanitize::generateAttributeString($attributes) .
     						'class="'.implode(' ', $classes) .
     						'" />';
 
