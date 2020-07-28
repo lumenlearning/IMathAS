@@ -54,6 +54,12 @@ if ($overwriteBody==1) {
     $stm->execute(array($cid));
     list($coursename, $courseownerid, $coursegroupid) = $stm->fetch(PDO::FETCH_NUM);
 
+    if (isset($CFG['customtypes'])) {
+        $custmap = array_flip($CFG['customtypes']);
+    } else {
+    	$custmap = array();
+    }
+    
     echo '<div class=breadcrumb>', $curBreadcrumb, '</div>';
     echo '<div id="headeruserdetail" class="pagetitle"><h1>' . _('Teacher Audit Log') . ': ';
     echo Sanitize::encodeStringForDisplay($coursename);
@@ -81,11 +87,12 @@ if ($overwriteBody==1) {
         echo '</tr>';
 
         foreach ($teacher_actions as $action) {
+            $action['action'] = ucfirst(strtr($action['action'], $custmap));
             echo '<tr>';
             echo '<td>' . formatdate($action['created_at']) . '</td>';
             echo "<td>";
-						echo Sanitize::encodeStringForDisplay($teacherNames[$action['userid']]);
-						echo " (" . Sanitize::onlyInt($action['userid']) . ')</td>';
+            echo Sanitize::encodeStringForDisplay($teacherNames[$action['userid']]);
+	        echo " (" . Sanitize::onlyInt($action['userid']) . ')</td>';
             echo '<td>' . Sanitize::encodeStringForDisplay($action['action']) . '</td>';
             echo '<td>' . Sanitize::onlyInt($action['itemid']) . '</td>';
             echo '<td><a href="javascript:alert(\'' . Sanitize::encodeStringForDisplay($action['metadata']) . '\')">Details</a></td>';

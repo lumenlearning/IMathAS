@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot; ?>/desmos/desmos-temp.css" type="text/css" />
 <?php if (count($item->steps) > 1) { ?>
 <script type="text/javascript">
     window.onload = ()=> {

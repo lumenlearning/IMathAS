@@ -103,12 +103,14 @@ if ($_POST['name']!= null || $_POST['title']!=null) {
     }
     if (isset($typeid)) {  //already have id; update
         $item->updateItem($typeid, $fields);
-        $track_type = $item->track('edit');
+        // tracking is inside updateItem already 
+        // $track_type = $item->track('edit');
     } else { //add new
         $fields['courseid'] = $cid;
         $item = new $itemObject($cid, $block, $totb);
         $item->addItem($fields);
-        $track_type = $item->track('add');
+        // tracking is inside addItem already 
+        // $track_type = $item->track('add');
     }
     header(
         sprintf('Location: %s/course/itemadd.php?type=desmos&id=%d&block=%d&cid=%d&r=%s',
