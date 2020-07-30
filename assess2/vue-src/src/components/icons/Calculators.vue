@@ -23,7 +23,7 @@
                 <rect fill="#212B36" x="4" y="3" width="17" height="18" rx="1"/>
                 <path fill="#DDE3E9" d="M5 9h3v3H5zM9 9h3v3H9zM5 13h3v3H5zM9 13h3v3H9zM9 17h3v3H9zM13 9h3v3h-3z"/><path fill="#F49342" d="M17 9h3v3h-3z"/><path fill="#DDE3E9" d="M13 13h3v3h-3zM13 17h3v3h-3zM5 17h3v3H6a1 1 0 01-1-1v-2z"/><path d="M17 13h3v6a1 1 0 01-1 1h-2v-7z" fill="#2DCF77"/><path d="M6 4h13a1 1 0 011 1v3H5V5a1 1 0 011-1z" fill="#FFF"/>
             </g>
-        </template>   
+        </template>
     </svg>
 </template>
 
