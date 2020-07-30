@@ -58,18 +58,25 @@
    *
    * @var JSON encoded Array $create
    */
-  $create = json_encode(
-    array(
-      'request' => array(
-        'subject' => $arr['z_subject'],
-        'comment' => array(
-          'body'=> $arr['z_description'] . ' Requester email: ' . $arr['z_email']
-        ),
-        'priority' => $arr['z_priority']
-      )
-    )
-  );
-var_export($create);
-  $return = curlWrap("/requests.json", $create);
 
-?>
+   $create = json_encode([
+      "ticket" => [
+          "subject" => $arr['z_subject'],
+          "comment" => [
+              'body' => $arr['z_description'] . '"\n \n" Course ID: ' . $arr['z_cid']
+          ],
+          "requester" => [
+              "name" => $arr['z_name'],
+              "email" => $arr['z_email'],
+          ]
+      ]
+  ]);
+
+  $return = curlWrap("/tickets.json", $create);
+
+  if (array_key_exists('error', $return)) {
+    // Returning a status 500 beacuse there's no reliable way to determine
+    // if we failed due to client input or an API issue. (Zendesk down, etc)
+    http_response_code(500);
+    echo json_encode($return);
+  }

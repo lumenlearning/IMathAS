@@ -613,6 +613,7 @@ $vueData = array(
                 <span class=formright>
 					<select name="showcalculator" id="showcalculator" v-model="showcalculator">
 						<option value="DNC"><?php echo _('Do not change'); ?></option>
+						<option value="">None</option>
                         <?php
                         foreach ($CFG['showcalculator'] as $key => $value) {
                             printf('<option value="%s"', $key);

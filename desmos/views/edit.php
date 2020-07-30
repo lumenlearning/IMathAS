@@ -1,5 +1,5 @@
-<link rel="stylesheet" href="/desmos/desmos-temp.css" type="text/css" />
-<link rel="stylesheet" href="/desmos/ohm-modal.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot; ?>/desmos/desmos-temp.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $imasroot; ?>/desmos/ohm-modal.css" type="text/css" />
 
 <script type="text/javascript" src="<?php echo $imasroot; ?>/desmos/js/ohmModal.js"></script>
 <script type="text/javascript">

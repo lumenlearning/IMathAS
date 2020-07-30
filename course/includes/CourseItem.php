@@ -6,6 +6,8 @@
 namespace Course\Includes;
 use PDO;
 use Sanitize;
+//use \TeacherAuditLog;
+require_once(__DIR__.'/../../includes/TeacherAuditLog.php');
 
 /**
  * Class CourseItem
@@ -59,17 +61,42 @@ abstract class CourseItem
         if (isset($GLOBALS['CFG']['CPS']['miniicons'])) {
             $this->miniicon = $GLOBALS['CFG']['CPS']['miniicons'][$this->typename];
         }
-        //if ($this->trackview === true || $this->trackedit === true)
     }
 
     public function track($track_type, $info = '')
     {
+        global $CFG;
         if ($track_type === 'view') {
             if ($this->trackview === true) {
                 ContentTracker::addTracking($this, $this->typename . 'view', $info);
             }
+        } else if ($this->trackedit === true && $track_type === 'delete') {
+            $itemname = $this->asArray()['title'];
+            \TeacherAuditLog::addTracking(
+                $this->courseid,
+                "Delete Item",
+                $this->typeid,
+                [
+                    'item_type'=>$this->typename,
+                    'item_name'=>$itemname
+                ]      
+            );
         } else if ($this->trackedit === true) {
-            ContentTracker::addTracking($this, $this->typename . $track_type, $info);
+            if (isset($CFG['customtypes'][$this->typename])) {
+            	    $customtype = $CFG['customtypes'][$this->typename];
+            } else {
+            	    echo 'Need to define $CFG["customtypes"]';
+            	    exit;
+            }
+            \TeacherAuditLog::addTracking(
+                $this->courseid,
+                $customtype . ' Settings Change',
+                $this->typeid,
+                [
+                    'action' => $track_type,
+                    'info' => $info
+                ]      
+            );
         }
     }
 
@@ -298,6 +325,7 @@ abstract class CourseItem
     public function deleteItemData(int $typeid)
     {
         $this->findItem($typeid);
+        $this->track('delete');
         $this->dbh->beginTransaction();
         $this->_deleteCourseItem();
         if ($this->points > 0) {
