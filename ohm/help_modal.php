@@ -42,17 +42,24 @@
       Get personal assistance from Lumen's support team.
     </p>
     <div id="ticket_form">
-      <form id="zd-help-form">
-        <input type="text" placeholder="ticket subject" name="z_subject" id="z_subject" class="field" required />
-        <textarea placeholder="how can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
-        <input type="text" placeholder="your email address" name="z_email" id="z_email" class="field" required />
-        <select name="z_priority" id="z_priority" required>
-          <option value="" disabled selected>priority</option>
-          <option value="low">Low</option>
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
-        </select>
+      <form id="zd-help-form" class="zd-help">
+        <div class="zd-info">
+          <label for="z_name" class="u-sr-only">Name</label>
+          <input type="text" placeholder="Name" name="z_name" id="z_name" class="field" />
+
+          <label for="z_email" class="u-sr-only">Email</label>
+          <input type="text" placeholder="Email" name="z_email" id="z_email" class="field" required />
+
+          <label for="z_cid" class="u-sr-only">Course Id</label>
+          <input type="text" placeholder="Course ID (optional)" name="z_cid" id="z_cid" class="field" />
+        </div>
+
+        <label for="z_subject" class="u-sr-only">Subject</label>
+        <input type="text" placeholder="Ticket Subject" name="z_subject" id="z_subject" class="field" required />
+
+        <label for="z_description" class="u-sr-only">Description</label>
+        <textarea placeholder="How can we help?" name="z_description" id="z_description" rows="6" class="field" required></textarea>
+       
         <div id="lumen-button-container">
           <button id="lumen-button" type="submit">Submit</button>
         </div>
