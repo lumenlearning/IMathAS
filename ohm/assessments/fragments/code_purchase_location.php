@@ -12,7 +12,12 @@ $bookstoreUrl = is_null($institutionData) ? null : $institutionData->getBookstor
 if (is_null($institutionData) || empty($bookstoreUrl)) {
 	echo '.';
 } else {
+	if(preg_match("/http[s]?:\/\//i", $bookstoreUrl)){
+		$fixedBookstoreURL = $bookstoreUrl;
+	} else {
+		$fixedBookstoreURL = 'http://' . $bookstoreUrl;
+	}
 	?>
-    or on the <a class="bookstore-url" target="_blank" href="<?php echo $bookstoreUrl; ?>">bookstore website</a>.
+    or on the <a class="bookstore-url" target="_blank" href="<?php echo $fixedBookstoreURL; ?>">bookstore website</a>.
 	<?php
 }
