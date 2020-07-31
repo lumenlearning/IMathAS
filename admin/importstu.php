@@ -167,7 +167,7 @@ if (!(isset($teacherid)) && $myrights<100) {
 				} else {
 					$pw = md5($arr[6]);
 				}
-				$stm = $DBH->prepare("INSERT INTO imas_users (SID,FirstName,LastName,email,rights,password,forcepwreset) VALUES (:SID, :FirstName, :LastName, :email, :rights, :password, 1, :created_at)");
+				$stm = $DBH->prepare("INSERT INTO imas_users (SID,FirstName,LastName,email,rights,password,forcepwreset,created_at) VALUES (:SID, :FirstName, :LastName, :email, :rights, :password, 1, :created_at)");
 				$stm->execute(array(':SID'=>Sanitize::stripHtmlTags($arr[0]), ':FirstName'=>Sanitize::stripHtmlTags($arr[1]), ':LastName'=>Sanitize::stripHtmlTags($arr[2]), ':email'=>Sanitize::emailAddress($arr[3]), ':rights'=>10, ':password'=>$pw, ':created_at'=>time()));
 				$id = $DBH->lastInsertId();
 			}
@@ -179,12 +179,11 @@ if (!(isset($teacherid)) && $myrights<100) {
 					continue;
 				}
 
-				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section,latepass) VALUES (:userid, :courseid, :code, :section, :latepass, :created_at)");
+				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,code,section,latepass,created_at) VALUES (:userid, :courseid, :code, :section, :latepass, :created_at)");
 				$stm->execute(array(':userid'=>$id, ':courseid'=>$ncid,
 					':code'=>($_POST['codetype']==1)?Sanitize::stripHtmlTags($arr[4]):null,
 					':section'=>($_POST['sectype']>0)?Sanitize::stripHtmlTags($arr[5]):null,
-					':latepass'=>$deflatepass
-                    ':created_at'=>time()));
+					':latepass'=>$deflatepass, ':created_at'=>time()));
 			}
 
 		}

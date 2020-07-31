@@ -1615,6 +1615,22 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
 					$deflatepass = $stm->fetchColumn(0);
 					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
 					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    $rowId = $DBH->lastInsertId();
+                    if ($rowId && 0 < $rowId) {
+                        $stmc = $DBH->prepare("UPDATE imas_students
+                            SET created_at = UNIX_TIMESTAMP() WHERE id=:id");
+                        $stmc->execute(array(':id' => $rowId));
+                    }
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
@@ -2786,6 +2802,22 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 					$deflatepass = $stm->fetchColumn(0);
 					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
 					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    $rowId = $DBH->lastInsertId();
+                    if ($rowId && 0 < $rowId) {
+                        $stmc = $DBH->prepare("UPDATE imas_students
+                            SET created_at = UNIX_TIMESTAMP() WHERE id=:id");
+                        $stmc->execute(array(':id' => $rowId));
+                    }
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
