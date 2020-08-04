@@ -21,13 +21,13 @@ $DBH->beginTransaction();
 
   // OHM-594: Commented this out to allow for rollbacks.
   // drop old columns
-//  $query = "ALTER TABLE `imas_msgs` DROP COLUMN isread, DROP INDEX msgfrom";
-//  $res = $DBH->query($query);
-//  if ($res===false) {
-//    echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
-//  $DBH->rollBack();
-//  return false;
-//  }
+  $query = "ALTER TABLE `imas_msgs` DROP COLUMN isread, DROP INDEX msgfrom";
+  $res = $DBH->query($query);
+  if ($res===false) {
+    echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
+  $DBH->rollBack();
+  return false;
+  }
 
 $DBH->commit();
 
