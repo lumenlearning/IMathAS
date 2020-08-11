@@ -177,7 +177,6 @@ if (isset($_GET['create']) && isset($_POST['whichitems'])) {
                 // #### End OHM-specific code #####################################################
 		}
 		echo '" class="floatleft"/><div style="margin-left:21px">'.Sanitize::encodeStringForDisplay($names[$i]).'</div></td>';
-			echo '" class="floatleft"/><div style="margin-left:21px">'.Sanitize::encodeStringForDisplay($names[$i]).'</div></td>';
 
 		echo '</tr>';
 	}
