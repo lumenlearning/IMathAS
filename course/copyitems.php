@@ -120,7 +120,7 @@ if (!(isset($teacherid))) {
 			}
 			$DBH->beginTransaction();
 			if (isset($_POST['copycourseopt'])) {
-				$tocopy = 'ancestors,hideicons,allowunenroll,copyrights,msgset,picicons,showlatepass,theme,latepasshrs,deflatepass';
+				$tocopy = 'ancestors,allowunenroll,copyrights,msgset,showlatepass,theme,latepasshrs,deflatepass';
 				$stm = $DBH->prepare("SELECT $tocopy FROM imas_courses WHERE id=:id");
 				$stm->execute(array(':id'=>$ctc));
 				$row = $stm->fetch(PDO::FETCH_ASSOC);
@@ -394,12 +394,11 @@ if (!(isset($teacherid))) {
 		} elseif (isset($_GET['action']) && $_GET['action']=="select") { //DATA MANIPULATION FOR second option
 			$items = false;
 
-			$stm = $DBH->prepare("SELECT id,itemorder,picicons,name,UIver FROM imas_courses WHERE id IN (?,?)");
+			$stm = $DBH->prepare("SELECT id,itemorder,name,UIver FROM imas_courses WHERE id IN (?,?)");
 			$stm->execute(array($_POST['ctc'], $cid));
 			while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 				if ($row['id']==$ctc) {
 					$items = unserialize($row['itemorder']);
-					$picicons = $row['picicons'];
 					$ctcname = $row['name'];
 					$sourceUIver = $row['UIver'];
 				}
@@ -548,7 +547,7 @@ $excludeAssess = ($sourceUIver > $destUIver);
 	<p class="noticetext"><?php echo _('You are about to copy ALL items in this course.'); ?></p>
 	<p><?php echo _("In most cases, you'll want to leave the options below set to their default	values"); ?> </p>
 	</div>
-    <div id="selectitemstocopy" <?php echo $excludeAssess?'':'style="display:none"';?>>
+	<div id="selectitemstocopy" <?php echo $excludeAssess?'':'style="display:none"';?>>
 <?php } ?>
 	<h3><?php _('Select Items to Copy'); ?></h3>
 
@@ -557,11 +556,7 @@ $excludeAssess = ($sourceUIver > $destUIver);
 	<table cellpadding=5 class=gb>
 		<thead>
 		<?php
-		if ($picicons) {
 			echo '<tr><th></th><th>'._('Title').'</th><th>'._('Summary').'</th></tr>';
-		} else {
-			echo '<tr><th></th><th>'._('Type').'</th><th>Title</th><th>'._('Summary').'</th></tr>';
-		}
 		?>
 
 		</thead>
@@ -590,17 +585,16 @@ $excludeAssess = ($sourceUIver > $destUIver);
 		<?php
 			$tdpad = 16*strlen($prespace[$i]);
 
-			if ($picicons) {
-				echo '<td style="padding-left:'.$tdpad.'px"><img alt="'.$types[$i].'" title="'.$types[$i].'" src="'.$imasroot.'/img/';
-				switch ($types[$i]) {
-					case 'Calendar': echo $CFG['CPS']['miniicons']['calendar']; break;
-					case 'InlineText': echo $CFG['CPS']['miniicons']['inline']; break;
-					case 'LinkedText': echo $CFG['CPS']['miniicons']['linked']; break;
-					case 'Forum': echo $CFG['CPS']['miniicons']['forum']; break;
-					case 'Wiki': echo $CFG['CPS']['miniicons']['wiki']; break;
-					case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
-					case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
-					case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
+			echo '<td style="padding-left:'.$tdpad.'px"><img alt="'.$types[$i].'" title="'.$types[$i].'" src="'.$imasroot.'/img/';
+			switch ($types[$i]) {
+				case 'Calendar': echo $CFG['CPS']['miniicons']['calendar']; break;
+				case 'InlineText': echo $CFG['CPS']['miniicons']['inline']; break;
+				case 'LinkedText': echo $CFG['CPS']['miniicons']['linked']; break;
+				case 'Forum': echo $CFG['CPS']['miniicons']['forum']; break;
+				case 'Wiki': echo $CFG['CPS']['miniicons']['wiki']; break;
+				case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
+				case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
+				case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
                     // #### Begin OHM-specific code #####################################################
                     // #### Begin OHM-specific code #####################################################
                     // #### Begin OHM-specific code #####################################################
@@ -612,13 +606,9 @@ $excludeAssess = ($sourceUIver > $destUIver);
                     // #### End OHM-specific code #####################################################
                     // #### End OHM-specific code #####################################################
                     // #### End OHM-specific code #####################################################
-				}
-				echo '" class="floatleft"/><div style="margin-left:21px">'.$names[$i].'</div></td>';
-			} else {
-
-				echo '<td>'.$prespace[$i].$names[$i].'</td>';
-				echo '<td>'.$types[$i].'</td>';
 			}
+			echo '" class="floatleft"/><div style="margin-left:21px">'.$names[$i].'</div></td>';
+
 		?>
 			<td><?php echo $sums[$i] ?></td>
 		</tr>

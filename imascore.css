@@ -153,7 +153,7 @@ div.block.grouptoggle {
 div.block.grouptoggle + div.blockitems {
 	margin-top: 0px
 }
-.hidden {
+.hidden,.pseudohidden {
 	display:none;
 }
 .showinmobile {
@@ -950,6 +950,12 @@ button.plain:hover, button.plain:active {
 	max-width: 700px;
 	border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+}
+@media (min-height: 2000px) {
+	.dialog {
+		position: absolute;
+		top: 5em;
+	}
 }
 .dialog button.slim {
   margin-right: -12px;

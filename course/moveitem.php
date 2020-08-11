@@ -178,7 +178,7 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 	}
 }
 
-if ($itemtomove{0} != 'B') {
+if ($itemtomove[0] != 'B') {
 	$itemtomovename = $iteminfo[$itemtomove][1];
 } else {
 	$itemtomovename = $itemtomovename;
