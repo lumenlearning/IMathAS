@@ -63,7 +63,7 @@
       "ticket" => [
           "subject" => $arr['z_subject'],
           "comment" => [
-              'body' => $arr['z_description'] . '"\n \n" Course ID: ' . $arr['z_cid']
+              'body' => $arr['z_description'] . "\n \n" . 'Course ID: ' . $arr['z_cid']
           ],
           "requester" => [
               "name" => $arr['z_name'],
