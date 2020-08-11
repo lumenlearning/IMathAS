@@ -201,7 +201,7 @@ $itemshowdata = null;
 function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 	   global $DBH,$teacherid,$tutorid,$studentid,$cid,$imasroot,$userid,$openblocks,$firstload,$myrights,$courseenddate;
 	   global $itemicons,$exceptions,$latepasses,$ispublic,$studentinfo,$newpostcnts,$CFG,$latepasshrs,$toolset;
-	   global $itemshowdata, $exceptionfuncs,$coursejsondata;
+	   global $itemshowdata, $exceptionfuncs,$coursejsondata, $excused;
 
 	   require_once("../includes/filehandler.php");
 
@@ -806,6 +806,12 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 				$preReqNote .= _(' on ').Sanitize::encodeStringForDisplay($line['reqscorename']).'</span>';
 			   }
 
+               $excusedNote = '';
+               if (!$canedit && !empty($excused['A'.$typeid])) {
+                   $excusedNote .= '<br/><span class="small">' . 
+                    _('You have been excused from this assignment. It will not be counted in your grade.') . 
+                    '</span>';
+               }
 				 if ($line['ver'] > 1) {
 					 $thisaddassess = "addassessment2.php";
 					 	if ($assessUseVueDev) {
@@ -906,7 +912,9 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 
 				   if ($viewall) {
 				   	   echo $preReqNote;
-				   }
+                   }
+                   
+                   echo $excusedNote;
 
 				   if ($line['enddate']!=2000000000) {
 					   echo "<BR> $endname $enddate \n";
@@ -956,7 +964,8 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 					   echo " ", _('until'), " $reviewdate \n";
 				   }
 				   if ($canuselatepass) {
-				   	   echo " <a href=\"redeemlatepass.php?cid=$cid&aid=$typeid\">", _('Use LatePass'), "</a>";
+                          echo " <a href=\"redeemlatepass.php?cid=$cid&aid=$typeid\">", _('Use LatePass'), "</a>";
+                          echo $excusedNote;
 				   }
 				   if ($canedit) {
 					echo '<span class="instronly">';
@@ -990,7 +999,8 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 				echo ". <a href=\"redeemlatepass.php?cid=$cid&aid=$typeid\">", _('Use LatePass'), "</a>";
 				if ($viewall) {
 				   echo $preReqNote;
-				}
+                }
+                echo $excusedNote;
 				echo '</div>'; //title
 				if ($canedit) {
 					echo getAssessDD($i, $typeid, $parent, $items[$i], $thisaddassess, $line['ver'], $line['name']);
@@ -1014,7 +1024,9 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 				   echo "<div class=\"title grey\"><b><i>".Sanitize::encodeStringForDisplay($line['name'])."</i></b>";
 				   //echo '<br/><span class="small">'._('The requirements for beginning this item have not been met yet').'</span>';
 
-				   echo $preReqNote;
+                   echo $preReqNote;
+                   
+                   echo $excusedNote;
 
 				   if ($line['enddate']!=2000000000) {
 					   echo "<br/> $endname $enddate \n";
@@ -1041,7 +1053,8 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 				   echo "<br/><i>$show</i>\n";
 				   if ($viewall) {
 				   	   echo $preReqNote;
-				   }
+                   }
+                   echo $excusedNote;
 				   echo '</div>'; //title
 				   if ($canedit) {
 				   	echo getAssessDD($i, $typeid, $parent, $items[$i], $thisaddassess, $line['ver'], $line['name']);
