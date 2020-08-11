@@ -608,7 +608,6 @@ $excludeAssess = ($sourceUIver > $destUIver);
                     // #### End OHM-specific code #####################################################
 			}
 			echo '" class="floatleft"/><div style="margin-left:21px">'.$names[$i].'</div></td>';
-				echo '" class="floatleft"/><div style="margin-left:21px">'.$names[$i].'</div></td>';
 
 		?>
 			<td><?php echo $sums[$i] ?></td>
