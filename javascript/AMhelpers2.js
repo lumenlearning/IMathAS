@@ -79,7 +79,23 @@ function clearparams(paramarr) {
   }
 }
 
+function toMQwVars(str, elid) {
+    var qn = elid.substr(2).split(/-/)[0];
+    var qtype = allParams[qn].qtype;
+    if (qtype === 'numfunc') {
+        str = AMnumfuncPrepVar(qn, str)[1];
+    }
+    return AMtoMQ(str);
+}
+function fromMQwText(str, elid) {
+    str = MQtoAM(str);
+    str = str.replace(/\(text\((.*?)\)\)/g,'($1)')
+            .replace(/text\((.*?)\)/g,' $1 ');
+    return str;
+}
+
 function init(paramarr, enableMQ, baseel) {
+  MQeditor.setConfig({toMQ: toMQwVars, fromMQ: fromMQwText});
   if ($("#arialive").length==0) {
     $('body').append($('<p>', {
       id: "arialive",
@@ -1041,7 +1057,7 @@ function AMnumfuncPrepVar(qn,str) {
 		  } else if (!isgreek && vars[i]!="varE" && vars[i].replace(/[^\w_]/g,'').length>1) {
 			  varstoquote.push(vars[i]);
 		  }
-      if (vars[i].match(/[^\w_]/)) {
+      if (vars[i].match(/[^\w_]/) || vars[i].match(/^(break|case|catch|continue|debugger|default|delete|do|else|finally|for|function|if|in|instanceof|new|return|switch|this|throw|try|typeof|var|void|while|and with)$/)) {
         str = str.replace(new RegExp(escapeRegExp(vars[i]),"g"), "repvars"+i);
 		  	vars[i] = "repvars"+i;
       }
@@ -1412,6 +1428,7 @@ function processNumfunc(qn, fullstr, format) {
   var fvars = params.fvars;
   var domain = params.domain;
   var iseqn = format.match(/equation/);
+  var isineq = format.match(/inequality/);
   var err = '';
 
   var strprocess = AMnumfuncPrepVar(qn, fullstr);
@@ -1420,8 +1437,21 @@ function processNumfunc(qn, fullstr, format) {
   totesteqn = totesteqn.replace(/,/g,"").replace(/^\s+/,'').replace(/\s+$/,'');
   var remapVars = strprocess[2].split('|');
 
-  if (fullstr.match(/=/)) {
-    if (!iseqn) {
+  if (fullstr.match(/(<=|>=|<|>)/)) {
+    if (!isineq) {
+      if (iseqn) {
+        err += _("syntax error: you gave an inequality, not an equation");
+      } else {
+        err += _("syntax error: you gave an inequality, not an expression");
+      }
+    } else if (fullstr.match(/(<=|>=|<|>)/g).length>1) {
+      err += _("syntax error: your inequality should only contain one inequality symbol");
+    }
+    totesteqn = totesteqn.replace(/(.*)(<=|>=|<|>)(.*)/,"$1-($3)");
+  } else if (fullstr.match(/=/)) {
+    if (isineq) {
+      err += _("syntax error: you gave an equation, not an inequality");
+    } else if (!iseqn) {
       err += _("syntax error: you gave an equation, not an expression");
     } else if (fullstr.match(/=/g).length>1) {
       err += _("syntax error: your equation should only contain one equal sign");
@@ -1429,12 +1459,15 @@ function processNumfunc(qn, fullstr, format) {
     totesteqn = totesteqn.replace(/(.*)=(.*)/,"$1-($2)");
   } else if (iseqn) {
     err += _("syntax error: this is not an equation");
+  } else if (isineq) {
+    err += _("syntax error: this is not an inequality");
   }
 
   if (fvars.length > 0) {
 	  reg = new RegExp("("+fvars.join('|')+")\\(","g");
 	  totesteqn = totesteqn.replace(reg,"$1*sin($1+");
   }
+
   totesteqn = prepWithMath(mathjs(totesteqn,remapVars.join('|')));
 
   var i,j,totest,testval,res;

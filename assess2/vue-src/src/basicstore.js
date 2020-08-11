@@ -33,6 +33,7 @@ export const store = Vue.observable({
   show_enddate_dialog: false,
   inPrintView: false,
   enableMQ: true,
+  lastPos: null,
   livepollServer: '',
   livepollSettings: {
     showQuestionDefault: true,
@@ -360,8 +361,15 @@ export const actions = {
     // figure out non-blank questions to submit
     const lastLoaded = [];
     const changedQuestions = this.getChangedQuestions(qns);
-
-    if (Object.keys(changedQuestions).length === 0 && !endattempt) {
+    let changedWork = false;
+    for (let k = 0; k < qns.length; k++) {
+      const qn = parseInt(qns[k]);
+      if (store.work[qn] && store.work[qn] !== actions.getInitValue(qn, 'sw' + qn)) {
+        changedWork = true;
+        break;
+      }
+    }
+    if (Object.keys(changedQuestions).length === 0 && !changedWork && !endattempt) {
       store.errorMsg = 'nochange';
       store.inTransit = false;
       return;
@@ -404,6 +412,7 @@ export const actions = {
         }
       }
     }
+
     for (let k = 0; k < qns.length; k++) {
       const qn = parseInt(qns[k]);
 

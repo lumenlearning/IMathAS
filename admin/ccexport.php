@@ -153,17 +153,17 @@ if (isset($_GET['create']) && isset($_POST['whichitems'])) {
 		echo '</td>';
 		$tdpad = 5*strlen($prespace[$i]);
 
-		if ($picicons) {
-			echo '<td style="padding-left:'.$tdpad.'px"><img alt="'.$types[$i].'" title="'.$types[$i].'" src="'.$imasroot.'/img/';
-			switch ($types[$i]) {
-				case 'Calendar': echo $CFG['CPS']['miniicons']['calendar']; break;
-				case 'InlineText': echo $CFG['CPS']['miniicons']['inline']; break;
-				case 'LinkedText': echo $CFG['CPS']['miniicons']['linked']; break;
-				case 'Forum': echo $CFG['CPS']['miniicons']['forum']; break;
-				case 'Wiki': echo $CFG['CPS']['miniicons']['wiki']; break;
-				case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
-				case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
-				case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
+
+		echo '<td style="padding-left:'.$tdpad.'px"><img alt="'.$types[$i].'" title="'.$types[$i].'" src="'.$imasroot.'/img/';
+		switch ($types[$i]) {
+			case 'Calendar': echo $CFG['CPS']['miniicons']['calendar']; break;
+			case 'InlineText': echo $CFG['CPS']['miniicons']['inline']; break;
+			case 'LinkedText': echo $CFG['CPS']['miniicons']['linked']; break;
+			case 'Forum': echo $CFG['CPS']['miniicons']['forum']; break;
+			case 'Wiki': echo $CFG['CPS']['miniicons']['wiki']; break;
+			case 'Block': echo $CFG['CPS']['miniicons']['folder']; break;
+			case 'Assessment': echo $CFG['CPS']['miniicons']['assess']; break;
+			case 'Drill': echo $CFG['CPS']['miniicons']['drill']; break;
                 // #### Begin OHM-specific code #####################################################
                 // #### Begin OHM-specific code #####################################################
                 // #### Begin OHM-specific code #####################################################
@@ -175,13 +175,10 @@ if (isset($_GET['create']) && isset($_POST['whichitems'])) {
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################
                 // #### End OHM-specific code #####################################################
-			}
-			echo '" class="floatleft"/><div style="margin-left:21px">'.Sanitize::encodeStringForDisplay($names[$i]).'</div></td>';
-		} else {
-
-			echo '<td>'.Sanitize::encodeStringForDisplay($prespace[$i].$types[$i]).'</td>';
-			echo '<td>'.Sanitize::encodeStringForDisplay($names[$i]).'</td>';
 		}
+		echo '" class="floatleft"/><div style="margin-left:21px">'.Sanitize::encodeStringForDisplay($names[$i]).'</div></td>';
+			echo '" class="floatleft"/><div style="margin-left:21px">'.Sanitize::encodeStringForDisplay($names[$i]).'</div></td>';
+
 		echo '</tr>';
 	}
 ?>

@@ -1,5 +1,5 @@
 <template>
-  <div class = "questionwrap questionpane">
+  <div class = "questionwrap questionpane" ref="main">
     <div v-if = "!questionContentLoaded">
       {{ $t('loading') }}
     </div>
@@ -103,6 +103,7 @@ import ScoreResult from '@/components/question/ScoreResult.vue';
 import Icons from '@/components/widgets/Icons.vue';
 import QuestionHelps from '@/components/question/QuestionHelps.vue';
 import ShowworkInput from '@/components/ShowworkInput.vue';
+import { pauseVideos } from '@/components/pauseVideos';
 import DesmosCalculator from '@/components/question/DesmosCalculator.vue';
 
 export default {
@@ -423,6 +424,9 @@ export default {
     active: function (newVal, oldVal) {
       this.loadQuestionIfNeeded();
       this.updateTime(newVal);
+      if (newVal === false) {
+        pauseVideos(this.$refs.main);
+      }
     },
     state: function (newVal, oldVal) {
       if ((newVal > 1 && oldVal <= 1) ||
@@ -517,5 +521,4 @@ input[type=text].ansyel, .mathquill-math-field.ansyel {
   padding-right: 17px;
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigyNTUsMTg3LDApIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0gNS4zLDEwLjYgOSwxNC4yIDE4LjUsNC42IDIxLjQsNy40IDksMTkuOCAyLjcsMTMuNSB6IiAvPjwvc3ZnPg==");
 }
-
 </style>

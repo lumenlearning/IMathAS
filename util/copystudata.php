@@ -73,6 +73,22 @@ function copyStuData($destcid, $sourcecid = null) {
 		$ph = Sanitize::generateQueryPlaceholdersGrouped($execarr, count($stufields)+1);
 		$stm = $DBH->prepare("INSERT INTO imas_students (courseid,$stufieldlist) VALUES $ph");
 		$stm->execute($execarr);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        $rowId = $DBH->lastInsertId();
+        if ($rowId && 0 < $rowId) {
+            $stmc = $DBH->prepare("UPDATE imas_students
+                    SET created_at = UNIX_TIMESTAMP() WHERE id=:id");
+            $stmc->execute(array(':id' => $rowId));
+        }
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 	}
 	                          
 

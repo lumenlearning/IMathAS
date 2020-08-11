@@ -18,6 +18,8 @@ A library of Stats functions.  Version 1.10, Nov 17, 2017
 <li><a href="#Nplus1quartile">Nplus1quartile</a></li>
 <li><a href="#allquartile">allquartile</a></li>
 <li><a href="#median">median</a></li>
+<li><a href="#modes">modes</a></li>
+<li><a href="#forceonemode">forceonemode</a></li>
 <li><a href="#freqdist">freqdist</a></li>
 <li><a href="#frequency">frequency</a></li>
 <li><a href="#countif">countif</a></li>
@@ -44,6 +46,7 @@ A library of Stats functions.  Version 1.10, Nov 17, 2017
 <li><a href="#fcdf">fcdf</a></li>
 <li><a href="#invfcdf">invfcdf</a></li>
 <li><a href="#mosaicplot">mosaicplot</a></li>
+<li><a href="#csvdownloadlink">csvdownloadlink</a></li>
 </ul>
 <h3><a name="nCr">nCr</a></h3>
 nCr(n,r)
@@ -114,6 +117,16 @@ allquartile(array,quartile)
 <BR><h3><a name="median">median</a></h3>
 median(array)
 <BR>returns the median of an array of numbers
+<BR><h3><a name="modes">modes</a></h3>
+modes(array)
+<br>Returns the mode or modes of the data array as a comma-separated list.
+If all the values have the same frequency it returns DNE.
+<BR><h3><a name="forceonemode">forceonemode</a></h3>
+forceonemode(array)
+<br>Returns the mode of the data array.  If the data does not have one unique
+mode, the data array will be altered to only have one mode.  Because this
+function can alter the given array, be sure to call it before any functions that
+use the array.
 <BR><h3><a name="freqdist">freqdist</a></h3>
 freqdist(array,label,start,classwidth)
 <BR>display macro.  Returns an HTML table that is a frequency distribution of
@@ -286,3 +299,7 @@ mosaicplot(rowlabels, columnlabels, count matrix, [width, height])
 <BR>&nbsp;&nbsp;rowlabel[1] and columnlabel[5]
 <BR>width and height are optional, default to 300 by 300.  Does not include labels
 <BR>
+<BR><h3><a name="csvdownloadlink">csvdownloadlink</a></h3>
+csvdownloadlink(string,array,[string,array]...)
+<p>Creates a link that downloads the specified data in CSV format. For each column
+  provide a string header and an array of values.</p>

@@ -29,7 +29,7 @@ if ($myrights<20) {
 	} else {
 		$onlychk = 0;
 	}
-  $qsetid = sanitize::onlyInt($_GET['qsetid']);
+  	$qsetid = Sanitize::onlyInt($_GET['qsetid']);
 	if (isset($_GET['formn']) && isset($_GET['loc'])) {
 		$formn = Sanitize::encodeStringForJavascript($_GET['formn']);
 		$loc = Sanitize::encodeStringForJavascript($_GET['loc']);
@@ -53,7 +53,8 @@ if ($myrights<20) {
 
   $a2 = new AssessStandalone($DBH);
   $a2->setQuestionData($line['id'], $line);
-  $hasSeqParts = preg_match('~(<p[^>]*>|\\n\s*\\n)\s*///+\s*(</p[^>]*>|\\n\s*\\n)~', $line['qtext']);
+
+  $hasSeqParts = preg_match('~(<p[^>]*>(<[^>]*>)*|\\n\s*\\n|<br\s*/?><br\s*/?>)\s*///+\s*((<[^>]*>)*</p[^>]*>|\\n\s*\\n|<br\s*/?><br\s*/?>)~', $line['qtext']);
 
   $qn = 27;  //question number to use during testing
   if (isset($_POST['state'])) {
@@ -130,7 +131,7 @@ if ($myrights<20) {
 	if (isset($CFG['AMS']['eqnhelper'])) {
 		$eqnhelper = $CFG['AMS']['eqnhelper'];
 	} else {
-		$eqnhelper = 0;
+		$eqnhelper = 4;
 	}
 	$resultLibNames = $DBH->prepare("SELECT imas_libraries.name,imas_users.LastName,imas_users.FirstName FROM imas_libraries,imas_library_items,imas_users  WHERE imas_libraries.id=imas_library_items.libid AND imas_libraries.deleted=0 AND imas_library_items.deleted=0 AND imas_library_items.ownerid=imas_users.id AND imas_library_items.qsetid=:qsetid");
 	$resultLibNames->execute(array(':qsetid'=>$qsetid));
@@ -156,7 +157,7 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
   $placeinhead .= '<script src="'.$imasroot.'/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
   $placeinhead .= '<script src="'.$imasroot.'/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
 } else {
-  $placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=052920" type="text/javascript"></script>';
+  $placeinhead .= '<script src="'.$imasroot.'/javascript/assess2_min.js?v=072520" type="text/javascript"></script>';
 }
 
 $placeinhead .= '<script src="'.$imasroot.'/javascript/assess2supp.js?v=050120" type="text/javascript"></script>';
@@ -336,7 +337,7 @@ if ($overwriteBody==1) {
     }
     echo '</ul>';
   }
-  echo '<div questionpane">';
+  echo '<div class="questionpane">';
   echo '<div class="question" id="questionwrap'.$qn.'">';
   echo $disp['html'];
   echo '</div></div>';
@@ -380,7 +381,8 @@ if ($overwriteBody==1) {
 		}
 	}
 
-	printf("<p>"._("Question id:")." %s.  ", Sanitize::encodeStringForDisplay($qsetid));
+	printf("<p>"._("Question ID:")." %s.  ", Sanitize::encodeStringForDisplay($qsetid));
+	echo '<span class="small subdued">'._('Seed:').' '.Sanitize::onlyInt($seed) . '.</span> ';
   if ($line['ownerid'] == $userid) {
     echo '<a href="moddataset.php?cid='. Sanitize::courseId($sendcid) . '&id=' . Sanitize::onlyInt($qsetid).'" target="_blank">';
     echo _('Edit Question') . '</a>';

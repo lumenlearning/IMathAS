@@ -199,7 +199,7 @@ $CFG['GEN']['communityforumlink'] = getenv('COMMUNITY_FORUM_URL');
      );*/
 
 $CFG['email']['new_acct_replyto'] = 'support@lumenlearning.com';
-$CFG['email']['new_acct_bcclist_ohm_hook'] = array('paul@lumenlearning.com');
+$CFG['email']['new_acct_bcclist_ohm_hook'] = array('support@lumenlearning.com');
 
 $CFG['GEN']['useSESmail'] = true;
 

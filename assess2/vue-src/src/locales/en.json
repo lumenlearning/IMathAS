@@ -9,6 +9,7 @@
   "next": "Next",
   "previous": "Previous",
   "question_n": "Question {n}",
+  "jumptocontent": "Skip Navigation",
   "launch": {
     "continue_assess": "Resume",
     "retake_assess": "Retake",
@@ -120,7 +121,7 @@
   "header": {
     "score": "Score: {pts}/{poss}",
     "practicescore": "Practice score: {pts}/{poss}",
-    "possible": "{poss} points possible",
+    "possible": "1 point possible | {n} points possible",
     "answered": "{n}/{tot} answered",
     "assess_submit": "Submit and End",
     "done": "Done",

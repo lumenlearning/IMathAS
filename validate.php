@@ -184,9 +184,14 @@
 	 	}
 	 	$_POST['usedetected'] = true;
 	 } else {
-		 $stm = $DBH->prepare("SELECT id,password,rights,groupid FROM imas_users WHERE SID=:SID");
+		 $stm = $DBH->prepare("SELECT id,password,rights,groupid,jsondata FROM imas_users WHERE SID=:SID");
 		 $stm->execute(array(':SID'=>$_POST['username']));
 		 $line = $stm->fetch(PDO::FETCH_ASSOC);
+     $json_data = json_decode($line['jsondata'], true);
+     if (isset($json_data['login_blockuntil']) && time()<$json_data['login_blockuntil']) {
+       echo _('Too many invalid logins - please wait a minute before trying again, or use the forgot password link to reset your password');
+       exit;
+     }
 	 }
 	// if (($line != null) && ($line['password'] == md5($_POST['password']))) {
 	if (isset($CFG['GEN']['newpasswords'])) {
@@ -236,13 +241,20 @@
        $_SESSION['tzname'] = $_POST['tzname'];
      }
 
+     $json_data = json_decode($line['jsondata'], true);
+     if (isset($json_data['login_errors'])) {
+       unset($json_data['login_errors']);
+       unset($json_data['login_blockuntil']);
+       $line['jsondata'] = json_encode($json_data);
+     }
+
 		 if (isset($CFG['GEN']['newpasswords']) && strlen($line['password'])==32) { //old password - rehash it
 		 	 $hashpw = password_hash($_POST['password'], PASSWORD_DEFAULT);
-		 	 $stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess,password=:password WHERE id=:id");
-		 	 $stm->execute(array(':lastaccess'=>$now, ':password'=>$hashpw, ':id'=>$userid));
+		 	 $stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess,password=:password,jsondata=:jsondata WHERE id=:id");
+		 	 $stm->execute(array(':lastaccess'=>$now, ':password'=>$hashpw, ':jsondata'=>$line['jsondata'], ':id'=>$userid));
 		 } else {
-		 	 $stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id");
-		 	 $stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
+		 	 $stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess,jsondata=:jsondata WHERE id=:id");
+		 	 $stm->execute(array(':lastaccess'=>$now, ':jsondata'=>$line['jsondata'], ':id'=>$userid));
 		 }
 
 		 //call hook, if defined
@@ -284,6 +296,17 @@
 		 } else {
 		 	 $badsession = false;
 		 }
+
+     if (!isset($json_data['login_errors'])) {
+       $json_data['login_errors'] = 0;
+     }
+     $json_data['login_errors']++;
+     if ($json_data['login_errors'] > 3) {
+       $json_data['login_blockuntil'] = time() + 60;
+     }
+     $stm = $DBH->prepare("UPDATE imas_users SET jsondata=:jsondata WHERE id=:id");
+     $stm->execute(array(':jsondata'=>json_encode($json_data), ':id'=>$line['id']));
+
 		 /*  For login error tracking - requires add'l table
 		 if ($line==null) {
 			 $err = "Bad SID";
@@ -366,6 +389,11 @@
 		 header('Location: ' . $GLOBALS['basesiteurl'] . '/forms.php?action=forcechgpwd&r='.Sanitize::randomQueryStringParam());
 		 exit;
 	}
+
+	 //call hook function in validate hook, if defined
+	 if (function_exists('alreadyLoggededIn')) {
+		alreadyLoggededIn($userid);
+	 }
 
 	$basephysicaldir = rtrim(dirname(__FILE__), '/\\');
 	if ($myrights==100 && (isset($_GET['debug']) || isset($_SESSION['debugmode']))) {
@@ -560,7 +588,7 @@
 				}
 			}
 		}
-		$query = "SELECT imas_courses.name,imas_courses.available,imas_courses.lockaid,imas_courses.copyrights,imas_users.groupid,imas_courses.theme,imas_courses.newflag,imas_courses.msgset,imas_courses.toolset,imas_courses.deftime,imas_courses.picicons,imas_courses.latepasshrs,imas_courses.startdate,imas_courses.enddate,imas_courses.UIver ";
+		$query = "SELECT imas_courses.name,imas_courses.available,imas_courses.lockaid,imas_courses.copyrights,imas_users.groupid,imas_courses.theme,imas_courses.newflag,imas_courses.msgset,imas_courses.toolset,imas_courses.deftime,imas_courses.latepasshrs,imas_courses.startdate,imas_courses.enddate,imas_courses.UIver ";
 		$query .= "FROM imas_courses JOIN imas_users ON imas_users.id=imas_courses.ownerid WHERE imas_courses.id=:id";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$cid));
@@ -589,7 +617,6 @@
 				$coursedefstime = $coursedeftime;
 			}
 			$courseenddate = $crow['enddate'];
-			$picicons = $crow['picicons'];
 			$latepasshrs = $crow['latepasshrs'];
       $courseUIver = $crow['UIver'];
 
