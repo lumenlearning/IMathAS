@@ -1,6 +1,6 @@
 <?php
 	//IMathAS:  Basic Actions
-	//(c) 20006 David Lippman
+	//(c) 2006 David Lippman
 
 
 
@@ -65,7 +65,32 @@ require_once("includes/sanitize.php");
 		$_POST['lastname'] = Sanitize::stripHtmlTags(trim($_POST['lastname']));
 		$_POST['courseid'] = Sanitize::courseId(trim($_POST['courseid']));
 
-		$error .= checkNewUserValidation();
+        $error .= checkNewUserValidation();
+
+        if (isset($CFG['GEN']['COPPA']) && empty($_POST['over13'])) {
+            if (!is_numeric($_POST['courseid'])) {
+                $error = _('Invalid course id');
+            } else {
+                $query = "SELECT enrollkey,allowunenroll FROM imas_courses WHERE id=:cid AND (available=0 OR available=2)";
+                $stm = $DBH->prepare($query);
+                $stm->execute(array(':cid'=>$_POST['courseid']));
+                $line = $stm->fetch(PDO::FETCH_ASSOC);
+
+                if ($line==null) {
+                    $error = _('Course not found');
+                } else if (($line['allowunenroll']&2)==2) {
+                    $error = _('Course is closed for self enrollment');
+                } else if ($_POST['ekey']=="" && $line['enrollkey'] != '') {
+                    $error = _('No enrollment key provided');
+                } else {
+                    $keylist = array_map('strtolower',array_map('trim',explode(';',$line['enrollkey'])));
+                    $_POST['ekey'] = trim($_POST['ekey']);
+                    if (!in_array(strtolower($_POST['ekey']), $keylist)) {
+                        $error = _('Incorrect enrollment key');
+                    }
+                }
+            }
+        }
 
 		if ($error != '') {
 			require("header.php");
@@ -135,8 +160,13 @@ require_once("includes/sanitize.php");
 			}
 		}
 
-		$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout, created_at) ";
-		$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout, :created_at)";
+        $jsondata = [];
+        if (isset($CFG['GEN']['COPPA']) && empty($_POST['over13'])) {
+            $jsondata['under13'] = 1;
+        }
+
+		$query = "INSERT INTO imas_users (SID, password, rights, FirstName, LastName, email, msgnotify, homelayout, jsondata, created_at) ";
+		$query .= "VALUES (:SID, :password, :rights, :FirstName, :LastName, :email, :msgnotify, :homelayout, :jsondata, :created_at)";
 
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(
@@ -147,8 +177,10 @@ require_once("includes/sanitize.php");
 			':LastName'=>Sanitize::stripHtmlTags($_POST['lastname']),
 			':email'=>Sanitize::emailAddress($_POST['email']),
 			':msgnotify'=>$msgnot,
-			':homelayout'=>$homelayout,
-			':created_at'=>time()));
+            ':homelayout'=>$homelayout,
+            ':jsondata'=>json_encode($jsondata),
+			':created_at'=>time()
+        ));
 		$newuserid = $DBH->lastInsertId();
 
 		if ($emailconfirmation) {
