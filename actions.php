@@ -66,7 +66,7 @@ require_once("includes/sanitize.php");
 		$_POST['courseid'] = Sanitize::courseId(trim($_POST['courseid']));
 
         $error .= checkNewUserValidation();
-
+        
         if (isset($CFG['GEN']['COPPA']) && empty($_POST['over13'])) {
             if (!is_numeric($_POST['courseid'])) {
                 $error = _('Invalid course id');
@@ -232,6 +232,7 @@ require_once("includes/sanitize.php");
 						if (!in_array(strtolower($_POST['ekey']), $keylist)) {
 							$error = _('Incorrect enrollment key');
 						} else {
+                            require('./includes/setSectionGroups.php');
 							if (count($keylist)>1) {
 								$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
 								$array = array(
@@ -240,10 +241,12 @@ require_once("includes/sanitize.php");
 									':section'=>$_POST['ekey'],
 									':latepass'=>$line['deflatepass'],
 									':created_at'=>time()
-								);
+                                );
+                                setSectionGroups($newuserid, $_POST['courseid'], $_POST['ekey']);
 							} else {
 								$query = "INSERT INTO imas_students (userid,courseid,latepass,created_at) VALUES (:uid,:cid,:latepass,:created_at);";
-								$array = array(':uid'=>$newuserid, ':cid'=>$_POST['courseid'], ':latepass'=>$line['deflatepass'], ':created_at'=>time());
+                                $array = array(':uid'=>$newuserid, ':cid'=>$_POST['courseid'], ':latepass'=>$line['deflatepass'], ':created_at'=>time());
+                                setSectionGroups($newuserid, $_POST['courseid'], '');
 							}
 							$stm = $DBH->prepare($query);
 							$stm->execute($array);
@@ -617,15 +620,18 @@ If you still have trouble or the wrong email address is on file, contact your in
 					require("footer.php");
 					exit;
 				} else {
+                    require('./includes/setSectionGroups.php');
 					if (count($keylist)>1) {
 						$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
-						$array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':section'=>$_POST['ekey'],':latepass'=>$line['deflatepass'], ':created_at'=>time());
+                        $array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':section'=>$_POST['ekey'],':latepass'=>$line['deflatepass'],':created_at'=>time());
+                        setSectionGroups($userid, $_POST['cid'], $_POST['ekey']);
 					} else {
 						$query = "INSERT INTO imas_students (userid,courseid,latepass,created_at) VALUES (:uid,:cid,:latepass,:created_at);";
-						$array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':latepass'=>$line['deflatepass'], ':created_at'=>time());
+                        $array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':latepass'=>$line['deflatepass'], ':created_at'=>time());
+                        setSectionGroups($userid, $_POST['cid'], '');
 					}
 					$stm = $DBH->prepare($query);
-					$stm->execute($array);
+                    $stm->execute($array);
 
 					$msgOnEnroll = ((floor($line['msgset']/5)&2) > 0);
 					if ($msgOnEnroll) {

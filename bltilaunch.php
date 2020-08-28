@@ -1019,12 +1019,22 @@ if ($stm->rowCount()==0) {
 							echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
 						}
 						if ($sourceUIver == 1) {
+                            #### Begin OHM-specific changes ############################################################
+                            #### Begin OHM-specific changes ############################################################
+                            #### Begin OHM-specific changes ############################################################
+                            #### Begin OHM-specific changes ############################################################
+                            #### Begin OHM-specific changes ############################################################
                             echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
                             echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
                             echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
                             echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
                             echo '<span class="js-versionOld-input"><label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" />' . _("Old Version - <span class=\"version-warning\">Warning: this version will be deprecated on 12/30/2020</span>") . '</label></span>';
                             echo '</span>';
+                            #### End OHM-specific changes ############################################################
+                            #### End OHM-specific changes ############################################################
+                            #### End OHM-specific changes ############################################################
+                            #### End OHM-specific changes ############################################################
+                            #### End OHM-specific changes ############################################################
 						}
 						echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
 					}
@@ -1617,7 +1627,7 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
 					$stm->execute(array(':id'=>$cid));
 					$deflatepass = $stm->fetchColumn(0);
 					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+                    $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
                     #### Begin OHM-specific changes ############################################################
                     #### Begin OHM-specific changes ############################################################
                     #### Begin OHM-specific changes ############################################################
@@ -1634,6 +1644,8 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
+                    require_once('./includes/setSectionGroups.php');
+                    setSectionGroups($userid, $cid, $_SESSION['lti_context_label']);
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
@@ -2523,7 +2535,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltiro
 						$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt) VALUES ";
 						$query .= "(:name, :ownerid, :enrollkey, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt);";
 						$stm = $DBH->prepare($query);
-						$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey,
+						$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, 
 							':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 							':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt));
 						$destcid  = $DBH->lastInsertId();
@@ -2802,7 +2814,7 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 					$stm->execute(array(':id'=>$cid));
 					$deflatepass = $stm->fetchColumn(0);
 					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+                    $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
                     #### Begin OHM-specific changes ############################################################
                     #### Begin OHM-specific changes ############################################################
                     #### Begin OHM-specific changes ############################################################
@@ -2819,6 +2831,8 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
+                    require_once('./includes/setSectionGroups.php');
+                    setSectionGroups($userid, $cid, $_SESSION['lti_context_label']);
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';

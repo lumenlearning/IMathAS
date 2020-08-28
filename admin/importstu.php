@@ -109,7 +109,8 @@ if (!(isset($teacherid)) && $myrights<100) {
 	if (isset($_POST['process'])) {
 		if (isset($CFG['GEN']['newpasswords'])) {
 			require_once("../includes/password.php");
-		}
+        }
+        require('../includes/setSectionGroups.php');
 		if ($isadmin) {
 			$ncid = Sanitize::onlyInt($_POST['enrollcid']);
 		} else {
@@ -183,7 +184,8 @@ if (!(isset($teacherid)) && $myrights<100) {
 				$stm->execute(array(':userid'=>$id, ':courseid'=>$ncid,
 					':code'=>($_POST['codetype']==1)?Sanitize::stripHtmlTags($arr[4]):null,
 					':section'=>($_POST['sectype']>0)?Sanitize::stripHtmlTags($arr[5]):null,
-					':latepass'=>$deflatepass, ':created_at'=>time()));
+                    ':latepass'=>$deflatepass, ':created_at'=>time()));
+                setSectionGroups($id, $ncid, ($_POST['sectype']>0)?Sanitize::stripHtmlTags($arr[5]):'');
 			}
 
 		}
