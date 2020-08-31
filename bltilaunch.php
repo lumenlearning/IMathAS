@@ -139,7 +139,7 @@ if (
 //check to see if accessiblity page is posting back
 if (isset($_GET['launch'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
 	if (empty($_POST['tzname']) && $_POST['tzoffset']=='') {
@@ -198,7 +198,7 @@ if (isset($_GET['launch'])) {
 	exit;
 } else if (isset($_GET['accessibility'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
 
@@ -528,7 +528,7 @@ if (isset($_GET['launch'])) {
 
 	//verify necessary POST values for LTI.  OAuth specific will be checked later
 	if (empty($_REQUEST['lti_version'])) {
-		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again"));
+		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	if (empty($_REQUEST['user_id'])) {
 		if (isset($_REQUEST['relaunch_url'])) {
@@ -1824,7 +1824,7 @@ if (!$promptforsettings && !$createnewsession && !($linkparts[0]=='aid' && $tlwr
 //check to see if accessiblity page is posting back
 if (isset($_GET['launch'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
 	if (empty($_POST['tzname']) && $_POST['tzoffset']=='') {
@@ -1884,7 +1884,7 @@ if (isset($_GET['launch'])) {
 	exit;
 } else if (isset($_GET['accessibility'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
 
@@ -2182,7 +2182,7 @@ if (isset($_GET['launch'])) {
 
 	//verify necessary POST values for LTI.  OAuth specific will be checked later
 	if (empty($_REQUEST['lti_version'])) {
-		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again"));
+		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	if (empty($_REQUEST['user_id'])) {
 		if (isset($_REQUEST['relaunch_url'])) {
