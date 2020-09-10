@@ -145,7 +145,7 @@ if ($assessInfoOut['has_active_attempt'] && $assessInfoOut['timelimit'] > 0) {
 list($qid, $qidstoload) = $assess_record->getQuestionId($qn);
 
 // load question settings and code
-$assess_info->loadQuestionSettings($qidstoload, true);
+$assess_info->loadQuestionSettings($qidstoload, true, false);
 $tm6 = microtime(true);
 // For livepoll, verify seed and generate new question version if needed
 if (!$isteacher && $assess_info->getSetting('displaymethod') === 'livepoll') {
@@ -231,4 +231,4 @@ if ($et - $st > .6) {
   );
 }
 //output JSON object
-echo json_encode($assessInfoOut);
+echo json_encode($assessInfoOut, JSON_INVALID_UTF8_IGNORE);
