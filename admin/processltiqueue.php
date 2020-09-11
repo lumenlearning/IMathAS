@@ -103,7 +103,7 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 				'sourcedid' => $row['sourcedid'],
 				'hash' => $row['hash'],
 				'sendon' => $row['sendon'],
-				'lasttry' => ($row['failures']>=2)
+				'lasttry' => ($row['failures']>=6)
 			)
 		);
 	}
