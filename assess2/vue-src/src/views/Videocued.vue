@@ -261,6 +261,10 @@ export default {
       store.errorMsg = event.data;
     },
     jumpTo (newCueNum, newToshow) {
+      if (this.ytplayer === null || typeof this.ytplayer.seekTo !== 'function') {
+        store.errorMsg = 'ytnotready';
+        return;
+      }
       if (newCueNum === -1 || newToshow === 'q') {
         // if showing a question, pause the video
         this.exitFullscreen();
@@ -300,6 +304,10 @@ export default {
       window.onYouTubePlayerAPIReady = () => {
         this.createPlayer();
       };
+      // async load YouTube API
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/player_api';
+      document.head.appendChild(tag);
     }
   },
   created () {
@@ -307,12 +315,6 @@ export default {
     if (store.assessInfo.intro !== '') {
       this.cue = -1;
       this.toshow = 'i';
-    }
-    // async load YouTube API
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/player_api';
-      document.head.appendChild(tag);
     }
   }
 };
