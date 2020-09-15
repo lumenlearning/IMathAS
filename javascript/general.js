@@ -551,7 +551,8 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 			{title:"Gridded", value:"gridded"},
 			{title:"Gridded Centered", value:"gridded centered"}],
 		style_formats_merge: true,
-		snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
+        snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
+        autolink_pattern: /^(https?:\/\/|www\.)(.+)$/i,
 		setup: function (editor) {
 			editor.on('change', function () {
 				editor.save();
@@ -1135,7 +1136,7 @@ function resizeResponsiveIframes(base, init) {
         jQuery(base).find('iframe.scaleresponsive').wrap(jQuery('<div>', {css:{overflow:"hidden"}}));
     }
     jQuery(base).find('iframe.scaleresponsive').each(function(i,el) {
-        var p = el.parentNode;
+        var p = el.parentNode; 
         var sc = Math.min(1,p.offsetWidth/parseInt(el.width || el.style.width));
         el.style.transform = "scale("+sc+")";
         p.style.height = (sc*parseInt(el.height || el.style.height)+3)+"px";
