@@ -1,17 +1,19 @@
 <?php
 //IMathAS:  Modify a question's settings in an assessment, new assess format
-// grid for multiple. Included in addquestions.php
-//(c) 2019 David Lippman
+// grid for multiple.  For embed
+//(c) 2020 David Lippman
 
+    require('../init.php');
 
 	if (!(isset($teacherid))) {
-		echo "This page cannot be accessed directly";
+		echo "You are not authorized to view this page";
 		exit;
-	}
+    }
+    $aid = intval($_GET['aid']);
 
-	if ($_GET['process']== true) {
+	if (isset($_POST['action'])) {
 		require_once("../includes/updateptsposs.php");
-		if (isset($_POST['add'])) { //adding new questions
+		if ($_POST['action'] == 'add') { //adding new questions
 			$stm = $DBH->prepare("SELECT itemorder,viddata,defpoints FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
 			list($itemorder, $viddata, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
@@ -29,7 +31,6 @@
 						$points = trim($_POST['points'.$qsetid]);
 					}
 					$attempts = trim($_POST['attempts'.$qsetid]);
-                    $showcalculator = $_POST['showcalculator'.$qsetid]??'default';
                     $showhints = intval($_POST['showhints'.$qsetid]);
                     $showwork = intval($_POST['showwork'.$qsetid]);
 					if ($points=='' || $points==$defpoints) { $points = 9999;}
@@ -37,12 +38,12 @@
 					if ($points==9999 && isset($_POST['pointsforparts']) && $_POST['qparts'.$qsetid]>1 && !isset($_POST['addasgroup'])) {
 						$points = intval($_POST['qparts'.$qsetid]);
 					}
-					$query = "INSERT INTO imas_questions (assessmentid,points,attempts,showcalculator,showhints,showwork,penalty,regen,showans,questionsetid) ";
-					$query .= "VALUES (:assessmentid, :points, :attempts, :showcalculator, :showhints, :showwork, :penalty, :regen, :showans, :questionsetid)";
+					$query = "INSERT INTO imas_questions (assessmentid,points,attempts,showhints,showwork,penalty,regen,showans,questionsetid) ";
+					$query .= "VALUES (:assessmentid, :points, :attempts, :showhints, :showwork, :penalty, :regen, :showans, :questionsetid)";
 					$stm = $DBH->prepare($query);
-                    $stm->execute(array(':assessmentid'=>$aid, ':points'=>$points, ':attempts'=>$attempts,
-                        ':showhints'=>$showhints, ':showwork'=>$showwork, ':penalty'=>9999, ':regen'=>0,
-                        ':showans'=>0, ':questionsetid'=>$qsetid, ':showcalculator'=>$showcalculator));
+                    $stm->execute(array(':assessmentid'=>$aid, ':points'=>$points, ':attempts'=>$attempts, 
+                        ':showhints'=>$showhints, ':showwork'=>$showwork, ':penalty'=>9999, ':regen'=>0, 
+                        ':showans'=>0, ':questionsetid'=>$qsetid));
 					$qid = $DBH->lastInsertId();
 					if ($newitemorder=='') {
 						$newitemorder = $qid;
@@ -94,7 +95,7 @@
 
 			updatePointsPossible($aid, $itemorder, $defpoints);
 
-		} else if (isset($_POST['mod'])) { //modifying existing
+		} else if ($_POST['action'] == 'mod') { //modifying existing
 			$stm = $DBH->prepare("SELECT itemorder,defpoints FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
 			list($itemorder, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
@@ -117,22 +118,21 @@
 
 			foreach(explode(',',$_POST['qids']) as $qid) {
 				$attempts = trim($_POST['attempts'.$qid]);
-                $showcalculator = $_POST['showcalculator'.$qid]??'default';
                 $showhints = intval($_POST['showhints'.$qid]);
                 $showwork = intval($_POST['showwork'.$qid]);
 				if ($points=='') { $points = 9999;}
 				if ($attempts=='' || intval($attempts)==0) {$attempts = 9999;}
-				$stm = $DBH->prepare("UPDATE imas_questions SET attempts=:attempts,showcalculator=:showcalculator,showhints=:showhints,showwork=:showwork WHERE id=:id");
-				$stm->execute(array(':attempts'=>$attempts, ':showcalculator'=>$showcalculator, ':showhints'=>$showhints, ':showwork'=>$showwork, ':id'=>$qid));
+				$stm = $DBH->prepare("UPDATE imas_questions SET attempts=:attempts,showhints=:showhints,showwork=:showwork WHERE id=:id");
+				$stm->execute(array(':attempts'=>$attempts, ':showhints'=>$showhints, ':showwork'=>$showwork, ':id'=>$qid));
 				if (intval($_POST['copies'.$qid])>0 && intval($qid)>0) {
 					for ($i=0;$i<intval($_POST['copies'.$qid]);$i++) {
 						$qsetid = $qidtoqsetid[$qid];
-						$query = "INSERT INTO imas_questions (assessmentid,points,attempts,showcalculator,showhints,showwork,penalty,regen,showans,questionsetid) ";
-						$query .= "VALUES (:assessmentid, :points, :attempts, :showcalculator, :showhints, :showwork, :penalty, :regen, :showans, :questionsetid)";
+						$query = "INSERT INTO imas_questions (assessmentid,points,attempts,showhints,showwork,penalty,regen,showans,questionsetid) ";
+						$query .= "VALUES (:assessmentid, :points, :attempts, :showhints, :showwork, :penalty, :regen, :showans, :questionsetid)";
 						$stm = $DBH->prepare($query);
-                        $stm->execute(array(':assessmentid'=>$aid, ':points'=>9999, ':attempts'=>$attempts,
-                            ':showhints'=>$showhints, ':showwork'=>$showwork, ':penalty'=>9999, ':regen'=>0,
-                            ':showans'=>0, ':questionsetid'=>$qsetid, ':showcalculator'=>$showcalculator));
+                        $stm->execute(array(':assessmentid'=>$aid, ':points'=>9999, ':attempts'=>$attempts, 
+                            ':showhints'=>$showhints, ':showwork'=>$showwork, ':penalty'=>9999, ':regen'=>0, 
+                            ':showans'=>0, ':questionsetid'=>$qsetid));
 						$newqid = $DBH->lastInsertId();
 
 						$itemarr = explode(',',$itemorder);
@@ -150,24 +150,22 @@
 			$stm->execute(array(':itemorder'=>$itemorder, ':id'=>$aid));
 
 			updatePointsPossible($aid, $itemorder, $defpoints);
-		}
+        }
+        
+        require('../includes/addquestions2util.php');
+        list($jsarr,$existingqs) = getQuestionsAsJSON($cid, $aid);
+        
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($jsarr, JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_INVALID_UTF8_IGNORE);
+        exit;
 
 	} else {
 		//get defaults
-		$query = "SELECT defpoints,defattempts,showcalculator,showhints,showwork FROM imas_assessments ";
+		$query = "SELECT defpoints,defattempts,showhints,showwork FROM imas_assessments ";
 		$query .= "WHERE id=:id";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$aid));
 		$defaults = $stm->fetch(PDO::FETCH_ASSOC);
-        if ($defaults['showcalculator'] == 'default') {
-            $defaults['showcalculator'] = _('Default');
-        } else if ($defaults['showcalculator'] == 'none') {
-            $defaults['showcalculator'] = _('None');
-        } else if (isset($CFG['showcalculator'][$defaults['showcalculator']])) {
-            $defaults['showcalculator'] = _($CFG['showcalculator'][$defaults['showcalculator']]);
-        } else {
-            $defaults['showcalculator'] = 'No';
-        }
 		if ($defaults['showhints'] == 0) {
       $defaults['showhints'] = _('No');
     } else if ($defaults['showhints'] == 1) {
@@ -186,7 +184,7 @@
         ];
         $defaults['showwork'] = $showworkoptions[$defaults['showwork']];
 
-		$pagetitle = _("Question Settings");
+		$pagetitle = "Question Settings";
 		$placeinhead = '<script type="text/javascript">
 			function previewq(qn) {
 			  previewpop = window.open(imasroot+"/course/testquestion2.php?cid="+cid+"&qsetid="+qn,"Testing","width="+(.4*screen.width)+",height="+(.8*screen.height)+",scrollbars=1,resizable=1,status=1,top=20,left="+(.6*screen.width-20));
@@ -200,33 +198,38 @@
 					$("input[name=pointsforparts]").prop("disabled", false);
 					$("input.ptscol").show();
 				}
-			}
-			</script>';
-		require("../header.php");
-		echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-		echo "&gt; <a href=\"addquestions.php?aid=$aid&cid=$cid\">"._("Add/Remove Questions")."</a> &gt; ";
-
-		echo _("Question Settings")."</div>\n";
+            }
+            $(function() {
+                $("form").on("submit", function(e) {
+                    e.preventDefault();
+                    $.ajax({
+                        type: "post",
+                        url: "embedmodquestiongrid2.php?cid='.$cid.'&aid='.$aid.'",
+                        data: $("form").serialize()
+                    }).done(function(msg) {
+                        window.parent.doneadding(msg);
+		                window.parent.GB_hide();
+                    });
+                });
+            });
+            </script>';
+    $flexwidth = true;
+    $nologo = true;        
+	require("../header.php");
 
 ?>
-<div id="headermodquestiongrid" class="pagetitle"><h1><?php echo _("Modify Question Settings"); ?></h1></div>
-<p><?php echo _("For more advanced settings, modify the settings for individual questions after adding."); ?></p>
-<?php
-if (isset($_POST['checked'])) { //modifying existing
-	echo "<form method=post action=\"addquestions.php?modqs=true&process=true&cid=$cid&aid=$aid\">";
-} else {
-	echo "<form method=post action=\"addquestions.php?addset=true&process=true&cid=$cid&aid=$aid\">";
-}
-?>
-<p><?php echo _("Leave items blank to use the assessment's default values"); ?></p>
+<div id="headermodquestiongrid" class="pagetitle"><h1>Modify Question Settings</h1></div>
+<p>For more advanced settings, modify the settings for individual questions after adding.</p>
+<form>
+<p>Leave items blank to use the assessment's default values</p>
 <table class=gb>
 <thead><tr>
 <?php
-		if (isset($_POST['checked'])) { //modifying existing questions
-
+		if (isset($_GET['modqs'])) { //modifying existing questions
+            $modqs = explode('-', $_GET['modqs']);
 			$qids = array();
 			$qns = array();
-			foreach ($_POST['checked'] as $k=>$v) {
+			foreach ($modqs as $k=>$v) {
 				$v = explode(':',$v);
 				$qids[] = Sanitize::onlyInt($v[1]);
 				$qnpts = explode('-',$v[2]);
@@ -238,7 +241,7 @@ if (isset($_POST['checked'])) { //modifying existing
 			}
 			$qrows = array();
 			$qidlist = implode(',', array_map('intval', $qids));
-			$query = "SELECT imas_questions.id,imas_questionset.description,imas_questions.points,imas_questions.attempts,imas_questions.showcalculator,imas_questions.showhints,imas_questions.showwork,imas_questionset.extref,imas_questionset.id AS qsid ";
+			$query = "SELECT imas_questions.id,imas_questionset.description,imas_questions.points,imas_questions.attempts,imas_questions.showhints,imas_questions.showwork,imas_questionset.extref,imas_questionset.id AS qsid ";
 			$query .= "FROM imas_questions,imas_questionset WHERE imas_questionset.id=imas_questions.questionsetid AND ";
 			$query .= "imas_questions.id IN ($qidlist)";
 			$stm = $DBH->query($query);
@@ -277,19 +280,6 @@ if (isset($_POST['checked'])) { //modifying existing
 				$qrows[$row['id']] .= '<option value="2" '.(($row['showhints']==2)?'selected="selected"':'').'>'._('Videos').'</option>';
 				$qrows[$row['id']] .= '<option value="3" '.(($row['showhints']==3)?'selected="selected"':'').'>'._('Hints &amp; Videos').'</option>';
                 $qrows[$row['id']] .= '</select></td>';
-                if (isset($CFG['showcalculator'])) {
-                    $qrows[$row['id']] .= "<td><select name=\"showcalculator{$row['id']}\">";
-                    $qrows[$row['id']] .= '<option value="default" '.(($row['showcalculator']=='default')?'selected="selected"':'').'>'._('Use Default').'</option>';
-                    $qrows[$row['id']] .= '<option value="none" '.(($row['showcalculator']=='none')?'selected="selected"':'').'>'._('No').'</option>';
-                    foreach ($CFG['showcalculator'] as $key=>$value) {
-                        $qrows[$row['id']] .= "<option value=\"$key\"";
-                        if ($row['showcalculator'] == $key) {
-                            $qrows[$row['id']] .= 'selected="1"';
-                        }
-                        $qrows[$row['id']] .= ">$value</option>\n";
-                    }
-                    $qrows[$row['id']] .= '</select></td>';
-                }
                 $qrows[$row['id']] .= "<td><select name=\"showwork{$row['id']}\">";
                 foreach ($showworkoptions as $v=>$l) {
                     $qrows[$row['id']] .= '<option value="'.$v.'" '.($row['showwork']==$v ? 'selected':'').'>';
@@ -300,13 +290,10 @@ if (isset($_POST['checked'])) { //modifying existing
 				$qrows[$row['id']] .= '</tr>';
 			}
 			echo "<th>Q#<br/>&nbsp;</th><th>Description<br/>&nbsp;</th><th></th><th></th>";
-			echo '<th>'._('Tries').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
-			echo '<th>'._('Show Hints &amp; Videos?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
-            if (isset($CFG['showcalculator'])) {
-                echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
-            }
-            echo '<th>'._('Show Work?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
-			echo "<th>"._("Copies to Add")."<br/>&nbsp;</th></tr></thead>";
+			echo '<th>Tries<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
+			echo '<th>Show Hints &amp; Videos?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
+			echo '<th>Show Work?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
+			echo "<th>Copies to Add<br/>&nbsp;</th></tr></thead>";
 			echo "<tbody>";
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>$aid));
@@ -329,26 +316,22 @@ if (isset($_POST['checked'])) { //modifying existing
 
 			echo '</tbody></table>';
 			echo '<input type=hidden name="qids" value="'.Sanitize::encodeStringForDisplay(implode(',',$qids)).'" />';
-			echo '<input type=hidden name="mod" value="true" />';
+			echo '<input type=hidden name="action" value="mod" />';
 
 			echo '<div class="submit"><input type="submit" value="'._('Save Settings').'"></div>';
 
         } else { //adding new questions
-			if (isset($_GET['toaddqs'])) {
-                $_POST['nchecked'] = explode('-', $_GET['toaddqs']);
-            }
-			echo "<th>"._("Description")."</th><th></th><th></th>";
-			echo '<th>'._('Points').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['defpoints']).'</i></th>';
-			echo '<th>'._('Tries').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
-            echo '<th>'._('Show Hints &amp; Videos?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
-            if (isset($CFG['showcalculator'])) {
-                echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
-            }
-            echo '<th>'._('Show Work?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
-			echo "<th>"._("Copies to Add")."</th></tr></thead>";
+            $addqs = explode('-', $_GET['toaddqs']);
+            
+			echo "<th>Description</th><th></th><th></th>";
+			echo '<th>Points<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defpoints']).'</i></th>';
+			echo '<th>Tries<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['defattempts']).'</i></th>';
+            echo '<th>Show Hints &amp; Videos?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showhints']).'</i></th>';
+			echo '<th>Show Work?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
+			echo "<th>Copies to Add</th></tr></thead>";
 			echo "<tbody>";
-			$checked = implode(',', array_map('intval', $_POST['nchecked']));
-			$stm = $DBH->query("SELECT id,description,extref,qtype,control FROM imas_questionset WHERE id IN ($checked)");
+			$addqs = implode(',', array_map('intval', $addqs));
+			$stm = $DBH->query("SELECT id,description,extref,qtype,control FROM imas_questionset WHERE id IN ($addqs)");
 			$first = true;
 			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 				if ($row[3]=='multipart') {
@@ -392,19 +375,6 @@ if (isset($_POST['checked'])) { //modifying existing
 				echo '<option value="1">'._('Hints').'</option>';
 				echo '<option value="2">'._('Videos').'</option>';
                 echo '<option value="3">'._('Hints &amp; Videos').'</option></select></td>';
-                if (isset($CFG['showcalculator'])) {
-                    echo "<td><select name=\"showcalculator" . Sanitize::encodeStringForDisplay($row[0]) . "\">";
-                    echo '<option value="default" selected="selected">' . _('Use Default') . '</option>';
-                    echo '<option value="none">' . _('No') . '</option>';
-                    foreach ($CFG['showcalculator'] as $key => $value) {
-                        echo "<option value=\"$key\"";
-                        if ($line['showcalculator'] == $key) {
-                            echo 'selected="1"';
-                        }
-                        echo ">$value</option>\n";
-                    }
-                    echo '</select></td>';
-                }
                 echo "<td><select name=\"showwork" . Sanitize::encodeStringForDisplay($row[0]) . "\">";
                 foreach ($showworkoptions as $v=>$l) {
                     echo '<option value="'.$v.'" '.($v==-1 ?'selected':'').'>';
@@ -415,8 +385,8 @@ if (isset($_POST['checked'])) { //modifying existing
 				echo '</tr>';
 			}
 			echo '</tbody></table>';
-			echo '<input type=hidden name="qsetids" value="'.Sanitize::encodeStringForDisplay(implode(',',$_POST['nchecked'])).'" />';
-			echo '<input type=hidden name="add" value="true" />';
+			echo '<input type=hidden name="qsetids" value="'.Sanitize::encodeStringForDisplay($addqs).'" />';
+			echo '<input type=hidden name="action" value="add" />';
 
 			echo '<p><input type=checkbox name="addasgroup" value="1" onclick="chgisgrouped()"/> Add as a question group?</p>';
 			echo '<p><input type=checkbox name="pointsforparts" value="1" /> Set the points equal to the number of parts for multipart?</p>';
@@ -426,3 +396,4 @@ if (isset($_POST['checked'])) { //modifying existing
 		require("../footer.php");
 		exit;
 	}
+?>
