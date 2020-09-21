@@ -509,7 +509,7 @@ function chkAllNone(frmid, arr, mark, skip) {
   return false;
 }
 
-var tinyMCEPreInit = {base: imasroot+"/tinymce4"};
+var tinyMCEPreInit = {base: staticroot+"/tinymce4"};
 var desmos = '';
 function initeditor(edmode,edids,css,inline,setupfunction){
 	var cssmode = css || 0;
@@ -537,7 +537,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
 		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg " + desmos,
 		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder|style|class],param[name|value],@[sscr]',
-		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme+(desmos==''?'':','+imasroot+'/desmos/desmos-temp.css'),
+		content_css : staticroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+staticroot+'/themes/'+coursetheme+(desmos==''?'':','+imasroot+'/desmos/desmos-temp.css'),
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
 		file_picker_callback: filePickerCallBackFunc,
@@ -903,7 +903,7 @@ function togglefileembed() {
 				text: 'Converting HEIC file (this may take a while)...'
 			}).insertAfter(jQuery(this));
 			if (!window.heic2any) {
-				jQuery.getScript(imasroot+'/javascript/heic2any.min.js')
+				jQuery.getScript(staticroot+'/javascript/heic2any.min.js')
 				 .done(function() { convertheic(href, 'fileiframe' + id); });
 			} else {
 				convertheic(href, 'fileiframe' + id);
@@ -1294,11 +1294,11 @@ jQuery(document).ready(function($) {
 				if (e.type=="click" || e.which==13) {
 					if ($(this).attr("aria-expanded") == "true") {
 						$(this).attr("aria-expanded", false);
-						$(this).children("img").attr("src", "../img/expand.gif");
+						$(this).children("img").attr("src", staticroot+"/img/expand.gif");
 						$(this).next(".blockitems").slideUp();
 					} else {
 						$(this).attr("aria-expanded", true);
-						$(this).children("img").attr("src", "../img/collapse.gif");
+						$(this).children("img").attr("src", staticroot+"/img/collapse.gif");
 						$(this).next(".blockitems").slideDown();
 					}
 				}
