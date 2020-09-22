@@ -43,6 +43,9 @@ deny from all
  <FilesMatch "\.(eot|ttf|otf|woff|png|jpg|gif|cur|css)$">
   Header set Access-Control-Allow-Origin "*"
  </FilesMatch>
+ <FilesMatch "\.(eot|ttf|otf|woff|png|jpg|gif|cur|css|js)$">
+  Header set Cache-Control "public, max-age=86400"
+ </FilesMatch>
 </IfModule>
 
 
