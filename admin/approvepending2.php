@@ -15,6 +15,18 @@ $instId = Sanitize::onlyInt($_POST['userid']);
 $defGrouptype = isset($CFG['GEN']['defGroupType'])?$CFG['GEN']['defGroupType']:0;
 
 //handle ajax postback
+if (!empty($_POST['breakassoc'])) {
+	$stm = $DBH->prepare("SELECT reqdata FROM imas_instr_acct_reqs WHERE userid=?");
+	$stm->execute(array($instId));
+	$reqdata = json_decode($stm->fetchColumn(0), true);
+	if (isset($reqdata['ipeds']) && $reqdata['ipeds']!='0') {
+		list($ipedtype, $ipedsid) = explode('-', $reqdata['ipeds']);
+		$stm = $DBH->prepare('DELETE FROM imas_ipeds_group WHERE type=? AND ipedsid=?');
+		$stm->execute(array($ipedtype, $ipedsid));
+	}
+	echo 'OK';
+	exit;
+}
 if (!empty($newStatus)) {
 	$stm = $DBH->prepare("SELECT reqdata FROM imas_instr_acct_reqs WHERE userid=?");
 	$stm->execute(array($instId));
@@ -76,6 +88,14 @@ if (!empty($newStatus)) {
 			$message .= 'Unfortunately, the information you provided was not sufficient for us to verify your instructor status, ';
 			$message .= 'so your account has been converted to a student account. If you believe you should have an instructor account, ';
 			$message .= 'you are welcome to reply to this email with additional verification information.</p>';
+			$message .= '<p>If you did not use your official school email address when requesting your account, please send any additional followup <b>from your school email</b>. ';
+			$message .= 'Even if we can verify your name as belonging to a teacher, we usually will not approve generic email addresses, like @yahoo.com or @gmail.com addresses, as anyone could have created that account.</p>';
+			$message .= '<p>For verification, you can do any of the following:</p> <ul>';
+			$message .= '<li>Provide a link to a school-maintained website listing your name. This could be a staff directory, or a class schedule. Personal blogs are not sufficient.</li>';
+			$message .= '<li>Have your supervisor or HR send an email verifying your employment as faculty (that supervisor must be verifiable on a school website as well).</li>';
+			$message .= '<li>Email a photo of your school employee ID identifying you as faculty.</li>';
+			$message .= '</ul>';
+			$message .= '<p>Thank you for your patience and support in ensuring the integrity of this resource.</p>';
 		}
 
 		//call hook, if defined
@@ -101,10 +121,24 @@ if (!empty($newStatus)) {
 				$stm = $DBH->prepare("INSERT INTO imas_groups (name,grouptype) VALUES (:name,:grouptype)");
 				$stm->execute(array(':name'=>$newGroupName, ':grouptype'=>$defGrouptype));
 				$group = $DBH->lastInsertId();
+
+				if (isset($reqdata['ipeds']) && $reqdata['ipeds']=='0' && $reqdata['schoolloc'] != 'us') {
+					// auto-insert international record into ipeds table
+					$ipedtype = ($reqdata['schooltype']=='coll') ? 'W' : 'U';
+					$stm = $DBH->prepare("INSERT INTO imas_ipeds (type,ipedsid,school,country) VALUES (?,?,?,?)");
+					$stm->execute(array(
+						$ipedtype, 
+						md5($newGroupName . $reqdata['schoolloc']),
+						$newGroupName,
+						$reqdata['schoolloc']
+					));
+					// to trigger group assoc below
+					$reqdata['ipeds'] = $ipedtype.'-'.md5($newGroupName . $reqdata['schoolloc']);
+				} 
 			}
 		} else {
 			$group = 0;
-        }
+		}
 
         if ($group > 0 && !empty($reqdata['ipeds']) && strpos($reqdata['ipeds'],'-')!==false) {
             list($ipedtype, $ipedid) = explode('-', $reqdata['ipeds']);
@@ -158,9 +192,9 @@ function getReqData() {
 		if (!isset($out[$row['status']])) {
 			$out[$row['status']] = array();
 		}
-        $userdata = json_decode($row['reqdata'],true);
+		$userdata = json_decode($row['reqdata'],true);
         if (isset($userdata['ipeds'])) {
-            // handle requests with ipeds info
+            // handle requests with ipeds info 
             if (strpos($userdata['ipeds'],'-') !== false) {
                 list($ipedstype,$ipedsval) = explode('-', $userdata['ipeds']);
                 $query = "SELECT DISTINCT IF(ip.type='A',ip.agency,ip.school) AS schoolname,ip.country,ig.id,ig.name 
@@ -173,23 +207,29 @@ function getReqData() {
                 $ipedsgroups = array();
                 while ($r2 = $stm2->fetch(PDO::FETCH_ASSOC)) {
                     $ipedname = $r2['schoolname'];
+					if ($ipedstype == 'A' || $ipedstype == 'I' || $ipedstype == 'S') {
+						$ipedname .= ' ('.$r2['state'].')';
+					}
                     if ($r2['id'] !== null) {
                         $ipedsgroups[] = ['id'=>$r2['id'], 'name'=>$r2['name']];
                     }
                 }
                 if (count($ipedsgroups)>0) {
                     $userdata['fixedgroups'] = $ipedsgroups;
-                }
+                } 
                 $userdata['school'] = $ipedname;
             } else if ($userdata['ipeds'] == '0') {
-                $userdata['school'] = $userdata['otherschool'].' ('.$countries[$userdata['schoolloc']].')';
+				$userdata['school'] = $userdata['otherschool'];
+				if (strtoupper($userdata['schoolloc']) != 'US') {
+					$userdata['school'] .= ' ('.$countries[$userdata['schoolloc']].')';
+				}
             }
         }
         $urlformatted = false;
         if (isset($userdata['vertype'])) {
             // these values are further handled and sanitized below.
             if ($userdata['vertype'] == 'url') {
-                $userdata['url'] = $userdata['verdata'];
+                $userdata['url'] = $userdata['verdata']; 
             } else if ($userdata['vertype'] == 'email') {
                 $userdata['url'] = _('Expect an email from: ').$userdata['verdata'];
             } else if ($userdata['vertype'] == 'upload') {
@@ -205,14 +245,14 @@ function getReqData() {
 				$urlstring = "Verification URL: <a href='{$userdata['url']}' target='_blank'>{$urldisplay}</a>";
 			} else if ($urlformatted) {
 				$urlstring = 'Verification: '.$userdata['url'];
-            } else {
+			} else {
 				$urlstring = 'Verification: '.Sanitize::encodeStringForDisplay($userdata['url']);
 			}
 			$userdata['url'] = $urlstring;
 		}
 		$userdata['reqdate'] = tzdate("D n/j/y, g:i a", $row['reqdate']);
 		$userdata['name'] = $row['LastName'].', '.$row['FirstName'];
-        $userdata['email'] = $row['email'];
+		$userdata['email'] = $row['email'];
         $userdata['username'] = $row['SID'];
 		$userdata['id'] = $row['id'];
 		if (isset($userdata['school'])) {
@@ -239,10 +279,10 @@ if (empty($reqFields)) {
         $reqFields = array(
             'school' => 'School',
             'phone' => 'Phone',
-            'url' => 'Verification URL',
+			'url' => 'Verification URL',
             'search' => 'Search'
         );
-    }
+	}
 }
 
 $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/vue@2.5.6/dist/vue.min.js"></script>';
@@ -286,6 +326,9 @@ require("../header.php");
 echo '<div class="breadcrumb">'. $curBreadcrumb . $pagetitle.'</div>';
 echo '<div class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
 
+echo '<p><a href="https://docs.google.com/document/d/1OAnjqBQRapdo6uVKD5FtkGBJkz2JMhFNdtZdx0OPixM/edit?usp=sharing" target="_blank">';
+echo 'Approval Guidelines</a></p>';
+
 ?>
 
 <div id="app" v-cloak>
@@ -319,9 +362,11 @@ echo '<div class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
       	    	<button @click="chgStatus(status, userindex, 3)">Probably should be Denied</button>
       	    </span>
       	  </li>
+		  <li v-if="fixedgroups">This school is already associated with a group, listed below. 
+		    <button type=button @click="breakAssoc(status, userindex)">This association is wrong</button></li>
           <li v-if="!fixedgroups">Search for group: <input v-model="grpsearch" size=30 @keyup.enter="searchGroups">
-            <button type=button @click="searchGroups">Search</button>
-          </li>
+						<button type=button @click="searchGroups">Search</button>
+					</li>
       	  <li v-show="groups !== null">Group: <select v-model="group">
       	  	<optgroup label="groups">
       	  		<option value="-1" v-if="!fixedgroups">New group</option>
@@ -331,8 +376,25 @@ echo '<div class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
       	  	</select>
       	  	<span v-if="group==-1">New group name: <input size=30 v-model="newgroup" @blur="checkgroupname"></span>
       	  </li>
+		  <li>If Requesting More Info, select reason:<br>
+			<select v-model="rejreason">
+			<option value="0">Select...</option>
+			<option value="badurl">Unable to access URL, no URL provided, or teacher not listed at URL provided</option>
+			<option value="urlemail">Used personal email, not listed on verification URL</option>
+			<option value="badimg">Verification image didn't come through or unreadable</option>
+			<option value="insuffimg">Verification image didn't provide sufficient proof</option>
+			<option value="missing">No verification info provided</option>
+			<?php
+			if ($installname == 'WAMAP') {
+				echo '<option value="notWA">Not a Washington school</option>';
+			}
+			?>
+			</select>
+		  </li>
       	  <li>
-      	    <button @click="chgStatus(status, userindex, 11)">Approve Request</button>
+      	    <button :disabled="groups === null" 
+			  @click="chgStatus(status, userindex, 11)"
+			>Approve Request</button>
       	    <button @click="chgStatus(status, userindex, 10)">Deny Request</button>
 						<span v-if="status!=4">
       	    	<button @click="chgStatus(status, userindex, 4)">Request More Info</button>
@@ -367,9 +429,10 @@ var app = new Vue({
 			4: 'Waiting for more info'
 		},
 		statusMsg: "",
-        group: 0,
+		group: 0,
         fixedgroups: false,
-		newgroup: ""
+		newgroup: "",
+		rejreason: 0
 	},
 	computed: {
 
@@ -384,14 +447,15 @@ var app = new Vue({
 				this.activeUser = userid;
 				this.activeUserStatus = status;
 				this.activeUserIndex = userindex;
+				this.rejreason = 0;
 				this.$nextTick(function() {
                     if (this.toApprove[status][userindex].hasOwnProperty('fixedgroups')) {
                         this.groups = this.toApprove[status][userindex].fixedgroups;
                         this.group = this.toApprove[status][userindex].fixedgroups[0]['id'];
                         this.fixedgroups = true;
                     } else {
-                        this.groups = null;
-                        this.group = 0;
+					this.groups = null;
+					this.group = 0;
                         this.fixedgroups = false;
                         this.grpsearch = this.toApprove[status][userindex].school;
                         this.newgroup = this.toApprove[status][userindex].school;
@@ -414,6 +478,22 @@ var app = new Vue({
 				self.group = msg[0].id;
 			});
 		},
+		breakAssoc: function (status, userindex) {
+			var self = this;
+			$.ajax({
+				type: "POST",
+				url: "approvepending2.php",
+				data: {
+					"breakassoc": true,
+					"userid": this.toApprove[status][userindex].id
+				}
+			}).done(function(msg) {
+				self.fixedgroups = false;
+				self.grpsearch = self.toApprove[status][userindex].school;
+				self.newgroup = self.toApprove[status][userindex].school;
+				self.groups = null;
+			});
+		},
 		chgStatus: function(status, userindex, newstatus) {
 			if (newstatus==11 && this.group===-1 && !this.checkgroupname()) {
 				return false;
@@ -427,7 +507,8 @@ var app = new Vue({
 					"userid": this.toApprove[status][userindex].id,
 					"group": this.group,
 					"newgroup": this.newgroup,
-					"newstatus": newstatus
+					"newstatus": newstatus,
+					"rejreason": this.rejreason
 				}
 			}).done(function(msg) {
 			  if (msg=="OK") {
