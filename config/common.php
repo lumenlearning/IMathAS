@@ -9,7 +9,7 @@ if (PHP_INT_SIZE==8) {
 $imasroot = "";
 $allowmacroinstall = false;
 $CFG['GEN']['AWSforcoursefiles'] = true;
-// $CFG['static_server'] = 'https://static.imathas.com';
+$CFG['static_server'] = 'https://static.myopenscience.com';
 
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
