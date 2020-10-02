@@ -1404,8 +1404,7 @@ class AssessRecord
         ) ||
         $this->teacherInGb;
       $out['info'] = $generate_html;
-      list($out['html'], $out['jsparams'], $out['answeights'], $out['usedautosave'], $out['work'], $out['errors']) =
-        $this->getQuestionHtml($qn, $ver, false, $force_scores, $force_answers, $tryToShow, $generate_html === 2);
+      $out += $this->getQuestionHtml($qn, $ver, false, $force_scores, $force_answers, $tryToShow, $generate_html === 2);
       if ($out['usedautosave']) {
         $autosave = $this->getAutoSaves($qn);
         $out['autosave_timeactive'] = $autosave['timeactive'];
@@ -1702,6 +1701,10 @@ class AssessRecord
     // get assessment attempt data for given version
     $qver = $this->getQuestionVer($qn, $ver);
     $work = isset($qver['work']) ? $qver['work'] : '';
+    $worktime = '0';
+    if (!empty($qver['worktime'])) {
+        $worktime = tzdate("n/j/y, g:i a", $qver['worktime'] + $this->assessRecord['starttime']);
+    }
 
     // get the question settings
     $qsettings = $this->assess_info->getQuestionSettings($qver['qid']);
@@ -1879,8 +1882,16 @@ class AssessRecord
       $jsparams['ans'] = $question->getCorrectAnswersForParts();
       $jsparams['stuans'] = $stuanswers[$qn+1];
     }
+    return [
+        'html' => $qout,
+        'jsparams' => $jsparams,
+        'answeights' => $answeights,
+        'usedautosave' => $usedAutosave,
+        'work' => $work,
+        'worktime' => $worktime,
+        'errors' => $question->getErrors()
+    ];
 
-    return array($qout, $jsparams, $answeights, $usedAutosave, $work, $question->getErrors());
   }
 
   private function parseScripts($html) {
@@ -3675,7 +3686,13 @@ class AssessRecord
       $question_versions = &$assessver['questions'][$qn]['question_versions'];
       $curq = &$question_versions[count($question_versions) - 1];
       if ($during || ($this->assess_info->getQuestionSetting($curq['qid'], 'showwork') & 2) == 2) {
-        $curq['work'] = Sanitize::incomingHtml($val);
+        $newwork = Sanitize::incomingHtml($val);
+        if (!isset($curq['work']) || $curq['work'] != $newwork) {
+            $curq['work'] = $newwork;
+            $curq['worktime'] = time() - $this->assessRecord['starttime'];
+        } else {
+            unset($work[$qn]);
+        }
       }
     }
     if (count($work) > 0) {
@@ -3721,6 +3738,7 @@ class AssessRecord
     foreach ($data as $pn=>$partdata) {
       if ($pn === 'work') {
         $curq['work'] = $partdata;
+        $curq['worktime'] = time() - $this->assessRecord['starttime'];
       } else {
         $curq['tries'][$pn][] = $partdata;
       }
