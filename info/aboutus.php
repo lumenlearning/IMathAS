@@ -12,17 +12,17 @@ require("../infoheader.php");
 <div class="content">
 <h2>What is MyOpenMath?</h2>
 
-<p>MyOpenMath is a free, open source, online course management system for 
-mathematics and other quantitative fields.  MyOpenMath's primary emphasis 
-is to facilitate the creation and implementation of online homework and assessment, 
-although it also supports content delivery on a limited basis.</p>
+<p>MyOpenMath is an online course management and assessment system for mathematics
+and other quantitative fields.  MyOpenMath’s focus is providing rich algorithmically
+generated assessment to support the use of free, open textbooks like the
+ones listed on <a href="http://www.opentextbookstore.com/">OpenTextBookStore.com</a>.</p>
 
-<p>MyOpenMath runs on the open source <a href="http://www.imathas.com">IMathAS</a> platform, providing
-free hosted use of this platform in support of free, open textbooks like the
-ones listed on <a href="http://www.opentextbookstore.com/">OpenTextBookStore.com</a>.
-The intent is to provide classroom use of
-the platform, without any required cost to students, for schools wanting a managed install of
-the IMathAS platform, and to provide students self-study opportunities.</p>
+<p>MyOpenMath is a collaborative community of users.
+MyOpenMath.com provides managed hosting of the
+open source <a href="http://www.imathas.com">IMathAS</a> online assessment software.
+Questions and pre-built courses are all created by faculty in the user community and
+shared with others in the spirit of openness.  Experienced users provide peer-to-peer
+support through discussion forums.</p>
 
 <p>MyOpenMath.com is operated by the non-profit organization MyOpenMath.</p>
 
@@ -39,29 +39,34 @@ adaptive learning platform, and OHM, an online math homework site.</p>
 
 <h3>XYZ Homework</h3>
  
-<p>XYZ Homework is an IMATHAS compatible online homework system. 
+<p>XYZ Homework is an IMathAS compatible online homework system.
 They are an OpenStax Ally providing custom templates and coding for their math titles. 
 XYZ Homework specializes in customization including printable eBooks and additional 
 ancillaries based on OpenStax and other OER materials. They are also the online 
 homework partner for XYZ Textbooks.</p>
 </div>
 
-<h2>Pricing</h2>
+<h2>Contributing Partners / Pricing</h2>
 
-<p>MyOpenMath operates using a "freemium" model.  Use of the site is and will 
-   always be available for free.</p>
+<p>MyOpenMath operates as a non-profit.  We have many wonderful volunteers who help run
+and maintain the site, but we depend on financial support from schools using the site,
+as well as corporate sponsors, to sustain ongoing operations.</p>
   
-<p>For institutions wanting a service level agreement and data sharing contract, 
-  as well as access to additional administrative features, these are available
-  for a low-cost annual hosting fee paid by the institution.  For more information,
-  contact <a href="mailto:sales@myopenmath.com">sales@myopenmath.com</a></p>
+<p>Our core mission is to support the use of free or low cost online homework to save
+students money.  Students will never be directly charged for access.  Teachers and
+schools will never be required to pay for standard use of MyOpenMath.  In particular, we encourage
+teachers and schools to use MyOpenMath for free, at any scale, to see whether it will
+meet their needs.</p>
 
-<p>MyOpenMath does not provide direct student or instructor support services, 
-	regardless of your service tier.</p>
+<p>When use of MyOpenMath at your school becomes a standardized and scaled part of the
+curriculum, we ask schools to contribute to ensuring the sustainability of our
+operations by becoming a Contributing Partner.
+More information about this program will be available soon.</p>
 
-<p>MyOpenMath follows the data protection policies set out in our <a href="privacy.php">Privacy Policy</a>
- and <a href="../termsofuse.php">Terms of Use</a>, regardless of your service tier.  
- We will never sell your personal data.</p>
+<p>MyOpenMath follows the data protection policies set out in our
+<a href="/info/policies/privacy.php">Privacy Policy</a>
+ and <a href="/info/policies/terms.php">Terms of Use</a>, regardless of whether
+ a school is a Contributing Partner or not. We will never sell your personal data.</p>
  
 <h2>Support</h2>
 <p>Community-based support is available through active, open support forums and training videos.
@@ -69,7 +74,7 @@ MyOpenMath does not provide direct support for instructors or students.</p>
 
 <p>If you are in need of more comprehensive support services beyond what is 
  available on MyOpenMath, then you should consider
- using a commercial homework system.  There are number of homework sites that provide
+ using a commercial homework system.  There are a number of homework sites that provide
  homework for open textbooks with support services.  Some of these sites are
  MyOpenMath compatible, meaning most courses on MyOpenMath can be moved to that
  platform.
@@ -78,6 +83,7 @@ MyOpenMath does not provide direct support for instructors or students.</p>
 <ul>
  <li><a href="https://ohm.lumenlearning.com">Lumen OHM</a> (MyOpenMath compatible)</li>
  <li><a href="https://xyzhomework.com">XYZ Homework</a> (MyOpenMath compatible)</li>
+ <li><a href="https://varsitylearning.com">Varsity Learning</a> (MyOpenMath compatible)</li>
  <li><a href="http://www.webassign.net">WebAssign</a></li>
  <li><a href="https://www.knewton.com/why-alta/">Knewton Alta</a></li>
  <li>And many others.  If you're using an OpenStax book, you can view their list
@@ -106,7 +112,7 @@ off their own version of MyOpenMath, called Lumen OHM, to help differentiate the
 supported service from the free, community MyOpenMath site.</p>
 
 <p>In 2018, the non-profit organization MyOpenMath was formed to be the official
-entity operating MyOpenMath.</p>
+entity operating MyOpenMath. MyOpenMath continues to lead the development of IMathAS.</p>
 
 <h2>Credits</h2>
 
@@ -135,7 +141,8 @@ entity operating MyOpenMath.</p>
    <li><a href="https://www.lumenlearning.com">Lumen Learning</a></li>
    <li><a href="https://www.xyzhomework.com">XYZ Homework</a></li>
    <li>University of Koblenz</li>
-   <li>Roy Shabahzian, David Cooper, Grant Sander, Cam Joyce, Larry Green, Bill Meacham, and others.</li>
+   <li>Roy Shabahzian, David Cooper, Grant Sander, Cam Joyce, Larry Green, Bill Meacham,
+     Ingo Dahn, Nick Chura, Amir Tavangar, David Flenner, and others.</li>
   </ul>
 </p>
 
@@ -145,6 +152,8 @@ entity operating MyOpenMath.</p>
  <li>William Meacham</li>
  <li>Robert Camner</li>
  <li>Melonie Rasmussen</li>
+ <li>Roy Shahbazian</li>
+ <li>Michael Jenck</li>
 </ul>
 
 </div>
