@@ -28,9 +28,10 @@ if (!empty($_POST['breakassoc'])) {
 	exit;
 }
 if (!empty($newStatus)) {
-	$stm = $DBH->prepare("SELECT reqdata FROM imas_instr_acct_reqs WHERE userid=?");
-	$stm->execute(array($instId));
-	$reqdata = json_decode($stm->fetchColumn(0), true);
+	$stm = $DBH->prepare("SELECT status,reqdata FROM imas_instr_acct_reqs WHERE userid=?");
+    $stm->execute(array($instId));
+    list($oldstatus, $reqdata) = $stm->fetch(PDO::FETCH_NUM);
+	$reqdata = json_decode($reqdata, true);
 
 	if (!isset($reqdata['actions'])) {
 		$reqdata['actions'] = array();
@@ -74,41 +75,33 @@ if (!empty($newStatus)) {
 				unenrollstu($rcid, array(intval($instId)));
 			}
 		}
+        if ($oldstatus != 4) {
+            $stm = $DBH->prepare("SELECT FirstName,LastName,SID,email FROM imas_users WHERE id=:id");
+            $stm->execute(array(':id'=>$instId));
+            $row = $stm->fetch(PDO::FETCH_ASSOC);
 
-		$stm = $DBH->prepare("SELECT FirstName,LastName,SID,email FROM imas_users WHERE id=:id");
-		$stm->execute(array(':id'=>$instId));
-		$row = $stm->fetch(PDO::FETCH_ASSOC);
+            //call hook, if defined
+            if (function_exists('getDenyMessage')) {
+                $message = getDenyMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
+            } else {
+                $message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
+                $message .= '<p>You recently requested an instructor account on '.$installname.' with the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b>. ';
+                $message .= 'Unfortunately, the information you provided was not sufficient for us to verify your instructor status, ';
+                $message .= 'so your account has been converted to a student account. If you believe you should have an instructor account, ';
+                $message .= 'you are welcome to reply to this email with additional verification information.</p>';
+            }
 
-		//call hook, if defined
-		if (function_exists('getDenyMessage')) {
-			$message = getDenyMessage($row['FirstName'], $row['LastName'], $row['SID'], $group);
-		} else {
-			$message = '<style type="text/css">p {margin:0 0 1em 0} </style><p>Hi '.Sanitize::encodeStringForDisplay($row['FirstName']).'</p>';
-			$message .= '<p>You recently requested an instructor account on '.$installname.' with the username <b>'.Sanitize::encodeStringForDisplay($row['SID']).'</b>. ';
-			$message .= 'Unfortunately, the information you provided was not sufficient for us to verify your instructor status, ';
-			$message .= 'so your account has been converted to a student account. If you believe you should have an instructor account, ';
-			$message .= 'you are welcome to reply to this email with additional verification information.</p>';
-			$message .= '<p>If you did not use your official school email address when requesting your account, please send any additional followup <b>from your school email</b>. ';
-			$message .= 'Even if we can verify your name as belonging to a teacher, we usually will not approve generic email addresses, like @yahoo.com or @gmail.com addresses, as anyone could have created that account.</p>';
-			$message .= '<p>For verification, you can do any of the following:</p> <ul>';
-			$message .= '<li>Provide a link to a school-maintained website listing your name. This could be a staff directory, or a class schedule. Personal blogs are not sufficient.</li>';
-			$message .= '<li>Have your supervisor or HR send an email verifying your employment as faculty (that supervisor must be verifiable on a school website as well).</li>';
-			$message .= '<li>Email a photo of your school employee ID identifying you as faculty.</li>';
-			$message .= '</ul>';
-			$message .= '<p>Thank you for your patience and support in ensuring the integrity of this resource.</p>';
-		}
+            //call hook, if defined
+            if (function_exists('getDenyBcc')) {
+                $CFG['email']['new_acct_bcclist'] = getDenyBcc();
+            }
 
-		//call hook, if defined
-		if (function_exists('getDenyBcc')) {
-			$CFG['email']['new_acct_bcclist'] = getDenyBcc();
-		}
-
-		require_once("../includes/email.php");
-		send_email(Sanitize::emailAddress($row['email']), !empty($accountapproval)?$accountapproval:$sendfrom,
-			$installname._(' Account Status'), $message,
-			!empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(),
-			!empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);
-
+            require_once("../includes/email.php");
+            send_email(Sanitize::emailAddress($row['email']), !empty($accountapproval)?$accountapproval:$sendfrom,
+                $installname._(' Account Status'), $message,
+                !empty($CFG['email']['new_acct_replyto'])?$CFG['email']['new_acct_replyto']:array(),
+                !empty($CFG['email']['new_acct_bcclist'])?$CFG['email']['new_acct_bcclist']:array(), 10);
+        }
 	} else if ($newStatus==11) { //approve
 		if ($_POST['group']>-1) {
 			$group = Sanitize::onlyInt($_POST['group']);
@@ -127,19 +120,19 @@ if (!empty($newStatus)) {
 					$ipedtype = ($reqdata['schooltype']=='coll') ? 'W' : 'U';
 					$stm = $DBH->prepare("INSERT INTO imas_ipeds (type,ipedsid,school,country) VALUES (?,?,?,?)");
 					$stm->execute(array(
-						$ipedtype, 
+						$ipedtype,
 						md5($newGroupName . $reqdata['schoolloc']),
 						$newGroupName,
 						$reqdata['schoolloc']
 					));
 					// to trigger group assoc below
 					$reqdata['ipeds'] = $ipedtype.'-'.md5($newGroupName . $reqdata['schoolloc']);
-				} 
+				}
 			}
 		} else {
 			$group = 0;
-		}
-
+        }
+        
         if ($group > 0 && !empty($reqdata['ipeds']) && strpos($reqdata['ipeds'],'-')!==false) {
             list($ipedtype, $ipedid) = explode('-', $reqdata['ipeds']);
             $stm = $DBH->prepare("INSERT IGNORE INTO imas_ipeds_group (type,ipedsid,groupid) VALUES (?,?,?)");
@@ -192,7 +185,7 @@ function getReqData() {
 		if (!isset($out[$row['status']])) {
 			$out[$row['status']] = array();
 		}
-		$userdata = json_decode($row['reqdata'],true);
+        $userdata = json_decode($row['reqdata'],true);
         if (isset($userdata['ipeds'])) {
             // handle requests with ipeds info 
             if (strpos($userdata['ipeds'],'-') !== false) {
@@ -245,14 +238,14 @@ function getReqData() {
 				$urlstring = "Verification URL: <a href='{$userdata['url']}' target='_blank'>{$urldisplay}</a>";
 			} else if ($urlformatted) {
 				$urlstring = 'Verification: '.$userdata['url'];
-			} else {
+            } else {
 				$urlstring = 'Verification: '.Sanitize::encodeStringForDisplay($userdata['url']);
 			}
 			$userdata['url'] = $urlstring;
 		}
 		$userdata['reqdate'] = tzdate("D n/j/y, g:i a", $row['reqdate']);
 		$userdata['name'] = $row['LastName'].', '.$row['FirstName'];
-		$userdata['email'] = $row['email'];
+        $userdata['email'] = $row['email'];
         $userdata['username'] = $row['SID'];
 		$userdata['id'] = $row['id'];
 		if (isset($userdata['school'])) {
@@ -282,7 +275,7 @@ if (empty($reqFields)) {
 			'url' => 'Verification URL',
             'search' => 'Search'
         );
-	}
+    }
 }
 
 $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/vue@2.5.6/dist/vue.min.js"></script>';
@@ -362,7 +355,7 @@ echo 'Approval Guidelines</a></p>';
       	    	<button @click="chgStatus(status, userindex, 3)">Probably should be Denied</button>
       	    </span>
       	  </li>
-		  <li v-if="fixedgroups">This school is already associated with a group, listed below. 
+		  <li v-if="fixedgroups">This school is already associated with a group, listed below.
 		    <button type=button @click="breakAssoc(status, userindex)">This association is wrong</button></li>
           <li v-if="!fixedgroups">Search for group: <input v-model="grpsearch" size=30 @keyup.enter="searchGroups">
 						<button type=button @click="searchGroups">Search</button>
@@ -390,9 +383,9 @@ echo 'Approval Guidelines</a></p>';
 			}
 			?>
 			</select>
-		  </li>
+      	  </li>
       	  <li>
-      	    <button :disabled="groups === null" 
+      	    <button :disabled="groups === null"
 			  @click="chgStatus(status, userindex, 11)"
 			>Approve Request</button>
       	    <button @click="chgStatus(status, userindex, 10)">Deny Request</button>
@@ -454,8 +447,8 @@ var app = new Vue({
                         this.group = this.toApprove[status][userindex].fixedgroups[0]['id'];
                         this.fixedgroups = true;
                     } else {
-					this.groups = null;
-					this.group = 0;
+                        this.groups = null;
+                        this.group = 0;
                         this.fixedgroups = false;
                         this.grpsearch = this.toApprove[status][userindex].school;
                         this.newgroup = this.toApprove[status][userindex].school;
