@@ -345,13 +345,13 @@ echo 'Approval Guidelines</a></p>';
       	    <span v-else>{{title}}: {{user[fieldindex]}}</span>
       	  </li>
       	  <li>
-      	    <span v-if="status!=1">
+      	    <span v-if="false && status!=1">
       	    	<button @click="chgStatus(status, userindex, 1)">Needs Investigation</button>
       	    </span>
       	    <span v-if="status!=2">
       	    	<button @click="chgStatus(status, userindex, 2)">Waiting for Confirmation</button>
       	    </span>
-      	    <span v-if="status!=3">
+      	    <span v-if="false && status!=3">
       	    	<button @click="chgStatus(status, userindex, 3)">Probably should be Denied</button>
       	    </span>
       	  </li>
