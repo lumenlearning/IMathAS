@@ -3,7 +3,7 @@
 //Add autoexecuse
 $DBH->beginTransaction();
 
- $query = "ALTER TABLE `imas_assessments` ADD `autoexcuse` TEXT NULL DEFAULT NULL";
+ $query = "ALTER TABLE `imas_assessments` ADD `autoexcuse` TEXT NULL DEFAULT NULL, ALGORITHM=INPLACE, LOCK=NONE";
  $res = $DBH->query($query);
  if ($res===false) {
  	 echo "<p>Query failed: ($query) : " . $DBH->errorInfo() . "</p>";
