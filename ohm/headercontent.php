@@ -68,9 +68,14 @@
 		});
 	</script>
 
+<?php
+    $helpModalQueryString = $_REQUEST['cid'] ? '?cid=' . intval($_REQUEST['cid']) : '';
+    $helpModalUrl = sprintf('%s/ohm/help_modal.php%s', $imasroot, $helpModalQueryString);
+?>
+
 	<script type="text/javascript">
 		$(document).ready(function(data) {
-			$.get("<?php echo $imasroot; ?>/ohm/help_modal.php", function(data) {
+			$.get("<?php echo $helpModalUrl; ?>", function(data) {
 				$('a#help-modal-open').click(function(e) {
 					modal.open({
 						content: data,

@@ -1,4 +1,14 @@
-<?php require '../init_without_validate.php'; ?>
+<?php
+require '../init.php';
+
+$stm = $GLOBALS['DBH']->prepare("SELECT FirstName, LastName, email FROM imas_users WHERE id = :userId");
+$stm->execute([':userId' => $userid]);
+$results = $stm->fetch(PDO::FETCH_ASSOC);
+
+$helpUserFullName = Sanitize::simpleStringWithSpaces($results['FirstName'] . ' ' . $results['LastName']);
+$helpUserEmail = Sanitize::emailAddress($results['email']);
+$helpCourseId = $_GET['cid'] ? Sanitize::onlyInt($_GET['cid']) : '';
+?>
 
 <div class="modal-inner">
 
@@ -45,13 +55,13 @@
       <form id="zd-help-form" class="zd-help">
         <div class="zd-info">
           <label for="z_name" class="u-sr-only">Name</label>
-          <input type="text" placeholder="Name" name="z_name" id="z_name" class="field" />
+          <input type="text" placeholder="Name" name="z_name" id="z_name" class="field" value="<?php echo $helpUserFullName; ?>"/>
 
           <label for="z_email" class="u-sr-only">Email</label>
-          <input type="text" placeholder="Email" name="z_email" id="z_email" class="field" required />
+          <input type="text" placeholder="Email" name="z_email" id="z_email" class="field" value="<?php echo $helpUserEmail; ?>"required />
 
           <label for="z_cid" class="u-sr-only">Course Id</label>
-          <input type="text" placeholder="Course ID (optional)" name="z_cid" id="z_cid" class="field" />
+          <input type="text" placeholder="Course ID (optional)" name="z_cid" id="z_cid" class="field" value="<?php echo $helpCourseId; ?>"/>
         </div>
 
         <label for="z_subject" class="u-sr-only">Subject</label>
