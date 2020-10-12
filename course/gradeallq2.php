@@ -79,7 +79,7 @@
 
 	// Load new assess info class
 	$assess_info = new AssessInfo($DBH, $aid, $cid, false);
-	$assess_info->loadQuestionSettings('all');
+	$assess_info->loadQuestionSettings('all', false, false);
 	$ptsposs = $assess_info->getQuestionSetting($qid, 'points_possible');
 
 	if (isset($_GET['update']) && $canedit) {
@@ -326,7 +326,7 @@
 	$placeinhead .= "       var toopen = '$address&page=' + stun;\n";
 	$placeinhead .= "  	window.location = toopen; \n";
 	$placeinhead .= "}\n";
-	$placeinhead .= 'var GBdeffbtext ="'.Sanitize::encodeStringForDisplay($deffbtext).'";';
+	$placeinhead .= 'var GBdeffbtext ="'.Sanitize::encodeStringForJavascript($deffbtext).'";';
 	$placeinhead .= 'function chgsecfilter() {
 		var sec = document.getElementById("secfiltersel").value;
 		var toopen = "'.$address.'&secfilter=" + encodeURIComponent(sec);

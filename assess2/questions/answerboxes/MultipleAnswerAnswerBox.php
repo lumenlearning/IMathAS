@@ -73,7 +73,10 @@ class MultipleAnswerAnswerBox implements AnswerBox
         $answers = count($questions)-1;
       }
     }
-		$_SESSION['choicemap'][$assessmentId][$qn] = $randkeys;
+    $_SESSION['choicemap'][$assessmentId][$qn] = $randkeys;
+    if (!empty($GLOBALS['inline_choicemap'])) {
+        $params['choicemap'] = encryptval($randkeys, $GLOBALS['inline_choicemap']);
+    }
     if (isset($GLOBALS['capturechoices'])) {
       $GLOBALS['choicesdata'][$qn] = $questions;
     }
@@ -172,7 +175,7 @@ class MultipleAnswerAnswerBox implements AnswerBox
 		$this->answerBox = $out;
     $this->jsParams = $params;
 		$this->entryTip = $tip;
-		$this->correctAnswerForPart = $sa;
+		$this->correctAnswerForPart = (string) $sa;
 		$this->previewLocation = $preview;
 	}
 

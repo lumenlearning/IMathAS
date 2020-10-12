@@ -460,7 +460,7 @@ if ($overwriteBody==1) {
 	<form id="qform" method=post action="copyitems.php?cid=<?php echo $cid ?>&action=copycalitems">
 	<input type=hidden name=ekey id=ekey value="<?php echo Sanitize::encodeStringForDisplay($_POST['ekey']); ?>">
 	<input type=hidden name=ctc id=ctc value="<?php echo Sanitize::encodeStringForDisplay($ctc); ?>">
-	<h3>Select Calendar Items to Copy</h3>
+	<h2>Select Calendar Items to Copy</h2>
 	Check: <a href="#" onclick="return chkAllNone('qform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('qform','checked[]',false)">None</a>
 
 	<table cellpadding=5 class=gb>
@@ -549,9 +549,9 @@ $excludeAssess = ($sourceUIver > $destUIver);
 	</div>
 	<div id="selectitemstocopy" <?php echo $excludeAssess?'':'style="display:none"';?>>
 <?php } ?>
-	<h3><?php _('Select Items to Copy'); ?></h3>
 
-	<?php echo _('Check'); ?>: <a href="#" onclick="return chkAllNone('qform','checked[]',true)"><?php echo _('All'); ?></a> <a href="#" onclick="return chkAllNone('qform','checked[]',false)"><?php echo _('None'); ?></a>
+
+	<p><?php echo _('Check'); ?>: <a href="#" onclick="return chkAllNone('qform','checked[]',true)"><?php echo _('All'); ?></a> <a href="#" onclick="return chkAllNone('qform','checked[]',false)"><?php echo _('None'); ?></a></p>
 
 	<table cellpadding=5 class=gb>
 		<thead>
@@ -669,7 +669,7 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 <?php
 	} else { //DEFAULT DISPLAY BLOCK
 ?>
-	<h3><?php echo _('Select a course to copy items from'); ?></h3>
+	<h2><?php echo _('Select a course to copy items from'); ?></h2>
 
 	<form method=post action="copyitems.php?cid=<?php echo $cid ?>&action=select">
 <?php
@@ -679,7 +679,7 @@ writeHtmlSelect ("addto",$page_blockSelect['val'],$page_blockSelect['label'],$se
 		if (isset($CFG['coursebrowsermsg'])) {
 			echo $CFG['coursebrowsermsg'];
 		} else {
-			echo _('Copy a template or promoted course');
+			echo _('Copy from a template or promoted course');
 		}
 		echo ' <button type="button" onclick="showCourseBrowser()">'._('Browse Courses').'</button>';
 		echo '<span id="coursebrowserout" style="display:none"><br/>';

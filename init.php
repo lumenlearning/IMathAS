@@ -48,24 +48,26 @@ function disallowsSameSiteNone () {
 if (isset($sessionpath)) { session_save_path($sessionpath);}
 ini_set('session.gc_maxlifetime',432000);
 ini_set('auto_detect_line_endings',true);
-$hostparts = explode('.',Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
+$hostdomain = explode(':', Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
+$hostparts = explode('.', $hostdomain[0]);
 // OHM-specific change: Added check for development environment. (for ngrok usage)
 if ((!function_exists('isDevEnvironment') || !isDevEnvironment())
-    && $_SERVER['HTTP_HOST'] != 'localhost'
+    && $hostdomain[0] != 'localhost'
     && !is_numeric($hostparts[count($hostparts)-1])
 ) {
 	$sess_cookie_domain = '.'.implode('.',array_slice($hostparts,isset($CFG['GEN']['domainlevel'])?$CFG['GEN']['domainlevel']:-2));
 	if (disallowsSameSiteNone()) {
-		session_set_cookie_params(0, '/', $sess_cookie_domain);
+		session_set_cookie_params(0, '/', $sess_cookie_domain, false, true);
 	} else if (PHP_VERSION_ID < 70300) {
 		// hack to add samesite
-		session_set_cookie_params(0, '/; samesite=none', $sess_cookie_domain, true);
+		session_set_cookie_params(0, '/; samesite=none', $sess_cookie_domain, true, true);
   } else {
 		session_set_cookie_params(array(
 			'lifetime' => 0,
 			'path' => '/',
 			'domain' => $sess_cookie_domain,
-			'secure' => true,
+            'secure' => true,
+            'httponly' => true,
 			'samesite'=>'None'
 		));
   }

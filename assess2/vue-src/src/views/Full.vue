@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <a href="#" class="sr-only" @click.prevent="$refs.scrollpane.focus()">
+    <a href="#" class="sr-only" id="skipnav" @click.prevent="$refs.scrollpane.focus()">
       {{ $t('jumptocontent') }}
     </a>
     <assess-header></assess-header>
@@ -29,7 +29,7 @@
       :aria-label="$t('regions.questions')"
     >
       <intro-text
-        v-if = "intro !== ''"
+        v-if = "hasIntro"
         :active = "showTexts"
         :html = "intro"
       />
@@ -96,6 +96,9 @@ export default {
   computed: {
     intro () {
       return store.assessInfo.intro;
+    },
+    hasIntro () {
+      return (store.assessInfo.intro !== '' || store.assessInfo.resources.length > 0);
     },
     isPreviewAll () {
       return !!store.assessInfo.preview_all;

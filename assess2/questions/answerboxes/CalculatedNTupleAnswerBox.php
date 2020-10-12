@@ -99,8 +99,8 @@ class CalculatedNTupleAnswerBox implements AnswerBox
     		if ($useeqnhelper) {
     			$params['helper'] = 1;
     		}
-    		if (!isset($hidepreview) && $_SESSION['userprefs']['livepreview']==1) {
-    			$params['preview'] = 1;
+    		if (!isset($hidepreview)) {
+    			$params['preview'] = $_SESSION['userprefs']['livepreview'] ? 1 : 2;
     		}
 
     		$out .= '<input ' .
@@ -127,7 +127,7 @@ class CalculatedNTupleAnswerBox implements AnswerBox
         $this->answerBox = $out;
         $this->jsParams = $params;
         $this->entryTip = $tip;
-        $this->correctAnswerForPart = $sa;
+        $this->correctAnswerForPart = (string) $sa;
         $this->previewLocation = $preview;
     }
 

@@ -208,9 +208,10 @@ class AssessInfo
   *                      Default 'all'.
   * @param boolean $get_code  set True to load the question code and other fields
   *                           from imas_questionset.  Gets stored in $questionSetData
+  * @param boolean $get_cats  whether to load question category info (def true)
   * @return void
   */
-  public function loadQuestionSettings($qids = 'all', $get_code = false) {
+  public function loadQuestionSettings($qids = 'all', $get_code = false, $get_cats = true) {
     if (is_array($qids)) {
       $ph = Sanitize::generateQueryPlaceholders($qids);
       $stm = $this->DBH->prepare("SELECT * FROM imas_questions WHERE id IN ($ph)");
@@ -223,21 +224,28 @@ class AssessInfo
     $tolookupAids = array();
     $tolookupOutcomes = array();
     while ($qrow = $stm->fetch(PDO::FETCH_ASSOC)) {
+      if (!$get_cats) {
+        unset($qrow['category']);
+      }
       $this->questionData[$qrow['id']] = self::normalizeQuestionSettings($qrow, $this->assessData);
       $qsids[] = $qrow['questionsetid'];
-      $category = &$this->questionData[$qrow['id']]['category'];
-      if ($category === '') {
-        // do nothing
-      } else if (is_numeric($category)) {
-        if (intval($category) === 0) {
-          $category = $this->assessData['defoutcome'];
+      if ($get_cats) {
+        $this->questionData[$qrow['id']]['origcategory'] = $this->questionData[$qrow['id']]['category'];
+        $category = &$this->questionData[$qrow['id']]['category'];
+
+        if ($category === '') {
+            // do nothing
+        } else if (is_numeric($category)) {
+            if (intval($category) === 0) {
+            $category = $this->assessData['defoutcome'];
+            }
+            $tolookupOutcomes[$qrow['id']] = $category;
+        } else if (0==strncmp($category,"AID-",4)) {
+            $tolookupAids[$qrow['id']] = substr($category, 4);
         }
-        $tolookupOutcomes[$qrow['id']] = $category;
-      } else if (0==strncmp($category,"AID-",4)) {
-        $tolookupAids[$qrow['id']] = substr($category, 4);
       }
     }
-    if (count($tolookupAids) > 0) {
+    if (count($tolookupAids) > 0 && $get_cats) {
       $uniqAids = array_values(array_unique($tolookupAids));
       $ph = Sanitize::generateQueryPlaceholders($uniqAids);
       $stm = $this->DBH->prepare("SELECT id,name FROM imas_assessments WHERE id IN ($ph) AND courseid=?");
@@ -251,7 +259,7 @@ class AssessInfo
         $this->questionData[$qid]['category'] = $aidmap[$aid];
       }
     }
-    if (count($tolookupOutcomes) > 0) {
+    if (count($tolookupOutcomes) > 0 && $get_cats) {
       $uniqOutcomes = array_values(array_unique($tolookupOutcomes));
       $ph = Sanitize::generateQueryPlaceholders($uniqOutcomes);
       $stm = $this->DBH->prepare("SELECT id,name FROM imas_outcomes WHERE id IN ($ph) AND courseid=?");
@@ -309,7 +317,11 @@ class AssessInfo
       'category', 'withdrawn', 'jump_to_answer','showwork','showcalculator');
     $out = array();
     foreach ($base as $field) {
-      $out[$field] = $this->questionData[$id][$field];
+        if (isset($this->questionData[$id][$field])) {
+            $out[$field] = $this->questionData[$id][$field];
+        } else {
+            $out[$field] = null;
+        }
     }
     if ($this->assessData['submitby'] == 'by_question') {
       foreach ($by_q as $field) {
@@ -358,6 +370,14 @@ class AssessInfo
     $out = array();
     foreach ($this->questionData as $qid=>$v) {
       $out[$qid] = $v['points_possible'];
+    }
+    return $out;
+  }
+
+  public function getAllQuestionPointsAndCats() {
+    $out = array();
+    foreach ($this->questionData as $qid=>$v) {
+      $out[$qid] = ['points'=>$v['points_possible'], 'cat'=>$v['origcategory']];
     }
     return $out;
   }
@@ -628,14 +648,23 @@ class AssessInfo
       }
     }
 
-    if ($this->assessData['shuffle']&1) {
-      //shuffle all
-      $RND->shuffle($qout);
-    } else if ($this->assessData['shuffle']&16) {
-      //shuffle all but first
-      $firstq = array_shift($qout);
-      $RND->shuffle($qout);
+    if ($this->assessData['shuffle']&16) {
+        //shuffle all but first
+        $firstq = array_shift($qout);
+    }
+    if ($this->assessData['shuffle']&32) {
+        //shuffle all but first
+        $lastq = array_pop($qout);
+    }
+    if ($this->assessData['shuffle']&(1+16+32)) {
+          // has any shuffle flag set
+          $RND->shuffle($qout);
+    }
+    if ($this->assessData['shuffle']&16) {
       array_unshift($qout, $firstq);
+    }
+    if ($this->assessData['shuffle']&32) {
+        array_push($qout, $lastq);
     }
 
     //pick seeds
@@ -658,7 +687,7 @@ class AssessInfo
             $seeds[] = $this->questionData[$qid]['fixedseeds'][($ispractice?1:0) % $n];
           } else {
             //pick seed based on assessment ID
-            $seeds[] = $i + $this->curAid + $attempt + $ispractice?100:0;
+            $seeds[] = $i + $this->curAid + $attempt + ($ispractice?100:0);
           }
         }
       } else { //regular selection

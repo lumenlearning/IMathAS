@@ -36,11 +36,13 @@ class AssessRecord
   private $status = 'no_record';
   private $inGb = false;
   private $teacherInGb = false;
+  private $teacherPreview = false;
   private $now = 0;
   private $need_to_record = false;
   private $penalties = array();
   private $dispqn = null;
   private $inTransaction = false;
+  private $new_excusals = [];
 
   /**
    * Construct object
@@ -124,6 +126,14 @@ class AssessRecord
   public function setTeacherInGb($val) {
     $this->teacherInGb = $val;
     $this->inGb = $val;
+  }
+
+   /**
+   * Set if teacher in preview
+   * @param bool $val true if teacher/tutor
+   */
+  public function setIsTeacherPreview($val) {
+    $this->teacherPreview = $val;
   }
 
   /**
@@ -838,7 +848,7 @@ class AssessRecord
     // Load the question code
     $qns = array_keys($autosaves);
     list($qids, $toloadqids) = $this->getQuestionIds($qns);
-    $this->assess_info->loadQuestionSettings($toloadqids, true);
+    $this->assess_info->loadQuestionSettings($toloadqids, true, false);
 
     // add a submission
     $submission = $this->addSubmission($submission_time);
@@ -861,7 +871,8 @@ class AssessRecord
           $qn,    // question number
           $qdata['timeactive'],      // time active
           $submission,    // submission #
-          $parts_to_score
+          $parts_to_score,
+          $qdata['stuans']
       );
     }
 
@@ -1660,7 +1671,7 @@ class AssessRecord
     }
 
     $numParts = isset($qver['answeights']) ? count($qver['answeights']) : count($qver['tries']);
-    if (isset($autosave['stuans'])) {
+    if (!empty($autosave['stuans'])) {
       $numParts = max($numParts, max(array_keys($autosave['stuans']))+1);
     }
     $partattemptn = array();
@@ -1684,6 +1695,7 @@ class AssessRecord
     list($scorenonzero, $scoreiscorrect) = $this->getScoreIsCorrect();
     $autosaves = [];
     $seqPartDone = array();
+    $correctAnswerWrongFormat = array();
 
     for ($pn = 0; $pn < $numParts; $pn++) {
       // figure out try #
@@ -1764,6 +1776,13 @@ class AssessRecord
           $qcolors[$pn] = $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'];
         }
       }
+      if ($tryToShow === 'scored') {
+        $correctAnswerWrongFormat[$pn] = 
+          !empty($qver['tries'][$pn][$qver['scored_try'][$pn]]['wrongfmt']);
+      } else {
+        $correctAnswerWrongFormat[$pn] = 
+          !empty($qver['tries'][$pn][$partattemptn[$pn] - 1]['wrongfmt']);
+      }
       if ($this->teacherInGb) {
         $seqPartDone[$pn] = true;
       } else if ($showscores) {
@@ -1797,7 +1816,8 @@ class AssessRecord
         ->setScoreNonZero($scorenonzero)
         ->setScoreIsCorrect($scoreiscorrect)
         ->setLastRawScores($qcolors)
-        ->setSeqPartDone($seqPartDone);
+        ->setSeqPartDone($seqPartDone)
+        ->setCorrectAnswerWrongFormat($correctAnswerWrongFormat);
     if ($this->dispqn !== null) {
       $questionParams->setDisplayQuestionNumber($this->dispqn);
     }
@@ -1856,9 +1876,10 @@ class AssessRecord
    * @param  int  $timeactive     Time the question was active, in ms
    * @param  int  $submission     The submission number, from addSubmission
    * @param  array $parts_to_score  an array, true if part is to be scored/recorded
+   * @param  array $processed_stuans  an array of processed stuanswers (from autosave)
    * @return string errors, if any
    */
-  public function scoreQuestion($qn, $timeactive, $submission, $parts_to_score=true) {
+  public function scoreQuestion($qn, $timeactive, $submission, $parts_to_score=true, $processed_stuans=[]) {
     $qver = &$this->getQuestionVer($qn);
 
     // get the question settings
@@ -1895,10 +1916,12 @@ class AssessRecord
         ->setDbQuestionSetId($qsettings['questionsetid'])
         ->setQuestionSeed($qver['seed'])
         ->setGivenAnswer($_POST['qn'.$qn])
+        ->setProcessedStuans($processed_stuans)
         ->setAttemptNumber($attemptn)
         ->setAllQuestionAnswers($stuanswers)
         ->setAllQuestionAnswersAsNum($stuanswersval)
-        ->setQnpointval($qsettings['points_possible']);
+        ->setQnpointval($qsettings['points_possible'])
+        ->setPartsToScore($parts_to_score);
 
     $scoreResult = $scoreEngine->scoreQuestion($scoreQuestionParams);
 
@@ -1929,6 +1952,9 @@ class AssessRecord
         }
         if (isset($rawparts[$k])) {
           $data[$k]['raw'] = $rawparts[$k];
+        }
+        if (!empty($scoreResult['correctAnswerWrongFormat'][$k])) {
+          $data[$k]['wrongfmt'] = 1;
         }
         $this->clearAutoSave($qn, $k);
       } else if (isset($rawparts[$k]) && $v!=='' && $v!==null && !empty($qver['tries'][$k])) {
@@ -2236,7 +2262,98 @@ class AssessRecord
     }
     // update out of attempts, if needed
     $this->updateStatus();
+    // calc and do excusals for by_assess
+    if (!$by_question && !$this->is_practice) {
+        $this->calcExcusals();
+    }
     return $maxAscore;
+  }
+
+  /**
+   * Calculate excusals based on scores 
+   * 
+   */
+  public function calcExcusals() {
+      $autoexecuse = $this->assess_info->getSetting('autoexcuse');
+      if ($autoexecuse === '' || $autoexecuse === null) {
+          return;
+      }
+      // format: array of [cat=>, aid=>, sc=>]
+      $excusals = json_decode($autoexecuse, true);
+      if ($excusals === null || count($excusals) == 0) {
+          return;
+      }
+      $toexcuse = [];
+
+      $qinfo = $this->assess_info->getAllQuestionPointsAndCats();
+
+      for ($av = 0; $av < count($this->data['assess_versions']); $av++) {
+        $curAver = &$this->data['assess_versions'][$av];
+        // we're only doing this for quiz-style, so there'll only be one question version
+        $catposs = [];
+        $cattot = [];
+        foreach($excusals as $ex) {
+            $catposs[$ex['cat']] = 0;
+            $cattot[$ex['cat']] = 0;
+        }
+        if (isset($catposs['whole'])) {
+            $cattot['whole'] = $curAver['score'];
+            $catposs['whole'] = $this->assess_info->getSetting('points_possible');
+        }
+        for ($qn = 0; $qn < count($curAver['questions']); $qn++) {
+            $qid = $curAver['questions'][$qn]['question_versions'][0]['qid'];
+            if (!empty($qinfo[$qid]['cat']) && isset($catposs[$qinfo[$qid]['cat']])) {
+                $catposs[$qinfo[$qid]['cat']] += $qinfo[$qid]['points'];
+                $cattot[$qinfo[$qid]['cat']] += $curAver['questions'][$qn]['score'];
+            }
+        }
+        foreach($excusals as $ex) {
+            if ($catposs[$ex['cat']] == 0) { continue; }
+            if (100*$cattot[$ex['cat']]/$catposs[$ex['cat']] >= $ex['sc']) {
+                // met requirement
+                $toexcuse[] = $ex['aid'];
+            }
+        }
+      }
+      // possibly duplicates from the loop over
+      $toexcuse = array_unique($toexcuse);
+      if (!isset($this->data['excused'])) {
+        $this->data['excused'] = [];
+      }
+      $newex = array_diff($toexcuse, $this->data['excused']);
+      // record to record
+      $this->data['excused'] = array_merge($this->data['excused'], $newex);
+      // store new ones temporarily
+      // sometimes retotal is called twice; keep values if already set
+      $this->new_excusals = array_unique(array_merge($newex, $this->new_excusals));
+
+      // record excusals in database
+      $vals = [];
+      $cid = $this->assess_info->getCourseId();
+      foreach ($newex as $aid) {
+          array_push($vals, $this->curUid, $cid, 'A', $aid);
+      }
+      if (count($vals)>0 && !$this->teacherPreview) {
+        $ph = Sanitize::generateQueryPlaceholdersGrouped($vals, 4);
+        $query = "INSERT IGNORE INTO imas_excused (userid,courseid,type,typeid) VALUES $ph";
+        $stm = $this->DBH->prepare($query);
+        $stm->execute($vals);
+      } 
+  }
+
+  public function get_new_excused() {
+      if (empty($this->new_excusals)) {
+          return [];
+      }
+      $ph = Sanitize::generateQueryPlaceholders($this->new_excusals);
+      $query = "SELECT id,name FROM imas_assessments WHERE id IN ($ph) ORDER BY name";
+      $stm = $this->DBH->prepare($query);
+      $stm->execute(array_values($this->new_excusals));
+      $out = [];
+      while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+          $out[$row['id']] = $row['name'];
+      }
+      return $out;
   }
 
   /**
@@ -2512,6 +2629,9 @@ class AssessRecord
   public function withdrawQuestions($qpts) {
     $this->parseData();
     $madeChanges = false;
+    if (empty($this->data['assess_versions'])) {
+        return 0; // no attempts, so score is 0
+    }
     $avers = &$this->data['assess_versions'];
     for ($av = 0; $av < count($avers); $av++) {
       for ($q = 0; $q < count($avers[$av]['questions']); $q++) {
@@ -2568,6 +2688,13 @@ class AssessRecord
       }
       if (isset($this->data['scoreoverride'])) {
         $out['scoreoverride'] = $this->data['scoreoverride'];
+      }
+      if (isset($this->data['excused']) && count($this->data['excused'])>0) {
+          $ph = Sanitize::generateQueryPlaceholders($this->data['excused']);
+          $query = "SELECT name FROM imas_assessments WHERE id IN ($ph) ORDER BY name";
+          $stm = $this->DBH->prepare($query);
+          $stm->execute(array_values($this->data['excused']));
+          $out['excused'] = $stm->fetchAll(PDO::FETCH_COLUMN, 0);
       }
     }
     return $out;
@@ -2647,6 +2774,11 @@ class AssessRecord
       }
       $out['starttime'] = $aver['starttime'];
       $out['questions'] = $this->getGbQuestionsData($qVerToGet);
+      $out['endmsg'] = AssessUtils::getEndMsg(
+        $this->assess_info->getSetting('endmsg'),
+        $aver['score'],
+        $this->assess_info->getSetting('points_possible')
+      );
     }
     return $out;
   }

@@ -102,7 +102,8 @@ dd {
 			<li><a href="#assessmentsettings">Assessment Settings</a></li>
 			<li><a href="#addingquestionstoanassessment">Adding Questions to an Assessment</a>
 				<ul>
-				<li><a href="#questionintrotext">Adding an Introduction to a Question</a></li>
+                    <li><a href="#questionicons">Icons used in question listing</a></li>
+				    <li><a href="#questionintrotext">Adding an Introduction to a Question</a></li>
 				</ul></li>
 			<li><a href="#addingnewquestions">Adding New Questions</a></li>
 			<li><a href="#categorizequestions">Categorizing Questions</a></li>
@@ -198,7 +199,7 @@ dd {
 		<li><a href="#calcinterval">Calculated Interval</a></li>
 		<li><a href="#fileupload">File Upload</a></li>
 		<li><a href="#multipart">Multipart</a></li>
-		<li><a href="#conditional">Conditional</a></li>
+        <li><a href="#conditional">Conditional</a></li>
 		</ul></li>
 	</ul></li>
 
@@ -881,16 +882,16 @@ can be used to search in all libraries (not just the selected ones), list only q
 added to your assessment.</p>
 From this list you can:
 <ul>
-<li>Use the checkboxes to select questions, then click the &quot;Add Selected (using defaults)&quot;
+<li>Use the checkboxes to select questions, then click the &quot;Add (using defaults)&quot;
 button to add the questions.  Adding this way will use the assessment default settings for
 points, attempts allowed, and penalty per attempt.  You can change these later by
 clicking the &quot;Change Settings&quot; link.</li>
 <li>Use the checkboxes to select questions, then click the &quot;Add&quot;
 button to add the questions.  Adding this way will allow you to override the default settings for
 points, attempts allowed, and penalty per attempt if you wish, and add a question multiple times.</li>
-<li>Click the &quot;Add&quot; link.  This will allow you to change the default
+<li>Choose &quot;Add&quot; from the Action dropdown.  This will allow you to change the default
 question settings</li>
-<li>Click &quot;Use as template for New Question&quot; link.  This will create a new question based
+<li>Choose &quot;Use as template for New Question&quot; from the Action dropdown.  This will create a new question based
 upon the existing question.  This allows you to avoid rewriting a question from
 scratch if a similar question exists</li>
 <li>Click &quot;Preview&quot; to preview the question</li>
@@ -902,20 +903,40 @@ the questions you wish to use.</p>
 
 Once added to the assessment you can:
 <ul>
-<li><strong>Reorder Questions</strong>: When "Rearrange Questions" is selected, using the number selectors next
+<li><strong>Reorder Questions</strong>: Using the number selectors next
     to each question will allow you to rearrange the order of the questions.  This is only useful if you
     are not shuffling the question order</li>
-<li><strong>Group Questions</strong>:  When "Group Questions" is selected, using the number selectors next to each
-    question will allow you to group questions.  When questions are grouped, the testing engine will randomly
-    select one question from the group to display to the student</li>
+<li><strong>Group Questions</strong>:  Use the checkboxes to select questions, then press the "Group" 
+    button to group questions.  Then you can specify how many questions from the group you want 
+    the system to randomly assign to students, and whether to make that selection with or without 
+    replacement.</li>
 <li><strong>Change Settings</strong>:  Override the default settings for points, attempts allowed, and
-    penalty per attempt, if desired</li>
-<li><strong>Edit Source</strong>:  Change the question code or wording</li>
-<li><strong>Remove from assessment</strong>:  Remove the question from the assessment.  This does not
-    delete the question from the Question Set.  You can also use the checkboxes and the "With selected, Remove"
-    button to remove multiple questions at once.</li>
+    penalty per attempt, if desired.  When done for one question using the "Change Settings" option 
+    in the Action dropdown there 
+    are more settings you can edit than when using the checkboxes and the "Change Settings" button.</li>
+<li><strong>Edit Code</strong>:  In the Action Dropdown. Change the question code or wording, if it is your question</li>
+<li><strong>View Code</strong>:  In the Action Dropdown. View the question code, if it is not your question</li>
+<li><strong>Edit Personal Copy</strong>:  In the Action Dropdown, if it is not your question.
+    Creates a copy of the question, and will trade out the original question for your personal copy.</li>
+<li><strong>Template</strong>:  In the Action Dropdown. Create a new question based on this one. 
+    The original will not be removed from the assessment.</li>
+<li><strong>Remove from assessment</strong>:  From the Action dropdown, or use the checkboxes and 
+    press the "Remove" button.  Removes the question(s) from the assessment.  This does not
+    delete the question itself.  </li>
 </ul>
 
+<div class=h5>
+    <h5 id="questionicons">Icons used in question listing</h5>
+    <ul class="nomark">
+        <li><img src="img/video_tiny.png" alt="video"> Has a video help (if <img src="img/cc.png" alt="cc"> is shown, the video has captions)</li>
+        <li><img src="img/html_tiny.png" alt="help resource"> Has help resource</li>
+        <li><img src="img/assess_tiny.png" alt="detailed solution"> Has a written solution</li>
+        <li><svg aria-label="show work" viewBox="0 0 24 24" width="14" height="14" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            Has "show work" enabled</li>
+        <li><svg aria-label="rubric" viewBox="0 0 24 24" width="14" height="14" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            Has a rubric associated</li>
+    </ul>
+</div>
 <div class=h5>
 <h5 id="questionintrotext">Adding an Introduction to a Question</h5>
 <p>In addition to the assignment Introduction, each question can have an individual introduction.  A common example is to display a video and then a related question as part of a video assignment.</p>
@@ -926,6 +947,7 @@ Once added to the assessment you can:
 <p>Below the last questions is an <span class="icon-enlarge2" style="font-weight: bold">&nbsp;Expand All</span> button which will expand all the question intros.  Click on any one to edit it.<p>
 </div> <!-- h5 -->
 
+<h5>After the Assessment has been Taken</h5>
 <p>If students have taken the assessment, you will not be allowed to make as many changes to the assessment, as it
 will mess up existing student attempts.  If you need to change the assessment a lot, you can clear all student attempts.
 Otherwise you can change individual question settings (be careful!) or edit the question if it's yours.  If there is a problem with
@@ -2216,7 +2238,7 @@ can be omitted.</p>
 <li><strong>diffrrands(min,max,p,n,[order])</strong>:  Returns n different real numbers between min and max in steps of p. Can set order to 'inc' or 'dec' to sort the values.</li>
 <li><strong>diffrandsfrom(list/array,n,[order])</strong>: Return n different elements of the list/array. Can set order to 'inc' or 'dec' to sort the values.</li>
 <li><strong>nonzerodiffrands(min,max,n,[order])</strong>:  Returns n different nonzero integers between min and max. Can set order to 'inc' or 'dec' to sort the values.</li>
-<li><strong>nonzerodiffrrands(min,max,p,n,[nonzero,order])</strong>:  Returns n different nonzero real numbers between min and max in steps of p. Can set order to 'inc' or 'dec' to sort the values.</li>
+<li><strong>nonzerodiffrrands(min,max,p,n,[order])</strong>:  Returns n different nonzero real numbers between min and max in steps of p. Can set order to 'inc' or 'dec' to sort the values.</li>
 <li><strong>jointshuffle(list/array1,list/array2,[n1,n2])</strong>:  Shuffles two lists/arrays in a way that retains
     respective order.  In n1 is provided, n1 elements from each shuffled array will be returned (like
     a joint version of diffrandsfrom).  If n2 is also provided, n1 elements of list/array1 and n2
@@ -2522,6 +2544,9 @@ These macros are used for mathematical calculations:
 <li><strong>v!</strong>: Factorial, like $a = $b!</li>
 <li><strong>evalfunc(func,vars,val1,val2,..)</strong>: Evaluates a function given the variables and values for each variable.
   for example evalfunc("x^2*y","x,y",2,3) will evaluate x^2*y with x=2, y=3</li>
+<li><strong>evalnumstr(expr)</strong>: Evaluates a string representation of a numerical expression, like "(2pi)/3", to a decimal.  
+  Avoid using this in place of direct calculation in most cases, but it can be handy if you already have generated the string 
+  for display but then need to do a calculation with it.</li>
 <li>See also: calconarray and multicalconarray in the <a href="#arraymacros">Array Macros</a> section</li>
 </ul>
 </div> <!-- h2 -->
@@ -3936,6 +3961,32 @@ This type of question can contain multiple parts, where each part is one of the 
 	allow Show Answer to be placed inline with text rather than on its own line.</dd>
 </dl>
 
+<p><strong>Scaffolding</strong></p>
+<p>Scaffolded questions, also know as Sequential Multipart questions, allow you 
+    to break a question up into chunks, where the second chunk only shows after the 
+    first chunk is correctly answered or the student runs out of tries.  This 
+    allows you to use the answer to the first chunk in the second without 
+    "giving away" the answer, and allows a student who gets stuck on the first 
+    chunk to move on to the rest of the question.</p>
+<p><em>Note: scaffolding is only available in the new assessment interface. 
+    If you are using the old interface, the question will behave like a 
+    regular multipart question.</em></p>
+<p>Scaffolded questions are an extension of Multipart questions.  To turn a multipart 
+    question into a scaffolded question, just add an isolated line with three or more slashes
+    in the Question Text where you want the chunks broken apart.</p>
+<p>An example: (in the Question Text)</p>
+<pre>
+To simplify $a(x+$b) + $c, first we need to distribute:
+
+$a(x+$b) = $answerbox[0]
+
+///
+
+Next, combine like terms:
+
+$a x + $ab + $c = $answerbox[1]
+</pre>
+
 </div> <!-- h3 -->
 <div class=h3>
 <h3 id="conditional">Conditional</h3>
@@ -3988,7 +4039,18 @@ own question type.
 	<dd>By default the $showanswer for conditional types is "Answers may vary".  Set $showanswer to override this.</dd>
 </dl>
 
+<p><strong>Scaffolding</strong></p>
+<p>While not as simple as scaffolding multipart questions, 
+    you can add scaffolding to a Conditional question.  As with multipart,
+    put an isolated line with three slashes in the question text to indicate 
+    where the breaks occur. Then you will need to set <code>$seqPartDone[pn]</code>
+    to <code>true</code> for each part index once that part should be considered 
+    completed.  The scaffolding will move onto the next chunk when 
+    all parts in the previous chunk have <code>$seqPartDone</code>
+    set to <code>true</code>.
+</p>
 </div> <!-- h3 -->
+
 </div> <!-- h2 -->
 </div> <!-- h1 -->
 <div class=h1>

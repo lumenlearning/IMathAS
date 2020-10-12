@@ -65,12 +65,11 @@ class StringAnswerBox implements AnswerBox
     		}
     		if ($displayformat=='select') {
     			$out .= "<select name=\"qn$qn\" id=\"qn$qn\" style=\"margin-right:20px\" class=\"$colorbox\" ";
-          $out .= 'aria-label="'.$this->answerBoxParams->getQuestionIdentifierString().'">';
-          $out .= '<option value=""> </option>';
+                $out .= 'aria-label="'.$this->answerBoxParams->getQuestionIdentifierString().'">';
+                $out .= '<option value=""> </option>';
     			foreach ($questions as $i=>$v) {
     				$out .= '<option value="'.htmlentities($v).'"';
-    				//This is a hack.  Need to figure a better way to deal with & in answers
-    				if (str_replace('&','',$v)==$la) {
+    				if ($v == $la) {
     					$out .= ' selected="selected"';
     				}
     				$out .= '>'.htmlentities($v).'</option>';
@@ -110,11 +109,10 @@ class StringAnswerBox implements AnswerBox
     			if ($useeqnhelper && $displayformat == 'usepreview') {
     				$params['helper'] = 1;
     			}
-    			if (!isset($hidepreview) && $displayformat == 'usepreview' &&
-            $_SESSION['userprefs']['livepreview']==1
-          ) {
-    				$params['preview'] = 1;
-    			}
+                if (!isset($hidepreview) && $displayformat == 'usepreview') {
+                    $params['preview'] = $_SESSION['userprefs']['livepreview'] ? 1 : 2;
+                }
+
     			$params['calcformat'] = $answerformat;
 
     			if ($displayformat == 'typeahead') {
@@ -169,7 +167,7 @@ class StringAnswerBox implements AnswerBox
         $this->answerBox = $out;
         $this->jsParams = $params;
         $this->entryTip = $tip;
-        $this->correctAnswerForPart = $sa;
+        $this->correctAnswerForPart = (string) $sa;
         $this->previewLocation = $preview;
     }
 
