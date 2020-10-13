@@ -11,6 +11,9 @@ $allowmacroinstall = false;
 $CFG['GEN']['AWSforcoursefiles'] = true;
 $CFG['static_server'] = 'https://static.myopenscience.com';
 
+//min 8 char password
+$CFG['acct']['passwordMinlength'] = 8;
+
 //do safe course delete
 $CFG['GEN']['doSafeCourseDelete'] = true;
 
