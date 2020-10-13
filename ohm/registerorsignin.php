@@ -1,5 +1,7 @@
 <?php
 require("../init_without_validate.php");
+
+$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
 require("../header.php");
 ?>
 <script type="text/javascript" src="<?php echo $imasroot; ?>/ohm/js/floatinglabel.js"></script>
@@ -49,6 +51,17 @@ if(($_POST['courseid'] && $_POST['verified'] || $_GET['cid'] && $_GET['ekey'])){
   <?php
   echo"<div id='loginbox'>
   <form action='$imasroot/actions.php?action=enroll' method=post>
+	<input type=\"hidden\" id=\"tzoffset\" name=\"tzoffset\" value=\"\">
+	<input type=\"hidden\" id=\"tzname\" name=\"tzname\" value=\"\">
+	<script type=\"text/javascript\">
+        $(function() {
+            var thedate = new Date();
+            document.getElementById(\"tzoffset\").value = thedate.getTimezoneOffset();
+            var tz = jstz.determine();
+            document.getElementById(\"tzname\").value = tz.name();
+            $(\"#username\").focus();
+        });
+	</script>
   $hiddeninput
   <input  type='hidden'   name='enrollandlogin'   value='enrollandlogin'/>
   <div class='enroll field'>
