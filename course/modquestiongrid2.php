@@ -277,12 +277,6 @@ if (isset($_POST['checked'])) { //modifying existing
 				$qrows[$row['id']] .= '<option value="2" '.(($row['showhints']==2)?'selected="selected"':'').'>'._('Videos').'</option>';
 				$qrows[$row['id']] .= '<option value="3" '.(($row['showhints']==3)?'selected="selected"':'').'>'._('Hints &amp; Videos').'</option>';
                 $qrows[$row['id']] .= '</select></td>';
-                $qrows[$row['id']] .= "<td><select name=\"showwork{$row['id']}\">";
-                foreach ($showworkoptions as $v=>$l) {
-                    $qrows[$row['id']] .= '<option value="'.$v.'" '.($row['showwork']==$v ? 'selected':'').'>';
-                    $qrows[$row['id']] .= Sanitize::encodeStringForDisplay($l).'</option>';
-                }
-                $qrows[$row['id']] .= '</select></td>';
                 if (isset($CFG['showcalculator'])) {
                     $qrows[$row['id']] .= "<td><select name=\"showcalculator{$row['id']}\">";
                     $qrows[$row['id']] .= '<option value="default" '.(($row['showcalculator']=='default')?'selected="selected"':'').'>'._('Use Default').'</option>';
@@ -296,6 +290,12 @@ if (isset($_POST['checked'])) { //modifying existing
                     }
                     $qrows[$row['id']] .= '</select></td>';
                 }
+                $qrows[$row['id']] .= "<td><select name=\"showwork{$row['id']}\">";
+                foreach ($showworkoptions as $v=>$l) {
+                    $qrows[$row['id']] .= '<option value="'.$v.'" '.($row['showwork']==$v ? 'selected':'').'>';
+                    $qrows[$row['id']] .= Sanitize::encodeStringForDisplay($l).'</option>';
+                }
+                $qrows[$row['id']] .= '</select></td>';
 				$qrows[$row['id']] .= "<td><input type=text size=1 name=\"copies" . Sanitize::onlyInt($row['id']) . "\" value=\"0\" /></td>";
 				$qrows[$row['id']] .= '</tr>';
 			}
