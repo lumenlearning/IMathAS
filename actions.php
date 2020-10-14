@@ -83,9 +83,8 @@ require_once("includes/sanitize.php");
                 } else if ($_POST['ekey']=="" && $line['enrollkey'] != '') {
                     $error = _('No enrollment key provided');
                 } else {
-                    $keylist = array_map('strtolower',array_map('trim',explode(';',$line['enrollkey'])));
-                    $_POST['ekey'] = trim($_POST['ekey']);
-                    if (!in_array(strtolower($_POST['ekey']), $keylist)) {
+                    $keylist = array_map('trim',explode(';',$line['enrollkey']));
+                    if (($p = array_search(strtolower(trim($_POST['ekey'])), array_map('strtolower', $keylist))) === false) {
                         $error = _('Incorrect enrollment key');
                     }
                 }
@@ -227,11 +226,11 @@ require_once("includes/sanitize.php");
 					} else if ($_POST['ekey']=="" && $line['enrollkey'] != '') {
 						$error = _('No enrollment key provided');
 					} else {
-						$keylist = array_map('strtolower',array_map('trim',explode(';',$line['enrollkey'])));
-						$_POST['ekey'] = trim($_POST['ekey']);
-						if (!in_array(strtolower($_POST['ekey']), $keylist)) {
+                        $keylist = array_map('trim',explode(';',$line['enrollkey']));
+                        if (($p = array_search(strtolower(trim($_POST['ekey'])), array_map('strtolower', $keylist))) === false) {
 							$error = _('Incorrect enrollment key');
 						} else {
+                            $_POST['ekey'] = $keylist[$p];
                             require('./includes/setSectionGroups.php');
 							if (count($keylist)>1) {
 								$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
@@ -612,14 +611,15 @@ If you still have trouble or the wrong email address is on file, contact your in
 				require("footer.php");
 				exit;
 			} else {
-				$keylist = array_map('strtolower',array_map('trim',explode(';',$line['enrollkey'])));
-				if (!in_array(strtolower(trim($_POST['ekey'])), $keylist)) {
+                $keylist = array_map('trim',explode(';',$line['enrollkey']));
+                if (($p = array_search(strtolower(trim($_POST['ekey'])), array_map('strtolower', $keylist))) === false) {
 					require("header.php");
 					echo $pagetopper;
 					echo _("Incorrect Enrollment Key."),"  <a href=\"forms.php?action=enroll$gb\">",_("Try Again"),"</a>\n";
 					require("footer.php");
 					exit;
 				} else {
+                    $_POST['ekey'] = $keylist[$p];
                     require('./includes/setSectionGroups.php');
 					if (count($keylist)>1) {
 						$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
