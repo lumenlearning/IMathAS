@@ -69,7 +69,13 @@ require_once("../includes/sanitize.php");
 		}
 	}
 	if ($endmsg!='') {
-		$endmsg = unserialize($endmsg);
+        $endmsg = unserialize($endmsg);
+        if (!isset($endmsg['msgs'])) {
+            $endmsg['def'] = '';
+		    $endmsg['type'] = 0;
+		    $endmsg['msgs'] = array();
+		    $endmsg['commonmsg'] = '';
+        }
 	} else {
 		$endmsg = array();
 		$endmsg['def'] = '';

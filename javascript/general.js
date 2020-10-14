@@ -90,8 +90,12 @@ function tipshow(el,tip, e) {
 		return;
 	}
 	if (typeof tipobj!= 'object') {
-		tipobj = document.createElement("div");
-		tipobj.className = "tips";
+        tipobj = document.createElement("div");
+        if (window.imathasAssess) {
+            tipobj.className = "dropdown-pane tooltip-pane";
+        } else {
+            tipobj.className = "tips";
+        }
 		tipobj.setAttribute("role","tooltip");
 		tipobj.id = "hovertipsholder";
 		document.getElementsByTagName("body")[0].appendChild(tipobj);
@@ -157,6 +161,13 @@ function tipout(e) {
 	}
 	curtipel = null;
 }
+jQuery(function() {
+	jQuery(document).on('keyup', function(e) {
+		if (e.which == 27 && curtipel !== null) {
+			tipout();
+		}
+	})
+});
 
 var popupwins = [];
 function popupwindow(id,content,width,height,scroll) {
@@ -244,7 +255,7 @@ function submitlimiter(e) {
 function setupFormLimiters() {
 	var el = document.getElementsByTagName("form");
 	for (var i=0;i<el.length;i++) {
-		if (typeof el[i].onsubmit != 'function' && el[i].className!="nolimit" && el[i].className!="limitaftervalidate") {
+		if (typeof el[i].onsubmit != 'function' && !el[i].className.match(/(nolimit|limitaftervalidate)/)) {
 			$(el[i]).on('submit',submitlimiter);
 		}
 	}
@@ -306,7 +317,8 @@ function GB_endresize(e) {
 }
 var GB_loaded = false;
 //based on greybox redux, http://jquery.com/demo/grey/
-function GB_show(caption,url,width,height) {
+function GB_show(caption,url,width,height,overlay,posstyle,showbelow) {
+    posstyle = posstyle || '';
 	if (GB_loaded == false) {
 		var gb_overlay = document.createElement("div");
 		gb_overlay.id = "GB_overlay";
@@ -336,7 +348,7 @@ function GB_show(caption,url,width,height) {
 			  .data("original_mouse_y", (e.type=='touchstart')?touch.pageY:e.pageY)
 			  .css("left", gbwin.getBoundingClientRect().left)
 			  .css("top", gbwin.getBoundingClientRect().top)
-			  .css("margin", 0);
+			  .css("margin", 0).css("right","").css("width",$(gbwin).width());
 			jQuery("#GB_window").append($("<div/>", {id: "GB_frameoverlay"}));
 			jQuery("body").css("user-select","none");
 
@@ -356,7 +368,7 @@ function GB_show(caption,url,width,height) {
 
 			jQuery("#GB_window").css("left", gbwin.getBoundingClientRect().left)
 			  .css("top", gbwin.getBoundingClientRect().top)
-			  .css("margin", 0)
+			  .css("margin", 0).css("right","")
 			  .data("original_w", $(gbwin).width())
 			  .data("original_h", $(gbwin).height())
 			  .data("original_mouse_x", (e.type=='touchstart')?touch.pageX:e.pageX)
@@ -373,16 +385,22 @@ function GB_show(caption,url,width,height) {
 				 .on('mouseup.GBresize', GB_endresize);
 			}
 		});
-	}
+    }
+    document.getElementById("GB_loading").style.display = "block";
 	if (url.charAt(0)=='<') {
 		document.getElementById("GB_frameholder").innerHTML = '<div>'+url+'</div>';
 		if (url.match(/data-enlarged/)) {
 			jQuery("#GB_window").attr("data-lockratio", 1);
 		}
 		setTimeout(GB_doneload, 50);
-	} else {
+    } else if (!document.getElementById("GB_frame") ||
+        document.getElementById("GB_frame").src.replace(/\/$/,'') !=
+            url.replace(/\/$/,'')
+    ) {
 		document.getElementById("GB_frameholder").innerHTML = '<iframe onload="GB_doneload()" id="GB_frame" src="'+url+'" title="'+caption+'"></iframe>';
-	}
+	} else {
+        document.getElementById("GB_loading").style.display = 'none';
+    }
 	jQuery("#GB_frameholder").isolatedScroll();
 	if (url.match(/libtree/)) {
 		var btnhtml = '<span class="floatright"><input type="button" value="Use Libraries" onClick="document.getElementById(\'GB_frame\').contentWindow.setlib()" /> ';
@@ -393,30 +411,64 @@ function GB_show(caption,url,width,height) {
 		document.getElementById("GB_caption").innerHTML = '<span class="floatright"><a href="#" class="pointer" onclick="GB_hide();return false;" aria-label="Close">[X]</a></span><span id="GB_title">'+caption+'</span>';
 		document.getElementById("GB_caption").onclick = GB_hide;
 		if (height=='auto') {
-			var h = self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
+            var h = self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
 		} else {
 			var h = height;
 		}
 	}
-	document.getElementById("GB_window").style.display = "block";
-	document.getElementById("GB_overlay").style.display = "block";
-	document.getElementById("GB_loading").style.display = "block";
+    document.getElementById("GB_window").style.display = "block";
+    if (overlay !== false) {
+        document.getElementById("GB_overlay").style.display = "block";
+    } else {
+        document.getElementById("GB_overlay").style.display = "none";
+    }
 
 	//var de = document.documentElement;
 	//var w = self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth;
 	var w = $(document).width();
 	if (width > w-20) {
 		width = w-20;
-	}
-	$("#GB_window").css("margin","").css("left","").css("top","");
-	document.getElementById("GB_window").style.width = width + "px";
-	document.getElementById("GB_window").style.height = (h-30) + "px";
-	//document.getElementById("GB_window").style.left = ((w - width)/2)+"px";
-	if (url.charAt(0)!='<') {
-		document.getElementById("GB_frameholder").style.height = (h - 30 -36)+"px";
-	} else {
-		document.getElementById("GB_frameholder").style.height = "auto";
-	}
+    }
+    if (!posstyle.match(/noreset/) || 
+        !jQuery("#GB_window").data("original_mouse_x") || 
+        document.getElementById("GB_window").style.left==''
+    ) {
+        var inittop = '';
+        if (typeof showbelow == 'object') {
+            var belowel;
+            for (var i in showbelow) {
+                if (belowel = document.getElementById(showbelow[i])) {
+                    inittop = belowel.getBoundingClientRect().bottom + 10;
+                    if (height=='auto') {
+						h = (window.self !== window.top) ? Math.min(600,self.innerHeight) : self.innerHeight;
+						h = Math.max(200, h - inittop - 20);
+                    }
+                    break;
+                }
+            }
+        }
+        $("#GB_window").css("margin","").css("left","").css("top",inittop);
+        if (posstyle.match(/left/) && document.getElementById("GB_window").style.left=='') {
+            if ($("body").hasClass("fw1000") && w > 1000) {
+                width += (w - 1000)/2;
+            }
+            if ($("body").hasClass("fw1920") && w > 1920) {
+                width += (w - 1920)/2;
+            }
+            $("#GB_window").css("left", width).css("width","auto").css("right",20).css("margin","0");
+            width = w - width - 20;
+        } else {
+            document.getElementById("GB_window").style.width = width + "px";
+        }
+        
+        document.getElementById("GB_window").style.height = (h-30) + "px";
+        //document.getElementById("GB_window").style.left = ((w - width)/2)+"px";
+        if (url.charAt(0)!='<') {
+            document.getElementById("GB_frameholder").style.height = (h - 30 -36)+"px";
+        } else {
+            document.getElementById("GB_frameholder").style.height = "auto";
+        }
+    }
 	document.getElementById("GB_window").focus();
 	$(document).on('keydown.GB', function(evt) {
 		if (evt.keyCode == 27) {
@@ -479,7 +531,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		menubar: false,//"edit insert format table tools ",
 		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
 		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg " + desmos,
-		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder],param[name|value],@[sscr]',
+		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder|style|class],param[name|value],@[sscr]',
 		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme+(desmos==''?'':','+imasroot+'/desmos/desmos-temp.css'),
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
@@ -650,9 +702,8 @@ function recclick(type,typeid,info,txt) {
 	}
 }
 function setuptracklinks(i,el) {
-	jQuery(el).addClass("trackprepped");
 	if (jQuery(el).attr("data-base")) {
-		jQuery(el).click(function(e) {
+		jQuery(el).off('click.recclick').on('click.recclick', function(e) {
 			var inf = jQuery(this).attr('data-base').split('-');
 			recclick(inf[0], inf[1], jQuery(this).attr("href"),
 				jQuery(this).clone().find(".sr-only").remove().end().text());
@@ -661,7 +712,7 @@ function setuptracklinks(i,el) {
 				setTimeout('window.location.href = "'+jQuery(this).attr('href')+'"',100);
 				return false;
 			}
-		}).mousedown(function(e) {
+		}).off('mousedown.recclick').on('mousedown.recclick', function(e) {
 			if (e.which==3) { //right click
 				var inf = jQuery(this).attr('data-base').split('-');
 				recclick(inf[0], inf[1], jQuery(this).attr("href"),
@@ -727,23 +778,32 @@ function togglevideoembed() {
 			timeref += '&end='+m[1];
 		}
 		timeref += '&enablejsapi=1';
-		var loc_protocol = location.protocol == 'https:' ? 'https:' : 'http:';
-		jQuery('<iframe/>', {
+        var loc_protocol = location.protocol == 'https:' ? 'https:' : 'http:';
+        var viframe = jQuery('<iframe/>', {
 			id: 'videoiframe'+id,
 			width: 640,
 			height: 400,
 			src: loc_protocol+'//'+vidsrc+vidid+timeref,
 			frameborder: 0,
 			allowfullscreen: 1
-		}).insertAfter(jQuery(this));
-		jQuery(this).parent().fitVids();
-		jQuery('<br/>').insertAfter(jQuery(this));
-		jQuery(this).text(' [-]')
+        });
+        var $this = jQuery(this);
+        if ($this.closest('.itemhdr').length == 0) {
+            viframe.insertAfter($this);
+            $this.parent().fitVids();
+            jQuery('<br/>').insertAfter($this);
+        } else {
+            var par = $this.closest('.itemhdr').next();
+            par.prepend(viframe);
+            par.fitVids();
+        }
+		
+		$this.text(' [-]')
 			.attr('title',_("Hide video"))
 			.attr('aria-label',_("Hide embedded video"));
-		if (jQuery(this).prev().attr("data-base")) {
-			var inf = jQuery(this).prev().attr('data-base').split('-');
-			recclick(inf[0], inf[1], href, jQuery(this).prev().text());
+		if ($this.prev().attr("data-base")) {
+			var inf = $this.prev().attr('data-base').split('-');
+			recclick(inf[0], inf[1], href, $this.prev().text());
 		}
 	}
 }
@@ -873,7 +933,7 @@ jQuery(function() {
 		}
 	});
 	jQuery('form').each(function(i,el) {
-		if (m=el.getAttribute('action').match(/cid=(\d+)/)) {
+		if (el.hasAttribute('action') && (m=el.getAttribute('action').match(/cid=(\d+)/))) {
 			var btf = window.sessionStorage.getItem('btf'+m[1]) || '';
 			if (btf !== '') {
 				el.setAttribute('action', el.getAttribute('action') + '&btf='+btf);
@@ -901,14 +961,28 @@ function addNoopener(i,el) {
 	if (!el.rel && el.target && el.host !== window.location.host) {
 		el.setAttribute("rel", "noopener noreferrer");
 	}
-	if (el.target) {
-		jQuery(el).append('<span class="sr-only">Opens externally</span>');
+	if (el.target && jQuery(el).find('.openext').length == 0) {
+		jQuery(el).append('<span class="sr-only openext">Opens externally</span>');
 	}
 }
 function addBlankTarget(i,el) {
 	if (el.host !== window.location.host) {
 		el.setAttribute("target", "_blank");
 	}
+}
+
+function uniqid(prefix) {
+    return (prefix || '') + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function setariastatus(status) {
+    var el = document.getElementById("ariastatus");
+    if (!el) {
+        el = $("<div>", {id:"ariastatus", role:"status", class:"sr-only", "aria-live":"polite"});
+        $("body").append(el);
+        el = el[0];
+    }
+    el.innerHTML = status;
 }
 
 function addmultiselect(el,n) {
@@ -1046,17 +1120,30 @@ function initlinkmarkup(base) {
 	if (typeof isImathasAssessment != 'undefined') {
 		$(base).find('a:not([target])').not('.textsegment a, .mce-content-body a').each(addBlankTarget);
 	}
-	$(base).find('a').not('.trackprepped').each(setuptracklinks).each(addNoopener);
+	$(base).find('a').each(setuptracklinks).each(addNoopener);
 	$(base).find('a[href*="youtu"]').not('.textsegment a,.mce-content-body a,.prepped').each(setupvideoembeds);
 	$(base).find('a[href*="vimeo"]').not('.textsegment a,.mce-content-body a,.prepped').each(setupvideoembeds);
 	$(base).find("a.attach").not('.textsegment a,.mce-content-body a').not(".prepped").each(setuppreviewembeds);
 	setupToggler(base);
 	setupToggler2(base);
-	$(base).fitVids();
+    $(base).fitVids();
+    resizeResponsiveIframes(base, true);
 }
 
+function resizeResponsiveIframes(base, init) {
+    if (init) {
+        jQuery(base).find('iframe.scaleresponsive').wrap(jQuery('<div>', {css:{overflow:"hidden"}}));
+    }
+    jQuery(base).find('iframe.scaleresponsive').each(function(i,el) {
+        var p = el.parentNode;
+        var sc = Math.min(1,p.offsetWidth/parseInt(el.width || el.style.width));
+        el.style.transform = "scale("+sc+")";
+        p.style.height = (sc*parseInt(el.height || el.style.height)+3)+"px";
+    });
+}
 jQuery(document).ready(function($) {
-	initlinkmarkup('body');
+    initlinkmarkup('body');
+    $(window).on('resize', function () {resizeResponsiveIframes('body');});
 });
 
 jQuery.fn.isolatedScroll = function() {
@@ -1350,12 +1437,14 @@ function initSageCell(base) {
 		var $this = jQuery(this);
 		if ($this.is("pre")) {
 			ta = this;
-			code = jQuery(ta).html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'');
+            code = jQuery(ta).html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'')
+                    .replace(/&lt;/g,'<').replace(/&gt;/g,'>');
 		} else {
 			ta = $this.find("textarea");
 			if (ta.length==0 || jQuery(ta[0]).val()=="") {
 				if ($this.find("pre").length>0) {
-					code = $this.find("pre").html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'').replace(/\n\n/g,"\n");
+                    code = $this.find("pre").html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'').replace(/\n\n/g,"\n")
+                            .replace(/&lt;/g,'<').replace(/&gt;/g,'>');
 					if (ta.length==0) {
 						ta = $this.find("pre")[0];
 					} else {

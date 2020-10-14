@@ -134,6 +134,8 @@ class QuestionHtmlGenerator
         $quesData = $this->questionParams->getQuestionData();
         $showHints = ($this->questionParams->getShowHints()&1)==1;
         $thisq = $this->questionParams->getQuestionNumber() + 1;
+        $correctAnswerWrongFormat = $this->questionParams->getCorrectAnswerWrongFormat();
+        $printFormat = $this->questionParams->getPrintFormat();
 
         if ($quesData['qtype'] == "multipart" || $quesData['qtype'] == 'conditional') {
           // if multipart/condition only has one part, the stuanswers script will
@@ -144,6 +146,11 @@ class QuestionHtmlGenerator
               $stuanswersval[$thisq] = array($stuanswersval[$thisq]);
             }
           }
+        } else {
+            // if $doShowAnswerParts is set for part 0, use it for global
+            if (!empty($doShowAnswerParts[0])) {
+                $doShowAnswer = true;
+            }
         }
         if ($attemptn == 0) {
           $GLOBALS['assess2-curq-iscorrect'] = -1;
@@ -225,6 +232,21 @@ class QuestionHtmlGenerator
             if (!isset($showanswer)) {
                 $showanswer = _('Answers may vary');
             }
+        }
+
+        if ($printFormat) {
+            if (isset($displayformat)) {
+                if (is_array($displayformat)) {
+                    foreach ($displayformat as $kidx => $iidx) {
+                        if ($iidx == 'select') {
+                            unset($displayformat[$kidx]);
+                        }
+                    }
+                } else if ($displayformat == 'select') {
+                    unset($displayformat);
+                }
+            }
+            unset($answersize);
         }
 
         /*
@@ -394,7 +416,8 @@ class QuestionHtmlGenerator
                     ->setQuestionPartCount(count($anstypes))
                     ->setAssessmentId($this->questionParams->getAssessmentId())
                     ->setStudentLastAnswers($lastAnswersAllParts[$atIdx])
-                    ->setColorboxKeyword($questionColor);
+                    ->setColorboxKeyword($questionColor)
+                    ->setCorrectAnswerWrongFormat($correctAnswerWrongFormat[$atIdx]);
 
                 try {
                   $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
@@ -415,6 +438,10 @@ class QuestionHtmlGenerator
                 $displayedAnswersForParts[$atIdx] = $answerBoxGenerator->getCorrectAnswerForPart();
                 $previewloc[$atIdx] = $answerBoxGenerator->getPreviewLocation();
 
+                if ($printFormat) {
+                    $answerbox[$atIdx] = preg_replace('/<ul class="?nomark"?>(.*?)<\/ul>/s', '<ol style="list-style-type:upper-alpha">$1</ol>', $answerbox[$atIdx]);
+                    $answerbox[$atIdx] = preg_replace('/<ol class="?lalpha"?/','<ol style="list-style-type:lower-alpha"', $answerbox[$atIdx]);
+                }
                 // enact hidetips if set
                 if (!empty($hidetips) && (!is_array($hidetips) || !empty($hidetips[$atIdx]))) {
                   unset($jsParams[$qnRef]['tip']);
@@ -438,6 +465,15 @@ class QuestionHtmlGenerator
               $jsParams['submitall'] = 1;
             }
         } else {
+
+
+            if ($GLOBALS['myrights'] > 10) {
+                if (isset($anstypes)) {
+                    $this->addError('It looks like you have defined $anstypes; did you mean for this question to be Multipart?');
+                } else if (strpos($toevalqtxt, '$answerbox[') !== false) {
+                    $this->addError('It looks like you have an $answerbox with part index; did you mean for this question to be Multipart?');
+                }
+            }
             // Generate answer boxes. (non-multipart question)
             $questionColor = $this->getAnswerColorFromRawScore(
                 $this->questionParams->getLastRawScores(), 0, 1);
@@ -466,7 +502,8 @@ class QuestionHtmlGenerator
                 ->setAssessmentId($this->questionParams->getAssessmentId())
                 ->setIsMultiPartQuestion(false)
                 ->setStudentLastAnswers($lastAnswer)
-                ->setColorboxKeyword($questionColor);
+                ->setColorboxKeyword($questionColor)
+                ->setCorrectAnswerWrongFormat($correctAnswerWrongFormat[0]);
 
             $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
             $answerBoxGenerator->generate();
@@ -478,6 +515,11 @@ class QuestionHtmlGenerator
             $jsParams[$qnRef]['qtype'] = $quesData['qtype'];
             $displayedAnswersForParts[0] = $answerBoxGenerator->getCorrectAnswerForPart();
             $previewloc = $answerBoxGenerator->getPreviewLocation();
+
+            if ($printFormat) {
+                $answerbox = preg_replace('/<ul class="?nomark"?>(.*?)<\/ul>/s', '<ol style="list-style-type:upper-alpha">$1</ol>', $answerbox);
+                $answerbox = preg_replace('/<ol class="?lalpha"?/','<ol style="list-style-type:lower-alpha"', $answerbox);
+            }
 
             // enact hidetips if set
             if (!empty($hidetips)) {

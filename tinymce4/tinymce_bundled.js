@@ -26833,7 +26833,7 @@
 
 }(window));
 })();
-(function() {
+(function () {
     tinymce.create('tinymce.plugins.desmos', {
         /**
          * Initializes the plugin, this will be executed after the plugin has been created.
@@ -52245,8 +52245,7 @@ var modern = (function (domGlobals) {
           layoutRect = windows[i].layoutRect();
           var newy;
           if (inIframe()) {
-            var contpos = global$3.DOM.getPos(global$1.activeEditor.editorContainer);
-            newy = contpos.y;
+            newy = global$1.activeEditor.editorContainer.getBoundingClientRect().y;
           } else {
             newy = Math.max(0, rect.h / 2 - layoutRect.h / 2);
           }
@@ -52373,8 +52372,7 @@ var modern = (function (domGlobals) {
         layoutRect.x = self.settings.x || Math.max(0, rect.w / 2 - layoutRect.w / 2);
         layoutRect.y = self.settings.y || Math.max(0, rect.h / 2 - layoutRect.h / 2);
         if (inIframe()) {
-            var contpos = global$3.DOM.getPos(global$1.activeEditor.editorContainer);
-            layoutRect.y = contpos.y;
+            layoutRect.y = global$1.activeEditor.editorContainer.getBoundingClientRect().y;
         }
         return layoutRect;
       },

@@ -4,10 +4,22 @@
       {{ $t('loading') }}
     </div>
     <score-result
-      v-if = "showScore"
+      v-if = "showScore && showResults"
       :qdata = "questionData"
       :qn = "qn"
     />
+    <div v-else-if = "showScore && questionData.canregen"
+      class="scoreresult neutral"
+      tabindex = "-1"
+    >
+      <button
+        type = "button"
+        @click = "trySimilar"
+      >
+        <icons name="retake" alt="" />
+        {{ $t('scoreresult.trysimilar') }}
+      </button>
+    </div>
     <p
       v-if="questionData.withdrawn !== 0"
       class="noticetext"
@@ -184,11 +196,13 @@ export default {
         (this.questionData.hasOwnProperty('score') ||
          this.questionData.status === 'attempted'
         ) &&
-        store.assessInfo.show_results &&
         (this.questionData.try > 0 ||
           this.questionData.hasOwnProperty('tries_remaining_range')) &&
         this.questionData.withdrawn === 0
       );
+    },
+    showResults () {
+      return store.assessInfo.show_results;
     },
     submitLabel () {
       let label = 'question.';
@@ -271,7 +285,7 @@ export default {
           } else {
             window.$(this).attr('data-lastval', window.$(this).val());
           }
-          actions.clearAutosaveTimer();
+          // actions.clearAutosaveTimer();
         })
         .on('input.dirtytrack', function () {
           store.somethingDirty = true;
@@ -395,6 +409,9 @@ export default {
     workFocused () {
       actions.clearAutosaveTimer();
       this.lastWorkVal = this.work;
+    },
+    trySimilar () {
+      actions.loadQuestion(this.qn, true);
     }
   },
   updated () {
@@ -436,6 +453,9 @@ export default {
         // force reload
         actions.loadQuestion(this.qn, false, false);
       }
+    },
+    qn: function (newVal, oldVal) {
+      actions.setRendered(oldVal, false);
     },
     seed: function (newVal, oldVal) {
       actions.loadQuestion(this.qn, false, false);
@@ -506,7 +526,10 @@ input.red {
 .ansyel {
   border: 1px solid #fb0 !important;
 }
-div.ansgrn, div.ansred, div.ansyel {
+.ansorg {
+  border: 1px solid #f50 !important;
+}
+div.ansgrn, div.ansred, div.ansyel, div.ansorg {
   margin: -1px;
 }
 input[type=text].ansgrn, .mathquill-math-field.ansgrn {
@@ -520,5 +543,9 @@ input[type=text].ansred, .mathquill-math-field.ansred {
 input[type=text].ansyel, .mathquill-math-field.ansyel {
   padding-right: 17px;
   background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigyNTUsMTg3LDApIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0gNS4zLDEwLjYgOSwxNC4yIDE4LjUsNC42IDIxLjQsNy40IDksMTkuOCAyLjcsMTMuNSB6IiAvPjwvc3ZnPg==");
+}
+input[type=text].ansorg, .mathquill-math-field.ansorg {
+  padding-right: 17px;
+  background: right no-repeat url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBzdHJva2U9InJnYigyNTUsODUsMCkiIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTE4IDYgTDYgMTggTTYgNiBMMTggMTgiIC8+PC9zdmc+");
 }
 </style>

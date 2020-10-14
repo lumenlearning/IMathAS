@@ -139,9 +139,10 @@ function init(paramarr, enableMQ, baseel) {
       }
     }
     if (params.preview) { //setup preview TODO: check for userpref
-      var thisqn = qn;
-      document.getElementById("pbtn"+qn).addEventListener('click', function() {showPreview(thisqn)});
-      if (!params.qtype.match(/matrix/)) { //no live preview for matrix types
+      document.getElementById("pbtn"+qn).addEventListener('click', (function(thisqn) {
+          return function() {showPreview(thisqn);}
+        })(qn));
+      if (params.preview == 1 && !params.qtype.match(/matrix/)) { //no live preview for matrix types
         if (LivePreviews.hasOwnProperty(qn)) {
           delete LivePreviews[qn]; // want to reinit
         }
@@ -292,9 +293,12 @@ function initqsclickchange() {
 function clearScoreMarkers(e) {
   var m;
   var target = e.currentTarget
-  if ((m = target.className.match(/(ansgrn|ansred|ansyel)/)) !== null) {
+  if ((m = target.className.match(/(ansgrn|ansred|ansyel|ansorg)/)) !== null) {
     $(target).removeClass(m[0]);
     $(target).nextAll('.scoremarker.sr-only').first().remove();
+    if (m[0]=='ansorg') {
+        $(target).nextAll('.scoremarker').first().remove();
+    }
     if (target.tagName.toLowerCase() == 'select') {
       $(target).nextAll('svg.scoremarker').first().remove();
     }
@@ -304,7 +308,7 @@ function clearScoreMarkers(e) {
   } else {
     var wrap = $(target).closest("[id^=qnwrap]");
     if (wrap.length > 0 &&
-      ((m = wrap[0].className.match(/(ansgrn|ansred|ansyel)/)) !== null)
+      ((m = wrap[0].className.match(/(ansgrn|ansred|ansyel|ansorg)/)) !== null)
     ) {
       wrap.removeClass(m[0]);
       wrap.find(".scoremarker").remove();
@@ -322,16 +326,34 @@ function setScoreMarkers(base) {
   var svgx = '<svg class="scoremarker" viewBox="0 0 24 24" width="16" height="16" stroke="rgb(153,0,0)" stroke-width="3" fill="none" role="img" aria-hidden=true>';
   svgx += '<path d="M18 6 L6 18 M6 6 L18 18" /></svg>';
   svgx += '<span class="sr-only scoremarker">' + _('Incorrect') + '</span>';
+  var svgox = '<svg class="scoremarker" viewBox="0 0 24 24" width="16" height="16" stroke="rgb(255,85,0)" stroke-width="3" fill="none" role="img" aria-hidden=true>';
+  svgox += '<path d="M18 6 L6 18 M6 6 L18 18" /></svg>';
+  svgox += '<span class="sr-only scoremarker">' + _('Incorrect, wrong format') + '</span>';
   $(base).find('.scoremarker').remove();
   $(base).find('div.ansgrn,table.ansgrn').append(svgchk);
   $(base).find('div.ansyel,table.ansyel').append(svgychk);
   $(base).find('div.ansred,table.ansred').append(svgx);
+  $(base).find('div.ansorg,table.ansorg').append(svgox);
   $(base).find('select.ansgrn').after(svgchk);
   $(base).find('select.ansyel').after(svgychk);
   $(base).find('select.ansred').after(svgx);
+  $(base).find('select.ansorg').after(svgox);
   $(base).find('span[id^=mqinput-].ansgrn,input[type=text].ansgrn').after('<span class="scoremarker sr-only">' + _('Correct') + '</span>');
   $(base).find('span[id^=mqinput-].ansyel,input[type=text].ansyel').after('<span class="scoremarker sr-only">' + _('Partially correct') + '</span>');
   $(base).find('span[id^=mqinput-].ansred,input[type=text].ansred').after('<span class="scoremarker sr-only">' + _('Incorrect') + '</span>');
+  $(base).find('span[id^=mqinput-].ansorg,input[type=text].ansorg').after('<span class="scoremarker sr-only">' + _('Incorrect, wrong format') + '</span>');
+  $(base).find('span[id^=mqinput-].ansorg,input[type=text].ansorg').after(
+      $('<span>', {
+          role: "button",
+          class: "scoremarker",
+          tabindex: 0,
+          "aria-label": _('Incorrect, wrong format'),
+          "data-tip": _('Your answer is equivalent to the correct answer, but is not simplified or is in the wrong format'),
+          "data-tooltipclass": "dropdown-pane tooltip-pane"
+      }).on('mouseover focus', function () {tipshow(this)})
+      .on('mouseleave blur', tipout)
+      .html('<svg style="vertical-align:middle;margin-left:3px;" viewBox="0 0 24 24" width="18" height="18" stroke="rgb(255,85,0)" stroke-width="2" stroke-linecap="round" fill="none" role="img" aria-hidden=true><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>')
+  );
 }
 
 function initClearScoreMarkers() {
@@ -348,12 +370,12 @@ function initEnterHandler(qn) {
 	  .on("keydown.enterhandler", function(e) {
 		if (e.which==13) {
 			var btn = $(this).closest(".questionwrap").find(".submitbtnwrap .primary");
-      if (btn.length>0) {
-        e.preventDefault();
-      }
-      if (!btn.is(':disabled')) {
-        btn.trigger('click');
-      }
+            if (btn.length>0) {
+                e.preventDefault();
+            }
+            if (!btn.is(':disabled')) {
+                btn.trigger('click');
+            }
 		}
 	});
 }
@@ -726,7 +748,7 @@ function normalizemathunicode(str) {
 	str = str.replace(/∞/g,"oo").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/∪/g,"U");
 	str = str.replace(/±/g,"+-").replace(/÷/g,"/").replace(/·|✕|×|⋅/g,"*");
 	str = str.replace(/√/g,"sqrt").replace(/∛/g,"root(3)");
-	str = str.replace(/²/g,"^2").replace(/³/g,"^3");
+	str = str.replace(/⁰/g,"^0").replace(/¹/g,"^1").replace(/²/g,"^2").replace(/³/g,"^3").replace(/⁴/g,"^4").replace(/⁵/g,"^5").replace(/⁶/g,"^6").replace(/⁷/g,"^7").replace(/⁸/g,"^8").replace(/⁹/g,"^9");
 	str = str.replace(/\u2329/g, "<").replace(/\u232a/g, ">");
 	str = str.replace(/₀/g,"_0").replace(/₁/g,"_1").replace(/₂/g,"_2").replace(/₃/g,"_3");
 	str = str.replace(/\bOO\b/i,"oo");
@@ -758,7 +780,6 @@ function showPreview(qn) {
   if (res.err && res.err != '' && res.str != '') {
     outstr += (outstr=='``')?'':'. ' + '<span class=noticetext>' + res.err + '</span>';
   }
-
   if (LivePreviews.hasOwnProperty(qn)) {
     LivePreviews[qn].RenderNow(outstr);
   } else {
@@ -801,7 +822,7 @@ function showSyntaxCheckMQ(qn) {
   if (res.err && res.err != '' && res.str != '') {
     outstr += '<span class=noticetext>' + res.err + '</span>';
   }
-  if (LivePreviews.hasOwnProperty(qn)) {
+  if (LivePreviews.hasOwnProperty(qn) && (mathRenderer=="MathJax" || mathRenderer=="Katex")) {
     var previewel = document.getElementById('p'+qn).firstChild;
     previewel.innerHTML = outstr;
     previewel.style.visibility = '';
@@ -1702,7 +1723,7 @@ function singlevalsyntaxcheck(str,format) {
 		  str = str.replace(/_/,' ');
 	} else if (format.indexOf('scinot')!=-1) {
 		  str = str.replace(/\s/g,'');
-		  str = str.replace(/(x|X|\u00D7)/,"xx");
+		  str = str.replace(/(xx|x|X|\u00D7)/,"xx");
 		  if (!str.match(/^\-?[1-9](\.\d*)?(\*|xx)10\^(\(?\-?\d+\)?)$/)) {
 		  	if (format.indexOf('scinotordec')==-1) { //not scinotordec
 		  		return (_("not valid scientific notation")+". ");
@@ -1788,6 +1809,9 @@ function singlevaleval(evalstr, format) {
   }
   if (format.indexOf('mixed')!=-1) {
     evalstr = evalstr.replace(/(\d+)\s+(\d+|\(\d+\))\s*\/\s*(\d+|\(\d+\))/g,"($1+$2/$3)");
+  }
+  if (format.indexOf('allowxtimes')!=-1) {
+    evalstr = evalstr.replace(/(xx|x|X|\u00D7)/,"*");  
   }
   if (format.indexOf('scinot')!=-1) {
       evalstr = evalstr.replace("xx","*");
@@ -1962,6 +1986,9 @@ function AutoSuggest(elem, suggestions)
 			break;
 
 			case ENTER:
+            if (me.highlighted > -1) {
+                ev.stopImmediatePropagation();
+            }
 			me.useSuggestion("enter");
 			return false;
 			break;
@@ -2029,7 +2056,8 @@ function AutoSuggest(elem, suggestions)
 		}
 	};
 	elem.onblur = function(ev) {
-		setTimeout(me.hideDiv,100);
+        //setTimeout(me.hideDiv,100);
+        me.hideDiv();
 	}
 
 
@@ -2162,8 +2190,9 @@ function AutoSuggest(elem, suggestions)
 		/********************************************************
 		click handler for the dropdown ul
 		insert the clicked suggestion into the input
-		********************************************************/
-		ul.onclick = function(ev)
+        ********************************************************/
+        
+		ul.onmousedown = ul.ontouchstart = function(ev)
 		{
 			me.useSuggestion("click");
 			me.hideDiv();
