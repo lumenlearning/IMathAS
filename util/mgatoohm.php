@@ -96,7 +96,8 @@ function storeQuestion($qdata, $lib, $libinfo, $qn) {
     $csvrow[] = [
         $libinfo['num'], 
         $libinfo['slo'], 
-        $libinfo['guid'], 
+        $libinfo['guid'],
+        $qsid,
         $qn, 
         trim(preg_replace('/\s+/m',' ',$qdata['prompt']))
     ];
@@ -126,7 +127,7 @@ while (($row = array_shift($input)) !== null) {
         $libinfo = ['slo'=>$libslo, 'num'=>$libnum, 'guid'=>$libguid];
         $qn = 1;
 
-        $stm = $DBH->prepare('SELECT id FROM imas_libraries WHERE name=?');
+        $stm = $DBH->prepare('SELECT id FROM imas_libraries WHERE name=? and deleted=0');
         $stm->execute(array($libname));
         $curlib = $stm->fetchColumn(0);
         if ($curlib === false) {
