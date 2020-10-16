@@ -119,36 +119,38 @@ $qn = 1;
 while (($row = array_shift($input)) !== null) {
     if (preg_match('/^(#+)([\d\.]+)(.*)/', $row, $matches)) {
         // is a library header
-        $level = strlen($matches[1]);
         $libnum = $matches[2];
         $libslo = trim($matches[3]);
         $libname = $libnum .' '.array_shift($input);
         $libguid = substr(array_shift($input), 1);
         $libinfo = ['slo'=>$libslo, 'num'=>$libnum, 'guid'=>$libguid];
-        $qn = 1;
+        if (strlen($matches[1]) < 3) {
+            $level = strlen($matches[1]);
+            $qn = 1;
 
-        $stm = $DBH->prepare('SELECT id FROM imas_libraries WHERE name=? and deleted=0');
-        $stm->execute(array($libname));
-        $curlib = $stm->fetchColumn(0);
-        if ($curlib === false) {
-            $stm = $DBH->prepare('INSERT INTO imas_libraries (uniqueid,adddate,lastmoddate,name,ownerid,userights,parent,groupid,sortorder,federationlevel) VALUES (?,?,?,?,?,?,?,?,?,?)');
-            $mt = microtime();
-			$uqid = substr($mt,11).substr($mt,2,6);
-            $stm->execute([
-                $uqid,
-                time(),
-                time(),
-                $libname,
-                $userid,
-                8, //userights
-                $lastparent[$level-1],
-                $groupid,
-                0, //sort order
-                0 //fed level
-            ]);
-            $curlib = $DBH->lastInsertId();
+            $stm = $DBH->prepare('SELECT id FROM imas_libraries WHERE name=? and deleted=0');
+            $stm->execute(array($libname));
+            $curlib = $stm->fetchColumn(0);
+            if ($curlib === false) {
+                $stm = $DBH->prepare('INSERT INTO imas_libraries (uniqueid,adddate,lastmoddate,name,ownerid,userights,parent,groupid,sortorder,federationlevel) VALUES (?,?,?,?,?,?,?,?,?,?)');
+                $mt = microtime();
+                $uqid = substr($mt,11).substr($mt,2,6);
+                $stm->execute([
+                    $uqid,
+                    time(),
+                    time(),
+                    $libname,
+                    $userid,
+                    8, //userights
+                    $lastparent[$level-1],
+                    $groupid,
+                    0, //sort order
+                    0 //fed level
+                ]);
+                $curlib = $DBH->lastInsertId();
+            }
+            $lastparent[$level] = $curlib;
         }
-        $lastparent[$level] = $curlib;
     } else {
         if (trim($row) == '') {
             if ($curquestion !== null) {
