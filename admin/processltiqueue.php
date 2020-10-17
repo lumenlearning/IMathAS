@@ -5,6 +5,8 @@
 /*
   To use the LTI queue, you'll need to either set up a cron job to call this
   script, or call it using a scheduled web call with the authcode option.
+  When called in cron job, the base address like https://www.mysite.com should
+  be passed as an argument.
   It should be called every minute.
 
   Config options (in config.php):
@@ -24,13 +26,64 @@
   To log results in /admin/import/ltiqueue.log:
      $CFG['LTI']['logltiqueue'] = true;
 */
+if (php_sapi_name() == "cli") {
+    if (empty($argv[1])) {
+        echo 'You need to provide the domain name as an argument';
+        exit;
+    }
+    $_SERVER['HTTP_HOST'] = explode('//',$argv[1])[1];
+}
 
 require("../init_without_validate.php");
 require("../includes/rollingcurl.php");
 require_once('../includes/ltioutcomes.php');
 
+function debuglog($str) {
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    ohmDebuglog($str);
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    if (!empty($GLOBALS['CFG']['LTI']['noisydebuglog'])) {
+		$fh = fopen(__DIR__.'/../lti/ltidebug.txt', 'a');
+		fwrite($fh, $str."\n");
+		fclose($fh);
+	}
+}
+
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+function ohmDebuglog($logText)
+{
+    $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
+    if (empty($lti_response_log_file)) {
+        return;
+    }
+
+    $timeStr = strftime('%Y-%b-%d %H:%M:%S %Z', time());
+    file_put_contents(
+        sprintf('[%s] %s' . "\n", $timeStr, $logText),
+        FILE_APPEND
+    );
+}
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+
 if (php_sapi_name() == "cli") {
-	//running command line - no need for auth code
+    //running command line - no need for auth code
+    $GLOBALS['basesiteurl'] = $argv[1] . $imasroot;
 } else if (!isset($CFG['LTI']['authcode'])) {
 	echo 'You need to set $CFG[\'LTI\'][\'authcode\'] in config.php';
 	exit;
@@ -61,6 +114,9 @@ if (isset($_SERVER['HTTP_X_AMZ_SNS_MESSAGE_TYPE'])) {
   Pull all the items from the queue with sendon < now
 */
 
+$updater1p3 = new LTI_Grade_Update($DBH);
+
+$updateStart = time();
 $batchsize = isset($CFG['LTI']['queuebatch'])?$CFG['LTI']['queuebatch']:10;
 $RCX = new RollingCurlX($batchsize);
 $RCX->setTimeout(5000); //5 second timeout on each request
@@ -82,30 +138,85 @@ $LTIsecrets = array();
 $cntsuccess = 0;
 $cntfailure = 0;
 $cntgiveup = 0;
+$round2 = array();
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	//echo "reading record ".$row['hash'].'<br/>';
-	list($lti_sourcedid,$ltiurl,$ltikey,$keytype) = explode(':|:', $row['sourcedid']);
-	$secret = '';
-	if (strlen($lti_sourcedid)>1 && strlen($ltiurl)>1 && strlen($ltikey)>1) {
-		$grade = min(1, max(0, $row['grade']));
-		$RCX->addRequest(
-			$ltiurl,  //url to request
-			array( 		//post data; will get transformed before send
-				'action' => 'update',
-				'key' => $ltikey,
-				'keytype' => $keytype,
-				'url' => $ltiurl,
-				'sourcedid' => $lti_sourcedid,
-				'grade' => $grade
-			),
-			null, //no special callback
-			array( 	  //user-data; will get passed to response
-				'sourcedid' => $row['sourcedid'],
-				'hash' => $row['hash'],
-				'sendon' => $row['sendon'],
-				'lasttry' => ($row['failures']>=6)
-			)
-		);
+	if (substr($row['sourcedid'],0,6)=='LTI1.3') {
+		// LTI 1.3 update
+		list($ltiver,$ltiuserid,$score_url,$platformid) = explode(':|:', $row['sourcedid']);
+		if ($updater1p3->have_token($platformid)) {
+			if ($updater1p3->token_valid($platformid)) {
+				debuglog('queing request with token for '.$row['hash']);
+				// we have a token, so add an update request
+				$pos = strpos($score_url, '?');
+				$score_url = $pos === false ? $score_url . '/scores' : substr_replace($score_url, '/scores', $pos, 0);
+				$RCX->addRequest(
+					$score_url,  //url to request
+					array( 		//post data; will get transformed before send
+						'ver' => 'LTI1.3',
+						'action' => 'update',
+						'ltiuserid' => $ltiuserid,
+						'platformid' => $platformid,
+						'grade' => max(0, $row['grade'])
+					),
+					null, //no special callback
+					array( 	  //user-data; will get passed to response
+						'hash' => $row['hash'],
+						'sendon' => $row['sendon'],
+						'lasttry' => ($row['failures']>=6)
+					)
+				);
+			} else {
+				$updater1p3->update_sendon($row['hash'], $platformid);
+			}
+		} else {
+			debuglog('queing token request for '.$row['hash']. ' on platform '.$platformid);
+			// we need to get a token, so add a token request
+			$platforminfo = $updater1p3->get_platform_info($platformid);
+			$RCX->addRequest(
+				$platforminfo['auth_token_url'],  //url to request
+				array( 		//post data; will get transformed before send
+					'ver' => 'LTI1.3',
+					'action' => 'gettoken',
+					'platformid' => $platformid,
+					'platforminfo' => $platforminfo
+				),
+				null, //no special callback
+				array( 	  //user-data; will get passed to response
+					'action' => 'gettoken',
+					'platformid' => $platformid
+				)
+			);
+			// add original ltiqueue to round 2, to process after first round is done
+			$round2[] = $row;
+		}
+	} else {
+		// LTI 1.1 update
+		list($lti_sourcedid,$ltiurl,$ltikey,$keytype) = explode(':|:', $row['sourcedid']);
+		$secret = '';
+		if (strlen($lti_sourcedid)>1 && strlen($ltiurl)>1 && strlen($ltikey)>1) {
+			debuglog('queing 1.1 request for '.$row['hash']);
+			$grade = min(1, max(0, $row['grade']));
+			$RCX->addRequest(
+				$ltiurl,  //url to request
+				array( 		//post data; will get transformed before send
+					'ver' => 'LTI1.1',
+					'action' => 'update',
+					'key' => $ltikey,
+					'keytype' => $keytype,
+					'url' => $ltiurl,
+					'sourcedid' => $lti_sourcedid,
+					'grade' => $grade
+				),
+				null, //no special callback
+				array( 	  //user-data; will get passed to response
+				    'sourcedid' => $row['sourcedid'],
+					'hash' => $row['hash'],
+					'sendon' => $row['sendon'],
+					'lasttry' => ($row['failures']>=6)
+				)
+			);
+		}
 	}
 }
 
@@ -114,6 +225,45 @@ $RCX->execute();
 if (count($deletequeue) > 0) {
     LTIDeleteQueue();
 }
+$timeused = time() - $updateStart;
+
+if (count($round2)>0 &&  $timeused < 40) {
+	// this is measured relative to start of exec
+	$RCX->setStopAddingTime(45 - $timeused);
+	// this would only be LTI1.3 updates that didn't have a token the first time
+	foreach ($round2 as $row) {
+		list($ltiver,$ltiuserid,$score_url,$platformid) = explode(':|:', $row['sourcedid']);
+		if ($updater1p3->have_token($platformid)) {
+			if ($updater1p3->token_valid($platformid)) {
+				debuglog('queing round2 request for '.$row['hash']);
+				// we have a token, so add an update request
+				$pos = strpos($score_url, '?');
+				$score_url = $pos === false ? $score_url . '/scores' : substr_replace($score_url, '/scores', $pos, 0);
+				$RCX->addRequest(
+					$score_url,  //url to request
+					array( 		//post data; will get transformed before send
+						'ver' => 'LTI1.3',
+						'action' => 'update',
+						'ltiuserid' => $ltiuserid,
+						'platformid' => $platformid,
+						'grade' => max(0, $row['grade'])
+					),
+					null, //no special callback
+					array( 	  //user-data; will get passed to response
+						'hash' => $row['hash'],
+						'sendon' => $row['sendon'],
+						'lasttry' => ($row['failures']>=6)
+					)
+				);
+			} else {
+				$updater1p3->update_sendon($row['hash'], $platformid);
+			}
+		}
+	}
+
+	$RCX->execute();
+}
+
 echo "Done in ".(time() - $scriptStartTime);
 
 if (!empty($CFG['LTI']['logltiqueue'])) {
@@ -129,7 +279,30 @@ if (!empty($CFG['LTI']['logltiqueue'])) {
 }
 
 function LTIqueuePostdataCallback($data) {
-	global $DBH, $LTIsecrets;
+	global $DBH, $LTIsecrets, $updater1p3;
+
+	if ($data['ver'] == 'LTI1.3') {
+		// it's an LTI 1.3 request
+		if ($data['action'] == 'gettoken') {
+			$platforminfo = $data['platforminfo'];
+			return [
+				'body' => $updater1p3->get_token_request_post($data['platformid'],
+										$platforminfo['client_id'],
+										$platforminfo['auth_token_url']),
+				'header' => array()
+			];
+		} else if ($data['action'] == 'update') {
+            if ($updater1p3->have_token($data['platformid']) &&
+                $updater1p3->token_valid($data['platformid'])
+            ) { // double check we have a valid token
+				$token = $updater1p3->get_access_token($data['platformid']);
+				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid']);
+			} else {
+				return false;
+			}
+		}
+	}
+	// it's an LTI 1.1 request
 
 	$secret = '';
 	if (isset($LTIsecrets[$data['key']])) {
@@ -162,56 +335,59 @@ function LTIqueuePostdataCallback($data) {
 }
 
 function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
-	global $DBH,$cntsuccess,$cntfailure,$cntgiveup,$deletequeue;
-
-	// Get the LTI request data for debugging.
+	global $DBH,$cntsuccess,$cntfailure,$cntgiveup,$updater1p3,$deletequeue;
 	$post_data = $request_info['post_data'];
-	// Don't log LTI secrets!
-	unset($post_data['key']);
-	unset($post_data['keytype']);
+	$success = true;
+    debuglog('callback request_info:'.json_encode($post_data));
+	debuglog('callback user_data:'.json_encode($user_data));
+	if ($post_data['ver'] == 'LTI1.3') {
+		if ($post_data['action'] == 'gettoken') {
+			// was a token request
+			if ($response === false) {
+				// record failure. in round 2 token will be read as not valid
+				$updater1p3->token_request_failure($user_data['platformid']);
+				debuglog('token request failure t1 '.$user_data['platformid']);
+			}
+			$token_data = json_decode($response, true);
+			if (isset($token_data['access_token'])) {
+				$updater1p3->store_access_token($user_data['platformid'], $token_data);
+				debuglog('got token for '.$user_data['platformid']);
+			} else {
+                // record failure. in round 2 token will be read as not valid
+				$updater1p3->token_request_failure($user_data['platformid']);
+				debuglog('token request failure t2 '.$response);
+			}
+			return; // doesn't effect ltiqueue, so return now
+		} else if ($post_data['action'] == 'update') {
+			debuglog('got update response '.$response);
+			if ($response === false) {
+				$success = false;
+			}
+		}
+	} else {
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        $successXmlStatus =
+            preg_match('/imsx_codeMajor.*success.*imsx_codeMajor/si',
+                $response);
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 
-    // check env variable, see file ohm/.ebextensions/custom_log_lti.config
-    // log $response
-    $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
-	if (!empty($lti_response_log_file)) {
-		file_put_contents(
-			$lti_response_log_file,
-			"===============================================================================\n"
-			. "Timestamp: " . strftime("%Y-%b-%d %H:%M:%S %Z", time()) . "\n"
-			. "---------\n"
-			. "POST data\n"
-			. "---------\n"
-			. print_r($post_data, true) . "\n"
-			. "---------\n"
-			. "user_data \n"
-			. "---------\n"
-			. print_r($user_data, true) . "\n"
-			. "-----------------\n"
-			. "Response metadata\n"
-			. "-----------------\n"
-			. "http_code: " . $request_info['http_code'] . "\n"
-			. "content_type: " . $request_info['content_type'] . "\n"
-			. "ssl_verify_result: " . $request_info['ssl_verify_result'] . "\n"
-			. "total_time: " . $request_info['total_time'] . "\n"
-			. "redirect_url: " . $request_info['redirect_url'] . "\n"
-			. "--------\n"
-			. "Response \n"
-			. "--------\n"
-			. $response,
-			FILE_APPEND
-		);
+        // LTI 1.1
+		if ($response === false || 1 !== $successXmlStatus) { //failed
+			$success = false;
+		}
 	}
 
-	//echo 'got response with hash'.$user_data['hash'].'<br/>';
-	//echo htmlentities($response);
-	//var_dump($request_info);
-
-	$successXmlStatus =
-		preg_match('/imsx_codeMajor.*success.*imsx_codeMajor/si',
-			$response);
-
-	if ($response === false || 1 !== $successXmlStatus) { //failed
+	if (!$success) {
 		//on call failure, we'll update failure count and push back sendon
+		debuglog('update failure for '.$user_data['hash']);
 		$setfailed = $DBH->prepare('UPDATE imas_ltiqueue SET sendon=sendon+(failures+1)*(failures+1)*300,failures=failures+1 WHERE hash=?');
 		$setfailed->execute(array($user_data['hash']));
 		if ($user_data['lasttry']===true) {
@@ -221,7 +397,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 			// Don't log LTI secrets!
 			unset($post_data['key']);
 			unset($post_data['keytype']);
-			
+
 			error_log("LTI update giving up:\n"
 			. "POST data\n"
 			. "---------\n"

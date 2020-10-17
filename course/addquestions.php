@@ -14,12 +14,15 @@ $overwriteBody = 0;
 $body = "";
 $pagetitle = _("Add/Remove Questions");
 
-$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=" . Sanitize::courseId($_GET['cid']) . "\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
+$curBreadcrumb = $breadcrumbbase;
+if (empty($_COOKIE['fromltimenu'])) {
+    $curBreadcrumb .= " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+}
 if (isset($_GET['clearattempts']) || isset($_GET['clearqattempts']) || isset($_GET['withdraw'])) {
-	$curBreadcrumb .= "&gt; <a href=\"addquestions.php?cid=" . Sanitize::courseId($_GET['cid']) . "&aid=" . Sanitize::onlyInt($_GET['aid']) . "\">"._("Add/Remove Questions")."</a> &gt; Confirm\n";
+	$curBreadcrumb .= " <a href=\"addquestions.php?cid=" . Sanitize::courseId($_GET['cid']) . "&aid=" . Sanitize::onlyInt($_GET['aid']) . "\">"._("Add/Remove Questions")."</a> &gt; Confirm\n";
 	//$pagetitle = "Modify Inline Text";
 } else {
-	$curBreadcrumb .= "&gt; "._("Add/Remove Questions")."\n";
+	$curBreadcrumb .= _("Add/Remove Questions")."\n";
 	//$pagetitle = "Add Inline Text";
 }
 
@@ -47,7 +50,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
     $aver = $row['ver'];
     $submitby = $row['submitby'];
     $modquestion = ($aver > 1) ? 'modquestion2' : 'modquestion';
-
+    
     if ($aver > 1) {
 		$query = "SELECT iar.userid FROM imas_assessment_records AS iar,imas_students WHERE ";
 		$query .= "iar.assessmentid=:assessmentid AND iar.userid=imas_students.userid AND imas_students.courseid=:courseid LIMIT 1";
@@ -487,7 +490,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	//load filter.  Need earlier than usual header.php load
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	require_once("$curdir/../filter/filter.php");
-
+	
 	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	list($itemorder,$page_assessmentName,$defpoints,$displaymethod,$showcalculatordef,$showhintsdef,$showworkdef,$assessintro) = $stm->fetch(PDO::FETCH_NUM);
