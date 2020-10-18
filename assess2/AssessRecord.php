@@ -1868,6 +1868,9 @@ class AssessRecord
         $seqPartDone[$pn] = ($partattemptn[$pn] > 0);
       }
     }
+    if ($numParts == 0 && $this->teacherInGb) {
+        $seqPartDone = true;
+    }
     $attemptn = (count($partattemptn) == 0) ? 0 : max($partattemptn);
     $questionParams = new QuestionParams();
     $questionParams
