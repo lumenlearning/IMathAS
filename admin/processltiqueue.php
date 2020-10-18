@@ -261,7 +261,10 @@ if (count($round2)>0 &&  $timeused < 40) {
 		}
 	}
 
-	$RCX->execute();
+    $RCX->execute();
+    if (count($deletequeue) > 0) {
+        LTIDeleteQueue();
+    }
 }
 
 echo "Done in ".(time() - $scriptStartTime);
