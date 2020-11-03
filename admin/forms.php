@@ -443,7 +443,7 @@ switch($_GET['action']) {
 				$cid = Sanitize::courseId($_GET['cid']);
                 echo "<div class=breadcrumb>$breadcrumbbase ";
                 if (empty($_COOKIE['fromltimenu'])) {
-                    echo " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+                    echo " <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
                 }
                 echo _('Course Settings') , '</div>';
 			}
@@ -670,7 +670,7 @@ switch($_GET['action']) {
             $cid = Sanitize::courseId($_GET['cid']);
             echo "<div class=breadcrumb>$breadcrumbbase ";
             if (empty($_COOKIE['fromltimenu'])) {
-                echo " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+                echo " <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
             }
             echo _('Course Settings') , '</div>';
         }
@@ -1011,7 +1011,7 @@ switch($_GET['action']) {
 			if ($dates_by_lti>0) { echo 'checked="checked"';}
             echo '/> '._('Allow the LMS to set assessment due dates');
             echo ' <span class="small">(',_('Only supported by Canvas'),')</span></span><br class="form" />';
-
+            
             if ($hasLTI13 && !empty($CFG['LTI']['usesendzeros'])) {
                 echo '<span class="form">',_('Send zeros'),'?<br/></span>';
                 echo '<span class="formright"><label><input type="checkbox" name="ltisendzeros" value="1" ';
