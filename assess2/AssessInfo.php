@@ -1184,6 +1184,12 @@ class AssessInfo
       }
     }
 
+    // fix old-format reqscore "grey out"
+    if ($settings['reqscore'] < 0) {
+        $settings['reqscoretype'] |= 1;
+        $settings['reqscore'] = abs($settings['reqscore']);
+    }
+
     //unpack itemorder
     $itemorder = json_decode($settings['itemorder'], true);
     //temp handling of old format
