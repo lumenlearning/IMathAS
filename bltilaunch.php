@@ -644,8 +644,14 @@ if (isset($_GET['launch'])) {
 
 	$_SESSION['ltirole'] = $ltirole;
 	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
-	$_SESSION['lti_context_label'] = (!empty($_REQUEST['context_label']))?$_REQUEST['context_label']:$_REQUEST['context_id'];
-	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
+    if (!empty($_REQUEST['context_label'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_label'];
+    } else if (!empty($_REQUEST['context_title'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_title'];
+    } else {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_id'];
+    }
+    $_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
 	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'];
 	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'];
 	$_SESSION['lti_key'] = $ltikey;
@@ -2325,7 +2331,7 @@ if (isset($_GET['launch'])) {
 			$_SESSION['view_folder'] = array($sourcecid,$parts[1]);
 		}
     }
-
+   
 
 	//Store all LTI request data in session variable for reuse on submit
 	//if we got this far, secret has already been verified
@@ -2349,8 +2355,14 @@ if (isset($_GET['launch'])) {
 	}
 
 	$_SESSION['ltirole'] = $ltirole;
-	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
-	$_SESSION['lti_context_label'] = (!empty($_REQUEST['context_label']))?$_REQUEST['context_label']:$_REQUEST['context_id'];
+    $_SESSION['lti_context_id'] = $_REQUEST['context_id'];
+    if (!empty($_REQUEST['context_label'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_label'];
+    } else if (!empty($_REQUEST['context_title'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_title'];
+    } else {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_id'];
+    }
 	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
 	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'];
 	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'];
