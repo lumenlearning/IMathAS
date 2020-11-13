@@ -11,6 +11,11 @@ require('ohm.php');
 $installname = "Lumen OHM Local";
 
 //$imasroot = "/ohm";
+
+// Static assets
+$CFG['static_server'] = 'http://localhost/';
+
+// AWS S3 bucket
 //$AWSbucket = null;
 //$AWSkey = 'api_key_goes_here';
 //$AWSsecret = 'api_secret_goes_here';
