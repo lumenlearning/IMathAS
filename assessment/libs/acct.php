@@ -404,24 +404,36 @@ function makejournal($j, $sn, $ops, &$anstypes, &$questions, &$answer, &$showans
 		$disptype = 'typeahead';
 	}
 
-	$maxsizedescr = 0;  $maxsizeentry = 0; $hasdecimals = false;
+	$maxsizedescr = 0;  $maxsizeentry = 0; $hasdecimals = false; $maxsizepostref=0;
 	foreach ($j as $ix=>$jd) {
-		for ($i=0;$i<count($jd['debits']);$i+=2) {
+		$usePostRefs = !empty($jd['haspostrefs']);
+		$valinc = $usePostRefs?2:1;
+		$colinc = $usePostRefs?3:2;
+		for ($i=0;$i<count($jd['debits']);$i+=$colinc) {
 			$sl = strlen($jd['debits'][$i]);
 			if ($sl>$maxsizedescr) { $maxsizedescr = $sl;}
-			$sl = strlen($jd['debits'][$i+1]);
+			if ($usePostRefs) {
+				$sl = strlen($jd['debits'][$i+1]);
+				if ($sl>$maxsizepostref) { $maxsizepostref = $sl; }
+			}
+			$sl = strlen($jd['debits'][$i+$valinc]);
 			if ($sl>$maxsizeentry) { $maxsizeentry = $sl;}
-			if (!$hasdecimals && strpos($jd['debits'][$i+1],'.')!==false) { $hasdecimals = true;}
+			if (!$hasdecimals && strpos($jd['debits'][$i+$valinc],'.')!==false) { $hasdecimals = true;}
 			if ($debug && !in_array($jd['debits'][$i], $ops)) {
 				echo "Eek: ".$jd['debits'][$i]." not in options array<br/>";
 			}
+
 		}
-		for ($i=0;$i<count($jd['credits']);$i+=2) {
+		for ($i=0;$i<count($jd['credits']);$i+=$colinc) {
 			$sl = strlen($jd['credits'][$i]);
 			if ($sl>$maxsizedescr) { $maxsizedescr = $sl;}
-			$sl = strlen($jd['credits'][$i+1]);
+			if ($usePostRefs) {
+				$sl = strlen($jd['credits'][$i+1]);
+				if ($sl>$maxsizepostref) { $maxsizepostref = $sl; }
+			}
+			$sl = strlen($jd['credits'][$i+$valinc]);
 			if ($sl>$maxsizeentry) { $maxsizeentry = $sl;}
-			if (!$hasdecimals && strpos($jd['credits'][$i+1],'.')!==false) { $hasdecimals = true;}
+			if (!$hasdecimals && strpos($jd['credits'][$i+$valinc],'.')!==false) { $hasdecimals = true;}
 			if ($debug && !in_array($jd['credits'][$i], $ops)) {
 				echo "Eek: ".$jd['credits'][$i]." not in options array<br/>";
 			}
@@ -435,66 +447,104 @@ function makejournal($j, $sn, $ops, &$anstypes, &$questions, &$answer, &$showans
 	$maxsizedescr += 6;
 	$maxsizeentry += 3;
 	$maxsizeentry = max($maxsizeentry,10);
-	$out = '<table class="acctstatement"><thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th></tr><thead><tbody>';
+	$out = '<table class="acctstatement"><thead><tr><th>Date</th><th>Description</th>';
+	if ($usePostRefs) {
+		$out .= '<th>Post Ref.</th>';
+	}
+	$out .= '<th>Debit</th><th>Credit</th></tr><thead><tbody>';
 	$sa = $out;
 	foreach ($j as $ix=>$jd) {
+		$usePostRefs = !empty($jd['haspostrefs']);
+		$colinc = $usePostRefs?3:2;
+		$valinc = $usePostRefs?2:1;
+		$colspan = $usePostRefs ? 5 : 4;
 		if ($ix>0) {
-			$out .= '<tr><td colspan="4">&nbsp;</td></tr>';
-			$sa .= '<tr><td colspan="4">&nbsp;</td></tr>';
+			$out .= '<tr><td colspan="'.$colspan.'">&nbsp;</td></tr>';
+			$sa .= '<tr><td colspan="'.$colspan.'">&nbsp;</td></tr>';
 		}
 		$dateset = false;
-		for ($i=0;$i<count($jd['debits']);$i+=2) {
+		for ($i=0;$i<count($jd['debits']);$i+=$colinc) {
 			$out .= '<tr><td>'.($dateset?'':$jd['date']).'</td>';
 			$sa .= '<tr><td>'.($dateset?'':$jd['date']).'</td>';
 			$dateset = true;
-			$out .= '<td>[AB'.$sn.']</td><td>[AB'.($sn+1).']</td><td>[AB'.($sn+2).']</td></tr>';
+			$out .= '<td>[AB'.$sn.']</td><td>[AB'.($sn+1).']</td><td>[AB'.($sn+2).']</td>';
+			if ($usePostRefs) {
+				$out .= '<td>[AB'.($sn+3).']</td>';
+			}
+			$out .= '</tr>';
 			$anstypes[$sn] = 'string'; $displayformat[$sn] = $disptype; $questions[$sn] = $ops; $answer[$sn] = $jd['debits'][$i]; $answerboxsize[$sn] = $maxsizedescr;
+			$sa .= '<td>'.$jd['debits'][$i].'</td>';
+			if ($usePostRefs) {
+				$anstypes[$sn+1] = 'string'; $answer[$sn+1] = $jd['debits'][$i+1]; $answerboxsize[$sn+1] = $maxsizepostref;
+				$sa .= '<td>'.$jd['debits'][$i+1].'</td>';
+			}
 
-			if ($jd['debits'][$i+1]=='') {
-				$anstypes[$sn+1] = 'number'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
+			if ($jd['debits'][$i+$valinc]=='') {
+				$anstypes[$sn+$valinc] = 'number'; $displayformat[$sn+$valinc] = 'debit';
+				$answer[$sn+$valinc] = ''; $answerboxsize[$sn+$valinc] = $maxsizeentry;
 				$sa .= '<td>'.$jd['debits'][$i].'</td><td class="r"></td><td></td></tr>';
 			} else {
-				$jd['debits'][$i+1] = str_replace(array('$',',',' '),'',$jd['debits'][$i+1])*1;
-				$sa .= '<td>'.$jd['debits'][$i].'</td><td class="r">'.($hasdecimals?number_format($jd['debits'][$i+1],2,'.',','):number_format($jd['debits'][$i+1])).'</td><td></td></tr>';
-				$anstypes[$sn+1] = 'number'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = $jd['debits'][$i+1]; $answerboxsize[$sn+1] = $maxsizeentry;
+				$jd['debits'][$i+$valinc] = str_replace(array('$',',',' '),'',$jd['debits'][$i+$valinc])*1;
+				$sa .= '<td class="r">'.($hasdecimals?number_format($jd['debits'][$i+$valinc],2,'.',','):number_format($jd['debits'][$i+$valinc])).'</td><td></td></tr>';
+				$anstypes[$sn+$valinc] = 'number'; $displayformat[$sn+$valinc] = 'debit';
+				$answer[$sn+$valinc] = $jd['debits'][$i+$valinc]; $answerboxsize[$sn+$valinc] = $maxsizeentry;
 			}
-			$anstypes[$sn+2] = 'number'; $displayformat[$sn+2] = 'credit'; $answer[$sn+2] = ''; $answerboxsize[$sn+2] = $maxsizeentry;
+			$anstypes[$sn+$colinc] = 'number'; $displayformat[$sn+$colinc] = 'credit';
+			$answer[$sn+$colinc] = ''; $answerboxsize[$sn+$colinc] = $maxsizeentry;
 
-			$sn += 3;
+			$sn += $colinc+1;
 		}
-		for ($i=0;$i<count($jd['credits']);$i+=2) {
+		for ($i=0;$i<count($jd['credits']);$i+=$colinc) {
 			$out .= '<tr><td>'.($dateset?'':$jd['date']).'</td>';
 			$sa .= '<tr><td>'.($dateset?'':$jd['date']).'</td>';
 			$dateset = true;
 
-			$out .= '<td>[AB'.$sn.']</td><td>[AB'.($sn+1).']</td><td>[AB'.($sn+2).']</td></tr>';
-			$jd['credits'][$i+1] = str_replace(array('$',',',' '),'',$jd['credits'][$i+1])*1;
-			$sa .= '<td>&nbsp;&nbsp;&nbsp;'.$jd['credits'][$i].'</td><td></td><td class="r">'.($hasdecimals?number_format($jd['credits'][$i+1],2,'.',','):number_format($jd['credits'][$i+1])).'</td></tr>';
+			$out .= '<td>[AB'.$sn.']</td><td>[AB'.($sn+1).']</td><td>[AB'.($sn+2).']</td>';
+			$sa .= '<td>&nbsp;&nbsp;&nbsp;'.$jd['credits'][$i].'</td>';
+			if ($usePostRefs) {
+				$out .= '<td>[AB'.($sn+3).']</td>';
+				$sa .= '<td>'.$jd['credits'][$i+1].'</td>';
+			}
+			$out .= '</tr>';
+			$jd['credits'][$i+$valinc] = str_replace(array('$',',',' '),'',$jd['credits'][$i+$valinc])*1;
+			$sa .= '<td></td><td class="r">'.($hasdecimals?number_format($jd['credits'][$i+$valinc],2,'.',','):number_format($jd['credits'][$i+$valinc])).'</td></tr>';
 			//$anstypes[$sn] = 'string'; $displayformat[$sn] = 'typeahead'; $questions[$sn] = $ops;  $answer[$sn] = $jd['credits'][$i]; $answerboxsize[$sn] = $maxsizedescr;
 			$anstypes[$sn] = 'string'; $displayformat[$sn] = $disptype; $questions[$sn] = $ops;  $answer[$sn] =$jd['credits'][$i]; $answerboxsize[$sn] = $maxsizedescr;
-			$anstypes[$sn+1] = 'number'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
-			$anstypes[$sn+2] = 'number'; $displayformat[$sn+2] = 'credit'; $answer[$sn+2] = $jd['credits'][$i+1]; $answerboxsize[$sn+2] = $maxsizeentry;
+			if ($usePostRefs) {
+				$anstypes[$sn+1] = 'string'; $answer[$sn+1] = $jd['credits'][$i+1]; $answerboxsize[$sn+1] = $maxsizepostref;
+			}
+			$anstypes[$sn+$valinc] = 'number'; $displayformat[$sn+$valinc] = 'debit';
+			$answer[$sn+$valinc] = ''; $answerboxsize[$sn+$valinc] = $maxsizeentry;
+			$anstypes[$sn+$colinc] = 'number'; $displayformat[$sn+$colinc] = 'credit';
+			$answer[$sn+$colinc] = $jd['credits'][$i+$valinc]; $answerboxsize[$sn+$colinc] = $maxsizeentry;
 
-			$sn += 3;
+			$sn += $colinc+1;
 		}
 		if (isset($jd['extrarows'])) {
 			for ($i=0;$i<$jd['extrarows'];$i++) {
 				$out .= '<tr><td>'.($dateset?'':$jd['date']).'</td>';
 				$dateset = true;
 
-				$out .= '<td>[AB'.$sn.']</td><td>[AB'.($sn+1).']</td><td>[AB'.($sn+2).']</td></tr>';
+				$out .= '<td>[AB'.$sn.']</td><td>[AB'.($sn+1).']</td><td>[AB'.($sn+2).']</td>';
+				if ($usePostRefs) {
+					$out .= '<td>[AB'.($sn+3).']</td>';
+				}
+				$out .= '</tr>';
 				$anstypes[$sn] = 'string'; $displayformat[$sn] = $disptype; $questions[$sn] = $ops;  $answer[$sn] = ""; $answerboxsize[$sn] = $maxsizedescr;
-				$anstypes[$sn+1] = 'string'; $displayformat[$sn+1] = 'debit'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizeentry;
-				$anstypes[$sn+2] = 'string'; $displayformat[$sn+2] = 'credit'; $answer[$sn+2] = ''; $answerboxsize[$sn+2] = $maxsizeentry;
-				$sn += 3;
+				if ($usePostRefs) {
+					$anstypes[$sn+1] = 'string'; $answer[$sn+1] = ''; $answerboxsize[$sn+1] = $maxsizepostref;
+				}
+				$anstypes[$sn+$valinc] = 'string'; $displayformat[$sn+$valinc] = 'debit'; $answer[$sn+$valinc] = ''; $answerboxsize[$sn+$valinc] = $maxsizeentry;
+				$anstypes[$sn+$colinc] = 'string'; $displayformat[$sn+$colinc] = 'credit'; $answer[$sn+$colinc] = ''; $answerboxsize[$sn+$colinc] = $maxsizeentry;
+				$sn += $colinc+1;
 			}
 		}
 		if (isset($jd['note'])) {
-			$out .= '<tr><td></td><td colspan="3">'.$jd['note'].'</td></tr>';
-			$sa .= '<tr><td></td><td colspan="3">'.$jd['note'].'</td></tr>';
+			$out .= '<tr><td></td><td colspan="'.($colspan-1).'">'.$jd['note'].'</td></tr>';
+			$sa .= '<tr><td></td><td colspan="'.($colspan-1).'">'.$jd['note'].'</td></tr>';
 		}
 		if (isset($jd['explanation'])) {
-			$sa .= '<tr><td></td><td colspan="3">'.$jd['explanation'].'</td></tr>';
+			$sa .= '<tr><td></td><td colspan="'.($colspan-1).'">'.$jd['explanation'].'</td></tr>';
 		}
 	}
 	$out .= '</tbody></table>';
@@ -516,41 +566,44 @@ function scorejournal($stua, $answer, $j, $sn) {
 	}
 	//$newans = $answer;
 	foreach ($j as $ix=>$jd) {
-		$n = (count($jd['debits']) + count($jd['credits']))/2;
+		$offset = !empty($jd['haspostrefs'])?1:0;
+		$n = (count($jd['debits']) + count($jd['credits']))/(2+$offset);
 		$usedans = array();
-		for ($i=$sn;$i<$sn+3*$n;$i+=3) {
+		for ($i=$sn;$i<$sn+(3+$offset)*$n;$i+=3+$offset) {
 			$matchtype = -1;  $matchval = -1;
-			for ($k=$sn;$k<$sn+3*$n;$k+=3) {
+			for ($k=$sn;$k<$sn+(3+$offset)*$n;$k+=3+$offset) {
 				if (trim(strtolower($stua[$i]))==trim(strtolower($answer[$k]))) {
 					$matchtype = $k;
 					break;
-				} else if (($answer[$k+1]=='' && $stua[$i+1]=='' && abs(floatval($stua[$i+2]) - floatval($answer[$k+2]))<.01) ||
-					($answer[$k+2]=='' && $stua[$i+2]=='' && abs(floatval($stua[$i+1])-floatval($answer[$k+1]))<.01)
+				} else if (($answer[$k+1+$offset]=='' && $stua[$i+1+$offset]=='' &&
+					abs(floatval($stua[$i+2+$offset]) - floatval($answer[$k+2+$offset]))<.01) ||
+					($answer[$k+2+$offset]=='' && $stua[$i+2+$offset]=='' &&
+					abs(floatval($stua[$i+1+$offset])-floatval($answer[$k+1+$offset]))<.01)
 				) {
 					$matchval = $k;
 				}
 			}
 			if ($matchtype > -1 && !in_array($matchtype,$usedans)) {
 				$tmp = array();
-				for ($k=0;$k<3;$k++) {
+				for ($k=0;$k<3+$offset;$k++) {
 					$tmp[$k] = $answer[$i+$k];
 				}
-				for ($k=0;$k<3;$k++) {
+				for ($k=0;$k<3+$offset;$k++) {
 					$answer[$i+$k] = $answer[$matchtype+$k];
 				}
-				for ($k=0;$k<3;$k++) {
+				for ($k=0;$k<3+$offset;$k++) {
 					$answer[$matchtype+$k] = $tmp[$k];
 				}
 				$usedans[] = $i;
 			} else if ($matchval > -1 && !in_array($matchval,$usedans)) {
 				$tmp = array();
-				for ($k=0;$k<3;$k++) {
+				for ($k=0;$k<3+$offset;$k++) {
 					$tmp[$k] = $answer[$i+$k];
 				}
-				for ($k=0;$k<3;$k++) {
+				for ($k=0;$k<3+$offset;$k++) {
 					$answer[$i+$k] = $answer[$matchval+$k];
 				}
-				for ($k=0;$k<3;$k++) {
+				for ($k=0;$k<3+$offset;$k++) {
 					$answer[$matchval+$k] = $tmp[$k];
 				}
 			}
@@ -558,31 +611,31 @@ function scorejournal($stua, $answer, $j, $sn) {
 		//look at order:  look for debits after credits, and credits before debits
 		//mark wrong the less harmful ones
 		$debaftercred = array();  $firstcred = false;
-		for ($i=$sn;$i<$sn+3*$n;$i+=3) {
-			if ($stua[$i+1]!='' && $stua[$i+2]=='' && $firstcred) { $debaftercred[] = $i;}
-			if ($stua[$i+1]=='' && $stua[$i+2]!='') { $firstcred = true; }
+		for ($i=$sn;$i<$sn+(3+$offset)*$n;$i+=3+$offset) {
+			if ($stua[$i+1+$offset]!='' && $stua[$i+2+$offset]=='' && $firstcred) { $debaftercred[] = $i;}
+			if ($stua[$i+1+$offset]=='' && $stua[$i+2+$offset]!='') { $firstcred = true; }
 		}
 		$credbeforedeb = array();  $firstdeb = false;
-		for ($i=$sn+3*$n-3;$i>=$sn;$i-=3) {
-			if ($stua[$i+1]!='' && $stua[$i+2]=='') { $firstdeb = true;}
-			if ($stua[$i+1]=='' && $stua[$i+2]!='' && $firstdeb) { $credbeforedeb[] = $i; }
+		for ($i=$sn+(3+$offset)*$n-3-$offset;$i>=$sn;$i-=(3+$offset)) {
+			if ($stua[$i+1+$offset]!='' && $stua[$i+2+$offset]=='') { $firstdeb = true;}
+			if ($stua[$i+1+$offset]=='' && $stua[$i+2+$offset]!='' && $firstdeb) { $credbeforedeb[] = $i; }
 		}
 		if (count($debaftercred)+count($credbeforedeb) > 0) {
 			if (count($credbeforedeb) > count($debaftercred)) {
 				foreach ($debaftercred as $i) {
-					for ($k=0;$k<3;$k++) {
+					for ($k=0;$k<3+$offset;$k++) {
 						$answer[$i+$k] = $answer[$i+$k].'50000';
 					}
 				}
 			} else {
 				foreach ($credbeforedeb as $i) {
-					for ($k=0;$k<3;$k++) {
+					for ($k=0;$k<3+$offset;$k++) {
 						$answer[$i+$k] = $answer[$i+$k].'50000';
 					}
 				}
 			}
 		}
-		$sn += 3*(count($jd['debits']) + count($jd['credits']))/2 + 3*$jd['extrarows'];
+		$sn += (3+$offset)*(count($jd['debits']) + count($jd['credits']))/(2+$offset) + (3+$offset)*$jd['extrarows'];
 	}
 	return $answer;
 }
@@ -1117,11 +1170,11 @@ function makeTchart($title,$numrows,$leftentries,$rightentries, $sn, &$anstypes,
 		}
 		$sn++;
 	}
-	if ($showtotal) {
+	if ($showtotal !== false) {
 		$out .= '<tr><td style="border-top: 3px double;border-right:5px solid #000;" class="r">[AB'.$sn.']</td>';
 		$answerboxsize[$sn] = $maxsize;
 		$displayformat[$sn] = 'alignright';
-		if ($tot>0) {
+		if ($tot>0 || ($tot==0 && $showtotal==='zeroleft')) {
 			$anstypes[$sn] = 'number';
 			$answer[$sn] = $tot;
 			$sa .= '<tr><td style="border-top: 3px double;border-right:5px solid #000;" class="r">';
@@ -1141,7 +1194,7 @@ function makeTchart($title,$numrows,$leftentries,$rightentries, $sn, &$anstypes,
 		$out .= '<td style="border-top: 3px double;">[AB'.$sn.']</td></tr>';
 		$answerboxsize[$sn] = $maxsize;
 		$displayformat[$sn] = 'alignright';
-		if ($tot<0) {
+		if ($tot<0 || ($tot==0 && $showtotal!=='zeroleft')) {
 			$anstypes[$sn] = 'number';
 			$answer[$sn] = -$tot;
 			$sa .= '<td style="border-top: 3px double;" class="r">';
@@ -1153,8 +1206,8 @@ function makeTchart($title,$numrows,$leftentries,$rightentries, $sn, &$anstypes,
 			$sa .= '</td></tr>';
 		} else {
 			$sa .= '<td style="border-top: 3px double;">&nbsp;</td></tr>';
-			$anstypes[$sn] = 'number';
-			$answer[$sn] = '0 or ';
+			$anstypes[$sn] = 'string';
+			$answer[$sn] = '';
 		}
 		$sn++;
 	}
@@ -1162,7 +1215,7 @@ function makeTchart($title,$numrows,$leftentries,$rightentries, $sn, &$anstypes,
 	$out .= '</tbody></table>';
 	$sa .= '</tbody></table>';
 	if ($dofloat) {
-		$showanswer .= $sa;
+		$showanswer .= $sa . '<br class="clear" />';
 	} else {
 		$showanswer .= $sa.'<p>&nbsp;</p>';
 	}
