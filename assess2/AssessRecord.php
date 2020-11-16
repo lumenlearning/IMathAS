@@ -1310,6 +1310,7 @@ class AssessRecord
     $parts = array();
     $score = -1;
     $try = 0;
+    $lastsub = -1;
     $status = 'unattempted';
     if (count($curq['tries']) == 0) {
       // no tries yet
@@ -1358,6 +1359,9 @@ class AssessRecord
         if ($parttry === 0 && $answeights[$pn] > 0) {
           // if any parts are unattempted, mark question as such
           $status = 'unattempted';
+        }
+        if ($parttry > 0 && $curq['tries'][$pn][$parttry-1]['sub'] > $lastsub) {
+            $lastsub = $curq['tries'][$pn][$parttry-1]['sub'];
         }
         if ($include_scores && $answeights[$pn] > 0) {
           if ($status != 'unattempted') {
@@ -1428,6 +1432,10 @@ class AssessRecord
       }
       if ($out['tries_max'] == 1) {
         $out['parts_entered'] = $this->getPartsEntered($qn, $curq['tries'], $out['answeights']);
+      }
+      if ($this->teacherInGb && $lastsub > -1) {
+          $out['lastchange'] = tzdate("n/j/y, g:i a", 
+            $this->submissions[$lastsub] + $this->assessRecord['starttime']);
       }
     } else {
       $out['html'] = null;
