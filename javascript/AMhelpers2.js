@@ -566,7 +566,8 @@ function isBlank(str) {
 }
 function editdebit(e) {
   var el = e.target;
-	var descr = $('#qn'+(el.id.substr(2)*1 - 1));
+	//var descr = $('#qn'+(el.id.substr(2)*1 - 1));
+	var descr = $(el).closest('tr').find("input").first();
 	if (!isBlank(el.value) && descr.hasClass("iscredit")) {
     var leftpad = descr.css('padding-left');
 		if (descr.is('select')) {
@@ -580,7 +581,8 @@ function editdebit(e) {
 }
 function editcredit(e) {
   var el = e.target;
-	var descr = $('#qn'+(el.id.substr(2)*1 - 2));
+	//var descr = $('#qn'+(el.id.substr(2)*1 - 2));
+	var descr = $(el).closest('tr').find("input").first();
 	if (!isBlank(el.value) && !descr.hasClass("iscredit")) {
     var leftpad = parseInt(descr.css('padding-left'));
 		if (descr.is('select')) {
