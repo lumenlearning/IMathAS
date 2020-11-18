@@ -1,0 +1,8 @@
+/* Adjust typeahead styling due to Lux form styles */
+.newinstructorform .typeahead__container {
+    align-self: center;
+}
+
+.newinstructorform .typeahead__container.result .typeahead__result {
+    margin-top: 3em;
+}

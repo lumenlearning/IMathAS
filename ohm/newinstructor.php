@@ -4,7 +4,11 @@
 	echo "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/themes/lumen.css\" type=\"text/css\">\n";
+	$placeinhead .= '<link rel="stylesheet" href="'.$imasroot.'/ohm/css/jquery.typeahead.min.css" type="text/css">';
+	$placeinhead .= '<link rel="stylesheet" href="'.$imasroot.'/ohm/css/newinstructor.css" type="text/css">';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/ohm/js/jquery.typeahead.min.js"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/ohm/js/newinstructorSchoolSearch.js"></script>';
 	$placeinhead .= '<style type="text/css">div { margin: 0px; padding: 0px;}</style>';
 	$nologo = true;
 	require("../header.php");
@@ -135,7 +139,7 @@ spam filter.</em>
 	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
 	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
 	if (isset($_POST['SID'])) {$username=$_POST['SID'];} else {$username='';}
-	echo "<div class=lumensignupforms>";
+	echo "<div class='lumensignupforms newinstructorform'>";
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
 	echo '<dl>';
 	echo '<dt><b>Note</b>: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges.</dt>';
@@ -146,13 +150,23 @@ spam filter.</em>
 	echo "<input class='lumenform form' type=text name=lastname id=lastname placeholder='Last Name' value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40 aria-label='Last Name' required></span>";
 	echo "<input class='lumenform form' type=text name=email id=email placeholder='School Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
 	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40 aria-label='Phone Number' required>";
-	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"".Sanitize::encodeStringForDisplay($school)."\" size=40 aria-label='School & District / College' required>";
+?>
+<div class="typeahead__container">
+	<input class='school-name lumenform form'
+		   type="text"
+		   name="school"
+		   placeholder='School Name'
+		   value="<?php Sanitize::encodeStringForDisplay($school); ?>"
+		   size=40
+		   aria-label='School & District / College'>
+</div>
+<input type="hidden" name="ipeds-id" value="">
+<?php
 	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
 	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
 	echo "<input class='lumenform form' type=text name=SID id=SID placeholder='Requested Username (letters,numbers, \"_\")' value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40>";
 	echo "<input class='lumenform form' placeholder='Requested Password' type=password name=pw1 id=pw1 size=40 aria-label='Password' required>";
 	echo "<input class='lumenform form' placeholder='Retype Password' type=password name=pw2 id=pw2 size=40 aria-label='Retype Password' required>";
-	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
 	if (isset($CFG['GEN']['TOSpage'])) {
 		echo "</br>
 		<label class=form>
