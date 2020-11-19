@@ -66,6 +66,19 @@
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
 				$reqdata = array('reqmade'=>$now, 'school'=>$_POST['school'], 'phone'=>$_POST['phone'], 'url'=>$_POST['verurl']);
+                if (
+                    // An IPEDS ID was submitted in hidden form data, populated
+                    // by jquery.typeahead.js.
+                    !empty($_POST['ipeds-id'])
+                    // We only trust the hidden IPEDS ID if the user has not
+                    // manually edited the school name after selecting one from
+                    // typeahead results.
+                    && strtolower($_POST['ipeds-name']) == strtolower($_POST['school'])
+                ) {
+                    // This key should not exist at all in $reqdata if we don't
+                    // have a valid ID, due to how it's checked for in approvepending2.php.
+                    $reqdata['ipeds'] = $_POST['ipeds-id'];
+                }
 				$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,0,?,?)");
 				$stm->execute(array($newuserid, $now, json_encode($reqdata)));
 
@@ -160,7 +173,8 @@ spam filter.</em>
 		   size=40
 		   aria-label='School & District / College'>
 </div>
-<input type="hidden" name="ipeds-id" value="">
+<input class="ipeds-id" type="hidden" name="ipeds-id" value="">
+<input class="ipeds-name" type="hidden" name="ipeds-name" value="">
 <?php
 	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
 	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
