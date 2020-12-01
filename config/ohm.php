@@ -31,6 +31,9 @@ $emailconfirmation = false;
 $sendfrom = "do-not-reply@lumenlearning.com";
 $accountapproval = "support@lumenlearning.com";
 
+//use IPEDS IDs during new instructor signup?
+$CFG['use_ipeds'] = true;
+
 //color shift icons as deadline approaches?
 $colorshift = true;
 
