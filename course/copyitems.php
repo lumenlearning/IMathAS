@@ -19,7 +19,11 @@ $body = "";
 $pagetitle = "Copy Course Items";
 $ctc = Sanitize::onlyInt($_POST['ctc']);
 
-$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=" .Sanitize::courseId($_GET['cid']). "\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; "._("Copy Course Items");
+$curBreadcrumb = $breadcrumbbase;
+if (empty($_COOKIE['fromltimenu'])) {
+    $curBreadcrumb .= " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+}
+$curBreadcrumb .= _("Copy Course Items");
 
 	// SECURITY CHECK DATA PROCESSING
 if (!(isset($teacherid))) {
@@ -440,9 +444,9 @@ if (!(isset($teacherid))) {
 /******* begin html output ********/
 
 if (!isset($_GET['loadothers']) && !isset($_GET['loadothergroup'])) {
-$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/libtree.js\"></script>\n";
-$placeinhead .= "<style type=\"text/css\">\n<!--\n@import url(\"$imasroot/course/libtree.css\");\n-->\n</style>\n";
-$placeinhead .= '<script src="../javascript/copyitemslist.js" type="text/javascript"></script>';
+$placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/libtree.js\"></script>\n";
+$placeinhead .= "<style type=\"text/css\">\n<!--\n@import url(\"$staticroot/course/libtree.css\");\n-->\n</style>\n";
+$placeinhead .= '<script src="'.$staticroot.'/javascript/copyitemslist.js" type="text/javascript"></script>';
 require("../header.php");
 }
 if ($overwriteBody==1) {
@@ -585,7 +589,7 @@ $excludeAssess = ($sourceUIver > $destUIver);
 		<?php
 			$tdpad = 16*strlen($prespace[$i]);
 
-			echo '<td style="padding-left:'.$tdpad.'px"><img alt="'.$types[$i].'" title="'.$types[$i].'" src="'.$imasroot.'/img/';
+			echo '<td style="padding-left:'.$tdpad.'px"><img alt="'.$types[$i].'" title="'.$types[$i].'" src="'.$staticroot.'/img/';
 			switch ($types[$i]) {
 				case 'Calendar': echo $CFG['CPS']['miniicons']['calendar']; break;
 				case 'InlineText': echo $CFG['CPS']['miniicons']['inline']; break;

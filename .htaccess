@@ -39,6 +39,15 @@ deny from all
 deny from all
 </Files>
 
+<IfModule mod_headers.c>
+ <FilesMatch "\.(eot|ttf|otf|woff|png|jpg|gif|cur|css)$">
+  Header set Access-Control-Allow-Origin "*"
+ </FilesMatch>
+ <FilesMatch "\.(eot|ttf|otf|woff|png|jpg|gif|cur|css|js)$">
+  Header set Cache-Control "public, max-age=14400"
+ </FilesMatch>
+</IfModule>
+
 
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^myopenmath\.com

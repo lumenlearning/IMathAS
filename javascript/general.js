@@ -90,11 +90,11 @@ function tipshow(el,tip, e) {
 		return;
 	}
 	if (typeof tipobj!= 'object') {
-        tipobj = document.createElement("div");
-        if (typeof window.imathasAssess != 'undefined') {
+		tipobj = document.createElement("div");
+        if (window.imathasAssess) {
             tipobj.className = "dropdown-pane tooltip-pane";
         } else {
-            tipobj.className = "tips";
+		tipobj.className = "tips";
         }
 		tipobj.setAttribute("role","tooltip");
 		tipobj.id = "hovertipsholder";
@@ -385,7 +385,7 @@ function GB_show(caption,url,width,height,overlay,posstyle,showbelow) {
 				 .on('mouseup.GBresize', GB_endresize);
 			}
 		});
-    }
+	}
     document.getElementById("GB_loading").style.display = "block";
 	if (url.charAt(0)=='<') {
 		document.getElementById("GB_frameholder").innerHTML = '<div>'+url+'</div>';
@@ -400,25 +400,30 @@ function GB_show(caption,url,width,height,overlay,posstyle,showbelow) {
 		document.getElementById("GB_frameholder").innerHTML = '<iframe onload="GB_doneload()" id="GB_frame" src="'+url+'" title="'+caption+'"></iframe>';
 	} else {
         document.getElementById("GB_loading").style.display = 'none';
-    }
+	}
 	jQuery("#GB_frameholder").isolatedScroll();
 	if (url.match(/libtree/)) {
 		var btnhtml = '<span class="floatright"><input type="button" value="Use Libraries" onClick="document.getElementById(\'GB_frame\').contentWindow.setlib()" /> ';
 		btnhtml += '<a href="#" class="pointer" onclick="GB_hide();return false;" aria-label="Close">[X]</a>&nbsp;</span><span id="GB_title">Select Libraries</span><div class="clear"></div>';
 		document.getElementById("GB_caption").innerHTML = btnhtml;
 		var h = self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
+	} else if (url.match(/assessselect/)) {
+		var btnhtml = '<span class="floatright"><input type="button" value="Use Assessments" onClick="document.getElementById(\'GB_frame\').contentWindow.setassess()" /> ';
+		btnhtml += '<a href="#" class="pointer" onclick="GB_hide();return false;" aria-label="Close">[X]</a>&nbsp;</span><span id="GB_title">Select Assessments</span><div class="clear"></div>';
+		document.getElementById("GB_caption").innerHTML = btnhtml;
+		var h = self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
 	} else {
 		document.getElementById("GB_caption").innerHTML = '<span class="floatright"><a href="#" class="pointer" onclick="GB_hide();return false;" aria-label="Close">[X]</a></span><span id="GB_title">'+caption+'</span>';
 		document.getElementById("GB_caption").onclick = GB_hide;
 		if (height=='auto') {
-            var h = self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
+			var h = self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
 		} else {
 			var h = height;
 		}
 	}
-    document.getElementById("GB_window").style.display = "block";
+	document.getElementById("GB_window").style.display = "block";
     if (overlay !== false) {
-        document.getElementById("GB_overlay").style.display = "block";
+	document.getElementById("GB_overlay").style.display = "block";
     } else {
         document.getElementById("GB_overlay").style.display = "none";
     }
@@ -428,7 +433,7 @@ function GB_show(caption,url,width,height,overlay,posstyle,showbelow) {
 	var w = $(document).width();
 	if (width > w-20) {
 		width = w-20;
-    }
+	}
     if (!posstyle.match(/noreset/) || 
         !jQuery("#GB_window").data("original_mouse_x") || 
         document.getElementById("GB_window").style.left==''
@@ -458,16 +463,16 @@ function GB_show(caption,url,width,height,overlay,posstyle,showbelow) {
             $("#GB_window").css("left", width).css("width","auto").css("right",20).css("margin","0");
             width = w - width - 20;
         } else {
-            document.getElementById("GB_window").style.width = width + "px";
+	document.getElementById("GB_window").style.width = width + "px";
         }
         
-        document.getElementById("GB_window").style.height = (h-30) + "px";
-        //document.getElementById("GB_window").style.left = ((w - width)/2)+"px";
-        if (url.charAt(0)!='<') {
-            document.getElementById("GB_frameholder").style.height = (h - 30 -36)+"px";
-        } else {
-            document.getElementById("GB_frameholder").style.height = "auto";
-        }
+	document.getElementById("GB_window").style.height = (h-30) + "px";
+	//document.getElementById("GB_window").style.left = ((w - width)/2)+"px";
+	if (url.charAt(0)!='<') {
+		document.getElementById("GB_frameholder").style.height = (h - 30 -36)+"px";
+	} else {
+		document.getElementById("GB_frameholder").style.height = "auto";
+	}
     }
 	document.getElementById("GB_window").focus();
 	$(document).on('keydown.GB', function(evt) {
@@ -504,7 +509,7 @@ function chkAllNone(frmid, arr, mark, skip) {
   return false;
 }
 
-var tinyMCEPreInit = {base: imasroot+"/tinymce4"};
+var tinyMCEPreInit = {base: staticroot+"/tinymce4"};
 var desmos = '';
 function initeditor(edmode,edids,css,inline,setupfunction){
 	var cssmode = css || 0;
@@ -525,14 +530,18 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 		plugins: [
 			desmos+" noneditable lists advlist autolink attach image charmap anchor",
 			"searchreplace code link textcolor snippet",
-			"media table paste asciimath asciisvg rollups colorpicker"
+			"media table paste rollups colorpicker"
 		],
+        external_plugins: {
+            "asciimath": imasroot+'/tinymce4/plugins/asciimath/plugin.min.js',
+            "asciisvg": imasroot+'/tinymce4/plugins/asciisvg/plugin.min.js'
+        },
 		noneditable_noneditable_class: "js-desmos",
 		menubar: false,//"edit insert format table tools ",
 		toolbar1: "myEdit myInsert styleselect | bold italic underline subscript superscript | forecolor backcolor | snippet code | saveclose",
 		toolbar2: " alignleft aligncenter alignright | bullist numlist outdent indent  | attach link unlink image | table | asciimath asciimathcharmap asciisvg " + desmos,
 		extended_valid_elements : 'iframe[src|width|height|name|align|allowfullscreen|frameborder|style|class],param[name|value],@[sscr]',
-		content_css : imasroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+imasroot+'/themes/'+coursetheme+(desmos==''?'':','+imasroot+'/desmos/desmos-temp.css'),
+		content_css : staticroot+(cssmode==1?'/assessment/mathtest.css,':'/imascore.css,')+staticroot+'/themes/'+coursetheme+(desmos==''?'':','+imasroot+'/desmos/desmos-temp.css'),
 		AScgiloc : imasroot+'/filter/graph/svgimg.php',
 		convert_urls: false,
 		file_picker_callback: filePickerCallBackFunc,
@@ -552,6 +561,7 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 			{title:"Gridded Centered", value:"gridded centered"}],
 		style_formats_merge: true,
 		snippets: (tinymceUseSnippets==1)?imasroot+'/tinymce4/getsnippets.php':false,
+        autolink_pattern: /^(https?:\/\/|www\.)(.+)$/i,
 		setup: function (editor) {
 			editor.on('change', function () {
 				editor.save();
@@ -692,13 +702,24 @@ function recclick(type,typeid,info,txt) {
 		var extradata = '',m;
 		if ((m = window.location.href.match(/showlinkedtext.*?&id=(\d+)/)) !== null && recordedunload==false) {
 			extradata = '&unloadinglinked='+m[1];
-			recordedunload = true;
-		}
-		jQuery.ajax({
-			type: "POST",
-			url: imasroot+'/course/rectrack.php?cid='+cid,
-			data: "type="+encodeURIComponent(type)+"&typeid="+encodeURIComponent(typeid)+"&info="+encodeURIComponent(info+'::'+txt)+extradata
-		});
+            recordedunload = true;
+        }
+        if (navigator.sendBeacon) {
+            var fd = new FormData();
+            fd.append('type', type);
+            fd.append('typeid', typeid);
+            fd.append('info',info+'::'+txt);
+            if (extradata != '') {
+                fd.append('unloadinglinked', m[1]);
+            }
+            navigator.sendBeacon(imasroot+'/course/rectrack.php?cid='+cid, fd);
+        } else {
+            jQuery.ajax({
+                type: "POST",
+                url: imasroot+'/course/rectrack.php?cid='+cid,
+                data: "type="+encodeURIComponent(type)+"&typeid="+encodeURIComponent(typeid)+"&info="+encodeURIComponent(info+'::'+txt)+extradata
+            });
+        }
 	}
 }
 function setuptracklinks(i,el) {
@@ -778,7 +799,7 @@ function togglevideoembed() {
 			timeref += '&end='+m[1];
 		}
 		timeref += '&enablejsapi=1';
-        var loc_protocol = location.protocol == 'https:' ? 'https:' : 'http:';
+		var loc_protocol = location.protocol == 'https:' ? 'https:' : 'http:';
         var viframe = jQuery('<iframe/>', {
 			id: 'videoiframe'+id,
 			width: 640,
@@ -897,7 +918,7 @@ function togglefileembed() {
 				text: 'Converting HEIC file (this may take a while)...'
 			}).insertAfter(jQuery(this));
 			if (!window.heic2any) {
-				jQuery.getScript(imasroot+'/javascript/heic2any.min.js')
+				jQuery.getScript(staticroot+'/javascript/heic2any.min.js')
 				 .done(function() { convertheic(href, 'fileiframe' + id); });
 			} else {
 				convertheic(href, 'fileiframe' + id);
@@ -939,7 +960,7 @@ jQuery(function() {
 				el.setAttribute('action', el.getAttribute('action') + '&btf='+btf);
 			}
 		}
-	});
+    });
 });
 
 function convertheic(href, divid) {
@@ -1081,7 +1102,10 @@ jQuery(document).ready(function($) {
 		if (typeof e.originalEvent.data=='string' && e.originalEvent.data.match(/lti\.frameResize/)) {
 			var edata = JSON.parse(e.originalEvent.data);
 			if ("frame_id" in edata) {
-				$("#"+edata["frame_id"]).height(edata.height);
+                $("#"+edata["frame_id"]).height(edata.height);
+                if (edata.wrapheight) {
+                    $("#"+edata["frame_id"]+"wrap").height(edata.wrapheight);
+                }
 			} else if ("iframe_resize_id" in edata) {
 				$("#"+edata["iframe_resize_id"]).height(edata.height);
 			} else {
@@ -1126,7 +1150,7 @@ function initlinkmarkup(base) {
 	$(base).find("a.attach").not('.textsegment a,.mce-content-body a').not(".prepped").each(setuppreviewembeds);
 	setupToggler(base);
 	setupToggler2(base);
-    $(base).fitVids();
+	$(base).fitVids();
     resizeResponsiveIframes(base, true);
 }
 
@@ -1135,15 +1159,35 @@ function resizeResponsiveIframes(base, init) {
         jQuery(base).find('iframe.scaleresponsive').wrap(jQuery('<div>', {css:{overflow:"hidden"}}));
     }
     jQuery(base).find('iframe.scaleresponsive').each(function(i,el) {
-        var p = el.parentNode;
+        var p = el.parentNode; 
         var sc = Math.min(1,p.offsetWidth/parseInt(el.width || el.style.width));
         el.style.transform = "scale("+sc+")";
         p.style.height = (sc*parseInt(el.height || el.style.height)+3)+"px";
     });
 }
 jQuery(document).ready(function($) {
-    initlinkmarkup('body');
+	initlinkmarkup('body');
     $(window).on('resize', function () {resizeResponsiveIframes('body');});
+});
+
+jQuery(function($) {
+	$("#ltimenubutton").on('click', function() {
+		var btn = $("#ltimenubutton");
+		if (!btn.attr("data-loaded")) {
+			$.ajax({
+					type: "GET",
+					url: imasroot+'/lti/ltimenu.php?launchid=' +
+						encodeURIComponent(window.sessionStorage.getItem('LTI1p3_launchid'))
+			}).done(function(msg) {
+				$("#ltimenudiv").html(msg);
+                btn.attr("data-loaded",1);
+                document.cookie = "fromltimenu=1;"
+                    + 'path=' + ((imasroot=='') ? '/' : imasroot) + ';'
+                    + ((window.location.protocol=='https:') ? "secure; samesite=none" : "");
+				sendLTIresizemsg();
+			});
+		}
+	});
 });
 
 jQuery.fn.isolatedScroll = function() {
@@ -1288,11 +1332,11 @@ jQuery(document).ready(function($) {
 				if (e.type=="click" || e.which==13) {
 					if ($(this).attr("aria-expanded") == "true") {
 						$(this).attr("aria-expanded", false);
-						$(this).children("img").attr("src", "../img/expand.gif");
+						$(this).children("img").attr("src", staticroot+"/img/expand.gif");
 						$(this).next(".blockitems").slideUp();
 					} else {
 						$(this).attr("aria-expanded", true);
-						$(this).children("img").attr("src", "../img/collapse.gif");
+						$(this).children("img").attr("src", staticroot+"/img/collapse.gif");
 						$(this).next(".blockitems").slideDown();
 					}
 				}
@@ -1432,7 +1476,7 @@ jQuery(document).ready(function($) {
 });
 var sagecellcounter = 0;
 function initSageCell(base) {
-	jQuery(base).find(".converttosagecell").each(function() {
+	jQuery(base).find(".converttosagecell:visible").each(function() {
 		var ta, code;
 		var $this = jQuery(this);
 		if ($this.is("pre")) {
@@ -1498,10 +1542,10 @@ function setActiveTab(el) {
 }
 
 /* ========================================================================
- * Bootstrap: dropdown.js v3.3.5
- * http://getbootstrap.com/javascript/#dropdowns
+ * Bootstrap: dropdown.js v3.4.1
+ * https://getbootstrap.com/docs/3.4/javascript/#dropdowns
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2019 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -1516,11 +1560,9 @@ function setActiveTab(el) {
   var toggle   = '[data-toggle="dropdown"]'
   var Dropdown = function (element) {
     $(element).on('click.bs.dropdown', this.toggle)
-		var $parent = getParent($(element));
-		$parent.find('[role=menu].dropdown-menu li:not(.disabled) a').attr('role','menuitem');
   }
 
-  Dropdown.VERSION = '3.3.5'
+    Dropdown.VERSION = '3.4.1'
 
   function getParent($this) {
     var selector = $this.attr('data-target')
@@ -1530,7 +1572,7 @@ function setActiveTab(el) {
       selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
     }
 
-    var $parent = selector && $(selector)
+      var $parent = selector !== '#' ? $(document).find(selector) : null
 
     return $parent && $parent.length ? $parent : $this.parent()
   }
@@ -1552,13 +1594,12 @@ function setActiveTab(el) {
       if (e.isDefaultPrevented()) return
 
       $this.attr('aria-expanded', 'false')
-      $parent.removeClass('open').trigger('hidden.bs.dropdown', relatedTarget)
+        $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
     })
   }
 
   Dropdown.prototype.toggle = function (e) {
     var $this = $(this)
-
     if ($this.is('.disabled, :disabled')) return
 
     var $parent  = getParent($this)
@@ -1586,8 +1627,7 @@ function setActiveTab(el) {
 
       $parent
         .toggleClass('open')
-        .trigger('shown.bs.dropdown', relatedTarget)
-
+          .trigger($.Event('shown.bs.dropdown', relatedTarget))
     }
 
     return false
@@ -1612,7 +1652,10 @@ function setActiveTab(el) {
     }
 
     var desc = ' li:not(.disabled):visible a'
-    var $items = $parent.find('.dropdown-menu' + desc)
+      var $items = $this.next('.dropdown-menu' + desc);
+      if (!$items.length) {
+        $items = $parent.find('.dropdown-menu' + desc);
+      }
 
     if (!$items.length) return
 
@@ -1663,9 +1706,5 @@ function setActiveTab(el) {
     .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
     .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
     .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
-
-	$(function() {
-		$('[role=menu].dropdown-menu li:not(.disabled) a').attr('role','menuitem');
-	});
 
 }(jQuery);

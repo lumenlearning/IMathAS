@@ -14,12 +14,15 @@ $overwriteBody = 0;
 $body = "";
 $pagetitle = _("Add/Remove Questions");
 
-$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=" . Sanitize::courseId($_GET['cid']) . "\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
+$curBreadcrumb = $breadcrumbbase;
+if (empty($_COOKIE['fromltimenu'])) {
+    $curBreadcrumb .= " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+}
 if (isset($_GET['clearattempts']) || isset($_GET['clearqattempts']) || isset($_GET['withdraw'])) {
-	$curBreadcrumb .= "&gt; <a href=\"addquestions.php?cid=" . Sanitize::courseId($_GET['cid']) . "&aid=" . Sanitize::onlyInt($_GET['aid']) . "\">"._("Add/Remove Questions")."</a> &gt; Confirm\n";
+	$curBreadcrumb .= " <a href=\"addquestions.php?cid=" . Sanitize::courseId($_GET['cid']) . "&aid=" . Sanitize::onlyInt($_GET['aid']) . "\">"._("Add/Remove Questions")."</a> &gt; Confirm\n";
 	//$pagetitle = "Modify Inline Text";
 } else {
-	$curBreadcrumb .= "&gt; "._("Add/Remove Questions")."\n";
+	$curBreadcrumb .= _("Add/Remove Questions")."\n";
 	//$pagetitle = "Add Inline Text";
 }
 
@@ -46,7 +49,22 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	}
     $aver = $row['ver'];
     $submitby = $row['submitby'];
-	$modquestion = ($aver > 1) ? 'modquestion2' : 'modquestion';
+    $modquestion = ($aver > 1) ? 'modquestion2' : 'modquestion';
+    
+    if ($aver > 1) {
+		$query = "SELECT iar.userid FROM imas_assessment_records AS iar,imas_students WHERE ";
+		$query .= "iar.assessmentid=:assessmentid AND iar.userid=imas_students.userid AND imas_students.courseid=:courseid LIMIT 1";
+	} else {
+		$query = "SELECT ias.id FROM imas_assessment_sessions AS ias,imas_students WHERE ";
+		$query .= "ias.assessmentid=:assessmentid AND ias.userid=imas_students.userid AND imas_students.courseid=:courseid LIMIT 1";
+	}
+	$stm = $DBH->prepare($query);
+	$stm->execute(array(':assessmentid'=>$aid, ':courseid'=>$cid));
+	if ($stm->rowCount() > 0) {
+		$beentaken = true;
+	} else {
+		$beentaken = false;
+	}
 
 	if (isset($_GET['grp'])) { $_SESSION['groupopt'.$aid] = Sanitize::onlyInt($_GET['grp']);}
 	if (isset($_GET['selfrom'])) {
@@ -57,7 +75,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		}
 	}
 
-	if (isset($teacherid) && isset($_GET['addset'])) {
+	if (isset($teacherid) && isset($_GET['addset']) && !$beentaken) {
 		if (!isset($_POST['nchecked']) && !isset($_POST['qsetids'])) {
 			$overwriteBody = 1;
 			$body = _("No questions selected").".  <a href=\"addquestions.php?cid=$cid&aid=$aid\">"._("Go back")."</a>\n";
@@ -460,11 +478,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var addqaddr = '$address';
 		var assessver = '$aver';
 		</script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addquestions.js?v=042220\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/addqsort.js?v=090220\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/junkflag.js\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addquestions.js?v=042220\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort.js?v=100820\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";
-	$placeinhead .= "<link rel=\"stylesheet\" href=\"$imasroot/course/addquestions.css?v=100517\" type=\"text/css\" />";
+	$placeinhead .= "<link rel=\"stylesheet\" href=\"$staticroot/course/addquestions.css?v=100517\" type=\"text/css\" />";
 	$loadiconfont = true;
 	$useeditor = "noinit";
 
@@ -472,21 +490,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	//load filter.  Need earlier than usual header.php load
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	require_once("$curdir/../filter/filter.php");
-	if ($aver > 1) {
-		$query = "SELECT iar.userid FROM imas_assessment_records AS iar,imas_students WHERE ";
-		$query .= "iar.assessmentid=:assessmentid AND iar.userid=imas_students.userid AND imas_students.courseid=:courseid LIMIT 1";
-	} else {
-		$query = "SELECT ias.id FROM imas_assessment_sessions AS ias,imas_students WHERE ";
-		$query .= "ias.assessmentid=:assessmentid AND ias.userid=imas_students.userid AND imas_students.courseid=:courseid LIMIT 1";
-	}
-	$stm = $DBH->prepare($query);
-	$stm->execute(array(':assessmentid'=>$aid, ':courseid'=>$cid));
-	if ($stm->rowCount() > 0) {
-		$beentaken = true;
-	} else {
-		$beentaken = false;
-	}
-	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showcalculator,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
+	
+	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	list($itemorder,$page_assessmentName,$defpoints,$displaymethod,$showcalculatordef,$showhintsdef,$showworkdef,$assessintro) = $stm->fetch(PDO::FETCH_NUM);
 	$ln = 1;
@@ -963,14 +968,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 								}
 							}
 							if ($hasvid) {
-								$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/video_tiny.png\" alt=\"{$altcap}"._("Video")."\"/>";
+								$page_questionTable[$i]['extref'] .= "<img src=\"$staticroot/img/video_tiny.png\" alt=\"{$altcap}"._("Video")."\"/>";
 							}
 							if ($hasother) {
-								$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/html_tiny.png\" alt=\""._("Help Resource")."\"/>";
+								$page_questionTable[$i]['extref'] .= "<img src=\"$staticroot/img/html_tiny.png\" alt=\""._("Help Resource")."\"/>";
 							}
 						}
 						if ($line['solution']!='' && ($line['solutionopts']&2)==2) {
-							$page_questionTable[$i]['extref'] .= "<img src=\"$imasroot/img/assess_tiny.png\" alt=\""._("Detailed Solution")."\"/>";
+							$page_questionTable[$i]['extref'] .= "<img src=\"$staticroot/img/assess_tiny.png\" alt=\""._("Detailed Solution")."\"/>";
 						}
 						/*$query = "SELECT COUNT(id) FROM imas_questions WHERE questionsetid='{$line['id']}'";
 						$result2 = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -1137,10 +1142,10 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 							}
 						}
 						if ($hasvid) {
-							$page_assessmentQuestions[$x]['extref'][$y] .= "<img src=\"$imasroot/img/video_tiny.png\" alt=\"{$altcap}Video\"/>";
+							$page_assessmentQuestions[$x]['extref'][$y] .= "<img src=\"$staticroot/img/video_tiny.png\" alt=\"{$altcap}Video\"/>";
 						}
 						if ($hasother) {
-							$page_assessmentQuestions[$x]['extref'][$y] .= "<img src=\"$imasroot/img/html_tiny.png\" alt=\"Help Resource\"/>";
+							$page_assessmentQuestions[$x]['extref'][$y] .= "<img src=\"$staticroot/img/html_tiny.png\" alt=\"Help Resource\"/>";
 						}
 					}
 
@@ -1206,12 +1211,12 @@ if ($overwriteBody==1) {
 		var AHAHsaveurl = '<?php echo $GLOBALS['basesiteurl'] ?>/course/addquestionssave.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>';
 		var curlibs = '<?php echo Sanitize::encodeStringForJavascript($searchlibs); ?>';
 	</script>
-	<script type="text/javascript" src="<?php echo $imasroot ?>/javascript/tablesorter.js"></script>
+	<script type="text/javascript" src="<?php echo $staticroot ?>/javascript/tablesorter.js"></script>
 
 	<div class="breadcrumb"><?php echo $curBreadcrumb ?></div>
 
 	<div id="headeraddquestions" class="pagetitle"><h1><?php echo _('Add/Remove Questions'); ?>
-		<img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=addingquestionstoanassessment','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/>
+		<img src="<?php echo $staticroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=addingquestionstoanassessment','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/>
     </h1></div>
     <div class="cp">
         <span class="column">
@@ -1230,13 +1235,16 @@ if ($overwriteBody==1) {
     if ($aver > 1 && $submitby == 'by_assessment') {
         echo '<br><a href="autoexcuse.php?aid='.$aid.'&amp;cid='.$cid.'">'._('Define Auto-Excuse').'</a>';
     }
+    if ($aver > 1) {
+        echo '<br><a href="addquestions2.php?aid='.$aid.'&amp;cid='.$cid.'">'._('Try New Add/Remove (Beta)').'</a>';
+    }
     echo '</span><br class=clear /></div>';
 	if ($beentaken) {
 ?>
 	<h2><?php echo _("Warning") ?></h2>
 	<p><?php echo _("This assessment has already been taken.  Adding or removing questions, or changing a	question's settings (point value, penalty, attempts) now would majorly mess things up. If you want to make these changes, you need to clear all existing assessment attempts") ?>
 	</p>
-	<p><input type=button value="Clear Assessment Attempts" onclick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&clearattempts=ask'">
+	<p><input type=button value="<?php echo _("Clear Assessment Attempts"); ?>" onclick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&clearattempts=ask'">
 	</p>
 <?php
 	}
@@ -1248,7 +1256,7 @@ if ($overwriteBody==1) {
 		echo "<p>"._("No Questions currently in assessment")."</p>\n";
 
 		echo '<a href="#" onclick="this.style.display=\'none\';document.getElementById(\'helpwithadding\').style.display=\'block\';return false;">';
-		echo "<img src=\"$imasroot/img/help.gif\" alt=\"Help\"/> ";
+		echo "<img src=\"$staticroot/img/help.gif\" alt=\"Help\"/> ";
 		echo _('How do I find questions to add?'),'</a>';
 		echo '<div id="helpwithadding" style="display:none">';
 		if ($_SESSION['selfrom'.$aid]=='lib') {
@@ -1444,9 +1452,9 @@ if ($overwriteBody==1) {
 					</td>
 					<?php if ($searchall==0) {
 						if ($page_questionTable[$qid]['junkflag']==1) {
-							echo "<td class=c><img class=\"pointer\" id=\"tag{$page_questionTable[$qid]['libitemid']}\" src=\"$imasroot/img/flagfilled.gif\" onClick=\"toggleJunkFlag({$page_questionTable[$qid]['libitemid']});return false;\" alt=\"Flagged\" /></td>";
+							echo "<td class=c><img class=\"pointer\" id=\"tag{$page_questionTable[$qid]['libitemid']}\" src=\"$staticroot/img/flagfilled.gif\" onClick=\"toggleJunkFlag({$page_questionTable[$qid]['libitemid']});return false;\" alt=\"Flagged\" /></td>";
 						} else {
-							echo "<td class=c><img class=\"pointer\" id=\"tag{$page_questionTable[$qid]['libitemid']}\" src=\"$imasroot/img/flagempty.gif\" onClick=\"toggleJunkFlag({$page_questionTable[$qid]['libitemid']});return false;\" alt=\"Not flagged\" /></td>";
+							echo "<td class=c><img class=\"pointer\" id=\"tag{$page_questionTable[$qid]['libitemid']}\" src=\"$staticroot/img/flagempty.gif\" onClick=\"toggleJunkFlag({$page_questionTable[$qid]['libitemid']});return false;\" alt=\"Not flagged\" /></td>";
 						}
 					} ?>
 				</tr>
@@ -1562,8 +1570,8 @@ if ($overwriteBody==1) {
 		<h3><?php echo _('Choose assessments to take questions from'); ?></h3>
 		<form id="sela" method=post action="addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>">
 		<?php echo _('Check'); ?>: <a href="#" onclick="return chkAllNone('sela','achecked[]',true)"><?php echo _('All'); ?></a> <a href="#" onclick="return chkAllNone('sela','achecked[]',false)"><?php echo _('None'); ?></a>
-		<input type=submit value="Use these Assessments" /> <?php echo _('or'); ?>
-		<input type=button value="Select From Libraries" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=lib'">
+		<input type=submit value="<?php echo _("Use these Assessments") ?>" /> <?php echo _('or'); ?>
+		<input type=button value="<?php echo _("Select From Libraries") ?>" onClick="window.location='addquestions.php?cid=<?php echo $cid ?>&aid=<?php echo $aid ?>&selfrom=lib'">
 
 		<table cellpadding=5 id=myTable class=gb>
 			<thead>
@@ -1587,7 +1595,7 @@ if ($overwriteBody==1) {
 
 			</tbody>
 		</table>
-		<script type=\"text/javascript\">
+		<script type="text/javascript">
 			initSortTable('myTable',Array(false,'S','S',false,false,false),true);
 		</script>
 	</form>

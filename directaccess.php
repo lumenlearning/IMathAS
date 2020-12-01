@@ -45,11 +45,12 @@
         } else if (strlen($enrollkey)>0 && trim($_POST['ekey2'])=='') {
 			$page_newaccounterror .= _("Please provide the enrollment key");
 		} else if (strlen($enrollkey)>0) {
-			$keylist = array_map('trim',explode(';',$enrollkey));
-			if (!in_array($_POST['ekey2'], $keylist)) {
+            $keylist = array_map('trim',explode(';',$line['enrollkey']));
+            if (($p = array_search(strtolower(trim($_POST['ekey2'])), array_map('strtolower', $keylist))) === false) {
 				$page_newaccounterror .= _("Enrollment key is invalid.");
 			} else {
-				$_POST['ekey'] = $_POST['ekey2'];
+                $_POST['ekey'] = $keylist[$p];
+                $_POST['ekey2'] = $keylist[$p];
 			}
 		}
 
@@ -179,18 +180,18 @@
 		$coursename = $stm->fetchColumn(0);
 
 		if (isset($CFG['GEN']['directaccessincludepath'])) {
-			$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/".$CFG['GEN']['directaccessincludepath']."infopages.css\" type=\"text/css\">\n";
+			$placeinhead = "<link rel=\"stylesheet\" href=\"$staticroot/".$CFG['GEN']['directaccessincludepath']."infopages.css\" type=\"text/css\">\n";
 		} else {
-			$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/infopages.css\" type=\"text/css\">\n";
+			$placeinhead = "<link rel=\"stylesheet\" href=\"$staticroot/infopages.css\" type=\"text/css\">\n";
 		}
 		//$placeinhead = "<style type=\"text/css\">div#header {clear: both;height: 75px;background-color: #9C6;margin: 0px;padding: 0px;border-left: 10px solid #036;border-bottom: 5px solid #036;} \n.vcenter {font-family: sans-serif;font-size: 28px;margin: 0px;margin-left: 30px;padding-top: 25px;color: #fff;}</style>";
-		$placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
+		$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/jstz_min.js\" ></script>";
 		$pagetitle = $coursename;
 		$challenge = uniqid();
 		$_SESSION['challenge'] = $challenge;
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
+		$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 		if (isset($CFG['locale'])) {
-			$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jqvalidatei18n/messages_'.substr($CFG['locale'],0,2).'.min.js"></script>';
+			$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/jqvalidatei18n/messages_'.substr($CFG['locale'],0,2).'.min.js"></script>';
 		}
 		$nologo = true;
 		require("header.php");
