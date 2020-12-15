@@ -4,7 +4,11 @@
 	echo "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\" />\n";
 	$pagetitle = "New instructor account request";
 	$placeinhead = "<link rel=\"stylesheet\" href=\"$imasroot/themes/lumen.css\" type=\"text/css\">\n";
+	$placeinhead .= '<link rel="stylesheet" href="'.$imasroot.'/ohm/css/jquery.typeahead.min.css" type="text/css">';
+	$placeinhead .= '<link rel="stylesheet" href="'.$imasroot.'/ohm/css/newinstructor.css" type="text/css">';
 	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/ohm/js/jquery.typeahead.min.js"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/ohm/js/newinstructorSchoolSearch.js"></script>';
 	$placeinhead .= '<style type="text/css">div { margin: 0px; padding: 0px;}</style>';
 	$nologo = true;
 	require("../header.php");
@@ -62,6 +66,19 @@
 				$stm->execute(array(':time'=>$now, ':log'=>"New Instructor Request: $newuserid:: School: {$_POST['school']} <br/> VerificationURL: <a href='{$_POST['verurl']}' target='_blank'>{$urldisplay}</a> <br/> Phone: {$_POST['phone']} <br/>"));
 
 				$reqdata = array('reqmade'=>$now, 'school'=>$_POST['school'], 'phone'=>$_POST['phone'], 'url'=>$_POST['verurl']);
+                if (
+                    // An IPEDS ID was submitted in hidden form data, populated
+                    // by jquery.typeahead.js.
+                    !empty($_POST['ipeds-id'])
+                    // We only trust the hidden IPEDS ID if the user has not
+                    // manually edited the school name after selecting one from
+                    // typeahead results.
+                    && strtolower($_POST['ipeds-name']) == strtolower($_POST['school'])
+                ) {
+                    // This key should not exist at all in $reqdata if we don't
+                    // have a valid ID, due to how it's checked for in approvepending2.php.
+                    $reqdata['ipeds'] = $_POST['ipeds-id'];
+                }
 				$stm = $DBH->prepare("INSERT INTO imas_instr_acct_reqs (userid,status,reqdate,reqdata) VALUES (?,0,?,?)");
 				$stm->execute(array($newuserid, $now, json_encode($reqdata)));
 
@@ -135,7 +152,7 @@ spam filter.</em>
 	if (isset($_POST['school'])) {$school=$_POST['school'];} else {$school='';}
 	if (isset($_POST['verurl'])) {$verurl=$_POST['verurl'];} else {$verurl='';}
 	if (isset($_POST['SID'])) {$username=$_POST['SID'];} else {$username='';}
-	echo "<div class=lumensignupforms>";
+	echo "<div class='lumensignupforms newinstructorform'>";
 	echo "<div id='headerforms' class='pagetitle'><h2>New Instructor Account Request</h2></div>\n";
 	echo '<dl>';
 	echo '<dt><b>Note</b>: Instructor accounts are manually verified, and will be provided for teachers at accredited schools and colleges.</dt>';
@@ -146,13 +163,24 @@ spam filter.</em>
 	echo "<input class='lumenform form' type=text name=lastname id=lastname placeholder='Last Name' value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40 aria-label='Last Name' required></span>";
 	echo "<input class='lumenform form' type=text name=email id=email placeholder='School Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
 	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40 aria-label='Phone Number' required>";
-	echo "<input class='lumenform form' type=\"text\" name=\"school\" placeholder='School & District / College' value=\"".Sanitize::encodeStringForDisplay($school)."\" size=40 aria-label='School & District / College' required>";
+?>
+<div class="typeahead__container">
+	<input class='school-name lumenform form'
+		   type="text"
+		   name="school"
+		   placeholder='School Name'
+		   value="<?php Sanitize::encodeStringForDisplay($school); ?>"
+		   size=40
+		   aria-label='School & District / College'>
+</div>
+<input class="ipeds-id" type="hidden" name="ipeds-id" value="">
+<input class="ipeds-name" type="hidden" name="ipeds-name" value="">
+<?php
 	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
 	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
 	echo "<input class='lumenform form' type=text name=SID id=SID placeholder='Requested Username (letters,numbers, \"_\")' value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40>";
 	echo "<input class='lumenform form' placeholder='Requested Password' type=password name=pw1 id=pw1 size=40 aria-label='Password' required>";
 	echo "<input class='lumenform form' placeholder='Retype Password' type=password name=pw2 id=pw2 size=40 aria-label='Retype Password' required>";
-	//echo "<span class=form>I have read and agree to the Terms of Use (below)</span><span class=formright><input type=checkbox name=agree></span><br class=form />\n";
 	if (isset($CFG['GEN']['TOSpage'])) {
 		echo "</br>
 		<label class=form>

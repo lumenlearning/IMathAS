@@ -41,8 +41,10 @@ if (!isset($CFG['GEN']['allowinstraddstus'])) {
 if (!isset($CFG['GEN']['allowinstraddtutors'])) {
 	$CFG['GEN']['allowinstraddtutors'] = true;
 }
-$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\"> ".Sanitize::encodeStringForDisplay($coursename)."</a>\n";
-
+$curBreadcrumb = $breadcrumbbase;
+if (empty($_COOKIE['fromltimenu'])) {
+    $curBreadcrumb .= " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+}
 if (!isset($teacherid)) { // loaded by a NON-teacher
 	$overwriteBody=1;
 	$body = "You need to log in as a teacher to access this page";
@@ -61,7 +63,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 
 	if (isset($_GET['assigncode'])) {
 
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Assign Codes\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Assign Codes\n";
 		$pagetitle = "Assign Section/Code Numbers";
 
 		if (isset($_POST['submit'])) {
@@ -92,7 +94,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 		}
 	} elseif (isset($_GET['enroll']) && ($myrights==100 || (isset($CFG['GEN']['allowinstraddbyusername']) && $CFG['GEN']['allowinstraddbyusername']==true))) {
 
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Enroll Students\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Enroll Students\n";
 		$pagetitle = "Enroll an Existing User";
 
 		if (isset($_POST['username'])) {
@@ -144,9 +146,9 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 
 		}
 	} elseif (isset($_GET['newstu']) && $CFG['GEN']['allowinstraddstus']) {
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Enroll Students\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Enroll Students\n";
 		$pagetitle = "Enroll a New Student";
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
+		$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 
 		if (isset($_POST['SID'])) {
 			require_once("../includes/newusercommon.php");
@@ -190,7 +192,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			}
 		}
 	} elseif (isset($_POST['submit']) && $_POST['submit']=="Copy Emails") {
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Copy Emails\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Copy Emails\n";
 		$pagetitle = "Copy Student Emails";
 		if (count($_POST['checked'])>0) {
 			$ulist = implode(',', array_map('intval', $_POST['checked']));
@@ -208,9 +210,9 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 		}
 
 	} elseif (isset($_GET['chgstuinfo'])) {
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Change User Info\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Change User Info\n";
 		$pagetitle = "Change Student Info";
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
+		$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 		require_once("../includes/newusercommon.php");
 
 		if (isset($_POST['timelimitmult'])) {
@@ -355,16 +357,14 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 		$overwriteBody = 1;
 		$fileToInclude = "massexception.php";
 	} elseif (isset($_GET['action']) && $_GET['action']=="unenroll" && !isset($CFG['GEN']['noInstrUnenroll'])){
-		$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\"> ".Sanitize::encodeStringForDisplay($coursename)."</a>\n";
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Confirm Change\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Confirm Change\n";
 		$pagetitle = "Unenroll Students";
 		$calledfrom='lu';
 		$overwriteBody = 1;
 		$fileToInclude = "unenroll.php";
 
 	} elseif (isset($_GET['action']) && $_GET['action']=="lock") {
-		$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\"> ".Sanitize::encodeStringForDisplay($coursename)."</a>\n";
-		$curBreadcrumb .= " &gt; <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Confirm Change\n";
+		$curBreadcrumb .= " <a href=\"listusers.php?cid=$cid\">Roster</a> &gt; Confirm Change\n";
 		$pagetitle = "LockStudents";
 		$calledfrom='lu';
 		$overwriteBody = 1;
@@ -386,7 +386,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 		exit;
 	} else { //DEFAULT DATA MANIPULATION HERE
 
-		$curBreadcrumb .= " &gt; Roster\n";
+		$curBreadcrumb .= " Roster\n";
 		$pagetitle = "Student Roster";
 		$stm = $DBH->prepare("SELECT DISTINCT section FROM imas_students WHERE imas_students.courseid=:courseid AND imas_students.section IS NOT NULL ORDER BY section");
 		$stm->execute(array(':courseid'=>$cid));
@@ -451,9 +451,6 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 		$hasSectionRowHeader = ($hassection)? "<th>Section$sectionselect</th>" : "";
 		$hasCodeRowHeader = ($hascode) ? "<th>Code</th>" : "";
 		$hasLatePassHeader = ($haslatepasses) ? "<th>LatePasses</th>" : "";
-		$hasSectionSortTable = ($hassection) ? "'S'," : "";
-		$hasCodeSortTable = ($hascode) ? "'N'," : "";
-		$hasLatePassSortTable = ($haslatepasses) ? ",'N'" : "";
 
 	}
 } //END DATA MANIPULATION
@@ -480,7 +477,7 @@ $placeinhead .= '$(function() { $(".lal").attr("title","View login log");
 	});';
 $placeinhead .= "</script>";
 $placeinhead .= '<script type="text/javascript">$(function() {
-  var html = \'<span class="dropdown"><a role="button" tabindex=0 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="../img/gears.png" alt="Options"/></a>\';
+  var html = \'<span class="dropdown"><a role="button" tabindex=0 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="'.$staticroot.'/img/gears.png" alt="Options"/></a>\';
   html += \'<ul role="menu" class="dropdown-menu">\';
   $("img[data-uid]").each(function (i,el) {
   	var uid = $(el).attr("data-uid");
@@ -687,7 +684,7 @@ if ($overwriteBody==1) {
 		window.location = "listusers.php?cid="+cid+"&rmode="+rmode;
 	}
 	</script>
-	<script type="text/javascript" src="<?php echo $imasroot ?>/javascript/tablesorter.js"></script>
+	<script type="text/javascript" src="<?php echo $staticroot ?>/javascript/tablesorter.js"></script>
 	<div class="cpmid">
 	<?php
 	echo '<span class="column" style="width:auto;">';
@@ -699,19 +696,21 @@ if ($overwriteBody==1) {
 	if ($CFG['GEN']['allowinstraddtutors']) {
 		echo "<br/><a href=\"managetutors.php?cid=$cid\">Manage Tutors</a>";
 	}
-	echo '</span>';
-	echo '<span class="column" style="width:auto;">';
-	if ($myrights==100 || (isset($CFG['GEN']['allowinstraddbyusername']) && $CFG['GEN']['allowinstraddbyusername']==true)) {
-		echo "<a href=\"listusers.php?cid=$cid&enroll=student\">Enroll Student with known username</a><br/>";
-	}
-	echo "<a href=\"enrollfromothercourse.php?cid=$cid\">Enroll students from another course</a>";
-	if (isset($CFG['GEN']['allowinstraddstus']) && $CFG['GEN']['allowinstraddstus']==true) {
-		echo '</span><span class="column" style="width:auto;">';
-		echo "<a href=\"$imasroot/admin/importstu.php?cid=$cid\">Import Students from File</a><br/>";
-		echo "<a href=\"listusers.php?cid=$cid&newstu=new\">Create and Enroll new student</a>";
-	}
-	echo '</span>';
-	echo '<br class="clear"/>';
+    echo '</span>';
+    if (empty($_COOKIE['fromltimenu'])) {
+        echo '<span class="column" style="width:auto;">';
+        if ($myrights==100 || (isset($CFG['GEN']['allowinstraddbyusername']) && $CFG['GEN']['allowinstraddbyusername']==true)) {
+            echo "<a href=\"listusers.php?cid=$cid&enroll=student\">Enroll Student with known username</a><br/>";
+        }
+        echo "<a href=\"enrollfromothercourse.php?cid=$cid\">Enroll students from another course</a>";
+        if (isset($CFG['GEN']['allowinstraddstus']) && $CFG['GEN']['allowinstraddstus']==true) {
+            echo '</span><span class="column" style="width:auto;">';
+            echo "<a href=\"$imasroot/admin/importstu.php?cid=$cid\">Import Students from File</a><br/>";
+            echo "<a href=\"listusers.php?cid=$cid&newstu=new\">Create and Enroll new student</a>";
+        }
+        echo '</span>';
+    }
+    echo '<br class="clear"/>';
 	echo '</div>';
 	echo '<p>Pictures: <select id="picsize" onchange="chgpicsize()">';
 	echo "<option value=0 selected>", _('None'), "</option>";
@@ -785,12 +784,12 @@ if ($overwriteBody==1) {
 			$icons = '';
 			$numstu++;
 			if ($line['locked']>0) {
-				$icons .= '<img src="../img/lock.png" alt="Locked" title="Locked"/>';
+				$icons .= '<img src="'.$staticroot.'/img/lock.png" alt="Locked" title="Locked"/>';
 			} else {
 				$numunlocked++;
 			}
 			if ($line['timelimitmult']!=1) {
-				$icons .= '<img src="../img/time.png" alt="'._('Has a time limit multiplier set').'" title="'._('Has a time limit multiplier set').'"/> ';
+				$icons .= '<img src="'.$staticroot.'/img/time.png" alt="'._('Has a time limit multiplier set').'" title="'._('Has a time limit multiplier set').'"/> ';
 			}
 			if ($icons != '') {
 				$icons = '<a href="listusers.php?cid='.$cid.'&chgstuinfo=true&uid='.Sanitize::onlyInt($line['userid']).'">'.$icons.'</a>';
@@ -825,7 +824,7 @@ if ($overwriteBody==1) {
 				echo $hasCodeData;
 				$nameline = '<a href="listusers.php?cid='.$cid.'&chgstuinfo=true&uid=' . Sanitize::onlyInt($line['userid']) . '" class="ui">';
 				$nameline .= Sanitize::encodeStringForDisplay($line['LastName']).', '.Sanitize::encodeStringForDisplay($line['FirstName']) . '</a>';
-				echo '<td><img data-uid="'. Sanitize::onlyInt($line['userid']) .'" src="../img/gears.png"/> ';
+				echo '<td><img data-uid="'. Sanitize::onlyInt($line['userid']) .'" src="'.$staticroot.'/img/gears.png"/> ';
 				if ($line['locked']>0) {
 					echo '<span class="greystrike">'.$nameline.'</span></td>';
 					echo '<td>'.$icons.'</td>';
@@ -869,8 +868,31 @@ if ($overwriteBody==1) {
 		}
 		echo '</p>';
 ?>
+
+        <?php
+            $sortstr = 'false,false';
+            if ($hassection) {
+                $sortstr .= ',"S"';
+            }
+            if ($hascode) {
+                $sortstr .= ',"S"';
+            }
+            $sortstr .= ',"S"';
+            $sortstr .= ',false';
+            if ($showSID) {
+                $sortstr .= ',"S"';
+            }
+            if ($showemail) {
+                $sortstr .= ',"S"';
+            }
+            $sortstr .= ',"D"';
+            $sortstr .= ',false';
+            if ($haslatepasses) {
+                $sortstr .= ',"N"';
+            }
+        ?>
 		<script type="text/javascript">
-			initSortTable('myTable',Array(false,false,<?php echo $hasSectionSortTable ?><?php echo $hasCodeSortTable ?>'S',false,'D',false<?php echo $hasLatePassSortTable ?>),true);
+			initSortTable('myTable',Array(<?php echo $sortstr;?>),true);
 		</script>
 	</form>
 

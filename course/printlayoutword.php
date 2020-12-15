@@ -26,7 +26,13 @@ if (!(isset($teacherid))) {
 /******* begin html output ********/
 
 $aid = Sanitize::onlyInt($_GET['aid']);
-
+if (!empty($_GET['from']) && $_GET['from'] == 'addq2') {
+    $addq = 'addquestions2';
+    $from = 'addq2';
+} else {
+    $addq = 'addquestions';
+    $from = 'addq';
+}
 $stm = $DBH->prepare("SELECT itemorder,shuffle,defpoints,name,intro FROM imas_assessments WHERE id=:id");
 $stm->execute(array(':id'=>$aid));
 $line = $stm->fetch(PDO::FETCH_ASSOC);
@@ -38,15 +44,18 @@ if ($overwriteBody==1) {
 } if (!isset($_REQUEST['versions'])) {
 
 	require("../header.php");
-	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-	echo "&gt; <a href=\"addquestions.php?cid=$cid&aid=$aid\">Add/Remove Questions</a> ";
+    echo "<div class=breadcrumb>$breadcrumbbase ";
+    if (empty($_COOKIE['fromltimenu'])) {
+        echo " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+    }
+	echo "<a href=\"$addq.php?cid=$cid&aid=$aid\">Add/Remove Questions</a> ";
 	echo "&gt; Print Test</div>\n";
 
     echo '<div class="cpmid">';
     if ($courseUIver == 1) {
-        echo '<a href="printtest.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for in-browser printing</a> | ';
+        echo '<a href="printtest.php?cid='.$cid.'&amp;aid='.$aid.'&amp;from='.$from.'">Generate for in-browser printing</a> | ';
     }
-    echo '<a href="printlayoutbare.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for cut-and-paste</a></div>';
+    echo '<a href="printlayoutbare.php?cid='.$cid.'&amp;aid='.$aid.'&amp;from='.$from.'">Generate for cut-and-paste</a></div>';
 
 	echo "<h1>"._('Generate Word Version')."</h1>";
 
@@ -54,7 +63,7 @@ if ($overwriteBody==1) {
 
 	echo '<p>This page will help you create a copy of this assessment as a Word 2007+ file that you can then edit for printing.</p>';
 
-	echo "<form method=\"post\" action=\"printlayoutword.php?cid=$cid&aid=$aid\" class=\"nolimit\">\n";
+	echo "<form method=\"post\" action=\"printlayoutword.php?cid=$cid&aid=$aid&from=$from\" class=\"nolimit\">\n";
 	echo '<span class="form">Number of different versions to generate:</span><span class="formright"><input type=text name=versions value="1" size="3"></span><br class="form"/>';
 	echo '<span class="form">Format?</span><span class="formright"><input type="radio" name="format" value="trad" checked="checked" /> Multiple forms of the whole assessment - Form A: 1 2 3, Form B: 1 2 3<br/><input type="radio" name="format" value="inter"/> Multiple forms grouped by question - 1a 1b 2a 2b</span><br class="form"/>';
 	echo '<span class="form">Generate answer keys?</span><span class="formright"> <input type=radio name=keys value=1 checked=1>Yes <input type=radio name=keys value=0>No</span><br class="form"/>';
@@ -157,7 +166,7 @@ if ($overwriteBody==1) {
 			$a2->setQuestionData($qdata['id'], $qdata);
 		}
 	} else {
-		include("../assessment/displayq2.php");
+	include("../assessment/displayq2.php");
 	}
 
 	if (is_numeric($_REQUEST['versions'])) {
@@ -233,7 +242,7 @@ if ($overwriteBody==1) {
 				if ($courseUIver > 1) {
 					list($newout,$sa[$j][$i]) = printq2($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_REQUEST['showqn']));
 				} else {
-					list($newout,$sa[$j][$i]) = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_REQUEST['showqn']));
+				list($newout,$sa[$j][$i]) = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_REQUEST['showqn']));
 				}
 				$out .= $newout;
 			}
@@ -282,7 +291,7 @@ if ($overwriteBody==1) {
 				if ($courseUIver > 1) {
 					list($newout,$sa[]) = printq2($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_REQUEST['showqn']));
 				} else {
-					list($newout,$sa[]) = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_REQUEST['showqn']));
+				list($newout,$sa[]) = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_REQUEST['showqn']));
 				}
 				$out .= $newout;
 			}
@@ -319,7 +328,7 @@ if ($overwriteBody==1) {
 	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 	echo "&gt; Print Test</div>\n";
 
-	echo '<div class="cpmid"><a href="printtest.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for in-browser printing</a> | <a href="printlayoutbare.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for cut-and-paste</a></div>';
+	echo '<div class="cpmid"><a href="printtest.php?cid='.$cid.'&amp;aid='.$aid.'&amp;from='.$from.'">Generate for in-browser printing</a> | <a href="printlayoutbare.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for cut-and-paste</a></div>';
 
 	echo "<h1>"._('Generate Word Version')."</h1>";
 	echo '<p>'._('Assessment is prepared, and ready for conversion').'.</p>';
@@ -330,7 +339,7 @@ if ($overwriteBody==1) {
 	echo '<label><input type="checkbox" name="doubleimgs"> '._('Double image sizes').'</label></p>';
 
 	echo '<p><input type="submit" value="'._("Convert to Word").'"/> ';
-	echo '<a href="printlayoutword.php?cid='.$cid.'&amp;aid='.$aid.'">'._('Change print settings').'</a></p>';
+	echo '<a href="printlayoutword.php?cid='.$cid.'&amp;aid='.$aid.'&amp;from='.$from.'">'._('Change print settings').'</a></p>';
 	echo '<textarea name="html" style="visibility:hidden">'.Sanitize::encodeStringForDisplay($out).'</textarea>';
 	echo '</form>';
 

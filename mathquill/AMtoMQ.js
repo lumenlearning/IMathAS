@@ -125,8 +125,8 @@ var AMQsymbols = [
 {input:":)", tag:"mo", output:"\u232A", tex:"rangle", ttype:RIGHTBRACKET},
 {input:"<<", tag:"mo", output:"\u2329", tex:"langle", ttype:LEFTBRACKET},
 {input:">>", tag:"mo", output:"\u232A", tex:"rangle", ttype:RIGHTBRACKET},
-//{input:"{:", tag:"mo", output:"{:", tex:null, ttype:LEFTBRACKET, invisible:true},
-//{input:":}", tag:"mo", output:":}", tex:null, ttype:RIGHTBRACKET, invisible:true},
+{input:"{:", tag:"mo", output:"{:", tex:null, ttype:LEFTBRACKET, invisible:true},
+{input:":}", tag:"mo", output:":}", tex:null, ttype:RIGHTBRACKET, invisible:true},
 
 //miscellaneous symbols
 {input:"int",  tag:"mo", output:"\u222B", tex:null, ttype:CONST},
@@ -145,6 +145,8 @@ var AMQsymbols = [
 //{input:"''", tag:"mo", output:"''", tex:null, val:true},
 //{input:"'''", tag:"mo", output:"'''", tex:null, val:true},
 //{input:"''''", tag:"mo", output:"''''", tex:null, val:true},
+{input:"degree",  tag:"mo", tex:null, ttype:CONST},
+{input:"degrees", output:"degree", ttype:DEFINITION},
 
 
 //standard functions
@@ -710,7 +712,7 @@ AMQinitSymbols();
 
 return function(str) {
  AMQnestingDepth = 0;
-  str = str.replace(/(&nbsp;|\u00a0|&#160;)/g,"");
+  str = str.replace(/(&nbsp;|\u00a0|&#160;|{::})/g,"");
   str = str.replace(/^\s*<([^<].*?[^>])>\s*$/,"<<$1>>");
   str = str.replace(/&gt;/g,">");
   str = str.replace(/&lt;/g,"<");
@@ -798,8 +800,8 @@ function MQtoAM(tex,display) {
 		}
 	}
 	//separate un-braced subscripts using latex rules
-	tex = tex.replace(/_(\d)(\d)/g, '_$1 $2');
-	tex = tex.replace(/\^(\d)(\d)/g, '^$1 $2');
+	tex = tex.replace(/_(\w)(\w)/g, '_$1 $2');
+	tex = tex.replace(/\^(\w)(\w)/g, '^$1 $2');
 	tex = tex.replace(/_{([\d\.]+)}\^/g,'_$1^');
 	tex = tex.replace(/_{([\d\.]+)}([^\^])/g,'_$1 $2');
 	tex = tex.replace(/_{([\d\.]+)}$/g,'_$1');

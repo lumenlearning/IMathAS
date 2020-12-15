@@ -23,12 +23,19 @@ if (!(isset($teacherid))) {
 
 /******* begin html output ********/
 if (isset($_POST['versions'])) {
-	$placeinhead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"$imasroot/assessment/print.css?v=100213\"/>\n";
+	$placeinhead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"$staticroot/assessment/print.css?v=100213\"/>\n";
 }
 
 $nologo = true;
 $cid = Sanitize::courseId($_GET['cid']);
 $aid = Sanitize::onlyInt($_GET['aid']);
+if (!empty($_GET['from']) && $_GET['from'] == 'addq2') {
+    $addq = 'addquestions2';
+    $from = 'addq2';
+} else {
+    $addq = 'addquestions';
+    $from = 'addq';
+}
 if (isset($_POST['mathdisp']) && $_POST['mathdisp']=='text') {
 	$_SESSION['mathdisp'] = 0;
 } else {
@@ -51,29 +58,32 @@ if ($overwriteBody==1) {
 	echo $body;
 } if (!isset($_POST['versions'])) {
 	require("../header.php");
-	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
-	echo "&gt; <a href=\"addquestions.php?cid=$cid&aid=$aid\">Add/Remove Questions</a> ";
+    echo "<div class=breadcrumb>$breadcrumbbase ";
+    if (empty($_COOKIE['fromltimenu'])) {
+        echo " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+    }
+	echo "<a href=\"$addq.php?cid=$cid&aid=$aid\">Add/Remove Questions</a> ";
 	echo "&gt; Print Test</div>\n";
 
     if ($courseUIver == 1 || isset($CFG['GEN']['pandocserver'])) {
         echo '<div class="cpmid">';
         if ($courseUIver == 1) {
-            echo '<a href="printtest.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for in-browser printing</a>';
+            echo '<a href="printtest.php?cid='.$cid.'&amp;aid='.$aid.'&amp;from='.$from.'">Generate for in-browser printing</a>';
         }
-        if (isset($CFG['GEN']['pandocserver'])) {
+	if (isset($CFG['GEN']['pandocserver'])) {
             if ($courseUIver == 1) {
                 echo ' | ';
-            }
-            echo '<a href="printlayoutword.php?cid='.$cid.'&amp;aid='.$aid.'">Generate for Word</a>';
+	}
+            echo '<a href="printlayoutword.php?cid='.$cid.'&amp;aid='.$aid.'&amp;from='.$from.'">Generate for Word</a>';
         }
-        echo '</div>';
+	echo '</div>';
     }
 	echo "<h1>Copy-and-Paste Print Version</h1>";
 
 	echo '<p>This page will help you create a copy of this assessment that you should be able to cut and ';
 	echo 'paste into Word or another word processor and adjust layout for printing</p>';
 
-	echo "<form method=post action=\"printlayoutbare.php?cid=$cid&aid=$aid\">\n";
+	echo "<form method=post action=\"printlayoutbare.php?cid=$cid&aid=$aid&from=$from\">\n";
 	echo '<span class="form">Number of different versions to generate:</span><span class="formright"><input type=text name=versions value="1" size="3"></span><br class="form"/>';
 	echo '<span class="form">Format?</span><span class="formright"><input type="radio" name="format" value="trad" checked="checked" /> Form A: 1 2 3, Form B: 1 2 3<br/><input type="radio" name="format" value="inter"/> 1a 1b 2a 2b</span><br class="form"/>';
 	echo '<span class="form">Generate answer keys?</span><span class="formright"> <input type=radio name=keys value=1 checked=1>Yes <input type=radio name=keys value=0>No</span><br class="form"/>';
@@ -179,7 +189,7 @@ if ($overwriteBody==1) {
             $a2->setQuestionData($qdata['id'], $qdata);
         }
     } else {
-        include("../assessment/displayq2.php");
+	include("../assessment/displayq2.php");
     }
 
 
@@ -258,13 +268,13 @@ if ($overwriteBody==1) {
 
 
 				for ($i=0; $i<$numq; $i++) {
-                    if ($i>0) { echo Sanitize::encodeStringForDisplay($_POST['qsep']);}
+					if ($i>0) { echo Sanitize::encodeStringForDisplay($_POST['qsep']);}
                     if ($courseUIver > 1) {
                         $sa[$j][$i] = printq2($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_POST['showqn']));
                     } else {
-                        $sa[$j][$i] = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_POST['showqn']));
-                    }
-                }
+					$sa[$j][$i] = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_POST['showqn']));
+				}
+			}
 			}
 
 			if ($_POST['keys']>0) { //print answer keys
@@ -306,13 +316,13 @@ if ($overwriteBody==1) {
 			for ($i=0; $i<$numq; $i++) {
 				if ($i>0) { echo Sanitize::encodeStringForDisplay($_POST['qsep']);}
 				for ($j=0; $j<$copies;$j++) {
-                    if ($j>0) { echo Sanitize::encodeStringForDisplay($_POST['qsep']);}
+					if ($j>0) { echo Sanitize::encodeStringForDisplay($_POST['qsep']);}
                     if ($courseUIver > 1) {
                         $sa[] = printq2($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_POST['showqn']));
                     } else {
-                        $sa[] = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_POST['showqn']));
-                    }
+					$sa[] = printq($i,$qn[$questions[$i]],$seeds[$j][$i],$points[$questions[$i]],isset($_POST['showqn']));
 				}
+			}
 			}
 			if ($_POST['keys']>0) { //print answer keys
 				echo Sanitize::encodeStringForDisplay($_POST['vsep']).'<br/>';

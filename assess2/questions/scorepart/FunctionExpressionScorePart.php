@@ -64,7 +64,8 @@ class FunctionExpressionScorePart implements ScorePart
         if ($multi) { $qn = ($qn+1)*1000+$partnum; }
 
         $givenans = normalizemathunicode(trim($givenans));
-
+        $answer = normalizemathunicode($answer);
+        
         if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
             list($givenans, $answer) = scorenosolninf($qn, $givenans, $answer, $ansprompt);
         }
@@ -144,6 +145,33 @@ class FunctionExpressionScorePart implements ScorePart
         $vlist = implode(",",$variables);
 
 
+        for($j=0; $j < count($variables); $j++) {
+            if ($fromto[2*$j+1]==$fromto[2*$j]) {
+                for ($i = 0; $i < 20; $i++) {
+                    $tps[$i][$j] = $fromto[2*$j];
+                } 
+            } else if ($restrictvartoint[$j]) {
+                if ($fromto[2*$j+1]-$fromto[2*$j] > 200) {
+                    for ($i = 0; $i < 20; $i++) {
+                        $tps[$i][$j] = rand($fromto[2*$j],$fromto[2*$j+1]);
+                    }
+                } else {
+                    $allbetween = range($fromto[2*$j],$fromto[2*$j+1]);
+                    shuffle($allbetween);
+                    $n = count($allbetween);
+                    for ($i = 0; $i < 20; $i++) {
+                        $tps[$i][$j] = $allbetween[$i%$n];
+                    }
+                }
+            } else {
+                $dx = ($fromto[2*$j+1]-$fromto[2*$j])/20;
+                for ($i = 0; $i < 20; $i++) {
+                    $tps[$i][$j] = $fromto[2*$j] + $dx*$i + $dx*rand(1,499)/500.0;
+                }
+            }
+        }
+/*
+    old code.  New code above distributes the points more evenly across the domain
         for ($i = 0; $i < 20; $i++) {
             for($j=0; $j < count($variables); $j++) {
                 if ($fromto[2*$j+1]==$fromto[2*$j]) {
@@ -155,10 +183,10 @@ class FunctionExpressionScorePart implements ScorePart
                 }
             }
         }
-
+*/
         //handle nosolninf case
         if ($givenans==='oo' || $givenans==='DNE') {
-            if ($answer==$givenans) {
+            if (strcmp($answer,$givenans) === 0) {
                 $scorePartResult->setRawScore(1);
                 return $scorePartResult;
             } else {
@@ -279,7 +307,7 @@ class FunctionExpressionScorePart implements ScorePart
                 $realans = $answerfunc->evaluateQuiet($varvals);
                 //echo "$answer, real: $realans, my: {$myans[$i]},rel: ". (abs($myans[$i]-$realans)/abs($realans))  ."<br/>";
                 if (isNaN($realans)) {$cntnan++; continue;} //avoid NaN problems
-                if (in_array('equation',$ansformats) || in_array('inequality',$ansformats)) {  //if equation, store ratios
+                if (in_array('equation',$ansformats) || in_array('inequality',$ansformats) || in_array('scalarmult',$ansformats)) {  //if equation, store ratios
                     if (isNaN($givenansvals[$i])) {
                         $stunan++;
                     } elseif (abs($realans)>.000001 && is_numeric($givenansvals[$i])) {
@@ -314,7 +342,7 @@ class FunctionExpressionScorePart implements ScorePart
             if ($stunan>1) { //if more than 1 student NaN response
                 $correct = false; continue;
             }
-            if (in_array('equation',$ansformats) || in_array('inequality',$ansformats)) {
+            if (in_array('equation',$ansformats) || in_array('inequality',$ansformats) || in_array('scalarmult',$ansformats)) {
                 if ($cntbothzero>18) {
                     $correct = true;
                 } else if (count($ratios)>1) {

@@ -16,7 +16,11 @@ $overwriteBody = 0;
 $body = "";
 $pagetitle = "Mass Change Assessment Settings";
 $cid = Sanitize::courseId($_GET['cid']);
-$curBreadcrumb = "$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; Mass Change Assessment Settings";
+$curBreadcrumb = $breadcrumbbase;
+if (empty($_COOKIE['fromltimenu'])) {
+    $curBreadcrumb .= " <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";
+}
+$curBreadcrumb .= _('Mass Change Assessment Settings');
 
 	// SECURITY CHECK DATA PROCESSING
 if (!(isset($teacherid))) {
@@ -633,7 +637,7 @@ if (!(isset($teacherid))) {
 		}
 
 		function getNestedList($items, $parent) {
-			global $itemshowdata, $agbcats;
+			global $itemshowdata, $agbcats, $staticroot;
 			$out = '';
 			foreach($items as $k=>$item) {
 				if (is_array($item)) {
@@ -641,7 +645,7 @@ if (!(isset($teacherid))) {
 						$sub = getNestedList($item['items'], $parent.'-'.($k+1));
 						if ($sub !== '') {
 							$out .= '<li>';
-							$out .= '<label> <img src="../img/folder_tiny.png"/> ';
+							$out .= '<label> <img src="'.$staticroot.'/img/folder_tiny.png"/> ';
 							$out .= '<input type=checkbox name="checked[]" value="0" id="'.$parent.'-'.($k+1).'" ';
 							$out .= 'onClick="chkgrp(this.form, \''.$parent.'-'.($k+1).'\', this.checked);" checked=checked /> ';
 
@@ -652,7 +656,7 @@ if (!(isset($teacherid))) {
 				} else if ($itemshowdata[$item]['itemtype'] == 'Assessment') {
 					$aid = $itemshowdata[$item]['id'];
 					$out .= '<li>';
-					$out .= '<label><img src="../img/assess_tiny.png"/> ';
+					$out .= '<label><img src="'.$staticroot.'/img/assess_tiny.png"/> ';
 					$out .= '<input type=checkbox name="checked[]" value="'.$aid.'" onclick="updgrp(\''.$parent.'\')" ';
 					$out .= 'id="' . $parent . "." . $item . ":" . $agbcats[$aid] . '" checked=checked /> ';
 
@@ -779,7 +783,7 @@ function tabToSettings() {
 
 	<div class=breadcrumb><?php echo $curBreadcrumb ?></div>
 	<div id="headerchgassessments" class="pagetitle"><h1>Mass Change Assessment Settings
-		<img src="<?php echo $imasroot ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=assessments','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/>
+		<img src="<?php echo $staticroot; ?>/img/help.gif" alt="Help" onClick="window.open('<?php echo $imasroot ?>/help.php?section=assessments','help','top=0,width=400,height=500,scrollbars=1,left='+(screen.width-420))"/>
 	</h1></div>
 
 	<div class="cpmid">

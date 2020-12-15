@@ -10,19 +10,6 @@ date_default_timezone_set('America/Los_Angeles');
 require("../../init.php");
 require_once("../../includes/filehandler.php");
 
-$placeinhead = "<script type=\"text/javascript\">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-30468975-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>";
 
 $questions = array(
 	"title"=>array(
@@ -262,7 +249,7 @@ $questions = array(
 	'license'=>array(
 		'req'=>1,
 		'short'=>'License',
-		'long'=>'A copyright license means "all rights reserved", so people need to get your permission before using or modifying your work.  An open <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">Creative Commons Attribution (CC-BY)</a> license is a "some rights reserved" license, which says that people can use, modify, and redistribute the materials as long as they give credit to the original author.',
+		'long'=>'A copyright license means "all rights reserved", so people need to get your permission before using or modifying your work.  An open <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank">Creative Commons Attribution (CC-BY)</a> license is a "some rights reserved" license, which says that people can use, modify, and redistribute the materials as long as they give credit to the original author.',
 		'type'=>'select',
 		'arr'=>array(
 			"C"=>"Copyright",
@@ -642,7 +629,7 @@ if (isset($_GET['modify'])) {
 			} else {
 				$url = substr($fl[2*$i+1],1);
 			}
-			echo '<a href="'.urlencode($url).'" target="_blank">';
+			echo '<a href="'.Sanitize::encodeStringForDisplay($url).'" target="_blank">';
 
 			/*if (isset($itemicons[$extension])) {
 				echo "<img alt=\"$extension\" src=\"$imasroot/img/{$itemicons[$extension]}\" class=\"mida\"/> ";
@@ -653,7 +640,7 @@ if (isset($_GET['modify'])) {
 			if ($fl[2*$i+1][0]!='#') {
 				$extension = ltrim(strtolower(strrchr($fl[2*$i+1],".")),'.');
 				if (in_array($extension,$canpreview)) {
-					echo ' <a style="font-size: 70%" href="#" onclick="GB_show(\'Preview\',\'http://docs.google.com/viewer?embedded=true&url='.urlencode($url).'\',700,780);return false;">Preview</a>';
+					echo ' <a style="font-size: 70%" href="#" onclick="GB_show(\'Preview\',\'https://docs.google.com/viewer?embedded=true&url='.urlencode($url).'\',700,780);return false;">Preview</a>';
 				}
 			}
 			//if (count($fl)>2) {echo '</li>';}
@@ -706,7 +693,7 @@ if (isset($_GET['modify'])) {
 	if ($myrights>10) {
 		echo '<a href="index.php?modify=new">Add a Task</a> | ';
 	}
-	echo '<a href="#" onclick="GB_show(\'FAQ\',\'http://www.wamap.org/projects/faq.html\',700,780);return false;">FAQ</a>';
+	echo '<a href="#" onclick="GB_show(\'FAQ\',\'https://www.wamap.org/projects/faq.html\',700,780);return false;">FAQ</a>';
 	echo '</p>';
 	echo '<p>';
 	echo '<table class="gb" id="myTable"><thead><tr>';

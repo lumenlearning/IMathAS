@@ -12,6 +12,9 @@ $loginpage = 'ohm/loginpage.php';
 
 $installname = "Lumen OHM";
 
+//static assets
+$CFG['static_server'] = getenv('STATIC_ASSETS_BASE_URL') ?? 'https://ohm.lumenlearning.com/';
+
 //aws config
 $AWSbucket = "development" == $configEnvironment ? null : $_ENV['S3_MAIN_BUCKET_NAME'];
 $dbname = 'myopenmathdb';
@@ -27,6 +30,9 @@ $emailconfirmation = false;
 //email to send notices from
 $sendfrom = "do-not-reply@lumenlearning.com";
 $accountapproval = "support@lumenlearning.com";
+
+//use IPEDS IDs during new instructor signup?
+$CFG['use_ipeds'] = true;
 
 //color shift icons as deadline approaches?
 $colorshift = true;

@@ -161,7 +161,7 @@ class AssessRecord
 
     $qarr = array();
     $fields = array('lti_sourcedid', 'timeontask', 'starttime', 'lastchange',
-                    'score', 'status');
+                    'score', 'status', 'timelimitexp');
     foreach ($fields as $field) {
       $qarr[':'.$field] = $this->assessRecord[$field];
     }
@@ -188,7 +188,13 @@ class AssessRecord
       // updating existing record
       $sets = array();
       foreach ($fields as $field) {
-        $sets[] = $field.'=:'.$field;
+          if ($field == 'lti_sourcedid' && $this->assessRecord['agroupid'] > 0) {
+            $sets[] = 'lti_sourcedid=IF(userid=:userid,:lti_sourcedid,lti_sourcedid)';
+            $qarr[':userid'] = $this->curUid;
+          } else {
+            $sets[] = $field.'=:'.$field;
+          }
+        
       }
       $setlist = implode(',', $sets);
       $query = "UPDATE imas_assessment_records SET $setlist WHERE ";
@@ -214,22 +220,54 @@ class AssessRecord
   }
 
   /**
+   * Update the LTI score for the current assessment record. 
+   * Should be called after saveRecord.
+   */
+  public function updateLTIscore() {
+    $lti_sourcedid = $this->getLTIsourcedId();
+    if (strlen($lti_sourcedid) > 1) {
+        require_once(__DIR__ . '/../includes/ltioutcomes.php');
+        $gbscore = $this->getGbScore();
+        $aidposs = $this->assess_info->getSetting('points_possible');
+        calcandupdateLTIgrade($lti_sourcedid, $this->curAid, $this->curUid, $gbscore['gbscore'], true, $aidposs);
+        if ($this->assessRecord['agroupid'] > 0) {
+            // has group; update their scores too
+            $stm = $this->DBH->prepare('SELECT userid,lti_sourcedid FROM imas_assessment_records WHERE agroupid=? AND userid<>?');
+            $stm->execute(array($this->assessRecord['agroupid'], $this->curUid));
+            while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+                if (strlen($row['lti_sourcedid']) > 1) {
+                    calcandupdateLTIgrade($row['lti_sourcedid'], $this->curAid, $row['userid'], $gbscore['gbscore'], true, $aidposs);
+                }
+            }
+        }
+    }
+  }
+
+  /**
    * Create a new record in the database.  Call after loadRecord.
    *
    * @param  array   $users         Array of users to create record for.
    *                                If false, current userid will be used. (def: false)
    * @param  int     $stugroupid    The stugroup ID, or 0 if not group (def: 0)
    * @param  boolean $recordStart   true to record the starttime now (def: true)
-   * @param  string  $lti_sourcedid The LTI sourcedid (def: '')
+   * @param  string  $lti_sourcedid The LTI sourcedid, or array of uid->sourcedid (def: '')
    * @return void
    */
   public function createRecord($users = false, $stugroupid = 0, $recordStart = true, $lti_sourcedid = '') {
     // if group, lookup group members. Otherwise just use current user
+    $lti_sourcedidarr = [];
     if ($users === false) {
       $users = array($this->curUid);
+    } else if (is_array($lti_sourcedid)) {
+        $lti_sourcedidarr = $lti_sourcedid;
+        if (isset($lti_sourcedidarr[$this->curUid])) {
+            $lti_sourcedid = $lti_sourcedidarr[$this->curUid];
+        } else {
+            $lti_sourcedid = '';
+        }
     }
 
-    //initiale a blank record
+    //initialize a blank record
     $this->assessRecord = array(
       'assessmentid' => $this->curAid,
       'userid' => $this->curUid,
@@ -271,11 +309,17 @@ class AssessRecord
     $vals = array();
     foreach ($users as $uid) {
       $vals[] = '(?,?,?,?,?,?,?,?,?)';
+      $this_lti_sourcedid = '';
+      if (isset($lti_sourcedidarr[$uid])) {
+        $this_lti_sourcedid = $lti_sourcedidarr[$uid];
+      } else if ($uid==$this->curUid) {
+        $this_lti_sourcedid = $lti_sourcedid;
+      }
       array_push($qarr,
         $uid,
         $this->curAid,
         $stugroupid,
-        ($uid==$this->curUid) ? $lti_sourcedid : '',
+        $this_lti_sourcedid,
         $recordStart ? $this->now : 0,
         2,
         $this->assessRecord['status'],
@@ -332,7 +376,7 @@ class AssessRecord
     if ($recordStart && $this->assess_info->getSetting('timelimit') > 0) {
       //recording start and has time limit, so record end time
       $out['timelimit_end'] = $this->now + $this->assess_info->getAdjustedTimelimit();
-      if (!$this->canMakeNewAttempt()) {
+      if (!$this->canMakeNewAttempt(1)) { // add 1 since to-be-created record isn't in there yet
         // set time after which latepass is useless
         $this->assessRecord['timelimitexp'] = $out['timelimit_end'] + $this->assess_info->getAdjustedTimelimitGrace();
       }
@@ -646,7 +690,7 @@ class AssessRecord
           $this->data['assess_versions'][$lastver]['timelimit_end'] =
             $this->now + $this->assess_info->getAdjustedTimelimit();
           if (!$this->canMakeNewAttempt()) {
-            $this->assessRecord['timelimitexp'] = $out['timelimit_end'];
+            $this->assessRecord['timelimitexp'] = $this->data['assess_versions'][$lastver]['timelimit_end'];
           }
         }
       }
@@ -978,7 +1022,7 @@ class AssessRecord
    * Check whether user is allowed to create a new assessment version
    * @return boolean              True if OK to create a new assess version
    */
-  public function canMakeNewAttempt() {
+  public function canMakeNewAttempt($add=0) {
     if ($this->is_practice) {
       // if in practice, can make new if we don't have one
       return (empty($this->data));
@@ -989,7 +1033,7 @@ class AssessRecord
       }
       $this->parseData();
       $submitby = $this->assess_info->getSetting('submitby');
-      $prev_attempt_cnt = count($this->data['assess_versions']);
+      $prev_attempt_cnt = count($this->data['assess_versions']) + $add;
       // if by-question, then we can if we have no versions yet
       if ($submitby == 'by_question' && $prev_attempt_cnt == 0) {
         return true;
@@ -1125,6 +1169,19 @@ class AssessRecord
     $names = AssessUtils::getGroupMembersByGroupId($this->assessRecord['agroupid']);
 
     return $names;
+  }
+
+  /**
+   * Get stu group id.
+   * 
+   * @return int  stu group id, or 0 if none
+   */
+  public function getGroupId() {
+    if (empty($this->assessRecord)) {
+        return 0;
+    } else {
+        return $this->assessRecord['agroupid'];
+    }
   }
 
   /**
@@ -1361,8 +1418,7 @@ class AssessRecord
         ) ||
         $this->teacherInGb;
       $out['info'] = $generate_html;
-      list($out['html'], $out['jsparams'], $out['answeights'], $out['usedautosave'], $out['work'], $out['errors']) =
-        $this->getQuestionHtml($qn, $ver, false, $force_scores, $force_answers, $tryToShow, $generate_html === 2);
+      $out += $this->getQuestionHtml($qn, $ver, false, $force_scores, $force_answers, $tryToShow, $generate_html === 2);
       if ($out['usedautosave']) {
         $autosave = $this->getAutoSaves($qn);
         $out['autosave_timeactive'] = $autosave['timeactive'];
@@ -1534,6 +1590,9 @@ class AssessRecord
 
     $answeights = isset($qver['answeights']) ? $qver['answeights'] : array(1);
     $answeightTot = array_sum($answeights);
+    if ($answeightTot == 0) {
+        $answeightTot = 1; //avoid errors
+    }
     $partscores = array_fill(0, count($answeights), 0);
     $partrawscores = array_fill(0, count($answeights), 0);
     $parts = array();
@@ -1659,9 +1718,24 @@ class AssessRecord
     // get assessment attempt data for given version
     $qver = $this->getQuestionVer($qn, $ver);
     $work = isset($qver['work']) ? $qver['work'] : '';
+    $worktime = '0';
+    if (!empty($qver['worktime'])) {
+        $worktime = tzdate("n/j/y, g:i a", $qver['worktime'] + $this->assessRecord['starttime']);
+    }
 
     // get the question settings
     $qsettings = $this->assess_info->getQuestionSettings($qver['qid']);
+    if ($qsettings === false) { // question doesn't exist
+        return [
+            'html' => _('Unable to load question data'),
+            'jsparams' => [],
+            'answeights' => [1],
+            'usedautosave' => false,
+            'work' => '',
+            'worktime' => '0',
+            'errors' => _('Unable to load question data')
+        ];
+    }
     $showscores = ($force_scores || ($this->assess_info->getSetting('showscores') === 'during'));
     // see if there is autosaved answers to redisplay
     if ($this->inGb) {
@@ -1692,7 +1766,7 @@ class AssessRecord
     }
 
     list($stuanswers, $stuanswersval) = $this->getStuanswers($ver, $tryToShow);
-    list($scorenonzero, $scoreiscorrect) = $this->getScoreIsCorrect();
+    list($scorenonzero, $scoreiscorrect) = $this->getScoreIsCorrect($ver);
     $autosaves = [];
     $seqPartDone = array();
     $correctAnswerWrongFormat = array();
@@ -1741,11 +1815,11 @@ class AssessRecord
       } else if ($qsettings['showans'] === 'never') {
         $showansparts[$pn] = false;
         $showans = false;
-      } else if ($qsettings['showans'] === 'after_lastattempt' && $partattemptn[$pn] === $trylimit) {
+      } else if ($qsettings['showans'] === 'after_lastattempt' && $partattemptn[$pn] >= $trylimit) {
         $showansparts[$pn] = true;  // show after last attempt
       } else if (!empty($qsettings['jump_to_answer']) && !empty($qver['jumptoans'])) {
         $showansparts[$pn] = true;  // show after jump to answer pressed
-      } else if ($qsettings['showans'] === 'with_score' && $showscores && $partattemptn[$pn] > 0) {
+      } else if ($qsettings['showans'] === 'with_score' && $showscores && $partattemptn[$pn] >= $trylimit) {
         $showansparts[$pn] = true; // show with score
       } else if ($qsettings['showans'] === 'after_n' && $partattemptn[$pn] >= $qsettings['showans_aftern']) {
         $showansparts[$pn] = true; // show after n attempts
@@ -1794,6 +1868,9 @@ class AssessRecord
         $seqPartDone[$pn] = ($partattemptn[$pn] > 0);
       }
     }
+    if ($numParts == 0 && $this->teacherInGb) {
+        $seqPartDone = true;
+    }
     $attemptn = (count($partattemptn) == 0) ? 0 : max($partattemptn);
     $questionParams = new QuestionParams();
     $questionParams
@@ -1836,8 +1913,16 @@ class AssessRecord
       $jsparams['ans'] = $question->getCorrectAnswersForParts();
       $jsparams['stuans'] = $stuanswers[$qn+1];
     }
+    return [
+        'html' => $qout,
+        'jsparams' => $jsparams,
+        'answeights' => $answeights,
+        'usedautosave' => $usedAutosave,
+        'work' => $work,
+        'worktime' => $worktime,
+        'errors' => $question->getErrors()
+    ];
 
-    return array($qout, $jsparams, $answeights, $usedAutosave, $work, $question->getErrors());
   }
 
   private function parseScripts($html) {
@@ -3632,7 +3717,13 @@ class AssessRecord
       $question_versions = &$assessver['questions'][$qn]['question_versions'];
       $curq = &$question_versions[count($question_versions) - 1];
       if ($during || ($this->assess_info->getQuestionSetting($curq['qid'], 'showwork') & 2) == 2) {
-        $curq['work'] = Sanitize::incomingHtml($val);
+        $newwork = Sanitize::incomingHtml($val);
+        if (!isset($curq['work']) || $curq['work'] != $newwork) {
+            $curq['work'] = $newwork;
+            $curq['worktime'] = time() - $this->assessRecord['starttime'];
+        } else {
+            unset($work[$qn]);
+        }
       }
     }
     if (count($work) > 0) {
@@ -3678,6 +3769,7 @@ class AssessRecord
     foreach ($data as $pn=>$partdata) {
       if ($pn === 'work') {
         $curq['work'] = $partdata;
+        $curq['worktime'] = time() - $this->assessRecord['starttime'];
       } else {
         $curq['tries'][$pn][] = $partdata;
       }

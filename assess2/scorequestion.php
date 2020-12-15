@@ -78,7 +78,7 @@ if ($assess_info->getSetting('available') === 'practice' && !empty($_POST['pract
 } else if ($assess_info->getSetting('available') === 'yes' || $canViewAll) {
   $in_practice = false;
   if ($canViewAll) {
-    $assess_info->overrideAvailable('yes');
+    $assess_info->overrideAvailable('yes', $uid!=$userid || $preview_all);
   }
 } else {
   echo '{"error": "not_avail"}';
@@ -372,15 +372,8 @@ if ($end_attempt) {
 // Record record
 $assess_record->saveRecord();
 
-if ($assessInfoOut['submitby'] == 'by_question' || $end_attempt) {
-  // update LTI grade
-  $lti_sourcedid = $assess_record->getLTIsourcedId();
-  if (strlen($lti_sourcedid) > 1) {
-    $gbscore = $assess_record->getGbScore();
-    require_once("../includes/ltioutcomes.php");
-    $aidposs = $assess_info->getSetting('points_possible');
-    calcandupdateLTIgrade($lti_sourcedid, $aid, $uid, $gbscore['gbscore'], false, $aidposs);
-  }
+if (($assessInfoOut['submitby'] == 'by_question' && !$in_practice) || $end_attempt) {
+    $assess_record->updateLTIscore();
 }
 
 //prep date display
