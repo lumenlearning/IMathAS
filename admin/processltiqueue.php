@@ -71,6 +71,7 @@ function ohmDebuglog($logText)
 
     $timeStr = strftime('%Y-%b-%d %H:%M:%S %Z', time());
     file_put_contents(
+        $lti_response_log_file,
         sprintf('[%s] %s' . "\n", $timeStr, $logText),
         FILE_APPEND
     );
