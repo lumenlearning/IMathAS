@@ -1194,6 +1194,7 @@ class AssessRecord
     if (empty($this->assessRecord)) {
       return false;
     }
+    $this->parseData();
 
     $returnVal = null;
     // if in practice, we want to grab scored previous attempts, so switch out
@@ -1233,6 +1234,11 @@ class AssessRecord
     }
     $enddate = $this->assess_info->getSetting('enddate');
     if ($this->assess_info->getSetting('timelimit_type') == 'allow_overtime') {
+      // check if extension has been applied
+      $lastvernum = count($this->data['assess_versions']) - 1;
+      if (!empty($this->data['assess_versions'][$lastvernum]['nograce'])) {
+          return $exp; // use timelimit; no grace
+      }
       $returnVal = $exp + $this->assess_info->getAdjustedTimelimitGrace();
       if ($returnVal > $enddate) {
         $returnVal = $enddate;
@@ -1241,6 +1247,43 @@ class AssessRecord
     } else {
       return 0;
     }
+  }
+
+  public function applyTimeLimitExtension($min) {
+    $exp = $this->getTimeLimitExpires();
+    if ($exp === false || $this->is_practice) {
+      return false;
+    }
+
+    $now = time();
+    $pasttime = (($this->assess_info->getSetting('timelimit_type') == 'kick_out' &&
+        $now > $exp + 10) ||
+        ($this->assess_info->getSetting('timelimit_type') == 'allow_overtime' &&
+        $now > $this->getTimeLimitGrace() + 10));
+
+    $lastvernum = count($this->data['assess_versions']) - 1;
+    if ($pasttime) { // set for now plus extension
+        $this->data['assess_versions'][$lastvernum]['timelimit_end'] = time() + $min*60;
+    } else { // just extend
+        $this->data['assess_versions'][$lastvernum]['timelimit_end'] += $min*60;
+    }
+    // record extension in record for later reference
+    if (!isset($this->data['assess_versions'][$lastvernum]['timelimit_ext'])) {
+        $this->data['assess_versions'][$lastvernum]['timelimit_ext'] = [];
+    }
+    $this->data['assess_versions'][$lastvernum]['timelimit_ext'][] = $min;
+    if ($pasttime) {
+        $this->data['assess_versions'][$lastvernum]['nograce'] = 1;
+    }
+    // if timelimitexp was previously set, update it
+    if ($this->assessRecord['timelimitexp'] > 0) {
+        $this->assessRecord['timelimitexp'] = $this->data['assess_versions'][$lastvernum]['timelimit_end'];
+    }
+    // mark extension as used
+    $stm = $this->DBH->prepare("UPDATE imas_exceptions SET timeext=-1*timeext WHERE userid=? AND assessmentid=? AND itemtype='A'");
+    $stm->execute(array($this->curUid, $this->curAid));
+
+    $this->need_to_record = true;
   }
 
 
@@ -1310,6 +1353,7 @@ class AssessRecord
     $parts = array();
     $score = -1;
     $try = 0;
+    $lastsub = -1;
     $status = 'unattempted';
     if (count($curq['tries']) == 0) {
       // no tries yet
@@ -1358,6 +1402,9 @@ class AssessRecord
         if ($parttry === 0 && $answeights[$pn] > 0) {
           // if any parts are unattempted, mark question as such
           $status = 'unattempted';
+        }
+        if ($parttry > 0 && $curq['tries'][$pn][$parttry-1]['sub'] > $lastsub) {
+            $lastsub = $curq['tries'][$pn][$parttry-1]['sub'];
         }
         if ($include_scores && $answeights[$pn] > 0) {
           if ($status != 'unattempted') {
@@ -1428,6 +1475,10 @@ class AssessRecord
       }
       if ($out['tries_max'] == 1) {
         $out['parts_entered'] = $this->getPartsEntered($qn, $curq['tries'], $out['answeights']);
+      }
+      if ($this->teacherInGb && $lastsub > -1) {
+          $out['lastchange'] = tzdate("n/j/y, g:i a", 
+            $this->data['submissions'][$lastsub] + $this->assessRecord['starttime']);
       }
     } else {
       $out['html'] = null;
@@ -1860,9 +1911,11 @@ class AssessRecord
       if ($this->teacherInGb) {
         $seqPartDone[$pn] = true;
       } else if ($showscores) {
-        // move on if correct or out of tries
+        // move on if correct or out of tries or manually graded
         $seqPartDone[$pn] = ($partattemptn[$pn] === $trylimit ||
-          $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'] > .98);
+          $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'] > .98 ||
+          $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'] == -2
+        );
       } else {
         // move on if attempted
         $seqPartDone[$pn] = ($partattemptn[$pn] > 0);
@@ -3367,6 +3420,11 @@ class AssessRecord
           'qattempt'=>$qScoresToLog
         )
       );
+    }
+    // if deleting last attempt, clear out any timelimit extensions
+    if ($type == 'all' || ($type == 'attempt' && $av == count($this->data['assess_versions'])-1)) {
+        $stm = $this->DBH->prepare("UPDATE imas_exceptions SET timeext=0 WHERE timeext<>0 AND assessmentid=? AND itemtype='A' AND userid=?");
+        $stm->execute(array($this->curAid, $this->curUid));
     }
     $this->updateStatus();
     return $replacedDeleted;

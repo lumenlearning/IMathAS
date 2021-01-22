@@ -441,7 +441,8 @@ function AMQTparseSexpr(str) { //parses str and returns [node,tailstr]
 	    }
     } else {
 	    if (typeof symbol.invisible == "boolean" && symbol.invisible)
-		    node = '{\\left.'+result[0]+'}';
+            //node = '{\\left.'+result[0]+'}';
+            node = '{'+result[0]+'}';
 	    else {
 		    node = '{\\left'+AMQTgetTeXbracket(symbol) + result[0]+'}';
 	    }
@@ -696,14 +697,14 @@ function AMQTparseExpr(str,rightbracket) {
       newFrag += node;
       addedright = true;
     } else {
-	    newFrag += '\\right.';
+	    //newFrag += '\\right.';
 	    addedright = true;
     }
 
   }
   if(AMQnestingDepth>0 && !addedright) {
-	  newFrag += '\\right.'; //adjust for non-matching left brackets
-	  //todo: adjust for non-matching right brackets
+      newFrag += '\\right)'; //adjust for non-matching left brackets.  should be \\right. but MQ can't handle that
+      //todo: adjust for non-matching right brackets
   }
   return [newFrag,str];
 }
@@ -741,7 +742,7 @@ n\frac{num}{denom} to n num/denom
 function MQtoAM(tex,display) {
   var nested,lb,rb,isfuncleft,curpos,c,i;
 	tex = tex.replace(/\\:/g,' ');
-  tex = tex.replace(/\\operatorname{(\w+)}/g,'\\$1');
+  tex = tex.replace(/\\operatorname{(\w+)}/g,' $1');
 	if (!display) {
     while ((i = tex.lastIndexOf('\\left|'))!=-1) { //found a left |)
       rb = tex.indexOf('\\right|',i+1);
@@ -764,9 +765,9 @@ function MQtoAM(tex,display) {
   tex = tex.replace(/\\begin{.?matrix}(.*?)\\end{.?matrix}/g, function(m, p) {
     return '[(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')]';
   });
-	tex = tex.replace(/\\le(?!f)/g,'<=');
-	tex = tex.replace(/\\ge/g,'>=');
-  tex = tex.replace(/\\ne/g,'!=');
+	tex = tex.replace(/\\le(?=(\b|\d))/g,'<=');
+	tex = tex.replace(/\\ge(?=(\b|\d))/g,'>=');
+  tex = tex.replace(/\\ne(?=(\b|\d))/g,'!=');
   tex = tex.replace(/\\pm/g,'+-');
 	tex = tex.replace(/\\approx/g,'~~');
 	tex = tex.replace(/(\\arrow|\\rightarrow)/g,'rarr');
@@ -818,6 +819,6 @@ function MQtoAM(tex,display) {
   tex = tex.replace(/\/\(([\a-zA-Z])\^([\d\.]+)\)/g,'/$1^$2');  //change /(x^n) to /x^n
 	tex = tex.replace(/\(([\a-zA-Z])\^([\d\.]+)\)\//g,'$1^$2/');  //change (x^n)/ to x^n/
   tex = tex.replace(/\+\-/g,'+ -'); // ensure spacing so it doesn't interpret as +-
-
-	return tex;
+  tex = tex.replace(/text\(([^)]*)\)/g, '$1');
+  return tex;
 }
