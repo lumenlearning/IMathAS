@@ -2202,7 +2202,7 @@ class AssessRecord
       } else {
         $curq = $question_versions[$ver];
       }
-      if (count($curq['tries']) == 0) {
+      if (empty($curq['tries'])) {
         $scorenonzero[$qn+1] = -1;
         $scoreiscorrect[$qn+1] = -1;
         continue;
@@ -2210,7 +2210,7 @@ class AssessRecord
       $scorenonzeroparts = array();
       $scoreiscorrectparts = array();
       foreach ($curq['tries'] as $pn => $v) {
-        if (count($curq['tries'][$pn]) == 0) {
+        if (empty($curq['tries'][$pn])) {
           $scorenonzeroparts[$pn] = -1;
           $scoreiscorrectparts[$pn] = -1;
         } else {
