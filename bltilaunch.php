@@ -644,8 +644,14 @@ if (isset($_GET['launch'])) {
 
 	$_SESSION['ltirole'] = $ltirole;
 	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
-	$_SESSION['lti_context_label'] = (!empty($_REQUEST['context_label']))?$_REQUEST['context_label']:$_REQUEST['context_id'];
-	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
+    if (!empty($_REQUEST['context_label'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_label'];
+    } else if (!empty($_REQUEST['context_title'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_title'];
+    } else {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_id'];
+    }
+    $_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
 	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'];
 	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'];
 	$_SESSION['lti_key'] = $ltikey;
@@ -654,7 +660,8 @@ if (isset($_GET['launch'])) {
 	$_SESSION['lti_keygroupid'] = intval($requestinfo[0]->groupid);
 	if (isset($_REQUEST['selection_directive']) && $_REQUEST['selection_directive']=='select_link') {
 		$_SESSION['selection_return'] = $_REQUEST['launch_presentation_return_url'];
-		$_SESSION['selection_return_format'] = "Canvas";
+        $_SESSION['selection_return_format'] = "Canvas";
+        unset($_SESSION['place_aid']);
 	}
 	if (isset($_REQUEST['lti_message_type']) && $_REQUEST['lti_message_type']=='ContentItemSelectionRequest') {
 		$_SESSION['selection_return'] = $_REQUEST['content_item_return_url'];
@@ -667,7 +674,8 @@ if (isset($_GET['launch'])) {
 		} else {
 			$_SESSION['selection_type'] = 'all';
 		}
-		$_SESSION['selection_data'] = @$_REQUEST['data'];
+        $_SESSION['selection_data'] = @$_REQUEST['data'];
+        unset($_SESSION['place_aid']);
 	}
 	unset($_SESSION['lti_duedate']);
 	if (!isset($_REQUEST['custom_canvas_assignment_due_at'])) {
@@ -2325,7 +2333,7 @@ if (isset($_GET['launch'])) {
 			$_SESSION['view_folder'] = array($sourcecid,$parts[1]);
 		}
     }
-
+   
 
 	//Store all LTI request data in session variable for reuse on submit
 	//if we got this far, secret has already been verified
@@ -2349,8 +2357,14 @@ if (isset($_GET['launch'])) {
 	}
 
 	$_SESSION['ltirole'] = $ltirole;
-	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
-	$_SESSION['lti_context_label'] = (!empty($_REQUEST['context_label']))?$_REQUEST['context_label']:$_REQUEST['context_id'];
+    $_SESSION['lti_context_id'] = $_REQUEST['context_id'];
+    if (!empty($_REQUEST['context_label'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_label'];
+    } else if (!empty($_REQUEST['context_title'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_title'];
+    } else {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_id'];
+    }
 	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
 	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'];
 	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'];
@@ -2360,7 +2374,8 @@ if (isset($_GET['launch'])) {
 	$_SESSION['lti_keygroupid'] = intval($requestinfo[0]->groupid);
 	if (isset($_REQUEST['selection_directive']) && $_REQUEST['selection_directive']=='select_link') {
 		$_SESSION['selection_return'] = $_REQUEST['launch_presentation_return_url'];
-		$_SESSION['selection_return_format'] = "Canvas";
+        $_SESSION['selection_return_format'] = "Canvas";
+        unset($_SESSION['place_aid']);
 	}
 	if (isset($_REQUEST['lti_message_type']) && $_REQUEST['lti_message_type']=='ContentItemSelectionRequest') {
 		$_SESSION['selection_return'] = $_REQUEST['content_item_return_url'];
@@ -2373,7 +2388,8 @@ if (isset($_GET['launch'])) {
 		} else {
 			$_SESSION['selection_type'] = 'all';
 		}
-		$_SESSION['selection_data'] = @$_REQUEST['data'];
+        $_SESSION['selection_data'] = @$_REQUEST['data'];
+        unset($_SESSION['place_aid']);
     }
     unset($_SESSION['lti_duedate']);
 	if (!isset($_REQUEST['custom_canvas_assignment_due_at'])) {

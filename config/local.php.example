@@ -10,6 +10,9 @@ require('ohm.php');
 
 $installname = "Lumen OHM Local";
 
+// For local file uploads
+unset($AWSkey);
+
 //$imasroot = "/ohm";
 
 // Static assets

@@ -158,7 +158,8 @@
 		$query .= "WHERE id=:id";
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':id'=>$aid));
-		$defaults = $stm->fetch(PDO::FETCH_ASSOC);
+        $defaults = $stm->fetch(PDO::FETCH_ASSOC);
+        $defaults['showwork'] = ($defaults['showwork'] & 3);
         if ($defaults['showcalculator'] == 'default') {
             $defaults['showcalculator'] = _('Default');
         } else if ($defaults['showcalculator'] == 'none') {

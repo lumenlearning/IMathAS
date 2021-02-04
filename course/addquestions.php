@@ -174,9 +174,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				$stm = $DBH->prepare("SELECT userid,score FROM imas_assessment_records WHERE assessmentid=:assessmentid");
 				$stm->execute(array(':assessmentid'=>$aid));
 				while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-			    $grades[$row['userid']]=$row["score"];
-				}
-				$stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid=:assessmentid");
+			        $grades[$row['userid']]=$row["score"];
+                }
+                // clear out time limit extensions
+                $stm = $DBH->prepare("UPDATE imas_exceptions SET timeext=0 WHERE timeext<>0 AND assessmentid=? AND itemtype='A'");
+                $stm->execute(array($aid));
+
+                $stm = $DBH->prepare("DELETE FROM imas_assessment_records WHERE assessmentid=:assessmentid");
+
 			} else {
 				$stm = $DBH->prepare("SELECT userid,bestscores FROM imas_assessment_sessions WHERE assessmentid=:assessmentid");
         $stm->execute(array(':assessmentid'=>$aid));
@@ -491,7 +496,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$curdir = rtrim(dirname(__FILE__), '/\\');
 	require_once("$curdir/../filter/filter.php");
 	
-	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
+	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showcalculator,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	list($itemorder,$page_assessmentName,$defpoints,$displaymethod,$showcalculatordef,$showhintsdef,$showworkdef,$assessintro) = $stm->fetch(PDO::FETCH_NUM);
 	$ln = 1;
@@ -1327,7 +1332,7 @@ if ($overwriteBody==1) {
 	}
 ?>
 	<p>
-		<a class="abutton" href="course.php?cid=<?php echo $cid ?>"><?php echo _("Done"); ?></a>
+		<a class="abutton" href="course.php?cid=<?php echo $cid ?>" onclick="return prePageChange()"><?php echo _("Done"); ?></a>
 		<button type="button" title=<?php echo '"'._("Preview this assessment").'"'; ?> onClick="window.open('<?php
 			if ($aver > 1) {
 				echo $imasroot . '/assess2/?cid=' . $cid . '&aid=' . $aid;
