@@ -1,0 +1,32 @@
+<?php
+namespace App\Repositories\ohm;
+
+use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
+
+class QuestionSetRepository extends BaseRepository implements QuestionSetRepositoryInterface
+{
+    public function getById($questionSetId)
+    {
+        $result = app('db')->select(
+            'SELECT * FROM imas_questionset WHERE id = :questionSetId;', ['questionSetId' => $questionSetId]);
+
+        return ($result) ? $this->toAssoc($result[0]) : null;
+    }
+
+    public function getFieldsById($questionSetId)
+    {
+        $result = app('db')->select(
+            'SELECT qtype, control, qcontrol, qtext, answer, hasimg, extref, solution, solutionopts
+                FROM imas_questionset WHERE id = :questionSetId;', ['questionSetId' => $questionSetId]);
+
+        return $this->toAssoc($result[0]);
+    }
+
+    public function getAllByQuestionId($questionIds, $placeholders)
+    {
+        $result = app('db')->select(
+            "SELECT * FROM imas_questionset WHERE id IN ($placeholders);", $questionIds);
+
+        return $this->toAssoc($result);
+    }
+}
