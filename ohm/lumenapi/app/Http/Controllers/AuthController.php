@@ -42,8 +42,8 @@ class AuthController extends Controller
                 'client_secret' => 'required']
         );
 
-        if (!($request->all()['client_id'] == env('LONG_LIVED_CLIENT_ID') ||
-            $request->all()['client_secret'] == env('LONG_LIVED_CLIENT_SECRET'))) {
+        if (!($request->all()['client_id'] == env('QUESTION_API_LONG_LIVED_CLIENT_ID') ||
+            $request->all()['client_secret'] == env('QUESTION_API_LONG_LIVED_CLIENT_SECRET'))) {
 
             return response()->json([
                 'errors' => ['Invalid credentials'],
@@ -51,13 +51,13 @@ class AuthController extends Controller
         }
 
         $issuedAt = time();
-        $expirationTime = $issuedAt + env('JWT_EXPIRY');
+        $expirationTime = $issuedAt + env('QUESTION_API_JWT_EXPIRY');
         $payload = array(
             'userid' => 1,
             'iat' => $issuedAt,
             'exp' => $expirationTime
         );
-        $key = env('JWT_SECRET');
+        $key = env('QUESTION_API_JWT_SECRET');
         $jwt = JWT::encode($payload, $key, 'HS256');
 
         return response()->json(['access_token' => $jwt, 'token_type' => 'Bearer']);

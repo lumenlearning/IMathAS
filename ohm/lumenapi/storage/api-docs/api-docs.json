@@ -27,7 +27,7 @@
             }
         },
         "/question/{questionId}": {
-            "get": {
+            "post": {
                 "operationId": "App\\Http\\Controllers\\QuestionController::GetQuestion",
                 "parameters": [
                     {

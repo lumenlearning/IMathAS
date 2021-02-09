@@ -52,7 +52,7 @@ class QuestionController extends ApiBaseController
     }
 
     /**
-     * @OA\Get(
+     * @OA\Post(
      *     path="/question/{questionId}",
      *     @OA\Parameter(
      *         name="questionId",
