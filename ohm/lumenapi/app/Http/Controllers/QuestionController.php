@@ -101,47 +101,64 @@ class QuestionController extends ApiBaseController
         }
     }
 
-    public function GetQuestions($questionId): \Illuminate\Http\JsonResponse
+    public function ScoreQuestion($questionId, Request $request): JsonResponse
     {
-        $questions = "";
-
         try {
-            $aid = 2992809; // assessment id
-            $cid = 6; // course id
-            $uid = 2; // user id
+            $this->validate($request,[]);
+            $inputState = $request->all();
 
+            // Change input so that this is not an array. i.e. questionSetId: 12345
+            $questionSetId = $inputState['qsid'][0];
+            $questionSet = $this->questionSetRepository->getById($questionSetId);
+            if (!$questionSet) return $this->BadRequest(['Unable to locate question set']);
 
-            $assessInfo = new \AssessInfo($this->DBH, $aid, $cid, 'all');
+            $assessStandalone = new AssessStandalone($this->DBH);
+            $assessStandalone->setQuestionData($questionSetId, $questionSet);
+            $assessStandalone->setState($inputState);
 
-            $_SESSION['userprefs']['livepreview'] = true;
+            $overrides = [];
 
-            $assessRecord = new AssessRecord($this->DBH, $assessInfo, false);
-            $assessRecord->loadRecord($uid);
-            $assessRecord->setTeacherInGb(true);
+            // Set the answer as provided by the student.
+//            $_POST['qn0'] = ["0","2|1|6|7|0|4|5|3"];
+//            $_POST['qn0-0'] = 2;// ["0","0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-1'] = 1;// ["0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-2'] = 6;// ["0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-3'] = 7;// ["0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-4'] = 0;// ["0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-5'] = 4;// ["0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-6'] = 5;// ["0|2|2|3|7|5|5|7"];
+//            $_POST['qn0-7'] = 3;// ["0|2|2|3|7|5|5|7"];
 
-            $questions = [];
+            $_POST['qn0'] = ["0","0|2|2|3|7|5|5|7"];
+            $_POST['qn0-0'] = 0;// ["0","0|2|2|3|7|5|5|7"];
+            $_POST['qn0-1'] = 2;// ["0|2|2|3|7|5|5|7"];
+            $_POST['qn0-2'] = 2;// ["0|2|2|3|7|5|5|7"];
+            $_POST['qn0-3'] = 3;// ["0|2|2|3|7|5|5|7"];
+            $_POST['qn0-4'] = 7;// ["0|2|2|3|7|5|5|7"];
+            $_POST['qn0-5'] = 5;// ["0|2|2|3|7|5|5|7"];
+            $_POST['qn0-6'] = 5;// ["0|2|2|3|7|5|5|7"];
+            $_POST['qn0-7'] = 7;// ["0|2|2|3|7|5|5|7"];
 
-            for($i = 0; $i < 8; $i++) {
-                $question = $assessRecord->getQuestionObject($i, true, true, true, 'last');
-                array_push($questions, $question);
-            }
+            // qn = question number as displayed to the user
+            $question = $assessStandalone->scoreQuestion($questionId, ['1' => true]);
 
-            return response()->json($questions);
+            //showscoredonsubmit
+            //$a2->getState()
+
+            return response()->json($question);
         } catch (exception $e) {
-            Log::info($e);
-            //code to handle the exception
+            Log::error($e);
+            return $this->BadRequest([$e->getMessage()]);
         }
-
-        return response()->json($questions);
     }
 
     private function loadGlobals() {
-        $mathfuncs = ["sin","cos","tan","sinh","cosh","tanh","arcsin","arccos","arctan","arcsinh","arccosh","arctanh","sqrt","ceil","floor","round","log","ln","abs","max","min","count"];
-        $allowedmacros = $mathfuncs;
-        array_push($allowedmacros,"loadlibrary","importcodefrom","includecodefrom","array","off","true","false","e","pi","null","setseed","if","for","where");
-        array_push($allowedmacros,"getprime","getprimes");
 
-        array_push($allowedmacros,"exp","sec","csc","cot","sech","csch","coth","nthlog",
+        // Lists compiled from existing assess flow
+        $allowedmacros = ["sin","cos","tan","sinh","cosh","tanh","arcsin","arccos","arctan","arcsinh","arccosh",
+            "arctanh","sqrt","ceil","floor","round","log","ln","abs","max","min","count", "getprime","getprimes",
+            "loadlibrary","importcodefrom","includecodefrom","array","off","true","false","e","pi","null","setseed",
+            "if","for","where", "exp","sec","csc","cot","sech","csch","coth","nthlog",
             "sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands",
             "randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand",
             "nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands",
@@ -171,7 +188,7 @@ class QuestionController extends ApiBaseController
             "getopendotsdata","gettwopointdata","getlinesdata","getineqdata","adddrawcommand",
             "mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate",
             "randstates","prettysmallnumber","makeprettynegative","rawurlencode","fractowords",
-            "randcountry","randcountries","sorttwopointdata");
+            "randcountry","randcountries","sorttwopointdata"];
         $GLOBALS['allowedmacros'] = $allowedmacros;
 
         $disallowedvar = ['$link','$qidx','$qnidx','$seed','$qdata','$toevalqtxt','$la',
@@ -183,5 +200,7 @@ class QuestionController extends ApiBaseController
 
         $RND = new Rand();
         $GLOBALS['RND'] = $RND;
+
+        $GLOBALS['myrights'] = 100;
     }
 }
