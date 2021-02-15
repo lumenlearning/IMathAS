@@ -13,11 +13,6 @@
 |
 */
 
-<<<<<<< Updated upstream
-use App\Repositories\Interfaces\AssessmentRepositoryInterface;
-
-=======
->>>>>>> Stashed changes
 $router->get('/api', function () use ($router) {
     return $router->app->version();
 });
@@ -37,12 +32,9 @@ $router->group(
         $router->post('/question/{questionId}', [
             'uses' => 'QuestionController@getQuestion'
         ]);
-<<<<<<< Updated upstream
-=======
 
         $router->post('/question/{questionId}/score', [
             'uses' => 'QuestionController@scoreQuestion'
         ]);
->>>>>>> Stashed changes
     }
 );

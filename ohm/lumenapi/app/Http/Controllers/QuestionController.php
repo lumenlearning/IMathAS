@@ -75,7 +75,10 @@ class QuestionController extends ApiBaseController
     public function GetQuestion($questionId, Request $request): JsonResponse
     {
         try {
-            $this->validate($request,[]);
+            $this->validate($request,[
+                'qsid' => 'required|array',
+                'seeds' => 'required|array'
+            ]);
             $inputState = $request->all();
 
             $questionSet = $this->questionSetRepository->getById($inputState['qsid'][$questionId]);
@@ -104,8 +107,17 @@ class QuestionController extends ApiBaseController
     public function ScoreQuestion($questionId, Request $request): JsonResponse
     {
         try {
-            $this->validate($request,[]);
+            $this->validate($request,[
+                'post' => 'required',
+                'post.*.name' => 'required|string',
+                'post.*.value' => 'required',
+                'qsid' => 'required|array',
+                'seeds' => 'required|array'
+            ]);
             $inputState = $request->all();
+
+            $postParams = $inputState['post'];
+            unset($inputState['post']);
 
             // Change input so that this is not an array. i.e. questionSetId: 12345
             $questionSetId = $inputState['qsid'][0];
@@ -118,26 +130,9 @@ class QuestionController extends ApiBaseController
 
             $overrides = [];
 
-            // Set the answer as provided by the student.
-//            $_POST['qn0'] = ["0","2|1|6|7|0|4|5|3"];
-//            $_POST['qn0-0'] = 2;// ["0","0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-1'] = 1;// ["0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-2'] = 6;// ["0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-3'] = 7;// ["0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-4'] = 0;// ["0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-5'] = 4;// ["0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-6'] = 5;// ["0|2|2|3|7|5|5|7"];
-//            $_POST['qn0-7'] = 3;// ["0|2|2|3|7|5|5|7"];
-
-            $_POST['qn0'] = ["0","0|2|2|3|7|5|5|7"];
-            $_POST['qn0-0'] = 0;// ["0","0|2|2|3|7|5|5|7"];
-            $_POST['qn0-1'] = 2;// ["0|2|2|3|7|5|5|7"];
-            $_POST['qn0-2'] = 2;// ["0|2|2|3|7|5|5|7"];
-            $_POST['qn0-3'] = 3;// ["0|2|2|3|7|5|5|7"];
-            $_POST['qn0-4'] = 7;// ["0|2|2|3|7|5|5|7"];
-            $_POST['qn0-5'] = 5;// ["0|2|2|3|7|5|5|7"];
-            $_POST['qn0-6'] = 5;// ["0|2|2|3|7|5|5|7"];
-            $_POST['qn0-7'] = 7;// ["0|2|2|3|7|5|5|7"];
+            foreach($postParams as $postParam) {
+                $_POST[$postParam['name']] = $postParam['value'];
+            }
 
             // qn = question number as displayed to the user
             $question = $assessStandalone->scoreQuestion($questionId, ['1' => true]);
