@@ -25,15 +25,11 @@ $router->group(
     ['prefix' => 'api/v1', 'middleware' => 'jwt.auth'],
     function() use ($router) {
 
-        $router->get('/questions/{questionId}', [
-            'uses' => 'QuestionController@getQuestions'
-        ]);
-
-        $router->post('/question/{questionId}', [
+        $router->post('/question', [
             'uses' => 'QuestionController@getQuestion'
         ]);
 
-        $router->post('/question/{questionId}/score', [
+        $router->post('/question/score', [
             'uses' => 'QuestionController@scoreQuestion'
         ]);
     }

@@ -53,14 +53,7 @@ class QuestionController extends ApiBaseController
 
     /**
      * @OA\Post(
-     *     path="/question/{questionId}",
-     *     @OA\Parameter(
-     *         name="questionId",
-     *         in="path",
-     *         description="The questionId parameter in path",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
+     *     path="/question",
      *     @OA\Response(
      *         response="200",
      *         description="Returns some sample category things",
@@ -72,7 +65,7 @@ class QuestionController extends ApiBaseController
      *     ),
      * )
      */
-    public function GetQuestion($questionId, Request $request): JsonResponse
+    public function GetQuestion(Request $request): JsonResponse
     {
         try {
             $this->validate($request,[
@@ -81,7 +74,9 @@ class QuestionController extends ApiBaseController
             ]);
             $inputState = $request->all();
 
-            $questionSet = $this->questionSetRepository->getById($inputState['qsid'][$questionId]);
+            $questionId = 0;
+            $questionSetId = $inputState['qsid'][$questionId];
+            $questionSet = $this->questionSetRepository->getById($questionSetId);
             if (!$questionSet) return $this->BadRequest(['Unable to locate question set']);
 
             $assessStandalone = new AssessStandalone($this->DBH);
@@ -104,7 +99,21 @@ class QuestionController extends ApiBaseController
         }
     }
 
-    public function ScoreQuestion($questionId, Request $request): JsonResponse
+    /**
+     * @OA\Post(
+     *     path="/question/score",
+     *     @OA\Response(
+     *         response="200",
+     *         description="Returns some sample category things",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Error: Bad request. When required parameters were not supplied.",
+     *     ),
+     * )
+     */
+    public function ScoreQuestion(Request $request): JsonResponse
     {
         try {
             $this->validate($request,[
@@ -120,7 +129,8 @@ class QuestionController extends ApiBaseController
             unset($inputState['post']);
 
             // Change input so that this is not an array. i.e. questionSetId: 12345
-            $questionSetId = $inputState['qsid'][0];
+            $questionId = 0;
+            $questionSetId = $inputState['qsid'][$questionId];
             $questionSet = $this->questionSetRepository->getById($questionSetId);
             if (!$questionSet) return $this->BadRequest(['Unable to locate question set']);
 
