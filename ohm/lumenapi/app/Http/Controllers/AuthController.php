@@ -20,6 +20,23 @@ class AuthController extends Controller
     /**
      * @OA\Post(
      *     path="/token",
+     *     summary="Retrieves bearer token for all api requests",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="client_id",
+     *                     type="string"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="client_secret",
+     *                     type="string"
+     *                 )
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="Returns some sample category things",

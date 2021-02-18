@@ -29,8 +29,16 @@ $router->group(
             'uses' => 'QuestionController@getQuestion'
         ]);
 
+        $router->post('/questions', [
+            'uses' => 'QuestionController@getAllQuestions'
+        ]);
+
         $router->post('/question/score', [
             'uses' => 'QuestionController@scoreQuestion'
+        ]);
+
+        $router->post('/questions/score', [
+            'uses' => 'QuestionController@scoreAllQuestions'
         ]);
     }
 );

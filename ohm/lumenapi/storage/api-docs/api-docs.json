@@ -7,7 +7,28 @@
     "paths": {
         "/token": {
             "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Retrieves bearer token for all api requests",
                 "operationId": "App\\Http\\Controllers\\AuthController::GetToken",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "client_id": {
+                                        "type": "string"
+                                    },
+                                    "client_secret": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Returns some sample category things",
@@ -26,31 +47,217 @@
                 }
             }
         },
-        "/question/{questionId}": {
+        "/question": {
             "post": {
-                "operationId": "App\\Http\\Controllers\\QuestionController::GetQuestion",
+                "tags": [
+                    "Display"
+                ],
+                "summary": "Retrieves question HTML for given question set id and seed.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::getQuestion",
                 "parameters": [
                     {
-                        "name": "questionId",
-                        "in": "path",
-                        "description": "The questionId parameter in path",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "example": "Bearer <token>"
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "seeds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    },
+                                    "qsid": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    },
+                                    "rawscores": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "seeds": [
+                                        8076
+                                    ],
+                                    "qsid": [
+                                        16208
+                                    ],
+                                    "rawscores": [
+                                        "[]"
+                                    ],
+                                    "submitall": false
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Returns some sample category things",
+                        "description": "OK",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "properties": {
+                                        "html": {
+                                            "description": "Contains html for question rendering",
+                                            "type": "string"
+                                        },
+                                        "jsparams": {
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "",
+                                        "value": {
+                                            "tbd": "tbd"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     },
                     "400": {
-                        "description": "Error: Bad request. When required parameters were not supplied."
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/questions": {
+            "post": {
+                "tags": [
+                    "Display"
+                ],
+                "summary": "Retrieves question HTML a given list of question set ids and seeds.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::getAllQuestions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/question/score": {
+            "post": {
+                "tags": [
+                    "Scoring"
+                ],
+                "summary": "Scores student reponse to a given question.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::scoreQuestion",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "scores": {
+                                            "description": "Contains weighted score for given question",
+                                            "type": "int"
+                                        },
+                                        "raw": {
+                                            "type": "Contains raw score for given question"
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "allans": {
+                                            "type": "bool"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "Multi-part question",
+                                        "value": {
+                                            "scores": "[0.5,0.5]",
+                                            "raw": "[1,1]",
+                                            "errors": "[]",
+                                            "allans": false
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/questions/score": {
+            "post": {
+                "tags": [
+                    "Scoring"
+                ],
+                "summary": "Scores student reponse to a given list of questions.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::scoreAllQuestions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }

@@ -5,7 +5,6 @@
 
 namespace App\Http\Controllers;
 
-use AssessRecord;
 use AssessStandalone;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,8 +13,10 @@ use Illuminate\Support\Facades\Log;
 use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 
+use Illuminate\Support\Facades\Validator;
 use PDO;
-use Rand;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use function FastRoute\TestFixtures\empty_options_cached;
 
 class QuestionController extends ApiBaseController
 {
@@ -34,6 +35,11 @@ class QuestionController extends ApiBaseController
     private $DBH;
 
     /**
+     * @var int Index of incoming question. Should always be 0.
+     */
+    private $questionId = 0;
+
+    /**
      * Controller constructor.
      * @param AssessmentRepositoryInterface $assessmentRepository
      * @param QuestionSetRepositoryInterface $questionSetRepository
@@ -45,54 +51,169 @@ class QuestionController extends ApiBaseController
         $this->assessmentRepository = $assessmentRepository;
         $this->questionSetRepository = $questionSetRepository;
 
-        $this->loadGlobals();
+        // AssessStandalone requires PDO connection. This uses Lumen's existing connection to provide PDO.
+        $this->DBH = app('db')->getPdo();
 
-        $dsn = 'mysql:host=' . env('DB_HOST') . ':' . env('DB_PORT') . ';dbname=' . env('DB_DATABASE');
-        $this->DBH = new PDO($dsn, env('DB_USERNAME'), env('DB_PASSWORD'));
+        // Allows the API to act as an admin user. Initially, Skeletor will be the only client however, when
+        // end users begin to use the API, some form of Skeletor to MOM user map should be used here instead.
+        $GLOBALS['myrights'] = 100;
     }
 
     /**
      * @OA\Post(
      *     path="/question",
+     *     summary="Retrieves question HTML for given question set id and seed.",
+     *     tags={"Display"},
+     *     @OA\Parameter(
+     *       name="Authorization",
+     *       in="header",
+     *       required=true,
+     *       example="Bearer <token>"
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="seeds",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="int"
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="qsid",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="int"
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="rawscores",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="int"
+     *                     )
+     *                 ),
+     *                 example={
+     *                   "seeds": {
+     *                     "0": 8076
+     *                   },
+     *                   "qsid": {
+     *                     "0": 16208
+     *                   },
+     *                   "rawscores": {
+     *                     "0": "[]"
+     *                   },
+     *                   "submitall": false
+     *                 }
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(
      *         response="200",
-     *         description="Returns some sample category things",
-     *         @OA\JsonContent()
+     *         description="OK",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             @OA\Property(
+     *               property="html",
+     *               type="string",
+     *               description="Contains html for question rendering"
+     *             ),
+     *             @OA\Property(
+     *               property="jsparams",
+     *               type="object"
+     *             ),
+     *             @OA\Property(
+     *               property="errors",
+     *               type="array",
+     *               @OA\Items(
+     *                 type="string"
+     *               )
+     *             )
+     *          ),
+     *          @OA\Examples(example=200, summary="", value={"tbd":"tbd"}),
+     *       )
      *     ),
      *     @OA\Response(
      *         response="400",
-     *         description="Error: Bad request. When required parameters were not supplied.",
+     *         description="Bad Request"
      *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
      * )
      */
-    public function GetQuestion(Request $request): JsonResponse
+    public function getQuestion(Request $request): JsonResponse
     {
         try {
             $this->validate($request,[
                 'qsid' => 'required|array',
-                'seeds' => 'required|array'
+                'seeds' => 'required|array',
+                'rawscores' => 'present|array'
             ]);
             $inputState = $request->all();
 
-            $questionId = 0;
-            $questionSetId = $inputState['qsid'][$questionId];
-            $questionSet = $this->questionSetRepository->getById($questionSetId);
-            if (!$questionSet) return $this->BadRequest(['Unable to locate question set']);
-
-            $assessStandalone = new AssessStandalone($this->DBH);
-            $assessStandalone->setQuestionData($questionSet['id'], $questionSet);
-            $assessStandalone->setState($inputState);
-
-            $overrides = [];
-
-            $question = $assessStandalone->displayQuestion($questionId, $overrides);
-
-            // force submitall
-            if ($inputState['submitall']) {
-                $question['jsparams']['submitall'] = 1;
-            }
+            $question = $this->getQuestionDisplay($inputState);
 
             return response()->json($question);
+        } catch (exception $e) {
+            Log::error($e);
+            return $this->BadRequest([$e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/questions",
+     *     summary="Retrieves question HTML a given list of question set ids and seeds.",
+     *     tags={"Display"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="OK",
+     *         @OA\MediaType(
+     *           mediaType="application/json"
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
+    public function getAllQuestions(Request $request): JsonResponse
+    {
+        try {
+            $inputState = $request->all();
+
+            $questions = [];
+            foreach($inputState as $question) {
+                $questionDisplay = $this->getQuestionDisplay($question);
+                // So that questionSetId and seed show up at the top
+                $questionWithIds = array_merge(
+                    [
+                        'questionSetId' => $question['qsid'][$this->questionId],
+                        'seed' => $question['seeds'][$this->questionId]
+                    ],
+                    $questionDisplay);
+                array_push($questions, $questionWithIds);
+            }
+
+            return response()->json($questions);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
@@ -102,110 +223,194 @@ class QuestionController extends ApiBaseController
     /**
      * @OA\Post(
      *     path="/question/score",
+     *     summary="Scores student reponse to a given question.",
+     *     tags={"Scoring"},
      *     @OA\Response(
      *         response="200",
-     *         description="Returns some sample category things",
-     *         @OA\JsonContent()
+     *         description="OK",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             @OA\Property(
+     *               property="scores",
+     *               type="int",
+     *               description="Contains weighted score for given question"
+     *             ),
+     *             @OA\Property(
+     *               property="raw",
+     *               type="Contains raw score for given question"
+     *             ),
+     *             @OA\Property(
+     *               property="errors",
+     *               type="array",
+     *               @OA\Items(
+     *                 type="string"
+     *               )
+     *             ),
+     *             @OA\Property(
+     *               property="allans",
+     *               type="bool"
+     *             )
+     *          ),
+     *          @OA\Examples(
+     *            example=200,
+     *            summary="Multi-part question",
+     *            value={"scores":"[0.5,0.5]","raw":"[1,1]","errors":"[]","allans":false}
+     *         ),
+     *       )
      *     ),
      *     @OA\Response(
      *         response="400",
-     *         description="Error: Bad request. When required parameters were not supplied.",
+     *         description="Bad Request"
      *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
      * )
      */
-    public function ScoreQuestion(Request $request): JsonResponse
+    public function scoreQuestion(Request $request): JsonResponse
     {
         try {
-            $this->validate($request,[
-                'post' => 'required',
-                'post.*.name' => 'required|string',
-                'post.*.value' => 'required',
+            $validator = Validator::make($request->all(), [
+                'post' => 'required|array|min:1',
+                'post.*.name' => 'required|distinct|string',
+                'post.*.value' => 'present',
                 'qsid' => 'required|array',
                 'seeds' => 'required|array'
             ]);
-            $inputState = $request->all();
-
-            $postParams = $inputState['post'];
-            unset($inputState['post']);
-
-            // Change input so that this is not an array. i.e. questionSetId: 12345
-            $questionId = 0;
-            $questionSetId = $inputState['qsid'][$questionId];
-            $questionSet = $this->questionSetRepository->getById($questionSetId);
-            if (!$questionSet) return $this->BadRequest(['Unable to locate question set']);
-
-            $assessStandalone = new AssessStandalone($this->DBH);
-            $assessStandalone->setQuestionData($questionSetId, $questionSet);
-            $assessStandalone->setState($inputState);
-
-            $overrides = [];
-
-            foreach($postParams as $postParam) {
-                $_POST[$postParam['name']] = $postParam['value'];
+            $validator->after(function($validator) {
+                // $scoreQuestionParams->->setGivenAnswer($_POST['qn'.$qn]) around line 279 of AssessStandalone
+                // requires a post parameter with the name 'qn' followed by some number. To make it easy, always
+                // pass in a 'qn0' param with any value for multi-part and matching type questions even though
+                // it will not be used.
+                $requiredPostElement = 'qn0';
+                $post = $validator->getData()['post'];
+                if (!in_array($requiredPostElement, array_column($post,'name'), true)) {
+                    $validator->errors()->add('post.*.name', 'Must contain one qn0 element with any value');
+                }
+            });
+            if ($validator->fails()) {
+                $this->throwValidationException($request, $validator);
             }
+            $inputState = $request->all();
+            $score = $this->getScore($inputState);
 
-            // qn = question number as displayed to the user
-            $question = $assessStandalone->scoreQuestion($questionId, ['1' => true]);
-
-            //showscoredonsubmit
-            //$a2->getState()
-
-            return response()->json($question);
+            return response()->json($score);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
         }
     }
 
-    private function loadGlobals() {
+    /**
+     * @OA\Post(
+     *     path="/questions/score",
+     *     summary="Scores student reponse to a given list of questions.",
+     *     tags={"Scoring"},
+     *     @OA\Response(
+     *         response="200",
+     *         description="OK",
+     *         @OA\MediaType(
+     *           mediaType="application/json"
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
+    public function scoreAllQuestions(Request $request): JsonResponse
+    {
+        try {
+            $scores = [];
 
-        // Lists compiled from existing assess flow
-        $allowedmacros = ["sin","cos","tan","sinh","cosh","tanh","arcsin","arccos","arctan","arcsinh","arccosh",
-            "arctanh","sqrt","ceil","floor","round","log","ln","abs","max","min","count", "getprime","getprimes",
-            "loadlibrary","importcodefrom","includecodefrom","array","off","true","false","e","pi","null","setseed",
-            "if","for","where", "exp","sec","csc","cot","sech","csch","coth","nthlog",
-            "sinn","cosn","tann","secn","cscn","cotn","rand","rrand","rands","rrands",
-            "randfrom","randsfrom","jointrandfrom","diffrandsfrom","nonzerorand",
-            "nonzerorrand","nonzerorands","nonzerorrands","diffrands","diffrrands",
-            "nonzerodiffrands","nonzerodiffrrands","singleshuffle","jointshuffle",
-            "makepretty","makeprettydisp","showplot","addlabel","showarrays","horizshowarrays",
-            "showasciisvg","listtoarray","arraytolist","calclisttoarray","sortarray","consecutive",
-            "gcd","lcm","calconarray","mergearrays","sumarray","dispreducedfraction","diffarrays",
-            "intersectarrays","joinarray","unionarrays","count","polymakepretty",
-            "polymakeprettydisp","makexpretty","makexprettydisp","calconarrayif","in_array",
-            "prettyint","prettyreal","prettysigfig","roundsigfig","arraystodots","subarray",
-            "showdataarray","arraystodoteqns","array_flip","arrayfindindex","fillarray",
-            "array_reverse","root","getsnapwidthheight","is_numeric","sign","sgn","prettynegs",
-            "dechex","hexdec","print_r","replacealttext","randpythag","changeimagesize","mod",
-            "numtowords","randname","randnamewpronouns","randmalename","randfemalename",
-            "randnames","randmalenames","randfemalenames","randcity","randcities","prettytime",
-            "definefunc","evalfunc","evalnumstr","safepow","arrayfindindices","stringtoarray","strtoupper",
-            "strtolower","ucfirst","makereducedfraction","makereducedmixednumber","stringappend",
-            "stringprepend","textonimage","addplotborder","addlabelabs","makescinot","today",
-            "numtoroman","sprintf","arrayhasduplicates","addfractionaxislabels","decimaltofraction",
-            "ifthen","multicalconarray","htmlentities","formhoverover","formpopup","connectthedots",
-            "jointsort","stringpos","stringlen","stringclean","substr","substr_count","str_replace",
-            "makexxpretty","makexxprettydisp","forminlinebutton","makenumberrequiretimes",
-            "comparenumbers","comparefunctions","getnumbervalue","showrecttable","htmldisp",
-            "getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt",
-            "getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc",
-            "getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata",
-            "getopendotsdata","gettwopointdata","getlinesdata","getineqdata","adddrawcommand",
-            "mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate",
-            "randstates","prettysmallnumber","makeprettynegative","rawurlencode","fractowords",
-            "randcountry","randcountries","sorttwopointdata"];
-        $GLOBALS['allowedmacros'] = $allowedmacros;
+            $inputState = $request->all();
 
-        $disallowedvar = ['$link','$qidx','$qnidx','$seed','$qdata','$toevalqtxt','$la',
-            '$laarr','$shanspt','$GLOBALS','$laparts','$anstype','$kidx','$iidx','$tips',
-            '$optionsPack','$partla','$partnum','$score','$disallowedvar','$allowedmacros',
-            '$wherecount','$forloopcnt','$countcnt','$myrights','$myspecialrights',
-            '$this', '$quesData', '$toevalsoln', '$doShowAnswer', '$doShowAnswerParts'];
-        $GLOBALS['disallowedvar'] = $disallowedvar;
+            foreach($inputState as $question) {
+                $score = $this->getScore($question);
+                // So that questionSetId and seed show up at the top
+                $scoreWithId = array_merge(
+                    [
+                        'questionSetId' => $question['qsid'][$this->questionId],
+                        'seed' => $question['seeds'][$this->questionId]
+                    ],
+                    $score);
+                array_push($scores, $scoreWithId);
+            }
 
-        $RND = new Rand();
-        $GLOBALS['RND'] = $RND;
+            return response()->json($scores);
+        } catch (exception $e) {
+            Log::error($e);
+            return $this->BadRequest([$e->getMessage()]);
+        }
+    }
 
-        $GLOBALS['myrights'] = 100;
+    /**
+     * Retrieves question set list and initializes AssessStandalone
+     * @param array $inputState
+     * @return AssessStandalone
+     */
+    protected function getAssessStandalone(array $inputState): AssessStandalone
+    {
+        // Use questionSetId from incoming request to retrieve list of questions from db
+        $questionSetId = $inputState['qsid'][$this->questionId];
+        $questionSet = $this->questionSetRepository->getById($questionSetId);
+        if (!$questionSet) throw new BadRequestException('Unable to locate question set');
+
+        $assessStandalone = new AssessStandalone($this->DBH);
+        $assessStandalone->setQuestionData($questionSet['id'], $questionSet);
+        $assessStandalone->setState($inputState);
+        return $assessStandalone;
+    }
+
+    /**
+     * Scores a single question using AssessStandalone
+     * @param array $inputState
+     * @return array
+     */
+    protected function getScore(array $inputState): array
+    {
+        // Score is calculated against form POST parameters. Since there will be no form post,
+        // answers are passed in request body then removed so as not to interfere with normal
+        // scoring operation.
+        $postParams = $inputState['post'];
+        foreach ($postParams as $postParam) {
+            $_POST[$postParam['name']] = $postParam['value'];
+        }
+        unset($inputState['post']);
+
+        $assessStandalone = $this->getAssessStandalone($inputState);
+        return $assessStandalone->scoreQuestion($this->questionId, [0 => true]);
+    }
+
+    /**
+     * @param array $inputState
+     * @return array
+     */
+    public function getQuestionDisplay(array $inputState): array
+    {
+        $assessStandalone = $this->getAssessStandalone($inputState);
+
+        $overrides = [];
+        if (!empty($inputState['options'])) {
+            $overrides = $inputState['options'];
+        }
+
+        $question = $assessStandalone->displayQuestion($this->questionId, $overrides);
+        return $question;
     }
 }
