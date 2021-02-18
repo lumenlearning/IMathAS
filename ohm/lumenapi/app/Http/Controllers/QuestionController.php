@@ -161,8 +161,14 @@ class QuestionController extends ApiBaseController
             $inputState = $request->all();
 
             $question = $this->getQuestionDisplay($inputState);
+            $questionWithIds = array_merge(
+                [
+                    'questionSetId' => $inputState['qsid'][$this->questionId],
+                    'seed' => $inputState['seeds'][$this->questionId]
+                ],
+                $question);
 
-            return response()->json($question);
+            return response()->json($questionWithIds);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
@@ -300,7 +306,14 @@ class QuestionController extends ApiBaseController
             $inputState = $request->all();
             $score = $this->getScore($inputState);
 
-            return response()->json($score);
+            $scoreWithIds = array_merge(
+                [
+                    'questionSetId' => $inputState['qsid'][$this->questionId],
+                    'seed' => $inputState['seeds'][$this->questionId]
+                ],
+                $score);
+
+            return response()->json($scoreWithIds);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
@@ -343,13 +356,13 @@ class QuestionController extends ApiBaseController
             foreach($inputState as $question) {
                 $score = $this->getScore($question);
                 // So that questionSetId and seed show up at the top
-                $scoreWithId = array_merge(
+                $scoreWithIds = array_merge(
                     [
                         'questionSetId' => $question['qsid'][$this->questionId],
                         'seed' => $question['seeds'][$this->questionId]
                     ],
                     $score);
-                array_push($scores, $scoreWithId);
+                array_push($scores, $scoreWithIds);
             }
 
             return response()->json($scores);
@@ -410,7 +423,6 @@ class QuestionController extends ApiBaseController
             $overrides = $inputState['options'];
         }
 
-        $question = $assessStandalone->displayQuestion($this->questionId, $overrides);
-        return $question;
+        return $assessStandalone->displayQuestion($this->questionId, $overrides);
     }
 }
