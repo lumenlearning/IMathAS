@@ -371,8 +371,8 @@ class QuestionController extends ApiBaseController
                 'post.*.value' => 'present',
                 'questionSetId' => 'required|int',
                 'seed' => 'required|int',
-                'stuanswers' => 'required|array',
-                'stuanswersval' => 'required|array',
+                'studentAnswers' => 'required|array',
+                'studentAnswerValues' => 'required|array',
             ]);
             $validator->after(function($validator) {
                 // $scoreQuestionParams->->setGivenAnswer($_POST['qn'.$qn]) around line 279 of AssessStandalone

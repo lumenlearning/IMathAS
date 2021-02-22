@@ -5,7 +5,6 @@ namespace App\Dtos;
 class QuestionDto extends BaseDto
 {
     private $rawScores = [];
-    private $partialAttemptNumber = [];
     private $options = [];
 
     public function __construct($request)
@@ -18,10 +17,10 @@ class QuestionDto extends BaseDto
 
         if (isset($request['partialAttemptNumber'])) {
             $this->partialAttemptNumber = $request['partialAttemptNumber'];
+        }
 
-            if (isset($request['options'])) {
-                $this->options = $request['options'];
-            }
+        if (isset($request['options'])) {
+            $this->options = $request['options'];
         }
     }
 

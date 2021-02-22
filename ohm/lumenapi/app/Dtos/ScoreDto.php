@@ -10,8 +10,8 @@ class ScoreDto extends BaseDto
     public function __construct($request) {
         parent::__construct($request);
 
-        $this->studentAnswers = $request['stuanswers'];
-        $this->studentAnswerValues = $request['stuanswersval'];
+        $this->studentAnswers = $request['studentAnswers'];
+        $this->studentAnswerValues = $request['studentAnswerValues'];
 
         $this->setPostParams($request['post']);
     }
@@ -22,7 +22,8 @@ class ScoreDto extends BaseDto
             'qsid' => [$this->questionSetId],
             'seeds' => [$this->seed],
             'stuanswers' => $this->studentAnswers,
-            'stuanswersval' => $this->studentAnswerValues
+            'stuanswersval' => $this->studentAnswerValues,
+            'partattemptn' => [$this->partialAttemptNumber]
         ];
     }
 
