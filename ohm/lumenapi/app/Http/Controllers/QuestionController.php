@@ -14,9 +14,10 @@ use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 
 use Illuminate\Support\Facades\Validator;
+use App\Dtos\QuestionDto;
+use App\Dtos\ScoreDto;
 use PDO;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-use function FastRoute\TestFixtures\empty_options_cached;
 
 class QuestionController extends ApiBaseController
 {
@@ -75,37 +76,48 @@ class QuestionController extends ApiBaseController
      *             mediaType="application/json",
      *             @OA\Schema(
      *                 @OA\Property(
-     *                     property="seeds",
+     *                     property="questionSetId",
+     *                     type="int"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="seed",
+     *                     type="int"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="rawScores",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="string"
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="partialAttemptNumber",
      *                     type="array",
      *                     @OA\Items(
      *                        type="int"
      *                     )
      *                 ),
      *                 @OA\Property(
-     *                     property="qsid",
-     *                     type="array",
-     *                     @OA\Items(
-     *                        type="int"
-     *                     )
-     *                 ),
-     *                 @OA\Property(
-     *                     property="rawscores",
+     *                     property="options",
      *                     type="array",
      *                     @OA\Items(
      *                        type="int"
      *                     )
      *                 ),
      *                 example={
-     *                   "seeds": {
-     *                     "0": 8076
-     *                   },
-     *                   "qsid": {
-     *                     "0": 16208
-     *                   },
-     *                   "rawscores": {
-     *                     "0": "[]"
-     *                   },
-     *                   "submitall": false
+     *                   "questionSetId": 16208,
+     *                   "seed": 8076,
+     *                   "rawScores": {},
+     *                   "partialAttemptNumber": {},
+     *                   "options": {
+     *                     "maxtries": 1,
+     *                     "showansafter": "",
+     *                     "hidescoremarkers": false,
+     *                     "showallparts": "",
+     *                     "showans": false,
+     *                     "showhints": 3,
+     *                     "includeans": false
+     *                   }
      *                 }
      *             )
      *         )
@@ -116,6 +128,16 @@ class QuestionController extends ApiBaseController
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
+     *             @OA\Property(
+     *               property="questionSetId",
+     *               type="int",
+     *               description="Question Set Id of scored item"
+     *             ),
+     *             @OA\Property(
+     *               property="seed",
+     *               type="int",
+     *               description="Seed of scored item"
+     *             ),
      *             @OA\Property(
      *               property="html",
      *               type="string",
@@ -133,7 +155,27 @@ class QuestionController extends ApiBaseController
      *               )
      *             )
      *          ),
-     *          @OA\Examples(example=200, summary="", value={"tbd":"tbd"}),
+     *          @OA\Examples(example=200, summary="", value={
+     *              "questionSetId": 123,
+     *              "seed": 999,
+     *              "html": "<div></div>",
+     *              "jsparams": {
+     *                  "0": {
+     *                     "tip": "Enter math expression",
+     *                     "longtip": "",
+     *                     "preview": 2,
+     *                     "calcformat": "",
+     *                     "qtype": "calculated",
+     *                  },
+     *                  "ans": {},
+     *                  "maxtries": {},
+     *                  "partatt": {},
+     *                  "disabled": {},
+     *                  "helps": {}
+     *              },
+     *              "errors": {}
+     *            }
+     *          ),
      *       )
      *     ),
      *     @OA\Response(
@@ -154,21 +196,13 @@ class QuestionController extends ApiBaseController
     {
         try {
             $this->validate($request,[
-                'qsid' => 'required|array',
-                'seeds' => 'required|array',
-                'rawscores' => 'present|array'
+                'questionSetId' => 'required|int',
+                'seed' => 'required|int'
             ]);
-            $inputState = $request->all();
 
-            $question = $this->getQuestionDisplay($inputState);
-            $questionWithIds = array_merge(
-                [
-                    'questionSetId' => $inputState['qsid'][$this->questionId],
-                    'seed' => $inputState['seeds'][$this->questionId]
-                ],
-                $question);
+            $question = $this->getQuestionDisplay($request->all());
 
-            return response()->json($questionWithIds);
+            return response()->json($question);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
@@ -204,19 +238,10 @@ class QuestionController extends ApiBaseController
     public function getAllQuestions(Request $request): JsonResponse
     {
         try {
-            $inputState = $request->all();
-
             $questions = [];
-            foreach($inputState as $question) {
-                $questionDisplay = $this->getQuestionDisplay($question);
-                // So that questionSetId and seed show up at the top
-                $questionWithIds = array_merge(
-                    [
-                        'questionSetId' => $question['qsid'][$this->questionId],
-                        'seed' => $question['seeds'][$this->questionId]
-                    ],
-                    $questionDisplay);
-                array_push($questions, $questionWithIds);
+            foreach($request->all() as $questionInput) {
+                $question = $this->getQuestionDisplay($questionInput);
+                array_push($questions, $question);
             }
 
             return response()->json($questions);
@@ -231,12 +256,70 @@ class QuestionController extends ApiBaseController
      *     path="/question/score",
      *     summary="Scores student reponse to a given question.",
      *     tags={"Scoring"},
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="questionSetId",
+     *                     type="int"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="seed",
+     *                     type="int"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="post",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="object"
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="studentAnswers",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="string"
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="studentAnswerValues",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="string"
+     *                     )
+     *                 ),
+     *                 example={
+     *                   "questionSetId": 16208,
+     *                   "seed": 8076,
+     *                   "post": {
+     *                      {
+     *                        "name": "qn0",
+     *                        "value": "1"
+     *                      }
+     *                   },
+     *                   "studentAnswers": { "1" },
+     *                   "studentAnswerValues": { 1 }
+     *                 }
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(
      *         response="200",
      *         description="OK",
      *         @OA\MediaType(
      *           mediaType="application/json",
      *           @OA\Schema(
+     *             @OA\Property(
+     *               property="questionSetId",
+     *               type="int",
+     *               description="Question Set Id of scored item"
+     *             ),
+     *             @OA\Property(
+     *               property="seed",
+     *               type="int",
+     *               description="Seed of scored item"
+     *             ),
      *             @OA\Property(
      *               property="scores",
      *               type="int",
@@ -261,7 +344,7 @@ class QuestionController extends ApiBaseController
      *          @OA\Examples(
      *            example=200,
      *            summary="Multi-part question",
-     *            value={"scores":"[0.5,0.5]","raw":"[1,1]","errors":"[]","allans":false}
+     *            value={"scores": {0.5,0.5},"raw":{1,1},"errors": {} ,"allans":false}
      *         ),
      *       )
      *     ),
@@ -286,8 +369,10 @@ class QuestionController extends ApiBaseController
                 'post' => 'required|array|min:1',
                 'post.*.name' => 'required|distinct|string',
                 'post.*.value' => 'present',
-                'qsid' => 'required|array',
-                'seeds' => 'required|array'
+                'questionSetId' => 'required|int',
+                'seed' => 'required|int',
+                'stuanswers' => 'required|array',
+                'stuanswersval' => 'required|array',
             ]);
             $validator->after(function($validator) {
                 // $scoreQuestionParams->->setGivenAnswer($_POST['qn'.$qn]) around line 279 of AssessStandalone
@@ -303,17 +388,10 @@ class QuestionController extends ApiBaseController
             if ($validator->fails()) {
                 $this->throwValidationException($request, $validator);
             }
-            $inputState = $request->all();
-            $score = $this->getScore($inputState);
 
-            $scoreWithIds = array_merge(
-                [
-                    'questionSetId' => $inputState['qsid'][$this->questionId],
-                    'seed' => $inputState['seeds'][$this->questionId]
-                ],
-                $score);
+            $score = $this->getScore($request->all());
 
-            return response()->json($scoreWithIds);
+            return response()->json($score);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
@@ -350,19 +428,9 @@ class QuestionController extends ApiBaseController
     {
         try {
             $scores = [];
-
-            $inputState = $request->all();
-
-            foreach($inputState as $question) {
+            foreach($request->all() as $question) {
                 $score = $this->getScore($question);
-                // So that questionSetId and seed show up at the top
-                $scoreWithIds = array_merge(
-                    [
-                        'questionSetId' => $question['qsid'][$this->questionId],
-                        'seed' => $question['seeds'][$this->questionId]
-                    ],
-                    $score);
-                array_push($scores, $scoreWithIds);
+                array_push($scores, $score);
             }
 
             return response()->json($scores);
@@ -374,19 +442,19 @@ class QuestionController extends ApiBaseController
 
     /**
      * Retrieves question set list and initializes AssessStandalone
-     * @param array $inputState
+     * @param int $questionSetId
+     * @param array $state
      * @return AssessStandalone
      */
-    protected function getAssessStandalone(array $inputState): AssessStandalone
+    protected function getAssessStandalone(int $questionSetId, array $state): AssessStandalone
     {
         // Use questionSetId from incoming request to retrieve list of questions from db
-        $questionSetId = $inputState['qsid'][$this->questionId];
         $questionSet = $this->questionSetRepository->getById($questionSetId);
         if (!$questionSet) throw new BadRequestException('Unable to locate question set');
 
         $assessStandalone = new AssessStandalone($this->DBH);
         $assessStandalone->setQuestionData($questionSet['id'], $questionSet);
-        $assessStandalone->setState($inputState);
+        $assessStandalone->setState($state);
         return $assessStandalone;
     }
 
@@ -397,17 +465,18 @@ class QuestionController extends ApiBaseController
      */
     protected function getScore(array $inputState): array
     {
-        // Score is calculated against form POST parameters. Since there will be no form post,
-        // answers are passed in request body then removed so as not to interfere with normal
-        // scoring operation.
-        $postParams = $inputState['post'];
-        foreach ($postParams as $postParam) {
-            $_POST[$postParam['name']] = $postParam['value'];
-        }
-        unset($inputState['post']);
+        $scoreDto = new ScoreDto($inputState);
 
-        $assessStandalone = $this->getAssessStandalone($inputState);
-        return $assessStandalone->scoreQuestion($this->questionId, [0 => true]);
+        $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
+        $score = $assessStandalone->scoreQuestion($this->questionId, [0 => true]);
+
+        $response = $scoreDto->getResponse($score);
+
+        if (isset($inputState['options']['returnState']) && $inputState['options']['returnState']) {
+            return array_merge($response, ['state' => $assessStandalone->getState()]);
+        }
+
+        return $response;
     }
 
     /**
@@ -416,13 +485,17 @@ class QuestionController extends ApiBaseController
      */
     public function getQuestionDisplay(array $inputState): array
     {
-        $assessStandalone = $this->getAssessStandalone($inputState);
+        $questionDto = new QuestionDto($inputState);
+        $assessStandalone = $this->getAssessStandalone($questionDto->getQuestionSetId(), $questionDto->getState());
 
-        $overrides = [];
-        if (!empty($inputState['options'])) {
-            $overrides = $inputState['options'];
+        $question = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
+
+        $response = $questionDto->getResponse($question);
+
+        if (isset($inputState['options']['returnState']) && $inputState['options']['returnState']) {
+            return array_merge($response, ['state' => $assessStandalone->getState()]);
         }
 
-        return $assessStandalone->displayQuestion($this->questionId, $overrides);
+        return $response;
     }
 }

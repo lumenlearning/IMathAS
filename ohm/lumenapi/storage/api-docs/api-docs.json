@@ -67,19 +67,25 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "seeds": {
+                                    "questionSetId": {
+                                        "type": "int"
+                                    },
+                                    "seed": {
+                                        "type": "int"
+                                    },
+                                    "rawScores": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "partialAttemptNumber": {
                                         "type": "array",
                                         "items": {
                                             "type": "int"
                                         }
                                     },
-                                    "qsid": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "int"
-                                        }
-                                    },
-                                    "rawscores": {
+                                    "options": {
                                         "type": "array",
                                         "items": {
                                             "type": "int"
@@ -88,16 +94,19 @@
                                 },
                                 "type": "object",
                                 "example": {
-                                    "seeds": [
-                                        8076
-                                    ],
-                                    "qsid": [
-                                        16208
-                                    ],
-                                    "rawscores": [
-                                        "[]"
-                                    ],
-                                    "submitall": false
+                                    "questionSetId": 16208,
+                                    "seed": 8076,
+                                    "rawScores": [],
+                                    "partialAttemptNumber": [],
+                                    "options": {
+                                        "maxtries": 1,
+                                        "showansafter": "",
+                                        "hidescoremarkers": false,
+                                        "showallparts": "",
+                                        "showans": false,
+                                        "showhints": 3,
+                                        "includeans": false
+                                    }
                                 }
                             }
                         }
@@ -110,6 +119,14 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "questionSetId": {
+                                            "description": "Question Set Id of scored item",
+                                            "type": "int"
+                                        },
+                                        "seed": {
+                                            "description": "Seed of scored item",
+                                            "type": "int"
+                                        },
                                         "html": {
                                             "description": "Contains html for question rendering",
                                             "type": "string"
@@ -131,7 +148,24 @@
                                         "example": 200,
                                         "summary": "",
                                         "value": {
-                                            "tbd": "tbd"
+                                            "questionSetId": 123,
+                                            "seed": 999,
+                                            "html": "<div></div>",
+                                            "jsparams": {
+                                                "0": {
+                                                    "tip": "Enter math expression",
+                                                    "longtip": "",
+                                                    "preview": 2,
+                                                    "calcformat": "",
+                                                    "qtype": "calculated"
+                                                },
+                                                "ans": [],
+                                                "maxtries": [],
+                                                "partatt": [],
+                                                "disabled": [],
+                                                "helps": []
+                                            },
+                                            "errors": []
                                         }
                                     }
                                 ]
@@ -183,6 +217,57 @@
                 ],
                 "summary": "Scores student reponse to a given question.",
                 "operationId": "App\\Http\\Controllers\\QuestionController::scoreQuestion",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "questionSetId": {
+                                        "type": "int"
+                                    },
+                                    "seed": {
+                                        "type": "int"
+                                    },
+                                    "post": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "studentAnswers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "studentAnswerValues": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "questionSetId": 16208,
+                                    "seed": 8076,
+                                    "post": [
+                                        {
+                                            "name": "qn0",
+                                            "value": "1"
+                                        }
+                                    ],
+                                    "studentAnswers": [
+                                        "1"
+                                    ],
+                                    "studentAnswerValues": [
+                                        1
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -190,6 +275,14 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "questionSetId": {
+                                            "description": "Question Set Id of scored item",
+                                            "type": "int"
+                                        },
+                                        "seed": {
+                                            "description": "Seed of scored item",
+                                            "type": "int"
+                                        },
                                         "scores": {
                                             "description": "Contains weighted score for given question",
                                             "type": "int"
@@ -214,9 +307,15 @@
                                         "example": 200,
                                         "summary": "Multi-part question",
                                         "value": {
-                                            "scores": "[0.5,0.5]",
-                                            "raw": "[1,1]",
-                                            "errors": "[]",
+                                            "scores": [
+                                                0.5,
+                                                0.5
+                                            ],
+                                            "raw": [
+                                                1,
+                                                1
+                                            ],
+                                            "errors": [],
                                             "allans": false
                                         }
                                     }
