@@ -1,0 +1,29 @@
+# Local dev
+/.idea
+/.elasticbeanstalk
+.DS_Store
+*.php~
+*.js~
+c3.php
+.env
+*.code-workspace
+*.iml
+/.vscode
+
+# Runtime
+/vendor/
+config/local.php
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+/vendor
+/tests/_support/_generated
+/tests/_output/
+/c3.php
+*.php~
+*.js~
+mathjax-b
+HTMLPurifier
