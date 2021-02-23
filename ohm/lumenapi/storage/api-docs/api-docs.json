@@ -245,6 +245,20 @@
                                         "items": {
                                             "type": "string"
                                         }
+                                    },
+                                    "partAttemptNumber": {
+                                        "description": "(optional)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    },
+                                    "partsToScore": {
+                                        "description": "(optional)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
                                     }
                                 },
                                 "type": "object",
@@ -261,6 +275,12 @@
                                         "1"
                                     ],
                                     "studentAnswerValues": [
+                                        1
+                                    ],
+                                    "partsToScore": [
+                                        1
+                                    ],
+                                    "partAttemptNumber": [
                                         1
                                     ]
                                 }
@@ -288,7 +308,11 @@
                                             "type": "int"
                                         },
                                         "raw": {
-                                            "type": "Contains raw score for given question"
+                                            "description": "Contains raw score for given question",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "int"
+                                            }
                                         },
                                         "errors": {
                                             "type": "array",
@@ -297,7 +321,15 @@
                                             }
                                         },
                                         "allans": {
+                                            "description": "True if all answer parts of question are provided otherwise false",
                                             "type": "bool"
+                                        },
+                                        "answerWeights": {
+                                            "description": "(optional) Returns score weights for multi-part questions",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "int"
+                                            }
                                         }
                                     },
                                     "type": "object"

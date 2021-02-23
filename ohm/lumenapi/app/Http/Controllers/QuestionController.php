@@ -41,6 +41,11 @@ class QuestionController extends ApiBaseController
     private $questionId = 0;
 
     /**
+     * @var array Stores question type and control from question set data
+     */
+    private $questionType;
+
+    /**
      * Controller constructor.
      * @param AssessmentRepositoryInterface $assessmentRepository
      * @param QuestionSetRepositoryInterface $questionSetRepository
@@ -289,6 +294,22 @@ class QuestionController extends ApiBaseController
      *                        type="string"
      *                     )
      *                 ),
+     *                 @OA\Property(
+     *                     property="partAttemptNumber",
+     *                     description="(optional)",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="int"
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="partsToScore",
+     *                     description="(optional)",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="int"
+     *                     )
+     *                 ),
      *                 example={
      *                   "questionSetId": 16208,
      *                   "seed": 8076,
@@ -299,7 +320,9 @@ class QuestionController extends ApiBaseController
      *                      }
      *                   },
      *                   "studentAnswers": { "1" },
-     *                   "studentAnswerValues": { 1 }
+     *                   "studentAnswerValues": { 1 },
+     *                   "partsToScore": { 1 },
+     *                   "partAttemptNumber": { 1 }
      *                 }
      *             )
      *         )
@@ -327,7 +350,11 @@ class QuestionController extends ApiBaseController
      *             ),
      *             @OA\Property(
      *               property="raw",
-     *               type="Contains raw score for given question"
+     *               type="array",
+     *               @OA\Items(
+     *                 type="int"
+     *               ),
+     *               description="Contains raw score for given question"
      *             ),
      *             @OA\Property(
      *               property="errors",
@@ -338,8 +365,17 @@ class QuestionController extends ApiBaseController
      *             ),
      *             @OA\Property(
      *               property="allans",
-     *               type="bool"
-     *             )
+     *               type="bool",
+     *               description="True if all answer parts of question are provided otherwise false"
+     *             ),
+     *             @OA\Property(
+     *               property="answerWeights",
+     *               type="array",
+     *               @OA\Items(
+     *                 type="int"
+     *               ),
+     *               description="(optional) Returns score weights for multi-part questions"
+     *             ),
      *          ),
      *          @OA\Examples(
      *            example=200,
@@ -452,6 +488,10 @@ class QuestionController extends ApiBaseController
         $questionSet = $this->questionSetRepository->getById($questionSetId);
         if (!$questionSet) throw new BadRequestException('Unable to locate question set');
 
+        // Store question type and control for use later in scoring
+        $this->questionType = ['questionType' => $questionSet['qtype'],
+                               'questionControl' => $questionSet['control']];
+
         $assessStandalone = new AssessStandalone($this->DBH);
         $assessStandalone->setQuestionData($questionSet['id'], $questionSet);
         $assessStandalone->setState($state);
@@ -468,15 +508,9 @@ class QuestionController extends ApiBaseController
         $scoreDto = new ScoreDto($inputState);
 
         $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
-        $score = $assessStandalone->scoreQuestion($this->questionId, [0 => true]);
+        $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
 
-        $response = $scoreDto->getResponse($score);
-
-        if (isset($inputState['options']['returnState']) && $inputState['options']['returnState']) {
-            return array_merge($response, ['state' => $assessStandalone->getState()]);
-        }
-
-        return $response;
+        return $scoreDto->getScoreResponse($score, $this->questionType, $assessStandalone->getState());
     }
 
     /**
@@ -490,12 +524,6 @@ class QuestionController extends ApiBaseController
 
         $question = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
 
-        $response = $questionDto->getResponse($question);
-
-        if (isset($inputState['options']['returnState']) && $inputState['options']['returnState']) {
-            return array_merge($response, ['state' => $assessStandalone->getState()]);
-        }
-
-        return $response;
+        return $questionDto->getQuestionResponse($question, $assessStandalone->getState());
     }
 }

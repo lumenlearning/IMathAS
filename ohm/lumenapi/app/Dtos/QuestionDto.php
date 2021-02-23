@@ -5,7 +5,6 @@ namespace App\Dtos;
 class QuestionDto extends BaseDto
 {
     private $rawScores = [];
-    private $options = [];
 
     public function __construct($request)
     {
@@ -24,16 +23,35 @@ class QuestionDto extends BaseDto
         }
     }
 
+    /**
+     * Returns response data for question
+     * @param $responseData
+     * @param $state
+     * @return array
+     */
+    public function getQuestionResponse($responseData, $state)
+    {
+        return parent::getResponse($responseData, $state);
+    }
+
+    /**
+     * Returns state in format expected by AssessStandalone
+     * @return array
+     */
     public function getState(): array
     {
         return [
             'qsid' => [$this->questionSetId],
             'seeds' => [$this->seed],
             'rawscores' => [$this->rawScores],
-            'partattemptn' => [$this->partialAttemptNumber]
+            'partattemptn' => [$this->partAttemptNumber]
         ];
     }
 
+    /**
+     * Return request options
+     * @return array
+     */
     public function getOptions(): array
     {
         return $this->options;
