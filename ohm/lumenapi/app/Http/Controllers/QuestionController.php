@@ -16,6 +16,7 @@ use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 use Illuminate\Support\Facades\Validator;
 use App\Dtos\QuestionDto;
 use App\Dtos\ScoreDto;
+use Illuminate\Validation\ValidationException;
 use PDO;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
@@ -410,6 +411,11 @@ class QuestionController extends ApiBaseController
                 'studentAnswers' => 'required|array',
                 'studentAnswerValues' => 'required|array',
             ]);
+            try {
+                $validator->validate();
+            } catch (ValidationException $e) {
+                return response()->json($validator->errors());
+            }
             $validator->after(function($validator) {
                 // $scoreQuestionParams->->setGivenAnswer($_POST['qn'.$qn]) around line 279 of AssessStandalone
                 // requires a post parameter with the name 'qn' followed by some number. To make it easy, always
@@ -418,7 +424,7 @@ class QuestionController extends ApiBaseController
                 $requiredPostElement = 'qn0';
                 $post = $validator->getData()['post'];
                 if (!in_array($requiredPostElement, array_column($post,'name'), true)) {
-                    $validator->errors()->add('post.*.name', 'Must contain one qn0 element with any value');
+                    $validator->errors()->add('post.*.name', 'Must contain one qn0 element with any value.');
                 }
             });
             if ($validator->fails()) {
