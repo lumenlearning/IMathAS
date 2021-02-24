@@ -2,15 +2,18 @@
 define('ADMIN_RIGHT_LEVEL', 100);
 session_start();
 
+$redirectUrl = parse_url(env('APP_URL'), PHP_URL_SCHEME) . '://' . parse_url(env('APP_URL'), PHP_URL_HOST);
+if (parse_url(env('APP_URL'), PHP_URL_PORT)) $redirectUrl .= ':' . parse_url(env('APP_URL'), PHP_URL_PORT);
+
 if (!isset($_SESSION['userid'])) {
-    header('Location: ' . env('APP_URL') . '/index.php');
+    header('Location: ' . $redirectUrl . '/index.php');
     exit;
 }
 
 $user = app('db')->select('SELECT rights FROM imas_users WHERE id = :id', [':id' => $_SESSION['userid']]);
 
 if (empty($user) || !isset($user[0]) || $user[0]->rights < ADMIN_RIGHT_LEVEL) {
-    header('Location: ' . env('APP_URL') . '/index.php');
+    header('Location: ' . $redirectUrl . '/index.php');
     exit;
 }
 ?>
