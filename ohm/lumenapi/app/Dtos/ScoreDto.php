@@ -109,7 +109,7 @@ class ScoreDto extends BaseDto
         if ($questionData['questionType'] === 'multipart') {
             $answerWeight = $this->getAnswerWeights($questionData['questionControl']);
             if ($answerWeight) {
-                return array_merge($response, ['answerWeight' => $answerWeight]);
+                return array_merge($response, ['answerWeights' => $answerWeight]);
             }
         }
 
