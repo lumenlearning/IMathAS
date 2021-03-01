@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Helpers;
-
 if (! function_exists('swagger_lume_asset')) {
     /**
      * Returns asset from swagger-ui composer package.
