@@ -432,7 +432,7 @@ function initShowAnswer2() {
       }).on('click', function(e) {
           var curstate = (e.currentTarget.getAttribute('aria-expanded') == 'true');
           e.currentTarget.setAttribute('aria-expanded', curstate ? 'false' : 'true');
-          $("#ans"+qref).toggle(!curstate);
+          $("#ans"+qref).toggleClass("hidden", curstate);
         })
         .html(icon)
     );
@@ -440,7 +440,7 @@ function initShowAnswer2() {
       var wrap = $("#qnwrap"+inref);
       if (wrap.length > 0) {
         $(el).prev(".sabtn").remove();
-        key.append($(el).hide().removeClass("hidden"))
+        key.append($(el))
           .addClass("inwrap");
         wrap.append(key);
         return;
@@ -448,14 +448,14 @@ function initShowAnswer2() {
       var inbox = $("#mqinput-qn"+inref+",input[type=text]#qn"+inref+",select#qn"+inref+",textarea#qn"+inref);
       if (inbox.length > 0) {
         $(el).prev(".sabtn").remove();
-        key.append($(el).hide().removeClass("hidden"));
+        key.append($(el));
         inbox.after(key);
         return;
       }
     }
     // not in autoshowans or no match, so don't want to relocate, just refresh
     var parel = $(el).parent();
-    key.append($(el).hide().removeClass("hidden"));
+    key.append($(el));
     parel.empty().append(key);
   });
 
@@ -465,10 +465,11 @@ function initShowAnswer2() {
 		var idnext = $(this).siblings("div:first-of-type").attr("id");
 		$(this).attr("aria-expanded",false).attr("aria-controls",idnext)
 		  .off("click.sashow").on("click.sashow", function() {
-			$(this).attr("aria-expanded",true)
+            var curstate = ($(this).attr("aria-expanded") == 'true');
+			$(this).attr("aria-expanded",!curstate)
 		  	  .siblings("div:first-of-type")
-				.attr("aria-expanded",true).attr("aria-hidden",false)
-				.removeClass("hidden");
+				.attr("aria-expanded",!curstate).attr("aria-hidden",curstate)
+				.toggleClass("hidden",curstate);
 		});
 	});
 }
@@ -770,7 +771,7 @@ function normalizemathunicode(str) {
 }
 
 function htmlEntities(str) {
-  return str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/&/g,'&amp;');
+  return str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&/g,'&amp;');
 }
 
 /**
@@ -843,7 +844,9 @@ function showSyntaxCheckMQ(qn) {
     previewel.style.position = '';
   } else {
     var previewel = document.getElementById('p'+qn);
-    previewel.innerHTML = outstr;
+    if (previewel) {
+        previewel.innerHTML = outstr;
+    }
   }
   a11ypreview('`'+htmlEntities(document.getElementById("qn"+qn).value)+'` ' + outstr);
 }
@@ -1142,18 +1145,18 @@ function processNumber(origstr, format) {
     if (format.indexOf('list')!== -1) {
         var strs = origstr.split(/\s*,\s*/);
     } else {
-        var strs = [origstr.replace(/,/,'')];
+        var strs = [origstr.replace(/,/g,'')];
     }
     var str;
     for (var j=0;j<strs.length;j++) {
         str = strs[j];
         if (format.indexOf('units')!=-1) {
             var unitformat = _('Units must be given as [decimal number]*[unit]^[power]*[unit]^[power].../[unit]^[power]*[unit]^[power]...');
-            if (!str.match(/^\s*(\d+\.?\d*|\.\d+|\d\.?\d*\s*(E|\*\s*10\s*\^)\s*[\-\+]?\d+)/)) {
+            if (!str.match(/^\s*(-?\s*\d+\.?\d*|-?\s*\.\d+|-?\s*\d\.?\d*\s*(E|\*\s*10\s*\^)\s*[\-\+]?\d+)/)) {
                 err += _('Answer must start with a number. ');
             }
             // strip number
-            str = str.replace(/^\s*(\d\.?\d*\s*(E|\*\s*10\s*\^)\s*[\-\+]?\d+|\d+\.?\d*|\.\d+)\s*[\-\*]?\s*/,'');
+            str = str.replace(/^\s*(-?\s*\d\.?\d*\s*(E|\*\s*10\s*\^)\s*[\-\+]?\d+|-?\s*\d+\.?\d*|-?\s*\.\d+)\s*[\-\*]?\s*/,'');
             str = str.replace(/\s*\-\s*([a-zA-Z])/g,'*$1');
             str = str.replace(/\*\*/g,'^');
             str = str.replace(/\s*(\/|\^|\-)\s*/g,'$1');
@@ -1186,7 +1189,7 @@ function processNumber(origstr, format) {
                 err += _('This is not an integer.');
             }
         } else {
-            if (!str.match(/^\s*\-?(\d+\.?\d*|\.\d+|\d\.?\d*\s*E\s*[\-\+]?\d+)\s*$/)) {
+            if (!str.match(/^\s*\-?(\d+\.?\d*|\.\d+|\d*\.?\d*\s*E\s*[\-\+]?\d+)\s*$/)) {
                 err += _('This is not a decimal or integer value.');
             }
         }
@@ -2247,8 +2250,8 @@ function AutoSuggest(elem, suggestions)
 		/********************************************************
 		mouseover handler for the dropdown ul
 		move the highlighted suggestion with the mouse
-		********************************************************/
-		ul.onmouseover = function(ev)
+        ********************************************************/
+        this.setHighlight = function(ev)
 		{
 			//Walk up from target until you find the LI.
 			var target = me.getEventSource(ev);
@@ -2270,7 +2273,8 @@ function AutoSuggest(elem, suggestions)
 				}
 			}
 			me.changeHighlight();
-		};
+        };
+        ul.onmouseover = me.setHighlight;
 
 		/********************************************************
 		click handler for the dropdown ul
@@ -2279,6 +2283,7 @@ function AutoSuggest(elem, suggestions)
         
 		ul.onmousedown = ul.ontouchstart = function(ev)
 		{
+            me.setHighlight(ev);
 			me.useSuggestion("click");
 			me.hideDiv();
 			me.cancelEvent(ev);

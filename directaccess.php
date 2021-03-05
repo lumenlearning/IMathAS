@@ -37,9 +37,9 @@
 		unset($_POST['password']);
 
 		$page_newaccounterror = checkNewUserValidation();
-		$stm = $DBH->prepare("SELECT enrollkey,deflatepass,allowunenroll FROM imas_courses WHERE id=:id");
+		$stm = $DBH->prepare("SELECT enrollkey,deflatepass,allowunenroll,msgset FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['cid']));
-        list($enrollkey,$deflatepass,$allowunenroll) = $stm->fetch(PDO::FETCH_NUM);
+        list($enrollkey,$deflatepass,$allowunenroll,$msgset) = $stm->fetch(PDO::FETCH_NUM);
         if (($allowunenroll&2)==2) {
             $page_newaccounterror .= _('Course is closed for self enrollment.  Contact your instructor for access.');
         } else if (strlen($enrollkey)>0 && trim($_POST['ekey2'])=='') {
@@ -99,7 +99,8 @@
 				$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,gbcomment,latepass,created_at) VALUES (:userid, :courseid, :gbcomment, :latepass, :created_at)");
                 $stm->execute(array(':userid'=>$newuserid, ':courseid'=>$cid, ':gbcomment'=>$code, ':latepass'=>$deflatepass, ':created_at'=>time()));
                 setSectionGroups($newuserid, $cid, '');
-			}
+            }
+            sendMsgOnEnroll($msgset, $cid, $newuserid);
 
 			if ($emailconfirmation) {
 				$id = $DBH->lastInsertId();
@@ -134,9 +135,9 @@
     $nocoursenav = true;
 	if ($verified) { //already have session
 		if (!isset($studentid) && !isset($teacherid) && !isset($tutorid)) {  //have account, not a student
-			$stm = $DBH->prepare("SELECT name,enrollkey,deflatepass,allowunenroll FROM imas_courses WHERE id=:id");
+			$stm = $DBH->prepare("SELECT name,enrollkey,deflatepass,allowunenroll,msgset FROM imas_courses WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['cid']));
-			list($coursename,$enrollkey,$deflatepass,$allowunenroll) = $stm->fetch(PDO::FETCH_NUM);
+			list($coursename,$enrollkey,$deflatepass,$allowunenroll,$msgset) = $stm->fetch(PDO::FETCH_NUM);
             $keylist = array_map('trim',explode(';',$enrollkey));
             if (($allowunenroll&2)==2) {
                 require("header.php");
@@ -154,7 +155,8 @@
 					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,latepass,created_at) VALUES (:userid, :courseid, :latepass, :created_at)");
                     $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':latepass'=>$deflatepass, ':created_at'=>time()));
                     setSectionGroups($userid, $cid, '');
-				}
+                }
+                sendMsgOnEnroll($msgset, $cid, $userid);
 
 				header('Location: ' . $GLOBALS['basesiteurl'] . '/course/course.php?cid='. $cid. '&r=' . Sanitize::randomQueryStringParam());
 				exit;
