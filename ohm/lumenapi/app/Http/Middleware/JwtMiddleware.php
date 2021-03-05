@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\ExpiredException;
+use Illuminate\Support\Facades\Log;
 
 class JwtMiddleware
 {
@@ -21,7 +22,7 @@ class JwtMiddleware
     {
         $authHeader = $request->header('authorization');
         if (!$authHeader) {
-            // Unauthorized response if token not there
+            Log::error('Authorization header not provided');
             return response()->json([
                 'errors' => ['Authorization header not provided']
             ], 401);
@@ -29,7 +30,7 @@ class JwtMiddleware
 
         list($jwt) = sscanf($authHeader, 'Bearer %s');
         if (!$jwt) {
-            // Unauthorized response if token not there
+            Log::error('Token not provided');
             return response()->json([
                 'errors' => ['Token not provided.']
             ], 401);
@@ -38,10 +39,12 @@ class JwtMiddleware
         try {
             $credentials = JWT::decode($jwt, env('QUESTION_API_JWT_SECRET'), ['HS256']);
         } catch (ExpiredException $e) {
+            Log::error($e);
             return response()->json([
                 'errors' => ['Provided token is expired.']
             ], 400);
         } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 'errors' => ['An error while decoding token.']
             ], 400);
