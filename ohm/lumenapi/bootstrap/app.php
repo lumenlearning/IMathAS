@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../app/Helpers/SwaggerHelper.php';
 require_once __DIR__.'/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
@@ -116,10 +117,6 @@ $app->router->group([
     //ohm/ohm/lumenapi/bootstrap/
     //.. / ../       ../       ../
     require __DIR__.'/../../../assess2/questions/QuestionGenerator.php';
-//    require __DIR__.'/../../../assess2/questions/models/QuestionParams.php';
-//    require __DIR__.'/../../../assess2/questions/models/ShowAnswer.php';
-//    require __DIR__.'/../../../assess2/AssessInfo.php';
-//    require __DIR__.'/../../../assess2/AssessRecord.php';
     require __DIR__.'/../../../assess2/AssessStandalone.php';
 });
 

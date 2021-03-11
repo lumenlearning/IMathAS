@@ -678,8 +678,10 @@
 					$instrPreviewId = $userid;
 				}
 			}
-		}
-	}
+        }
+	} else if ($_GET['cid']=="admin") {
+        $courseUIver = 2;
+    }
 	$verified = true;
 
  }

@@ -7,7 +7,28 @@
     "paths": {
         "/token": {
             "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Retrieves bearer token for all api requests",
                 "operationId": "App\\Http\\Controllers\\AuthController::GetToken",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "client_id": {
+                                        "type": "string"
+                                    },
+                                    "client_secret": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Returns some sample category things",
@@ -26,31 +47,348 @@
                 }
             }
         },
-        "/question/{questionId}": {
+        "/question": {
             "post": {
-                "operationId": "App\\Http\\Controllers\\QuestionController::GetQuestion",
+                "tags": [
+                    "Display"
+                ],
+                "summary": "Retrieves question HTML for given question set id and seed.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::getQuestion",
                 "parameters": [
                     {
-                        "name": "questionId",
-                        "in": "path",
-                        "description": "The questionId parameter in path",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "example": "Bearer <token>"
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "questionSetId": {
+                                        "type": "int"
+                                    },
+                                    "seed": {
+                                        "type": "int"
+                                    },
+                                    "rawScores": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "partialAttemptNumber": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    },
+                                    "options": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "questionSetId": 16208,
+                                    "seed": 8076,
+                                    "rawScores": [],
+                                    "partialAttemptNumber": [],
+                                    "options": {
+                                        "maxtries": 1,
+                                        "showansafter": "",
+                                        "hidescoremarkers": false,
+                                        "showallparts": "",
+                                        "showans": false,
+                                        "showhints": 3,
+                                        "includeans": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Returns some sample category things",
+                        "description": "OK",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "properties": {
+                                        "questionSetId": {
+                                            "description": "Question Set Id of scored item",
+                                            "type": "int"
+                                        },
+                                        "seed": {
+                                            "description": "Seed of scored item",
+                                            "type": "int"
+                                        },
+                                        "html": {
+                                            "description": "Contains html for question rendering",
+                                            "type": "string"
+                                        },
+                                        "jsparams": {
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "",
+                                        "value": {
+                                            "questionSetId": 123,
+                                            "seed": 999,
+                                            "html": "<div></div>",
+                                            "jsparams": {
+                                                "0": {
+                                                    "tip": "Enter math expression",
+                                                    "longtip": "",
+                                                    "preview": 2,
+                                                    "calcformat": "",
+                                                    "qtype": "calculated"
+                                                },
+                                                "ans": [],
+                                                "maxtries": [],
+                                                "partatt": [],
+                                                "disabled": [],
+                                                "helps": []
+                                            },
+                                            "errors": []
+                                        }
+                                    }
+                                ]
                             }
                         }
                     },
                     "400": {
-                        "description": "Error: Bad request. When required parameters were not supplied."
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/questions": {
+            "post": {
+                "tags": [
+                    "Display"
+                ],
+                "summary": "Retrieves question HTML a given list of question set ids and seeds.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::getAllQuestions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/question/score": {
+            "post": {
+                "tags": [
+                    "Scoring"
+                ],
+                "summary": "Scores student reponse to a given question.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::scoreQuestion",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "questionSetId": {
+                                        "type": "int"
+                                    },
+                                    "seed": {
+                                        "type": "int"
+                                    },
+                                    "post": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "studentAnswers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "studentAnswerValues": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "partAttemptNumber": {
+                                        "description": "(optional)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    },
+                                    "partsToScore": {
+                                        "description": "(optional)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "int"
+                                        }
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "questionSetId": 16208,
+                                    "seed": 8076,
+                                    "post": [
+                                        {
+                                            "name": "qn0",
+                                            "value": "1"
+                                        }
+                                    ],
+                                    "studentAnswers": [
+                                        "1"
+                                    ],
+                                    "studentAnswerValues": [
+                                        1
+                                    ],
+                                    "partsToScore": [
+                                        1
+                                    ],
+                                    "partAttemptNumber": [
+                                        1
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "questionSetId": {
+                                            "description": "Question Set Id of scored item",
+                                            "type": "int"
+                                        },
+                                        "seed": {
+                                            "description": "Seed of scored item",
+                                            "type": "int"
+                                        },
+                                        "scores": {
+                                            "description": "Contains weighted score for given question",
+                                            "type": "int"
+                                        },
+                                        "raw": {
+                                            "description": "Contains raw score for given question",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "int"
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "allans": {
+                                            "description": "True if all answer parts of question are provided otherwise false",
+                                            "type": "bool"
+                                        },
+                                        "answerWeights": {
+                                            "description": "(optional) Returns score weights for multi-part questions",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "int"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "Multi-part question",
+                                        "value": {
+                                            "scores": [
+                                                0.5,
+                                                0.5
+                                            ],
+                                            "raw": [
+                                                1,
+                                                1
+                                            ],
+                                            "errors": [],
+                                            "allans": false
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/questions/score": {
+            "post": {
+                "tags": [
+                    "Scoring"
+                ],
+                "summary": "Scores student reponse to a given list of questions.",
+                "operationId": "App\\Http\\Controllers\\QuestionController::scoreAllQuestions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }

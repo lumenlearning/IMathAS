@@ -45,9 +45,10 @@
         </span>
       </div>
 
-      <div v-if="canEdit && aData.latepass_blocked_by_practice">
-        {{ $t('gradebook.latepass_blocked_practice') }}
+      <div v-if="canEdit && aData.latepass_status > 1">
+        {{ latepassBlockMsg }}
         <button
+          v-if="aData.latepass_status > 6"
           type="button"
           @click="clearLPblock"
         >
@@ -116,10 +117,10 @@
       </div>
 
       <div v-if="canEdit">
-        <a v-if="aData.has_active_attempt" :href="viewAsStuUrl">
+        <a v-if="showViewAsStu" :href="viewAsStuUrl">
           {{ $t('gradebook.view_as_stu') }}
         </a>
-        <span v-if="aData.has_active_attempt">|</span>
+        <span v-if="showViewAsStu">|</span>
         <a :href="viewAsStuUrl + '#/print'">
           {{ $t('gradebook.print') }}
         </a>
@@ -131,16 +132,26 @@
       <div v-else class="gbmainview">
         <div>
           {{ scoreCalc }}
-          <gb-assess-select
-            v-if = "viewFull || aData.submitby === 'by_assessment'"
-            :versions = "aData.assess_versions"
-            :submitby = "aData.submitby"
-            :haspractice = "aData.has_practice"
-            :selected = "curAver"
-            @setversion = "changeAssessVersion"
-          />
+          <div>
+            <gb-assess-select
+              style = "display: inline-block"
+              v-if = "viewFull || aData.submitby === 'by_assessment'"
+              :versions = "aData.assess_versions"
+              :submitby = "aData.submitby"
+              :haspractice = "aData.has_practice"
+              :selected = "curAver"
+              @setversion = "changeAssessVersion"
+            />
+            <button
+              v-if = "!isByQuestion && canEdit && aData.assess_versions[curAver].status != -1"
+              type="button"
+              @click="clearAttempts('attempt')"
+            >
+              {{ $t('gradebook.clear_attempt') }}
+            </button>
+          </div>
           <div v-if="isUnsubmitted">
-            {{ $t('gradebook.unsubmitted') }}.
+            {{ $t('gradebook.unsubmitted') }}
             <button
               type="button"
               @click="submitVersion"
@@ -157,20 +168,13 @@
           </div>
         </div>
 
-        <div v-if = "(curEndmsg !== '' && viewFull) || !isByQuestion">
+        <div v-if = "curEndmsg !== ''">
           <button
-            v-if = "curEndmsg !== '' && viewFull"
+            v-if = "viewFull"
             type="button"
             @click = "showEndmsg = !showEndmsg"
           >
             {{ $t('gradebook.' + (showEndmsg ? 'hide' : 'show') + '_endmsg') }}
-          </button>
-          <button
-            v-if = "!isByQuestion"
-            type="button"
-            @click="clearAttempts('attempt')"
-          >
-            {{ $t('gradebook.clear_attempt') }}
           </button>
           <div
             class="introtext"
@@ -507,6 +511,13 @@ export default {
         return '';
       }
     },
+    showViewAsStu () {
+      // show if there's an active attempt, or if there's only an instructor-generated
+      // non-started assessment version
+      return (this.aData.has_active_attempt ||
+        (this.aData.scored_version === 0 && this.aData.assess_versions[0].status === -1)
+      );
+    },
     viewAsStuUrl () {
       return 'index.php?cid=' + store.cid + '&aid=' + store.aid + '&uid=' + store.uid;
     },
@@ -517,7 +528,7 @@ export default {
         let showit = true;
         if (this.hidePerfect && Math.abs(qdata.rawscore - 1) < 0.002) {
           showit = false;
-        } else if (this.hideUnanswered && qdata.try === 0) {
+        } else if (this.hideUnanswered && qdata.parts.reduce((a, c) => Math.max(a, c.try), 0) === 0) {
           showit = false;
         } else if (this.hideZero && Math.abs(qdata.rawscore) < 0.002) {
           showit = false;
@@ -563,6 +574,19 @@ export default {
       } else {
         return this.$t('gradebook.' + store.saving);
       }
+    },
+    latepassBlockMsg () {
+      var m;
+      switch (this.aData.latepass_status) {
+        case 7: m = 'practice'; break;
+        case 8: m = 'gb'; break;
+        case 2: m = 'lpcutoff'; break;
+        case 3: m = 'courseend'; break;
+        case 4: m = 'pastdue'; break;
+        case 5: m = 'toolate'; break;
+        case 6: m = 'toofew'; break;
+      }
+      return this.$t('gradebook.latepass_blocked_' + m);
     },
     isUnsubmitted () {
       return (this.aData.submitby === 'by_assessment' &&

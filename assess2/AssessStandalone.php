@@ -229,7 +229,6 @@ class AssessStandalone {
 
     if (!empty($options['includeans'])) {
       $jsparams['ans'] = $question->getCorrectAnswersForParts();
-      $jsparams['stuans'] = $stuanswers[$qn+1];
     }
 
     if ($maxtries > 0) {
@@ -280,6 +279,7 @@ class AssessStandalone {
         ->setAttemptNumber($attemptn)
         ->setAllQuestionAnswers($this->state['stuanswers'])
         ->setAllQuestionAnswersAsNum($this->state['stuanswersval'])
+        ->setPartsToScore($parts_to_score)
         ->setQnpointval(1);
 
     $scoreResult = $scoreEngine->scoreQuestion($scoreQuestionParams);
