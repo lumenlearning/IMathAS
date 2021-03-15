@@ -987,30 +987,17 @@ if ($stm->rowCount()==0) {
 							echo $advuseother;
 						}
 						echo "	</ul>";
+						if ($sourceUIver == 1) {
+                            if (!empty($CFG['assess_upgrade_optout'])) {
+                                echo '<p id="usenew" style="display:none;"><input type="checkbox" name="usenewassess" value="1" checked /> Use new assessment interface (only applies if copying)</p>';
+                            } else {
+                                echo '<input type="hidden" name="usenewassess" value="1">';
+                            }
+						}
 						echo "<p>The first option is best if this is your first time using this $installname course.  The second option
 							may be preferrable if you have copied the course in your LMS and want your students records to
-                                                        show in a separate $installname course.</p>";
-                            // #### Begin OHM-specific code #####################################################
-                            // #### Begin OHM-specific code #####################################################
-                            // #### Begin OHM-specific code #####################################################
-                            // #### Begin OHM-specific code #####################################################
-                            // #### Begin OHM-specific code #####################################################
-                            if ($sourceUIver == 1) {
-                                echo '<div id="usenew" style="display:none;">';
-                                echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
-                                echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
-                                echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
-                                echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
-                                echo '<span class="js-versionOld-input"><label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" />' . _("Old Version - <span class=\"version-warning\">This version will retire on May 12, 2021.</span>") . '</label></span>';
-                                echo '</span>';
-                                echo '</div>';
-                            }
-                            // #### End OHM-specific code #######################################################
-                            // #### End OHM-specific code #######################################################
-                            // #### End OHM-specific code #######################################################
-                            // #### End OHM-specific code #######################################################
-                            // #### End OHM-specific code #######################################################
-							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
+							show in a separate $installname course.</p>
+							<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
 					} else {
 						echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
 							link is located in a $installname course you are not a teacher of (course ID $aidsourcecid).
@@ -1031,22 +1018,11 @@ if ($stm->rowCount()==0) {
 							echo "<input name=\"docoursecopy\" type=\"hidden\" value=\"makecopy\" />";
 						}
 						if ($sourceUIver == 1) {
-                            #### Begin OHM-specific changes ############################################################
-                            #### Begin OHM-specific changes ############################################################
-                            #### Begin OHM-specific changes ############################################################
-                            #### Begin OHM-specific changes ############################################################
-                            #### Begin OHM-specific changes ############################################################
-                            echo '<p class="assess-player-title">'._('Assessment Player Version').'</p>';
-                            echo '<span class="js-version-inputs version-inputs version-inputs-lti">';
-                            echo '<label for="versionNew"><input type="radio" class="disable-input" name="assess-version" value="2" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
-                            echo '<button class="js-change-default-link u-button-reset" type="button">'._('Change default version').'</button>';
-                            echo '<span class="js-versionOld-input"><label for="versionOld"><input type="radio" name="assess-version" value="1" id="versionOld" />' . _("Old Version - <span class=\"version-warning\">This version will retire on May 12, 2021.</span>") . '</label></span>';
-                            echo '</span>';
-                            #### End OHM-specific changes ############################################################
-                            #### End OHM-specific changes ############################################################
-                            #### End OHM-specific changes ############################################################
-                            #### End OHM-specific changes ############################################################
-                            #### End OHM-specific changes ############################################################
+                            if (!empty($CFG['assess_upgrade_optout'])) {
+                                echo '<p><input type="checkbox" name="usenewassess" checked /> Use new assessment interface (only applies if copying)</p>';
+                            } else {
+                                echo '<input type="hidden" name="usenewassess" value="1">';
+                            }
 						}
 						echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
 					}
@@ -1150,17 +1126,7 @@ if ($stm->rowCount()==0) {
 				$deflatepass = $r[5];
 				$sourceUIver = $r[6];
 				$courselevel = $r[7];
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                // #### Begin OHM-specific code #####################################################
-                if ($_POST['assess-version'] == 2) {
-                // #### End OHM-specific code #######################################################
-                // #### End OHM-specific code #######################################################
-                // #### End OHM-specific code #######################################################
-                // #### End OHM-specific code #######################################################
-                // #### End OHM-specific code #######################################################
+				if (isset($_POST['usenewassess'])) {
 					$destUIver = 2;
 					$convertAssessVer = 2;
 				} else {

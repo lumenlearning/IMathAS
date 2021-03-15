@@ -817,11 +817,18 @@ switch($_GET['action']) {
 		}
 		//Start grouping: copy options
 		if ($_GET['action']=='addcourse' && $ctc>0) {
-			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
-			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
-			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
-			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
-			### OHM-specific change: Removed "Upgrade assessment version" checkbox.
+			if ($sourceUIver < 2) {
+                if (!empty($CFG['assess_upgrade_optout'])) {
+                    echo '<span class=form>'._('Upgrade assessment version').'</span>';
+                    echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1" checked />';
+                    echo _('The source course is using an older format of assessments. Select this option to set your new course to use the new version of assessments, and convert copied assessments to the new format. You will want to review the settings after the copy.');
+                    echo '</label></span><br class=form>';
+                } else {
+                    echo '<p><input type=hidden name="newassessver" id="newassessver" value="1" />';
+                    echo _('The source course is using an older format of assessments, so they will be converted to the new format during the copy. You will want to review the settings after the copy.');
+                    echo '</p>';
+                }
+			}
 			echo '<div class="block grouptoggle">';
 			echo '<img class="mida" src="'.$staticroot.'/img/expand.gif" /> ';
 			echo _('Course Copy Options');
@@ -842,31 +849,17 @@ switch($_GET['action']) {
 			echo '<span class=form><label for=copyallcalitems>'._('Copy all calendar items?').'</label></span>';
 			echo '<span class=formright><input type=checkbox name="copyallcalitems" id="copyallcalitems" value="1"/>';
 			echo '</span><br class=form>';
-			if ($sourceUIver < 2) {
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				echo '<span class="form">'._('Assessment Player Version').'</span>';
-				echo '<span class="js-version-inputs version-inputs">';
-				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
-				echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld"/>'._("Old Version - <span class=\"version-warning\">This version will retire on May 12, 2021.</span>").'</label></span>';
-				echo '</span>';
-				echo '<br class="form"/>';
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-			}
 			echo '</div>';
 
-		### OHM-specific change: Removed "Use new assessment version" checkbox.
-		### OHM-specific change: Removed "Use new assessment version" checkbox.
-		### OHM-specific change: Removed "Use new assessment version" checkbox.
-		### OHM-specific change: Removed "Use new assessment version" checkbox.
-		### OHM-specific change: Removed "Use new assessment version" checkbox.
+		} else if ($_GET['action']=='addcourse' && $ctc == 0) {
+            if (!empty($CFG['assess_upgrade_optout'])) {
+                echo '<span class=form>'._('Assessment version').'</span>';
+                echo '<span class=formright><label><input type=checkbox name="newassessver" id="newassessver" value="1" checked />';
+                echo _('Use the new version of assessments.');
+                echo '</label></span><br class=form>';
+            } else {
+                echo '<input type=hidden name="newassessver" id="newassessver" value="1" />';
+            }
 		}
 		//Start grouping: Availability and Access
 		echo '<div class="block grouptoggle">';
@@ -1037,26 +1030,6 @@ switch($_GET['action']) {
 		echo '</div>';
 		echo '<div class="blockitems hidden">';
 
-		if ($_GET['action']=='addcourse' && $ctc == 0) {
-			if ($sourceUIver < 2) {
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				#### Begin OHM-specific code #####################################################################
-				echo '<span class="form">'._('Assessment Player Version').'</span>';
-				echo '<span class="js-version-inputs version-inputs">';
-				echo '<label for="versionNew"><input type="radio" name="assess-version" value="Newest Version" id="versionNew" checked/>'._('Newest Version (Recommended)').'</label>';
-				echo '<label for="versionOld"><input type="radio" name="assess-version" value="Old Version" id="versionOld"/>'._("Old Version - <span class=\"version-warning\">This version will retire on May 12, 2021.</span>").'</label></span>';
-				echo '</span>';
-				echo '<br class="form"/>';
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-				#### End OHM-specific code #####################################################################
-			}
-		}
 		if (!isset($CFG['CPS']['deflatepass']) || $CFG['CPS']['deflatepass'][1]==1) {
 			echo '<span class="form">',_('Auto-assign LatePasses on course enroll'),':</span><span class="formright">';
 			echo '<input type="text" size="3" name="deflatepass" value="'.Sanitize::encodeStringForDisplay($deflatepass).'"/> ',_('LatePasses'),'</span><br class="form" />';
