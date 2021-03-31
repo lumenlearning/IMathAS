@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * Turning this on is causing the following ErrorException in AWS Beanstalk:
+ *   ob_end_flush(): failed to send buffer of zlib output compression (1)
+ */
+ini_set("zlib.output_compression", 'Off');
+
 return [
     'api' => [
         /*
