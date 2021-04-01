@@ -16,6 +16,16 @@ if (empty($user) || !isset($user[0]) || $user[0]->rights < ADMIN_RIGHT_LEVEL) {
     header('Location: ' . $redirectUrl . '/index.php');
     exit;
 }
+
+/*
+ * In AWS Beanstalk environments, the Swagger json url is being forced to http
+ * instead of https. This will ensure the URL is https when appropriate.
+ */
+
+if ('https' == parse_url(env('APP_URL'), PHP_URL_SCHEME)) {
+    $urlToDocs = preg_replace('/^http\:/', 'https\:', $urlToDocs);
+}
+
 ?>
 <!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>
