@@ -307,6 +307,36 @@ var styles$1 = {
   }
 };
 
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css = "#payment-button-form .stripe-button-el { \n    background-color: #1e74d1;\n    background-image: unset;\n    border: 1px solid #004c9f;\n    border-radius: 3px;\n    box-shadow: unset;\n    color: #fff;\n    font-size: 14px;\n    height: 36px;\n    width: 106px;\n    padding: 0;\n    cursor: pointer;\n}\n\n#payment-button-form .stripe-button-el span {\n    background-image: unset;\n    border-radius: unset; \n    box-shadow: unset;\n    background-color: unset; \n    font-size: unset; \n    font-weight: unset;\n    font-family: unset;\n    text-shadow: unset;\n}";
+styleInject(css);
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -330,6 +360,21 @@ var createClass = function () {
     return Constructor;
   };
 }();
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+};
 
 var _extends = Object.assign || function (target) {
   for (var i = 1; i < arguments.length; i++) {
@@ -700,74 +745,68 @@ var DirectPayCourseActivation = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      if (this.state.showCheckout) {
-        return React.createElement(CheckoutTaxPage, {
-          amount_in_cents: this.props.chargeAmount,
-          stripeKey: this.props.stripeKey,
-          paymentStatus: this.props.paymentStatus,
-          institutionName: this.props.institutionName,
-          chargeDescription: this.props.chargeDescription,
-          stripeModalLogoUrl: this.props.stripeModalLogoUrl,
-          endpointUrl: this.props.endpointUrl,
-          userEmail: this.props.userEmail
-        });
-      } else {
-        var termsOfServiceURL = "https://lumenlearning.com/policies/terms-of-service/";
-        var privacyPolicy = "https://lumenlearning.com/policies/privacy-policy/";
-        var priceInDollars = (this.props.chargeAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+      var termsOfServiceURL = "https://lumenlearning.com/policies/terms-of-service/";
+      var privacyPolicy = "https://lumenlearning.com/policies/privacy-policy/";
+      var priceInDollars = (this.props.chargeAmount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 
-        return React.createElement(
+      return React.createElement(
+        'div',
+        null,
+        React.createElement(
           'div',
-          null,
+          { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
           React.createElement(
             'div',
-            { style: _extends({}, styles.parentWrapper, this._getParentStyle()) },
+            { className: 'left-column', style: _extends({}, styles.leftColumn, this._getTabletSpecs()) },
             React.createElement(
-              'div',
-              { className: 'left-column', style: _extends({}, styles.leftColumn, this._getTabletSpecs()) },
-              React.createElement(
-                'h1',
-                { className: 'activation-heading', style: styles.activationHeading },
-                this._headerLanguage()
-              ),
-              React.createElement(
-                'h3',
-                { className: 'course-title',
-                  style: styles.courseTitle },
-                this.props.courseTitle + ': ' + priceInDollars
-              ),
-              window.innerWidth < 800 ? React.createElement(
-                'p',
-                { className: 'top-small-block-text', style: styles.topSmallBlockText },
-                'This low-cost activation is only required for assessments. Course content is always available.'
-              ) : "",
-              React.createElement(
-                'p',
-                { className: 'terms-and-privacy', style: styles.termsAndPrivacy },
-                'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning ',
-                React.createElement(
-                  'a',
-                  { href: termsOfServiceURL, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
-                  'Terms of Service'
-                ),
-                ' and ',
-                React.createElement(
-                  'a',
-                  { href: privacyPolicy, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
-                  'Privacy Policy'
-                ),
-                '.'
-              ),
-              React.createElement(
-                'button',
-                { style: styles.payNowButton, onClick: this._toggleCheckout },
-                'Pay Now'
-              )
+              'h1',
+              { className: 'activation-heading', style: styles.activationHeading },
+              this._headerLanguage()
             ),
-            this._renderRightColumn()
-          )
-        );
-      }
+            React.createElement(
+              'h3',
+              { className: 'course-title',
+                style: styles.courseTitle },
+              this.props.courseTitle + ': ' + priceInDollars
+            ),
+            window.innerWidth < 800 ? React.createElement(
+              'p',
+              { className: 'top-small-block-text', style: styles.topSmallBlockText },
+              'This low-cost activation is only required for assessments. Course content is always available.'
+            ) : "",
+            React.createElement(
+              'p',
+              { className: 'terms-and-privacy', style: styles.termsAndPrivacy },
+              'By clicking on Pay Now or by starting a trial you agree to the Lumen Learning ',
+              React.createElement(
+                'a',
+                { href: termsOfServiceURL, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
+                'Terms of Service'
+              ),
+              ' and ',
+              React.createElement(
+                'a',
+                { href: privacyPolicy, target: "_blank", style: { textDecoration: 'underline', color: '#212b36' } },
+                'Privacy Policy'
+              ),
+              '.'
+            ),
+            React.createElement(DirectPayButton, {
+              style: styles.payNowButton,
+              paymentStatus: this.props.paymentStatus,
+              stripeKey: this.props.stripeKey,
+              chargeAmount: this.state.total,
+              institutionName: this.props.institutionName,
+              chargeDescription: this.props.chargeDescription,
+              stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+              endpointUrl: this.props.endpointUrl,
+              userEmail: this.props.userEmail,
+              zipcode: this.state.zipcode
+            })
+          ),
+          this._renderRightColumn()
+        )
+      );
     }
   }, {
     key: 'componentWillUnmount',
@@ -1276,38 +1315,11 @@ var styles$3 = {
   }
 };
 
-function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (!css || typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}
-
-var css = "/* http://meyerweb.com/eric/tools/css/reset/\n   v2.0 | 20110126\n   License: none (public domain)\n*/\n\nhtml, body, div, span, applet, object, iframe,\nh1, h2, h3, h4, h5, h6, p, blockquote, pre,\na, abbr, acronym, address, big, cite, code,\ndel, dfn, em, img, ins, kbd, q, s, samp,\nsmall, strike, strong, sub, sup, tt, var,\nb, u, i, center,\ndl, dt, dd, ol, ul, li,\nfieldset, form, label, legend,\ntable, caption, tbody, tfoot, thead, tr, th, td,\narticle, aside, canvas, details, embed,\nfigure, figcaption, footer, header, hgroup,\nmenu, nav, output, ruby, section, summary,\ntime, mark, audio, video {\n\tmargin: 0;\n\tpadding-top: 0;\n\tpadding-bottom: 0;\n\tpadding-left: 0;\n\tpadding-right: 0;\n\tborder: 0;\n\tfont-family: 'Libre Franklin, sans serif';\n\tfont-size: 100%;\n\tfont: inherit;\n\tvertical-align: baseline;\n\tbox-sizing: unset;\n}\n/* HTML5 display-role reset for older browsers */\narticle, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {\n\tdisplay: block;\n}\nbody {\n\tline-height: 1 !important;\n}\nol, ul {\n\tlist-style: none;\n}\nblockquote, q {\n\tquotes: none;\n}\nblockquote:before, blockquote:after,\nq:before, q:after {\n\tcontent: '';\n\tcontent: none;\n}\ntable {\n\tborder-collapse: collapse;\n\tborder-spacing: 0;\n}\n\nbutton {\n\tmargin-bottom: 0;\n}\n";
-styleInject(css);
-
-var css$1 = "@import url('https://fonts.googleapis.com/css?family=Libre+Franklin:400,700');\n";
+var css$1 = "/* http://meyerweb.com/eric/tools/css/reset/\n   v2.0 | 20110126\n   License: none (public domain)\n*/\n\nhtml, body, div, span, applet, object, iframe,\nh1, h2, h3, h4, h5, h6, p, blockquote, pre,\na, abbr, acronym, address, big, cite, code,\ndel, dfn, em, img, ins, kbd, q, s, samp,\nsmall, strike, strong, sub, sup, tt, var,\nb, u, i, center,\ndl, dt, dd, ol, ul, li,\nfieldset, form, label, legend,\ntable, caption, tbody, tfoot, thead, tr, th, td,\narticle, aside, canvas, details, embed,\nfigure, figcaption, footer, header, hgroup,\nmenu, nav, output, ruby, section, summary,\ntime, mark, audio, video {\n\tmargin: 0;\n\tpadding-top: 0;\n\tpadding-bottom: 0;\n\tpadding-left: 0;\n\tpadding-right: 0;\n\tborder: 0;\n\tfont-family: 'Libre Franklin, sans serif';\n\tfont-size: 100%;\n\tfont: inherit;\n\tvertical-align: baseline;\n\tbox-sizing: unset;\n}\n/* HTML5 display-role reset for older browsers */\narticle, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {\n\tdisplay: block;\n}\nbody {\n\tline-height: 1 !important;\n}\nol, ul {\n\tlist-style: none;\n}\nblockquote, q {\n\tquotes: none;\n}\nblockquote:before, blockquote:after,\nq:before, q:after {\n\tcontent: '';\n\tcontent: none;\n}\ntable {\n\tborder-collapse: collapse;\n\tborder-spacing: 0;\n}\n\nbutton {\n\tmargin-bottom: 0;\n}\n";
 styleInject(css$1);
+
+var css$2 = "@import url('https://fonts.googleapis.com/css?family=Libre+Franklin:400,700');\n";
+styleInject(css$2);
 
 var DirectPayLandingPage = function (_React$Component) {
   inherits(DirectPayLandingPage, _React$Component);
@@ -1943,7 +1955,6 @@ var OptionItem = function (_React$Component) {
             showItemButton: true,
             hoveringInfo: false
         };
-
         _this._handleClick = _this._handleClick.bind(_this);
         _this._handleMouseOver = _this._handleMouseOver.bind(_this);
         _this._handleMouseLeave = _this._handleMouseLeave.bind(_this);
@@ -2033,6 +2044,19 @@ var OptionItem = function (_React$Component) {
         value: function _renderItemButton() {
             if (1 === this.props.item && this.state.showDropdown) {
                 return;
+            } else if (2 === this.props.item) {
+                return React.createElement(DirectPayButton, {
+                    style: this._getItemButtonStyles(),
+                    paymentStatus: this.props.paymentStatus,
+                    stripeKey: this.props.stripeKey,
+                    chargeAmount: this.state.total,
+                    institutionName: this.props.institutionName,
+                    chargeDescription: this.props.chargeDescription,
+                    stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+                    endpointUrl: this.props.endpointUrl,
+                    userEmail: this.props.userEmail,
+                    zipcode: this.state.zipcode
+                });
             } else if (this.state.showItemButton) {
                 return React.createElement(
                     'button',
@@ -2158,7 +2182,16 @@ var MultiPayAccessOptions = function (_React$Component) {
                     subLabel: '',
                     buttonText: 'Pay Now',
                     showCheckout: this.props.showCheckout,
-                    activationCodeErrors: this.props.activationCodeErrors
+                    activationCodeErrors: this.props.activationCodeErrors,
+                    amount_in_cents: this.props.chargeAmount,
+                    stripeKey: this.props.stripeKey,
+                    paymentStatus: this.props.paymentStatus,
+                    institutionName: this.props.institutionName,
+                    chargeDescription: this.props.chargeDescription,
+                    stripeModalLogoUrl: this.props.stripeModalLogoUrl,
+                    endpointUrl: this.props.endpointUrl,
+                    userEmail: this.props.userEmail,
+                    schoolLogoUrl: this.props.schoolLogoUrl
                 }),
                 React.createElement(OptionItem, {
                     item: 3,
@@ -2268,6 +2301,8 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
     createClass(MultiPayCourseAssessmentActivation, [{
         key: 'render',
         value: function render() {
+            var _React$createElement;
+
             return React.createElement(
                 'div',
                 { style: styles$6.bodyWrapper },
@@ -2286,7 +2321,7 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                     null,
                     'Course content is always available and free.'
                 ),
-                React.createElement(MultiPayAccessOptions, {
+                React.createElement(MultiPayAccessOptions, (_React$createElement = {
                     trialType: this.props.trialType,
                     trialPassesRemaining: this.props.trialPassesRemaining,
                     trialTimeRemaining: this.props.trialTimeRemaining,
@@ -2296,8 +2331,10 @@ var MultiPayCourseAssessmentActivation = function (_React$Component) {
                     redirectTo: this.props.redirectTo,
                     activationCodeErrors: this.props.activationCodeErrors,
                     endpointUrl: this.props.endpointUrl,
-                    assessmentUrl: this.props.assessmentUrl
-                }),
+                    assessmentUrl: this.props.assessmentUrl,
+                    amount_in_cents: this.props.chargeAmount,
+                    stripeKey: this.props.stripeKey
+                }, defineProperty(_React$createElement, 'paymentStatus', this.props.paymentStatus), defineProperty(_React$createElement, 'institutionName', this.props.institutionName), defineProperty(_React$createElement, 'chargeDescription', this.props.chargeDescription), defineProperty(_React$createElement, 'stripeModalLogoUrl', this.props.stripeModalLogoUrl), defineProperty(_React$createElement, 'endpointUrl', this.props.endpointUrl), defineProperty(_React$createElement, 'userEmail', this.props.userEmail), defineProperty(_React$createElement, 'schoolLogoUrl', this.props.schoolLogoUrl), _React$createElement)),
                 React.createElement('div', { style: styles$6.footerBorder }),
                 React.createElement(
                     'p',
@@ -2453,7 +2490,9 @@ var MultiPayPage = function (_React$Component) {
                     schoolLogoUrl: this.props.schoolLogoUrl
                 });
             } else {
-                return React.createElement(MultiPayCourseAssessmentActivation, {
+                var _React$createElement;
+
+                return React.createElement(MultiPayCourseAssessmentActivation, (_React$createElement = {
                     trialType: this.props.trialType,
                     trialPassesRemaining: this.props.trialPassesRemaining,
                     trialTimeRemaining: this.props.trialTimeRemaining,
@@ -2464,8 +2503,10 @@ var MultiPayPage = function (_React$Component) {
                     activationCodeErrors: this.props.activationCodeErrors || [],
                     endpointUrl: this.props.endpointUrl,
                     assessmentUrl: this.props.assessmentUrl,
-                    schoolLogoUrl: this.props.schoolLogoUrl
-                });
+                    schoolLogoUrl: this.props.schoolLogoUrl,
+                    amount_in_cents: this.props.chargeAmount,
+                    stripeKey: this.props.stripeKey
+                }, defineProperty(_React$createElement, 'paymentStatus', this.props.paymentStatus), defineProperty(_React$createElement, 'institutionName', this.props.institutionName), defineProperty(_React$createElement, 'chargeDescription', this.props.chargeDescription), defineProperty(_React$createElement, 'stripeModalLogoUrl', this.props.stripeModalLogoUrl), defineProperty(_React$createElement, 'endpointUrl', this.props.endpointUrl), defineProperty(_React$createElement, 'userEmail', this.props.userEmail), defineProperty(_React$createElement, 'schoolLogoUrl', this.props.schoolLogoUrl), _React$createElement));
             }
         }
     }]);
