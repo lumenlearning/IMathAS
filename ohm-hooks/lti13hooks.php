@@ -79,7 +79,7 @@ function lti_get_othercourses(array $targetinfo, int $userid): array {
         $stm->execute(array(
             ':userid' => $userid,
             ':cregex' => '[[:<:]]' . $target['refcid'] . '[[:>:]]',
-            ':dregex' => '[[:<:]]' . $target['refaid'] . '[[:>:]]'));
+            ':dregex' => '[[:<:]]' . $target['refid'] . '[[:>:]]'));
         while ($row = $stm->fetch(PDO::FETCH_NUM)) {
             $othercourses[$row[0]] = $row[1];
         }
@@ -127,7 +127,7 @@ function lti_handle_launch(
     // DESMOS STUFF
 
     $target = lti_parse_target_link($targetlink);
-    $sourceaid = $target['refaid'];
+    $sourceaid = $target['refid'];
     $destcid = $localcourse->get_courseid();
     // is an assessment launch
     if ($target['refcid'] == $destcid) {
@@ -359,7 +359,7 @@ function lti_ltihome(
     $item = lti_parse_target_link($launch->get_target_link());
     if ($item['type'] == 'desmos') {
         $stm = $DBH->prepare('SELECT * FROM desmos_items WHERE id=?');
-        $stm->execute([$item['refaid']]);
+        $stm->execute([$item['refid']]);
         $iteminfo = $stm->fetch(PDO::FETCH_ASSOC);
         echo "<h2>LTI Placement of " . Sanitize::encodeStringForDisplay($iteminfo['title']) . "</h2>";
         $now = time();
