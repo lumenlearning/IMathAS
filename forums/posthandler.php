@@ -17,8 +17,7 @@ if ($caller=="posts") {
 	$returnurl = "posts.php?view=$view&cid=$cid&page=$page&forum=$forumid&thread=$threadid";
 	$returnname = "Posts";
 } else if ($caller=="byname") {
-	$threadid = Sanitize::onlyInt($_GET['thread']);
-	$returnurl = "postsbyname.php?cid=$cid&forum=$forumid&thread=$threadid";
+	$returnurl = "postsbyname.php?cid=$cid&forum=$forumid";
 	$returnname = "Posts by Name";
 
 } else if ($caller=='thread') {
@@ -565,8 +564,8 @@ if (isset($_GET['modify'])) { //adding or modifying post
 			} else if ($allowanon==1 && $line['isanon']==1) { //teacher editing an anonymous post, perhaps
 				echo '<input type=hidden name=postanon value=1 />';
 			}
-            if ($isteacher &&
-                ($_GET['modify']=='new' || (isset($line['userid']) && $line['userid']==$userid)) &&
+            if ($isteacher && 
+                ($_GET['modify']=='new' || (isset($line['userid']) && $line['userid']==$userid)) && 
                 ($_GET['modify']=='new' || $_GET['modify']==$_GET['thread'] || ($_GET['modify']!='reply' && $line['parent']==0))
             ) {
 				echo "<span class=form id=posttypelabel>Post Type:</span><span class=formright role=radiogroup aria-labelledby=posttypelabel>\n";
