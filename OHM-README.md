@@ -15,14 +15,30 @@ and maintain a safe,
 pleasant work environment.
 
 ## Getting Started
-
 This application is developed in PHP,
-with some features being developed using the 
+with some features being developed using the
 [Slim](https://www.slimframework.com/)
 Microframework.
 These instructions will get you up and running on your local machine for development and testing purposes.
+### SSL CERTS
+This step is only needed the first time you are setting up locally.
+1. Install `mkcert`. You can use `brew install mkcert` (homebrew) or `port install mkcert` (macports)
+2. Create a directory to store your certificates. 
+3. In the above directory, run `mkcert -install` and `mkcert localhost 127.0.0.1 ::1`.
+4. Copy the two resulting files into the project subdirectory `/docker/ssl`. 
+   - Name the .key.pem file `docker/ssl/ssl-cert-snakeoil.key`
+    - Name the .pem file  `docker/ssl/ssl-cert-snakeoil.pem`
+    
 
-***TODO:** Add instructions for setting up a local instance of OHM.*
+### Running OHM locally
+1. Copy in the config subdirectory local.php.example to local.php and modify the `$dbserver` to 127.0.0.1
+2. Run `composer install` at root directory as well as in `ohm/lumenapi` directory
+3. Execute `npm run serve` from the `assess2/vue-src` (You might need to `nvm use stable` if this step fails)
+4. Start Docker
+5. Go into project root directory and run docker-compose up
+6. In a browser, go to https://localhost/setupdb.php and wait for DB migrations to complete. If fails, https://localhost/upgrade.php
+7. Hopefully app is up and running at localhost!
+
 
 ### Order of development and operations
 
