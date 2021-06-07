@@ -666,8 +666,8 @@ switch($_POST['action']) {
                 cleanupdate=:cleanupdate,level=:level,ltisendzeros=:ltisendzeros WHERE id=:id";
             $qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], 
                 ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
-                ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll,
-                ':copyrights'=>$copyrights, ':msgset'=>$msgset,	':toolset'=>$toolset,
+                ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, 
+                ':copyrights'=>$copyrights, ':msgset'=>$msgset,	':toolset'=>$toolset, 
                 ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
                 ':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, 
                 ':startdate'=>$startdate, ':enddate'=>$enddate,	':latepasshrs'=>$latepasshrs, 
@@ -1261,7 +1261,7 @@ switch($_POST['action']) {
 			//check that code is valid and not a replay
 			if ($MFA->verifyCode($mfadata['secret'], $_POST['mfatoken']) &&
 			   ($_POST['mfatoken'] != $mfadata['last'] || time() - $mfadata['laston'] > 600)) {
-				$_SESSION['mfaverified'] = true;
+				$_SESSION['mfaadminverified'] = true;
 				$mfadata['last'] = $_POST['mfatoken'];
 				$mfadata['laston'] = time();
 				if (isset($_POST['mfatrust'])) {
