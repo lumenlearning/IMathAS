@@ -419,7 +419,7 @@ class AssessRecord
    * @return int   New question ID
    */
   public function buildNewQuestionVersion($qn, $qid, $forceseed = -1) {
-    list($oldquestions, $oldseeds) = $this->getOldQuestions();
+    list($oldquestions, $oldseeds) = $this->getOldQuestions($qn);
     list($question, $seed) = $this->assess_info->regenQuestionAndSeed($qid, $oldseeds, $oldquestions);
     // build question data
     $newver = array(
@@ -1462,6 +1462,7 @@ class AssessRecord
           $showans === 'after_take' || $ansInGb === 'after_take')
         ) ||
         ($ansInGb == 'after_due'
+          && !$this->is_practice
           && time() > $this->assess_info->getSetting('enddate')
           && !$this->assess_info->getSetting('can_use_latepass')
         ) ||
@@ -1910,7 +1911,7 @@ class AssessRecord
         $correctAnswerWrongFormat[$pn] = 
           !empty($qver['tries'][$pn][$partattemptn[$pn] - 1]['wrongfmt']);
       }
-      if ($this->teacherInGb) {
+      if ($this->teacherInGb || $force_answers) {
         $seqPartDone[$pn] = true;
       } else if ($showscores) {
         // move on if correct or out of tries or manually graded
@@ -3369,7 +3370,7 @@ class AssessRecord
           'score'=>$aver['questions'][$qn]['score']];
       }
       if (count($qvers) == 1) { // only 1 ver, so will need to rebuild it
-        list($oldquestions, $oldseeds) = $this->getOldQuestions();
+        list($oldquestions, $oldseeds) = $this->getOldQuestions($qn);
         list($question, $seed) = $this->assess_info->regenQuestionAndSeed($qvers[0]['qid'], $oldseeds, $oldquestions);
         $qvers[0] = array(
           'qid' => $question,
@@ -3478,6 +3479,7 @@ class AssessRecord
         $outOfAttempts = true;
       }
       $hasSubmitted = false;
+      $hasUnSubmitted = false;
       for ($av=0; $av < count($this->data['assess_versions']); $av++) {
         if (!empty($this->data['assess_versions'][$av]['timelimit_end'])) {
           if ($this->data['assess_versions'][$av]['lastchange'] >
@@ -3488,12 +3490,19 @@ class AssessRecord
         }
         if ($this->data['assess_versions'][$av]['status'] == 1) {
           $hasSubmitted = true;
+        } else if ($this->data['assess_versions'][$av]['status'] == 0) {
+          $hasUnSubmitted = true;
         }
       }
       if ($hasSubmitted) {
         $this->assessRecord['status'] |= 64;
       } else {
         $this->assessRecord['status'] = $this->assessRecord['status'] & ~64;
+      }
+      if ($hasUnSubmitted) {
+        $this->assessRecord['status'] |= 1;
+      } else {
+        $this->assessRecord['status'] = $this->assessRecord['status'] & ~1;
       }
     }
     if ($outOfAttempts) {
@@ -3568,6 +3577,8 @@ class AssessRecord
             $outstr .= " <br/><div><img id=\"img$qn-$pn-$tn\" style=\"display:none;max-width:80%;\" aria-hidden=\"true\" onclick=\"rotateimg(this)\" src=\"$url\" alt=\"Student uploaded image\"/></div>";
           }*/
           $out[$pn][] = $outstr;
+        } else if ($qtype == 'essay') {
+          $out[$pn][] = $parttrydata[$tn]['stuans'];
         } else {
           $out[$pn][] = Sanitize::encodeStringForDisplay($parttrydata[$tn]['stuans']);
         }

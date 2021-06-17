@@ -676,7 +676,7 @@ function gbstudisp($stu) {
 			}
 			$query = "SELECT iu.id,iu.FirstName,iu.LastName,istu.section FROM imas_users AS iu JOIN imas_students as istu ON iu.id=istu.userid WHERE istu.courseid=:courseid ";
 			if ($hidelocked) {
-				$query .= "AND istu.locked=0 ";
+				$query .= "AND (istu.locked=0 OR iu.id=:uid) ";
 			}
 			if ($usersort==0) {
 				$query .= "ORDER BY istu.section,iu.LastName,iu.FirstName";
@@ -684,7 +684,11 @@ function gbstudisp($stu) {
 				$query .= "ORDER BY iu.LastName,iu.FirstName";
 			}
 			$stm = $DBH->prepare($query);
-			$stm->execute(array(':courseid'=>$cid));
+			if ($hidelocked) {
+				$stm->execute(array(':courseid'=>$cid, ':uid'=>$stu));
+			} else {
+				$stm->execute(array(':courseid'=>$cid));
+			}
 
 			echo '<select id="userselect" style="border:0;font-size:1.1em;font-weight:bold" onchange="chgstu(this)">';
 			$lastsec = '';
@@ -825,7 +829,11 @@ function gbstudisp($stu) {
 			}
 			if ($hidepast && $gbt[0][1][$i][3]==0) {
 				continue;
-			}
+            }
+            if (isset($gbt[0][1][$i][17]) && $gbt[0][1][$i][17] != $stusection) {
+                // is section limited, and this student isn't in the section
+                continue;
+            }
 
 			echo '<tr class="grid">';
 			if ($stu>0 && $isteacher) {
@@ -1790,7 +1798,7 @@ function gbinstrdisp() {
 						} else if ($gbt[$i][1][$j][3]==5) {
 							echo ' (UA)';
 						} else if ($gbt[$i][1][$j][3]==3) {
-							echo ' (OT)';
+							// echo ' (OT)';
 						} else if ($gbt[$i][1][$j][3]==4) {
 							echo ' (PT)';
 						}
