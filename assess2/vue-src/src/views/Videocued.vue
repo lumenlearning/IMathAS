@@ -52,6 +52,8 @@
           pos = "before"
           :qn = "curqn"
           :active="curqn == qn"
+          :textlist = "textList"
+          :lastq = "lastQ"
         />
         <full-question-header
           v-show = "curqn == qn"
@@ -66,6 +68,8 @@
           pos = "after"
           :qn = "curqn"
           :active="curqn == qn"
+          :textlist = "textList"
+          :lastq = "lastQ"
         />
       </div>
     </div>
@@ -169,6 +173,16 @@ export default {
         qnArray[i] = i;
       }
       return qnArray;
+    },
+    lastQ () {
+      return store.assessInfo.questions.length - 1;
+    },
+    textList () {
+      if (!store.assessInfo.hasOwnProperty('interquestion_text')) {
+        return [];
+      } else {
+        return store.assessInfo.interquestion_text;
+      }
     }
   },
   methods: {

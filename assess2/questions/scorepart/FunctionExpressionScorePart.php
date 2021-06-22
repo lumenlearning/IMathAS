@@ -64,6 +64,12 @@ class FunctionExpressionScorePart implements ScorePart
         if ($multi) { $qn = ($qn+1)*1000+$partnum; }
 
         $givenans = normalizemathunicode(trim($givenans));
+
+        $givenans = preg_replace_callback(
+            '/(arcsinh|arccosh|arctanh|arcsin|arccos|arctan|arcsec|arccsc|arccot|root|sqrt|sign|sinh|cosh|tanh|sech|csch|coth|abs|sin|cos|tan|sec|csc|cot|exp|log|ln)[\(\[]/i',
+            function($m) { return strtolower($m[0]); },
+            $givenans
+        );
         $answer = normalizemathunicode($answer);
         
         if (in_array('nosoln',$ansformats) || in_array('nosolninf',$ansformats)) {
@@ -301,7 +307,7 @@ class FunctionExpressionScorePart implements ScorePart
                     $varvals[$variables[$j]] = $tps[$i][$j];
                 }
                 $realans = $answerfunc->evaluateQuiet($varvals);
-                //echo "$answer, real: $realans, my: {$myans[$i]},rel: ". (abs($myans[$i]-$realans)/abs($realans))  ."<br/>";
+                //echo "$answer, real: $realans, my: {$givenansvals[$i]},rel: ". (abs(10^16*$givenansvals[$i]-10^16*$realans))  ."<br/>";
                 if (isNaN($realans)) {$cntnan++; continue;} //avoid NaN problems
                 if (in_array('equation',$ansformats) || in_array('inequality',$ansformats) || in_array('scalarmult',$ansformats)) {  //if equation, store ratios
                     if (isNaN($givenansvals[$i])) {
@@ -324,10 +330,9 @@ class FunctionExpressionScorePart implements ScorePart
                     if (isNaN($givenansvals[$i])) {
                         $stunan++;
                     } else if (isset($abstolerance)) {
-
-                        if (abs($givenansvals[$i]-$realans) > $abstolerance-1E-12) {$correct = false; break;}
+                        if (abs($givenansvals[$i]-$realans) > $abstolerance+1E-12) { $correct = false; break;}
                     } else {
-                        if ((abs($givenansvals[$i]-$realans)/(abs($realans)+.0001) > $reltolerance-1E-12)) {$correct = false; break;}
+                        if ((abs($givenansvals[$i]-$realans)/(abs($realans)+.0001) > $reltolerance+1E-12)) {$correct = false; break;}
                     }
                 }
             }
@@ -360,9 +365,9 @@ class FunctionExpressionScorePart implements ScorePart
                         }
                         for ($i=0; $i<count($ratios); $i++) {
                             if (isset($abstolerance)) {
-                                if (abs($ratios[$i]-$meanratio) > $abstolerance-1E-12) {$correct = false; break;}
+                                if (abs($ratios[$i]-$meanratio) > $abstolerance+1E-12) {$correct = false; break;}
                             } else {
-                                if ((abs($ratios[$i]-$meanratio)/(abs($meanratio)+.0001) > $reltolerance-1E-12)) {$correct = false; break;}
+                                if ((abs($ratios[$i]-$meanratio)/(abs($meanratio)+.0001) > $reltolerance+1E-12)) {$correct = false; break;}
                             }
                         }
                     }
@@ -382,10 +387,10 @@ class FunctionExpressionScorePart implements ScorePart
                 }
                 for ($i=0; $i<count($diffs); $i++) {
                     if (isset($abstolerance)) {
-                        if (abs($diffs[$i]-$meandiff) > $abstolerance-1E-12) {$correct = false; break;}
+                        if (abs($diffs[$i]-$meandiff) > $abstolerance+1E-12) {$correct = false; break;}
                     } else {
                         //if ((abs($diffs[$i]-$meandiff)/(abs($meandiff)+0.0001) > $reltolerance-1E-12)) {$correct = false; break;}
-                        if ((abs($diffs[$i]-$meandiff)/(abs($realanss[$i])+0.0001) > $reltolerance-1E-12)) {$correct = false; break;}
+                        if ((abs($diffs[$i]-$meandiff)/(abs($realanss[$i])+0.0001) > $reltolerance+1E-12)) {$correct = false; break;}
                     }
                 }
             }

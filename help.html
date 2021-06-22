@@ -1777,7 +1777,7 @@ username or password, so they will only be able to access IMathAS resources thro
 	<p>To import the cartridge in Brightspace:</p>
 	<ul>
 		<li>Go to Course Admin, and select Import/Export/Copy Components.</li>
-		<li>Select Import Components, and "from a File"</li>
+		<li>Select Import Components, and "from a course package"</li>
 		<li>Choose the export file and click Import All Components.</li>
 		<li>If you have a global key and secret, you can skip ahead.
 		    If you need to set up a course-level configuration, follow these steps.
@@ -2247,8 +2247,8 @@ can be omitted.</p>
 <li><strong>singleshuffle(list/array,[n])</strong>:  returns a shuffled version of a list/array.  If n is provided,
     it behaves identically to diffrandsfrom</li>
 <li><strong>randnames(n),randmalenames(n),randfemalenames(n)</strong>:  Returns n random first names</li>
-<li><strong>randcity(),randcities(n)</strong>:  Returns one or n random city names</li>
-<li><strong>randstate(),randstates(n)</strong>:  Returns one or n random US state names</li>
+<li><strong>randcity([country]),randcities(n, [country])</strong>:  Returns one or n random US or Canadian city names. Argument country can be set to "USA" or "Canada". The default is "USA".</li>
+<li><strong>randstate([country]),randstates(n, [country])</strong>:  Returns one or n random US state or Canadian province names. Argument country can be set to "USA" or "Canada". The default is "USA".</li>
 <li><strong>randcountry(),randcountries(n)</strong>:  Returns one or n random country names</li>
 <li><strong>randpythag([min,max])</strong>:  Return a Pythagorean triple.  min/max default to 1 to 100</li>
 </ul>
@@ -2365,9 +2365,9 @@ The following macros create graphs or tables:
   of the two points used.</li>
 <li><strong>gettwopointdata(stuans, type, [xmin, xmax, ymin, ymax, drawing width, drawing height]) or gettwopointdata(stuans, type, [grid, snaptogrid])</strong>:  Takes a $stuanswers from a drawing question
   and pulls out the two-point data for the given curve type.  Type should be one of 'line', 'lineseg', 'ray', 'parab', 'horizparab', 'sqrt', 'cubic', 'cuberoot',
-  'rational', 'exp', 'log', 'sin', 'cos', 'abs', 'vector', 'circle'.  Returns an array of curve data, each of form array(x1,y1,x2,y2) giving the coordinates of
+  'rational', 'exp', 'log', 'sin', 'cos', 'abs', 'vector', 'circle','ellipse'.  Returns an array of curve data, each of form array(x1,y1,x2,y2) giving the coordinates of
   the two points used.  They are returned in the order clicked.  For example, with 'parab' type, the first point is the vertex and the
-  second point is an arbitrary point.</li>
+  second point is an arbitrary point. Can use type 'circlerad' to return array(x-center,y-center,radius) or 'ellipserad' to return array(x-center,y-center,x-radius,y-radius).</li>
 <li><strong>getdotsdata(stuans, [xmin, xmax, ymin, ymax, drawing width, drawing height]) or getdotsdata(stuans, [grid, snaptogrid])</strong>:  Takes a $stuanswers from a drawing
   question and pulls out the closed dots data.  Returns an array of dots, each of form array(x1,y1) giving the coordinates
   of the dot.</li>
@@ -2441,6 +2441,7 @@ The following macros help with formatting values for display:
 <li><strong>decimaltofraction(decimal,[format,maxden])</strong>:  Converts a decimal to a fraction.  Can use format="mixednumber" to get a mixed number rather than improper fraction.
     Only works for denominators up to maxden (default 5000)</li>
 <li><strong>htmldisp(string,[variables])</strong>:  Uses HTML instead of the math typesetter to display simple exponents and subscripts, and to italicize variables</li>
+<li><strong>formatcomplex(real,imag)</strong>: Creates a string like "2+i" from the real and imaginary parts.</li>
 </ul>
 
 </div> <!-- h2 -->
@@ -2504,6 +2505,7 @@ These macros are for working with arrays:
 <li><strong>intersectarrays(array,array)</strong>:  Finds the intersection of two arrays</li>
 <li><strong>diffarrays(array1,array2)</strong>: Returns all elements in array1 that are not also in array2</li>
 <li><strong>array_unique(array)</strong>: Returns the array, stripping duplicate values</li>
+<li><strong>array_values(array)</strong>: Returns the values of an array, reindexing with consecutive numeric indices.</li>
 <li><strong>count(array)</strong>:  Counts the number of entries in the array</li>
 <li><strong>sumarray(array)</strong>: Adds the entries in an array</li>
 <li><strong>in_array(needle,haystack)</strong>:  Checks if value needle is in array haystack.  Returns true or false</li>
@@ -2586,11 +2588,16 @@ These macros are used to test various conditions.  They typically return true or
   tolerance.  Set tol to specify the relative tolerance (defaults to .001), or prefix with | for an absolute tolerance.</li>
 <li><strong>comparefunctions(a,b,[vars,tol,domain])</strong>: Compares functions a and b to see if they are algebraically equivalent.  Set
   vars to a list of variables (defaults to 'x').  Set tol to specify the relative tolerance (defaults to .001), or prefix with | for an absolute tolerance.
-  Set domain to "xmin,xmax" to specify a domain for comparison.</li>
+  Set domain to "xmin,xmax" to specify a domain for comparison, or "xmin,xmax,integers" to restrict domain to integer values.</li>
+<li><strong>comparelogic(a,b,vars)</strong>: Compares two logical statements, written using 
+ ^^ for and, vv for or, ~ for not, -&gt; or =&gt; for conditional, and &lt;-&gt; or &lt;=&gt; for biconditional.
+ vars should be a list or array of variables in the statements. </li>
 <li><strong>is_numeric(str)</strong>:  Checks if the string represents an integer or decimal number.</li>
 <li><strong>scorestring($answer,$showanswer,words,$stuanswers,$thisq,[partn, highlight])</strong>: This function checks
   to see if the words in the list/array "words" appear in the student's answer. If they all appear, it redefines
-  $answer and $showanswer so the student's answer is marked correct.
+  $answer so the student's answer is marked correct.  $showanswer is also redefined to show the original $answer 
+  with all the required words highlighted. You can turn off the highlighting by setting the optional highlight 
+  parameters to false.<br>
   For multipart questions, include the part number as an
   additional parameter.  Usage for single part questions (where $words is predefined earlier in the code):<br/>
   $answer,$showanswer = scorestring($answer,"",$words,$stuanswers,$thisq)<Br/>
@@ -3209,7 +3216,10 @@ A student is asked to match answers with questions
 	<dd>Retains original order of questions or answers, and only shuffles the other.  By default, both lists are shuffled</dd>
 <dt>$displayformat = "select" or "2columnselect"</dt>
 	<dd>Only displays the $answers, with select boxes next to each containing the $questions.  This should only be used with
-	pure text $questions.</dd>
+    pure text $questions.</dd>
+<dt>$scoremethod = "allornothing" </dt>
+	<dd>Setting "allornothing" will mean no partial credit is given, and the student must match all parts 
+        correctly to get credit.</dd>
 <dt>$readerlabel = string</dt>
     <dd>A string that will be used as a visually hidden label on the input box for screenreaders.</dd>
 <dt>$answerbox (In Question Text)</dt>
@@ -3349,14 +3359,21 @@ A student is asked to enter a string (a word or list of letters).
 	<dd>"takeanything" or "takeanythingorblank" sets the problem to give full credit
 		for any answer.  "takeanythingorblank" also counts blank answers as correct.
 	  "submitblank" will cause blank answers to get submitted for scoring (new system only).</dd>
-<dt>$answerformat = "list" </dt>
-	<dd>Specifies that a list of answers is expected.  Renders ignore_commas unnecessary.  Cannot be used with
-	partial_credit flag.  Duplicates are not ignored.</dd>
-<dt>$displayformat = "usepreview" or "typeahead"</dt>
-	<dd>"usepreview" adds a preview button for previewing mathematical answers.<br/>
+<dt>$answerformat = "list" or "logic" </dt>
+	<dd>"list" specifies that a list of answers is expected.  Renders ignore_commas unnecessary.  Cannot be used with
+    partial_credit flag.  Duplicates are not ignored. <br><br>
+    "logic" enables a separate grading algorithm for logic statements, ignoring $strflags.  The $answer 
+    should be given using vv for or, ^^ for and, ~ for not, =&gt; for conditional, and &lt;=&gt; for biconditional.
+    Parens are supported, but no other symbols.  The variables used in the logic expression must be declared by 
+    defining $variables.</dd>
+<dt>$displayformat = "usepreview" or "typeahead" or "usepreviewnomq"</dt>
+    <dd>"usepreview" enables mathquill entry for mathematical answers.<br/>
+        "usepreviewnomq" adds a preview button for previewing mathematical answers in asciimath.<br/>
 	"typeahead" will enable an auto-suggest list of options once the student has typed at least
 	two letters of the word.  Provide the auto-suggest list in the variable $questions.
-	</dd>
+    </dd>
+<dt>$variables</dt>
+    <dd>When $answerformat="logic" is used, define the $variables in the logic statement, like "p,q"</dd>
 <dt>$ansprompt = string </dt>
 	<dd>A string that will be displayed in front of the input box.  Example: $ansprompt="type: "</dd>
 <dt>$answerboxsize = number </dt>
