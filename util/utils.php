@@ -371,6 +371,7 @@ if (isset($_GET['form'])) {
 	######### Begin OHM-specific code #########################################
 	######### Begin OHM-specific code #########################################
 	######### Begin OHM-specific code #########################################
+	echo '<a href="desmos-usage-report.php">Desmos usage report</a><br/>';
 	echo '<a href="itemsearch.php">Search inline/linked items</a><br/>';
 	echo '<a href="ohm_api_consumers.php">Manage API consumers</a><br/>';
 	echo '<a href="../admin/requeue-lti.php">View and ReQueue LTI Grade Passback</a><br/>';
