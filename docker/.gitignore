@@ -1,0 +1,3 @@
+# SSL certs
+ssl/*.key
+ssl/*.pem
