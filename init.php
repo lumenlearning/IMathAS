@@ -156,13 +156,13 @@ if (isset($_SESSION['ratelimiter']) && isset($CFG['GEN']['ratelimit']) &&
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
-if (!is_null($GLOBALS['userid'])) { // User is logged in.
+if (isset($GLOBALS['userid']) && !is_null($GLOBALS['userid'])) { // User is logged in.
     $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
 
     $acceptanceRequired = false;
     try {
         $acceptanceRequired = $eulaService->isAcceptanceRequired($GLOBALS['userid']);
-    } catch (\OHM\Exceptions\DatabaseReadException | \OHM\Exceptions\DatabaseWriteException $e) {
+    } catch (\OHM\Exceptions\DatabaseReadException $e) {
         error_log($e->getMessage());
     }
 

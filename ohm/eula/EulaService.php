@@ -117,10 +117,11 @@ class EulaService
      */
     public function redirectToEulaPage(): void
     {
-        $url = $GLOBALS['basesiteurl']
-            . "/ohm/eula/index.php?r=" . Sanitize::randomQueryStringParam();
+        $destUrl = Sanitize::encodeUrlParam($_SERVER['REQUEST_URI']);
+        $randomQueryString = Sanitize::randomQueryStringParam();
         ob_clean();
-        header('Location: ' . $url);
+        header(sprintf('Location: %s/ohm/eula/index.php?r=%s&dest=%s',
+            $GLOBALS['basesiteurl'], $randomQueryString, $destUrl));
     }
 
     /**
