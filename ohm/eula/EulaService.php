@@ -37,6 +37,37 @@ class EulaService
     }
 
     /**
+     * Require the user to accept the latest EULA.
+     *
+     * Call this method anywhere EULA enforcement is required.
+     *
+     * - If the user has not accepted the latest EULA, they will be
+     *   redirected to the EULA page instead of their originally requested
+     *   location.
+     * - They will be redirected to their original destination after they
+     *   accept the EULA.
+     */
+    public function enforceOhmEula(): void
+    {
+        if (!isset($GLOBALS['userid']) || empty($GLOBALS['userid'])) {
+            // Without a User ID, we can't do anything.
+            return;
+        }
+
+        $acceptanceRequired = false;
+        try {
+            $acceptanceRequired = $this->isAcceptanceRequired($GLOBALS['userid']);
+        } catch (DatabaseReadException $e) {
+            error_log($e->getMessage());
+        }
+
+        if ($acceptanceRequired) {
+            $this->redirectToEulaPage();
+            exit;
+        }
+    }
+
+    /**
      * Does a user need to accept the latest EULA version.
      *
      * This checks:

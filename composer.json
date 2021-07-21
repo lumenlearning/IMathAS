@@ -26,6 +26,7 @@
             "Course\\Includes\\": "course/includes/",
             "OHM\\": "ohm/",
             "OHM\\Admin\\": "admin/",
+            "OHM\\Eula\\": "ohm/eula/",
             "OHM\\Models\\": "ohm/models/",
             "OHM\\Controlers\\": "ohm/controlers/",
             "OHM\\Api\\": "ohm/api/src/",

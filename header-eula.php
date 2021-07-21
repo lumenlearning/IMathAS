@@ -114,69 +114,72 @@
 	echo '<div class="mainbody">';
 
 	$insertinheaderwrapper = ' '; //"<h1>$coursename</h1>";
-	if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
-		echo '<div class="headerwrapper">';
-	}
-	if ($coursetheme == 'otbsreader.css') {
-		$nologo = true;
-	}
-	if (!isset($flexwidth) && $coursetheme == 'lumen.css') {
-		$smallheaderlogo = '<img src="' . $imasroot . '/img/collapse.gif"/>';
-	?>
+	if (isset($ltirole)) {
 
-		<div id="headercontent" style='font-size: 14px; font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", "sans-serif"'>
+		if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
+			echo '<div class="headerwrapper">';
+		}
+		if ($coursetheme == 'otbsreader.css') {
+			$nologo = true;
+		}
+		if (!isset($flexwidth) && $coursetheme == 'lumen.css') {
+			$smallheaderlogo = '<img src="' . $imasroot . '/img/collapse.gif"/>';
+		?>
 
-			<div class="headerbar-wrapper">
-				<div id="headerbarlogo">
-					<a href="<?php echo $imasroot; ?>/index.php">
-						<img alt="Lumen OHM, Online Learning Manager, logo" title="Click to return home" src="<?php echo $imasroot; ?>/ohm/img/ohm-logo-800.png" height="60" />
-					</a>
+			<div id="headercontent" style='font-size: 14px; font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", "sans-serif"'>
+
+				<div class="headerbar-wrapper">
+					<div id="headerbarlogo">
+						<a href="<?php echo $imasroot; ?>/index.php">
+							<img alt="Lumen OHM, Online Learning Manager, logo" title="Click to return home" src="<?php echo $imasroot; ?>/ohm/img/ohm-logo-800.png" height="60" />
+						</a>
+					</div>
+					<div id="headerbar-menu-toggle">
+						<img class="menu-dropdown-btn" src="<?php echo $imasroot; ?>/ohm/img/menu-dropdown-btn.png" alt="header bar menu dropdown toggle button" />
+					</div>
 				</div>
-				<div id="headerbar-menu-toggle">
-					<img class="menu-dropdown-btn" src="<?php echo $imasroot; ?>/ohm/img/menu-dropdown-btn.png" alt="header bar menu dropdown toggle button" />
+				<div class="linksgroup" id="headerrightlinksgroup">
+					<?php
+					if (isset($userid)) {
+						if ($myrights > 5) {
+							$usernameinheader = true;
+							echo "<span id=\"myname\" class=\"header-menu-item\">" .
+								Sanitize::encodeStringForDisplay($userfullname)
+								. "<img id=\"avatar\" alt=\"\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
+						}
+						echo "<div id=\"headerrightlinks\"><a href=\"$imasroot/actions.php?action=logout\" class=\"header-menu-item\">Log Out</a></div>";
+					}
+					?>
 				</div>
 			</div>
-			<div class="linksgroup" id="headerrightlinksgroup">
-				<?php
-				if (isset($userid)) {
-					if ($myrights > 5) {
-						$usernameinheader = true;
-						echo "<span id=\"myname\" class=\"header-menu-item\">" .
-							Sanitize::encodeStringForDisplay($userfullname)
-							. "<img id=\"avatar\" alt=\"\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
-					}
-					echo "<div id=\"headerrightlinks\"><a href=\"$imasroot/actions.php?action=logout\" class=\"header-menu-item\">Log Out</a></div>";
-				}
-				?>
-			</div>
-		</div>
 
-		<script type="text/javascript">
-			$(document).ready(function() {
-				$('img.menu-dropdown-btn').click(function(e) {
-					var x = document.getElementById('headerrightlinksgroup');
-					if (x.className === 'linksgroup') {
-						x.className += ' responsive';
-						$('#navlistcont').addClass('responsive');
-					} else {
-						x.className = 'linksgroup';
-						$('#navlistcont').removeClass('responsive');
-					}
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('img.menu-dropdown-btn').click(function(e) {
+						var x = document.getElementById('headerrightlinksgroup');
+						if (x.className === 'linksgroup') {
+							x.className += ' responsive';
+							$('#navlistcont').addClass('responsive');
+						} else {
+							x.className = 'linksgroup';
+							$('#navlistcont').removeClass('responsive');
+						}
+					});
 				});
-			});
-		</script>
+			</script>
 
-	<?php
-		$nologo = true;
-		$haslogout = true;
-	} else if (isset($CFG['GEN']['hidedefindexmenu'])) {
-		unset($CFG['GEN']['hidedefindexmenu']);
-	}
+		<?php
+			$nologo = true;
+			$haslogout = true;
+		} else if (isset($CFG['GEN']['hidedefindexmenu'])) {
+			unset($CFG['GEN']['hidedefindexmenu']);
+		}
 
-	$didnavlist = false;
-	$essentialsnavcnt = 0;
-	if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
-		echo '</div>';
+		$didnavlist = false;
+		$essentialsnavcnt = 0;
+		if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
+			echo '</div>';
+		}
 	}
 	echo '<div class="midwrapper" role="main">';
 

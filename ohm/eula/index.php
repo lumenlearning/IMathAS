@@ -33,7 +33,7 @@ require(__DIR__ . '/../../header-eula.php');
 ?>
             <section id="js-eula-agreement" class="eula-agreement lux-component">
                 <h1>Lumen OHM &ndash; End User License Agreement</h1>
-                <p>Last updated on 12/12/2020</p>
+                <p>Last updated on 7/27/2021</p>
                 <div class="eula-frame u-margin-vertical-sm">
                     <?php include_once 'agreement.php' ?>
                 </div>
