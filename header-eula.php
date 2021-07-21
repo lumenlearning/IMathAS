@@ -114,7 +114,7 @@
 	echo '<div class="mainbody">';
 
 	$insertinheaderwrapper = ' '; //"<h1>$coursename</h1>";
-	if (isset($ltirole)) {
+	if ('true' != $_GET['lms']) {
 
 		if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
 			echo '<div class="headerwrapper">';

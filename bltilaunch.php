@@ -39,6 +39,9 @@ unset($init_skip_csrfp);
 // #### Begin OHM-specific code #####################################################
 require_once(__DIR__ . '/includes/ltiroles.php');
 
+// Used to programmatically determine if the user is logged in via an LMS.
+$isLmsUser = true;
+
 $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################

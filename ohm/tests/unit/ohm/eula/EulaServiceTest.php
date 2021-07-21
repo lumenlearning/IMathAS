@@ -29,6 +29,7 @@ final class EulaServiceTest extends TestCase
         $this->eulaService = new EulaService($this->dbh);
 
         putenv('EULA_ENABLED=true');
+        unset($GLOBALS['isLmsUser']);
     }
 
     /*
@@ -170,4 +171,30 @@ final class EulaServiceTest extends TestCase
         $result = $this->eulaService->isCurrentPageExcludedFromEula();
         $this->assertTrue($result);
     }
+
+    /*
+     * isLmsUser
+     */
+
+    public function testisLmsUser_True(): void
+    {
+        $GLOBALS['isLmsUser'] = true;
+        $result = $this->eulaService->isLmsUser();
+        $this->assertTrue($result);
+    }
+
+    public function testisLmsUser_NotSet(): void
+    {
+        $result = $this->eulaService->isLmsUser();
+        $this->assertFalse($result);
+    }
+
+    public function testisLmsUser_False(): void
+    {
+        $GLOBALS['isLmsUser'] = 'meow';
+        $result = $this->eulaService->isLmsUser();
+        $this->assertFalse($result);
+    }
+
+
 }

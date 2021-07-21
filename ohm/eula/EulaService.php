@@ -160,9 +160,10 @@ class EulaService
     {
         $destUrl = Sanitize::encodeUrlParam($_SERVER['REQUEST_URI']);
         $randomQueryString = Sanitize::randomQueryStringParam();
+        $lmsParam = $this->isLmsUser() ? '&lms=true' : '';
         ob_clean();
-        header(sprintf('Location: %s/ohm/eula/index.php?r=%s&dest=%s',
-            $GLOBALS['basesiteurl'], $randomQueryString, $destUrl));
+        header(sprintf('Location: %s/ohm/eula/index.php?r=%s&dest=%s%s',
+            $GLOBALS['basesiteurl'], $randomQueryString, $destUrl, $lmsParam));
     }
 
     /**
@@ -178,5 +179,19 @@ class EulaService
             return true;
         }
         return false;
+    }
+
+    /**
+     * Determine if the user is logged in via LMS.
+     *
+     * @return bool True if logged in via LMS. False if not.
+     */
+    public function isLmsUser(): bool
+    {
+        if (!isset($GLOBALS['isLmsUser']) || true !== $GLOBALS['isLmsUser']) {
+            return false;
+        }
+
+        return true;
     }
 }
