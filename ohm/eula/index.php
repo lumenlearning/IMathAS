@@ -46,7 +46,7 @@ require(__DIR__ . '/../../header-eula.php');
                     </label>
                     <div class="u-margin-vertical">
                         <button type="button" id="js-eula-button--disagree" class="button">I disagree</button>
-                        <button type="submit" disabled id="js-eula-button--agree" class="button button--primary">I agree</button>
+                        <button type="submit" disabled id="js-eula-button--agree" class="button">I agree</button>
                     </div>
                 </form>
             </section>
@@ -59,9 +59,9 @@ require(__DIR__ . '/../../header-eula.php');
             <script>
                 $('#eula-checkbox').click(function() {
                     if ($(this).is(':checked')) {
-                        $('#js-eula-button--agree').prop('disabled', false);
+                        $('#js-eula-button--agree').addClass('button--primary').prop('disabled', false);
                     } else {
-                        $('#js-eula-button--agree').prop('disabled', true);
+                        $('#js-eula-button--agree').removeClass('button--primary').prop('disabled', true);
                     }
                 });
                 $('#js-eula-button--disagree').click(function() {

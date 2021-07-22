@@ -29,6 +29,16 @@
 .eula-frame a:hover, .eula-frame a:focus {
   color: #1e74d1;
 }
+.eula-agreement form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (min-width: 651px) {
+  .eula-agreement form {
+    align-items: flex-end;
+  }
+}
 .eula-disagree {
   text-align: center;
 }
