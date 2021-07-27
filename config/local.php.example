@@ -54,6 +54,9 @@ $GLOBALS['student_pay_api']['debug'] = true;
 //$CFG['assess2-use-vue-dev'] = true;
 //$CFG['assess2-use-vue-dev-address'] = 'http://localhost:8080'; // no trailing slash
 
+// End user license agreement
+putenv('EULA_ENABLED=true');
+
 //zendesk stuff
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY') ?? 'api_key_goes_here';
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL') ?? 'api_url_goes_here';

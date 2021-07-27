@@ -28,3 +28,24 @@ function onAddCourse($courseId, $userId, $myrights = null, $groupid = null)
         $studentPaymentDb->setCourseRequiresStudentPayment(true);
     }
 }
+
+/**
+ * Called during an LTI launch, after we have a User ID.
+ *
+ * @param int $userID The user's ID.
+ */
+function onHaveLocalUser(int $userId): void
+{
+    // Need to exclude students because the EULA check is breaking
+    // student LTI user to OHM local user mapping on initial launch.
+    if (
+        !isset($ltirole)
+        || empty($ltirole)
+        || in_array(strtolower($ltirole), ['learner', 'tutor'])
+    ) {
+        return;
+    }
+
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+}
