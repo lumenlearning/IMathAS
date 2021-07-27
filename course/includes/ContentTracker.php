@@ -43,7 +43,8 @@ class ContentTracker
     /**
      * Count the number of STUDENTS tracked, grouped by school.
      *
-     * @param string $type The item tracking type. (Example: "desmosview")
+     * @param array<string> $types The item tracking types.
+     *                                Example: ['desmosview', 'desmoscalc']
      * @param DateTime $startTimestamp The beginning date range.
      * @param DateTime $endTimestamp The ending date range.
      * @param bool $ltiOnly True to count LTI students. False to count all students.
@@ -52,7 +53,7 @@ class ContentTracker
      * @return array Associative array of groupIds and counts.
      * @see self::STUDENTS
      */
-    public static function countUniqueStudentsByGroup(string $type,
+    public static function countUniqueStudentsByGroup(array $types,
                                                       DateTime $startTimestamp,
                                                       DateTime $endTimestamp,
                                                       bool $ltiOnly,
@@ -60,14 +61,15 @@ class ContentTracker
                                                       ?PDO $dbh = null
     ): array
     {
-        return ContentTracker::countUniqueUsersByGroup($type, self::STUDENTS,
+        return ContentTracker::countUniqueUsersByGroup($types, self::STUDENTS,
             $startTimestamp, $endTimestamp, false, $groupId, $dbh);
     }
 
     /**
      * Count the number of TEACHERS tracked, grouped by school.
      *
-     * @param string $type The item tracking type. (Example: "desmosview")
+     * @param array<string> $types The item tracking types.
+     *                                Example: ['desmosview', 'desmoscalc']
      * @param DateTime $startTimestamp The beginning date range.
      * @param DateTime $endTimestamp The ending date range.
      * @param bool $ltiOnly True to count LTI teachers. False to count all teachers.
@@ -76,7 +78,7 @@ class ContentTracker
      * @return array Associative array of groupIds and counts.
      * @see self::TEACHERS
      */
-    public static function countUniqueTeachersByGroup(string $type,
+    public static function countUniqueTeachersByGroup(array $types,
                                                       DateTime $startTimestamp,
                                                       DateTime $endTimestamp,
                                                       bool $ltiOnly,
@@ -84,14 +86,15 @@ class ContentTracker
                                                       ?PDO $dbh = null
     ): array
     {
-        return ContentTracker::countUniqueUsersByGroup($type, self::TEACHERS,
+        return ContentTracker::countUniqueUsersByGroup($types, self::TEACHERS,
             $startTimestamp, $endTimestamp, false, $groupId, $dbh);
     }
 
     /**
      * Count the number of unique users tracked, grouped by school.
      *
-     * @param string $type The item tracking type. (Example: "desmosview")
+     * @param array<string> $types The item tracking types.
+     *                                Example: ['desmosview', 'desmoscalc']
      * @param array<int> $rights The user rights to search on.
      * @param DateTime $startTimestamp The beginning date range.
      * @param DateTime $endTimestamp The ending date range.
@@ -100,7 +103,7 @@ class ContentTracker
      * @param PDO|null $dbhOverride A database connection.
      * @return array Associative array of groupIds and counts.
      */
-    protected static function countUniqueUsersByGroup(string $type,
+    protected static function countUniqueUsersByGroup(array $types,
                                                       array $rights,
                                                       DateTime $startTimestamp,
                                                       DateTime $endTimestamp,
@@ -111,8 +114,10 @@ class ContentTracker
     {
         $dbh = is_null($dbhOverride) ? $GLOBALS['DBH'] : $dbhOverride;
 
+        $typesSanitized = array_map('Sanitize::simpleString', $types);
+        $typeList = "'" . implode("', '", $typesSanitized) . "'";
         $rightsList = implode(',', array_map('intval', $rights));
-        $groupIdSql = is_null($groupId) ? '' : 'AND tu.groupid = ' . intval($groupId);
+        $groupIdSql = is_null($groupId) ? '' : 'AND tu.groupid = ' . $groupId;
         $ltiUsers = false === $ltiOnly ? '' : 'AND (su.SID LIKE "lti-%" OR tu.SID LIKE "lti-%"'; // $rightsList should limit this.
         $query = sprintf("SELECT
                 COUNT(DISTINCT su.id) AS user_count,
@@ -123,7 +128,7 @@ class ContentTracker
                 JOIN imas_users AS tu ON tu.id = c.ownerid
                 JOIN imas_groups AS tg ON tg.id = tu.groupid
             WHERE su.rights IN ($rightsList)
-                AND ct.type = :type
+                AND ct.type IN ($typeList)
                 AND ct.viewtime >= :startTimestamp
                 AND ct.viewtime <= :endTimestamp
                 $groupIdSql
@@ -131,7 +136,6 @@ class ContentTracker
             GROUP BY tg.id
 ");
         $params = [
-            ':type' => $type,
             ':startTimestamp' => $startTimestamp->getTimestamp(),
             ':endTimestamp' => $endTimestamp->getTimestamp()
         ];
@@ -144,5 +148,55 @@ class ContentTracker
             $totalCounts[$row['group_id']] = $row['user_count'];
         }
         return $totalCounts;
+    }
+
+    /**
+     * Count the total number of unique {$types} across ALL users.
+     *
+     * @param array<string> $types The item tracking types.
+     *                                Example: ['desmosview', 'desmoscalc']
+     * @param DateTime $startTimestamp The beginning date range.
+     * @param DateTime $endTimestamp The ending date range.
+     * @param bool $ltiOnly True to count LTI users. False to count all users.
+     * @param PDO|null $dbhOverride A database connection.
+     * @return int The total number of unique users.
+     */
+    public static function countTotalUniqueUsers(array $types,
+                                                    DateTime $startTimestamp,
+                                                    DateTime $endTimestamp,
+                                                    bool $ltiOnly,
+                                                    ?PDO $dbhOverride = null
+    ): int
+    {
+        $dbh = is_null($dbhOverride) ? $GLOBALS['DBH'] : $dbhOverride;
+
+        $typesSanitized = array_map('Sanitize::simpleString', $types);
+        $typeList = "'" . implode("', '", $typesSanitized) . "'";
+        $ltiUsers = false === $ltiOnly ? '' : 'AND (u.SID LIKE "lti-%"'; // $rightsList should limit this., typeid
+
+        $query = "SELECT COUNT(userid)
+            FROM (
+                SELECT userid
+                FROM imas_content_track AS ct
+                    JOIN imas_users AS u ON u.id = ct.userid
+                WHERE
+                    ct.type IN ($typeList)
+                    AND ct.viewtime >= :startTimestamp
+                    AND ct.viewtime <= :endTimestamp
+                    $ltiUsers
+                GROUP BY ct.userid
+            ) AS total_views
+        ";
+
+        $params = [
+            ':startTimestamp' => $startTimestamp->getTimestamp(),
+            ':endTimestamp' => $endTimestamp->getTimestamp()
+        ];
+
+        $stm = $dbh->prepare($query);
+        $stm->execute($params);
+
+        $result = $stm->fetch(PDO::FETCH_NUM)[0];
+        return intval($result);
     }
 }
