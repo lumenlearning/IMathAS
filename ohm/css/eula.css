@@ -1,0 +1,55 @@
+.eula-agreement {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 92px);
+}
+@media (min-width: 651px) {
+  .eula-agreement {
+    height: calc(100vh - 120px);
+  }
+}
+@media (min-width: 901px) {
+  .eula-agreement {
+    height: calc(100vh - 86px);
+  }
+}
+.eula-frame {
+  background-color: #f2f2f2;
+  border-bottom: 12px solid #f2f2f2;
+  border-top: 12px solid #f2f2f2;
+  flex: 1 0 auto;
+  height: 50vh;
+  overflow-y: scroll;
+  padding-left: 12px;
+  padding-right: 24px;
+}
+.eula-frame a {
+  word-break: break-word;
+}
+.eula-frame a:hover, .eula-frame a:focus {
+  color: #1e74d1;
+}
+.eula-agreement form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (min-width: 651px) {
+  .eula-agreement form {
+    align-items: flex-end;
+  }
+}
+.eula-disagree {
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .eula-disagree {
+    padding-top: 8px;
+  }
+}
+.eula-disagree svg {
+  display: block;
+  height: 176px;
+  margin: 32px auto;
+  width: 176px;
+}

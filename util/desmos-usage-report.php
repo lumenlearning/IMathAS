@@ -124,13 +124,15 @@ function generateReport(DateTime $startDate, DateTime $endDate): void
     // $totalDesmosItems only includes items that are not copies (itemid_chain_size == 1)
     $totalDesmosItemsAuthoredByGroup = DesmosItem::getTotalItemsCreatedByAllGroups($startDate, $endDate, true, $dbh);
 
-    $uniqueStudentViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, false, null,  $dbh);
-    $uniqueStudentLtiViewsByGroup = ContentTracker::countUniqueStudentsByGroup("desmosview", $startDate, $endDate, true, null, $dbh);
-    $uniqueTeacherViewsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosview", $startDate, $endDate, false, null, $dbh);
-    $uniqueTeacherAddsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosadd", $startDate, $endDate, false, null, $dbh);
-    $uniqueTeacherCopiesByGroup = ContentTracker::countUniqueTeachersByGroup("desmoscopy", $startDate, $endDate, false, null, $dbh);
-    $uniqueTeacherEditsByGroup = ContentTracker::countUniqueTeachersByGroup("desmosedit", $startDate, $endDate, false, null, $dbh);
-    outputSummaryTable($totalDesmosItemsByGroup, $uniqueStudentViewsByGroup, $uniqueTeacherViewsByGroup);
+    $totalUniqueViews = ContentTracker::countTotalUniqueUsers(["desmosview", "desmoscalc"], $startDate, $endDate, false, $dbh);
+    $uniqueStudentViewsByGroup = ContentTracker::countUniqueStudentsByGroup(["desmosview", "desmoscalc"], $startDate, $endDate, false, null,  $dbh);
+    $uniqueStudentLtiViewsByGroup = ContentTracker::countUniqueStudentsByGroup(["desmosview", "desmoscalc"], $startDate, $endDate, true, null, $dbh);
+    $uniqueTeacherViewsByGroup = ContentTracker::countUniqueTeachersByGroup(["desmosview", "desmoscalc"], $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherAddsByGroup = ContentTracker::countUniqueTeachersByGroup(["desmosadd"], $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherCopiesByGroup = ContentTracker::countUniqueTeachersByGroup(["desmoscopy"], $startDate, $endDate, false, null, $dbh);
+    $uniqueTeacherEditsByGroup = ContentTracker::countUniqueTeachersByGroup(["desmosedit"], $startDate, $endDate, false, null, $dbh);
+    outputSummaryTable($totalDesmosItemsByGroup, $uniqueStudentViewsByGroup, $uniqueTeacherViewsByGroup, $totalUniqueViews);
+    echo "<hr>";
     outputGroupReportTable($totalDesmosItemsByGroup, $totalDesmosItemsAuthoredByGroup, $uniqueStudentViewsByGroup,
         $uniqueStudentLtiViewsByGroup, $uniqueTeacherAddsByGroup, $uniqueTeacherCopiesByGroup, $uniqueTeacherEditsByGroup);
 }
@@ -142,10 +144,12 @@ function generateReport(DateTime $startDate, DateTime $endDate): void
  * @param array $totalDesmosItemsByGroup As returned by DesmosItem::getTotalItemsCreatedByAllGroups.
  * @param array $uniqueStudentViewsByGroup As returned by ContentTracker::countUniqueStudentsByGroup.
  * @param array $uniqueTeacherViewsByGroup As returned by ContentTracker::countUniqueTeachersByGroup.
+ * @param int $totalUniqueViews Total unique views across ALL users.
  */
 function outputSummaryTable(array $totalDesmosItemsByGroup,
                             array $uniqueStudentViewsByGroup,
-                            array $uniqueTeacherViewsByGroup
+                            array $uniqueTeacherViewsByGroup,
+                            int $totalUniqueViews
 ): void
 {
     // Sum of all unique student views across all schools
@@ -166,12 +170,16 @@ function outputSummaryTable(array $totalDesmosItemsByGroup,
         $totalDesmosItems += $group['total_items'];
     }
     ?>
-    <table>
+    <table border="1" cellspacing="0">
         <thead>
         <tr>
             <td colspan="2">Totals across all schools</td>
         </tr>
         </thead>
+        <tr>
+            <td>Total unique users<br/>('desmosview', 'desmoscalc')</td>
+            <td><?php echo $totalUniqueViews ?></td>
+        </tr>
         <tr>
             <td>Unique student views</td>
             <td><?php echo $uniqueStudentViews ?></td>
@@ -181,7 +189,7 @@ function outputSummaryTable(array $totalDesmosItemsByGroup,
             <td><?php echo $uniqueTeacherViews ?></td>
         </tr>
         <tr>
-            <td>Interactives created</td>
+            <td>Total interactives created</td>
             <td><?php echo $totalDesmosItems ?></td>
         </tr>
     </table>

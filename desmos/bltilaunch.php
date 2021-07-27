@@ -200,6 +200,7 @@ if (isset($_GET['launch'])) {
                 ."?type=".str_replace('Item', '', $item->itemtype)
                 ."&cid=".$item->courseid
                 ."&id=".$item->typeid
+                ."&lms=true"
             );
         } else
             // #### End OHM-specific code #####################################################
@@ -2090,6 +2091,7 @@ if (isset($_GET['launch'])) {
                 ."?type=".str_replace('Item', '', $item->itemtype)
                 ."&cid=".$item->courseid
                 ."&id=".$item->typeid
+                ."&lms=true"
             );
         } else
             // #### End OHM-specific code #####################################################

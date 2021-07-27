@@ -5,6 +5,12 @@
  * @author Alena Holligan <alena@lumenlearning.com>
  */
 
+// Allow for detection of LMS users.
+// This is currently used by EULA enforcement code.
+if (isset($_GET['lms']) && 'true' == $_GET['lms']) {
+    $isLmsUser = true;
+}
+
 /* master php includes */
 require "../init.php";
 require "../includes/htmlutil.php";

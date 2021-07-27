@@ -150,3 +150,16 @@ if (isset($_SESSION['ratelimiter']) && isset($CFG['GEN']['ratelimit']) &&
 	$_SESSION['ratelimiter'] = microtime(true);
 }
 */
+
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+$eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+$eulaService->enforceOhmEula();
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################

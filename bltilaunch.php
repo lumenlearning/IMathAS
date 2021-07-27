@@ -38,6 +38,11 @@ unset($init_skip_csrfp);
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 require_once(__DIR__ . '/includes/ltiroles.php');
+
+// Used to programmatically determine if the user is logged in via an LMS.
+$isLmsUser = true;
+
+$eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
@@ -210,6 +215,19 @@ if (isset($_GET['launch'])) {
 		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
+
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 
 	//time to output a postback to capture tzname
 	$pref = 0;
@@ -1880,6 +1898,19 @@ if (isset($_GET['launch'])) {
 	}
 	$userid = $_SESSION['userid'];
 
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+
 	//time to output a postback to capture tzoffset and math/graph settings
 	$pref = 0;
 	/*if (isset($_COOKIE['mathgraphprefs'])) {
@@ -2488,6 +2519,19 @@ if ($askforuserinfo == true) {
 }
 
 //if here, we know the local userid.
+
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 
 //if it's a common catridge placement and we're here, then either we're using domain credentials, or
 //course credentials for a non-source course.
