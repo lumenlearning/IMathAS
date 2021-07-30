@@ -22,6 +22,8 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<?php
+    $fullStory = new \OHM\Tracking\FullStory();
+    $fullStory::outputHeaderSnippet();
 	if (!empty($CFG['GEN']['uselocaljs'])) {
 		echo '<script src="' . $staticroot . '/javascript/jquery.min.js"></script>';
 	} else {
