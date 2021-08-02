@@ -16,8 +16,11 @@ pleasant work environment.
 
 ## User privacy
 
-To exclude sensitive user information from being recorded by FullStory, use
-the HTML element class `fs-exclude` or `fs-mask`.
+To **mask** sensitive user information from being recorded by FullStory, use
+one of the appropriate CSS classes listed in:
+[ohm/tracking/sensitive_info_highlight.css](ohm/tracking/sensitive_info_highlight.css)
+
+To **exclude** sensitive user information, use the `fs-exclude` CSS class.
 
 - Reference: [How do I protect my users' privacy in FullStory?](https://help.fullstory.com/hc/en-us/articles/360020623574)
 

@@ -65,10 +65,10 @@ switch ($assessmentVersion) {
 
 	<h2 id="subhead">Submission Details</h2>
 	<div id="confirmation-details">
-		<p><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($GLOBALS['userfullname']); ?></p>
+		<p class="pii-full-name"><strong>Student Name: </strong><?php echo Sanitize::encodeStringForDisplay($GLOBALS['userfullname']); ?></p>
 		<p><strong>Course Name: </strong><?php echo Sanitize::encodeStringForDisplay($courseName); ?></p>
         <p><strong>Course ID: </strong><?php echo Sanitize::encodeStringForDisplay($courseId); ?></p>
-		<p><strong>Activation Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
+		<p class="pii-security"><strong>Activation Code Used: </strong><span style="text-transform:uppercase;"><?php echo Sanitize::encodeStringForDisplay($accessCode); ?></span></p>
 		<p><strong>Timestamp: </strong><?php echo $timestamp_string; ?></p>
 	</div>
 

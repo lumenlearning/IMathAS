@@ -33,7 +33,7 @@ require(__DIR__ . "/../header.php");
   </div>
 <div class="enroll field">
   <label for="ekey">Enrollment Key</label>
-  <input class="lumenform form" type="text" name="ekey" placeholder="Enrollment Key" aria-label="Enrollment Key:"/></br>
+  <input class="lumenform form pii-security" type="text" name="ekey" placeholder="Enrollment Key" aria-label="Enrollment Key:"/></br>
 </div>
 <div class="enroll-div"><center><button  class="button" type=submit>Enroll</button>
 <a href='<?php echo $imasroot; ?>/' class='go-back'>Go Back</a><center></div>

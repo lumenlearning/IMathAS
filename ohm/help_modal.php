@@ -55,10 +55,10 @@ $helpCourseId = $_GET['cid'] ? Sanitize::onlyInt($_GET['cid']) : '';
       <form id="zd-help-form" class="zd-help">
         <div class="zd-info">
           <label for="z_name" class="u-sr-only">Name</label>
-          <input type="text" placeholder="Name" name="z_name" id="z_name" class="field" value="<?php echo $helpUserFullName; ?>"/>
+          <input type="text" placeholder="Name" name="z_name" id="z_name" class="field pii-full-name" value="<?php echo $helpUserFullName; ?>"/>
 
           <label for="z_email" class="u-sr-only">Email</label>
-          <input type="text" placeholder="Email" name="z_email" id="z_email" class="field" value="<?php echo $helpUserEmail; ?>"required />
+          <input type="text" placeholder="Email" name="z_email" id="z_email" class="field pii-email" value="<?php echo $helpUserEmail; ?>"required />
 
           <label for="z_cid" class="u-sr-only">Course Id</label>
           <input type="text" placeholder="Course ID (optional)" name="z_cid" id="z_cid" class="field" value="<?php echo $helpCourseId; ?>"/>

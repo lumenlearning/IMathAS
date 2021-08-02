@@ -57,6 +57,9 @@ $GLOBALS['student_pay_api']['debug'] = true;
 // End user license agreement
 putenv('EULA_ENABLED=true');
 
+// Enable FullStory
+putenv('FULLSTORY_ENABLED=false');
+
 //zendesk stuff
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY') ?? 'api_key_goes_here';
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL') ?? 'api_url_goes_here';

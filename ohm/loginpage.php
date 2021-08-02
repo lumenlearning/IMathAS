@@ -41,7 +41,7 @@
 			<!-- <h2>Login to Lumen Ohm</h2> -->
 			<img id="login-logo" src="<?php echo $imasroot;?>/ohm/img/ohm-logo-800.png" />
 			<div class="login-group">
-				<input type="text" size="15" id="username" name="username" placeholder="Username" aria-label="Username" />
+				<input type="text" size="15" id="username" class="pii-username" name="username" placeholder="Username" aria-label="Username" />
 				<input type="password" size="15" id="password" name="password" placeholder="Password"  aria-label="Password" />
 				<button id="login-button" class="login-button" type="submit">Login</button>
 			</div>

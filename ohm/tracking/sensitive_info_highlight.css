@@ -1,0 +1,37 @@
+/*
+ * For elements not containing PII.
+ *
+ * This is useful when there is non-PII data we want to show up in FullStory
+ * that exists inside PII data.
+ *
+ * Example: A mailto href that does not contain the email in text visible on
+ *          the page. <a href="mailto:a@b.com">Send email</a>
+ */
+
+/*
+ * The following classes should be used for elements NOT containing PII.
+ */
+.pii-safe {
+    background-image: none;
+}
+
+/*
+ * The following classes should used for elements containing PII.
+ */
+.pii-first-name,
+.pii-last-name,
+.pii-full-name,
+.pii-username,
+.pii-email,
+.pii-phone,
+.pii-mixed,
+.pii-image,
+.pii-security,
+.fs-mask {
+    background-image: repeating-linear-gradient(
+            110deg,
+            #ff0000,
+            rgba(219, 219, 219, 0) 2px,
+            rgba(0, 0, 0, 0) 15px
+    );
+}

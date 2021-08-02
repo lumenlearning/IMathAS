@@ -38,4 +38,22 @@ final class FullStoryTest extends TestCase
         $result = $this->fullStory::outputHeaderSnippet();
         $this->assertFalse($result);
     }
+
+    /*
+     * getHeaderSnippet
+     */
+
+    public function testGetHeaderSnippet_Enabled(): void
+    {
+        $result = $this->fullStory::getHeaderSnippet();
+        $this->assertNotEmpty($result);
+    }
+
+    public function testGetHeaderSnippet_Disabled(): void
+    {
+        putenv('FULLSTORY_ENABLED'); // This unsets the environment variable.
+
+        $result = $this->fullStory::getHeaderSnippet();
+        $this->assertEmpty($result);
+    }
 }
