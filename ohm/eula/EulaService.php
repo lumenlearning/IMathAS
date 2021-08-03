@@ -22,6 +22,7 @@ class EulaService
         '/ohm/eula/',
         '/ohm/eula/index.php',
         '/actions.php', // This allows logging out.
+        '/forms.php', // Allow users to reset their passwords. See OHM-1054.
     ];
 
     private $dbh;
