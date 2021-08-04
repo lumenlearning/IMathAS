@@ -145,14 +145,15 @@ switch($_GET['action']) {
 	case "chgrights":
 	case "newadmin":
 		if ($myrights < 75 && ($myspecialrights&16)!=16 && ($myspecialrights&32)!=32) { echo "You don't have the authority for this action"; break;}
-		echo "<form method=post id=userform class=limitaftervalidate action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
+    echo "<form method=post id=userform class=limitaftervalidate action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
 		if ($_GET['action']=="chgrights") { echo "&id=".Sanitize::encodeUrlParam($_GET['id']); }
 		echo "\">\n";
 		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']).'" />';
 		if ($_GET['action'] == "newadmin") {
 			echo '<div class="pagetitle"><h1>'._('New User').'</h1></div>';
 			$oldgroup = (isset($_GET['group'])?Sanitize::onlyInt($_GET['group']):0);
-			$oldrights = 10;
+            $oldrights = 10;
+            $oldspecialrights = 0;
 		} else {
 			$stm = $DBH->prepare("SELECT SID,FirstName,LastName,email,rights,groupid,specialrights FROM imas_users WHERE id=:id");
 			$stm->execute(array(':id'=>$_GET['id']));
@@ -610,7 +611,7 @@ switch($_GET['action']) {
 				if (!empty($_POST['coursebrowserctc'])) {
 					$ctc = Sanitize::onlyInt($_POST['coursebrowserctc']);
 				} else {
-					$ctc = Sanitize::onlyInt($_POST['ctc']);
+					$ctc = Sanitize::onlyInt($_POST['ctc'] ?? 0);
 				}
 				if ($ctc>0) {
 					$query = "SELECT ic.*,iu.groupid ";
@@ -1128,7 +1129,7 @@ switch($_GET['action']) {
 				if (($istemplate&2)==2) {echo 'checked="checked"';};
 				echo ' /> ',_('Mark as group template course');
 			}
-			if ((($myspecialrights&2)==2 || $myrights==100) && $hassupergroup) {
+			if ((($myspecialrights&2)==2 || $myrights==100) && !empty($hassupergroup)) {
 				echo '<br/><input type=checkbox name="issupergrptemplate" value="32" ';
 				if (($istemplate&32)==32) {echo 'checked="checked"';};
 				echo ' /> ',_('Mark as super-group template course');
@@ -1253,7 +1254,7 @@ switch($_GET['action']) {
 								$ingroup = true;
 							} else {
 								echo '<option value="'.Sanitize::encodeStringForDisplay($k).'"';
-								if ($k==$browser[$propname]) { echo ' selected';}
+								if (isset($browser[$propname]) && $k==$browser[$propname]) { echo ' selected';}
 								echo '>';
 								echo Sanitize::encodeStringForDisplay($v).'</option>';
 							}
@@ -1264,14 +1265,14 @@ switch($_GET['action']) {
 						echo '</select>';
 
 						if (isset($propvals['options']['other'])) {
-							echo '<span id="browser'.$propname.'otherwrap" '.($browser[$propname]!='other'?'style="display:none"':'').'>';
-							echo '<br/>Other: <input type=text size=40 name="browser'.$propname.'other" value="'.($browser[$propname]=='other'?Sanitize::encodeStringForDisplay($browser[$propname.'other']):'').'"></span>';
+							echo '<span id="browser'.$propname.'otherwrap" '.(!isset($browser[$propname]) || $browser[$propname]!='other'?'style="display:none"':'').'>';
+							echo '<br/>Other: <input type=text size=40 name="browser'.$propname.'other" value="'.(isset($browser[$propname]) && $browser[$propname]=='other'?Sanitize::encodeStringForDisplay($browser[$propname.'other']):'').'"></span>';
 						}
 					}
 				} else if ($propvals['type']=='string') {
 					echo '<input type=text name="browser'.$propname.'" size=50 value="'.Sanitize::encodeStringForDisplay($browser[$propname]).'" />';
 				} else if ($propvals['type']=='textarea') {
-					echo '<textarea rows=6 cols=70 name=browser'.$propname.'>'.Sanitize::encodeStringForDisplay($browser[$propname], true).'</textarea>';
+					echo '<textarea rows=6 cols=70 name=browser'.$propname.'>'.Sanitize::encodeStringForDisplay($browser[$propname] ?? '', true).'</textarea>';
 				}
 				echo '</span><br class="form">';
 			}
@@ -1718,7 +1719,7 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle"><h1>',_('Find Student'),'</h1></div>';
 		echo '<form method="post" action="forms.php?from='.Sanitize::encodeUrlParam($from).'&action=findstudent">';
 		echo '<p>',_('Enter all or part of the name, email, or username:'),' ';
-		echo '<input type=text size=20 name=userinfo value="'.Sanitize::encodeStringForDisplay($_POST['userinfo']).'"/></p>';
+		echo '<input type=text size=20 name=userinfo value="'.Sanitize::encodeStringForDisplay($_POST['userinfo'] ?? '').'"/></p>';
 		echo '<input type="submit">';
 		echo '</form>';
 		if (!empty($_POST['userinfo'])) {

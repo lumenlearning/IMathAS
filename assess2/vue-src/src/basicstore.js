@@ -624,13 +624,22 @@ export const actions = {
     // adds autosave data to existing FormData
     const lastLoaded = {};
     const tosaveqn = {};
+    let valstr;
     for (const qn in store.autosaveQueue) {
       if (skip.indexOf(qn) !== -1) {
         continue; // skip it
       }
       tosaveqn[qn] = store.autosaveQueue[qn];
+      if (store.autosaveQueue[qn].length === 1 && store.autosaveQueue[qn][0] === 0) {
+        // one part, might be single part
+        valstr = window.imathasAssess.preSubmit(qn);
+        if (valstr !== false) {
+          data.append('qn' + qn + '-val', valstr);
+        }
+      }
       // build up regex to match the inputs for all the parts we want to save
       const regexpts = [];
+      let subqn;
       for (const k in store.autosaveQueue[qn]) {
         const pn = store.autosaveQueue[qn][k];
         if (pn === 'sw') {
@@ -640,7 +649,12 @@ export const actions = {
         if (pn === 0) {
           regexpts.push(qn);
         }
-        regexpts.push((qn * 1 + 1) * 1000 + pn * 1);
+        subqn = (qn * 1 + 1) * 1000 + pn * 1;
+        regexpts.push(subqn);
+        valstr = window.imathasAssess.preSubmit(subqn);
+        if (valstr !== false) {
+          data.append('qn' + subqn + '-val', valstr);
+        }
       }
       var regex = new RegExp('^(qn|tc|qs)(' + regexpts.join('\\b|') + '\\b)');
       window.$('#questionwrap' + qn).find('input,select,textarea').each(function (i, el) {
@@ -1150,6 +1164,7 @@ export const actions = {
         const thisq = data.questions[i];
 
         data.questions[i].canretry = (thisq.try < thisq.tries_max);
+        data.questions[i].canretry_primary = data.questions[i].canretry;
         data.questions[i].tries_remaining = thisq.tries_max - thisq.try;
         if (thisq.hasOwnProperty('parts')) {
           let trymin = 1e10;
@@ -1172,7 +1187,7 @@ export const actions = {
               canretrydet = true;
             }
           }
-          data.questions[i].canretry = canretrydet;
+          data.questions[i].canretry_primary = canretrydet;
           if (trymin !== trymax) {
             data.questions[i].tries_remaining_range = [trymin, trymax];
           }

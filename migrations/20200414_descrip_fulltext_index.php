@@ -19,7 +19,7 @@ $DBH->beginTransaction();
  }
 
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Added fulltext index on questionset description</p>";
 

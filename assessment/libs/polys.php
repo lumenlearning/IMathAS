@@ -1,8 +1,13 @@
 <?php
 //Polynomial functions.  Version 1.1, Nov 11, 2007
 
-
 global $allowedmacros;
+
+// COMMENT OUT BEFORE UPLOADING
+if(!is_array($allowedmacros)) {
+	$allowedmacros = array();
+}
+
 array_push($allowedmacros,"formpoly","formpolyfromroots","writepoly","addpolys","subtpolys","multpolys","scalepoly","roundpoly","quadroot","getcoef","polypower","checkpolypowerorder","derivepoly");
 
 
@@ -25,7 +30,7 @@ function formpoly($coef,$deg) {
 		for ($i=0;$i<min(count($deg),count($coef));$i++) {
 			$poly[$i][0] = $coef[$i]*1;
 			$poly[$i][1] = $deg[$i];
-		}	
+		}
 	} else {
 		for ($i=0;$i<count($coef);$i++) {
 			$poly[$i][0] = $coef[$i]*1;
@@ -41,11 +46,16 @@ function formpoly($coef,$deg) {
 //use writepoly to create a display form of the polynomial
 //stretch:  a stretch factor; the A in A*(x-root)(x-root)...
 //roots: an array of the roots (zeros, x-intercepts) of the polynomial
-//multiplicites (optional): an array of multiplicites of the roots.  Assumed to 
+//       for a complex root pair a+-bi give a single array [a,b] as the root.
+//multiplicites (optional): an array of multiplicites of the roots.  Assumed to
 //  be all 1 if not provided
 function formpolyfromroots($a,$roots,$mult=1) {
 	for($i=0; $i<count($roots); $i++) {
-		$newpoly = formpoly(array(1,-1*$roots[$i]),1);
+        if (is_array($roots[$i])) { // complex a+bi as [a,b]
+            $newpoly = formpoly(array(1,-2*$roots[$i][0],($roots[$i][0])**2 + ($roots[$i][1])**2),2);
+        } else {
+            $newpoly = formpoly(array(1,-1*$roots[$i]),1);
+        }
 		if (is_array($mult) && $mult[$i]>1) {
 			$newpoly = polypower($newpoly,$mult[$i]);
 		}
@@ -56,7 +66,7 @@ function formpolyfromroots($a,$roots,$mult=1) {
 		}
 	}
 	$outpoly = scalepoly($outpoly,$a);
-	return $outpoly;	
+	return $outpoly;
 }
 
 //writepoly(poly,[var,showzeros])
@@ -269,11 +279,13 @@ function checkpolypowerorder($p,$ord='dec') {
 // derivative of polynomial
 function derivepoly($p) {
 	$out = array();
+	$j=-1; // this is to prevent index skipping - MPJ 2/28/2021
 	for ($i=0;$i<count($p);$i++) {
 		if ($p[$i][1] == 0) { continue; }
-		$out[$i] = array();
-		$out[$i][0] = $p[$i][0]*$p[$i][1];
-		$out[$i][1] = $p[$i][1]-1;
+		$j++;
+		$out[$j] = array();
+		$out[$j][0] = $p[$i][0]*$p[$i][1];
+		$out[$j][1] = $p[$i][1]-1;
     }
 	return $out;
 }

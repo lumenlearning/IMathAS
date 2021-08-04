@@ -46795,7 +46795,7 @@ var paste = (function (domGlobals) {
 			ed.on('PastePostProcess', function(o) {
                 var AMtags, MJtags;
 				//if (o.get) {
-					AMtags = ed.dom.select('span.AM', o.node);
+                    AMtags = ed.dom.select('span.AM', o.node);
 					for (var i=0; i<AMtags.length; i++) {
 						t.math2ascii(AMtags[i]);
 					}
@@ -46831,7 +46831,7 @@ var paste = (function (domGlobals) {
 					AMtags = ed.dom.select('span.AMedit', o.node);
 					for (var i=0; i<AMtags.length; i++) {
 						var myAM = AMtags[i].innerHTML;
-						myAM = "`"+myAM.replace(/\`/g,"")+"`";
+						myAM = "`"+t.cleanmath(myAM)+"`";
 						AMtags[i].innerHTML = myAM;
 						AMtags[i].className = "AM";
 					}
@@ -47009,7 +47009,7 @@ var paste = (function (domGlobals) {
 				//myAM = myAM.replace(/&lt;/g,"<");
 				myAM = myAM.replace(/>/g,"&gt;");
 				myAM = myAM.replace(/</g,"&lt;");
-				myAM = "`"+myAM.replace(/\`/g,"")+"`";
+				myAM = "`"+this.cleanmath(myAM)+"`";
 				el.innerHTML = myAM;
 			}
 		},
@@ -47029,7 +47029,8 @@ var paste = (function (domGlobals) {
 
 		nodeToAM : function(outnode) {
 			var str = outnode.innerHTML.replace(/\`/g,"");
-			str = str.replace(/<span[^>]*>(.*?)<\/span>/,"$1").replace(/<br\s*\/>/," ");
+            str = str.replace(/<span[^>]*>(.*?)<\/span>/,"$1").replace(/<br\s*\/>/," ")
+                .replace(/<img[^>]*title="(.*?)".*?>/g,"$1");
 			str = str.replace(/[\u200B-\u200D\uFEFF]/g, '');
 			if (tinymce.isIE) {
 				  //str.replace(/\"/,"&quot;");
@@ -47042,13 +47043,27 @@ var paste = (function (domGlobals) {
 			  } else {
 				  //doesn't work on IE, probably because this script is in the parent
 				  //windows, and the node is in the iframe.  Should it work in Moz?
-				 var myAM = "`"+str+"`"; //next 2 lines needed to make caret
+				 var myAM = "`"+this.cleanmath(str)+"`"; //next 2 lines needed to make caret
 				 outnode.innerHTML = myAM;     //move between `` on Firefox insert math
 				 AMprocessNode(outnode);
 				 outnode.title=myAM.replace(/\`/g,""); //add title to <span class="AM"> with equation for cut-and-paste
 			  }
 
-		},
+        },
+        
+        cleanmath: function(str) {
+            return str.replace(/\`/g,"")
+                .replace(/<([^>]*)>/g,"")
+                .replace(/&(m|n)dash;/g,"-")
+                .replace(/&?nbsp;?/g," ")
+                .replace(/&(.*?);/g, function(m,p) {
+                    if (p=='lt' || p=='gt') {
+                        return m;
+                    } else {
+                        return p;
+                    }
+                });
+        },
 
 		imgwrap : function(ed, imgnode) {
 			p = ed.dom.getParent(imgnode,this.testAMclass);
