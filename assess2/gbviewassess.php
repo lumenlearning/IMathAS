@@ -2,7 +2,7 @@
 // IMathAS: Assess2 gradebook details page
 // (c) 2019 David Lippman
 
-$lastupdate = '20210401';
+$lastupdate = '20210613';
 
 require('../init.php');
 if (empty($_GET['cid']) || empty($_GET['aid'])) {
@@ -15,9 +15,9 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid)) {
 }
 $cid = Sanitize::onlyInt($_GET['cid']);
 $aid = Sanitize::onlyInt($_GET['aid']);
-$stu = Sanitize::onlyInt($_GET['stu']);
+$stu = Sanitize::onlyInt($_GET['stu'] ?? 0);
 
-$from = $_GET['from'];
+$from = $_GET['from'] ?? '';
 if ($from=='isolate') {
   $exitUrl =  $GLOBALS['basesiteurl'] . "/course/isolateassessgrade.php?stu=$stu&cid=$cid&aid=$aid";
 } else if ($from=='gisolate') {

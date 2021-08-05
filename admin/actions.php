@@ -175,8 +175,8 @@ switch($_POST['action']) {
                     $valbits = array();
                     $valvals = array();
                     foreach ($toEnroll as $ncid) {
-                        $valbits[] = "(?,?)";
-                        array_push($valvals, $_GET['id'], $ncid);
+                        $valbits[] = "(?,?,?)";
+                        array_push($valvals, $_GET['id'], $ncid, time());
                     }
                     $stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,created_at) VALUES ".implode(',',$valbits));
                     $stm->execute($valvals);
@@ -572,8 +572,12 @@ switch($_POST['action']) {
 		if (!isset($CFG['coursebrowserRightsToPromote'])) {
 			$CFG['coursebrowserRightsToPromote'] = 40;
 		}
-		$updateJsonData = false;
-		$jsondata = json_decode($old_course_settings['jsondata'], true);
+        $updateJsonData = false;
+        if (isset($old_course_settings['jsondata'])) {
+            $jsondata = json_decode($old_course_settings['jsondata'], true);
+        } else {
+            $jsondata = null;
+        }
 		if ($jsondata===null) {
 			$jsondata = array();
 		}
@@ -631,7 +635,7 @@ switch($_POST['action']) {
 		} else {
 			$enddate = parsedatetime($_POST['edate'],'11:59pm',2000000000);
 		}
-		$_POST['ltisecret'] = trim($_POST['ltisecret']);
+		$_POST['ltisecret'] = trim($_POST['ltisecret'] ?? '');
 		if (isset($_POST['setdatesbylti']) && $_POST['setdatesbylti']==1) {
 			$setdatesbylti = 1;
 		} else {
@@ -660,14 +664,14 @@ switch($_POST['action']) {
                 deftime=:deftime,deflatepass=:deflatepass,latepasshrs=:latepasshrs,
                 dates_by_lti=:ltidates,startdate=:startdate,enddate=:enddate,
                 cleanupdate=:cleanupdate,level=:level,ltisendzeros=:ltisendzeros WHERE id=:id";
-            $qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'],
+            $qarr = array(':name'=>$_POST['coursename'], ':enrollkey'=>$_POST['ekey'], 
                 ':available'=>$avail, ':lockaid'=>$_POST['lockaid'],
-                ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll,
-                ':copyrights'=>$copyrights, ':msgset'=>$msgset,	':toolset'=>$toolset,
+                ':showlatepass'=>$showlatepass, ':allowunenroll'=>$unenroll, 
+                ':copyrights'=>$copyrights, ':msgset'=>$msgset,	':toolset'=>$toolset, 
                 ':theme'=>$theme, ':ltisecret'=>$_POST['ltisecret'], ':istemplate'=>$istemplate,
-                ':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti,
-                ':startdate'=>$startdate, ':enddate'=>$enddate,	':latepasshrs'=>$latepasshrs,
-                ':cleanupdate'=>$old_course_settings['cleanupdate'], ':level'=> $_POST['courselevel'],
+                ':deftime'=>$deftime, ':deflatepass'=>$deflatepass, ':ltidates'=>$setdatesbylti, 
+                ':startdate'=>$startdate, ':enddate'=>$enddate,	':latepasshrs'=>$latepasshrs, 
+                ':cleanupdate'=>$old_course_settings['cleanupdate'], ':level'=> $_POST['courselevel'], 
                 ':ltisendzeros'=>$ltisendzeros, ':id'=>$_GET['id']);
 			if ($myrights<75) {
 				$query .= " AND ownerid=:ownerid";
@@ -1257,7 +1261,7 @@ switch($_POST['action']) {
 			//check that code is valid and not a replay
 			if ($MFA->verifyCode($mfadata['secret'], $_POST['mfatoken']) &&
 			   ($_POST['mfatoken'] != $mfadata['last'] || time() - $mfadata['laston'] > 600)) {
-				$_SESSION['mfaverified'] = true;
+				$_SESSION['mfaadminverified'] = true;
 				$mfadata['last'] = $_POST['mfatoken'];
 				$mfadata['laston'] = time();
 				if (isset($_POST['mfatrust'])) {

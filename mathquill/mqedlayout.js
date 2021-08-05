@@ -445,7 +445,8 @@ var myMQeditor = (function($) {
             {b:'-'},
             {b:'0'},
             {'b':'.'},
-            calcformat.match(/(list|set)/) ? {'b':','} : {s:1},
+            (calcformat.match(/(list|set)/) ||
+            qtype.match(/(ntuple|interval)/)) ? {'b':','} : {s:1},
             ((qtype === 'calcntuple' && !calcformat.match(/vector/)) ||
               calcformat.match(/point/)) ? {l:'\\left(\\right)', c:'t', w:'('} : {s:1}
           ]
@@ -476,9 +477,11 @@ var myMQeditor = (function($) {
             {b:'-'},
             {b:'0'},
             calcformat.match(/fracordec/) ? {'b':'.'} : {s:1},
-            calcformat.match(/(list|set)/) ? {'b':','} : {s:1},
+            (calcformat.match(/(list|set)/) ||
+             qtype.match(/(ntuple|interval)/)) ? {'b':','} : {s:1},
             ((qtype === 'calcntuple' && !calcformat.match(/vector/)) ||
-              calcformat.match(/point/)) ? {l:'\\left(\\right)', c:'t', w:'('} : {s:1}
+              calcformat.match(/point/)) ? {l:'\\left(\\right)', c:'t', w:'('} :
+              (qtype.match(/complex/) ? {b:'+'} : {s:1})
           ]
         };
       } else {
@@ -613,10 +616,13 @@ var myMQeditor = (function($) {
         maxlen = vars[i].length;
       }
       vars[i] = vars[i].replace(/_(\w{2,})/,"_{$1}");
+
       if (vars[i].length == 1) {
         btns.push({'b':vars[i], c:'w', v:1});
       } else {
-        btns.push({'b':vars[i], c:'w', r:1});
+        btns.push({'l':vars[i].replace(/(\\)?([a-zA-Z0-9]{2,})/g, function(m,p1,p2) {
+            return p1 ? m : "\\text{"+p2+"}";
+        }), 'w':vars[i], c:'w', r:1});
       }
     }
     var perrow = Math.min(8,Math.max(4, Math.ceil(vars.length/4)));
