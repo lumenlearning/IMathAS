@@ -21,6 +21,7 @@ class EulaService
         '/ohm/eula',
         '/ohm/eula/',
         '/ohm/eula/index.php',
+        '/diag/index.php', // OHM-1061: Prevent endless redirects for /diag/index.php workflow.
         '/actions.php', // This allows logging out.
         '/forms.php', // Allow users to reset their passwords. See OHM-1054.
     ];
@@ -51,6 +52,11 @@ class EulaService
     public function enforceOhmEula(): void
     {
         if (!isset($GLOBALS['userid']) || empty($GLOBALS['userid'])) {
+            // OHM-1061: Prevent endless redirects for /diag/index.php workflow.
+            if (isset($_SESSION['eula_acceptance_required']) && !$_SESSION['eula_acceptance_required']) {
+                unset($_SESSION['eula_acceptance_required']);
+            }
+
             // Without a User ID, we can't do anything.
             return;
         }
@@ -60,6 +66,11 @@ class EulaService
             $acceptanceRequired = $this->isAcceptanceRequired($GLOBALS['userid']);
         } catch (DatabaseReadException $e) {
             error_log($e->getMessage());
+        }
+
+        // OHM-1061: Prevent endless redirects for /diag/index.php workflow.
+        if ($acceptanceRequired) {
+            $_SESSION['eula_acceptance_required'] = true;
         }
 
         if ($acceptanceRequired) {
@@ -150,6 +161,9 @@ class EulaService
             error_log(sprintf('%s - Error ID: %s - %s', $message, $uuid, $dbErrors));
             throw new DatabaseWriteException($message);
         }
+
+        // OHM-1061: Endless redirects for /diag/index.php workflow.
+        $_SESSION['eula_acceptance_required'] = false;
 
         return true;
     }
