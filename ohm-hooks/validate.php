@@ -38,3 +38,14 @@ function allowedInAssessment()
         'resync-lms-grades.php',
     );
 }
+
+/**
+ * Determine if a user is requesting a diagnostic assessment and does
+ * NOT require EULA acceptance.
+ *
+ * @return bool True if diagnostic assessment and does not need EULA acceptance.
+ */
+function isDiagnostic()
+{
+    return isset($_SESSION['isdiag']) && !isset($_SESSION['eula_acceptance_required']);
+}
