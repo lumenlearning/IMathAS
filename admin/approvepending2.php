@@ -360,12 +360,12 @@ echo 'Approval Guidelines</a></p>';
         <span @click="toggleActiveUser(user.id, status, userindex)">
           <span v-if="activeUser==user.id">[-]</span>
           <span v-else>[+]</span>
-          {{user.name}} ({{user.school}})
+          <span class="pii-full-name">{{user.name}}</span> ({{user.school}})
         </span>
       	<ul class="userdata" v-if="activeUser==user.id">
       	  <li>Request Made: {{user.reqdate}}</li>
-          <li>Username: {{user.username}}</li>
-      	  <li>Email: {{user.email}}</li>
+          <li>Username: <span class="pii-username">{{user.username}}</span></li>
+          <li>Email: <span class="pii-email">{{user.email}}</span></li>
       	  <li v-for="(title,fieldindex) in fieldTitles">
       	    <span v-if="fieldindex=='url' || fieldindex=='search'" v-html="user[fieldindex]"></span>
       	    <span v-else>{{title}}: {{user[fieldindex]}}</span>
