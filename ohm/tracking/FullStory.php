@@ -53,7 +53,7 @@ class FullStory
         // This assists QA & devs to ensure sensitive user information
         // is properly excluded or masked during non-production testing.
         if (100 == $myrights && 'production' != $configEnvironment) {
-            $snippet .= printf(
+            $snippet .= sprintf(
                 '<link rel="stylesheet" href="%s/ohm/tracking/sensitive_info_highlight.css">' . "\n",
                 $basesiteurl);
         }
