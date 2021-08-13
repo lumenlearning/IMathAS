@@ -164,9 +164,6 @@ switch($_GET['action']) {
 				echo "You do not have access to edit this user";
 				break;
 			}
-            if (($myrights >= 75 || ($myspecialrights&48)>0) && isset($CFG['GEN']['COPPA'])) {
-                $line['jsondata'] = json_decode($line['jsondata'], true);
-            }
 			printf("<div class=pagetitle><h1 class='pii-full-name'>%s %s</h1></div>\n", Sanitize::encodeStringForDisplay($line['FirstName']),
 				Sanitize::encodeStringForDisplay($line['LastName']));
 			$oldgroup = $line['groupid'];
