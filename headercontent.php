@@ -11,9 +11,9 @@ if (!isset($flexwidth) && ($coursetheme=='otbs_fw.css' || $coursetheme=='otbs.cs
 $usernameinheader = true;
 if (isset($userid)) {
 	if ($myrights > 5) {
-		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a><br/>";
+		echo "&nbsp;<br/><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span id=\"myname\" class=\"pii-full-name\">$userfullname</span> <img style=\"vertical-align:top\" src=\"$imasroot/img/gears.png\" alt=\"\"/></a><br/>";
 	} else {
-		echo '&nbsp;<br/><span id="myname">'.$userfullname.'</span><br/>';
+		echo '&nbsp;<br/><span id="myname" class="pii-full-name">'.$userfullname.'</span><br/>';
 	}
 }
 ?>

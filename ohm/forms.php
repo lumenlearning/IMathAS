@@ -35,12 +35,12 @@ switch($_GET['action']) {
 		echo "<div class=lumensignupforms>
 		<div id=headerforms class=pagetitle><h2>New Student Signup</h2></div>
 		<form method=post action=../actions.php?action=newuser$gb onsubmit=\"return validateForm(this)\">\n
-		<input class='lumenform form' class=\"form\" type=\"text\" size=12 id=SID name=SID placeholder= ".$username_placeholder ." aria-label=Enter Username required>\n
+		<input class='lumenform form pii-username' class=\"form\" type=\"text\" size=12 id=SID name=SID placeholder= ".$username_placeholder ." aria-label=Enter Username required>\n
 		<input class='lumenform form' type=\"password\" size=20 id=pw1 name=pw1 placeholder= ".$choose_password ." aria-label=Password required>\n
 		<input class='lumenform form' type=\"password\" size=20 id=pw2 name=pw2 placeholder= ".$confirm_password ." aria-label=Password required>\n
-	  <input class='lumenform form' type=\"text\" size=20 id=firstname name=firstname placeholder=Firstname  aria-label=firstname required>\n
-	  <input class='lumenform form' type=\"text\" size=20 id=lastname name=lastname placeholder=Lastname  aria-label=lastname required>\n
-		<input class='lumenform form' type=\"text\" size=60 id=email name=email placeholder=Email  aria-label=email required>\n
+	  <input class='lumenform form pii-first-name' type=\"text\" size=20 id=firstname name=firstname placeholder=Firstname  aria-label=firstname required>\n
+	  <input class='lumenform form pii-last-name' type=\"text\" size=20 id=lastname name=lastname placeholder=Lastname  aria-label=lastname required>\n
+		<input class='lumenform form pii-email' type=\"text\" size=60 id=email name=email placeholder=Email  aria-label=email required>\n
     <br/>
 		<label class=form>
       <input type=checkbox id=msgnot name=msgnot checked=checked aria-label=msgnot />
@@ -63,7 +63,7 @@ switch($_GET['action']) {
 		if($_POST['enrollandregister']){
 			echo "<input  type='hidden'   name='enrollandregister'       value='enrollandregister'/>";
 			echo '<input  class="lumenform form" type="hidden"  name="courseid" placeholder="Course Id" value="'. Sanitize::courseId($_POST['cid']) .'" aria-label="courseid" />';
-			echo '<input class="lumenform form" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. Sanitize::encodeStringForDisplay($_POST['ekey']).'" aria-label="Enrollment Key:" />';
+			echo '<input class="lumenform form pii-security" type="hidden" name="ekey" placeholder="Enrollment Key"  value="'. Sanitize::encodeStringForDisplay($_POST['ekey']).'" aria-label="Enrollment Key:" />';
 		}else{
 		if (!$emailconfirmation) {
 			$doselfenroll = false;
@@ -91,7 +91,7 @@ switch($_GET['action']) {
 			// <input class='lumenform form' type=\"text\" size=60 id=email name=email placeholder=Email  aria-label=email required>\n
 
 			echo '<input  class="lumenform form" type="text"  name="courseid" placeholder="Course Id"  aria-label="courseid"/>';
-			echo '<input class="lumenform form" type="text" name="ekey" placeholder="Enrollment Key"  aria-label="Enrollment Key:"/>';
+			echo '<input class="lumenform form pii-security" type="text" name="ekey" placeholder="Enrollment Key"  aria-label="Enrollment Key:"/>';
 			if ($doselfenroll) {
 				// echo '</div>';
 				echo '<div id="selfenrollwarn" class=noticetext style="display:none;">Warning: You have selected a non-credit self-study course. ';
@@ -133,8 +133,8 @@ switch($_GET['action']) {
 		echo '<div id="headerforms" class="pagetitle"><h2>User Profile</h2></div>';
 		echo "<form enctype=\"multipart/form-data\" method=post action=../actions.php?action=chguserinfo$gb>\n";
 		echo '<fieldset id="userinfoprofile"><legend>Profile Settings</legend>';
-		echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class=form type=text size=20 id=firstname name=firstname value=\"".Sanitize::encodeStringForDisplay($line['FirstName'])."\" /><br class=\"form\" />\n";
-		echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class=form type=text size=20 id=lastname name=lastname value=\"".Sanitize::encodeStringForDisplay($line['LastName'])."\"><BR class=form>\n";
+		echo "<span class=form><label for=\"firstname\">Enter First Name:</label></span> <input class='form pii-first-name' type=text size=20 id=firstname name=firstname value=\"".Sanitize::encodeStringForDisplay($line['FirstName'])."\" /><br class=\"form\" />\n";
+		echo "<span class=form><label for=\"lastname\">Enter Last Name:</label></span> <input class='form pii-last-name' type=text size=20 id=lastname name=lastname value=\"".Sanitize::encodeStringForDisplay($line['LastName'])."\"><BR class=form>\n";
 		if ($myrights>10 && $groupid>0) {
 			//DB $query = "SELECT name FROM imas_groups WHERE id=".intval($groupid);
 			//DB $result = mysql_query($query) or die("Query failed : " . mysql_error());
@@ -150,7 +150,7 @@ switch($_GET['action']) {
 		echo "<span class=form><label for=\"newpw1\">Enter new password:</label></span>  <input class=form type=password id=newpw1 name=newpw1 size=40> <BR class=form>\n";
 		echo "<span class=form><label for=\"newpw1\">Verify new password:</label></span>  <input class=form type=password id=newpw2 name=newpw2 size=40> <BR class=form>\n";
 		echo '</div>';
-		echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=text size=60 id=email name=email value=\"".Sanitize::encodeStringForDisplay($line['email'])."\"><BR class=form>\n";
+		echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class='form pii-email' type=text size=60 id=email name=email value=\"".Sanitize::encodeStringForDisplay($line['email'])."\"><BR class=form>\n";
 		echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><span class=formright><input type=checkbox id=msgnot name=msgnot ";
 		if ($line['msgnotify']==1) {echo "checked=1";}
 		echo " /></span><BR class=form>\n";
@@ -159,11 +159,11 @@ switch($_GET['action']) {
 		echo "<span class=\"formright\">";
 		if ($line['hasuserimg']==1) {
 			if(isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
-				echo "<img src=\"{$urlmode}{$GLOBALS['AWSbucket']}.s3.amazonaws.com/cfiles/userimg_$userid.jpg\" alt=\"User picture\"/> <input type=\"checkbox\" name=\"removepic\" id=removepic value=\"1\" /> <label for=removepic>Remove</label> ";
+				echo "<img class=\"pii-image\" src=\"{$urlmode}{$GLOBALS['AWSbucket']}.s3.amazonaws.com/cfiles/userimg_$userid.jpg\" alt=\"User picture\"/> <input type=\"checkbox\" name=\"removepic\" id=removepic value=\"1\" /> <label for=removepic>Remove</label> ";
 			} else {
 				$curdir = rtrim(dirname(__FILE__), '/\\');
 				$galleryPath = "$curdir/course/files/";
-				echo "<img src=\"$imasroot/course/files/userimg_$userid.jpg\" alt=\"User picture\"/> <input type=\"checkbox\" name=\"removepic\" id=removepic value=\"1\" /> <label for=removepic>Remove</label> ";
+				echo "<img class=\"pii-image\" src=\"$imasroot/course/files/userimg_$userid.jpg\" alt=\"User picture\"/> <input type=\"checkbox\" name=\"removepic\" id=removepic value=\"1\" /> <label for=removepic>Remove</label> ";
 			}
 		} else {
 			echo "No Pic ";
@@ -329,7 +329,7 @@ switch($_GET['action']) {
 			echo '<p>If you already know your course ID, you can enter it now.  Otherwise, leave this blank and you can enroll later.</p>';
 		}
 		echo '<span class="form"><label for="cid">Course ID:</label></span><input class="form" type="text" size="20" name="cid" id="cid"/><br class="form"/>';
-		echo '<span class="form"><label for="ekey">Enrollment Key:</label></span><input class="form" type="text" size="20" name="ekey" id="ekey"/><br class="form"/>';
+		echo '<span class="form"><label for="ekey">Enrollment Key:</label></span><input class="form pii-security" type="text" size="20" name="ekey" id="ekey"/><br class="form"/>';
 		if ($doselfenroll) {
 			echo '</div>';
 			echo '<div id="selfenrollwarn" class=noticetext style="display:none;">Warning: You have selected a non-credit self-study course. ';
@@ -358,7 +358,7 @@ switch($_GET['action']) {
 		      <div id=headerforms class=pagetitle><h2>Reset Password</h2></div>
 		      <form  method=post action=../actions.php?action=resetpw$gb>
 		      <p class=directions>Enter your username below to reset your password</p>
-		      <input class='lumenform form' type=text name=\"username\" id=username placeholder=Username  aria-label=Username required />
+		      <input class='lumenform form pii-username' type=text name=\"username\" id=username placeholder=Username  aria-label=Username required />
 		      <button class=button type=submit>Submit</button></form>
 		      </div>";
 		break;
@@ -370,7 +370,7 @@ switch($_GET['action']) {
 		      <div id=headerforms class=pagetitle><h2>Lookup Username</h2></div>
 					<form method=post action=../actions.php?action=lookupusername$gb>\n
 					<p class=directions>Forgot your username? Enter your email address below.</p>
-					<input class='lumenform form' type=text name=\"email\" placeholder=Email id=email  aria-label=Email required />
+					<input class='lumenform form pii-email' type=text name=\"email\" placeholder=Email id=email  aria-label=Email required />
 					<button class=button type=submit>Submit</button></form>
 					</div>";
 		break;
@@ -472,7 +472,7 @@ switch($_GET['action']) {
 		echo "the gadget to your iGoogle page, then use the Access key below in the settings ";
 		echo "to gain access to your data</p>";
 
-		echo "<p>Access Code:". Sanitize::encodeStringForDisplay($code)."</p>";
+		echo "<p class='pii-security'>Access Code:". Sanitize::encodeStringForDisplay($code)."</p>";
 		echo "<p><a href=forms.php?action=googlegadget&regen=true$gb>Generate a new Access code<a/><br/>";
 		echo "<p><a href=../actions.php?action=googlegadget&clear=true$gb>Clear Access code</a></p>";
 		echo "<p>Note: This access code only allows Google to access a list of new posts and messages, and does not provide access to grades or any other data stored at $installname.  Be aware that this form of access is insecure and could be intercepted by a third party.</p>";

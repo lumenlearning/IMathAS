@@ -159,10 +159,10 @@ spam filter.</em>
 	echo '<dd>Lumen OHM does not currently provide instructor accounts to parents, home-schools, or tutors.</dd>';
 	echo '<dd>Lumen OHM is only intended for use with children and adults over the age of 13. </dd></dl><br/>';
 	echo "<form method=post id=newinstrform class=limitaftervalidate action=\"newinstructor.php\" >\n";
-	echo "<input class='lumenform form' type=text name=firstname id=firstname placeholder='First Name' value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40 aria-label='First Name' required>";
-	echo "<input class='lumenform form' type=text name=lastname id=lastname placeholder='Last Name' value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40 aria-label='Last Name' required></span>";
-	echo "<input class='lumenform form' type=text name=email id=email placeholder='School Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
-	echo "<input class='lumenform form' type=text name=phone placeholder='Phone Number' value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40 aria-label='Phone Number' required>";
+	echo "<input class='lumenform form pii-first-name' type=text name=firstname id=firstname placeholder='First Name' value=\"".Sanitize::encodeStringForDisplay($firstname)."\" size=40 aria-label='First Name' required>";
+	echo "<input class='lumenform form pii-last-name' type=text name=lastname id=lastname placeholder='Last Name' value=\"".Sanitize::encodeStringForDisplay($lastname)."\" size=40 aria-label='Last Name' required></span>";
+	echo "<input class='lumenform form pii-email' type=text name=email id=email placeholder='School Email' value=\"".Sanitize::encodeStringForDisplay($email)."\" size=40 aria-label='Email' required>";
+	echo "<input class='lumenform form pii-phone' type=text name=phone placeholder='Phone Number' value=\"".Sanitize::encodeStringForDisplay($phone)."\" size=40 aria-label='Phone Number' required>";
 ?>
 <div class="typeahead__container">
 	<input class='school-name lumenform form'
@@ -176,9 +176,9 @@ spam filter.</em>
 <input class="ipeds-id" type="hidden" name="ipeds-id" value="">
 <input class="ipeds-name" type="hidden" name="ipeds-name" value="">
 <?php
-	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
+	echo "<p class=directions >* Where your instructor status can be verified</p> <input  class='lumenform form pii-mixed' type=\"text\" name=\"verurl\" value=\"".Sanitize::encodeStringForDisplay($verurl)."\" placeholder='Web Page (e.g. a school directory)' size=40 aria-label='Web Page (e.g. a school directory)' required>";
 	// echo "<p class=directionsstar>Web page where your instructor status can be verified</p>";
-	echo "<input class='lumenform form' type=text name=SID id=SID placeholder='Requested Username (letters,numbers, \"_\")' value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40>";
+	echo "<input class='lumenform form pii-username' type=text name=SID id=SID placeholder='Requested Username (letters,numbers, \"_\")' value=\"".Sanitize::encodeStringForDisplay($username)."\" size=40>";
 	echo "<input class='lumenform form' placeholder='Requested Password' type=password name=pw1 id=pw1 size=40 aria-label='Password' required>";
 	echo "<input class='lumenform form' placeholder='Retype Password' type=password name=pw2 id=pw2 size=40 aria-label='Retype Password' required>";
 	if (isset($CFG['GEN']['TOSpage'])) {

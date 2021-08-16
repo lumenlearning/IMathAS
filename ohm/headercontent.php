@@ -25,7 +25,7 @@
 			if (isset($userid)) {
 				if ($myrights > 5) {
 					$usernameinheader = true;
-					echo "<span id=\"myname\" class=\"header-menu-item\">" .
+					echo "<span id=\"myname\" class=\"header-menu-item pii-full-name\">" .
                         Sanitize::encodeStringForDisplay($userfullname)
                         . "<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
 					// User avatar logic
