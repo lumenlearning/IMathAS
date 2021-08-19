@@ -162,6 +162,55 @@ final class FullStoryTest extends TestCase
     }
 
     /*
+     * generateUserMetadata
+     */
+
+    public function testGenerateUserMetadata_NoRights1(): void
+    {
+        $GLOBALS['myrights'] = 0;
+
+        $result = $this->fullStory::generateUserMetadata();
+        $this->assertEmpty($result);
+    }
+
+    public function testGenerateUserMetadata_NoRights2(): void
+    {
+        $GLOBALS['myrights'] = null;
+
+        $result = $this->fullStory::generateUserMetadata();
+        $this->assertEmpty($result);
+    }
+
+    public function testGenerateUserMetadata_NoRights3(): void
+    {
+        unset($GLOBALS['myrights']);
+
+        $result = $this->fullStory::generateUserMetadata();
+        $this->assertEmpty($result);
+    }
+
+    public function testGenerateUserMetadata(): void
+    {
+        $GLOBALS['myrights'] = 10;
+        $GLOBALS['userid'] = 1138;
+        $GLOBALS['groupid'] = 42;
+        $GLOBALS['cid'] = 123;
+        $GLOBALS['coursename'] = 'How to Meow';
+        $GLOBALS['ohmEnrollmentId'] = 666;
+        $GLOBALS['ohmCourseTeacherId'] = 543;
+
+        $result = $this->fullStory::generateUserMetadata();
+        $this->assertEquals('ohm', $result['product_str']);
+        $this->assertEquals('OHM-1138', $result['userId_str']);
+        $this->assertEquals('student', $result['role_str']);
+        $this->assertEquals(42, $result['groupId_int']);
+        $this->assertEquals(123, $result['courseId_int']);
+        $this->assertEquals('How to Meow', $result['courseName_str']);
+        $this->assertEquals('OHM-543', $result['instructorId_str']);
+        $this->assertEquals('OHM-666', $result['enrollmentId_str']);
+    }
+
+    /*
      * getUserRole
      */
 

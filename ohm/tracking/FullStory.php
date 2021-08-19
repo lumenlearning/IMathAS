@@ -8,6 +8,10 @@ namespace OHM\Tracking;
 class FullStory
 {
 
+    const EXCLUDE_COURSES = [
+        'Course Page' // OHM reports this when on the course listing page.
+    ];
+
     /**
      * Output the JS snippet required to load FullStory during a user's
      * session.
@@ -102,6 +106,11 @@ class FullStory
     /**
      * Get the HTML that provides user metadata to FullStory.
      *
+     * Notes:
+     * - Some metadata is only available after some of the page has loaded.
+     * - To ensure all metadata is available for FullStory, call this
+     *   method in footer.php.
+     *
      * @return string An HTML snippet that provides user metadata to FullStory.
      *                An empty string for unauthenticated users.
      */
@@ -114,16 +123,59 @@ class FullStory
             return '';
         }
 
-        $roleName = self::getUserRole();
+        $metadataAsString = json_encode(self::generateUserMetadata());
 
         return sprintf('<script type="text/javascript">
   if ("undefined" !== FS && null != FS) {
-    FS.setUserVars({
-     "role_str" : "%s",
-    });
+    FS.setUserVars(%s);
   }
-</script>' . "\n",
-            $roleName);
+</script>' . "\n", $metadataAsString);
+    }
+
+    /**
+     * Generate the metadata we'll send to FullStory for the current user.
+     *
+     * @return array The user's metadata. An empty array for unauthenticated users.
+     */
+    public static function generateUserMetadata(): array
+    {
+        global $myrights, $userid, $groupid, $cid, $coursename,
+               $ohmCourseTeacherId, $ohmEnrollmentId;
+
+        // We can only provide user metadata for authenticated users.
+        if (empty($myrights) || 0 == $myrights) {
+            return [];
+        }
+
+        $metadata = [
+            "product_str" => 'ohm',
+            "userId_str" => 'OHM-' . $userid, // always available with $myrights.
+            "role_str" => self::getUserRole(),
+        ];
+
+        // The following become available later during page loads, after the
+        // header has been displayed.
+        if (!empty($groupid)) {
+            $metadata['groupId_int'] = intval($groupid);
+        }
+
+        if (!empty($cid)) {
+            $metadata['courseId_int'] = intval($cid);
+        }
+
+        if (!empty($coursename) && !in_array($coursename, self::EXCLUDE_COURSES)) {
+            $metadata['courseName_str'] = $coursename;
+        }
+
+        if (!empty($ohmCourseTeacherId)) {
+            $metadata['instructorId_str'] = 'OHM-' . $ohmCourseTeacherId;
+        }
+
+        if (!empty($ohmEnrollmentId)) {
+            $metadata['enrollmentId_str'] = 'OHM-' . $ohmEnrollmentId;
+        }
+
+        return $metadata;
     }
 
     /**
