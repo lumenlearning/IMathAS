@@ -1,8 +1,10 @@
 <?php
 // Some data is not available until after the page has loaded, so we wait
 // for the page to load before attempting to sending data to FullStory.
+use OHM\Tracking\FullStorySnippets;
+
 $fullstory = new \OHM\Tracking\FullStory();
-$fullstory->getUserMetadataSnippet();
+echo FullStorySnippets::getCurrentUserMetadataSnippet();
 
 // The closed php tag is needed because this file is require'd in footer.php.
 ?>

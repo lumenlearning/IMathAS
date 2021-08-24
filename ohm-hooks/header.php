@@ -10,7 +10,7 @@ function insertIntoHead(): void
     global $DBH, $userid, $cid;
 
     // For FullStory metadata.
-    if (!empty($cid) && 0 < $cid) {
+    if (FullStory::isFullStoryEnabled() && !empty($cid) && 0 < $cid) {
         $stm = $DBH->prepare("SELECT id FROM imas_students WHERE userid=:userId AND courseid=:courseId");
         $stm->execute([':userId' => $userid, ':courseId' => $cid]);
         $GLOBALS['ohmEnrollmentId'] = $stm->fetchColumn(0);
