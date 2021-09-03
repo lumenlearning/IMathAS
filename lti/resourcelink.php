@@ -65,7 +65,7 @@ function link_to_resource($launch, $localuserid, $localcourse, $db) {
           exit;
         }
       }
-    } else if (function_exists('lti_can_ext_handle_launch') && lti_can_ext_handle_launch($launch->get_target_link())) {
+    } else if (function_exists('lti_can_handle_launch') && lti_can_handle_launch($launch->get_target_link())) {
       $link = lti_handle_launch($launch, $localcourse, $localuserid, $db);
     } else {
       echo 'Unsupported link type';
@@ -150,7 +150,9 @@ function link_to_resource($launch, $localuserid, $localcourse, $db) {
     lti_redirect_launch($link);
   } else {
     echo 'Unsupported placementtype';
+    echo '<pre>';
     print_r($link);
+    echo '</pre>';
     exit;
   }
 }

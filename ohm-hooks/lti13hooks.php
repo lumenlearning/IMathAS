@@ -1,4 +1,9 @@
-<?php 
+<?php
+
+use IMSGlobal\LTI\Database;
+use IMSGlobal\LTI\LTI_Localcourse;
+use IMSGlobal\LTI\LTI_Message_Launch;
+use IMSGlobal\LTI\LTI_Placement;
 
 /**
  * Define custom placement types
@@ -27,6 +32,17 @@ function lti_can_handle_launch(string $targetlink): bool {
     return (!empty($param['custom_item_type']) && 
         $param['custom_item_type'] == 'DesmosItem' &&
         !empty($param['custom_item_id']));
+}
+
+/**
+ * Determine if the hooks can redirect to a placement type.
+ *
+ * @param string $placementtype The placementtype for the launch.
+ * @return bool true if hooks can handle this placement type.
+ */
+function lti_can_handle_redirect(string $placementtype): bool {
+    $placementTypes = array_keys(lti_get_types_as_num());
+    return in_array($placementtype, $placementTypes);
 }
 
 /**
@@ -75,7 +91,7 @@ function lti_get_othercourses(array $targetinfo, int $userid): array {
         $query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
         $query .= "AND imt.userid=:userid JOIN desmos_items AS di ON ic.id=di.courseid ";
         $query .= "WHERE ic.available<4 AND ic.ancestors REGEXP :cregex AND di.itemid_chain REGEXP :dregex ORDER BY ic.name";
-        $stm = $this->dbh->prepare($query);
+        $stm = $DBH->prepare($query);
         $stm->execute(array(
             ':userid' => $userid,
             ':cregex' => '[[:<:]]' . $target['refcid'] . '[[:>:]]',
@@ -138,11 +154,11 @@ function lti_handle_launch(
       $destaid = false;
       if ($target['refcid'] == $localcourse->get_copiedfrom()) {
         // aid is in the originally copied course - find our copy of it
-        $destaid = $db->find_desmos_by_immediate_ancestor($sourceaid, $destcid);
+        $destaid = find_desmos_by_immediate_ancestor($sourceaid, $destcid);
       }
       if ($destaid === false) {
         // try looking further back
-        $destaid = $db->find_desmos_by_ancestor_walkback(
+        $destaid = find_desmos_by_ancestor_walkback(
           $sourceaid,
           $target['refcid'],
           $localcourse->get_copiedfrom(),
@@ -176,10 +192,52 @@ function lti_handle_launch(
     return $link;
 }
 
+function lti_redirect_launch(LTI_Placement $link): void
+{
+    global $DBH, $userid;
+
+    if (empty($link->get_placementtype()) || empty($link->get_typeid())) {
+        echo 'Error: LTI_Placement is missing placement type or type id.';
+        exit;
+    }
+
+    // Only handle Desmos items
+    if ('desmos' != $link->get_placementtype()) {
+        printf("Error: Unknown placement type: %s (expected 'desmos')",
+            $link->get_placementtype());
+        exit;
+    }
+
+    /*
+     * The following is based on code found in /desmos/bltilaunch.php.
+     */
+
+    $itemid = $link->get_typeid();
+    $item = new Desmos\Models\DesmosItem();
+    if (!$item->findItem($itemid)) {
+        $diaginfo = "(Debug info: 30-".$itemid.")";
+        echo "This item does not appear to exist anymore. $diaginfo";
+        exit;
+    }
+
+    if ($_SESSION['ltirole'] == 'learner') {
+        $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
+        $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => time()));
+    }
+    header('Location: ' . $GLOBALS['basesiteurl'] . "/course/itemview.php"
+        ."?type=".$link->get_placementtype()
+        ."&cid=".$item->courseid
+        ."&id=".$item->typeid
+        ."&lms=true"
+    );
+}
+
 function find_desmos_by_immediate_ancestor(int $idtolookfor, int $destcid)
 {
+    global $DBH;
+
     $anregex = '^([0-9]+:)?' . $idtolookfor . '[[:>:]]';
-    $stm = $this->dbh->prepare("SELECT id FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:destcid");
+    $stm = $DBH->prepare("SELECT id FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:destcid");
     $stm->execute(array(':ancestors' => $anregex, ':destcid' => $destcid));
     return $stm->fetchColumn(0);
 }
@@ -187,7 +245,9 @@ function find_desmos_by_immediate_ancestor(int $idtolookfor, int $destcid)
 function find_desmos_by_ancestor_walkback(int $sourceaid, int $aidsourcecid,
     int $copiedfrom, int $destcid
 ) {
-    $stm = $this->dbh->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
+    global $DBH;
+
+    $stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
     $stm->execute(array($destcid));
     $ancestors = explode(',', $stm->fetchColumn(0));
     $ciddepth = array_search($aidsourcecid, $ancestors); //so if we're looking for 23, "20,24,23,26" would give 2 here.
@@ -197,7 +257,7 @@ function find_desmos_by_ancestor_walkback(int $sourceaid, int $aidsourcecid,
         $foundsubaid = true;
         $aidtolookfor = $sourceaid;
         for ($i = $ciddepth; $i >= 0; $i--) { //starts one course back from aidsourcecid because of the unshift
-            $stm = $this->dbh->prepare("SELECT id FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:cid");
+            $stm = $DBH->prepare("SELECT id FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:cid");
             $stm->execute(array(':ancestors' => '^([0-9]+:)?' . $aidtolookfor . '[[:>:]]', ':cid' => $ancestors[$i]));
             if ($stm->rowCount() > 0) {
                 $aidtolookfor = $stm->fetchColumn(0);
@@ -214,13 +274,13 @@ function find_desmos_by_ancestor_walkback(int $sourceaid, int $aidsourcecid,
         // history.  So let's see if we have a copy in our course with the item
         // anywhere in the ancestry.
         $anregex = '[[:<:]]' . $sourceaid . '[[:>:]]';
-        $stm = $this->dbh->prepare("SELECT id,title,itemid_chain FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:destcid");
+        $stm = $DBH->prepare("SELECT id,title,itemid_chain FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:destcid");
         $stm->execute(array(':ancestors' => $anregex, ':destcid' => $destcid));
         $res = $stm->fetchAll(PDO::FETCH_ASSOC);
         if (count($res) == 1) { //only one result - we found it
             return $res[0]['id'];
         }
-        $stm = $this->dbh->prepare("SELECT title FROM desmos_items WHERE id=?");
+        $stm = $DBH->prepare("SELECT title FROM desmos_items WHERE id=?");
         $stm->execute(array($sourceaid));
         $aidsourcename = $stm->fetchColumn(0);
         if (count($res) > 1) { //multiple results - look for the identical name
@@ -238,7 +298,7 @@ function find_desmos_by_ancestor_walkback(int $sourceaid, int $aidsourcecid,
         // still haven't found it, so nothing in our current course has the
         // desired assessment as an ancestor.  Try finding something just with
         // the right name maybe?
-        $stm = $this->dbh->prepare("SELECT id FROM desmos_items WHERE title=:name AND courseid=:courseid");
+        $stm = $DBH->prepare("SELECT id FROM desmos_items WHERE title=:name AND courseid=:courseid");
         $stm->execute(array(':name' => $aidsourcename, ':courseid' => $destcid));
         if ($stm->rowCount() > 0) {
             return $stm->fetchColumn(0);
