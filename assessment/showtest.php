@@ -154,6 +154,7 @@
 		// #### Begin OHM-specific code #####################################################
 
 		if (!$assessmentclosed) {
+			require(__DIR__ . '/../ohm/optout/check_status.php');
 			require(__DIR__ . '/../ohm/assessments/paywall_start.php');
 		}
 
@@ -637,6 +638,7 @@
 	// #### Begin OHM-specific code #####################################################
 
 	$assessmentIdFromDb = $line['assessmentid'];
+	require(__DIR__ . '/../ohm/optout/check_status.php');
 	require(__DIR__ . '/../ohm/assessments/paywall_start.php');
 
 	// #### Begin OHM-specific code #####################################################

@@ -68,6 +68,7 @@ if ((!$isltilimited || $_SESSION['ltirole']!='learner') && !$inTreeReader && !$i
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 
+require(__DIR__ . '/../ohm/optout/check_status.php');
 require(__DIR__ . '/../ohm/assessments/paywall_start.php');
 
 // #### End OHM-specific code #######################################################
