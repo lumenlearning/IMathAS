@@ -210,6 +210,7 @@ $CFG['email']['new_acct_bcclist_ohm_hook'] = array('support@lumenlearning.com');
 $CFG['GEN']['useSESmail'] = true;
 
 $CFG['hooks']['init'] = 'ohm-hooks/init.php';
+$CFG['hooks']['header'] = 'ohm-hooks/header.php';
 $CFG['hooks']['util/batchcreateinstr'] = '../ohm-hooks/util/batchcreateinstr.php';
 $CFG['hooks']['actions'] = 'ohm-hooks/actions.php';
 $CFG['hooks']['admin/actions'] = '../ohm-hooks/admin/actions.php';
@@ -221,6 +222,8 @@ $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
 $CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
 $CFG['hooks']['util/utils'] = '../ohm-hooks/util/utils.php';
+
+$CFG['GEN']['footerscriptinclude'] = 'ohm-hooks/footer.php';
 
 $CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js';
 

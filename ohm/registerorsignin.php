@@ -66,7 +66,7 @@ if(($_POST['courseid'] && $_POST['verified'] || $_GET['cid'] && $_GET['ekey'])){
   <input  type='hidden'   name='enrollandlogin'   value='enrollandlogin'/>
   <div class='enroll field'>
     <label for='username'>Username</label>
-    <input class='lumenform form inputText' type='text' id='username' name='username' placeholder='Username' aria-label='Username' />
+    <input class='lumenform form inputText pii-username' type='text' id='username' name='username' placeholder='Username' aria-label='Username' />
   </div>
   <div class='enroll field'>
     <label for='p'>Password</label>
@@ -88,7 +88,7 @@ if(($_POST['courseid'] && $_POST['verified'] || $_GET['cid'] && $_GET['ekey'])){
   echo "
   <div class='enroll field'>
     <label for='SID'>Enter a username (letters, numbers, _ )</label>
-    <input class='lumenform form inputText' class=\"form\" type=\"text\"  id=SID name=SID placeholder= ".$username_placeholder ." aria-label=Enter Username required>\n
+    <input class='lumenform form inputText pii-username' class=\"form\" type=\"text\"  id=SID name=SID placeholder= ".$username_placeholder ." aria-label=Enter Username required>\n
   </div>
   <div class='enroll field'>
     <label for='pw1'>Choose a Password</label>
@@ -100,15 +100,15 @@ if(($_POST['courseid'] && $_POST['verified'] || $_GET['cid'] && $_GET['ekey'])){
   </div>
   <div class='enroll field'>
     <label for='firstname'>Firstname</label>
-    <input class='lumenform form inputText' type=\"text\" size=20 id=firstname name=firstname placeholder=Firstname  aria-label=firstname required>\n
+    <input class='lumenform form inputText pii-first-name' type=\"text\" size=20 id=firstname name=firstname placeholder=Firstname  aria-label=firstname required>\n
   </div>
   <div class='enroll field'>
     <label for='lastname'>Lastname</label>
-    <input class='lumenform form inputText' type=\"text\" size=20 id=lastname name=lastname placeholder=Lastname  aria-label=lastname required>\n
+    <input class='lumenform form inputText pii-last-name' type=\"text\" size=20 id=lastname name=lastname placeholder=Lastname  aria-label=lastname required>\n
   </div>
   <div class='enroll field'>
     <label for='email'>Email</label>
-    <input class='lumenform form inputText' type=\"text\"  id=email name=email placeholder=Email  aria-label=email required>\n
+    <input class='lumenform form inputText pii-email' type=\"text\"  id=email name=email placeholder=Email  aria-label=email required>\n
   </div>
   <br/>
   <label class=form>

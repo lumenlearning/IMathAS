@@ -14,6 +14,16 @@ craft great code,
 and maintain a safe,
 pleasant work environment.
 
+## User privacy
+
+To **mask** sensitive user information from being recorded by FullStory, use
+one of the appropriate CSS classes listed in:
+[ohm/tracking/sensitive_info_highlight.css](ohm/tracking/sensitive_info_highlight.css)
+
+To **exclude** sensitive user information, use the `fs-exclude` CSS class.
+
+- Reference: [How do I protect my users' privacy in FullStory?](https://help.fullstory.com/hc/en-us/articles/360020623574)
+
 ## Getting Started
 This application is developed in PHP,
 with some features being developed using the

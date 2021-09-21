@@ -40,8 +40,8 @@ if($_POST['courseid']){
      $Detailsmessage = "
       <p>Course Name: <span>$coursename</span></p>
        <p>Course Id:<span> $cid</span></p>
-       <p>Course Enrollment Key: <span>$ekey</span></p>
-       <p>Teacher <span>$FirstName $LastName</span></p>
+       <p class='pii-security'>Course Enrollment Key: <span>$ekey</span></p>
+       <p class='pii-full-name'>Teacher <span>$FirstName $LastName</span></p>
        </div>";
 
   }
