@@ -4,6 +4,11 @@ namespace OHM\Tracking;
 
 class FullStoryIdentity
 {
+    // Paths only, no query strings!
+    const EXCLUDE_URL_PATHS = [
+        '/diag/index.php',
+    ];
+
     /**
      * Get the user's logged in ID. This works even if a user is impersonating
      * another user.
@@ -54,6 +59,14 @@ class FullStoryIdentity
         // immediately submits a form to load another page and FS does not
         // have enough time to reliably run FS.identify.
         if (isset($_GET['accessibility'])) {
+            return false;
+        }
+
+        // Prevent identifying users on specific pages.
+        // In a few cases, modifying $_SESSION breaks site functionality.
+        //   Example: OHM-1086 - Placement test / diagnostic page not working.
+        $requestedUrlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        if (in_array($requestedUrlPath, self::EXCLUDE_URL_PATHS)) {
             return false;
         }
 
