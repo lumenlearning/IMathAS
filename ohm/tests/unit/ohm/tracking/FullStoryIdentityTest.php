@@ -18,6 +18,7 @@ final class FullStoryIdentityTest extends TestCase
 
         $GLOBALS['configEnvironment'] = 'test';
         $GLOBALS['myrights'] = 10; // 10 = student
+        $_SERVER['REQUEST_URI'] = '/'; // userNeedsFullStoryIdentity() checks for URLs to exclude.
     }
 
     function tearDown(): void
@@ -113,6 +114,15 @@ final class FullStoryIdentityTest extends TestCase
     {
         $GLOBALS['userid'] = 64;
         $_SESSION['sent-fullstory-user-identity'] = 64;
+
+        $result = FullStoryIdentity::userNeedsFullStoryIdentity();
+        $this->assertFalse($result);
+    }
+
+    public function testUserNeedsFullStoryIdentity_ExcludedUrl(): void
+    {
+        $GLOBALS['userid'] = 64;
+        $_SERVER['REQUEST_URI'] = FullStoryIdentity::EXCLUDE_URL_PATHS[0];
 
         $result = FullStoryIdentity::userNeedsFullStoryIdentity();
         $this->assertFalse($result);
