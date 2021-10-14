@@ -222,6 +222,7 @@ $CFG['hooks']['ltihome'] = 'ohm-hooks/ltihome.php';
 $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
 $CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
 $CFG['hooks']['util/utils'] = '../ohm-hooks/util/utils.php';
+$CFG['hooks']['lti'] = __DIR__ . '/../ohm-hooks/lti13hooks.php';
 
 $CFG['GEN']['footerscriptinclude'] = 'ohm-hooks/footer.php';
 

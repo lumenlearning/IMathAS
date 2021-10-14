@@ -412,6 +412,21 @@ class DesmosItem extends CourseItem
     }
 
     /**
+     * Update the `steporder` column for this DesmosItem.
+     *
+     * This is most useful after copying a DesmosItem, because the new copy
+     * will not preserve the original order of DesmosStep IDs.
+     */
+    public function updateStepOrderAfterCopy(array $stepOrder): void
+    {
+        $stm = $this->dbh->prepare('UPDATE desmos_items SET steporder = :stepOrder WHERE id = :id');
+        $stm->execute([
+            ':stepOrder' => implode(',', $stepOrder),
+            ':id' => $this->typeid,
+        ]);
+    }
+
+    /**
      * Set required parameter
      *
      * @param null $value or keep $this->setorder

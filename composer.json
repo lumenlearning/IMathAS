@@ -35,6 +35,7 @@
             "OHM\\Services\\": "ohm/services/",
             "OHM\\Tracking\\": "ohm/tracking/",
             "Desmos\\": "desmos/",
+            "Desmos\\Includes\\": "desmos/includes",
             "Desmos\\Models\\": "desmos/models/",
             "Desmos\\Controlers\\": "desmos/controlers/",
             "Desmos\\Views\\": "desmos/views/"

@@ -4,6 +4,7 @@
  */
 
 namespace Course\Includes;
+use Desmos\Includes\DesmosStepSorter;
 use PDO;
 use Sanitize;
 //use \TeacherAuditLog;
@@ -221,6 +222,13 @@ abstract class CourseItem
                 $fields[$key] = $typeid;
             }
         }
+
+        // OHM-1077 - Store the original order of DesmosStep IDs before copy.
+        // We'll use this later to re-order step IDs after the copy.
+        if (isset($this->typename) && 'desmos' == $this->typename) {
+            $originalStepIdOrder = $this->steporder;
+        }
+
         $newtypeid = $this->insertItem($fields);
         if ($newtypeid) {
             $this->addAncestorNode($newtypeid, $fields);
@@ -228,6 +236,13 @@ abstract class CourseItem
             $this->setItem($fields);
             $this->addCourseItems($newtypeid);
             $this->track('copy', $typeid);
+
+            // OHM-1077 - Reorder DesmosStep IDs using the order of original IDs.
+            if (isset($this->typename) && 'desmos' == $this->typename) {
+                $originalStepIdOrderIndexes = DesmosStepSorter::getUnsortedArrayIndexes($originalStepIdOrder);
+                $newStepOrder = DesmosStepSorter::reorderByIndexes($this->steporder, $originalStepIdOrderIndexes);
+                $this->updateStepOrderAfterCopy($newStepOrder);
+            }
         }
         return $this;
     }
