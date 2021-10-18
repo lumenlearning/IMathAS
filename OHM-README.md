@@ -41,10 +41,7 @@ This step is only needed the first time you are setting up locally.
     
 
 ### Running OHM locally
-0. Ensure you have installed Docker, PHP (version 7.3), Homebrew 
-	0.1 Homebrew: https://brew.sh/
-	0.2 Docker: https://www.docker.com/get-started
-	0.3 PHP: 'brew install php@7.3' in terminal
+0. Ensure you have installed Homebrew (https://brew.sh/), Docker (https://www.docker.com/get-started), and PHP ('brew install php@7.3' in terminal)
 1. Copy in the config subdirectory local.php.example to local.php and modify the `$dbserver` to 127.0.0.1
 2. Run `composer install` at root directory as well as in `ohm/lumenapi` directory
 3. Execute `npm run serve` from the `assess2/vue-src` (You might need to `nvm use stable` if this step fails)
