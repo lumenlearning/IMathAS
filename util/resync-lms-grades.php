@@ -93,7 +93,7 @@ function resyncGrades(): void
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
         }
-        elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
+        elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true, $us['uid'], $us['aid'])) {
             error_log('Queued LMS grade. ' . json_encode($logInfo));
             $totalQueued++;
         } else {
