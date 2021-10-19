@@ -153,14 +153,14 @@ class LTI
         $response = sendOAuthBodyPOST($method, $url, $key, $secret, $content_type, $postBody, $checkResponse);
         return $response;
     }
-    public static function addToLTIQueue($sourcedid, $grade, $sendnow=false)
+    public static function addToLTIQueue($sourcedid, $grade, $sendnow=false, $userid, $assessmentid)
     {
         global $DBH, $CFG;
 
         $LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
 
-        $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon) ';
-        $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon) ON DUPLICATE KEY UPDATE ';
+        $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon, userid, assessmentid) ';
+        $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon, :userid, :assessmentid) ON DUPLICATE KEY UPDATE ';
         $query .= 'grade=VALUES(grade),sendon=VALUES(sendon),failures=0 ';
 
         $stm = $DBH->prepare($query);
@@ -169,7 +169,9 @@ class LTI
                 ':hash' => md5($sourcedid),
                 ':sourcedid' => $sourcedid,
                 ':grade' => $grade,
-                ':sendon' => (time() + ($sendnow?0:$LTIdelay))
+                ':sendon' => (time() + ($sendnow?0:$LTIdelay)),
+                ':userid' => $userid,
+                ':assessmentid' => $assessmentid,
             )
         );
 
