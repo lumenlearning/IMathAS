@@ -83,7 +83,6 @@ class EulaService
      * Does a user need to accept the latest EULA version.
      *
      * This checks:
-     * - EULA feature flag.
      * - User's last accepted EULA version.
      * - Requested URL against a list of excluded URLs.
      *
@@ -93,11 +92,6 @@ class EulaService
      */
     public function isAcceptanceRequired(int $userId): bool
     {
-        // Is the EULA feature enabled?
-        if ('true' != getenv('EULA_ENABLED')) {
-            return false;
-        }
-
         // Check URL exclusions.
         if ($this->isCurrentPageExcludedFromEula()) {
             return false;
