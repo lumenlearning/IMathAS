@@ -95,6 +95,7 @@ $app->routeMiddleware([
 */
 
 $app->register(App\Providers\Repositories\AssessmentRepositoryServiceProvider::class);
+$app->register(App\Providers\Repositories\EnrollmentRepositoryServiceProvider::class);
 $app->register(App\Providers\Repositories\QuestionSetRepositoryServiceProvider::class);
 $app->register(\SwaggerLume\ServiceProvider::class);
 

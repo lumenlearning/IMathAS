@@ -42,3 +42,16 @@ $router->group(
         ]);
     }
 );
+
+$router->group(
+    ['prefix' => 'api/dev/v1'],
+    function() use ($router) {
+        $router->get('/enrollments', [
+            'uses' => 'EnrollmentController@getAllEnrollments'
+        ]);
+
+        $router->get('/enrollments/{id}', [
+            'uses' => 'EnrollmentController@getEnrollment'
+        ]);
+    }
+);
