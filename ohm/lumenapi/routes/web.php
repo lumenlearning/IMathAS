@@ -43,6 +43,7 @@ $router->group(
     }
 );
 
+// FIXME: Move this back to the main router group after done with OHM-1083.
 $router->group(
     ['prefix' => 'api/dev/v1'],
     function() use ($router) {
