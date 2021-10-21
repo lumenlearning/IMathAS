@@ -33,8 +33,14 @@ class EnrollmentController extends ApiBaseController
 
     public function getAllEnrollments(Request $request): JsonResponse
     {
-        // TODO: Implement me!
-        return response()->json(['message' => 'Not implemented yet!']);
+        try {
+            list($pageNum, $pageSize) = $this->getPaginationArgs($request);
+            $enrollments = $this->enrollmentService->getAll($pageNum, $pageSize);
+            return response()->json($enrollments);
+        } catch (Exception $e) {
+            Log::error($e);
+            return $this->BadRequest([$e->getMessage()]);
+        }
     }
 
     public function getEnrollment(Request $request, int $id): JsonResponse
