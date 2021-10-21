@@ -54,5 +54,9 @@ $router->group(
         $router->get('/enrollments/{id}', [
             'uses' => 'EnrollmentController@getEnrollment'
         ]);
+
+        $router->put('/enrollments/{id}', [
+            'uses' => 'EnrollmentController@updateEnrollment'
+        ]);
     }
 );

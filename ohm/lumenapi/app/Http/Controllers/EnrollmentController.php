@@ -14,6 +14,11 @@ use App\Services\Interfaces\EnrollmentServiceInterface;
 
 class EnrollmentController extends ApiBaseController
 {
+    const WRITE_ALLOWED_FIELDS = [
+        'has_valid_access_code',
+        'is_opted_out_of_assessments'
+    ];
+
     /**
      * @var EnrollmentServiceInterface
      */
@@ -52,6 +57,18 @@ class EnrollmentController extends ApiBaseController
             } else {
                 return response()->json($enrollment);
             }
+        } catch (Exception $e) {
+            Log::error($e);
+            return $this->BadRequest([$e->getMessage()]);
+        }
+    }
+
+    public function updateEnrollment(Request $request, int $id): JsonResponse
+    {
+        try {
+            $input = $request->only(self::WRITE_ALLOWED_FIELDS);
+            $enrollment = $this->enrollmentService->updateById($id, $input);
+            return response()->json($enrollment);
         } catch (Exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);

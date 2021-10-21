@@ -24,4 +24,10 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
 
         return $enrollments->get();
     }
+
+    public function update(Enrollment $enrollment)
+    {
+        $enrollment->save();
+        return $enrollment;
+    }
 }

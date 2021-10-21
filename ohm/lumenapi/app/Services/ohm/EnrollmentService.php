@@ -6,6 +6,7 @@ use App\Dtos\EnrollmentDto;
 use App\Models\Enrollment;
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use App\Services\Interfaces\EnrollmentServiceInterface;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 
 class EnrollmentService extends BaseService implements EnrollmentServiceInterface
 {
@@ -61,6 +62,28 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
             $enrollmentDto = new EnrollmentDto($enrollment->toArray());
             return $enrollmentDto->toArray();
         }
+    }
+
+    /**
+     * Update an enrollment.
+     *
+     * @param int $id The enrollment ID.
+     * @param array $input An associative array with updated data.
+     * @return array The updated enrollment as an associative array.
+     */
+    public function updateById(int $id, array $input): array
+    {
+        $enrollment = $this->enrollmentRepository->getById($id);
+        if (empty($enrollment)) {
+            throw new RelationNotFoundException(
+                sprintf('Enrollment ID %d was not found.', $id));
+        }
+
+        $enrollment->fill($input); // See Enrollment model for allowed fillable fields.
+        $enrollment = $this->enrollmentRepository->update($enrollment);
+
+        $enrollmentDto = new EnrollmentDto($enrollment->toArray());
+        return $enrollmentDto->toArray();
     }
 
     /**
