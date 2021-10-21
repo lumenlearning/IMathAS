@@ -33,21 +33,6 @@ class EnrollmentDto extends AbstractDto implements DtoInterface
     }
 
     /**
-     * Define the rules for validating the associative array to be mapped to
-     * the DTO's fields.
-     *
-     * @return array An associative array containing validation rules..
-     * @see https://lumen.laravel.com/docs/8.x/validation
-     */
-    protected function configureValidatorRules(): array
-    {
-        return [
-            'userid' => 'required',
-            'courseid' => 'required',
-        ];
-    }
-
-    /**
      * Map an associative array to DTO fields.
      *
      * @param array $data An associative array. (representing a single database row)
