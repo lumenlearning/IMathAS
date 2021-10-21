@@ -10,26 +10,25 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-use App\Dtos\EnrollmentDto;
-use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
+use App\Services\Interfaces\EnrollmentServiceInterface;
 
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class EnrollmentController extends ApiBaseController
 {
     /**
-     * @var EnrollmentRepositoryInterface
+     * @var EnrollmentServiceInterface
      */
-    private $enrollmentRepository;
+    private $enrollmentService;
 
     /**
      * Controller constructor.
-     * @param EnrollmentRepositoryInterface $enrollmentRepository
+     * @param EnrollmentServiceInterface $enrollmentService
      */
-    public function __construct(EnrollmentRepositoryInterface $enrollmentRepository)
+    public function __construct(EnrollmentServiceInterface $enrollmentService)
     {
         parent::__construct();
-        $this->enrollmentRepository = $enrollmentRepository;
+        $this->enrollmentService = $enrollmentService;
     }
 
     public function getAllEnrollments(Request $request): JsonResponse
@@ -41,14 +40,8 @@ class EnrollmentController extends ApiBaseController
     public function getEnrollment(Request $request, int $id): JsonResponse
     {
         try {
-            $enrollment = $this->enrollmentRepository->getById($id);
-
-            if (empty($enrollment)) {
-                return response()->json($enrollment);
-            } else {
-                $enrollmentDto = new EnrollmentDto($enrollment);
-                return response()->json($enrollmentDto->toArray());
-            }
+            $enrollment = $this->enrollmentService->getById($id);
+            return response()->json($enrollment);
         } catch (Exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
