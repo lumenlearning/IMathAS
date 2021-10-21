@@ -30,14 +30,14 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
      * @return array An associative array with the enrollment record.
      * @throws ValidationException
      */
-    public function getById(int $id): array
+    public function getById(int $id): ?array
     {
         $enrollment = $this->enrollmentRepository->getById($id);
 
         if (empty($enrollment)) {
-            return [];
+            return null;
         } else {
-            $enrollmentDto = new EnrollmentDto($enrollment);
+            $enrollmentDto = new EnrollmentDto($enrollment->toArray());
             return $enrollmentDto->toArray();
         }
     }
