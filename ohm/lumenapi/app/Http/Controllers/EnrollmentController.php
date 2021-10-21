@@ -41,7 +41,11 @@ class EnrollmentController extends ApiBaseController
     {
         try {
             $enrollment = $this->enrollmentService->getById($id);
-            return response()->json($enrollment);
+            if (empty($enrollment)) {
+                return response()->json(null)->setStatusCode(404);
+            } else {
+                return response()->json($enrollment);
+            }
         } catch (Exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
