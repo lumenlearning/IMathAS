@@ -12,8 +12,16 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         return Enrollment::find($enrollmentId);
     }
 
-    public function getAll(int $limit, int $offset)
+    public function getAll(int $limit, int $offset, array $columnFilters)
     {
-        return Enrollment::take($limit)->skip($offset)->get();
+        $enrollments = Enrollment::take($limit)->skip($offset);
+
+        if (!empty($columnFilters)) {
+            foreach ($columnFilters as $columnName => $columnValue) {
+                $enrollments = $enrollments->where($columnName, '=', $columnValue);
+            }
+        }
+
+        return $enrollments->get();
     }
 }

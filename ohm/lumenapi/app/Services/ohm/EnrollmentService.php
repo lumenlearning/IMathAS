@@ -9,6 +9,12 @@ use App\Services\Interfaces\EnrollmentServiceInterface;
 
 class EnrollmentService extends BaseService implements EnrollmentServiceInterface
 {
+    // Mapping of filter keys (as provided by Administrate) to DB column names.
+    const ALLOWED_FILTERS = [
+        'user_id_filter' => 'userid',
+        'course_id_filter' => 'courseid',
+    ];
+
     /**
      * @var EnrollmentRepositoryInterface
      */
@@ -23,9 +29,19 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
         $this->enrollmentRepository = $enrollmentRepository;
     }
 
-    public function getAll(int $pageNum, int $pageSize): array
+    /**
+     * Get all Enrollments.
+     *
+     * @param int $pageNum Pagination. The page number to return.
+     * @param int $pageSize Pagination. The size of the page to return.
+     * @param array $filters An associative array of filters to search by.
+     * @return array An associative array of Enrollment data.
+     */
+    public function getAll(int $pageNum, int $pageSize, array $filters): array
     {
-        $enrollments = $this->enrollmentRepository->getAll($pageSize, $pageSize * $pageNum);
+        $columnFilters = $this->mapFilterNames($filters);
+
+        $enrollments = $this->enrollmentRepository->getAll($pageSize, $pageSize * $pageNum, $columnFilters);
         return $this->enrollmentsToArray($enrollments);
     }
 
@@ -62,5 +78,24 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
         }
 
         return $enrollmentsArray;
+    }
+
+    /**
+     * Map filter names provided by EnrollmentController to DB column names.
+     *
+     * @param array $inputFilters The array of filters provided by EnrollmentController.
+     * @return array An associative array of filters by DB column name.
+     * @see self::ALLOWED_FILTERS
+     */
+    private function mapFilterNames(array $inputFilters): array
+    {
+        $columnFilters = [];
+        foreach (self::ALLOWED_FILTERS as $ALLOWED_FILTER_BEFORE => $ALLOWED_FILTER_AFTER) {
+            if (isset($inputFilters[$ALLOWED_FILTER_BEFORE])) {
+                $dbColumnName = self::ALLOWED_FILTERS[$ALLOWED_FILTER_BEFORE];
+                $columnFilters[$dbColumnName] = $inputFilters[$ALLOWED_FILTER_BEFORE];
+            }
+        }
+        return $columnFilters;
     }
 }

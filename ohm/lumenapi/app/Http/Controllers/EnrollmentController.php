@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Log;
 
 use App\Services\Interfaces\EnrollmentServiceInterface;
 
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-
 class EnrollmentController extends ApiBaseController
 {
     /**
@@ -35,7 +33,9 @@ class EnrollmentController extends ApiBaseController
     {
         try {
             list($pageNum, $pageSize) = $this->getPaginationArgs($request);
-            $enrollments = $this->enrollmentService->getAll($pageNum, $pageSize);
+            $filters = $this->getSearchFilters($request);
+
+            $enrollments = $this->enrollmentService->getAll($pageNum, $pageSize, $filters);
             return response()->json($enrollments);
         } catch (Exception $e) {
             Log::error($e);
@@ -56,5 +56,18 @@ class EnrollmentController extends ApiBaseController
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
         }
+    }
+
+    private function getSearchFilters(Request $request): array
+    {
+        // These filter names are provided by Lumenistration's Administrate library.
+        $filters = [];
+        if (!empty($request->get('user_id_filter'))) {
+            $filters['user_id_filter'] = $request->get('user_id_filter');
+        }
+        if (!empty($request->get('course_id_filter'))) {
+            $filters['course_id_filter'] = $request->get('course_id_filter');
+        }
+        return $filters;
     }
 }
