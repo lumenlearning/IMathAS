@@ -2,7 +2,7 @@
 
 namespace App\Dtos;
 
-class QuestionDto extends BaseDto
+class QuestionDto extends QuestionBaseDto
 {
     private $rawScores = [];
 

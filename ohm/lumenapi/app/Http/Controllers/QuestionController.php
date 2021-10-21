@@ -15,7 +15,7 @@ use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 
 use Illuminate\Support\Facades\Validator;
 use App\Dtos\QuestionDto;
-use App\Dtos\ScoreDto;
+use App\Dtos\QuestionScoreDto;
 use Illuminate\Validation\ValidationException;
 use PDO;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -511,7 +511,7 @@ class QuestionController extends ApiBaseController
      */
     protected function getScore(array $inputState): array
     {
-        $scoreDto = new ScoreDto($inputState);
+        $scoreDto = new QuestionScoreDto($inputState);
 
         $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
