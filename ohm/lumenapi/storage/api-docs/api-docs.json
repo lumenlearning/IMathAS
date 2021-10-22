@@ -47,6 +47,87 @@
                 }
             }
         },
+        "/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollment"
+                ],
+                "summary": "Get all enrollments.",
+                "description": "Returns all enrollment.",
+                "operationId": "getAllEnrollments",
+                "parameters": [
+                    {
+                        "name": "user_id_filter",
+                        "in": "query",
+                        "description": "Filter by user ID.",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "int32"
+                        }
+                    },
+                    {
+                        "name": "course_id_filter",
+                        "in": "query",
+                        "description": "Filter by course ID.",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/enrollment_collection"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "",
+                                        "value": [
+                                            {
+                                                "id": 2,
+                                                "user_id": 8,
+                                                "course_id": 1,
+                                                "lti_course_id": 0,
+                                                "last_access": 1491866005,
+                                                "has_valid_access_code": false,
+                                                "is_opted_out_of_assessments": false,
+                                                "created_at": null
+                                            },
+                                            {
+                                                "id": 4,
+                                                "user_id": 21,
+                                                "course_id": 0,
+                                                "lti_course_id": 0,
+                                                "last_access": 0,
+                                                "has_valid_access_code": false,
+                                                "is_opted_out_of_assessments": false,
+                                                "created_at": null
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/enrollments/{id}": {
             "get": {
                 "tags": [
@@ -568,6 +649,17 @@
                     "created_at": {
                         "description": "The creation timestamp for the enrollment.",
                         "type": "int32"
+                    }
+                },
+                "type": "object"
+            },
+            "enrollment_collection": {
+                "properties": {
+                    "": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/enrollment"
+                        }
                     }
                 },
                 "type": "object"

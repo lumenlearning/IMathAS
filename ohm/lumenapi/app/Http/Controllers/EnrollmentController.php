@@ -31,6 +31,78 @@ class EnrollmentController extends ApiBaseController
         $this->enrollmentService = $enrollmentService;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/enrollments",
+     *     tags={"Enrollment"},
+     *     summary="Get all enrollments.",
+     *     description="Returns all enrollment.",
+     *     operationId="getAllEnrollments",
+     *     @OA\Parameter(
+     *         name="user_id_filter",
+     *         in="query",
+     *         description="Filter by user ID.",
+     *         required=false,
+     *         explode=true,
+     *         @OA\Schema(
+     *             type="int32"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="course_id_filter",
+     *         in="query",
+     *         description="Filter by course ID.",
+     *         required=false,
+     *         explode=true,
+     *         @OA\Schema(
+     *             type="int32"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(ref="#/components/schemas/enrollment_collection"),
+     *           @OA\Examples(example=200, summary="", value={
+     *              {
+     *                  "id": 2,
+     *                  "user_id": 8,
+     *                  "course_id": 1,
+     *                  "lti_course_id": 0,
+     *                  "last_access": 1491866005,
+     *                  "has_valid_access_code": false,
+     *                  "is_opted_out_of_assessments": false,
+     *                  "created_at": null
+     *              },
+     *              {
+     *                  "id": 4,
+     *                  "user_id": 21,
+     *                  "course_id": 0,
+     *                  "lti_course_id": 0,
+     *                  "last_access": 0,
+     *                  "has_valid_access_code": false,
+     *                  "is_opted_out_of_assessments": false,
+     *                  "created_at": null
+     *              }
+     *            }
+     *           ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
     public function getAllEnrollments(Request $request): JsonResponse
     {
         try {
@@ -257,6 +329,16 @@ class EnrollmentController extends ApiBaseController
      *     property="created_at",
      *     type="int32",
      *     description="The creation timestamp for the enrollment."
+     *   ),
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *   schema="enrollment_collection",
+     *   @OA\Property(
+     *     type="array",
+     *     @OA\Items(ref="#/components/schemas/enrollment")
      *   ),
      * )
      */
