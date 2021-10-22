@@ -118,8 +118,8 @@ $app->router->group([
 
     //ohm/ohm/lumenapi/bootstrap/
     //.. / ../       ../       ../
-    require __DIR__.'/../../../assess2/questions/QuestionGenerator.php';
-    require __DIR__.'/../../../assess2/AssessStandalone.php';
+    require_once __DIR__.'/../../../assess2/questions/QuestionGenerator.php';
+    require_once __DIR__.'/../../../assess2/AssessStandalone.php';
 });
 
 return $app;
