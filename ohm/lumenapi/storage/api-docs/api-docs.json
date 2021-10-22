@@ -47,10 +47,149 @@
                 }
             }
         },
+        "/enrollments/{id}": {
+            "get": {
+                "tags": [
+                    "Enrollment"
+                ],
+                "summary": "Get an enrollment by ID.",
+                "description": "Returns an enrollment.",
+                "operationId": "getEnrollmentById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the enrollment to return.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/enrollment"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "",
+                                        "value": {
+                                            "id": 2,
+                                            "user_id": 8,
+                                            "course_id": 1,
+                                            "lti_course_id": 0,
+                                            "last_access": 1491866005,
+                                            "has_valid_access_code": false,
+                                            "is_opted_out_of_assessments": false,
+                                            "created_at": null
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Enrollment"
+                ],
+                "summary": "Update an enrollment by ID.",
+                "description": "Updates an enrollment.",
+                "operationId": "updateEnrollmentById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the enrollment to update.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "has_valid_access_code": {
+                                        "description": "Does the user have a valid access code?",
+                                        "type": "boolean"
+                                    },
+                                    "is_opted_out_of_assessments": {
+                                        "description": "Is the user opted out of assessments?",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "has_valid_access_code": false,
+                                "is_opted_out_of_assessments": false
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/enrollment"
+                                },
+                                "examples": [
+                                    {
+                                        "example": 200,
+                                        "summary": "",
+                                        "value": {
+                                            "id": 2,
+                                            "user_id": 8,
+                                            "course_id": 1,
+                                            "lti_course_id": 0,
+                                            "last_access": 1491866005,
+                                            "has_valid_access_code": false,
+                                            "is_opted_out_of_assessments": false,
+                                            "created_at": null
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/question": {
             "post": {
                 "tags": [
-                    "Display"
+                    "Question Display"
                 ],
                 "summary": "Retrieves question HTML for given question set id and seed.",
                 "operationId": "App\\Http\\Controllers\\QuestionController::getQuestion",
@@ -187,7 +326,7 @@
         "/questions": {
             "post": {
                 "tags": [
-                    "Display"
+                    "Question Display"
                 ],
                 "summary": "Retrieves question HTML a given list of question set ids and seeds.",
                 "operationId": "App\\Http\\Controllers\\QuestionController::getAllQuestions",
@@ -213,7 +352,7 @@
         "/question/score": {
             "post": {
                 "tags": [
-                    "Scoring"
+                    "Question Scoring"
                 ],
                 "summary": "Scores student reponse to a given question.",
                 "operationId": "App\\Http\\Controllers\\QuestionController::scoreQuestion",
@@ -370,7 +509,7 @@
         "/questions/score": {
             "post": {
                 "tags": [
-                    "Scoring"
+                    "Question Scoring"
                 ],
                 "summary": "Scores student reponse to a given list of questions.",
                 "operationId": "App\\Http\\Controllers\\QuestionController::scoreAllQuestions",
@@ -391,6 +530,47 @@
                         "description": "Internal Server Error"
                     }
                 }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "enrollment": {
+                "properties": {
+                    "id": {
+                        "description": "Enrollment ID.",
+                        "type": "int32"
+                    },
+                    "user_id": {
+                        "description": "The user's ID.",
+                        "type": "int32"
+                    },
+                    "course_id": {
+                        "description": "The course ID.",
+                        "type": "int32"
+                    },
+                    "lti_course_id": {
+                        "description": "The LTI course ID.",
+                        "type": "int32"
+                    },
+                    "last_access": {
+                        "description": "The user's last access time.",
+                        "type": "int32"
+                    },
+                    "has_valid_access_code": {
+                        "description": "Does the user have a valid access code?",
+                        "type": "boolean"
+                    },
+                    "is_opted_out_of_assessments": {
+                        "description": "Is the user opted out of assessments?",
+                        "type": "int32"
+                    },
+                    "created_at": {
+                        "description": "The creation timestamp for the enrollment.",
+                        "type": "int32"
+                    }
+                },
+                "type": "object"
             }
         }
     }

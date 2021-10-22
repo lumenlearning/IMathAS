@@ -70,7 +70,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/question",
      *     summary="Retrieves question HTML for given question set id and seed.",
-     *     tags={"Display"},
+     *     tags={"Question Display"},
      *     @OA\Parameter(
      *       name="Authorization",
      *       in="header",
@@ -219,7 +219,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/questions",
      *     summary="Retrieves question HTML a given list of question set ids and seeds.",
-     *     tags={"Display"},
+     *     tags={"Question Display"},
      *     @OA\Response(
      *         response="200",
      *         description="OK",
@@ -261,7 +261,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/question/score",
      *     summary="Scores student reponse to a given question.",
-     *     tags={"Scoring"},
+     *     tags={"Question Scoring"},
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -444,7 +444,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/questions/score",
      *     summary="Scores student reponse to a given list of questions.",
-     *     tags={"Scoring"},
+     *     tags={"Question Scoring"},
      *     @OA\Response(
      *         response="200",
      *         description="OK",

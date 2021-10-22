@@ -52,11 +52,11 @@ $router->group(
         ]);
 
         $router->get('/enrollments/{id}', [
-            'uses' => 'EnrollmentController@getEnrollment'
+            'uses' => 'EnrollmentController@getEnrollmentById'
         ]);
 
         $router->put('/enrollments/{id}', [
-            'uses' => 'EnrollmentController@updateEnrollment'
+            'uses' => 'EnrollmentController@updateEnrollmentById'
         ]);
     }
 );

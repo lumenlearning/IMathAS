@@ -4,7 +4,7 @@
 
 The project currently runs from a sub-folder of the existing ohm application and does not use ohm's existing composer.json or vendor directory. It has its own composer.json file and must therefore have composer run separately from ohm composer from within project root.
 
-From within ./ohm/lumen-api
+From within ./ohm/lumenapi
 ```bash
  composer update 
  composer install
@@ -18,7 +18,7 @@ A .env.sample is provided and should be renamed to .env and updated with the app
 
 ## Swagger
 
-The Swagger UI page is currently access via http://<host>/ohm/lumen-api/public/api/documentation.
+The Swagger UI page is currently access via http://<host>/ohm/lumenapi/public/api/documentation.
 
 Data for the UI page is located in ./storage/api-docs/app-docs.json.
 

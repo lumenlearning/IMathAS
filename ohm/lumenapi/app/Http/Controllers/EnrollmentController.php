@@ -1,7 +1,4 @@
 <?php
-/**
- * @OA\Info(title="API", version="1.0")
- */
 
 namespace App\Http\Controllers;
 
@@ -48,7 +45,57 @@ class EnrollmentController extends ApiBaseController
         }
     }
 
-    public function getEnrollment(Request $request, int $id): JsonResponse
+    /**
+     * @OA\Get(
+     *     path="/enrollments/{id}",
+     *     tags={"Enrollment"},
+     *     summary="Get an enrollment by ID.",
+     *     description="Returns an enrollment.",
+     *     operationId="getEnrollmentById",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the enrollment to return.",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int32"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(ref="#/components/schemas/enrollment"),
+     *           @OA\Examples(example=200, summary="", value={
+     *              "id": 2,
+     *              "user_id": 8,
+     *              "course_id": 1,
+     *              "lti_course_id": 0,
+     *              "last_access": 1491866005,
+     *              "has_valid_access_code": false,
+     *              "is_opted_out_of_assessments": false,
+     *              "created_at": null
+     *             }
+     *           ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
+    public function getEnrollmentById(Request $request, int $id): JsonResponse
     {
         try {
             $enrollment = $this->enrollmentService->getById($id);
@@ -63,9 +110,85 @@ class EnrollmentController extends ApiBaseController
         }
     }
 
-    public function updateEnrollment(Request $request, int $id): JsonResponse
+    /**
+     * @OA\Put(
+     *     path="/enrollments/{id}",
+     *     tags={"Enrollment"},
+     *     summary="Update an enrollment by ID.",
+     *     description="Updates an enrollment.",
+     *     operationId="updateEnrollmentById",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the enrollment to update.",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer",
+     *             format="int32"
+     *         )
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(
+     *             @OA\Property(
+     *               property="has_valid_access_code",
+     *               type="boolean",
+     *               description="Does the user have a valid access code?"
+     *             ),
+     *             @OA\Property(
+     *               property="is_opted_out_of_assessments",
+     *               type="boolean",
+     *               description="Is the user opted out of assessments?"
+     *             ),
+     *          ),
+     *          example={
+     *              "has_valid_access_code": false,
+     *              "is_opted_out_of_assessments": false,
+     *            }
+     *          ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *         @OA\MediaType(
+     *           mediaType="application/json",
+     *           @OA\Schema(ref="#/components/schemas/enrollment"),
+     *           @OA\Examples(example=200, summary="", value={
+     *              "id": 2,
+     *              "user_id": 8,
+     *              "course_id": 1,
+     *              "lti_course_id": 0,
+     *              "last_access": 1491866005,
+     *              "has_valid_access_code": false,
+     *              "is_opted_out_of_assessments": false,
+     *              "created_at": null
+     *             }
+     *           ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
+    public function updateEnrollmentById(Request $request, int $id): JsonResponse
     {
         try {
+            $this->validate($request, [
+                'has_valid_access_code' => 'required|boolean',
+                'is_opted_out_of_assessments' => 'required|boolean'
+            ]);
+
             $input = $request->only(self::WRITE_ALLOWED_FIELDS);
             $enrollment = $this->enrollmentService->updateById($id, $input);
             return response()->json($enrollment);
@@ -87,4 +210,54 @@ class EnrollmentController extends ApiBaseController
         }
         return $filters;
     }
+
+    /*
+     * Swagger refs
+     */
+
+    /**
+     * @OA\Schema(
+     *   schema="enrollment",
+     *   @OA\Property(
+     *     property="id",
+     *     type="int32",
+     *     description="Enrollment ID."
+     *   ),
+     *   @OA\Property(
+     *     property="user_id",
+     *     type="int32",
+     *     description="The user's ID."
+     *   ),
+     *   @OA\Property(
+     *     property="course_id",
+     *     type="int32",
+     *     description="The course ID."
+     *   ),
+     *   @OA\Property(
+     *     property="lti_course_id",
+     *     type="int32",
+     *     description="The LTI course ID."
+     *   ),
+     *   @OA\Property(
+     *     property="last_access",
+     *     type="int32",
+     *     description="The user's last access time."
+     *   ),
+     *   @OA\Property(
+     *     property="has_valid_access_code",
+     *     type="boolean",
+     *     description="Does the user have a valid access code?"
+     *   ),
+     *   @OA\Property(
+     *     property="is_opted_out_of_assessments",
+     *     type="int32",
+     *     description="Is the user opted out of assessments?"
+     *   ),
+     *   @OA\Property(
+     *     property="created_at",
+     *     type="int32",
+     *     description="The creation timestamp for the enrollment."
+     *   ),
+     * )
+     */
 }
