@@ -20,6 +20,7 @@ script:
   - ./composer run-script test-mom
   #- ./composer run-script test-ohm
   - ./vendor/bin/codecept run unit
+  - cd ohm/lumenapi && composer test
 env:
   global:
     - CLI=true
