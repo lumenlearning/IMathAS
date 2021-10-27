@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Controllers;
 
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
 use Mockery;
 use ReflectionClass;
@@ -119,6 +120,21 @@ class EnrollmentControllerTest extends TestCase
         $this->assertEquals(21, $jsonData[1]->user_id);
     }
 
+    public function testGetAllEnrollments_NoneFound(): void
+    {
+        $this->enrollmentService
+            ->shouldReceive('getAll')
+            ->andReturn([]);
+
+        $request = Request::create('/api/dev/v1/enrollments', 'GET');
+        $jsonResponse = $this->enrollmentController->getAllEnrollments($request);
+        $jsonData = $jsonResponse->getData();
+
+        $this->assertEquals(200, $jsonResponse->getStatusCode());
+        // A valid Enrollment collection is returned.
+        $this->assertEquals(0, sizeof($jsonData));
+    }
+
     /*
      * getEnrollmentById
      */
@@ -144,6 +160,19 @@ class EnrollmentControllerTest extends TestCase
         $this->assertEquals(true, $jsonData[0]->has_valid_access_code);
         $this->assertEquals(false, $jsonData[0]->is_opted_out_of_assessments);
         $this->assertEquals(null, $jsonData[0]->created_at);
+    }
+
+    public function testGetEnrollmentById_NotFound(): void
+    {
+        $this->enrollmentService
+            ->shouldReceive('getById')
+            ->with(42)
+            ->andReturn(null);
+
+        $request = Request::create('/api/dev/v1/enrollments/42', 'GET');
+        $jsonResponse = $this->enrollmentController->getEnrollmentById($request, 42);
+
+        $this->assertEquals(404, $jsonResponse->getStatusCode());
     }
 
     /*
@@ -208,6 +237,23 @@ class EnrollmentControllerTest extends TestCase
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
         $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+    }
+
+    public function testUpdateEnrollmentById_NotFound(): void
+    {
+        $this->enrollmentService
+            ->shouldReceive('updateById')
+            ->withAnyArgs()
+            ->andThrow(RelationNotFoundException::class);
+
+        $request = Request::create('/api/dev/v1/enrollments/42', 'PUT', [
+            'has_valid_access_code' => true,
+            'is_opted_out_of_assessments' => false,
+        ]);
+        $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
+        $jsonData = $jsonResponse->getData();
+
+        $this->assertEquals(404, $jsonResponse->getStatusCode());
     }
 
     /*

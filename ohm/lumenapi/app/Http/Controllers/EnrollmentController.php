@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -265,6 +266,8 @@ class EnrollmentController extends ApiBaseController
             $input = $request->only(self::WRITE_ALLOWED_FIELDS);
             $enrollment = $this->enrollmentService->updateById($id, $input);
             return response()->json($enrollment);
+        } catch (RelationNotFoundException $e) {
+            return response()->json(null)->setStatusCode(404);
         } catch (Exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);
