@@ -2,7 +2,6 @@
 
 namespace App\Dtos;
 
-use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
 
 abstract class AbstractDto

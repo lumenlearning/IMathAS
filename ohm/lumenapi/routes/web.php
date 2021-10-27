@@ -40,13 +40,7 @@ $router->group(
         $router->post('/questions/score', [
             'uses' => 'QuestionController@scoreAllQuestions'
         ]);
-    }
-);
 
-// FIXME: Move this back to the main router group after done with OHM-1083.
-$router->group(
-    ['prefix' => 'api/dev/v1'],
-    function() use ($router) {
         $router->get('/enrollments', [
             'uses' => 'EnrollmentController@getAllEnrollments'
         ]);
