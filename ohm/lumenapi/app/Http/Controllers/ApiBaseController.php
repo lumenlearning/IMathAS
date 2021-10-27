@@ -9,8 +9,8 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 class ApiBaseController extends BaseController
 {
     // Pagination settings
-    private $defaultPageSize = 10;
-    private $maxPageSize = 100;
+    const DEFAULT_PAGE_SIZE = 10;
+    const MAX_PAGE_SIZE = 100;
 
     /**
      * Create a new controller instance.
@@ -45,9 +45,12 @@ class ApiBaseController extends BaseController
             $pageNum = 0;
         }
 
-        $pageSize = $request->get('per_page', $this->defaultPageSize);
-        if ($this->maxPageSize < $pageSize) {
-            $pageSize = $this->maxPageSize;
+        $pageSize = $request->get('per_page', self::DEFAULT_PAGE_SIZE);
+        if (self::MAX_PAGE_SIZE < $pageSize) {
+            $pageSize = self::MAX_PAGE_SIZE;
+        }
+        if (1 > $pageSize) {
+            $pageSize = self::DEFAULT_PAGE_SIZE;
         }
 
         return array($pageNum, $pageSize);

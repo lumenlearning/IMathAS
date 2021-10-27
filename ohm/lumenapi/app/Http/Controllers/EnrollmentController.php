@@ -11,6 +11,7 @@ use App\Services\Interfaces\EnrollmentServiceInterface;
 
 class EnrollmentController extends ApiBaseController
 {
+    // These fields may be written to by API clients.
     const WRITE_ALLOWED_FIELDS = [
         'has_valid_access_code',
         'is_opted_out_of_assessments'
