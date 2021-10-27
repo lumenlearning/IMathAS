@@ -11,6 +11,7 @@ before_script:
   - wget -O composer https://getcomposer.org/download/1.10.16/composer.phar
   - chmod 755 composer
   - ./composer install
+  - cd ohm/lumenapi && composer install && cd ../..
   - php -S 127.0.0.1:8080 -t . &
 script:
   - sleep 3
@@ -20,6 +21,7 @@ script:
   - ./composer run-script test-mom
   #- ./composer run-script test-ohm
   - ./vendor/bin/codecept run unit
+  - cd ohm/lumenapi && composer test
 env:
   global:
     - CLI=true
@@ -30,6 +32,7 @@ env:
     - DB_PASSWORD=""
     - S3_MAIN_BUCKET_NAME=none
     - OHM_API_JWT_SECRET=development_jwt_secret
+    - LOG_CHANNEL=stderr
 deploy:
   - provider: elasticbeanstalk
     access_key_id: AKIA2R75LKKD2R36Q7O4

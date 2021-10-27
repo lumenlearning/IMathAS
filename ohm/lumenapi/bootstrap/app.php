@@ -95,7 +95,9 @@ $app->routeMiddleware([
 */
 
 $app->register(App\Providers\Repositories\AssessmentRepositoryServiceProvider::class);
+$app->register(App\Providers\Repositories\EnrollmentRepositoryServiceProvider::class);
 $app->register(App\Providers\Repositories\QuestionSetRepositoryServiceProvider::class);
+$app->register(App\Providers\Services\EnrollmentServiceProvider::class);
 $app->register(\SwaggerLume\ServiceProvider::class);
 
 /*
@@ -116,8 +118,8 @@ $app->router->group([
 
     //ohm/ohm/lumenapi/bootstrap/
     //.. / ../       ../       ../
-    require __DIR__.'/../../../assess2/questions/QuestionGenerator.php';
-    require __DIR__.'/../../../assess2/AssessStandalone.php';
+    require_once __DIR__.'/../../../assess2/questions/QuestionGenerator.php';
+    require_once __DIR__.'/../../../assess2/AssessStandalone.php';
 });
 
 return $app;

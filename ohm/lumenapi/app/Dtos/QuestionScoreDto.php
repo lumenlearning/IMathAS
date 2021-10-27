@@ -4,7 +4,7 @@ namespace App\Dtos;
 
 use Illuminate\Support\Facades\Log;
 
-class ScoreDto extends BaseDto
+class QuestionScoreDto extends QuestionBaseDto
 {
     private $studentAnswers;
     private $studentAnswerValues;

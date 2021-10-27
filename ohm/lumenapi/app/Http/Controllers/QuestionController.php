@@ -15,7 +15,7 @@ use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 
 use Illuminate\Support\Facades\Validator;
 use App\Dtos\QuestionDto;
-use App\Dtos\ScoreDto;
+use App\Dtos\QuestionScoreDto;
 use Illuminate\Validation\ValidationException;
 use PDO;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -70,7 +70,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/question",
      *     summary="Retrieves question HTML for given question set id and seed.",
-     *     tags={"Display"},
+     *     tags={"Question Display"},
      *     @OA\Parameter(
      *       name="Authorization",
      *       in="header",
@@ -219,7 +219,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/questions",
      *     summary="Retrieves question HTML a given list of question set ids and seeds.",
-     *     tags={"Display"},
+     *     tags={"Question Display"},
      *     @OA\Response(
      *         response="200",
      *         description="OK",
@@ -261,7 +261,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/question/score",
      *     summary="Scores student reponse to a given question.",
-     *     tags={"Scoring"},
+     *     tags={"Question Scoring"},
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -444,7 +444,7 @@ class QuestionController extends ApiBaseController
      * @OA\Post(
      *     path="/questions/score",
      *     summary="Scores student reponse to a given list of questions.",
-     *     tags={"Scoring"},
+     *     tags={"Question Scoring"},
      *     @OA\Response(
      *         response="200",
      *         description="OK",
@@ -511,7 +511,7 @@ class QuestionController extends ApiBaseController
      */
     protected function getScore(array $inputState): array
     {
-        $scoreDto = new ScoreDto($inputState);
+        $scoreDto = new QuestionScoreDto($inputState);
 
         $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
