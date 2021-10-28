@@ -409,7 +409,7 @@ switch($_POST['action']) {
                 $jsondata['under13'] = 1;
             }
         }
-		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights,created_at,jsondata) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :jsondata);");
+		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights,created_at,jsondata) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :created_at, :jsondata);");
 		$stm->execute(array(':SID'=>$_POST['SID'],
 			':password'=>$md5pw,
 			':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
