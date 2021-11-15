@@ -54,9 +54,9 @@ switch($_POST['action']) {
 		if ($_POST['newrights']>$myrights) {
 			$_POST['newrights'] = $myrights;
 		}
-		$stm = $DBH->prepare("SELECT rights,groupid FROM imas_users WHERE id=:id");
+		$stm = $DBH->prepare("SELECT rights,groupid,jsondata FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
-		list($oldrights,$oldgroupid) = $stm->fetch(PDO::FETCH_NUM);
+		list($oldrights,$oldgroupid,$oldjsondata) = $stm->fetch(PDO::FETCH_NUM);
 		if ($row === false) {
 			echo _("invalid id");
 			exit;
@@ -114,6 +114,20 @@ switch($_POST['action']) {
 		if (isset($_POST['doresetpw'])) {
 			$arr[':password'] = $hashpw;
 		}
+        $chgJsondata = false;
+        if (($myrights >= 75 || ($myspecialrights&48)>0) && isset($CFG['GEN']['COPPA'])) {
+            $oldjsondata = json_decode($oldjsondata, true);
+            if ($oldjsondata === null) {
+                $oldjsondata = [];
+            }
+            if (empty($_POST['over13'])) {
+                $oldjsondata['under13'] = 1;
+            } else {
+                unset($oldjsondata['under13']);
+            }
+            $chgJsondata = true;
+            $arr[':jsondata'] = json_encode($oldjsondata);
+        }
 
 		if ($myrights == 100 || ($myspecialrights&32)==32) { //update library groupids
 			if ($_POST['group']==-1) {
@@ -140,6 +154,9 @@ switch($_POST['action']) {
 			if ($chgSID) {
 				$query .= ',SID=:SID';
 			}
+            if ($chgJsondata) {
+                $query .= ',jsondata=:jsondata';
+            }
 			if (isset($_POST['doresetpw'])) {
 				$query .= ',password=:password,forcepwreset=1';
 			}
@@ -156,6 +173,9 @@ switch($_POST['action']) {
 			if ($chgSID) {
 				$query .= ',SID=:SID';
 			}
+            if ($chgJsondata) {
+                $query .= ',jsondata=:jsondata';
+            }
 			if (isset($_POST['doresetpw'])) {
 				$query .= ',password=:password';
 			}
@@ -383,7 +403,13 @@ switch($_POST['action']) {
 		if (isset($_POST['specialrights64']) && $myrights==100) {
 			$specialrights += 64;
 		}
-		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights,created_at) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :created_at);");
+        $jsondata = [];
+        if (($myrights >= 75 || ($myspecialrights&48)>0) && isset($CFG['GEN']['COPPA'])) {
+            if (empty($_POST['over13'])) {
+                $jsondata['under13'] = 1;
+            }
+        }
+		$stm = $DBH->prepare("INSERT INTO imas_users (SID,password,FirstName,LastName,rights,email,groupid,homelayout,specialrights,created_at,jsondata) VALUES (:SID, :password, :FirstName, :LastName, :rights, :email, :groupid, :homelayout, :specialrights, :created_at, :jsondata);");
 		$stm->execute(array(':SID'=>$_POST['SID'],
 			':password'=>$md5pw,
 			':FirstName'=>Sanitize::stripHtmlTags($_POST['firstname']),
@@ -393,7 +419,8 @@ switch($_POST['action']) {
 			':groupid'=>$newgroup,
 			':homelayout'=>$homelayout,
 			':specialrights'=>$specialrights,
-			':created_at'=>time()));
+            ':created_at'=>time())),
+            ':jsondata'=>json_encode($jsondata)));
 		$newuserid = $DBH->lastInsertId();
 		if (isset($CFG['GEN']['enrollonnewinstructor']) && $_POST['newrights']>=20) {
 			$valbits = array();

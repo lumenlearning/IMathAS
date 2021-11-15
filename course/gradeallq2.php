@@ -312,7 +312,7 @@
 
 	$useeditor='review';
 	$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/rubric_min.js?v=051120"></script>';
-	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/gb-scoretools.js?v=060721"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/gb-scoretools.js?v=081921"></script>';
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/index.css?v='.$lastupdate.'" />';
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/gbviewassess.css?v='.$lastupdate.'" />';
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/chunk-common.css?v='.$lastupdate.'" />';
@@ -747,6 +747,16 @@
 					'cid' => $cid, 'add' => 'new', 'quoteq' => "{$loc}-{$qsetid}-{$qdata['seed']}-$aid-{$line['ver']}",
                     'to' => $line['userid'])) . "\">Use in Message</a>";
             echo ' <span class="subdued small">'._('Question ID ').$qsetid.'</span>';
+            if (!empty($qdata['timeactive']['total']) || !empty($qdata['lastchange'])) {
+                echo '<br/>';
+                if (!empty($qdata['timeactive']['total'])) {
+                    echo _('Time spent on this version').': ';
+                    echo round($qdata['timeactive']['total']/60, 1)._(' minutes').'. ';
+                }
+                if (!empty($qdata['lastchange'])) {
+                    echo _('Last Changed').' '.$qdata['lastchange'];
+                }
+            }
 			echo "</div>\n"; //end review div
 			echo '</div>'; //end wrapper div
 			if ($groupdup) {

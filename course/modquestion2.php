@@ -50,6 +50,7 @@ if (!(isset($teacherid))) {
             $showhints = -1;
             $showwork = -1;
             $fixedseeds = null;
+            $extracredit = 0;
             $_POST['copies'] = 1;
         } else {
             if (trim($_POST['points']) == "") {$points = 9999;} else { $points = intval($_POST['points']);}
@@ -76,6 +77,7 @@ if (!(isset($teacherid))) {
             $showwork = Sanitize::onlyInt($_POST['showwork']);
             $rubric = intval($_POST['rubric']);
             $showhints = intval($_POST['showhints']);
+            $extracredit = !empty($_POST['ec']) ? 1 : 0;
             $showcalculator = $_POST['showcalculator']??'default';
         }
         if (isset($_GET['id'])) { //already have id - updating
@@ -83,12 +85,14 @@ if (!(isset($teacherid))) {
             $stm->execute(array($_GET['id']));
             $old_settings = $stm->fetch(PDO::FETCH_ASSOC);
             if (isset($_POST['replacementid']) && $_POST['replacementid'] != '' && intval($_POST['replacementid']) != 0) {
-				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,showwork=:showwork,rubric=:rubric,showcalculator=:showcalculator,showhints=:showhints,fixedseeds=:fixedseeds";
-                $query .= ',questionsetid=:questionsetid WHERE id=:id';
+                $query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans,showwork=:showwork,rubric=:rubric,showcalculator=:showcalculator,showhints=:showhints,fixedseeds=:fixedseeds";
+                $query .= ',questionsetid=:questionsetid,extracredit=:extracredit WHERE id=:id';
                 $stm = $DBH->prepare($query);
                 $settings = array(':points' => $points, ':attempts' => $attempts,
                     ':penalty' => $penalty, ':regen' => $regen, ':showans' => $showans, ':showwork' => $showwork,
                     ':rubric' => $rubric, ':showhints' => $showhints, ':fixedseeds' => $fixedseeds,
+                    ':questionsetid' => $_POST['replacementid'], ':extracredit' => $extracredit,
+                    ':id' => $_GET['id']);
           ':questionsetid'=>$_POST['replacementid'], ':id'=>$_GET['id']
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
@@ -104,12 +108,12 @@ if (!(isset($teacherid))) {
         );
                 $stm->execute($settings);
             } else {
-				$query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans, showwork=:showwork, rubric=:rubric,showcalculator=:showcalculator,showhints=:showhints,fixedseeds=:fixedseeds";
+                $query = "UPDATE imas_questions SET points=:points,attempts=:attempts,penalty=:penalty,regen=:regen,showans=:showans, showwork=:showwork, rubric=:rubric,showcalculator=:showcalculator,showhints=:showhints,fixedseeds=:fixedseeds,extracredit=:extracredit";
                 $query .= " WHERE id=:id";
                 $stm = $DBH->prepare($query);
                 $settings = array(':points' => $points, ':attempts' => $attempts,
                     ':penalty' => $penalty, ':regen' => $regen, ':showans' => $showans, ':showwork' => $showwork,
-                    ':rubric' => $rubric, ':showhints' => $showhints, ':fixedseeds' => $fixedseeds,
+                    ':rubric' => $rubric, ':showhints' => $showhints, ':fixedseeds' => $fixedseeds, ':extracredit' => $extracredit,
           ':id'=>$_GET['id']
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
@@ -151,11 +155,11 @@ if (!(isset($teacherid))) {
             $stm->execute(array(':id' => $aid));
             list($itemorder, $defpoints) = $stm->fetch(PDO::FETCH_NUM);
             for ($i = 0; $i < $_POST['copies']; $i++) {
-				$query = "INSERT INTO imas_questions (assessmentid,points,attempts,penalty,regen,showans,showwork,questionsetid,rubric,showcalculator,showhints,fixedseeds) ";
-				$query .= "VALUES (:assessmentid, :points, :attempts, :penalty, :regen, :showans, :showwork, :questionsetid, :rubric, :showcalculator, :showhints, :fixedseeds)";
+                $query = "INSERT INTO imas_questions (assessmentid,points,attempts,penalty,regen,showans,showwork,questionsetid,rubric,showcalculator,showhints,fixedseeds,extracredit) ";
+                $query .= "VALUES (:assessmentid, :points, :attempts, :penalty, :regen, :showans, :showwork, :questionsetid, :rubric, :showcalculator, :showhints, :fixedseeds, :extracredit)";
                 $stm = $DBH->prepare($query);
                 $stm->execute(array(':assessmentid' => $aid, ':points' => $points, ':attempts' => $attempts, ':penalty' => $penalty, ':regen' => $regen,
-					':showans'=>$showans, ':showwork'=>$showwork, ':questionsetid'=>$_GET['qsetid'], ':rubric'=>$rubric, ':showcalculator'=>$showcalculator, ':showhints'=>$showhints, ':fixedseeds'=>$fixedseeds));
+                    ':showans' => $showans, ':showwork' => $showwork, ':questionsetid' => $_GET['qsetid'], ':rubric' => $rubric, ':showcalculator'=>$showcalculator, ':showhints' => $showhints, ':fixedseeds' => $fixedseeds, ':extracredit' => $extracredit));
                 $qid = $DBH->lastInsertId();
 
                 //add to itemorder
@@ -201,7 +205,7 @@ if (!(isset($teacherid))) {
     } else { //DEFAULT DATA MANIPULATION
 
         if (isset($_GET['id'])) {
-			$stm = $DBH->prepare("SELECT points,attempts,penalty,regen,showans,showwork,rubric,showcalculator,showhints,questionsetid,fixedseeds FROM imas_questions WHERE id=:id");
+            $stm = $DBH->prepare("SELECT points,attempts,penalty,regen,showans,showwork,rubric,showcalculator,showhints,questionsetid,fixedseeds,extracredit FROM imas_questions WHERE id=:id");
             $stm->execute(array(':id' => $_GET['id']));
             $line = $stm->fetch(PDO::FETCH_ASSOC);
             if ($line['penalty'][0] === 'S') {
@@ -229,6 +233,7 @@ if (!(isset($teacherid))) {
             $line['rubric'] = 0;
             $line['showcalculator']='default';
             $line['showhints'] = -1;
+            $line['extracredit'] = 0;
             $qsetid = $_GET['qsetid'];
         }
 
@@ -238,6 +243,7 @@ if (!(isset($teacherid))) {
         if (isset($_GET['loc'])) {
             $qdescrip = $_GET['loc'] . ': ' . $qdescrip;
         }
+        $qingroup = (strpos($_GET['loc'],'-') !== false);
 
         $rubric_vals = array(0);
         $rubric_names = array('None');
@@ -339,6 +345,7 @@ if (isset($_GET['id'])) {
     ?>
 </h1></div>
 <p><?php
+
 echo '<b>' . Sanitize::encodeStringForDisplay($qdescrip) . '</b> ';
     echo '<button type="button" onclick="previewq(' . Sanitize::encodeStringForJavascript($qsetid) . ')">' . _('Preview') . '</button>';
     ?>
@@ -428,6 +435,14 @@ writeHtmlSelect('rubric', $rubric_vals, $rubric_names, $line['rubric']);
     ?>
     </span><br class="form"/>
 <?php
+if (!$qingroup) {
+?>
+<span class="form"><label for="ec"><?php echo _('Count as extra credit?');?></label></span>
+<span class=formright>
+    <input type=checkbox value=1 name=ec id=ec <?php if ($line['extracredit'] > 0) { echo 'checked';} ?>>
+</span><br class="form"/>
+<?php
+}
 if (isset($_GET['qsetid'])) { //adding new question
         echo "<span class=form>" . _("Number of copies of question to add:") . "</span><span class=formright><input type=text size=4 name=copies value=\"1\"/></span><br class=form />";
     } else if (!$beentaken) {

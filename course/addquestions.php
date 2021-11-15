@@ -484,7 +484,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var assessver = '$aver';
 		</script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addquestions.js?v=042220\"></script>";
-	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort.js?v=042821\"></script>";
+	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort.js?v=090821\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/junkflag.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";
 	$placeinhead .= "<link rel=\"stylesheet\" href=\"$staticroot/course/addquestions.css?v=100517\" type=\"text/css\" />";
@@ -499,6 +499,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showcalculator,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	list($itemorder,$page_assessmentName,$defpoints,$displaymethod,$showcalculatordef,$showhintsdef,$showworkdef,$assessintro) = $stm->fetch(PDO::FETCH_NUM);
+    $showworkdef = ($showworkdef & 3);
 	$ln = 1;
 
 	// Format of imas_assessments.intro is a JSON representation like
@@ -542,7 +543,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	$query = "SELECT iq.id,iq.questionsetid,iqs.description,iqs.userights,iqs.ownerid,";
 	$query .= "iqs.qtype,iq.points,iq.withdrawn,iqs.extref,imas_users.groupid,iq.showcalculator,iq.showhints,";
     $query .= "iq.showwork,iq.rubric,iqs.solution,iqs.solutionopts,iqs.meantime,iqs.meanscore,";
-    $query .= "iqs.meantimen FROM imas_questions AS iq ";
+    $query .= "iqs.meantimen,iq.extracredit FROM imas_questions AS iq ";
 	$query .= "JOIN imas_questionset AS iqs ON iqs.id=iq.questionsetid JOIN imas_users ON iqs.ownerid=imas_users.id ";
 	$query .= "WHERE iq.assessmentid=:aid";
 	$stm = $DBH->prepare($query);
@@ -616,7 +617,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			(int)$canedit,
 			(int)Sanitize::onlyInt($line['withdrawn']),
 			(int)$extrefval,
-            $timeout
+            $timeout,
+            (int)Sanitize::onlyInt($line['extracredit'])
         );
 
 	}
@@ -1241,6 +1243,7 @@ if ($overwriteBody==1) {
     if ($aver > 1 && $submitby == 'by_assessment') {
         echo '<br><a href="autoexcuse.php?aid='.$aid.'&amp;cid='.$cid.'">'._('Define Auto-Excuse').'</a>';
     }
+    echo '<br><a href="findquestion.php?aid='.$aid.'&amp;cid='.$cid.'">'._('Find Question in Course').'</a>';
     if ($aver > 1) {
         echo '<br><a href="addquestions2.php?aid='.$aid.'&amp;cid='.$cid.'">'._('Try New Add/Remove (Beta)').'</a>';
     }
