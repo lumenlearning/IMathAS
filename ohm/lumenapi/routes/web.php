@@ -40,5 +40,17 @@ $router->group(
         $router->post('/questions/score', [
             'uses' => 'QuestionController@scoreAllQuestions'
         ]);
+
+        $router->get('/enrollments', [
+            'uses' => 'EnrollmentController@getAllEnrollments'
+        ]);
+
+        $router->get('/enrollments/{id}', [
+            'uses' => 'EnrollmentController@getEnrollmentById'
+        ]);
+
+        $router->put('/enrollments/{id}', [
+            'uses' => 'EnrollmentController@updateEnrollmentById'
+        ]);
     }
 );

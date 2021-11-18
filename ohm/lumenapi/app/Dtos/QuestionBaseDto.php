@@ -2,7 +2,7 @@
 
 namespace App\Dtos;
 
-class BaseDto {
+class QuestionBaseDto {
     protected $seed;
     protected $partAttemptNumber = [];
     protected $questionSetId;

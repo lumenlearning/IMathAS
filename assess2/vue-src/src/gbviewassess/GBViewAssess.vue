@@ -62,6 +62,7 @@
             <input id="assessoverride" size=4
               :value = "aData.scoreoverride"
               @input = "setScoreOverride"
+              @keyup.enter="submitForm"
             />/{{ aData.points_possible }}
           </span>
           <span v-else>
@@ -86,7 +87,7 @@
           </button>
           <span v-if="showOverride">
             <label for="assessoverride">{{ $t('gradebook.override') }}</label>:
-            <input id="assessoverride" size=4 v-model="assessOverride" />
+            <input id="assessoverride" size=4 v-model="assessOverride" @keyup.enter="submitForm" />
           </span>
         </span>
         <button
@@ -288,6 +289,9 @@
                 <strong>
                   {{ $tc('question_n', qn+1) }}.
                 </strong>
+                <em v-if="qdata[curQver[qn]].extracredit" class="small subdued">
+                  {{ $t('extracredit') }}
+                </em>
 
                 <gb-question-select
                   v-if = "aData.submitby === 'by_question'"
@@ -322,6 +326,7 @@
                 :canedit = "canEdit"
                 :qdata = "qdata[curQver[qn]]"
                 :qn = "qn"
+                @submitform = "submitForm"
               />
             </div>
           </div>
@@ -716,6 +721,9 @@ export default {
       }
       var doexit = (exit === true);
       actions.saveChanges(doexit);
+    },
+    submitForm () {
+      this.submitChanges(true);
     },
     exit () {
       window.location = window.exiturl;

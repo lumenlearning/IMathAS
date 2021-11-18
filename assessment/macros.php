@@ -32,11 +32,11 @@ array_push($GLOBALS['allowedmacros'],"exp","sec","csc","cot","sech","csch","coth
  "getstuans","checkreqtimes","stringtopolyterms","getfeedbackbasic","getfeedbacktxt",
  "getfeedbacktxtessay","getfeedbacktxtnumber","getfeedbacktxtnumfunc",
  "getfeedbacktxtcalculated","explode","gettwopointlinedata","getdotsdata",
- "getopendotsdata","gettwopointdata","getlinesdata","getineqdata","adddrawcommand",
+ "getopendotsdata","gettwopointdata","gettwopointformulas","getlinesdata","getineqdata","adddrawcommand",
  "mergeplots","array_unique","ABarray","scoremultiorder","scorestring","randstate",
  "randstates","prettysmallnumber","makeprettynegative","rawurlencode","fractowords",
  "randcountry","randcountries","sorttwopointdata","addimageborder","formatcomplex",
- "array_values","comparelogic","stuansready","comparentuples","isset");
+ "array_values","comparelogic","stuansready","comparentuples","isset","atan2");
 
 function mergearrays() {
 	$args = func_get_args();
@@ -2066,11 +2066,11 @@ function makescinot($n,$d=8,$f="x") {
 		$mant = number_format($n/pow(10,$exp),$d);
 	}
 	if ($f=="*") {
-		return "$isneg $mant * 10^($exp)";
+		return "$isneg$mant*10^($exp)";
 	} else if ($f=="E") {
-		return "$isneg $mant E $exp";
+		return "$isneg{$mant}E$exp";
 	} else {
-		return "$isneg $mant xx 10^($exp)";
+		return "$isneg$mant xx 10^($exp)";
 	}
 }
 
@@ -4091,11 +4091,15 @@ function gettwopointdata($str,$type,$xmin=null,$xmax=null,$ymin=null,$ymax=null,
 		$code = 8.3;
 	} else if ($type=='log') {
 		$code = 8.4;
-	} else if ($type=='circle' || $type=='circlerad') {
+	} else if ($type=='genexp') {
+        $code = 8.5;
+    } else if ($type=='genlog') {
+        $code = 8.6;
+    } else if ($type=='circle' || $type=='circlerad') {
 		$code = 7;
 	} else if ($type=='ellipse' || $type=='ellipserad') {
-    $code = 7.2;
-  } else if ($type=='sin') {
+        $code = 7.2;
+    } else if ($type=='sin') {
 		$code = 9.1;
 	} else if ($type=='cos') {
 		$code = 9;
@@ -4118,17 +4122,235 @@ function gettwopointdata($str,$type,$xmin=null,$xmax=null,$ymin=null,$ymax=null,
 			$pts[3] = ($pts[3] - $imgborder)/$pixelsperx + $xmin;
 			$pts[2] = ($h - $pts[2] - $imgborder)/$pixelspery + $ymin;
 			$pts[4] = ($h - $pts[4] - $imgborder)/$pixelspery + $ymin;
-      if ($type=='ellipserad') {
-        $pts[3] = abs($pts[3]-$pts[1]);
-        $pts[4] = abs($pts[4]-$pts[2]);
-      } else if ($type=='circlerad') {
-        $pts[3] = sqrt(pow($pts[3]-$pts[1],2)+pow($pts[4]-$pts[2],2));
-        unset($pts[4]);
-      }
-			$outpts[] = array($pts[1], $pts[2], $pts[3], $pts[4]);
+            $outpt = array($pts[1], $pts[2], $pts[3], $pts[4]);
+            if ($type=='ellipserad') {
+                $pts[3] = abs($pts[3]-$pts[1]);
+                $pts[4] = abs($pts[4]-$pts[2]);
+                $outpt = array($pts[1], $pts[2], $pts[3], $pts[4]);
+            } else if ($type=='circlerad') {
+                $pts[3] = sqrt(pow($pts[3]-$pts[1],2)+pow($pts[4]-$pts[2],2));
+                $outpt = array($pts[1], $pts[2], $pts[3]);
+            } else if ($type=='genexp' || $type=='genlog') {
+                $pts[5] = ($pts[5] - $imgborder)/$pixelsperx + $xmin;
+                $pts[6] = ($h - $pts[6] - $imgborder)/$pixelspery + $ymin;
+                // Last value is the asymptote: y val for genexp, x val for genlog
+                $outpt = ($type=='genexp') ? array($pts[3], $pts[4], $pts[5], $pts[6], $pts[2]) : array($pts[3], $pts[4], $pts[5], $pts[6], $pts[1]);
+            }
+			$outpts[] = $outpt;
 		}
 	}
 	return $outpts;
+}
+
+function gettwopointformulas($str,$type,$xmin=null,$xmax=null,$ymin=null,$ymax=null,$w=null,$h=null) {
+  $args = func_get_args();
+  $eqnvars = [];
+  foreach ($args as $key => $arg) {
+    if (strpos($arg,'showequation') !== false) {
+      $showequation = true;
+      if (!is_array($args[$key])) {
+        $eqnvars = explode(",",$args[$key]);
+      }
+    }
+  }
+  $x = (!empty($eqnvars[1])) ? $eqnvars[1] : 'x';
+  $y = (!empty($eqnvars[2])) ? $eqnvars[2] : 'y';
+  $pts = gettwopointdata($str,$type,$xmin,$xmax,$ymin,$ymax,$w,$h);
+  if (!empty($pts)) {
+    if ($type=='line' || $type=='lineseg' || $type=='ray') {
+  		foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12) {
+          $slope = ($pt[3]-$pt[1])/($pt[2]-$pt[0]);
+          $int = $pt[1] - $slope*$pt[0];
+          $outexps[] = makexxpretty("$slope $x + $int");
+          $outeqs[] = makexxpretty("$y = $slope $x + $int");
+        }
+      }
+  	} else if ($type=='parab') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12) {
+          $k = ($pt[3]-$pt[1])/pow($pt[2]-$pt[0],2);
+          $coef1 = -2*$pt[0]*$k;
+          $coef2 = pow($pt[0],2)*$k + $pt[1];
+          $outexps[] = makexxpretty("$k $x^2 + $coef1 $x + $coef2");
+          $outeqs[] = makexxpretty("$y = $k $x^2 + $coef1 $x + $coef2");
+        }
+      }
+  	} else if ($type=='horizparab') {
+  	  foreach ($pts as $key => $pt) {
+        if (abs($pt[1]-$pt[3]) > 1E-12) {
+          $k = ($pt[2]-$pt[0])/pow($pt[3]-$pt[1],2);
+          $coef1 = -2*$pt[1]*$k;
+          $coef2 = pow($pt[1],2)*$k + $pt[0];
+          $outexps[] = makexxpretty("$k $y^2 + $coef1 $y + $coef2");
+          $outeqs[] = makexxpretty("$x = $k $y^2 + $coef1 $y + $coef2");
+        }
+      }
+  	} else if ($type=='cubic') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12) {
+          $k = ($pt[3]-$pt[1])/pow($pt[2]-$pt[0],3);
+          $coef1 = -3*$pt[0]*$k;
+          $coef2 = 3*pow($pt[0],2)*$k;
+          $coef3 = -1*pow($pt[0],3)*$k+$pt[1];
+          $outexps[] = makexxpretty("$k $x^3 + $coef1 $x^2 + $coef2 $x + $coef3");
+          $outeqs[] = makexxpretty("$y = $k $x^3 + $coef1 $x^2 + $coef2 $x + $coef3");
+        }
+      }
+  	} else if ($type=='sqrt') {
+      foreach ($pts as $key => $pt) {
+    		if (abs($pt[0]-$pt[2]) > 1E-12) {
+          $k = ($pt[3]-$pt[1])/sqrt(abs($pt[2]-$pt[0]));
+          $j = ($pt[2] > $pt[0]) ? 1 : -1;
+          $outexps[] = makexxpretty("$k sqrt($j $x - $pt[0]) + $pt[1]");
+          $outeqs[] = makexxpretty("$y = $k sqrt($j $x - $pt[0]) + $pt[1]");
+        }
+      }
+  	} else if ($type=='cuberoot') {
+      foreach ($pts as $key => $pt) {
+    		if (abs($pt[0]-$pt[2]) > 1E-12) {
+          $k = abs($pt[3]-$pt[1])/pow(abs($pt[2]-$pt[0]),1/3);
+          $k *= (($pt[2]-$pt[0])*($pt[3]-$pt[1]) < 0) ? -1 : 1;
+          $outexps[] = makexxpretty("$k root(3)($x - $pt[0]) + $pt[1]");
+          $outeqs[] = makexxpretty("$y = $k root(3)($x - $pt[0]) + $pt[1]");
+        }
+      }
+  	} else if ($type=='abs') {
+      foreach ($pts as $key => $pt) {
+    		if (abs($pt[0]-$pt[2]) > 1E-12) {
+          $k = ($pt[2] > $pt[0]) ? ($pt[3]-$pt[1])/($pt[2]-$pt[0]) : -1*($pt[3]-$pt[1])/($pt[2]-$pt[0]);
+          $outexps[] = makexxpretty("$k abs($x - $pt[0]) + $pt[1]");
+          $outeqs[] = makexxpretty("$y = $k abs($x - $pt[0]) + $pt[1]");
+        }
+      }
+  	} else if ($type=='rational') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12 && abs($pt[1]-$pt[3]) > 1E-12) {
+          $k = ($pt[3]-$pt[1])*($pt[2]-$pt[0]);
+          $outexps[] = makexxpretty("$k/($x - $pt[0]) + $pt[1]");
+          $outeqs[] = makexxpretty("$y = $k/($x - $pt[0]) + $pt[1]");
+        }
+      }
+  	} else if ($type=='exp') {
+      foreach ($pts as $key => $pt) {
+        if ($pt[1]*$pt[3] > 0) {
+          if (abs($pt[0]-$pt[2]) > 1E-12) {
+            $k = pow($pt[3]/$pt[1],1/($pt[2]-$pt[0]));
+            $j = $pt[1]/pow($k,$pt[0]);
+          } 
+          $outexps[] = ($pt[3]==$pt[1]) ? $pt[1] : makexxpretty("$j($k)^$x");
+          $outeqs[] = ($pt[3]==$pt[1]) ? "$y = $pt[1]" : makexxpretty("$y = $j($k)^$x");
+        } else if ($pt[1] == 0 && $pt[3] == 0) {
+          $outexps[] = 0;
+          $outeqs[] = "$y = 0";
+        }
+      }
+  	} else if ($type=='log') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12 && abs($pt[1]-$pt[3]) > 1E-12 && $pt[0]*$pt[2] > 0) {
+          $j = abs($pt[0])/$pt[0];
+          $k = ($pt[3]-$pt[1])/(log($j*$pt[2])-log($j*$pt[0]));
+          $b = $pt[1]-$k*log($j*$pt[0]);
+          $outexps[] = makexxpretty("$k ln($j $x) + $b");
+          $outeqs[] = makexxpretty("$y = $k ln($j $x) + $b");
+        }
+      }
+  	} else if ($type=='genexp') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[1]-$pt[3]) < 1E-12) {
+          $outexp = "$pt[1]";
+          $outeq = "$y = $pt[1]";
+        } else if (($pt[1]-$pt[4])*($pt[3]-$pt[4]) > 0 && abs($pt[0]-$pt[2]) > 1E-12) {
+          if (abs($pt[1]-$pt[3]) > 1E-12) {
+            $b = pow(($pt[3]-$pt[4])/($pt[1]-$pt[4]),1/($pt[2]-$pt[0]));
+            $a = ($pt[3]-$pt[1])/(pow($b,$pt[2])-pow($b,$pt[0]));
+          } elseif (abs($pt[1]-$pt[3]) <= 1E-12) {
+            $outexp = "$pt[1]";
+            $outeq = "$y = $pt[1]";
+          }
+          $outexp = makexxpretty("$a($b)^$x + $pt[4]");
+          $outeq = "$y=".$outexp;
+        }
+        $outexps[] = $outexp;
+        $outeqs[] = $outeq;
+      }
+  	} else if ($type=='genlog') {
+      foreach ($pts as $key => $pt) {
+        if (($pt[0]-$pt[4])*($pt[2]-$pt[4]) > 0 && abs($pt[0]-$pt[2]) > 1E-12 && abs($pt[1]-$pt[3]) > 1E-12) {
+          $a = ($pt[3]-$pt[1])/(log(abs($pt[2]-$pt[4]))-log(abs($pt[0]-$pt[4])));
+          $b = $pt[1] - $a*log(abs($pt[0]-$pt[4]));
+          $j = ($pt[0] > $pt[4]) ? 1 : -1;
+          $shift = $pt[4]*$j;
+          $outexp = makexxpretty("$a ln($j $x - $shift) + $b");
+          $outeq = "$y=".$outexp;
+        }
+        $outexps[] = $outexp;
+        $outeqs[] = $outeq;
+      }
+  	} else if ($type=='circle') {
+      foreach ($pts as $key => $pt) {
+        if (!(abs($pt[0]-$pt[2]) < 1E-12 && abs($pt[1]-$pt[3]) < 1E-12)) {
+          $rs = pow($pt[2]-$pt[0],2) + pow($pt[3]-$pt[1],2);
+          $xexp = ($pt[0]==0) ? "$x^2" : "($x-$pt[0])^2";
+          $yexp = ($pt[1]==0) ? "$y^2" : "($y-$pt[1])^2";
+          $outexps[] = makexxpretty("$xexp/$rs + $yexp/$rs");
+          $outeqs[] = makexxpretty("$xexp + $yexp = $rs");
+        }
+      }
+  	} else if ($type=='ellipse') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12 && abs($pt[1]-$pt[3]) > 1E-12) {
+          $as = pow($pt[2]-$pt[0],2);
+          $bs = pow($pt[3]-$pt[1],2);
+          $xexp = ($pt[0]==0) ? "$x^2/$as" : "($x-$pt[0])^2/$as";
+          $yexp = ($pt[1]==0) ? "$y^2/$bs" : "($y-$pt[1])^2/$bs";
+          $outexps[] = makexxpretty("$xexp + $yexp");
+          $outeqs[] = makexxpretty("$xexp + $yexp = 1");
+        }
+      }
+    } else if ($type=='sin') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12) {
+          if (abs($pt[1]-$pt[3]) > 1E-12) {
+            $a = abs($pt[3]-$pt[1]);
+            $b = M_PI/(2*abs($pt[2]-$pt[0]));
+            $c = $pt[1];
+            $shift = (($pt[1]-$pt[3])*($pt[0]-$pt[2]) > 0) ? fmod($pt[0]*$b,2*M_PI) : fmod((2*$pt[2]-$pt[0])*$b,2*M_PI);
+            $outexp = makexxpretty("$a sin($b $x - $shift) + $c");
+            $outeq = "$y=".$outexp;
+          } else if (abs($pt[1]-$pt[3]) <= 1E-12) {
+            $outexp = $pt[1];
+            $outeq = "$y = $pt[1]";
+          }
+        }
+        $outexps[] = $outexp;
+        $outeqs[] = $outeq;
+      }
+  	} else if ($type=='cos') {
+      foreach ($pts as $key => $pt) {
+        if (abs($pt[0]-$pt[2]) > 1E-12) {
+          if (abs($pt[1]-$pt[3]) > 1E-12) {
+            $a = abs($pt[3]-$pt[1])/2;
+            $b = M_PI/abs($pt[2]-$pt[0]);
+            $c = ($pt[1] + $pt[3])/2;
+            $shift = ($pt[1] > $pt[3]) ? fmod($pt[0]*$b,2*M_PI) : fmod($pt[2]*$b,2*M_PI);
+            $outexp = makexxpretty("$a cos($b $x - $shift) + $c");
+            $outeq = "$y=".$outexp;
+          } else if (abs($pt[1]-$pt[3]) <= 1E-12) {
+            $outexp = $pt[1];
+            $outeq = "$y=$pt[1]";
+          }
+        }
+      }
+      $outexps[] = $outexp;
+      $outeqs[] = $outeq;
+  	}
+  }
+  if ($showequation === true) {
+    return $outeqs;
+  } else {
+    return $outexps;  
+  }
 }
 
 function getineqdata($str,$type='linear',$xmin=null,$xmax=null,$ymin=null,$ymax=null,$w=null,$h=null) {
@@ -4528,12 +4750,14 @@ function checksigfigs($givenans, $anans, $reqsigfigs, $exactsigfig, $reqsigfigof
 		$v = -1*floor(-log10(abs($anans))-1e-12) - $reqsigfigs;
 	}
 	$epsilon = (($anans==0||abs($anans)>1)?1E-12:(abs($anans)*1E-12));
-	if ($sigfigscoretype[0]=='abs') {
+	/*  Adjustment not needed now due to rounding later
+    if ($sigfigscoretype[0]=='abs') {
 		$sigfigscoretype[1] = max(pow(10,$v)/2, $sigfigscoretype[1]);
 	} else if ($sigfigscoretype[1]/100 * $anans < pow(10,$v)/2) {
         // relative tolerance, but too small
         $sigfigscoretype = ['abs', pow(10,$v)/2];
     }
+    */
 	if (strpos($givenans,'E')!==false) {  //handle computer-style scientific notation
 		preg_match('/^-?[1-9]\.?(\d*)E/', $givenans, $matches);
 		$gasigfig = 1+strlen($matches[1]);
@@ -4549,24 +4773,36 @@ function checksigfigs($givenans, $anans, $reqsigfigs, $exactsigfig, $reqsigfigof
 			if ($gadploc===false) { // no decimal place
                 if ($anans != 0 && strlen($givenans) < $reqsigfigs) { return false; } //not enough digits
                 if ($anans != 0 && $reqsigfigoffset>0 && strlen(rtrim($givenans,'0')) > $reqsigfigs + $reqsigfigoffset) {return false;} //too many sigfigs
+                $gasigfig = strlen(rtrim($givenans,'0'));
             } else {
                 if ($anans != 0 && $v < 0 && strlen($givenans) - $gadploc-1 + $v < 0) { return false; } //not enough decimal places
                 if ($anans != 0 && $reqsigfigoffset>0 && strlen($givenans) - $gadploc-1 + $v>$reqsigfigoffset) {return false;} //too many sigfigs
+                $gasigfig = strlen($givenans) - 1;
             }
 		} else {
 			$absgivenans = str_replace('-','',$givenans);
 			$gadploc = strpos($absgivenans,'.');
 			if ($gadploc===false) { //no decimal place
-				if (strlen(rtrim($absgivenans,'0')) > $reqsigfigs) { return false;}
+				if (strlen(rtrim($absgivenans,'0')) > $reqsigfigs || 
+                    strlen($absgivenans) < $reqsigfigs
+                ) { 
+                    return false;
+                }
+                $gasigfig = $reqsigfigs;
 			} else {
 				if (abs($givenans)<1) {
 					if (strlen(ltrim(substr($absgivenans,$gadploc+1),'0')) != $reqsigfigs) { return false;}
 				} else {
 					if (strlen(ltrim($absgivenans,'0'))-1 != $reqsigfigs) { return false;}
 				}
+                $gasigfig = $reqsigfigs;
 			}
 		}
 	}
+    // We've confirmed the sigfigs on givenans are acceptable, so
+    // now round anans to givenans's sigfigs for numeric comparison
+    $anans = roundsigfig($anans, $gasigfig);
+
     //checked format, now check value
 	if ($sigfigscoretype[0]=='abs') {
 		if (abs($anans-$givenans)< $sigfigscoretype[1]+$epsilon) {return true;}

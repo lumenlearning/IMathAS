@@ -28,21 +28,12 @@ final class EulaServiceTest extends TestCase
 
         $this->eulaService = new EulaService($this->dbh);
 
-        putenv('EULA_ENABLED=true');
         unset($GLOBALS['isLmsUser']);
     }
 
     /*
      * isAcceptanceRequired
      */
-
-    public function testIsAcceptanceRequired_FeatureDisabled(): void
-    {
-        putenv('EULA_ENABLED'); // This unsets the environment variable.
-
-        $result = $this->eulaService->isAcceptanceRequired(1);
-        $this->assertFalse($result);
-    }
 
     public function testIsAcceptanceRequired_ExcludedFalse_AcceptedFalse(): void
     {

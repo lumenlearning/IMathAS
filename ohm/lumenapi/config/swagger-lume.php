@@ -5,7 +5,9 @@
  *   ob_end_flush(): failed to send buffer of zlib output compression (1)
  * Output compression is already enabled at the load balancer level.
  */
-ini_set("zlib.output_compression", 'Off');
+if (!headers_sent()) {
+    ini_set("zlib.output_compression", 'Off');
+}
 
 return [
     'api' => [

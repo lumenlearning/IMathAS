@@ -47,7 +47,7 @@ if ($_POST['cid']) {
             echo '<li>Score: ' . Assessments::getScoreForDisplay($us['scores']) . '</li>';
             $grade = LTI::reCalcandupdateLTIgrade($us['aid'], $us['scores'], $us['ver']);
             echo '<li>Grade: ' . Sanitize::encodeStringForDisplay($grade) . '</li>';
-            if ($queue === true && LTI::addToLTIQueue($us['sourcedid'], $grade, true)) {
+            if ($queue === true && LTI::addToLTIQueue($us['sourcedid'], $grade, true, $us['uid'], $us['aid'])) {
                 if ($lms==true and $uid) {
                     echo '<li>LMS Grade: Recheck in a few minutes to pull a new grade after requeue</li>';
                 }
