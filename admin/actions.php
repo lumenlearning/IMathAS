@@ -419,7 +419,7 @@ switch($_POST['action']) {
 			':groupid'=>$newgroup,
 			':homelayout'=>$homelayout,
 			':specialrights'=>$specialrights,
-            ':created_at'=>time())),
+            ':created_at'=>time(),
             ':jsondata'=>json_encode($jsondata)));
 		$newuserid = $DBH->lastInsertId();
 		if (isset($CFG['GEN']['enrollonnewinstructor']) && $_POST['newrights']>=20) {
