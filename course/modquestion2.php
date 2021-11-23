@@ -92,8 +92,7 @@ if (!(isset($teacherid))) {
                     ':penalty' => $penalty, ':regen' => $regen, ':showans' => $showans, ':showwork' => $showwork,
                     ':rubric' => $rubric, ':showhints' => $showhints, ':fixedseeds' => $fixedseeds,
                     ':questionsetid' => $_POST['replacementid'], ':extracredit' => $extracredit,
-                    ':id' => $_GET['id']);
-          ':questionsetid'=>$_POST['replacementid'], ':id'=>$_GET['id']
+                    ':id' => $_GET['id']
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
