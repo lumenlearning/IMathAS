@@ -85,7 +85,7 @@ if (isset($CFG['CPS']['theme'])) {
 }
 /* Connecting, selecting database */
 try {
-  $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+  $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname;charset=$dbcharset", $dbusername, $dbpassword);
   //$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
   //loud during beta
   $DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

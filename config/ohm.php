@@ -17,7 +17,6 @@ $CFG['static_server'] = getenv('STATIC_ASSETS_BASE_URL') ?? 'https://ohm.lumenle
 
 //aws config
 $AWSbucket = "development" == $configEnvironment ? null : $_ENV['S3_MAIN_BUCKET_NAME'];
-$dbname = 'myopenmathdb';
 
 //login prompts
 $loginprompt = "Username";

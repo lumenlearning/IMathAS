@@ -1,13 +1,10 @@
 <?php
 require_once(__DIR__ . "/../includes/sanitize.php");
 
-$dbusername = getenv('DB_USERNAME');
-$dbpassword = getenv('DB_PASSWORD');
-$dbserver = getenv('DB_SERVER');
-$dbname = "sagecell";
+require(__DIR__ . '/../config/database.php');
 
 try {
-	$DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+	$DBH = new PDO("mysql:host=$dbserver;dbname=$dbname_sagecell;charset=$dbcharset", $dbusername, $dbpassword);
 	$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 	$GLOBALS["DBH"] = $DBH;
 } catch(PDOException $e) {
