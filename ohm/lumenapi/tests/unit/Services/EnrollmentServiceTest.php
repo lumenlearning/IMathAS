@@ -217,4 +217,20 @@ class EnrollmentServiceTest extends TestCase
 
         $this->assertEquals(['userid' => 42, 'courseid' => 123], $filters);
     }
+
+    /*
+     * mapFilterNames
+     */
+
+    public function testMapFieldNames(): void
+    {
+        $reflector = new ReflectionClass(EnrollmentService::class);
+        $method = $reflector->getMethod('mapFieldNames');
+        $method->setAccessible(true);
+
+        $fieldsFromController = ['has_valid_access_code' => true, 'is_opted_out_of_assessments' => false];
+        $entityData = $method->invokeArgs($this->enrollmentService, [$fieldsFromController]);
+
+        $this->assertEquals(['has_valid_access_code' => true, 'is_opted_out_assessments' => false], $entityData);
+    }
 }

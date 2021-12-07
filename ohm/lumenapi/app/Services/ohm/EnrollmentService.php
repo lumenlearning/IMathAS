@@ -16,6 +16,11 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
         'course_id_filter' => 'courseid',
     ];
 
+    const ALLOWED_FIELDS = [
+        'has_valid_access_code' => 'has_valid_access_code',
+        'is_opted_out_of_assessments' => 'is_opted_out_assessments',
+    ];
+
     /**
      * @var EnrollmentRepositoryInterface
      */
@@ -79,7 +84,9 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
                 sprintf('Enrollment ID %d was not found.', $id));
         }
 
-        $enrollment->fill($input); // See Enrollment model for allowed fillable fields.
+        $entityData = $this->mapFieldNames($input);
+
+        $enrollment->fill($entityData); // See Enrollment model for allowed fillable fields.
         $enrollment = $this->enrollmentRepository->update($enrollment);
 
         $enrollmentDto = new EnrollmentDto($enrollment->toArray());
@@ -106,7 +113,7 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
     /**
      * Map filter names provided by EnrollmentController to DB column names.
      *
-     * @param array $inputFilters The array of filters provided by EnrollmentController.
+     * @param array $inputFilters The associative array of filters provided by EnrollmentController.
      * @return array An associative array of filters by DB column name.
      * @see self::ALLOWED_FILTERS
      */
@@ -120,5 +127,24 @@ class EnrollmentService extends BaseService implements EnrollmentServiceInterfac
             }
         }
         return $columnFilters;
+    }
+
+    /**
+     * Map Enrollment field names provided by EnrollmentController to DB column names.
+     *
+     * @param array $inputFields The associative array of fields provided by EnrollmentController.
+     * @return array An associative array of fields by DB column name.
+     * @see self::ALLOWED_FIELDS
+     */
+    private function mapFieldNames(array $inputFields): array
+    {
+        $entityData = [];
+        foreach (self::ALLOWED_FIELDS as $ALLOWED_FIELD_BEFORE => $ALLOWED_FIELD_AFTER) {
+            if (isset($inputFields[$ALLOWED_FIELD_BEFORE])) {
+                $dbColumnName = self::ALLOWED_FIELDS[$ALLOWED_FIELD_BEFORE];
+                $entityData[$dbColumnName] = $inputFields[$ALLOWED_FIELD_BEFORE];
+            }
+        }
+        return $entityData;
     }
 }
