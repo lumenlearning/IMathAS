@@ -1,5 +1,8 @@
 #!/bin/bash
 
-mkdir -p /var/log/httpd/lti
-chown webapp:webapp /var/log/httpd/lti
+LOGDIR=/var/log/httpd/lti
+
+mkdir -p "$LOGDIR"
+chown webapp:webapp "$LOGDIR"
+chmod 755 "$LOGDIR"
 
