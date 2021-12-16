@@ -50,7 +50,7 @@ return [
         'daily' => [
             'driver' => 'daily',
 //            'path' => storage_path('logs/laravel.log'),
-            'path' => '/var/log/httpd/question_api.log',
+            'path' => '/var/log/httpd/question_api/question_api.log',
 //            'level' => env('LOG_LEVEL', 'debug'),
             'days' => 7,
         ],
