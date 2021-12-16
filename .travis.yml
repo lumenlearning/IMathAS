@@ -30,6 +30,7 @@ env:
     - DB_NAME=myopenmathdb
     - DB_USERNAME=root
     - DB_PASSWORD=""
+    - DB_CHARSET=latin1
     - S3_MAIN_BUCKET_NAME=none
     - OHM_API_JWT_SECRET=development_jwt_secret
     - LOG_CHANNEL=stderr
