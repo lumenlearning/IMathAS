@@ -1,7 +1,7 @@
 dist: bionic
 language: php
 php:
-  - '7.3'
+  - '7.4'
 services:
   - mysql  # dist "bionic" provides MySQL 5.7.
 before_script:
@@ -30,6 +30,7 @@ env:
     - DB_NAME=myopenmathdb
     - DB_USERNAME=root
     - DB_PASSWORD=""
+    - DB_CHARSET=latin1
     - S3_MAIN_BUCKET_NAME=none
     - OHM_API_JWT_SECRET=development_jwt_secret
     - LOG_CHANNEL=stderr

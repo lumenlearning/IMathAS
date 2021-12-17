@@ -51,13 +51,10 @@ if (isset($_GET['getxml'])) {
   exit;
 }
 
-$dbusername = getenv('DB_USERNAME');
-$dbpassword = getenv('DB_PASSWORD');
-$dbserver = getenv('DB_SERVER');
-$dbname = "ltidata";
+require(__DIR__ . '/../config/database.php');
 $tool = "ccrel";
 try {
-	$DBH = new PDO("mysql:host=$dbserver;dbname=$dbname", $dbusername, $dbpassword);
+	$DBH = new PDO("mysql:host=$dbserver;dbname=$dbname_ltidata;charset=$dbcharset", $dbusername, $dbpassword);
 	$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
 	// global $DBH;
 	$GLOBALS["DBH"] = $DBH;
