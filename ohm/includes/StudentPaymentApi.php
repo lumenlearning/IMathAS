@@ -498,7 +498,9 @@ class StudentPaymentApi
 		}
 
 		$studentPayApiResult = new StudentPayApiResult();
-		$studentPayApiResult->setStudentPaymentStatus($apiResponse['status']);
+		if (isset($apiResponse['status'])) {
+            $studentPayApiResult->setStudentPaymentStatus($apiResponse['status']);
+        }
 		if (isset($apiResponse['message'])) {
 			$studentPayApiResult->setApiUserMessage($apiResponse['message']);
 		}

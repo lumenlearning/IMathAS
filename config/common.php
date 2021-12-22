@@ -63,11 +63,10 @@ $CFG['hooks']['admin/actions'] = "myopenmath/hooks.php";
 $CFG['hooks']['admin/approvepending'] = "myopenmath/hooks.php";
 
 //database access settings
+require(__DIR__ . '/database.php');
+
 $AWSkey = getenv('AWS_ACCESS_KEY_ID');
 $AWSsecret = getenv('AWS_SECRET_KEY');
-$dbserver = getenv('DB_SERVER');
-$dbusername = getenv('DB_USERNAME');
-$dbpassword = getenv('DB_PASSWORD');
 if (getenv('imasroot')!==false) {
   $imasroot = getenv('imasroot');
 }

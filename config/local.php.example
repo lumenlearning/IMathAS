@@ -28,12 +28,14 @@ $dbserver = getenv('DB_SERVER') ?? 'localhost';
 $dbname = getenv('DB_NAME') ?? 'myopenmath';
 $dbusername = getenv('DB_USERNAME') ?? 'username';
 $dbpassword = getenv('DB_PASSWORD') ?? 'password';
+$dbcharset = getenv('DB_CHARSET') ?? 'latin1'; // Production uses "latin1"
 
 // Database - read replica (env vars used in /ohm/includes/ReadReplicaDb.php)
 putenv('REPLICA_DB_SERVER=' . $dbserver);
 putenv('REPLICA_DB_USERNAME=' . $dbusername);
 putenv('REPLICA_DB_PASSWORD=' . $dbpassword);
 putenv('REPLICA_DB_NAME=' . $dbname);
+putenv('REPLICA_DB_CHARSET=' . $dbcharset);
 
 // Lumen student payment authorization API
 $GLOBALS['student_pay_api']['enabled'] = false;
