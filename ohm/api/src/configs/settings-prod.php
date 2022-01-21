@@ -2,7 +2,7 @@
 
 $CONFIG_ENV = getenv('CONFIG_ENV') ? getenv('CONFIG_ENV') : 'development';
 $LOG_PATH = in_array($CONFIG_ENV, ['production', 'staging']) ?
-	'/var/app/support/logs' : __DIR__ . '/../../logs';
+	'/var/log/httpd/payment_api' : __DIR__ . '/../../logs';
 
 return [
 	'settings' => [
