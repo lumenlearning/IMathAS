@@ -60,18 +60,22 @@ if ("begin_trial" == $action) {
 			$e->getMessage(), $e->getTraceAsString()));
 	}
 
+    // Failed to get a valid response from the student payment service.
+    if (is_null($studentPayStatus)) {
+        error_log("An unexpected error occurred in process_activation.php->begin_trial."
+            . " This needs to be fixed. Allowing the student through to assessments anyway.");
+
+        // All unknown / unexpected errors should allow the user through to assessments.
+        redirectBeginTrial($assessmentUrl);
+    }
+
+    // A valid response was received from the student payment service.
 	if ($studentPayStatus->getStudentIsInTrial()) {
-		setcookie("activation_event", "begin_trial", 0, '/');
-		header("Location: " . $assessmentUrl);
-		exit;
+	    redirectBeginTrial($assessmentUrl);
 	} else {
 		if ($studentPayStatus->getUserMessage()) {
 			response(500, $studentPayStatus->getUserMessage());
-		}
-		// Failed to begin trial.
-		// All unknown / unexpected errors should allow the user through to assessments.
-		error_log("An unexpected error occurred in process_activation.php->begin_trial."
-			. "This should be fixed. Allowing the student through to assessments anyway.");
+        }
 	}
 }
 
@@ -114,6 +118,17 @@ if ("continue_trial" == $action) {
 
 
 /**
+ * Redirect a user to an assessment after they've chosen to begin a trial.
+ *
+ * @param string $assessmentUrl The assessment URL to redirect to.
+ */
+function redirectBeginTrial(string $assessmentUrl): void {
+    setcookie("activation_event", "begin_trial", 0, '/');
+    header("Location: " . $assessmentUrl);
+    exit;
+}
+
+/**
  * Return a response to the client.
  *
  * @param $status integer The HTTP status to return.
@@ -134,5 +149,5 @@ function response($status, $msg)
 
 // All unknown / unexpected errors should allow the user through to assessments.
 error_log("An unexpected error occurred in process_activation.php. This needs to be fixed."
-	. "Allowing the student through to assessments anyway.");
+	. " Allowing the student through to assessments anyway.");
 
