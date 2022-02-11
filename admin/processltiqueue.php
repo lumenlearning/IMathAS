@@ -5,7 +5,7 @@
 /*
   To use the LTI queue, you'll need to either set up a cron job to call this
   script, or call it using a scheduled web call with the authcode option.
-  When called in cron job, the base address like https://www.mysite.com should
+  When called in cron job, the base address like https://www.mysite.com should 
   be passed as an argument.
   It should be called every minute.
 
@@ -50,7 +50,7 @@ function debuglog($str) {
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
-    if (!empty($GLOBALS['CFG']['LTI']['noisydebuglog'])) {
+	if (!empty($GLOBALS['CFG']['LTI']['noisydebuglog'])) {
 		$fh = fopen(__DIR__.'/../lti/ltidebug.txt', 'a');
 		fwrite($fh, $str."\n");
 		fclose($fh);
@@ -159,6 +159,8 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 						'ltiuserid' => $ltiuserid,
 						'platformid' => $platformid,
 						'grade' => max(0, $row['grade']),
+                        'isstu' => $row['isstu'],
+                        'addedon' => $row['addedon'],
                         'keyseturl' => $row['keyseturl'],
 					),
 					null, //no special callback
@@ -305,7 +307,7 @@ function LTIqueuePostdataCallback($data) {
                 $updater1p3->token_valid($data['platformid'])
             ) { // double check we have a valid token
 				$token = $updater1p3->get_access_token($data['platformid'], '', '', '', $data['keyseturl']);
-				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid']);
+				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid'], $data['isstu'], $data['addedon']);
 			} else {
 				return false;
 			}
@@ -347,7 +349,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 	global $DBH,$cntsuccess,$cntfailure,$cntgiveup,$updater1p3,$deletequeue;
 	$post_data = $request_info['post_data'];
 	$success = true;
-    debuglog('callback request_info:'.json_encode($post_data));
+	debuglog('callback request_info:'.json_encode($post_data));
 	debuglog('callback user_data:'.json_encode($user_data));
 	if ($post_data['ver'] == 'LTI1.3') {
 		if ($post_data['action'] == 'gettoken') {
@@ -388,7 +390,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
         #### End OHM-specific changes ############################################################
         #### End OHM-specific changes ############################################################
 
-        // LTI 1.1
+		// LTI 1.1
 		if ($response === false || 1 !== $successXmlStatus) { //failed
 			$success = false;
 		}
