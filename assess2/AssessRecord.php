@@ -3087,6 +3087,7 @@ class AssessRecord
         $out['scoreoverride'] = $qdata['scoreoverride'];
       }
       $out['timeactive'] = $this->calcTimeActive($qdata);
+      $out['ver'] = $by_question ? $qver : $aver;
       if ($showScores) {
         $out['feedback'] = $qdata['feedback'] ?? '';
       }
