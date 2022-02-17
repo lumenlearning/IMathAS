@@ -22,11 +22,11 @@ include("init_without_validate.php");
 
 if (getenv('CLI')) {
     require_once('dotenv.php');
-    $_POST['username'] = getenv['USERNAME'];
-    $_POST['password'] = getenv['PASSWORD'];
-    $_POST['firstname'] = getenv['FIRSTNAME'];
-    $_POST['lastname'] = getenv['LASTNAME'];
-    $_POST['email'] = getenv['EMAIL'];
+    $_POST['username'] = getenv('USERNAME');
+    $_POST['password'] = getenv('PASSWORD');
+    $_POST['firstname'] = getenv('FIRSTNAME');
+    $_POST['lastname'] = getenv('LASTNAME');
+    $_POST['email'] = getenv('EMAIL');
 
 	$username = $_POST['username'];
 	echo "JDJDJDJD username is <$username>";
