@@ -27,6 +27,9 @@ if (getenv('CLI')) {
     $_POST['firstname'] = getenv['FIRSTNAME'];
     $_POST['lastname'] = getenv['LASTNAME'];
     $_POST['email'] = getenv['EMAIL'];
+
+	$username = $_POST['username'];
+	echo "JDJDJDJD username is <$username>";
 }
 
 $stm = $DBH->query("SHOW TABLES LIKE 'imas_dbschema'");
@@ -89,8 +92,6 @@ $password = $_POST['password'];
 $firstname = $_POST['firstname'];
 $lastname = $_POST['lastname'];
 $email = $_POST['email'];
-
-
 
 $sql = 'CREATE TABLE `imas_users` ('
         . ' `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, '
