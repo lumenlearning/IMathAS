@@ -27,9 +27,6 @@ if (getenv('CLI')) {
     $_POST['firstname'] = getenv('FIRSTNAME');
     $_POST['lastname'] = getenv('LASTNAME');
     $_POST['email'] = getenv('EMAIL');
-
-	$username = $_POST['username'];
-	echo "JDJDJDJD username is <$username>";
 }
 
 $stm = $DBH->query("SHOW TABLES LIKE 'imas_dbschema'");
