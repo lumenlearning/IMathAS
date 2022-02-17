@@ -90,6 +90,8 @@ $firstname = $_POST['firstname'];
 $lastname = $_POST['lastname'];
 $email = $_POST['email'];
 
+
+
 $sql = 'CREATE TABLE `imas_users` ('
         . ' `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, '
         . ' `SID` VARCHAR(50) NOT NULL, '
