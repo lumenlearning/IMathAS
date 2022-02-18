@@ -10,7 +10,7 @@ before_script:
   - cp ohm/api/src/configs/settings-prod.php ohm/api/src/configs/settings.php
   - wget -O composer https://getcomposer.org/download/1.10.16/composer.phar
   - chmod 755 composer
-  - ./deploy-scripts/build.sh
+  - ./deploy-scripts/build-all.sh
   - php -S 127.0.0.1:8080 -t . &
 script:
   - sleep 3
