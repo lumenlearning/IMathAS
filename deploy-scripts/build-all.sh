@@ -7,7 +7,8 @@ function findComposer() {
 	COMPOSER_PATHS[2]=composer
 
 	for name in ${COMPOSER_PATHS[@]}; do
-		local COMPOSER=`which "$name"`
+		local FOUND_COMPOSER=`which "$name"`
+		local COMPOSER=`realpath "$FOUND_COMPOSER"`
 		if [ ! -z "$COMPOSER" ]; then
 			echo "$COMPOSER"
 			return

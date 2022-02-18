@@ -19,6 +19,7 @@ bin/
 # Runtime
 /vendor/
 config/local.php
+assess2/vue-src/node_modules
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
