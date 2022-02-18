@@ -1,1 +1,0 @@
-../../hooks/prebuild/10-lumenapi_packages.sh
