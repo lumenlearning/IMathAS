@@ -1,1 +1,0 @@
-../../hooks/prebuild/11-lumenapi_swagger.sh
