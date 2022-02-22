@@ -490,7 +490,7 @@ class QuestionHtmlGenerator
                 $scoremethodwhole == 'singlescore' ||
                 $scoremethodwhole == 'allornothing'
               ) ||
-              $quesData['qtype'] == 'conditional'
+              $quesData['qtype'] == 'conditional' && count($anstypes)>1
             ) {
               $jsParams['submitall'] = 1;
             }
