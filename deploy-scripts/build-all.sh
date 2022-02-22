@@ -8,8 +8,8 @@ function findComposer() {
 
 	for name in ${COMPOSER_PATHS[@]}; do
 		local FOUND_COMPOSER=`which "$name"`
-		local COMPOSER=`realpath "$FOUND_COMPOSER"`
-		if [ ! -z "$COMPOSER" ]; then
+		if [ ! -z "$FOUND_COMPOSER" ]; then
+			local COMPOSER=`realpath "$FOUND_COMPOSER"`
 			echo "$COMPOSER"
 			return
 		fi
@@ -17,8 +17,9 @@ function findComposer() {
 }
 
 function findNpm() {
-	local NPM=`which npm`
-	if [ ! -z "$NPM" ]; then
+	local FOUND_NPM=`which npm`
+	if [ ! -z "$FOUND_NPM" ]; then
+		local NPM=`realpath "$FOUND_NPM"`
 		echo $NPM
 		return
 	fi
