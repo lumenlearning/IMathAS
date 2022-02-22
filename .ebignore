@@ -1,3 +1,5 @@
+# Paths not listed in this file will be deployed to AWS Beanstalk.
+# This file should match /.gitignore AND include ".git/".
 .git/
 
 # Local dev
