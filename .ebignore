@@ -1,3 +1,7 @@
+# Paths not listed in this file will be deployed to AWS Beanstalk.
+# This file should match /.gitignore AND include ".git/".
+.git/
+
 # Local dev
 .idea/
 .elasticbeanstalk/
@@ -17,6 +21,7 @@ bin/
 # Runtime
 /vendor/
 config/local.php
+assess2/vue-src/node_modules
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
