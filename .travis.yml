@@ -59,6 +59,7 @@ deploy:
       repo: lumenlearning/ohm
       branch: staging-env
   - provider: elasticbeanstalk
+    edge: true
     access_key_id: AKIAZGFHQO2ZIEBTJJNO
     secret_access_key:
       secure: "dc15m9pSRMKZNhZuU9nnhmOghn4ULFfkV6GKkG4sgdDNN1g1lE5qxftzcDBVomqpP0mqA+FM/5Hn3pBXFDEwk6rGVBAFLY0ZJdfDeS6ZM/B5/l0OfNXGrZn8W5LLlhZ66Z3k8XIXAUcrykMpKENOP/1qsBZcvDSq4kMbYV21MoMHBh1XPzN53pxvaUuCFcPtlIdfxv6jrYHnevBkta6nkziLzC45W/kVSLKKdqe9E52uQ1mDpHC5J88NgSPLxYkHKbcYFPAjSaTylqhHng2JRkRyqGvkv2G64My/KiPx+H+/WeyPlfNFFWZO0bzG6JLK+kcV1JDJiFq8eOV7ngB/nuq+cm5OXSbxk0cu5IlVOkAvgQiKpiB6Nqac+l+ZYnKGaHdf7qGUb9rdv656RrF8Fq8g3WHMP72D+hWtAdDBeCxC8VG1zDOXRNJcBydy6KY+l6MM2vA+XidEaIp60Mz58oyXv+kdS4hEaeaZ3PUotr91FerfoZ4ctchYzAGxl5K9tRw3tiPHFTNBQkRKTEu20WudPmqP6gy5CyCn7WDNOxE3CaPijSO7ah58rB1NMtIEiBY838YOtbPiwIQLZ4oxI9/M5Jc1S9it6BtOuzQMwz/tPF/V4AbrkCGcc9ku/VhjjWKaSe6ux3cmZrge0YO/0aDSOt6+CHxZyV7HMFOHTX4="
