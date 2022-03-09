@@ -47,6 +47,17 @@ deploy:
       repo: lumenlearning/ohm
       branch: staging
   - provider: elasticbeanstalk
+    access_key_id: AKIAZGFHQO2ZIEBTJJNO
+    secret_access_key:
+      secure: "dc15m9pSRMKZNhZuU9nnhmOghn4ULFfkV6GKkG4sgdDNN1g1lE5qxftzcDBVomqpP0mqA+FM/5Hn3pBXFDEwk6rGVBAFLY0ZJdfDeS6ZM/B5/l0OfNXGrZn8W5LLlhZ66Z3k8XIXAUcrykMpKENOP/1qsBZcvDSq4kMbYV21MoMHBh1XPzN53pxvaUuCFcPtlIdfxv6jrYHnevBkta6nkziLzC45W/kVSLKKdqe9E52uQ1mDpHC5J88NgSPLxYkHKbcYFPAjSaTylqhHng2JRkRyqGvkv2G64My/KiPx+H+/WeyPlfNFFWZO0bzG6JLK+kcV1JDJiFq8eOV7ngB/nuq+cm5OXSbxk0cu5IlVOkAvgQiKpiB6Nqac+l+ZYnKGaHdf7qGUb9rdv656RrF8Fq8g3WHMP72D+hWtAdDBeCxC8VG1zDOXRNJcBydy6KY+l6MM2vA+XidEaIp60Mz58oyXv+kdS4hEaeaZ3PUotr91FerfoZ4ctchYzAGxl5K9tRw3tiPHFTNBQkRKTEu20WudPmqP6gy5CyCn7WDNOxE3CaPijSO7ah58rB1NMtIEiBY838YOtbPiwIQLZ4oxI9/M5Jc1S9it6BtOuzQMwz/tPF/V4AbrkCGcc9ku/VhjjWKaSe6ux3cmZrge0YO/0aDSOt6+CHxZyV7HMFOHTX4="
+    region: "us-west-2"
+    app: "ohm"
+    env: "ohm-dev-exemplar-php"
+    bucket_name: elasticbeanstalk-us-west-2-631711495858
+    on:
+      repo: lumenlearning/ohm
+      branch: dev-exemplar
+  - provider: elasticbeanstalk
     access_key_id: AKIAXT4KW2NSWFUUDD4P
     secret_access_key:
       secure: "g1dbhOtr6ziziEHIogI0W54pXn8q2BbkQ79eV0uJZXEBhOniobd57Q/FrnGvzVe91gpi3ypYtORrYwcJBxN3fhVQN26NVYaVRmjnl8Qagr+P26+n31JtQdSi4z9vri4R8FdLs0apSNXI5y57+LgRpoW9SfVyTNcg8wlTidGvFcNRFvfgNIdJaZjqYLLshZI732u92py92GksRH1r0DuGWjf7JZSrCZoD0f6cBJ9hcZWOK+k2G6pUZutNJ2bJgfykowg0PpnXe9LjeHUlbaC3EZPxtKJ8am69so3UPFTbEULmWFciCZcsKcawt39v1bfPGmYEkkgG4ljcBzdgtff1PL6t0tMYyR4ezQuHPD2lA/ZSmY2YEE85LEguFgJx/918aaLKYHwFWKg7KqHPfgxhzXFvwnV0wXqikcqvwjJcnbPdwqmoxm60Y/wlFUQw/S9Qz+5AJGlrN0O8ykdYUCAPr3azLlcjw/sFWgn7sK52SK2QI3l4Kvj3kKcDVnIa/L9gEKXHpNVZ/7IZcUzsjtUQu0UyAt1n6eaj54bp2BASudybrsKuZp56bFnwVNeRaadisNIigrHz1ZFj/bk8qD1ng4QjUSr4Zg2FgMYEg4Nzv1q+Ycr9qppcsko5PJixPUYMkTLnwdAocpYynS80XzVg4Ue6E9gILd1tK7T6H0lR11w="
