@@ -19,7 +19,6 @@ c3.php
 bin/
 
 # Runtime
-/vendor/
 config/local.php
 assess2/vue-src/node_modules
 
@@ -28,7 +27,6 @@ assess2/vue-src/node_modules
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-/vendor
 /tests/_support/_generated
 /tests/_output/
 /c3.php
