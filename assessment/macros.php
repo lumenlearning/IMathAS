@@ -3579,8 +3579,8 @@ function comparefunctions($a,$b,$vars='x',$tol='.001',$domain='-10,10') {
     list($variables, $tps, $flist) = numfuncGenerateTestpoints($vars, $domain);
 
 	$vlist = implode(",",$variables);
-    $a = numfuncPrepForEval($a, $variables, $flist);
-    $b = numfuncPrepForEval($b, $variables, $flist);
+    $a = numfuncPrepForEval($a, $variables);
+    $b = numfuncPrepForEval($b, $variables);
 
 	if ($type=='equation') {
 		if (substr_count($a, '=')!=1) {return false;}
@@ -3589,8 +3589,8 @@ function comparefunctions($a,$b,$vars='x',$tol='.001',$domain='-10,10') {
 		$b = preg_replace('/(.*)=(.*)/','$1-($2)',$b);
 	}
 
-	$afunc = makeMathFunction($a, $vlist);
-	$bfunc= makeMathFunction($b, $vlist);
+	$afunc = makeMathFunction($a, $vlist, [], $flist);
+	$bfunc= makeMathFunction($b, $vlist, [], $flist);
 	if ($afunc === false || $bfunc === false) {
 		if (isset($GLOBALS['teacherid'])) {
 			echo "<p>Debug info: one function failed to compile.</p>";
@@ -3744,7 +3744,7 @@ function stringtopolyterms($str) {
  array of
    $variables  array
    $testpoints  2d array
-   $flist string (function variables, | separated) 
+   $flist string (function variables, comma separated) 
 */
 function numfuncGenerateTestpoints($variables,$domain='') {
     $variables = array_values(array_filter(array_map('trim', explode(",", $variables)), 'strlen'));
@@ -3804,7 +3804,7 @@ function numfuncGenerateTestpoints($variables,$domain='') {
     $flist = '';
     if (count($ofunc)>0) {
         usort($ofunc,'lensort');
-        $flist = implode("|",$ofunc);
+        $flist = implode(",",$ofunc);
     }
 
     for($j=0; $j < count($variables); $j++) {
@@ -3840,11 +3840,10 @@ function numfuncGenerateTestpoints($variables,$domain='') {
    before eval
    @param $expr  string  the expression to rewrite
    @param $variables array  of variables
-   @param flist   string, | separated of function variables
    return:
    string of rewritten expression
 */
-function numfuncPrepForEval($expr, $variables, $flist) {
+function numfuncPrepForEval($expr, $variables) {
     $expr = preg_replace('/(\d)\s*,\s*(?=\d{3}(\D|\b))/','$1',$expr);
 
     for ($i = 0; $i < count($variables); $i++) {
@@ -3855,9 +3854,6 @@ function numfuncPrepForEval($expr, $variables, $flist) {
         if (preg_match('/^(\w+)_(\w+)$/', $variables[$i], $m)) {
             $expr = preg_replace('/'.$m[1].'_\('.$m[2].'\)/', $m[0], $expr);
         }
-    }
-    if ($flist != '') {
-        $expr = preg_replace('/('.$flist.')\(/',"funcvar[$1](",$expr);
     }
 
     return $expr;
@@ -4096,10 +4092,10 @@ function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars
         list($variables, $tps, $flist) = numfuncGenerateTestpoints($vars, $domain);
         $numpts = count($tps);
 		$vlist = implode(",",$variables);
-        $stu = numfuncPrepForEval($stu, $variables, $flist);
+        $stu = numfuncPrepForEval($stu, $variables);
 
 		$origstu = $stu;
-		$stufunc = makeMathFunction(makepretty($stu), $vlist);
+		$stufunc = makeMathFunction(makepretty($stu), $vlist, [], $flist);
 		if ($stufunc===false) {
 			return '<div class="feedbackwrap incorrect"><img src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
 		}
@@ -4124,13 +4120,13 @@ function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars
 		if (!is_array($partial)) { $partial = listtoarray($partial);}
 		for ($k=0;$k<count($partial);$k+=2) {
 			$correct = true;
-			$b =  numfuncPrepForEval($partial[$k], $variables, $flist);
+			$b =  numfuncPrepForEval($partial[$k], $variables);
 			if ($type=='equation') {
 				if (substr_count($b, '=')!=1) {continue;}
 				$b = preg_replace('/(.*)=(.*)/','$1-($2)',$b);
 			} else if (strpos($b, '=')!==false) {continue;}
 			$origb = $b;
-			$bfunc = makeMathFunction(makepretty($b), $vlist);
+			$bfunc = makeMathFunction(makepretty($b), $vlist, [], $flist);
 			if ($bfunc === false) {
 				//parse error - skip it
 				continue;
