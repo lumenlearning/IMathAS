@@ -370,7 +370,7 @@ function copyitem($itemid, $gbcats = false, $sethidden = false)
             $flat = implode(',', $goodqs);
             //$flat is santized above
             $query = "SELECT id,questionsetid,points,attempts,penalty,category,regen,
-				showans,showcalculator,showhints,rubric,withdrawn,fixedseeds,showwork FROM imas_questions
+				showans,showcalculator,showhints,rubric,withdrawn,fixedseeds,showwork,extracredit FROM imas_questions
 				WHERE id IN ($flat)";
             $stm = $DBH->query($query);
             $inssph = array();
@@ -398,8 +398,8 @@ function copyitem($itemid, $gbcats = false, $sethidden = false)
                         $row['category'] = 0;
                     }
                 }
-				$inssph[] = "(?,?,?,?,?,?,?,?,?,?,?,?)";
-				array_push($inss, $newtypeid, $row['questionsetid'],$row['points'],$row['attempts'],$row['penalty'],$row['category'],$row['regen'],$row['showans'],$row['showcalculator'],$row['showhints'],$row['fixedseeds'],$row['showwork']);
+                $inssph[] = "(?,?,?,?,?,?,?,?,?,?,?,?)";
+                array_push($inss, $newtypeid, $row['questionsetid'], $row['points'], $row['attempts'], $row['penalty'], $row['category'], $row['regen'], $row['showans'], $row['showcalculator'], $row['showhints'], $row['fixedseeds'], $row['showwork'], $row['extracredit']);
                 $rubric[$row['id']] = $row['rubric'];
                 //check for a category that's set to an assessment e.g. AID-1234
                 if (0 == strncmp($row['category'], "AID-", 4)) {
@@ -411,7 +411,7 @@ function copyitem($itemid, $gbcats = false, $sethidden = false)
             $idtoorder = array_flip($insorder);
 
             if (count($inss) > 0) {
-				$query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans,showcalculator,showhints,fixedseeds,showwork) ";
+                $query = "INSERT INTO imas_questions (assessmentid,questionsetid,points,attempts,penalty,category,regen,showans,showcalculator,showhints,fixedseeds,showwork,extracredit) ";
                 $query .= "VALUES " . implode(',', $inssph);
                 $stm = $DBH->prepare($query);
                 $stm->execute($inss);
