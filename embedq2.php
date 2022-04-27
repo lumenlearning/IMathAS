@@ -78,7 +78,7 @@ $_SESSION['userprefs'] = array();
 foreach ($prefdefaults as $key => $def) {
     if (isset($QS[$key])) { // can overwrite via JWT
         $_SESSION['userprefs'][$key] = filter_var($QS[$key], FILTER_SANITIZE_NUMBER_INT);
-    } else if ($prefcookie !== null && isset($prefcookie[$key])) {
+    } else if (!empty($prefcookie) && isset($prefcookie[$key])) {
         $_SESSION['userprefs'][$key] = filter_var($prefcookie[$key], FILTER_SANITIZE_NUMBER_INT);
     } else {
         $_SESSION['userprefs'][$key] = $def;
@@ -281,7 +281,7 @@ if (isset($_GET['theme'])) {
 }
 
 $lastupdate = '20200422';
-$placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/index.css?v=' . $lastupdate . '" />';
+$placeinhead = '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/index.css?v=' . $lastupdate . '" />';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/chunk-common.css?v=' . $lastupdate . '" />';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/print.css?v=' . $lastupdate . '" media="print">';
 $placeinhead .= '<script src="' . $staticroot . '/mathquill/mathquill.min.js?v=022720" type="text/javascript"></script>';
@@ -396,6 +396,7 @@ echo '</div>';
 echo '<input type=hidden name=toscoreqn id=toscoreqn value=""/>';
 echo '<input type=hidden name=state id=state value="'.Sanitize::encodeStringForDisplay(JWT::encode($a2->getState(), $statesecret)).'" />';
 
+echo '<div class="mce-content-body" style="text-align:right;font-size:70%;margin-right:5px;"><a style="color:#666" target="_blank" href="course/showlicense.php?id='.$qsid.'">'._('License').'</a></div>';
 echo '<script>
     $(function() {
         showandinit('.$qn.','.json_encode($disp).');

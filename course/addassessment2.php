@@ -273,6 +273,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 			// additional display options
 			$toset['caltag'] = Sanitize::stripHtmlTags($_POST['caltag']);
+			if ($_POST['caltagradio'] == 'usename') {
+				$toset['caltag'] = 'use_name';
+			}
 			$toset['shuffle'] = Sanitize::onlyInt($_POST['shuffle']);
 			if (isset($_POST['sameseed'])) { $toset['shuffle'] += 2;}
 			if (isset($_POST['samever'])) { $toset['shuffle'] += 4;}
@@ -589,7 +592,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
       $stm = $DBH->prepare("UPDATE imas_courses SET itemorder=:itemorder WHERE id=:id");
       $stm->execute(array(':itemorder'=>$itemorder, ':id'=>$cid));
       $DBH->commit();
-      header(sprintf('Location: %s/course/addquestions.php?cid=%s&aid=%d', $GLOBALS['basesiteurl'], $cid, $newaid));
+      header(sprintf('Location: %s/course/addquestions2.php?cid=%s&aid=%d', $GLOBALS['basesiteurl'], $cid, $newaid));
       exit;
 		}
 
@@ -888,7 +891,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
  /******* begin html output ********/
 $placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/DatePicker.js?v=080818\"></script>";
 // $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/vue"></script>';
-$placeinhead .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>';
+if (!empty($CFG['GEN']['uselocaljs'])) {
+	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/vue2-6-10.min.js"></script>';
+} else {
+	$placeinhead .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>';
+}
 
  require("../header.php");
 
@@ -905,7 +912,7 @@ if ($overwriteBody==1) {
 
 	<?php
 	if (isset($_GET['id'])) {
-		printf('<div class="cp"><a href="addquestions.php?aid=%d&amp;cid=%s" onclick="return confirm(\''
+		printf('<div class="cp"><a href="addquestions2.php?aid=%d&amp;cid=%s" onclick="return confirm(\''
             . _('This will discard any changes you have made on this page').'\');">'
             . _('Add/Remove Questions').'</a></div>', Sanitize::onlyInt($_GET['id']), $cid);
 	}

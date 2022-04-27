@@ -22,6 +22,9 @@ $t = Sanitize::onlyInt($_GET['t']);
 $_SESSION['coursetheme'] = $coursetheme;
 
 $flexwidth = true;
+$isdiag = false;
+$useeqnhelper = false;
+$isfw = false;
 require("header.php");
 echo '<p><b style="font-size:110%">'._('Written Example').'</b> '._('of a similar problem').'</p>';
 if ($sig != md5($id.$_SESSION['secsalt'])) {
@@ -31,7 +34,7 @@ if ($sig != md5($id.$_SESSION['secsalt'])) {
 
 require("displayq2.php");
 $txt = displayq(0,$id,100000,false,false,0,2+$t);
-echo filter($txt);
+echo printfilter(filter($txt));
 require("../footer.php");
 
 ?>
