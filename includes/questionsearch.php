@@ -119,7 +119,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             $names = preg_split('/([,\s]+)/', trim($search['author']), -1, PREG_SPLIT_DELIM_CAPTURE);
             if (count($names) == 1) {
                 $searchand[] = 'iq.author LIKE ?';
-                $searchvals[] = $names[0] . '%';
+                $searchvals[] = $names[0] . ',' . '%';
             } else if (trim($names[1]) == ',') {
                 $searchand[] = 'iq.author LIKE ?';
                 $searchvals[] = $names[0] . ',' . $names[2] . '%';
@@ -129,7 +129,6 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
                 $searchvals[] = $names[2] . ',' . $names[0] . '%';
             }
         }
-        print_r($searchvals);
     }
     if (!empty($search['regex'])) {
         $searchand[] = 'iq.description REGEXP ?';
