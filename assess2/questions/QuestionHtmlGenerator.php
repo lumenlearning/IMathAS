@@ -136,6 +136,7 @@ class QuestionHtmlGenerator
         $thisq = $this->questionParams->getQuestionNumber() + 1;
         $correctAnswerWrongFormat = $this->questionParams->getCorrectAnswerWrongFormat();
         $printFormat = $this->questionParams->getPrintFormat();
+        $teacherInGb = $this->questionParams->getTeacherInGb();
 
         $isbareprint = !empty($GLOBALS['isbareprint']); // lazy hack
 
@@ -205,6 +206,16 @@ class QuestionHtmlGenerator
         }
 
         $toevalqtxt = interpret('qtext', $quesData['qtype'], $quesData['qtext']);
+        if (!$teacherInGb) {
+            $toevalqtxt = preg_replace('~(<p[^>]*>\[teachernote\].*?\[/teachernote\]</p>|\[teachernote\].*?\[/teachernote\])~ms','',$toevalqtxt);
+        } else {
+            $toevalqtxt = preg_replace_callback('~(<p[^>]*>\[teachernote\](.*?)\[/teachernote\]</p>|\[teachernote\](.*?)\[/teachernote\])~ms',
+                function($matches) {
+                    return '<div><input class=\\"dsbtn\\" type=\\"button\\" value=\\"'._('Show Instructor Note').'\\"/>' . 
+                        '<div class=\\"hidden dsbox\\" id=\\"dsboxTN'.uniqid().'\\">' . 
+                        (empty($matches[2]) ? $matches[3] : $matches[2]) . '</div></div>';
+                },$toevalqtxt);
+        }
         $toevalqtxt = str_replace('\\', '\\\\', $toevalqtxt);
         $toevalqtxt = str_replace(array('\\\\n', '\\\\"', '\\\\$', '\\\\{'),
             array('\\n', '\\"', '\\$', '\\{'), $toevalqtxt);
@@ -214,6 +225,7 @@ class QuestionHtmlGenerator
         $toevalsoln = str_replace(array('\\\\n', '\\\\"', '\\\\$', '\\\\{'),
             array('\\n', '\\"', '\\$', '\\{'), $toevalsoln);
         $toevalsoln = preg_replace('/\$answerbox(\[.*?\])?/', '', $toevalsoln);
+        
         // Reset the RNG to a known state after the question code has been eval'd.
         $this->randWrapper->srand($this->questionParams->getQuestionSeed() + 2);
 
@@ -478,7 +490,7 @@ class QuestionHtmlGenerator
         } else {
 
 
-            if ($GLOBALS['myrights'] > 10) {
+            if (isset($GLOBALS['myrights']) && $GLOBALS['myrights'] > 10) {
                 if (isset($anstypes)) {
                     $this->addError('It looks like you have defined $anstypes; did you mean for this question to be Multipart?');
                 } else if (strpos($toevalqtxt, '$answerbox[') !== false) {
@@ -547,7 +559,7 @@ class QuestionHtmlGenerator
 
         if (isset($hints) && is_array($hints) && count($hints) > 0 && $showHints) {
             // Eval'd question writer code expects this to be "$hintloc".
-            $hintloc = $this->getHintText($hints);
+            $hintloc = $this->getHintText($hints, $hintlabel ?? '');
         }
 
         /*
@@ -596,6 +608,7 @@ class QuestionHtmlGenerator
                 $doShowAnswer = false; // disable automatic display of answers
             }
         }
+
         /*
          * Get the "Show Answer" button location.
          */
@@ -603,7 +616,21 @@ class QuestionHtmlGenerator
         // This variable must be named $showanswerloc, as it may be used by
         // the question writer.
         $showanswerloc = $this->getShowAnswerLocation($doShowAnswer, $doShowAnswerParts,
-          $answerbox, $entryTips, $displayedAnswersForParts, $questionWriterVars);
+          $answerbox, $entryTips, $displayedAnswersForParts, $questionWriterVars,
+          $anstypes ?? $quesData['qtype']);
+
+        // incorporate $showanswer.  Really this should be done prior to the last line,
+        // and remove the redundant logic from that function, but I don't want to refactor 
+        // that much right now
+        if (!empty($showanswer)) {
+            if (!is_array($showanswer)) {
+                $displayedAnswersForParts = [0 => $showanswer];
+            } else {
+                foreach ($showanswer as $iidx => $atIdx) {
+                    $displayedAnswersForParts[$iidx] = $atIdx;
+                }
+            }
+        }
 
         /*
          * Eval the question code.
@@ -883,9 +910,10 @@ class QuestionHtmlGenerator
      * Get hint text for question and/or individual parts.
      *
      * @param array $hints As provided by the question writer.
+     * @param string $hintlabel 
      * @return string|array The hint text.
      */
-    private function getHintText(array $hints)
+    private function getHintText(array $hints, string $hintlabel)
     {
         $qdata = $this->questionParams->getQuestionData();
         $attemptn = $this->questionParams->getStudentAttemptNumber();
@@ -929,7 +957,7 @@ class QuestionHtmlGenerator
                         $hintpart[$usenum] = $hintpart[$usenum][0];
                     }
                 } else {
-                    if (isset($scoreiscorrect) && $scoreiscorrect[$thisq][$iidx] == 1) {
+                    if (!empty($scoreiscorrect[$thisq][$iidx])) {
                         continue;
                     }
                     if (!isset($partattemptn[$iidx])) {
@@ -946,7 +974,7 @@ class QuestionHtmlGenerator
                         $hintloc[$iidx] = $hintpart[$usenum];
                     } else if (strpos($hintpart[$usenum], 'button"') !== false) {
                         $hintloc[$iidx] = "<p>{$hintpart[$usenum]}</p>\n";
-                    } else if (isset($hintlabel)) {
+                    } else if (!empty($hintlabel)) {
                         $hintloc[$iidx] = "<p>$hintlabel {$hintpart[$usenum]}</p>\n";
                     } else {
                         $hintloc[$iidx] = "<p><i>" . _('Hint:') . "</i> {$hintpart[$usenum]}</p>\n";
@@ -964,7 +992,7 @@ class QuestionHtmlGenerator
                     $hintloc = $hints[$usenum];
                 } else if (strpos($hints[$usenum], 'button"') !== false) {
                     $hintloc = "<p>{$hints[$usenum]}</p>\n";
-                } else if (isset($hintlabel)) {
+                } else if (!empty($hintlabel)) {
                     $hintloc = "<p>$hintlabel {$hints[$usenum]}</p>\n";
                 } else {
                     $hintloc = "<p><i>" . _('Hint:') . "</i> {$hints[$usenum]}</p>\n";
@@ -1026,6 +1054,7 @@ class QuestionHtmlGenerator
      * @param array $entryTips Tooltips displayed for answer boxes.
      * @param array $displayedAnswersForParts
      * @param array $questionWriterVars
+     * @param array|string $anstypes or qtype
      * @return array|string
      */
     private function getShowAnswerLocation(int $doShowAnswer,
@@ -1033,7 +1062,8 @@ class QuestionHtmlGenerator
                                            $answerBoxes,
                                            array $entryTips,
                                            array $displayedAnswersForParts,
-                                           array $questionWriterVars
+                                           array $questionWriterVars,
+                                           $procanstypes
     )
     {
         $qnidx = $this->questionParams->getDisplayQuestionNumber();
@@ -1057,19 +1087,20 @@ class QuestionHtmlGenerator
          */
 
         if (isset($showanswer) && !is_array($showanswer)) {
-            $showanswer = $this->fixDegrees($showanswer);
+            $showanswer = $this->fixDegrees($showanswer, $procanstypes);
         } else if (isset($showanswer)) {
             foreach ($showanswer as $k=>$v) {
                 if ($v === null) {continue;}
-                $showanswer[$k] = $this->fixDegrees($v);
+                $showanswer[$k] = $this->fixDegrees($v, $procanstypes[$k]);
             }
         }
         if (!is_array($shanspt)) {
-            $shanspt = $this->fixDegrees($shanspt);
+            $shanspt = $this->fixDegrees($shanspt, $procanstypes);
         } else {
             foreach ($shanspt as $k=>$v) {
                 if ($v === null) {continue;}
-                $shanspt[$k] = $this->fixDegrees($v);
+                $shanspt[$k] = $this->fixDegrees($v, 
+                    is_array($procanstypes) ? $procanstypes[$k] : $procanstypes);
             }
         }
         
@@ -1142,6 +1173,7 @@ class QuestionHtmlGenerator
         $qnidx = $this->questionParams->getDisplayQuestionNumber();
         $qidx = $this->questionParams->getDbQuestionSetId();
         $qid = $this->questionParams->getQuestionId();
+        $qref = '';
 
         $externalReferences = [];
 
@@ -1156,9 +1188,7 @@ class QuestionHtmlGenerator
                 if ($qid > 0 && (!isset($_SESSION['isteacher'])
                         || $_SESSION['isteacher'] == false) && !isset($_SESSION['stuview'])) {
                     $qref = $qid . '-' . ($qnidx + 1);
-                } else {
-                    $qref = '';
-                }
+                } 
                 for ($i = 0; $i < count($extref); $i++) {
                     $extrefpt = explode('!!', $extref[$i]);
                     if (strpos($extrefpt[1],'youtube.com/watch')!==false ||
@@ -1299,9 +1329,12 @@ class QuestionHtmlGenerator
         $this->errors[] = $errorMessage;
     }
 
-    private function fixDegrees($str) 
+    private function fixDegrees($str, $atype) 
     {
         if ($str === null) { return ''; }
+        if (is_array($atype) || $atype == 'choices' || $atype == 'multans' || $atype == 'string') {
+            return $str;
+        }
         return preg_replace_callback('/`(.*?)`/s', function($m) {
             return '`' . str_replace(['degrees','degree'],'^@', $m[1]).'`';
         }, $str);

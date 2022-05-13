@@ -1955,7 +1955,8 @@ class AssessRecord
         ->setScoreIsCorrect($scoreiscorrect)
         ->setLastRawScores($qcolors)
         ->setSeqPartDone($seqPartDone)
-        ->setCorrectAnswerWrongFormat($correctAnswerWrongFormat);
+        ->setCorrectAnswerWrongFormat($correctAnswerWrongFormat)
+        ->setTeacherInGb($this->teacherInGb);
     if ($this->dispqn !== null) {
       $questionParams->setDisplayQuestionNumber($this->dispqn);
     }
@@ -2589,6 +2590,13 @@ class AssessRecord
           $partla = $scoreResult['lastAnswerAsGiven'];
           $partlaNum = $scoreResult['lastAnswerAsNumber'];
 
+          if (is_array($scoreResult['answeights']) && 
+              (empty($curQver['answeights']) || $scoreResult['answeights'] !== $curQver['answeights'])
+          ) {
+            // answeights changed during rescoring
+            $this->setAnsweights($qn, $scoreResult['answeights'], $by_question ? $qv : $av);
+          }
+
           // overwrite scores and only keep newly rescored try
           foreach ($partla as $pn=>$v) {
             if (isset($rawparts[$pn])) {
@@ -2608,6 +2616,7 @@ class AssessRecord
     }
     $this->reTotalAssess();
     if ($by_question) {
+
       $qnsAffected = array_unique($qnsAffected);
       $curQuestions = &$this->data['assess_versions'][0]['questions'];
       // Loop through affected question numbers
@@ -3926,7 +3935,7 @@ class AssessRecord
 
     for ($pn = 0; $pn < count($qdata['tries']); $pn++) {
       $firstTry = $qdata['tries'][$pn][0];
-      $scoreonfirst += $firstTry['raw'] * $qdata['answeights'][$pn]/$answeightTot;
+      $scoreonfirst += max($firstTry['raw'],0) * $qdata['answeights'][$pn]/$answeightTot;
       $scoredet[$pn] = $firstTry['raw'];
       if (!isset($subsUsed[$firstTry['sub']])) {
         $timeonfirst += $firstTry['time'];
