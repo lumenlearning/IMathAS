@@ -76,7 +76,11 @@ if (!(isset($teacherid))) {
             $showans = Sanitize::simpleASCII($_POST['showans']);
             $showwork = Sanitize::onlyInt($_POST['showwork']);
             $rubric = intval($_POST['rubric']);
-            $showhints = intval($_POST['showhints']);
+            $showhints = !empty($_POST['showhintsusedef']) ? -1 : (
+                (empty($_POST['showhints1']) ? 0 : 1) +
+                (empty($_POST['showhints2']) ? 0 : 2) +
+                (empty($_POST['showhints4']) ? 0 : 4)
+            );
             $extracredit = !empty($_POST['ec']) ? 1 : 0;
             $showcalculator = $_POST['showcalculator']??'default';
         }
@@ -298,12 +302,18 @@ if (!(isset($teacherid))) {
         }
         if ($defaults['showhints'] == 0) {
             $defaults['showhints'] = _('No');
-        } else if ($defaults['showhints'] == 1) {
-            $defaults['showhints'] = _('Hints');
-        } else if ($defaults['showhints'] == 2) {
-            $defaults['showhints'] = _('Video/text buttons');
-        } else if ($defaults['showhints'] == 3) {
-            $defaults['showhints'] = _('Hints and Video/text buttons');
+        } else {
+            $ht = [];
+            if ($defaults['showhints']&1) {
+                $ht[] = _('Hints');
+            } 
+            if ($defaults['showhints']&2) {
+                $ht[] = _('Videos');
+            } 
+            if ($defaults['showhints']&4) {
+                $ht[] = _('Examples');
+            } 
+            $defaults['showhints'] = implode(' &amp; ', $ht);
         }
 
         if ($defaults['showwork'] == 0) {
@@ -324,6 +334,11 @@ function previewq(qn) {
   previewpop = window.open(imasroot+"/course/testquestion2.php?fixedseeds=1&cid="+cid+"&qsetid="+qn,"Testing","width="+(.4*screen.width)+",height="+(.8*screen.height)+",scrollbars=1,resizable=1,status=1,top=20,left="+(.6*screen.width-20));
   previewpop.focus();
 }
+$(function() {
+    $(".showhintsdef").on("change", function() {
+        $(this).closest("span").find("span").toggle(!this.checked);
+    });
+});
 </script>';
 require "../header.php";
 
@@ -402,13 +417,28 @@ if (!isset($_GET['id']) || $beentaken) {
    </select><br/><i class="grey"><?php echo _('Default:'); ?> <?php echo Sanitize::encodeStringForDisplay($defaults['showwork']); ?></i></span><br class="form"/>
 
 <span class=form><?php echo _('Show hints and video/text buttons?'); ?></span><span class=formright>
-    <select name="showhints">
-     <option value="-1" <?php if ($line['showhints'] == -1) {echo 'selected="1"';}?>><?php echo _('Use Default'); ?></option>
-     <option value="0" <?php if ($line['showhints'] == 0) {echo 'selected="1"';}?>><?php echo _('No'); ?></option>
-     <option value="1" <?php if ($line['showhints'] == 1) {echo 'selected="1"';}?>><?php echo _('Hints'); ?></option>
-     <option value="2" <?php if ($line['showhints'] == 2) {echo 'selected="1"';}?>><?php echo _('Video/text buttons'); ?></option>
-     <option value="3" <?php if ($line['showhints'] == 3) {echo 'selected="1"';}?>><?php echo _('Hints and Video/text buttons'); ?></option>
-    </select><br/><i class="grey"><?php echo _('Default:'); ?> <?php echo $defaults['showhints']; ?></i></span><br class="form"/>
+    <label>
+        <input type=checkbox class=showhintsdef name="showhintsusedef" value=1 <?php if ($line['showhints'] == -1) {echo 'checked';}?>>
+        <?php echo _('Use Default'); ?>
+    </label>
+    <span <?php if ($line['showhints'] == -1) {echo 'style="display:none"';}?>>
+    <br/>
+    <label>
+        &nbsp; <input type=checkbox name="showhints1" value=1 <?php if ($line['showhints']&1) {echo 'checked';}?>>
+        <?php echo _('Hints'); ?>
+    </label>
+    <br/>
+    <label>
+        &nbsp; <input type=checkbox name="showhints2" value=2 <?php if ($line['showhints']&2) {echo 'checked';}?>>
+        <?php echo _('Videos/Text'); ?>
+    </label>
+    <br/>
+    <label>
+        &nbsp; <input type=checkbox name="showhints4" value=4 <?php if ($line['showhints']&4) {echo 'checked';}?>>
+        <?php echo _('Written Examples'); ?>
+    </label>
+    </span>
+    <br/><i class="grey"><?php echo _('Default:'); ?> <?php echo $defaults['showhints']; ?></i></span><br class="form"/>
 
 <?php if (isset($CFG['showcalculator'])) : ?>
     <span class=form>Show Embedded Calculator?</span><span class=formright>
