@@ -17,6 +17,7 @@ c3.php
 
 # Travis CI
 bin/
+!vendor/bin/phinx
 
 # Runtime
 config/local.php
