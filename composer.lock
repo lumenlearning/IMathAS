@@ -1342,21 +1342,24 @@
         },
         {
             "name": "codeception/c3",
-            "version": "2.4.1",
+            "version": "2.6.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Codeception/c3.git",
-                "reference": "d841be32a6785e2f565b9f88f5ff36c905931a9a"
+                "reference": "d228302ac12860a0e92344756aa6eebff54ce171"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Codeception/c3/zipball/d841be32a6785e2f565b9f88f5ff36c905931a9a",
-                "reference": "d841be32a6785e2f565b9f88f5ff36c905931a9a",
+                "url": "https://api.github.com/repos/Codeception/c3/zipball/d228302ac12860a0e92344756aa6eebff54ce171",
+                "reference": "d228302ac12860a0e92344756aa6eebff54ce171",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.0",
+                "composer-plugin-api": "^1.0 || ^2.0",
                 "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "composer/composer": "^1.0 || ^2.0"
             },
             "type": "composer-plugin",
             "extra": {
@@ -1388,7 +1391,11 @@
                 "code coverage",
                 "codecoverage"
             ],
-            "time": "2018-05-26T22:34:28+00:00"
+            "support": {
+                "issues": "https://github.com/Codeception/c3/issues",
+                "source": "https://github.com/Codeception/c3/tree/2.6.5"
+            },
+            "time": "2022-04-28T12:08:33+00:00"
         },
         {
             "name": "codeception/codeception",
@@ -4373,5 +4380,6 @@
         "php": ">=7.3.0",
         "ext-pdo": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

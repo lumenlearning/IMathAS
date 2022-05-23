@@ -59,7 +59,11 @@
         }
     },
     "config": {
-        "process-timeout" : 0
+        "process-timeout" : 0,
+        "allow-plugins": {
+            "codeception/c3": false,
+            "kylekatarnls/update-helper": false
+        }
     },
     "scripts": {
         "start": "php -S localhost:8080 -t .",
