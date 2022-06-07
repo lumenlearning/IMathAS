@@ -32,18 +32,21 @@ require_once("includes/sanitize.php");
 		$init_session_start = true;
 		require_once("init_without_validate.php");
 		require_once("includes/newusercommon.php");
-		#### Begin OHM-specific changes ############################################################
-		#### Begin OHM-specific changes ############################################################
-		#### Begin OHM-specific changes ############################################################
-		#### Begin OHM-specific changes ############################################################
-		#### Begin OHM-specific changes ############################################################
-		// Commenting out the check below, since not implemented on OHM enrollment pages
-		/*
-		if ($_POST['challenge'] !== $_SESSION['challenge'] || !empty($_POST['hval'])) {
-			echo "Invalid submission";
-			exit;
-		}
-		*/
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        // Commenting out the check below, since not implemented on OHM enrollment pages
+        /*
+        if (!isset($_SESSION['challenge']) || $_POST['challenge'] !== $_SESSION['challenge'] ||
+            !empty($_POST['hval']) ||
+            !isset($_SESSION['newuserstart']) || (time() - $_SESSION['newuserstart']) < 5
+        ) {
+            echo "Invalid submission";
+            exit;
+        }
+        */
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
 		#### End OHM-specific changes ############################################################
@@ -51,6 +54,7 @@ require_once("includes/sanitize.php");
 		#### End OHM-specific changes ############################################################
 
 		$_SESSION['challenge'] = '';
+        unset($_SESSION['newuserstart']);
 
 		$error = '';
 		if (isset($studentTOS) && !isset($_POST['agree'])) {
@@ -285,8 +289,18 @@ require_once("includes/sanitize.php");
 			require("footer.php");
 		}
 	} else if (isset($_GET['action']) && $_GET['action']=="resetpw") {
+        $init_session_start = true;
 		require_once("init_without_validate.php");
 		if (isset($_POST['username'])) {
+            if (!isset($_SESSION['challenge']) || $_POST['challenge'] !== $_SESSION['challenge'] ||
+                !empty($_POST['terms']) ||
+                !isset($_SESSION['resetpwstart']) || (time() - $_SESSION['resetpwstart']) < 3
+            ) {
+                echo "Invalid submission";
+                exit;
+            }
+            $_SESSION['challenge'] = '';
+            unset($_SESSION['resetpwstart']);
 
 			$query = "SELECT id,email,rights,lastemail FROM imas_users WHERE SID=:sid";
 			$stm = $DBH->prepare($query);
@@ -398,7 +412,20 @@ If you still have trouble or the wrong email address is on file, contact your in
 			header('Location: ' . $GLOBALS['basesiteurl'] . '/action=resetpw&id='.Sanitize::onlyInt($_GET['id']).'&code='.Sanitize::encodeUrlParam($code) . "&r=" . Sanitize::randomQueryStringParam());
 		}
 	} else if (isset($_GET['action']) && $_GET['action']=="lookupusername") {
+        $init_session_start = true;
 		require_once("init_without_validate.php");
+        if (!isset($_SESSION['challenge']) || $_POST['challenge'] !== $_SESSION['challenge'] ||
+            !empty($_POST['terms']) ||
+            !isset($_SESSION['lookupusernamestart']) || (time() - $_SESSION['lookupusernamestart']) < 3
+        ) {
+            echo ($_POST['challenge'] !== $_SESSION['challenge']) ? 'challenge bad' : 'challenge ok';
+            if ((time() - $_SESSION['lookupusernamestart']) < 5) { echo 'time blocked';}
+
+            echo "Invalid submission";
+            exit;
+        }
+        $_SESSION['challenge'] = '';
+        unset($_SESSION['lookupusernamestart']);
 
 		$query = "SELECT id,SID,lastaccess,lastemail FROM imas_users WHERE email=:email AND SID NOT LIKE 'lti-%'";
 		$stm = $DBH->prepare($query);
@@ -783,8 +810,8 @@ If you still have trouble or the wrong email address is on file, contact your in
         } else {
             $lastmfatype = 0;
         }
-
-        if (isset($_POST['dochgpw']) ||
+        
+        if (isset($_POST['dochgpw']) || 
             $_POST['dochgmfa'] < $lastmfatype ||
             trim($old_email) != trim($_POST['email'])
         ) {
@@ -802,7 +829,7 @@ If you still have trouble or the wrong email address is on file, contact your in
                 // also check MFA
                 require_once('includes/GoogleAuthenticator.php');
                 $MFA = new GoogleAuthenticator();
-
+   
                 if (!$MFA->verifyCode($mfadata['secret'], $_POST['oldmfa'])) {
                     // MFA ok
                     require("header.php");
@@ -850,9 +877,9 @@ If you still have trouble or the wrong email address is on file, contact your in
 
                 if ($MFA->verifyCode($mfasecret, $_POST['mfaverify'])) {
                     $mfadata = array(
-                        'secret'=>$mfasecret,
-                        'last'=>'',
-                        'laston'=>0,
+                        'secret'=>$mfasecret, 
+                        'last'=>'', 
+                        'laston'=>0, 
                         'mfatype'=>($_POST['dochgmfa'] == 1 ? 'admin' : 'all')
                     );
                 } else {
