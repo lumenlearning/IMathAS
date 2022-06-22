@@ -136,7 +136,6 @@ class QuestionHtmlGenerator
         $thisq = $this->questionParams->getQuestionNumber() + 1;
         $correctAnswerWrongFormat = $this->questionParams->getCorrectAnswerWrongFormat();
         $printFormat = $this->questionParams->getPrintFormat();
-        $teacherInGb = $this->questionParams->getTeacherInGb();
 
         $isbareprint = !empty($GLOBALS['isbareprint']); // lazy hack
 
@@ -206,16 +205,6 @@ class QuestionHtmlGenerator
         }
 
         $toevalqtxt = interpret('qtext', $quesData['qtype'], $quesData['qtext']);
-        if (!$teacherInGb) {
-            $toevalqtxt = preg_replace('~(<p[^>]*>\[teachernote\].*?\[/teachernote\]</p>|\[teachernote\].*?\[/teachernote\])~ms','',$toevalqtxt);
-        } else {
-            $toevalqtxt = preg_replace_callback('~(<p[^>]*>\[teachernote\](.*?)\[/teachernote\]</p>|\[teachernote\](.*?)\[/teachernote\])~ms',
-                function($matches) {
-                    return '<div><input class=\\"dsbtn\\" type=\\"button\\" value=\\"'._('Show Instructor Note').'\\"/>' . 
-                        '<div class=\\"hidden dsbox\\" id=\\"dsboxTN'.uniqid().'\\">' . 
-                        (empty($matches[2]) ? $matches[3] : $matches[2]) . '</div></div>';
-                },$toevalqtxt);
-        }
         $toevalqtxt = str_replace('\\', '\\\\', $toevalqtxt);
         $toevalqtxt = str_replace(array('\\\\n', '\\\\"', '\\\\$', '\\\\{'),
             array('\\n', '\\"', '\\$', '\\{'), $toevalqtxt);
@@ -225,7 +214,6 @@ class QuestionHtmlGenerator
         $toevalsoln = str_replace(array('\\\\n', '\\\\"', '\\\\$', '\\\\{'),
             array('\\n', '\\"', '\\$', '\\{'), $toevalsoln);
         $toevalsoln = preg_replace('/\$answerbox(\[.*?\])?/', '', $toevalsoln);
-        
         // Reset the RNG to a known state after the question code has been eval'd.
         $this->randWrapper->srand($this->questionParams->getQuestionSeed() + 2);
 
@@ -608,7 +596,6 @@ class QuestionHtmlGenerator
                 $doShowAnswer = false; // disable automatic display of answers
             }
         }
-
         /*
          * Get the "Show Answer" button location.
          */
