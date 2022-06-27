@@ -232,3 +232,6 @@ $CFG['showcalculator'] = [
     'scientific' => 'Scientific Calculator',
     'graphing' => 'Graphing Calculator'
 ];
+
+$CFG['LTI']['autoreg'] = true;
+
