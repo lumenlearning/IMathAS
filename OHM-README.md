@@ -36,8 +36,8 @@ This step is only needed the first time you are setting up locally.
 2. Create a directory to store your certificates. 
 3. In the above directory, run `mkcert -install` and `mkcert localhost 127.0.0.1 ::1`.
 4. Copy the two resulting files into the project subdirectory `/docker/ssl`. 
-   - Name the .key.pem file `docker/ssl/ssl-cert-snakeoil.key`
-    - Name the .pem file  `docker/ssl/ssl-cert-snakeoil.pem`
+   - Name the .key.pem file `docker/ssl/lumenlearning.key`
+    - Name the .pem file  `docker/ssl/lumenlearning.crt`
     
 
 ### Running OHM locally

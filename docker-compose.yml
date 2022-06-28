@@ -19,8 +19,7 @@ services:
       - db
     volumes:
       - "./:/var/www/html"
-      - "./docker/ssl:/etc/ssl/certs"
-      - "./docker/ssl:/etc/ssl/private"
+      - "./docker/ssl:/etc/ssl/docker"
 
     hostname: ohm
     domainname: ludev.team
