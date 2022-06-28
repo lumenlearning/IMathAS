@@ -111,9 +111,13 @@ tr.textsegmentrow td {
 	padding: 0px 5px;
 }
 
+/* #### Begin OHM-specific changes ###########################################################
+ * CSS disabled by request of OHM-1138.
+
 .zebra tbody tr:nth-of-type(even) {
     background-color: #dfd;
 }
+// #### End OHM-specific changes ########################################################### */
 .searchbar {
     align-items: stretch;
 }
