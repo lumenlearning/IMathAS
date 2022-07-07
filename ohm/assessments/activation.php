@@ -26,7 +26,7 @@ if ('' == trim($userDisplayName)) {
 	$userDisplayName = $GLOBALS['username'];
 }
 
-$studentPayment = new StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
+$studentPayment = new StudentPayment(null, $GLOBALS['cid'], $GLOBALS['userid'], $courseOwnerGroupId, null);
 
 $paymentStatus = $GLOBALS['studentPayStatus']->getStudentPaymentRawStatus();
 $pageDisplayed = false;

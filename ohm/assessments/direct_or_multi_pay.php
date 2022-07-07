@@ -19,7 +19,7 @@ $attributionLogoUrl = is_null($schoolLogoUrl) || empty($schoolLogoUrl)
 $assessmentUrl = $_SERVER['REQUEST_URI'];
 $endpointUrl = $GLOBALS["basesiteurl"]
 	. sprintf('/ohm/assessments/activation_ajax.php?action=payment_proxy'
-		. '&groupId=%d&courseId=%d&studentId=%d&assessmentId=%d', $courseOwnerGroupId,
+		. '&courseOwnerGroupId=%d&courseId=%d&studentId=%d&assessmentId=%d', $courseOwnerGroupId,
 		$courseId, $userid, $assessmentId);
 $apiKey = $GLOBALS["student_pay_api"]["stripe_api_key"];
 $amount = "$paymentAmount"; // must be a string, and in cents (not dollars)
@@ -38,7 +38,7 @@ $groupName = $stm->fetch(PDO::FETCH_ASSOC)['name'];
 $redirectTo = null;
 if ('trial_not_started' == $paymentStatus) {
 	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
-		. sprintf('action=begin_trial&group_id=%d&course_id=%d&assessment_id=%d&assessment_version=%d',
+		. sprintf('action=begin_trial&course_owner_group_id=%d&course_id=%d&assessment_id=%d&assessment_version=%d',
 			$courseOwnerGroupId, $courseId, $assessmentId, $assessmentVersion);
 }
 if ('in_trial' == $paymentStatus) {
@@ -48,7 +48,7 @@ if ('in_trial' == $paymentStatus) {
 }
 if ('can_extend' == $paymentStatus) {
 	$redirectTo = $GLOBALS['basesiteurl'] . '/ohm/assessments/process_activation.php?'
-		. sprintf('action=extend_trial&group_id=%d&course_id=%d&assessment_id=%d&assessment_version=%d',
+		. sprintf('action=extend_trial&course_owner_group_id=%d&course_id=%d&assessment_id=%d&assessment_version=%d',
 			$courseOwnerGroupId, $courseId, $assessmentId, $assessmentVersion);
 }
 if ('expired' == $paymentStatus) {

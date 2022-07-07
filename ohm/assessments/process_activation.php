@@ -20,7 +20,7 @@ use OHM\Exceptions\StudentPaymentException;
 
 
 $action = Sanitize::simpleString($_REQUEST['action']);
-$groupId = Sanitize::onlyInt($_REQUEST['group_id']);
+$courseOwnerGroupId = Sanitize::onlyInt($_REQUEST['course_owner_group_id']);
 $courseId = Sanitize::courseId($_REQUEST['course_id']);
 $assessmentId = Sanitize::onlyInt($_REQUEST['assessment_id']);
 $assessmentVersion = Sanitize::onlyInt($_REQUEST['assessment_version']);
@@ -44,7 +44,7 @@ if (1 == $assessmentVersion) {
 			$assessmentId, $courseId); // used by fragments/api_error.php
 }
 
-$studentPayment = new StudentPayment($groupId, $courseId, $GLOBALS['userid']);
+$studentPayment = new StudentPayment(null, $courseId, $GLOBALS['userid'], $courseOwnerGroupId, null);
 
 
 /*

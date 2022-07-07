@@ -120,7 +120,7 @@ function renderCourseRequiresStudentPayment($action, $userRights, $courseId): vo
         return;
     }
 
-    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($courseOwnerGroupId, $courseId, null);
+    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $courseId, null, $courseOwnerGroupId, null);
     $groupRequiresPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
     if ($groupRequiresPayment && 'addcourse' != $action) {
         $checked = $studentPaymentDb->getCourseRequiresStudentPayment() ? 'checked' : '';
@@ -177,22 +177,22 @@ function getCourseOwnerGroupId($courseId): int
  * - "activation_code"
  * - "direct_pay"
  *
- * @param $groupId integer The group ID to get the payment/access type for.
+ * @param $courseOwnerGroupId integer The group ID to get the payment/access type for.
  * @return string|null The access type. Null is returned on API communication failure.
  */
-function getGroupAssessmentAccessType($groupId): ?string
+function getGroupAssessmentAccessType($courseOwnerGroupId): ?string
 {
     require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
     require_once(__DIR__ . "/../../ohm/models/StudentPayApiResult.php");
 
-    $groupId = Sanitize::onlyInt($groupId);
-    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb($groupId, null, null);
+    $courseOwnerGroupId = Sanitize::onlyInt($courseOwnerGroupId);
+    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, null, null, $courseOwnerGroupId, null);
 
     $currentAccessType = null;
     try {
         if ($studentPaymentDb->getGroupRequiresStudentPayment()) {
             require_once(__DIR__ . "/../../ohm/includes/StudentPaymentApi.php");
-            $studentPaymentApi = new \OHM\Includes\StudentPaymentApi($groupId, null, null);
+            $studentPaymentApi = new \OHM\Includes\StudentPaymentApi(null, null, null, $courseOwnerGroupId, null);
             $apiResult = $studentPaymentApi->getGroupAccessType();
 
             // If the student payment API doesn't know about this group, then
@@ -206,7 +206,7 @@ function getGroupAssessmentAccessType($groupId): ?string
     } catch (StudentPaymentException $e) {
         // Don't allow failed API communication to break UX.
         error_log(sprintf("Exception while attempting to get student payment / access type for group ID %d: %s",
-            Sanitize::onlyInt($groupId), $e->getMessage()));
+            Sanitize::onlyInt($courseOwnerGroupId), $e->getMessage()));
         error_log($e->getTraceAsString());
     }
 

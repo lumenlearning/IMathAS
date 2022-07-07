@@ -28,36 +28,37 @@ class StudentPayment
 	private $studentPaymentApi;
 	private $studentPaymentDb;
 
-	private $groupId;
+	private $studentGroupId;
 	private $courseId;
-	private $studentId;
+	private $studentUserId;
 
-	public function __construct($groupId, $courseId, $studentId)
+    /**
+     * StudentPayment constructor.
+     * @param int $studentGroupId The student's user ID.
+     * @param int $courseId The course ID.
+     * @param int $studentUserId The student's group ID.
+     * @param int|null $courseOwnerGroupId The course owner's group ID.
+     * @param int|null $courseOwnerUserId The course owner's user ID.
+     * @param StudentPaymentApi|null $studentPaymentApi
+     * @param StudentPaymentDb|null $studentPaymentDb
+     */
+    public function __construct($studentGroupId,
+                                $courseId,
+                                $studentUserId,
+                                ?int $courseOwnerGroupId = null,
+                                ?int $courseOwnerUserId = null,
+                                StudentPaymentApi $studentPaymentApi = null,
+                                StudentPaymentDb $studentPaymentDb = null
+    )
 	{
-		$this->groupId = $groupId;
-		$this->courseId = $courseId;
-		$this->studentId = $studentId;
+        $this->courseId = $courseId;
+		$this->studentUserId = $studentUserId;
+        $this->studentGroupId = $studentGroupId;
 
-		$this->studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
-		$this->studentPaymentDb = new StudentPaymentDb($groupId, $courseId, $studentId);
-	}
-
-	/**
-	 * StudentPaymentApi object setter. Used during testing.
-	 * @param object $studentPaymentApi The StudentPaymentApi object to use for API operations.
-	 */
-	public function setStudentPaymentApi($studentPaymentApi)
-	{
-		$this->studentPaymentApi = $studentPaymentApi;
-	}
-
-	/**
-	 * StudentPaymentDb object setter. Used during testing.
-	 * @param StudentPaymentDb $studentPaymentDb The StudentPaymentDb object to use for DB operations.
-	 */
-	public function setStudentPaymentDb($studentPaymentDb)
-	{
-		$this->studentPaymentDb = $studentPaymentDb;
+        $this->studentPaymentApi = $studentPaymentApi ??
+            new StudentPaymentApi($studentGroupId, $courseId, $studentUserId, $courseOwnerGroupId, $courseOwnerUserId);
+        $this->studentPaymentDb = $studentPaymentDb ??
+            new StudentPaymentDb($studentGroupId, $courseId, $studentUserId, $courseOwnerGroupId, $courseOwnerUserId);
 	}
 
 	/**
@@ -355,7 +356,7 @@ class StudentPayment
 			// Don't allow metrics logging failures to halt the experience!
 			error_log(
 				sprintf("Exception while getting institution details from Lumenistration API for group ID %d. %s",
-					$this->groupId, $e->getMessage()));
+					$this->studentGroupId, $e->getMessage()));
 			error_log($e->getTraceAsString());
 		}
 

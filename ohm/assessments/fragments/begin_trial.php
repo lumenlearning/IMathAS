@@ -31,7 +31,7 @@ $assessmentName = $assessNameStm->fetchColumn(0);
         <div class="trial_button_wrapper">
             <form method="POST" action="<?php echo $GLOBALS['basesiteurl']; ?>/ohm/assessments/process_activation.php">
                 <input type="hidden" name="action" value="begin_trial"/>
-                <input type="hidden" name="group_id" value="<?php echo Sanitize::onlyInt($courseOwnerGroupId); ?>"/>
+                <input type="hidden" name="course_owner_group_id" value="<?php echo Sanitize::onlyInt($courseOwnerGroupId); ?>"/>
                 <input type="hidden" name="course_id" value="<?php echo Sanitize::courseId($courseId); ?>"/>
                 <input type="hidden" name="assessment_id" value="<?php echo Sanitize::onlyInt($assessmentId); ?>"/>
                 <input type="hidden" name="assessment_version" value="<?php echo Sanitize::onlyInt($assessmentVersion); ?>"/>

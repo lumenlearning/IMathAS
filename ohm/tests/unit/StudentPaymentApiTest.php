@@ -73,7 +73,7 @@ final class StudentPaymentApiTest extends TestCase
 		$this->pdoStatementMock = $this->createMock(PDOStatementMock::class);
 
 		$this->studentPaymentApi = new StudentPaymentApi($this->groupId, $this->courseID,
-			$this->studentId, $this->curlMock, $this->studentPaymentDbMock);
+			$this->studentId, $this->groupId, null, $this->curlMock, $this->studentPaymentDbMock);
 	}
 
 	/**

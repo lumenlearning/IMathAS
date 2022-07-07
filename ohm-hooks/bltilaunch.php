@@ -20,7 +20,7 @@ function onAddCourse($courseId, $userId, $myrights = null, $groupid = null)
 
     global $DBH;
 
-    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $courseId, $userId);
+    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $courseId, null, null, $userId);
     $studentPaymentDb->setDbh($DBH);
 
     $groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();

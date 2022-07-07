@@ -69,11 +69,11 @@ $courseName = $stm->fetch(\PDO::FETCH_ASSOC)['name'];
     </script>
 
 <?php
-function getInstitutionData($groupId, $courseId, $studentId)
+function getInstitutionData($courseOwnerGroupId, $courseId, $studentId)
 {
 	$lumenistrationInstitution = null;
 	try {
-		$studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
+		$studentPaymentApi = new StudentPaymentApi(null, $courseId, $studentId, $courseOwnerGroupId, null);
 		$lumenistrationInstitution = $studentPaymentApi->getInstitutionData();
 	} catch (StudentPaymentException $e) {
 		error_log("Failed to communicate with Lumenistration. " . $e->getMessage());

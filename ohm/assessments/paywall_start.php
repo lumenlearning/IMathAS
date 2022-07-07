@@ -57,7 +57,7 @@ $courseOwnerGroupId = null;
 $courseOwnerGroupGuid = null;
 $enrollmentId = null;
 if (isStudentPayEnabled() && !isTutor($userId, $courseId)) {
-	$studentPaymentDb = new StudentPaymentDb(null, $courseId, $GLOBALS['userid']);
+	$studentPaymentDb = new StudentPaymentDb(null, $courseId, $GLOBALS['userid'], null, null);
 	$courseOwnerGroupId = $studentPaymentDb->getCourseOwnerGroupId();
 	$courseOwnerGroupGuid = $studentPaymentDb->getGroupGuid($courseOwnerGroupId);
 	$enrollmentId = $studentPaymentDb->getStudentEnrollmentId();
@@ -73,7 +73,7 @@ if (isStudentPayEnabled() && !isTutor($userId, $courseId)) {
 $studentPayment = null;
 $studentPayStatus = null;
 if (isStudentPayEnabled() && !isTutor($userId, $courseId) && isValidGroupIdForStudentPayments($courseOwnerGroupId)) {
-	$studentPayment = new StudentPayment($courseOwnerGroupId, $GLOBALS['cid'], $GLOBALS['userid']);
+	$studentPayment = new StudentPayment(null, $GLOBALS['cid'], $GLOBALS['userid'], $courseOwnerGroupId, null);
 
 	try {
 		$studentPayStatus = $studentPayment->getCourseAndStudentPaymentInfo();

@@ -30,11 +30,11 @@ if (!in_array($action, $validActions)) {
  */
 if ("activate_code" == $action) {
 	$activationCode = isset($_REQUEST['activationCode']) ? $_REQUEST['activationCode'] : NULL;
-	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
+	$courseOwnerGroupId = isset($_REQUEST['courseOwnerGroupId']) ? $_REQUEST['courseOwnerGroupId'] : NULL;
 	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
 
-	$studentPayment = new StudentPayment($groupId, $courseId, $studentId);
+	$studentPayment = new StudentPayment(null, $courseId, $studentId, $courseOwnerGroupId, null);
 
 	$studentPaymentStatus = null;
 	try {
@@ -71,7 +71,7 @@ if ("activate_code" == $action) {
  *   2. After entering an activation code, successful or not.
  */
 if ("payment_proxy" == $action) {
-	$groupId = isset($_REQUEST['groupId']) ? $_REQUEST['groupId'] : NULL;
+	$courseOwnerGroupId = isset($_REQUEST['courseOwnerGroupId']) ? $_REQUEST['courseOwnerGroupId'] : NULL;
 	$courseId = isset($_REQUEST['courseId']) ? $_REQUEST['courseId'] : NULL;
 	$courseName = getCourseNameById($courseId);
 	$studentId = isset($_REQUEST['studentId']) ? $_REQUEST['studentId'] : NULL;
@@ -82,18 +82,18 @@ if ("payment_proxy" == $action) {
 	studentPaymentDebug('Received POST data from Stripe checkout: '
 		. print_r($_POST, true));
 	studentPaymentDebug(sprintf(
-		'Relaying Stripe data to Lumenistration. groupId=%d, courseId=%d, studentId=%d',
-		$groupId, $courseId, $studentId));
+		'Relaying Stripe data to Lumenistration. courseOwnerGroupId=%d, courseId=%d, studentId=%d',
+		$courseOwnerGroupId, $courseId, $studentId));
 
-	$studentPaymentApi = new StudentPaymentApi($groupId, $courseId, $studentId);
+	$studentPaymentApi = new StudentPaymentApi(null, $courseId, $studentId, $courseOwnerGroupId, null);
 	$apiResponse = null;
 	try {
 		$formData = array_merge($_POST, array('section_name' => $courseName));
 		$apiResponse = $studentPaymentApi->paymentProxy($formData);
 	} catch (StudentPaymentException $e) {
 		error_log(sprintf("Exception while attempting to proxy activation/payment data to Lumenistration."
-			. " groupId=%d, courseId=%d, studentId=%d, error: %s",
-			$groupId, $courseId, $studentId, $e->getMessage()));
+			. " courseOwnerGroupId=%d, courseId=%d, studentId=%d, error: %s",
+			$courseOwnerGroupId, $courseId, $studentId, $e->getMessage()));
 		error_log($e->getTraceAsString());
 		header('Location: ' . $GLOBALS["basesiteurl"] . '/assessment/showtest.php', true);
 		exit;
@@ -122,10 +122,10 @@ if ("payment_proxy" == $action) {
 	}
 
 	if (is_null($activationCode)) {
-		redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
+		redirect_to_payment_confirmation($courseOwnerGroupId, $courseId, $assessmentId,
 			$confirmationNum, $activationCode, $userEmail);
 	} else {
-		redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
+		redirect_to_activation_confirmation($courseOwnerGroupId, $courseId, $assessmentId,
 			$confirmationNum, $activationCode, $userEmail);
 	}
 
@@ -158,7 +158,7 @@ function response($status, $msg)
 /**
  * Redirect a user to the activation confirmation page.
  */
-function redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
+function redirect_to_activation_confirmation($courseOwnerGroupId, $courseId, $assessmentId,
 											 $confirmationNum, $activationCode, $email)
 {
 	$confirmationUrl = $GLOBALS["basesiteurl"] . '/ohm/assessments/activation_confirmation.php?'
@@ -176,20 +176,20 @@ function redirect_to_activation_confirmation($groupId, $courseId, $assessmentId,
 /**
  * Redirect a user to the direct payment confirmation page.
  *
- * @param integer $groupId The group ID. (from imas_groups)
+ * @param integer $courseOwnerGroupId The group ID. (from imas_groups)
  * @param integer $courseId The course ID. (from imas_courses)
  * @param integer $assessmentId The assessment ID.
  * @param string $confirmationNum The confirmation number, as a string.
  * @param string $activationCode The activation code used.
  * @param string $email The user's email used for payment receipts
  */
-function redirect_to_payment_confirmation($groupId, $courseId, $assessmentId,
+function redirect_to_payment_confirmation($courseOwnerGroupId, $courseId, $assessmentId,
 										  $confirmationNum, $activationCode, $email)
 {
 	$cookieData = array(
 		'confNum' => $confirmationNum,
 		'code' => $activationCode,
-		'gid' => $groupId,
+		'gid' => $courseOwnerGroupId,
 		'cid' => $courseId,
 		'aid' => $assessmentId,
 		'email' => $email,
