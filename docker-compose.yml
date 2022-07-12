@@ -8,7 +8,9 @@ services:
   app:
     build:
       context: ./
-      dockerfile: Dockerfile-php
+      dockerfile: docker/Dockerfile-php
+      args:
+        enabledev: "true"
     expose:
       - 80
       - 443
