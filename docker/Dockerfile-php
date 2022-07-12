@@ -17,7 +17,8 @@ RUN if [ "ztrue" = "z$enabledev" ]; then \
 RUN a2enmod rewrite
 
 # Update Linux package DB
-RUN apt-get update
+RUN apt-get update \
+	&& apt-get install vim less
 
 # Install PHP extensions: pdo, pdo_mysql, mbstring, gettext
 RUN apt-get install -y libonig-dev \
@@ -45,6 +46,9 @@ RUN if [ "ztrue" = "z$enabledev" ]; then \
 # Enable error logging
 RUN if [ "ztrue" = "z$enabledev" ]; then \
 		cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini \
+		; \
+	else \
+		cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
 		; \
 	fi
 
