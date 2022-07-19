@@ -28,7 +28,7 @@ final class StudentPaymentDbTest extends TestCase
 		$this->pdoMock = $this->createMock(PDOMock::class);
 		$this->pdoStatementMock = $this->createMock(PDOStatementMock::class);
 
-		$this->studentPaymentDb = new StudentPaymentDb(42, 2604, 128);
+		$this->studentPaymentDb = new StudentPaymentDb(42, 2604, 128, 42, null);
 		$this->studentPaymentDb->setDbh($this->pdoMock);
 	}
 
@@ -111,6 +111,59 @@ final class StudentPaymentDbTest extends TestCase
 	}
 
 	/*
+	 * getGroupIdForPayments
+	 */
+
+    public function testGetGroupIdForPayments_byCourseOwnerGroupId() {
+        $studentPaymentDb = new StudentPaymentDb(null, null, null, 42, null);
+
+        $groupId = $studentPaymentDb->getGroupIdForPayments();
+
+        $this->assertEquals(42, $groupId);
+    }
+
+    public function testGetGroupIdForPayments_byCourseOwnerUserId() {
+        $studentPaymentDb = new StudentPaymentDb(null, null, null, null, 123);
+        $studentPaymentDb->setDbh($this->pdoMock);
+        $this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+        $this->pdoStatementMock->method('fetch')->willReturn(['groupid' => 42]);
+
+        $groupId = $studentPaymentDb->getGroupIdForPayments();
+
+        $this->assertEquals(42, $groupId);
+    }
+
+    public function testGetGroupIdForPayments_byCourseId() {
+        $studentPaymentDb = new StudentPaymentDb(null, 123, null, null, null);
+        $studentPaymentDb->setDbh($this->pdoMock);
+        $this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+        $this->pdoStatementMock->method('fetch')->willReturn(['groupid' => 42]);
+
+        $groupId = $studentPaymentDb->getGroupIdForPayments();
+
+        $this->assertEquals(42, $groupId);
+    }
+
+    public function testGetGroupIdForPayments_byStudentGroupId() {
+        $studentPaymentDb = new StudentPaymentDb(42, null, null, null, null);
+
+        $groupId = $studentPaymentDb->getGroupIdForPayments();
+
+        $this->assertEquals(42, $groupId);
+    }
+
+    public function testGetGroupIdForPayments_byStudentUserId() {
+        $studentPaymentDb = new StudentPaymentDb(null, null, 12345, null, null);
+        $studentPaymentDb->setDbh($this->pdoMock);
+        $this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+        $this->pdoStatementMock->method('fetchColumn')->willReturn(42);
+
+        $groupId = $studentPaymentDb->getGroupIdForPayments();
+
+        $this->assertEquals(42, $groupId);
+    }
+
+	/*
 	 * getGroupRequiresStudentPayment
 	 */
 
@@ -185,6 +238,21 @@ final class StudentPaymentDbTest extends TestCase
 
 		$this->assertEquals(42, $result);
 	}
+
+	/*
+	 * getGroupIdByUserId
+	 */
+
+    public function testGetGroupIdByUserId() {
+        $dbResult = array('groupid' => 42);
+
+        $this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+        $this->pdoStatementMock->method('fetch')->willReturn($dbResult);
+
+        $result = $this->studentPaymentDb->getGroupIdByUserId(123);
+
+        $this->assertEquals(42, $result);
+    }
 
 	/*
 	 * getGroupGuid

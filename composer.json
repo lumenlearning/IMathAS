@@ -10,7 +10,7 @@
         "tuupola/slim-jwt-auth": "^2.4.0"
     },
     "require-dev": {
-        "robmorgan/phinx": "^0.9.2",
+        "robmorgan/phinx": "^0.12.10",
         "phpunit/phpunit": "^9.1",
         "codeception/codeception": "^4.1",
         "codeception/c3": "^2.4",
@@ -59,7 +59,11 @@
         }
     },
     "config": {
-        "process-timeout" : 0
+        "process-timeout" : 0,
+        "allow-plugins": {
+            "codeception/c3": false,
+            "kylekatarnls/update-helper": false
+        }
     },
     "scripts": {
         "start": "php -S localhost:8080 -t .",

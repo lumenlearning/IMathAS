@@ -18,22 +18,29 @@ class StudentPaymentDb
 
 	private $dbh;
 
-	private $groupId;
 	private $courseId;
-	private $studentId;
+	private $studentUserId;
+	private $studentGroupId;
+	private $courseOwnerUserId;
+	private $courseOwnerGroupId;
 
 	/**
 	 * StudentPaymentDb constructor.
 	 *
-	 * @param $groupId integer The student's group ID. (MySQL imas_groups. ID column)
-	 * @param $courseId integer The course ID. (MySQL table 'imas_courses', ID column)
-	 * @param $studentId integer The the student's ID. (MySQL table 'imas_users', ID column)
+	 * @param $studentGroupId integer The student's group ID.
+	 * @param $courseId integer The course ID.
+	 * @param $studentUserId integer The enrolled student's user ID.
+	 * @param $courseOwnerGroupId int|null The course owner's group ID.
+	 * @param $courseOwnerUserId int|null The course owner's user ID.
 	 */
-	public function __construct($groupId, $courseId, $studentId)
+	public function __construct($studentGroupId, $courseId, $studentUserId,
+								?int $courseOwnerGroupId, ?int $courseOwnerUserId)
 	{
-		$this->groupId = $groupId;
 		$this->courseId = $courseId;
-		$this->studentId = $studentId;
+		$this->studentUserId = $studentUserId;
+		$this->studentGroupId = $studentGroupId;
+		$this->courseOwnerUserId = $courseOwnerUserId;
+		$this->courseOwnerGroupId = $courseOwnerGroupId;
 
 		if (isset($GLOBALS['DBH'])) {
 			$this->dbh = $GLOBALS['DBH'];
@@ -58,12 +65,12 @@ class StudentPaymentDb
 	public function getStudentGroupId()
 	{
 		$stm = $this->dbh->prepare("SELECT groupid FROM imas_users WHERE id=:studentid");
-		$stm->execute(array(':studentid' => $this->studentId));
+		$stm->execute(array(':studentid' => $this->studentUserId));
 		$result = $stm->fetchColumn(0);
 
 		if (null == $result || 1 > $result) {
 			throw new StudentPaymentException(sprintf("Unable to get group ID for user ID %d.",
-				$this->studentId));
+				$this->studentUserId));
 		}
 
 		return $result;
@@ -78,13 +85,13 @@ class StudentPaymentDb
 	public function getStudentEnrollmentId()
 	{
 		$stm = $this->dbh->prepare("SELECT id FROM imas_students WHERE userid=:studentid AND courseid=:courseid");
-		$stm->execute(array(':studentid' => $this->studentId, ':courseid' => $this->courseId));
+		$stm->execute(array(':studentid' => $this->studentUserId, ':courseid' => $this->courseId));
 		$result = $stm->fetchColumn(0);
 
 		if (null == $result) {
 			throw new StudentPaymentException(sprintf(
 				"Unable to get student enrollment ID for course ID %d for student ID %d.", $this->courseId,
-				$this->studentId));
+				$this->studentUserId));
 		}
 
 		return $result;
@@ -99,7 +106,7 @@ class StudentPaymentDb
 	{
 		$stm = $this->dbh->prepare("SELECT has_valid_access_code FROM imas_students
 										WHERE userid=:studentid AND courseid=:courseid");
-		$stm->execute(array(':studentid' => $this->studentId, ':courseid' => $this->courseId));
+		$stm->execute(array(':studentid' => $this->studentUserId, ':courseid' => $this->courseId));
 		$result = $stm->fetchColumn(0);
 
 		return $result;
@@ -119,7 +126,7 @@ class StudentPaymentDb
 
 		$stm = $this->dbh->prepare("UPDATE imas_students SET has_valid_access_code = :hascode
 										WHERE userid=:studentid AND courseid=:courseid");
-		$stm->execute(array(':hascode' => $hasCode, ':studentid' => $this->studentId, ':courseid' => $this->courseId));
+		$stm->execute(array(':hascode' => $hasCode, ':studentid' => $this->studentUserId, ':courseid' => $this->courseId));
 	}
 
 	/**
@@ -152,23 +159,79 @@ class StudentPaymentDb
 		}
 
 		$stm = $this->dbh->prepare("UPDATE imas_courses SET student_pay_required = :required WHERE id=:courseid");
-		$stm->execute(array(':required' => $studentPaymentRequired, ':courseid' => $this->courseId));
+		$success = $stm->execute(array(':required' => $studentPaymentRequired, ':courseid' => $this->courseId));
+
+		if (!$success) {
+			throw new StudentPaymentException("Unable to set payment setting for course ID: " . $this->courseId);
+		}
+	}
+
+	/**
+	 * Get the group ID that should be used for paywall decisions.
+	 *
+	 * Ideally, this should always be the course owner's group ID.
+	 * Valid group IDs are row IDs from imas_groups.
+	 *
+	 * The group ID returned is prioritized in this order, based on available
+	 * information passed in on instantiation:
+	 *
+	 * 1. The course owner's group ID, using the value of $this->courseOwnerGroupId.
+	 * 2. The course owner's group ID, obtained using $this->courseOwnerUserId.
+	 * 3. The course owner's group ID, obtained using $this->courseId.
+	 * 4. The student's group ID, using the value of $this->$studentGroupId.
+	 * 5. The student's group ID, obtained using $this->studentUserId.
+	 *
+	 * This method exists due to the various ways this class is instantiated
+	 * throughout OHM, with varying amounts of information provided.
+	 *
+	 * In cases where the course owner's group ID is not available, we return
+	 * the student's group ID if possible.
+	 *
+	 * @return int The group ID to use for paywall decisions.
+	 * @throws StudentPaymentException Thrown if unable to get the group ID for payments.
+	 */
+	public function getGroupIdForPayments(): int
+	{
+		if (isset($this->courseOwnerGroupId) && 0 < $this->courseOwnerGroupId) {
+			return $this->courseOwnerGroupId;
+		}
+
+		if (isset($this->courseOwnerUserId) && 0 < $this->courseOwnerUserId) {
+			return $this->getGroupIdByUserId($this->courseOwnerUserId);
+		}
+
+		if (isset($this->courseId) && 0 < $this->courseId) {
+			return $this->getCourseOwnerGroupId();
+		}
+
+		if (isset($this->studentGroupId) && 0 < $this->studentGroupId) {
+			return $this->studentGroupId;
+		}
+
+		if (isset($this->studentUserId) && 0 < $this->studentUserId) {
+			return $this->getStudentGroupId();
+		}
+
+		throw new StudentPaymentException(
+			"Unable to get course owner's group ID for payments."
+			. ' (StudentPaymentDB is lacking: courseOwnerGroupId, courseId, studentGroupId, and studentUserId information)'
+		);
 	}
 
 	/**
 	 * Determine if this group MAY require student payment for assessments.
+	 *
+	 * This is done by looking at student_pay_enabled in imas_groups.
 	 *
 	 * @return bool True if student payment may be required. False if not.
 	 * @throws StudentPaymentException Thrown if unable to get student payment value.
 	 */
 	public function getGroupRequiresStudentPayment()
 	{
-		if (!isset($this->groupId) || null == $this->groupId) {
-			$this->groupId = $this->getStudentGroupId();
-		}
+		$groupIdForPayments = $this->getGroupIdForPayments();
 
 		$stm = $this->dbh->prepare("SELECT name, student_pay_enabled FROM imas_groups WHERE id=:groupid");
-		$stm->execute(array(':groupid' => $this->groupId));
+		$stm->execute(array(':groupid' => $groupIdForPayments));
 		$result = $stm->fetch(\PDO::FETCH_ASSOC);
 
 		$studentPayRequired = $result['student_pay_enabled'];
@@ -176,7 +239,7 @@ class StudentPaymentDb
 		if (null == $studentPayRequired) {
 			throw new StudentPaymentException(sprintf(
 				"Unable to determine if group ID %d (%s) may require student payment for course ID %d.",
-				$this->groupId, $result['name'], $this->courseId));
+				$groupIdForPayments, $result['name'], $this->courseId));
 		}
 
 		return $studentPayRequired;
@@ -194,12 +257,10 @@ class StudentPaymentDb
 			throw new StudentPaymentException("Invalid non-boolean value: " . $studentPaymentRequired);
 		}
 
-		if (!isset($this->groupId) || null == $this->groupId) {
-			$this->groupId = $this->getStudentGroupId();
-		}
+		$groupIdForPayments = $this->getGroupIdForPayments();
 
 		$stm = $this->dbh->prepare("UPDATE imas_groups SET student_pay_enabled = :required WHERE id=:groupid");
-		$stm->execute(array(':required' => $studentPaymentRequired, ':groupid' => $this->groupId));
+		$stm->execute(array(':required' => $studentPaymentRequired, ':groupid' => $groupIdForPayments));
 	}
 
 	/**
@@ -227,14 +288,23 @@ class StudentPaymentDb
 	 * Get a course owner's group ID.
 	 *
 	 * @return integer The course ID. If none, 0 will be returned
+	 * @throws StudentPaymentException Thrown if there is no course ID available.
 	 */
 	function getCourseOwnerGroupId()
 	{
-		$sth = $this->dbh->prepare("SELECT u.groupid FROM imas_courses AS c
+		if (!empty($this->courseOwnerGroupId)) {
+			return $this->courseOwnerGroupId;
+		}
+
+		if (empty($this->courseId)) {
+			throw new StudentPaymentException("Unable to get course owner's group ID. The course ID is unknown.");
+		}
+
+		$pdoStatement = $this->dbh->prepare("SELECT u.groupid FROM imas_courses AS c
 											JOIN imas_users AS u ON u.id = c.ownerid
 											WHERE c.id = :id");
-		$sth->execute(array(':id' => $this->courseId));
-		$results = $sth->fetch(\PDO::FETCH_ASSOC);
+		$pdoStatement->execute(array(':id' => $this->courseId));
+		$results = $pdoStatement->fetch(\PDO::FETCH_ASSOC);
 		$groupId = $results['groupid'];
 
 		if (is_null($groupId) || 0 >= $groupId) {
@@ -245,15 +315,30 @@ class StudentPaymentDb
 	}
 
 	/**
+	 * Get a user's group ID by their user ID.
+	 *
+	 * @param int $userId The user's ID from imas_users.
+	 * @return int The user's group ID.
+	 */
+	function getGroupIdByUserId(int $userId): int
+	{
+		$pdoStatement = $this->dbh->prepare("SELECT groupid FROM imas_users WHERE id = :id");
+		$pdoStatement->execute([':id' => $userId]);
+		$results = $pdoStatement->fetch(\PDO::FETCH_ASSOC);
+
+		return $results['groupid'];
+	}
+
+	/**
 	 * Get the Lumen GUID for a group ID.
 	 *
 	 * @return string The group's Lumen GUID.
 	 */
 	function getGroupGuid($groupId)
 	{
-		$sth = $this->dbh->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :id");
-		$sth->execute(array(':id' => $groupId));
-		$results = $sth->fetch(\PDO::FETCH_ASSOC);
+		$pdoStatement = $this->dbh->prepare("SELECT lumen_guid FROM imas_groups WHERE id = :id");
+		$pdoStatement->execute(array(':id' => $groupId));
+		$results = $pdoStatement->fetch(\PDO::FETCH_ASSOC);
 
 		return $results['lumen_guid'];
 	}
@@ -267,15 +352,12 @@ class StudentPaymentDb
 	 */
 	function getLumenGuid()
 	{
-		if (is_null($this->groupId)) {
-			throw new StudentPaymentException("Group ID is undefined."
-				. " Please provide a group ID when instantiating this class.");
-		}
+		$groupId = $this->getGroupIdForPayments();
 
-		$sth = $this->dbh->prepare("SELECT g.lumen_guid FROM imas_groups AS g
+		$pdoStatement = $this->dbh->prepare("SELECT g.lumen_guid FROM imas_groups AS g
 											WHERE g.id = :id");
-		$sth->execute(array(':id' => $this->groupId));
-		$results = $sth->fetch(\PDO::FETCH_ASSOC);
+		$pdoStatement->execute(array(':id' => $groupId));
+		$results = $pdoStatement->fetch(\PDO::FETCH_ASSOC);
 		$lumenGuid = $results['lumen_guid'];
 
 		return $lumenGuid;

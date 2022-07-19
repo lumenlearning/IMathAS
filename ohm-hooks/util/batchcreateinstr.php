@@ -4,17 +4,17 @@ require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
 
 
 /**
- * Called when adding a course.
+ * Called when adding a course while adding an instructor.
  *
  * @param int $courseId The course's ID.
- * @param int $userId The user's ID.
+ * @param int $courseOwnerUserId The course owner's user ID.
  * @throws \OHM\Exceptions\StudentPaymentException
  */
-function onAddCourse($courseId, $userId)
+function onAddCourse($courseId, $courseOwnerUserId)
 {
     global $DBH;
 
-    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, null, $userId);
+    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, null, null, null, $courseOwnerUserId);
     $groupRequiresStudentPayment = $studentPaymentDb->getGroupRequiresStudentPayment();
 
     if ($groupRequiresStudentPayment) {

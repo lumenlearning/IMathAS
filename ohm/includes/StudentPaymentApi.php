@@ -27,33 +27,34 @@ class StudentPaymentApi
 	private $studentPaymentDb;
 	private $institutionIdForApi = null;
 
-	private $groupId;
+	private $studentUserId;
 	private $courseId;
-	private $studentId;
+	private $studentGroupId;
+	private $courseOwnerGroupId;
 
 	/**
 	 * StudentPayment constructor.
-	 * @param $groupId integer The student's group ID. (MySQL imas_groups. ID column)
+	 *
+	 * @param $studentGroupId integer The student's group ID. (MySQL imas_groups. ID column)
 	 * @param $courseId integer The course ID. (MySQM imas_courses, ID column)
-	 * @param $studentId integer The student's user ID. (MySQL imas_users table, ID column)
+	 * @param $studentUserId integer The student's user ID. (MySQL imas_users table, ID column)
+	 * @param $courseOwnerGroupId int|null The course owner's group ID.
+	 * @param $courseOwnerUserId int|null The course owner's user ID.
 	 * @param $curl HttpRequest An implementation of HttpRequest. (optional; for unit testing)
 	 * @param $studentPaymentDb StudentPaymentDb An implementation of StudentPaymentDb. (optional; for unit testing)
 	 */
-	public function __construct($groupId, $courseId, $studentId, $curl = null, $studentPaymentDb = null)
+	public function __construct($studentGroupId, $courseId, $studentUserId,
+								?int $courseOwnerGroupId, ?int $courseOwnerUserId,
+								$curl = null, $studentPaymentDb = null)
 	{
-		$this->groupId = $groupId;
 		$this->courseId = $courseId;
-		$this->studentId = $studentId;
-		$this->curl = $curl;
-		$this->studentPaymentDb = $studentPaymentDb;
+		$this->studentUserId = $studentUserId;
+		$this->studentGroupId = $studentGroupId;
+		$this->courseOwnerGroupId = $courseOwnerGroupId;
 
-		if (null == $curl) {
-			$this->curl = new CurlRequest();
-		}
-
-		if (null == $studentPaymentDb) {
-			$this->studentPaymentDb = new StudentPaymentDb($groupId, $courseId, $studentId);
-		}
+		$this->curl = $curl ?? new CurlRequest();
+		$this->studentPaymentDb = $studentPaymentDb ?? new StudentPaymentDb($studentGroupId,
+				$courseId, $studentUserId, $courseOwnerGroupId, $courseOwnerUserId);
 	}
 
 	/**
@@ -499,8 +500,8 @@ class StudentPaymentApi
 
 		$studentPayApiResult = new StudentPayApiResult();
 		if (isset($apiResponse['status'])) {
-            $studentPayApiResult->setStudentPaymentStatus($apiResponse['status']);
-        }
+			$studentPayApiResult->setStudentPaymentStatus($apiResponse['status']);
+		}
 		if (isset($apiResponse['message'])) {
 			$studentPayApiResult->setApiUserMessage($apiResponse['message']);
 		}
@@ -606,7 +607,7 @@ class StudentPaymentApi
 
 		$lumenGuid = $this->studentPaymentDb->getLumenGuid();
 		$this->institutionIdForApi = is_null($lumenGuid) || empty($lumenGuid)
-			? $this->groupId : $lumenGuid;
+			? $this->courseOwnerGroupId : $lumenGuid;
 
 		return $this->institutionIdForApi;
 	}

@@ -33,9 +33,8 @@ final class StudentPaymentTest extends TestCase
 		$this->studentPaymentApiMock = $this->createMock(StudentPaymentApi::class);
 		$this->studentPaymentDbMock = $this->createMock(StudentPaymentDb::class);
 
-		$this->studentPayment = new StudentPayment(42, 2604, 128);
-		$this->studentPayment->setStudentPaymentApi($this->studentPaymentApiMock);
-		$this->studentPayment->setStudentPaymentDb($this->studentPaymentDbMock);
+		$this->studentPayment = new StudentPayment(42, 2604, 128, 42, null,
+            $this->studentPaymentApiMock, $this->studentPaymentDbMock);
 	}
 
 	/*

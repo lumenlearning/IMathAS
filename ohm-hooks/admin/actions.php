@@ -40,9 +40,17 @@ function onAddCourse($courseId, $userId, $userRights, $userGroupId)
 {
     require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
 
-    global $DBH;
+    global $DBH, $courseownerid;
 
-    $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $courseId, $userId);
+    $studentPaymentDb = null;
+    if (!empty($courseownerid)) {
+        // We explicitly have the user ID for the user who will own the course,
+        // even if being created by a different user, such as an admin.
+        $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $courseId, null, null, $courseownerid);
+    } else {
+        // Use the current user's ID and group ID to set the course's payment setting.
+        $studentPaymentDb = new \OHM\Includes\StudentPaymentDb(null, $courseId, null, $userGroupId, $userId);
+    }
     $studentPaymentDb->setDbh($DBH);
 
     // If payments are enabled at the group level, enable them at the course level.

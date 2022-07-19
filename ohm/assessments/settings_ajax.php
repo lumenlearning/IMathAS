@@ -102,19 +102,19 @@ function validParamsPaymentType()
 /**
  * Update the student payment setting in the OHM database.
  *
- * @param $groupId integer The group's ID. (imas_groups, id column)
+ * @param $courseOwnerGroupId integer The group's ID. (imas_groups, id column)
  * @param $isEnabled boolean True for enabled, false for disabled.
  */
-function setStudentPaymentEnabled($groupId, $isEnabled)
+function setStudentPaymentEnabled($courseOwnerGroupId, $isEnabled)
 {
 	try {
-		$studentPaymebtDb = new StudentPaymentDb($groupId, null, null);
-		$studentPaymebtDb->setStudentPaymentAllCoursesByGroupId($groupId, $isEnabled);
+		$studentPaymebtDb = new StudentPaymentDb(null, null, null, $courseOwnerGroupId, null);
+		$studentPaymebtDb->setStudentPaymentAllCoursesByGroupId($courseOwnerGroupId, $isEnabled);
 		$studentPaymebtDb->setGroupRequiresStudentPayment($isEnabled);
 	} catch (\PDOException $e) {
-		dbException($e, $groupId);
+		dbException($e, $courseOwnerGroupId);
 	} catch (StudentPaymentException $e) {
-		dbException($e, $groupId);
+		dbException($e, $courseOwnerGroupId);
 	}
 }
 
@@ -142,10 +142,10 @@ function dbException($exception, $groupId)
  * - "activation_code"
  * - "direct_pay"
  *
- * @param $groupId integer The group's ID. (imas_groups, id column)
+ * @param $courseOwnerGroupId integer The group's ID. (imas_groups, id column)
  * @param $paymentType string The payment type.
  */
-function setStudentPaymentType($groupId, $paymentType)
+function setStudentPaymentType($courseOwnerGroupId, $paymentType)
 {
 	// If we're disabling student payments, don't delete it in the student
 	// payment API. Associated data now exists that OHM doesn't know about.
@@ -153,7 +153,7 @@ function setStudentPaymentType($groupId, $paymentType)
 		return;
 	}
 
-	$studentPaymentApi = new StudentPaymentApi($groupId, null, null);
+	$studentPaymentApi = new StudentPaymentApi(null, null, null, $courseOwnerGroupId, null);
 
 	try {
 		$apiResult = $studentPaymentApi->updateGroupPaymentSettings($paymentType);

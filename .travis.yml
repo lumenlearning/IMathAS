@@ -8,7 +8,8 @@ before_script:
   - mysql -e 'CREATE DATABASE myopenmathdb;'
   - cp .env.example .env
   - cp ohm/api/src/configs/settings-prod.php ohm/api/src/configs/settings.php
-  - wget -O composer https://getcomposer.org/download/1.10.16/composer.phar
+  - wget -O composer https://getcomposer.org/download/2.3.5/composer.phar
+  - echo "3b3b5a899c06a46aec280727bdf50aad14334f6bc40436ea76b07b650870d8f4 composer" | sha256sum -c
   - chmod 755 composer
   - ./deploy-scripts/build-all.sh
   - php -S 127.0.0.1:8080 -t . &
