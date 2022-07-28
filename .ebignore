@@ -1,5 +1,5 @@
 # Paths not listed in this file will be deployed to AWS Beanstalk.
-# This file should match /.gitignore AND include ".git/".
+# This file should match /.gitignore, /.dockerignore, AND include ".git/".
 .git/
 
 # Local dev
@@ -15,7 +15,7 @@ c3.php
 *.code-workspace
 *.iml
 
-# Travis CI
+# CI
 bin/
 !vendor/bin/phinx
 !vendor/robmorgan/phinx/bin/

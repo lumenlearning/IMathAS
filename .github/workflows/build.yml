@@ -1,0 +1,130 @@
+name: build-and-push
+env:
+  ECR_REPOSITORY: ohm-beanstalk
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches:
+    - main
+    - rc/**
+jobs:
+  build-and-push:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    name: Build, Test, Push
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+      id-token: write
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      CLI: true
+      CONFIG_ENV: ci
+      DB_SERVER: 127.0.0.1
+      DB_NAME: myopenmathdb
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      DB_CHARSET: latin1
+      S3_MAIN_BUCKET_NAME: none
+      OHM_API_JWT_SECRET: development_jwt_secret
+      LOG_CHANNEL: stderr
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout project
+
+    - id: read_tree_hash
+      name: Read git tree hash
+      run: |
+        tree_hash=$(git rev-parse HEAD:)
+        echo "::set-output name=tree_hash::$tree_hash"
+
+    - id: set_branch_name
+      name: Read git branch name
+      run: |
+        branch_name=${GITHUB_REF##*/}
+        echo "::set-output name=branch_name::$branch_name"
+
+    - id: set_node_version
+      name: Read Node Version from .nvmrc
+      run: |
+        node_version=$(< .nvmrc)
+        echo "::set-output name=node_version::$node_version"
+
+    - uses: ./.github/actions/private-ecr-login
+      name: Login to Private ECR
+      id: login-ecr
+
+    - name: Check for prebuilt image
+      id: prebuilt_check
+      run: |
+        docker manifest inspect ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-tree-${{ steps.read_tree_hash.outputs.tree_hash }} || echo "::set-output name=image_exists::$?"
+
+    - name: Set up Docker Buildx
+      if: steps.prebuilt_check.outputs.image_exists != 0
+      uses: docker/setup-buildx-action@v2
+
+    - name: Create Ohm Bulid Environment
+      uses: docker/build-push-action@v3
+      if: steps.prebuilt_check.outputs.image_exists != 0
+      with:
+        context: .
+        file: docker/Dockerfile-beanstalk
+        platforms: linux/amd64
+        push: false
+        load: true
+        target: builder
+        build-args: |
+          NODE_VERSION=${{ steps.set_node_version.outputs.node_version }}
+        tags: |
+          ohm:local
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Open permissions on working directory for docker
+      run: chmod -R a+rw $GITHUB_WORKSPACE
+
+    - name: Build Ohm
+      if: steps.prebuilt_check.outputs.image_exists != 0
+      run: |
+        docker run -v $GITHUB_WORKSPACE:/build:rw ohm:local ./deploy-scripts/build-all.sh
+
+    - name: Run Tests in Container
+      if: steps.prebuilt_check.outputs.image_exists != 0
+      run: |
+        docker run --network host \
+          -v $GITHUB_WORKSPACE:/build:rw \
+          -e CLI -e CONFIG_ENV -e DB_SERVER -e DB_NAME -e DB_USERNAME -e DB_PASSWORD -e DB_CHARSET -e S3_MAIN_BUCKET_NAME -e OHM_API_JWT_SECRET -e LOG_CHANNEL \
+          ohm:local ./deploy-scripts/run-tests.sh
+
+    - name: Docker build and push
+      uses: docker/build-push-action@v3
+      if: steps.prebuilt_check.outputs.image_exists != 0
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      with:
+        context: .
+        file: docker/Dockerfile-beanstalk
+        platforms: linux/amd64
+        push: true
+        build-args: |
+          NODE_VERSION=${{ steps.set_node_version.outputs.node_version }}
+        tags: |
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-commit-${{ github.sha }}
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-tree-${{ steps.read_tree_hash.outputs.tree_hash }}
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-build-${{ steps.set_branch_name.outputs.branch_name }}-${{ github.run_number }}-${{ github.run_attempt }}
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-build-${{ steps.set_branch_name.outputs.branch_name }}-latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

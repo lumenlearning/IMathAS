@@ -1,0 +1,124 @@
+name: shared-deployment-workflow
+permissions:
+  id-token: write   # Used for AWS OIDC auth
+  contents: read    # This is required for actions/checkout
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment name passed from the caller workflow'
+        required: true
+        type: string
+      ecr_repository:
+        description: 'ECR Repository name passed from the caller workflow'
+        required: true
+        type: string
+    secrets:
+      aws_user_account:
+        description: 'AWS Account ID for IAM users'
+        required: true
+
+jobs:
+  # this job gets a password for public ECR to use in future steps
+  ecr-public-auth:
+    runs-on: ubuntu-latest
+    name: Login to Public ECR
+    timeout-minutes: 5
+    permissions:
+      id-token: write   # Used for AWS OIDC auth
+    outputs:
+      ECR_PASSWORD: ${{ steps.ecr-auth.outputs.ECR_PASSWORD }}
+    steps:
+      # This is required to role chain from the OIDC role to other cross-account roles
+      # https://github.com/aws-actions/configure-aws-credentials/issues/279
+      - name: OIDC Auth
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
+          role-session-name: github-actions
+          role-duration-seconds: 900
+
+      - name: Assume role in CI Account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::824635284302:role/ci-role
+          role-session-name: github-actions
+          role-duration-seconds: 1200
+      
+      - name: Set Public ECR Auth
+        id: ecr-auth
+        run: echo "::set-output name=ECR_PASSWORD::$(aws ecr-public --region us-east-1 get-login-password)"
+  beanstalk-deploy:
+    name: Beanstalk Deployment
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    needs: [ecr-public-auth]
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout project
+    
+    - uses: ./.github/actions/private-ecr-login
+      name: Login to Private ECR
+      id: login-ecr
+    
+    - name: Login to Public ECR
+      uses: docker/login-action@v1
+      with:
+        registry: public.ecr.aws/o9c0t3w1
+        username: AWS
+        password: ${{ needs.ecr-public-auth.outputs.ECR_PASSWORD }}
+
+    - id: read_tree_hash
+      name: Read git tree hash
+      run: |
+        tree_hash=$(git rev-parse HEAD:)
+        echo "::set-output name=tree_hash::$tree_hash"
+        
+    - id: read_env_json
+      name: Read Environment JSON
+      run: |
+        env_json=$(jq -c '.environments[] | select(.environment_label=="${{ inputs.environment }}")' ./deploy-scripts/environments.json)
+        echo "::set-output name=env_json::$env_json" 
+
+    - id: set_env_metadata
+      name: Set Environment Metadata
+      run: |
+        echo "::set-output name=account::${{ fromJSON(steps.read_env_json.outputs.env_json).account }}"
+        echo "::set-output name=application::${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.application }}"
+        echo "::set-output name=bucket::${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.bucket }}"
+        echo "::set-output name=beanstalk_env::${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.beanstalk_environment }}"
+
+    - name: OIDC Auth to AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
+        role-session-name: github-actions
+        role-duration-seconds: 900
+
+    - name: Assume role in target account
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::${{ steps.set_env_metadata.outputs.account }}:role/ci-role
+        role-session-name: github-actions
+        role-duration-seconds: 1200
+
+    - name: Run deploy script
+      run: |
+        docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e GITHUB_WORKFLOW -e GITHUB_SHA -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT ${IMAGE_URL} \
+          deploy-scripts/gha_beanstalk_deploy.sh \
+          --application-name ${{ steps.set_env_metadata.outputs.application }} \
+          --environment-name ${{ steps.set_env_metadata.outputs.beanstalk_env }} \
+          --bucket-name ${{ steps.set_env_metadata.outputs.bucket }} \
+          --image-tag gha-tree-${{ steps.read_tree_hash.outputs.tree_hash }}
+      env:
+        IMAGE_URL: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:gha-tree-${{ steps.read_tree_hash.outputs.tree_hash }}

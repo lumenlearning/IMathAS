@@ -1,37 +1,39 @@
 # Paths not listed in this file will be deployed to AWS Beanstalk.
-# This file should match /.gitignore AND include ".git/".
-.git/
+# This file should match /.gitignore, /.ebignore, AND include ".git/".
+**/.git/
 
 # Local dev
-.idea/
-.elasticbeanstalk/
-zlocal-dev/
-ohm/lumenapi/.phpunit.result.cache
-.DS_Store
-*.php~
-*.js~
-c3.php
-.env
-*.code-workspace
-*.iml
+**/.idea/
+**/.elasticbeanstalk/
+**/zlocal-dev/
+**/ohm/lumenapi/.phpunit.result.cache
+**/.DS_Store
+**/*.php~
+**/*.js~
+**/c3.php
+**/.env
+**/*.code-workspace
+**/*.iml
 
-# Travis CI
-bin/
+# CI
+**/bin/
+!**/vendor/bin/phinx
+!**/vendor/robmorgan/phinx/bin/
+/.github/
+/.nvmrc
+/.dockerignore
+/docker/
 
 # Runtime
-/vendor/
-config/local.php
+**/config/local.php
+**/assess2/vue-src/node_modules
 
 # Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+**/.elasticbeanstalk/*
+!**/.elasticbeanstalk/*.cfg.yml
+!**/.elasticbeanstalk/*.global.yml
 
-/vendor
 /tests/_support/_generated
 /tests/_output/
-/c3.php
-*.php~
-*.js~
-mathjax-b
-HTMLPurifier
+**/mathjax-b
+**/HTMLPurifier

@@ -16,7 +16,7 @@ c3.php
 *.code-workspace
 *.iml
 
-# Travis CI
+# CI
 bin/
 
 # Runtime
