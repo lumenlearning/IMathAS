@@ -14,7 +14,7 @@
             "account": 631711495858,
             "beanstalk": {
                 "application": "ohm",
-                "beanstalk_environment": "ohm-staging-exemplar-docker",
+                "beanstalk_environment": "ohm-staging-exemplar-php",
                 "bucket": "elasticbeanstalk-us-west-2-631711495858"
             }
         },
