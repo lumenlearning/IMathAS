@@ -619,7 +619,6 @@ class QuestionHtmlGenerator
                 }
                 $doShowAnswer = false; // disable automatic display of answers
             }
-            print_r($doShowAnswerParts);
         }
 
         /*
