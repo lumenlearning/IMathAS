@@ -1,0 +1,61 @@
+# This sets up an environment for building and running tests including PHP, Composer, Node, and the Mysql client
+# The actual build and test commands are run outside this image build
+FROM php:7.4-cli AS builder
+
+RUN apt-get update && apt-get install -y libzip-dev zip gnupg
+
+# Install mysql
+RUN curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 | gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
+RUN echo 'deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/debian buster mysql-5.7' > /etc/apt/sources.list.d/mysql.list
+RUN apt-get update && apt-get install -y mysql-client
+RUN apt-get install -y git
+
+RUN docker-php-ext-configure zip && docker-php-ext-install zip pdo pdo_mysql
+
+# Install node
+ENV NODE_PATH /node
+WORKDIR $NODE_PATH
+ARG NODE_VERSION=v16.16.0
+RUN curl -O https://nodejs.org/download/release/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.gz && \
+    tar xzf node-${NODE_VERSION}-linux-x64.tar.gz
+ENV PATH ${PATH}:$NODE_PATH/node-${NODE_VERSION}-linux-x64/bin
+
+# Install composer
+RUN curl -o /usr/local/bin/composer https://getcomposer.org/download/2.3.5/composer.phar
+RUN echo "3b3b5a899c06a46aec280727bdf50aad14334f6bc40436ea76b07b650870d8f4 /usr/local/bin/composer" | sha256sum -c
+RUN chmod 755 /usr/local/bin/composer
+
+ENV INSTALL_PATH /build
+WORKDIR $INSTALL_PATH
+
+RUN groupadd -r builduser && useradd -m -s /bin/bash -r -g builduser builduser
+USER builduser
+
+# Copies in the working directory, filtering files based on .dockerignore
+# Assumes that all build steps have been run
+FROM builder AS zipper
+WORKDIR /zip
+
+COPY ./ ./
+
+# deploy-scripts is in the image for use in deployment, but should be excluded from beanstalk
+RUN zip -r beanstalk.zip . -x deploy-scripts/**
+
+# This is the final image which gets pushed into ECR, containing only the zip and deployment dependencies
+FROM alpine:3 as deployer
+
+RUN apk add --no-cache \
+        python3 \
+        py3-pip \
+        zip \
+        unzip \
+    && pip3 install --upgrade pip
+
+RUN pip3 --no-cache-dir install --upgrade awscli
+
+WORKDIR /app
+
+COPY --from=zipper /zip/beanstalk.zip /app
+COPY --from=zipper /zip/deploy-scripts/ /app/deploy-scripts/
+
+ENTRYPOINT ["/bin/sh"]
