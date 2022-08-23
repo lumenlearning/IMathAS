@@ -67,6 +67,15 @@ class QuestionController extends ApiBaseController
     }
 
     /**
+     * Set the PDO object to use for DB interaction. Used by unit tests.
+     *
+     * @param PDO $dbh
+     */
+    public function setPdo(PDO $dbh) {
+        $this->dbh = $dbh;
+    }
+
+    /**
      * @OA\Post(
      *     path="/question",
      *     summary="Retrieves question HTML for given question set id and seed.",
@@ -530,6 +539,7 @@ class QuestionController extends ApiBaseController
 
         $question = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
 
-        return $questionDto->getQuestionResponse($question, $assessStandalone->getState());
+        return $questionDto->getQuestionResponse($question, $this->questionType['questionType'],
+            $assessStandalone->getState());
     }
 }

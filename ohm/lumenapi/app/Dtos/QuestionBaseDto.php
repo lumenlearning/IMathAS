@@ -26,14 +26,16 @@ class QuestionBaseDto {
     /**
      * Returns response from AssessRecord
      * @param $responseData
+     * @param $questionType string The question type. (number, multipart, etc)
      * @param $state
      * @return array
      */
-    public function getResponse($responseData, $state): array
+    public function getResponse($responseData, string $questionType, $state): array
     {
         $response = array_merge(
             [
                 'questionSetId' => $this->questionSetId,
+                'questionType' => $questionType,
                 'seed' => $this->seed
             ],
             $responseData);

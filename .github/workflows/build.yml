@@ -34,10 +34,13 @@ jobs:
       CLI: true
       CONFIG_ENV: ci
       DB_SERVER: 127.0.0.1
+      DB_HOST: 127.0.0.1 # For Questions API using Lumen framework
       DB_NAME: myopenmathdb
+      DB_DATABASE: myopenmathdb # For Questions API using Lumen framework
       DB_USERNAME: root
       DB_PASSWORD: ""
       DB_CHARSET: latin1
+      DB_COLLATION: latin1_swedish_ci # For Questions API using Lumen framework
       S3_MAIN_BUCKET_NAME: none
       OHM_API_JWT_SECRET: development_jwt_secret
       LOG_CHANNEL: stderr
@@ -106,7 +109,7 @@ jobs:
       run: |
         docker run --network host \
           -v $GITHUB_WORKSPACE:/build:rw \
-          -e CLI -e CONFIG_ENV -e DB_SERVER -e DB_NAME -e DB_USERNAME -e DB_PASSWORD -e DB_CHARSET -e S3_MAIN_BUCKET_NAME -e OHM_API_JWT_SECRET -e LOG_CHANNEL \
+          -e CLI -e CONFIG_ENV -e DB_SERVER -e DB_NAME -e DB_DATABASE -e DB_HOST -e DB_USERNAME -e DB_PASSWORD -e DB_CHARSET -e DB_COLLATION -e S3_MAIN_BUCKET_NAME -e OHM_API_JWT_SECRET -e LOG_CHANNEL \
           ohm:local ./deploy-scripts/run-tests.sh
 
     - name: Docker build and push
