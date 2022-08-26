@@ -718,7 +718,7 @@ class ScoreEngine
             'lastAnswerAsGiven' => array($scorePartResult->getLastAnswerAsGiven()),
             'lastAnswerAsNumber' => array($scorePartResult->getLastAnswerAsNumber()),
             'correctAnswerWrongFormat' => array($scorePartResult->getCorrectAnswerWrongFormat()),
-            'answeights' => array(1),
+            'answeights' => array(1)
         );
 
         if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
