@@ -1208,7 +1208,7 @@ class QuestionHtmlGenerator
         $qref = '';
 
         $externalReferences = [];
-
+        
         $extrefwidth = isset($GLOBALS['CFG']['GEN']['extrefsize']) ? $GLOBALS['CFG']['GEN']['extrefsize'][0] : 700;
         $extrefheight = isset($GLOBALS['CFG']['GEN']['extrefsize']) ? $GLOBALS['CFG']['GEN']['extrefsize'][1] : 500;
         $vidextrefwidth = isset($GLOBALS['CFG']['GEN']['vidextrefsize']) ? $GLOBALS['CFG']['GEN']['vidextrefsize'][0] : 873;
@@ -1221,7 +1221,7 @@ class QuestionHtmlGenerator
             if ($qid > 0 && (!isset($_SESSION['isteacher'])
                     || $_SESSION['isteacher'] == false) && !isset($_SESSION['stuview'])) {
                 $qref = $qid . '-' . ($qnidx + 1);
-            }
+            } 
             for ($i = 0; $i < count($extref); $i++) {
                 $extrefpt = explode('!!', $extref[$i]);
                 if (strpos($extrefpt[1],'youtube.com/watch')!==false ||
@@ -1236,7 +1236,7 @@ class QuestionHtmlGenerator
                         'w' => $vidextrefwidth,
                         'h' => $vidextrefheight,
                         'ref' => $qref,
-                        'descr' => !empty($extrefpt[3]) ? $extrefpt[3] : ''
+                        'descr' => !empty($extrefpt[3]) ? $extrefpt[3] : '' 
                     ];
                     //$externalReferences .= formpopup($extrefpt[0], $extrefpt[1], $vidextrefwidth, $vidextrefheight, "button", true, "video", $qref);
                 } else {
@@ -1247,7 +1247,7 @@ class QuestionHtmlGenerator
                         'w' => $extrefwidth,
                         'h' => $extrefheight,
                         'ref' => $qref,
-                        'descr' => !empty($extrefpt[3]) ? $extrefpt[3] : ''
+                        'descr' => !empty($extrefpt[3]) ? $extrefpt[3] : '' 
                     ];
                 }
             }
@@ -1265,7 +1265,7 @@ class QuestionHtmlGenerator
                 'w' => $extrefwidth,
                 'h' => $extrefheight,
                 'ref' => $qref
-            ];
+            ]; 
         }
 
         return $externalReferences;
