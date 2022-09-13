@@ -104,7 +104,7 @@ class QuestionScoreDto extends QuestionBaseDto
      */
     public function getScoreResponse($responseData, $questionData, $state): array
     {
-        $response = parent::getResponse($responseData, $state);
+        $response = parent::getResponse($responseData, $questionData['questionType'], $state);
 
         if ($questionData['questionType'] === 'multipart') {
             $answerWeight = $this->getAnswerWeights($questionData['questionControl']);

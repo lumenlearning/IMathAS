@@ -6,7 +6,7 @@
             "beanstalk": {
                 "application": "ohm",
                 "beanstalk_environment": "ohm-dev-exemplar-php",
-                "bucket": "dev-exemplar-lumen-beanstalk-ohm-php"
+                "bucket": "elasticbeanstalk-us-west-2-631711495858"
             }
         },
         {
