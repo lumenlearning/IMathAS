@@ -3,7 +3,10 @@
  * This file is based on /assessment/macros.php.
  *
  * Feedback macros have been copied and modified to always return all feedback
- * available (correct and incorrect) for frontend (Catra) to use as needed.
+ * available (correct and incorrect) when no student answer is provided.
+ *
+ * When a student answer is provided, only the appropriate feedback (correct or
+ * incorrect) is returned.
  *
  * See /help.php#feedbackmacros for more information on macro usage.
  */
