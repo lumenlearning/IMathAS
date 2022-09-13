@@ -100,11 +100,12 @@ class QuestionScoreDto extends QuestionBaseDto
      * @param $responseData
      * @param $questionData
      * @param $state
+     * @param array|null $feedback An associative array of question feedback.
      * @return array
      */
-    public function getScoreResponse($responseData, $questionData, $state): array
+    public function getScoreResponse($responseData, $questionData, $state, ?array $feedback): array
     {
-        $response = parent::getResponse($responseData, $questionData['questionType'], $state);
+        $response = parent::getResponse($responseData, $questionData['questionType'], $state, $feedback);
 
         if ($questionData['questionType'] === 'multipart') {
             $answerWeight = $this->getAnswerWeights($questionData['questionControl']);

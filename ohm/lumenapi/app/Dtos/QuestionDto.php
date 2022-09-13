@@ -28,11 +28,12 @@ class QuestionDto extends QuestionBaseDto
      * @param $responseData
      * @param $questionType string The question type. (number, multipart, etc)
      * @param $state
+     * @param array|null $feedback An associative array of question feedback.
      * @return array
      */
-    public function getQuestionResponse($responseData, string $questionType, $state)
+    public function getQuestionResponse($responseData, string $questionType, $state, ?array $feedback)
     {
-        return parent::getResponse($responseData, $questionType, $state);
+        return parent::getResponse($responseData, $questionType, $state, $feedback);
     }
 
     /**

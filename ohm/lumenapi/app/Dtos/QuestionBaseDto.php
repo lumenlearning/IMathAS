@@ -28,9 +28,10 @@ class QuestionBaseDto {
      * @param $responseData
      * @param $questionType string The question type. (number, multipart, etc)
      * @param $state
+     * @param array|null $feedback An associative array of question feedback.
      * @return array
      */
-    public function getResponse($responseData, string $questionType, $state): array
+    public function getResponse($responseData, string $questionType, $state, ?array $feedback): array
     {
         $response = array_merge(
             [
@@ -38,7 +39,11 @@ class QuestionBaseDto {
                 'questionType' => $questionType,
                 'seed' => $this->seed
             ],
-            $responseData);
+            $responseData,
+            [
+                'feedback' => $feedback
+            ]
+        );
 
         if (isset($this->options['returnState']) && $this->options['returnState']) {
             return array_merge($response, ['state' => $state]);
