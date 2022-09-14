@@ -110,7 +110,7 @@ jobs:
 #        ## limits ssh access and adds the ssh public key for the user which triggered the workflow
 #        limit-access-to-actor: true
 #        ## limits ssh access and adds the ssh public keys of the listed GitHub users
-#        limit-access-to-users: kittysnacks, smith750, sharz1
+#        limit-access-to-users: kittysnacks, smith750, sharz1, jeff-dewan-lumen, lumenisaac
 
     - name: Run Tests in Container
       if: steps.prebuilt_check.outputs.image_exists != 0
