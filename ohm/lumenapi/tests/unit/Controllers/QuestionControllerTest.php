@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Controllers;
 
-use App\Http\Middleware\JwtMiddleware;
 use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 use App\Repositories\ohm\AssessmentRepository;
@@ -14,6 +13,9 @@ use ReflectionClass;
 use Tests\TestCase;
 
 use App\Http\Controllers\QuestionController;
+
+// Required for tests to work in GitHub Actions.
+require_once(__DIR__ . '/../../../../../i18n/i18n.php');
 
 class QuestionControllerTest extends TestCase
 {
