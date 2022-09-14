@@ -31,13 +31,13 @@ array_push($GLOBALS['allowedmacros'],
  * - If a student answer is provided, feedback will be returned based on correctness.
  *
  * @param string $correctFeedback The feedback for correct answers.
- * @param string $wrongFeedback The feedback for incorrect answers.
+ * @param string $incorrectFeedback The feedback for incorrect answers.
  * @param mixed $thisq
  * @param mixed $partn A part number for multipart questions to get part-based feedback.
  * @return array|null An associative array of feedback.
  * @see https://localhost/help.php#feedbackmacros
  */
-function ohm_getfeedbackbasic(string $correctFeedback, string $wrongFeedback, $thisq, $partn = null): ?array
+function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback, $thisq, $partn = null): ?array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
@@ -65,7 +65,7 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $wrongFeedback, $t
             ],
             1 => [
                 'correctness' => 'incorrect',
-                'feedback' => $wrongFeedback,
+                'feedback' => $incorrectFeedback,
             ]
         ];
     } else if ($res == 1) {
@@ -76,7 +76,7 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $wrongFeedback, $t
     } else if ($res == 0) {
         return [
             'correctness' => 'incorrect',
-            'feedback' => $wrongFeedback,
+            'feedback' => $incorrectFeedback,
         ];
     }
 }
