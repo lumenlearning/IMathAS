@@ -8,4 +8,4 @@ composer seed-ohm
 composer run-script test-mom
 # composer run-script test-ohm
 ./vendor/bin/codecept run unit
-cd ohm/lumenapi && composer test
+cd ohm/lumenapi && cp .env.sample .env && composer test
