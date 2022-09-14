@@ -415,7 +415,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
             $abstol = false;
         }
         $type = "expression";
-        if (strpos($studentAnswer, '=') !== false && strpos($studentAnswer, '=') !== false) {
+        if (strpos($studentAnswer, '=') !== false) {
             $type = "equation";
         }
         $stuorig = $studentAnswer;
