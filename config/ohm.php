@@ -223,6 +223,11 @@ $CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
 $CFG['hooks']['util/utils'] = '../ohm-hooks/util/utils.php';
 $CFG['hooks']['lti'] = __DIR__ . '/../ohm-hooks/lti13hooks.php';
 
+// The following hooks are defined in the Question API. (ohm/lumenapi/config/)
+//$GLOBALS['CFG']['hooks']['assess2/questions/score_engine']
+//$GLOBALS['CFG']['hooks']['assess2/assess_standalone']
+//$GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator']
+
 $CFG['GEN']['footerscriptinclude'] = 'ohm-hooks/footer.php';
 
 $CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js';

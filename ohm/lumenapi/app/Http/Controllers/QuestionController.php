@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Dtos\QuestionDto;
 use App\Dtos\QuestionScoreDto;
 use Illuminate\Validation\ValidationException;
+use IMathAS\assess2\questions\models\Question;
 use PDO;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
@@ -525,7 +526,11 @@ class QuestionController extends ApiBaseController
         $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
 
-        return $scoreDto->getScoreResponse($score, $this->questionType, $assessStandalone->getState());
+        // Get question feedback.
+        $question = $assessStandalone->getQuestion();
+        $questionFeedback = !is_null($question) ? $this->getQuestionFeedback($question) : null;
+
+        return $scoreDto->getScoreResponse($score, $this->questionType, $assessStandalone->getState(), $questionFeedback);
     }
 
     /**
@@ -537,9 +542,30 @@ class QuestionController extends ApiBaseController
         $questionDto = new QuestionDto($inputState);
         $assessStandalone = $this->getAssessStandalone($questionDto->getQuestionSetId(), $questionDto->getState());
 
-        $question = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
+        $questionData = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
 
-        return $questionDto->getQuestionResponse($question, $this->questionType['questionType'],
-            $assessStandalone->getState());
+        // Get question feedback.
+        $question = $assessStandalone->getQuestion();
+        $questionFeedback = $this->getQuestionFeedback($question);
+
+        return $questionDto->getQuestionResponse($questionData, $this->questionType['questionType'],
+            $assessStandalone->getState(), $questionFeedback);
+    }
+
+    /**
+     * Check for and return question feedback.
+     *
+     * If no question feedback is found, null is returned.
+     *
+     * @param Question $question An instance of Question.
+     * @return array|null An associative array of question feedback.
+     */
+    private function getQuestionFeedback(Question $question): ?array
+    {
+        if (empty($question->getExtraData())) return null;
+        if (empty($question->getExtraData()['lumenlearning'])) return null;
+        if (empty($question->getExtraData()['lumenlearning']['feedback'])) return null;
+
+        return $question->getExtraData()['lumenlearning']['feedback'];
     }
 }

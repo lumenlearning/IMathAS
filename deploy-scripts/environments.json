@@ -44,6 +44,15 @@
                 "beanstalk_environment": "ohm-prod-74",
                 "bucket": "elasticbeanstalk-us-west-2-523740042085"
             }
+        },
+        {
+            "environment_label": "prod-exemplar",
+            "account": 701384285930,
+            "beanstalk": {
+                "application": "ohm",
+                "beanstalk_environment": "ohm-prod-exemplar-php",
+                "bucket": "elasticbeanstalk-us-west-2-701384285930"
+            }
         }
     ]
 }
