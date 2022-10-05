@@ -57,26 +57,28 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback
         $res = 0;
     }
 
+    if (empty($partn)) {
+        $questionIndex = 'qn0';
+    } else {
+        $questionNumber = 1000 + $partn;
+        $questionIndex = 'qn' . $questionNumber;
+    }
+
     if ($res == -1) {
+        return null;
+    } else if ($res == 1) {
         return [
-            0 => [
+            $questionIndex => [
                 'correctness' => 'correct',
                 'feedback' => $correctFeedback,
             ],
-            1 => [
-                'correctness' => 'incorrect',
-                'feedback' => $incorrectFeedback,
-            ]
-        ];
-    } else if ($res == 1) {
-        return [
-            'correctness' => 'correct',
-            'feedback' => $correctFeedback,
         ];
     } else if ($res == 0) {
         return [
-            'correctness' => 'incorrect',
-            'feedback' => $incorrectFeedback,
+            $questionIndex => [
+                'correctness' => 'incorrect',
+                'feedback' => $incorrectFeedback,
+            ]
         ];
     }
 }
@@ -106,7 +108,8 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         $feedbacks = [];
         foreach ($feedbacksPossible as $index => $feedbackText) {
             $correctness = ($index == $correctAnswer) ? 'correct' : 'incorrect';
-            $feedbacks[$index] = [
+            $choiceQuestionIndex = 'qn0-' . $index;
+            $feedbacks[$choiceQuestionIndex] = [
                 'correctness' => $correctness,
                 'feedback' => $feedbackText
             ];
@@ -114,8 +117,10 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         return $feedbacks;
     } else if ($studentAnswer === 'NA') {
         return [
-            'correctness' => 'incorrect',
-            'feedback' => _("No answer selected. Try again.")
+            'qn0' => [
+                'correctness' => 'incorrect',
+                'feedback' => _("No answer selected. Try again.")
+            ],
         ];
     } else {
         $anss = explode(' or ', $correctAnswer);
@@ -123,8 +128,10 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
             // Student provided the correct answer.
             if ($studentAnswer == $ans) {
                 $feedback = [
-                    'correctness' => 'correct',
-                    'feedback' => null,
+                    'qn0' => [
+                        'correctness' => 'correct',
+                        'feedback' => null,
+                    ],
                 ];
                 if (isset($feedbacksPossible[$studentAnswer])) {
                     $feedback['feedback'] = $feedbacksPossible[$studentAnswer];
@@ -134,8 +141,10 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         }
         // Student provided an incorrect answer.
         $feedback = [
-            'correctness' => 'incorrect',
-            'feedback' => null,
+            'qn0' => [
+                'correctness' => 'incorrect',
+                'feedback' => null,
+            ],
         ];
         if (isset($feedbacksPossible[$studentAnswer])) {
             $feedback['feedback'] = $feedbacksPossible[$studentAnswer];
@@ -161,8 +170,10 @@ function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText): a
         return [];
     } else {
         return [
-            'correctness' => 'correct',
-            'feedback' => $feedbackText,
+            'qn0' => [
+                'correctness' => 'correct',
+                'feedback' => $feedbackText,
+            ],
         ];
     }
 }
@@ -198,8 +209,10 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         return [];
     } else if (!is_numeric($studentAnswer)) {
         return [
-            'correctness' => 'incorrect',
-            'feedback' => _("This answer does not appear to be a valid number."),
+            'qn0' => [
+                'correctness' => 'incorrect',
+                'feedback' => _("This answer does not appear to be a valid number."),
+            ],
         ];
     } else {
         if (strval($tolerance)[0] == '|') {
@@ -231,19 +244,25 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         if ($match > -1) {
             if ($partialCredit[$i + 1] < 1) {
                 return [
-                    'correctness' => 'incorrect',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    'qn0' => [
+                        'correctness' => 'incorrect',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             } else {
                 return [
-                    'correctness' => 'correct',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    'qn0' => [
+                        'correctness' => 'correct',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             }
         } else {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                'qn0' => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
     }
@@ -354,19 +373,25 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
         if ($match > -1) {
             if ($partialCredit[$i + 1] < 1) {
                 return [
-                    'correctness' => 'incorrect',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    'qn0' => [
+                        'correctness' => 'incorrect',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             } else {
                 return [
-                    'correctness' => 'correct',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    'qn0' => [
+                        'correctness' => 'correct',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             }
         } else {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                'qn0' => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
     }
@@ -431,8 +456,10 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         $stufunc = makeMathFunction(makepretty($studentAnswer), $vlist);
         if ($stufunc === false) {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                'qn0' => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
 
@@ -468,8 +495,10 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         }
         if ($cntnana == $numpts || !$correct) { //evald to NAN at all points
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                'qn0' => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
 
@@ -592,19 +621,25 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         if ($match > -1) {
             if ($partialCredit[$match + 1] < 1) {
                 return [
-                    'correctness' => 'incorrect',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    'qn0' => [
+                        'correctness' => 'incorrect',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             } else {
                 return [
-                    'correctness' => 'correct',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    'qn0' => [
+                        'correctness' => 'correct',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             }
         } else {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                'qn0' => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
     }
