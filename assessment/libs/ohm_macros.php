@@ -65,9 +65,7 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback
     }
 
     if ($res == -1) {
-        return [
-            $questionIndex => null
-        ];
+        return [];
     } else if ($res == 1) {
         return [
             $questionIndex => [
@@ -186,9 +184,7 @@ function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText, ?i
     }
 
     if ($studentAnswer == null || trim($studentAnswer) == '') {
-        return [
-            $questionIndex => null
-        ];
+        return [];
     } else {
         return [
             $questionIndex => [
@@ -237,9 +233,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         $studentAnswer = preg_replace('/[^\-\d\.eE]/', '', $studentAnswer);
     }
     if ($studentAnswer === null) {
-        return [
-            $questionIndex => null
-        ];
+        return [];
     } else if (!is_numeric($studentAnswer)) {
         return [
             $questionIndex => [
@@ -358,9 +352,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
     }
 
     if ($studentAnswer === null) {
-        return [
-            $questionIndex => null
-        ];
+        return [];
     } else {
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
@@ -485,9 +477,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
     }
 
     if ($studentAnswer === null || trim($studentAnswer) === '') {
-        return [
-            $questionIndex => null
-        ];
+        return [];
     } else {
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
