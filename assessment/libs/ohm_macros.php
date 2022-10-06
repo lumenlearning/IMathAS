@@ -24,6 +24,27 @@ array_push($GLOBALS['allowedmacros'],
 );
 
 /**
+ * Generate the question index for a single or multipart question for feedback.
+ *
+ * - Index strings will match question input IDs in question display HTML.
+ * - Single part questions will always be indexed as "qn0".
+ *
+ * @param int|null $partNumber The question part number.
+ * @return string The question index for feedback.
+ */
+function getFeedbackIndex(?int $partNumber): string
+{
+    if (is_null($partNumber)) {
+        $questionIndex = 'qn0';
+    } else {
+        $questionNumber = 1000 + $partNumber;
+        $questionIndex = 'qn' . $questionNumber;
+    }
+
+    return $questionIndex;
+}
+
+/**
  * Generates feedback based solely on whether the question was scored correct or not.
  *
  * - Feedback is returned without any added HTML.
@@ -103,12 +124,7 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         return [];
     }
 
-    if (is_null($partNumber)) {
-        $questionIndex = 'qn0';
-    } else {
-        $questionNumber = 1000 + $partNumber;
-        $questionIndex = 'qn' . $questionNumber;
-    }
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer === null) {
         // If no student answers are provided, then we are only displaying
@@ -176,12 +192,7 @@ function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText, ?i
         return [];
     }
 
-    if (is_null($partNumber)) {
-        $questionIndex = 'qn0';
-    } else {
-        $questionNumber = 1000 + $partNumber;
-        $questionIndex = 'qn' . $questionNumber;
-    }
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer == null || trim($studentAnswer) == '') {
         return [];
@@ -222,12 +233,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         return [];
     }
 
-    if (is_null($partNumber)) {
-        $questionIndex = 'qn0';
-    } else {
-        $questionNumber = 1000 + $partNumber;
-        $questionIndex = 'qn' . $questionNumber;
-    }
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer !== null) {
         $studentAnswer = preg_replace('/[^\-\d\.eE]/', '', $studentAnswer);
@@ -344,12 +350,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
         return [];
     }
 
-    if (is_null($partNumber)) {
-        $questionIndex = 'qn0';
-    } else {
-        $questionNumber = 1000 + $partNumber;
-        $questionIndex = 'qn' . $questionNumber;
-    }
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer === null) {
         return [];
@@ -469,12 +470,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         return [];
     }
 
-    if (is_null($partNumber)) {
-        $questionIndex = 'qn0';
-    } else {
-        $questionNumber = 1000 + $partNumber;
-        $questionIndex = 'qn' . $questionNumber;
-    }
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer === null || trim($studentAnswer) === '') {
         return [];
