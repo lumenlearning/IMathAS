@@ -210,7 +210,7 @@ function ohm_getfeedbacktxtessay(?string $studentAnswer, string $feedbackText, ?
  * Gives feedback on number questions.
  *
  * @param mixed $studentAnswer The answer provided by the student.
- * @param array $partialCredit An array or list of form array(number, score, number, score, ... )
+ * @param mixed $partialCredit An array or list of form array(number, score, number, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
@@ -222,7 +222,7 @@ function ohm_getfeedbacktxtessay(?string $studentAnswer, string $feedbackText, ?
  * @see https://localhost/help.php#feedbackmacros
  */
 function ohm_getfeedbacktxtnumber($studentAnswer,
-                                  array $partialCredit,
+                                  $partialCredit,
                                   array $feedbacksPossible,
                                   string $defaultFeedback = 'Incorrect',
                                   $tolerance = .001,
