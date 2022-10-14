@@ -180,13 +180,13 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
 /**
  * Gives feedback on essay questions once the student has entered any response.
  *
- * @param string $studentAnswer The answer provided by the student.
+ * @param ?string $studentAnswer The answer provided by the student.
  * @param string $feedbackText The feedback response.
  * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback(s).
  * @see https://localhost/help.php#feedbackmacros
  */
-function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText, ?int $partNumber = null): array
+function ohm_getfeedbacktxtessay(?string $studentAnswer, string $feedbackText, ?int $partNumber = null): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
@@ -210,7 +210,7 @@ function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText, ?i
  * Gives feedback on number questions.
  *
  * @param mixed $studentAnswer The answer provided by the student.
- * @param array $partialCredit An array or list of form array(number, score, number, score, ... )
+ * @param mixed $partialCredit An array or list of form array(number, score, number, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
@@ -222,7 +222,7 @@ function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText, ?i
  * @see https://localhost/help.php#feedbackmacros
  */
 function ohm_getfeedbacktxtnumber($studentAnswer,
-                                  array $partialCredit,
+                                  $partialCredit,
                                   array $feedbacksPossible,
                                   string $defaultFeedback = 'Incorrect',
                                   $tolerance = .001,
@@ -320,7 +320,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
  * @param mixed $studentAnswer The student answer, obtained from $stuanswers[$thisq] for single
  *                             part questions, or using the getstuans macro for multipart.
  * @param mixed $studentAnswerValue The numerical value of the student answer, obtained from $stuanswersval[$thisq]
- * @param array $partialCredit An array or list of form array(number, score, number, score, ... )
+ * @param mixed $partialCredit An array or list of form array(number, score, number, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
@@ -337,7 +337,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
  */
 function ohm_getfeedbacktxtcalculated($studentAnswer,
                                       $studentAnswerValue,
-                                      array $partialCredit,
+                                      $partialCredit,
                                       array $feedbacksPossible,
                                       string $defaultFeedback = 'Incorrect',
                                       $answerformat = '',
@@ -440,7 +440,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
  *
  * @param mixed $studentAnswer The student answer, obtained from $stuanswers[$thisq] for single
  *                             part questions, or using the getstuans macro for multipart.
- * @param array $partialCredit An array or list of form array(expression, score, expression, score, ... )
+ * @param mixed $partialCredit An array or list of form array(expression, score, expression, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
@@ -456,14 +456,14 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
  * @see https://localhost/help.php#feedbackmacros
  */
 function ohm_getfeedbacktxtnumfunc($studentAnswer,
-                                   array $partialCredit,
+                                   $partialCredit,
                                    array $feedbacksPossible,
                                    string $defaultFeedback = 'Incorrect',
                                    $vars = 'x',
                                    $requiretimes = '',
                                    $tolerance = '.001',
                                    $domain = '-10,10',
-                                   ?int $partNumber
+                                   ?int $partNumber = null
 ): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
