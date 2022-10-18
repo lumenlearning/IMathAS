@@ -24,6 +24,27 @@ array_push($GLOBALS['allowedmacros'],
 );
 
 /**
+ * Generate the question index for a single or multipart question for feedback.
+ *
+ * - Index strings will match question input IDs in question display HTML.
+ * - Single part questions will always be indexed as "qn0".
+ *
+ * @param int|null $partNumber The question part number.
+ * @return string The question index for feedback.
+ */
+function getFeedbackIndex(?int $partNumber): string
+{
+    if (is_null($partNumber)) {
+        $questionIndex = 'qn0';
+    } else {
+        $questionNumber = 1000 + $partNumber;
+        $questionIndex = 'qn' . $questionNumber;
+    }
+
+    return $questionIndex;
+}
+
+/**
  * Generates feedback based solely on whether the question was scored correct or not.
  *
  * - Feedback is returned without any added HTML.
@@ -34,10 +55,10 @@ array_push($GLOBALS['allowedmacros'],
  * @param string $incorrectFeedback The feedback for incorrect answers.
  * @param mixed $thisq
  * @param mixed $partn A part number for multipart questions to get part-based feedback.
- * @return array|null An associative array of feedback.
+ * @return array An associative array of feedback.
  * @see https://localhost/help.php#feedbackmacros
  */
-function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback, $thisq, $partn = null): ?array
+function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback, $thisq, $partn = null): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
@@ -57,26 +78,28 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback
         $res = 0;
     }
 
+    if (is_null($partn)) {
+        $questionIndex = 'qn0';
+    } else {
+        $questionNumber = 1000 + $partn;
+        $questionIndex = 'qn' . $questionNumber;
+    }
+
     if ($res == -1) {
+        return [];
+    } else if ($res == 1) {
         return [
-            0 => [
+            $questionIndex => [
                 'correctness' => 'correct',
                 'feedback' => $correctFeedback,
             ],
-            1 => [
-                'correctness' => 'incorrect',
-                'feedback' => $incorrectFeedback,
-            ]
-        ];
-    } else if ($res == 1) {
-        return [
-            'correctness' => 'correct',
-            'feedback' => $correctFeedback,
         ];
     } else if ($res == 0) {
         return [
-            'correctness' => 'incorrect',
-            'feedback' => $incorrectFeedback,
+            $questionIndex => [
+                'correctness' => 'incorrect',
+                'feedback' => $incorrectFeedback,
+            ]
         ];
     }
 }
@@ -91,14 +114,17 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback
  * @param string|integer $studentAnswer The answer provided by the student.
  * @param array $feedbacksPossible The correct and incorrect feedback responses.
  * @param string|integer $correctAnswer The correct answer.
+ * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback(s).
  * @see https://localhost/help.php#feedbackmacros
  */
-function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAnswer): array
+function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAnswer, ?int $partNumber = null): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
     }
+
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer === null) {
         // If no student answers are provided, then we are only displaying
@@ -106,7 +132,8 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         $feedbacks = [];
         foreach ($feedbacksPossible as $index => $feedbackText) {
             $correctness = ($index == $correctAnswer) ? 'correct' : 'incorrect';
-            $feedbacks[$index] = [
+            $choiceQuestionIndex = $questionIndex . '-' . $index;
+            $feedbacks[$choiceQuestionIndex] = [
                 'correctness' => $correctness,
                 'feedback' => $feedbackText
             ];
@@ -114,8 +141,10 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         return $feedbacks;
     } else if ($studentAnswer === 'NA') {
         return [
-            'correctness' => 'incorrect',
-            'feedback' => _("No answer selected. Try again.")
+            $questionIndex => [
+                'correctness' => 'incorrect',
+                'feedback' => _("No answer selected. Try again.")
+            ],
         ];
     } else {
         $anss = explode(' or ', $correctAnswer);
@@ -123,8 +152,10 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
             // Student provided the correct answer.
             if ($studentAnswer == $ans) {
                 $feedback = [
-                    'correctness' => 'correct',
-                    'feedback' => null,
+                    $questionIndex => [
+                        'correctness' => 'correct',
+                        'feedback' => null,
+                    ],
                 ];
                 if (isset($feedbacksPossible[$studentAnswer])) {
                     $feedback['feedback'] = $feedbacksPossible[$studentAnswer];
@@ -134,8 +165,10 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
         }
         // Student provided an incorrect answer.
         $feedback = [
-            'correctness' => 'incorrect',
-            'feedback' => null,
+            $questionIndex => [
+                'correctness' => 'incorrect',
+                'feedback' => null,
+            ],
         ];
         if (isset($feedbacksPossible[$studentAnswer])) {
             $feedback['feedback'] = $feedbacksPossible[$studentAnswer];
@@ -147,22 +180,28 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
 /**
  * Gives feedback on essay questions once the student has entered any response.
  *
- * @param string $studentAnswer The answer provided by the student.
+ * @param ?string $studentAnswer The answer provided by the student.
  * @param string $feedbackText The feedback response.
+ * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback(s).
  * @see https://localhost/help.php#feedbackmacros
  */
-function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText): array
+function ohm_getfeedbacktxtessay(?string $studentAnswer, string $feedbackText, ?int $partNumber = null): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
     }
+
+    $questionIndex = getFeedbackIndex($partNumber);
+
     if ($studentAnswer == null || trim($studentAnswer) == '') {
         return [];
     } else {
         return [
-            'correctness' => 'correct',
-            'feedback' => $feedbackText,
+            $questionIndex => [
+                'correctness' => 'correct',
+                'feedback' => $feedbackText,
+            ],
         ];
     }
 }
@@ -171,26 +210,31 @@ function ohm_getfeedbacktxtessay(string $studentAnswer, string $feedbackText): a
  * Gives feedback on number questions.
  *
  * @param mixed $studentAnswer The answer provided by the student.
- * @param array $partialCredit An array or list of form array(number, score, number, score, ... )
+ * @param mixed $partialCredit An array or list of form array(number, score, number, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
  * @param string $defaultFeedback The default incorrect response feedback.
  * @param float|string $tolerance The relative tolerance (defaults to .001),
  *                                or prefix with | for an absolute tolerance.
+ * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback.
  * @see https://localhost/help.php#feedbackmacros
  */
 function ohm_getfeedbacktxtnumber($studentAnswer,
-                                  array $partialCredit,
+                                  $partialCredit,
                                   array $feedbacksPossible,
                                   string $defaultFeedback = 'Incorrect',
-                                  $tolerance = .001
+                                  $tolerance = .001,
+                                  ?int $partNumber = null
 ): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
     }
+
+    $questionIndex = getFeedbackIndex($partNumber);
+
     if ($studentAnswer !== null) {
         $studentAnswer = preg_replace('/[^\-\d\.eE]/', '', $studentAnswer);
     }
@@ -198,8 +242,10 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         return [];
     } else if (!is_numeric($studentAnswer)) {
         return [
-            'correctness' => 'incorrect',
-            'feedback' => _("This answer does not appear to be a valid number."),
+            $questionIndex => [
+                'correctness' => 'incorrect',
+                'feedback' => _("This answer does not appear to be a valid number."),
+            ],
         ];
     } else {
         if (strval($tolerance)[0] == '|') {
@@ -231,19 +277,25 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         if ($match > -1) {
             if ($partialCredit[$i + 1] < 1) {
                 return [
-                    'correctness' => 'incorrect',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    $questionIndex => [
+                        'correctness' => 'incorrect',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             } else {
                 return [
-                    'correctness' => 'correct',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    $questionIndex => [
+                        'correctness' => 'correct',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             }
         } else {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                $questionIndex => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
     }
@@ -268,7 +320,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
  * @param mixed $studentAnswer The student answer, obtained from $stuanswers[$thisq] for single
  *                             part questions, or using the getstuans macro for multipart.
  * @param mixed $studentAnswerValue The numerical value of the student answer, obtained from $stuanswersval[$thisq]
- * @param array $partialCredit An array or list of form array(number, score, number, score, ... )
+ * @param mixed $partialCredit An array or list of form array(number, score, number, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
@@ -279,22 +331,27 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
  *                             with each element applied to the corresponding expression.
  * @param float|string $tolerance The relative tolerance (defaults to .001),
  *                                or prefix with | for an absolute tolerance.
+ * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback.
  * @see https://localhost/help.php#feedbackmacros
  */
 function ohm_getfeedbacktxtcalculated($studentAnswer,
                                       $studentAnswerValue,
-                                      array $partialCredit,
+                                      $partialCredit,
                                       array $feedbacksPossible,
                                       string $defaultFeedback = 'Incorrect',
                                       $answerformat = '',
                                       $requiretimes = '',
-                                      $tolerance = .001
+                                      $tolerance = .001,
+                                      ?int $partNumber = null
 ): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
     }
+
+    $questionIndex = getFeedbackIndex($partNumber);
+
     if ($studentAnswer === null) {
         return [];
     } else {
@@ -354,19 +411,25 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
         if ($match > -1) {
             if ($partialCredit[$i + 1] < 1) {
                 return [
-                    'correctness' => 'incorrect',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    $questionIndex => [
+                        'correctness' => 'incorrect',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             } else {
                 return [
-                    'correctness' => 'correct',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    $questionIndex => [
+                        'correctness' => 'correct',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             }
         } else {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                $questionIndex => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
     }
@@ -377,7 +440,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
  *
  * @param mixed $studentAnswer The student answer, obtained from $stuanswers[$thisq] for single
  *                             part questions, or using the getstuans macro for multipart.
- * @param array $partialCredit An array or list of form array(expression, score, expression, score, ... )
+ * @param mixed $partialCredit An array or list of form array(expression, score, expression, score, ... )
  *                             where the scores are in the range [0,1].
  * @param array $feedbacksPossible An array of feedback messages, corresponding in array
  *                                 order to the order of the numbers in the partialcredit list.
@@ -388,22 +451,26 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
  * @param float|string $tolerance The relative tolerance (defaults to .001),
  *                                or prefix with | for an absolute tolerance.
  * @param string $domain To limit the test domain. Defaults to "-10,10".
+ * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback.
  * @see https://localhost/help.php#feedbackmacros
  */
 function ohm_getfeedbacktxtnumfunc($studentAnswer,
-                                   array $partialCredit,
+                                   $partialCredit,
                                    array $feedbacksPossible,
                                    string $defaultFeedback = 'Incorrect',
                                    $vars = 'x',
                                    $requiretimes = '',
                                    $tolerance = '.001',
-                                   $domain = '-10,10'
+                                   $domain = '-10,10',
+                                   ?int $partNumber = null
 ): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
     }
+
+    $questionIndex = getFeedbackIndex($partNumber);
 
     if ($studentAnswer === null || trim($studentAnswer) === '') {
         return [];
@@ -431,8 +498,10 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         $stufunc = makeMathFunction(makepretty($studentAnswer), $vlist);
         if ($stufunc === false) {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                $questionIndex => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
 
@@ -468,8 +537,10 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         }
         if ($cntnana == $numpts || !$correct) { //evald to NAN at all points
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                $questionIndex => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
 
@@ -592,19 +663,25 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         if ($match > -1) {
             if ($partialCredit[$match + 1] < 1) {
                 return [
-                    'correctness' => 'incorrect',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    $questionIndex => [
+                        'correctness' => 'incorrect',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             } else {
                 return [
-                    'correctness' => 'correct',
-                    'feedback' => $feedbacksPossible[$match / 2],
+                    $questionIndex => [
+                        'correctness' => 'correct',
+                        'feedback' => $feedbacksPossible[$match / 2],
+                    ],
                 ];
             }
         } else {
             return [
-                'correctness' => 'incorrect',
-                'feedback' => $defaultFeedback,
+                $questionIndex => [
+                    'correctness' => 'incorrect',
+                    'feedback' => $defaultFeedback,
+                ],
             ];
         }
     }
