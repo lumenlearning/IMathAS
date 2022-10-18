@@ -227,6 +227,8 @@ $CFG['hooks']['lti'] = __DIR__ . '/../ohm-hooks/lti13hooks.php';
 //$GLOBALS['CFG']['hooks']['assess2/questions/score_engine']
 //$GLOBALS['CFG']['hooks']['assess2/assess_standalone']
 //$GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator']
+//$GLOBALS['CFG']['hooks']['assess2/questions/scorepart/multiple_answer_score_part']
+//$GLOBALS['CFG']['hooks']['assess2/questions/scorepart/choices_score_part']
 
 $CFG['GEN']['footerscriptinclude'] = 'ohm-hooks/footer.php';
 
