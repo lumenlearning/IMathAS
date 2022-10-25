@@ -1,5 +1,7 @@
 <?php
 
+use IMathAS\assess2\questions\models\ScorePartResult;
+
 /**
  * Include the correct answers in scoring results.
  *
@@ -16,4 +18,30 @@ function onScoreQuestionResult(array $scoreResult,
     $scoreResult['extra']['answer'] = $varsForScorepart['answer'] ?? null;
     $scoreResult['extra']['answers'] = $varsForScorepart['answers'] ?? null;
     return $scoreResult;
+}
+
+/**
+ * Include the correct answers in scoring results after they've been randomized.
+ *
+ * @param array $returnData The original array to be returned by scorePartNonMultiPart().
+ * @param ScorePartResult $scorePartResult An instance of ScorePartResult.
+ * @return array The scoring result data with correct answers included.
+ */
+function onScorePartMultiPart(array $returnData, ScorePartResult $scorePartResult): array
+{
+    $returnData['extra'] = $scorePartResult->getExtraData();
+    return $returnData;
+}
+
+/**
+ * Include the correct answers in scoring results after they've been randomized.
+ *
+ * @param array $returnData The original array to be returned by scorePartNonMultiPart().
+ * @param ScorePartResult $scorePartResult An instance of ScorePartResult.
+ * @return array The scoring result data with correct answers included.
+ */
+function onScorePartNonMultiPart(array $returnData, ScorePartResult $scorePartResult): array
+{
+    $returnData['extra'] = $scorePartResult->getExtraData();
+    return $returnData;
 }

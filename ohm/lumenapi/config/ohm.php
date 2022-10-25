@@ -11,6 +11,17 @@
 $GLOBALS['assessUIver'] = 2;
 
 // Define OHM hooks.
-$GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] = __DIR__ . '/../../../ohm-hooks/assess2/questions/score_engine.php';
-$GLOBALS['CFG']['hooks']['assess2/assess_standalone'] = __DIR__ . '/../../../ohm-hooks/assess2/assess_standalone.php';
-$GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator'] = __DIR__ . '/../../../ohm-hooks/assess2/questions/question_html_generator.php';
+$GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] =
+    __DIR__ . '/../../../ohm-hooks/assess2/questions/score_engine.php';
+
+$GLOBALS['CFG']['hooks']['assess2/assess_standalone'] =
+    __DIR__ . '/../../../ohm-hooks/assess2/assess_standalone.php';
+
+$GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator'] =
+    __DIR__ . '/../../../ohm-hooks/assess2/questions/question_html_generator.php';
+
+$GLOBALS['CFG']['hooks']['assess2/questions/scorepart/multiple_answer_score_part'] =
+    __DIR__ . '/../../../ohm-hooks/assess2/questions/scorepart/multiple_answer_score_part.php';
+
+$GLOBALS['CFG']['hooks']['assess2/questions/scorepart/choices_score_part'] =
+    __DIR__ . '/../../../ohm-hooks/assess2/questions/scorepart/choices_score_part.php';
