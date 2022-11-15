@@ -524,6 +524,19 @@ class QuestionController extends ApiBaseController
         $scoreDto = new QuestionScoreDto($inputState);
 
         $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
+
+        // For "multans" questions, if a student selects answers [0, 2, 4], the array
+        // of answers passed to the scoring engine should be: [0, null, 2, null, 4]
+        if ("multans" == $this->questionType['questionType']) {
+            $_POST['qn0'] = $this->reIndexMultansAnswers($_POST['qn0']);
+        }
+        // We need to check multipart questions for "multans" parts and apply the
+        // same re-indexing of answers.
+        if ("multipart" == $this->questionType['questionType']) {
+            $_POST = $this->reIndexMultipartMultansAnswers($_POST,
+                $this->questionType['questionControl'], $scoreDto->getQuestionSetId());
+        }
+
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
 
         // Get question feedback.
@@ -567,5 +580,91 @@ class QuestionController extends ApiBaseController
         if (empty($question->getExtraData()['lumenlearning']['feedback'])) return null;
 
         return $question->getExtraData()['lumenlearning']['feedback'];
+    }
+
+    /**
+     * Given an array of integers, return a new array with:
+     * - The same integers but indexed into positions indicated by their value.
+     * - No values for any gaps in sequence.
+     *
+     * Example:
+     *     Input: [0, 2, 3, 5, 7]
+     *     Output: [0, null, 2, 3, null, 5, null, 7]
+     *
+     * @param int[] $answers An array of integers.
+     * @return array An array of integers with nulls.
+     */
+    private function reIndexMultansAnswers(array $answers): array
+    {
+        $reIndexedAnswers = [];
+        foreach ($answers as $i) {
+            $reIndexedAnswers[$i] = $i;
+        }
+
+        return $reIndexedAnswers;
+    }
+
+    /**
+     * For multipart questions, apply reIndexMultansAnswers() to "multans" parts.
+     *
+     * This methods requires the entire $_POST variable as input and will
+     * return a replacement. It will not modify the original value of $_POST.
+     *
+     * @param array $postVars The entire value of $_POST, after
+     *                        QuestionScoreDto->setPostParams() has been called.
+     * @param string $questionControl The question control. (question code)
+     * @param int $questionsetId The question ID from imas_questionset.
+     * @return array A new array of part answers, suitable for replacing $_POST.
+     */
+    private function reIndexMultipartMultansAnswers(array $postVars,
+                                                    string $questionControl,
+                                                    int $questionsetId): array
+    {
+        /*
+         * Each part of a multipart question is a question.
+         * Example: A two-part multipart question contains two questions.
+         *
+         * Each part type is defined in a variable named $anstypes, which
+         * lives in the question control. (question control contains PHP)
+         *
+         * $anstypes is declared when the question code (PHP) is eval'd, when
+         * displaying or scoring a question. We'll extract it with a regex
+         * instead.
+         *
+         * The format of $anstypes is a comma-separated string of question types.
+         * Examples: "choices,number,multans" or "calculated,essay"
+         */
+        $anstypes = null;
+        if (preg_match('/\$anstypes\s+?=\s+?\"(.*)\"/', $questionControl, $matches)) {
+            $anstypes = explode(',', $matches[1]);
+        } else {
+            // If we can't find $anstypes, we can't check for "multans" question types.
+            // We shouldn't get this far as multipart questions require $anstypes to be
+            // defined to function properly.
+            error_log('WARNING: Unable to find $anstypes in question control for multipart question!'
+                . ' This may result in incorrect scoring if this question contains a "multans" type part!'
+                . ' imas_questionset ID: ' . $questionsetId);
+            return $postVars;
+        }
+
+        $postVarsWithMultansReindexed = [];
+        $arrayPosition = 0;
+        foreach ($postVars as $partIndex => $answer) {
+            if ('qn0' == $partIndex) {
+                $postVarsWithMultansReindexed[$partIndex] = $answer;
+                continue; // "qn0" has no matching $anstype.
+            } elseif ('multans' == $anstypes[$arrayPosition]) { // Each part's question type is found in $anstypes.
+                if (!is_array($answer)) {
+                    $answer = explode(',', $answer);
+                }
+                $postVarsWithMultansReindexed[$partIndex] = $this->reIndexMultansAnswers($answer);
+            } else {
+                // Copy non-multans answers as-is.
+                $postVarsWithMultansReindexed[$partIndex] = $answer;
+            }
+            $arrayPosition++;
+        }
+
+        return $postVarsWithMultansReindexed;
     }
 }
