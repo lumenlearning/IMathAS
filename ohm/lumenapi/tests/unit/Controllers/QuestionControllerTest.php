@@ -158,7 +158,7 @@ $feedback = mergearrays(
   ohm_getfeedbacktxt($stuanswer[$thisq], $colorfeedbacks, $answer[0], 0),
   ohm_getfeedbacktxt($stuanswer[$thisq], $numbersfeedbacks, $answer[1], 1),
   ohm_getfeedbacktxt($stuanswer[$thisq], $pizzafeedbacks, $answer[2], 2),
-  ohm_getfeedbackbasic("Correct!", "Not correct.", $thisq, 3)
+  ohm_getfeedbackbasic($stuanswer[$thisq], "Correct!", "Not correct.", $answer[3], 3)
 )',
         'qcontrol' => '',
         'qtext' => 'Choose the best color:
@@ -206,7 +206,9 @@ $answerbox[3]
         'license' => '1',
         'description' => 'Multipart: multans + number',
         'qtype' => 'multipart',
-        'control' => '$anstypes = "number,multans"
+        'control' => 'loadlibrary("ohm_macros")
+
+$anstypes = "number,multans"
 
 $choices = [
   "Correct",
@@ -218,6 +220,19 @@ $choices = [
 
 $answer[0] = 42
 $answer[1] = "0,2,4"
+
+$multansFeedbacks = array(
+  "You chose well.",
+  "Nope.",
+  "You chose correctly.",
+  "lol, no.",
+  "This is correct."
+)
+
+$feedback = mergearrays(
+  ohm_getfeedbackbasic($stuanswers[$thisq], "This is correct.", "This is not correct.", $answer[0], 0),
+  ohm_getfeedbacktxtmultans($stuanswers[$thisq], $multansFeedbacks, $answer[1], 1)
+)
 
 $noshuffle = "all"
 ',
@@ -354,9 +369,6 @@ $answerbox[1]
         $this->assertNull($scoreResponse['correctAnswers']['answers']);
     }
 
-    /**
-     * @group failing
-     */
     public function testGetScore_multiPart_multans(): void
     {
         $inputState = json_decode('{
@@ -405,6 +417,60 @@ $answerbox[1]
         $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
         $this->assertEquals([1, 1], $scoreResponse['raw']);
         $this->assertEquals([], $scoreResponse['errors']);
+    }
+
+    public function testGetScore_multiPart_multans_feedback(): void
+    {
+        $inputState = json_decode('{
+            "request": {
+                "post": [      
+                    { 
+                        "name": "qn0",
+                        "value": ""
+                    },
+                    { 
+                        "name": "qn1000",
+                        "value": "42"
+                    },
+                     { 
+                        "name": "qn1001",
+                        "value": "0,2,3"
+                    }
+                ],
+                "questionSetId": 3618,
+                "seed": 4120,
+                "studentAnswers": ["","true","false"],
+                "studentAnswerValues": [22,7,0],
+                "partAttemptNumber": [1,1,1],
+                "partsToScore": [1,1,1],
+                "options": {
+                    "returnState": true
+                }
+            }
+        }', true);
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_multipart_multans);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3618, $scoreResponse['questionSetId']);
+        $this->assertEquals([], $scoreResponse['errors']);
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1000']['correctness']);
+        $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1000']['feedback']);
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-0']['correctness']);
+        $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-0']['feedback']);
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-2']['correctness']);
+        $this->assertEquals('You chose correctly.', $scoreResponse['feedback']['qn1001-2']['feedback']);
+        $this->assertEquals('incorrect', $scoreResponse['feedback']['qn1001-3']['correctness']);
+        $this->assertEquals('lol, no.', $scoreResponse['feedback']['qn1001-3']['feedback']);
     }
 
     public function testGetQuestion_withFeedback_singlePart(): void

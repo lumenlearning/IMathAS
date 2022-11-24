@@ -15,6 +15,7 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
 
     $returnData['correctAnswers']['answer'] = $scoreResult['extra']['answer'];
     $returnData['correctAnswers']['answers'] = $scoreResult['extra']['answers'];
+    $returnData['feedback'] = $scoreResult['extra']['feedback'];
 
     /*
      * For questions whose answers have been randomized to minimize cheating,

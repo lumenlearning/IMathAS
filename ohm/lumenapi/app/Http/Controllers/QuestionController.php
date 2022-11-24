@@ -540,8 +540,7 @@ class QuestionController extends ApiBaseController
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
 
         // Get question feedback.
-        $question = $assessStandalone->getQuestion();
-        $questionFeedback = !is_null($question) ? $this->getQuestionFeedback($question) : null;
+        $questionFeedback = $score['feedback'] ?? null;
 
         return $scoreDto->getScoreResponse($score, $this->questionType, $assessStandalone->getState(), $questionFeedback);
     }
