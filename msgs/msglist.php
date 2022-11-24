@@ -335,6 +335,7 @@ If deleted on both ends, delete from DB
 				$msgset = $msgset%5;
 			} else {
 				$courseopts = getCourseOpts(true);
+                $msgmonitor = 0;
 			}
 
 			$courseid=($cid==0)?$filtercid:$cid;
@@ -628,6 +629,7 @@ If deleted on both ends, delete from DB
 		}
 	} else if ($myrights > 5 && $filtercid==0) {
 		$cansendmsgs = true;
+        $msgmonitor = 0;
 	}
 
 	$actbar = array();
@@ -647,7 +649,7 @@ If deleted on both ends, delete from DB
 	}
 	$actbar[] = "<a href=\"sentlist.php?cid=$cid\">Sent Messages</a>";
 
-	if ($isteacher && $cid>0 && $msgmonitor==1) {
+	if ($isteacher && $filtercid>0 && $msgmonitor==1) {
 		$actbar[] = "<a href=\"allstumsglist.php?cid=$cid\">Student Messages</a>";
 	}
 	$actbar[] = '<input type="button" value="Pictures" onclick="rotatepics()" title="View/hide student pictures, if available" />';
