@@ -70,7 +70,7 @@ function ohm_getfeedbackbasic(?array $stuanswers,
     }
 
     $questionIndex = getFeedbackIndex($partNumber);
-    $studentAnswer = is_null($partNumber) ? $stuanswers[0] : $stuanswers[$partNumber];
+    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
 
     if (empty($studentAnswer)) {
         return [];
@@ -699,7 +699,7 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
     }
 
     $questionIndex = getFeedbackIndex($partNumber);
-    $studentAnswer = is_null($partNumber) ? $stuanswers[0] : $stuanswers[$partNumber];
+    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
 
     if (empty($studentAnswer)) {
         return [];
