@@ -195,6 +195,54 @@ $answerbox[3]
         'varscore' => '0'
     ];
 
+    private array $imasQuestionSet_dbRow_with_ohm1_macro = [
+        'id' => '3607',
+        'uniqueid' => '1661894316883503',
+        'adddate' => '1661894316',
+        'lastmoddate' => '1661990728',
+        'ownerid' => '1',
+        'author' => '<h1>AdminLastName</h1>,<h1>AdminFirstName</h1>',
+        'userights' => '2',
+        'license' => '1',
+        'description' => 'Multiple Choice Test 1 with Feedback',
+        'qtype' => 'choices',
+        'control' => '$questions[0] = "Sportsball"
+ $feedbacktxt[0] = "This is correct. Way to go."
+ $questions[1] = "Blernsball"
+ $feedbacktxt[1] = "Sorry, Option B is incorrect. Try again."
+ $questions[2] = "Calvin Ball"
+ $feedbacktxt[2] = "Sorry, Option C is not the right answer. Try again."
+ $questions[3] = "Quidditch"
+ $feedbacktxt[3] = "Sorry, Option D was the wrong choice. Try again."
+ $displayformat = "vert"
+ $noshuffle = "all"
+ $answer = 0
+ 
+ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
+        'qcontrol' => '',
+        'qtext' => '<p>What is your favorite sport?</p>\r\n<p>$answerbox</p>\r\n<p>$feedback</p>\r\n',
+        'answer' => '',
+        'solution' => '',
+        'extref' => '',
+        'hasimg' => '0',
+        'deleted' => '0',
+        'avgtime' => '0',
+        'ancestors' => '',
+        'ancestorauthors' => '',
+        'otherattribution' => '',
+        'importuid' => '',
+        'replaceby' => '0',
+        'broken' => '0',
+        'solutionopts' => '6',
+        'sourceinstall' => '',
+        'meantimen' => '0',
+        'meantime' => '0',
+        'vartime' => '0',
+        'meanscoren' => '0',
+        'meanscore' => '0',
+        'varscore' => '0',
+    ];
+
     public function setUp(): void
     {
         if (!$this->app) {
@@ -210,6 +258,28 @@ $answerbox[3]
 
         $this->pdo = Mockery::mock(PDO::class);
         $this->questionController->setPdo($this->pdo);
+    }
+
+    /*
+     * getQuestionDisplay
+     */
+
+    public function testGetQuestionDisplay(): void
+    {
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_with_ohm1_macro);
+
+        $responseData = $this->questionController->getQuestionDisplay([
+            'questionSetId' => 3607,
+            'seed' => 3469,
+        ]);
+
+        $this->assertContains(
+            'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!',
+            $responseData['errors']
+        );
     }
 
     /*
