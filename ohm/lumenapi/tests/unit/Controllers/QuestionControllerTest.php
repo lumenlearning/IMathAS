@@ -204,23 +204,25 @@ $answerbox[3]
         'author' => '<h1>AdminLastName</h1>,<h1>AdminFirstName</h1>',
         'userights' => '2',
         'license' => '1',
-        'description' => 'Multiple Choice Test 1 with Feedback',
+        'description' => 'Multiple Choice Test 10 with Feedback - Staging QID 638',
         'qtype' => 'choices',
-        'control' => '$questions[0] = "Sportsball"
- $feedbacktxt[0] = "This is correct. Way to go."
- $questions[1] = "Blernsball"
- $feedbacktxt[1] = "Sorry, Option B is incorrect. Try again."
- $questions[2] = "Calvin Ball"
- $feedbacktxt[2] = "Sorry, Option C is not the right answer. Try again."
- $questions[3] = "Quidditch"
- $feedbacktxt[3] = "Sorry, Option D was the wrong choice. Try again."
- $displayformat = "vert"
- $noshuffle = "all"
- $answer = 0
- 
- $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
+        'control' => '$questions[0] = "Something like that."
+$feedbacktxt[0] = "This is correct. Way to go."
+$questions[1] = "No, sorry. I\'ll add an oxford comma next time."
+$feedbacktxt[1] = "Sorry, this is incorrect. Try again."
+$questions[2] = "I\'m not the planning committee."
+$feedbacktxt[2] = "Sorry, not the right answer. Try again."
+$questions[3] = "You were supposed to make the plan!"
+$feedbacktxt[3] = "Sorry, that was the wrong choice. Try again."
+$displayformat = "vert"
+$noshuffle = "all"
+$answer = 0
+
+$feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         'qcontrol' => '',
-        'qtext' => '<p>What is your favorite sport?</p>\r\n<p>$answerbox</p>\r\n<p>$feedback</p>\r\n',
+        'qtext' => '<p>Was that the plan?</p>
+<p>$answerbox</p>
+<p>$feedback</p>',
         'answer' => '',
         'solution' => '',
         'extref' => '',
