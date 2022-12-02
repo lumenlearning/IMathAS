@@ -583,7 +583,7 @@ class QuestionController extends ApiBaseController
          *
          * Catra expects feedback as an array and without HTML, so we return null.
          */
-        if ('string' == gettype($feedback)) {
+        if ('array' != gettype($feedback)) {
             $question->addErrors([
                 'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!'
             ]);
