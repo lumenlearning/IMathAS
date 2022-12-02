@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Include the correct answers in scoring results.
+ * Include the correct answers and feedback for the student's answers in scoring results.
  *
  * @param array $returnData The scoring data being returned.
  * @param array $scoreResult Score results from ScoreEngine->scoreResult().
@@ -18,46 +18,74 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
     $returnData['feedback'] = $scoreResult['extra']['feedback'];
 
     /*
-     * For questions whose answers have been randomized to minimize cheating,
+     * For questions whose answers have been shuffled to minimize cheating,
      * we need to return the correct answers *after* they've been rearranged
      * using the question seed.
      *
-     * The existence of "randomAnswerKeys" indicates we need to map the original
-     * correct answer index(es) to the rearranged answer index(es).
+     * If feedback is being returned, we need to do this for feedback as well.
+     *
+     * The existence of "randomAnswerKeys" indicates we need to map the original,
+     * unseeded correct answer index(es) to the shuffled, seeded answer index(es).
      */
 
-    // Handle randomized "multans" type question answers.
+    // Handle shuffled "multans" type question answers.
     if (
         _hasCorrectAnswers($scoreResult)
         && !_hasCorrectAnswer($scoreResult)
         && _hasRandomAnswerKeys($scoreResult)
     ) {
-        $originalCorrectAnswers = _correctAnswersAsArray($scoreResult['extra']['answers']);
+        $unseededCorrectAnswers = _correctAnswersAsArray($scoreResult['extra']['answers']);
+        $shuffledAnswerKeymap = $scoreResult['extra']['lumenlearning']['randomAnswerKeys'];
 
-        $randomizedCorrectAnswers = [];
-        foreach ($scoreResult['extra']['lumenlearning']['randomAnswerKeys'] as $randomAnswerKey => $originalAnswerKey) {
-            if (in_array($originalAnswerKey, $originalCorrectAnswers)) {
-                array_push($randomizedCorrectAnswers, $randomAnswerKey);
+        // Reorder correct answers.
+        $shuffledCorrectAnswers = [];
+        foreach ($shuffledAnswerKeymap as $shuffledAnswerKey => $unseededAnswerKey) {
+            if (in_array($unseededAnswerKey, $unseededCorrectAnswers)) {
+                array_push($shuffledCorrectAnswers, $shuffledAnswerKey);
             }
         }
 
-        // Replace the original answers with the randomized answers.
-        $returnData['correctAnswers']['answers'] = implode(',', $randomizedCorrectAnswers);
+        // Replace the original, unseeded answers with the shuffled answers.
+        $returnData['correctAnswers']['answers'] = implode(',', $shuffledCorrectAnswers);
+
+        // Reorder feedback.
+        // Note: This only works for single-part questions.
+        // TODO: Need to handle multi-part questions containing multans parts.
+        $studentProvidedAnswersUnseeded = explode('|', $scoreResult['lastAnswerAsGiven'][0]);
+        $shuffledFeedback = [];
+        if (!empty($scoreResult['extra']['feedback'])) {
+            foreach ($scoreResult['extra']['feedback'] as $feedbackAnswerKey => $feedback) {
+                [$unseededKeyName, $unseededKeyNumber] = explode('-', $feedbackAnswerKey);
+
+                // Don't include feedback for answers the student didn't provide.
+                if (!in_array($unseededKeyNumber, $studentProvidedAnswersUnseeded)) continue;
+
+                $shuffledKeyNumber = _getShuffledKeyByUnseededKey($unseededKeyNumber, $shuffledAnswerKeymap);
+
+                $newKey = $unseededKeyName . '-' . $shuffledKeyNumber;
+                $shuffledFeedback[$newKey] = $feedback;
+            }
+
+            // Replace the original, unseeded feedback with the shuffled feedback.
+            $returnData['feedback'] = $shuffledFeedback;
+        }
     }
 
-    // Handle randomized "choices" type question answers.
+    // Handle shuffled "choices" type question answers.
     if (
         _hasCorrectAnswer($scoreResult)
         && !_hasCorrectAnswers($scoreResult)
         && _hasRandomAnswerKeys($scoreResult)
     ) {
-        $originalCorrectAnswer = (int)$scoreResult['extra']['answer'];
+        $unseededCorrectAnswer = (int)$scoreResult['extra']['answer'];
 
-        $randomizedCorrectAnswer = array_search($originalCorrectAnswer,
+        $shuffledCorrectAnswer = array_search($unseededCorrectAnswer,
             $scoreResult['extra']['lumenlearning']['randomAnswerKeys']);
 
-        // Replace the original answers with the randomized answers.
-        $returnData['correctAnswers']['answer'] = $randomizedCorrectAnswer;
+        // Replace the original, unseeded answers with the shuffled answers.
+        $returnData['correctAnswers']['answer'] = $shuffledCorrectAnswer;
+
+        // TODO: Do we need to reorder feedback here as well? (Most likely yes!)
     }
 
     return $returnData;
@@ -127,4 +155,36 @@ function _correctAnswersAsArray($correctAnswers)
     } else {
         return explode(',', $correctAnswers);
     }
+}
+
+/**
+ * Get an answer or feedback key after it's been shuffled by a question seed.
+ *
+ * @param int $unseededKey The original answer or feedback key as it would exist in
+ *                         question code ("question control"), before being shuffled
+ *                         by a question seed.
+ * @param array $randomAnswerKeymap The mapping of original answer/feedback keys to the
+ *                                  keys after a question seed has been applied.
+ *                                    Example:
+ *                                      [
+ *                                          // (shuffledKey) => (originalKey)
+ *                                          0 => 3,
+ *                                          1 => 2,
+ *                                          2 => 0,
+ *                                          3 => 1
+ *                                      ]
+ *
+ * @return int|null The answer or feedback key after it's been shuffled.
+ */
+function _getShuffledKeyByUnseededKey(int $unseededKey, array $randomAnswerKeymap): ?int
+{
+    $seededKey = null;
+
+    foreach ($randomAnswerKeymap as $key => $value) {
+        if ($value == $unseededKey) {
+            $seededKey = $key;
+        }
+    }
+
+    return $seededKey;
 }

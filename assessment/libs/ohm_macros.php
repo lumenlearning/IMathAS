@@ -675,11 +675,15 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
 }
 
 /**
- * Gives feedback on multiple answer questions based on the student's answer.
+ * Return ALL feedback for multiple answer questions.
  *
- * - Feedback is returned without any added HTML.
- * - If student answer is null, all available feedback is returned.
- * - If a student answer is provided, feedback will be returned based on correctness.
+ * From within this macro, it is not possible to obtain the correct answer
+ * indexes for a question after they've been shuffled with a question seed.
+ *
+ * The returned feedback will need to be shuffled and filtered in:
+ *   ohm-hooks/assess2/questions/scorepart/multiple_answer_score_part.php
+ *
+ * Feedback is returned without any added HTML.
  *
  * @param string|array|null $stuanswers The student answer, obtained from $stuanswers[$thisq] for single
  *                                      part questions, or using the getstuans macro for multipart.
@@ -715,20 +719,18 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
         $correctAnswers = preg_replace('/s*/', '', $correctAnswers);
         $correctAnswersAsArray = explode(',', $correctAnswers);
 
-        # For a part question, $studentAnswer will look like "0|2|3|5".
-        # For a multipart question, it will be an array of integers.
-        $studentAnswersAsArray = is_array($studentAnswer) ? $studentAnswer : preg_split('/[\|,]/', $studentAnswer);
+        $allFeedback = [];
+        foreach ($feedbacksPossible as $idx => $feedback) {
+            $answerIndex = $questionIndex . '-' . $idx;
+            $isCorrect = in_array($idx, $correctAnswersAsArray);
 
-        $feedback = [];
-        foreach ($studentAnswersAsArray as $answer) { // $answer is always (int)
-            $answerIndex = $questionIndex . '-' . $answer;
-            $isCorrect = in_array($answer, $correctAnswersAsArray);
-
-            $feedback[$answerIndex] = [
-                'correctness' => $isCorrect ? 'correct' : 'incorrect',
-                'feedback' => $feedbacksPossible[$answer]
+            $allFeedback += [
+                $answerIndex => [
+                    'correctness' => $isCorrect ? 'correct' : 'incorrect',
+                    'feedback' => $feedback,
+                ]
             ];
         }
-        return $feedback;
+        return $allFeedback;
     }
 }
