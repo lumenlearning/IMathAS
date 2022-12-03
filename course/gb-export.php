@@ -380,7 +380,9 @@ function gbinstrdisp() {
 	if ($availshow==4) {
 		$availshow=1;
 		$hidepast = true;
-	}
+	} else {
+        $hidepast = false;
+    }
 	$gbt = gbtable();
 	echo '<table class="gb" id="myTable"><thead><tr>';
 	$n=0;
