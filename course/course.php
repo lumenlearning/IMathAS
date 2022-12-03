@@ -223,11 +223,11 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 		$backtrack = array();
 		for ($i=1;$i<count($blocktree);$i++) {
 			if (!isset($items[$blocktree[$i]-1]['name']) || (
-                !isset($teacherid) && !isset($tutorid) &&
-                $items[$blocktree[$i]-1]['avail']<2 &&
+                !isset($teacherid) && !isset($tutorid) && 
+                $items[$blocktree[$i]-1]['avail']<2 && 
                 $items[$blocktree[$i]-1]['SH'][0]!='S' && (
-                    $now<$items[$blocktree[$i]-1]['startdate'] ||
-                    $now>$items[$blocktree[$i]-1]['enddate'] ||
+                    $now<$items[$blocktree[$i]-1]['startdate'] || 
+                    $now>$items[$blocktree[$i]-1]['enddate'] || 
                     $items[$blocktree[$i]-1]['avail']=='0'
                 )
             )) {
@@ -267,7 +267,7 @@ if (!isset($teacherid) && !isset($tutorid) && !isset($studentid) && !isset($inst
 	$plblist = implode(',',$prevloadedblocks);
 	$oblist = implode(',',$openblocks);
 
-	$curBreadcrumb = $breadcrumbbase;
+	$curBreadcrumb = $breadcrumbbase ?? '';
 	if (isset($backtrack) && count($backtrack)>0) {
 		if (isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==3) {
 			array_unshift($backtrack, array($coursename, '0'));
