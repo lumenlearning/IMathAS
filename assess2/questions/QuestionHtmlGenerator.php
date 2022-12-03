@@ -1169,7 +1169,7 @@ class QuestionHtmlGenerator
             $showanswer = $this->fixDegrees($showanswer, $procanstypes);
         } else if (isset($showanswer)) {
             foreach ($showanswer as $k=>$v) {
-                if ($v === null) {continue;}
+                if ($v === null || !isset($procanstypes[$k])) {continue;}
                 $showanswer[$k] = $this->fixDegrees($v, $procanstypes[$k]);
             }
         }

@@ -162,6 +162,7 @@ $seeds = array_map('Sanitize::onlyInt',$seeds);
 
 require("./assessment/displayq2.php");
 $GLOBALS['assessver'] = 2;
+$showhints = true;
 
 if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 	//load filter
@@ -198,7 +199,7 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 		'scores' => $rawscores,
 		'jwt' => $jwtstring
 	);
-	echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify('.json_encode($scoremessage,JSON_HEX_TAG).'), "*");</script>';
+	echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify('.json_encode($scoremessage,JSON_HEX_TAG|JSON_INVALID_UTF8_IGNORE).'), "*");</script>';
 	exit;
 }
 
@@ -290,7 +291,6 @@ if (getenv('ALLOW_TRY_ANOTHER_VERSION') == 'true') {
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
-$showhints = true;
 
 //preload qsdata
 $placeholders = Sanitize::generateQueryPlaceholders($qids);
