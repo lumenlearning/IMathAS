@@ -793,7 +793,6 @@ If you still have trouble or the wrong email address is on file, contact your in
 		} else {
 			$chguserimg = '';
 		}
-		$_POST['theme'] = str_replace(array('/','..'), '', $_POST['theme']);
 
 		//DEB $query = "UPDATE imas_users SET FirstName='{$_POST['firstname']}',LastName='{$_POST['lastname']}',email='{$_POST['email']}',msgnotify=$msgnot,qrightsdef=$qrightsdef,deflib='$deflib',usedeflib='$usedeflib',homelayout='$layoutstr',theme='{$_POST['theme']}',listperpage='$perpage'$chguserimg ";
 
@@ -848,7 +847,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		$stm = $DBH->prepare($query);
 		$stm->execute(array(':FirstName'=>$_POST['firstname'],
 			':LastName'=>$_POST['lastname'], ':email'=>$_POST['email'], ':msgnotify'=>$msgnot, ':homelayout'=>$layoutstr, ':qrightsdef'=>$qrightsdef,
-			':deflib'=>$deflib, ':usedeflib'=>$usedeflib, ':theme'=>$_POST['theme'], ':listperpage'=>$perpage, ':uid'=>$userid));
+			':deflib'=>$deflib, ':usedeflib'=>$usedeflib, ':theme'=>'', ':listperpage'=>$perpage, ':uid'=>$userid));
 
 		$pwchanged = false;
 		if (isset($_POST['dochgpw'])) {
