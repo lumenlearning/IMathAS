@@ -406,7 +406,7 @@ class QuestionHtmlGenerator
                       $jsParams['hasseqnext'] = true;
                       $_thisGroupDone = false;
                     }
-                    if ($seqPartDone !== true && empty($seqPartDone[$_pnidx]) && ($quesData['qtype'] == "conditional" || $answeights[$_pnidx]!=0)) {
+                    if ($seqPartDone !== true && empty($seqPartDone[$_pnidx]) && ($quesData['qtype'] == "conditional" || !empty($answeights[$_pnidx]))) {
                       $_thisGroupDone = false;
                     }
                   }
@@ -612,7 +612,7 @@ class QuestionHtmlGenerator
          * Possibly adjust the showanswer if it doesn't look right
          */
         $doShowDetailedSoln = false;
-        if (isset($showanswer) && is_array($showanswer) && count($showanswer) < count($answerbox)) {
+        if (isset($showanswer) && is_array($showanswer) && is_array($answerbox) && count($showanswer) < count($answerbox)) {
             $showansboxloccnt = substr_count($toevalqtxt,'$showanswerloc') + substr_count($toevalqtxt,'[SAB');
             if ($showansboxloccnt > 0 && count($answerbox) > $showansboxloccnt && count($showanswer) == $showansboxloccnt) {
                 // not enough showanswerloc boxes for all the parts.  
@@ -750,7 +750,7 @@ class QuestionHtmlGenerator
             $newqtext = '';
             $lastGroupDone = true;
             foreach ($seqParts as $k=>$seqPart) {
-              $thisGroupDone = $seqGroupDone[$k];
+              $thisGroupDone = !empty($seqGroupDone[$k]);
               preg_match_all('/<(input|select|textarea)[^>]*name="?qn(\d+)/', $seqPart, $matches);
               foreach ($matches[2] as $qnrefnum) {
                 $pn = $qnrefnum % 1000;
