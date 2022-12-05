@@ -1026,7 +1026,7 @@ class QuestionHtmlGenerator
                     if ($usenum == 10000) { 
                         continue;
                     }
-                    if (is_array($hintpart[$usenum])) {
+                    if (!empty($hintpart[$usenum]) && is_array($hintpart[$usenum])) {
                         $hintpart[$usenum] = $hintpart[$usenum][0];
                     }
                 } else {

@@ -5,7 +5,7 @@
 } else {
 	echo '<html lang="en">';
 }
-if (!isset($myrights)) {
+if (!isset($myrights)) { 
     $myrights = 0; // avoid errors in headercontent if not defined
 }
 ?>
@@ -230,7 +230,7 @@ div { zoom: 1; }
 
 <?php
 
-if (isset($useeditor) && $_SESSION['useed']==1) {
+if (isset($useeditor) && !empty($_SESSION['useed'])) {
 	echo '<script type="text/javascript" src="'.$staticroot.'/tinymce4/tinymce_bundled.min.js?v=051919"></script>';
 	//echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.min.js?v=082716"></script>';
 	echo "\n";
