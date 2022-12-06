@@ -600,6 +600,11 @@ class ScoreEngine
             ${$k} = $v;
         }
 
+        // handle undefined $anstypes to prevent exception
+        if (!isset($anstypes)) {
+            echo '$anstypes not defined - will cause scoring issues';
+            $anstypes = [];
+        }
         /*
          * Begin scoring.
          */
@@ -629,6 +634,16 @@ class ScoreEngine
                 $answeights = array(1);
             }
         }
+        
+        $scoremethodwhole = '';
+        if (isset($scoremethod)) {
+            if (!is_array($scoremethod)) {
+                $scoremethodwhole = $scoremethod;
+            } else if (!empty($scoremethod['whole'])) {
+                $scoremethodwhole = $scoremethod['whole'];
+            }
+        }
+
         $scores = array();
         $raw = array();
         $accpts = 0;
@@ -659,15 +674,6 @@ class ScoreEngine
             }
             $scorePartResult = $scorePart->getResult();
             $raw[$partnum] = $scorePartResult->getRawScore();
-
-            $scoremethodwhole = '';
-            if (isset($scoremethod)) {
-                if (!is_array($scoremethod)) {
-                    $scoremethodwhole = $scoremethod;
-                } else if (!empty($scoremethod['whole'])) {
-                    $scoremethodwhole = $scoremethod['whole'];
-                }
-            }
 
             if ($scoremethodwhole == 'acct') {
                 if (($anstype == 'string' || $anstype == 'number') && $answer[$partnum] === '') {
