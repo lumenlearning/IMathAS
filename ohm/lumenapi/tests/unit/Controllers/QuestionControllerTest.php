@@ -195,6 +195,61 @@ $answerbox[3]
         'varscore' => '0'
     ];
 
+    private array $imasQuestionSet_dbRow_multipart_multans = [
+        'id' => '3618',
+        'uniqueid' => '1668057407498824',
+        'adddate' => '1668057407',
+        'lastmoddate' => '1668066745',
+        'ownerid' => '1',
+        'author' => '<h1>AdminLastName</h1>,<h1>AdminFirstName</h1>',
+        'userights' => '0',
+        'license' => '1',
+        'description' => 'Multipart: multans + number',
+        'qtype' => 'multipart',
+        'control' => '$anstypes = "number,multans"
+
+$choices = [
+  "Correct",
+  "Not correct",
+  "Correct",
+  "Not correct",
+  "Correct"
+]
+
+$answer[0] = 42
+$answer[1] = "0,2,4"
+
+$noshuffle = "all"
+',
+        'qcontrol' => '',
+        'qtext' => 'What is the answer to life, the universe, and everything?
+$answerbox[0]
+
+Choose the correct answers:
+$answerbox[1]
+',
+        'answer' => '',
+        'solution' => '',
+        'extref' => '',
+        'hasimg' => '0',
+        'deleted' => '0',
+        'avgtime' => '0',
+        'ancestors' => '',
+        'ancestorauthors' => '',
+        'otherattribution' => '',
+        'importuid' => '',
+        'replaceby' => '0',
+        'broken' => '0',
+        'solutionopts' => '6',
+        'sourceinstall' => '',
+        'meantimen' => '0',
+        'meantime' => '0',
+        'vartime' => '0',
+        'meanscoren' => '0',
+        'meanscore' => '0',
+        'varscore' => '0'
+    ];
+
     public function setUp(): void
     {
         if (!$this->app) {
@@ -297,6 +352,59 @@ $answerbox[3]
         $this->assertNotEmpty($scoreResponse['correctAnswers']);
         $this->assertEquals('10', $scoreResponse['correctAnswers']['answer']);
         $this->assertNull($scoreResponse['correctAnswers']['answers']);
+    }
+
+    /**
+     * @group failing
+     */
+    public function testGetScore_multiPart_multans(): void
+    {
+        $inputState = json_decode('{
+            "request": {
+                "post": [      
+                    { 
+                        "name": "qn0",
+                        "value": ""
+                    },
+                    { 
+                        "name": "qn1000",
+                        "value": "42"
+                    },
+                     { 
+                        "name": "qn1001",
+                        "value": "0,2,4"
+                    }
+                ],
+                "questionSetId": 3618,
+                "seed": 4120,
+                "studentAnswers": ["","true","false"],
+                "studentAnswerValues": [22,7,0],
+                "partAttemptNumber": [1,1,1],
+                "partsToScore": [1,1,1],
+                "options": {
+                    "returnState": true
+                }
+            }
+        }', true);
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_multipart_multans);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3618, $scoreResponse['questionSetId']);
+        $this->assertEquals('multipart', $scoreResponse['questionType']);
+        $this->assertEquals(4120, $scoreResponse['seed']);
+        $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
+        $this->assertEquals([1, 1], $scoreResponse['raw']);
+        $this->assertEquals([], $scoreResponse['errors']);
     }
 
     public function testGetQuestion_withFeedback_singlePart(): void
