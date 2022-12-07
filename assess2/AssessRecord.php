@@ -2642,7 +2642,7 @@ class AssessRecord
               ->setAssessmentId($this->assess_info->getSetting('id'))
               ->setDbQuestionSetId($qsettings['questionsetid'])
               ->setQuestionSeed($curQver['seed'])
-              ->setGivenAnswer($_POST['qn'.$qn])
+              ->setGivenAnswer($_POST['qn'.$qn] ?? '')
               ->setAttemptNumber($attemptn)
               ->setAllQuestionAnswers($stuanswers)
               ->setAllQuestionAnswersAsNum($stuanswersval)
