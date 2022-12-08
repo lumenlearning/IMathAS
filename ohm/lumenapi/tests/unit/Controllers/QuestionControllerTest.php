@@ -83,7 +83,6 @@ class QuestionControllerTest extends TestCase
  $questions[3] = "Quidditch"
  $feedbacktxt[3] = "Sorry, Option D was the wrong choice. Try again."
  $displayformat = "vert"
- $noshuffle = "all"
  $answer = 0
  
  $feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
@@ -111,7 +110,7 @@ class QuestionControllerTest extends TestCase
         'varscore' => '0',
     ];
 
-    private array $imasQuestionSet_dbRow_multipart = [
+    private array $imasQuestionSet_dbRow_multipart_choices = [
         'id' => '3609',
         'uniqueid' => '1665009644605959',
         'adddate' => '1665009644',
@@ -230,11 +229,9 @@ $multansFeedbacks = array(
 )
 
 $feedback = mergearrays(
-  ohm_getfeedbackbasic($stuanswers[$thisq], "This is correct.", "This is not correct.", $answer[0], 0),
+  ohm_getfeedbackbasic($stuanswers[$thisq], "Good answer.", "Wrong answer.", $answer[0], 0),
   ohm_getfeedbacktxtmultans($stuanswers[$thisq], $multansFeedbacks, $answer[1], 1)
 )
-
-$noshuffle = "all"
 ',
         'qcontrol' => '',
         'qtext' => 'What is the answer to life, the universe, and everything?
@@ -321,8 +318,7 @@ $answerbox[1]
         $this->assertEquals([], $responseData['errors']);
         $this->assertTrue($responseData['allans']);
         $this->assertNotEmpty($responseData['correctAnswers']);
-        $this->assertEquals('10', $responseData['correctAnswers']['answer']);
-        $this->assertNull($responseData['correctAnswers']['answers']);
+        $this->assertEquals('10', $responseData['correctAnswers'][0]);
     }
 
     /*
@@ -365,61 +361,10 @@ $answerbox[1]
         $this->assertEquals([], $scoreResponse['errors']);
         $this->assertTrue($scoreResponse['allans']);
         $this->assertNotEmpty($scoreResponse['correctAnswers']);
-        $this->assertEquals('10', $scoreResponse['correctAnswers']['answer']);
-        $this->assertNull($scoreResponse['correctAnswers']['answers']);
+        $this->assertEquals('10', $scoreResponse['correctAnswers'][0]);
     }
 
-    public function testGetScore_multiPart_multans(): void
-    {
-        $inputState = json_decode('{
-            "request": {
-                "post": [      
-                    { 
-                        "name": "qn0",
-                        "value": ""
-                    },
-                    { 
-                        "name": "qn1000",
-                        "value": "42"
-                    },
-                     { 
-                        "name": "qn1001",
-                        "value": "0,2,4"
-                    }
-                ],
-                "questionSetId": 3618,
-                "seed": 4120,
-                "studentAnswers": ["","true","false"],
-                "studentAnswerValues": [22,7,0],
-                "partAttemptNumber": [1,1,1],
-                "partsToScore": [1,1,1],
-                "options": {
-                    "returnState": true
-                }
-            }
-        }', true);
-
-        // Setup mocks.
-        $this->questionSetRepository
-            ->shouldReceive('getById')
-            ->andReturn($this->imasQuestionSet_dbRow_multipart_multans);
-
-        // Set the method to public.
-        $class = new ReflectionClass(QuestionController::class);
-        $method = $class->getMethod('getScore');
-        $method->setAccessible(true);
-
-        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
-
-        $this->assertEquals(3618, $scoreResponse['questionSetId']);
-        $this->assertEquals('multipart', $scoreResponse['questionType']);
-        $this->assertEquals(4120, $scoreResponse['seed']);
-        $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
-        $this->assertEquals([1, 1], $scoreResponse['raw']);
-        $this->assertEquals([], $scoreResponse['errors']);
-    }
-
-    public function testGetScore_multiPart_multans_feedback(): void
+    public function testGetScore_multiPart_with_multans_feedback(): void
     {
         $inputState = json_decode('{
             "request": {
@@ -440,12 +385,7 @@ $answerbox[1]
                 "questionSetId": 3618,
                 "seed": 4120,
                 "studentAnswers": ["","true","false"],
-                "studentAnswerValues": [22,7,0],
-                "partAttemptNumber": [1,1,1],
-                "partsToScore": [1,1,1],
-                "options": {
-                    "returnState": true
-                }
+                "studentAnswerValues": [22,7,0]
             }
         }', true);
 
@@ -462,15 +402,26 @@ $answerbox[1]
         $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
 
         $this->assertEquals(3618, $scoreResponse['questionSetId']);
+        $this->assertEquals('multipart', $scoreResponse['questionType']);
+        $this->assertEquals(4120, $scoreResponse['seed']);
+        $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
+        $this->assertEquals([1, 1], $scoreResponse['raw']);
+        $this->assertEquals([42, "0,2,3"], $scoreResponse['correctAnswers']);
         $this->assertEquals([], $scoreResponse['errors']);
+
+        $this->assertCount(4, $scoreResponse['feedback']);
+
         $this->assertEquals('correct', $scoreResponse['feedback']['qn1000']['correctness']);
-        $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1000']['feedback']);
+        $this->assertEquals('Good answer.', $scoreResponse['feedback']['qn1000']['feedback']);
+
         $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-0']['correctness']);
-        $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-0']['feedback']);
+        $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1001-0']['feedback']);
+
         $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-2']['correctness']);
         $this->assertEquals('You chose correctly.', $scoreResponse['feedback']['qn1001-2']['feedback']);
-        $this->assertEquals('incorrect', $scoreResponse['feedback']['qn1001-3']['correctness']);
-        $this->assertEquals('lol, no.', $scoreResponse['feedback']['qn1001-3']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-3']['correctness']);
+        $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-3']['feedback']);
     }
 
     public function testGetQuestion_withFeedback_singlePart(): void
@@ -494,13 +445,18 @@ $answerbox[1]
         $this->assertEquals('choices', $responseData['questionType']);
         $this->assertEquals(4120, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
-        $this->assertNotEmpty($responseData['feedback']);
+
+        $this->assertCount(4, $responseData['feedback']);
+
         $this->assertEquals('correct', $responseData['feedback']['qn0-0']['correctness']);
         $this->assertEquals('This is correct. Way to go.', $responseData['feedback']['qn0-0']['feedback']);
+
         $this->assertEquals('incorrect', $responseData['feedback']['qn0-1']['correctness']);
         $this->assertEquals('Sorry, Option B is incorrect. Try again.', $responseData['feedback']['qn0-1']['feedback']);
+
         $this->assertEquals('incorrect', $responseData['feedback']['qn0-2']['correctness']);
         $this->assertEquals('Sorry, Option C is not the right answer. Try again.', $responseData['feedback']['qn0-2']['feedback']);
+
         $this->assertEquals('incorrect', $responseData['feedback']['qn0-3']['correctness']);
         $this->assertEquals('Sorry, Option D was the wrong choice. Try again.', $responseData['feedback']['qn0-3']['feedback']);
     }
@@ -510,7 +466,7 @@ $answerbox[1]
         // Setup mocks.
         $this->questionSetRepository
             ->shouldReceive('getById')
-            ->andReturn($this->imasQuestionSet_dbRow_multipart);
+            ->andReturn($this->imasQuestionSet_dbRow_multipart_choices);
 
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
@@ -526,7 +482,8 @@ $answerbox[1]
         $this->assertEquals('multipart', $responseData['questionType']);
         $this->assertEquals(4120, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
-        $this->assertNotEmpty($responseData['feedback']);
+
+        $this->assertCount(11, $responseData['feedback']);
 
         $this->assertEquals('correct', $responseData['feedback']['qn1000-0']['correctness']);
         $this->assertEquals('Excellent choice.', $responseData['feedback']['qn1000-0']['feedback']);
@@ -575,6 +532,6 @@ $answerbox[1]
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
-        $this->assertEmpty($responseData['feedback']);
+        $this->assertNull($responseData['feedback']);
     }
 }

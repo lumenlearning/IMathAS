@@ -17,6 +17,7 @@ function onScoreQuestionResult(array $scoreResult,
     // In multipart, both $answer and $answers are arrays, indexed by the question part.
     $scoreResult['extra']['answer'] = $varsForScorepart['answer'] ?? null;
     $scoreResult['extra']['answers'] = $varsForScorepart['answers'] ?? null;
+    $scoreResult['extra']['anstypes'] = $varsForScorepart['anstypes'] ?? null;
     $scoreResult['extra']['feedback'] = $additionalVarsForScoring['feedback'] ?? null;
     return $scoreResult;
 }
