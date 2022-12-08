@@ -914,6 +914,7 @@ switch($_POST['action']) {
 					}
 					function updateoutcomes(&$arr) {
 						global $outcomes;
+                        if (!is_array($arr)) { return; }
 						foreach ($arr as $k=>$v) {
 							if (is_array($v)) {
 								updateoutcomes($arr[$k]['outcomes']);
@@ -923,6 +924,9 @@ switch($_POST['action']) {
 						}
 					}
 					$outcomesarr = unserialize($outcomesarr);
+                    if ($outcomesarr === false) {
+                        $outcomesarr = [];
+                    }
 					updateoutcomes($outcomesarr);
 					$newoutcomearr = serialize($outcomesarr);
 				} else {
