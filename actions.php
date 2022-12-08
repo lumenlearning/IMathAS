@@ -288,6 +288,7 @@ require_once("includes/sanitize.php");
 			require("header.php");
 			echo _("Error").".\n";
 			require("footer.php");
+            exit;
 		}
 	} else if (isset($_GET['action']) && $_GET['action']=="resetpw") {
         $init_session_start = true;
@@ -377,6 +378,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 				exit;
 			}
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" . Sanitize::randomQueryStringParam());
+            exit;
 		} else if (isset($_POST['pw1'])) {
 			if ($_POST['pw1']!=$_POST['pw2']) {
 				echo _('Passwords do not match'),'.  <a href="forms.php?action=resetpw&code='.Sanitize::encodeUrlParam($_POST['code'])
@@ -411,6 +413,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		} else if (isset($_GET['code'])) {
 			//moved to forms.php - keep redirect for to keep old links working for now.
 			header('Location: ' . $GLOBALS['basesiteurl'] . '/action=resetpw&id='.Sanitize::onlyInt($_GET['id']).'&code='.Sanitize::encodeUrlParam($code) . "&r=" . Sanitize::randomQueryStringParam());
+            exit;
 		}
 	} else if (isset($_GET['action']) && $_GET['action']=="lookupusername") {
         $init_session_start = true;
