@@ -576,17 +576,6 @@ class ScoreEngine
         $raw = array();
         $accpts = 0;
         $answeightTot = array_sum($answeights);
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        $ohmRandomAnswerKeys = [];
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
         foreach ($anstypes as $partnum => $anstype) {
             $inputReferenceNumber = ($qnidx + 1) * 1000 + $partnum;
 
@@ -613,21 +602,6 @@ class ScoreEngine
             }
             $scorePartResult = $scorePart->getResult();
             $raw[$partnum] = $scorePartResult->getRawScore();
-
-            #### Begin OHM-specific changes ############################################################
-            #### Begin OHM-specific changes ############################################################
-            #### Begin OHM-specific changes ############################################################
-            #### Begin OHM-specific changes ############################################################
-            #### Begin OHM-specific changes ############################################################
-            $extraData = $scorePartResult->getExtraData();
-            if (!empty($extraData['lumenlearning']['randomAnswerKeys'])) {
-                $ohmRandomAnswerKeys = array_merge($ohmRandomAnswerKeys, $extraData['lumenlearning']['randomAnswerKeys']);
-            }
-            #### End OHM-specific changes ############################################################
-            #### End OHM-specific changes ############################################################
-            #### End OHM-specific changes ############################################################
-            #### End OHM-specific changes ############################################################
-            #### End OHM-specific changes ############################################################
 
             $scoremethodwhole = '';
             if (isset($scoremethod)) {
@@ -660,24 +634,6 @@ class ScoreEngine
             $partLastAnswerAsNumber[$partnum] = $scorePartResult->getLastAnswerAsNumber();
             $partCorrectAnswerWrongFormat[$partnum] = $scorePartResult->getCorrectAnswerWrongFormat();
         }
-
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        if (!empty($ohmRandomAnswerKeys) && !empty($scorePartResult)) {
-            $scorePartResult->setExtraData([
-                'lumenlearning' => [
-                    'randomAnswerKeys' => $ohmRandomAnswerKeys
-                ]
-            ]);
-        }
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
 
         $returnData = [
             'rawScores' => $raw,

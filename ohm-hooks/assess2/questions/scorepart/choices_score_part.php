@@ -8,6 +8,7 @@
  * calling statement. ($randkeys may not always be available)
  */
 if (!isset($randkeys)) $randkeys = null;
+if (!isset($GLOBALS['ohmRandomAnswerKeys'])) $GLOBALS['ohmRandomAnswerKeys'] = [];
 $onGetResult = function () use (
     &$scorePartResult, // [ScorePartResult] An instance of ScorePartResult
     &$randkeys // [?array] An array of randomized correct answer keys.
@@ -24,11 +25,10 @@ $onGetResult = function () use (
     $partNumber = $isMultiPart ? $scoreQuestionParams->getQuestionPartNumber() : 0;
 
     /** @var \IMathAS\assess2\questions\models\ScorePartResult $scorePartResult */
+    $GLOBALS['ohmRandomAnswerKeys'] = array_merge($GLOBALS['ohmRandomAnswerKeys'], [$partNumber => $randkeys]);
     $scorePartResult->setExtraData([
         'lumenlearning' => [
-            'randomAnswerKeys' => [
-                $partNumber => $randkeys
-            ]
-        ],
+            'randomAnswerKeys' => $GLOBALS['ohmRandomAnswerKeys']
+        ]
     ]);
 };
