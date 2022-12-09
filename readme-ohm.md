@@ -4,7 +4,7 @@ A [MyOpenMath](https://github.com/lumenlearning/myopenmath) (MOM) fork.
 
 **NOTE:** Some development and changes flow in both directions between OHM and MyOpenMath.
 
-## Code of Conduct
+# Code of Conduct
 
 Lumen Learning's
 [Code of Conduct](https://github.com/lumenlearning/code_of_conduct)
@@ -24,12 +24,10 @@ To **exclude** sensitive user information, use the `fs-exclude` CSS class.
 
 - Reference: [How do I protect my users' privacy in FullStory?](https://help.fullstory.com/hc/en-us/articles/360020623574)
 
-## Getting Started
-This application is developed in PHP,
-with some features being developed using the
-[Slim](https://www.slimframework.com/)
-Microframework.
-These instructions will get you up and running on your local machine for development and testing purposes.
+# Getting Started
+
+## Get OHM running
+
 ### SSL CERTS
 This step is only needed the first time you are setting up locally.
 1. Install `mkcert`. You can use `brew install mkcert` (homebrew) or `port install mkcert` (macports)
@@ -39,7 +37,6 @@ This step is only needed the first time you are setting up locally.
    - Name the .key.pem file `docker/ssl/lumenlearning.key`
     - Name the .pem file  `docker/ssl/lumenlearning.crt`
     
-
 ### Running OHM locally
 0. Ensure you have installed:
   - Homebrew: https://brew.sh/
@@ -48,69 +45,31 @@ This step is only needed the first time you are setting up locally.
     1. `brew install php@7.4`
     2. `brew link php@7.4`
     
-Note: If you're having issues with Macbook M1 installation, see this [confluence page](https://lumenlearning.atlassian.net/l/cp/0DPenfEX).
+Note: If you have issues with Macbook M1 installation, see this [confluence page](https://lumenlearning.atlassian.net/l/cp/0DPenfEX).
 
-1. Copy in the config subdirectory local.php.example to local.php and modify the `$dbserver` to 127.0.0.1
-2. Run `composer install` at root directory as well as in `ohm/lumenapi` directory
-3. Execute `npm run serve` from the `assess2/vue-src` (You might need to `nvm use stable` if this step fails)
-4. Start Docker
-5. Go into project root directory and run `docker-compose up`
-6. In a browser, go to https://localhost/setupdb.php and wait for DB migrations to complete. If fails, https://localhost/upgrade.php
-7. Hopefully app is up and running at localhost!
+1. Copy local.php.example to local.php:
+   ```
+   cd ohm/
+   cp config/local.php.example config/local.php
+   ```
+1. Modify the `$dbserver` in `local.php` to 127.0.0.1
+1. Run `composer install` at root directory as well as in `ohm/lumenapi` directory
+1. Start Docker Desktop
+1. Go into project root directory and run `docker-compose up`
+1. In a browser, go to https://localhost/setupdb.php and wait for DB migrations to complete. If fails, https://localhost/upgrade.php
+1. Hopefully app is up and running at localhost!
 
+### Get Vue Running
+For OHM1 development only.
 
-### Order of development and operations
+1. Execute `npm run serve` from the `assess2/vue-src` 
+   (You might need to `nvm use stable` if this step fails)
+    
+2. See [Vue's specific README.md](assess2/vue-src/README.md) file
 
-1. [OHM branching](docs/ohm_branching.md)
-1. [Merging MOM changes into OHM](docs/ohm_mom_merges.md)
-1. [Prepare an RC branch](docs/ohm_prepare_rc_branch.md)
-1. [Setup your ability to deploy to AWS](docs/ohm_deploy_requirements.md)
-1. [AWS deployment and hot-fixes](docs/ohm_deployment.md)
+# Reference
 
-### OHM branching
-
-OHM has a fairly wild branching structure and workflow.
-
-Before deploying anything to PROD or merging things into `dev`,
-please read and understand how branching is done in OHM!
-(and if you have suggestions for improvements,
-please share!)
-
-See details and why [here](docs/ohm_branching.md).
-
-### Merging MOM changes into OHM
-
-This is typically done when building an RC branch with recent MOM changes.
-
-See details [here](docs/ohm_mom_merges.md).
-
-### Prepare an RC branch
-
-Release candidate branches contain: (merged in this order)
-
-1. OHM-specific changes
-1. MOM changes
-1. MOM bug fixes
-
-RC branches live in staging for some time during testing, and are then merged
-into `dev`, merged into `master`, are release tagged, then deployed to PROD.
-
-See details [here](docs/ohm_prepare_rc_branch.md).
-
-### Deployment
-
-Assuming you have everything configured correctly locally for AWS,
-deployment is as simple as running `eb deploy` from the project root directory.
-
-For details on setting up your local environment to deploy with AWS,
-follow [these instructions](docs/ohm_deploy_requirements.md).
-
-For details on general deployment with AWS,
-follow [these instructions](docs/ohm_deployment.md).
-
-## Reference
-
-### User Permissions
+## User Permissions
 
 In the `imas_users` table, each user record has one of these values in the
 `rights` column to define their role and access level within OHM.
@@ -128,32 +87,12 @@ In the `imas_users` table, each user record has one of these values in the
 | 100        | Admin            |
 | 11, 76, 77 | LTI credentials  |
 
-# Additional documentation
-
-See [ohm/README.md](ohm/README.md). That should be merged with this README at
-some point.
-
-# Installation and setup
-
-1. Clone this repo.
-1. Run `composer install`.
-   - `$ brew install composer` or [getcomposer.org](https://getcomposer.org/)
-1. Create a MySQL database for OHM.
-   1. Note the credentials and database name.
-1. Copy [ohm/api/src/configs/settings-prod.php](ohm/api/src/configs/settings-prod.php)
-   to `settings.php`.
-   1. Update `settings.php` appropriately -- specifically, DB settings and `displayErrorDetails`.
-1. Go to (document root)[/install.php](/install.php)
-
-After filling and submitted a few forms, a `config.php` file will
-be created for you.
-
 # Running migrations
 
 After initial setup, this needs to be done manually any time there are
 new migrations.
 
-Go to (document_root)[/upgrade.php](/upgrade.php) in your web browser.
+Go to https://localhost/upgrade.php in your web browser.
 
 # Testing
 
@@ -162,8 +101,7 @@ Requirements:
 - Composer with all dependencies installed.
     - `$ brew install composer` or [getcomposer.org](https://getcomposer.org/)
     - `$ composer install`
-- A local server already running with this project root available at
-[http://localhost:8080/](http://localhost:8080/)
+- A local server already running with this project root available at https://localhost
 	- `composer start` will start a local server for you.
 - PHP must have `xdebug` enabled.
 
@@ -183,9 +121,9 @@ MOM currently uses PHPUnit for testing. To run those tests:
 
 Additional requirements:
 
-- PHP 7.2
+- PHP 7.4
 
-PHP 7.2 is required for tests and test coverage reports.
+PHP 7.4 is required for tests and test coverage reports.
 
     $ composer install
     $ composer migrate-ohm
