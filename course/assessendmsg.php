@@ -72,7 +72,7 @@ require_once("../includes/sanitize.php");
 		$endmsg = $stm->fetchColumn(0);
 	} else {
 		$endmsg = '';
-		if (count($_POST['checked'])==0) {
+		if (empty($_POST['checked'])) {
 			echo "No assessments selected";
 			require("../footer.php");
 			exit;

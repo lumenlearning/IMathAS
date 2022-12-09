@@ -204,7 +204,6 @@ require_once("includes/sanitize.php");
 			echo _("Registration recorded.  You should shortly receive an email with confirmation instructions.");
 			echo "<a href=\"$imasroot/index.php\">",_("Back to main login page"),"</a>\n";
 			require("footer.php");
-			exit;
 
 		} else {
 			$pagetitle = _('Account Created');
@@ -283,13 +282,12 @@ require_once("includes/sanitize.php");
 			require("header.php");
 			echo sprintf(_("Confirmed.  Please %s Log In %s"),"<a href=\"index.php\">","</a>\n");
 			require("footer.php");
-			exit;
 		} else {
 			require("header.php");
 			echo _("Error").".\n";
 			require("footer.php");
-            exit;
 		}
+        exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="resetpw") {
         $init_session_start = true;
 		require_once("init_without_validate.php");
@@ -378,7 +376,6 @@ If you still have trouble or the wrong email address is on file, contact your in
 				exit;
 			}
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/index.php?r=" . Sanitize::randomQueryStringParam());
-            exit;
 		} else if (isset($_POST['pw1'])) {
 			if ($_POST['pw1']!=$_POST['pw2']) {
 				echo _('Passwords do not match'),'.  <a href="forms.php?action=resetpw&code='.Sanitize::encodeUrlParam($_POST['code'])
@@ -409,12 +406,11 @@ If you still have trouble or the wrong email address is on file, contact your in
 			} else {
 				echo _('Invalid user');
 			}
-			exit;
 		} else if (isset($_GET['code'])) {
 			//moved to forms.php - keep redirect for to keep old links working for now.
 			header('Location: ' . $GLOBALS['basesiteurl'] . '/action=resetpw&id='.Sanitize::onlyInt($_GET['id']).'&code='.Sanitize::encodeUrlParam($code) . "&r=" . Sanitize::randomQueryStringParam());
-            exit;
 		}
+        exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="lookupusername") {
         $init_session_start = true;
 		require_once("init_without_validate.php");
@@ -462,7 +458,6 @@ If you still have trouble or the wrong email address is on file, contact your in
 			$ids = implode(',', $ids); // database values, so safe
 			$stm = $DBH->prepare("UPDATE imas_users SET lastemail=? WHERE id IN ($ids)");
 			$stm->execute(array(time()));
-			exit;
 		} else {
 
 			$query = "SELECT SID,lastaccess FROM imas_users WHERE email=:email AND SID LIKE 'lti-%'";
@@ -473,8 +468,8 @@ If you still have trouble or the wrong email address is on file, contact your in
 			} else {
 				echo _("No usernames match this email address, or the email address provided is invalid.")," <a href=\"index.php\">",_("Return to login page"),"</a>";
 			}
-			exit;
 		}
+        exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="checkusername") {
 		require_once("init_without_validate.php");
 		if (isset($_GET['originalSID']) && $_GET['originalSID']==$_GET['SID']) {
