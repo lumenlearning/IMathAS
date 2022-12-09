@@ -65,6 +65,12 @@ class QuestionController extends ApiBaseController
         // Allows the API to act as an admin user. Initially, Skeletor will be the only client however, when
         // end users begin to use the API, some form of Skeletor to MOM user map should be used here instead.
         $GLOBALS['myrights'] = 100;
+
+        // Sets preferences manually, similarly to how it is done with embedded questions,
+        // so that graphs can be displayed through Catra as if in OHM.
+        $_SESSION = array();
+        $_SESSION['graphdisp'] = 1;
+        $_SESSION['mathdisp'] = 3;
     }
 
     /**
