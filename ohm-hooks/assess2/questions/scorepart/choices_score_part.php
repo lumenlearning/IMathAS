@@ -1,5 +1,10 @@
 <?php
 
+// We need to keep this updated outside the scope of ScorePartResult, so we
+// can provide the random answer keymap for all parts of a multi-part question.
+// This information is needed by the Question API.
+if (!isset($GLOBALS['ohmRandomAnswerKeys'])) $GLOBALS['ohmRandomAnswerKeys'] = [];
+
 /**
  * Include the correct answers in scoring results after they've been randomized.
  *
@@ -7,11 +12,10 @@
  * created in the parent scope, without specifying those variable names in the
  * calling statement. ($randkeys may not always be available)
  */
-if (!isset($randkeys)) $randkeys = null;
-if (!isset($GLOBALS['ohmRandomAnswerKeys'])) $GLOBALS['ohmRandomAnswerKeys'] = [];
 $onGetResult = function () use (
     &$scorePartResult, // [ScorePartResult] An instance of ScorePartResult
     &$randkeys // [?array] An array of randomized correct answer keys.
+               //          This should be set by ChoicesScorePart.
 ) {
     // This variable contains the mapping of original question answer keys as defined
     // in question code to the shuffled answer keys.
