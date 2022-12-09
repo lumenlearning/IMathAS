@@ -127,6 +127,7 @@ function _shuffleCorrectAnswers(array $unseededCorrectAnswers, array $shuffledAn
 function _shuffleFeedback(string $studentAnswers, array $shuffledAnswerKeymap, array $allFeedback): array
 {
     $studentProvidedAnswersUnseeded = explode('|', $studentAnswers);
+
     $shuffledFeedback = [];
     if (!empty($allFeedback)) {
         foreach ($allFeedback as $feedbackAnswerKey => $feedback) {
@@ -140,20 +141,22 @@ function _shuffleFeedback(string $studentAnswers, array $shuffledAnswerKeymap, a
             $newKey = $unseededKeyName . '-' . $shuffledKeyNumber;
             $shuffledFeedback[$newKey] = $feedback;
         }
-
-        return $shuffledFeedback;
     }
+
+    return $shuffledFeedback;
 }
 
 /**
  * Get only the feedback for a specific multi-part question part number.
  *
- * @param array $allFeedback An array containing all feedback for all question parts.
+ * @param array|null $allFeedback An array containing all feedback for all question parts.
  * @param int $partNumber The question part number to get feedback for.
  * @return array An array of feedback for only the specified part number.
  */
-function _getFeedbackForPart(array $allFeedback, int $partNumber): array
+function _getFeedbackForPart(?array $allFeedback, int $partNumber): array
 {
+    if (empty($allFeedback)) return [];
+
     $feedback = [];
     foreach ($allFeedback as $key => $value) {
         // All multi-part question parts are indexed like "qn1000", "qn1001", etc.
@@ -168,12 +171,14 @@ function _getFeedbackForPart(array $allFeedback, int $partNumber): array
 /**
  * Delete feedbacks by key.
  *
- * @param array $feedback An array of feedback.
+ * @param array|null $feedback An array of feedback.
  * @param array $keysToDelete The keys to delete.
- * @return array
+ * @return array The array of feedback with specified keys deleted.
  */
-function _deleteFeedbackByKeys(array $feedback, array $keysToDelete): array
+function _deleteFeedbackByKeys(?array $feedback, array $keysToDelete): array
 {
+    if (empty($feedback)) return [];
+
     foreach ($keysToDelete as $key) {
         if (!empty($feedback[$key])) {
             unset($feedback[$key]);
