@@ -1,6 +1,6 @@
 <?php
 
-$ohmApiSettings = require_once(__DIR__ . '/ohm/api/src/configs/settings.php');
+$ohmApiSettings = require_once(__DIR__ . '/ohm/api/src/configs/settings-prod.php');
 $ohmApiSettings = $ohmApiSettings['settings'];
 
 print_r($ohmApiSettings['db']);
@@ -28,7 +28,7 @@ return [
 			'name' => $ohmApiSettings['db']['database'],
 			'user' => $ohmApiSettings['db']['username'],
 			'pass' => $ohmApiSettings['db']['password'],
-			'port' => 3306,
+			'port' => 3305,
 			'charset' => $ohmApiSettings['db']['charset'],
 		],
 		'testing' => [

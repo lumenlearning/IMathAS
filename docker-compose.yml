@@ -39,6 +39,7 @@ services:
       CONFIG_ENV: "development"
 
   db:
+    platform: linux/x86_64
     image: mysql:5.7
     expose:
       - 3306
@@ -60,3 +61,4 @@ services:
       MYSQL_USER: "ohm"
       MYSQL_PASSWORD: "ohm"
       MYSQL_DATABASE: "ohm"
+      DB_CHARSET: "latin1"

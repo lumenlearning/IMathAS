@@ -45,13 +45,16 @@ This step is only needed the first time you are setting up locally.
   - Homebrew: https://brew.sh/
   - Docker: https://www.docker.com/get-started)
   - PHP: (run these commands in a terminal)
-    1. `brew install php@7.3`
-    2. `brew link php@7.3`
+    1. `brew install php@7.4`
+    2. `brew link php@7.4`
+    
+Note: If you're having issues with Macbook M1 installation, see this [confluence page](https://lumenlearning.atlassian.net/l/cp/0DPenfEX).
+
 1. Copy in the config subdirectory local.php.example to local.php and modify the `$dbserver` to 127.0.0.1
 2. Run `composer install` at root directory as well as in `ohm/lumenapi` directory
 3. Execute `npm run serve` from the `assess2/vue-src` (You might need to `nvm use stable` if this step fails)
 4. Start Docker
-5. Go into project root directory and run docker-compose up
+5. Go into project root directory and run `docker-compose up`
 6. In a browser, go to https://localhost/setupdb.php and wait for DB migrations to complete. If fails, https://localhost/upgrade.php
 7. Hopefully app is up and running at localhost!
 
