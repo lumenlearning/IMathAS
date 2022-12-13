@@ -1,10 +1,5 @@
 <?php
 
-// We need to keep this updated outside the scope of ScorePartResult, so we
-// can provide the random answer keymap for all parts of a multi-part question.
-// This information is needed by the Question API.
-if (!isset($GLOBALS['ohmRandomAnswerKeys'])) $GLOBALS['ohmRandomAnswerKeys'] = [];
-
 /**
  * Include the correct answers in scoring results after they've been randomized.
  *
@@ -13,7 +8,6 @@ if (!isset($GLOBALS['ohmRandomAnswerKeys'])) $GLOBALS['ohmRandomAnswerKeys'] = [
  * calling statement. ($randkeys may not always be available)
  */
 $onGetResult = function () use (
-    &$scorePartResult, // [ScorePartResult] An instance of ScorePartResult
     &$randkeys // [?array] An array of randomized correct answer keys.
                //          This should be set by ChoicesScorePart.
 ) {
@@ -28,11 +22,9 @@ $onGetResult = function () use (
     $isMultiPart = $scoreQuestionParams->getIsMultiPartQuestion(); // always returns bool
     $partNumber = $isMultiPart ? $scoreQuestionParams->getQuestionPartNumber() : 0;
 
-    /** @var \IMathAS\assess2\questions\models\ScorePartResult $scorePartResult */
-    $GLOBALS['ohmRandomAnswerKeys'] = array_merge($GLOBALS['ohmRandomAnswerKeys'], [$partNumber => $randkeys]);
-    $scorePartResult->setExtraData([
-        'lumenlearning' => [
-            'randomAnswerKeys' => $GLOBALS['ohmRandomAnswerKeys']
-        ]
-    ]);
+    // We need to keep this updated outside the scope of ScorePartResult, so we
+    // can provide the random answer keymap for all parts of a multi-part question.
+    // This information is needed by the Question API.
+    if (!isset($GLOBALS['ohmRandomAnswerKeymaps'])) $GLOBALS['ohmRandomAnswerKeymaps'] = [];
+    $GLOBALS['ohmRandomAnswerKeymaps'][$partNumber] = $randkeys;
 };

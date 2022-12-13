@@ -127,7 +127,7 @@ function ohm_getfeedbacktxt($studentAnswer,
 
     $questionIndex = getFeedbackIndex($partNumber);
 
-    if (empty($studentAnswer)) {
+    if (!is_null($studentAnswer) && empty($studentAnswer)) {
         return [];
     } else if ($studentAnswer === 'NA') {
         return [
@@ -687,7 +687,7 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
     $questionIndex = getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
 
-    if (empty($studentAnswer)) {
+    if (!is_null($studentAnswer) && empty($studentAnswer)) {
         return [];
     } else if ($studentAnswer === 'NA') {
         return [

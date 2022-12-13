@@ -24,18 +24,22 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
     // Some or all feedback will be shuffled later.
     $returnData['feedback'] = $scoreResult['extra']['feedback'];
 
+    // This was the least intrusive way (to MOM) to pass randqkeys/randkeys
+    // from IMathAS\assess2\questions\scorepart\ScorePart to this hook. :(
+    $randomAnswerKeymaps = $GLOBALS['ohmRandomAnswerKeymaps'] ?? [];
+
     /*
      * For questions whose answers have been shuffled to minimize cheating,
      * we need to return the correct answers and feedback *after* they've
      * been rearranged using the question seed.
      */
     if (!$isMultiPart) {
-        // The existence of "randomAnswerKeys" indicates we need to map the original,
-        // unseeded correct answer keys to the shuffled, seeded answer keys.
-        if (_hasRandomAnswerKeys($scoreResult, 0)) {
+        // The existence of a "randomAnswerKeymap" indicates we need to map the
+        // original, unseeded correct answer keys to the shuffled, seeded answer keys.
+        if (!empty($randomAnswerKeymaps[0])) {
             $shuffledCorrectAnswers = _shuffleCorrectAnswers(
                 _correctAnswersAsArray($correctAnswers),
-                $scoreResult['extra']['lumenlearning']['randomAnswerKeys'][0]
+                $randomAnswerKeymaps[0]
             );
 
             // For single part questions, we'll use a single element array for answers.
@@ -45,7 +49,7 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
             // Shuffle feedback.
             $returnData['feedback'] = _shuffleFeedback(
                 $scoreResult['lastAnswerAsGiven'][0],
-                $scoreResult['extra']['lumenlearning']['randomAnswerKeys'][0],
+                $randomAnswerKeymaps[0],
                 $returnData['feedback']
             );
         } else {
@@ -53,11 +57,12 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
         }
     } else {
         $questionPartTypes = $scoreResult['extra']['anstypes']; // This is a simple, flat array.
+        $returnData['partTypes'] = $questionPartTypes; // Needed by Skeletor.
         foreach ($questionPartTypes as $partNumber => $partType) {
             // Not all multans/choices questions are shuffled, so check for
             // shuffled answers instead of checking the question type.
-            if (_hasRandomAnswerKeys($scoreResult, $partNumber)) {
-                $randomAnswerKeysForPart = $scoreResult['extra']['lumenlearning']['randomAnswerKeys'][$partNumber];
+            if (!empty($randomAnswerKeymaps[$partNumber])) {
+                $randomAnswerKeysForPart = $randomAnswerKeymaps[$partNumber];
 
                 $shuffledCorrectAnswers = _shuffleCorrectAnswers(
                     _correctAnswersAsArray($correctAnswers[$partNumber]),
@@ -191,22 +196,6 @@ function _deleteFeedbackByKeys(?array $feedback, array $keysToDelete): array
 /*
  * "Private" functions follow; not for use outside of this PHP file.
  */
-
-/**
- * Determine if score results contain shuffled correct answers.
- *
- * This is the array of answers after the question seed has been used
- * to shuffle question answers to minimize cheating.
- *
- * @param array $scoreResult The scoreResult array as provided to onScoreQuestionReturn().
- * @param int $partNumber 0 for single part. The question part number for multi-part questions.
- * @return bool True if shuffled correct answers are present. False if not.
- */
-function _hasRandomAnswerKeys(array $scoreResult, int $partNumber)
-{
-    // This exists and is not empty.
-    return !empty($scoreResult['extra']['lumenlearning']['randomAnswerKeys'][$partNumber]);
-}
 
 /**
  * Cast the correct answers to an array of answers.
