@@ -97,6 +97,10 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
     return $returnData;
 }
 
+/*
+ * "Private" functions follow; not for use outside of this PHP file.
+ */
+
 /**
  * Shuffle the correct answers for a question part using the randomAnswerKeys
  * found in $scorePartResult data.
@@ -192,10 +196,6 @@ function _deleteFeedbackByKeys(?array $feedback, array $keysToDelete): array
 
     return $feedback;
 }
-
-/*
- * "Private" functions follow; not for use outside of this PHP file.
- */
 
 /**
  * Cast the correct answers to an array of answers.
