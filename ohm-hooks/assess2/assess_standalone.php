@@ -3,7 +3,7 @@
 /**
  * Include the correct answers and feedback for the student's answers in scoring results.
  *
- * @param array $returnData The scoring data being returned.
+ * @param array $returnData The scoring data being returned by AssessStandalone.
  * @param array $scoreResult Score results from ScoreEngine->scoreResult().
  * @return array The scoring data with correct answers included.
  */
@@ -16,10 +16,7 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
     $isMultiPart = !empty($scoreResult['extra']['anstypes']) &&
         is_array($scoreResult['extra']['anstypes']);
 
-    // $answer and $answers are variables defined by question writers.
-    // They are free to use either variable, so we must check for both.
-    $correctAnswers = !empty($scoreResult['extra']['answer']) ?
-        $scoreResult['extra']['answer'] : $scoreResult['extra']['answers'];
+    $correctAnswers = _getCorrectAnswersFromScoreResult($scoreResult, $isMultiPart);
 
     // Some or all feedback will be shuffled later.
     $returnData['feedback'] = $scoreResult['extra']['feedback'];
@@ -38,7 +35,7 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
         // original, unseeded correct answer keys to the shuffled, seeded answer keys.
         if (!empty($randomAnswerKeymaps[0])) {
             $shuffledCorrectAnswers = _shuffleCorrectAnswers(
-                _correctAnswersAsArray($correctAnswers),
+                _correctAnswersAsArray($correctAnswers[0]),
                 $randomAnswerKeymaps[0]
             );
 
@@ -53,7 +50,9 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
                 $returnData['feedback']
             );
         } else {
-            $returnData['correctAnswers'] = [$correctAnswers];
+            // This must be an array of correct answers. Single part questions
+            // should contain a single element array with the correct answer.
+            $returnData['correctAnswers'] = $correctAnswers;
         }
     } else {
         $questionPartTypes = $scoreResult['extra']['anstypes']; // This is a simple, flat array.
@@ -100,6 +99,40 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
 /*
  * "Private" functions follow; not for use outside of this PHP file.
  */
+
+/**
+ * Get the correct answers for all question parts from the score result
+ * returned from ScoreEngine->scoreResult().
+ *
+ * The answers returned will be the original, unseeded answers.
+ *
+ * @param array $scoreResult Score results from ScoreEngine->scoreResult().
+ * @param bool $isMultiPart True if this is a multi-part question. False if not.
+ * @return array Correct answers for all question parts, indexed by part number.
+ *               Single part question answers will be indexed at 0.
+ */
+function _getCorrectAnswersFromScoreResult(array $scoreResult, bool $isMultiPart): array
+{
+    if (!$isMultiPart) {
+        $correctAnswer = !empty($scoreResult['extra']['answer']) ?
+            $scoreResult['extra']['answer'] : $scoreResult['extra']['answers'];
+        return [$correctAnswer];
+    }
+
+    // $answer and $answers are variables defined by question writers.
+    // They can BOTH exist in the same multi-part question code, with
+    // each containing correct answers.
+    $correctAnswers = [];
+    foreach (['answer', 'answers'] as $answerVar) {
+        if (!empty($scoreResult['extra'][$answerVar])) {
+            foreach ($scoreResult['extra'][$answerVar] as $partNumber => $answer) {
+                $correctAnswers[$partNumber] = $answer;
+            }
+        }
+    }
+
+    return $correctAnswers;
+}
 
 /**
  * Shuffle the correct answers for a question part using the randomAnswerKeys

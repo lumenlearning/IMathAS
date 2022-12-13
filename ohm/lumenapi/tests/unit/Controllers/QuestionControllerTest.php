@@ -217,8 +217,9 @@ $choices = [
   "Correct"
 ]
 
+// Both $answer and $answers are declared here, for testing.
 $answer[0] = 42
-$answer[1] = "0,2,4"
+$answers[1] = "0,2,4"
 
 $multansFeedbacks = array(
   "You chose well.",
@@ -230,7 +231,7 @@ $multansFeedbacks = array(
 
 $feedback = mergearrays(
   ohm_getfeedbackbasic($stuanswers[$thisq], "Good answer.", "Wrong answer.", $answer[0], 0),
-  ohm_getfeedbacktxtmultans($stuanswers[$thisq], $multansFeedbacks, $answer[1], 1)
+  ohm_getfeedbacktxtmultans($stuanswers[$thisq], $multansFeedbacks, $answers[1], 1)
 )
 ',
         'qcontrol' => '',
