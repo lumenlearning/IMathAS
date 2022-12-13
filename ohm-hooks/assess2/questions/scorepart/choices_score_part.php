@@ -7,6 +7,7 @@
  * created in the parent scope, without specifying those variable names in the
  * calling statement. ($randkeys may not always be available)
  */
+if (!isset($randkeys)) $randkeys = null;
 $onGetResult = function () use (
     &$randkeys // [?array] An array of randomized correct answer keys.
                //          This should be set by ChoicesScorePart.
@@ -25,6 +26,5 @@ $onGetResult = function () use (
     // We need to keep this updated outside the scope of ScorePartResult, so we
     // can provide the random answer keymap for all parts of a multi-part question.
     // This information is needed by the Question API.
-    if (!isset($GLOBALS['ohmRandomAnswerKeymaps'])) $GLOBALS['ohmRandomAnswerKeymaps'] = [];
     $GLOBALS['ohmRandomAnswerKeymaps'][$partNumber] = $randkeys;
 };

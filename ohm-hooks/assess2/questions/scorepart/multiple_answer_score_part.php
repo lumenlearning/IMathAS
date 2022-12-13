@@ -7,6 +7,7 @@
  * created in the parent scope, without specifying those variable names in the
  * calling statement. ($randqkeys may not always be available)
  */
+if (!isset($randqkeys)) $randqkeys = null;
 $onGetResult = function () use (
     &$randqkeys // [?array] An array of randomized correct answer keys.
                 //          This should be set by MultipleAnswerScorePart.
