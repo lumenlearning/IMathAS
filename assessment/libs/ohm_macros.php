@@ -30,7 +30,7 @@ array_push($GLOBALS['allowedmacros'],
  * - Index strings will match question input IDs in question display HTML.
  * - Single part questions will always be indexed as "qn0".
  *
- * @param int|null $partNumber The question part number.
+ * @param integer|null $partNumber The question part number.
  * @return string The question index for feedback.
  */
 function getFeedbackIndex(?int $partNumber): string
@@ -49,14 +49,25 @@ function getFeedbackIndex(?int $partNumber): string
  * Gives feedback based on a simple comparison between the correct
  * answer and the student's answer.
  *
+ * Differences from getfeedbackbasic in IMathAS' macros.php:
+ * - The function signature matches the pattern of all other ohm_* macros.
+ * - The answer is checked directly, instead of looking at $GLOBALs.
+ * - Unlike getfeedbackbasic, which depends on a $GLOBAL to determine
+ *   correctness, this macro is unable to determine correctness for
+ *   shuffled answers. Correct answers are only made available to this
+ *   macro before they've been shuffled.
+ *
+ * The most important note:
+ * - Shuffling MUST be disabled to use this macro.
+ *
  * @param string|array|null $stuanswers The student answer, obtained from $stuanswers[$thisq] for single
  *                                      part questions, or using the getstuans macro for multipart.
  * @param string $correctFeedback The feedback for correct answers.
  * @param string $incorrectFeedback The feedback for incorrect answers.
- * @param string|integer|null $correctAnswer The correct answer.
- * @param int|null $partNumber The part number for multipart questions.
+ * @param string|integer|null $correctAnswer The correct answer from question code.
+ * @param integer|null $partNumber The part number for multipart questions.
  *                             Null for single part questions.
- * @return array
+ * @return array An array of feedback.
  */
 function ohm_getfeedbackbasic($stuanswers,
                               string $correctFeedback,
@@ -71,6 +82,18 @@ function ohm_getfeedbackbasic($stuanswers,
 
     $questionIndex = getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
+
+    // For "multans" type questions, the student answer will be an array of answer keys.
+    if (is_array($studentAnswer)) {
+        sort($studentAnswer);
+        $studentAnswer = implode(',', $studentAnswer);
+        // The correct answer is written by humans.
+        // Remove spaces and ensure the answer keys are sorted.
+        $correctAnswer = preg_replace('/\s*/', '', $correctAnswer);
+        $correctAnswer = explode(',', $correctAnswer);
+        sort($correctAnswer);
+        $correctAnswer = implode(',', $correctAnswer);
+    }
 
     if (empty($studentAnswer)) {
         return [];

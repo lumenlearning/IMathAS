@@ -168,7 +168,23 @@ function _shuffleCorrectAnswers(array $unseededCorrectAnswers, array $shuffledAn
  */
 function _shuffleFeedback(string $studentAnswers, array $shuffledAnswerKeymap, array $allFeedback): array
 {
+    if (empty($allFeedback)) return [];
+
     $studentProvidedAnswersUnseeded = explode('|', $studentAnswers);
+
+    /*
+     * Some feedback macros do not return feedback for individual answers, even if
+     * the answers have been shuffled with a seed.
+     *
+     * Instead, they return a single feedback string for the entire question.
+     *
+     * An example would be using ohm_getfeedbackbasic() in a "multans" type question.
+     * In this case, even if answers were shuffled, all we can do is return feedback as-is.
+     */
+    $feedbackKeys = array_keys($allFeedback);
+    if (!preg_match('/\-/', $feedbackKeys[0])) {
+        return $allFeedback;
+    }
 
     $shuffledFeedback = [];
     if (!empty($allFeedback)) {
