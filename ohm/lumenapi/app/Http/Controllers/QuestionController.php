@@ -533,7 +533,7 @@ class QuestionController extends ApiBaseController
         // We need to check multipart questions for "multans" parts and apply the
         // same re-indexing of answers.
         if ("multipart" == $this->questionType['questionType']) {
-            $_POST = $this->reIndexMultipartMultansAnswers($_POST,
+            $_POST = $this->reIndexMultipartMultansAnswers($scoreDto->getPostParams(),
                 $this->questionType['questionControl'], $scoreDto->getQuestionSetId());
         }
 
