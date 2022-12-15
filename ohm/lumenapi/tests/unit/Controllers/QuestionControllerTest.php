@@ -263,6 +263,70 @@ $answerbox[1]
         'varscore' => '0'
     ];
 
+    private array $imasQuestionSet_dbRow_multans_basicfeedback = [
+        'id' => '3623',
+        'uniqueid' => '1670955967303564',
+        'adddate' => '1670955967',
+        'lastmoddate' => '1671133493',
+        'ownerid' => '1',
+        'author' => '<h1>AdminLastName</h1>,<h1>AdminFirstName</h1>',
+        'userights' => '0',
+        'license' => '1',
+        'description' => '1.3 L1 - QID 646 in staging',
+        'qtype' => 'multans',
+        'control' => 'loadlibrary("ohm_macros")
+
+$a = "0 - How tall is the tallest mountain in the United States?"
+$b = "1 - Do standing heart rates tend to be higher than sitting heartrates?"
+$c = "2 - What is the sum of all the whole numbers between 0 and 10?"
+$d = "3 - What is your favorite subject in school?"
+$e = "4 - What proportion of college students live on campus?"
+$f = "5 - How many members does your household have (including pets)?"
+
+$questions = array($a,$b,$c,$d,$e,$f)
+$answers = "1,4"
+
+$hints[1] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
+
+$feedback = ohm_getfeedbackbasic($thisq, "Excellent! You are able to distinguish the statstical investigative questions from the rest.", "A statistical investigative question would require data collection and analysis. Does the question account for variability?  Questions with a single mathematical answer are not considered statistical investigative questions.", $answers)
+
+// As of AST-275, using ohm_getfeedbackbasic or feedbacktxt requires
+// shuffling to be disabled.
+$noshuffle = "all"
+
+$hinttext[0] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
+
+$hinttext_a=forminlinebutton("Hint",$hinttext[0])
+',
+        'qcontrol' => '',
+        'qtext' => 'Which of the following are statistical investigative questions? <em>There may be more than one correct answer.</em>
+<p>$hinttext_a
+  $answerbox
+  $feedback
+  $hintloc
+',
+        'answer' => '',
+        'solution' => '',
+        'extref' => '',
+        'hasimg' => '0',
+        'deleted' => '0',
+        'avgtime' => '0',
+        'ancestors' => '',
+        'ancestorauthors' => '',
+        'otherattribution' => '',
+        'importuid' => '',
+        'replaceby' => '0',
+        'broken' => '0',
+        'solutionopts' => '6',
+        'sourceinstall' => '',
+        'meantimen' => '0',
+        'meantime' => '0',
+        'vartime' => '0',
+        'meanscoren' => '0',
+        'meanscore' => '0',
+        'varscore' => '0'
+    ];
+
     public function setUp(): void
     {
         if (!$this->app) {
@@ -423,6 +487,50 @@ $answerbox[1]
 
         $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-3']['correctness']);
         $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-3']['feedback']);
+    }
+
+    public function testGetScore_Multans_with_basic_feedback(): void
+    {
+        $inputState = json_decode('{
+            "request": {
+                "post": [
+                    {
+                        "name": "qn0",
+                        "value": [1,4]
+                    }
+                ],
+                "questionSetId": 3623,
+                "seed": 4136,
+                "studentAnswers": ["1", "4"],
+                "studentAnswerValues": [1, 4]
+            }
+        }', true);
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_multans_basicfeedback);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3623, $scoreResponse['questionSetId']);
+        $this->assertEquals('multans', $scoreResponse['questionType']);
+        $this->assertEquals(4136, $scoreResponse['seed']);
+        $this->assertEquals([1.0], $scoreResponse['scores']);
+        $this->assertEquals([1], $scoreResponse['raw']);
+        $this->assertEquals(["1,4"], $scoreResponse['correctAnswers']);
+        $this->assertEquals([], $scoreResponse['errors']);
+
+        $this->assertCount(1, $scoreResponse['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn0']['correctness']);
+        $this->assertEquals('Excellent! You are able to distinguish the statstical investigative questions from the rest.',
+            $scoreResponse['feedback']['qn0']['feedback']);
     }
 
     public function testGetQuestion_withFeedback_singlePart(): void
