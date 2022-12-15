@@ -74,6 +74,11 @@ $CFG['GEN']['footerscriptinclude'] = "ohm/js/lumenga.js";
 
 $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
+// Override question answer shuffling.
+if (getenv('NOSHUFFLE_ANSWERS')) {
+    $CFG['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
+}
+
 //can set almost any assessment setting this way
 $CFG['AMS']['defpoints'] = 1;
 $CFG['AMS']['showtips'] = 2;
@@ -223,10 +228,12 @@ $CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
 $CFG['hooks']['util/utils'] = '../ohm-hooks/util/utils.php';
 $CFG['hooks']['lti'] = __DIR__ . '/../ohm-hooks/lti13hooks.php';
 
+// The following hooks are defined here AND in the Question API. (ohm/lumenapi/config/)
+$GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] = __DIR__ . '/../ohm-hooks/assess2/questions/score_engine.php';
+$GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator'] = __DIR__ . '/../ohm-hooks/assess2/questions/question_html_generator.php';
+
 // The following hooks are defined in the Question API. (ohm/lumenapi/config/)
-//$GLOBALS['CFG']['hooks']['assess2/questions/score_engine']
 //$GLOBALS['CFG']['hooks']['assess2/assess_standalone']
-//$GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator']
 //$GLOBALS['CFG']['hooks']['assess2/questions/scorepart/multiple_answer_score_part']
 //$GLOBALS['CFG']['hooks']['assess2/questions/scorepart/choices_score_part']
 

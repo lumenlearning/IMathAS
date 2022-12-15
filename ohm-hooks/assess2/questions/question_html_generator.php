@@ -1,6 +1,20 @@
 <?php
 
 /**
+ * Override variables declared from question code evals before generating
+ * question text and answer boxes.
+ *
+ * We are currently using this to override answer shuffling globally in OHM.
+ */
+$onBeforeAnswerBoxGenerator = function () use (
+    &$questionWriterVars // [?array] This is the array of variables packaged up by IMathAS.
+) {
+    if (isset($GLOBALS['CFG']['GEN']['noshuffle'])) {
+        $questionWriterVars['noshuffle'] = $GLOBALS['CFG']['GEN']['noshuffle'];
+    }
+};
+
+/**
  * Include additional feedback in scoring results.
  *
  * This method is defined this way because we need access to variables
