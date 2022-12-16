@@ -270,9 +270,8 @@ class ScoreEngine
 
         if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
             require_once($GLOBALS['CFG']['hooks']['assess2/questions/score_engine']);
-            if (function_exists('onBeforeScoreQuestion')) {
-                onBeforeScoreQuestion($scoreQuestionParams,
-                    $varsForScorepart, $additionalVarsForScoring);
+            if (isset($onBeforeScoreQuestion) && is_callable($onBeforeScoreQuestion)) {
+                $onBeforeScoreQuestion();
             }
         }
 
@@ -440,7 +439,7 @@ class ScoreEngine
                   list($randqkeys, $randakeys) = $_SESSION['choicemap'][$assessmentId][$partnum];
                   $mapped = array();
                   foreach ($tmp as $k=>$v) {
-                    $mapped[$randqkeys[$k]] = $randakeys[$v];
+                    $mapped[$randqkeys[$k]] = $randakeys[$v] ?? '';
                   }
                   ksort($mapped);
                   $stuanswers[$thisq][$kidx] = implode('|', $mapped);
@@ -667,7 +666,7 @@ class ScoreEngine
                 $scoreQuestionParams->setGivenAnswer($stuanswers[$qnidx+1][$partnum] ?? '');  
             } else {
                 $scoreQuestionParams->setIsRescore($baseIsRescore);
-                $scoreQuestionParams->setGivenAnswer($_POST["qn$inputReferenceNumber"]);
+                $scoreQuestionParams->setGivenAnswer($_POST["qn$inputReferenceNumber"] ?? '');
             }
 
             try {
