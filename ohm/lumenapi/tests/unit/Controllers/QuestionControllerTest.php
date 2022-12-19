@@ -290,8 +290,8 @@ $hints[1] = "Remember that all statistical investigative questions anticipate va
 
 $feedback = ohm_getfeedbackbasic($thisq, "Excellent! You are able to distinguish the statstical investigative questions from the rest.", "A statistical investigative question would require data collection and analysis. Does the question account for variability?  Questions with a single mathematical answer are not considered statistical investigative questions.", $answers)
 
-// As of AST-275, using ohm_getfeedbackbasic or feedbacktxt requires
-// shuffling to be disabled.
+// As of AST-275, using ohm_getfeedbackbasic or feedbacktxt in a multans
+// type question requires shuffling to be disabled.
 $noshuffle = "all"
 
 $hinttext[0] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
@@ -531,6 +531,71 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         $this->assertEquals('correct', $scoreResponse['feedback']['qn0']['correctness']);
         $this->assertEquals('Excellent! You are able to distinguish the statstical investigative questions from the rest.',
             $scoreResponse['feedback']['qn0']['feedback']);
+    }
+
+    /**
+     * @group noshuffle_all
+     */
+    public function testGetScore_global_shuffling_disabled(): void
+    {
+        $inputState = json_decode('{
+            "request": {
+                "post": [
+                    {
+                        "name": "qn0",
+                        "value": ""
+                    },
+                    {
+                        "name": "qn1000",
+                        "value": "42"
+                    },
+                    {
+                        "name": "qn1001",
+                        "value": "0,2,4"
+                    }
+                ],
+                "questionSetId": 3618,
+                "seed": 4120,
+                "studentAnswers": ["","true","false"],
+                "studentAnswerValues": [22,7,0]
+            }
+        }', true);
+
+        $this->assertEquals('all', getenv('NOSHUFFLE_ANSWERS'));
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_multipart_multans);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3618, $scoreResponse['questionSetId']);
+        $this->assertEquals('multipart', $scoreResponse['questionType']);
+        $this->assertEquals(4120, $scoreResponse['seed']);
+        $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
+        $this->assertEquals([1, 1], $scoreResponse['raw']);
+        $this->assertEquals([42, "0,2,4"], $scoreResponse['correctAnswers']);
+        $this->assertEquals([], $scoreResponse['errors']);
+
+        $this->assertCount(4, $scoreResponse['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1000']['correctness']);
+        $this->assertEquals('Good answer.', $scoreResponse['feedback']['qn1000']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-0']['correctness']);
+        $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-0']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-2']['correctness']);
+        $this->assertEquals('You chose correctly.', $scoreResponse['feedback']['qn1001-2']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-4']['correctness']);
+        $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1001-4']['feedback']);
     }
 
     public function testGetQuestion_withFeedback_singlePart(): void
