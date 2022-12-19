@@ -60,3 +60,4 @@ services:
       MYSQL_USER: "ohm"
       MYSQL_PASSWORD: "ohm"
       MYSQL_DATABASE: "ohm"
+      DB_CHARSET: "latin1"

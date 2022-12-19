@@ -263,6 +263,56 @@ $answerbox[1]
         'varscore' => '0'
     ];
 
+    private array $imasQuestionSet_dbRow_with_ohm1_macro = [
+        'id' => '3607',
+        'uniqueid' => '1661894316883503',
+        'adddate' => '1661894316',
+        'lastmoddate' => '1661990728',
+        'ownerid' => '1',
+        'author' => '<h1>AdminLastName</h1>,<h1>AdminFirstName</h1>',
+        'userights' => '2',
+        'license' => '1',
+        'description' => 'Multiple Choice Test 10 with Feedback - Staging QID 638',
+        'qtype' => 'choices',
+        'control' => '$questions[0] = "Something like that."
+$feedbacktxt[0] = "This is correct. Way to go."
+$questions[1] = "No, sorry. I\'ll add an oxford comma next time."
+$feedbacktxt[1] = "Sorry, this is incorrect. Try again."
+$questions[2] = "I\'m not the planning committee."
+$feedbacktxt[2] = "Sorry, not the right answer. Try again."
+$questions[3] = "You were supposed to make the plan!"
+$feedbacktxt[3] = "Sorry, that was the wrong choice. Try again."
+$displayformat = "vert"
+$noshuffle = "all"
+$answer = 0
+
+$feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
+        'qcontrol' => '',
+        'qtext' => '<p>Was that the plan?</p>
+<p>$answerbox</p>
+<p>$feedback</p>',
+        'answer' => '',
+        'solution' => '',
+        'extref' => '',
+        'hasimg' => '0',
+        'deleted' => '0',
+        'avgtime' => '0',
+        'ancestors' => '',
+        'ancestorauthors' => '',
+        'otherattribution' => '',
+        'importuid' => '',
+        'replaceby' => '0',
+        'broken' => '0',
+        'solutionopts' => '6',
+        'sourceinstall' => '',
+        'meantimen' => '0',
+        'meantime' => '0',
+        'vartime' => '0',
+        'meanscoren' => '0',
+        'meanscore' => '0',
+        'varscore' => '0',
+    ];
+
     private array $imasQuestionSet_dbRow_multans_basicfeedback = [
         'id' => '3623',
         'uniqueid' => '1670955967303564',
@@ -342,6 +392,28 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
 
         $this->pdo = Mockery::mock(PDO::class);
         $this->questionController->setPdo($this->pdo);
+    }
+
+    /*
+     * getQuestionDisplay
+     */
+
+    public function testGetQuestionDisplay(): void
+    {
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_with_ohm1_macro);
+
+        $responseData = $this->questionController->getQuestionDisplay([
+            'questionSetId' => 3607,
+            'seed' => 3469,
+        ]);
+
+        $this->assertContains(
+            'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!',
+            $responseData['errors']
+        );
     }
 
     /*
