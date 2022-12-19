@@ -398,7 +398,7 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
      * getQuestionDisplay
      */
 
-    public function testGetQuestionDisplay(): void
+    public function testGetQuestionDisplay_ohm1_macro(): void
     {
         // Setup mocks.
         $this->questionSetRepository
@@ -410,6 +410,8 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
             'seed' => 3469,
         ]);
 
+        // OHM1 macros return a string of feedback with HTML, which is
+        // not usable by the Question API.
         $this->assertContains(
             'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!',
             $responseData['errors']
