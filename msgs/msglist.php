@@ -19,11 +19,10 @@ If deleted on both ends, delete from DB
 	   require("../footer.php");
 	   exit;
 	}
-	if (isset($teacherid)) {
-		$isteacher = true;
-	} else {
-		$isteacher = false;
-	}
+
+	$isteacher = isset($teacherid);
+    $isstudent = isset($studentid);
+    $istutor = isset($tutorid);
 
 	$cansendmsgs = false;
 	$threadsperpage = intval($listperpage);
@@ -100,12 +99,12 @@ If deleted on both ends, delete from DB
 			$query = "SELECT imas_users.id,imas_users.FirstName,imas_users.LastName FROM ";
 			$query .= "imas_users,imas_tutors WHERE imas_users.id=imas_tutors.userid AND ";
 			$query .= "imas_tutors.courseid=:courseid ";
-			if (!$isteacher && $studentinfo['section']!=null) {
+			if (!$isteacher && !$istutor && $studentinfo['section']!=null) {
 			     $query .= "AND (imas_tutors.section=:section OR imas_tutors.section='') ";
 			}
 			$query .= "ORDER BY imas_users.LastName";
 			$stm = $DBH->prepare($query);
-			if (!$isteacher && $studentinfo['section']!=null) {
+			if (!$isteacher && !$istutor && $studentinfo['section']!=null) {
 			   $stm->execute(array(':courseid'=>$cid, ':section'=>$studentinfo['section']));
 			} else {
 				$stm->execute(array(':courseid'=>$cid));
@@ -491,12 +490,12 @@ If deleted on both ends, delete from DB
       			$query = "SELECT imas_users.id,imas_users.FirstName,imas_users.LastName FROM ";
       			$query .= "imas_users,imas_tutors WHERE imas_users.id=imas_tutors.userid AND ";
       			$query .= "imas_tutors.courseid=:courseid ";
-            if (!$isteacher && $studentinfo['section']!=null) {
+            if (!$isteacher && !$istutor && $studentinfo['section']!=null) {
       			     $query .= "AND (imas_tutors.section=:section OR imas_tutors.section='') ";
             }
       			$query .= "ORDER BY imas_users.LastName";
       			$stm = $DBH->prepare($query);
-            if (!$isteacher && $studentinfo['section']!=null) {
+            if (!$isteacher && !$istutor && $studentinfo['section']!=null) {
       			   $stm->execute(array(':courseid'=>$cid, ':section'=>$studentinfo['section']));
             } else {
                $stm->execute(array(':courseid'=>$cid));
@@ -602,7 +601,7 @@ If deleted on both ends, delete from DB
 	}
 	require("../header.php");
 	$curdir = rtrim(dirname(__FILE__), '/\\');
-
+   
 	echo "<div class=breadcrumb>$breadcrumbbase ";
 	if ($cid>0 && (!isset($_SESSION['ltiitemtype']) || $_SESSION['ltiitemtype']!=0)) {
 		echo " <a href=\"../course/course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> &gt; ";

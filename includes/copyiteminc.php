@@ -881,7 +881,7 @@ function copyrubrics($offlinerubrics = array())
 
         $qfound = array_keys($qrubrictrack, $srcrub['id']);
         if (count($qfound) > 0) {
-            if ($iqupd === null) {
+            if (!isset($iqupd)) {
                 $iqupd = $DBH->prepare("UPDATE imas_questions SET rubric=:rubric WHERE id=:id");
             }
             foreach ($qfound as $qid) {
@@ -892,7 +892,7 @@ function copyrubrics($offlinerubrics = array())
         }
         $ffound = array_keys($frubrictrack, $srcrub['id']);
         if (count($ffound) > 0) {
-            if ($ifupd === null) {
+            if (!isset($ifupd)) {
                 $ifupd = $DBH->prepare("UPDATE imas_forums SET rubric=:rubric WHERE id=:id");
             }
             foreach ($ffound as $fid) {
