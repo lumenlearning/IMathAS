@@ -561,6 +561,14 @@ class QuestionController extends ApiBaseController
         $question = $assessStandalone->getQuestion();
         $questionFeedback = $this->getQuestionFeedback($question);
 
+        if (
+            isset($questionData['errors'])
+            && 'array' == gettype($questionData['errors'])
+            && !empty($question->getErrors())
+        ) {
+            $questionData['errors'] = array_merge($question->getErrors(), $questionData['errors']);
+        }
+
         return $questionDto->getQuestionResponse($questionData, $this->questionType['questionType'],
             $assessStandalone->getState(), $questionFeedback);
     }
@@ -570,16 +578,32 @@ class QuestionController extends ApiBaseController
      *
      * If no question feedback is found, null is returned.
      *
-     * @param Question $question An instance of Question.
+     * @param Question $question A reference to an instance of Question.
      * @return array|null An associative array of question feedback.
      */
-    private function getQuestionFeedback(Question $question): ?array
+    private function getQuestionFeedback(Question &$question): ?array
     {
         if (empty($question->getExtraData())) return null;
         if (empty($question->getExtraData()['lumenlearning'])) return null;
         if (empty($question->getExtraData()['lumenlearning']['feedback'])) return null;
 
-        return $question->getExtraData()['lumenlearning']['feedback'];
+        $feedback = $question->getExtraData()['lumenlearning']['feedback'];
+
+        /*
+         * If feedback is a string, then an original OHM (from IMathAS) macro
+         * was used. Those macros return strings containing HTML and all feedback
+         * in a string, to be rendered by the assess2 client.
+         *
+         * Catra expects feedback as an array and without HTML, so we return null.
+         */
+        if ('array' != gettype($feedback)) {
+            $question->addErrors([
+                'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!'
+            ]);
+            return null;
+        }
+
+        return $feedback;
     }
 
     /**
