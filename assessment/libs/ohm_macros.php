@@ -12,7 +12,6 @@
  */
 
 require_once(__DIR__ . '/../../includes/Rand.php');
-$GLOBALS['RND'] = new Rand();
 
 array_push($GLOBALS['allowedmacros'],
     "ohm_getfeedbackbasic",
