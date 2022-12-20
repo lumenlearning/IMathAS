@@ -56,6 +56,7 @@ class ScoreEngine
     );
 
     const ADDITIONAL_VARS_FOR_SCORING = array(
+        'feedback',
         'qnpointval',
     );
 
@@ -236,6 +237,13 @@ class ScoreEngine
             $additionalVarsForScoring[$optionKey] = ${$optionKey};
         }
 
+        if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
+            require_once($GLOBALS['CFG']['hooks']['assess2/questions/score_engine']);
+            if (isset($onBeforeScoreQuestion) && is_callable($onBeforeScoreQuestion)) {
+                $onBeforeScoreQuestion();
+            }
+        }
+
         /*
          * Score the student's answers.
          *
@@ -264,11 +272,8 @@ class ScoreEngine
             }
         }
 
-        if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
-            require_once($GLOBALS['CFG']['hooks']['assess2/questions/score_engine']);
-            if (function_exists('onScoreQuestionResult')) {
-                $scoreResult = onScoreQuestionResult($scoreResult, $varsForScorepart, $additionalVarsForScoring);
-            }
+        if (function_exists('onScoreQuestionResult')) {
+            $scoreResult = onScoreQuestionResult($scoreResult, $varsForScorepart, $additionalVarsForScoring);
         }
 
         restore_error_handler();
