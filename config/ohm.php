@@ -75,7 +75,7 @@ $CFG['GEN']['footerscriptinclude'] = "ohm/js/lumenga.js";
 $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
 // Override question answer shuffling.
-if (getenv('NOSHUFFLE_ANSWERS')) {
+if (!empty(getenv('NOSHUFFLE_ANSWERS'))) {
     $CFG['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
 }
 
