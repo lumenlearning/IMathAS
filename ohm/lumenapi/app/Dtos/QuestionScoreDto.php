@@ -10,6 +10,7 @@ class QuestionScoreDto extends QuestionBaseDto
     private $studentAnswerValues;
     private $partsToScore = true;
     private $control;
+    private $postParams;
 
     public function __construct($request) {
         parent::__construct($request);
@@ -124,8 +125,15 @@ class QuestionScoreDto extends QuestionBaseDto
      */
     public function setPostParams($postParams)
     {
+        $this->postParams = [];
         foreach ($postParams as $postParam) {
             $_POST[$postParam['name']] = $postParam['value'];
+            $this->postParams[$postParam['name']] = $postParam['value'];
         }
+    }
+
+    public function getPostParams()
+    {
+        return $this->postParams;
     }
 }
