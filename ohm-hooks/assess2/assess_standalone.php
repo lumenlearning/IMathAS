@@ -163,10 +163,10 @@ function _shuffleCorrectAnswers(array $unseededCorrectAnswers, array $shuffledAn
  * @param array $shuffledAnswerKeymap The mapping of unseeded answer keys to shuffled keys.
  *                                    Also known as $randqkeys and $randkeys.
  *                                      Example: See _getShuffledKeyByUnseededKey()
- * @param array $allFeedback An array containing all feedback.
+ * @param array|null $allFeedback An array containing all feedback.
  * @return array The shuffled array of feedback.
  */
-function _shuffleFeedback(string $studentAnswers, array $shuffledAnswerKeymap, array $allFeedback): array
+function _shuffleFeedback(string $studentAnswers, array $shuffledAnswerKeymap, ?array $allFeedback): array
 {
     if (empty($allFeedback)) return [];
 
