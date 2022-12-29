@@ -121,6 +121,10 @@ $app->router->group([
     //.. / ../       ../       ../
     require_once __DIR__.'/../../../assess2/questions/QuestionGenerator.php';
     require_once __DIR__.'/../../../assess2/AssessStandalone.php';
+
+    // Globals required by OHM.
+    // $namearray is declared in macros.php after being require_once'd by QuestionGenerator.
+    $GLOBALS['namearray'] = $namearray ?? null; // Used by randname() question macro.
 });
 
 return $app;
