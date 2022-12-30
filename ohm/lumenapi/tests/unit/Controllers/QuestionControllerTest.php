@@ -672,6 +672,57 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1001-4']['feedback']);
     }
 
+    /**
+     * @group noshuffle_all
+     *
+     * Usage of OHM1 basic/txt feedback macros requires shuffling to be disabled.
+     */
+    public function testScoreQuestion_with_ohm1_macro(): void
+    {
+        $request = Request::create('/api/v1/question/score', 'POST',
+            json_decode('{
+                "post": [
+                    {
+                        "name": "qn0",
+                        "value": 0
+                    }
+                ],
+                "questionSetId": 3607,
+                "seed": 3469,
+                "studentAnswers": [0],
+                "studentAnswerValues": ["0"]
+            }', true)
+        );
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_with_ohm1_macro);
+
+        $response = $this->questionController->scoreQuestion($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(3607, $responseData['questionSetId']);
+        $this->assertEquals('choices', $responseData['questionType']);
+        $this->assertEquals(3469, $responseData['seed']);
+        $this->assertEquals([1.0], $responseData['scores']);
+        $this->assertEquals([1.0], $responseData['raw']);
+        $this->assertTrue($responseData['allans']);
+        $this->assertNotEmpty($responseData['correctAnswers']);
+        $this->assertEquals('0', $responseData['correctAnswers'][0]);
+        $this->assertCount(2, $responseData['errors']);
+        $this->assertContains(
+            'Warning: Feedback may be available but is not being returned due to the usage of OHM1 macros!',
+            $responseData['errors']
+        );
+        $this->assertContains('Warning: OHM1 feedback is an empty string.', $responseData['errors']);
+    }
+
+    /*
+     * getQuestion
+     */
+
     public function testGetQuestion_withFeedback_singlePart(): void
     {
         // Setup mocks.
