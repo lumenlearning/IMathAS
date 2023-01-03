@@ -39,7 +39,8 @@ require_once("includes/sanitize.php");
         #### Begin OHM-specific changes ############################################################
         // Commenting out the check below, since not implemented on OHM enrollment pages
         /*
-        if (!isset($_SESSION['challenge']) || $_POST['challenge'] !== $_SESSION['challenge'] ||
+        if (!isset($_SESSION['challenge']) || !isset($_POST['challenge']) ||
+            $_POST['challenge'] !== $_SESSION['challenge'] ||
             !empty($_POST['hval']) ||
             !isset($_SESSION['newuserstart']) || (time() - $_SESSION['newuserstart']) < 5
         ) {
