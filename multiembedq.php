@@ -279,12 +279,23 @@ echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&a
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
 
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// @see https://lumenlearning.atlassian.net/browse/AST-255
 // echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.Sanitize::encodeUrlParam($sameseed).'&amp;theme='.Sanitize::encodeUrlParam($theme).'&amp;iframe_resize_id='.Sanitize::encodeUrlParam($targetid).'">';
 // if (count($qids)>1) {
 // 	echo _('Try Another Version of These Questions').'</a></p>';
 // } else {
 // 	echo _('Try Another Version of This Question').'</a></p>';
 // }
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
+// ####### End OHM-specific changes ####################################################################
 $showhints = true;
 
 //preload qsdata
