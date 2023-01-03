@@ -254,7 +254,7 @@ if (isset($_POST['SID'])) {
             #### End OHM-specific changes ############################################################
 		}
 		$allowreentry = ($line['public']&4);
-		if (!in_array(strtolower($_POST['passwd']),$superpw) && (!$allowreentry || $line['reentrytime']>0)) {
+		if (!in_array(strtolower($_POST['passwd'] ?? ''),$superpw) && (!$allowreentry || $line['reentrytime']>0)) {
 			$d = null;
 			$stm2 = $DBH->prepare("SELECT id,starttime FROM imas_assessment_sessions WHERE userid=:userid AND assessmentid=:assessmentid");
 			$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$paid));
