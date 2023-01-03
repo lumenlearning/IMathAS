@@ -236,6 +236,14 @@ class ScoreEngine
             $additionalVarsForScoring[$optionKey] = ${$optionKey};
         }
 
+        if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
+            require_once($GLOBALS['CFG']['hooks']['assess2/questions/score_engine']);
+            if (function_exists('onBeforeScoreQuestion')) {
+                onBeforeScoreQuestion($scoreQuestionParams,
+                    $varsForScorepart, $additionalVarsForScoring);
+            }
+        }
+
         /*
          * Score the student's answers.
          *

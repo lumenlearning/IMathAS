@@ -1,6 +1,23 @@
 <?php
 
 use IMathAS\assess2\questions\models\ScorePartResult;
+use IMathAS\assess2\questions\models\ScoreQuestionParams;
+
+
+/**
+ * Override variables declared from question code evals before scoring.
+ *
+ * We are currently using this to override answer shuffling globally in OHM.
+ */
+function onBeforeScoreQuestion(ScoreQuestionParams $scoreQuestionParams,
+                               array &$varsForScorepart,
+                               array $additionalVarsForScoring
+): void
+{
+    if (isset($GLOBALS['CFG']['GEN']['noshuffle'])) {
+        $varsForScorepart['noshuffle'] = $GLOBALS['CFG']['GEN']['noshuffle'];
+    }
+}
 
 /**
  * Include the correct answers in scoring results.
