@@ -21,19 +21,6 @@ function onBeforeScoreQuestion(ScoreQuestionParams $scoreQuestionParams,
 
 
 /**
- * Override variables declared from question code evals before scoring.
- *
- * We are currently using this to override answer shuffling globally in OHM.
- */
-$onBeforeScoreQuestion = function () use (
-    &$varsForScorepart // [?array] This is the array of variables packaged up by IMathAS.
-) {
-    if (isset($GLOBALS['CFG']['GEN']['noshuffle'])) {
-        $varsForScorepart['noshuffle'] = $GLOBALS['CFG']['GEN']['noshuffle'];
-    }
-};
-
-/**
  * Include the correct answers in scoring results.
  *
  * @param array $scoreResult The original scoring result data.
