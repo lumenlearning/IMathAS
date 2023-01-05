@@ -272,7 +272,7 @@ $showQuestionNumbers = '';
 if (isset($_REQUEST['show_question_numbers'])) {
 	$showQuestionNumbers = '&amp;show_question_numbers';
 }
-echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.$showQuestionNumbers.'">';
+// echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.$showQuestionNumbers.'">';
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
