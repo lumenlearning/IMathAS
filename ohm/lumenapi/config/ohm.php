@@ -10,6 +10,12 @@
 // Use version 2 of OHM's question and scoring code.
 $GLOBALS['assessUIver'] = 2;
 
+// Override question answer shuffling.
+// This setting also exists in OHM's root /config/ohm.php file.
+if (getenv('NOSHUFFLE_ANSWERS')) {
+    $GLOBALS['CFG']['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
+}
+
 // Define OHM hooks.
 $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] =
     __DIR__ . '/../../../ohm-hooks/assess2/questions/score_engine.php';

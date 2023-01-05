@@ -12,7 +12,6 @@
  */
 
 require_once(__DIR__ . '/../../includes/Rand.php');
-$GLOBALS['RND'] = new Rand();
 
 array_push($GLOBALS['allowedmacros'],
     "ohm_getfeedbackbasic",
@@ -20,7 +19,8 @@ array_push($GLOBALS['allowedmacros'],
     "ohm_getfeedbacktxtessay",
     "ohm_getfeedbacktxtnumber",
     "ohm_getfeedbacktxtnumfunc",
-    "ohm_getfeedbacktxtcalculated"
+    "ohm_getfeedbacktxtcalculated",
+    "ohm_getfeedbacktxtmultans",
 );
 
 /**
@@ -29,7 +29,7 @@ array_push($GLOBALS['allowedmacros'],
  * - Index strings will match question input IDs in question display HTML.
  * - Single part questions will always be indexed as "qn0".
  *
- * @param int|null $partNumber The question part number.
+ * @param integer|null $partNumber The question part number.
  * @return string The question index for feedback.
  */
 function getFeedbackIndex(?int $partNumber): string
@@ -45,56 +45,65 @@ function getFeedbackIndex(?int $partNumber): string
 }
 
 /**
- * Generates feedback based solely on whether the question was scored correct or not.
+ * Gives feedback based on a simple comparison between the correct
+ * answer and the student's answer.
  *
- * - Feedback is returned without any added HTML.
- * - If student answer is null, all available feedback is returned.
- * - If a student answer is provided, feedback will be returned based on correctness.
+ * Differences from getfeedbackbasic in IMathAS' macros.php:
+ * - The function signature matches the pattern of all other ohm_* macros.
+ * - The answer is checked directly, instead of looking at $GLOBALs.
+ * - Unlike getfeedbackbasic, which depends on a $GLOBAL to determine
+ *   correctness, this macro is unable to determine correctness for
+ *   shuffled answers. Correct answers are only made available to this
+ *   macro before they've been shuffled.
  *
+ * The most important note:
+ * - Shuffling MUST be disabled to use this macro.
+ *
+ * @param string|array|null $stuanswers The student answer, obtained from $stuanswers[$thisq] for single
+ *                                      part questions, or using the getstuans macro for multipart.
  * @param string $correctFeedback The feedback for correct answers.
  * @param string $incorrectFeedback The feedback for incorrect answers.
- * @param mixed $thisq
- * @param mixed $partn A part number for multipart questions to get part-based feedback.
- * @return array An associative array of feedback.
- * @see https://localhost/help.php#feedbackmacros
+ * @param string|integer|null $correctAnswer The correct answer from question code.
+ * @param integer|null $partNumber The part number for multipart questions.
+ *                             Null for single part questions.
+ * @return array An array of feedback.
  */
-function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback, $thisq, $partn = null): array
+function ohm_getfeedbackbasic($stuanswers,
+                              string $correctFeedback,
+                              string $incorrectFeedback,
+                              $correctAnswer,
+                              ?int $partNumber = null
+): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
     }
 
-    $val = $GLOBALS['assess2-curq-iscorrect'] ?? -1;
-    if ($partn !== null && is_array($val)) {
-        if (isset($val[$partn])) {
-            $res = $val[$partn];
-        } else {
-            $res = -1;
-        }
-    } else {
-        $res = $val;
-    }
-    if ($res > 0 && $res < 1) {
-        $res = 0;
+    $questionIndex = getFeedbackIndex($partNumber);
+    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
+
+    // For "multans" type questions, the student answer will be an array of answer keys.
+    if (is_array($studentAnswer)) {
+        sort($studentAnswer);
+        $studentAnswer = implode(',', $studentAnswer);
+        // The correct answer is written by humans.
+        // Remove spaces and ensure the answer keys are sorted.
+        $correctAnswer = preg_replace('/\s*/', '', $correctAnswer);
+        $correctAnswer = explode(',', $correctAnswer);
+        sort($correctAnswer);
+        $correctAnswer = implode(',', $correctAnswer);
     }
 
-    if (is_null($partn)) {
-        $questionIndex = 'qn0';
-    } else {
-        $questionNumber = 1000 + $partn;
-        $questionIndex = 'qn' . $questionNumber;
-    }
-
-    if ($res == -1) {
+    if (empty($studentAnswer)) {
         return [];
-    } else if ($res == 1) {
+    } else if ($studentAnswer == $correctAnswer) {
         return [
             $questionIndex => [
                 'correctness' => 'correct',
                 'feedback' => $correctFeedback,
             ],
         ];
-    } else if ($res == 0) {
+    } else {
         return [
             $questionIndex => [
                 'correctness' => 'incorrect',
@@ -105,20 +114,34 @@ function ohm_getfeedbackbasic(string $correctFeedback, string $incorrectFeedback
 }
 
 /**
- * Gives feedback on multiple choice questions based on the student's answer.
+ * Get ALL feedback for "choices" type questions.
  *
- * - Feedback is returned without any added HTML.
- * - If student answer is null, all available feedback is returned.
- * - If a student answer is provided, feedback will be returned based on correctness.
+ * From within this macro, it is not possible to obtain the correct answer
+ * indexes for a question after they've been shuffled with a question seed.
+ *
+ * Feedback is returned without any added HTML.
+ *
+ * Notes:
+ * - The random answer key mapping is available in:
+ *   - ohm-hooks/assess2/questions/scorepart/choices_score_part.php
+ * - The feedback returned by this function will need to be shuffled and filtered in:
+ *   - ohm-hooks/assess2/assess_standalone.php
  *
  * @param string|integer $studentAnswer The answer provided by the student.
  * @param array $feedbacksPossible The correct and incorrect feedback responses.
  * @param string|integer $correctAnswer The correct answer.
+ *                                          Examples:
+ *                                              - 2
+ *                                              - "2 or 3"
  * @param integer|null $partNumber A part number for multipart questions.
  * @return array An associative array of feedback(s).
  * @see https://localhost/help.php#feedbackmacros
  */
-function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAnswer, ?int $partNumber = null): array
+function ohm_getfeedbacktxt($studentAnswer,
+                            array $feedbacksPossible,
+                            $correctAnswer,
+                            ?int $partNumber = null
+): array
 {
     if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
         return [];
@@ -126,19 +149,8 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
 
     $questionIndex = getFeedbackIndex($partNumber);
 
-    if ($studentAnswer === null) {
-        // If no student answers are provided, then we are only displaying
-        // the question. (no scoring)
-        $feedbacks = [];
-        foreach ($feedbacksPossible as $index => $feedbackText) {
-            $correctness = ($index == $correctAnswer) ? 'correct' : 'incorrect';
-            $choiceQuestionIndex = $questionIndex . '-' . $index;
-            $feedbacks[$choiceQuestionIndex] = [
-                'correctness' => $correctness,
-                'feedback' => $feedbackText
-            ];
-        }
-        return $feedbacks;
+    if (!is_null($studentAnswer) && empty($studentAnswer)) {
+        return [];
     } else if ($studentAnswer === 'NA') {
         return [
             $questionIndex => [
@@ -146,35 +158,11 @@ function ohm_getfeedbacktxt($studentAnswer, array $feedbacksPossible, $correctAn
                 'feedback' => _("No answer selected. Try again.")
             ],
         ];
-    } else {
-        $anss = explode(' or ', $correctAnswer);
-        foreach ($anss as $ans) {
-            // Student provided the correct answer.
-            if ($studentAnswer == $ans) {
-                $feedback = [
-                    $questionIndex => [
-                        'correctness' => 'correct',
-                        'feedback' => null,
-                    ],
-                ];
-                if (isset($feedbacksPossible[$studentAnswer])) {
-                    $feedback['feedback'] = $feedbacksPossible[$studentAnswer];
-                }
-                return $feedback;
-            }
-        }
-        // Student provided an incorrect answer.
-        $feedback = [
-            $questionIndex => [
-                'correctness' => 'incorrect',
-                'feedback' => null,
-            ],
-        ];
-        if (isset($feedbacksPossible[$studentAnswer])) {
-            $feedback['feedback'] = $feedbacksPossible[$studentAnswer];
-        }
-        return $feedback;
     }
+
+    $correctAnswersAsArray = explode(' or ', $correctAnswer);
+
+    return _getAllFeedbacks($feedbacksPossible, $correctAnswersAsArray, $partNumber);
 }
 
 /**
@@ -687,3 +675,88 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
     }
 }
 
+/**
+ * Get ALL feedback for multiple answer questions.
+ *
+ * From within this macro, it is not possible to obtain the correct answer
+ * indexes for a question after they've been shuffled with a question seed.
+ *
+ * Feedback is returned without any added HTML.
+ *
+ * Notes:
+ * - The random answer key mapping is available in:
+ *   - ohm-hooks/assess2/questions/scorepart/multiple_answer_score_part.php
+ * - The feedback returned by this function will need to be shuffled and filtered in:
+ *   - ohm-hooks/assess2/assess_standalone.php
+ *
+ * @param string|array|null $stuanswers The student answer, obtained from $stuanswers[$thisq] for single
+ *                                      part questions, or using the getstuans macro for multipart.
+ * @param array $feedbacksPossible The correct and incorrect feedback responses.
+ * @param string $correctAnswers The correct answers. Example: "0,2,5,6"
+ * @param integer|null $partNumber The part number for multipart questions.
+ * @return array An associative array of feedback(s).
+ */
+function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
+                                   array $feedbacksPossible,
+                                   string $correctAnswers,
+                                   ?int $partNumber = null
+): array
+{
+    if (isset($GLOBALS['testsettings']['testtype']) && ($GLOBALS['testsettings']['testtype'] == 'NoScores' || $GLOBALS['testsettings']['testtype'] == 'EndScore')) {
+        return [];
+    }
+
+    $questionIndex = getFeedbackIndex($partNumber);
+    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
+
+    if (!is_null($studentAnswer) && empty($studentAnswer)) {
+        return [];
+    } else if ($studentAnswer === 'NA') {
+        return [
+            $questionIndex => [
+                'correctness' => 'incorrect',
+                'feedback' => _("No answer selected. Try again.")
+            ],
+        ];
+    }
+
+    # This value is created by a human, so remove spaces if found.
+    $correctAnswers = preg_replace('/s*/', '', $correctAnswers);
+    $correctAnswersAsArray = explode(',', $correctAnswers);
+
+    return _getAllFeedbacks($feedbacksPossible, $correctAnswersAsArray, $partNumber);
+}
+
+/**
+ * Get all feedback for a question with correctness.
+ *
+ * This is used by feedback macros for "choices" and "multans" type questions.
+ * - ohm_getfeedbacktxt  (choices)
+ * - ohm_getfeedbacktxtmultans  (multans)
+ *
+ * @param array $feedbacksPossible The correct and incorrect feedback responses.
+ * @param array $correctAnswers An array of correct answers.
+ * @param integer|null $partNumber The part number for multipart questions.
+ * @return array An associative array of feedback(s) with correctness.
+ */
+function _getAllFeedbacks(array $feedbacksPossible,
+                          array $correctAnswers,
+                          ?int $partNumber = null
+): array
+{
+    $questionIndex = getFeedbackIndex($partNumber);
+
+    $allFeedback = [];
+    foreach ($feedbacksPossible as $idx => $feedback) {
+        $answerIndex = $questionIndex . '-' . $idx;
+        $isCorrect = in_array($idx, $correctAnswers);
+
+        $allFeedback += [
+            $answerIndex => [
+                'correctness' => $isCorrect ? 'correct' : 'incorrect',
+                'feedback' => $feedback,
+            ]
+        ];
+    }
+    return $allFeedback;
+}

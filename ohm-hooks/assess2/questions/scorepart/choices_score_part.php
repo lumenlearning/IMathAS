@@ -9,15 +9,22 @@
  */
 if (!isset($randkeys)) $randkeys = null;
 $onGetResult = function () use (
-    &$scorePartResult, // [ScorePartResult] An instance of ScorePartResult
     &$randkeys // [?array] An array of randomized correct answer keys.
-)
-{
-    if (!empty($randkeys)) {
-        $scorePartResult->setExtraData([
-            'lumenlearning' => [
-                'randomAnswerKeys' => $randkeys
-            ],
-        ]);
-    }
+               //          This should be set by ChoicesScorePart.
+) {
+    // This variable contains the mapping of original question answer keys as defined
+    // in question code to the shuffled answer keys.
+    // If this is not defined or is empty, there is nothing for us to do here.
+    if (empty($randkeys)) return;
+
+    /** @var \IMathAS\assess2\questions\models\ScoreQuestionParams $scoreQuestionParams */
+    $scoreQuestionParams = $this->scoreQuestionParams;
+
+    $isMultiPart = $scoreQuestionParams->getIsMultiPartQuestion(); // always returns bool
+    $partNumber = $isMultiPart ? $scoreQuestionParams->getQuestionPartNumber() : 0;
+
+    // We need to keep this updated outside the scope of ScorePartResult, so we
+    // can provide the random answer keymap for all parts of a multi-part question.
+    // This information is needed by the Question API.
+    $GLOBALS['ohmRandomAnswerKeymaps'][$partNumber] = $randkeys;
 };

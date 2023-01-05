@@ -83,7 +83,6 @@ class QuestionControllerTest extends TestCase
  $questions[3] = "Quidditch"
  $feedbacktxt[3] = "Sorry, Option D was the wrong choice. Try again."
  $displayformat = "vert"
- $noshuffle = "all"
  $answer = 0
  
  $feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
@@ -111,7 +110,7 @@ class QuestionControllerTest extends TestCase
         'varscore' => '0',
     ];
 
-    private array $imasQuestionSet_dbRow_multipart = [
+    private array $imasQuestionSet_dbRow_multipart_choices = [
         'id' => '3609',
         'uniqueid' => '1665009644605959',
         'adddate' => '1665009644',
@@ -158,7 +157,7 @@ $feedback = mergearrays(
   ohm_getfeedbacktxt($stuanswer[$thisq], $colorfeedbacks, $answer[0], 0),
   ohm_getfeedbacktxt($stuanswer[$thisq], $numbersfeedbacks, $answer[1], 1),
   ohm_getfeedbacktxt($stuanswer[$thisq], $pizzafeedbacks, $answer[2], 2),
-  ohm_getfeedbackbasic("Correct!", "Not correct.", $thisq, 3)
+  ohm_getfeedbackbasic($stuanswer[$thisq], "Correct!", "Not correct.", $answer[3], 3)
 )',
         'qcontrol' => '',
         'qtext' => 'Choose the best color:
@@ -206,7 +205,9 @@ $answerbox[3]
         'license' => '1',
         'description' => 'Multipart: multans + number',
         'qtype' => 'multipart',
-        'control' => '$anstypes = "number,multans"
+        'control' => 'loadlibrary("ohm_macros")
+
+$anstypes = "number,multans"
 
 $choices = [
   "Correct",
@@ -216,10 +217,22 @@ $choices = [
   "Correct"
 ]
 
+// Both $answer and $answers are declared here, for testing.
 $answer[0] = 42
-$answer[1] = "0,2,4"
+$answers[1] = "0,2,4"
 
-$noshuffle = "all"
+$multansFeedbacks = array(
+  "You chose well.",
+  "Nope.",
+  "You chose correctly.",
+  "lol, no.",
+  "This is correct."
+)
+
+$feedback = mergearrays(
+  ohm_getfeedbackbasic($stuanswers[$thisq], "Good answer.", "Wrong answer.", $answer[0], 0),
+  ohm_getfeedbacktxtmultans($stuanswers[$thisq], $multansFeedbacks, $answers[1], 1)
+)
 ',
         'qcontrol' => '',
         'qtext' => 'What is the answer to life, the universe, and everything?
@@ -300,6 +313,70 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         'varscore' => '0',
     ];
 
+    private array $imasQuestionSet_dbRow_multans_basicfeedback = [
+        'id' => '3623',
+        'uniqueid' => '1670955967303564',
+        'adddate' => '1670955967',
+        'lastmoddate' => '1671133493',
+        'ownerid' => '1',
+        'author' => '<h1>AdminLastName</h1>,<h1>AdminFirstName</h1>',
+        'userights' => '0',
+        'license' => '1',
+        'description' => '1.3 L1 - QID 646 in staging',
+        'qtype' => 'multans',
+        'control' => 'loadlibrary("ohm_macros")
+
+$a = "0 - How tall is the tallest mountain in the United States?"
+$b = "1 - Do standing heart rates tend to be higher than sitting heartrates?"
+$c = "2 - What is the sum of all the whole numbers between 0 and 10?"
+$d = "3 - What is your favorite subject in school?"
+$e = "4 - What proportion of college students live on campus?"
+$f = "5 - How many members does your household have (including pets)?"
+
+$questions = array($a,$b,$c,$d,$e,$f)
+$answers = "1,4"
+
+$hints[1] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
+
+$feedback = ohm_getfeedbackbasic($thisq, "Excellent! You are able to distinguish the statstical investigative questions from the rest.", "A statistical investigative question would require data collection and analysis. Does the question account for variability?  Questions with a single mathematical answer are not considered statistical investigative questions.", $answers)
+
+// As of AST-275, using ohm_getfeedbackbasic or feedbacktxt in a multans
+// type question requires shuffling to be disabled.
+$noshuffle = "all"
+
+$hinttext[0] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
+
+$hinttext_a=forminlinebutton("Hint",$hinttext[0])
+',
+        'qcontrol' => '',
+        'qtext' => 'Which of the following are statistical investigative questions? <em>There may be more than one correct answer.</em>
+<p>$hinttext_a
+  $answerbox
+  $feedback
+  $hintloc
+',
+        'answer' => '',
+        'solution' => '',
+        'extref' => '',
+        'hasimg' => '0',
+        'deleted' => '0',
+        'avgtime' => '0',
+        'ancestors' => '',
+        'ancestorauthors' => '',
+        'otherattribution' => '',
+        'importuid' => '',
+        'replaceby' => '0',
+        'broken' => '0',
+        'solutionopts' => '6',
+        'sourceinstall' => '',
+        'meantimen' => '0',
+        'meantime' => '0',
+        'vartime' => '0',
+        'meanscoren' => '0',
+        'meanscore' => '0',
+        'varscore' => '0'
+    ];
+
     public function setUp(): void
     {
         if (!$this->app) {
@@ -321,7 +398,7 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
      * getQuestionDisplay
      */
 
-    public function testGetQuestionDisplay(): void
+    public function testGetQuestionDisplay_ohm1_macro(): void
     {
         // Setup mocks.
         $this->questionSetRepository
@@ -333,6 +410,8 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
             'seed' => 3469,
         ]);
 
+        // OHM1 macros return a string of feedback with HTML, which is
+        // not usable by the Question API.
         $this->assertContains(
             'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!',
             $responseData['errors']
@@ -378,8 +457,7 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         $this->assertEquals([], $responseData['errors']);
         $this->assertTrue($responseData['allans']);
         $this->assertNotEmpty($responseData['correctAnswers']);
-        $this->assertEquals('10', $responseData['correctAnswers']['answer']);
-        $this->assertNull($responseData['correctAnswers']['answers']);
+        $this->assertEquals('10', $responseData['correctAnswers'][0]);
     }
 
     /*
@@ -422,14 +500,10 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         $this->assertEquals([], $scoreResponse['errors']);
         $this->assertTrue($scoreResponse['allans']);
         $this->assertNotEmpty($scoreResponse['correctAnswers']);
-        $this->assertEquals('10', $scoreResponse['correctAnswers']['answer']);
-        $this->assertNull($scoreResponse['correctAnswers']['answers']);
+        $this->assertEquals('10', $scoreResponse['correctAnswers'][0]);
     }
 
-    /**
-     * @group failing
-     */
-    public function testGetScore_multiPart_multans(): void
+    public function testGetScore_multiPart_with_multans_feedback(): void
     {
         $inputState = json_decode('{
             "request": {
@@ -444,18 +518,13 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
                     },
                      { 
                         "name": "qn1001",
-                        "value": "0,2,4"
+                        "value": "0,2,3"
                     }
                 ],
                 "questionSetId": 3618,
                 "seed": 4120,
                 "studentAnswers": ["","true","false"],
-                "studentAnswerValues": [22,7,0],
-                "partAttemptNumber": [1,1,1],
-                "partsToScore": [1,1,1],
-                "options": {
-                    "returnState": true
-                }
+                "studentAnswerValues": [22,7,0]
             }
         }', true);
 
@@ -476,8 +545,183 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         $this->assertEquals(4120, $scoreResponse['seed']);
         $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
         $this->assertEquals([1, 1], $scoreResponse['raw']);
+        $this->assertEquals([42, "0,2,3"], $scoreResponse['correctAnswers']);
         $this->assertEquals([], $scoreResponse['errors']);
+
+        $this->assertCount(4, $scoreResponse['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1000']['correctness']);
+        $this->assertEquals('Good answer.', $scoreResponse['feedback']['qn1000']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-0']['correctness']);
+        $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1001-0']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-2']['correctness']);
+        $this->assertEquals('You chose correctly.', $scoreResponse['feedback']['qn1001-2']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-3']['correctness']);
+        $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-3']['feedback']);
     }
+
+    public function testGetScore_Multans_with_basic_feedback(): void
+    {
+        $inputState = json_decode('{
+            "request": {
+                "post": [
+                    {
+                        "name": "qn0",
+                        "value": [1,4]
+                    }
+                ],
+                "questionSetId": 3623,
+                "seed": 4136,
+                "studentAnswers": ["1", "4"],
+                "studentAnswerValues": [1, 4]
+            }
+        }', true);
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_multans_basicfeedback);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3623, $scoreResponse['questionSetId']);
+        $this->assertEquals('multans', $scoreResponse['questionType']);
+        $this->assertEquals(4136, $scoreResponse['seed']);
+        $this->assertEquals([1.0], $scoreResponse['scores']);
+        $this->assertEquals([1], $scoreResponse['raw']);
+        $this->assertEquals(["1,4"], $scoreResponse['correctAnswers']);
+        $this->assertEquals([], $scoreResponse['errors']);
+
+        $this->assertCount(1, $scoreResponse['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn0']['correctness']);
+        $this->assertEquals('Excellent! You are able to distinguish the statstical investigative questions from the rest.',
+            $scoreResponse['feedback']['qn0']['feedback']);
+    }
+
+    /**
+     * @group noshuffle_all
+     */
+    public function testGetScore_global_shuffling_disabled(): void
+    {
+        $inputState = json_decode('{
+            "request": {
+                "post": [
+                    {
+                        "name": "qn0",
+                        "value": ""
+                    },
+                    {
+                        "name": "qn1000",
+                        "value": "42"
+                    },
+                    {
+                        "name": "qn1001",
+                        "value": "0,2,4"
+                    }
+                ],
+                "questionSetId": 3618,
+                "seed": 4120,
+                "studentAnswers": ["","true","false"],
+                "studentAnswerValues": [22,7,0]
+            }
+        }', true);
+
+        $this->assertEquals('all', getenv('NOSHUFFLE_ANSWERS'));
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_multipart_multans);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3618, $scoreResponse['questionSetId']);
+        $this->assertEquals('multipart', $scoreResponse['questionType']);
+        $this->assertEquals(4120, $scoreResponse['seed']);
+        $this->assertEquals([0.5, 0.5], $scoreResponse['scores']);
+        $this->assertEquals([1, 1], $scoreResponse['raw']);
+        $this->assertEquals([42, "0,2,4"], $scoreResponse['correctAnswers']);
+        $this->assertEquals([], $scoreResponse['errors']);
+
+        $this->assertCount(4, $scoreResponse['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1000']['correctness']);
+        $this->assertEquals('Good answer.', $scoreResponse['feedback']['qn1000']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-0']['correctness']);
+        $this->assertEquals('You chose well.', $scoreResponse['feedback']['qn1001-0']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-2']['correctness']);
+        $this->assertEquals('You chose correctly.', $scoreResponse['feedback']['qn1001-2']['feedback']);
+
+        $this->assertEquals('correct', $scoreResponse['feedback']['qn1001-4']['correctness']);
+        $this->assertEquals('This is correct.', $scoreResponse['feedback']['qn1001-4']['feedback']);
+    }
+
+    /**
+     * @group noshuffle_all
+     *
+     * Usage of OHM1 basic/txt feedback macros requires shuffling to be disabled.
+     */
+    public function testScoreQuestion_with_ohm1_macro(): void
+    {
+        $request = Request::create('/api/v1/question/score', 'POST',
+            json_decode('{
+                "post": [
+                    {
+                        "name": "qn0",
+                        "value": 0
+                    }
+                ],
+                "questionSetId": 3607,
+                "seed": 3469,
+                "studentAnswers": [0],
+                "studentAnswerValues": ["0"]
+            }', true)
+        );
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn($this->imasQuestionSet_dbRow_with_ohm1_macro);
+
+        $response = $this->questionController->scoreQuestion($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(3607, $responseData['questionSetId']);
+        $this->assertEquals('choices', $responseData['questionType']);
+        $this->assertEquals(3469, $responseData['seed']);
+        $this->assertEquals([1.0], $responseData['scores']);
+        $this->assertEquals([1.0], $responseData['raw']);
+        $this->assertTrue($responseData['allans']);
+        $this->assertNotEmpty($responseData['correctAnswers']);
+        $this->assertEquals('0', $responseData['correctAnswers'][0]);
+        $this->assertCount(2, $responseData['errors']);
+        $this->assertContains(
+            'Warning: Feedback may be available but is not being returned due to the usage of OHM1 macros!',
+            $responseData['errors']
+        );
+        $this->assertContains('Warning: OHM1 feedback is an empty string.', $responseData['errors']);
+    }
+
+    /*
+     * getQuestion
+     */
 
     public function testGetQuestion_withFeedback_singlePart(): void
     {
@@ -500,13 +744,18 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         $this->assertEquals('choices', $responseData['questionType']);
         $this->assertEquals(4120, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
-        $this->assertNotEmpty($responseData['feedback']);
+
+        $this->assertCount(4, $responseData['feedback']);
+
         $this->assertEquals('correct', $responseData['feedback']['qn0-0']['correctness']);
         $this->assertEquals('This is correct. Way to go.', $responseData['feedback']['qn0-0']['feedback']);
+
         $this->assertEquals('incorrect', $responseData['feedback']['qn0-1']['correctness']);
         $this->assertEquals('Sorry, Option B is incorrect. Try again.', $responseData['feedback']['qn0-1']['feedback']);
+
         $this->assertEquals('incorrect', $responseData['feedback']['qn0-2']['correctness']);
         $this->assertEquals('Sorry, Option C is not the right answer. Try again.', $responseData['feedback']['qn0-2']['feedback']);
+
         $this->assertEquals('incorrect', $responseData['feedback']['qn0-3']['correctness']);
         $this->assertEquals('Sorry, Option D was the wrong choice. Try again.', $responseData['feedback']['qn0-3']['feedback']);
     }
@@ -516,7 +765,7 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         // Setup mocks.
         $this->questionSetRepository
             ->shouldReceive('getById')
-            ->andReturn($this->imasQuestionSet_dbRow_multipart);
+            ->andReturn($this->imasQuestionSet_dbRow_multipart_choices);
 
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
@@ -532,7 +781,8 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         $this->assertEquals('multipart', $responseData['questionType']);
         $this->assertEquals(4120, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
-        $this->assertNotEmpty($responseData['feedback']);
+
+        $this->assertCount(11, $responseData['feedback']);
 
         $this->assertEquals('correct', $responseData['feedback']['qn1000-0']['correctness']);
         $this->assertEquals('Excellent choice.', $responseData['feedback']['qn1000-0']['feedback']);
@@ -581,6 +831,6 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
-        $this->assertEmpty($responseData['feedback']);
+        $this->assertNull($responseData['feedback']);
     }
 }
