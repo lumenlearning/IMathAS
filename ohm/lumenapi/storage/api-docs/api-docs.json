@@ -657,6 +657,126 @@
                                     },
                                     {
                                         "example": 200,
+                                        "summary": "Single part - matching",
+                                        "value": {
+                                            "questionSetId": 3618,
+                                            "questionType": "matching",
+                                            "seed": 482936,
+                                            "scores": [
+                                                1
+                                            ],
+                                            "raw": [
+                                                1
+                                            ],
+                                            "errors": [],
+                                            "allans": true,
+                                            "feedback": {
+                                                "qn0": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Correct."
+                                                }
+                                            },
+                                            "correctAnswers": [
+                                                [
+                                                    1,
+                                                    2,
+                                                    3,
+                                                    4,
+                                                    5,
+                                                    6
+                                                ]
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "example": 200,
+                                        "summary": "Single part - string",
+                                        "value": {
+                                            "questionSetId": 3618,
+                                            "questionType": "string",
+                                            "seed": 482936,
+                                            "scores": [
+                                                1
+                                            ],
+                                            "raw": [
+                                                1
+                                            ],
+                                            "errors": [],
+                                            "allans": true,
+                                            "feedback": {
+                                                "qn0": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Correct."
+                                                }
+                                            },
+                                            "correctAnswers": [
+                                                "Cats and meows"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "example": 200,
+                                        "summary": "Single part - draw",
+                                        "value": {
+                                            "questionSetId": 3618,
+                                            "questionType": "draw",
+                                            "seed": 482936,
+                                            "scores": [
+                                                1
+                                            ],
+                                            "raw": [
+                                                1
+                                            ],
+                                            "errors": [],
+                                            "allans": true,
+                                            "feedback": {
+                                                "qn0": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Correct."
+                                                }
+                                            },
+                                            "correctAnswers": [
+                                                "7.65,3.583",
+                                                "7.8,3.526",
+                                                "7.9,3.552",
+                                                "8.05,3.758",
+                                                "8.05,3.313",
+                                                "8.15,3.318",
+                                                "8.3,2.961",
+                                                "8.5,2.913",
+                                                "8.65,3.253",
+                                                "8.75,3.468"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "example": 200,
+                                        "summary": "Single part - essay",
+                                        "value": {
+                                            "questionSetId": 3618,
+                                            "questionType": "essay",
+                                            "seed": 482936,
+                                            "scores": [
+                                                1
+                                            ],
+                                            "raw": [
+                                                1
+                                            ],
+                                            "errors": [],
+                                            "allans": true,
+                                            "feedback": {
+                                                "qn0": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Sample answer: Cats are meowsome."
+                                                }
+                                            },
+                                            "correctAnswers": [
+                                                null
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "example": 200,
                                         "summary": "Multi-part question",
                                         "value": {
                                             "questionSetId": 3618,
