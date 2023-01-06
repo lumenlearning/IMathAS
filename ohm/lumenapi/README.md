@@ -18,7 +18,7 @@ A .env.sample is provided and should be renamed to .env and updated with the app
 
 ## Swagger
 
-The Swagger UI page is currently access via http://<host>/ohm/lumenapi/public/api/documentation.
+The Swagger UI page is currently accessed via: http://localhost/ohm/lumenapi/public/api/documentation.
 
 Data for the UI page is located in ./storage/api-docs/app-docs.json.
 
