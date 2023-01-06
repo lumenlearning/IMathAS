@@ -356,14 +356,22 @@ class QuestionController extends ApiBaseController
      *               description="Question Set Id of scored item"
      *             ),
      *             @OA\Property(
+     *                 property="questionType",
+     *                 type="string",
+     *                 description="The question type (number, multans, etc)"
+     *             ),
+     *             @OA\Property(
      *               property="seed",
      *               type="int",
      *               description="Seed of scored item"
      *             ),
      *             @OA\Property(
      *               property="scores",
-     *               type="int",
-     *               description="Contains weighted score for given question"
+     *               type="array",
+     *               @OA\Items(
+     *                 type="int"
+     *               ),
+     *               description="Contains weighted scores for given question"
      *             ),
      *             @OA\Property(
      *               property="raw",
@@ -371,7 +379,7 @@ class QuestionController extends ApiBaseController
      *               @OA\Items(
      *                 type="int"
      *               ),
-     *               description="Contains raw score for given question"
+     *               description="Contains raw scores for given question"
      *             ),
      *             @OA\Property(
      *               property="errors",
@@ -386,18 +394,83 @@ class QuestionController extends ApiBaseController
      *               description="True if all answer parts of question are provided otherwise false"
      *             ),
      *             @OA\Property(
-     *               property="answerWeights",
+     *               property="feedback",
+     *               type="object",
+     *               description="Contains all correct answers"
+     *             ),
+     *             @OA\Property(
+     *               property="partTypes",
      *               type="array",
      *               @OA\Items(
-     *                 type="int"
+     *                 type="string"
      *               ),
-     *               description="(optional) Returns score weights for multi-part questions"
+     *               description="For multi-part questions, contains the question part types (choices, number, etc)"
+     *             ),
+     *             @OA\Property(
+     *               property="correctAnswers",
+     *               type="array",
+     *               @OA\Items(
+     *                 type="string|int|float"
+     *               ),
+     *               description="Contains all correct answers"
      *             ),
      *          ),
      *          @OA\Examples(
      *            example=200,
      *            summary="Multi-part question",
-     *            value={"scores": {0.5,0.5},"raw":{1,1},"errors": {} ,"allans":false}
+     *            value={
+     *                "questionSetId": 3618,
+     *                "questionType": "multipart",
+     *                "seed": 482936,
+     *                "scores": {
+     *                    0.3333,
+     *                    0.3333,
+     *                    0.3333
+     *                },
+     *                "raw": {
+     *                    1,
+     *                    1,
+     *                    1
+     *                },
+     *                "errors": {},
+     *                "allans": true,
+     *                "feedback": {
+     *                    "qn1000": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Correct."
+     *                    },
+     *                    "qn1001-0": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Yes, apples are fruit."
+     *                    },
+     *                    "qn1001-1": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Yes, bananas are fruit."
+     *                    },
+     *                    "qn1001-2": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Yes, strawberries are fruit."
+     *                    },
+     *                    "qn1001-4": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Yes, tomatoes are fruit."
+     *                    },
+     *                    "qn1002-0": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Correct. Cats are the answer."
+     *                    }
+     *                },
+     *                "partTypes": {
+     *                    "number",
+     *                    "multans",
+     *                    "choices"
+     *                },
+     *                "correctAnswers": {
+     *                    42,
+     *                    "0,1,2,4",
+     *                    "0"
+     *                }
+     *            }
      *         ),
      *       )
      *     ),

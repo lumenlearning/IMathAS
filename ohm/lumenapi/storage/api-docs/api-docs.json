@@ -519,16 +519,23 @@
                                             "description": "Question Set Id of scored item",
                                             "type": "int"
                                         },
+                                        "questionType": {
+                                            "description": "The question type (number, multans, etc)",
+                                            "type": "string"
+                                        },
                                         "seed": {
                                             "description": "Seed of scored item",
                                             "type": "int"
                                         },
                                         "scores": {
-                                            "description": "Contains weighted score for given question",
-                                            "type": "int"
+                                            "description": "Contains weighted scores for given question",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "int"
+                                            }
                                         },
                                         "raw": {
-                                            "description": "Contains raw score for given question",
+                                            "description": "Contains raw scores for given question",
                                             "type": "array",
                                             "items": {
                                                 "type": "int"
@@ -544,11 +551,22 @@
                                             "description": "True if all answer parts of question are provided otherwise false",
                                             "type": "bool"
                                         },
-                                        "answerWeights": {
-                                            "description": "(optional) Returns score weights for multi-part questions",
+                                        "feedback": {
+                                            "description": "Contains all correct answers",
+                                            "type": "object"
+                                        },
+                                        "partTypes": {
+                                            "description": "For multi-part questions, contains the question part types (choices, number, etc)",
                                             "type": "array",
                                             "items": {
-                                                "type": "int"
+                                                "type": "string"
+                                            }
+                                        },
+                                        "correctAnswers": {
+                                            "description": "Contains all correct answers",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string|int|float"
                                             }
                                         }
                                     },
@@ -559,16 +577,57 @@
                                         "example": 200,
                                         "summary": "Multi-part question",
                                         "value": {
+                                            "questionSetId": 3618,
+                                            "questionType": "multipart",
+                                            "seed": 482936,
                                             "scores": [
-                                                0.5,
-                                                0.5
+                                                0.3333,
+                                                0.3333,
+                                                0.3333
                                             ],
                                             "raw": [
+                                                1,
                                                 1,
                                                 1
                                             ],
                                             "errors": [],
-                                            "allans": false
+                                            "allans": true,
+                                            "feedback": {
+                                                "qn1000": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Correct."
+                                                },
+                                                "qn1001-0": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Yes, apples are fruit."
+                                                },
+                                                "qn1001-1": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Yes, bananas are fruit."
+                                                },
+                                                "qn1001-2": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Yes, strawberries are fruit."
+                                                },
+                                                "qn1001-4": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Yes, tomatoes are fruit."
+                                                },
+                                                "qn1002-0": {
+                                                    "correctness": "correct",
+                                                    "feedback": "Correct. Cats are the answer."
+                                                }
+                                            },
+                                            "partTypes": [
+                                                "number",
+                                                "multans",
+                                                "choices"
+                                            ],
+                                            "correctAnswers": [
+                                                42,
+                                                "0,1,2,4",
+                                                "0"
+                                            ]
                                         }
                                     }
                                 ]
