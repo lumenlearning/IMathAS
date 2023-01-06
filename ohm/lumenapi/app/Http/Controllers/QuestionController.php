@@ -417,6 +417,88 @@ class QuestionController extends ApiBaseController
      *          ),
      *          @OA\Examples(
      *            example=200,
+     *            summary="Single part - number",
+     *            value={
+     *                "questionSetId": 3618,
+     *                "questionType": "number",
+     *                "seed": 482936,
+     *                "scores": {
+     *                    1,
+     *                },
+     *                "raw": {
+     *                    1,
+     *                },
+     *                "errors": {},
+     *                "allans": true,
+     *                "feedback": {
+     *                    "qn0": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Correct."
+     *                    }
+     *                },
+     *                "correctAnswers": {
+     *                    42,
+     *                }
+     *            }
+     *          ),
+     *          @OA\Examples(
+     *            example=200,
+     *            summary="Single part - multiple choice",
+     *            value={
+     *                "questionSetId": 3618,
+     *                "questionType": "choices",
+     *                "seed": 482936,
+     *                "scores": {
+     *                    1,
+     *                },
+     *                "raw": {
+     *                    1,
+     *                },
+     *                "errors": {},
+     *                "allans": true,
+     *                "feedback": {
+     *                    "qn0-4": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Correct."
+     *                    }
+     *                },
+     *                "correctAnswers": {
+     *                    "4",
+     *                }
+     *            }
+     *          ),
+     *          @OA\Examples(
+     *            example=200,
+     *            summary="Single part - multiple answer",
+     *            value={
+     *                "questionSetId": 3618,
+     *                "questionType": "multans",
+     *                "seed": 482936,
+     *                "scores": {
+     *                    1,
+     *                },
+     *                "raw": {
+     *                    1,
+     *                },
+     *                "errors": {},
+     *                "allans": true,
+     *                "feedback": {
+     *                    "qn0-1": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Correct."
+     *                    },
+     *                    "qn0-3": {
+     *                        "correctness": "correct",
+     *                        "feedback": "Correct."
+     *                    }
+     *                },
+     *                "correctAnswers": {
+     *                    "1,3",
+     *                }
+     *            }
+     *          ),
+     *          @OA\Examples(
+     *            example=200,
      *            summary="Multi-part question",
      *            value={
      *                "questionSetId": 3618,
