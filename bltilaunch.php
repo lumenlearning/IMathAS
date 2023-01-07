@@ -1802,7 +1802,7 @@ if (isset($SESS['selection_return'])) {
 	$_SESSION['lti_selection_return'] = $SESS['selection_return'];
 	$_SESSION['lti_selection_targets'] = $SESS['selection_targets'] ?? '';
 	$_SESSION['lti_selection_return_format'] = $SESS['selection_return_format'];
-	$_SESSION['lti_selection_type'] = $SESS['selection_type'];
+	$_SESSION['lti_selection_type'] = $SESS['selection_type'] ?? '';
 	$_SESSION['lti_selection_data'] = $SESS['selection_data'] ?? '';
 }
 
@@ -3115,7 +3115,7 @@ if (isset($SESS['selection_return'])) {
 	$_SESSION['lti_selection_return'] = $SESS['selection_return'];
 	$_SESSION['lti_selection_targets'] = $SESS['selection_targets'] ?? '';
 	$_SESSION['lti_selection_return_format'] = $SESS['selection_return_format'];
-	$_SESSION['lti_selection_type'] = $SESS['selection_type'];
+	$_SESSION['lti_selection_type'] = $SESS['selection_type'] ?? '';
 	$_SESSION['lti_selection_data'] = $SESS['selection_data'] ?? '';
 }
 

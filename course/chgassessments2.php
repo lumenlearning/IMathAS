@@ -86,6 +86,7 @@ if (!(isset($teacherid))) {
                     $sets[] = "$item=:$item";
                 }
             }
+            $submitby = $qarr['submitby'];
 		} else {
 			$turnonshuffle = 0;
 			$turnoffshuffle = 0;
