@@ -97,6 +97,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
 
     $searchand = [];
     $searchvals = [];
+    $stopwords = ['about','from','that','this','what','when','where','will','with'];
 
     if ($searchtype != 'all' && !is_array($libs)) {
         $libs = explode(',', $libs);
@@ -150,7 +151,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
                     $sgn = '-';
                     $v = substr($v, 1);
                 }
-                if (ctype_alnum($v) && strlen($v) > 3) {
+                if (ctype_alnum($v) && strlen($v) > 3 && !in_array($v, $stopwords)) {
                     $wholewords[] = $sgn . $v . '*';
                     unset($search['terms'][$k]);
                 }
