@@ -400,22 +400,7 @@ class LTI_Grade_Update {
     if (!empty($this->private_key[$keyseturl])) {
       return $this->private_key[$keyseturl];
     }
-    #### Begin OHM-specific changes ############################################################
-    #### Begin OHM-specific changes ############################################################
-    #### Begin OHM-specific changes ############################################################
-    #### Begin OHM-specific changes ############################################################
-    #### Begin OHM-specific changes ############################################################
-    #
-    # https://lumenlearning.atlassian.net/browse/OHM-1160
-    # - Added "AND privatekey != ''" to the SELECT query.
-    # - This addresses broken grade returns due to rows with empty private keys.
-    #
     $stm = $this->dbh->prepare('SELECT * FROM imas_lti_keys WHERE key_set_url=? AND privatekey != "" ORDER BY created_at DESC LIMIT 1');
-    #### End OHM-specific changes ############################################################
-    #### End OHM-specific changes ############################################################
-    #### End OHM-specific changes ############################################################
-    #### End OHM-specific changes ############################################################
-    #### End OHM-specific changes ############################################################
     $stm->execute(array($keyseturl));
     $row = $stm->fetch(PDO::FETCH_ASSOC);
     $this->private_key = $row;
