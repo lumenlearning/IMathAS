@@ -19,7 +19,6 @@ function onBeforeScoreQuestion(ScoreQuestionParams $scoreQuestionParams,
     }
 }
 
-
 /**
  * Include the correct answers in scoring results.
  *
