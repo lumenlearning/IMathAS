@@ -133,21 +133,7 @@ if (strpos($_SERVER['HTTP_HOST'],'localhost')!==false) {
 }
 
 //pull all lti queue items ready to send; we'll process until we're done or timeout
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#
-# See OHM-1159.
-# Ignoring LTI 1.3 grades for now until we can address the issue breaking grade returns.
-#
-$stm = $DBH->prepare('SELECT * FROM imas_ltiqueue WHERE sendon<? AND failures<7 AND sourcedid NOT LIKE "LTI1.3%" ORDER BY sendon LIMIT 2000');
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
+$stm = $DBH->prepare('SELECT * FROM imas_ltiqueue WHERE sendon<? AND failures<7 ORDER BY sendon LIMIT 2000');
 $stm->execute(array(time()));
 $LTIsecrets = array();
 $cntsuccess = 0;
