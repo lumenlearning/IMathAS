@@ -16,6 +16,11 @@ if (isset($CFG['hooks']['ltihome'])) {
 
 $hasplacement = false;
 
+if (!isset($_SESSION['ltiitemtype'])) {
+    echo _('Missing assessment information. Try opening from the LMS again');
+    exit;
+}
+
 //decide what we need to display
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
@@ -592,6 +597,10 @@ if (!$hascourse || isset($_GET['chgcourselink'])) {
 	$stm = $DBH->prepare("SELECT name,avail,startdate,enddate,date_by_lti,ver FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$typeid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
+    if ($line === false) {
+        echo 'Invalid assessment ID';
+        exit;
+    }
 	echo "<h2>".sprintf(_("LTI Placement of %s"), Sanitize::encodeStringForDisplay($line['name'])) . "</h2>";
 	if ($line['ver'] > 1) {
 		echo "<p><a href=\"assess2/?cid=" . Sanitize::courseId($cid) . "&aid=" . Sanitize::encodeUrlParam($typeid) . "\">"._("Preview assessment")."</a> | ";
