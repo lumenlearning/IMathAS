@@ -833,4 +833,47 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         $this->assertEquals([], $responseData['errors']);
         $this->assertNull($responseData['feedback']);
     }
+
+    public function testReIndexMultipartMultansAnswers(): void
+    {
+        $inputPostVars = [
+            'qn0' => '',
+            'qn1000' =>
+                [
+                    0 => 1,
+                    1 => 2,
+                ],
+            'qn1001' => 0,
+            'qn1002' => 1,
+        ];
+
+        $expectedOutputPostVars = [
+            'qn0' => '',
+            'qn1000' =>
+                array (
+                    1 => 1,
+                    2 => 2,
+                ),
+            'qn1001' => 0,
+            'qn1002' => 1,
+        ];
+
+        // The many different ways $anstypes could be defined in question code.
+        $questionControls = [
+            "\$anstypes = \"multans,choices,choices\") // [rest of question code]...",
+            "\$anstypes=\"multans,choices,choices\") // [rest of question code]...",
+            "\$anstypes = array(\"multans\",\"choices\",\"choices\") // [rest of question code]...",
+            "\$anstypes=array(\"multans\",\"choices\",\"choices\") // [rest of question code]...",
+            "\$anstypes = [\"multans\",\"choices\",\"choices\"] // [rest of question code]...",
+            "\$anstypes=[\"multans\",\"choices\",\"choices\"] // [rest of question code]..."
+        ];
+
+        foreach ($questionControls as $questionControl) {
+
+            $outputPostVars = $this->reIndexMultipartMultansAnswers($inputPostVars, $questionControl, 42);
+
+            $this->assertEquals($outputPostVars, $expectedOutputPostVars);
+        }
+
+    }
 }
