@@ -836,11 +836,6 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
 
     public function testReIndexMultipartMultansAnswers(): void
     {
-        // Set the method to public.
-        $class = new ReflectionClass(QuestionController::class);
-        $method = $class->getMethod('reIndexMultipartMultansAnswers');
-        $method->setAccessible(true);
-
         $inputPostVars = [
             'qn0' => '',
             'qn1000' =>
@@ -873,9 +868,14 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
             "\$anstypes=[\"multans\",\"choices\",\"choices\"] // [rest of question code]..."
         ];
 
+        // Set the reIndexMultipartMultansAnswers method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('reIndexMultipartMultansAnswers');
+        $method->setAccessible(true);
+
         foreach ($questionControls as $questionControl) {
 
-            $outputPostVars = $this->reIndexMultipartMultansAnswers($inputPostVars, $questionControl, 42);
+            $outputPostVars = $method->invokeArgs($this->questionController,[$inputPostVars, $questionControl, 42]);
 
             $this->assertEquals($outputPostVars, $expectedOutputPostVars);
         }
