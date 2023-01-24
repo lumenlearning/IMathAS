@@ -928,12 +928,17 @@ class QuestionController extends ApiBaseController
          * displaying or scoring a question. We'll extract it with a regex
          * instead.
          *
-         * The format of $anstypes is a comma-separated string of question types.
-         * Examples: "choices,number,multans" or "calculated,essay"
+         * The format of $anstypes is a comma-separated string of question types or an array
+         * of question type strings.
          */
         $anstypes = null;
-        if (preg_match('/\$anstypes\s+?=\s+?\"(.*)\"/', $questionControl, $matches)) {
+        // Expected regex pattern for strings: "$anstypes = "choices,number,multans"" - with 0 or more spaces next to =.
+        if (preg_match('/\$anstypes\s?=\s?\"(.*)\"/', $questionControl, $matches)) {
             $anstypes = explode(',', $matches[1]);
+        // Expected regex patterns for arrays: "$anstypes = ["multans","choices","number"]"
+        // OR "$anstypes = array("multans","file","essay")" - both with 0 or more spaces next to =.
+        } elseif (preg_match ('/\$anstypes\s?=\s?\[(.*)\]/', $questionControl, $matches) || preg_match ('/\$anstypes\s?=\s?array\((.*)\)/', $questionControl, $matches)) {
+            $anstypes = explode(',', str_replace("\"", "", $matches[1]));
         } else {
             // If we can't find $anstypes, we can't check for "multans" question types.
             // We shouldn't get this far as multipart questions require $anstypes to be
