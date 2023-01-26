@@ -16,7 +16,7 @@ final class GetFeedbackTxtTest extends TestCase
         // loading ohm_macros.php in isolation for testing.
         $GLOBALS['allowedmacros'] = [];
 
-        // Needed for _()
+        // Needed for _(), used by ohm_getfeedbacktxtnumber.
         require_once(__DIR__ . '/../../../../../../i18n/i18n.php');
 
         // This file contains OHM 2 "macros" as PHP functions instead of a class.
