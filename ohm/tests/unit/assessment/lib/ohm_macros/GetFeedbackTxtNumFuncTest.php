@@ -18,8 +18,6 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
 
         // Needed by ohm_getfeedbacktxtnumfunc.
         require_once(__DIR__ . '/../../../../../../assessment/displayq2.php');
-//        require_once(__DIR__ . '/../../../../../../assessment/macros.php');
-//        require_once(__DIR__ . '/../../../../../../assessment/mathparser.php');
 
         // This file contains OHM 2 "macros" as PHP functions instead of a class.
         require_once(__DIR__ . '/../../../../../../assessment/libs/ohm_macros.php');
