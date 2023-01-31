@@ -96,6 +96,23 @@ if (!empty($CFG['use_csrfp']) && class_exists('csrfProtector')) {
 	echo csrfProtector::output_header_code();
 }
 
+#### Begin OHM-specific changes ###########################################################
+#### Begin OHM-specific changes ###########################################################
+#### Begin OHM-specific changes ###########################################################
+#### Begin OHM-specific changes ###########################################################
+#### Begin OHM-specific changes ###########################################################
+# https://lumenlearning.atlassian.net/browse/AST-349
+// - Don't prompt for confirmation for embedded questions in OHM 2.
+$isOhmExemplarEnv = getenv('IS_EXEMPLAR');
+$isOhmExemplar = !empty($isOhmExemplarEnv) && is_string($isOhmExemplarEnv) && 'true' == strtolower($isOhmExemplarEnv);
+$isOhmExemplarValue = $isOhmExemplar ? 'true' : 'false';
+echo '<script>var isOhmExemplar = ' . $isOhmExemplarValue . ';</script>';
+#### End OHM-specific changes ###########################################################
+#### End OHM-specific changes ###########################################################
+#### End OHM-specific changes ###########################################################
+#### End OHM-specific changes ###########################################################
+#### End OHM-specific changes ###########################################################
+
 echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=112420" type="text/javascript"></script>';
 
 

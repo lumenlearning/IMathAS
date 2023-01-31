@@ -31,7 +31,19 @@ function checkComplete(baseel) {
 
 function confirmSubmit (form) {
 	var allans = checkComplete(form);
-	if (!allans) {
+	// Begin OHM-specific changes ###########################################################
+	// Begin OHM-specific changes ###########################################################
+	// Begin OHM-specific changes ###########################################################
+	// Begin OHM-specific changes ###########################################################
+	// Begin OHM-specific changes ###########################################################
+	// https://lumenlearning.atlassian.net/browse/AST-349
+	// - Don't prompt for confirmation for embedded questions in OHM 2.
+	if (!allans && !isOhmExemplar) {
+	// End OHM-specific changes ###########################################################
+	// End OHM-specific changes ###########################################################
+	// End OHM-specific changes ###########################################################
+	// End OHM-specific changes ###########################################################
+	// End OHM-specific changes ###########################################################
 		var msg = "Not all question parts have been answered.  Are you sure you want to submit this question?";
 		return confirm(msg);
 	} else {
