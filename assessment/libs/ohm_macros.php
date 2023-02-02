@@ -32,7 +32,7 @@ array_push($GLOBALS['allowedmacros'],
  * @param integer|null $partNumber The question part number.
  * @return string The question index for feedback.
  */
-function getFeedbackIndex(?int $partNumber): string
+function _getFeedbackIndex(?int $partNumber): string
 {
     if (is_null($partNumber)) {
         $questionIndex = 'qn0';
@@ -59,8 +59,8 @@ function getFeedbackIndex(?int $partNumber): string
  * The most important note:
  * - Shuffling MUST be disabled to use this macro.
  *
- * @param string|array|null $stuanswers The student answer, obtained from $stuanswers[$thisq] for single
- *                                      part questions, or using the getstuans macro for multipart.
+ * @param string|int|array|null $stuanswers The student answer, obtained from $stuanswers[$thisq] for single
+ *                                          part questions, or using the getstuans macro for multipart.
  * @param string $correctFeedback The feedback for correct answers.
  * @param string $incorrectFeedback The feedback for incorrect answers.
  * @param string|integer|null $correctAnswer The correct answer from question code.
@@ -79,7 +79,7 @@ function ohm_getfeedbackbasic($stuanswers,
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
 
     // For "multans" type questions, the student answer will be an array of answer keys.
@@ -94,7 +94,7 @@ function ohm_getfeedbackbasic($stuanswers,
         $correctAnswer = implode(',', $correctAnswer);
     }
 
-    if (empty($studentAnswer)) {
+    if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];
     } else if ($studentAnswer == $correctAnswer) {
         return [
@@ -147,9 +147,12 @@ function ohm_getfeedbacktxt($studentAnswer,
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
 
-    if (!is_null($studentAnswer) && empty($studentAnswer)) {
+    // This should probably be: ( is_null(answer) || '' === answer ),
+    // but this macro is currently in use by PROD question code, so
+    // leaving the !is_null check as-is for now.
+    if (!is_null($studentAnswer) && '' === $studentAnswer) {
         return [];
     } else if ($studentAnswer === 'NA') {
         return [
@@ -162,7 +165,7 @@ function ohm_getfeedbacktxt($studentAnswer,
 
     $correctAnswersAsArray = explode(' or ', $correctAnswer);
 
-    return _getAllFeedbacks($feedbacksPossible, $correctAnswersAsArray, $partNumber);
+    return _getAllFeedbacksWithCorrectness($feedbacksPossible, $correctAnswersAsArray, $partNumber);
 }
 
 /**
@@ -180,7 +183,7 @@ function ohm_getfeedbacktxtessay(?string $studentAnswer, string $feedbackText, ?
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
 
     if ($studentAnswer == null || trim($studentAnswer) == '') {
         return [];
@@ -221,7 +224,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $studentAnswer : $studentAnswer[$partNumber];
 
     if ($studentAnswer !== null) {
@@ -339,7 +342,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
 
     if ($studentAnswer === null) {
         return [];
@@ -459,7 +462,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $studentAnswer : $studentAnswer[$partNumber];
 
     if ($studentAnswer === null || trim($studentAnswer) === '') {
@@ -708,10 +711,10 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
         return [];
     }
 
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
 
-    if (!is_null($studentAnswer) && empty($studentAnswer)) {
+    if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];
     } else if ($studentAnswer === 'NA') {
         return [
@@ -726,7 +729,7 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
     $correctAnswers = preg_replace('/s*/', '', $correctAnswers);
     $correctAnswersAsArray = explode(',', $correctAnswers);
 
-    return _getAllFeedbacks($feedbacksPossible, $correctAnswersAsArray, $partNumber);
+    return _getAllFeedbacksWithCorrectness($feedbacksPossible, $correctAnswersAsArray, $partNumber);
 }
 
 /**
@@ -741,12 +744,12 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
  * @param integer|null $partNumber The part number for multipart questions.
  * @return array An associative array of feedback(s) with correctness.
  */
-function _getAllFeedbacks(array $feedbacksPossible,
-                          array $correctAnswers,
-                          ?int $partNumber = null
+function _getAllFeedbacksWithCorrectness(array $feedbacksPossible,
+                                         array $correctAnswers,
+                                         ?int $partNumber = null
 ): array
 {
-    $questionIndex = getFeedbackIndex($partNumber);
+    $questionIndex = _getFeedbackIndex($partNumber);
 
     $allFeedback = [];
     foreach ($feedbacksPossible as $idx => $feedback) {
