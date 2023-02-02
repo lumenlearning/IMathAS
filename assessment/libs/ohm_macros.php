@@ -225,6 +225,7 @@ function ohm_getfeedbacktxtnumber($studentAnswer,
     }
 
     $questionIndex = _getFeedbackIndex($partNumber);
+    $studentAnswer = is_null($partNumber) ? $studentAnswer : $studentAnswer[$partNumber];
 
     if ($studentAnswer !== null) {
         $studentAnswer = preg_replace('/[^\-\d\.eE]/', '', $studentAnswer);
@@ -462,6 +463,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
     }
 
     $questionIndex = _getFeedbackIndex($partNumber);
+    $studentAnswer = is_null($partNumber) ? $studentAnswer : $studentAnswer[$partNumber];
 
     if ($studentAnswer === null || trim($studentAnswer) === '') {
         return [];
