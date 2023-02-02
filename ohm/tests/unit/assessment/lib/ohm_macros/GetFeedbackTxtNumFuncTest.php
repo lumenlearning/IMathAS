@@ -48,7 +48,8 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
     {
         // Test different part numbers.
         foreach ([0, 2, 4, 7] as $partNumber) {
-            $feedback = ohm_getfeedbacktxtnumfunc(null, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = null;
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals([], $feedback);
         }
     }
@@ -57,7 +58,8 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
     {
         // Test different part numbers.
         foreach ([0, 2, 4, 7] as $partNumber) {
-            $feedback = ohm_getfeedbacktxtnumfunc('', [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = '';
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals([], $feedback);
         }
     }
@@ -140,10 +142,12 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
                 ]
             ];
 
-            $feedback = ohm_getfeedbacktxtnumfunc(42, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = 42;
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals($expectedFeedback, $feedback);
 
-            $feedback = ohm_getfeedbacktxtnumfunc(41.999, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = 41.999;
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals($expectedFeedback, $feedback);
         }
     }
@@ -163,7 +167,8 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
                 ]
             ];
 
-            $feedback = ohm_getfeedbacktxtnumfunc(41.999, [42, 0.5], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = 41.999;
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [42, 0.5], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals($expectedFeedback, $feedback);
         }
     }
@@ -179,7 +184,8 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
                 ]
             ];
 
-            $feedback = ohm_getfeedbacktxtnumfunc(40, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = 40;
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [42, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals($expectedFeedback, $feedback);
         }
     }
@@ -195,7 +201,8 @@ final class GetFeedbackTxtNumFuncTest extends TestCase
                 ]
             ];
 
-            $feedback = ohm_getfeedbacktxtnumfunc(0, [0, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
+            $stuanswers[$partNumber] = 0;
+            $feedback = ohm_getfeedbacktxtnumfunc($stuanswers, [0, 1], ['Correct.'], 'Incorrect', 'x', '', '.001', '-10,10', $partNumber);
             $this->assertEquals($expectedFeedback, $feedback);
         }
     }
