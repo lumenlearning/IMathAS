@@ -128,6 +128,7 @@ class QuestionScoreDto extends QuestionBaseDto
         $this->postParams = [];
         foreach ($postParams as $postParam) {
             $_POST[$postParam['name']] = $postParam['value'];
+            $_POST[$postParam['name'] . '-val'] = $postParam['value-decimal'] ?? null;
             $this->postParams[$postParam['name']] = $postParam['value'];
         }
     }
