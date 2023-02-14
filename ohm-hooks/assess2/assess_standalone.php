@@ -89,7 +89,7 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
                     $unshuffledPartFeedback
                 );
                 // Merge the shuffled part feedback with all other feedback.
-                $returnData['feedback'] = array_merge($shuffledPartFeedback, $allFeedbackWithPartRemoved);
+                $returnData['feedback'] = array_merge($allFeedbackWithPartRemoved, $shuffledPartFeedback);
             } else {
                 $returnData['correctAnswers'][$partNumber] = $correctAnswers[$partNumber];
             }
