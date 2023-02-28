@@ -1166,7 +1166,7 @@ function makeTchartsfromjournal($j, $order, $sn, &$anstypes, &$answer, &$showans
 		if (!isset($debits[$o])) {$debits[$o] = array();}
 		if (!isset($credits[$o])) {$credits[$o] = array();}
 		$out .= makeTchart($o, $max, $debits[$o], $credits[$o], $sn, $anstypes, $answer, $showanswer, $displayformat, $answerboxsize,true, $showtotal);
-		$sn += $max*2 + 2;
+		$sn += $max*2 + ($showtotal?2:0);
 	}
 	$out .= '<br class="clear"/>';
 	$showanswer .= '<br class="clear"/><p>&nbsp;</p>';
@@ -1174,7 +1174,7 @@ function makeTchartsfromjournal($j, $order, $sn, &$anstypes, &$answer, &$showans
 }
 
 // scoreTchartsfromjournal($stua,$answer,$j,$order,$sn)
-function scoreTchartsfromjournal($stua,$answer,$j,$order,$sn) {
+function scoreTchartsfromjournal($stua,$answer,$j,$order,$sn, $showtotal=true) {
 	$out = '';
 	$debits = array(); $credits = array();
 	foreach ($j as $jd) {
@@ -1205,7 +1205,7 @@ function scoreTchartsfromjournal($stua,$answer,$j,$order,$sn) {
 		if (!isset($debits[$o])) {$debits[$o] = array();}
 		if (!isset($credits[$o])) {$credits[$o] = array();}
 		$answer = scoreTchart($stua, $answer, $max, $debits[$o], $credits[$o], $sn);
-		$sn += $max*2 + 2;
+		$sn += $max*2 + ($showtotal?2:0);
 	}
 	return $answer;
 }
