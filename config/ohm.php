@@ -33,6 +33,9 @@ $accountapproval = "support@lumenlearning.com";
 //use IPEDS IDs during new instructor signup?
 $CFG['use_ipeds'] = true;
 
+//this is for util/getstucntdetcsv2.php
+$CFG['statsauth'] = getenv('STUDENT_DETAIL_REPORT_PASSWORD');
+
 //color shift icons as deadline approaches?
 $colorshift = true;
 
