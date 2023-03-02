@@ -268,24 +268,13 @@ echo '<input type="hidden" id="isreview" value="0"/>';
 // ####### Begin OHM-specific changes ##################################################################
 // ####### Begin OHM-specific changes ##################################################################
 // ####### Begin OHM-specific changes ##################################################################
+// @see https://lumenlearning.atlassian.net/browse/AST-255
+// @see https://lumenlearning.atlassian.net/browse/OHM-1168
+// Show/hide try another version option in OHM vs OHM2 based on feature flag.
 $showQuestionNumbers = '';
 if (isset($_REQUEST['show_question_numbers'])) {
 	$showQuestionNumbers = '&amp;show_question_numbers';
 }
-// ####### End OHM-specific changes ####################################################################
-// ####### End OHM-specific changes ####################################################################
-// ####### End OHM-specific changes ####################################################################
-// ####### End OHM-specific changes ####################################################################
-// ####### End OHM-specific changes ####################################################################
-
-// ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################
-// @see https://lumenlearning.atlassian.net/browse/AST-255
-// @see https://lumenlearning.atlassian.net/browse/OHM-1168
-// Show/hide try another version option in OHM vs OHM2 based on feature flag.
 if (getenv('ALLOW_TRY_ANOTHER_VERSION') == 'true') {
 	echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.$showQuestionNumbers.'">';
  	echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.Sanitize::encodeUrlParam($sameseed).'&amp;theme='.Sanitize::encodeUrlParam($theme).'&amp;iframe_resize_id='.Sanitize::encodeUrlParam($targetid).'">';
