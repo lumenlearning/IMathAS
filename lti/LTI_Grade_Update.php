@@ -21,7 +21,7 @@ define('TOOL_HOST', $GLOBALS['basesiteurl']);
 class LTI_Grade_Update {
   private $dbh;
   private $access_tokens = [];
-  private $private_key = '';
+  private $private_key = [];
   private $failures = [];
   private $debug = false;
 
@@ -316,7 +316,7 @@ class LTI_Grade_Update {
     ];
 
     // Get tool private key from our JWKS
-    $private_key = $this->get_tool_private_key($keyseturl);
+    $private_key[$keyseturl] = $this->get_tool_private_key($keyseturl);
 
     // Sign the JWT with our private key (given by the platform on registration)
     $jwt = JWT::encode($jwt_claim, $private_key['privatekey'], 'RS256', $private_key['kid']);
@@ -380,8 +380,8 @@ class LTI_Grade_Update {
    * @return array
    */
   private function get_tool_private_key(string $keyseturl): array {
-    if (!empty($this->private_key)) {
-      return $this->private_key;
+    if (!empty($this->private_key[$keyseturl])) {
+      return $this->private_key[$keyseturl];
     }
     #### Begin OHM-specific changes ############################################################
     #### Begin OHM-specific changes ############################################################
