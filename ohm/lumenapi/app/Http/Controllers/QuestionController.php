@@ -14,6 +14,7 @@ use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 
 use Illuminate\Support\Facades\Validator;
+use App\Dtos\QuestionBaseDto;
 use App\Dtos\QuestionDto;
 use App\Dtos\QuestionScoreDto;
 use Illuminate\Validation\ValidationException;
@@ -102,6 +103,11 @@ class QuestionController extends ApiBaseController
      *                     type="int"
      *                 ),
      *                 @OA\Property(
+     *                     property="externalId",
+     *                     type="string",
+     *                     format="uuid"
+     *                 ),
+     *                 @OA\Property(
      *                     property="seed",
      *                     type="int"
      *                 ),
@@ -154,6 +160,12 @@ class QuestionController extends ApiBaseController
      *               property="questionSetId",
      *               type="int",
      *               description="Question Set Id of scored item"
+     *             ),
+     *             @OA\Property(
+     *               property="externalId",
+     *               type="string",
+     *               format="uuid",
+     *               description="External Question Id of scored item"
      *             ),
      *             @OA\Property(
      *               property="seed",
@@ -218,7 +230,8 @@ class QuestionController extends ApiBaseController
     {
         try {
             $this->validate($request,[
-                'questionSetId' => 'required|int',
+                'questionSetId' => 'required_without:externalId|int',
+                'externalId' => 'required_without:questionSetId|uuid',
                 'seed' => 'required|int'
             ]);
 
@@ -285,6 +298,11 @@ class QuestionController extends ApiBaseController
      *                 @OA\Property(
      *                     property="questionSetId",
      *                     type="int"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="externalId",
+     *                     type="string",
+     *                     format="uuid"
      *                 ),
      *                 @OA\Property(
      *                     property="seed",
@@ -354,6 +372,12 @@ class QuestionController extends ApiBaseController
      *               property="questionSetId",
      *               type="int",
      *               description="Question Set Id of scored item"
+     *             ),
+     *             @OA\Property(
+     *               property="externalId",
+     *               type="string",
+     *               format="uuid",
+     *               description="External Question Id of scored item"
      *             ),
      *             @OA\Property(
      *                 property="questionType",
@@ -690,7 +714,8 @@ class QuestionController extends ApiBaseController
                 'post' => 'required|array|min:1',
                 'post.*.name' => 'required|distinct|string',
                 'post.*.value' => 'present',
-                'questionSetId' => 'required|int',
+                'questionSetId' => 'required_without:externalId|int',
+                'externalId' => 'required_without:questionSetId|uuid',
                 'seed' => 'required|int',
                 'studentAnswers' => 'required|array',
                 'studentAnswerValues' => 'required|array',
@@ -768,14 +793,25 @@ class QuestionController extends ApiBaseController
 
     /**
      * Retrieves question set list and initializes AssessStandalone
-     * @param int $questionSetId
+     * @param QuestionBaseDto $questionBaseDto
      * @param array $state
      * @return AssessStandalone
      */
-    protected function getAssessStandalone(int $questionSetId, array $state): AssessStandalone
+    protected function getAssessStandalone(QuestionBaseDto $questionBaseDto, array $state): AssessStandalone
     {
-        // Use questionSetId from incoming request to retrieve list of questions from db
-        $questionSet = $this->questionSetRepository->getById($questionSetId);
+        // Use question IDs from the incoming request to retrieve the a question from the DB.
+        // If an externalId was provided, this will be used instead of the questionSetId.
+        $questionSet = null;
+        if ($questionBaseDto->getExternalId()) {
+            $questionSet = $this->questionSetRepository->getByExternalId($questionBaseDto->getExternalId());
+            $questionBaseDto->setQuestionSetId($questionSet['id']);
+            $state['qsid'][0] = $questionSet['id']; // QuestionSetRepository only returns one question.
+        } else if ($questionBaseDto->getQuestionSetId()) {
+            $questionSet = $this->questionSetRepository->getById($questionBaseDto->getQuestionSetId());
+            $questionBaseDto->setExternalId($questionSet['external_id']);
+        }
+
+        // FIXME: This should probably throw NotFoundHttpException.
         if (!$questionSet) throw new BadRequestException('Unable to locate question set');
 
         // Store question type and control for use later in scoring
@@ -797,7 +833,7 @@ class QuestionController extends ApiBaseController
     {
         $scoreDto = new QuestionScoreDto($inputState);
 
-        $assessStandalone = $this->getAssessStandalone($scoreDto->getQuestionSetId(), $scoreDto->getState());
+        $assessStandalone = $this->getAssessStandalone($scoreDto, $scoreDto->getState());
 
         // For "multans" questions, if a student selects answers [0, 2, 4], the array
         // of answers passed to the scoring engine should be: [0, null, 2, null, 4]
@@ -832,7 +868,7 @@ class QuestionController extends ApiBaseController
     public function getQuestionDisplay(array $inputState): array
     {
         $questionDto = new QuestionDto($inputState);
-        $assessStandalone = $this->getAssessStandalone($questionDto->getQuestionSetId(), $questionDto->getState());
+        $assessStandalone = $this->getAssessStandalone($questionDto, $questionDto->getState());
 
         // Get question HTML and "JS params".
         $questionDisplayData = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
