@@ -813,6 +813,10 @@ class QuestionController extends ApiBaseController
 
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
 
+        // Get the question's external ID.
+        $questionDbData = $assessStandalone->getQuestionData($scoreDto->getQuestionSetId());
+        $score['external_id'] = $questionDbData['external_id'];
+
         // Get question feedback.
         $questionFeedback = $score['feedback'] ?? null;
 
@@ -820,6 +824,8 @@ class QuestionController extends ApiBaseController
     }
 
     /**
+     * Get a single question for display using AssessStandalone.
+     *
      * @param array $inputState
      * @return array
      */
@@ -828,21 +834,26 @@ class QuestionController extends ApiBaseController
         $questionDto = new QuestionDto($inputState);
         $assessStandalone = $this->getAssessStandalone($questionDto->getQuestionSetId(), $questionDto->getState());
 
-        $questionData = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
+        // Get question HTML and "JS params".
+        $questionDisplayData = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
+
+        // Get the question's external ID.
+        $questionDbData = $assessStandalone->getQuestionData($questionDto->getQuestionSetId());
+        $questionDisplayData['external_id'] = $questionDbData['external_id'];
 
         // Get question feedback.
         $question = $assessStandalone->getQuestion();
         $questionFeedback = $this->getQuestionFeedback($question);
 
         if (
-            isset($questionData['errors'])
-            && 'array' == gettype($questionData['errors'])
+            isset($questionDisplayData['errors'])
+            && 'array' == gettype($questionDisplayData['errors'])
             && !empty($question->getErrors())
         ) {
-            $questionData['errors'] = array_merge($question->getErrors(), $questionData['errors']);
+            $questionDisplayData['errors'] = array_merge($question->getErrors(), $questionDisplayData['errors']);
         }
 
-        return $questionDto->getQuestionResponse($questionData, $this->questionType['questionType'],
+        return $questionDto->getQuestionResponse($questionDisplayData, $this->questionType['questionType'],
             $assessStandalone->getState(), $questionFeedback);
     }
 
