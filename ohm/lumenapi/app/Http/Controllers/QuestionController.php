@@ -134,6 +134,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
+     *                   "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
      *                   "seed": 8076,
      *                   "rawScores": {},
      *                   "partialAttemptNumber": {},
@@ -191,6 +192,7 @@ class QuestionController extends ApiBaseController
      *          ),
      *          @OA\Examples(example=200, summary="", value={
      *              "questionSetId": 123,
+     *              "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
      *              "seed": 999,
      *              "html": "<div></div>",
      *              "jsparams": {
@@ -347,6 +349,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
+     *                   "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
      *                   "seed": 8076,
      *                   "post": {
      *                      {
@@ -444,6 +447,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - number",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "6953f40d-4d11-4dd6-a430-39cc7447c581",
      *                "questionType": "number",
      *                "seed": 482936,
      *                "scores": {
@@ -470,6 +474,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple choice",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
      *                "questionType": "choices",
      *                "seed": 482936,
      *                "scores": {
@@ -496,6 +501,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple answer",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "679659b5-b206-488e-ad6a-d1af1c42ec99",
      *                "questionType": "multans",
      *                "seed": 482936,
      *                "scores": {
@@ -526,6 +532,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - matching",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "09de1325-314e-45cb-ae1c-02b6f04b70a2",
      *                "questionType": "matching",
      *                "seed": 482936,
      *                "scores": {
@@ -552,6 +559,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - string",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "b560b54d-d672-4a20-826e-e9e40df4eae0",
      *                "questionType": "string",
      *                "seed": 482936,
      *                "scores": {
@@ -578,6 +586,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - draw",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "276bad3e-b9cf-4b0b-b484-f3b390b60e8c",
      *                "questionType": "draw",
      *                "seed": 482936,
      *                "scores": {
@@ -613,6 +622,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - essay",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "3ce6876f-8258-4c2a-85a8-d4afe204120a",
      *                "questionType": "essay",
      *                "seed": 482936,
      *                "scores": {
@@ -639,6 +649,7 @@ class QuestionController extends ApiBaseController
      *            summary="Multi-part question",
      *            value={
      *                "questionSetId": 3618,
+     *                "externalId": "10dc9ad3-6d13-4633-ab05-a55734c2b33a",
      *                "questionType": "multipart",
      *                "seed": 482936,
      *                "scores": {
