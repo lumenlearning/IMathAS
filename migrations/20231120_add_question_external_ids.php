@@ -6,7 +6,8 @@ $DBH->beginTransaction();
 
 // ALGORITHM=INPLACE is not supported on this table.
 $query = "ALTER TABLE `imas_questionset` 
-  ADD COLUMN `external_id` VARCHAR(36) NULL;";
+  ADD COLUMN `external_id` VARCHAR(36) NULL,
+  ADD UNIQUE INDEX `external_id_UNIQUE` (`external_id` ASC);";
 $res = $DBH->query($query);
 if ($res===false) {
     echo "<p>Query failed: ($query) : ".print_r($DBH->errorInfo(),true)."</p>";
