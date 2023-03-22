@@ -22,7 +22,7 @@ function addToLTIQueue($sourcedid, $key, $grade, $sendnow=false) {
 
 	$query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon, keyseturl) ';
 	$query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon, :keyseturl) ON DUPLICATE KEY UPDATE ';
-	$query .= 'grade=VALUES(grade),sendon=VALUES(sendon),sourcedid=VALUES(sourcedid),failures=0 ';
+	$query .= 'grade=VALUES(grade),sendon=VALUES(sendon),sourcedid=VALUES(sourcedid),failures=0,keyseturl=VALUES(keyseturl) ';
 
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(
