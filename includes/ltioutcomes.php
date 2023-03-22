@@ -18,17 +18,19 @@ function addToLTIQueue($sourcedid, $key, $grade, $sendnow=false) {
 	global $DBH, $CFG;
 
 	$LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
+	$keyseturl = $GLOBALS['basesiteurl'] . '/lti/jwks.php';
 
-	$query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon) ';
-	$query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon) ON DUPLICATE KEY UPDATE ';
-	$query .= 'grade=VALUES(grade),sendon=VALUES(sendon),sourcedid=VALUES(sourcedid),failures=0 ';
+	$query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon, keyseturl) ';
+	$query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon, :keyseturl) ON DUPLICATE KEY UPDATE ';
+	$query .= 'grade=VALUES(grade),sendon=VALUES(sendon),sourcedid=VALUES(sourcedid),failures=0,keyseturl=VALUES(keyseturl) ';
 
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(
 		':hash' => $key,
 		':sourcedid' => $sourcedid,
 		':grade' => $grade,
-		':sendon' => (time() + ($sendnow?0:$LTIdelay))
+		':sendon' => (time() + ($sendnow?0:$LTIdelay)),
+		':keyseturl' => $keyseturl,
 	));
 
 	return ($stm->rowCount()>0);

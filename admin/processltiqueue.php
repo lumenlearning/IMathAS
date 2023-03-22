@@ -158,7 +158,8 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 						'action' => 'update',
 						'ltiuserid' => $ltiuserid,
 						'platformid' => $platformid,
-						'grade' => max(0, $row['grade'])
+						'grade' => max(0, $row['grade']),
+                        'keyseturl' => $row['keyseturl'],
 					),
 					null, //no special callback
 					array( 	  //user-data; will get passed to response
@@ -180,7 +181,8 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 					'ver' => 'LTI1.3',
 					'action' => 'gettoken',
 					'platformid' => $platformid,
-					'platforminfo' => $platforminfo
+					'platforminfo' => $platforminfo,
+                    'keyseturl' => $row['keyseturl'],
 				),
 				null, //no special callback
 				array( 	  //user-data; will get passed to response
@@ -293,7 +295,8 @@ function LTIqueuePostdataCallback($data) {
 				'body' => $updater1p3->get_token_request_post($data['platformid'],
 										$platforminfo['client_id'],
 										$platforminfo['auth_token_url'],
-										$platforminfo['auth_server']
+										$platforminfo['auth_server'],
+                                        $data['keyseturl'],
 									),
 				'header' => array()
 			];
@@ -301,7 +304,7 @@ function LTIqueuePostdataCallback($data) {
             if ($updater1p3->have_token($data['platformid']) &&
                 $updater1p3->token_valid($data['platformid'])
             ) { // double check we have a valid token
-				$token = $updater1p3->get_access_token($data['platformid']);
+				$token = $updater1p3->get_access_token($data['platformid'], '', '', '', $data['keyseturl']);
 				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid']);
 			} else {
 				return false;
