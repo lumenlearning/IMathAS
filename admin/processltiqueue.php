@@ -304,7 +304,7 @@ function LTIqueuePostdataCallback($data) {
             if ($updater1p3->have_token($data['platformid']) &&
                 $updater1p3->token_valid($data['platformid'])
             ) { // double check we have a valid token
-				$token = $updater1p3->get_access_token($data['platformid'], $data['keyseturl']);
+				$token = $updater1p3->get_access_token($data['platformid'], '', '', '', $data['keyseturl']);
 				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid']);
 			} else {
 				return false;
