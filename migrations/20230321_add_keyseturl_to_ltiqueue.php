@@ -6,7 +6,7 @@
 $DBH->beginTransaction();
 
 $query = "ALTER TABLE `imas_ltiqueue` 
-  ADD COLUMN `keyseturl` INT NULL,
+  ADD COLUMN `keyseturl` VARCHAR(256) NULL,
   ALGORITHM=INPLACE,
   LOCK=NONE;";
 $res = $DBH->query($query);
