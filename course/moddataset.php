@@ -1038,6 +1038,20 @@
 	if (!$myq) {
 		echo "<p class=noticetext>"._("This question is not set to allow you to modify the code.  You can only view the code and make additional library assignments")."</p>";
 	}
+
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    if (100 == $myrights && $line['external_id']) {
+        echo "<span style='display: block;'>External ID: " . $line['external_id'] . "</span>";
+    }
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 ?>
 <form enctype="multipart/form-data" method=post action="<?php echo $formAction; // Sanitized near line 806 ?>">
 <input type="hidden" name="hasimg" value="<?php echo Sanitize::encodeStringForDisplay($line['hasimg']);?>"/>

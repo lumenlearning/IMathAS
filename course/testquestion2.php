@@ -428,6 +428,19 @@ if ($overwriteBody==1) {
   } else {
 	  echo "<a href=\"#\" onclick=\"GB_show('$sendtitle','$imasroot/course/sendmsgmodal.php?sendtype=$sendtype&cid=" . Sanitize::courseId($sendcid) . '&quoteq='.Sanitize::encodeUrlParam("0-{$qsetid}-{$seed}-reperr-{$assessver}"). "',800,'auto')\">$sendtitle</a> "._("to report problems");
   }
+  #### Begin OHM-specific changes ############################################################
+  #### Begin OHM-specific changes ############################################################
+  #### Begin OHM-specific changes ############################################################
+  #### Begin OHM-specific changes ############################################################
+  #### Begin OHM-specific changes ############################################################
+  if (100 == $myrights && $line['external_id']) { // Admin user rights
+      echo "<span class='small subdued' style='display: block;'>External ID: " . $line['external_id'] . "</span>";
+  }
+  #### End OHM-specific changes ############################################################
+  #### End OHM-specific changes ############################################################
+  #### End OHM-specific changes ############################################################
+  #### End OHM-specific changes ############################################################
+  #### End OHM-specific changes ############################################################
   echo '</p>';
 
 	printf("<p>"._("Description:")." %s</p><p>"._("Author:")." <span class='pii-full-name'>%s</span></p>",
