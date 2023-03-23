@@ -548,6 +548,78 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
     }
 
     /*
+     * scoreAllQuestions
+     */
+
+    public function testScoreAllQuestions_byExternalId(): void
+    {
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getByExternalId')
+            ->andReturn($this->imasQuestionSet_dbRow_number);
+
+        // When both a questionSetId and externalId are requested, only
+        // the externalId should be used.
+        $request = Request::create('/api/v1/questions/score', 'POST',
+            json_decode('[
+                {
+                    "post": [
+                        {
+                            "name": "qn0",
+                            "value": "10"
+                        }
+                    ],
+                    "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                    "seed": 3469,
+                    "studentAnswers": ["10"],
+                    "studentAnswerValues": ["10"],
+                    "partAttemptNumber": [0]
+                },
+                {
+                    "post": [
+                        {
+                            "name": "qn0",
+                            "value": "8"
+                        }
+                    ],
+                    "externalId": "4aa944ce-ccea-4966-a00f-bb9f89a2f1d8",
+                    "seed": 5106,
+                    "studentAnswers": ["8"],
+                    "studentAnswerValues": ["8"],
+                    "partAttemptNumber": [0]
+                }
+            ]', true)
+        );
+
+        $response = $this->questionController->scoreAllQuestions($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $question1 = $responseData[0];
+        $this->assertEquals('a741e53b-d37a-49aa-88cf-c8226b7cc170', $question1['externalId']);
+        $this->assertEquals('number', $question1['questionType']);
+        $this->assertEquals(3469, $question1['seed']);
+        $this->assertEquals([1.0], $question1['scores']);
+        $this->assertEquals([1.0], $question1['raw']);
+        $this->assertEquals([], $question1['errors']);
+        $this->assertTrue($question1['allans']);
+        $this->assertNotEmpty($question1['correctAnswers']);
+        $this->assertEquals('10', $question1['correctAnswers'][0]);
+
+        $question2 = $responseData[1];
+        $this->assertEquals('4aa944ce-ccea-4966-a00f-bb9f89a2f1d8', $question2['externalId']);
+        $this->assertEquals('number', $question2['questionType']);
+        $this->assertEquals(5106, $question2['seed']);
+        $this->assertEquals([1.0], $question2['scores']);
+        $this->assertEquals([1.0], $question2['raw']);
+        $this->assertEquals([], $question2['errors']);
+        $this->assertTrue($question2['allans']);
+        $this->assertNotEmpty($question2['correctAnswers']);
+        $this->assertEquals('8', $question2['correctAnswers'][0]);
+    }
+
+    /*
      * getScore
      */
 
@@ -1019,5 +1091,45 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
+    }
+
+    /*
+     * getAllQuestions
+     */
+
+    public function testGetAllQuestions_byExternalId(): void
+    {
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getByExternalId')
+            ->andReturn($this->imasQuestionSet_dbRow_number);
+
+        $request = Request::create('/api/v1/questions', 'POST',
+            json_decode('[
+                                  {
+                                      "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                                      "seed": 3469
+                                  },
+                                  {
+                                      "externalId": "4aa944ce-ccea-4966-a00f-bb9f89a2f1d8",
+                                      "seed": 5106
+                                  }
+                              ]', true)
+        );
+
+        $response = $this->questionController->getAllQuestions($request);
+        $responseData = $response->getData(true);
+
+        $question1 = $responseData[0];
+        $this->assertEquals('a741e53b-d37a-49aa-88cf-c8226b7cc170', $question1['externalId']);
+        $this->assertEquals('number', $question1['questionType']);
+        $this->assertEquals(3469, $question1['seed']);
+        $this->assertEquals([], $question1['errors']);
+
+        $question2 = $responseData[1];
+        $this->assertEquals('4aa944ce-ccea-4966-a00f-bb9f89a2f1d8', $question2['externalId']);
+        $this->assertEquals('number', $question2['questionType']);
+        $this->assertEquals(5106, $question2['seed']);
+        $this->assertEquals([], $question2['errors']);
     }
 }
