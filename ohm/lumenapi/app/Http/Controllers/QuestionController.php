@@ -103,9 +103,8 @@ class QuestionController extends ApiBaseController
      *                     type="int"
      *                 ),
      *                 @OA\Property(
-     *                     property="externalId",
-     *                     type="string",
-     *                     format="uuid"
+     *                     property="uniqueId",
+     *                     type="int"
      *                 ),
      *                 @OA\Property(
      *                     property="seed",
@@ -134,7 +133,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
-     *                   "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
+     *                   "uniqueId": "1491933600157156",
      *                   "seed": 8076,
      *                   "rawScores": {},
      *                   "partialAttemptNumber": {},
@@ -163,10 +162,9 @@ class QuestionController extends ApiBaseController
      *               description="Question Set Id of scored item"
      *             ),
      *             @OA\Property(
-     *               property="externalId",
-     *               type="string",
-     *               format="uuid",
-     *               description="External Question Id of scored item"
+     *               property="uniqueId",
+     *               type="int",
+     *               description="Unique Question Id of scored item"
      *             ),
      *             @OA\Property(
      *               property="seed",
@@ -192,7 +190,7 @@ class QuestionController extends ApiBaseController
      *          ),
      *          @OA\Examples(example=200, summary="", value={
      *              "questionSetId": 123,
-     *              "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
+     *              "uniqueId": "1491933600157156",
      *              "seed": 999,
      *              "html": "<div></div>",
      *              "jsparams": {
@@ -232,8 +230,8 @@ class QuestionController extends ApiBaseController
     {
         try {
             $this->validate($request,[
-                'questionSetId' => 'required_without:externalId|int',
-                'externalId' => 'required_without:questionSetId|uuid',
+                'questionSetId' => 'required_without:uniqueId|int',
+                'uniqueId' => 'required_without:questionSetId|int',
                 'seed' => 'required|int'
             ]);
 
@@ -302,9 +300,8 @@ class QuestionController extends ApiBaseController
      *                     type="int"
      *                 ),
      *                 @OA\Property(
-     *                     property="externalId",
-     *                     type="string",
-     *                     format="uuid"
+     *                     property="uniqueId",
+     *                     type="int"
      *                 ),
      *                 @OA\Property(
      *                     property="seed",
@@ -349,7 +346,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
-     *                   "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
+     *                   "uniqueId": "1491933600157156",
      *                   "seed": 8076,
      *                   "post": {
      *                      {
@@ -377,10 +374,9 @@ class QuestionController extends ApiBaseController
      *               description="Question Set Id of scored item"
      *             ),
      *             @OA\Property(
-     *               property="externalId",
-     *               type="string",
-     *               format="uuid",
-     *               description="External Question Id of scored item"
+     *               property="uniqueId",
+     *               type="int",
+     *               description="Unique Question Id of scored item"
      *             ),
      *             @OA\Property(
      *                 property="questionType",
@@ -447,7 +443,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - number",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "6953f40d-4d11-4dd6-a430-39cc7447c581",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "number",
      *                "seed": 482936,
      *                "scores": {
@@ -474,7 +470,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple choice",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "5c32d1f3-198f-4f00-b519-e6b5cc66291b",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "choices",
      *                "seed": 482936,
      *                "scores": {
@@ -501,7 +497,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple answer",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "679659b5-b206-488e-ad6a-d1af1c42ec99",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "multans",
      *                "seed": 482936,
      *                "scores": {
@@ -532,7 +528,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - matching",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "09de1325-314e-45cb-ae1c-02b6f04b70a2",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "matching",
      *                "seed": 482936,
      *                "scores": {
@@ -559,7 +555,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - string",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "b560b54d-d672-4a20-826e-e9e40df4eae0",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "string",
      *                "seed": 482936,
      *                "scores": {
@@ -586,7 +582,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - draw",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "276bad3e-b9cf-4b0b-b484-f3b390b60e8c",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "draw",
      *                "seed": 482936,
      *                "scores": {
@@ -622,7 +618,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - essay",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "3ce6876f-8258-4c2a-85a8-d4afe204120a",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "essay",
      *                "seed": 482936,
      *                "scores": {
@@ -649,7 +645,7 @@ class QuestionController extends ApiBaseController
      *            summary="Multi-part question",
      *            value={
      *                "questionSetId": 3618,
-     *                "externalId": "10dc9ad3-6d13-4633-ab05-a55734c2b33a",
+     *                "uniqueId": "1491933600157156",
      *                "questionType": "multipart",
      *                "seed": 482936,
      *                "scores": {
@@ -725,8 +721,8 @@ class QuestionController extends ApiBaseController
                 'post' => 'required|array|min:1',
                 'post.*.name' => 'required|distinct|string',
                 'post.*.value' => 'present',
-                'questionSetId' => 'required_without:externalId|int',
-                'externalId' => 'required_without:questionSetId|uuid',
+                'questionSetId' => 'required_without:uniqueId|int',
+                'uniqueId' => 'required_without:questionSetId|int',
                 'seed' => 'required|int',
                 'studentAnswers' => 'required|array',
                 'studentAnswerValues' => 'required|array',
@@ -811,15 +807,15 @@ class QuestionController extends ApiBaseController
     protected function getAssessStandalone(QuestionBaseDto $questionBaseDto, array $state): AssessStandalone
     {
         // Use question IDs from the incoming request to retrieve the a question from the DB.
-        // If an externalId was provided, this will be used instead of the questionSetId.
+        // If an uniqueId was provided, this will be used instead of the questionSetId.
         $questionSet = null;
-        if ($questionBaseDto->getExternalId()) {
-            $questionSet = $this->questionSetRepository->getByExternalId($questionBaseDto->getExternalId());
+        if ($questionBaseDto->getUniqueId()) {
+            $questionSet = $this->questionSetRepository->getByUniqueId($questionBaseDto->getUniqueId());
             $questionBaseDto->setQuestionSetId($questionSet['id']);
             $state['qsid'][0] = $questionSet['id']; // QuestionSetRepository only returns one question.
         } else if ($questionBaseDto->getQuestionSetId()) {
             $questionSet = $this->questionSetRepository->getById($questionBaseDto->getQuestionSetId());
-            $questionBaseDto->setExternalId($questionSet['external_id']);
+            $questionBaseDto->setUniqueId($questionSet['uniqueid']);
         }
 
         // FIXME: This should probably throw NotFoundHttpException.
@@ -860,9 +856,9 @@ class QuestionController extends ApiBaseController
 
         $score = $assessStandalone->scoreQuestion($this->questionId, $scoreDto->getPartsToScore());
 
-        // Get the question's external ID.
+        // Get the question's unique ID.
         $questionDbData = $assessStandalone->getQuestionData($scoreDto->getQuestionSetId());
-        $score['external_id'] = $questionDbData['external_id'];
+        $score['uniqueid'] = $questionDbData['uniqueid'];
 
         // Get question feedback.
         $questionFeedback = $score['feedback'] ?? null;
@@ -884,9 +880,9 @@ class QuestionController extends ApiBaseController
         // Get question HTML and "JS params".
         $questionDisplayData = $assessStandalone->displayQuestion($this->questionId, $questionDto->getOptions());
 
-        // Get the question's external ID.
+        // Get the question's unique ID.
         $questionDbData = $assessStandalone->getQuestionData($questionDto->getQuestionSetId());
-        $questionDisplayData['external_id'] = $questionDbData['external_id'];
+        $questionDisplayData['uniqueid'] = $questionDbData['uniqueid'];
 
         // Get question feedback.
         $question = $assessStandalone->getQuestion();

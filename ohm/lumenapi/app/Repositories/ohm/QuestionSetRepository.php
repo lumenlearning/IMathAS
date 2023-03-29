@@ -13,10 +13,10 @@ class QuestionSetRepository extends BaseRepository implements QuestionSetReposit
         return ($result) ? $this->toAssoc($result[0]) : null;
     }
 
-    public function getByExternalId($externalId)
+    public function getByUniqueId($uniqueId)
     {
         $result = app('db')->select(
-            'SELECT * FROM imas_questionset WHERE external_id = :externalId;', ['externalId' => $externalId]);
+            'SELECT * FROM imas_questionset WHERE uniqueid = :uniqueId;', ['uniqueId' => $uniqueId]);
 
         return ($result) ? $this->toAssoc($result[0]) : null;
     }

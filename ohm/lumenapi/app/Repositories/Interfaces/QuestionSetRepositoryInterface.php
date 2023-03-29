@@ -5,7 +5,7 @@ interface QuestionSetRepositoryInterface
 {
     public function getById($questionSetId);
 
-    public function getByExternalId($externalId);
+    public function getByUniqueId($uniqueId);
 
     public function getFieldsById($questionSetId);
 
