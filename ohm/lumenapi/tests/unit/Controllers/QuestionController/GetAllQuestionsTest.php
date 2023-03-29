@@ -45,21 +45,21 @@ class GetAllQuestionsTest extends TestCase
      * getAllQuestions
      */
 
-    public function testGetAllQuestions_byExternalId(): void
+    public function testGetAllQuestions_byUniqueId(): void
     {
         // Setup mocks.
         $this->questionSetRepository
-            ->shouldReceive('getByExternalId')
+            ->shouldReceive('getByUniqueId')
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
         $request = Request::create('/api/v1/questions', 'POST',
             json_decode('[
                 {
-                    "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                    "uniqueId": "1491933600157156",
                     "seed": 3469
                 },
                 {
-                    "externalId": "4aa944ce-ccea-4966-a00f-bb9f89a2f1d8",
+                    "uniqueId": "1661894316883503",
                     "seed": 5106
                 }
             ]', true)
@@ -69,13 +69,13 @@ class GetAllQuestionsTest extends TestCase
         $responseData = $response->getData(true);
 
         $question1 = $responseData[0];
-        $this->assertEquals('a741e53b-d37a-49aa-88cf-c8226b7cc170', $question1['externalId']);
+        $this->assertEquals('1491933600157156', $question1['uniqueId']);
         $this->assertEquals('number', $question1['questionType']);
         $this->assertEquals(3469, $question1['seed']);
         $this->assertEquals([], $question1['errors']);
 
         $question2 = $responseData[1];
-        $this->assertEquals('4aa944ce-ccea-4966-a00f-bb9f89a2f1d8', $question2['externalId']);
+        $this->assertEquals('1661894316883503', $question2['uniqueId']);
         $this->assertEquals('number', $question2['questionType']);
         $this->assertEquals(5106, $question2['seed']);
         $this->assertEquals([], $question2['errors']);

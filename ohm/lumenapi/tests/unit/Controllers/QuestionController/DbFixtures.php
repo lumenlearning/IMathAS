@@ -38,7 +38,6 @@ class DbFixtures
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '1111',
-        'external_id' => 'a741e53b-d37a-49aa-88cf-c8226b7cc170',
     ];
 
     const imas_QuestionSet_dbRow_choices = [
@@ -88,7 +87,6 @@ class DbFixtures
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
-        'external_id' => '0dfb18e7-b0a9-4f3d-98eb-7b1fa76e135e',
     ];
 
     const imas_QuestionSet_dbRow_multipart_choices = [
@@ -173,7 +171,6 @@ $answerbox[3]
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
-        'external_id' => '2a0d71b1-a04b-4c34-a8c7-5c5c5346e53d',
     ];
 
     const imas_QuestionSet_dbRow_multipart_multans = [
@@ -243,7 +240,6 @@ $answerbox[1]
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
-        'external_id' => '9dc5472f-bb3b-45f3-9ebe-c6f2986383bf',
     ];
 
     const imas_QuestionSet_dbRow_with_ohm1_macro = [
@@ -294,7 +290,6 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
-        'external_id' => 'c0fdfb0f-7208-4c5e-ad8f-2b3c20bddd3c',
     ];
 
     const imas_QuestionSet_dbRow_multans_basicfeedback = [
@@ -359,6 +354,5 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
-        'external_id' => '0fcf0a44-e187-43f4-aff0-a03808c145d5',
     ];
 }

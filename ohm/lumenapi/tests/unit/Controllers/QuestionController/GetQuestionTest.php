@@ -152,17 +152,17 @@ class GetQuestionTest extends TestCase
         $this->assertNull($responseData['feedback']);
     }
 
-    public function testGetQuestion_byExternalId(): void
+    public function testGetQuestion_byUniqueId(): void
     {
         // Setup mocks.
         $this->questionSetRepository
-            ->shouldReceive('getByExternalId')
-            ->withArgs(['a741e53b-d37a-49aa-88cf-c8226b7cc170'])
+            ->shouldReceive('getByUniqueId')
+            ->withArgs(['1491933600157156'])
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
-                                  "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                                  "uniqueId": "1491933600157156",
                                   "seed": 1234
                               }', true)
         );
@@ -171,26 +171,26 @@ class GetQuestionTest extends TestCase
         $responseData = $response->getData(true);
 
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('a741e53b-d37a-49aa-88cf-c8226b7cc170', $responseData['externalId']);
+        $this->assertEquals('1491933600157156', $responseData['uniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
     }
 
-    public function testGetQuestion_byExternalIdAndQuestionSetId(): void
+    public function testGetQuestion_byUniqueIdAndQuestionSetId(): void
     {
         // Setup mocks.
         $this->questionSetRepository
-            ->shouldReceive('getByExternalId')
-            ->withArgs(['a741e53b-d37a-49aa-88cf-c8226b7cc170'])
+            ->shouldReceive('getByUniqueId')
+            ->withArgs(['1491933600157156'])
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
-        // When both a questionSetId and externalId are requested, only
-        // the externalId should be used.
+        // When both a questionSetId and uniqueId are requested, only
+        // the uniqueId should be used.
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
                                   "questionSetId": 424242,
-                                  "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                                  "uniqueId": "1491933600157156",
                                   "seed": 1234
                               }', true)
         );
@@ -199,7 +199,7 @@ class GetQuestionTest extends TestCase
         $responseData = $response->getData(true);
 
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('a741e53b-d37a-49aa-88cf-c8226b7cc170', $responseData['externalId']);
+        $this->assertEquals('1491933600157156', $responseData['uniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);

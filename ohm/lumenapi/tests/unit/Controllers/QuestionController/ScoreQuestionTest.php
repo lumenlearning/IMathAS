@@ -79,12 +79,12 @@ class ScoreQuestionTest extends TestCase
         $this->assertEquals('10', $responseData['correctAnswers'][0]);
     }
 
-    public function testScoreQuestion_byExternalId(): void
+    public function testScoreQuestion_byUniqueId(): void
     {
         // Setup mocks.
         $this->questionSetRepository
-            ->shouldReceive('getByExternalId')
-            ->withArgs(['a741e53b-d37a-49aa-88cf-c8226b7cc170'])
+            ->shouldReceive('getByUniqueId')
+            ->withArgs(['1491933600157156'])
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
         $request = Request::create('/api/v1/question/score', 'POST',
@@ -95,7 +95,7 @@ class ScoreQuestionTest extends TestCase
                         "value": "10"
                     }
                 ],
-                "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                "uniqueId": "1491933600157156",
                 "seed": 3469,
                 "studentAnswers": ["10"],
                 "studentAnswerValues": ["10"],
@@ -108,6 +108,7 @@ class ScoreQuestionTest extends TestCase
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals(42, $responseData['questionSetId']);
+        $this->assertEquals('1491933600157156', $responseData['uniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(3469, $responseData['seed']);
         $this->assertEquals([1.0], $responseData['scores']);
@@ -118,16 +119,16 @@ class ScoreQuestionTest extends TestCase
         $this->assertEquals('10', $responseData['correctAnswers'][0]);
     }
 
-    public function testScoreQuestion_byExternalIdAndQuestionSetId(): void
+    public function testScoreQuestion_byUniqueIdAndQuestionSetId(): void
     {
         // Setup mocks.
         $this->questionSetRepository
-            ->shouldReceive('getByExternalId')
-            ->withArgs(['a741e53b-d37a-49aa-88cf-c8226b7cc170'])
+            ->shouldReceive('getByUniqueId')
+            ->withArgs(['1491933600157156'])
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
-        // When both a questionSetId and externalId are requested, only
-        // the externalId should be used.
+        // When both a questionSetId and uniqueId are requested, only
+        // the uniqueId should be used.
         $request = Request::create('/api/v1/question/score', 'POST',
             json_decode('{
                 "post": [
@@ -137,7 +138,7 @@ class ScoreQuestionTest extends TestCase
                     }
                 ],
                 "questionSetId": 424242,
-                "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                "uniqueId": "1491933600157156",
                 "seed": 3469,
                 "studentAnswers": ["10"],
                 "studentAnswerValues": ["10"],
@@ -150,6 +151,7 @@ class ScoreQuestionTest extends TestCase
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals(42, $responseData['questionSetId']);
+        $this->assertEquals('1491933600157156', $responseData['uniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(3469, $responseData['seed']);
         $this->assertEquals([1.0], $responseData['scores']);

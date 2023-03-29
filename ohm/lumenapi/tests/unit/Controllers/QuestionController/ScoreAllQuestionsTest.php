@@ -41,15 +41,15 @@ class ScoreAllQuestionsTest extends TestCase
         $this->questionController->setPdo($this->pdo);
     }
 
-    public function testScoreAllQuestions_byExternalId(): void
+    public function testScoreAllQuestions_byUniqueId(): void
     {
         // Setup mocks.
         $this->questionSetRepository
-            ->shouldReceive('getByExternalId')
+            ->shouldReceive('getByUniqueId')
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
-        // When both a questionSetId and externalId are requested, only
-        // the externalId should be used.
+        // When both a questionSetId and uniqueId are requested, only
+        // the uniqueId should be used.
         $request = Request::create('/api/v1/questions/score', 'POST',
             json_decode('[
                 {
@@ -59,7 +59,7 @@ class ScoreAllQuestionsTest extends TestCase
                             "value": "10"
                         }
                     ],
-                    "externalId": "a741e53b-d37a-49aa-88cf-c8226b7cc170",
+                    "uniqueId": "1491933600157156",
                     "seed": 3469,
                     "studentAnswers": ["10"],
                     "studentAnswerValues": ["10"],
@@ -72,7 +72,7 @@ class ScoreAllQuestionsTest extends TestCase
                             "value": "8"
                         }
                     ],
-                    "externalId": "4aa944ce-ccea-4966-a00f-bb9f89a2f1d8",
+                    "uniqueId": "1661894316883503",
                     "seed": 5106,
                     "studentAnswers": ["8"],
                     "studentAnswerValues": ["8"],
@@ -87,7 +87,7 @@ class ScoreAllQuestionsTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
 
         $question1 = $responseData[0];
-        $this->assertEquals('a741e53b-d37a-49aa-88cf-c8226b7cc170', $question1['externalId']);
+        $this->assertEquals('1491933600157156', $question1['uniqueId']);
         $this->assertEquals('number', $question1['questionType']);
         $this->assertEquals(3469, $question1['seed']);
         $this->assertEquals([1.0], $question1['scores']);
@@ -98,7 +98,7 @@ class ScoreAllQuestionsTest extends TestCase
         $this->assertEquals('10', $question1['correctAnswers'][0]);
 
         $question2 = $responseData[1];
-        $this->assertEquals('4aa944ce-ccea-4966-a00f-bb9f89a2f1d8', $question2['externalId']);
+        $this->assertEquals('1661894316883503', $question2['uniqueId']);
         $this->assertEquals('number', $question2['questionType']);
         $this->assertEquals(5106, $question2['seed']);
         $this->assertEquals([1.0], $question2['scores']);
