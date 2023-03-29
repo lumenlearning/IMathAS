@@ -33,7 +33,7 @@ class QuestionScoreDto extends QuestionBaseDto
     {
         return [
             'qsid' => [$this->questionSetId],
-            'externalid' => [$this->uniqueId],
+            'uniqueid' => [$this->uniqueId],
             'seeds' => [$this->seed],
             'stuanswers' => $this->studentAnswers,
             'stuanswersval' => $this->studentAnswerValues,

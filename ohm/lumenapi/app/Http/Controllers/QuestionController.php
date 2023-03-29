@@ -817,8 +817,6 @@ class QuestionController extends ApiBaseController
             $questionSet = $this->questionSetRepository->getById($questionBaseDto->getQuestionSetId());
             $questionBaseDto->setUniqueId($questionSet['uniqueid']);
         }
-
-        // FIXME: This should probably throw NotFoundHttpException.
         if (!$questionSet) throw new BadRequestException('Unable to locate question set');
 
         // Store question type and control for use later in scoring
