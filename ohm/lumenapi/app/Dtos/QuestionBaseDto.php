@@ -2,6 +2,8 @@
 
 namespace App\Dtos;
 
+use App\Exceptions\MissingIdException;
+
 class QuestionBaseDto {
     protected $seed;
     protected $partAttemptNumber = [];
@@ -10,6 +12,10 @@ class QuestionBaseDto {
     protected $options = [];
 
     public function __construct($request) {
+        if (empty($request['questionSetId']) && empty($request['uniqueId'])) {
+            throw new MissingIdException("One question ID must be specified: questionSetId or uniqueId");
+        }
+
         $this->seed = $request['seed'];
         $this->questionSetId = $request['questionSetId'] ?? null;
         $this->uniqueId = $request['uniqueId'] ?? null;
