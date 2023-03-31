@@ -338,7 +338,7 @@ $answers = "1,4"
 
 $hints[1] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
 
-$feedback = ohm_getfeedbackbasic($thisq, "Excellent! You are able to distinguish the statistical investigative questions from the rest.", "A statistical investigative question would require data collection and analysis. Does the question account for variability?  Questions with a single mathematical answer are not considered statistical investigative questions.", $answers)
+$feedback = ohm_getfeedbackbasic($stuanswers[$thisq], "Excellent! You are able to distinguish the statistical investigative questions from the rest.", "A statistical investigative question would require data collection and analysis. Does the question account for variability?  Questions with a single mathematical answer are not considered statistical investigative questions.", $answers)
 
 // As of AST-275, using ohm_getfeedbackbasic or feedbacktxt in a multans
 // type question requires shuffling to be disabled.
