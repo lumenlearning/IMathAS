@@ -96,7 +96,7 @@ function ohm_getfeedbackbasic($stuanswers,
 
     if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];
-    } else if ($studentAnswer == $correctAnswer) {
+    } else if (normalizemathunicode($studentAnswer) == $correctAnswer) {
         return [
             $questionIndex => [
                 'correctness' => 'correct',
@@ -347,6 +347,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
     if ($studentAnswer === null) {
         return [];
     } else {
+        $studentAnswer = normalizemathunicode($studentAnswer);
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
             $tolerance = substr($tolerance, 1);
@@ -468,6 +469,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
     if ($studentAnswer === null || trim($studentAnswer) === '') {
         return [];
     } else {
+        $studentAnswer = normalizemathunicode($studentAnswer);
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
             $tolerance = substr($tolerance, 1);
