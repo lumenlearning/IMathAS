@@ -92,11 +92,13 @@ function ohm_getfeedbackbasic($stuanswers,
         $correctAnswer = explode(',', $correctAnswer);
         sort($correctAnswer);
         $correctAnswer = implode(',', $correctAnswer);
+    } else if (!is_null($studentAnswer)) {
+        $studentAnswer = normalizemathunicode($studentAnswer);
     }
 
     if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];
-    } else if (normalizemathunicode($studentAnswer) == $correctAnswer) {
+    } else if ($studentAnswer == $correctAnswer) {
         return [
             $questionIndex => [
                 'correctness' => 'correct',
