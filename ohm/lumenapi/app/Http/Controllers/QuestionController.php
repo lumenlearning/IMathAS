@@ -103,7 +103,7 @@ class QuestionController extends ApiBaseController
      *                     type="int"
      *                 ),
      *                 @OA\Property(
-     *                     property="uniqueId",
+     *                     property="ohmUniqueId",
      *                     type="string"
      *                 ),
      *                 @OA\Property(
@@ -133,7 +133,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
-     *                   "uniqueId": "1fk4km8c030",
+     *                   "ohmUniqueId": "1fk4km8c030",
      *                   "seed": 8076,
      *                   "rawScores": {},
      *                   "partialAttemptNumber": {},
@@ -162,7 +162,7 @@ class QuestionController extends ApiBaseController
      *               description="Question Set Id of scored item"
      *             ),
      *             @OA\Property(
-     *               property="uniqueId",
+     *               property="ohmUniqueId",
      *               type="string",
      *               description="Unique Question Id of scored item"
      *             ),
@@ -190,7 +190,7 @@ class QuestionController extends ApiBaseController
      *          ),
      *          @OA\Examples(example=200, summary="", value={
      *              "questionSetId": 123,
-     *              "uniqueId": "1fk4km8c030",
+     *              "ohmUniqueId": "1fk4km8c030",
      *              "seed": 999,
      *              "html": "<div></div>",
      *              "jsparams": {
@@ -230,8 +230,8 @@ class QuestionController extends ApiBaseController
     {
         try {
             $this->validate($request,[
-                'questionSetId' => 'required_without:uniqueId|int',
-                'uniqueId' => 'required_without:questionSetId|string',
+                'questionSetId' => 'required_without:ohmUniqueId|int',
+                'ohmUniqueId' => 'required_without:questionSetId|string',
                 'seed' => 'required|int'
             ]);
 
@@ -300,7 +300,7 @@ class QuestionController extends ApiBaseController
      *                     type="int"
      *                 ),
      *                 @OA\Property(
-     *                     property="uniqueId",
+     *                     property="ohmUniqueId",
      *                     type="string"
      *                 ),
      *                 @OA\Property(
@@ -346,7 +346,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
-     *                   "uniqueId": "1fk4km8c030",
+     *                   "ohmUniqueId": "1fk4km8c030",
      *                   "seed": 8076,
      *                   "post": {
      *                      {
@@ -374,7 +374,7 @@ class QuestionController extends ApiBaseController
      *               description="Question Set Id of scored item"
      *             ),
      *             @OA\Property(
-     *               property="uniqueId",
+     *               property="ohmUniqueId",
      *               type="string",
      *               description="Unique Question Id of scored item"
      *             ),
@@ -443,7 +443,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - number",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "number",
      *                "seed": 482936,
      *                "scores": {
@@ -470,7 +470,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple choice",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "choices",
      *                "seed": 482936,
      *                "scores": {
@@ -497,7 +497,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple answer",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "multans",
      *                "seed": 482936,
      *                "scores": {
@@ -528,7 +528,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - matching",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "matching",
      *                "seed": 482936,
      *                "scores": {
@@ -555,7 +555,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - string",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "string",
      *                "seed": 482936,
      *                "scores": {
@@ -582,7 +582,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - draw",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "draw",
      *                "seed": 482936,
      *                "scores": {
@@ -618,7 +618,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - essay",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "essay",
      *                "seed": 482936,
      *                "scores": {
@@ -645,7 +645,7 @@ class QuestionController extends ApiBaseController
      *            summary="Multi-part question",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1fk4km8c030",
+     *                "ohmUniqueId": "1fk4km8c030",
      *                "questionType": "multipart",
      *                "seed": 482936,
      *                "scores": {
@@ -721,8 +721,8 @@ class QuestionController extends ApiBaseController
                 'post' => 'required|array|min:1',
                 'post.*.name' => 'required|distinct|string',
                 'post.*.value' => 'present',
-                'questionSetId' => 'required_without:uniqueId|int',
-                'uniqueId' => 'required_without:questionSetId|string',
+                'questionSetId' => 'required_without:ohmUniqueId|int',
+                'ohmUniqueId' => 'required_without:questionSetId|string',
                 'seed' => 'required|int',
                 'studentAnswers' => 'required|array',
                 'studentAnswerValues' => 'required|array',
@@ -807,7 +807,7 @@ class QuestionController extends ApiBaseController
     protected function getAssessStandalone(QuestionBaseDto $questionBaseDto, array $state): AssessStandalone
     {
         // Use question IDs from the incoming request to retrieve the a question from the DB.
-        // If an uniqueId was provided, this will be used instead of the questionSetId.
+        // If a uniqueId is available, this will be used instead of the questionSetId.
         $questionSet = null;
         if ($questionBaseDto->getUniqueId()) {
             $questionSet = $this->questionSetRepository->getByUniqueId($questionBaseDto->getUniqueId());
@@ -836,9 +836,9 @@ class QuestionController extends ApiBaseController
      */
     protected function getScore(array $inputState): array
     {
-        // Convert the provided unique ID to base 10.
-        if (!empty($inputState['uniqueId'])) {
-            $inputState['uniqueId'] = $this->uniqueId32ToBase10($inputState['uniqueId']);
+        // Convert the provided OHM unique ID to an IMathAS unique ID.
+        if (!empty($inputState['ohmUniqueId'])) {
+            $inputState['uniqueId'] = $this->uniqueId32ToBase10($inputState['ohmUniqueId']);
         }
 
         $scoreDto = new QuestionScoreDto($inputState);
@@ -877,9 +877,9 @@ class QuestionController extends ApiBaseController
      */
     public function getQuestionDisplay(array $inputState): array
     {
-        // Convert the provided unique ID to base 10.
-        if (!empty($inputState['uniqueId'])) {
-            $inputState['uniqueId'] = $this->uniqueId32ToBase10($inputState['uniqueId']);
+        // Convert the provided unique ID to an IMathAS unique ID.
+        if (!empty($inputState['ohmUniqueId'])) {
+            $inputState['uniqueId'] = $this->uniqueId32ToBase10($inputState['ohmUniqueId']);
         }
 
         $questionDto = new QuestionDto($inputState);

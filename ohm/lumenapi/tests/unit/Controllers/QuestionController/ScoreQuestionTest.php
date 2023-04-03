@@ -95,7 +95,7 @@ class ScoreQuestionTest extends TestCase
                         "value": "10"
                     }
                 ],
-                "uniqueId": "1acsve483f4",
+                "ohmUniqueId": "1acsve483f4",
                 "seed": 3469,
                 "studentAnswers": ["10"],
                 "studentAnswerValues": ["10"],
@@ -108,7 +108,7 @@ class ScoreQuestionTest extends TestCase
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('1acsve483f4', $responseData['uniqueId']);
+        $this->assertEquals('1acsve483f4', $responseData['ohmUniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(3469, $responseData['seed']);
         $this->assertEquals([1.0], $responseData['scores']);
@@ -127,8 +127,8 @@ class ScoreQuestionTest extends TestCase
             ->withArgs(['1491933600157156'])
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
-        // When both a questionSetId and uniqueId are requested, only
-        // the uniqueId should be used.
+        // When both a questionSetId and ohmUniqueId are requested, only
+        // the ohmUniqueId should be used.
         $request = Request::create('/api/v1/question/score', 'POST',
             json_decode('{
                 "post": [
@@ -138,7 +138,7 @@ class ScoreQuestionTest extends TestCase
                     }
                 ],
                 "questionSetId": 424242,
-                "uniqueId": "1acsve483f4",
+                "ohmUniqueId": "1acsve483f4",
                 "seed": 3469,
                 "studentAnswers": ["10"],
                 "studentAnswerValues": ["10"],
@@ -151,7 +151,7 @@ class ScoreQuestionTest extends TestCase
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('1acsve483f4', $responseData['uniqueId']);
+        $this->assertEquals('1acsve483f4', $responseData['ohmUniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(3469, $responseData['seed']);
         $this->assertEquals([1.0], $responseData['scores']);

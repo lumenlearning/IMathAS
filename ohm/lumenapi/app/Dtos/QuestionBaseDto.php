@@ -46,7 +46,7 @@ class QuestionBaseDto {
         $response = array_merge(
             [
                 'questionSetId' => $this->questionSetId,
-                'uniqueId' => $uniqueId32,
+                'ohmUniqueId' => $uniqueId32,
                 'questionType' => $questionType,
                 'seed' => $this->seed
             ],

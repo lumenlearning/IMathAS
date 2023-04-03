@@ -162,7 +162,7 @@ class GetQuestionTest extends TestCase
 
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
-                                  "uniqueId": "1acsve483f4",
+                                  "ohmUniqueId": "1acsve483f4",
                                   "seed": 1234
                               }', true)
         );
@@ -171,7 +171,7 @@ class GetQuestionTest extends TestCase
         $responseData = $response->getData(true);
 
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('1acsve483f4', $responseData['uniqueId']);
+        $this->assertEquals('1acsve483f4', $responseData['ohmUniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
@@ -185,12 +185,12 @@ class GetQuestionTest extends TestCase
             ->withArgs(['1491933600157156'])
             ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
 
-        // When both a questionSetId and uniqueId are requested, only
-        // the uniqueId should be used.
+        // When both a questionSetId and ohmUniqueId are requested, only
+        // the ohmUniqueId should be used.
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
                                   "questionSetId": 424242,
-                                  "uniqueId": "1acsve483f4",
+                                  "ohmUniqueId": "1acsve483f4",
                                   "seed": 1234
                               }', true)
         );
@@ -199,7 +199,7 @@ class GetQuestionTest extends TestCase
         $responseData = $response->getData(true);
 
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('1acsve483f4', $responseData['uniqueId']);
+        $this->assertEquals('1acsve483f4', $responseData['ohmUniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
