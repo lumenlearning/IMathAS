@@ -428,20 +428,6 @@ if ($overwriteBody==1) {
   } else {
 	  echo "<a href=\"#\" onclick=\"GB_show('$sendtitle','$imasroot/course/sendmsgmodal.php?sendtype=$sendtype&cid=" . Sanitize::courseId($sendcid) . '&quoteq='.Sanitize::encodeUrlParam("0-{$qsetid}-{$seed}-reperr-{$assessver}"). "',800,'auto')\">$sendtitle</a> "._("to report problems");
   }
-  #### Begin OHM-specific changes ############################################################
-  #### Begin OHM-specific changes ############################################################
-  #### Begin OHM-specific changes ############################################################
-  #### Begin OHM-specific changes ############################################################
-  #### Begin OHM-specific changes ############################################################
-  if (100 == $myrights) { // Admin user rights
-      $uniqueid32 = base_convert($line['uniqueid'], 10, 32);
-      echo "<span class='small subdued' style='display: block;'>OHM unique ID: " . $uniqueid32 . "</span>";
-  }
-  #### End OHM-specific changes ############################################################
-  #### End OHM-specific changes ############################################################
-  #### End OHM-specific changes ############################################################
-  #### End OHM-specific changes ############################################################
-  #### End OHM-specific changes ############################################################
   echo '</p>';
 
 	printf("<p>"._("Description:")." %s</p><p>"._("Author:")." <span class='pii-full-name'>%s</span></p>",
@@ -494,6 +480,18 @@ if ($overwriteBody==1) {
 	}
 	if ($myrights==100) {
 		echo '<p>'._('UniqueID: ').Sanitize::encodeStringForDisplay($line['uniqueid']).'</p>';
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        $uniqueid32 = base_convert($line['uniqueid'], 10, 32);
+        echo "<p>OHM UniqueID: " . $uniqueid32 . "</p>";
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 	}
   echo '<p>'._('Testing using the new interface.');
   echo ' <a href="testquestion.php?cid='.$cid.'&qsetid='.$qsetid.'">';
