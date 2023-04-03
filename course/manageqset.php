@@ -677,8 +677,8 @@ if ($myrights<20) {
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
-            } else if (substr($safesearch, 0, 4) == 'ouid=') {
-                $uniqueid32 = substr($safesearch, 4);
+            } else if (substr($safesearch, 0, 5) == 'ouid=') {
+                $uniqueid32 = substr($safesearch, 5);
                 $uniqueid = base_convert($uniqueid32, 32, 10);
                 $searchlikes = "imas_questionset.uniqueid=? AND ";
                 $searchlikevals = [$uniqueid];
