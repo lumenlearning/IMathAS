@@ -435,7 +435,7 @@ if ($overwriteBody==1) {
   #### Begin OHM-specific changes ############################################################
   if (100 == $myrights) { // Admin user rights
       $uniqueid32 = base_convert($line['uniqueid'], 10, 32);
-      echo "<span class='small subdued' style='display: block;'>Unique ID: " . $uniqueid32 . "</span>";
+      echo "<span class='small subdued' style='display: block;'>OHM unique ID: " . $uniqueid32 . "</span>";
   }
   #### End OHM-specific changes ############################################################
   #### End OHM-specific changes ############################################################
