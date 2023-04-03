@@ -15,12 +15,38 @@
 function parseSearchString($str)
 {
     $out = array();
-    preg_match_all('/(author|type|id|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/', $str, $matches, PREG_SET_ORDER);
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #
+    # Added "ohmuniqueid" to the preg_match_all pattern.
+    #
+    preg_match_all('/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/', $str, $matches, PREG_SET_ORDER);
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
     if (count($matches) > 0) {
         foreach ($matches as $match) {
             $out[$match[1]] = str_replace('"', '', $match[2]);
         }
-        $str = preg_replace('/(author|type|id|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/', '', $str);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #
+        # Added "ohmuniqueid" to the preg_match_all pattern.
+        #
+        $str = preg_replace('/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/', '', $str);
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
     }
 
     $out['terms'] = preg_split('/\s+/', trim($str));
@@ -187,6 +213,23 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             $searchand[] = '(LENGTH(iq.solution) > 0 AND (iq.solutionopts&2)=2)';
         }
     }
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    if (isset($search['ohmuniqueid'])) {
+        $uniqueId32 = $search['ohmuniqueid'];
+        $uniqueId = base_convert($uniqueId32, 32, 10);
+
+        $searchand[] = 'iq.uniqueid = ?';
+        $searchvals[] = $uniqueId;
+    }
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
     $searchquery = '';
     if (count($searchand) > 0) {
         $searchquery = '(' . implode(' AND ', $searchand) . ')';
