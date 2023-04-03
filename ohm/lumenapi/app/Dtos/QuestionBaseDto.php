@@ -41,10 +41,12 @@ class QuestionBaseDto {
      */
     public function getResponse($responseData, string $questionType, $state, ?array $feedback): array
     {
+        $uniqueId32 = base_convert($this->uniqueId, 10, 32);
+
         $response = array_merge(
             [
                 'questionSetId' => $this->questionSetId,
-                'uniqueId' => $this->uniqueId,
+                'uniqueId' => $uniqueId32,
                 'questionType' => $questionType,
                 'seed' => $this->seed
             ],

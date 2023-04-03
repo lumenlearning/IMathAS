@@ -162,7 +162,7 @@ class GetQuestionTest extends TestCase
 
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
-                                  "uniqueId": "1491933600157156",
+                                  "uniqueId": "1acsve483f4",
                                   "seed": 1234
                               }', true)
         );
@@ -171,7 +171,7 @@ class GetQuestionTest extends TestCase
         $responseData = $response->getData(true);
 
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('1491933600157156', $responseData['uniqueId']);
+        $this->assertEquals('1acsve483f4', $responseData['uniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
@@ -190,7 +190,7 @@ class GetQuestionTest extends TestCase
         $request = Request::create('/api/v1/question', 'POST',
             json_decode('{
                                   "questionSetId": 424242,
-                                  "uniqueId": "1491933600157156",
+                                  "uniqueId": "1acsve483f4",
                                   "seed": 1234
                               }', true)
         );
@@ -199,7 +199,7 @@ class GetQuestionTest extends TestCase
         $responseData = $response->getData(true);
 
         $this->assertEquals(42, $responseData['questionSetId']);
-        $this->assertEquals('1491933600157156', $responseData['uniqueId']);
+        $this->assertEquals('1acsve483f4', $responseData['uniqueId']);
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);

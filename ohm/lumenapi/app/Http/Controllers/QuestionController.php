@@ -104,7 +104,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 @OA\Property(
      *                     property="uniqueId",
-     *                     type="int"
+     *                     type="string"
      *                 ),
      *                 @OA\Property(
      *                     property="seed",
@@ -133,7 +133,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
-     *                   "uniqueId": "1491933600157156",
+     *                   "uniqueId": "1fk4km8c030",
      *                   "seed": 8076,
      *                   "rawScores": {},
      *                   "partialAttemptNumber": {},
@@ -163,7 +163,7 @@ class QuestionController extends ApiBaseController
      *             ),
      *             @OA\Property(
      *               property="uniqueId",
-     *               type="int",
+     *               type="string",
      *               description="Unique Question Id of scored item"
      *             ),
      *             @OA\Property(
@@ -190,7 +190,7 @@ class QuestionController extends ApiBaseController
      *          ),
      *          @OA\Examples(example=200, summary="", value={
      *              "questionSetId": 123,
-     *              "uniqueId": "1491933600157156",
+     *              "uniqueId": "1fk4km8c030",
      *              "seed": 999,
      *              "html": "<div></div>",
      *              "jsparams": {
@@ -231,7 +231,7 @@ class QuestionController extends ApiBaseController
         try {
             $this->validate($request,[
                 'questionSetId' => 'required_without:uniqueId|int',
-                'uniqueId' => 'required_without:questionSetId|int',
+                'uniqueId' => 'required_without:questionSetId|string',
                 'seed' => 'required|int'
             ]);
 
@@ -301,7 +301,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 @OA\Property(
      *                     property="uniqueId",
-     *                     type="int"
+     *                     type="string"
      *                 ),
      *                 @OA\Property(
      *                     property="seed",
@@ -346,7 +346,7 @@ class QuestionController extends ApiBaseController
      *                 ),
      *                 example={
      *                   "questionSetId": 16208,
-     *                   "uniqueId": "1491933600157156",
+     *                   "uniqueId": "1fk4km8c030",
      *                   "seed": 8076,
      *                   "post": {
      *                      {
@@ -375,7 +375,7 @@ class QuestionController extends ApiBaseController
      *             ),
      *             @OA\Property(
      *               property="uniqueId",
-     *               type="int",
+     *               type="string",
      *               description="Unique Question Id of scored item"
      *             ),
      *             @OA\Property(
@@ -443,7 +443,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - number",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "number",
      *                "seed": 482936,
      *                "scores": {
@@ -470,7 +470,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple choice",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "choices",
      *                "seed": 482936,
      *                "scores": {
@@ -497,7 +497,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - multiple answer",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "multans",
      *                "seed": 482936,
      *                "scores": {
@@ -528,7 +528,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - matching",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "matching",
      *                "seed": 482936,
      *                "scores": {
@@ -555,7 +555,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - string",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "string",
      *                "seed": 482936,
      *                "scores": {
@@ -582,7 +582,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - draw",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "draw",
      *                "seed": 482936,
      *                "scores": {
@@ -618,7 +618,7 @@ class QuestionController extends ApiBaseController
      *            summary="Single part - essay",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "essay",
      *                "seed": 482936,
      *                "scores": {
@@ -645,7 +645,7 @@ class QuestionController extends ApiBaseController
      *            summary="Multi-part question",
      *            value={
      *                "questionSetId": 3618,
-     *                "uniqueId": "1491933600157156",
+     *                "uniqueId": "1fk4km8c030",
      *                "questionType": "multipart",
      *                "seed": 482936,
      *                "scores": {
@@ -722,7 +722,7 @@ class QuestionController extends ApiBaseController
                 'post.*.name' => 'required|distinct|string',
                 'post.*.value' => 'present',
                 'questionSetId' => 'required_without:uniqueId|int',
-                'uniqueId' => 'required_without:questionSetId|int',
+                'uniqueId' => 'required_without:questionSetId|string',
                 'seed' => 'required|int',
                 'studentAnswers' => 'required|array',
                 'studentAnswerValues' => 'required|array',
@@ -836,6 +836,11 @@ class QuestionController extends ApiBaseController
      */
     protected function getScore(array $inputState): array
     {
+        // Convert the provided unique ID to base 10.
+        if (!empty($inputState['uniqueId'])) {
+            $inputState['uniqueId'] = $this->uniqueId32ToBase10($inputState['uniqueId']);
+        }
+
         $scoreDto = new QuestionScoreDto($inputState);
 
         $assessStandalone = $this->getAssessStandalone($scoreDto, $scoreDto->getState());
@@ -872,6 +877,11 @@ class QuestionController extends ApiBaseController
      */
     public function getQuestionDisplay(array $inputState): array
     {
+        // Convert the provided unique ID to base 10.
+        if (!empty($inputState['uniqueId'])) {
+            $inputState['uniqueId'] = $this->uniqueId32ToBase10($inputState['uniqueId']);
+        }
+
         $questionDto = new QuestionDto($inputState);
         $assessStandalone = $this->getAssessStandalone($questionDto, $questionDto->getState());
 
@@ -1020,5 +1030,40 @@ class QuestionController extends ApiBaseController
         }
 
         return $postVarsWithMultansReindexed;
+    }
+
+    /**
+     * Convert a base 32 unique ID to base 10.
+     *
+     * @param string $uniqueId The unique ID.
+     * @return string The unique ID in base 10.
+     *                Unchanged if already in base 10.
+     */
+    private function uniqueId32ToBase10(string $uniqueId): string {
+        $uniqueId10 = trim($uniqueId);
+
+        // Unique IDs in the DB (in base 10) are always at least 16 digits.
+        // Example: 1679612045929581
+        $containsLetters = $this->containsLetters($uniqueId10);
+        if ($containsLetters) {
+            $uniqueId10 = base_convert($uniqueId, 32, 10);
+        }
+
+        return $uniqueId10;
+    }
+
+    /**
+     * Determine if a string contains numbers.
+     *
+     * @param string $subject The string to check.
+     * @return bool True if the string contains letters. False if not.
+     */
+    private function containsLetters(string $subject): bool {
+        for ($i = 0; $i < strlen($subject); $i++) {
+            $char = $subject[$i];
+            if (!is_numeric($char)) return true;
+        }
+
+        return false;
     }
 }

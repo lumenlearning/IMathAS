@@ -59,7 +59,7 @@ class ScoreAllQuestionsTest extends TestCase
                             "value": "10"
                         }
                     ],
-                    "uniqueId": "1491933600157156",
+                    "uniqueId": "1acsve483f4",
                     "seed": 3469,
                     "studentAnswers": ["10"],
                     "studentAnswerValues": ["10"],
@@ -72,7 +72,7 @@ class ScoreAllQuestionsTest extends TestCase
                             "value": "8"
                         }
                     ],
-                    "uniqueId": "1661894316883503",
+                    "uniqueId": "1f7ffm6ivhf",
                     "seed": 5106,
                     "studentAnswers": ["8"],
                     "studentAnswerValues": ["8"],
@@ -87,7 +87,7 @@ class ScoreAllQuestionsTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
 
         $question1 = $responseData[0];
-        $this->assertEquals('1491933600157156', $question1['uniqueId']);
+        $this->assertEquals('1acsve483f4', $question1['uniqueId']);
         $this->assertEquals('number', $question1['questionType']);
         $this->assertEquals(3469, $question1['seed']);
         $this->assertEquals([1.0], $question1['scores']);
@@ -98,7 +98,7 @@ class ScoreAllQuestionsTest extends TestCase
         $this->assertEquals('10', $question1['correctAnswers'][0]);
 
         $question2 = $responseData[1];
-        $this->assertEquals('1661894316883503', $question2['uniqueId']);
+        $this->assertEquals('1f7ffm6ivhf', $question2['uniqueId']);
         $this->assertEquals('number', $question2['questionType']);
         $this->assertEquals(5106, $question2['seed']);
         $this->assertEquals([1.0], $question2['scores']);
