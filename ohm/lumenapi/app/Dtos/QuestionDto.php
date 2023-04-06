@@ -44,6 +44,7 @@ class QuestionDto extends QuestionBaseDto
     {
         return [
             'qsid' => [$this->questionSetId],
+            'uniqueid' => [$this->uniqueId],
             'seeds' => [$this->seed],
             'rawscores' => [$this->rawScores],
             'partattemptn' => [$this->partAttemptNumber]

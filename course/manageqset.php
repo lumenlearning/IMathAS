@@ -672,6 +672,21 @@ if ($myrights<20) {
 				$searchlikes = "imas_questionset.id=? AND ";
 				$searchlikevals = array(substr($safesearch,3));
 				$isIDsearch = substr($safesearch,3);
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            } else if (substr($safesearch, 0, 5) == 'ouid=') {
+                $uniqueid32 = substr($safesearch, 5);
+                $uniqueid = base_convert($uniqueid32, 32, 10);
+                $searchlikes = "imas_questionset.uniqueid=? AND ";
+                $searchlikevals = [$uniqueid];
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 			} else {
 				$searchterms = explode(" ",$safesearch);
 				$searchlikes = '';

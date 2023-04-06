@@ -33,7 +33,8 @@ $(function() {
 function parseAdvSearch() {
     var search = document.getElementById("search").value;
     var matches;
-    if (matches = search.match(/(author|type|id|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/g)) {
+    // OHM-specific change: Added "ohmuniqueid" to pattern patcher.
+    if (matches = search.match(/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/g)) {
         var pts;
         for (var i=0;i<matches.length;i++) {
             pts = matches[i].split(/:/);
@@ -44,6 +45,10 @@ function parseAdvSearch() {
                 $("#search-type").val(pts[1]);
             } else if (pts[0] == 'id') {
                 $("#search-id").val(pts[1]);
+            // Begin OHM-specific change.
+            } else if (pts[0] == 'ohmuniqueid') {
+                $("#search-ohm-unique-id").val(pts[1]);
+            // End OHM-specific change.
             } else if (pts[0] == 'avgtime') {
                 var avgt = pts[1].split(/,/);
                 $("#search-avgtime-min").val(avgt[0]);
@@ -70,7 +75,8 @@ function parseAdvSearch() {
             }
         }
     }
-    search = search.replace(/(author|type|id|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/g, '');
+    // OHM-specific change: Added "ohmuniqueid" to pattern patcher.
+    search = search.replace(/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore):("[^"]+?"|\w+)/g, '');
     var words = search.split(/\s+/);
     var haswords = [];
     var excwords = [];
@@ -105,6 +111,12 @@ function doAdvSearch() {
             outstr += 'id:' + qid + ' ';
         }
     }
+    //#### Begin OHM-specific changes ############################################################
+    var ohmuniqueid = $("#search-ohm-unique-id").val().trim()
+    if (ohmuniqueid != '') {
+        outstr += 'ohmuniqueid:"' + ohmuniqueid + '" ';
+    }
+    //#### End OHM-specific changes ############################################################
     var type = $("#search-type").val();
     if (type != '') {
         outstr += 'type:' + type + ' ';
