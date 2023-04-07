@@ -16,6 +16,9 @@ final class GetFeedbackBasicTest extends TestCase
         // loading ohm_macros.php in isolation for testing.
         $GLOBALS['allowedmacros'] = [];
 
+        // Needed by ohm_getfeedbackbasic for checking answers with symbols for correctness.
+        require_once(__DIR__ . '/../../../../../../assessment/displayq2.php');
+
         // This file contains OHM 2 "macros" as PHP functions instead of a class.
         require_once(__DIR__ . '/../../../../../../assessment/libs/ohm_macros.php');
     }

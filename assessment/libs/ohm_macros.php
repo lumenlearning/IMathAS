@@ -82,6 +82,10 @@ function ohm_getfeedbackbasic($stuanswers,
     $questionIndex = _getFeedbackIndex($partNumber);
     $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
 
+    if (is_null($studentAnswer) || '' === $studentAnswer) {
+        return [];
+    }
+
     // For "multans" type questions, the student answer will be an array of answer keys.
     if (is_array($studentAnswer)) {
         sort($studentAnswer);
@@ -92,11 +96,11 @@ function ohm_getfeedbackbasic($stuanswers,
         $correctAnswer = explode(',', $correctAnswer);
         sort($correctAnswer);
         $correctAnswer = implode(',', $correctAnswer);
-    }
+    } else {
+        $studentAnswer = normalizemathunicode($studentAnswer);
+    };
 
-    if (is_null($studentAnswer) || '' === $studentAnswer) {
-        return [];
-    } else if ($studentAnswer == $correctAnswer) {
+    if ($studentAnswer == $correctAnswer) {
         return [
             $questionIndex => [
                 'correctness' => 'correct',
@@ -347,6 +351,7 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
     if ($studentAnswer === null) {
         return [];
     } else {
+        $studentAnswer = normalizemathunicode($studentAnswer);
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
             $tolerance = substr($tolerance, 1);
@@ -468,6 +473,7 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
     if ($studentAnswer === null || trim($studentAnswer) === '') {
         return [];
     } else {
+        $studentAnswer = normalizemathunicode($studentAnswer);
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
             $tolerance = substr($tolerance, 1);
