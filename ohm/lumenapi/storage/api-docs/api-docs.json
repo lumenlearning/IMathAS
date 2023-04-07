@@ -290,6 +290,9 @@
                                     "questionSetId": {
                                         "type": "int"
                                     },
+                                    "ohmUniqueId": {
+                                        "type": "string"
+                                    },
                                     "seed": {
                                         "type": "int"
                                     },
@@ -315,6 +318,7 @@
                                 "type": "object",
                                 "example": {
                                     "questionSetId": 16208,
+                                    "ohmUniqueId": "1fk4km8c030",
                                     "seed": 8076,
                                     "rawScores": [],
                                     "partialAttemptNumber": [],
@@ -343,6 +347,10 @@
                                             "description": "Question Set Id of scored item",
                                             "type": "int"
                                         },
+                                        "ohmUniqueId": {
+                                            "description": "Unique Question Id of scored item",
+                                            "type": "string"
+                                        },
                                         "seed": {
                                             "description": "Seed of scored item",
                                             "type": "int"
@@ -369,6 +377,7 @@
                                         "summary": "",
                                         "value": {
                                             "questionSetId": 123,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "seed": 999,
                                             "html": "<div></div>",
                                             "jsparams": {
@@ -445,6 +454,9 @@
                                     "questionSetId": {
                                         "type": "int"
                                     },
+                                    "ohmUniqueId": {
+                                        "type": "string"
+                                    },
                                     "seed": {
                                         "type": "int"
                                     },
@@ -484,6 +496,7 @@
                                 "type": "object",
                                 "example": {
                                     "questionSetId": 16208,
+                                    "ohmUniqueId": "1fk4km8c030",
                                     "seed": 8076,
                                     "post": [
                                         {
@@ -518,6 +531,10 @@
                                         "questionSetId": {
                                             "description": "Question Set Id of scored item",
                                             "type": "int"
+                                        },
+                                        "ohmUniqueId": {
+                                            "description": "Unique Question Id of scored item",
+                                            "type": "string"
                                         },
                                         "questionType": {
                                             "description": "The question type (number, multans, etc)",
@@ -578,6 +595,7 @@
                                         "summary": "Single part - number",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "number",
                                             "seed": 482936,
                                             "scores": [
@@ -604,6 +622,7 @@
                                         "summary": "Single part - multiple choice",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "choices",
                                             "seed": 482936,
                                             "scores": [
@@ -630,6 +649,7 @@
                                         "summary": "Single part - multiple answer",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "multans",
                                             "seed": 482936,
                                             "scores": [
@@ -660,6 +680,7 @@
                                         "summary": "Single part - matching",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "matching",
                                             "seed": 482936,
                                             "scores": [
@@ -693,6 +714,7 @@
                                         "summary": "Single part - string",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "string",
                                             "seed": 482936,
                                             "scores": [
@@ -719,6 +741,7 @@
                                         "summary": "Single part - draw",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "draw",
                                             "seed": 482936,
                                             "scores": [
@@ -754,6 +777,7 @@
                                         "summary": "Single part - essay",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "essay",
                                             "seed": 482936,
                                             "scores": [
@@ -780,6 +804,7 @@
                                         "summary": "Multi-part question",
                                         "value": {
                                             "questionSetId": 3618,
+                                            "ohmUniqueId": "1fk4km8c030",
                                             "questionType": "multipart",
                                             "seed": 482936,
                                             "scores": [

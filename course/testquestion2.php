@@ -480,6 +480,18 @@ if ($overwriteBody==1) {
 	}
 	if ($myrights==100) {
 		echo '<p>'._('UniqueID: ').Sanitize::encodeStringForDisplay($line['uniqueid']).'</p>';
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        $uniqueid32 = base_convert($line['uniqueid'], 10, 32);
+        echo "<p>OHM UniqueID: " . $uniqueid32 . "</p>";
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 	}
   echo '<p>'._('Testing using the new interface.');
   echo ' <a href="testquestion.php?cid='.$cid.'&qsetid='.$qsetid.'">';

@@ -676,7 +676,19 @@ if ($overwriteBody==1) {
                         <input id="search-author"/></div>
                     <div><label for="search-id"><?php echo _('ID');?>:</label> 
                         <input id="search-id"></div>
-                    <div><label for="search-type"><?php echo _('Type');?>:</label> 
+<?php               #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################ ?>
+                    <div><label for="search-ohm-unique-id"><?php echo _('OHM unique ID');?>:</label>
+                        <input id="search-ohm-unique-id"></div>
+<?php               #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################ ?>
+                    <div><label for="search-type"><?php echo _('Type');?>:</label>
                         <select id="search-type">
                             <option value=""><?php echo _('All');?></option>
                             <option value="number">Number</option>
