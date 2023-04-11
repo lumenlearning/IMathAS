@@ -158,10 +158,11 @@ class LTI
         global $DBH, $CFG;
 
         $LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
+        $keyseturl = $GLOBALS['basesiteurl'] . '/lti/jwks.php';
 
-        $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon, userid, assessmentid) ';
-        $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon, :userid, :assessmentid) ON DUPLICATE KEY UPDATE ';
-        $query .= 'grade=VALUES(grade),sendon=VALUES(sendon),failures=0 ';
+        $query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon, userid, assessmentid, keyseturl) ';
+        $query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon, :userid, :assessmentid, :keyseturl) ON DUPLICATE KEY UPDATE ';
+        $query .= 'grade=VALUES(grade),sendon=VALUES(sendon),failures=0,keyseturl=VALUES(keyseturl) ';
 
         $stm = $DBH->prepare($query);
         $stm->execute(
@@ -172,6 +173,7 @@ class LTI
                 ':sendon' => (time() + ($sendnow?0:$LTIdelay)),
                 ':userid' => $userid,
                 ':assessmentid' => $assessmentid,
+                ':keyseturl' => $keyseturl,
             )
         );
 
