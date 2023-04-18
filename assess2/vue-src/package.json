@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "core-js": "^3.22.5",
+    "json5": "^1.0.2",
     "uglifyjs": "^2.4.11",
     "vue": "^2.6.14",
     "vue-draggable-resizable": "2.1.0",
@@ -34,7 +35,7 @@
     "webpack-cli": "^3.3.12"
   },
   "resolutions": {
-    "minimist": "1.2.3",
+    "minimist": "1.2.8",
     "mkdir": "0.5.3"
   }
 }
