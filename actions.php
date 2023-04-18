@@ -37,6 +37,12 @@ require_once("includes/sanitize.php");
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
+
+		// This happens too early in IMathAS for OHM.
+		if (isset($CFG['hooks']['actions'])) {
+			require_once($CFG['hooks']['actions']);
+		}
+
         // Commenting out the check below, since not implemented on OHM enrollment pages
         /*
         if (!isset($_SESSION['challenge']) || !isset($_POST['challenge']) ||
