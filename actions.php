@@ -299,6 +299,14 @@ require_once("includes/sanitize.php");
         $init_session_start = true;
 		require_once("init_without_validate.php");
 		if (isset($_POST['username'])) {
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+
+            // Commenting out the check below, since not implemented on OHM-specific form
+            /*
             if (!isset($_SESSION['challenge']) || $_POST['challenge'] !== $_SESSION['challenge'] ||
                 !empty($_POST['terms']) ||
                 !isset($_SESSION['resetpwstart']) || (time() - $_SESSION['resetpwstart']) < 3
@@ -306,6 +314,12 @@ require_once("includes/sanitize.php");
                 echo "Invalid submission";
                 exit;
             }
+            */
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
             $_SESSION['challenge'] = '';
             unset($_SESSION['resetpwstart']);
 
