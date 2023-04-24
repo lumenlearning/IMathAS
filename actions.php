@@ -435,6 +435,14 @@ If you still have trouble or the wrong email address is on file, contact your in
 	} else if (isset($_GET['action']) && $_GET['action']=="lookupusername") {
         $init_session_start = true;
 		require_once("init_without_validate.php");
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+
+        // Commenting out the check below, since not implemented on OHM enrollment pages
+        /*
         if (!isset($_SESSION['challenge']) || !isset($_POST['challenge']) || $_POST['challenge'] !== $_SESSION['challenge'] ||
             !empty($_POST['terms']) ||
             !isset($_SESSION['lookupusernamestart']) || (time() - $_SESSION['lookupusernamestart']) < 3
@@ -445,6 +453,12 @@ If you still have trouble or the wrong email address is on file, contact your in
             echo "Invalid submission";
             exit;
         }
+        */
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
         $_SESSION['challenge'] = '';
         unset($_SESSION['lookupusernamestart']);
 
