@@ -97,6 +97,27 @@ class AssessStandalone {
     $this->qdata[$qsid] = $data;
   }
 
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    /**
+     * Get a question's data (DB row data) as represented in imas_questionset.
+     *
+     * @param int $questionSetId The question's ID from imas_questionset.
+     * @return array|null An associative array of the question's data.
+     *                    Null if the question's data is unknown.
+     */
+    function getQuestionData(int $questionSetId): ?array {
+        return empty($this->qdata[$questionSetId]) ? null : $this->qdata[$questionSetId];
+    }
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+
     /**
      * Get the Question object.
      *
