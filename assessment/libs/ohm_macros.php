@@ -348,10 +348,9 @@ function ohm_getfeedbacktxtcalculated($studentAnswer,
 
     $questionIndex = _getFeedbackIndex($partNumber);
 
-    if ($studentAnswer === null) {
+    if ($studentAnswer === null || !is_numeric($studentAnswerValue)) {
         return [];
     } else {
-        $studentAnswer = normalizemathunicode($studentAnswer);
         if (strval($tolerance)[0] == '|') {
             $abstol = true;
             $tolerance = substr($tolerance, 1);
