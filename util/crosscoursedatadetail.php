@@ -60,7 +60,7 @@ if (empty($_REQUEST['baseassess'])) {
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
-    echo '<p>This utility allows you to output question averages from all copies of the specified assessment.</p>';
+	echo '<p>This utility allows you to output question averages from all copies of the specified assessment.</p>';
 	echo '<p>All scores are averages reported as percents.  The average only includes students who took the assessment, but will include students who did not attempt the question.</p>';
 	echo '<form method=post>';
 	echo '<p>Base Assessment ID: <input name=baseassess size=10 /></p>';
@@ -186,11 +186,11 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	}
 	if ($row['ptsposs'] != $ptsposs) {
 		//wrong points possible
-		continue;	
+		continue;
 	}
 	$assessdata[$row['id']] = $row;
 	$courses[$row['id']] = $row['courseid'];
-	$qmap = $qmap + array_flip($row['itemorder']);	
+	$qmap = $qmap + array_flip($row['itemorder']);
 }
 
 //pull qsetids to verify assessments match

@@ -1,7 +1,6 @@
 <?php
 //IMathAS:  Basic forms
 //(c) 2006 David Lippman
-echo "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\"/>\n";
 if ($_GET['action']!="newuser" && $_GET['action']!="resetpw" && $_GET['action']!="lookupusername") {
 	require("../init.php");
 } else {
@@ -20,6 +19,7 @@ if (isset($_GET['greybox'])) {
 } else {
 	$gb = '';
 }
+echo "<link rel=\"stylesheet\" href=\"$imasroot/ohm/forms.css\" type=\"text/css\"/>\n";
 require("../header.php");
 
 switch($_GET['action']) {

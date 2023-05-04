@@ -55,6 +55,7 @@ $vueData = array(
     'showwork' => ($line['showwork']&3),
     'showworktype' => ($line['showwork']&4),
 	'showextrefs' => ($line['showhints']&2) > 0,
+    'showwrittenex' => ($line['showhints']&4) > 0,
 	'msgtoinstr' => $line['msgtoinstr'] > 0,
 	'doposttoforum' => $line['posttoforum'] > 0,
 	'posttoforum' => $line['posttoforum']>0 ? $line['posttoforum'] :
@@ -169,7 +170,7 @@ $vueData = array(
 		</span><br class=form />
 	</div>
 
-	<div v-show="avail==1 && edatetype=='edate'">
+	<div v-show="avail==1 && (edatetype=='edate' || datesbylti==1 || (datesbylti>0 && enddate<2000000000))">
 		<span class=form><?php echo _('Practice mode');?>:</span>
 		<span class=formright>
 			<label>
@@ -552,6 +553,11 @@ $vueData = array(
 				<label>
 					<input type="checkbox" name="showextrefs" value="2" v-model="showextrefs" />
 					<?php echo _('Show video/text buttons when available?');?>
+				</label>
+                <br/>
+				<label>
+					<input type="checkbox" name="showwrittenex" value="4" v-model="showwrittenex" />
+					<?php echo _('Show written example buttons when available?');?>
 				</label>
 			</span><br class=form />
 

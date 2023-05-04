@@ -18,6 +18,7 @@ $inline_choicemap = !empty($CFG['GEN']['choicesalt']) ? $CFG['GEN']['choicesalt'
 $statesecret = !empty($CFG['GEN']['embedsecret']) ? $CFG['GEN']['embedsecret'] : 'test';
 $cid = 'embedq';
 $_SESSION['secsalt'] = "12345";
+$myrights = 5;
 
 $issigned = false;
 // Get basic settings from JWT or query string
@@ -36,6 +37,8 @@ if (empty($QS['id'])) {
 if (!is_array($QS['id'])) {
     $QS['id'] = explode('-', $QS['id']);
 }
+$QS['id'] = array_map('trim', $QS['id']);
+
 // set user preferences
 $prefdefaults = array(
     'mathdisp' => 6, //default is katex
@@ -108,7 +111,7 @@ if (isset($QS['jssubmit'])) {
 if (isset($QS['showhints'])) {
     $state['showhints'] = $QS['showhints'];
 } else {
-    $state['showhints'] = 3;
+    $state['showhints'] = 7;
 }
 
 if (isset($QS['maxtries'])) {
@@ -169,6 +172,9 @@ if (isset($_POST['toscoreqn'])) {
     $qns = array_keys($toscoreqn);
     if (count($qns)>1) {
         echo "Error - can only handle submitting one question at a time";
+    } else if (count($qns)==0) {
+        echo 'Error - nothing submitted';
+        exit;
     }
     $qn = $qns[0];
     $parts_to_score = array();
@@ -194,7 +200,7 @@ if (isset($_POST['toscoreqn'])) {
         'errors' => $res['errors'],
         'state' => JWT::encode($a2->getState(), $statesecret)
     );
-    $out = array('jwt'=>JWT::encode($jwtcontents, $QS['auth']));
+    $out = array('jwt'=>JWT::encode($jwtcontents, ''));
 
     if ($state['showscoredonsubmit'] || !$res['allans']) {
         $disp = $a2->displayQuestion($qn);
@@ -276,11 +282,11 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
 } else {
-    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=111520" type="text/javascript"></script>';
+    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=021123" type="text/javascript"></script>';
 }
 
-$placeinhead .= '<script src="' . $staticroot . '/javascript/assess2supp.js" type="text/javascript"></script>';
-$placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/mathquill/mathquill-basic.css">
+$placeinhead .= '<script src="' . $staticroot . '/javascript/assess2supp.js?v=041522" type="text/javascript"></script>';
+$placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/mathquill/mathquill-basic.css?v=021823">
   <link rel="stylesheet" type="text/css" href="' . $staticroot . '/mathquill/mqeditor.css">';
 
 // setup resize message sender
