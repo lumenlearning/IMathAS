@@ -32,7 +32,7 @@ jobs:
       # This is required to role chain from the OIDC role to other cross-account roles
       # https://github.com/aws-actions/configure-aws-credentials/issues/279
       - name: OIDC Auth
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
@@ -40,7 +40,7 @@ jobs:
           role-duration-seconds: 900
 
       - name: Assume role in CI Account
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -52,7 +52,7 @@ jobs:
       
       - name: Set Public ECR Auth
         id: ecr-auth
-        run: echo "::set-output name=ECR_PASSWORD::$(aws ecr-public --region us-east-1 get-login-password)"
+        run: echo "ECR_PASSWORD=$(aws ecr-public --region us-east-1 get-login-password)" >> $GITHUB_OUTPUT
   beanstalk-deploy:
     name: Beanstalk Deployment
     timeout-minutes: 30
@@ -67,7 +67,7 @@ jobs:
       id: login-ecr
     
     - name: Login to Public ECR
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         registry: public.ecr.aws/o9c0t3w1
         username: AWS
@@ -77,24 +77,24 @@ jobs:
       name: Read git tree hash
       run: |
         tree_hash=$(git rev-parse HEAD:)
-        echo "::set-output name=tree_hash::$tree_hash"
+        echo "tree_hash=$tree_hash" >> $GITHUB_OUTPUT
         
     - id: read_env_json
       name: Read Environment JSON
       run: |
         env_json=$(jq -c '.environments[] | select(.environment_label=="${{ inputs.environment }}")' ./deploy-scripts/environments.json)
-        echo "::set-output name=env_json::$env_json" 
+        echo "env_json=$env_json" >> $GITHUB_OUTPUT
 
     - id: set_env_metadata
       name: Set Environment Metadata
       run: |
-        echo "::set-output name=account::${{ fromJSON(steps.read_env_json.outputs.env_json).account }}"
-        echo "::set-output name=application::${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.application }}"
-        echo "::set-output name=bucket::${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.bucket }}"
-        echo "::set-output name=beanstalk_env::${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.beanstalk_environment }}"
+        echo "account=${{ fromJSON(steps.read_env_json.outputs.env_json).account }}" >> $GITHUB_OUTPUT
+        echo "application=${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.application }}" >> $GITHUB_OUTPUT
+        echo "bucket=${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.bucket }}" >> $GITHUB_OUTPUT
+        echo "beanstalk_env=${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.beanstalk_environment }}" >> $GITHUB_OUTPUT
 
     - name: OIDC Auth to AWS
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: us-west-2
         role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
@@ -102,7 +102,7 @@ jobs:
         role-duration-seconds: 900
 
     - name: Assume role in target account
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}

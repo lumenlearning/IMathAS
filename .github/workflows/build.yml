@@ -52,19 +52,19 @@ jobs:
       name: Read git tree hash
       run: |
         tree_hash=$(git rev-parse HEAD:)
-        echo "::set-output name=tree_hash::$tree_hash"
+        echo "tree_hash=$tree_hash" >> $GITHUB_OUTPUT
 
     - id: set_branch_name
       name: Read git branch name
       run: |
         branch_name=${GITHUB_REF##*/}
-        echo "::set-output name=branch_name::$branch_name"
+        echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
     - id: set_node_version
       name: Read Node Version from .nvmrc
       run: |
         node_version=$(< .nvmrc)
-        echo "::set-output name=node_version::$node_version"
+        echo "node_version=$node_version" >> $GITHUB_OUTPUT
 
     - uses: ./.github/actions/private-ecr-login
       name: Login to Private ECR
@@ -73,7 +73,7 @@ jobs:
     - name: Check for prebuilt image
       id: prebuilt_check
       run: |
-        docker manifest inspect ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-tree-${{ steps.read_tree_hash.outputs.tree_hash }} || echo "::set-output name=image_exists::$?"
+        docker manifest inspect ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:gha-tree-${{ steps.read_tree_hash.outputs.tree_hash }} || echo "image_exists=$?" >> $GITHUB_OUTPUT
 
     - name: Set up Docker Buildx
       if: steps.prebuilt_check.outputs.image_exists != 0
