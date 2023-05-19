@@ -195,9 +195,9 @@ if (count($qns) > 0) {
     #### Begin OHM-specific changes ############################################################
     #### Begin OHM-specific changes ############################################################
     if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
-        $debugIsStudent = isset($isstudent) ? $isstudent : false;
-        $debugIsActualTeacher = isset($isActualTeacher) ? $isActualTeacher : false;
-        $debugIsTeacherPreview = isset($isTeacherPreview) ? $isTeacherPreview : false;
+        $debugIsStudent = isset($isstudent) ? $isstudent : null;
+        $debugIsActualTeacher = isset($isActualTeacher) ? $isActualTeacher : null;
+        $debugIsTeacherPreview = isset($isTeacherPreview) ? $isTeacherPreview : null;
 
         $logData = [
             'message' => 'Received an answer submission.',
@@ -427,9 +427,9 @@ prepDateDisp($assessInfoOut);
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
 if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
-    $debugIsStudent = isset($isstudent) ? $isstudent : false;
-    $debugIsActualTeacher = isset($isActualTeacher) ? $isActualTeacher : false;
-    $debugIsTeacherPreview = isset($isTeacherPreview) ? $isTeacherPreview : false;
+    $debugIsStudent = isset($isstudent) ? $isstudent : null;
+    $debugIsActualTeacher = isset($isActualTeacher) ? $isActualTeacher : null;
+    $debugIsTeacherPreview = isset($isTeacherPreview) ? $isTeacherPreview : null;
 
     $logData = [
         'message' => 'Sending scoring response to client.',
