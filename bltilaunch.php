@@ -26,6 +26,18 @@
 //    lis_person_name_family
 //    lis_person_contact_email_primary
 
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+try {
+#### END OHM-specific changes ############################################################
+#### END OHM-specific changes ############################################################
+#### END OHM-specific changes ############################################################
+#### END OHM-specific changes ############################################################
+#### END OHM-specific changes ############################################################
+
 header('P3P: CP="ALL CUR ADM OUR"');
 $init_skip_csrfp = true;
 $init_session_start = true;
@@ -3181,5 +3193,24 @@ if ($_SESSION['lti_keytype']=='cc-vf' || (!$promptforsettings && !$createnewsess
 
 /*end using old behavior for other requests */
 }
+
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+} catch (Exception $exception) {
+    if ('true' == getenv('ENABLE_LTI_DEBUG')) {
+        error_log("Caught exception in bltilaunch.php:");
+        error_log("Exception message: " . $exception->getMessage());
+        error_log("Exception trace: " . $exception->getTraceAsString());
+    }
+    throw $exception;
+}
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
 
 ?>

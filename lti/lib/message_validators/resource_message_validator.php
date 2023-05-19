@@ -7,6 +7,25 @@ class Resource_Message_Validator implements Message_Validator {
     }
 
     public function validate($jwt_body) {
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        if ('true' == getenv('ENABLE_LTI_DEBUG')) {
+            error_log(
+                sprintf(
+                    '%s: JWT body = %s',
+                    __METHOD__,
+                    print_r($jwt_body, true)
+                )
+            );
+        }
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
         if (empty($jwt_body['sub'])) {
             throw new LTI_Exception('Must have a user (sub)');
         }
