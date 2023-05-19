@@ -12,14 +12,13 @@ class Resource_Message_Validator implements Message_Validator {
         #### Begin OHM-specific code #####################################################################
         #### Begin OHM-specific code #####################################################################
         #### Begin OHM-specific code #####################################################################
-        if ('true' == getenv('ENABLE_LTI_DEBUG')) {
-            error_log(
-                sprintf(
-                    '%s: JWT body = %s',
-                    __METHOD__,
-                    print_r($jwt_body, true)
-                )
-            );
+        if ($GLOBALS['ENABLE_LTI_DEBUG']) {
+            $logData = [
+                'message' => 'Validating LTI resource message.',
+                'classMethod' => __METHOD__,
+                'jwtBody' => $jwt_body,
+            ];
+            error_log(json_encode($logData));
         }
         #### End OHM-specific code #####################################################################
         #### End OHM-specific code #####################################################################
