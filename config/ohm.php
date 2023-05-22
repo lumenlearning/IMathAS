@@ -252,3 +252,5 @@ $CFG['showcalculator'] = [
 
 $CFG['LTI']['autoreg'] = true;
 
+// Debug logging
+$GLOBALS['ENABLE_LTI_DEBUG'] = 'true' == getenv('ENABLE_LTI_DEBUG');

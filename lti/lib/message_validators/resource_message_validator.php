@@ -7,6 +7,26 @@ class Resource_Message_Validator implements Message_Validator {
     }
 
     public function validate($jwt_body) {
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        #### Begin OHM-specific code #####################################################################
+        if ($GLOBALS['ENABLE_LTI_DEBUG']) {
+            $logData = [
+                'message' => 'Validating LTI resource message.',
+                'classMethod' => __METHOD__,
+                'phpFile' => __FILE__,
+                'lineNumber' => __LINE__,
+                'jwtBody' => $jwt_body,
+            ];
+            error_log(json_encode($logData));
+        }
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
+        #### End OHM-specific code #####################################################################
         if (empty($jwt_body['sub'])) {
             throw new LTI_Exception('Must have a user (sub)');
         }
