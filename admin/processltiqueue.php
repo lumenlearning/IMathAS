@@ -169,6 +169,20 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 						'hash' => $row['hash'],
 						'sendon' => $row['sendon'],
 						'lasttry' => ($row['failures']>=6)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
 					)
 				);
 			} else {
@@ -192,7 +206,21 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 					array( 	  //user-data; will get passed to response
 						'action' => 'gettoken',
 						'platformid' => $platformid
-					)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                    )
 				);
 				$tokensQueued[] = $platformid;
 			}
@@ -225,6 +253,20 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
                         'hash' => $row['hash'],
                         'sendon' => $row['sendon'],
                         'lasttry' => ($row['failures']>=6)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
                     )
                 );
             }
@@ -267,7 +309,21 @@ if (count($round2)>0 &&  $timeused < 40) {
 						'hash' => $row['hash'],
 						'sendon' => $row['sendon'],
 						'lasttry' => ($row['failures']>=6)
-					)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                    )
 				);
 			} else {
 				$updater1p3->update_sendon($row['hash'], $platformid);

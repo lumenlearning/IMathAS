@@ -225,6 +225,37 @@ class AssessRecord
       }
 
       $this->need_to_record = false;
+
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
+            if (isset($qarr[':scoreddata']) || isset($qarr[':practicedata'])) {
+                $userId = $this->curUid;
+                $assessmentId = $this->curAid;
+                $debugScoredData = empty($qarr[':scoreddata']) ? ''
+                    : json_decode(gzdecode($qarr[':scoreddata']));
+                $debugPracticeData = empty($qarr[':practicedata']) ? ''
+                    : json_decode(gzdecode($qarr[':practicedata']));
+
+                $logData = [
+                    'message' => 'Saved updated assessment record to the DB.',
+                    'classMethod' => __METHOD__,
+                    'userId' => $userId,
+                    'assessmentId' => $assessmentId,
+                    'scoredData' => $debugScoredData,
+                    'practiceData' => $debugPracticeData,
+                ];
+                error_log(json_encode($logData));
+            }
+        }
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
     }
   }
 
@@ -346,6 +377,37 @@ class AssessRecord
     $stm->execute($qarr);
 
     $this->hasRecord = true;
+
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
+          foreach ($qarr as $rowData) {
+              $userId = $rowData[0];
+              $assessmentId = $rowData[1];
+              $debugScoredData = empty($rowData[7]) ? '' : json_decode(gzdecode($rowData[7]));
+              $debugPracticeData = empty($rowData[8]) ? '' : json_decode(gzdecode($rowData[8]));
+
+              if (empty($assessmentId)) continue;
+
+              $logData = [
+                  'message' => 'Saved new assessment record to the DB.',
+                  'classMethod' => __METHOD__,
+                  'userId' => $userId,
+                  'assessmentId' => $assessmentId,
+                  'scoredData' => $debugScoredData,
+                  'practiceData' => $debugPracticeData,
+              ];
+              error_log(json_encode($logData));
+          }
+      }
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
   }
 
   /**
@@ -2067,6 +2129,29 @@ class AssessRecord
    */
   public function addSubmission($time) {
     $seconds = $time - $this->assessRecord['starttime'];
+
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
+          $logData = [
+              'message' => 'Adding answer submission timestamp to assessment record. (not written to DB yet)',
+              'classMethod' => __METHOD__,
+              'userId' => $this->curUid,
+              'assessmentId' => $this->curAid,
+              'assessmentStartTime' => $this->assessRecord['starttime'],
+              'submissionTime' => $seconds,
+              'submissionTimeUnit' => 'secondsAfterStartTime',
+          ];
+          error_log(json_encode($logData));
+      }
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
 
     $this->parsedata();
     $this->data['submissions'][] = $seconds;
