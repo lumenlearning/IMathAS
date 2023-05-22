@@ -3201,7 +3201,7 @@ if ($_SESSION['lti_keytype']=='cc-vf' || (!$promptforsettings && !$createnewsess
 #### Begin OHM-specific changes ############################################################
 } catch (Exception $exception) {
     if ($GLOBALS['ENABLE_LTI_DEBUG']) {
-        error_log(sprintf('Caught exception in %s(%d):', __FILE__, __LINE__);
+        error_log(sprintf('Caught exception in %s(%d):', __FILE__, __LINE__));
         error_log("Exception message: " . $exception->getMessage());
         error_log("Exception trace: " . $exception->getTraceAsString());
     }

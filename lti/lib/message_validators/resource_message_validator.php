@@ -16,6 +16,8 @@ class Resource_Message_Validator implements Message_Validator {
             $logData = [
                 'message' => 'Validating LTI resource message.',
                 'classMethod' => __METHOD__,
+                'phpFile' => __FILE__,
+                'lineNumber' => __LINE__,
                 'jwtBody' => $jwt_body,
             ];
             error_log(json_encode($logData));
