@@ -206,7 +206,7 @@ class AssessStandalone {
 
     $showans = (!empty($this->getOpVal($options, 'showans', false)) || $showans) &&
         !$this->getOpVal($options, 'hideans', false);
-    $showhints = $this->getOpVal($options, 'showhints', 3);
+    $showhints = $this->getOpVal($options, 'showhints', 7);
     $rawscores = $this->state['rawscores'][$qn] ?? [];
 
     if ($hidescoremarkers) {
@@ -287,7 +287,12 @@ class AssessStandalone {
       $jsparams['disabled'] = $disabled;
     }
 
-    return array('html' => $qout, 'jsparams' => $jsparams, 'errors'=>$question->getErrors());
+    return array(
+        'html' => $qout, 
+        'jsparams' => $jsparams, 
+        'errors'=>$question->getErrors(),
+        'soln'=>$question->getSolutionContentDetailed()
+    );
   }
 
   /*
@@ -375,9 +380,9 @@ class AssessStandalone {
       }
     }
 
-    $allPartsAns = (count($this->state['partattemptn'][$qn]) == count($scoreResult['answeights']));
+    $allPartsAns = (count($this->state['partattemptn'][$qn]) >= count($scoreResult['answeights']));
     $score = array_sum($scores);
-    if (count($partla) > 1) {
+    if (count($scoreResult['answeights']) > 1) {
       $this->state['scorenonzero'][$qn+1] = array();
       $this->state['scoreiscorrect'][$qn+1] = array();
       foreach ($partla as $k=>$v) {

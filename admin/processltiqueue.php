@@ -5,7 +5,7 @@
 /*
   To use the LTI queue, you'll need to either set up a cron job to call this
   script, or call it using a scheduled web call with the authcode option.
-  When called in cron job, the base address like https://www.mysite.com should
+  When called in cron job, the base address like https://www.mysite.com should 
   be passed as an argument.
   It should be called every minute.
 
@@ -34,9 +34,9 @@ if (php_sapi_name() == "cli") {
     $_SERVER['HTTP_HOST'] = explode('//',$argv[1])[1];
 }
 
-require("../init_without_validate.php");
-require("../includes/rollingcurl.php");
-require_once('../includes/ltioutcomes.php');
+require(__DIR__ . "/../init_without_validate.php");
+require(__DIR__ . "/../includes/rollingcurl.php");
+require_once(__DIR__ . '/../includes/ltioutcomes.php');
 
 function debuglog($str) {
     #### Begin OHM-specific changes ############################################################
@@ -50,7 +50,7 @@ function debuglog($str) {
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
-    if (!empty($GLOBALS['CFG']['LTI']['noisydebuglog'])) {
+	if (!empty($GLOBALS['CFG']['LTI']['noisydebuglog'])) {
 		$fh = fopen(__DIR__.'/../lti/ltidebug.txt', 'a');
 		fwrite($fh, $str."\n");
 		fclose($fh);
@@ -101,7 +101,7 @@ $scriptStartTime = time();
 
 //if called via AWS SNS, we need to return an OK quickly so it won't retry
 if (isset($_SERVER['HTTP_X_AMZ_SNS_MESSAGE_TYPE'])) {
-	require("../includes/AWSSNSutil.php");
+	require(__DIR__ . "/../includes/AWSSNSutil.php");
 	respondOK();
 }
 
@@ -139,6 +139,7 @@ $LTIsecrets = array();
 $cntsuccess = 0;
 $cntfailure = 0;
 $cntgiveup = 0;
+$tokensQueued = [];
 $round2 = array();
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	//echo "reading record ".$row['hash'].'<br/>';
@@ -159,6 +160,8 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 						'ltiuserid' => $ltiuserid,
 						'platformid' => $platformid,
 						'grade' => max(0, $row['grade']),
+                        'isstu' => $row['isstu'],
+                        'addedon' => $row['addedon'],
                         'keyseturl' => $row['keyseturl'],
 					),
 					null, //no special callback
@@ -166,60 +169,108 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 						'hash' => $row['hash'],
 						'sendon' => $row['sendon'],
 						'lasttry' => ($row['failures']>=6)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
 					)
 				);
 			} else {
 				$updater1p3->update_sendon($row['hash'], $platformid);
 			}
 		} else {
-			debuglog('queing token request for '.$row['hash']. ' on platform '.$platformid);
-			// we need to get a token, so add a token request
-			$platforminfo = $updater1p3->get_platform_info($platformid);
-			$RCX->addRequest(
-				$platforminfo['auth_token_url'],  //url to request
-				array( 		//post data; will get transformed before send
-					'ver' => 'LTI1.3',
-					'action' => 'gettoken',
-					'platformid' => $platformid,
-					'platforminfo' => $platforminfo,
-                    'keyseturl' => $row['keyseturl'],
-				),
-				null, //no special callback
-				array( 	  //user-data; will get passed to response
-					'action' => 'gettoken',
-					'platformid' => $platformid
-				)
-			);
+			if (!in_array($platformid, $tokensQueued)) { // only request token once per platform
+				debuglog('queing token request for '.$row['hash']. ' on platform '.$platformid);
+				// we need to get a token, so add a token request
+				$platforminfo = $updater1p3->get_platform_info($platformid);
+				$RCX->addRequest(
+					$platforminfo['auth_token_url'],  //url to request
+					array( 		//post data; will get transformed before send
+						'ver' => 'LTI1.3',
+						'action' => 'gettoken',
+						'platformid' => $platformid,
+					    'platforminfo' => $platforminfo,
+                        'keyseturl' => $row['keyseturl'],
+					),
+					null, //no special callback
+					array( 	  //user-data; will get passed to response
+						'action' => 'gettoken',
+						'platformid' => $platformid
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                    )
+				);
+				$tokensQueued[] = $platformid;
+			}
 			// add original ltiqueue to round 2, to process after first round is done
 			$round2[] = $row;
 		}
 	} else {
 		// LTI 1.1 update
-		list($lti_sourcedid,$ltiurl,$ltikey,$keytype) = explode(':|:', $row['sourcedid']);
-		$secret = '';
-		if (strlen($lti_sourcedid)>1 && strlen($ltiurl)>1 && strlen($ltikey)>1) {
-			debuglog('queing 1.1 request for '.$row['hash']);
-			$grade = min(1, max(0, $row['grade']));
-			$RCX->addRequest(
-				$ltiurl,  //url to request
-				array( 		//post data; will get transformed before send
-					'ver' => 'LTI1.1',
-					'action' => 'update',
-					'key' => $ltikey,
-					'keytype' => $keytype,
-					'url' => $ltiurl,
-					'sourcedid' => $lti_sourcedid,
-					'grade' => $grade
-				),
-				null, //no special callback
-				array( 	  //user-data; will get passed to response
-				    'sourcedid' => $row['sourcedid'],
-					'hash' => $row['hash'],
-					'sendon' => $row['sendon'],
-					'lasttry' => ($row['failures']>=6)
-				)
-			);
-		}
+        $sourcedid_parts = explode(':|:', $row['sourcedid']);
+        if (count($sourcedid_parts)==4) {
+		    list($lti_sourcedid,$ltiurl,$ltikey,$keytype) = $sourcedid_parts;
+            $secret = '';
+            if (strlen($lti_sourcedid)>1 && strlen($ltiurl)>1 && strlen($ltikey)>1) {
+                debuglog('queing 1.1 request for '.$row['hash']);
+                $grade = min(1, max(0, $row['grade']));
+                $RCX->addRequest(
+                    $ltiurl,  //url to request
+                    array( 		//post data; will get transformed before send
+                        'ver' => 'LTI1.1',
+                        'action' => 'update',
+                        'key' => $ltikey,
+                        'keytype' => $keytype,
+                        'url' => $ltiurl,
+                        'sourcedid' => $lti_sourcedid,
+                        'grade' => $grade
+                    ),
+                    null, //no special callback
+                    array( 	  //user-data; will get passed to response
+				        'sourcedid' => $row['sourcedid'],
+                        'hash' => $row['hash'],
+                        'sendon' => $row['sendon'],
+                        'lasttry' => ($row['failures']>=6)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                    )
+                );
+            }
+        }
 	}
 }
 
@@ -249,14 +300,30 @@ if (count($round2)>0 &&  $timeused < 40) {
 						'action' => 'update',
 						'ltiuserid' => $ltiuserid,
 						'platformid' => $platformid,
-						'grade' => max(0, $row['grade'])
+						'grade' => max(0, $row['grade']),
+                        'isstu' => $row['isstu'],
+                        'addedon' => $row['addedon']
 					),
 					null, //no special callback
 					array( 	  //user-data; will get passed to response
 						'hash' => $row['hash'],
 						'sendon' => $row['sendon'],
 						'lasttry' => ($row['failures']>=6)
-					)
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        #### Begin OHM-specific changes ############################################################
+                        ,
+                        'userid' => $row['userid'],
+                        'assessmentid' => $row['assessmentid'],
+                        'grade' => $row['grade'],
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                        #### End OHM-specific changes ############################################################
+                    )
 				);
 			} else {
 				$updater1p3->update_sendon($row['hash'], $platformid);
@@ -305,7 +372,7 @@ function LTIqueuePostdataCallback($data) {
                 $updater1p3->token_valid($data['platformid'])
             ) { // double check we have a valid token
 				$token = $updater1p3->get_access_token($data['platformid'], '', '', '', $data['keyseturl']);
-				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid']);
+				return $updater1p3->get_update_body($token, $data['grade'], $data['ltiuserid'], $data['isstu'], $data['addedon']);
 			} else {
 				return false;
 			}
@@ -347,15 +414,16 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 	global $DBH,$cntsuccess,$cntfailure,$cntgiveup,$updater1p3,$deletequeue;
 	$post_data = $request_info['post_data'];
 	$success = true;
-    debuglog('callback request_info:'.json_encode($post_data));
+	debuglog('callback request_info:'.json_encode($post_data));
 	debuglog('callback user_data:'.json_encode($user_data));
 	if ($post_data['ver'] == 'LTI1.3') {
 		if ($post_data['action'] == 'gettoken') {
 			// was a token request
 			if ($response === false) {
 				// record failure. in round 2 token will be read as not valid
-				$updater1p3->token_request_failure($user_data['platformid']);
+				$updater1p3->token_request_failure($user_data['platformid'], $request_info['response_text']);
 				debuglog('token request failure t1 '.$user_data['platformid']);
+                return;
 			}
 			$token_data = json_decode($response, true);
 			if (isset($token_data['access_token'])) {
@@ -363,7 +431,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 				debuglog('got token for '.$user_data['platformid']);
 			} else {
                 // record failure. in round 2 token will be read as not valid
-				$updater1p3->token_request_failure($user_data['platformid']);
+				$updater1p3->token_request_failure($user_data['platformid'], $response . $request_info['response_text']);
 				debuglog('token request failure t2 '.$response);
 			}
 			return; // doesn't effect ltiqueue, so return now
@@ -388,7 +456,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
         #### End OHM-specific changes ############################################################
         #### End OHM-specific changes ############################################################
 
-        // LTI 1.1
+		// LTI 1.1
 		if ($response === false || 1 !== $successXmlStatus) { //failed
 			$success = false;
 		}
@@ -407,7 +475,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 			unset($post_data['key']);
 			unset($post_data['keytype']);
 
-			error_log("LTI update giving up:\n"
+			$logdata = "LTI update giving up:\n"
 			. "POST data\n"
 			. "---------\n"
 			. print_r($post_data, true) . "\n"
@@ -426,7 +494,10 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 			. "--------\n"
 			. "Response \n"
 			. "--------\n"
-			. $response);
+			. $response
+            . $request_info['response_text'];
+            $logstm = $DBH->prepare("INSERT INTO imas_log (time,log) VALUES (?,?)");
+            $logstm->execute([time(), $logdata]);
 		} else {
 			$cntfailure++;
 		}

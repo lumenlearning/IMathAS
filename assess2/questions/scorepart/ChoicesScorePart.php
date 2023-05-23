@@ -60,7 +60,7 @@ class ChoicesScorePart implements ScorePart
         if ($multi) { $qn = ($qn+1)*1000+$partnum; }
 
         if ($noshuffle == "last") {
-            $randkeys = $RND->array_rand(array_slice($questions,0,count($questions)-1),count($questions)-1);
+            $randkeys = (array) $RND->array_rand(array_slice($questions,0,count($questions)-1),count($questions)-1);
             $RND->shuffle($randkeys);
             array_push($randkeys,count($questions)-1);
         } else if ($noshuffle == "all") {
@@ -70,17 +70,17 @@ class ChoicesScorePart implements ScorePart
             if ($n>count($questions)) {
                 $n = count($questions);
             }
-            $randkeys = $RND->array_rand(array_slice($questions,0,count($questions)-$n),count($questions)-$n);
+            $randkeys = (array) $RND->array_rand(array_slice($questions,0,count($questions)-$n),count($questions)-$n);
             $RND->shuffle($randkeys);
             for ($i=count($questions)-$n;$i<count($questions);$i++) {
                 array_push($randkeys,$i);
             }
         } else {
-            $randkeys = $RND->array_rand($questions,count($questions));
+            $randkeys = (array) $RND->array_rand($questions,count($questions));
             $RND->shuffle($randkeys);
         }
 
-        if ($givenans==='NA' || $givenans === null || $isRescore) {
+        if ($givenans==='NA' || $givenans === null || $givenans === '' || $isRescore) {
             $scorePartResult->setLastAnswerAsGiven($givenans);
         } else {
             $scorePartResult->setLastAnswerAsGiven($randkeys[$givenans]);
@@ -93,7 +93,7 @@ class ChoicesScorePart implements ScorePart
             }
         }
 
-        if ($givenans ==='NA' || $givenans === null) {
+        if ($givenans ==='NA' || $givenans === null || $givenans === '') {
             $scorePartResult->setRawScore(0);
             return $scorePartResult;
         }
@@ -103,7 +103,7 @@ class ChoicesScorePart implements ScorePart
             $anss[$k] = intval($v);
         }
         //if ($randkeys[$givenans] == $answer) {return 1;} else { return 0;}
-        $adjGiven = $isRescore ? $givenans : $randkeys[$givenans];
+        $adjGiven = ($isRescore || !isset($randkeys[$givenans])) ? $givenans : $randkeys[$givenans];
 
         if (in_array($adjGiven,$anss)) {
             $scorePartResult->setRawScore(1);

@@ -6,7 +6,7 @@
  * @param  Imathas_LTI_Database $db
  */
 function show_postback_form($launch, $db, $err='') {
-  global $imasroot,$installname,$coursetheme,$CFG;
+  global $imasroot,$staticroot,$installname,$coursetheme,$CFG;
   $promptForName = false;
   $promptForAcctCreation = false;
   $promptForLogin = false;
@@ -57,8 +57,8 @@ function show_postback_form($launch, $db, $err='') {
   $deflast = '';
   $defemail = '';
   if (!empty($name)) {
-    $deffirst = $name['first'];
-    $deflast = $name['last'];
+    $deffirst = $name['first'] ?? '';
+    $deflast = $name['last'] ?? '';
     if (!empty($launch->get_launch_data()['email'])) {
       $defemail = $launch->get_launch_data()['email'];
     }

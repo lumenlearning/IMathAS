@@ -9,7 +9,7 @@
 		exit;
 	}
 
-	if ($_GET['process']== true) {
+	if (!empty($_GET['process'])) {
 		require_once("../includes/updateptsposs.php");
 		if (isset($_POST['add'])) { //adding new questions
 			$stm = $DBH->prepare("SELECT itemorder,viddata,defpoints FROM imas_assessments WHERE id=:id");
@@ -151,6 +151,17 @@
 
 			updatePointsPossible($aid, $itemorder, $defpoints);
 		}
+        // Delete any teacher or tutor attempts on this assessment
+        $query = 'DELETE iar FROM imas_assessment_records AS iar JOIN
+            imas_teachers AS usr ON usr.userid=iar.userid AND usr.courseid=?
+            WHERE iar.assessmentid=?';
+        $stm = $DBH->prepare($query);
+        $stm->execute(array($cid, $aid));
+        $query = 'DELETE iar FROM imas_assessment_records AS iar JOIN
+            imas_tutors AS usr ON usr.userid=iar.userid AND usr.courseid=?
+            WHERE iar.assessmentid=?';
+        $stm = $DBH->prepare($query);
+        $stm->execute(array($cid, $aid));
 
 	} else {
 		//get defaults
@@ -170,14 +181,20 @@
             $defaults['showcalculator'] = 'No';
         }
 		if ($defaults['showhints'] == 0) {
-      $defaults['showhints'] = _('No');
-    } else if ($defaults['showhints'] == 1) {
-      $defaults['showhints'] = _('Hints');
-    } else if ($defaults['showhints'] == 2) {
-      $defaults['showhints'] = _('Video buttons');
-    } else if ($defaults['showhints'] == 3) {
-      $defaults['showhints'] = _('Hints &amp; Videos');
-    }
+            $defaults['showhints'] = _('No');
+        } else {
+            $ht = [];
+            if ($defaults['showhints']&1) {
+                $ht[] = _('Hints');
+            }
+            if ($defaults['showhints']&2) {
+                $ht[] = _('Videos');
+            }
+            if ($defaults['showhints']&4) {
+                $ht[] = _('Examples');
+            }
+            $defaults['showhints'] = implode(' &amp; ', $ht);
+        }
         $showworkoptions = [
             '-1' => _('Use Default'),
             '0' => _('No'),
@@ -260,7 +277,6 @@ if (isset($_POST['checked'])) { //modifying existing
 							$hasother = true;
 						}
 					}
-					$page_questionTable[$i]['extref'] = '';
 					if ($hasvid) {
 						$qrows[$row['id']] .= "<img src=\"$staticroot/img/video_tiny.png\" alt=\"Video\"/>";
 					}
@@ -275,8 +291,12 @@ if (isset($_POST['checked'])) { //modifying existing
 				$qrows[$row['id']] .= '<option value="-1" '.(($row['showhints']==-1)?'selected="selected"':'').'>'._('Use Default').'</option>';
 				$qrows[$row['id']] .= '<option value="0" '.(($row['showhints']==0)?'selected="selected"':'').'>'._('No').'</option>';
 				$qrows[$row['id']] .= '<option value="1" '.(($row['showhints']==1)?'selected="selected"':'').'>'._('Hints').'</option>';
-				$qrows[$row['id']] .= '<option value="2" '.(($row['showhints']==2)?'selected="selected"':'').'>'._('Videos').'</option>';
+                $qrows[$row['id']] .= '<option value="2" '.(($row['showhints']==2)?'selected="selected"':'').'>'._('Videos').'</option>';
+                $qrows[$row['id']] .= '<option value="4" '.(($row['showhints']==4)?'selected="selected"':'').'>'._('Examples').'</option>';
 				$qrows[$row['id']] .= '<option value="3" '.(($row['showhints']==3)?'selected="selected"':'').'>'._('Hints &amp; Videos').'</option>';
+                $qrows[$row['id']] .= '<option value="5" '.(($row['showhints']==5)?'selected="selected"':'').'>'._('Hints &amp; Examples').'</option>';
+                $qrows[$row['id']] .= '<option value="6" '.(($row['showhints']==6)?'selected="selected"':'').'>'._('Videos &amp; Examples').'</option>';
+                $qrows[$row['id']] .= '<option value="7" '.(($row['showhints']==7)?'selected="selected"':'').'>'._('Hints &amp; Videos &amp; Examples').'</option>';
                 $qrows[$row['id']] .= '</select></td>';
                 if (isset($CFG['showcalculator'])) {
                     $qrows[$row['id']] .= "<td><select name=\"showcalculator{$row['id']}\">";
@@ -306,7 +326,7 @@ if (isset($_POST['checked'])) { //modifying existing
             if (isset($CFG['showcalculator'])) {
                 echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
             }
-            echo '<th>'._('Show Work?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
+			echo '<th>'._('Show Work?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
 			echo "<th>"._("Copies to Add")."<br/>&nbsp;</th></tr></thead>";
 			echo "<tbody>";
 			$stm = $DBH->prepare("SELECT itemorder FROM imas_assessments WHERE id=:id");
@@ -345,7 +365,7 @@ if (isset($_POST['checked'])) { //modifying existing
             if (isset($CFG['showcalculator'])) {
                 echo '<th>Show Embedded Calculator?<br/><i class="grey">Default: '.Sanitize::encodeStringForDisplay($defaults['showcalculator']).'</i></th>';
             }
-            echo '<th>'._('Show Work?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
+			echo '<th>'._('Show Work?').'<br/><i class="grey">'._('Default:').' '.Sanitize::encodeStringForDisplay($defaults['showwork']).'</i></th>';
 			echo "<th>"._("Copies to Add")."</th></tr></thead>";
 			echo "<tbody>";
 			$checked = implode(',', array_map('intval', $_POST['nchecked']));
@@ -369,7 +389,6 @@ if (isset($_POST['checked'])) { //modifying existing
 							$hasother = true;
 						}
 					}
-					$page_questionTable[$i]['extref'] = '';
 					if ($hasvid) {
 						echo "<td><img src=\"$staticroot/img/video_tiny.png\" alt=\"Video\"/></td>";
 					}
@@ -392,7 +411,11 @@ if (isset($_POST['checked'])) { //modifying existing
 				echo '<option value="0">'._('No').'</option>';
 				echo '<option value="1">'._('Hints').'</option>';
 				echo '<option value="2">'._('Videos').'</option>';
-                echo '<option value="3">'._('Hints &amp; Videos').'</option></select></td>';
+                echo '<option value="4">'._('Examples').'</option>';
+                echo '<option value="3">'._('Hints &amp; Videos').'</option>';
+                echo '<option value="5">'._('Hints &amp; Examples').'</option>';
+                echo '<option value="6">'._('Videos &amp; Examples').'</option>';
+                echo '<option value="7">'._('Hints &amp; Videos &amp; Examples').'</option>';
                 if (isset($CFG['showcalculator'])) {
                     echo "<td><select name=\"showcalculator" . Sanitize::encodeStringForDisplay($row[0]) . "\">";
                     echo '<option value="default" selected="selected">' . _('Use Default') . '</option>';
@@ -406,6 +429,7 @@ if (isset($_POST['checked'])) { //modifying existing
                     }
                     echo '</select></td>';
                 }
+                echo '</select></td>';
                 echo "<td><select name=\"showwork" . Sanitize::encodeStringForDisplay($row[0]) . "\">";
                 foreach ($showworkoptions as $v=>$l) {
                     echo '<option value="'.$v.'" '.($v==-1 ?'selected':'').'>';

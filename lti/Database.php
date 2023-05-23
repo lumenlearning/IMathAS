@@ -173,7 +173,7 @@ class Imathas_LTI_Database implements LTI\Database
         return LTI\LTI_Registration::new ()
             ->set_auth_login_url($row['auth_login_url'])
             ->set_auth_token_url($row['auth_token_url'])
-            ->set_auth_server($row['auth_server'])
+            ->set_auth_server($row['auth_server'] ?? '')
             ->set_client_id($row['client_id'])
             ->set_key_set_url($row['key_set_url'])
             ->set_issuer($iss)
@@ -452,19 +452,24 @@ class Imathas_LTI_Database implements LTI\Database
                 $stm->execute(array($userid, $localcourse->get_courseid()));
             }
         } else {
-            $stm = $this->dbh->prepare('SELECT id,lticourseid FROM imas_students WHERE userid=? AND courseid=?');
-            $stm->execute(array($userid, $localcourse->get_courseid()));
-            $row = $stm->fetch(PDO::FETCH_ASSOC);
-            if ($row === false || $row === null) {
-                $stm = $this->dbh->prepare("SELECT deflatepass FROM imas_courses WHERE id=:id");
-                $stm->execute(array(':id'=>$localcourse->get_courseid()));
-                $deflatepass = $stm->fetchColumn(0);
+            // check to see if they're already a teacher or tutor
+            $stm = $this->dbh->prepare('SELECT id FROM imas_teachers WHERE userid=? AND courseid=? UNION SELECT id FROM imas_tutors WHERE userid=? AND courseid=?');
+            $stm->execute(array($userid, $localcourse->get_courseid(), $userid, $localcourse->get_courseid()));
+            if ($stm->fetchColumn(0) === false) {
+                $stm = $this->dbh->prepare('SELECT id,lticourseid FROM imas_students WHERE userid=? AND courseid=?');
+                $stm->execute(array($userid, $localcourse->get_courseid()));
+                $row = $stm->fetch(PDO::FETCH_ASSOC);
+                if ($row === false || $row === null) {
+                    $stm = $this->dbh->prepare("SELECT deflatepass FROM imas_courses WHERE id=:id");
+                    $stm->execute(array(':id'=>$localcourse->get_courseid()));
+                    $deflatepass = $stm->fetchColumn(0);
 
-                $stm = $this->dbh->prepare('INSERT INTO imas_students (userid,courseid,section,latepass,lticourseid) VALUES (?,?,?,?,?)');
-                $stm->execute(array($userid, $localcourse->get_courseid(), $section, $deflatepass, $localcourse->get_id()));
-            } else if ($row['lticourseid'] !== $localcourse->get_id()) {
-                $stm = $this->dbh->prepare('UPDATE imas_students SET lticourseid=? WHERE id=?');
-                $stm->execute(array($localcourse->get_id(), $row['id']));
+                    $stm = $this->dbh->prepare('INSERT INTO imas_students (userid,courseid,section,latepass,lticourseid) VALUES (?,?,?,?,?)');
+                    $stm->execute(array($userid, $localcourse->get_courseid(), $section, $deflatepass, $localcourse->get_id()));
+                } else if ($row['lticourseid'] !== $localcourse->get_id()) {
+                    $stm = $this->dbh->prepare('UPDATE imas_students SET lticourseid=? WHERE id=?');
+                    $stm->execute(array($localcourse->get_id(), $row['id']));
+                }
             }
         }
     }
@@ -743,10 +748,10 @@ class Imathas_LTI_Database implements LTI\Database
         }
 
         // get origin course
-        // TODO: if the $lastcopied isn't owned by us, should we still offer it as
-        // an option to be copied?
-        $stm = $this->dbh->prepare('SELECT DISTINCT id,name,ownerid FROM imas_courses WHERE id=?');
-        $stm->execute(array($target['refcid']));
+        $query = 'SELECT DISTINCT ic.id,ic.name,it.userid FROM imas_courses AS ic ';
+        $query .= 'LEFT JOIN imas_teachers AS it ON it.courseid=ic.id AND it.userid=? WHERE ic.id=?';
+        $stm = $this->dbh->prepare($query);
+        $stm->execute(array($userid, $target['refcid']));
         while ($row = $stm->fetch(PDO::FETCH_NUM)) {
             $copycourses[$row[0]] = $row[1];
             // if it's user's course, also include in assoc list
