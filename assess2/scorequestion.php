@@ -189,6 +189,37 @@ if (count($qns) > 0) {
     exit;
   }
 
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
+        $debugIsStudent = isset($isstudent) ? $isstudent : null;
+        $debugIsActualTeacher = isset($isActualTeacher) ? $isActualTeacher : null;
+        $debugIsTeacherPreview = isset($isTeacherPreview) ? $isTeacherPreview : null;
+
+        $logData = [
+            'message' => 'Received an answer submission.',
+            'phpFile' => __FILE__,
+            'lineNumber' => __LINE__,
+            'userId' => $uid,
+            'courseId' => $cid,
+            'assessmentId' => $aid,
+            'isStudent' => $debugIsStudent,
+            'isActualTeacher' => $debugIsActualTeacher,
+            'isTeacherPreview' => $debugIsTeacherPreview,
+            'dataGET' => $_GET,
+            'dataPOST' => $_POST,
+        ];
+        error_log(json_encode($logData));
+    }
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+
   // Record a submission
   $submission = $assess_record->addSubmission($now);
 
@@ -389,6 +420,38 @@ if (($assessInfoOut['submitby'] == 'by_question' && !$in_practice) || $end_attem
 
 //prep date display
 prepDateDisp($assessInfoOut);
+
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+if ($GLOBALS['ENABLE_SCORE_DEBUG']) {
+    $debugIsStudent = isset($isstudent) ? $isstudent : null;
+    $debugIsActualTeacher = isset($isActualTeacher) ? $isActualTeacher : null;
+    $debugIsTeacherPreview = isset($isTeacherPreview) ? $isTeacherPreview : null;
+
+    $logData = [
+        'message' => 'Sending scoring response to client.',
+        'phpFile' => __FILE__,
+        'lineNumber' => __LINE__,
+        'userId' => $uid,
+        'courseId' => $cid,
+        'assessmentId' => $aid,
+        'isStudent' => $debugIsStudent,
+        'isActualTeacher' => $debugIsActualTeacher,
+        'isTeacherPreview' => $debugIsTeacherPreview,
+        'dataGET' => $_GET,
+        'dataPOST' => $_POST,
+        'response' => $assessInfoOut,
+    ];
+    error_log(json_encode($logData));
+}
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
 
 //output JSON object
 echo json_encode($assessInfoOut);
