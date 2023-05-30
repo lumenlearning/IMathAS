@@ -8,7 +8,7 @@
       @click="openCalc"
       v-show="!showCalculator || calcIsPoppedOut"
       :disabled="calcIsPoppedOut">
-        <icon-calc :calc-type="calctype"></icon-calc>
+        <icon-calc :calc-type="calctype">
         Calculator
     </button>
     <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calctype === 'graphing'}">
@@ -133,6 +133,7 @@ export default {
         this.calcObj = window.Desmos.FourFunctionCalculator(this.$refs.figure);
       } else if (this.calctype === 'scientific') {
         this.calcObj = window.Desmos.ScientificCalculator(this.$refs.figure);
+        this.calcObj.updateSettings({degreeMode: true});
       } if (this.calctype === 'graphing') {
         this.calcObj = window.Desmos.GraphingCalculator(this.$refs.figure);
       }
