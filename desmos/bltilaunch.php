@@ -994,13 +994,14 @@ $now = time();
             // #### End OHM-specific code #####################################################
             if (isset($_SESSION['place_aid'])) {
                 $stm = $DBH->prepare('SELECT courseid,name FROM imas_assessments WHERE id=:aid');
-                $stm->execute(array(':aid'=>$_SESSION['place_aid']));
-        $row = $stm->fetch(PDO::FETCH_NUM);
-		if ($row===false) {
-            $aidsourcecid = -1; // assessment doesn't exist anymore
-            $aidsourcename = '';
-		} else {
-            list($aidsourcecid,$aidsourcename) = $row;
+                $stm->execute(array(':aid' => $_SESSION['place_aid']));
+                $row = $stm->fetch(PDO::FETCH_NUM);
+                if ($row === false) {
+                    $aidsourcecid = -1; // assessment doesn't exist anymore
+                    $aidsourcename = '';
+                } else {
+                    list($aidsourcecid, $aidsourcename) = $row;
+                }
             }
 
 		//look to see if we've already linked this context_id with a course
