@@ -8,7 +8,7 @@
       @click="openCalc"
       v-show="!showCalculator || calcIsPoppedOut"
       :disabled="calcIsPoppedOut">
-        <icon-calc :calc-type="calctype">
+        <icon-calc :calc-type="calctype"></icon-calc>
         Calculator
     </button>
     <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calctype === 'graphing'}">
