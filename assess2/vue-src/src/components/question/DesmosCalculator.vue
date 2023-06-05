@@ -133,6 +133,7 @@ export default {
         this.calcObj = window.Desmos.FourFunctionCalculator(this.$refs.figure);
       } else if (this.calctype === 'scientific') {
         this.calcObj = window.Desmos.ScientificCalculator(this.$refs.figure);
+        this.calcObj.updateSettings({degreeMode: true});
       } if (this.calctype === 'graphing') {
         this.calcObj = window.Desmos.GraphingCalculator(this.$refs.figure);
       }
