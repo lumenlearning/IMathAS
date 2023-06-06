@@ -194,7 +194,7 @@ function lti_handle_launch(
 
 function lti_redirect_launch(LTI_Placement $link): void
 {
-    global $DBH, $userid;
+    global $DBH;
 
     if (empty($link->get_placementtype()) || empty($link->get_typeid())) {
         echo 'Error: LTI_Placement is missing placement type or type id.';
@@ -220,7 +220,12 @@ function lti_redirect_launch(LTI_Placement $link): void
         exit;
     }
 
-    if ($_SESSION['ltirole'] == 'learner') {
+    $userid = $GLOBALS['userid'];
+    if (empty($userid) && !empty($_SESSION['userid'])) {
+        $userid = $_SESSION['userid'];
+    }
+
+    if ($_SESSION['ltirole'] == 'learner' && !empty($userid)) {
         $stm = $DBH->prepare('INSERT INTO imas_content_track (userid,courseid,type,typeid,viewtime,info) VALUES (:userid,:courseid,\'itemlti\',:typeid,:viewtime,\'\')');
         $stm->execute(array(':userid' => $userid, ':courseid' => $item->courseid, ':typeid' => $item->itemid, ':viewtime' => time()));
     }
