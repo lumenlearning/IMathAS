@@ -38,6 +38,11 @@ unset($init_skip_csrfp);
 // #### Begin OHM-specific code #####################################################
 // #### Begin OHM-specific code #####################################################
 require_once(__DIR__ . '/../includes/ltiroles.php');
+
+// Used to programmatically determine if the user is logged in via an LMS.
+$isLmsUser = true;
+
+$eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
 // #### End OHM-specific code #######################################################
@@ -53,7 +58,7 @@ $curdir = rtrim(dirname(__FILE__), '/\\');
 
  if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
 	 $urlmode = 'https://';
- } else {
+ } else if ($_SERVER['HTTP_HOST'] != 'localhost') {
  	 $urlmode = 'http://';
 	 $errormsg = _('This launch was made insecurely (using http instead of https). ');
  	 $errormsg .= sprintf(_('%s requires secure launches to protect student data. '),$installname);
@@ -73,7 +78,7 @@ if ($enablebasiclti!=true) {
 }
 
 function reporterror($err) {
-	global $imasroot;
+	global $imasroot,$staticroot,$installname;
 	require("../header.php");
 	printf('<p>%s</p>', Sanitize::encodeStringForDisplay($err));
 	require("../footer.php");
@@ -146,6 +151,7 @@ if (
     // #### End OHM-specific code #####################################################
     // #### End OHM-specific code #####################################################
 ) {
+
 //if (isset($_SESSION['place_aid']) || isset($_REQUEST['custom_place_aid'])) {
 /*use new behavior for place_aid requests */
 
@@ -153,7 +159,7 @@ if (
 //check to see if accessiblity page is posting back
 if (isset($_GET['launch'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
 	if (empty($_POST['tzname']) && $_POST['tzoffset']=='') {
@@ -163,6 +169,11 @@ if (isset($_GET['launch'])) {
 	if (isset($_POST['tzname'])) {
 		$_SESSION['logintzname'] = $_POST['tzname'];
 	}
+    if ($_POST['orig_linkid'] != $_SESSION['lti_resource_link_id']) {
+        echo _('Uh oh, something went wrong.  Please go back and try again').'. ';
+        echo _('You may have launched too many assignments too quickly.');
+		exit;
+    }
 
 	require_once("$curdir/../includes/userprefs.php");
 	generateuserprefs();
@@ -177,8 +188,11 @@ if (isset($_GET['launch'])) {
 	}
 	$_SESSION['tzoffset'] = $_POST['tzoffset'];
 	$_SESSION['tzname'] = $tzname;
+    if (isset($CFG['static_server']) && !empty($_POST['static_check'])) {
+        $_SESSION['static_ok'] = 1;
+    }
 
-        $keyparts = explode('_',$_SESSION['ltikey']);
+        $keyparts = explode('_',$_SESSION['lti_key']);
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
@@ -241,15 +255,28 @@ if (isset($_GET['launch'])) {
 	exit;
 } else if (isset($_GET['accessibility'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
+
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 
 	//time to output a postback to capture tzname
 	$pref = 0;
 	$flexwidth = true;
 	$nologo = true;
-	$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
+	$placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/jstz_min.js\" ></script>";
 	require("../header.php");
 	echo "<h3>Connecting to $installname</h3>";
 	echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/desmos/bltilaunch.php?launch=true\" ";
@@ -267,6 +294,7 @@ if (isset($_GET['launch'])) {
 	} else {
 		echo ">";
 	}
+    echo '<input type=hidden name="orig_linkid" value="'. Sanitize::encodeStringForDisplay($_SESSION['lti_resource_link_id']) . '"/>';
 	?>
 	<div id="settings"><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.
 	Please enable JavaScript and reload this page</noscript></div>
@@ -296,7 +324,7 @@ if (isset($_GET['launch'])) {
 	$ltiuserid = $_SESSION['ltiuserid'];
 	$ltiorg = $_SESSION['ltiorg'];
 	$ltirole = $_SESSION['ltirole'];
-	$keyparts = explode('_',$_SESSION['ltikey']);
+	$keyparts = explode('_',$_SESSION['lti_key']);
 	$name_only = false;
 	if (count($keyparts)==1 && $ltirole=='learner') {
 		$name_only = true;
@@ -324,16 +352,33 @@ if (isset($_GET['launch'])) {
 		} else {
 			if (!empty($_POST['curSID']) && !empty($_POST['curPW'])) {
 				//provided current SID/PW pair
-				$stm = $DBH->prepare('SELECT password,id FROM imas_users WHERE SID=:sid');
+				$stm = $DBH->prepare('SELECT password,id,mfa FROM imas_users WHERE SID=:sid');
 				$stm->execute(array(':sid'=>$_POST['curSID']));
 				//if (mysql_num_rows($result)==0) {
 				if ($stm->rowCount()==0) {
 					$infoerr = 'Username (key) is not valid';
 				} else {
-					list($realpw,$tmpuserid) = $stm->fetch(PDO::FETCH_NUM); //DB mysql_result($result,0,0);
+					list($realpw,$tmpuserid,$mfadata) = $stm->fetch(PDO::FETCH_NUM); //DB mysql_result($result,0,0);
 					if (((!isset($CFG['GEN']['newpasswords']) || $CFG['GEN']['newpasswords']!='only') && ($realpw == md5($_POST['curPW'])))
 					  || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['curPW'],$realpw)) ) {
-						$userid= $tmpuserid; //DB mysql_result($result,0,1);
+                        if ($mfadata != '') {
+                            $mfadata = json_decode($mfadata, true);
+                            if (empty($mfadata['mfatype']) || $mfadata['mfatype'] == 'all') {
+                                $flexwidth = true;
+                                $nologo = true;
+                                require_once(__DIR__.'/../includes/mfa.php');
+                                $formaction = $imasroot."/desmos/bltilaunch.php?userinfo=set";
+                                if (!isset($_POST['mfatoken'])) {
+                                    mfa_showLoginEntryForm($formaction, '', false);
+                                    exit;
+                                } else if (mfa_verify($mfadata, $formaction, $tmpuserid, false)) {
+                                    // good to go
+                                } else {
+                                    $infoerr = "MFA verification failed";
+                                }
+                            }
+                        }
+                        $userid= $tmpuserid;
 					} else {
 						$infoerr = 'Existing username/password provided are not valid.';
 						unset($tmpuserid);
@@ -360,6 +405,7 @@ if (isset($_GET['launch'])) {
 			}
 		}
 		if ($infoerr=='') { // no error, so create!
+            $DBH->beginTransaction();
 			$stm = $DBH->prepare('INSERT INTO imas_ltiusers (org,ltiuserid) VALUES (:org,:ltiuserid)');
 			$stm->execute(array(':org'=>$ltiorg,':ltiuserid'=>$ltiuserid));
 			$localltiuser = $DBH->lastInsertId();
@@ -410,6 +456,7 @@ if (isset($_GET['launch'])) {
 			}
 			$stm = $DBH->prepare('UPDATE imas_ltiusers SET userid=:userid WHERE id=:localltiuser');
 			$stm->execute(array(':userid'=>$userid, ':localltiuser'=>$localltiuser));
+            $DBH->commit();
 		} else {
 			//uh-oh, had an error.  Better ask for user info again
 			$askforuserinfo = true;
@@ -418,7 +465,7 @@ if (isset($_GET['launch'])) {
 		//ask for student info
 		$flexwidth = true;
 		$nologo = true;
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
+		$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 		require("../header.php");
 		if (isset($infoerr)) {
 			echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
@@ -466,8 +513,8 @@ if (isset($_GET['launch'])) {
 			if (count($ltiorgparts)>2) {
 				array_shift($ltiorgparts);
 				$ltiorgname = implode(':',$ltiorgparts);
-			} else {
-				$ltiorgname = $ltiorgparts[1];
+			} else if (count($ltiorgparts)>1) {
+				$ltiorgname = $ltiorgparts[1] ?? '';
 			}
 
 			//tying LTI to IMAthAS account
@@ -490,7 +537,7 @@ if (isset($_GET['launch'])) {
 				echo "<span class=form><label for=\"email\">"._("Enter E-mail address:")."</label></span>  <input class=form type=email value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email autocomplete=\"email\"><BR class=form>\n";
 				echo "<span class=form><label for=\"msgnot\">"._("Notify me by email when I receive a new message:")."</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
 				echo "<div class=submit><input type=submit value='"._("Create Account")."'></div>\n";
-				require_once(__DIR__.'/includes/newusercommon.php');
+				require_once(__DIR__.'/../includes/newusercommon.php');
 				$requiredrules = array(
 					'curSID'=>'{depends: function(element) {return $("#SID").val()==""}}',
 					'curPW'=>'{depends: function(element) {return $("#SID").val()==""}}',
@@ -532,7 +579,7 @@ if (isset($_GET['launch'])) {
 			reporterror(_("No session recorded"));
 	}
 
-	$keyparts = explode('_',$_SESSION['ltikey']);
+	$keyparts = explode('_',$_SESSION['lti_key']);
 } else if(isset($_REQUEST['custom_view_folder'])) {
 	//temporary branch for handling this deprecated feature, until it can be removed.
 	$linkparts = explode("-",$_REQUEST['custom_view_folder']);
@@ -572,7 +619,7 @@ if (isset($_GET['launch'])) {
 
 	//verify necessary POST values for LTI.  OAuth specific will be checked later
 	if (empty($_REQUEST['lti_version'])) {
-		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again"));
+		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	if (empty($_REQUEST['user_id'])) {
 		if (isset($_REQUEST['relaunch_url'])) {
@@ -703,10 +750,16 @@ if (isset($_GET['launch'])) {
 
 	$_SESSION['ltirole'] = $ltirole;
 	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
-	$_SESSION['lti_context_label'] = (!empty($_REQUEST['context_label']))?$_REQUEST['context_label']:$_REQUEST['context_id'];
-	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
-	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'];
-	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'];
+    if (!empty($_REQUEST['context_label'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_label'];
+    } else if (!empty($_REQUEST['context_title'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_title'];
+    } else {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_id'];
+    }
+    $_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'] ?? '';
+	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'] ?? '';
+	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'] ?? '';
 	$_SESSION['lti_key'] = $ltikey;
 	$_SESSION['lti_keytype'] = $keytype;
 	$_SESSION['lti_keyrights'] = $requestinfo[0]->rights;
@@ -714,6 +767,7 @@ if (isset($_GET['launch'])) {
 	if (isset($_REQUEST['selection_directive']) && $_REQUEST['selection_directive']=='select_link') {
 		$_SESSION['selection_return'] = $_REQUEST['launch_presentation_return_url'];
 		$_SESSION['selection_return_format'] = "Canvas";
+        unset($_SESSION['place_aid']);
 	}
 	if (isset($_REQUEST['lti_message_type']) && $_REQUEST['lti_message_type']=='ContentItemSelectionRequest') {
 		$_SESSION['selection_return'] = $_REQUEST['content_item_return_url'];
@@ -727,6 +781,7 @@ if (isset($_GET['launch'])) {
 			$_SESSION['selection_type'] = 'all';
 		}
 		$_SESSION['selection_data'] = @$_REQUEST['data'];
+        unset($_SESSION['place_aid']);
 	}
 	unset($_SESSION['lti_duedate']);
 	if (!isset($_REQUEST['custom_canvas_assignment_due_at'])) {
@@ -811,6 +866,7 @@ if (isset($_GET['launch'])) {
 			} else {
 				$email = 'none@none.com';
 			}
+            $DBH->beginTransaction();
 			$stm = $DBH->prepare('INSERT INTO imas_ltiusers (org,ltiuserid) VALUES (:org,:ltiuserid)');
 			$stm->execute(array(':org'=>$ltiorg,':ltiuserid'=>$ltiuserid));
 			$localltiuser = $DBH->lastInsertId();
@@ -857,17 +913,18 @@ if (isset($_GET['launch'])) {
 			}
 			$stm = $DBH->prepare('UPDATE imas_ltiusers SET userid=:userid WHERE id=:localltiuser');
 			$stm->execute(array(':userid'=>$userid, ':localltiuser'=>$localltiuser));
+            $DBH->commit();
 		} else {
 			////create form asking them for user info
 			$askforuserinfo = true;
-			$_SESSION['LMSfirstname'] = $_REQUEST['lis_person_name_given'];
-			$_SESSION['LMSlastname'] = $_REQUEST['lis_person_name_family'];
+			$_SESSION['LMSfirstname'] = $_REQUEST['lis_person_name_given'] ?? '';
+			$_SESSION['LMSlastname'] = $_REQUEST['lis_person_name_family'] ?? '';
 			if (!empty($_REQUEST['lis_person_contact_email_primary'])) {
 				$_SESSION['LMSemail'] = $_REQUEST['lis_person_contact_email_primary'];
 			}
 		}
 	}
-	$_SESSION['ltikey'] = $ltikey;
+	$_SESSION['lti_key'] = $ltikey;
 }
 
 
@@ -884,6 +941,11 @@ if ($askforuserinfo == true) {
 }
 
 //if here, we know the local userid.
+
+//call hook, if defined
+if (function_exists('onHaveLocalUser')) {
+	onHaveLocalUser($userid);
+}
 
 //if it's a common catridge placement and we're here, then either we're using domain credentials, or
 //course credentials for a non-source course.
@@ -932,11 +994,13 @@ $now = time();
             // #### End OHM-specific code #####################################################
             if (isset($_SESSION['place_aid'])) {
                 $stm = $DBH->prepare('SELECT courseid,name FROM imas_assessments WHERE id=:aid');
-                $stm->execute(array(':aid'=>$_SESSION['place_aid']));
-                list($aidsourcecid,$aidsourcename) = $stm->fetch(PDO::FETCH_NUM);
-                if ($aidsourcecid===false) {
-                    $diaginfo = "(Debug info: 2-{$_SESSION['place_aid']})";
-                    reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
+                $stm->execute(array(':aid' => $_SESSION['place_aid']));
+                $row = $stm->fetch(PDO::FETCH_NUM);
+                if ($row === false) {
+                    $aidsourcecid = -1; // assessment doesn't exist anymore
+                    $aidsourcename = '';
+                } else {
+                    list($aidsourcecid, $aidsourcename) = $row;
                 }
             }
 
@@ -944,6 +1008,10 @@ $now = time();
 		$stm = $DBH->prepare('SELECT courseid,copiedfrom FROM imas_lti_courses WHERE contextid=:contextid AND org LIKE :org');
 		$stm->execute(array(':contextid'=>$_SESSION['lti_context_id'], ':org'=>"$shortorg:%"));
 		if ($stm->rowCount()==0) {
+            if ($aidsourcecid == -1) { // not enough info to proceed
+                $diaginfo = "(Debug info: 2a-{$_SESSION['place_aid']})";
+			    reporterror(_("The originally linked assignment does not appear to exist anymore.")." $diaginfo");
+            }
 			//if instructor, see if the source course is ours
 			/***TODO:  check rights to see if they have course creation rights or not */
 			if ($_SESSION['ltirole']=='instructor') {
@@ -955,29 +1023,41 @@ $now = time();
 					if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="useexisting") {
 						$destcid = $aidsourcecid;
 						$copycourse = "no";
+						$ltilog = ['copy'=>'useorig', 'cid'=>$destcid];
 					}
 				}
 				$stm = $DBH->prepare('SELECT jsondata,UIver FROM imas_courses WHERE id=:aidsourcecid');
 				$stm->execute(array(':aidsourcecid'=>$aidsourcecid));
 				list($aidsourcejsondata,$sourceUIver) = $stm->fetch(PDO::FETCH_NUM);
-				$aidsourcejsondata = json_decode($aidsourcejsondata, true);
+                if ($aidsourcejsondata!==null) {
+				    $aidsourcejsondata = json_decode($aidsourcejsondata, true);
+                }
 				$blockLTICopyOfCopies = ($aidsourcejsondata!==null && !empty($aidsourcejsondata['blockLTICopyOfCopies']));
 
                 if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="useother" && !empty($_POST['useothercoursecid'])) {
                     $destcid = $_POST['useothercoursecid'];
                     $copycourse = "no";
+					$ltilog = ['copy'=>'useother', 'cid'=>$destcid];
                 } else if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="makecopy") {
                     $copycourse = "yes";
                     $sourcecid = $aidsourcecid;
+					$ltilog = ['copy'=>'copyorig', 'cid'=>$sourcecid];
                 } else if (isset($_POST['docoursecopy']) && $_POST['docoursecopy']=="copyother" && $_POST['othercoursecid']>0) {
                     $copycourse = "yes";
                     $sourcecid = Sanitize::onlyInt($_POST['othercoursecid']);
+					$ltilog = ['copy'=>'copyother', 'cid'=>$sourcecid];
                 }
                 if ($copycourse=="notify" || $copycourse=="ask") {
                     $_SESSION['userid'] = $userid; //remember me
                     $nologo = true;
                     $flexwidth = true;
-                    $placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}
+					$placeinhead = '<style type="text/css"> ul.nomark {margin-left: 20px;} ul.nomark li {text-indent: -20px;}</style>';
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    $placeinhead .= '<style type="text/css">
                         /* LTI New Assessment Player */
                         .assess-player-title {
                             font-weight: bold;
@@ -993,6 +1073,11 @@ $now = time();
                             pointer-events: none;
                         }</style>';
                     $placeinhead .= "<script type=\"text/javascript\" src=\"$imasroot/ohm/js/newPlayerDefault.js\" ></script>";
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
                     require("../header.php");
 
                         // #### Start OHM-specific code #####################################################
@@ -1075,10 +1160,9 @@ $now = time();
                                 }
                             }
                             echo "<p>The first option is best if this is your first time using this $installname course.  The second option
-                                                        may be preferrable if you have copied the course in your LMS and want your students records to
-                                                        show in a separate $installname course.</p>";
-
-							echo "<p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
+                                may be preferrable if you have copied the course in your LMS and want your students records to
+                                show in a separate $installname course.</p>
+							    <p><input type=\"submit\" value=\"Continue\"/> (this may take a few moments - please be patient)</p>";
                         } else {
                             echo "<p>Your LMS course is not yet associated with a course on $installname.  The assignment associated with this
 							link is located in a $installname course you are not a teacher of (course ID $aidsourcecid).
@@ -1120,8 +1204,6 @@ $now = time();
                 $blockcnt = 1;
                 $itemorder = serialize(array());
                 $randkey = uniqid();
-                $hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
-                $picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
                 $allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
                 $copyrights = isset($CFG['CPS']['copyrights'])?$CFG['CPS']['copyrights'][0]:0;
                 $msgset = isset($CFG['CPS']['msgset'])?$CFG['CPS']['msgset'][0]:0;
@@ -1135,10 +1217,10 @@ $now = time();
 				$lockaid = 0;
 				$DBH->beginTransaction();
 
-				$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
-				$query .= "(:name,:ownerid,:enrollkey,:hideicons,:picicons,:allowunenroll,:copyrights,:msgset,:showlatepass,:itemorder,:available,:theme,:ltisecret,:blockcnt,:created_at)";
+				$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
+				$query .= "(:name,:ownerid,:enrollkey,:allowunenroll,:copyrights,:msgset,:showlatepass,:itemorder,:available,:theme,:ltisecret,:blockcnt,:created_at)";
 				$stm = $DBH->prepare($query);
-				$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
+				$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey,
 					':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 					':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 				$destcid = $DBH->lastInsertId();
@@ -1258,8 +1340,12 @@ $now = time();
 						}
 					}
 					$outcomesarr = unserialize($outcomesarr);
-					updateoutcomes($outcomesarr);
-					$newoutcomearr = serialize($outcomesarr);
+                    if ($outcomesarr !== false) {
+                        updateoutcomes($outcomesarr);
+                        $newoutcomearr = serialize($outcomesarr);
+                    } else {
+                        $newoutcomearr = '';
+                    }
 				} else {
 					$newoutcomearr = '';
 				}
@@ -1298,6 +1384,8 @@ $now = time();
 				copyrubrics();
 				$DBH->commit();
 				$copiedfromcid = $sourcecid;
+			} else {
+                $copiedfromcid = 0;
 			}
 			$query = "INSERT INTO imas_lti_courses (org,contextid,courseid,copiedfrom,contextlabel) VALUES ";
 			$query .= "(:org, :contextid, :courseid, :copiedfrom, :contextlabel)";
@@ -1308,6 +1396,16 @@ $now = time();
 				':courseid'=>$destcid,
 				':copiedfrom'=>($copycourse == "yes")?$sourcecid:0,
 				':contextlabel'=>$_SESSION['lti_context_label']));
+
+			$ltilog['contextid'] = $_SESSION['lti_context_id'];
+			$ltilog['action'] = 'Establish LTI course connection';
+			require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
+			TeacherAuditLog::addTracking(
+				$destcid,
+				"Course Settings Change",
+				$destcid,
+				$ltilog
+			);
 		} else {
 			list($destcid, $copiedfromcid) = $stm->fetch(PDO::FETCH_NUM);
 		}
@@ -1426,7 +1524,7 @@ $now = time();
 					//exit;
 				}
 			}
-			if (!$foundaid) { //do course ancestor walk-back
+			if (!$foundaid && $aidsourcecid != -1) { //do course ancestor walk-back
 				//need to look up ancestor depth
 				$stm = $DBH->prepare("SELECT ancestors FROM imas_courses WHERE id=?");
 				$stm->execute(array($destcid));
@@ -1466,7 +1564,7 @@ $now = time();
 					//echo "found 3";
 					//exit;
 				}
-				if (!$foundaid && count($res)>0) { //multiple results - look for the identical name
+				if (!$foundaid && count($res)>0 && $aidsourcename != '') { //multiple results - look for the identical name
 					foreach ($res as $k=>$row) {
 						$res[$k]['loc'] = strpos($row['ancestors'], (string) $aidtolookfor);
 						if ($row['name']==$aidsourcename) {
@@ -1489,6 +1587,10 @@ $now = time();
 				}
 			}
 			if (!$foundaid) {
+                if ($aidsourcecid == -1) { // can't proceed further in this case
+                    $diaginfo = "(Debug info: 2b-{$_SESSION['place_aid']})";
+                    reporterror(_("The originally linked assignment does not appear to exist anymore.")." $diaginfo");
+                }
 				//aid is in source course.  Let's look and see if there's an assessment in destination with the same title.
 				//this handles cases where an assessment was linked in from elsewhere and manually copied
 
@@ -1616,6 +1718,17 @@ if ($_SESSION['lti_keytype']=='cc-of') {
 					':contextid'=>$_SESSION['lti_context_id'],
 					':courseid'=>$linkcid,
 					':contextlabel'=>$_SESSION['lti_context_label']));
+				require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
+				TeacherAuditLog::addTracking(
+					$linkcid,
+					"Course Settings Change",
+					$linkcid,
+					[
+						'action'=>'Establish LTI course connection',
+						'type'=>'cc-of',
+						'contextid'=>$_SESSION['lti_context_id']
+					]
+				);
 			} else {
 				reporterror(_("You are not an instructor on the course and folder this link is pointing to. Auto-copying is not currently supported for folder-level links."));
 			}
@@ -1658,7 +1771,7 @@ if ($linkparts[0]=='cid') {
 	$stm->execute(array(':id'=>$cid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($_SESSION['ltirole']!='instructor') {
-		if (!($line['avail']==0 || $line['avail']==2)) {
+		if (!($line['available']==0 || $line['available']==2)) {
 			reporterror(_("This course is not available"));
 		}
 	}
@@ -1672,6 +1785,8 @@ if ($linkparts[0]=='cid') {
 		reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
 	}
 	$cid = $line['courseid'];
+    $GLOBALS['courseenddate'] = $line['enddate'];
+
 	if (isset($_SESSION['lti_duedate']) && ($line['date_by_lti']==1 || $line['date_by_lti']==2)) {
 		if ($_SESSION['ltirole']=='instructor') {
 			$newdatebylti = 2; //set/keep as instructor-set
@@ -1721,10 +1836,10 @@ if ($linkparts[0]=='cid') {
 						':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
 				}
 			}
-			require_once("../includes/exceptionfuncs.php");
+			require_once(__DIR__ . "/../includes/exceptionfuncs.php");
 			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
 			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
-		} else if ($line['date_by_lti']==3 && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
+		} else if ($line['date_by_lti']==3 && isset($_SESSION['lti_duedate']) && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
 			//default dates already set by LTI, and users's date doesn't match - create new exception
 			//also create if it's before the default assessment startdate - since they could access via LMS, it should be available.
 			$exceptionrow = array(min($now,$_SESSION['lti_duedate']), $_SESSION['lti_duedate'], 0, 1);
@@ -1821,8 +1936,26 @@ if ($linkparts[0]=='cid') {
 					$stm = $DBH->prepare("SELECT deflatepass FROM imas_courses WHERE id=:id");
 					$stm->execute(array(':id'=>$cid));
 					$deflatepass = $stm->fetchColumn(0);
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass, ':created_at'=>time()));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
+                    $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    $rowId = $DBH->lastInsertId();
+                    if ($rowId && 0 < $rowId) {
+                        $stmc = $DBH->prepare("UPDATE imas_students
+                            SET created_at = UNIX_TIMESTAMP() WHERE id=:id");
+                        $stmc->execute(array(':id' => $rowId));
+                    }
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    require_once(__DIR__ . '/../includes/setSectionGroups.php');
+                    setSectionGroups($userid, $cid, $_SESSION['lti_context_label']);
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
@@ -1916,11 +2049,11 @@ if ($linkparts[0]=='aid') {
 	$_SESSION['ltiitemid'] = $aid;
 
 	$_SESSION['lticanuselatepass'] = false;
-	if ($_SESSION['ltirole']!='instructor' && $line['allowlate']>0) {
+	if ($SESS['ltirole']!='instructor' && $line['allowlate']>0) {
 		$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$latepasshrs = $stm->fetchColumn(0);
-		require_once("../includes/exceptionfuncs.php");
+		require_once(__DIR__ . "/../includes/exceptionfuncs.php");
 		$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
 		list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
 		$_SESSION['lticanuselatepass'] = $canuselatepass;
@@ -1944,7 +2077,9 @@ if ($linkparts[0]=='aid') {
 }
 $_SESSION['lti_outcomeurl']  = $SESS['lti_outcomeurl'];
 $_SESSION['lti_context_label'] = $SESS['lti_context_label'];
-$_SESSION['lti_launch_get'] = $SESS['lti_launch_get'];
+if (isset($SESS['lti_launch_get'])) {
+    $_SESSION['lti_launch_get'] = $SESS['lti_launch_get'];
+}
 $_SESSION['lti_key'] = $SESS['lti_key'];
 $_SESSION['lti_keytype'] = $SESS['lti_keytype'];
 $_SESSION['lti_keylookup'] = $SESS['ltilookup'];
@@ -1954,10 +2089,10 @@ if (isset($SESS['lti_duedate'])) {
 }
 if (isset($SESS['selection_return'])) {
 	$_SESSION['lti_selection_return'] = $SESS['selection_return'];
-	$_SESSION['lti_selection_targets'] = $SESS['selection_targets'];
+	$_SESSION['lti_selection_targets'] = $SESS['selection_targets'] ?? '';
 	$_SESSION['lti_selection_return_format'] = $SESS['selection_return_format'];
-	$_SESSION['lti_selection_type'] = $SESS['selection_type'];
-	$_SESSION['lti_selection_data'] = $SESS['selection_data'];
+	$_SESSION['lti_selection_type'] = $SESS['selection_type'] ?? '';
+	$_SESSION['lti_selection_data'] = $SESS['selection_data'] ?? '';
 }
 
 if (isset($setstuviewon) && $setstuviewon==true) {
@@ -1968,6 +2103,7 @@ if ($_SESSION['lti_keytype']=='gc') {
 	$_SESSION['lti_launch_get']['cid'] = $linkparts[1];
 }
 
+$_SESSION['ltiuserid'] = $SESS['ltiuserid'];
 $_SESSION['userid'] = $userid;
 $_SESSION['time'] = $now;
 
@@ -2044,16 +2180,21 @@ if (!$promptforsettings && !$createnewsession && !($linkparts[0]=='aid' && $tlwr
 //check to see if accessiblity page is posting back
 if (isset($_GET['launch'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
-	if (empty($_POST['tzname']) && $_POST['tzoffset']=='') {
+	if (empty($_POST['tzname']) || $_POST['tzoffset']=='') {
 		echo _('Uh oh, something went wrong.  Please go back and try again');
 		exit;
 	}
 	if (isset($_POST['tzname'])) {
 		$_SESSION['logintzname'] = $_POST['tzname'];
 	}
+    if ($_POST['orig_linkid'] != $_SESSION['lti_resource_link_id']) {
+        echo _('Uh oh, something went wrong.  Please go back and try again').'. ';
+        echo _('You may have launched too many assignments too quickly.');
+		exit;
+    }
 
 	require_once("$curdir/../includes/userprefs.php");
 	generateuserprefs();
@@ -2069,8 +2210,11 @@ if (isset($_GET['launch'])) {
 	}
 	$_SESSION['tzoffset'] = $_POST['tzoffset'];
 	$_SESSION['tzname'] = $tzname;
+    if (isset($CFG['static_server']) && !empty($_POST['static_check'])) {
+        $_SESSION['static_ok'] = 1;
+    }
 
-        $keyparts = explode('_',$_SESSION['ltikey']);
+        $keyparts = explode('_',$_SESSION['lti_key']);
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
@@ -2132,9 +2276,22 @@ if (isset($_GET['launch'])) {
 	exit;
 } else if (isset($_GET['accessibility'])) {
 	if (empty($_SESSION['userid'])) {
-		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again."));
+		reporterror(_("No authorized session exists. This is most likely caused by your browser blocking third-party cookies.  Please adjust your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	$userid = $_SESSION['userid'];
+
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 
 	//time to output a postback to capture tzoffset and math/graph settings
 	$pref = 0;
@@ -2150,7 +2307,7 @@ if (isset($_GET['launch'])) {
 	}*/
 	$flexwidth = true;
 	$nologo = true;
-	$placeinhead = "<script type=\"text/javascript\" src=\"$imasroot/javascript/jstz_min.js\" ></script>";
+	$placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/jstz_min.js\" ></script>";
 	require("../header.php");
 	echo "<h3>Connecting to $installname</h3>";
 	echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/desmos/bltilaunch.php?launch=true\" ";
@@ -2165,6 +2322,7 @@ if (isset($_GET['launch'])) {
 	} else {
 		echo ">";
 	}
+    echo '<input type=hidden name="orig_linkid" value="'. Sanitize::encodeStringForDisplay($_SESSION['lti_resource_link_id']) . '"/>';
 	?>
 	<div id="settings"><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.
 	Please enable JavaScript and reload this page</noscript></div>
@@ -2195,7 +2353,7 @@ if (isset($_GET['launch'])) {
 	$ltiuserid = $_SESSION['ltiuserid'];
 	$ltiorg = $_SESSION['ltiorg'];
 	$ltirole = $_SESSION['ltirole'];
-	$keyparts = explode('_',$_SESSION['ltikey']);
+	$keyparts = explode('_',$_SESSION['lti_key']);
 	$name_only = false;
 	if (count($keyparts)==1 && $ltirole=='learner') {
 		$name_only = true;
@@ -2223,15 +2381,32 @@ if (isset($_GET['launch'])) {
 		} else {
 			if (!empty($_POST['curSID']) && !empty($_POST['curPW'])) {
 				//provided current SID/PW pair
-				$stm = $DBH->prepare("SELECT password,id FROM imas_users WHERE SID=:SID");
+				$stm = $DBH->prepare("SELECT password,id,mfa FROM imas_users WHERE SID=:SID");
 				$stm->execute(array(':SID'=>$_POST['curSID']));
 				if ($stm->rowCount()==0) {
 					$infoerr = 'Username (key) is not valid';
 				} else {
-					list($realpw,$queryuserid) = $stm->fetch(PDO::FETCH_NUM);
+					list($realpw,$queryuserid,$mfadata) = $stm->fetch(PDO::FETCH_NUM);
 					if (((!isset($CFG['GEN']['newpasswords']) || $CFG['GEN']['newpasswords']!='only') && ($realpw == md5($_POST['curPW'])))
 					  || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['curPW'],$realpw)) ) {
 						$userid = $queryuserid;
+                        if ($mfadata != '') {
+                            $mfadata = json_decode($mfadata, true);
+                            if (empty($mfadata['mfatype']) || $mfadata['mfatype'] == 'all') {
+                                $flexwidth = true;
+                                $nologo = true;
+                                require_once(__DIR__.'/includes/mfa.php');
+                                $formaction = $imasroot."/bltilaunch.php?userinfo=set";
+                                if (!isset($_POST['mfatoken'])) {
+                                    mfa_showLoginEntryForm($formaction, '', false);
+                                    exit;
+                                } else if (mfa_verify($mfadata, $formaction, $userid, false)) {
+                                    // good to go
+                                } else {
+                                    $infoerr = "MFA verification failed";
+                                }
+                            }
+                        }
 					} else {
 						$infoerr = 'Existing username/password provided are not valid.';
 					}
@@ -2261,6 +2436,7 @@ if (isset($_GET['launch'])) {
 			}
 		}
 		if ($infoerr=='') { // no error, so create!
+            $DBH->beginTransaction();
 			$stm = $DBH->prepare("INSERT INTO imas_ltiusers (org,ltiuserid) VALUES (:org, :ltiuserid)");
 			$stm->execute(array(':org'=>$ltiorg, ':ltiuserid'=>$ltiuserid));
 			$localltiuser = $DBH->lastInsertId();
@@ -2301,6 +2477,7 @@ if (isset($_GET['launch'])) {
 			}
 			$stm = $DBH->prepare("UPDATE imas_ltiusers SET userid=:userid WHERE id=:id");
 			$stm->execute(array(':userid'=>$userid, ':id'=>$localltiuser));
+            $DBH->commit();
 		} else {
 			//uh-oh, had an error.  Better ask for user info again
 			$askforuserinfo = true;
@@ -2309,7 +2486,7 @@ if (isset($_GET['launch'])) {
 		//ask for student info
 		$nologo = true;
 		$flexwidth = true;
-		$placeinhead .= '<script type="text/javascript" src="'.$imasroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
+		$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
 		require("../header.php");
 		if (isset($infoerr)) {
 			echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
@@ -2358,7 +2535,7 @@ if (isset($_GET['launch'])) {
 				array_shift($ltiorgparts);
 				$ltiorgname = implode(':',$ltiorgparts);
 			} else {
-				$ltiorgname = $ltiorgparts[1];
+				$ltiorgname = $ltiorgparts[1] ?? '';
 			}
 
 			//tying LTI to IMAthAS account
@@ -2425,13 +2602,13 @@ if (isset($_GET['launch'])) {
 		$userid = $_SESSION['userid'];
 	}
 
-	$keyparts = explode('_',$_SESSION['ltikey']);
+	$keyparts = explode('_',$_SESSION['lti_key']);
 } else {
 	//not postback of new LTI user info, so must be fresh request
 
 	//verify necessary POST values for LTI.  OAuth specific will be checked later
 	if (empty($_REQUEST['lti_version'])) {
-		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again"));
+		reporterror(_("Insufficient launch information. This might indicate your browser is set to restrict third-party cookies. Check your browser settings and try again. If you are using Safari, you may need to disable Prevent Cross-Site Tracking."));
 	}
 	if (empty($_REQUEST['user_id'])) {
 		if (isset($_REQUEST['relaunch_url'])) {
@@ -2476,8 +2653,8 @@ if (isset($_GET['launch'])) {
 	}
 
 	//check OAuth Signature!
-	require_once 'includes/OAuth.php';
-	require_once 'includes/ltioauthstore.php';
+	require_once __DIR__ . '/../includes/OAuth.php';
+	require_once __DIR__ . '/../includes/ltioauthstore.php';
 
 	//set up OAuth
 	$store = new IMathASLTIOAuthDataStore();
@@ -2495,6 +2672,7 @@ if (isset($_GET['launch'])) {
 
 	$keyparts = explode('_',$ltikey);
 	$_SESSION['ltiorigkey'] = $ltikey;
+    unset($_SESSION['place_aid']); // make sure only set if for current launch
 
         // prepend ltiorg with courseid or sso+userid to prevent cross-instructor hacking
         if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {  //cid:org
@@ -2666,10 +2844,16 @@ if (isset($_GET['launch'])) {
 
 	$_SESSION['ltirole'] = $ltirole;
 	$_SESSION['lti_context_id'] = $_REQUEST['context_id'];
-	$_SESSION['lti_context_label'] = (!empty($_REQUEST['context_label']))?$_REQUEST['context_label']:$_REQUEST['context_id'];
-	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'];
-	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'];
-	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'];
+    if (!empty($_REQUEST['context_label'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_label'];
+    } else if (!empty($_REQUEST['context_title'])) {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_title'];
+    } else {
+        $_SESSION['lti_context_label'] = $_REQUEST['context_id'];
+    }
+	$_SESSION['lti_resource_link_id'] = $_REQUEST['resource_link_id'] ?? '';
+	$_SESSION['lti_lis_result_sourcedid'] = $_REQUEST['lis_result_sourcedid'] ?? '';
+	$_SESSION['lti_outcomeurl'] = $_REQUEST['lis_outcome_service_url'] ?? '';
 	$_SESSION['lti_key'] = $ltikey;
 	$_SESSION['lti_keytype'] = $keytype;
 	$_SESSION['lti_keyrights'] = $requestinfo[0]->rights;
@@ -2677,6 +2861,7 @@ if (isset($_GET['launch'])) {
 	if (isset($_REQUEST['selection_directive']) && $_REQUEST['selection_directive']=='select_link') {
 		$_SESSION['selection_return'] = $_REQUEST['launch_presentation_return_url'];
 		$_SESSION['selection_return_format'] = "Canvas";
+        unset($_SESSION['place_aid']);
 	}
 	if (isset($_REQUEST['lti_message_type']) && $_REQUEST['lti_message_type']=='ContentItemSelectionRequest') {
 		$_SESSION['selection_return'] = $_REQUEST['content_item_return_url'];
@@ -2690,6 +2875,21 @@ if (isset($_GET['launch'])) {
 			$_SESSION['selection_type'] = 'all';
 		}
 		$_SESSION['selection_data'] = @$_REQUEST['data'];
+        unset($_SESSION['place_aid']);
+    }
+    unset($_SESSION['lti_duedate']);
+	if (!isset($_REQUEST['custom_canvas_assignment_due_at'])) {
+		if (isset($_REQUEST['custom_assignment_due_at'])) {
+			$_REQUEST['custom_canvas_assignment_due_at'] = $_REQUEST['custom_assignment_due_at'];
+		}
+    }
+	if (isset($_REQUEST['custom_canvas_assignment_due_at'])) {
+		$duedate = strtotime($_REQUEST['custom_canvas_assignment_due_at']);
+		if ($duedate !== false) {
+			$_SESSION['lti_duedate'] = $duedate;
+		} else {
+			$_SESSION['lti_duedate'] = 2000000000;
+		}
 	}
 
 	//look if we know this student
@@ -2732,6 +2932,7 @@ if (isset($_GET['launch'])) {
 			} else {
 				$email = 'none@none.com';
 			}
+            $DBH->beginTransaction();
 			$stm = $DBH->prepare("INSERT INTO imas_ltiusers (org,ltiuserid) VALUES (:org, :ltiuserid)");
 			$stm->execute(array(':org'=>$ltiorg, ':ltiuserid'=>$ltiuserid));
 			$localltiuser = $DBH->lastInsertId();
@@ -2770,17 +2971,18 @@ if (isset($_GET['launch'])) {
 			}
 			$stm = $DBH->prepare("UPDATE imas_ltiusers SET userid=:userid WHERE id=:id");
 			$stm->execute(array(':userid'=>$userid, ':id'=>$localltiuser));
+            $DBH->commit();
 		} else {
 			////create form asking them for user info
 			$askforuserinfo = true;
-			$_SESSION['LMSfirstname'] = $_REQUEST['lis_person_name_given'];
-			$_SESSION['LMSlastname'] = $_REQUEST['lis_person_name_family'];
+			$_SESSION['LMSfirstname'] = $_REQUEST['lis_person_name_given'] ?? '';
+			$_SESSION['LMSlastname'] = $_REQUEST['lis_person_name_family'] ?? '';
 			if (!empty($_REQUEST['lis_person_contact_email_primary'])) {
 				$_SESSION['LMSemail'] = $_REQUEST['lis_person_contact_email_primary'];
 			}
 		}
 	}
-	$_SESSION['ltikey'] = $ltikey;
+	$_SESSION['lti_key'] = $ltikey;
 }
 
 
@@ -2797,6 +2999,19 @@ if ($askforuserinfo == true) {
 }
 
 //if here, we know the local userid.
+
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
+    $eulaService->enforceOhmEula();
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 
 //if it's a common catridge placement and we're here, then either we're using domain credentials, or
 //course credentials for a non-source course.
@@ -2816,6 +3031,7 @@ $now = time();
 //general placement or common catridge placement - look for placement, or create if know info
     $orgparts = explode(':',$_SESSION['ltiorg']);  //THIS was added to avoid issues when GUID change, while still storing it
     $shortorg = $orgparts[0];
+
     if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['ltirole']!='instructor' && $_SESSION['lti_keytype']!='cc-vf' && $_SESSION['lti_keytype']!='cc-of') || $_SESSION['lti_keytype']=='cc-g' || $_SESSION['lti_keytype']=='cc-c') {
         $query = "SELECT placementtype,typeid FROM imas_lti_placements WHERE ";
         $query .= "contextid=:contextid AND linkid=:linkid AND typeid>0 AND org LIKE :org";
@@ -2917,8 +3133,6 @@ $now = time();
 						$blockcnt = 1;
 						$itemorder = serialize(array());
 						$randkey = uniqid();
-						$hideicons = isset($CFG['CPS']['hideicons'])?$CFG['CPS']['hideicons'][0]:0;
-						$picicons = isset($CFG['CPS']['picicons'])?$CFG['CPS']['picicons'][0]:0;
 						$allowunenroll = isset($CFG['CPS']['allowunenroll'])?$CFG['CPS']['allowunenroll'][0]:0;
 						$copyrights = isset($CFG['CPS']['copyrights'])?$CFG['CPS']['copyrights'][0]:0;
 						$msgset = isset($CFG['CPS']['msgset'])?$CFG['CPS']['msgset'][0]:0;
@@ -2929,10 +3143,10 @@ $now = time();
 
 						$avail = 0;
 						$lockaid = 0;
-						$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,hideicons,picicons,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
-						$query .= "(:name, :ownerid, :enrollkey, :hideicons, :picicons, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt, :created_at);";
+						$query = "INSERT INTO imas_courses (name,ownerid,enrollkey,allowunenroll,copyrights,msgset,showlatepass,itemorder,available,theme,ltisecret,blockcnt,created_at) VALUES ";
+						$query .= "(:name, :ownerid, :enrollkey, :allowunenroll, :copyrights, :msgset, :showlatepass, :itemorder, :available, :theme, :ltisecret, :blockcnt, :created_at);";
 						$stm = $DBH->prepare($query);
-						$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey, ':hideicons'=>$hideicons, ':picicons'=>$picicons,
+						$stm->execute(array(':name'=>$_SESSION['lti_context_label'], ':ownerid'=>$userid, ':enrollkey'=>$randkey,
 							':allowunenroll'=>$allowunenroll, ':copyrights'=>$copyrights, ':msgset'=>$msgset, ':showlatepass'=>$showlatepass, ':itemorder'=>$itemorder,
 							':available'=>$avail, ':theme'=>$theme, ':ltisecret'=>$randkey, ':blockcnt'=>$blockcnt, ':created_at'=>time()));
 						$destcid  = $DBH->lastInsertId();
@@ -2965,6 +3179,19 @@ $now = time();
 						':contextid'=>$_SESSION['lti_context_id'],
 						':courseid'=>$destcid,
 						':contextlabel'=>$_SESSION['lti_context_label']));
+					require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
+					TeacherAuditLog::addTracking(
+						$destcid,
+						"Course Settings Change",
+						$destcid,
+						[
+							'action'=>'Establish LTI course connection',
+							'type'=>'2',
+							'contextid'=>$_SESSION['lti_context_id'],
+							'copycourse'=>$copycourse,
+							'orig'=>$_SESSION['place_aid'][0]
+						]
+					);
 
 				} else if ($_SESSION['lti_keytype']=='cc-c') {
 					$copyaid = true;
@@ -2976,7 +3203,17 @@ $now = time();
 						':contextid'=>$_SESSION['lti_context_id'],
 						':courseid'=>$destcid,
 						':contextlabel'=>$_SESSION['lti_context_label']));
-
+					require_once(__DIR__ . '/../includes/TeacherAuditLog.php');
+					TeacherAuditLog::addTracking(
+						$destcid,
+						"Course Settings Change",
+						$destcid,
+						[
+							'action'=>'Establish LTI course connection',
+							'type'=>'3',
+							'contextid'=>$_SESSION['lti_context_id'],
+						]
+					);
 				}
 			} else {
 				$destcid = $stm->fetchColumn(0);
@@ -3061,6 +3298,7 @@ $now = time();
 
         }
     }
+
     if ($_SESSION['lti_keytype']=='cc-vf' || $_SESSION['lti_keytype']=='cc-of') {
         $keyparts = array('folder',$_SESSION['view_folder'][0],$_SESSION['view_folder'][1]);
     }
@@ -3089,13 +3327,13 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 	$stm->execute(array(':id'=>$cid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($_SESSION['ltirole']!='instructor') {
-		if (!($line['avail']==0 || $line['avail']==2)) {
+		if (!($line['available']==0 || $line['available']==2)) {
 			reporterror(_("This course is not available"));
 		}
 	}
 } else if ($keyparts[0]=='aid') {   //is assessment level placement
 	$aid = intval($keyparts[1]);
-	$stm = $DBH->prepare("SELECT courseid,startdate,enddate,reviewdate,LPcutoff,avail,ltisecret,allowlate FROM imas_assessments WHERE id=:id");
+	$stm = $DBH->prepare("SELECT id,courseid,startdate,enddate,reviewdate,LPcutoff,avail,ltisecret,allowlate,date_by_lti FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));
 	$line = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($line===false) {
@@ -3103,6 +3341,33 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 		reporterror(_("This assignment does not appear to exist anymore.")." $diaginfo");
 	}
 	$cid = $line['courseid'];
+    if (isset($_SESSION['lti_duedate']) && ($line['date_by_lti']==1 || $line['date_by_lti']==2)) {
+		if ($_SESSION['ltirole']=='instructor') {
+			$newdatebylti = 2; //set/keep as instructor-set
+		} else {
+			$newdatebylti = 3; //mark as student-set
+		}
+		//no default due date set yet, or is the instructor:  set the default due date
+		$stm = $DBH->prepare("UPDATE imas_assessments SET startdate=:startdate,enddate=:enddate,date_by_lti=:datebylti WHERE id=:id");
+		$stm->execute(array(':startdate'=>min($now, $_SESSION['lti_duedate']),
+			':enddate'=>$_SESSION['lti_duedate'], ':datebylti'=>$newdatebylti, ':id'=>$aid));
+		$line['enddate'] = $_SESSION['lti_duedate'];
+    }
+    if (!isset($_SESSION['lti_duedate']) && $line['date_by_lti']==1) {
+		//assessment is set to use dates sent by LTI, but none was sent.  Give error for instructor.
+		if ($_SESSION['ltirole'] == 'instructor') {
+			$err = 'Your '.$installname.' course is set to use dates sent by the LMS, but the LMS did not send a date. ';
+			$err .= 'Your "App Config" may be old and not contain the necessary info. ';
+			$err .= 'In Canvas, go to Settings -> Apps -> View App Configurations ';
+			$err .= 'and edit the '.$installname.' app. (If you cannot edit it, you may have to ask your ';
+			$err .= 'Canvas admin to edit the app). In the "Custom Fields" box, ';
+			$err .= 'enter this: canvas_assignment_due_at=$Canvas.assignment.dueAt.iso8601';
+			reporterror($err);
+		} else {
+			$err = 'Tell your teacher that Canvas is not sending due dates.';
+			reporterror($err);
+		}
+	}
 	if ($_SESSION['ltirole']!='instructor') {
 		//if ($line['avail']==0 || $now>$line['enddate'] || $now<$line['startdate']) {
 		//	reporterror("This assessment is closed");
@@ -3110,17 +3375,32 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 		if ($line['avail']==0) {
 			//reporterror("This assessment is closed");
 		}
-		$stm2 = $DBH->prepare("SELECT startdate,enddate FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+		$stm2 = $DBH->prepare("SELECT startdate,enddate,islatepass,is_lti FROM imas_exceptions WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
 		$stm2->execute(array(':userid'=>$userid, ':assessmentid'=>$aid));
-		$row = $stm2->fetch(PDO::FETCH_NUM);
+		$exceptionrow = $stm2->fetch(PDO::FETCH_NUM);
 		$useexception = false;
-		if ($row!=null) {
-			require_once("./includes/exceptionfuncs.php");
+		if ($exceptionrow!=null) {
+            if (isset($_SESSION['lti_duedate']) && $line['date_by_lti']>0 && $_SESSION['lti_duedate']!=$exceptionrow[1]) {
+				//if new due date is later, or no latepass used, then update
+				if ($exceptionrow[2]==0 || $_SESSION['lti_duedate']>$exceptionrow[1]) {
+					$stm = $DBH->prepare("UPDATE imas_exceptions SET startdate=:startdate,enddate=:enddate,is_lti=1,islatepass=0 WHERE userid=:userid AND assessmentid=:assessmentid AND itemtype='A'");
+					$stm->execute(array(':startdate'=>min($now, $line['startdate'], $exceptionrow[0]),
+						':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
+				}
+			}
+			require_once("../includes/exceptionfuncs.php");
 			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
-			$useexception = $exceptionfuncs->getCanUseAssessException($row, $line, true);
+			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
+		} else if ($line['date_by_lti']==3 && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
+			//default dates already set by LTI, and users's date doesn't match - create new exception
+			//also create if it's before the default assessment startdate - since they could access via LMS, it should be available.
+			$exceptionrow = array(min($now,$_SESSION['lti_duedate']), $_SESSION['lti_duedate'], 0, 1);
+			$stm = $DBH->prepare("INSERT INTO imas_exceptions (startdate,enddate,islatepass,is_lti,userid,assessmentid,itemtype) VALUES (?,?,?,?,?,?,'A')");
+			$stm->execute(array_merge($exceptionrow, array($userid, $aid)));
+			$useexception = true;
 		}
-		if ($row!=null && $useexception) {
-			if ($now<$row[0] || $row[1]<$now) { //outside exception dates
+		if ($exceptionrow!=null && $useexception) {
+			if ($now<$exceptionrow[0] || $exceptionrow[1]<$now) { //outside exception dates
 				if ($now > $line['startdate'] && $now < $line['reviewdate']) {
 					$isreview = true;
 				} else {
@@ -3131,7 +3411,7 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 					$inexception = true; //only trigger if past due date for penalty
 				}
 			}
-			$exceptionduedate = $row[1];
+			$exceptionduedate = $exceptionrow[1];
 		} else { //has no exception
 			if ($now < $line['startdate'] || $line['enddate'] < $now) { //outside normal dates
 				if ($now > $line['startdate'] && $now < $line['reviewdate']) {
@@ -3206,7 +3486,7 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 		}
 		$timelimitmult = 1;
 	} else {
-		$stm = $DBH->prepare("SELECT id,timelimitmult FROM imas_students WHERE userid=:userid AND courseid=:courseid");
+		$stm = $DBH->prepare("SELECT timelimitmult,latepass FROM imas_students WHERE userid=:userid AND courseid=:courseid");
 		$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid));
 		if ($stm->rowCount() == 0) {
 			$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE userid=:userid AND courseid=:courseid");
@@ -3218,8 +3498,26 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 					$stm = $DBH->prepare("SELECT deflatepass FROM imas_courses WHERE id=:id");
 					$stm->execute(array(':id'=>$cid));
 					$deflatepass = $stm->fetchColumn(0);
-					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:userid, :courseid, :section, :latepass, :created_at)");
-					$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass, ':created_at'=>time()));
+					$stm = $DBH->prepare("INSERT INTO imas_students (userid,courseid,section,latepass) VALUES (:userid, :courseid, :section, :latepass)");
+                    $stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':section'=>$_SESSION['lti_context_label'], ':latepass'=>$deflatepass));
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    $rowId = $DBH->lastInsertId();
+                    if ($rowId && 0 < $rowId) {
+                        $stmc = $DBH->prepare("UPDATE imas_students
+                            SET created_at = UNIX_TIMESTAMP() WHERE id=:id");
+                        $stmc->execute(array(':id' => $rowId));
+                    }
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    require_once(__DIR__ . '/../includes/setSectionGroups.php');
+                    setSectionGroups($userid, $cid, $_SESSION['lti_context_label']);
 				}
 			} else {
 				$_SESSION['ltirole']='instructor';
@@ -3227,7 +3525,7 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
 			}
 			$timelimitmult = 1;
 		} else {
-			$timelimitmult = $stm->fetchColumn(1);
+            list($timelimitmult,$latepasses) = $stm->fetch(PDO::FETCH_NUM);
 		}
 	}
 }
@@ -3251,7 +3549,7 @@ if (!empty($_SESSION['userid'])) {
 		//already have session.  Don't need to create one
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
-			require_once("$curdir/includes/userprefs.php");
+			require_once("$curdir/../includes/userprefs.php");
 			generateuserprefs(true);
 		}
 		$createnewsession = false;
@@ -3312,11 +3610,11 @@ if ($keyparts[0]=='aid') {
 	$_SESSION['ltiitemid'] = $aid;
 
 	$_SESSION['lticanuselatepass'] = false;
-	if ($_SESSION['ltirole']!='instructor' && $line['allowlate']>0) {
+	if ($SESS['ltirole']!='instructor' && $line['allowlate']>0 && isset($latepasses) && isset($exceptionrow)) {
 		$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$latepasshrs = $stm->fetchColumn(0);
-		require_once("./includes/exceptionfuncs.php");
+		require_once(__DIR__ . "/../includes/exceptionfuncs.php");
 		$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
 		list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
 		$_SESSION['lticanuselatepass'] = $canuselatepass;
@@ -3342,7 +3640,9 @@ if ($keyparts[0]=='aid') {
 }
 $_SESSION['lti_outcomeurl']  = $SESS['lti_outcomeurl'];
 $_SESSION['lti_context_label'] = $SESS['lti_context_label'];
-$_SESSION['lti_launch_get'] = $SESS['lti_launch_get'];
+if (isset($SESS['lti_launch_get'])) {
+    $_SESSION['lti_launch_get'] = $SESS['lti_launch_get'];
+}
 $_SESSION['lti_key'] = $SESS['lti_key'];
 $_SESSION['lti_keytype'] = $SESS['lti_keytype'];
 $_SESSION['lti_keylookup'] = $SESS['ltilookup'];
@@ -3352,10 +3652,10 @@ if (isset($SESS['lti_duedate'])) {
 }
 if (isset($SESS['selection_return'])) {
 	$_SESSION['lti_selection_return'] = $SESS['selection_return'];
-	$_SESSION['lti_selection_targets'] = $SESS['selection_targets'];
+	$_SESSION['lti_selection_targets'] = $SESS['selection_targets'] ?? '';
 	$_SESSION['lti_selection_return_format'] = $SESS['selection_return_format'];
-	$_SESSION['lti_selection_type'] = $SESS['selection_type'];
-	$_SESSION['lti_selection_data'] = $SESS['selection_data'];
+	$_SESSION['lti_selection_type'] = $SESS['selection_type'] ?? '';
+	$_SESSION['lti_selection_data'] = $SESS['selection_data'] ?? '';
 }
 
 if (isset($setstuviewon) && $setstuviewon==true) {
@@ -3371,6 +3671,7 @@ if ($_SESSION['lti_keytype']=='cc-vf') {
 	$_SESSION['tzoffset'] = 0;
 }
 
+$_SESSION['ltiuserid'] = $SESS['ltiuserid'];
 $_SESSION['userid'] = $userid;
 $_SESSION['time'] = $now;
 
