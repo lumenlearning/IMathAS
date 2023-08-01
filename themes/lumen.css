@@ -389,10 +389,11 @@ div.todoquestion {
 	font-size: 15px;
 }
 div.question {
-	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
-	font-size: 15px;
-	background-color: #F7FCFF;
-	border: 1px solid #C3D4DD;
+	font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+	background-color: #ffffff;
+	border: none;
+  color: purple;
 	line-height: 1.4em;
 }
 div.inset {
