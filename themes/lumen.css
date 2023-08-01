@@ -396,6 +396,10 @@ div.question {
   color: purple;
 	line-height: 1.4em;
 }
+/* Intro paragraph of question gets larger font */
+div.question > div > p:first-of-type {
+    font-size: 20px;
+}
 div.inset {
 	margin-right: 0px;
 }
