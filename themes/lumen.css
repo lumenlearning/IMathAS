@@ -11,7 +11,23 @@ div.question {
 	line-height: 1.4;
 }
 
-/* Intro paragraph of question gets larger font */
-div.question > div > p:first-of-type {
+/* Intro paragraph of question gets larger font. 
+* Sometimes this is in a <p> tag, sometimes it's directly in the
+* <div> that wraps the whole question.
+*/
+div.question > div {
   font-size: 20px;
 }
+/* Anything not right in main div should be smaller except first <p> */
+div.question > div > :not(p:first-of-type) {
+  font-size: 16px;
+}
+/* First <p> bigger except if it's the Hint button (b/c the intro text was right in the div) */
+div.question > div > p:first-of-type {
+  font-size: 20px;
+  /* if first <p> contains a button, its text shouldn't be 20px */
+  button { 
+    font-size: 16px;
+  }
+}
+
