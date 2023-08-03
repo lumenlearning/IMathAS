@@ -398,22 +398,9 @@ div.question {
 	line-height: 1.4;
 }
 
-/* Intro paragraph of question gets larger font. 
-* Sometimes this is in a <p> tag, sometimes it's directly in the
-* <div> that wraps the whole question.
-*/
-div.question > div:first-child,
-div.question > p:first-child {
+/* Intro paragraph of question gets larger font. */
+div.question > div:first-child > p:first-child {
   font-size: 20px;
-  /* if either contains a button, its text shouldn't be 20px */
-  button { 
-    font-size: 16px;
-  }
-}
-
-/* Any child elements in main div should be smaller text except first <p> */
-div.question > div:first-child > :not(p:first-child) {
-  font-size: 16px;
 }
 
 div.inset {
