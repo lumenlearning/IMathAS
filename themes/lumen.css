@@ -404,21 +404,16 @@ div.question {
 div.question > div:first-child,
 div.question > p:first-child {
   font-size: 20px;
+  /* if either contains a button, its text shouldn't be 20px */
+  button { 
+    font-size: 16px;
+  }
 }
 
 /* Any child elements in main div should be smaller text except first <p> */
 div.question > div:first-child > :not(p:first-child) {
   font-size: 16px;
 }
-
-/* First <p> bigger except if it's the Hint button (b/c the intro text was right in the div) */
-div.question > div > p:first-of-type {
-  font-size: 20px;
-  /* if first <p> contains a button, its text shouldn't be 20px */
-  button { 
-    font-size: 16px;
-  }
-} 
 
 div.inset {
 	margin-right: 0px;
