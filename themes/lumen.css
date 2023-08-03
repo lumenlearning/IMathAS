@@ -1,6 +1,7 @@
 /*General settings - fonts, overall page background, etc*/
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700);
+@import url(https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap);
 
 body {
 	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
@@ -388,13 +389,20 @@ div.todoquestion {
 	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
 	font-size: 15px;
 }
+
 div.question {
-	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
-	font-size: 15px;
-	background-color: #F7FCFF;
-	border: 1px solid #C3D4DD;
-	line-height: 1.4em;
+  background-color: #ffffff;
+	border: none;
+	font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+	line-height: 1.4;
 }
+
+/* Intro paragraph of question gets larger font. */
+div.question > div:first-child > p:first-child {
+  font-size: 20px;
+}
+
 div.inset {
 	margin-right: 0px;
 }
@@ -1312,3 +1320,4 @@ div.itemhdr div.title {
 		display: none;
 	}
 }
+
