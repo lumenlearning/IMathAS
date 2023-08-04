@@ -105,6 +105,9 @@ function ohm_getfeedbackbasic($stuanswers,
             $questionIndex => [
                 'correctness' => 'correct',
                 'feedback' => $correctFeedback,
+                'failsafe_data' => [
+                    'incorrect_feedback' => $incorrectFeedback
+                ],
             ],
         ];
     } else {
@@ -112,7 +115,10 @@ function ohm_getfeedbackbasic($stuanswers,
             $questionIndex => [
                 'correctness' => 'incorrect',
                 'feedback' => $incorrectFeedback,
-            ]
+                'failsafe_data' => [
+                    'correct_feedback' => $correctFeedback,
+                ],
+            ],
         ];
     }
 }

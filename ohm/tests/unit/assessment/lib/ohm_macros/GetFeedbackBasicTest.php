@@ -78,7 +78,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'correct',
-                'feedback' => 'Correct!'
+                'feedback' => 'Correct!',
+                'failsafe_data' => [
+                    incorrect_feedback => 'Nope!'
+                ]
             ]
         ];
 
@@ -91,7 +94,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'incorrect',
-                'feedback' => 'Nope!'
+                'feedback' => 'Nope!',
+                'failsafe_data' => [
+                    correct_feedback => 'Correct!'
+                ]
             ]
         ];
 
@@ -115,7 +121,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'correct',
-                    'feedback' => 'Correct!'
+                    'feedback' => 'Correct!',
+                    'failsafe_data' => [
+                        incorrect_feedback => 'Nope!'
+                    ]
                 ]
             ];
 
@@ -136,7 +145,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'incorrect',
-                    'feedback' => 'Nope!'
+                    'feedback' => 'Nope!',
+                    'failsafe_data' => [
+                        correct_feedback => 'Correct!'
+                    ]
                 ]
             ];
 
@@ -154,7 +166,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'correct',
-                'feedback' => 'Correct!'
+                'feedback' => 'Correct!',
+                'failsafe_data' => [
+                    incorrect_feedback => 'Nope!'
+                ]
             ]
         ];
 
@@ -167,7 +182,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'incorrect',
-                'feedback' => 'Nope!'
+                'feedback' => 'Nope!',
+                'failsafe_data' => [
+                    correct_feedback => 'Correct!'
+                ]
             ]
         ];
 
@@ -180,7 +198,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'incorrect',
-                'feedback' => 'Nope!'
+                'feedback' => 'Nope!',
+                'failsafe_data' => [
+                    correct_feedback => 'Correct!'
+                ]
             ]
         ];
 
@@ -204,7 +225,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'correct',
-                    'feedback' => 'Correct!'
+                    'feedback' => 'Correct!',
+                    'failsafe_data' => [
+                        incorrect_feedback => 'Nope!'
+                    ]
                 ]
             ];
 
@@ -225,7 +249,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'incorrect',
-                    'feedback' => 'Nope!'
+                    'feedback' => 'Nope!',
+                    'failsafe_data' => [
+                        correct_feedback => 'Correct!'
+                    ]
                 ]
             ];
 
@@ -246,7 +273,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'incorrect',
-                    'feedback' => 'Nope!'
+                    'feedback' => 'Nope!',
+                    'failsafe_data' => [
+                        correct_feedback => 'Correct!'
+                    ]
                 ]
             ];
 
@@ -264,7 +294,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'correct',
-                'feedback' => 'Correct!'
+                'feedback' => 'Correct!',
+                'failsafe_data' => [
+                    incorrect_feedback => 'Nope!'
+                ]
             ]
         ];
 
@@ -277,7 +310,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'incorrect',
-                'feedback' => 'Nope!'
+                'feedback' => 'Nope!',
+                'failsafe_data' => [
+                    correct_feedback => 'Correct!'
+                ]
             ]
         ];
 
@@ -290,7 +326,10 @@ final class GetFeedbackBasicTest extends TestCase
         $expectedFeedback = [
             'qn0' => [
                 'correctness' => 'incorrect',
-                'feedback' => 'Nope!'
+                'feedback' => 'Nope!',
+                'failsafe_data' => [
+                    correct_feedback => 'Correct!'
+                ]
             ]
         ];
 
@@ -314,7 +353,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'correct',
-                    'feedback' => 'Correct!'
+                    'feedback' => 'Correct!',
+                    'failsafe_data' => [
+                        incorrect_feedback => 'Nope!'
+                    ]
                 ]
             ];
 
@@ -335,7 +377,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'incorrect',
-                    'feedback' => 'Nope!'
+                    'feedback' => 'Nope!',
+                    'failsafe_data' => [
+                        correct_feedback => 'Correct!'
+                    ]
                 ]
             ];
 
@@ -356,7 +401,10 @@ final class GetFeedbackBasicTest extends TestCase
             $expectedFeedback = [
                 'qn' . (1000 + $partNumber) => [
                     'correctness' => 'incorrect',
-                    'feedback' => 'Nope!'
+                    'feedback' => 'Nope!',
+                    'failsafe_data' => [
+                        correct_feedback => 'Correct!'
+                    ]
                 ]
             ];
 
