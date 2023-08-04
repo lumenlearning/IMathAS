@@ -685,15 +685,21 @@ div.pagetitle h2, div.pagetitle h1 {
 	clear: both;
 }
 
-input[type=submit],input[type=button], button {
-	color: #000;
-	background-color: #eee;
-	border-radius: 4px;
-	border: 1px solid #ccc;
-	font: inherit;
+/* Hint and Show Answer link-style buttons */
+input[type=button], button:not(.btn) {
+	/* 'primary_text' in Harmony Colors */
+	color: #202325;
+	background-color: #FFFFFF;
+	border: none;
+  cursor: pointer;
+  font-family: Public Sans;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration-line: underline;
+	/* font: inherit;
 	height:1.5em;
 	padding: 0 8px;
-	margin: 2px 3px;
+	margin: 2px 3px; */
 }
 input[type=submit].secondarybtn,input[type=button].secondarybtn, button.secondarybtn {
 	background-color: #f9f9f9;
