@@ -403,6 +403,47 @@ div.question > div:first-child > p:first-child {
   font-size: 20px;
 }
 
+/* Submit button is the only button with .btn class AFAIK */
+div.question > .btn {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  align-content: center;
+  /* indigo_500 in Harmony Colors */
+  background: #5367EA;
+  border: 2px solid #5367EA;
+  border-radius: 10px;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: block;
+  font-family: 'Public Sans';
+  font-size: 16px;
+  font-weight: 700;
+  gap: 10px;
+  height: auto;
+  justify-content: center;
+  margin: 0;
+  outline: 2px solid transparent;
+  padding: 13px 20px;
+  text-decoration: none;
+  transition: background 250ms ease-in-out, transform 150ms ease;
+  white-space: normal;
+  
+}
+div.question > .btn:hover, 
+div.question > .btn:focus {
+  /* indigo_600 in Harmony Colors */
+  background: #4252BB; 
+}
+
+div.question > .btn:focus-visible {
+  box-shadow: 0px 0px 0px 4px #FFFFFF;
+  outline: 2px solid #FFFFFF;
+}
+
+div.question > .btn:active {
+  transform: scale(0.99);
+}
+
 div.inset {
 	margin-right: 0px;
 }
