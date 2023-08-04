@@ -403,6 +403,31 @@ div.question > div:first-child > p:first-child {
   font-size: 20px;
 }
 
+/* 
+* Hint buttons all have an id starting with 'inlinebtn', 
+* and Show Answer buttons all have a class of 'sabtn'
+*/
+/* 
+button[id^="inlinebtn"],
+.sabtn {
+  background: #FFFFFF;
+  border: none;
+  'primary_text' in Harmony Colors
+	color: #202325;
+	cursor: pointer;
+  font-family: Public Sans;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+  outline: inherit;
+  padding: 0;
+  text-decoration-line: underline;
+} */
+
+.sabtn {
+  background: #FFFFFF;
+}
+
 div.inset {
 	margin-right: 0px;
 }
