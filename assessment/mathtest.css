@@ -696,17 +696,11 @@ input[type=button], button:not(.btn) {
   font-size: 16px;
   font-weight: 700;
   text-decoration-line: underline;
-	/* font: inherit;
-	height:1.5em;
-	padding: 0 8px;
-	margin: 2px 3px; */
 }
 input[type=submit].secondarybtn,input[type=button].secondarybtn, button.secondarybtn {
 	background-color: #f9f9f9;
 }
-input[type=submit]:hover, button:hover,input[type=button]:hover {
-	background-color: #e3e3ff;
-}
+
 #GB_overlay {
   position: fixed;
   margin: auto;
