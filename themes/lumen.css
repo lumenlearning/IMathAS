@@ -424,6 +424,8 @@ div.question > .btn {
   margin: 0;
   outline: 2px solid transparent;
   padding: 13px 20px;
+  position: relative;
+  right: 2px;
   text-decoration: none;
   transition: background 250ms ease-in-out, transform 150ms ease;
   white-space: normal;
