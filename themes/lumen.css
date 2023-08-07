@@ -403,7 +403,11 @@ div.question > div:first-child > p:first-child {
   font-size: 20px;
 }
 
-/* Submit button is the only button with .btn class AFAIK */
+/* 
+* Submit Button Styles Begin
+* Submit button is styled to match the primary buttons from Valkyrie.
+* No other buttons in embedded questions use the .btn class.
+*/
 div.question > .btn {
   -moz-appearance: none;
   -webkit-appearance: none;
@@ -443,6 +447,7 @@ div.question > .btn:focus-visible {
 div.question > .btn:active {
   transform: scale(0.99);
 }
+/* Submit Button Styles End */
 
 div.inset {
 	margin-right: 0px;
