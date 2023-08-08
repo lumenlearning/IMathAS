@@ -1,3 +1,10 @@
+:root {
+  --indigo-500: #5367EA;
+  --indigo-600: #4252BB;
+  --primary-text: #202325;
+  --white: #FFFFFF;
+}
+
 a:link {
 	text-decoration: none;
 }
@@ -685,11 +692,10 @@ div.pagetitle h2, div.pagetitle h1 {
 	clear: both;
 }
 
-/* Hint and Show Answer link-style buttons */
-input[type=button], button:not(.btn) {
-	/* 'primary_text' in Harmony Colors */
-	color: #202325;
-	background-color: #FFFFFF;
+/* START: Hint and Show Answer link-style buttons */
+input[type=button].sabtn, button:not(.btn) {
+	color: var(--primary-text);
+	background-color: var(--white);
 	border: none;
   cursor: pointer;
   font-family: Public Sans;
@@ -698,13 +704,15 @@ input[type=button], button:not(.btn) {
   text-decoration-line: underline;
 }
 
-/* Show Answer buttons need a bit of spacing from 
-* their answer if stacked vertically. Hint buttons are 
+/* Show Answer buttons need a bit of spacing from their answers 
+* (and from one another) if stacked vertically. Hint buttons are 
 * already in a <p> tag so they don't need it.
 */
-input[type=button] {
-  margin-bottom: 5px;
+input[type=button].sabtn {
+  margin-bottom: 20px;
 }
+
+/* END: Hint and Show Answer link-style buttons */
 
 input[type=submit].secondarybtn,input[type=button].secondarybtn, button.secondarybtn {
 	background-color: #f9f9f9;
