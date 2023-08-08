@@ -406,8 +406,7 @@ div.question > div:first-child > p:first-child {
 
 /* 
 * Submit Button Styles Begin
-* Submit button is styled to match the primary buttons from Valkyrie.
-* No other buttons in embedded questions use the .btn class.
+* The submit button is styled to match the Lumen One primary button.
 */
 div.question > .btn[value="Submit"] {
   -moz-appearance: none;
@@ -435,8 +434,7 @@ div.question > .btn[value="Submit"] {
 }
 div.question > .btn[value="Submit"]:hover, 
 div.question > .btn[value="Submit"]:focus {
-  /* indigo_600 in Harmony Colors */
-  background: #4252BB; 
+  background: var(--indigo-600)
 }
 
 div.question > .btn[value="Submit"]:focus-visible {
