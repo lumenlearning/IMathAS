@@ -259,10 +259,11 @@ for ($qn=0; $qn < $numq; $qn++) {
 }
 
 if (isset($_GET['frame_id'])) {
-    $frameid = preg_replace('/[^\w:.-]/', '', $_GET['frame_id']);
+   $frameid = preg_replace('/[^\w:.-]/', '', $_GET['frame_id']);
 } else {
-    $frameid = "embedq2-" . $qsid;
+  $frameid = "ohm" . $qsid;
 }
+
 if (isset($_GET['theme'])) {
     $theme = preg_replace('/\W/', '', $_GET['theme']);
     $coursetheme = $theme . '.css';
@@ -291,7 +292,6 @@ $placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . 
 
 // setup resize message sender
 $placeinhead .= '<script type="text/javascript">
-  var frame_id = "' . $frameid . '";
   function sendresizemsg() {
    if(inIframe()){
       var default_height = Math.max(
