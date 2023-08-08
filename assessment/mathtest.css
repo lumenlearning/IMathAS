@@ -1,8 +1,13 @@
 :root {
+  --green-500: #15B976;
   --indigo-500: #5367EA;
   --indigo-600: #4252BB;
+  --middle-gray: #EAE8E3;
   --primary-text: #202325;
+  --red-500: #FF5B5B;
+  --yellow-500: #F3BE36;
   --white: #FFFFFF;
+  
 }
 
 a:link {
@@ -554,15 +559,16 @@ div.tips {
 div.ansred, div.ansgrn, div.ansyel, div.ansorg {
 	padding: 2px;
 	display: inline-block;
+  border-radius: 10px;
 }
 .ansred {
-	border: 1px solid #f00;
+	border: 1px solid var(--red-500);
 }
 .ansgrn {
-	border: 1px solid #0f0;
+	border: 1px solid var(--green-500);
 }
 .ansyel {
-	border: 1px solid #fc0;
+	border: 1px solid var(--yellow-500);
 }
 .ansorg {
 	border: 1px solid #f60;
@@ -984,9 +990,29 @@ span.inlinebtn:hover {
  input.iscredit {
  	 padding-left: 2em;
  }
+ 
+ /* Start short-answer text box styles */
  input.text {
  	 margin: 2px;
+   border: 2px solid var(--middle-gray);
+   border-radius: 10px;
+   height: 45px;
+   width: 130px;
  }
+
+ input.text.ansred {
+  border-color: var(--red-500);
+ }
+
+ input.text.ansgrn {
+  border-color: var(--green-500);
+ }
+
+ input.text.ansyel {
+  border-color: var(--yellow-500);
+ }
+ /* End short-answer text box styles */
+
  .sticky {
  	 position: fixed;
  	 top: 0px;
