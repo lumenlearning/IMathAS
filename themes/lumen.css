@@ -529,6 +529,29 @@ div.question > .btn[value="Submit"]:active {
 }
 /* END: Submit button styles */
 
+/* START: Styles for Hint and Show Answer link-style buttons */
+input[type=button].sabtn, button:not(.btn) {
+	color: var(--primary-text);
+	background-color: var(--white);
+	border: none;
+  cursor: pointer;
+  font-family: Public Sans;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration-line: underline;
+}
+
+/* Show Answer buttons need a bit of spacing from their answers 
+* (and from one another) if stacked vertically. Hint buttons are 
+* already in a <p> tag so they don't need it.
+*/
+input[type=button].sabtn {
+  margin-bottom: 20px;
+}
+
+/* END: Styles for Hint and Show Answer link-style buttons */
+
+
 div.inset {
 	margin-right: 0px;
 }
