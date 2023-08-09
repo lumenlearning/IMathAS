@@ -1,11 +1,19 @@
-/*General settings - fonts, overall page background, etc*/
+/* Styles are in the process of being updated to align with Lumen One styles in Valkyrie/Catra. */
 
+/* General settings - fonts, overall page background, etc */
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700);
 @import url(https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap);
 
 :root {
+  --green-100: #E8F8F1;
+  --green-500: #15B976;
   --indigo-500: #5367EA;
   --indigo-600: #4252BB;
+  --middle-gray: #EAE8E3;
+  --primary-text: #202325;
+  --red-200: #FFDEDE;
+  --red-500: #FF5B5B;
+  --yellow-500: #F3BE36;
   --white: #FFFFFF;
 }
 
@@ -404,10 +412,81 @@ div.question > div:first-child > p:first-child {
   font-size: 20px;
 }
 
-/* 
-* Submit Button Styles Begin
-* The submit button is styled to match the Lumen One primary button.
-*/
+/* START: Styles for answer highlighting for multiple choice, multans, etc*/
+div.ansred, div.ansgrn, div.ansyel, div.ansorg {
+	padding: 2px;
+	display: inline-block;
+  border-radius: 10px;
+}
+
+div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
+  margin-left: 8px;
+}
+
+.ansred {
+	border: 1px solid var(--red-500);
+}
+
+.ansgrn {
+	border: 1px solid var(--green-500);
+}
+
+.ansyel {
+	border: 1px solid var(--yellow-500);
+}
+/* END: Styles for answer highlighting for multiple choice, multans, etc */
+
+/* START: Styles for short-answer text box and answer highlighting */
+input.text {
+  margin: 2px;
+  border: 2px solid var(--middle-gray);
+  border-radius: 10px;
+  height: 45px;
+  width: 130px;
+}
+
+input.text ~ .scoreboxicon {
+  position: relative;
+  top: 5px;
+}
+
+input.text.ansred {
+  border-color: var(--red-500);
+}
+
+input.text.ansgrn {
+  border-color: var(--green-500);
+}
+
+input.text.ansyel {
+  border-color: var(--yellow-500);
+}
+/* END: Styles for short-answer text box and answer highlighting */
+
+/* START: Styles for question explanation */
+.feedbackwrap {
+	display: block;
+	padding: 20px;
+  border-radius: 10px;
+  width: max-content;
+}
+
+.feedbackwrap img { /* Suppresses icons in question explanations */
+	display: none;
+}
+
+.feedbackwrap.correct {
+	background: var(--green-100);
+  border-color: var(--green-100);
+}
+
+.feedbackwrap.incorrect {
+	background: var(--red-200);
+  border-color: var(--red-200);
+}
+/* END: Styles for question explanation */
+
+/* START: Submit button styles */
 div.question > .btn[value="Submit"] {
   -moz-appearance: none;
   -webkit-appearance: none;
@@ -434,6 +513,7 @@ div.question > .btn[value="Submit"] {
   white-space: normal;
   
 }
+
 div.question > .btn[value="Submit"]:hover, 
 div.question > .btn[value="Submit"]:focus {
   background: var(--indigo-600)
@@ -447,7 +527,7 @@ div.question > .btn[value="Submit"]:focus-visible {
 div.question > .btn[value="Submit"]:active {
   transform: scale(0.99);
 }
-/* Submit Button Styles End */
+/* END: Submit button styles */
 
 div.inset {
 	margin-right: 0px;

@@ -1,17 +1,3 @@
-:root {
-  --green-100: #E8F8F1;
-  --green-500: #15B976;
-  --indigo-500: #5367EA;
-  --indigo-600: #4252BB;
-  --middle-gray: #EAE8E3;
-  --primary-text: #202325;
-  --red-200: #FFDEDE;
-  --red-500: #FF5B5B;
-  --yellow-500: #F3BE36;
-  --white: #FFFFFF;
-  
-}
-
 a:link {
 	text-decoration: none;
 }
@@ -557,35 +543,23 @@ div.tips {
 	opacity: 0.9;
 }
 
-/* START: Styles for answer highlighting */
+/*colors for answer highlighting*/
 div.ansred, div.ansgrn, div.ansyel, div.ansorg {
 	padding: 2px;
 	display: inline-block;
-  border-radius: 10px;
 }
-
-div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
-  margin-left: 8px;
-}
-
 .ansred {
-	border: 1px solid var(--red-500);
+	border: 1px solid #f00;
 }
 .ansgrn {
-	border: 1px solid var(--green-500);
+	border: 1px solid #0f0;
 }
 .ansyel {
-	border: 1px solid var(--yellow-500);
+	border: 1px solid #fc0;
 }
-/* 
-* .ansorg is apparently used for "Correct, but wrong format". 
-* Are we still using this anywhere? 
-*/
-
 .ansorg {
 	border: 1px solid #f60;
 }
-/* END: Styles for answer highlighting */
 
 ul.tablist {
 	padding: 0;
@@ -711,32 +685,22 @@ div.pagetitle h2, div.pagetitle h1 {
 	clear: both;
 }
 
-/* START: Styles for Hint and Show Answer link-style buttons */
-input[type=button].sabtn, button:not(.btn) {
-	color: var(--primary-text);
-	background-color: var(--white);
-	border: none;
-  cursor: pointer;
-  font-family: Public Sans;
-  font-size: 16px;
-  font-weight: 700;
-  text-decoration-line: underline;
+input[type=submit],input[type=button], button {
+	color: #000;
+	background-color: #eee;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	font: inherit;
+	height:1.5em;
+	padding: 0 8px;
+	margin: 2px 3px;
 }
-
-/* Show Answer buttons need a bit of spacing from their answers 
-* (and from one another) if stacked vertically. Hint buttons are 
-* already in a <p> tag so they don't need it.
-*/
-input[type=button].sabtn {
-  margin-bottom: 20px;
-}
-
-/* END: Styles for Hint and Show Answer link-style buttons */
-
 input[type=submit].secondarybtn,input[type=button].secondarybtn, button.secondarybtn {
 	background-color: #f9f9f9;
 }
-
+input[type=submit]:hover, button:hover,input[type=button]:hover {
+	background-color: #e3e3ff;
+}
 #GB_overlay {
   position: fixed;
   margin: auto;
@@ -942,27 +906,18 @@ span.inlinebtn {
 span.inlinebtn:hover {
 	background: #dfd;
 }
-
-/* START: Styles for question explanation */
 .feedbackwrap {
 	display: block;
-	padding: 20px;
-  border-radius: 10px;
-  width: max-content;
+	padding: 5px;
+	background: #fff;
+	border: 1px solid #ccc;
 }
-
-.feedbackwrap img { /* Suppresses icons in question explanations */
-	display: none;
-}
-
 .feedbackwrap.correct {
-	background: var(--green-100);
+	background: #efe;
 }
-
 .feedbackwrap.incorrect {
-	background: var(--red-200);
+	background: #fee;
 }
-/* END: Styles for question explanation */
 
 .AMHnotice {
 	color: #033;
@@ -1012,34 +967,9 @@ span.inlinebtn:hover {
  input.iscredit {
  	 padding-left: 2em;
  }
-
-/* START: Styles for short-answer text box and answer highlighting */
-input.text {
-  margin: 2px;
-  border: 2px solid var(--middle-gray);
-  border-radius: 10px;
-  height: 45px;
-  width: 130px;
-}
-
-input.text ~ .scoreboxicon {
-  position: relative;
-  top: 5px;
-}
-
-input.text.ansred {
-border-color: var(--red-500);
-}
-
-input.text.ansgrn {
-border-color: var(--green-500);
-}
-
-input.text.ansyel {
-border-color: var(--yellow-500);
-}
-/* END: Styles for short-answer text box and answer highlighting */
-
+ input.text {
+ 	 margin: 2px;
+ }
  .sticky {
  	 position: fixed;
  	 top: 0px;
