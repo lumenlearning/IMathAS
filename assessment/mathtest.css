@@ -1,9 +1,11 @@
 :root {
+  --green-100: #E8F8F1;
   --green-500: #15B976;
   --indigo-500: #5367EA;
   --indigo-600: #4252BB;
   --middle-gray: #EAE8E3;
   --primary-text: #202325;
+  --red-200: #FFDEDE;
   --red-500: #FF5B5B;
   --yellow-500: #F3BE36;
   --white: #FFFFFF;
@@ -940,18 +942,27 @@ span.inlinebtn {
 span.inlinebtn:hover {
 	background: #dfd;
 }
+
+/* START: Styles for question explanation */
 .feedbackwrap {
 	display: block;
-	padding: 5px;
-	background: #fff;
-	border: 1px solid #ccc;
+	padding: 20px;
+  border-radius: 10px;
+  width: max-content;
 }
+
+.feedbackwrap img { /* Suppresses icons in question explanations */
+	display: none;
+}
+
 .feedbackwrap.correct {
-	background: #efe;
+	background: var(--green-100);
 }
+
 .feedbackwrap.incorrect {
-	background: #fee;
+	background: var(--red-200);
 }
+/* END: Styles for question explanation */
 
 .AMHnotice {
 	color: #033;
