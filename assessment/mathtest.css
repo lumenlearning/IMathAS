@@ -704,10 +704,6 @@ input[type=button].sabtn, button:not(.btn) {
   text-decoration-line: underline;
 }
 
-input[type=button].sabtn:focus, button:not(.btn):focus {
-	border: none;
-}
-
 /* Show Answer buttons need a bit of spacing from their answers 
 * (and from one another) if stacked vertically. Hint buttons are 
 * already in a <p> tag so they don't need it.
