@@ -13,6 +13,7 @@
   --primary-text: #202325;
   --red-200: #FFDEDE;
   --red-500: #FF5B5B;
+  --secondary-text: #636566;
   --yellow-500: #F3BE36;
   --white: #FFFFFF;
 }
@@ -438,10 +439,14 @@ div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
 
 /* START: Styles for short-answer text box and answer highlighting */
 input.text {
-  margin: 2px;
-  border: 2px solid var(--middle-gray);
   border-radius: 10px;
+  border: 2px solid var(--middle-gray);
+  color: var(--secondary-text);
+  font-family: 'Public Sans';
+  font-size: 16px;
   height: 45px;
+  margin: 2px;
+  padding-left: 20px;
   width: 130px;
 }
 
@@ -468,11 +473,8 @@ input.text.ansyel {
 	display: block;
 	padding: 20px;
   border-radius: 10px;
-  width: max-content;
-}
-
-.feedbackwrap img { /* Suppresses icons in question explanations */
-	display: none;
+  width: fit-content;
+  overflow-wrap: normal;
 }
 
 .feedbackwrap.correct {
