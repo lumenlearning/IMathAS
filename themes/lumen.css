@@ -421,7 +421,26 @@ div.ansred, div.ansgrn, div.ansyel, div.ansorg {
 }
 
 div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
-  margin-left: 8px;
+  /* hides old Waymaker X and checkmark images coming from displayq2.php */
+  display: none;
+}
+
+div.ansred:after, div.ansgrn:after, div.ansyel:after, div.ansorg:after {
+  position: relative;
+  left: 8px;
+  padding-right: 12px;
+}
+
+div.ansgrn:after {
+  content: url(../img/correct.svg);
+}
+
+div.ansred:after {
+  content: url(../img/incorrect.svg);
+}
+
+div.ansyel:after {
+  content: url(../img/partially_correct.svg);
 }
 
 .ansred {
@@ -435,6 +454,16 @@ div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
 .ansyel {
 	border: 1px solid var(--yellow-500);
 }
+
+/* Matching questions need extra padding to get correctness mark inside the border */
+div.ansgrn:has( > ul.nomark), div.ansred:has( > ul.nomark), div.ansyel:has( > ul.nomark) {
+  padding-bottom: 25px;
+}
+
+div.ansgrn:has( > ul.nomark):after, div.ansred:has( > ul.nomark):after, div.ansyel:has( > ul.nomark):after {
+  bottom: 5px;
+}
+
 /* END: Styles for answer highlighting for multiple choice, multans, etc */
 
 /* START: Styles for short-answer text box and answer highlighting */
@@ -451,8 +480,7 @@ input.text {
 }
 
 input.text ~ .scoreboxicon {
-  position: relative;
-  top: 5px;
+  display: none;
 }
 
 input.text.ansred {
@@ -466,9 +494,32 @@ input.text.ansgrn {
 input.text.ansyel {
   border-color: var(--yellow-500);
 }
+
+/* p:has( > input.text.ansred ):after {
+  content: url(../img/incorrect.svg);
+  position: relative;
+  top: 5px; */
+  /* for some reason pulling this positioning out to 
+  a shared selector set makes them stop working */
+/* } */
+/* 
+p:has( > input.text.ansgrn ):after {
+  content: url(../img/correct.svg);
+  position: relative;
+  top: 5px;
+}
+
+p:has( > input.text.ansyel ):after {
+  content: url(../img/partially_correct.svg);
+  position: relative;
+  top: 5px;
+} */
+
+
 /* END: Styles for short-answer text box and answer highlighting */
 
 /* START: Styles for question explanation */
+/* Partially correct questions also get incorrect feedback wrap */
 .feedbackwrap {
 	display: block;
 	padding: 20px;
@@ -486,6 +537,27 @@ input.text.ansyel {
 	background: var(--red-200);
   border-color: var(--red-200);
 }
+
+.feedbackwrap.correct img, .feedbackwrap.incorrect img {
+  /* hides old Waymaker X and checkmark images*/
+  display: none;
+}
+
+.feedbackwrap.correct:before, .feedbackwrap.incorrect:before {
+  position: relative;
+  top: 5px;
+  padding-right: 5px;
+}
+
+.feedbackwrap.correct:before {
+  content: url(../img/correct.svg);
+}
+
+
+.feedbackwrap.incorrect:before {
+  content: url(../img/incorrect.svg);
+}
+
 /* END: Styles for question explanation */
 
 /* START: Submit button styles */
