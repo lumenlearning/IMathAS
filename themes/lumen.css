@@ -540,10 +540,26 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
   border-color: var(--red-200);
 }
 
-.feedbackwrap.correct img, .feedbackwrap.incorrect img {
+.feedbackwrap img, .feedbackwrap.correct img, .feedbackwrap.incorrect img {
   /* hides old Waymaker X and checkmark images*/
   display: none;
 }
+
+.feedbackwrap.correct:before, .feedbackwrap.incorrect:before {
+  position: relative;
+  top: 5px;
+  padding-right: 5px;
+}
+
+.feedbackwrap.correct:before {
+  content: url(../img/correct.svg);
+}
+
+
+.feedbackwrap.incorrect:before {
+  content: url(../img/incorrect.svg);
+}
+
 /* END: Styles for question explanation */
 
 
