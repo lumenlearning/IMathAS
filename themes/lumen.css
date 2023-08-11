@@ -455,12 +455,14 @@ div.ansyel:after {
 	border: 1px solid var(--yellow-500);
 }
 
-/* Matching questions need extra padding to get correctness mark inside the border */
+/* Multans (checkbox) questions need extra padding to get correctness mark inside the border */
 div.ansgrn:has( > ul.nomark), div.ansred:has( > ul.nomark), div.ansyel:has( > ul.nomark) {
   padding-bottom: 25px;
 }
 
-div.ansgrn:has( > ul.nomark):after, div.ansred:has( > ul.nomark):after, div.ansyel:has( > ul.nomark):after {
+div.ansgrn:has( > ul.nomark):after, 
+div.ansred:has( > ul.nomark):after, 
+div.ansyel:has( > ul.nomark):after {
   bottom: 5px;
 }
 
@@ -487,39 +489,42 @@ input.text.ansred {
   border-color: var(--red-500);
 }
 
-input.text.ansgrn {
+/* input.text.ansgrn {
   border-color: var(--green-500);
-}
+} */
 
 input.text.ansyel {
   border-color: var(--yellow-500);
 }
 
-/* p:has( > input.text.ansred ):after {
+p:has( > input.text.ansred ):before {
   content: url(../img/incorrect.svg);
   position: relative;
-  top: 5px; */
-  /* for some reason pulling this positioning out to 
-  a shared selector set makes them stop working */
-/* } */
-/* 
-p:has( > input.text.ansgrn ):after {
+  top: 5px;
+  padding-right: 5px;
+  /* for some reason pulling the shaared non-content styles
+  out to a shared selector set makes them stop working */
+}
+
+p:has( > input.text.ansgrn ):before {
   content: url(../img/correct.svg);
   position: relative;
   top: 5px;
+  padding-right: 5px;
 }
 
-p:has( > input.text.ansyel ):after {
+p:has( > input.text.ansyel ):before {
   content: url(../img/partially_correct.svg);
   position: relative;
   top: 5px;
-} */
-
-
+  padding-right: 5px;
+}
 /* END: Styles for short-answer text box and answer highlighting */
 
+
 /* START: Styles for question explanation */
-/* Partially correct questions also get incorrect feedback wrap */
+/* HTML for partially correct questions has a feedback wrap with class .incorrect,
+so no styles for a .feedbackwrap.partiallycorrect are included here. */
 .feedbackwrap {
 	display: block;
 	padding: 20px;
@@ -552,7 +557,6 @@ p:has( > input.text.ansyel ):after {
 .feedbackwrap.correct:before {
   content: url(../img/correct.svg);
 }
-
 
 .feedbackwrap.incorrect:before {
   content: url(../img/incorrect.svg);
