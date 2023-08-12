@@ -469,6 +469,39 @@ div.ansyel:has( > ul.nomark):after {
 /* END: Styles for answer highlighting for multiple choice, multans, etc. */
 
 
+/* START: Styles for dropdown answer highlighting */
+select, select.ansgrn, select.ansred, select.ansyel {
+  border: 2px solid var(--middle-gray);
+}
+
+p:has( > select.ansgrn ) img,
+p:has( > select.ansred ) img,
+p:has( > select.ansyel ) img {
+  display: none;
+}
+
+p:has( > select.ansgrn ):before,
+p:has( > select.ansred ):before,
+p:has( > select.ansyel ):before {
+  position: relative;
+  top: 5px;
+  padding-right: 5px;
+}
+
+p:has( > select.ansgrn ):before {
+  content: url(../img/correct.svg);
+}
+
+p:has( > select.ansred ):before {
+  content: url(../img/incorrect.svg);
+}
+
+p:has( > select.ansyel ):before {
+  content: url(../img/partially_correct.svg);
+}
+/* END: Styles for dropdown answer highlighting */
+
+
 /* START: Styles for short-answer text box and answer highlighting */
 input.text {
   border-radius: 10px;
