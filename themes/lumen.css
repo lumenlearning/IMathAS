@@ -568,19 +568,6 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
   border-color: var(--green-100);
 }
 
-/* Injects the new icon and 'Correct!' into feedback wrap that has no text */
-.feedbackwrap.no-text.correct:before { 
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCI+CiAgPHBhdGggZD0ibTMgOS42NjUgNC42NjcgNC42NjVMMTcgNSIgc3Ryb2tlPSIjMTVCOTc2IiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPg==");
-  background-repeat: no-repeat;
-  content: "Correct!";
-  padding-left: 30px;
-}
-
-/* Vertically centers injected text and checkmark */ 
-.feedbackwrap.no-text.correct {
-  padding-top: 10px;
-}
-
 .feedbackwrap.incorrect {
 	background: var(--red-200);
   border-color: var(--red-200);
@@ -604,6 +591,19 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 
 .feedbackwrap.incorrect:before {
   content: url(../img/incorrect.svg);
+}
+
+/* Injects the new icon and 'Correct!' into feedback wrap that has no text */
+.feedbackwrap.no-text.correct:before { 
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCI+CiAgPHBhdGggZD0ibTMgOS42NjUgNC42NjcgNC42NjVMMTcgNSIgc3Ryb2tlPSIjMTVCOTc2IiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPg==");
+  background-repeat: no-repeat;
+  content: "Correct!";
+  padding-left: 30px;
+}
+
+/* Vertically centers injected text and checkmark */ 
+.feedbackwrap.no-text.correct {
+  padding-top: 10px;
 }
 
 /* END: Styles for question explanation */
