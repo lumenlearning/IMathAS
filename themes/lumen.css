@@ -415,8 +415,8 @@ div.question > div:first-child > p:first-child {
 
 /* START: Styles for answer highlighting for multiple choice, multans, etc. */
 div.ansred, div.ansgrn, div.ansyel, div.ansorg {
-	padding: 2px;
 	display: inline-block;
+	padding: 2px;
   border-radius: 10px;
 }
 
@@ -426,9 +426,9 @@ div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
 }
 
 div.ansred:after, div.ansgrn:after, div.ansyel:after, div.ansorg:after {
-  position: relative;
   left: 8px;
   padding-right: 12px;
+  position: relative;
 }
 
 div.ansgrn:after {
@@ -483,9 +483,9 @@ p:has( > select.ansyel ) img {
 p:has( > select.ansgrn ):before,
 p:has( > select.ansred ):before,
 p:has( > select.ansyel ):before {
+  padding-right: 5px;
   position: relative;
   top: 5px;
-  padding-right: 5px;
 }
 
 p:has( > select.ansgrn ):before {
@@ -504,8 +504,8 @@ p:has( > select.ansyel ):before {
 
 /* START: Styles for short-answer text box and answer highlighting */
 input.text {
-  border-radius: 10px;
   border: 2px solid var(--middle-gray);
+  border-radius: 10px;
   color: var(--secondary-text);
   font-family: 'Public Sans';
   font-size: 16px;
@@ -529,25 +529,25 @@ input.text.ansyel {
 
 p:has( > input.text.ansred ):before {
   content: url(../img/incorrect.svg);
+  padding-right: 5px;
   position: relative;
   top: 5px;
-  padding-right: 5px;
   /* for some reason pulling the shared non-content styles
   out to a shared selector set makes them stop working */
 }
 
 p:has( > input.text.ansgrn ):before {
   content: url(../img/correct.svg);
+  padding-right: 5px;
   position: relative;
   top: 5px;
-  padding-right: 5px;
 }
 
 p:has( > input.text.ansyel ):before {
   content: url(../img/partially_correct.svg);
+  padding-right: 5px;
   position: relative;
   top: 5px;
-  padding-right: 5px;
 }
 /* END: Styles for short-answer text box and answer highlighting */
 
@@ -556,11 +556,11 @@ p:has( > input.text.ansyel ):before {
 /* HTML for partially correct questions has a feedback wrap with class .incorrect,
 so no styles for a .feedbackwrap.partiallycorrect are included here. */
 .feedbackwrap {
-	display: block;
-	padding: 20px;
   border-radius: 10px;
-  width: fit-content;
+	display: block;
   overflow-wrap: normal;
+	padding: 20px;
+  width: fit-content;
 }
 
 .feedbackwrap.correct {
@@ -579,9 +579,9 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 }
 
 .feedbackwrap.correct:before, .feedbackwrap.incorrect:before {
+  padding-right: 5px;
   position: relative;
   top: 5px;
-  padding-right: 5px;
 }
 
 .feedbackwrap.correct:before {
