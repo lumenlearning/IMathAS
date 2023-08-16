@@ -610,13 +610,7 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 
 /* START: Styles for inside tables */
 /* adds rounded corners to table */
-.question table:not(.feedbackwrap) {
-	border-spacing: 0 !important;
-	border: 1px solid var(--light-contrast-2) !important;
-	border-radius: 10px !important;
-	border-collapse: inherit !important;
-}
-.question table:has(.feedbackwrap) {
+.question table {
 	border-spacing: 0 !important;
 	border: 1px solid var(--light-contrast-2) !important;
 	border-radius: 10px !important;
