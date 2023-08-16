@@ -666,6 +666,7 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 	position: relative;
 	text-indent: -29px;
 	padding: 0px;
+	min-width: 130px;
 }
 
 /* this works to move the correctness icon
