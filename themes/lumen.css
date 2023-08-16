@@ -608,6 +608,77 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 
 /* END: Styles for question explanation */
 
+/* START: Styles for inside tables */
+/* adds rounded corners to table */
+.question table:not(.feedbackwrap) {
+	border-spacing: 0 !important;
+	border: 1px solid var(--light-contrast-2) !important;
+	border-radius: 10px !important;
+	border-collapse: inherit !important;
+}
+.question table:has(.feedbackwrap) {
+	border-spacing: 0 !important;
+	border: 1px solid var(--light-contrast-2) !important;
+	border-radius: 10px !important;
+	border-collapse: inherit !important;
+}
+.question table:has(.feedbackwrap) tbody tr td {
+	border-top: 1px solid var(--light-contrast-2) !important;
+	border-bottom: 1px solid var(--light-contrast-2) !important;
+}
+.question table thead tr th:first-child {
+	border-top-left-radius: 8px !important;
+}
+.question table thead tr th:last-child {
+	border-top-right-radius: 8px !important;
+}
+.question table tbody tr:last-child td:first-child {
+	border-bottom-left-radius: 8px !important;
+}
+.question table tbody tr:last-child td:last-child {
+	border-bottom-right-radius: 8px !important;
+}
+
+.question table tbody tr td {
+	padding: 10px 15px;
+}
+
+/* changes whole block to proper background color */
+.question table tbody tr td:has(> .feedbackwrap.correct) {
+	background: var(--green-100);
+}
+.question table tbody tr td:has(> .feedbackwrap.incorrect) {
+	background: var(--red-200);
+}
+
+/* this affects input width within table */
+.question table tbody tr td input.text {
+	width: 84px;
+}
+
+/* when answered, removes preview button after the scorebox icon */
+.question table tbody tr td .scoreboxicon + input.btn {
+	display: none;
+}
+
+/* moves the feedback text */
+.question table tbody tr td .feedbackwrap {
+	position: relative;
+	text-indent: -29px;
+	padding: 0px;
+}
+
+/* this works to move the correctness icon
+in relation to the feedback text above */
+.question table tbody tr td div.feedbackwrap.correct::before {
+	left: 143px;
+	top: -30px;
+}
+.question table tbody tr td div.feedbackwrap.incorrect::before {
+	left: 143px;
+	top: -30px;
+}
+  /* END: Table content styles */
 
 /* START: Submit button styles */
 div.question > .btn[value="Submit"] {
