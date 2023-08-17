@@ -611,14 +611,13 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 /* START: Styles for inside tables */
 /* adds rounded corners to table */
 .question table {
-	border-spacing: 0 !important;
-	border: 1px solid var(--light-contrast-2) !important;
+	border: 2px solid var(--light-contrast-2) !important;
+	border-collapse: separate !important;
 	border-radius: 10px !important;
-	border-collapse: inherit !important;
+	border-spacing: 0 !important;
 }
-.question table:has(.feedbackwrap) tbody tr td {
+.question table:has(.feedbackwrap) tbody tr:not(:first-child) td {
 	border-top: 1px solid var(--light-contrast-2) !important;
-	border-bottom: 1px solid var(--light-contrast-2) !important;
 }
 .question table thead tr th:first-child {
 	border-top-left-radius: 8px !important;
@@ -633,8 +632,14 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 	border-bottom-right-radius: 8px !important;
 }
 
+/* fixes border widths of rows and columns  */
 .question table tbody tr td {
+  	border-left-width: 1px !important;
+  	border-right: none !important;
 	padding: 10px 15px;
+}
+.question table tbody tr td:first-child {
+	border-left: none !important;
 }
 
 /* changes whole block to proper background color */
@@ -673,7 +678,7 @@ in relation to the feedback text above */
 	left: 143px;
 	top: -30px;
 }
-  /* END: Table content styles */
+/* END: Table content styles */
 
 /* START: Submit button styles */
 div.question > .btn[value="Submit"] {
