@@ -563,9 +563,13 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
   width: fit-content;
 }
 
+/* Firefox does not support has selector this is a minor adjustment for styling */
 @supports not selector(:has(*)) {
 	.feedbackwrap {
 		border-radius: 0px;
+	}
+	.question table tbody tr td .feedbackwrap {
+		padding: 0px 8px;
 	}
   }
 
