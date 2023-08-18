@@ -668,6 +668,13 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 	min-width: 130px;
 }
 
+/* Firefox does not support has selector this is a minor adjustment for styling */
+@supports not selector(:has(*)) {
+	.question table tbody tr td .feedbackwrap {
+		padding: 10px;
+	}
+  }
+
 /* this works to move the correctness icon
 in relation to the feedback text above */
 .question table tbody tr td div.feedbackwrap.correct::before {
