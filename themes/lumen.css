@@ -563,6 +563,12 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
   width: fit-content;
 }
 
+@supports not selector(:has(*)) {
+	.feedbackwrap {
+		border-radius: 0px;
+	}
+  }
+
 .feedbackwrap.correct {
 	background: var(--green-100);
   border-color: var(--green-100);
