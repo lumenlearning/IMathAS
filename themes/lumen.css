@@ -563,16 +563,6 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
   width: fit-content;
 }
 
-/* Firefox does not support has selector this is a minor adjustment for styling */
-@supports not selector(:has(*)) {
-	.feedbackwrap {
-		border-radius: 0px;
-	}
-	.question table tbody tr td .feedbackwrap {
-		padding: 0px 8px;
-	}
-  }
-
 .feedbackwrap.correct {
 	background: var(--green-100);
   border-color: var(--green-100);
@@ -677,6 +667,13 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 	padding: 0px;
 	min-width: 130px;
 }
+
+/* Firefox does not support has selector this is a minor adjustment for styling */
+@supports not selector(:has(*)) {
+	.question table tbody tr td .feedbackwrap {
+		padding: 10px;
+	}
+  }
 
 /* this works to move the correctness icon
 in relation to the feedback text above */
