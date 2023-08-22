@@ -23,6 +23,17 @@ array_push($GLOBALS['allowedmacros'],
     "ohm_getfeedbacktxtmultans",
 );
 
+/*
+ * Copied from macros.php. Required for convertTri(), which is required
+ * for numtowords().
+ */
+$GLOBALS['ones'] = array( "", " one", " two", " three", " four", " five", " six", " seven", " eight", " nine", " ten", " eleven", " twelve", " thirteen", " fourteen", " fifteen", " sixteen", " seventeen", " eighteen", " nineteen");
+$GLOBALS['onesth'] = array(""," first"," second", " third", " fourth", " fifth", " sixth", " seventh", " eighth", " ninth", "tenth"," eleventh", " twelfth", " thirteenth", " fourteenth"," fifteenth", " sixteenth", " seventeenth", " eighteenth"," nineteenth");
+$GLOBALS['tens'] = array( "", "", " twenty", " thirty", " forty", " fifty", " sixty", " seventy", " eighty", " ninety");
+$GLOBALS['tensth'] = array("",""," twentieth", " thirtieth", " fortieth", " fiftieth", " sixtieth", " seventieth", " eightieth", " ninetieth");
+$GLOBALS['triplets'] = array( "", " thousand", " million", " billion", " trillion", " quadrillion", " quintillion", " sextillion", " septillion", " octillion", " nonillion");
+$GLOBALS['placevals'] = array( "", "tenth", "hundredth", "thousandth", "ten-thousandth", "hundred-thousandth", "millionth", "ten-millionth", "hundred-millionth", "billionth");
+
 /**
  * Generate the question index for a single or multipart question for feedback.
  *
@@ -105,6 +116,9 @@ function ohm_getfeedbackbasic($stuanswers,
             $questionIndex => [
                 'correctness' => 'correct',
                 'feedback' => $correctFeedback,
+                'failsafe_data' => [
+                    'incorrect_feedback' => $incorrectFeedback
+                ],
             ],
         ];
     } else {
@@ -112,7 +126,10 @@ function ohm_getfeedbackbasic($stuanswers,
             $questionIndex => [
                 'correctness' => 'incorrect',
                 'feedback' => $incorrectFeedback,
-            ]
+                'failsafe_data' => [
+                    'correct_feedback' => $correctFeedback,
+                ],
+            ],
         ];
     }
 }

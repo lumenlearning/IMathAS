@@ -1,16 +1,19 @@
 /*General settings - fonts, overall page background, etc*/
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700);
+@import url(https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap);
+
+:root {
+  --indigo-500: #5367EA;
+  --indigo-600: #4252BB;
+  --primary-text: #202325;
+  --white: #FFFFFF;
+}
 
 body {
 	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
 	font-size: 14px;
-	/*line-height: 1.4em;*/
-	background-color: #fff;
-	/*background-color:#F5F2ED;*/
-	/*background-image:url(../img/simplebg.png);*/
-	/*background-position:center top;*/
-	/*background-repeat:repeat-y;*/
+	background-color: var(--white);
 	padding: 0;
 	margin: 0;
 }
@@ -388,13 +391,88 @@ div.todoquestion {
 	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
 	font-size: 15px;
 }
+
 div.question {
-	font-family: "Open Sans", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
-	font-size: 15px;
-	background-color: #F7FCFF;
-	border: 1px solid #C3D4DD;
-	line-height: 1.4em;
+  background-color: var(--white);
+	border: none;
+	font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+	line-height: 1.4;
 }
+
+/* Intro paragraph of question gets larger font. */
+div.question > div:first-child > p:first-child {
+  font-size: 20px;
+}
+
+/* 
+* Submit Button Styles Begin
+* The submit button is styled to match the Lumen One primary button.
+*/
+div.question > .btn[value="Submit"] {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  align-content: center;
+  background: var(--indigo-500);
+  border: 2px solid var(--indigo-500);
+  border-radius: 10px;
+  color: var(--white);
+  cursor: pointer;
+  display: block;
+  font-family: 'Public Sans';
+  font-size: 16px;
+  font-weight: 700;
+  gap: 10px;
+  height: auto;
+  justify-content: center;
+  margin: 0;
+  outline: 2px solid transparent;
+  padding: 13px 20px;
+  position: relative;
+  right: 2px;
+  text-decoration: none;
+  transition: background 250ms ease-in-out, transform 150ms ease;
+  white-space: normal;
+  
+}
+div.question > .btn[value="Submit"]:hover, 
+div.question > .btn[value="Submit"]:focus {
+  background: var(--indigo-600)
+}
+
+div.question > .btn[value="Submit"]:focus-visible {
+  box-shadow: 0px 0px 0px 4px #FFFFFF;
+  outline: 2px solid #FFFFFF;
+}
+
+div.question > .btn[value="Submit"]:active {
+  transform: scale(0.99);
+}
+/* Submit Button Styles End */
+
+/* START: Styles for Hint and Show Answer link-style buttons */
+input[type=button].sabtn, button:not(.btn) {
+	color: var(--primary-text);
+	background-color: var(--white);
+	border: none;
+  cursor: pointer;
+  font-family: Public Sans;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration-line: underline;
+}
+
+/* Show Answer buttons need a bit of spacing from their answers 
+* (and from one another) if stacked vertically. Hint buttons are 
+* already in a <p> tag so they don't need it.
+*/
+input[type=button].sabtn {
+  margin-bottom: 20px;
+}
+
+/* END: Styles for Hint and Show Answer link-style buttons */
+
+
 div.inset {
 	margin-right: 0px;
 }
@@ -1312,3 +1390,4 @@ div.itemhdr div.title {
 		display: none;
 	}
 }
+
