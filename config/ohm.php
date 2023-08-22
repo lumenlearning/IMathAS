@@ -251,9 +251,6 @@ $CFG['showcalculator'] = [
 ];
 
 $CFG['LTI']['autoreg'] = true;
-$CFG['LTI']['canvas/oidc/prod'] = 'sso.canvaslms.com';
-$CFG['LTI']['canvas/oidc/beta'] = 'sso.beta.canvaslms.com';
-$CFG['LTI']['canvas/oidc/test'] = 'sso.test.canvaslms.com';
 
 // Debug logging
 $GLOBALS['ENABLE_SCORE_DEBUG'] = 'true' == getenv('ENABLE_SCORE_DEBUG');
