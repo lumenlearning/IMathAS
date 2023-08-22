@@ -120,66 +120,83 @@ function getApprovalEmailForNonLumenCustomer(string $firstName,
     $sanitizedUsername = Sanitize::encodeStringForDisplay($username);
 
     return "
-<p>
-    Hi ${sanitizedName},
-</p>
+      <p>
+        Hi ${sanitizedName},
+      </p>
 
-<p>
-	Welcome to Lumen OHM! Your instructor access has been approved. Login with
-	your username ${sanitizedUsername} and password at
-	<a href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
-	to get started today.
-</p>
+      <p>
+          Welcome to Lumen Learning's Online Homework Manager (aka OHM).
+          Your instructor access has been approved. 
+          Login with your username ${sanitizedUsername} and password at 
+          <a href='${GLOBALS['basesiteurl'] }'>ohm.lumenlearning.com</a> to get started.
+      </p>
 
-<p>
-    These resources can help orient you to using OHM:
-</p>
+      <p>
+          The following resources can help guide and support you as you start to explore OHM:
+      </p>
 
-<p>
-	<ul>
-		<li>
-		    <strong>Startup Guide:</strong> step-by-step instructions on the
-		    basics of course creation, adding homework, quizzes, activities, and
-		    tests.
-		</li>
-		<ul>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>Download the PDF</a></li>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>Watch the Video Training Series</a></li>
-		</ul>
-	</ul>
-</p>
+      <p>
+        <ul>
+          <li>
+            <p>
+              <strong>
+                <a 
+                  href='https://support.lumenlearning.com/hc/en-us/articles/360049502553-OHM-Faculty-StartUp-Guide' 
+                  target='_blank'> Start Up Guide</a>:
+              </strong> 
+              includes step-by-step instructions on the basics of course creation, assigning 
+              homework, and adding quizzes, activities, and tests.       
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>
+                <a 
+                  href='https://www.youtube.com/playlist?list=PL7Xv4ZtgRLGRFw9yP-YPJaFjUCG43jT2i' 
+                  target='_blank'>OHM Video Guides</a>:
+              </strong>
+               a compilation of short videos offering tutorials on effectively navigating and 
+               utilizing OHM's features.
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>
+                <a 
+                  href='https://support.lumenlearning.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide' 
+                  target='_blank'>Complete User Guide</a>:
+              </strong> 
+              includes more detailed information about features and functionality found in OHM, 
+              including guidance for course creation, course management, LMS integration, and more.
+            </p>
+          </li>
+        </ul>
+      </p>
 
-<p>
-    <ul>
-        <li>
-            <strong>Complete User Guide:</strong> more detailed information
-            about every feature of OHM including course creation, course
-            management, LMS integrations and more.
-        </li>
-		<ul>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>View the entire OHM User Guide.</a></li>
-		</ul>
-    </ul>
-</p>
+      <p>
+        <strong>
+          The standard pricing of just $35 per student includes full use of the courseware.
+        </strong> This gives your students access to the etext, online homework, and other 
+        learning content. Students can pay that fee by purchasing access through their bookstore 
+        or directly through Lumen Learning. Additionally, if you're interested, we can work with 
+        you to set up a course materials fee or institution/department pay.
+      </p>
+      <p>
+        When you are ready to have students enroll in your course, we'll connect about how to 
+        handle payment. If you need additional support, please contact us 
+          <a 
+            href='https://support.lumenlearning.com/hc/en-us/requests/new' 
+            target='_blank'>here</a>.
+      </p>
+      <p>
+        We appreciate your interest in Lumen Learning OHM and look forward to partnering with you 
+        to provide your students with affordable and effective course materials.
+      </p>
 
-<p>
-    As you explore OHM and begin building courses, we’ll check in on your
-    progress. Our standard pricing is just $25 per student for full use of
-    courseware, etext, online homework, and other learning content. Typically
-    this is handled through the bookstore, via a course materials fee, or by
-    students paying Lumen directly. Your institution may have an agreement in
-    place to cover this cost for your students. When you’re ready to enroll
-    students, we’ll confirm how to handle payment. Learn more about payment
-    options
-    <a target='_blank' href='https://lumenlearning.com/how/payment-options/'>here</a>.
-</p>
-
-<p>
-    We appreciate your interest in Open Educational Resources (OER) and look
-    forward to partnering with you to create affordable and effective math
-    courses. We welcome you to the Lumen OHM community!
-</p>
-";
+      <p>
+        Thanks.
+      </p>
+  ";
 }
 
 
@@ -198,60 +215,67 @@ function getApprovalEmailForLumenCustomer(string $firstName,
     $sanitizedUsername = Sanitize::encodeStringForDisplay($username);
 
     return "
-    <p>
-      Hi ${sanitizedName},
-    </p>
+      <p>
+        Hi ${sanitizedName},
+      </p>
 
-    <p>
-        Welcome to Lumen Learning's Online Homework Manager (aka OHM). Your instructor access has been approved. Login with your  username ${sanitizedUsername} and password at 
-        <a href='${GLOBALS['basesiteurl'] }'>ohm.lumenlearning.com</a> to get started.
-    </p>
+      <p>
+          Welcome to Lumen Learning's Online Homework Manager (aka OHM). Your instructor access 
+          has been approved. Login with your  username ${sanitizedUsername} and password at 
+          <a href='${GLOBALS['basesiteurl'] }'>ohm.lumenlearning.com</a> to get started.
+      </p>
 
-    <p>
-        The following resources can help guide and support you as you start to explore OHM:
-    </p>
+      <p>
+          The following resources can help guide and support you as you start to explore OHM:
+      </p>
 
-    <p>
-      <ul>
-        <li>
-          <p>
-            <strong>
-              <a 
-                href='https://support.lumenlearning.com/hc/en-us/articles/360049502553-OHM-Faculty-StartUp-Guide' 
-                target='_blank'> Start Up Guide</a>:
-            </strong> includes step-by-step instructions on the basics of course creation, assigning homework, and adding quizzes, activities and tests.       
-          </p>
-        </li>
-        <li>
-          <p>
-            <strong>
-              <a 
-                href='https://www.youtube.com/playlist?list=PL7Xv4ZtgRLGRFw9yP-YPJaFjUCG43jT2i' 
-                target='_blank'>OHM Video Guides</a>:
-            </strong> a compilation of short videos offering tutorials on effectively navigating and utilizing OHM's features.
-          </p>
-        </li>
-        <li>
-          <p>
-            <strong>
-              <a 
-                href='https://support.lumenlearning.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide' 
-                target='_blank'>Complete User Guide</a>:
-            </strong> includes more detailed information about features and functionality found in OHM, including guidance for course creation, course management, LMS integration, and more.
-          </p>
-        </li>
-      </ul>
-    </p>
+      <p>
+        <ul>
+          <li>
+            <p>
+              <strong>
+                <a 
+                  href='https://support.lumenlearning.com/hc/en-us/articles/360049502553-OHM-Faculty-StartUp-Guide' 
+                  target='_blank'> Start Up Guide</a>:
+              </strong> includes step-by-step instructions on the basics of course creation, 
+              assigning homework, and adding quizzes, activities and tests.       
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>
+                <a 
+                  href='https://www.youtube.com/playlist?list=PL7Xv4ZtgRLGRFw9yP-YPJaFjUCG43jT2i' 
+                  target='_blank'>OHM Video Guides</a>:
+              </strong> a compilation of short videos offering tutorials on effectively navigating 
+              and utilizing OHM's features.
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>
+                <a 
+                  href='https://support.lumenlearning.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide' 
+                  target='_blank'>Complete User Guide</a>:
+              </strong> includes more detailed information about features and functionality found 
+              in OHM, including guidance for course creation, course management, 
+              LMS integration, and more.
+            </p>
+          </li>
+        </ul>
+      </p>
 
-    <p>
-        We appreciate your interest in Lumen Learning OHM and look forward to partnering with you to provide your students with affordable and effective course materials. Welcome to the Lumen community!
-    </p>
+      <p>
+          We appreciate your interest in Lumen Learning OHM and look forward to partnering with you 
+          to provide your students with affordable and effective course materials. 
+          Welcome to the Lumen community!
+      </p>
 
-    <p>
-      Thank you,<br/>
-      The Lumen Team
-    </p>
-";
+      <p>
+        Thank you,<br/>
+        The Lumen Team
+      </p>
+  ";
 }
 
 
