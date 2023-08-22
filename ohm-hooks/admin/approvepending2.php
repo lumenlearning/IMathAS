@@ -198,53 +198,59 @@ function getApprovalEmailForLumenCustomer(string $firstName,
     $sanitizedUsername = Sanitize::encodeStringForDisplay($username);
 
     return "
-<p>
-    Hi ${sanitizedName},
-</p>
+    <p>
+      Hi ${sanitizedName},
+    </p>
 
-<p>
-	Welcome to Lumen OHM! Your instructor access has been approved. Login with
-	your username ${sanitizedUsername} and password at
-	<a href='${GLOBALS['basesiteurl']}'>ohm.lumenlearning.com</a>
-	to get started today.
-</p>
+    <p>
+        Welcome to Lumen Learning's Online Homework Manager (aka OHM). Your instructor access has been approved. Login with your  username ${sanitizedUsername} and password at 
+        <a href='${GLOBALS['basesiteurl'] }'>ohm.lumenlearning.com</a> to get started.
+    </p>
 
-<p>
-These resources can help orient you to using OHM:
-</p>
+    <p>
+        The following resources can help guide and support you as you start to explore OHM:
+    </p>
 
-<p>
-    <ul>
+    <p>
+      <ul>
         <li>
-            <strong>Startup Guide:</strong> step-by-step instructions on the
-            basics of course creation, adding homework, quizzes, activities and
-            tests.
+          <p>
+            <strong>
+              <a 
+                href='https://support.lumenlearning.com/hc/en-us/articles/360049502553-OHM-Faculty-StartUp-Guide' 
+                target='_blank'> Start Up Guide</a>:
+            </strong> includes step-by-step instructions on the basics of course creation, assigning homework, and adding quizzes, activities and tests.       
+          </p>
         </li>
-		<ul>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115010623688-Faculty-Quick-Start-Guide-Lumen-OHM'>Download the PDF</a></li>
-			<li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/articles/115015412808-Lumen-OHM-Training-Videos'>Watch the Video Training Series</a></li>
-		</ul>
-		<li>
-            <strong>Complete User Guide:</strong> more detailed information
-            about every feature of OHM including course creation, course
-            management, LMS integrations and more.
+        <li>
+          <p>
+            <strong>
+              <a 
+                href='https://www.youtube.com/playlist?list=PL7Xv4ZtgRLGRFw9yP-YPJaFjUCG43jT2i' 
+                target='_blank'>OHM Video Guides</a>:
+            </strong> a compilation of short videos offering tutorials on effectively navigating and utilizing OHM's features.
+          </p>
         </li>
-        <ul>
-            <li><a target='_blank' href='https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide'>View the entire OHM User Guide</a></li>
-        </ul>
-    </ul>
-</p>
+        <li>
+          <p>
+            <strong>
+              <a 
+                href='https://support.lumenlearning.com/hc/en-us/categories/115000706447-OHM-Faculty-User-Guide' 
+                target='_blank'>Complete User Guide</a>:
+            </strong> includes more detailed information about features and functionality found in OHM, including guidance for course creation, course management, LMS integration, and more.
+          </p>
+        </li>
+      </ul>
+    </p>
 
-<p>
-    We appreciate your interest in Open Educational Resources (OER) and look
-    forward to partnering with you to create affordable and effective math
-    courses. We welcome you to the Lumen OHM community!
-</p>
+    <p>
+        We appreciate your interest in Lumen Learning OHM and look forward to partnering with you to provide your students with affordable and effective course materials. Welcome to the Lumen community!
+    </p>
 
-<p>
-	Thank you,<br/>
-	The Lumen Team
-</p>
+    <p>
+      Thank you,<br/>
+      The Lumen Team
+    </p>
 ";
 }
 
