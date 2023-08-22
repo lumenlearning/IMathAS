@@ -139,7 +139,7 @@ function getApprovalEmailForNonLumenCustomer(string $firstName,
 	<ul>
 		<li>
 		    <strong>Startup Guide:</strong> step-by-step instructions on the
-		    basics of course creation, adding homework, quizzes, activities and
+		    basics of course creation, adding homework, quizzes, activities, and
 		    tests.
 		</li>
 		<ul>
