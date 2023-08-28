@@ -174,7 +174,7 @@ if (isset($_GET['launch'])) {
     }
 
 	require_once("$curdir/includes/userprefs.php");
-	generateuserprefs();
+	generateuserprefs($userid);
 
 	$stm = $DBH->prepare('UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id');
 	$stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
@@ -1735,7 +1735,7 @@ if (!empty($_SESSION['userid'])) {	//check that same userid, and that we're not 
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
 			require_once("$curdir/includes/userprefs.php");
-			generateuserprefs(true);
+			generateuserprefs($userid);
 		}
 		$createnewsession = false;
 	}
@@ -1901,7 +1901,7 @@ if (isset($_GET['launch'])) {
     }
 
 	require_once("$curdir/includes/userprefs.php");
-	generateuserprefs();
+	generateuserprefs($userid);
 
 	$now = time();
 	$stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id");
@@ -3048,7 +3048,7 @@ if (!empty($_SESSION['userid'])) {
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
 			require_once("$curdir/includes/userprefs.php");
-			generateuserprefs(true);
+			generateuserprefs($userid);
 		}
 		$createnewsession = false;
 	}
