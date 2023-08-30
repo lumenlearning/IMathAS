@@ -655,9 +655,9 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 	width: 84px;
 }
 
-/* when answered, removes preview button after the scorebox icon */
+/* moves preview button after the scorebox icon */
 .question table tbody tr td .scoreboxicon + input.btn {
-	display: none;
+	transform: translate(12px, 8px);
 }
 
 /* moves the feedback text */
@@ -686,6 +686,19 @@ in relation to the feedback text above */
 	top: -30px;
 }
 /* END: Table content styles */
+
+/* START: Preview button style to link-style  */
+div.question input.btn[value="Preview"] {
+	color: var(--primary-text);
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	font-family: Public Sans;
+	font-size: 16px;
+	font-weight: 700;
+	text-decoration-line: underline;
+  }
+/* END: Preview button style to link-style  */
 
 /* START: Submit button styles */
 div.question > .btn[value="Submit"] {
