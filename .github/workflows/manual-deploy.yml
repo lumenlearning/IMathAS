@@ -12,7 +12,6 @@ on:
         - dev-exemplar
         - staging
         - staging-exemplar
-        - prod-exemplar
 jobs:
   beanstalk-deploy:
     name: Beanstalk Deployment

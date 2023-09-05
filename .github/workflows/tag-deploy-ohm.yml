@@ -1,0 +1,15 @@
+name: ohm-tag-deploy
+on:
+  push:
+    tags:
+    - release/ohm/*
+
+jobs:
+  beanstalk-deploy:
+    name: Beanstalk Deployment
+    uses: ./.github/workflows/shared-deploy.yml
+    with:
+      environment: prod
+      ecr_repository: ohm-beanstalk
+    secrets:
+      aws_user_account: ${{ secrets.AWS_USER_ACCOUNT }}

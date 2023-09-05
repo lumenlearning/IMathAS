@@ -4254,7 +4254,14 @@ function getfeedbacktxt($stu,$fbtxt,$ans) {
         $anss = explode(' or ', $ans);
         foreach ($anss as $ans) {
             if ($stu==$ans) {
+                // ####### Begin OHM-specific changes ##################################################################
+                if ($fbtxt[$stu] == '') { // add class to enable suppression styling if feedback has no text
+                  $out = '<div class="feedbackwrap no-text correct"><img src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> ';
+                } else {
                 $out = '<div class="feedbackwrap correct"><img src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> ';
+                };
+                // ####### End OHM-specific changes ##################################################################
+
                 if (isset($fbtxt[$stu])) {
                     $out .= $fbtxt[$stu];
                 }
