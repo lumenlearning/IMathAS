@@ -174,7 +174,7 @@ if (isset($_GET['launch'])) {
     }
 
 	require_once("$curdir/includes/userprefs.php");
-	generateuserprefs();
+	generateuserprefs($userid);
 
 	$stm = $DBH->prepare('UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id');
 	$stm->execute(array(':lastaccess'=>$now, ':id'=>$userid));
@@ -776,7 +776,9 @@ if (isset($_GET['launch'])) {
 			}
 			if (!empty($_REQUEST['lis_person_contact_email_primary'])) {
 				$email = $_REQUEST['lis_person_contact_email_primary'];
-			} else {
+			} else if (!empty($userrow['email'])) {
+                $email = $userrow['email']; // keep existing if we have it and no new one
+            } else {
 				$email = 'none@none.com';
 			}
 			if ($userrow['FirstName'] === null) { //accidentally deleted the imas_users record!  Restore it
@@ -1394,7 +1396,7 @@ if ($stm->rowCount()==0) {
 			if (!$foundaid) {
                 if ($aidsourcecid == -1) { // can't proceed further in this case
                     $diaginfo = "(Debug info: 2b-{$_SESSION['place_aid']})";
-                    reporterror(_("The originally linked assignment does not appear to exist anymore.")." $diaginfo");
+                    reporterror(_("The originally linked assignment does not appear to exist anymore.")." $diaginfo");    
                 }
 				//aid is in source course.  Let's look and see if there's an assessment in destination with the same title.
 				//this handles cases where an assessment was linked in from elsewhere and manually copied
@@ -1733,7 +1735,7 @@ if (!empty($_SESSION['userid'])) {	//check that same userid, and that we're not 
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
 			require_once("$curdir/includes/userprefs.php");
-			generateuserprefs(true);
+			generateuserprefs($userid);
 		}
 		$createnewsession = false;
 	}
@@ -1899,7 +1901,7 @@ if (isset($_GET['launch'])) {
     }
 
 	require_once("$curdir/includes/userprefs.php");
-	generateuserprefs();
+	generateuserprefs($userid);
 
 	$now = time();
 	$stm = $DBH->prepare("UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id");
@@ -3046,7 +3048,7 @@ if (!empty($_SESSION['userid'])) {
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
 			require_once("$curdir/includes/userprefs.php");
-			generateuserprefs(true);
+			generateuserprefs($userid);
 		}
 		$createnewsession = false;
 	}

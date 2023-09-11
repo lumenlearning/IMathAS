@@ -121,7 +121,7 @@ echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=112420" type
 //assessment_min.js bundles: general.js, mathjs.js, AMhelpers.js, confirmsubmit.js, drawing.js, and eqntips.js
 /*
 echo '<script src="' . $imasroot . '/javascript/general.js?v=042220" type="text/javascript"></script>';
-echo '<script src="' . $imasroot . '/javascript/mathjs.js?v=033120" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/mathjs.js?v=20230729" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/AMhelpers.js?v=060920" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/confirmsubmit.js?v=031018" type="text/javascript"></script>';
 echo '<script src="' . $imasroot . '/javascript/drawing.js?v=042920" type="text/javascript"></script>';

@@ -179,10 +179,15 @@ if ($haslogin && !$hasusername) {
         }
         $_POST['usedetected'] = true;
     } else {
-        $stm = $DBH->prepare("SELECT id,password,rights,groupid,jsondata,mfa FROM imas_users WHERE SID=:SID");
+        $query = "SELECT id,password,rights,groupid";
+        if (strpos(basename($_SERVER['PHP_SELF']), 'upgrade.php') === false) {
+            $query .= ',jsondata,mfa';
+        }
+        $query .= " FROM imas_users WHERE SID=:SID";
+        $stm = $DBH->prepare($query);
         $stm->execute(array(':SID' => $_POST['username']));
         $line = $stm->fetch(PDO::FETCH_ASSOC);
-        if ($line != false) {
+        if ($line != false && isset($line['jsondata'])) {
             $json_data = json_decode($line['jsondata'], true);
             if (isset($json_data['login_blockuntil']) && time() < $json_data['login_blockuntil']) {
                 echo _('Too many invalid logins - please wait a minute before trying again, or use the forgot password link to reset your password');
@@ -243,7 +248,7 @@ if ($haslogin && !$hasusername) {
                 $_SESSION['static_ok'] = 1;
             }
             require_once "$curdir/includes/userprefs.php";
-            generateuserprefs();
+            generateuserprefs($userid);
 
             $_SESSION['tzoffset'] = $_POST['tzoffset'];
             if (!empty($_POST['tzname']) && strpos(basename($_SERVER['PHP_SELF']), 'upgrade.php') === false) {
@@ -422,7 +427,7 @@ if ($hasusername) {
         //userprefs are missing!  They should be defined from initial session setup
         //we should never be here. But in case we are, reload prefs
         require_once "$curdir/includes/userprefs.php";
-        generateuserprefs(true);
+        generateuserprefs($userid);
     }
     if (isset($_SESSION['userprefs']['usertheme']) && strcmp($_SESSION['userprefs']['usertheme'], '0') != 0) {
         $coursetheme = $_SESSION['userprefs']['usertheme'];
@@ -539,7 +544,7 @@ if ($hasusername) {
                 'index.php', 'gbviewassess.php', 'autosave.php', 'endassess.php', 'getscores.php', 'livepollstatus.php', 'loadassess.php',
                 'loadquestion.php', 'scorequestion.php', 'startassess.php', 'uselatepass.php', 'gbloadassess.php', 'gbloadassessver.php',
                 'gbloadquestionver.php', 'getquestions.php', 'savework.php', 'posts.php', 'thread.php', 'postsbyname.php',
-                'savetagged.php', 'recordlikes.php', 'listlikes.php', 'gbloadtexts.php');
+                'savetagged.php', 'recordlikes.php', 'listlikes.php', 'gbloadtexts.php', 'rectrack.php');
             //call hook, if defined
             if (function_exists('allowedInAssessment')) {
                 $allowedinLTI = array_merge($allowedinLTI, allowedInAssessment());
