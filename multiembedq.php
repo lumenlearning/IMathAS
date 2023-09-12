@@ -204,7 +204,14 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 		'jwt' => $jwtstring
 	);
 	echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify('.json_encode($scoremessage,JSON_HEX_TAG|JSON_INVALID_UTF8_IGNORE).'), "*");</script>';
-	exit;
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  // send 'tryItSubmit' postMessage so Valkyrie can create FullStory event
+  echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify({ subject: "tryItSubmit", qid: '.$qids[$qn].' }), "*");</script>';
+	// ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+  
+  exit;
 }
 
 
