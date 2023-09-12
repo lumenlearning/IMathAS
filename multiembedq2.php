@@ -369,7 +369,7 @@ for ($qn=0; $qn < $numq; $qn++) {
     echo '</div></div>';
     if (!$state['jssubmit']) {
         echo '<p>';
-        echo '<button type=button onclick="submitq('.$qn.')" class="primary">'._("Submit").'</button>';
+        echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary">'._("Submit").'</button>';
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
