@@ -2129,10 +2129,14 @@ function toggleinlinebtn(n,p){ //n: target, p: click el
 		el.style.display="";
 		el.setAttribute("aria-hidden",true);
 		btn.setAttribute("aria-expanded",false);
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
     // sends tryItHint message to Valkyrie can create FullStory event
     window.parent.postMessage( JSON.stringify({
       subject: "tryItHint"
     }), "*");
+    // ####### End OHM-specific changes ##################################################################
+    // ####### End OHM-specific changes ##################################################################
 	} else {
 		el.style.display="none";
 		el.setAttribute("aria-hidden",false);
