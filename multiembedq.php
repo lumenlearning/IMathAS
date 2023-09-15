@@ -218,7 +218,11 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 
 $flexwidth = true; //tells header to use non _fw stylesheet
 $placeinhead = '<style type="text/css">html,body {margin:0px;} div.question {width: auto;} div.review {width: auto; margin-top: 5px;} body {height:auto;}</style>';
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
 $placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers.js" type="text/javascript"></script>';
+// ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################
 if ($targetid != '') {
 	$placeinhead .= '<script type="text/javascript">
 	function sendresizemsg() {
