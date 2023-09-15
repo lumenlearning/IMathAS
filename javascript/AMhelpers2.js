@@ -2133,7 +2133,8 @@ function toggleinlinebtn(n,p){ //n: target, p: click el
     // ####### Begin OHM-specific changes ##################################################################
     // sends tryItHint message to Valkyrie can create FullStory event
     window.parent.postMessage( JSON.stringify({
-      subject: "tryItHint"
+      subject: "tryItHint",
+      hintId: n
     }), "*");
     // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
