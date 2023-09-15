@@ -30,16 +30,16 @@ function showerrors(errors) {
   }
 }
 
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+// adds qid as param to send 'tryItSubmit' postMessage, so Valkyrie can create a FullStory event
 function submitq(qn, qid) {
-  // ####### Begin OHM-specific changes ##################################################################
-  // ####### Begin OHM-specific changes ##################################################################
-  // send 'tryItSubmit' postMessage so Valkyrie can create FullStory event
   window.parent.postMessage(
     JSON.stringify({ subject: 'tryItSubmit', qid: qid }),
     '*'
   )
-  // ####### End OHM-specific changes ##################################################################
-  // ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################
   $('#results' + qn).html(_('Submitting...'))
   var data = dopresubmit(qn, true)
   data.append('state', document.getElementById('state').value)
