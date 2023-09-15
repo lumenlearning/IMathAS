@@ -744,7 +744,7 @@ div.question > .btn[value="Submit"]:active {
 /* END: Submit button styles */
 
 /* START: Styles for Hint and Show Answer link-style buttons */
-input[type=button].sabtn, button:not(.btn) {
+input[type=button].sabtn, p > button:only-child {
 	color: var(--primary-text);
 	background-color: var(--white);
 	border: none;
@@ -1683,4 +1683,3 @@ div.itemhdr div.title {
 		display: none;
 	}
 }
-
