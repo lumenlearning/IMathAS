@@ -327,7 +327,7 @@ export default {
             // Only one "part" listed, but multiple input boxes.
             // Probably conditional. Disable all boxes
             regex = new RegExp('^(qn|tc|qs)(' + (this.qn) + '\\b|' + (this.qn + 1) + '\\d{3}\\b)');
-          } else if (pn === 0) {
+          } else if (pn == 0) {
             regex = new RegExp('^(qn|tc|qs)(' + (this.qn) + '\\b|' + ((this.qn + 1) * 1000 + pn * 1) + '\\b)');
           } else {
             regex = new RegExp('^(qn|tc|qs)' + ((this.qn + 1) * 1000 + pn * 1) + '\\b');
@@ -504,7 +504,6 @@ input.red {
   border-radius: 4px 0 0 4px;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  height: 20px;
 }
 .scoremark.red {
   border-color: #900;

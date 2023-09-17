@@ -430,6 +430,6 @@ class NTupleScorePart implements ScorePart
                 $out[] = implode(' or ', $sub);
             }
         }
-        implode(',', $out);
+        return implode(',', $out);
     }
 }
