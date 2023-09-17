@@ -6,7 +6,7 @@
 ini_set("max_execution_time", "600");
 
 
-require("../init.php");
+require_once "../init.php";
 
 if ($myrights<100) {
 	echo 'You do not have the authority for this action';
@@ -36,7 +36,7 @@ $curBreadcrumb .= ' &gt; Cross-Course Results';
 
 function reporterror($err) {
 	extract($GLOBALS, EXTR_SKIP | EXTR_REFS);
-	require("../header.php");
+	require_once "../header.php";
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Results</h1>';
     // #### Begin OHM-specific code #####################################################
@@ -53,12 +53,12 @@ function reporterror($err) {
     // #### End OHM-specific code #######################################################
     // #### End OHM-specific code #######################################################
 	echo '<p class=noticetext>'.$err.'</p>';
-	require("../footer.php");
+	require_once "../footer.php";
 	exit;
 }
 
 if (empty($_REQUEST['basecourse'])) {
-	require("../header.php");
+	require_once "../header.php";
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Results</h1>';
     // #### Begin OHM-specific code #####################################################
@@ -82,7 +82,7 @@ if (empty($_REQUEST['basecourse'])) {
 	echo '<p>Output format: <select name=output><option value=html selected>Online</option><option value=csv>CSV download</option></select></p>';
 	echo '<p><button type=submit>Generate</button></p>';
 	echo '</form>';
-	require("../footer.php");
+	require_once "../footer.php";
 	exit;
 }
 
@@ -268,7 +268,7 @@ foreach ($assessdata as $aid=>$ainfo) {
 }
 
 if ($_REQUEST['output']=='html') {
-	require("../header.php");
+	require_once "../header.php";
 	echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<h1>Cross-Course Assessment Results</h1>';
     // #### Begin OHM-specific code #####################################################
@@ -304,7 +304,7 @@ if ($_REQUEST['output']=='html') {
 		'days'=>$days,
 		'basecourse'=>$basecourse));
 	echo '<p><a href="crosscoursedata.php?'.$qs.'">Download as CSV</a></p>';
-	require("../footer.php");
+	require_once "../footer.php";
 } else {
 	header('Content-type: text/csv');
 	header("Content-Disposition: attachment; filename=\"gradebook-$cid.csv\"");

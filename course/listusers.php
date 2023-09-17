@@ -5,7 +5,7 @@
 //(c) 2006 David Lippman
 
 /*** master php includes *******/
-require("../init.php");
+require_once "../init.php";
 
 
 /*** pre-html data manipulation, including function code *******/
@@ -79,7 +79,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 					$_POST['code'][$stuid] = null;
 				}
             }
-            require('../includes/setSectionGroups.php');
+            require_once '../includes/setSectionGroups.php';
 			foreach ($keys as $stuid) {
 				$stm = $DBH->prepare("UPDATE imas_students SET section=:section,code=:code WHERE id=:id AND courseid=:courseid ");
                 $stm->execute(array(':section'=>$_POST['sec'][$stuid], ':code'=>$_POST['code'][$stuid], ':id'=>$stuid, ':courseid'=>$cid));
@@ -141,7 +141,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null,
 					":created_at"=>time()
 					));
-                require('../includes/setSectionGroups.php');
+                require_once '../includes/setSectionGroups.php';
                 setSectionGroups($id, $cid, $_POST['section']);
 				header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid&r=" . Sanitize::randomQueryStringParam());
 				exit;
@@ -188,7 +188,7 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 					":section"=>trim($_POST['section'])!=''?trim($_POST['section']):null,
 					":code"=>trim($_POST['code'])!=''?trim($_POST['code']):null,
 					":created_at"=>time()));
-                require('../includes/setSectionGroups.php');
+                require_once '../includes/setSectionGroups.php';
                 setSectionGroups($newuserid, $cid, $_POST['section']);
 				header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid&r=" . Sanitize::randomQueryStringParam());
 				exit;
@@ -309,10 +309,10 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 				$stm = $DBH->prepare("UPDATE imas_students SET locked=:locked WHERE userid=:userid AND courseid=:courseid AND locked=0");
 				$stm->execute(array(':locked'=>$locked, ':userid'=>$_GET['uid'], ':courseid'=>$cid));
             }
-            require('../includes/setSectionGroups.php');
+            require_once '../includes/setSectionGroups.php';
             setSectionGroups($_GET['uid'], $cid, $section);
 
-			require('../includes/userpics.php');
+			require_once '../includes/userpics.php';
 
 			// $_FILES[]['tmp_name'] is not user provided. This is safe.
 			if (is_uploaded_file($_FILES['stupic']['tmp_name'])) {
@@ -332,13 +332,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			}
 
 
-			require("../header.php");
+			require_once "../header.php";
 			echo '<div class="breadcrumb">'.$curBreadcrumb.'</div>';
 			echo '<div id="headerlistusers" class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
 			echo "<p>User info updated. ";
 			echo $msgout;
 			echo "</p><p><a href=\"listusers.php?cid=$cid\">OK</a></p>";
-			require("../footer.php");
+			require_once "../footer.php";
 
 			//header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/listusers.php?cid=$cid");
 			exit;
@@ -505,7 +505,7 @@ $placeinhead .= '<script type="text/javascript">$(function() {
   }
   </script>';
 
-require("../header.php");
+require_once "../header.php";
 $curdir = rtrim(dirname(__FILE__), '/\\');
 }
 /**** post-html data manipulation ******/
@@ -909,5 +909,5 @@ if ($overwriteBody==1) {
 	}
 }
 
-require("../footer.php");
+require_once "../footer.php";
 ?>

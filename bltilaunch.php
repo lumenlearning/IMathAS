@@ -62,7 +62,7 @@ $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
 // #### End OHM-specific code #######################################################
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['bltilaunch'])) {
-	require($CFG['hooks']['bltilaunch']);
+	require_once $CFG['hooks']['bltilaunch'];
 }
 
 $curdir = rtrim(dirname(__FILE__), '/\\');
@@ -91,9 +91,9 @@ if ($enablebasiclti!=true) {
 
 function reporterror($err) {
 	global $imasroot,$staticroot,$installname;
-	require("header.php");
+	require_once "header.php";
 	printf('<p>%s</p>', Sanitize::encodeStringForDisplay($err));
-	require("footer.php");
+	require_once "footer.php";
 	exit;
 }
 
@@ -246,7 +246,7 @@ if (isset($_GET['launch'])) {
 	$flexwidth = true;
 	$nologo = true;
 	$placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/jstz_min.js\" ></script>";
-	require("header.php");
+	require_once "header.php";
 	echo "<h3>Connecting to $installname</h3>";
     echo "<form id=\"postbackform\" method=\"post\" action=\"" . $imasroot . "/bltilaunch.php?launch=true\" ";
 	if ($_SESSION['ltiitemtype']==0 && $_SESSION['ltitlwrds'] != '') {
@@ -285,7 +285,7 @@ if (isset($_GET['launch'])) {
 	</script>
 	</form>
 	<?php
-	require("footer.php");
+	require_once "footer.php";
 	exit;
 
 } else if (isset($_GET['userinfo']) && isset($_SESSION['ltiuserid'])) {
@@ -434,7 +434,7 @@ if (isset($_GET['launch'])) {
 		$flexwidth = true;
 		$nologo = true;
 		$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
-		require("header.php");
+		require_once "header.php";
 		if (isset($infoerr)) {
 			echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
 		}
@@ -532,7 +532,7 @@ if (isset($_GET['launch'])) {
 			}
 		}
 		echo "</form>\n";
-		require("footer.php");
+		require_once "footer.php";
 		exit;
 
 	}
@@ -1006,7 +1006,7 @@ if ($stm->rowCount()==0) {
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
-					require("header.php");
+                    require_once "header.php";
 
 					$query = "SELECT DISTINCT ic.id,ic.name FROM imas_courses AS ic JOIN imas_teachers AS imt ON ic.id=imt.courseid ";
 					$query .= "AND imt.userid=:userid JOIN imas_assessments AS ia ON ic.id=ia.courseid ";
@@ -1094,7 +1094,7 @@ if ($stm->rowCount()==0) {
 						echo "<p><input type=\"submit\" value=\"Create a copy on $installname\"/> (this may take a few moments - please be patient)</p>";
 					}
 					echo "</form>";
-					require("footer.php");
+					require_once "footer.php";
 					exit;
 				}
 			} else {
@@ -1984,7 +1984,7 @@ if (isset($_GET['launch'])) {
 	$flexwidth = true;
 	$nologo = true;
 	$placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/jstz_min.js\" ></script>";
-	require("header.php");
+	require_once "header.php";
 	echo "<h3>Connecting to $installname</h3>";
     echo "<form id=\"postbackform\" method=\"post\" action=\"".$imasroot."/bltilaunch.php?launch=true\" ";
 	if ($_SESSION['ltiitemtype']==0 && $_SESSION['ltitlwrds'] != '') {
@@ -2021,7 +2021,7 @@ if (isset($_GET['launch'])) {
 	</script>
 	</form>
 	<?php
-	require("footer.php");
+	require_once "footer.php";
 	exit;
 
 } else if (isset($_GET['userinfo']) && isset($_SESSION['ltiuserid'])) {
@@ -2162,7 +2162,7 @@ if (isset($_GET['launch'])) {
 		$nologo = true;
 		$flexwidth = true;
 		$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
-		require("header.php");
+		require_once "header.php";
 		if (isset($infoerr)) {
 			echo '<p class=noticetext>'.Sanitize::encodeStringForDisplay($infoerr).'</p>';
 		}
@@ -2262,7 +2262,7 @@ if (isset($_GET['launch'])) {
 			}
 		}
 		echo "</form>\n";
-		require("footer.php");
+		require_once "footer.php";
 		exit;
 
 	}

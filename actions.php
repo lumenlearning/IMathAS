@@ -7,7 +7,7 @@
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['actions'])) {
-	require($CFG['hooks']['actions']);
+	require_once $CFG['hooks']['actions'];
 }
 
 require_once("includes/sanitize.php");
@@ -103,7 +103,7 @@ require_once("includes/sanitize.php");
         }
 
 		if ($error != '') {
-			require("header.php");
+			require_once "header.php";
 			if ($gb == '') {
 				echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; ",_("New User Signup"),"</div>\n";
 			}
@@ -115,7 +115,7 @@ require_once("includes/sanitize.php");
 			} else {
 				echo '<p><a href="forms.php?action=newuser">',_('Try Again'),'</a></p>';
 			}
-			require("footer.php");
+			require_once "footer.php";
 			exit;
 		}
 
@@ -146,7 +146,7 @@ require_once("includes/sanitize.php");
 			if ($stm->rowCount()>0) {
 				$nologo = true;
                 $_SESSION['newuserstart'] = time() - 10;
-				require("header.php");
+				require_once "header.php";
 				echo '<form method="post" action="actions.php?action=newuser&amp;confirmed=true'.$gb.'">';
 				echo '<input type="hidden" name="SID" value="'.Sanitize::encodeStringForDisplay($_POST['SID']).'" />';
 				echo '<input type="hidden" name="firstname" value="'.Sanitize::encodeStringForDisplay($_POST['firstname']).'" />';
@@ -166,7 +166,7 @@ require_once("includes/sanitize.php");
 				echo sprintf(_('If you are creating an account because you forgot your username, you can %s look up your username %s instead.'),'<a href="forms.php?action=lookupusername">','</a>'),'</p>';
 				echo '<input type="submit" value="',_('Create new account anyways'),'"/>';
 				echo '</form>';
-				require("footer.php");
+				require_once "footer.php";
 				exit;
 			}
 		}
@@ -203,18 +203,18 @@ require_once("includes/sanitize.php");
 			require_once("./includes/email.php");
 			send_email($_POST['email'], $sendfrom, $installname._(' Confirmation'), $message, array(), array(), 10);
 
-			require("header.php");
+			require_once "header.php";
 			if ($gb == '') {
 				echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; ",_("New User Signup"),"</div>\n";
 			}
 			echo '<div id="headerforms" class="pagetitle"><h1>',_('New User Signup'),'</h1></div>';
 			echo _("Registration recorded.  You should shortly receive an email with confirmation instructions.");
 			echo "<a href=\"$imasroot/index.php\">",_("Back to main login page"),"</a>\n";
-			require("footer.php");
+			require_once "footer.php";
 
 		} else {
 			$pagetitle = _('Account Created');
-			require("header.php");
+			require_once "header.php";
 			echo "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; ",_("New User Signup"),"</div>\n";
 			echo '<div id="headerforms" class="pagetitle"><h1>',_('New User Signup'),'</h1></div>';
 			echo "<p>",sprintf(_("Your account with username %s has been created.  If you forget your password, you can ask your instructor to reset your password or use the forgotten password link on the login page."),"<b>" . Sanitize::encodeStringForDisplay($_POST['SID']) . "</b>"),"</p>\n";
@@ -242,7 +242,7 @@ require_once("includes/sanitize.php");
 							$error = _('Incorrect enrollment key');
 						} else {
                             $_POST['ekey'] = $keylist[$p];
-                            require('./includes/setSectionGroups.php');
+                            require_once './includes/setSectionGroups.php';
 							if (count($keylist)>1) {
 								$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
 								$array = array(
@@ -274,7 +274,7 @@ require_once("includes/sanitize.php");
 
 
 			echo "<p>",sprintf(_("You can now %s return to the login page %s and login with your new username and password"),"<a href=\"" . $GLOBALS['basesiteurl'] . "/index.php\">","</a>"),"</p>";
-			require("footer.php");
+			require_once "footer.php";
 		}
 		//header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
 		exit;
@@ -286,13 +286,13 @@ require_once("includes/sanitize.php");
 		$stm->execute(array(':id'=>Sanitize::onlyInt($_GET['id'])));
 
 		if ($stm->rowCount()>0) {
-			require("header.php");
+			require_once "header.php";
 			echo sprintf(_("Confirmed.  Please %s Log In %s"),"<a href=\"index.php\">","</a>\n");
-			require("footer.php");
+			require_once "footer.php";
 		} else {
-			require("header.php");
+			require_once "header.php";
 			echo _("Error").".\n";
-			require("footer.php");
+			require_once "footer.php";
 		}
         exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="resetpw") {
@@ -333,7 +333,7 @@ require_once("includes/sanitize.php");
 					exit;
 				}
 				if (substr($email,0,7)==='BOUNCED') {
-					require("header.php");
+					require_once "header.php";
 					echo '<p>';
 					echo _('The email address on record for this username is invalid.').' ';
 					if ($myrights < 20) {
@@ -344,7 +344,7 @@ require_once("includes/sanitize.php");
 						echo $addr.'.';
 					}
 					echo '</p>';
-					require("footer.php");
+					require_once "footer.php";
 					exit;
 				}
 
@@ -367,7 +367,7 @@ require_once("includes/sanitize.php");
 				require_once("./includes/email.php");
 				send_email($email, $sendfrom, $installname._(' Password Reset Request'), $message, array(), array(), 10);
 
-				require("header.php");
+                require_once "header.php";
 				#### Begin OHM-specific changes ############################################################
 				#### Begin OHM-specific changes ############################################################
 				#### Begin OHM-specific changes ############################################################
@@ -390,7 +390,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 				if (function_exists('getInstructorSupport')) {
 					getInstructorSupport($rights);
 				}
-				require("footer.php");
+				require_once "footer.php";
 				exit;
 			} else {
 				echo _("Invalid Username"),".  <a href=\"index.php$gb\">",_("Try again"),"</a>";
@@ -521,7 +521,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		exit;
 	}
 
-	require("init.php");
+	require_once "init.php";
 	if (isset($_GET['action']) && $_GET['action']=="logout") {
 		$_SESSION = array();
 		if (isset($_COOKIE[session_name()])) {
@@ -604,10 +604,10 @@ If you still have trouble or the wrong email address is on file, contact your in
 		}
 		$pagetopper .= '<div id="headerforms" class="pagetitle"><h1>'._('Enroll in a Course').'</h1></div>';
 		if (empty($_POST['cid']) || !is_numeric($_POST['cid'])) {
-			require("header.php");
+			require_once "header.php";
 			echo $pagetopper;
 			echo _("Please include Course ID."),"  <a href=\"forms.php?action=enroll$gb\">",_("Try Again"),"</a>\n";
-			require("footer.php");
+			require_once "footer.php";
 			exit;
 		}
 
@@ -616,63 +616,63 @@ If you still have trouble or the wrong email address is on file, contact your in
 		$line = $stm->fetch(PDO::FETCH_ASSOC);
 
 		if ($line === false) {
-			require("header.php");
+			require_once "header.php";
 			echo $pagetopper;
 			echo _("Course not found."),"  <a href=\"forms.php?action=enroll$gb\">",_("Try Again"),"</a>\n";
-			require("footer.php");
+			require_once "footer.php";
 			exit;
 		} else if (($line['allowunenroll']&2)==2) {
-			require("header.php");
+			require_once "header.php";
 			echo $pagetopper;
 			echo _("Course is closed for self enrollment.  Contact your instructor for access."),"  <a href=\"index.php\">",_("Return to home page."),"</a>\n";
-			require("footer.php");
+			require_once "footer.php";
 			exit;
 		} else if ($_POST['ekey']=="" && $line['enrollkey'] != '') {
-			require("header.php");
+			require_once "header.php";
 			echo $pagetopper;
 			echo _("Please include Enrollment Key."),"  <a href=\"forms.php?action=enroll$gb\">",_("Try Again"),"</a>\n";
-			require("footer.php");
+			require_once "footer.php";
 			exit;
 		}  else {
 			$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE userid=:uid AND courseid=:cid");
 			$stm->execute(array(':uid'=>$userid, ':cid'=>$_POST['cid']));
 			if ($stm->rowCount() > 0) {
-				require("header.php");
+				require_once "header.php";
 				echo $pagetopper;
 				echo _("You are a teacher for this course, and can't enroll as a student.  Use Student View to see the class from a student's perspective, or create a dummy student account.  ");
 				echo _("Click on the course name on the <a href=\"index.php\">main page</a> to access the course"),"\n";
-				require("footer.php");
+				require_once "footer.php";
 				exit;
 			}
 			$stm = $DBH->prepare("SELECT id FROM imas_tutors WHERE userid=:uid AND courseid=:cid");
 			$stm->execute(array(':uid'=>$userid, ':cid'=>$_POST['cid']));
 			if ($stm->rowCount() > 0) {
-				require("header.php");
+				require_once "header.php";
 				echo $pagetopper;
 				echo _("You are a tutor for this course, and can't enroll as a student. ");
 				echo _("Click on the course name on the <a href=\"index.php\">main page</a> to access the course"),"\n";
-				require("footer.php");
+				require_once "footer.php";
 				exit;
 			}
 			$stm = $DBH->prepare("SELECT id FROM imas_students WHERE userid=:uid AND courseid=:cid");
 			$stm->execute(array(':uid'=>$userid, ':cid'=>$_POST['cid']));
 			if ($stm->rowCount() > 0) {
-				require("header.php");
+				require_once "header.php";
 				echo $pagetopper;
 				echo _("You are already enrolled in the course.  Click on the course name on the <a href=\"index.php\">main page</a> to access the course"),"\n";
-				require("footer.php");
+				require_once "footer.php";
 				exit;
 			} else {
                 $keylist = array_map('trim',explode(';',$line['enrollkey']));
                 if (($p = array_search(strtolower(trim($_POST['ekey'])), array_map('strtolower', $keylist))) === false) {
-					require("header.php");
+					require_once "header.php";
 					echo $pagetopper;
 					echo _("Incorrect Enrollment Key."),"  <a href=\"forms.php?action=enroll$gb\">",_("Try Again"),"</a>\n";
-					require("footer.php");
+					require_once "footer.php";
 					exit;
 				} else {
                     $_POST['ekey'] = $keylist[$p];
-                    require('./includes/setSectionGroups.php');
+                    require_once './includes/setSectionGroups.php';
 					if (count($keylist)>1) {
 						$query = "INSERT INTO imas_students (userid,courseid,section,latepass,created_at) VALUES (:uid,:cid,:section,:latepass,:created_at);";
                         $array = array(':uid'=>$userid, ':cid'=>$_POST['cid'], ':section'=>$_POST['ekey'],':latepass'=>$line['deflatepass'],':created_at'=>time());
@@ -692,11 +692,11 @@ If you still have trouble or the wrong email address is on file, contact your in
 						onEnroll($_POST['cid']);
 					}
 
-					require("header.php");
+					require_once "header.php";
 					echo $pagetopper;
 					echo '<p>',_('You have been enrolled in course ID ').Sanitize::courseId($_POST['cid']).'</p>';
 					echo "<p>",_("Return to the <a href=\"index.php\">main page</a> and click on the course name to access the course"),"</p>";
-					require("footer.php");
+					require_once "footer.php";
 					exit;
 				}
 
@@ -711,9 +711,9 @@ If you still have trouble or the wrong email address is on file, contact your in
 			exit;
 		}
 		if (!isset($_GET['cid'])) {
-			require("header.php");
+			require_once "header.php";
 			echo _("Course ID not specified."),"  <a href=\"index.php\">",_("Try Again"),"</a>\n";
-			require("footer.php");
+			require_once "footer.php";
 			exit;
 		}
 		$cid = Sanitize::courseId($_GET['cid']);
@@ -766,7 +766,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 			$pagetopper .= "<div class=breadcrumb><a href=\"index.php\">Home</a> &gt; Modify User Profile</div>\n";
 		}
 		$pagetopper .= '<div id="headerforms" class="pagetitle"><h1>Modify User Profile</h1></div>';
-		require('includes/userpics.php');
+		require_once 'includes/userpics.php';
 		if (isset($_POST['msgnot'])) {
 			$msgnot = 1;
 		} else {
@@ -852,10 +852,10 @@ If you still have trouble or the wrong email address is on file, contact your in
             if ((md5($_POST['oldpw'])==$oldpw || (isset($CFG['GEN']['newpasswords']) && password_verify($_POST['oldpw'],$oldpw))) && $myrights>5) {
                 // pw ok
             } else {
-                require("header.php");
+                require_once "header.php";
                 echo $pagetopper;
                 echo _("Password verification failed."),"  <a href=\"forms.php?action=chguserinfo$gb\">",_("Try Again"),"</a>\n";
-                require("footer.php");
+                require_once "footer.php";
                 exit;
             }
             if ($lastmfatype > 0) {
@@ -865,10 +865,10 @@ If you still have trouble or the wrong email address is on file, contact your in
    
                 if (!$MFA->verifyCode($mfadata['secret'], $_POST['oldmfa'])) {
                     // MFA ok
-                    require("header.php");
+                    require_once "header.php";
                     echo $pagetopper;
                     echo "2-factor authentication verification failed.  <a href=\"forms.php?action=chguserinfo$gb\">Try Again</a>\n";
-                    require("footer.php");
+                    require_once "footer.php";
                     exit;
                 }
             }
@@ -894,10 +894,10 @@ If you still have trouble or the wrong email address is on file, contact your in
 				$stm->execute(array(':uid'=>$userid, ':newpw'=>$newpw));
 				$pwchanged = true;
 			} else {
-				require("header.php");
+				require_once "header.php";
 				echo $pagetopper;
 				echo _("Password change failed."),"  <a href=\"forms.php?action=chguserinfo$gb\">",_("Try Again"),"</a>\n";
-				require("footer.php");
+				require_once "footer.php";
 				exit;
 			}
 		}
@@ -916,10 +916,10 @@ If you still have trouble or the wrong email address is on file, contact your in
                         'mfatype'=>($_POST['dochgmfa'] == 1 ? 'admin' : 'all')
                     );
                 } else {
-                    require("header.php");
+                    require_once "header.php";
                     echo $pagetopper;
                     echo "Incorrect 2-factor authentication code.  <a href=\"forms.php?action=chguserinfo$gb\">Try Again</a>\n";
-                    require("footer.php");
+                    require_once "footer.php";
                     exit;
                 }
             } else {
@@ -933,7 +933,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 			$stm->execute(array(':uid'=>$userid));
 		}
 
-		require("includes/userprefs.php");
+		require_once "includes/userprefs.php";
 		storeUserPrefs();
 
 		if (($pwchanged || trim($old_email) != trim($_POST['email'])) && (time() - $lastemail > 60)) {

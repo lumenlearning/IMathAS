@@ -8,10 +8,10 @@
 ini_set("max_execution_time", "900");
 
 /*** master php includes *******/
-require "../init.php";
+require_once "../init.php";
 require_once "../includes/filehandler.php";
-require "itemexportfields.php";
-require "importitemsfuncs.php";
+require_once "itemexportfields.php";
+require_once "importitemsfuncs.php";
 /*** pre-html data manipulation, including function code *******/
 
 //set some page specific variables and counters
@@ -116,7 +116,7 @@ if (!(isset($teacherid))) {
     }
 }
 /******* begin html output ********/
-require "../header.php";
+require_once "../header.php";
 
 if ($overwriteBody == 1) {
     echo $body;
@@ -186,7 +186,7 @@ echo $curBreadcrumb;
             // #### Begin OHM-specific code #####################################################
             // #### Begin OHM-specific code #####################################################
             echo '<p class=noticetext>'._('The course you are copying from uses the new assessment format which cannot be used in an old assessment format course. Only non-assessment items are displayed below for copy.').'</p>';
-            //require "../footer.php";
+            //require_once "../footer.php";
             //exit;
             // #### End OHM-specific code #####################################################
             // #### End OHM-specific code #####################################################
@@ -303,4 +303,4 @@ $alt = 0;
     }
 
 }
-require "../footer.php";
+require_once "../footer.php";

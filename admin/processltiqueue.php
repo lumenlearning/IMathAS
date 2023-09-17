@@ -34,8 +34,8 @@ if (php_sapi_name() == "cli") {
     $_SERVER['HTTP_HOST'] = explode('//',$argv[1])[1];
 }
 
-require(__DIR__ . "/../init_without_validate.php");
-require(__DIR__ . "/../includes/rollingcurl.php");
+require_once __DIR__ . "/../init_without_validate.php";
+require_once __DIR__ . "/../includes/rollingcurl.php";
 require_once(__DIR__ . '/../includes/ltioutcomes.php');
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
@@ -91,7 +91,7 @@ $scriptStartTime = time();
 
 //if called via AWS SNS, we need to return an OK quickly so it won't retry
 if (isset($_SERVER['HTTP_X_AMZ_SNS_MESSAGE_TYPE'])) {
-	require(__DIR__ . "/../includes/AWSSNSutil.php");
+    require_once __DIR__ . "/../includes/AWSSNSutil.php";
 	respondOK();
 }
 
