@@ -31,7 +31,7 @@ if (isset($_GET['from'])) {
 	} else if ($_GET['from']=='unhide') {
 		$from = 'unhide';
 		$backloc = 'unhidefromcourselist.php?type=teach';
-	}
+	} 
 }
 if ($from=='admin') {
 	$breadcrumbbase .= '<a href="admin.php">Admin</a> &gt; ';
@@ -1012,7 +1012,7 @@ switch($_POST['action']) {
 			if (trim($_POST['ekey'])=='') {
 				echo '<li>',sprintf(_('Tell them to leave the enrollment key blank, since you didn\'t specify one.  The enrollment key acts like a course password to prevent random strangers from enrolling in your course.  If you want to set an enrollment key, %s modify your course settings %s'),'<a href="forms.php?action=modify&id='.$cid.'">','</a>'),'</li>';
 			} else {
-				echo '<li>',_('The enrollment key'),': <b>'.$_POST['ekey'].'</b></li>';
+				echo '<li>',_('The enrollment key'),': <b>'.Sanitize::encodeStringForDisplay($_POST['ekey']).'</b></li>';
 			}
 			echo '</ol></p>';
 
