@@ -173,7 +173,7 @@ if (isset($_GET['launch'])) {
 		exit;
     }
 
-	require_once("$curdir/includes/userprefs.php");
+	require_once "$curdir/includes/userprefs.php";
 	generateuserprefs($userid);
 
 	$stm = $DBH->prepare('UPDATE imas_users SET lastaccess=:lastaccess WHERE id=:id');
@@ -307,7 +307,7 @@ if (isset($_GET['launch'])) {
 	}
 	if ($_GET['userinfo']=='set') {
 		if (isset($CFG['GEN']['newpasswords'])) {
-			require_once("includes/password.php");
+			require_once "includes/password.php";
 		}
 		//check input
 		$infoerr = '';
@@ -335,7 +335,7 @@ if (isset($_GET['launch'])) {
                             if (empty($mfadata['mfatype']) || $mfadata['mfatype'] == 'all') {
                                 $flexwidth = true;
                                 $nologo = true;
-                                require_once(__DIR__.'/includes/mfa.php');
+                                require_once __DIR__.'/includes/mfa.php';
                                 $formaction = $imasroot."/bltilaunch.php?userinfo=set";
                                 if (!isset($_POST['mfatoken'])) {
                                     mfa_showLoginEntryForm($formaction, '', false);
@@ -357,7 +357,7 @@ if (isset($_GET['launch'])) {
 				if (!$allow_acctcreation) {
 					$infoerr = 'Must link to an existing account';
 				} else {
-					require_once(__DIR__.'/includes/newusercommon.php');
+					require_once __DIR__.'/includes/newusercommon.php';
 					$infoerr = checkNewUserValidation();
 					//new info
 					if (isset($_POST['msgnot'])) {
@@ -505,7 +505,7 @@ if (isset($_GET['launch'])) {
 				echo "<span class=form><label for=\"email\">"._("Enter E-mail address:")."</label></span>  <input class=form type=email value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email autocomplete=\"email\"><BR class=form>\n";
 				echo "<span class=form><label for=\"msgnot\">"._("Notify me by email when I receive a new message:")."</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
 				echo "<div class=submit><input type=submit value='"._("Create Account")."'></div>\n";
-				require_once(__DIR__.'/includes/newusercommon.php');
+				require_once __DIR__.'/includes/newusercommon.php';
 				$requiredrules = array(
 					'curSID'=>'{depends: function(element) {return $("#SID").val()==""}}',
 					'curPW'=>'{depends: function(element) {return $("#SID").val()==""}}',
@@ -1255,7 +1255,7 @@ if ($stm->rowCount()==0) {
 				$usereplaceby = "all";
 				$newitems = array();
 				$cid = $destcid; //needed for copyiteminc
-				require_once("includes/copyiteminc.php");
+				require_once "includes/copyiteminc.php";
 				copyallsub($items,'0',$newitems,$gbcats);
 				doaftercopy($sourcecid, $newitems);
 
@@ -1301,7 +1301,7 @@ if ($stm->rowCount()==0) {
 
 			$ltilog['contextid'] = $_SESSION['lti_context_id'];
 			$ltilog['action'] = 'Establish LTI course connection';
-			require_once('includes/TeacherAuditLog.php');
+			require_once 'includes/TeacherAuditLog.php';
 			TeacherAuditLog::addTracking(
 				$destcid,
 				"Course Settings Change",
@@ -1408,7 +1408,7 @@ if ($stm->rowCount()==0) {
 					//echo "here 7: $aid";
 				} else {
 					// no assessment with same title - need to copy assessment from destination to source course
-					require_once("includes/copyiteminc.php");
+					require_once "includes/copyiteminc.php";
 					$stm = $DBH->prepare("SELECT id FROM imas_items WHERE itemtype='Assessment' AND typeid=:typeid");
 					$stm->execute(array(':typeid'=>$_SESSION['place_aid']));
 					if ($stm->rowCount()==0) {
@@ -1487,7 +1487,7 @@ if ($_SESSION['lti_keytype']=='cc-of') {
 					':contextid'=>$_SESSION['lti_context_id'],
 					':courseid'=>$linkcid,
 					':contextlabel'=>$_SESSION['lti_context_label']));
-				require_once('includes/TeacherAuditLog.php');
+				require_once 'includes/TeacherAuditLog.php';
 				TeacherAuditLog::addTracking(
 					$linkcid,
 					"Course Settings Change",
@@ -1584,7 +1584,7 @@ if ($linkparts[0]=='cid') {
 						':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
 				}
 			}
-			require_once("./includes/exceptionfuncs.php");
+			require_once "./includes/exceptionfuncs.php";
 			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
 			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
 		} else if ($line['date_by_lti']==3 && isset($_SESSION['lti_duedate']) && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
@@ -1701,7 +1701,7 @@ if ($linkparts[0]=='cid' || $linkparts[0]=='aid' || $linkparts[0]=='placein' || 
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
-                    require_once('./includes/setSectionGroups.php');
+                    require_once './includes/setSectionGroups.php';
                     setSectionGroups($userid, $cid, $_SESSION['lti_context_label']);
 				}
 			} else {
@@ -1734,7 +1734,7 @@ if (!empty($_SESSION['userid'])) {	//check that same userid, and that we're not 
 		//already have session.  Don't need to create one
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
-			require_once("$curdir/includes/userprefs.php");
+			require_once "$curdir/includes/userprefs.php";
 			generateuserprefs($userid);
 		}
 		$createnewsession = false;
@@ -1787,7 +1787,7 @@ if ($linkparts[0]=='aid') {
 		$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$latepasshrs = $stm->fetchColumn(0);
-		require_once("./includes/exceptionfuncs.php");
+		require_once "./includes/exceptionfuncs.php";
 		$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
 		list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
 		$_SESSION['lticanuselatepass'] = $canuselatepass;
@@ -1900,7 +1900,7 @@ if (isset($_GET['launch'])) {
 		exit;
     }
 
-	require_once("$curdir/includes/userprefs.php");
+	require_once "$curdir/includes/userprefs.php";
 	generateuserprefs($userid);
 
 	$now = time();
@@ -2043,7 +2043,7 @@ if (isset($_GET['launch'])) {
 	}
 	if ($_GET['userinfo']=='set') {
 		if (isset($CFG['GEN']['newpasswords'])) {
-			require_once("includes/password.php");
+			require_once "includes/password.php";
 		}
 		//check input
 		$infoerr = '';
@@ -2071,7 +2071,7 @@ if (isset($_GET['launch'])) {
                             if (empty($mfadata['mfatype']) || $mfadata['mfatype'] == 'all') {
                                 $flexwidth = true;
                                 $nologo = true;
-                                require_once(__DIR__.'/includes/mfa.php');
+                                require_once __DIR__.'/includes/mfa.php';
                                 $formaction = $imasroot."/bltilaunch.php?userinfo=set";
                                 if (!isset($_POST['mfatoken'])) {
                                     mfa_showLoginEntryForm($formaction, '', false);
@@ -2094,7 +2094,7 @@ if (isset($_GET['launch'])) {
 					if (!$allow_acctcreation) {
 						$infoerr = 'Must link to an existing account';
 					} else {
-						require_once(__DIR__.'/includes/newusercommon.php');
+						require_once __DIR__.'/includes/newusercommon.php';
 						$infoerr = checkNewUserValidation();
 						//new info
 						if (isset($_POST['msgnot'])) {
@@ -2236,7 +2236,7 @@ if (isset($_GET['launch'])) {
 				echo "<span class=form><label for=\"email\">Enter E-mail address:</label></span>  <input class=form type=email autocomplete=\"email\" value=\"".Sanitize::encodeStringForDisplay($defemail)."\" size=60 id=email name=email><BR class=form>\n";
 				echo "<span class=form><label for=\"msgnot\">Notify me by email when I receive a new message:</label></span><input class=floatleft type=checkbox id=msgnot name=msgnot /><BR class=form>\n";
 				echo "<div class=submit><input type=submit value='Create Account'></div>\n";
-				require_once(__DIR__.'/includes/newusercommon.php');
+				require_once __DIR__.'/includes/newusercommon.php';
 				$requiredrules = array(
 					'curSID'=>'{depends: function(element) {return $("#SID").val()==""}}',
 					'curPW'=>'{depends: function(element) {return $("#SID").val()==""}}',
@@ -2708,7 +2708,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['lti_k
 						':contextid'=>$_SESSION['lti_context_id'],
 						':courseid'=>$destcid,
 						':contextlabel'=>$_SESSION['lti_context_label']));
-					require_once('includes/TeacherAuditLog.php');
+					require_once 'includes/TeacherAuditLog.php';
 					TeacherAuditLog::addTracking(
 						$destcid,
 						"Course Settings Change",
@@ -2732,7 +2732,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['lti_k
 						':contextid'=>$_SESSION['lti_context_id'],
 						':courseid'=>$destcid,
 						':contextlabel'=>$_SESSION['lti_context_label']));
-					require_once('includes/TeacherAuditLog.php');
+					require_once 'includes/TeacherAuditLog.php';
 					TeacherAuditLog::addTracking(
 						$destcid,
 						"Course Settings Change",
@@ -2768,7 +2768,7 @@ if (((count($keyparts)==1 || $_SESSION['lti_keytype']=='gc') && $_SESSION['lti_k
 						$aid = $stm->fetchColumn(0);
 					} else {
 						// no assessment with same title - need to copy assessment from destination to source course
-						require_once("includes/copyiteminc.php");
+						require_once "includes/copyiteminc.php";
 						$cid = $destcid;
 						$stm = $DBH->prepare("SELECT itemorder,dates_by_lti,UIver FROM imas_courses WHERE id=:id");
 						$stm->execute(array(':id'=>$cid));
@@ -2886,7 +2886,7 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='placein' || $keyparts[0]=='LTIkey') {
 						':enddate'=>$_SESSION['lti_duedate'], ':userid'=>$userid, ':assessmentid'=>$aid));
 				}
 			}
-			require_once("./includes/exceptionfuncs.php");
+			require_once "./includes/exceptionfuncs.php";
 			$exceptionfuncs = new ExceptionFuncs($userid, $cid, true);
 			$useexception = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line, true);
 		} else if ($line['date_by_lti']==3 && ($line['enddate']!=$_SESSION['lti_duedate'] || $now<$line['startdate'])) {
@@ -3014,7 +3014,7 @@ if ($keyparts[0]=='cid' || $keyparts[0]=='aid' || $keyparts[0]=='placein' || $ke
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
                     #### End OHM-specific changes ############################################################
-                    require_once('./includes/setSectionGroups.php');
+                    require_once './includes/setSectionGroups.php';
                     setSectionGroups($userid, $cid, $_SESSION['lti_context_label']);
 				}
 			} else {
@@ -3047,7 +3047,7 @@ if (!empty($_SESSION['userid'])) {
 		//already have session.  Don't need to create one
 		if (!isset($_SESSION['mathdisp'])) {
 			//for some reason settings are not set, so reload from user prefs
-			require_once("$curdir/includes/userprefs.php");
+			require_once "$curdir/includes/userprefs.php";
 			generateuserprefs($userid);
 		}
 		$createnewsession = false;
@@ -3099,7 +3099,7 @@ if ($keyparts[0]=='aid') {
 		$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$latepasshrs = $stm->fetchColumn(0);
-		require_once("./includes/exceptionfuncs.php");
+		require_once "./includes/exceptionfuncs.php";
 		$exceptionfuncs = new ExceptionFuncs($userid, $cid, true, $latepasses, $latepasshrs);
 		list($useexception, $canundolatepass, $canuselatepass) = $exceptionfuncs->getCanUseAssessException($exceptionrow, $line);
 		$_SESSION['lticanuselatepass'] = $canuselatepass;

@@ -10,7 +10,7 @@ if (isset($CFG['hooks']['actions'])) {
 	require_once $CFG['hooks']['actions'];
 }
 
-require_once("includes/sanitize.php");
+require_once "includes/sanitize.php";
 
 	if (isset($_GET['greybox'])) {
 		$isgb = true;
@@ -26,12 +26,12 @@ require_once("includes/sanitize.php");
 	} else {
 		 $urlmode = 'http://';
 	}
-	require_once("includes/password.php");
+	require_once "includes/password.php";
 
 	if (isset($_GET['action']) && $_GET['action']=="newuser") {
 		$init_session_start = true;
-		require_once("init_without_validate.php");
-		require_once("includes/newusercommon.php");
+		require_once "init_without_validate.php";
+		require_once "includes/newusercommon.php";
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
@@ -200,7 +200,7 @@ require_once("includes/sanitize.php");
 			$message .= "<p>".sprintf(_("To complete your %s registration, please click on the following link, or copy and paste it into your webbrowser:"),$installname)."</p>\r\n";
 			$message .= "<a href=\"" . $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id\">";
 			$message .= $GLOBALS['basesiteurl'] . "/actions.php?action=confirm&id=$id</a>\r\n";
-			require_once("./includes/email.php");
+			require_once "./includes/email.php";
 			send_email($_POST['email'], $sendfrom, $installname._(' Confirmation'), $message, array(), array(), 10);
 
 			require_once "header.php";
@@ -279,7 +279,7 @@ require_once("includes/sanitize.php");
 		//header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/index.php");
 		exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="confirm") {
-		require_once("init_without_validate.php");
+		require_once "init_without_validate.php";
 
 		$query = "UPDATE imas_users SET rights=10 WHERE id=:id AND rights=0";
 		$stm = $DBH->prepare($query);
@@ -297,7 +297,7 @@ require_once("includes/sanitize.php");
         exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="resetpw") {
         $init_session_start = true;
-		require_once("init_without_validate.php");
+		require_once "init_without_validate.php";
 		if (isset($_POST['username'])) {
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
@@ -364,7 +364,7 @@ require_once("includes/sanitize.php");
 				$message .= "<a href=\"" . $GLOBALS['basesiteurl'] . "/forms.php?action=resetpw&id=$id&code=$code\">";
 				$message .= $GLOBALS['basesiteurl'] . "/forms.php?action=resetpw&id=$id&code=$code</a>\r\n";
 
-				require_once("./includes/email.php");
+				require_once "./includes/email.php";
 				send_email($email, $sendfrom, $installname._(' Password Reset Request'), $message, array(), array(), 10);
 
                 require_once "header.php";
@@ -434,7 +434,7 @@ If you still have trouble or the wrong email address is on file, contact your in
         exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="lookupusername") {
         $init_session_start = true;
-		require_once("init_without_validate.php");
+		require_once "init_without_validate.php";
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
         #### Begin OHM-specific changes ############################################################
@@ -486,7 +486,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 			}
 			$message .= "</p><p>"._("If you forgot your password, use the Lost Password link at the login page.")."</p>";
 
-			require_once("./includes/email.php");
+			require_once "./includes/email.php";
 			send_email($_POST['email'], $sendfrom, $installname._(' Username Request'), $message, array(), array(), 10);
 			echo $cnt . _(" usernames match this email address and were emailed"),".  <a href=\"index.php\">",_("Return to login page"),"</a>";
 
@@ -506,7 +506,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		}
         exit;
 	} else if (isset($_GET['action']) && $_GET['action']=="checkusername") {
-		require_once("init_without_validate.php");
+		require_once "init_without_validate.php";
 		if (isset($_GET['originalSID']) && $_GET['originalSID']==$_GET['SID']) {
 			echo "true";
 			exit;
@@ -542,7 +542,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 			$stm->execute(array(':uid'=>$userid, ':newpw'=>$newpw));
 
 			if ($_GET['action']=="chgpwd" && time() - $line['lastemail'] > 60) {
-				require_once("./includes/email.php");
+				require_once "./includes/email.php";
 				$message = '<p><b>'._('This is an automated message. Do not reply to this email.').'</b></p>';
 				$message .= '<p>'.sprintf(_('Hi, your account details on %s were recently changed.'), $installname).' ';
 				$message .= _('Your password was changed.');
@@ -860,7 +860,7 @@ If you still have trouble or the wrong email address is on file, contact your in
             }
             if ($lastmfatype > 0) {
                 // also check MFA
-                require_once('includes/GoogleAuthenticator.php');
+                require_once 'includes/GoogleAuthenticator.php';
                 $MFA = new GoogleAuthenticator();
    
                 if (!$MFA->verifyCode($mfadata['secret'], $_POST['oldmfa'])) {
@@ -904,7 +904,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		if ($_POST['dochgmfa'] > 0) {
             if ($lastmfatype == 0) {
                 //enabling new
-                require_once('includes/GoogleAuthenticator.php');
+                require_once 'includes/GoogleAuthenticator.php';
                 $MFA = new GoogleAuthenticator();
                 $mfasecret = $_POST['mfasecret'];
 
@@ -937,7 +937,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		storeUserPrefs();
 
 		if (($pwchanged || trim($old_email) != trim($_POST['email'])) && (time() - $lastemail > 60)) {
-			require_once("./includes/email.php");
+			require_once "./includes/email.php";
 			$message = '<p><b>'._('This is an automated message. Do not reply to this email.').'</b></p>';
 			$message .= '<p>'.sprintf(_('Hi, your account details on %s were recently changed.'), $installname).' ';
 			if ($old_email != $_POST['email']) {

@@ -5,7 +5,7 @@
 /*** master php includes *******/
 require_once "../init.php";
 include("../includes/htmlutil.php");
-require_once("../includes/TeacherAuditLog.php");
+require_once "../includes/TeacherAuditLog.php";
 
 /*** pre-html data manipulation, including function code *******/
 
@@ -142,7 +142,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$stm = $DBH->prepare("UPDATE imas_assessments SET itemorder=:itemorder,viddata=:viddata WHERE id=:id");
 			$stm->execute(array(':itemorder'=>$itemorder, ':viddata'=>$viddata, ':id'=>$aid));
 
-			require_once("../includes/updateptsposs.php");
+			require_once "../includes/updateptsposs.php";
 			updatePointsPossible($aid, $itemorder, $row[2]);
 
 			header('Location: ' . $GLOBALS['basesiteurl'] . "/course/addquestions.php?cid=$cid&aid=$aid&r=" .Sanitize::randomQueryStringParam());
@@ -167,7 +167,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	}
 	if (isset($_REQUEST['clearattempts'])) {
 		if (isset($_POST['clearattempts']) && $_POST['clearattempts']=="confirmed") {
-			require_once('../includes/filehandler.php');
+			require_once '../includes/filehandler.php';
 			deleteallaidfiles($aid);
 			$grades = array();
 			if ($aver > 1) {
@@ -362,7 +362,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 			if ($_POST['withdrawtype']=='zero' || $_POST['withdrawtype']=='groupzero') {
 				//update points possible
-				require_once("../includes/updateptsposs.php");
+				require_once "../includes/updateptsposs.php";
 				updatePointsPossible($aid, $itemorder, $defpoints);
 			}
 
@@ -376,8 +376,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					}
 				}
 				//need to re-score assessment attempts based on withdrawal
-				require_once('../assess2/AssessInfo.php');
-				require_once('../assess2/AssessRecord.php');
+				require_once '../assess2/AssessInfo.php';
+				require_once '../assess2/AssessRecord.php';
 				$assess_info = new AssessInfo($DBH, $aid, $cid, false);
 				$assess_info->loadQuestionSettings('all', false, false);
 				$DBH->beginTransaction();
@@ -396,7 +396,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 					if (strlen($row['lti_sourcedid'])>1) {
 						//update LTI score
-						require_once("../includes/ltioutcomes.php");
+						require_once "../includes/ltioutcomes.php";
 						calcandupdateLTIgrade($row['lti_sourcedid'], $aid, $row['userid'], $updatedScore, true, -1, false);
 					}
 				}
@@ -440,7 +440,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 					if (strlen($row['lti_sourcedid'])>1) {
 						//update LTI score
-						require_once("../includes/ltioutcomes.php");
+						require_once "../includes/ltioutcomes.php";
 						calcandupdateLTIgrade($row['lti_sourcedid'], $aid, $row['userid'], $bestscores, true, -1, false);
 					}
 				}
@@ -494,7 +494,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 	//DEFAULT LOAD PROCESSING GOES HERE
 	//load filter.  Need earlier than usual header.php load
 	$curdir = rtrim(dirname(__FILE__), '/\\');
-	require_once("$curdir/../filter/filter.php");
+	require_once "$curdir/../filter/filter.php";
 	
 	$stm = $DBH->prepare("SELECT itemorder,name,defpoints,displaymethod,showcalculator,showhints,showwork,intro FROM imas_assessments WHERE id=:id");
 	$stm->execute(array(':id'=>$aid));

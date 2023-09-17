@@ -17,19 +17,13 @@
  *          object, but may also update some assessInfo fields
  */
 
-$st = microtime(true);
-$no_session_handler = 'json_error';
-require_once("../init.php");
-$tm1 = microtime(true);
-require_once("./common_start.php");
-$tm2 = microtime(true);
-require_once("./AssessInfo.php");
-$tm3 = microtime(true);
-require_once("./AssessRecord.php");
-$tm4 = microtime(true);
-require_once('./AssessUtils.php');
-$tm5 = microtime(true);
 
+$no_session_handler = 'json_error';
+require_once "../init.php";
+require_once "./common_start.php";
+require_once "./AssessInfo.php";
+require_once "./AssessRecord.php";
+require_once './AssessUtils.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -51,7 +45,6 @@ $now = time();
 
 // load settings including question info
 $assess_info = new AssessInfo($DBH, $aid, $cid, false);
-
 $assess_info->loadException($uid, $isstudent);
 if ($isstudent) {
   $assess_info->applyTimelimitMultiplier($studentinfo['timelimitmult']);
@@ -155,7 +148,7 @@ list($qid, $qidstoload) = $assess_record->getQuestionId($qn);
 
 // load question settings and code
 $assess_info->loadQuestionSettings($qidstoload, true, false);
-$tm6 = microtime(true);
+
 // For livepoll, verify seed and generate new question version if needed
 if (!$isteacher && $assess_info->getSetting('displaymethod') === 'livepoll') {
   $curQuestionObject = $assess_record->getQuestionObject($qn, false, false, false);
@@ -219,13 +212,11 @@ if ($assess_info->getSetting('displaymethod') === 'livepoll') {
 } else {
   $showscores = $assess_info->showScoresDuring();
 }
-$tm7 = microtime(true);
 $assessInfoOut['questions'] = array(
   $qn => $assess_record->getQuestionObject($qn, $showscores, true, true)
 );
-$tm8 = microtime(true);
 
-// save autosaves, if set
+// save autosaves, if set 
 $assessInfoOut['saved_autosaves'] = false;
 if (!empty($_POST['autosave-tosaveqn'])) {
     $qns = json_decode($_POST['autosave-tosaveqn'], true);
@@ -264,21 +255,9 @@ if (!empty($_POST['autosave-tosaveqn'])) {
 
 // save record if needed
 $assess_record->saveRecordIfNeeded();
-$tm9 = microtime(true);
+
 //prep date display
 prepDateDisp($assessInfoOut);
 
-$et = microtime(true);
-if ($et - $st > .6) {
-  error_log('loadquestion took '.($et-$st).' for '.
-    $assessInfoOut['questions'][$qn]['questionsetid'].
-    ' breaks: '.
-    ($tm1 - $st).','.
-    ($tm2 - $tm1).','.
-    ($tm3 - $tm2).','.
-    ($tm4 - $tm3).','.
-    ($tm5 - $tm4)
-  );
-}
 //output JSON object
 echo json_encode($assessInfoOut, JSON_INVALID_UTF8_IGNORE);
