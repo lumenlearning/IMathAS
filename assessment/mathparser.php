@@ -63,13 +63,13 @@ function makeMathFunction($str, $vars = '', $allowedfuncs = array(), $fvlist = '
       echo ". Error: ".$t->getMessage();
     }
     return false;
-  } 
+  }
   return function($varvals) use ($parser) {
     try {
       return $parser->evaluate($varvals);
     } catch (Throwable $t) {
       return sqrt(-1);
-    } 
+    }
   };
 }
 
@@ -357,7 +357,7 @@ class MathParser
       return $this->evaluate($variableValues);
     } catch (Throwable $t) {
       return sqrt(-1);
-    } 
+    }
   }
 
   /**
