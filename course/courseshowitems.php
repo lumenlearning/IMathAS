@@ -2150,7 +2150,6 @@ function showitems($items,$parent,$inpublic=false,$greyitems=0) {
 	   $now = time();
 	   for ($i=0;$i<count($items); $i++) {
 		   if (is_array($items[$i])) { //is a block
-			$items[$i]['name'] = $items[$i]['name'];
 
 			if ($items[$i]['startdate']==0) {
 				$startdate = _('Always');
