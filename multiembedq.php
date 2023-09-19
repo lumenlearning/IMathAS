@@ -204,13 +204,25 @@ if (isset($_GET['action']) && $_GET['action']=='scoreembed') {
 		'jwt' => $jwtstring
 	);
 	echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify('.json_encode($scoremessage,JSON_HEX_TAG|JSON_INVALID_UTF8_IGNORE).'), "*");</script>';
-	exit;
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  // send 'tryItSubmit' postMessage so Valkyrie can create FullStory event
+  echo '<script type="text/javascript">window.parent.postMessage(JSON.stringify({ subject: "tryItSubmit", qid: '.$qids[$qn].' }), "*");</script>';
+	// ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+  
+  exit;
 }
 
 
 
 $flexwidth = true; //tells header to use non _fw stylesheet
 $placeinhead = '<style type="text/css">html,body {margin:0px;} div.question {width: auto;} div.review {width: auto; margin-top: 5px;} body {height:auto;}</style>';
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################
+$placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers.js" type="text/javascript"></script>';
+// ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################
 if ($targetid != '') {
 	$placeinhead .= '<script type="text/javascript">
 	function sendresizemsg() {

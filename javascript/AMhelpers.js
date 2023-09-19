@@ -1517,6 +1517,15 @@ function toggleinlinebtn(n, p) { //n: target, p: click el
 		el.style.display = "";
 		el.setAttribute("aria-hidden", false);
 		btn.setAttribute("aria-expanded", true);
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+    // sends tryItHint message to Valkyrie can create FullStory event
+    window.parent.postMessage( JSON.stringify({
+      subject: "tryItHint",
+      hintId: n
+    }), "*");
+    // ####### End OHM-specific changes ##################################################################
+    // ####### End OHM-specific changes ##################################################################
 	} else {
 		el.style.display = "none";
 		el.setAttribute("aria-hidden", true);
@@ -1870,7 +1879,6 @@ function AutoSuggest(elem, suggestions) {
 			case ENTER:
 				me.useSuggestion("enter");
 				return false;
-				break;
 
 			case ESC:
 				me.hideDiv();
