@@ -192,7 +192,7 @@ $vueData = array(
 	 		<a href="#" onclick="groupToggleAll(0);return false;"><?php echo _('Collapse All'); ?></a>
 		</div>
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/collapse.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/collapse.gif" alt="Collapse" />
 			<?php echo _('Core Options'); ?>
 		</div>
 		<div class="blockitems">
@@ -366,7 +366,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Additional Display Options'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -457,7 +457,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Time Limit and Access Control'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -557,7 +557,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Help and Hints'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -671,7 +671,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Grading and Feedback'); ?>
 		</div>
 		<div class="blockitems hidden">
