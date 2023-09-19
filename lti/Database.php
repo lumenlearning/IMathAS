@@ -135,33 +135,29 @@ class Imathas_LTI_Database implements LTI\Database
         $row = $stm->fetch(PDO::FETCH_ASSOC);
         if ($row === false || $row === null) {
             if (!empty($GLOBALS['CFG']['LTI']['autoreg']) && trim($client_id) != '') {
-                $canvas_oidc_hostname = $GLOBALS['CFG']['LTI']['canvas/oidc/prod'] ?? 'canvas.instructure.com';
-                $canvas_beta_oidc_hostname = $GLOBALS['CFG']['LTI']['canvas/oidc/beta'] ?? 'canvas.beta.instructure.com';
-                $canvas_test_oidc_hostname = $GLOBALS['CFG']['LTI']['canvas/oidc/test'] ?? 'canvas.test.instructure.com';
-
                 if ($iss === 'https://canvas.instructure.com') {
                     $row = [
                        'issuer' => $iss,
                        'client_id' => trim($client_id),
-                       'auth_login_url' => sprintf('https://%s/api/lti/authorize_redirect', $canvas_oidc_hostname),
-                       'auth_token_url' => sprintf('https://%s/login/oauth2/token', $canvas_oidc_hostname),
-                       'key_set_url' => sprintf('https://%s/api/lti/security/jwks', $canvas_oidc_hostname)
+                       'auth_login_url' => 'https://sso.canvaslms.com/api/lti/authorize_redirect',
+                       'auth_token_url' => 'https://sso.canvaslms.com/login/oauth2/token',
+                       'key_set_url' => 'https://sso.canvaslms.com/api/lti/security/jwks'
                     ];
                 } else if ($iss === 'https://canvas.beta.instructure.com') {
                     $row = [
                        'issuer' => $iss,
                        'client_id' => trim($client_id),
-                       'auth_login_url' => sprintf('https://%s/api/lti/authorize_redirect', $canvas_beta_oidc_hostname),
-                       'auth_token_url' => sprintf('https://%s/login/oauth2/token', $canvas_beta_oidc_hostname),
-                       'key_set_url' => sprintf('https://%s/api/lti/security/jwks', $canvas_beta_oidc_hostname)
+                       'auth_login_url' => 'https://sso.beta.canvaslms.com/api/lti/authorize_redirect',
+                       'auth_token_url' => 'https://sso.beta.canvaslms.com/login/oauth2/token',
+                       'key_set_url' => 'https://sso.beta.canvaslms.com/api/lti/security/jwks'
                     ];
                 } else if ($iss === 'https://canvas.test.instructure.com') {
                     $row = [
                        'issuer' => $iss,
                        'client_id' => trim($client_id),
-                       'auth_login_url' => sprintf('https://%s/api/lti/authorize_redirect', $canvas_test_oidc_hostname),
-                       'auth_token_url' => sprintf('https://%s/login/oauth2/token', $canvas_test_oidc_hostname),
-                       'key_set_url' => sprintf('https://%s/api/lti/security/jwks', $canvas_test_oidc_hostname)
+                       'auth_login_url' => 'https://sso.test.canvaslms.com/api/lti/authorize_redirect',
+                       'auth_token_url' => 'https://sso.test.canvaslms.com/login/oauth2/token',
+                       'key_set_url' => 'https://sso.test.canvaslms.com/api/lti/security/jwks'
                     ];
                 }
                 if (is_array($row)) { // set something above - create platform reg
@@ -501,6 +497,15 @@ class Imathas_LTI_Database implements LTI\Database
     {
         $stm = $this->dbh->prepare('UPDATE imas_users SET SID=? WHERE id=?');
         $stm->execute(array($SID, $userid));
+    }
+
+    /**
+     * Update imas_users.lastaccess for a user
+     * @param int  $localuserid
+     */
+    public function set_user_lastaccess(int $localuserid): void {
+        $stm = $this->dbh->prepare('UPDATE imas_users SET lastaccess=? WHERE id=?');
+        $stm->execute(array(time(), $localuserid));
     }
 
     /**
@@ -1003,8 +1008,16 @@ class Imathas_LTI_Database implements LTI\Database
                     }
                     $ancparts = explode(':', $aidanc[$i]);
                     if ($ancparts[0] != $ancestors[$i]) {
+                        // course sequence doesn't match
                         $isok = false;
                         break; // not the same ancestry path
+                    }
+                    if ($i == $ciddepth) {
+                        // on last one - match sure assessment matches
+                        if ($sourceaid != $ancparts[1]) {
+                            $isok = false;
+                            break;
+                        }
                     }
                 }
                 if ($isok) { // found it!
