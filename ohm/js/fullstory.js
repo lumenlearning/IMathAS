@@ -6,7 +6,9 @@ window['_fs_org'] = '119CXP';
 window['_fs_namespace'] = 'FS';
 // adds ability to capture content in cross-origin iframes (OHM2 Try-Its inside Valk)
 // https://help.fullstory.com/hc/en-us/articles/360020622514
-window['_fs_run_in_iframe'] = true;
+if (window.location.hostname === 'ohm.one.lumenlearning.com') {  // restrict iframe setting to OHM2
+  window['_fs_run_in_iframe'] = true;
+}
 (function(m,n,e,t,l,o,g,y){
   if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
   g=m[e]=function(a,b,s){g.q?g.q.push([a,b,s]):g._api(a,b,s);};g.q=[];
