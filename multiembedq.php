@@ -328,8 +328,8 @@ foreach ($qids as $i=>$qid) {
 	$qdatafordisplayq = $qsdata[$qid];
 	displayq($i,$qid,$seeds[$i],($showanstype==2),$showhints,$attempts[$i]);
 	$quesout .= ob_get_clean();
-	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span></div>';
-	echo $quesout;
+	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span><span id="ohm'.$qid.'"/></div>';
+  echo $quesout;
 	echo '<input type="hidden" id="verattempts'.$i.'" value="'.Sanitize::encodeStringForDisplay($attempts[$i]).'"/>';
 	echo '</div>';
 }

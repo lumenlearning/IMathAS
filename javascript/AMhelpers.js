@@ -1510,8 +1510,13 @@ function arraysearch(needle, hay) {
 	return -1;
 }
 
+const getQuestionIdToToggle = (qid) => {
+  toggleinlinebtn(n, p, qid)
+}
+
 function toggleinlinebtn(n, p) { //n: target, p: click el
-	var btn = document.getElementById(p);
+	let questionId = document.querySelector('[id^=ohm]').id.substring(3);
+  var btn = document.getElementById(p);
 	var el = document.getElementById(n);
 	if (el.style.display == "none") {
 		el.style.display = "";
@@ -1522,7 +1527,7 @@ function toggleinlinebtn(n, p) { //n: target, p: click el
     // sends tryItHint message to Valkyrie can create FullStory event
     window.parent.postMessage( JSON.stringify({
       subject: "tryItHint",
-      hintId: n
+      qid: questionId
     }), "*");
     // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
