@@ -2123,8 +2123,11 @@ function prepWithMath(str) {
 }
 
 function toggleinlinebtn(n,p){ //n: target, p: click el
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
   let questionId = document.querySelector('[id^=ohm]').id.substring(3);
-  console.log('qid', questionId)
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
 	var btn = document.getElementById(p);
 	var el = document.getElementById(n);
 	if (el.style.display=="none") {

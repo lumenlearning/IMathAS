@@ -328,7 +328,13 @@ foreach ($qids as $i=>$qid) {
 	$qdatafordisplayq = $qsdata[$qid];
 	displayq($i,$qid,$seeds[$i],($showanstype==2),$showhints,$attempts[$i]);
 	$quesout .= ob_get_clean();
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  // adds empty span with QID so AMhelpers.js can access QID by querying document 
 	$quesout = substr($quesout,0,-7).'<br/><input type="button" class="btn" value="'. _('Submit'). '" onclick="assessbackgsubmit('.$i.',\'submitnotice'.$i.'\')" /><span id="submitnotice'.$i.'"></span><span id="ohm'.$qid.'"/></div>';
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+	
   echo $quesout;
 	echo '<input type="hidden" id="verattempts'.$i.'" value="'.Sanitize::encodeStringForDisplay($attempts[$i]).'"/>';
 	echo '</div>';

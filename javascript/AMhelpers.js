@@ -1515,8 +1515,12 @@ const getQuestionIdToToggle = (qid) => {
 }
 
 function toggleinlinebtn(n, p) { //n: target, p: click el
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
 	let questionId = document.querySelector('[id^=ohm]').id.substring(3);
-  var btn = document.getElementById(p);
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+	var btn = document.getElementById(p);
 	var el = document.getElementById(n);
 	if (el.style.display == "none") {
 		el.style.display = "";
