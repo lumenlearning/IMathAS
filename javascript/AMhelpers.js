@@ -1511,7 +1511,7 @@ function arraysearch(needle, hay) {
 }
 
 function toggleinlinebtn(n, p, event) { //n: target, p: click el, event: click event
-  event.stopPropagation;
+  event.stopPropagation();
 	var btn = document.getElementById(p);
 	var el = document.getElementById(n);
 	if (el.style.display == "none") {
