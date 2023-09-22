@@ -1510,10 +1510,6 @@ function arraysearch(needle, hay) {
 	return -1;
 }
 
-const getQuestionIdToToggle = (qid) => {
-  toggleinlinebtn(n, p, qid)
-}
-
 function toggleinlinebtn(n, p) { //n: target, p: click el
   // ####### Begin OHM-specific changes ##################################################################
   // ####### Begin OHM-specific changes ##################################################################
