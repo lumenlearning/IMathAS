@@ -2123,6 +2123,8 @@ function prepWithMath(str) {
 }
 
 function toggleinlinebtn(n,p){ //n: target, p: click el
+  let questionId = document.querySelector('[id^=ohm]').id.substring(3);
+  console.log('qid', questionId)
 	var btn = document.getElementById(p);
 	var el = document.getElementById(n);
 	if (el.style.display=="none") {
@@ -2134,7 +2136,7 @@ function toggleinlinebtn(n,p){ //n: target, p: click el
     // sends tryItHint message to Valkyrie can create FullStory event
     window.parent.postMessage( JSON.stringify({
       subject: "tryItHint",
-      hintId: n
+      qid: questionId
     }), "*");
     // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
