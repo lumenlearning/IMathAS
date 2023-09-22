@@ -3317,7 +3317,7 @@ function forminlinebutton($label,$content,$style='button',$outstyle='block') {
 
 	$r = uniqid();
 	$label = str_replace('"','',$label);
-	$common = 'id="inlinebtn'.$r.'" aria-controls="inlinebtnc'.$r.'" aria-expanded="false" onClick="toggleinlinebtn(\'inlinebtnc'.$r.'\', \'inlinebtn'.$r.'\');return false;"';
+	$common = 'id="inlinebtn'.$r.'" aria-controls="inlinebtnc'.$r.'" aria-expanded="false" onClick="toggleinlinebtn(\'inlinebtnc'.$r.'\', \'inlinebtn'.$r.'\', event);return false;"';
     if ($style=='link') {
         $out = '<a href="#" '.$common.'>'.$label.'</a>';
     } else {

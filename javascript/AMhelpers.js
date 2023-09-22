@@ -1510,7 +1510,8 @@ function arraysearch(needle, hay) {
 	return -1;
 }
 
-function toggleinlinebtn(n, p) { //n: target, p: click el
+function toggleinlinebtn(n, p, event) { //n: target, p: click el, event: click event
+  event.stopPropagation;
 	var btn = document.getElementById(p);
 	var el = document.getElementById(n);
 	if (el.style.display == "none") {
