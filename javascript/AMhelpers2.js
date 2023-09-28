@@ -2123,16 +2123,30 @@ function prepWithMath(str) {
 }
 
 function toggleinlinebtn(n,p){ //n: target, p: click el
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  let questionId = document.querySelector('[id^=ohm]').id.substring(3);
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
 	var btn = document.getElementById(p);
-	var el=document.getElementById(n);
+	var el = document.getElementById(n);
 	if (el.style.display=="none") {
 		el.style.display="";
-		el.setAttribute("aria-hidden",false);
-		btn.setAttribute("aria-expanded",true);
-	} else {
-		el.style.display="none";
 		el.setAttribute("aria-hidden",true);
 		btn.setAttribute("aria-expanded",false);
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+    // sends tryItHint message to Valkyrie can create FullStory event
+    window.parent.postMessage( JSON.stringify({
+      subject: "tryItHint",
+      qid: questionId
+    }), "*");
+    // ####### End OHM-specific changes ##################################################################
+    // ####### End OHM-specific changes ##################################################################
+	} else {
+		el.style.display="none";
+		el.setAttribute("aria-hidden",false);
+		btn.setAttribute("aria-expanded",true);
 	}
 	var k=btn.innerHTML;
 	btn.innerHTML = k.match(/\[\+\]/)?k.replace(/\[\+\]/,'[-]'):k.replace(/\[\-\]/,'[+]');
@@ -2285,7 +2299,6 @@ function AutoSuggest(elem, suggestions)
             }
 			me.useSuggestion("enter");
 			return false;
-			break;
 
 			case ESC:
 			me.hideDiv();

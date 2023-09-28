@@ -284,7 +284,12 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
 } else {
     $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=20230803" type="text/javascript"></script>';
-}
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################    
+    $placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+  }
 
 $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2supp.js?v=041522" type="text/javascript"></script>';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/mathquill/mathquill-basic.css?v=021823">
@@ -369,7 +374,9 @@ for ($qn=0; $qn < $numq; $qn++) {
     echo '</div></div>';
     if (!$state['jssubmit']) {
         echo '<p>';
-        echo '<button type=button onclick="submitq('.$qn.')" class="primary">'._("Submit").'</button>';
+        // ####### Begin OHM-specific changes ##################################################################
+        // Adds $qsid param to submitq to send postMessage to Valkyrie for FullStory Try-It recording
+        echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
