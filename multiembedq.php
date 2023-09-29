@@ -271,6 +271,16 @@ if ($targetid != '') {
 if ($theme != '') {
 	$_SESSION['coursetheme'] = $theme.'.css';
 }
+if (isset($_GET['iframe_resize_id'])) {
+  $targetid = preg_replace('/[^\w:.-]/','',$_GET['iframe_resize_id']);
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  //iframe_resize_id in URL means we're serving Try-It questions in book content; use this stylesheet
+  // $placeinhead .= '<link rel="stylesheet" href="themes/tnhcontent.css"/>';
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+
+}
 require("./assessment/header.php");
 if ($_SESSION['graphdisp'] == 1) {
 	echo '<div style="position:absolute;width:1px;height:1px;left:0px:top:-1px;overflow:hidden;"><a href="multiembedq.php?'.Sanitize::encodeStringForDisplay($_SERVER['QUERY_STRING']).'&graphdisp=0">' . _('Enable text based alternatives for graph display and drawing entry') . '</a></div>';
