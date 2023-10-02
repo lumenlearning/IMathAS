@@ -1,21 +1,27 @@
-/* Styles are in the process of being updated to align with Lumen One styles in Valkyrie/Catra. */
+/* Styles for content-embedded Try-It questions only. */
 
 /* General settings - fonts, overall page background, etc */
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700);
 @import url(https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap);
 
+/* Please check by hex value to see if your desired color
+* is here and add it if it's not. BEWARE: Color names may 
+* not match between mocks and Valkyrie's HarmonyColors.ts,
+* from which these names are taken.
+*/
 :root {
   --green-100: #E8F8F1;
   --green-500: #15B976;
   --indigo-500: #5367EA;
   --indigo-600: #4252BB;
-  --middle-gray: #EAE8E3;
+  /* middle-gray also called "Light Contrast 2" in mocks */
+  --middle-gray: #EAE8E3; 
   --primary-text: #202325;
   --red-200: #FFDEDE;
   --red-500: #FF5B5B;
   --secondary-text: #636566;
   --yellow-500: #F3BE36;
-  --white: #f5e1af; /*changed for testing so background is yellow*/
+  --white: #FFFFFF;
 }
 
 body {
@@ -611,13 +617,18 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 /* START: Styles for inside tables */
 /* adds rounded corners to table */
 .question table {
-	border: 2px solid var(--light-contrast-2) !important;
+	border: 2px solid var(--middle-gray) !important;
 	border-collapse: separate !important;
 	border-radius: 10px !important;
 	border-spacing: 0 !important;
+  margin-top: 10px;
 }
+.question table td {
+  border: 1px solid var(--middle-gray) !important;
+}
+
 .question table:has(.feedbackwrap) tbody tr:not(:first-child) td {
-	border-top: 1px solid var(--light-contrast-2) !important;
+	border-top: 1px solid var(--middle-gray) !important;
 }
 .question table thead tr th:first-child {
 	border-top-left-radius: 8px !important;
@@ -701,7 +712,7 @@ div.question input.btn[value="Preview"] {
 /* END: Preview button style to link-style  */
 
 /* START: Submit button styles */
-div.question > .btn[value="Submit"] {
+div.question > .btn[value="Submit"], .submitbtn {
   -moz-appearance: none;
   -webkit-appearance: none;
   align-content: center;
