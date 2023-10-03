@@ -426,7 +426,7 @@ div.ansred, div.ansgrn, div.ansyel, div.ansorg {
   border-radius: 10px;
 }
 
-div.ansred img, div.ansgrn img, div.ansyel img, div.ansorg img {
+img.gchk, img.redx, svg.scoremarker {
   /* hides old Waymaker X and checkmark images coming from displayq2.php */
   display: none;
 }
@@ -450,7 +450,7 @@ div.ansyel:after {
 }
 
 .ansred {
-	border: 1px solid var(--red-500);
+	border: 1px solid var(--red-500) !important;
 }
 
 .ansgrn {
@@ -509,6 +509,15 @@ p:has( > select.ansyel ):before {
 
 
 /* START: Styles for short-answer text box and answer highlighting */
+textarea {
+  border: 2px solid var(--middle-gray);
+  border-radius: 10px;
+  color: var(--secondary-text);
+  font-family: 'Public Sans';
+  font-size: 16px;
+  padding: 20px;
+  resize: none;
+}
 input.text {
   border: 2px solid var(--middle-gray);
   border-radius: 10px;
