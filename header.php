@@ -272,9 +272,14 @@ if (function_exists('insertIntoHead')) {
 if (isset($coursetheme)) {
 	echo '<link rel="stylesheet" href="'. $staticroot . "/themes/$coursetheme?v=042217\" type=\"text/css\" />";
 }
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################        
 if (isset($_GET['iframe_resize_id'])) {
   echo '<link rel="stylesheet" href="/themes/tryits.css" type="text/css"/>';
 }
+// ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################    
+    
 echo '<link rel="stylesheet" href="'. $staticroot . '/handheld.css?v=071320" media="only screen and (max-width:480px)"/>';
 if (isset($CFG['GEN']['translatewidgetID'])) {
 	echo '<meta name="google-translate-customization" content="'.$CFG['GEN']['translatewidgetID'].'"></meta>';

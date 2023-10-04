@@ -484,11 +484,10 @@ select {
   font-weight: 700;
   line-height: 1.5;
   padding: 11px 10px 10px 10px;
-  width: 230px;
+  width: auto;
 }
 
-.question > select, .question > select.ansgrn, 
-.question > select.ansred, .question > select.ansyel {
+select, select.ansgrn, select.ansred, select.ansyel {
   border: 2px solid var(--middle-gray);
 }
 
@@ -738,8 +737,8 @@ div.question > .btn[value="Submit"], .submitbtn {
   -moz-appearance: none;
   -webkit-appearance: none;
   align-content: center;
-  background: var(--indigo-500);
-  border: 2px solid var(--indigo-500);
+  background: var(--indigo-500) !important;
+  border: 2px solid var(--indigo-500) !important;
   border-radius: 10px;
   color: var(--white);
   cursor: pointer;
@@ -758,20 +757,23 @@ div.question > .btn[value="Submit"], .submitbtn {
   text-decoration: none;
   transition: background 250ms ease-in-out, transform 150ms ease;
   white-space: normal;
-  
 }
 
 div.question > .btn[value="Submit"]:hover, 
-div.question > .btn[value="Submit"]:focus {
-  background: var(--indigo-600)
+div.question > .btn[value="Submit"]:focus, 
+.submitbtn:hover,
+.submitbtn:focus {
+  background: var(--indigo-600) !important;
 }
 
-div.question > .btn[value="Submit"]:focus-visible {
+div.question > .btn[value="Submit"]:focus-visible,
+.submitbtn:focus-visible {
   box-shadow: 0px 0px 0px 4px #FFFFFF;
   outline: 2px solid #FFFFFF;
 }
 
-div.question > .btn[value="Submit"]:active {
+div.question > .btn[value="Submit"]:active,
+.submitbtn:active {
   transform: scale(0.99);
 }
 /* END: Submit button styles */

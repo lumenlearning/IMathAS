@@ -361,7 +361,6 @@ if ($_SESSION['mathdisp']==1 || $_SESSION['mathdisp']==3) {
 
 $flexwidth = true; //tells header to use non _fw stylesheet
 $nologo = true;
-
 require "./header.php";
 
 echo '<div><ul id="errorslist" style="display:none" class="small"></ul></div>';
@@ -377,6 +376,7 @@ for ($qn=0; $qn < $numq; $qn++) {
         echo '<p>';
         // ####### Begin OHM-specific changes ##################################################################
         // Adds $qsid param to submitq to send postMessage to Valkyrie for FullStory Try-It recording
+        // Adds submitbtn class to style button differently for Try-Its
         echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary submitbtn">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################

@@ -82,16 +82,20 @@ if (isset($_SESSION['coursetheme'])) {
 		}
 	}
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$staticroot/themes/$coursetheme?v=042217\"/>\n";
-}
-if (isset($_GET['iframe_resize_id'])) {
-  echo '<link rel="stylesheet" href="/themes/tryits.css" type="text/css"/>';
-}
+}		
 echo '<link rel="stylesheet" href="'.$staticroot.'/handheld.css?v=101817" media="handheld,only screen and (max-width:480px)"/>';
 if (!empty($isdiag)) {
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$staticroot/diag/print.css\" media=\"print\"/>\n";
 } else {
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$staticroot/assessment/print.css\" media=\"print\"/>\n";
 }
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################    
+if (isset($_GET['iframe_resize_id'])) {
+  echo '<link rel="stylesheet" href="/themes/tryits.css" type="text/css"/>';
+}
+// ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################    
 if (isset($CFG['GEN']['favicon'])) {
 	echo '<link rel="shortcut icon" href="'.$CFG['GEN']['favicon'].'" />';
 } else {
