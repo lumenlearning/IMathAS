@@ -273,13 +273,6 @@ if ($theme != '') {
 }
 if (isset($_GET['iframe_resize_id'])) {
   $targetid = preg_replace('/[^\w:.-]/','',$_GET['iframe_resize_id']);
-  // ####### Begin OHM-specific changes ##################################################################
-  // ####### Begin OHM-specific changes ##################################################################
-  //iframe_resize_id in URL means we're serving Try-It questions in book content; use this stylesheet
-  // $placeinhead .= '<link rel="stylesheet" href="themes/tryits.css"/>';
-  // ####### End OHM-specific changes ##################################################################
-  // ####### End OHM-specific changes ##################################################################
-
 }
 require("./assessment/header.php");
 if ($_SESSION['graphdisp'] == 1) {

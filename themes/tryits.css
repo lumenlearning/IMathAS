@@ -426,7 +426,7 @@ div.ansred, div.ansgrn, div.ansyel, div.ansorg {
   border-radius: 10px;
 }
 
-img.gchk, img.redx, svg.scoremarker {
+img.gchk, img.redx, svg.scoremarker, img.scoreboxicon {
   /* hides old Waymaker X and checkmark images coming from displayq2.php */
   display: none;
 }
@@ -475,8 +475,20 @@ div.ansyel:has( > ul.nomark):after {
 /* END: Styles for answer highlighting for multiple choice, multans, etc. */
 
 
-/* START: Styles for dropdown answer highlighting */
-select, select.ansgrn, select.ansred, select.ansyel {
+/* START: Styles for dropdowns and dropdown answer highlighting */
+select {
+  border-radius: 10px;
+  border: 2px solid var(--middle-gray);
+  font-family: 'Public Sans';
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 11px 10px 10px 10px;
+  width: 230px;
+}
+
+.question > select, .question > select.ansgrn, 
+.question > select.ansred, .question > select.ansyel {
   border: 2px solid var(--middle-gray);
 }
 
@@ -518,11 +530,12 @@ textarea {
   padding: 20px;
   resize: none;
 }
-input.text {
+
+input.text, span.mq-math-mode {
   border: 2px solid var(--middle-gray);
   border-radius: 10px;
   color: var(--secondary-text);
-  font-family: 'Public Sans';
+  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-size: 16px;
   height: 45px;
   margin: 2px;
@@ -693,7 +706,7 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 	.question table tbody tr td .feedbackwrap {
 		padding: 10px;
 	}
-  }
+}
 
 /* this works to move the correctness icon
 in relation to the feedback text above */
@@ -713,7 +726,7 @@ div.question input.btn[value="Preview"] {
 	background-color: transparent;
 	border: none;
 	cursor: pointer;
-	font-family: Public Sans;
+	font-family: 'Public Sans';
 	font-size: 16px;
 	font-weight: 700;
 	text-decoration-line: underline;
@@ -769,7 +782,7 @@ input[type=button].sabtn, p > button:only-child {
 	background-color: var(--white);
 	border: none;
   cursor: pointer;
-  font-family: Public Sans;
+  font-family: 'Public Sans';
   font-size: 16px;
   font-weight: 700;
   text-decoration-line: underline;
@@ -785,6 +798,20 @@ input[type=button].sabtn {
 
 /* END: Styles for Hint and Show Answer link-style buttons */
 
+/* START: Fixes styles for ul.helplist using prod QID 74150 as a baseline */
+div.qhelps {
+  padding-top: 10px;
+}
+
+ul.helplist {
+  position: relative;
+  right: 10px;
+}
+
+ul.helplist > li {
+  font-family: 'Public Sans';
+}
+/* END: Fixes styles for ul.helplist using prod QID 74150 as a baseline */
 
 div.inset {
 	margin-right: 0px;

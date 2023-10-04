@@ -361,25 +361,8 @@ if ($_SESSION['mathdisp']==1 || $_SESSION['mathdisp']==3) {
 
 $flexwidth = true; //tells header to use non _fw stylesheet
 $nologo = true;
-// ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################  
-//iframe_resize_id in URL means we're serving Try-It questions in book content; use this stylesheet
-// if (isset($_GET['iframe_resize_id'])) {
-//   $placeinhead .= '<link rel="stylesheet" href="themes/tnhcontent.css"/>';
-// }
-// ####### End OHM-specific changes ##################################################################
-// ####### End OHM-specific changes ##################################################################
 
 require "./header.php";
-// ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################  
-//iframe_resize_id in URL means we're serving Try-It questions in book content; use this stylesheet
-// if (isset($_GET['iframe_resize_id'])) {
-//   $placeinhead .= '<link rel="stylesheet" href="themes/tryits.css"/>';
-// }
-// ####### End OHM-specific changes ##################################################################
-// ####### End OHM-specific changes ##################################################################
-
 
 echo '<div><ul id="errorslist" style="display:none" class="small"></ul></div>';
 for ($qn=0; $qn < $numq; $qn++) {
