@@ -376,7 +376,8 @@ for ($qn=0; $qn < $numq; $qn++) {
         echo '<p>';
         // ####### Begin OHM-specific changes ##################################################################
         // Adds $qsid param to submitq to send postMessage to Valkyrie for FullStory Try-It recording
-        echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
+        // Adds submitbtn class to style button differently for Try-Its
+        echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary submitbtn">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
