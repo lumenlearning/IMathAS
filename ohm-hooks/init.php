@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This entire file is require'd as-is in /init.php.
+ * This entire file is required as-is in /init.php.
  */
 
 require_once(__DIR__ . '/../vendor/autoload.php');

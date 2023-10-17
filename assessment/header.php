@@ -89,6 +89,13 @@ if (!empty($isdiag)) {
 } else {
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$staticroot/assessment/print.css\" media=\"print\"/>\n";
 }
+// ####### Begin OHM-specific changes ##################################################################
+// ####### Begin OHM-specific changes ##################################################################    
+if (isset($_GET['iframe_resize_id'])) {
+  echo '<link rel="stylesheet" href="/themes/tryits.css" type="text/css"/>';
+}
+// ####### End OHM-specific changes ##################################################################
+// ####### End OHM-specific changes ##################################################################    
 if (isset($CFG['GEN']['favicon'])) {
 	echo '<link rel="shortcut icon" href="'.$CFG['GEN']['favicon'].'" />';
 } else {
