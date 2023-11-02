@@ -128,7 +128,7 @@ echo '<script>var isOhmExemplar = ' . $isOhmExemplarValue . ';</script>';
 #### End OHM-specific changes ###########################################################
 #### End OHM-specific changes ###########################################################
 
-echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=112420" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=110223" type="text/javascript"></script>';
 
 
 //assessment_min.js bundles: general.js, mathjs.js, AMhelpers.js, confirmsubmit.js, drawing.js, and eqntips.js
