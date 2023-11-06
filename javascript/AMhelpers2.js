@@ -413,7 +413,28 @@ function initDupRubrics() {
 }
 
 function initShowAnswer2() {
-  var icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>';
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  // ####### Begin OHM-specific changes ##################################################################
+  // The submitbtn class is only rendered by multiembedq2 if the iframe_resize_id param 
+  // is in the URL (meaning the question is a Try-It and not regular OHM)
+  let tryIt = document.getElementsByClassName('submitbtn')
+  let icon;
+  if (tryIt.length !== 0) {
+    icon = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="14" viewBox="0 0 30 14" fill="none">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M6.23016 10.0557C7.9177 10.0557 9.28571 8.68772 9.28571 7.00018C9.28571 5.31264 7.9177 3.94462 6.23016 3.94462C4.54262 3.94462 3.1746 5.31264 3.1746 7.00018C3.1746 8.68772 4.54262 10.0557 6.23016 10.0557ZM6.23016 13.2303C9.67098 13.2303 12.4603 10.441 12.4603 7.00018C12.4603 3.55936 9.67098 0.77002 6.23016 0.77002C2.78934 0.77002 0 3.55936 0 7.00018C0 10.441 2.78934 13.2303 6.23016 13.2303Z" fill="#202325"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.6348 6.64297C10.6348 5.76632 11.3454 5.05566 12.2221 5.05566H28.4125C29.2892 5.05566 29.9998 5.76632 29.9998 6.64297C29.9998 7.51961 29.2892 8.23027 28.4125 8.23027H12.2221C11.3454 8.23027 10.6348 7.51961 10.6348 6.64297Z" fill="#202325"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M22.2223 7.04004C23.0989 7.04004 23.8096 7.7507 23.8096 8.62734L23.8096 9.97655C23.8096 10.8532 23.0989 11.5638 22.2223 11.5638C21.3456 11.5638 20.635 10.8532 20.635 9.97655L20.635 8.62734C20.635 7.7507 21.3456 7.04004 22.2223 7.04004Z" fill="#202325"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M26.4283 7.04004C27.305 7.04004 28.0156 7.7507 28.0156 8.62734L28.0156 9.97655C28.0156 10.8532 27.305 11.5638 26.4283 11.5638C25.5517 11.5638 24.841 10.8532 24.841 9.97655L24.841 8.62734C24.841 7.7507 25.5517 7.04004 26.4283 7.04004Z" fill="#202325"/>
+    </svg>`
+  } else {
+    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>';
+  }
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+  // ####### End OHM-specific changes ##################################################################
+  
   $("input.sabtn + span.hidden, input.sabtn + div.hidden").each(function(i, el) {
 
     var qref = el.id.substring(3);
