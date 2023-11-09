@@ -1840,6 +1840,7 @@ if ($_SESSION['lti_keytype']=='gc') {
 $_SESSION['ltiuserid'] = $SESS['ltiuserid'];
 $_SESSION['userid'] = $userid;
 $_SESSION['time'] = $now;
+$_SESSION['started'] = $now;
 
 if (!$promptforsettings && !$createnewsession && !($linkparts[0]=='aid' && $tlwrds != '')) {
 
@@ -3159,6 +3160,7 @@ if ($_SESSION['lti_keytype']=='cc-vf') {
 $_SESSION['ltiuserid'] = $SESS['ltiuserid'];
 $_SESSION['userid'] = $userid;
 $_SESSION['time'] = $now;
+$_SESSION['started'] = $now;
 
 if ($_SESSION['lti_keytype']=='cc-vf' || (!$promptforsettings && !$createnewsession && !($keyparts[0]=='aid' && $tlwrds != ''))) {
 	//redirect now if already have session and no timelimit
