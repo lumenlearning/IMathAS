@@ -375,9 +375,16 @@ for ($qn=0; $qn < $numq; $qn++) {
     if (!$state['jssubmit']) {
         echo '<p>';
         // ####### Begin OHM-specific changes ##################################################################
+        // ####### Begin OHM-specific changes ##################################################################        
+        // ####### Begin OHM-specific changes ##################################################################
         // Adds $qsid param to submitq to send postMessage to Valkyrie for FullStory Try-It recording
-        // Adds submitbtn class to style button differently for Try-Its
-        echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary submitbtn">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
+        // Conditionally adds submitbtn class to style button differently for Try-Its (not sent if not a Try-It)
+        // The presence of this conditional class ^ is also used to decide which key SVG to show (since it's different for Try-Its)
+        if (isset($_GET['iframe_resize_id'])) {
+          echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary submitbtn">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
+        } else {
+          echo '<button type=button onclick="submitq('.$qn.', '.$qsid.')" class="primary">'._("Submit").'</button><span id="ohm'.$qsid.'"/>';
+        }
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
@@ -410,7 +417,7 @@ for ($qn=0; $qn < $numq; $qn++) {
 echo '<input type=hidden name=toscoreqn id=toscoreqn value=""/>';
 echo '<input type=hidden name=state id=state value="'.Sanitize::encodeStringForDisplay(JWT::encode($a2->getState(), $statesecret)).'" />';
 
-echo '<div class="mce-content-body" style="text-align:right;font-size:70%;margin-right:5px;"><a style="color:#666" target="_blank" href="course/showlicense.php?id='.Sanitize::encodeUrlParam(implode('-', $QS['id'])).'">'._('License').'</a></div>';
+echo '<div class="mce-content-body" style="text-align:right;font-size:70%;margin-right:5px;"><a class="license" style="color:#666" target="_blank" href="course/showlicense.php?id='.Sanitize::encodeUrlParam(implode('-', $QS['id'])).'">'._('License').'</a></div>';
 
 
 if ($state['jssubmit']) {
