@@ -497,7 +497,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 			require_once "./includes/email.php";
 			send_email($_POST['email'], $sendfrom, $installname._(' Username Request'), $message, array(), array(), 10);
 			echo $cnt . _(" usernames match this email address and were emailed"),".  <a href=\"index.php\">",_("Return to login page"),"</a>";
-
+            
 		} else {
 
 			$query = "SELECT SID,lastaccess FROM imas_users WHERE email=:email AND SID LIKE 'lti-%'";
@@ -559,7 +559,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 			$stm = $DBH->prepare("UPDATE imas_users SET password=:newpw,forcepwreset=0 WHERE id=:uid LIMIT 1");
 			$stm->execute(array(':uid'=>$userid, ':newpw'=>$newpw));
 
-            $jsondata = json_decode($jsondata,true);
+            $jsondata = json_decode($line['jsondata'],true);
 			if ($_GET['action']=="chgpwd") {
 				require_once "./includes/email.php";
 				$message = '<p><b>'._('This is an automated message. Do not reply to this email.').'</b></p>';
@@ -569,7 +569,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 				$message .= _('If you did not make these changes, please log into your account and correct the changes and change your password.').' ';
 
                 require_once './includes/passwordreset.php';
-                $code = make_pwreset_link($userid, true);
+                $code = make_pwreset_link($userid, true);   
 
 				$message .= _('If you are unable to log into your account, use the following link.'). ' ';
 				$message .= '<a href="' . $GLOBALS['basesiteurl'] . "/forms.php?action=resetpw&code=$code\">";
@@ -977,12 +977,12 @@ If you still have trouble or the wrong email address is on file, contact your in
 			$message .= _('If you did not make these changes, please log into your account and correct the changes and change your password.').' ';
 
             require_once './includes/passwordreset.php';
-            $code = make_pwreset_link($userid, true);
+            $code = make_pwreset_link($userid, true);  
 
             $message .= _('If you are unable to log into your account, use the following link.'). ' ';
             $message .= '<a href="' . $GLOBALS['basesiteurl'] . "/forms.php?action=resetpw&code=$code\">";
             $message .= _('Reset Password').'</a></p>';
-
+			
 
 			send_email($old_email, $sendfrom,
 				_('Alert:'). ' '.$installname.' '._('Account Activity'),
@@ -1035,7 +1035,7 @@ If you still have trouble or the wrong email address is on file, contact your in
 		$hidelist = implode(',', $tohide);
 		$stm = $DBH->prepare("UPDATE imas_users SET hideonpostswidget=:hidelist WHERE id= :uid");
 		$stm->execute(array(':uid'=>$userid, ':hidelist'=>$hidelist));
-	}
+	} 
 	if ($isgb) {
 		echo '<html><body>',_('Changes Recorded.'),'  <input type="button" onclick="parent.GB_hide()" value="',_('Done'),'" /></body></html>';
 	} else if (isset($_SESSION['ltiitemtype']) && $_SESSION['ltiitemtype']==0) {
