@@ -10,6 +10,7 @@
 * from which these names are taken.
 */
 :root {
+  --gray: #C2BDBA;
   --green-100: #E8F8F1;
   --green-500: #15B976;
   --indigo-500: #5367EA;
@@ -414,6 +415,17 @@ div.question {
 	line-height: 1.4;
 }
 
+/* Suppresses the numerical score (out of 1) that appears 
+* at the top of multiembedq2 after a user hits Submit. */
+#results0 {
+  display: none;
+}
+
+/* Suppresses the License link that appears at the bottom of multiembedq2. */
+.license {
+  display: none;
+}
+
 /* Intro paragraph of question gets larger font. */
 div.question > div:first-child > p:first-child {
   font-size: 20px;
@@ -427,7 +439,7 @@ div.ansred, div.ansgrn, div.ansyel, div.ansorg {
 }
 
 img.gchk, img.redx, svg.scoremarker, img.scoreboxicon {
-  /* hides old Waymaker X and checkmark images coming from displayq2.php */
+  /* hides old Waymaker/OHM1 checkmark and X images coming from displayq2.php */
   display: none;
 }
 
@@ -542,6 +554,10 @@ input.text, span.mq-math-mode {
   width: 130px;
 }
 
+span.mq-root-block{
+  margin-top: 12px;
+}
+
 input.text ~ .scoreboxicon {
   display: none;
 }
@@ -558,7 +574,7 @@ p:has( > input.text.ansred ):before {
   content: url(../img/incorrect.svg);
   padding-right: 5px;
   position: relative;
-  top: 5px;
+  top: 12px;
   /* for some reason pulling the shared non-content styles
   out to a shared selector set makes them stop working */
 }
@@ -567,14 +583,14 @@ p:has( > input.text.ansgrn ):before {
   content: url(../img/correct.svg);
   padding-right: 5px;
   position: relative;
-  top: 5px;
+  top: 12px;
 }
 
 p:has( > input.text.ansyel ):before {
   content: url(../img/partially_correct.svg);
   padding-right: 5px;
   position: relative;
-  top: 5px;
+  top: 12px;
 }
 /* END: Styles for short-answer text box and answer highlighting */
 
@@ -778,7 +794,54 @@ div.question > .btn[value="Submit"]:active,
 }
 /* END: Submit button styles */
 
-/* START: Styles for Hint and Show Answer link-style buttons */
+/* 
+* START: Styles for key-logo Show Answer buttons
+* (seen in multiembedq2 but not multiembedq)
+*/
+.keywrap {
+  border: unset;
+  margin: 10px;
+  display: flex;
+}
+
+.keywrap > button {
+  align-items: center;
+  background: var(--white);
+  border-radius: 10px;
+  border: 2px solid var(--gray);
+  display: flex;
+  gap: 10px;
+  height: 50px;
+  justify-content: center;
+  padding: 10px;
+  width: 50px;
+}
+
+.keywrap > span { 
+  /* vertically centers answer */
+  margin-top: 10px;
+}
+
+.keywrap > span > br:nth-child(1) {
+  /* answers are sometimes (but not often) coded 
+  * with starting line-breaks to try to do the 
+  * same thing as our margin-top above; 
+  * we'll hide these because we don't need them */
+  display: none;
+}
+
+.keywrap > span:has(br:nth-child(2)) {
+  /* gives vertical space back if multi-line answer */
+  margin-top: unset;
+}
+
+/* END: Styles for key-logo Show Answer buttons */
+
+/* 
+* START: Styles for Hint link-style buttons 
+* (also Show Answer for multiembedq but NOT multiembedq2 
+* as they have different markup) 
+*/
 input[type=button].sabtn, p > button:only-child {
 	color: var(--primary-text);
 	background-color: var(--white);
@@ -790,7 +853,8 @@ input[type=button].sabtn, p > button:only-child {
   text-decoration-line: underline;
 }
 
-/* Show Answer buttons need a bit of spacing from their answers 
+/* 
+* Show Answer buttons need a bit of spacing from their answers 
 * (and from one another) if stacked vertically. Hint buttons are 
 * already in a <p> tag so they don't need it.
 */

@@ -32,6 +32,7 @@ var courseBrowserProps = {
 			"trig": "Trigonometry",
 			"precalc": "Precalculus",
 			"calc": "Calculus",
+			"business": "Math for Business",
 			"qr": "Math for Liberal Arts / Quantitative Reasoning",
 			"stats": "Statistics",
 			"linalg": "Linear Algebra",
@@ -39,6 +40,7 @@ var courseBrowserProps = {
             "chem": "Chemistry",
 			"acct": "Accounting",
 			"phys": "Physics",
+			"placement": "Placement testing",
 			"other": "Other"
 		},
 		"multi": true,
