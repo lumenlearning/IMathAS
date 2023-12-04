@@ -46,6 +46,21 @@ final class StudentPaymentDbTest extends TestCase
 		$this->assertEquals(42, $result);
 	}
 
+    public function testGetStudentGroupId_StudentIdNotFound()
+    {
+        $pdoMock = $this->createMock(PDOMock::class);
+        $pdoStatementMock = $this->createMock(PDOStatementMock::class);
+
+        $pdoMock->method('prepare')->willReturn($pdoStatementMock);
+        $pdoStatementMock->method('fetchColumn')->willReturn(null); // return a group ID
+
+        $this->expectException(StudentPaymentException::class);
+
+        $studentPaymentDb = new StudentPaymentDb(42, 2604, 128, 42, null);
+        $studentPaymentDb->setDbh($pdoMock);
+        $studentPaymentDb->getStudentGroupId();
+    }
+
 	/*
 	 * getStudentEnrollmentId
 	 */
@@ -59,6 +74,21 @@ final class StudentPaymentDbTest extends TestCase
 
 		$this->assertEquals(42, $result);
 	}
+
+    public function testGetStudentEnrollmentId_EnrollmentIdNotFound()
+    {
+        $pdoMock = $this->createMock(PDOMock::class);
+        $pdoStatementMock = $this->createMock(PDOStatementMock::class);
+
+        $pdoMock->method('prepare')->willReturn($pdoStatementMock);
+        $pdoStatementMock->method('fetchColumn')->willReturn(null); // return a group ID
+
+        $this->expectException(StudentPaymentException::class);
+
+        $studentPaymentDb = new StudentPaymentDb(42, 2604, 128, 42, null);
+        $studentPaymentDb->setDbh($pdoMock);
+        $studentPaymentDb->getStudentEnrollmentId();
+    }
 
 	/*
 	 * getStudentHasActivationCode
@@ -163,6 +193,13 @@ final class StudentPaymentDbTest extends TestCase
         $this->assertEquals(42, $groupId);
     }
 
+    public function testGetGroupIdForPayments_InsufficientData() {
+        $this->expectException(StudentPaymentException::class);
+
+        $studentPaymentDb = new StudentPaymentDb(null, null, null, null, null);
+        $studentPaymentDb->getGroupIdForPayments();
+    }
+
 	/*
 	 * getGroupRequiresStudentPayment
 	 */
@@ -238,6 +275,38 @@ final class StudentPaymentDbTest extends TestCase
 
 		$this->assertEquals(42, $result);
 	}
+
+    public function testGetCourseOwnerGroupId_NoCourseId()
+    {
+        $this->expectException(StudentPaymentException::class);
+
+        $studentPaymentDb = new StudentPaymentDb(null, null, null, null, null);
+        $studentPaymentDb->getCourseOwnerGroupId();
+    }
+
+    /*
+     * getCourseOwnerGroupName
+     */
+
+    public function testGetCourseOwnerGroupName()
+    {
+        $dbResult = array('name' => 'Meow School of Meowing');
+
+        $this->pdoMock->method('prepare')->willReturn($this->pdoStatementMock);
+        $this->pdoStatementMock->method('fetch')->willReturn($dbResult);
+
+        $result = $this->studentPaymentDb->getCourseOwnerGroupName();
+
+        $this->assertEquals('Meow School of Meowing', $result);
+    }
+
+    public function testGetCourseOwnerGroupName_NoCourseId()
+    {
+        $this->expectException(StudentPaymentException::class);
+
+        $studentPaymentDb = new StudentPaymentDb(null, null, null, null, null);
+        $studentPaymentDb->getCourseOwnerGroupName();
+    }
 
 	/*
 	 * getGroupIdByUserId

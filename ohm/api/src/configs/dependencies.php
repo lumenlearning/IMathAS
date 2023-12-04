@@ -37,3 +37,12 @@ $container['phpErrorLogger'] = function ($c) {
 	return new \OHM\Api\Handlers\PhpErrorHandler($c);
 };
 
+// Factory for ModelAuditService.
+$container['modelAuditService'] = function ($c) {
+    return new \OHM\Api\Services\ModelAuditService($c);
+};
+
+// Factory for GroupService.
+$container['groupService'] = function ($c) {
+    return new \OHM\Api\Services\GroupService($c);
+};

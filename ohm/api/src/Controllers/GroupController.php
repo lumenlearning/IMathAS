@@ -2,6 +2,8 @@
 
 namespace OHM\Api\Controllers;
 
+use Monolog\Logger;
+use OHM\Api\Services\GroupService;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -10,13 +12,16 @@ use OHM\Models\Group;
 
 class GroupController extends BaseApiController
 {
-	private $logger;
+	private Logger $logger;
+
+    private GroupService $groupService;
 
 	public function __construct(Container $container)
 	{
 		parent::__construct($container);
 
 		$this->logger = $container->get('logger');
+        $this->groupService = $container->get('groupService');
 	}
 
 	/**
@@ -50,7 +55,7 @@ class GroupController extends BaseApiController
 	 */
 	public function find($request, $response, $args)
 	{
-		$group = $this->findByIdOrUuid($args['id']);
+		$group = $this->groupService->findByIdOrUuid($args['id']);
 
 		if (empty($group)) {
 			return $response->withStatus(404);
@@ -100,7 +105,7 @@ class GroupController extends BaseApiController
 	{
 		$groupId = $args['id'];
 
-		$group = $this->findByIdOrUuid($groupId);
+		$group = $this->groupService->findByIdOrUuid($groupId);
 		if (is_null($group)) {
 			return $response->withStatus(204);
 		}
@@ -127,32 +132,14 @@ class GroupController extends BaseApiController
 	public function update($request, $response, $args)
 	{
 		$groupId = $args['id'];
+        $groupAttributes = $request->getParsedBody();
 
-		$group = $this->findByIdOrUuid($groupId);
-		if (is_null($group)) {
-			return $response->withStatus(404);
-		}
+        $group = $this->groupService->updateByIdOrUuid($groupId, $groupAttributes);
 
-		$group->fill($request->getParsedBody());
-		$group->save();
+        if (is_null($group)) {
+            return $response->withStatus(404);
+        }
 
-		return $response->withStatus(200)->withJson($group);
-	}
-
-	/**
-	 * Get a Group by ID or UUID.
-	 *
-	 * @param $id
-	 * @return Group
-	 */
-	private function findByIdOrUuid($id)
-	{
-		if ((string)(int)$id == $id) {
-			$group = Group::find($id);
-		} else {
-			$group = Group::where('lumen_guid', $id)->first();
-		}
-
-		return $group;
+        return $response->withStatus(200)->withJson($group);
 	}
 }
