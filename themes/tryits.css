@@ -864,33 +864,6 @@ input[type=button].sabtn {
 
 /* END: Styles for Hint and Show Answer link-style buttons */
 
-/* START: Styles for Try Another Version link-style buttons */
-
-a.newversion {
-  color: var(--primary-text);
-  cursor: pointer;
-  font-family: 'Public Sans';
-  font-size: 16px;
-  font-weight: 700;
-  text-decoration-line: underline;
-}
-
-button.newversion {
-  color: var(--primary-text);
-	background-color: var(--white);
-	border: none;
-  cursor: pointer;
-  font-family: 'Public Sans';
-  font-size: 16px;
-  font-weight: 700;
-  margin-top: 15px;
-  position: relative;
-  right: 5px;
-  text-decoration-line: underline;
-}
-
-/* END: Styles for Try Another Version link-style buttons */
-
 /* START: Fixes styles for ul.helplist using prod QID 74150 as a baseline */
 div.qhelps {
   padding-top: 10px;
