@@ -274,8 +274,12 @@ if (isset($coursetheme)) {
 }
 // ####### Begin OHM-specific changes ##################################################################
 // ####### Begin OHM-specific changes ##################################################################        
-if (isset($_GET['iframe_resize_id'])) {
+if (isset($_GET['iframe_resize_id'])) { // add Try-It styles to Try Its
   echo '<link rel="stylesheet" href="/themes/tryits.css" type="text/css"/>';
+}
+// add a few extra styles to Waymaker/PBJ Try Its only
+if (isset($_GET['iframe_resize_id']) && !isset($_GET['source'])) {
+  echo '<link rel="stylesheet" href="/themes/waymakertryits.css" type="text/css"/>';
 }
 // ####### End OHM-specific changes ##################################################################
 // ####### End OHM-specific changes ##################################################################    
