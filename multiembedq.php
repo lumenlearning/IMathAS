@@ -293,7 +293,7 @@ $showQuestionNumbers = '';
 if (isset($_REQUEST['show_question_numbers'])) {
 	$showQuestionNumbers = '&amp;show_question_numbers';
 }
-// if (getenv('ALLOW_TRY_ANOTHER_VERSION') == 'true') {
+if (getenv('ALLOW_TRY_ANOTHER_VERSION') == 'true') {
   // newversion class added to allow for specific styling
 	echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.$sameseed.'&amp;theme='.$theme.'&amp;iframe_resize_id='.$targetid.$showQuestionNumbers.'" class="newversion">';
  	echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.Sanitize::encodeUrlParam($sameseed).'&amp;theme='.Sanitize::encodeUrlParam($theme).'&amp;iframe_resize_id='.Sanitize::encodeUrlParam($targetid).'" class="newversion">';
@@ -311,7 +311,7 @@ if (isset($_REQUEST['show_question_numbers'])) {
       echo _('Try Another Version of This Question').'</a></p>';
     }
  	}
-// }
+}
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################
 // ####### End OHM-specific changes ####################################################################

@@ -393,9 +393,9 @@ for ($qn=0; $qn < $numq; $qn++) {
         // @see https://lumenlearning.atlassian.net/browse/AST-255
         // @see https://lumenlearning.atlassian.net/browse/OHM-1168
         // Show/hide try another version option in OHM vs OHM2 based on feature flag.
-        // if (getenv('ALLOW_TRY_ANOTHER_VERSION') != 'true') {
+        if (getenv('ALLOW_TRY_ANOTHER_VERSION') != 'true') {
             $state['allowregen'] = 0;
-        // }
+        }
         if ($state['allowregen']) { // newversion class added to allow for specific styling
           if (isset($_GET['iframe_resize_id'])) {
             // Use different wording for TryIts vs regular OHM
@@ -404,7 +404,7 @@ for ($qn=0; $qn < $numq; $qn++) {
             echo ' <button type=button onclick="regenq('.$qn.')" class="secondary newversion">'._('Try a similar question').'</button>';
           }
         }
-         // ####### End OHM-specific changes ####################################################################
+        // ####### End OHM-specific changes ####################################################################
         // ####### End OHM-specific changes ####################################################################
         // ####### End OHM-specific changes ####################################################################
         // ####### End OHM-specific changes ####################################################################
