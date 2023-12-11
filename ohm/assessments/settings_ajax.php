@@ -105,12 +105,13 @@ function validParamsPaymentType()
  * @param $courseOwnerGroupId integer The group's ID. (imas_groups, id column)
  * @param $isEnabled boolean True for enabled, false for disabled.
  */
-function setStudentPaymentEnabled($courseOwnerGroupId, $isEnabled)
+function setStudentPaymentEnabled(int $courseOwnerGroupId, bool $isEnabled): void
 {
 	try {
-		$studentPaymebtDb = new StudentPaymentDb(null, null, null, $courseOwnerGroupId, null);
-		$studentPaymebtDb->setStudentPaymentAllCoursesByGroupId($courseOwnerGroupId, $isEnabled);
-		$studentPaymebtDb->setGroupRequiresStudentPayment($isEnabled);
+		$studentPaymentDb = new StudentPaymentDb(null, null, null, $courseOwnerGroupId, null);
+        logStudentPaymentSettingChange($studentPaymentDb, $courseOwnerGroupId, $isEnabled);
+		$studentPaymentDb->setStudentPaymentAllCoursesByGroupId($courseOwnerGroupId, $isEnabled);
+		$studentPaymentDb->setGroupRequiresStudentPayment($isEnabled);
 	} catch (\PDOException $e) {
 		dbException($e, $courseOwnerGroupId);
 	} catch (StudentPaymentException $e) {
@@ -118,6 +119,26 @@ function setStudentPaymentEnabled($courseOwnerGroupId, $isEnabled)
 	}
 }
 
+/**
+ * Log changes to the student payment setting for a group.
+ *
+ * @param StudentPaymentDb $studentPaymentDb An instance of StudentPaymentDb set to the group ID
+ *                                           whose student payment setting is being changed.
+ * @param int $courseOwnerGroupId The group ID whose student payment setting is being changed.
+ * @param bool $isEnabled The new payment setting.
+ * @return void
+ * @throws StudentPaymentException
+ */
+function logStudentPaymentSettingChange(StudentPaymentDb $studentPaymentDb, int $courseOwnerGroupId, bool $isEnabled): void
+{
+    global $username; // This is set by validate.php.
+
+    $isEnabledAsString = $isEnabled ? 'true' : 'false';
+    $courseOwnerGroupName = $studentPaymentDb->getCourseOwnerGroupName();
+    $logMessage = sprintf('(OHM UI) Setting payments enabled to %s for %s (group ID %d). Change submitted by user "%s".',
+        $isEnabledAsString, $courseOwnerGroupName, $courseOwnerGroupId, $username);
+    error_log($logMessage);
+}
 
 /**
  * This function is called in setStudentPaymentEnabled try/catch blocks.
