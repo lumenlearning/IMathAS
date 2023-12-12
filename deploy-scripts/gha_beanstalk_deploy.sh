@@ -55,7 +55,7 @@ echo -e "\n============================================================"
 echo "  Uploading to S3: beanstalk.zip -> s3://${S3_BUCKET_NAME}/$ZIP_FILE_NAME"
 echo -e "============================================================\n"
 
-aws s3 cp beanstalk.zip "s3://${S3_BUCKET_NAME}/$ZIP_FILE_NAME"
+aws s3 --region us-west-2 cp beanstalk.zip "s3://${S3_BUCKET_NAME}/$ZIP_FILE_NAME"
 
 echo -e "\n============================================================"
 echo "  Creating application version"
