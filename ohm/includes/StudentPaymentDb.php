@@ -314,6 +314,26 @@ class StudentPaymentDb
 		return $groupId;
 	}
 
+    /**
+     * Get a course owner's group name.
+     *
+     * @return string The course owner's group name.
+     * @throws StudentPaymentException Thrown if the course ID is not known.
+     */
+    function getCourseOwnerGroupName()
+    {
+        $courseOwnerGroupId = $this->getCourseOwnerGroupId();
+        if (0 == $courseOwnerGroupId) {
+            return 'Default Group (group ID == 0)';
+        }
+
+        $pdoStatement = $this->dbh->prepare("SELECT name FROM imas_groups WHERE id = :id");
+        $pdoStatement->execute(array(':id' => $courseOwnerGroupId));
+        $results = $pdoStatement->fetch(\PDO::FETCH_ASSOC);
+
+        return $results['name'];
+    }
+
 	/**
 	 * Get a user's group ID by their user ID.
 	 *

@@ -3,6 +3,8 @@
 namespace OHM\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Group extends Model
 {
@@ -17,6 +19,28 @@ class Group extends Model
 	 */
 	const UPDATED_AT = null;
 
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'groupid', 'id');
+    }
+
+    public function courses(): HasManyThrough
+    {
+        /*
+         * SELECT * FROM `imas_courses`
+	     * INNER JOIN `imas_users` ON `imas_users`.`id` = `imas_courses`.`ownerid`
+         * WHERE `imas_users`.`groupid` = ?
+         */
+        return $this->hasManyThrough(
+            Course::class,
+            User::class,
+            'groupid',
+            'ownerid',
+            'id',
+            'id'
+        );
+    }
+
 	/**
 	 * The attributes that are mass assignable.
 	 *
@@ -30,6 +54,6 @@ class Group extends Model
 	 *
 	 * @var array
 	 */
-	protected $hidden = [];
+	protected $hidden = ['courses'];
 
 }

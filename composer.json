@@ -1,6 +1,6 @@
 {
     "require": {
-        "php": ">=7.3.0",
+        "php": ">=7.4",
         "ext-pdo": "*",
         "slim/slim": "3.9.2",
         "slim/php-view": "2.2.0",
