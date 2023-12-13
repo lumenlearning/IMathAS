@@ -398,7 +398,7 @@ for ($qn=0; $qn < $numq; $qn++) {
         }
         if ($state['allowregen']) { // newversion class added to allow for specific styling
           if (isset($_GET['iframe_resize_id'])) {
-            // Use different wording for TryIts vs regular OHM
+            // Use different wording for Try-Its vs regular OHM
             echo ' <button type=button onclick="regenq('.$qn.')" class="secondary newversion">'._('Try another version of this question').'</button>';
           } else {
             echo ' <button type=button onclick="regenq('.$qn.')" class="secondary newversion">'._('Try a similar question').'</button>';

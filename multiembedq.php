@@ -299,7 +299,7 @@ if (getenv('ALLOW_TRY_ANOTHER_VERSION') == 'true') {
  	echo '<p><a href="multiembedq.php?id='.Sanitize::encodeUrlParam($_GET['id']).'&amp;regen=1&amp;sameseed='.Sanitize::encodeUrlParam($sameseed).'&amp;theme='.Sanitize::encodeUrlParam($theme).'&amp;iframe_resize_id='.Sanitize::encodeUrlParam($targetid).'" class="newversion">';
  	if (count($qids)>1) {
     if (isset($_GET['iframe_resize_id'])) {
-      // Use different capitalization for TryIts vs regular OHM
+      // Use different capitalization for Try-Its vs regular OHM
       echo _('Try another version of these questions').'</a></p>';
     } else {
  		  echo _('Try Another Version of These Questions').'</a></p>';
