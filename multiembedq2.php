@@ -396,14 +396,20 @@ for ($qn=0; $qn < $numq; $qn++) {
         if (getenv('ALLOW_TRY_ANOTHER_VERSION') != 'true') {
             $state['allowregen'] = 0;
         }
-        // ####### End OHM-specific changes ####################################################################
-        // ####### End OHM-specific changes ####################################################################
-        // ####### End OHM-specific changes ####################################################################
-        // ####### End OHM-specific changes ####################################################################
-        // ####### End OHM-specific changes ####################################################################
-        if ($state['allowregen']) {
-            echo ' <button type=button onclick="regenq('.$qn.')" class="secondary">'._('Try a similar question').'</button>';
+        if ($state['allowregen']) { // newversion class added to allow for specific styling
+          if (isset($_GET['iframe_resize_id'])) {
+            // Use different wording for Try-Its vs regular OHM
+            echo ' <button type=button onclick="regenq('.$qn.')" class="secondary newversion">'._('Try another version of this question').'</button>';
+          } else {
+            echo ' <button type=button onclick="regenq('.$qn.')" class="secondary newversion">'._('Try a similar question').'</button>';
+          }
         }
+        // ####### End OHM-specific changes ####################################################################
+        // ####### End OHM-specific changes ####################################################################
+        // ####### End OHM-specific changes ####################################################################
+        // ####### End OHM-specific changes ####################################################################
+        // ####### End OHM-specific changes ####################################################################
+        
         echo '</p>';
     }
     echo '</div>';
