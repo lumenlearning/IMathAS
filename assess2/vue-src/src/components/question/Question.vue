@@ -268,7 +268,6 @@ export default {
         actions.loadQuestion(this.qn, false, false);
       } else if (this.questionContentLoaded && this.active &&
         !this.questionData.rendered && skiprender !== true) {
-        window.console.log('rendering question ' + this.qn);
         this.renderAndTrack();
       }
     },
