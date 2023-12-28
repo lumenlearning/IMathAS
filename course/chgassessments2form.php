@@ -760,11 +760,10 @@ $vueData = array(
 	</fieldset>
 </div>
 <script type="text/javascript">
-
-var app = new Vue({
-	el: '#app',
-  data: <?php echo json_encode($vueData, JSON_INVALID_UTF8_IGNORE); ?>,
-	computed: {
+const { createApp } = Vue;
+createApp({
+  data: function() { return <?php echo json_encode($vueData, JSON_INVALID_UTF8_IGNORE); ?>;},
+  computed: {
 		coreSet: function() {
 			let tot = (this.subtype === 'DNC' ? 0 : 1) +
 				(this.defregens === '' ? 0 : 1) +
@@ -1061,5 +1060,5 @@ var app = new Vue({
     	// call init method
         this.initCalTagRadio();
 	}
-});
+}).mount('#app');
 </script>

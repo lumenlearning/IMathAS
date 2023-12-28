@@ -778,10 +778,10 @@ $vueData = array(
 	</div>
 </div>
 <script type="text/javascript">
-var app = new Vue({
-	el: '#app',
-  data: <?php echo json_encode($vueData); ?>,
-	computed: {
+const { createApp } = Vue;
+createApp({
+  data: function() { return <?php echo json_encode($vueData, JSON_INVALID_UTF8_IGNORE); ?>;},
+  computed: {
 		showscoresOptions: function() {
 			var during = {
 				'value': 'during',
@@ -1026,5 +1026,5 @@ var app = new Vue({
 			$("#dispdetails").focus();
 		}
 	}
-});
+}).mount('#app');
 </script>
