@@ -206,6 +206,6 @@ class ScoreQuestionTest extends TestCase
             'Warning: Feedback may be available but is not being returned due to the usage of OHM1 macros!',
             $responseData['errors']
         );
-        $this->assertContains('Warning: OHM1 feedback is an empty string.', $responseData['errors']);
+        $this->assertStringContainsString('Warning: OHM1 feedback = ', $responseData['errors'][1]);
     }
 }
