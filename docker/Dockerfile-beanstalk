@@ -4,13 +4,8 @@ FROM php:7.4-cli AS builder
 
 RUN apt-get update && apt-get install -y libzip-dev zip gnupg
 
-# Fetch updated MySQL GnuPG key.
-RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys B7B3B788A8D3785C \
-	&& rm -f /etc/apt/trusted.gpg.d/mysql.gpg \
-	&& gpg --output /etc/apt/trusted.gpg.d/mysql.gpg --export B7B3B788A8D3785C
-
 # Install mysql
-RUN curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2022 | gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
+RUN curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
 RUN echo 'deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/debian buster mysql-5.7' > /etc/apt/sources.list.d/mysql.list
 RUN apt-get update && apt-get install -y mysql-client
 RUN apt-get install -y git
