@@ -28,7 +28,11 @@ if ("setGroupPaymentType" == $action) {
 	$paymentType = validParamsPaymentType();
 	$groupId = validParamsGroupId();
 
-	setStudentPaymentType($groupId, $paymentType);
+    if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType) {
+        deleteStudentPaymentSetting($groupId);
+    } else {
+        setStudentPaymentType($groupId, $paymentType);
+    }
 
 	$newDbState = StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType ? false : true;
 	setStudentPaymentEnabled($groupId, $newDbState);
@@ -168,24 +172,50 @@ function dbException($exception, $groupId)
  */
 function setStudentPaymentType($courseOwnerGroupId, $paymentType)
 {
-	// If we're disabling student payments, don't delete it in the student
-	// payment API. Associated data now exists that OHM doesn't know about.
-	if (StudentPayApiResult::ACCESS_TYPE_NOT_REQUIRED == $paymentType) {
-		return;
-	}
-
 	$studentPaymentApi = new StudentPaymentApi(null, null, null, $courseOwnerGroupId, null);
 
 	try {
 		$apiResult = $studentPaymentApi->updateGroupPaymentSettings($paymentType);
 
 		if ($apiResult->getErrors()) {
-			response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+			response(500, 'Failed to change student payment setting for group ID ' . $courseOwnerGroupId);
 		}
 	} catch (StudentPaymentException $e) {
 		error_log(sprintf("Failed to change student payment setting (in student payment API) for group ID %d. Exception: %s",
-			$groupId, $e->getMessage()));
+            $courseOwnerGroupId, $e->getMessage()));
 		error_log($e->getTraceAsString());
-		response(500, 'Failed to change student payment setting for group ID ' . $groupId);
+		response(500, 'Failed to change student payment setting for group ID ' . $courseOwnerGroupId);
 	}
+}
+
+/**
+ * Delete a payment setting in the student payment API.
+ *
+ * @param int $courseOwnerGroupId The group's ID. (imas_groups, id column)
+ * @return void
+ */
+function deleteStudentPaymentSetting($courseOwnerGroupId) {
+    $studentPaymentApi = new StudentPaymentApi(null, null, null, $courseOwnerGroupId, null);
+
+    /*
+     * A warning from May 17, 2018:
+     *   If we're disabling student payments in OHM, don't delete it in the student
+     *   payment API. Associated data now exists in the payment service that OHM
+     *   doesn't know about.
+     *
+     * As of Jan 3, 2024, I did not find what may have been referenced here.
+     */
+
+    try {
+        $apiResult = $studentPaymentApi->deleteGroupPaymentSettings();
+
+        if ($apiResult->getErrors()) {
+            response(500, 'Failed to delete student payment setting for group ID ' . $courseOwnerGroupId);
+        }
+    } catch (StudentPaymentException $e) {
+        error_log(sprintf("Failed to delete student payment setting (in student payment API) for group ID %d. Exception: %s",
+            $courseOwnerGroupId, $e->getMessage()));
+        error_log($e->getTraceAsString());
+        response(500, 'Failed to delete student payment setting for group ID ' . $courseOwnerGroupId);
+    }
 }
