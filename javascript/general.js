@@ -552,7 +552,7 @@ function chkAllNone(frmid, arr, mark, skip) {
 
 var tinyMCEPreInit = {base: staticroot+"/tinymce4"};
 var desmos = '';
-function initeditor(edmode,edids,css,inline,setupfunction){
+function initeditor(edmode,edids,css,inline,setupfunction,extendsetup){
 	var cssmode = css || 0;
 	var inlinemode = inline || 0;
 	var selectorstr = '';
@@ -649,6 +649,9 @@ function initeditor(edmode,edids,css,inline,setupfunction){
 	if (setupfunction) {
 		edsetup.setup = setupfunction;
 	}
+    if (extendsetup) {
+        edsetup = Object.assign(edsetup, extendsetup);
+    }
 	//for (var i in tinymce.editors) {
 	//	tinymce.editors[i].remove();
 	//}
@@ -1244,7 +1247,7 @@ jQuery(function($) {
 			}).done(function(msg) {
 				$("#ltimenudiv").html(msg);
                 btn.attr("data-loaded",1);
-                document.cookie = "fromltimenu=1;"
+                document.cookie = "fromltimenu=1;" 
                     + 'path=' + ((imasroot=='') ? '/' : imasroot) + ';'
                     + ((window.location.protocol=='https:') ? "secure; samesite=none" : "");
 				sendLTIresizemsg();
