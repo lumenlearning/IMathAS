@@ -31,7 +31,7 @@ function parseMathQuiet($str, $vars = '', $allowedfuncs = array(), $fvlist = '',
       echo ". Error: ".$t->getMessage();
     }
     return false;
-  }
+  } 
   return $parser;
 }
 
@@ -63,13 +63,13 @@ function makeMathFunction($str, $vars = '', $allowedfuncs = array(), $fvlist = '
       echo ". Error: ".$t->getMessage();
     }
     return false;
-  }
+  } 
   return function($varvals) use ($parser) {
     try {
       return $parser->evaluate($varvals);
     } catch (Throwable $t) {
       return sqrt(-1);
-    }
+    } 
   };
 }
 
@@ -357,7 +357,7 @@ class MathParser
       return $this->evaluate($variableValues);
     } catch (Throwable $t) {
       return sqrt(-1);
-    }
+    } 
   }
 
   /**
@@ -1308,6 +1308,11 @@ class MathParser
       $sym1 = '*';
       $sym2 = '/';
     }
+
+    if ($node['left']['symbol'] === '~') {
+
+    }
+
 
     if ($sym1 !== '') {
       if ($node['left']['symbol'] === '~' && ($node['left']['left']['symbol'] === $sym1 || $node['left']['left']['symbol'] === $sym2)) {
