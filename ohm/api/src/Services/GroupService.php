@@ -63,7 +63,7 @@ class GroupService
             // If the payment service doesn't provide this value, then the
             // group's payment settings won't be modified. In this case, we
             // shouldn't touch course payment settings.
-            if (!is_null($groupAttributes['student_pay_enabled'])) {
+            if (isset($groupAttributes['student_pay_enabled'])) {
                 $this->updatePaymentSettingAllCourses($group, $groupAttributes['student_pay_enabled']);
             }
 
