@@ -56,8 +56,17 @@ class GroupService
         DB::beginTransaction();
 
         try {
+            // The contents of $groupAttributes is currently provided by
+            // the payment service. See: GroupController::update()
             $group->fill($groupAttributes);
-            $this->updatePaymentSettingAllCourses($group, $groupAttributes['student_pay_enabled']);
+
+            // If the payment service doesn't provide this value, then the
+            // group's payment settings won't be modified. In this case, we
+            // shouldn't touch course payment settings.
+            if (isset($groupAttributes['student_pay_enabled'])) {
+                $this->updatePaymentSettingAllCourses($group, $groupAttributes['student_pay_enabled']);
+            }
+
             $this->modelAuditService->logChanges($group, $groupAttributes);
             $group->save();
             DB::commit();
