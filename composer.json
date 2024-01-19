@@ -2,6 +2,7 @@
     "require": {
         "php": ">=7.4",
         "ext-pdo": "*",
+        "ext-json": "*",
         "slim/slim": "3.9.2",
         "slim/php-view": "2.2.0",
         "monolog/monolog": "1.23.0",
