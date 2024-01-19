@@ -2,7 +2,7 @@
 
 namespace OHM\Includes;
 
-use Cake\Database\Statement\PDOStatement;
+use PDOStatement;
 
 class LtiQueueValidator
 {
