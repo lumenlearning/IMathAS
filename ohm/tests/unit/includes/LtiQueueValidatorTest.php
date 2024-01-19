@@ -199,7 +199,12 @@ final class LtiQueueValidatorTest extends TestCase
         // Due to how the LTI version is detected, this will be parsed
         // by the LTI 1.1 validator. It should still fail as it's not
         // a valid 1.1 sourcedid either.
-        $sourcedid = ':|:8fbdc725-0775-4123-840b-8cb9f1684d68:|:https://mylearning.suny.edu/api/v1/grades:|:42';
+        $sourcedid = implode(':|:', [
+            '',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            'https://mylearning.suny.edu/api/v1/grades',
+            '42'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -209,7 +214,12 @@ final class LtiQueueValidatorTest extends TestCase
     {
         // IMathAS uses substr to check for "LTI1.3". This check ensures
         // there are no trailing spaces.
-        $sourcedid = 'LTI1.3 :|:8fbdc725-0775-4123-840b-8cb9f1684d68:|:https://mylearning.suny.edu/api/v1/grades:|:42';
+        $sourcedid = implode(':|:', [
+            'LTI1.3 ',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            'https://mylearning.suny.edu/api/v1/grades',
+            '42'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -217,7 +227,12 @@ final class LtiQueueValidatorTest extends TestCase
 
     public function test_is_valid_sourcedid_13_ltiuserid_is_empty(): void
     {
-        $sourcedid = 'LTI1.3:|::|:https://mylearning.suny.edu/api/v1/grades:|:42';
+        $sourcedid = implode(':|:', [
+            'LTI1.3',
+            '',
+            'https://mylearning.suny.edu/api/v1/grades',
+            '42'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -225,7 +240,12 @@ final class LtiQueueValidatorTest extends TestCase
 
     public function test_is_valid_sourcedid_13_score_url_is_empty(): void
     {
-        $sourcedid = 'LTI1.3:|:8fbdc725-0775-4123-840b-8cb9f1684d68:|::|:42';
+        $sourcedid = implode(':|:', [
+            'LTI1.3',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            '',
+            '42'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -233,7 +253,12 @@ final class LtiQueueValidatorTest extends TestCase
 
     public function test_is_valid_sourcedid_13_score_url_is_invalid(): void
     {
-        $sourcedid = 'LTI1.3:|:8fbdc725-0775-4123-840b-8cb9f1684d68:|:meow:|:42';
+        $sourcedid = implode(':|:', [
+            'LTI1.3',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            'meow',
+            '42'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -241,7 +266,12 @@ final class LtiQueueValidatorTest extends TestCase
 
     public function test_is_valid_sourcedid_13_platformid_missing(): void
     {
-        $sourcedid = 'LTI1.3:|:8fbdc725-0775-4123-840b-8cb9f1684d68:|:https://mylearning.suny.edu/api/v1/grades:|:';
+        $sourcedid = implode(':|:', [
+            'LTI1.3',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            'https://mylearning.suny.edu/api/v1/grades',
+            ''
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -249,7 +279,12 @@ final class LtiQueueValidatorTest extends TestCase
 
     public function test_is_valid_sourcedid_13_platformid_is_float(): void
     {
-        $sourcedid = 'LTI1.3:|:8fbdc725-0775-4123-840b-8cb9f1684d68:|:https://mylearning.suny.edu/api/v1/grades:|:42.5';
+        $sourcedid = implode(':|:', [
+            'LTI1.3',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            'https://mylearning.suny.edu/api/v1/grades',
+            '42.5'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
@@ -257,7 +292,12 @@ final class LtiQueueValidatorTest extends TestCase
 
     public function test_is_valid_sourcedid_13_platformid_is_string(): void
     {
-        $sourcedid = 'LTI1.3:|:8fbdc725-0775-4123-840b-8cb9f1684d68:|:https://mylearning.suny.edu/api/v1/grades:|:meow';
+        $sourcedid = implode(':|:', [
+            'LTI1.3',
+            '8fbdc725-0775-4123-840b-8cb9f1684d68',
+            'https://mylearning.suny.edu/api/v1/grades',
+            'meow'
+        ]);
         $isValid = $this->ltiQueueValidator->is_valid_sourcedid('meow', $sourcedid);
 
         $this->assertFalse($isValid);
