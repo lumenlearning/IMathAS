@@ -14,11 +14,7 @@ class LtiQueueValidator
      * Determine if a sourcedid is valid. Covers LTI 1.1 and 1.3.
      *
      * @param string $hash The hash column for the sourcedid.
-     *                          Null is only permitted so we can validate against it
-     *                          without throwing an exception.
      * @param string $sourcedid The sourcedid to validate.
-     *                               Null is only permitted so we can validate against it
-     *                               without throwing an exception.
      * @return bool True if the sourcedid is valid. False if not.
      */
     public function is_valid_sourcedid(string $hash, string $sourcedid): bool
