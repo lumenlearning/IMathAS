@@ -80,7 +80,7 @@ class LtiQueueValidator
 
         if (1 > $stm->rowCount()) {
             $message = sprintf(
-                'Failed to set "failures" to %d for hash %s.',
+                'Failed to set "failures" to %d for hash %s. (UPDATE statement affected 0 rows)',
                 self::LTI_QUEUE_MAX_FAIL_COUNT, $hash
             );
             LtiQueueLogger::debug_log($message);
