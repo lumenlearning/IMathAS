@@ -37,6 +37,9 @@ putenv('REPLICA_DB_PASSWORD=' . $dbpassword);
 putenv('REPLICA_DB_NAME=' . $dbname);
 putenv('REPLICA_DB_CHARSET=' . $dbcharset);
 
+// Health check auth code
+$GLOBALS['health_check']['auth_code'] = 'authcode';
+
 // Lumen student payment authorization API
 $GLOBALS['student_pay_api']['enabled'] = false;
 $GLOBALS['student_pay_api']['base_url'] = 'http://127.0.0.1:5000/studentpay_api/v1'; // No trailing slash!
