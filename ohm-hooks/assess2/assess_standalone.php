@@ -1,5 +1,8 @@
 <?php
 
+// This file has tests!
+// See: /ohm/tests/unit/ohm-hooks/assess2/AssessmentStandaloneTest.php
+
 /**
  * Include the correct answers and feedback for the student's answers in scoring results.
  *
@@ -22,11 +25,17 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
     $returnData['feedback'] = $scoreResult['extra']['feedback'];
 
     // Remove OHM1 feedback, as these are unusable by Catra.
-    $returnData = _removeOhm1Macros($returnData);
+    $returnData = _removeOhm1Feedback($returnData);
 
     // This was the least intrusive way (to MOM) to pass randqkeys/randkeys
     // from IMathAS\assess2\questions\scorepart\ScorePart to this hook. :(
     $randomAnswerKeymaps = $GLOBALS['ohmRandomAnswerKeymaps'] ?? [];
+
+    // We need to unset this global to prevent the issue reported in OHM-1200.
+    // This is set in two places:
+    // - /ohm-hooks/assess2/questions/scorepart/choices_score_part.php
+    // - /ohm-hooks/assess2/questions/scorepart/multiple_answer_score_part.php
+    if (isset($GLOBALS['ohmRandomAnswerKeymaps'])) unset($GLOBALS['ohmRandomAnswerKeymaps']);
 
     /*
      * For questions whose answers have been shuffled to minimize cheating,
@@ -117,14 +126,14 @@ function onScoreQuestionReturn(array $returnData, array $scoreResult): array
  * @param array $responseData The response being returned to Catra.
  * @return array An updated response to return to Catra.
  */
-function _removeOhm1Macros(array $responseData): array
+function _removeOhm1Feedback(array $responseData): array
 {
     $questionLevelFeedback = $responseData['feedback'];
     if (is_string($questionLevelFeedback)) {
         array_push($responseData['errors'],
             "Warning: Feedback may be available but is not being returned due to the usage of OHM1 macros!");
         // This may help troubleshooting efforts.
-        if (empty($questionPartTypes)) {
+        if (empty($questionLevelFeedback)) {
             array_push($responseData['errors'], "Warning: OHM1 feedback is an empty string.");
         } else {
             array_push($responseData['errors'], "Warning: OHM1 feedback = " . $questionLevelFeedback);
@@ -174,9 +183,20 @@ function _getCorrectAnswersFromScoreResult(array $scoreResult, bool $isMultiPart
  * Shuffle the correct answers for a question part using the randomAnswerKeys
  * found in $scorePartResult data.
  *
+ * This is used to get the correct answers for a question after the answer keys
+ * have been shuffled.
+ *
  * @param array $unseededCorrectAnswers Score results from ScoreEngine->scoreResult().
  * @param array $shuffledAnswerKeymap The mapping of unseeded answer keys to shuffled keys.
  *                                    Also known as $randqkeys and $randkeys.
+ *                                      Example:
+ *                                        [
+ *                                            // (shuffledKey) => (originalKey)
+ *                                            0 => 3,
+ *                                            1 => 2,
+ *                                            2 => 0,
+ *                                            3 => 1
+ *                                        ]
  * @return string The shuffled correct answers.
  */
 function _shuffleCorrectAnswers(array $unseededCorrectAnswers, array $shuffledAnswerKeymap): string
@@ -198,7 +218,14 @@ function _shuffleCorrectAnswers(array $unseededCorrectAnswers, array $shuffledAn
  *                                  Example: "2|3|5"
  * @param array $shuffledAnswerKeymap The mapping of unseeded answer keys to shuffled keys.
  *                                    Also known as $randqkeys and $randkeys.
- *                                      Example: See _getShuffledKeyByUnseededKey()
+ *                                      Example:
+ *                                       [
+ *                                           // (shuffledKey) => (originalKey)
+ *                                           0 => 3,
+ *                                           1 => 2,
+ *                                           2 => 0,
+ *                                           3 => 1
+ *                                       ]
  * @param array|null $allFeedback An array containing all feedback.
  * @return array The shuffled array of feedback.
  */
@@ -292,9 +319,10 @@ function _correctAnswersAsArray($correctAnswers)
 {
     if (is_array($correctAnswers)) {
         return $correctAnswers;
-    } else {
-        return explode(',', $correctAnswers);
     }
+
+    $correctAnswersAsArray = explode(',', $correctAnswers);
+    return $correctAnswersAsArray;
 }
 
 /**

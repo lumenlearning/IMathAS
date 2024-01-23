@@ -26,5 +26,6 @@ $onGetResult = function () use (
     // We need to keep this updated outside the scope of ScorePartResult, so we
     // can provide the random answer keymap for all parts of a multi-part question.
     // This information is needed by the Question API.
+    // This global will be unset in: /ohm-hooks/assess2/assess_standalone.php
     $GLOBALS['ohmRandomAnswerKeymaps'][$partNumber] = $randkeys;
 };
