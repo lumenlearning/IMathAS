@@ -17,6 +17,7 @@
   --indigo-600: #4252bb;
   /* middle-gray also called "Light Contrast 2" in mocks */
   --middle-gray: #eae8e3;
+  --dark-gray: #8b8e8e;
   --primary-text: #202325;
   --red-200: #ffdede;
   --red-500: #ff5b5b;
@@ -526,7 +527,7 @@ div.ansyel:has(> ul.nomark):after {
 /* START: Styles for dropdowns and dropdown answer highlighting */
 select {
   border-radius: 10px;
-  border: 2px solid var(--middle-gray);
+  border: 2px solid var(--dark-gray);
   font-family: "Public Sans";
   font-size: 16px;
   font-weight: 700;
@@ -539,7 +540,7 @@ select,
 select.ansgrn,
 select.ansred,
 select.ansyel {
-  border: 2px solid var(--middle-gray);
+  border: 2px solid var(--dark-gray);
 }
 
 p:has(> select.ansgrn) img,
@@ -571,7 +572,7 @@ p:has(> select.ansyel):before {
 
 /* START: Styles for short-answer text box and answer highlighting */
 textarea {
-  border: 2px solid var(--middle-gray);
+  border: 2px solid var(--dark-gray);
   border-radius: 10px;
   color: var(--secondary-text);
   font-family: "Public Sans";
@@ -582,7 +583,7 @@ textarea {
 
 input.text,
 span.mq-math-mode {
-  border: 2px solid var(--middle-gray);
+  border: 2px solid var(--dark-gray);
   border-radius: 10px;
   color: var(--secondary-text);
   font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",

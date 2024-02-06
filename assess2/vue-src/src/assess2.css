@@ -1,12 +1,11 @@
 /* Should move to imascore.css */
 
-
 /* General assessment player support styles */
 
 .ehdd {
   position: absolute;
   background: #669;
-  display:none;
+  display: none;
   color: #fff;
   font-size: 75%;
   padding: 0px 4px;
@@ -22,58 +21,58 @@
   opacity: 0.9;
 }
 .suggestion_list {
-   background: white;
-   border: 1px solid #ccc;
-   box-shadow: 1px 3px 8px 0 rgba(0,0,0,0.25);
-   padding: 0px;
- }
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 1px 3px 8px 0 rgba(0, 0, 0, 0.25);
+  padding: 0px;
+}
 
- .suggestion_list ul {
-   padding: 0;
-   margin: 0;
-   list-style-type: none;
- }
+.suggestion_list ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
 
- .suggestion_list a {
-   display: inline-block;
-   text-decoration: none;
-   color: navy;
-   padding: 4px 8px;
- }
+.suggestion_list a {
+  display: inline-block;
+  text-decoration: none;
+  color: navy;
+  padding: 4px 8px;
+}
 
- .suggestion_list .selected {
-   background: #ddd;
- }
+.suggestion_list .selected {
+  background: #ddd;
+}
 
- .dsbox {
-   border: 1px solid #ccc;
-   background-color: #eef;
-   padding: 8px;
- }
- .keywrap {
-   display: inline-block;
-   padding: 0;
-   margin: 1px 0 1px 2px;
-   border: 1px solid #ccc;
-   border-radius: 4px;
-   vertical-align: middle;
- }
- .keywrap [id^=ans] {
-   padding: 2px 8px;
- }
- .keybtn {
-   height: 28px;
-   padding: 4px;
-   margin: -1px;
-   border: 1px solid #ccc;
-   vertical-align: middle;
- }
- .keywrap.inwrap {
-   vertical-align: top;
- }
- .keywrap.inwrap .keybtn {
-   vertical-align: top;
- }
+.dsbox {
+  border: 1px solid #ccc;
+  background-color: #eef;
+  padding: 8px;
+}
+.keywrap {
+  display: inline-block;
+  padding: 0;
+  margin: 1px 0 1px 2px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+.keywrap [id^="ans"] {
+  padding: 2px 8px;
+}
+.keybtn {
+  height: 28px;
+  padding: 4px;
+  margin: -1px;
+  border: 1px solid #ccc;
+  vertical-align: middle;
+}
+.keywrap.inwrap {
+  vertical-align: top;
+}
+.keywrap.inwrap .keybtn {
+  vertical-align: top;
+}
 
 /* Question type supports */
 div.choice {
@@ -82,19 +81,20 @@ div.choice {
   text-align: center;
 }
 div.float {
-  float:left;
+  float: left;
 }
 
 div.match {
-  float:left;
+  float: left;
   padding: 5px;
   padding-right: 30px;
 }
-div.match li img, div.match li [role=img] {
+div.match li img,
+div.match li [role="img"] {
   vertical-align: middle;
 }
-div[role=radiogroup].clearfix .match {
-	padding-right: 5px;
+div[role="radiogroup"].clearfix .match {
+  padding-right: 5px;
 }
 div.spacer {
   clear: both;
@@ -102,7 +102,7 @@ div.spacer {
   padding: 0px;
 }
 input.unind {
-	margin-left: -15px;
+  margin-left: -15px;
 }
 p.centered {
   text-align: center;
@@ -117,12 +117,12 @@ table.p3longdiv td.right {
   padding: 0px;
 }
 table.p3longdiv td.bottomborder {
-  border-bottom:1px solid black;
+  border-bottom: 1px solid black;
   text-align: right;
   padding: 0px;
 }
 table.p3longdiv td.topborder {
-  border-top:1px solid black;
+  border-top: 1px solid black;
   text-align: right;
   padding: 0px;
 }
@@ -189,7 +189,10 @@ td.barslefttop {
   border-left: 1px solid #000;
   border-top: 1px solid #000;
 }
-td.matrixleft, td.matrixright, td.matrixdetleft, td.matrixdetright {
+td.matrixleft,
+td.matrixright,
+td.matrixdetleft,
+td.matrixdetright {
   border: 1px solid #000;
   margin: 0px;
   padding: 0px;
@@ -206,44 +209,82 @@ td.matrixdetleft {
 td.matrixdetright {
   border-width: 0px 1px 0px 0px;
 }
-table.paddedtable tr.onepixel { line-height: 1px;}
-table.paddedtable td.matrixtopborder {border-top:1px solid black;padding:0;}
-table.paddedtable td.matrixtopleftborder { border-left:1px solid black;border-top:1px solid black;padding:0;width:5px; }
-table.paddedtable td.matrixtoprightborder { border-right:1px solid black;border-top:1px solid black;padding:0;width:5px; }
-table.paddedtable td.matrixleftborder { border-left:1px solid black;padding:0;width:5px; }
-table.paddedtable td.matrixrightborder { border-right:1px solid black;padding:0;width:5px; }
-table.paddedtable td.matrixbottomleftborder { border-left:1px solid black;border-bottom:1px solid black;padding:0;width:5px; }
-table.paddedtable td.matrixbottomrightborder { border-right:1px solid black;border-bottom:1px solid black;padding:0;width:5px; }
-table.paddedtable td.nopad { padding:0;  width: 5px;}
+table.paddedtable tr.onepixel {
+  line-height: 1px;
+}
+table.paddedtable td.matrixtopborder {
+  border-top: 1px solid black;
+  padding: 0;
+}
+table.paddedtable td.matrixtopleftborder {
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  padding: 0;
+  width: 5px;
+}
+table.paddedtable td.matrixtoprightborder {
+  border-right: 1px solid black;
+  border-top: 1px solid black;
+  padding: 0;
+  width: 5px;
+}
+table.paddedtable td.matrixleftborder {
+  border-left: 1px solid black;
+  padding: 0;
+  width: 5px;
+}
+table.paddedtable td.matrixrightborder {
+  border-right: 1px solid black;
+  padding: 0;
+  width: 5px;
+}
+table.paddedtable td.matrixbottomleftborder {
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+  padding: 0;
+  width: 5px;
+}
+table.paddedtable td.matrixbottomrightborder {
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  padding: 0;
+  width: 5px;
+}
+table.paddedtable td.nopad {
+  padding: 0;
+  width: 5px;
+}
 
-table.paddedtable td, table.paddedtable th {
+table.paddedtable td,
+table.paddedtable th {
   padding: 2px 5px;
 }
-td.c, table.stats tbody td.c {
+td.c,
+table.stats tbody td.c {
   text-align: center;
 }
-td.r, table.stats tbody td.r {
+td.r,
+table.stats tbody td.r {
   text-align: right;
 }
-td.l, table.stats tbody td.l {
+td.l,
+table.stats tbody td.l {
   text-align: left;
 }
 
 @media only screen and (max-width: 700px) {
-  table[role=presentation] > tbody > tr > td,
-	table[role=presentation] > tbody > tr > th,
-	table[role=presentation] > thead > tr > td,
-	table[role=presentation] > thead > tr > th
-	{
-		display: block;
-	}
-	table.responsive > tbody > tr > td,
-	table.responsive > tbody > tr > th,
-	table.responsive > thead > tr > td,
-	table.responsive > thead > tr > th
-	{
-		display: block;
-	}
+  table[role="presentation"] > tbody > tr > td,
+  table[role="presentation"] > tbody > tr > th,
+  table[role="presentation"] > thead > tr > td,
+  table[role="presentation"] > thead > tr > th {
+    display: block;
+  }
+  table.responsive > tbody > tr > td,
+  table.responsive > tbody > tr > th,
+  table.responsive > thead > tr > td,
+  table.responsive > thead > tr > th {
+    display: block;
+  }
 }
 
 ul.nomark {
@@ -259,21 +300,31 @@ ul.likelines {
   list-style-type: none;
 }
 ul.likelines li {
-  margin-bottom: .4em;
+  margin-bottom: 0.4em;
 }
 
-ul.nomark {list-style-type: none;}
-ul.nomark li { margin-top: .7em;}
-ol.lalpha {list-style-type: lower-alpha;}
-ol.lalpha li { margin-top: .7em;}
+ul.nomark {
+  list-style-type: none;
+}
+ul.nomark li {
+  margin-top: 0.7em;
+}
+ol.lalpha {
+  list-style-type: lower-alpha;
+}
+ol.lalpha li {
+  margin-top: 0.7em;
+}
 
-.spaced li { margin-bottom: .3em;}
+.spaced li {
+  margin-bottom: 0.3em;
+}
 
 .drawtools {
   margin-left: 8px;
 }
 .drawtools > span {
-    display:inline-block;
+  display: inline-block;
 }
 .drawtools img {
   vertical-align: middle;
@@ -287,21 +338,23 @@ ol.lalpha li { margin-top: .7em;}
   padding: 2px 8px;
 }
 .drawtools [data-drawaction]:hover {
-  background-color: #EDF4FC;
+  background-color: #edf4fc;
 }
 .drawtools [data-drawaction].sel {
-  background-color: #E6F0F9;
+  background-color: #e6f0f9;
 }
 .drawcanvas {
-	margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 .drawcanvas img {
-	max-width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* General layout styles used many places */
-input, .mq-editable-field, .mathquill-math-field {
-  border: 1px solid #999;
+input,
+.mq-editable-field,
+.mathquill-math-field {
+  border: 1px solid #8b8d8e;
   padding: 4px 6px;
   border-radius: 4px;
   margin: 1px 0;
@@ -309,10 +362,12 @@ input, .mq-editable-field, .mathquill-math-field {
   color: #000;
 }
 
-input[type=radio], input[type=checkbox] {
+input[type="radio"],
+input[type="checkbox"] {
   margin-right: 4px;
 }
-input[type=text]:disabled, .mathquill-math-field.disabled {
+input[type="text"]:disabled,
+.mathquill-math-field.disabled {
   background-color: #eee;
   color: #444;
 }
@@ -324,7 +379,10 @@ input[type=text]:disabled, .mathquill-math-field.disabled {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  background-image: linear-gradient(to right, white, white), linear-gradient(to right, white, white), linear-gradient(to right, rgba(0,0,0,.25), rgba(255,255,255,0)), linear-gradient(to left, rgba(0,0,0,.25), rgba(255,255,255,0));
+  background-image: linear-gradient(to right, white, white),
+    linear-gradient(to right, white, white),
+    linear-gradient(to right, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0)),
+    linear-gradient(to left, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0));
   background-position: left center, right center, left center, right center;
   background-repeat: no-repeat;
   background-color: inherit;
@@ -343,7 +401,8 @@ input[type=text]:disabled, .mathquill-math-field.disabled {
 .questionwrap {
   position: relative;
 }
-.questionpane.introtext, .questionpane > .question > .question {
+.questionpane.introtext,
+.questionpane > .question > .question {
   max-width: 700px;
   overflow: visible;
 }
@@ -359,7 +418,10 @@ input[type=text]:disabled, .mathquill-math-field.disabled {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  background-image: linear-gradient(to right, white, white), linear-gradient(to right, white, white), linear-gradient(to right, rgba(0,0,0,.25), rgba(255,255,255,0)), linear-gradient(to left, rgba(0,0,0,.25), rgba(255,255,255,0));
+  background-image: linear-gradient(to right, white, white),
+    linear-gradient(to right, white, white),
+    linear-gradient(to right, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0)),
+    linear-gradient(to left, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0));
   background-position: left center, right center, left center, right center;
   background-repeat: no-repeat;
   background-color: inherit;
@@ -374,17 +436,20 @@ input[type=text]:disabled, .mathquill-math-field.disabled {
   clear: both;
 }
 
-div.question img, div.intro img, div.sidepreview img {
-	max-width: 90%;
-	height: auto;
+div.question img,
+div.intro img,
+div.sidepreview img {
+  max-width: 90%;
+  height: auto;
 }
 
 div.txtimgwrap > img {
-	max-width: none;
+  max-width: none;
 }
 
-div.question td img, div.question th img {
-	max-width: 100%;
+div.question td img,
+div.question th img {
+  max-width: 100%;
 }
 
 p.seqsep {
@@ -422,7 +487,7 @@ p.seqsep:first-child {
   display: flex;
   flex-flow: row wrap;
 }
-.flexpanes > div + div{
+.flexpanes > div + div {
   border-left: 1px solid #ddd;
   border-top: 1px solid #ddd;
   margin-top: -1px;
@@ -441,65 +506,67 @@ p.seqsep:first-child {
 }
 
 table.tchart {
-	border-collapse: collapse;
+  border-collapse: collapse;
 }
 table.tchart td {
-	min-width: 3em;
+  min-width: 3em;
 }
 table.tchart caption {
-    font-weight: bold;
+  font-weight: bold;
 }
 table.acctstatement {
-	border-collapse: collapse;
+  border-collapse: collapse;
 }
-table.acctstatement th, table.acctstatement td, table.acctstatement caption {
-	border: 1px solid #eee;
-	background-color: #fff;
-	padding: 1px 5px;
+table.acctstatement th,
+table.acctstatement td,
+table.acctstatement caption {
+  border: 1px solid #eee;
+  background-color: #fff;
+  padding: 1px 5px;
 }
 table.acctstatement tbody th {
-    font-weight: normal;
+  font-weight: normal;
 }
 
-
-table.acctstatement thead th, table.acctstatement caption {
-	text-align: center;
-	z-index: 20;
-	background-color: #eef;
-	font-weight: bold;
-	border-bottom: 2px solid #333;
-	padding: 5px;
+table.acctstatement thead th,
+table.acctstatement caption {
+  text-align: center;
+  z-index: 20;
+  background-color: #eef;
+  font-weight: bold;
+  border-bottom: 2px solid #333;
+  padding: 5px;
 }
-table.acctstatement.noborder  td {
-	border: 0px;
+table.acctstatement.noborder td {
+  border: 0px;
 }
 input.iscredit {
   padding-left: 2em;
 }
 
 span.inlinebtn {
-	cursor: pointer;
-	border: 1px solid #000;
-	padding: 5px 10px;
-	line-height: 1em;
-	display: inline-block;
-	background: #efe;
-	margin: 10px;
+  cursor: pointer;
+  border: 1px solid #000;
+  padding: 5px 10px;
+  line-height: 1em;
+  display: inline-block;
+  background: #efe;
+  margin: 10px;
 }
 span.inlinebtn:hover {
-	background: #dfd;
+  background: #dfd;
 }
 .feedbackwrap {
-	display: block;
-	padding: 5px;
-	background: #fff;
-	border: 1px solid #ccc;
+  display: block;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid #ccc;
 }
 .feedbackwrap.correct {
-	background: #efe;
+  background: #efe;
 }
 .feedbackwrap.incorrect {
-	background: #fee;
+  background: #fee;
 }
 
 .inlineheader {
@@ -510,13 +577,13 @@ span.inlinebtn:hover {
   text-align: right;
 }
 #GB_window {
-    box-shadow: 1px 3px 8px 0 rgba(0,0,0,0.65);
-    border: 0;
-    border-radius: 4px;
+  box-shadow: 1px 3px 8px 0 rgba(0, 0, 0, 0.65);
+  border: 0;
+  border-radius: 4px;
 }
 #GB_caption {
-    padding: 6px 6px;
+  padding: 6px 6px;
 }
 #GB_title {
-    padding-left: 6px;
+  padding-left: 6px;
 }
