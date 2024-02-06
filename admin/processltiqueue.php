@@ -37,6 +37,20 @@ if (php_sapi_name() == "cli") {
 require(__DIR__ . "/../init_without_validate.php");
 require(__DIR__ . "/../includes/rollingcurl.php");
 require_once(__DIR__ . '/../includes/ltioutcomes.php');
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+use OHM\Includes\LtiQueueLogger;
+use OHM\Includes\LtiQueueValidator;
+
+$ohmLtiQueueValidator = new LtiQueueValidator();
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
 
 function debuglog($str) {
     #### Begin OHM-specific changes ############################################################
@@ -44,7 +58,7 @@ function debuglog($str) {
     #### Begin OHM-specific changes ############################################################
     #### Begin OHM-specific changes ############################################################
     #### Begin OHM-specific changes ############################################################
-    ohmDebuglog($str);
+    LtiQueueLogger::debug_log($str);
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
@@ -57,30 +71,6 @@ function debuglog($str) {
 	}
 }
 
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-#### Begin OHM-specific changes ############################################################
-function ohmDebuglog($logText)
-{
-    $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
-    if (empty($lti_response_log_file)) {
-        return;
-    }
-
-    $timeStr = strftime('%Y-%b-%d %H:%M:%S %Z', time());
-    file_put_contents(
-        $lti_response_log_file,
-        sprintf('[%s] %s' . "\n", $timeStr, $logText),
-        FILE_APPEND
-    );
-}
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
-#### End OHM-specific changes ############################################################
 
 if (php_sapi_name() == "cli") {
     //running command line - no need for auth code
@@ -143,6 +133,20 @@ $tokensQueued = [];
 $round2 = array();
 while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	//echo "reading record ".$row['hash'].'<br/>';
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    if (!$ohmLtiQueueValidator->is_valid_sourcedid($row['hash'], $row['sourcedid'])) {
+        $ohmLtiQueueValidator->set_ltiqueue_row_invalid($row['hash']);
+        continue;
+    }
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 	if (substr($row['sourcedid'],0,6)=='LTI1.3') {
 		// LTI 1.3 update
 		list($ltiver,$ltiuserid,$score_url,$platformid) = explode(':|:', $row['sourcedid']);
@@ -498,6 +502,17 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
             . $request_info['response_text'];
             $logstm = $DBH->prepare("INSERT INTO imas_log (time,log) VALUES (?,?)");
             $logstm->execute([time(), $logdata]);
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            LtiQueueLogger::debug_log($logdata);
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 		} else {
 			$cntfailure++;
 		}

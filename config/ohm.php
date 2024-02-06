@@ -48,6 +48,9 @@ $allownongrouplibs = false;
 //allow course import of questions?
 $allowcourseimport = false;
 
+// Health check auth code
+$GLOBALS['health_check']['auth_code'] = getenv('HEALTH_CHECK_AUTH_CODE');
+
 // Lumen student payment authorization API
 $GLOBALS['student_pay_api']['enabled'] = "true" == strtolower(getenv('STUPAY_ENABLED')) ? true : false;
 $GLOBALS['student_pay_api']['base_url'] = getenv('STUPAY_API_BASE_URL');

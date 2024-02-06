@@ -4254,9 +4254,9 @@ function getfeedbackbasic($correct,$wrong,$thisq,$partn=null) {
     // ####### Begin OHM-specific changes ##################################################################
     // ####### Begin OHM-specific changes ##################################################################    
 		// adds img class to enable suppression styling for Try-Its
-    return '<div class="feedbackwrap correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$correct.'</div>';
+    return '<div class="feedbackwrap correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$correct.'</div>';
 	} else if ($res==0) {
-		return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$wrong.'</div>';
+		return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$wrong.'</div>';
 	  // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################    
   }
@@ -4275,15 +4275,15 @@ function getfeedbacktxt($stu,$fbtxt,$ans) {
     // ####### Begin OHM-specific changes ##################################################################
     // ####### Begin OHM-specific changes ##################################################################
     // adds img class to enable suppression styling for Try-Its
-		return '<div class="feedbackwrap"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> ' . _("No answer selected. Try again.") . '</div>';
+		return '<div class="feedbackwrap" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> ' . _("No answer selected. Try again.") . '</div>';
     } else {
         $anss = explode(' or ', $ans);
         foreach ($anss as $ans) {
             if ($stu==$ans) {
                if ($fbtxt[$stu] == '') { 
-                  $out = '<div class="feedbackwrap no-text correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> ';
+                  $out = '<div class="feedbackwrap no-text correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> ';
                 } else {
-                $out = '<div class="feedbackwrap correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> ';
+                $out = '<div class="feedbackwrap correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> ';
                 };
                 if (isset($fbtxt[$stu])) {
                     $out .= $fbtxt[$stu];
@@ -4291,7 +4291,7 @@ function getfeedbacktxt($stu,$fbtxt,$ans) {
                 return $out .= '</div>';
             } 
         }
-        $out = '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> ';
+        $out = '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> ';
     // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
@@ -4310,7 +4310,7 @@ function getfeedbacktxtessay($stu,$fbtxt) {
 	if ($stu===null || !is_scalar($stu) || trim($stu)=='') {
 		return '';
 	} else {
-		return '<div class="feedbackwrap correct">'.$fbtxt.'</div>';
+		return '<div class="feedbackwrap correct" role="alert">'.$fbtxt.'</div>';
 	}
 }
 
@@ -4338,13 +4338,13 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.
             // ####### Begin OHM-specific changes ##################################################################
             // ####### Begin OHM-specific changes ##################################################################
             // adds img class to enable suppression styling for Try-Its
-                        return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$i/2].'</div>';
+                        return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$i/2].'</div>';
                     } else {
-                        return '<div class="feedbackwrap correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$i/2].'</div>';
+                        return '<div class="feedbackwrap correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$i/2].'</div>';
                    }
                 }
             }
-            return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
+            return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
             // ####### End OHM-specific changes ##################################################################
             // ####### End OHM-specific changes ##################################################################
                     
@@ -4356,7 +4356,7 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.
     // ####### Begin OHM-specific changes ##################################################################
     // ####### Begin OHM-specific changes ##################################################################
     // adds img class to enable suppression styling for Try-Its 
-		return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> ' . _("This answer does not appear to be a valid number.") . '</div>';
+		return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> ' . _("This answer does not appear to be a valid number.") . '</div>';
 	  // ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
     
@@ -4387,12 +4387,12 @@ function getfeedbacktxtnumber($stu, $partial, $fbtxt, $deffb='Incorrect', $tol=.
       // ####### Begin OHM-specific changes ##################################################################
       // ####### Begin OHM-specific changes ##################################################################
       // adds img class to enable suppression styling for Try-Its
-      	return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$match/2].'</div>';
+      	return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$match/2].'</div>';
 			} else {
-				return '<div class="feedbackwrap correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$match/2].'</div>';
+				return '<div class="feedbackwrap correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$match/2].'</div>';
 			}
 		} else {
-			return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
+			return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
       // ####### End OHM-specific changes ##################################################################
       // ####### End OHM-specific changes ##################################################################           
     }
@@ -4457,12 +4457,12 @@ function getfeedbacktxtcalculated($stu, $stunum, $partial, $fbtxt, $deffb='Incor
       // ####### Begin OHM-specific changes ##################################################################
       // ####### Begin OHM-specific changes ##################################################################
       // adds img class to enable suppression styling for Try-Its
-				return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$match/2].'</div>';
+				return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$match/2].'</div>';
 			} else {
-				return '<div class="feedbackwrap correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$match/2].'</div>';
+				return '<div class="feedbackwrap correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$match/2].'</div>';
 			}
 		} else {
-			return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
+			return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
 		// ####### End OHM-specific changes ##################################################################
     // ####### End OHM-specific changes ##################################################################
     }
@@ -4505,7 +4505,7 @@ function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars
       // ####### Begin OHM-specific changes ##################################################################
       // ####### Begin OHM-specific changes ##################################################################
       // adds img class to enable suppression styling for Try-Its
-			return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
+			return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
 		  // ####### End OHM-specific changes ##################################################################
       // ####### End OHM-specific changes ##################################################################
     }
@@ -4526,7 +4526,7 @@ function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars
       // ####### Begin OHM-specific changes ##################################################################
       // ####### Begin OHM-specific changes ##################################################################
       // adds img class to enable suppression styling for Try-Its
-			return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
+			return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
 		  // ####### End OHM-specific changes ##################################################################
       // ####### End OHM-specific changes ##################################################################
     }
@@ -4640,12 +4640,12 @@ function getfeedbacktxtnumfunc($stu, $partial, $fbtxt, $deffb='Incorrect', $vars
       // ####### Begin OHM-specific changes ##################################################################
       // ####### Begin OHM-specific changes ##################################################################
       // adds img class to enable suppression styling for Try-Its
-				return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$match/2].'</div>';
+				return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$fbtxt[$match/2].'</div>';
 			} else {
-				return '<div class="feedbackwrap correct"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$match/2].'</div>';
+				return '<div class="feedbackwrap correct" role="alert"><img class="gchk" src="'.$staticroot.'/img/gchk.gif" alt="Correct"/> '.$fbtxt[$match/2].'</div>';
 			}
 		} else {
-			return '<div class="feedbackwrap incorrect"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
+			return '<div class="feedbackwrap incorrect" role="alert"><img class="redx" src="'.$staticroot.'/img/redx.gif" alt="Incorrect"/> '.$deffb.'</div>';
 		  // ####### End OHM-specific changes ##################################################################
       // ####### End OHM-specific changes ##################################################################
     }
