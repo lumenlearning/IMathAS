@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e2e640318fdb8d25358f1cf92ac67da5",
+    "content-hash": "80926dace936a9031d471383336c7d07",
     "packages": [
         {
             "name": "brick/math",
@@ -132,30 +132,29 @@
         },
         {
             "name": "darkaonline/swagger-lume",
-            "version": "8.0",
+            "version": "10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DarkaOnLine/SwaggerLume.git",
-                "reference": "5ee548ccaf487b4561880eb9741975dad3c3dd1a"
+                "reference": "5db6551af461b2a542fcfb87d30d77af145fb244"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DarkaOnLine/SwaggerLume/zipball/5ee548ccaf487b4561880eb9741975dad3c3dd1a",
-                "reference": "5ee548ccaf487b4561880eb9741975dad3c3dd1a",
+                "url": "https://api.github.com/repos/DarkaOnLine/SwaggerLume/zipball/5db6551af461b2a542fcfb87d30d77af145fb244",
+                "reference": "5db6551af461b2a542fcfb87d30d77af145fb244",
                 "shasum": ""
             },
             "require": {
-                "laravel/lumen-framework": "~6.0|~7.0|^8.0",
-                "php": ">=7.2",
-                "swagger-api/swagger-ui": "^3.0",
-                "zircote/swagger-php": "~2.0|3.*"
+                "laravel/lumen-framework": "~6.0 || ~7.0 || ^8.0 || ^9.0 || ^10.0",
+                "php": ">=7.2 || ^8.0",
+                "swagger-api/swagger-ui": "^3.0 || ^4.0",
+                "symfony/yaml": "^4.0 || ^5.0 || ^6.2",
+                "zircote/swagger-php": "~2.0 || 3.*"
             },
             "require-dev": {
-                "fzaninotto/faker": "~1.8",
                 "mockery/mockery": "1.*",
-                "phpunit/phpunit": "8.*",
-                "satooshi/php-coveralls": "^2.0",
-                "vlucas/phpdotenv": "~3.3|~4.0"
+                "php-coveralls/php-coveralls": "^2.0",
+                "phpunit/phpunit": "^10.0 || ^9.5"
             },
             "type": "library",
             "autoload": {
@@ -176,15 +175,20 @@
                     "email": "darius@matulionis.lt"
                 }
             ],
-            "description": "Swagger integration to Lumen 5",
+            "description": "OpenApi or Swagger integration to Lumen",
             "keywords": [
+                "api",
+                "documentation",
                 "laravel",
                 "lumen",
-                "swagger"
+                "openapi",
+                "specification",
+                "swagger",
+                "ui"
             ],
             "support": {
                 "issues": "https://github.com/DarkaOnLine/SwaggerLume/issues",
-                "source": "https://github.com/DarkaOnLine/SwaggerLume/tree/8.0"
+                "source": "https://github.com/DarkaOnLine/SwaggerLume/tree/10.1"
             },
             "funding": [
                 {
@@ -192,7 +196,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-25T10:41:43+00:00"
+            "time": "2023-05-10T09:48:27+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -3157,16 +3161,16 @@
         },
         {
             "name": "swagger-api/swagger-ui",
-            "version": "v3.52.5",
+            "version": "v4.19.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swagger-api/swagger-ui.git",
-                "reference": "f1ad60dc92e7edb0898583e16c3e66fe3e9eada2"
+                "reference": "92ffd76d15671954c239fdefb43d1951e06f8bb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swagger-api/swagger-ui/zipball/f1ad60dc92e7edb0898583e16c3e66fe3e9eada2",
-                "reference": "f1ad60dc92e7edb0898583e16c3e66fe3e9eada2",
+                "url": "https://api.github.com/repos/swagger-api/swagger-ui/zipball/92ffd76d15671954c239fdefb43d1951e06f8bb5",
+                "reference": "92ffd76d15671954c239fdefb43d1951e06f8bb5",
                 "shasum": ""
             },
             "type": "library",
@@ -3212,9 +3216,9 @@
             ],
             "support": {
                 "issues": "https://github.com/swagger-api/swagger-ui/issues",
-                "source": "https://github.com/swagger-api/swagger-ui/tree/v3.52.5"
+                "source": "https://github.com/swagger-api/swagger-ui/tree/v4.19.1"
             },
-            "time": "2021-10-14T14:25:14+00:00"
+            "time": "2023-06-12T16:31:43+00:00"
         },
         {
             "name": "symfony/console",
