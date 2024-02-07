@@ -63,6 +63,7 @@ class GetQuestionTest extends TestCase
         $this->assertEquals(4120, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
 
+        $this->assertIsArray($responseData['feedback']);
         $this->assertCount(4, $responseData['feedback']);
 
         $this->assertEquals('correct', $responseData['feedback']['qn0-0']['correctness']);
@@ -100,7 +101,8 @@ class GetQuestionTest extends TestCase
         $this->assertEquals(4120, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
 
-        $this->assertCount(11, $responseData['feedback']);
+        $this->assertIsArray($responseData['feedback']);
+        $this->assertCount(12, $responseData['feedback']);
 
         $this->assertEquals('correct', $responseData['feedback']['qn1000-0']['correctness']);
         $this->assertEquals('Excellent choice.', $responseData['feedback']['qn1000-0']['feedback']);
