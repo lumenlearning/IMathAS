@@ -255,6 +255,8 @@ $CFG['showcalculator'] = [
 
 $CFG['LTI']['autoreg'] = true;
 
+$CFG['logquestionerrors'] = true;
+
 // Debug logging
 $GLOBALS['ENABLE_SCORE_DEBUG'] = 'true' == getenv('ENABLE_SCORE_DEBUG');
 $GLOBALS['ENABLE_LTI_DEBUG'] = 'true' == getenv('ENABLE_LTI_DEBUG');
