@@ -33,7 +33,7 @@ class SlimPhp3TestCase extends TestCase
         $modelAuditService = $this->createMock(ModelAuditService::class);
 
         $this->container->method('get')
-            ->withConsecutive(['logger'], ['modelAuditService'])
+//            ->withConsecutive(['logger'], ['modelAuditService']) // deprecated in phpunit 9.6
             ->willReturnOnConsecutiveCalls($logger, $modelAuditService);
 
         // Add a real DB connection.
