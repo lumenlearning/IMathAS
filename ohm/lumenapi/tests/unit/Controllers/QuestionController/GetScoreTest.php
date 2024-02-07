@@ -82,28 +82,26 @@ class GetScoreTest extends TestCase
 
     public function testGetScore_multiPart_with_multans_feedback(): void
     {
-        $inputState = json_decode('{
-            "request": {
-                "post": [      
-                    { 
-                        "name": "qn0",
-                        "value": ""
-                    },
-                    { 
-                        "name": "qn1000",
-                        "value": "42"
-                    },
-                     { 
-                        "name": "qn1001",
-                        "value": "0,2,3"
-                    }
-                ],
-                "questionSetId": 3618,
-                "seed": 4120,
-                "studentAnswers": ["","true","false"],
-                "studentAnswerValues": [22,7,0]
-            }
-        }', true);
+        $inputState = json_decode('[{
+            "post": [      
+                { 
+                    "name": "qn0",
+                    "value": ""
+                },
+                { 
+                    "name": "qn1000",
+                    "value": "42"
+                },
+                 { 
+                    "name": "qn1001",
+                    "value": "0,2,3"
+                }
+            ],
+            "questionSetId": 3618,
+            "seed": 4120,
+            "studentAnswers": ["","true","false"],
+            "studentAnswerValues": [22,7,0]
+        }]', true);
 
         // Setup mocks.
         $this->questionSetRepository
@@ -142,20 +140,18 @@ class GetScoreTest extends TestCase
 
     public function testGetScore_Multans_with_basic_feedback(): void
     {
-        $inputState = json_decode('{
-            "request": {
-                "post": [
-                    {
-                        "name": "qn0",
-                        "value": [1,4]
-                    }
-                ],
-                "questionSetId": 3623,
-                "seed": 4136,
-                "studentAnswers": ["1", "4"],
-                "studentAnswerValues": [1, 4]
-            }
-        }', true);
+        $inputState = json_decode('[{
+            "post": [
+                {
+                    "name": "qn0",
+                    "value": [1,4]
+                }
+            ],
+            "questionSetId": 3623,
+            "seed": 4136,
+            "studentAnswers": ["1", "4"],
+            "studentAnswerValues": [1, 4]
+        }]', true);
 
         // Setup mocks.
         $this->questionSetRepository
