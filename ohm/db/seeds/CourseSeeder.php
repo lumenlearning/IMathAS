@@ -21,19 +21,19 @@ class CourseSeeder extends AbstractSeed
         $faker = FakerFactory::create();
 
         $groupName = $faker->company . ' University';
-        $this->insert('imas_groups', [
+        $this->table('imas_groups')->insert([
             'grouptype' => 0,
             'name' => $groupName,
             'parent' => 0,
             'student_pay_enabled' => 0,
             'lumen_guid' => Uuid::uuid4(),
             'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
-        ]);
+        ])->save();
         $row = $this->fetchRow(sprintf('SELECT * FROM imas_groups WHERE name = "%s"', $groupName));
         $groupId = $row['id'];
 
         $username = $faker->unique()->userName;
-        $this->insert('imas_users', [
+        $this->table('imas_users')->insert([
             'SID' => $username,
             'password' => password_hash($username, PASSWORD_BCRYPT),
             'rights' => 20,
@@ -45,7 +45,7 @@ class CourseSeeder extends AbstractSeed
             'hideonpostswidget' => '',
             'mfa' => '',
             'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
-        ]);
+        ])->save();
         $row = $this->fetchRow(sprintf('SELECT * FROM imas_users WHERE SID = "%s"', $username));
         $userId = $row['id'];
 
@@ -155,6 +155,6 @@ class CourseSeeder extends AbstractSeed
             'ltisendzeros' => '0',
         ];
 
-        $this->insert('imas_courses', $data);
+        $this->table('imas_courses')->insert($data)->save();
     }
 }

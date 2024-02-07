@@ -100,6 +100,6 @@ class UserSeeder extends AbstractSeed
 			];
 		}
 
-		$this->insert('imas_users', $data);
+		$this->table('imas_users')->insert($data)->save();
 	}
 }

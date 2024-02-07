@@ -56,6 +56,6 @@ class GroupSeeder extends AbstractSeed
 			];
 		}
 
-		$this->insert('imas_groups', $data);
+		$this->table('imas_groups')->insert($data)->save();
 	}
 }

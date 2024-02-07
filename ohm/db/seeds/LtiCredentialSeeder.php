@@ -64,6 +64,6 @@ class LtiCredentialSeeder extends AbstractSeed
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
-		$this->insert('imas_users', $data);
+		$this->table('imas_users')->insert($data)->save();
 	}
 }
