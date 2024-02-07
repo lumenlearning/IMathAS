@@ -12,14 +12,14 @@
     },
     "require-dev": {
         "robmorgan/phinx": "^0.14.0",
-        "phpunit/phpunit": "^9.1",
-        "codeception/codeception": "^4.1",
-        "codeception/c3": "^2.4",
+        "phpunit/phpunit": "^10.5",
+        "codeception/codeception": "^5.1",
+        "codeception/c3": "^2.9",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-webdriver": "^4.0",
         "softcreatr/jsonpath": "0.8.3",
         "fakerphp/faker": "^1.23.1",
-        "squizlabs/php_codesniffer": "3.8.1",
-        "codeception/module-asserts": "^1.2",
-        "codeception/module-webdriver": "^1.0"
+        "squizlabs/php_codesniffer": "3.8.1"
     },
     "autoload": {
         "psr-4": {
