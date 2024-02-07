@@ -11,7 +11,7 @@ return [
 		'seeds' => __DIR__ . '/ohm/db/seeds',
 	],
 	'environments' => [
-		'default_database' => 'development',
+		'default_environment' => 'development',
 		'migration_table' => 'ohm_phinxlog',
 		'production' => [
 			'adapter' => 'mysql',
