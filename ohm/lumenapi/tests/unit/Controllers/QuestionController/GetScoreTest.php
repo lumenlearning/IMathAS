@@ -180,6 +180,9 @@ class GetScoreTest extends TestCase
             $scoreResponse['feedback']['qn0']['feedback']);
     }
 
+    /**
+     * @group noshuffle_all
+     */
     public function testGetScore_global_shuffling_disabled(): void
     {
         $inputState = json_decode('[{

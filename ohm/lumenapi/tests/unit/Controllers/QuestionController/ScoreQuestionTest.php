@@ -163,6 +163,8 @@ class ScoreQuestionTest extends TestCase
     }
 
     /**
+     * @group noshuffle_all
+     *
      * Usage of OHM1 basic/txt feedback macros requires shuffling to be disabled.
      */
     public function testScoreQuestion_with_ohm1_macro(): void
