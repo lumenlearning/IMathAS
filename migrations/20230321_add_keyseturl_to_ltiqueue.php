@@ -17,7 +17,7 @@ if ($res===false) {
 }
 
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 echo '<p>Add keyseturl columnn to imas_ltiqueue.</p>';
 
 return true;

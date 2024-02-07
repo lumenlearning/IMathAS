@@ -11,7 +11,7 @@ if (false === $result) {
 	return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Added <b>lumen_guid</b> column to <b>imas_groups</b>.</p>";
 

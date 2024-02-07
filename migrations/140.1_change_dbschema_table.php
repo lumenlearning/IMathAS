@@ -11,7 +11,7 @@ if (false === $result) {
 	return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Change <b>imas_dbschema.ver</b> column to FLOAT type.</p>";
 

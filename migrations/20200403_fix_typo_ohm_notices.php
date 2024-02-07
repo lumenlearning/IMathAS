@@ -17,7 +17,7 @@ if ($res === false) {
     return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Renamed column: ohm_notices.is_dismissable -&gt; is_dismissible</p>";
 
