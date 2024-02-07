@@ -38,7 +38,7 @@
     "scripts": {
         "swagger": "php artisan swagger-lume:generate",
         "test": [
-            "phpunit --exclude noshuffle_all",
+            "phpunit --exclude-group noshuffle_all",
             "NOSHUFFLE_ANSWERS=all phpunit --group noshuffle_all"
         ]
     }
