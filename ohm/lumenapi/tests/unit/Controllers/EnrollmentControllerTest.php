@@ -208,21 +208,21 @@ class EnrollmentControllerTest extends TestCase
 
     public function testUpdateEnrollmentById_missingAccessCode(): void
     {
-        $this->expectException(ValidationException::class);
-
         $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'is_opted_out_of_assessments' => false,
         ]);
+
+        $this->expectException(ValidationException::class);
         $this->enrollmentController->updateEnrollmentById($request, 42);
     }
 
     public function testUpdateEnrollmentById_missingOptedOutAssessments(): void
     {
-        $this->expectException(ValidationException::class);
-
         $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'has_valid_access_code' => true,
         ]);
+
+        $this->expectException(ValidationException::class);
         $this->enrollmentController->updateEnrollmentById($request, 42);
     }
 
