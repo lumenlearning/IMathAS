@@ -739,7 +739,12 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
     }
 
     $questionIndex = _getFeedbackIndex($partNumber);
-    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
+
+    if (!is_null($partNumber) && is_array($stuanswers)) {
+        $studentAnswer = $stuanswers[$partNumber];
+    } else {
+        $studentAnswer = $stuanswers;
+    }
 
     if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];

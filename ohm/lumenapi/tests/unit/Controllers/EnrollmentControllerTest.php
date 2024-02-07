@@ -4,6 +4,7 @@ namespace Tests\Unit\Controllers;
 
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Mockery;
 use ReflectionClass;
 use Tests\TestCase;
@@ -207,36 +208,22 @@ class EnrollmentControllerTest extends TestCase
 
     public function testUpdateEnrollmentById_missingAccessCode(): void
     {
-        $this->enrollmentService
-            ->shouldReceive('updateById')
-            ->withAnyArgs()
-            ->andReturn(self::ENROLLMENT_SINGLE);
+        $this->expectException(ValidationException::class);
 
         $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'is_opted_out_of_assessments' => false,
         ]);
-        $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
-        $jsonData = $jsonResponse->getData();
-
-        $this->assertEquals(400, $jsonResponse->getStatusCode());
-        $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+        $this->enrollmentController->updateEnrollmentById($request, 42);
     }
 
     public function testUpdateEnrollmentById_missingOptedOutAssessments(): void
     {
-        $this->enrollmentService
-            ->shouldReceive('updateById')
-            ->withAnyArgs()
-            ->andReturn(self::ENROLLMENT_SINGLE);
+        $this->expectException(ValidationException::class);
 
         $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'has_valid_access_code' => true,
         ]);
-        $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
-        $jsonData = $jsonResponse->getData();
-
-        $this->assertEquals(400, $jsonResponse->getStatusCode());
-        $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+        $this->enrollmentController->updateEnrollmentById($request, 42);
     }
 
     public function testUpdateEnrollmentById_NotFound(): void
