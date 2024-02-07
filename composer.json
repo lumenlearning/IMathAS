@@ -1,14 +1,14 @@
 {
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.1",
         "ext-pdo": "*",
         "ext-json": "*",
         "slim/slim": "3.9.2",
         "slim/php-view": "2.2.0",
         "monolog/monolog": "1.23.0",
         "illuminate/database": "5.4.36",
-        "ramsey/uuid": "3.7.3",
-        "tuupola/slim-jwt-auth": "^2.4.0"
+        "ramsey/uuid": "4.7.5",
+        "tuupola/slim-jwt-auth": "^3.8.0"
     },
     "require-dev": {
         "robmorgan/phinx": "^0.12.10",
@@ -16,7 +16,7 @@
         "codeception/codeception": "^4.1",
         "codeception/c3": "^2.4",
         "flow/jsonpath": "0.4.0",
-        "fzaninotto/faker": "^1.7",
+        "fakerphp/faker": "^1.23.1",
         "squizlabs/php_codesniffer": "3.4.2",
         "codeception/module-asserts": "^1.2",
         "codeception/module-webdriver": "^1.0"
