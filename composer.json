@@ -11,11 +11,11 @@
         "tuupola/slim-jwt-auth": "^3.8.0"
     },
     "require-dev": {
-        "robmorgan/phinx": "^0.12.10",
+        "robmorgan/phinx": "^0.14.0",
         "phpunit/phpunit": "^9.1",
         "codeception/codeception": "^4.1",
         "codeception/c3": "^2.4",
-        "flow/jsonpath": "0.4.0",
+        "softcreatr/jsonpath": "0.8.3",
         "fakerphp/faker": "^1.23.1",
         "squizlabs/php_codesniffer": "3.4.2",
         "codeception/module-asserts": "^1.2",
