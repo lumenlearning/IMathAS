@@ -233,7 +233,7 @@ class EnrollmentControllerTest extends TestCase
                 'is_opted_out_of_assessments' => false,
             ]);
             $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
-        } catch (ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return;
         }
 
@@ -270,7 +270,7 @@ class EnrollmentControllerTest extends TestCase
                 'has_valid_access_code' => true,
             ]);
             $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
-        } catch (ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return;
         }
 
