@@ -213,34 +213,16 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $jsonResponse = null;
-        try {
-            /*
-             * - In a GitHub Actions environment:
-             *   - This is throwing a ValidationException during testing.
-             *   - $this->expectException(ValidationException::class) is
-             *     failing to catch the exception.
-             * - In local development:
-             *   - Calling enrollmentController() directly _should_ throw a
-             *     ValidationException in local testing, but it's not.
-             *   - A response object is being returned with the correct
-             *     data and assertions are working.
-             *
-             * - This try/catch handles testing in GHA, while the rest of this
-             *   test runs assertions in local testing.
-             */
-            $request = Request::create('/api/v1/enrollments/42', 'PUT', [
-                'is_opted_out_of_assessments' => false,
-            ]);
-            $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return;
-        }
+        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
+            'is_opted_out_of_assessments' => false,
+        ]);
+        $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
 
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
-        $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+        $this->assertEquals('The has valid access code field is required.',
+            $jsonData->errors->has_valid_access_code[0]);
     }
 
     public function testUpdateEnrollmentById_missingOptedOutAssessments(): void
@@ -250,34 +232,16 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $jsonResponse = null;
-        try {
-            /*
-             * - In a GitHub Actions environment:
-             *   - This is throwing a ValidationException during testing.
-             *   - $this->expectException(ValidationException::class) is
-             *     failing to catch the exception.
-             * - In local development:
-             *   - Calling enrollmentController() directly _should_ throw a
-             *     ValidationException in local testing, but it's not.
-             *   - A response object is being returned with the correct
-             *     data and assertions are working.
-             *
-             * - This try/catch handles testing in GHA, while the rest of this
-             *   test runs assertions in local testing.
-             */
-            $request = Request::create('/api/v1/enrollments/42', 'PUT', [
-                'has_valid_access_code' => true,
-            ]);
-            $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return;
-        }
+        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
+            'has_valid_access_code' => true,
+        ]);
+        $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
 
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
-        $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+        $this->assertEquals('The is opted out of assessments field is required.',
+            $jsonData->errors->is_opted_out_of_assessments[0]);
     }
 
     public function testUpdateEnrollmentById_NotFound(): void

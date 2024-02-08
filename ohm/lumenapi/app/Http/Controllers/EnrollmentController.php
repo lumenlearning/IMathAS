@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 use App\Services\Interfaces\EnrollmentServiceInterface;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class EnrollmentController extends ApiBaseController
 {
@@ -257,12 +259,18 @@ class EnrollmentController extends ApiBaseController
      */
     public function updateEnrollmentById(Request $request, int $id): JsonResponse
     {
+        $validator = Validator::make($request->all(), [
+            'has_valid_access_code' => 'required|boolean',
+            'is_opted_out_of_assessments' => 'required|boolean',
+        ]);
         try {
-            $this->validate($request, [
-                'has_valid_access_code' => 'required|boolean',
-                'is_opted_out_of_assessments' => 'required|boolean'
-            ]);
+            $validator->validate();
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $validator->errors()])
+                ->setStatusCode(400);
+        }
 
+        try {
             $input = $request->only(self::WRITE_ALLOWED_FIELDS);
             $enrollment = $this->enrollmentService->updateById($id, $input);
             return response()->json($enrollment);
