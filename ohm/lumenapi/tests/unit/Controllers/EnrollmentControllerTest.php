@@ -4,7 +4,6 @@ namespace Tests\Unit\Controllers;
 
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Mockery;
 use ReflectionClass;
 use Tests\TestCase;
