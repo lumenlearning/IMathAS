@@ -213,10 +213,6 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
-            'is_opted_out_of_assessments' => false,
-        ]);
-
         $jsonResponse = null;
         try {
             /*
@@ -233,6 +229,9 @@ class EnrollmentControllerTest extends TestCase
              * - This try/catch handles testing in GHA, while the rest of this
              *   test runs assertions in local testing.
              */
+            $request = Request::create('/api/v1/enrollments/42', 'PUT', [
+                'is_opted_out_of_assessments' => false,
+            ]);
             $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
         } catch (ValidationException $e) {
             return;
@@ -251,10 +250,6 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
-            'has_valid_access_code' => true,
-        ]);
-
         $jsonResponse = null;
         try {
             /*
@@ -271,6 +266,9 @@ class EnrollmentControllerTest extends TestCase
              * - This try/catch handles testing in GHA, while the rest of this
              *   test runs assertions in local testing.
              */
+            $request = Request::create('/api/v1/enrollments/42', 'PUT', [
+                'has_valid_access_code' => true,
+            ]);
             $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
         } catch (ValidationException $e) {
             return;
