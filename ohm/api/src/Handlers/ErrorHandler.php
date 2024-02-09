@@ -2,7 +2,7 @@
 
 namespace OHM\Api\Handlers;
 
-use Slim\Container;
+use DI\Container;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -47,8 +47,9 @@ class ErrorHandler extends \Slim\Handlers\Error
 			),
 			'error_guid' => $errorGuid,
 		);
-
+        $payload = json_encode($content);
+        $response->getBody()->write($payload);
 		return $response->withStatus(500)
-			->withJson($content);
+            ->withHeader('Content-Type', 'application/json');
 	}
 }
