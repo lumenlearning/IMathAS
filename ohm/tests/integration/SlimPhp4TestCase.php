@@ -6,7 +6,7 @@ use Illuminate\Database\Capsule\Manager;
 use Monolog\Logger;
 use OHM\Api\Services\ModelAuditService;
 use PHPUnit\Framework\TestCase;
-use Slim\Container;
+use DI\Container;
 
 /**
  * This class provides a SlimPHP v3 Container for running tests
@@ -19,7 +19,7 @@ use Slim\Container;
  * Real dependencies:
  * - DB connection
  */
-class SlimPhp3TestCase extends TestCase
+class SlimPhp4TestCase extends TestCase
 {
     protected Container $container;
 
@@ -50,8 +50,8 @@ class SlimPhp3TestCase extends TestCase
         ]);
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
-        $this->container['db'] = function ($container) use ($capsule) {
+        $this->container->set('db', function (Container $container) use ($capsule) {
             return $capsule;
-        };
+        });
     }
 }
