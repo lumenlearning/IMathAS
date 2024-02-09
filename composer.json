@@ -13,7 +13,7 @@
         "tuupola/slim-jwt-auth": "^3.8.0"
     },
     "require-dev": {
-        "robmorgan/phinx": "^0.14.0",
+        "robmorgan/phinx": "^0.16.0",
         "phpunit/phpunit": "^10.5",
         "codeception/codeception": "^5.1",
         "codeception/c3": "^2.9",
