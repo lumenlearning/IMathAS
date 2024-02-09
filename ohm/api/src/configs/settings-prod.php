@@ -6,6 +6,8 @@ $CONFIG_ENV = getenv('CONFIG_ENV') ? getenv('CONFIG_ENV') : 'development';
 $LOG_PATH = in_array($CONFIG_ENV, ['production', 'staging']) ?
 	'/var/log/httpd/payment_api' : __DIR__ . '/../../logs';
 
+const API_BASE_PATH = '/ohm/api/index.php';
+
 return [
     // SlimPHP settings
     'slim' => [

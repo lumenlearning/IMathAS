@@ -15,8 +15,6 @@ if (PHP_SAPI == 'cli-server') {
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-const API_BASE_PATH = '/ohm/api/index.php';
-
 session_start();
 
 // Create Container using PHP-DI
