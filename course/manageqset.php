@@ -680,6 +680,10 @@ if ($myrights<20) {
 				$searchlikes = "imas_questionset.id=? AND ";
 				$searchlikevals = array(substr($safesearch,3));
 				$isIDsearch = substr($safesearch,3);
+			} else if (ctype_digit(trim($safesearch))) {
+                $searchlikes = "imas_questionset.id=? AND ";
+                $searchlikevals = [trim($safesearch)];
+                $isIDsearch = trim($safesearch);
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
@@ -695,7 +699,7 @@ if ($myrights<20) {
             #### End OHM-specific changes ############################################################
             #### End OHM-specific changes ############################################################
             #### End OHM-specific changes ############################################################
-			} else {
+            } else {
 				$searchterms = explode(" ",$safesearch);
 				$searchlikes = '';
 				foreach ($searchterms as $k=>$v) {
@@ -707,11 +711,17 @@ if ($myrights<20) {
 				}
         $wholewords = array();
 				foreach ($searchterms as $k=>$v) {
-					if (ctype_alnum($v) && strlen($v)>3) {
+					if (ctype_alnum($v) && strlen($v)>2) {
 						$wholewords[] = '+'.$v.'*';
 						unset($searchterms[$k]);
 					}
 				}
+                if (count($wholewords)==0 && !$isIDsearch && $searchall===1 && $searchmine===0) {
+                    echo _('Cannot search all libraries without at least one 3+ letter word in the search terms');
+                    echo '<br><a href="manageqset.php?cid='.$cid.'">' . _('Back').'</a>';
+                    $_SESSION['searchall'.$cid] = 0;
+                    exit;
+                }
         if (count($wholewords)>0 || count($searchterms)>0) {
   				$searchlikes .= '(';
   				if (count($wholewords)>0) {

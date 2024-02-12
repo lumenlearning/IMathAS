@@ -140,7 +140,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         $wholewords = array();
         $haspos = false;
         foreach ($search['terms'] as $k => $v) {
-            if ($v[0] != '!' && ctype_alnum($v) && strlen($v) > 3) {
+            if ($v[0] != '!' && ctype_alnum($v) && strlen($v) > 2) {
                 $haspos = true;
                 break;
             }
@@ -152,7 +152,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
                     $sgn = '-';
                     $v = substr($v, 1);
                 }
-                if (ctype_alnum($v) && strlen($v) > 3 && !in_array($v, $stopwords)) {
+                if (ctype_alnum($v) && strlen($v) > 2 && !in_array($v, $stopwords)) {
                     $wholewords[] = $sgn . $v . '*';
                     unset($search['terms'][$k]);
                 }
@@ -174,6 +174,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             }
         }
     }
+    
     if (!empty($search['avgtime'])) {
         $avgtimeparts = explode(',', $search['avgtime']);
         if (!empty($avgtimeparts[0])) {
@@ -254,6 +255,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
     }
     // do this last, since this will be an OR with other stuff
     // TODO: extend to allow searching for multiple IDs
+    $basicidsearch = false;
     if (isset($search['id'])) {
         $ids = explode(',', $search['id']);
         $idors = [];
@@ -264,6 +266,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         $idsearch = implode(' OR ', $idors);
         if ($searchquery === '') {
             $searchquery = '(' . $idsearch . ')';
+            $basicidsearch = true;
         } else {
             $searchquery = '(' . $searchquery . ' OR ' . $idsearch . ')';
         }
@@ -346,6 +349,9 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         $rightsquery = '';
     }
 
+    if (empty($wholewords) && $libquery === '' && isset($search['terms'])) {
+        return _('Cannot search all libraries without at least one 3+ letter word in the search terms');
+    }
     if ($searchquery === '' && $libquery === '') {
         return 'Cannot search all libraries without a search term';
     }
