@@ -48,8 +48,6 @@
 			<div><noscript>JavaScript is not enabled.  JavaScript is required for <?php echo $installname; ?>.  Please enable JavaScript and reload this page</noscript></div>
 
 
-			<!-- <div><a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
-			<a href="<?php// echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></div>		<input type="hidden" id="tzoffset" name="tzoffset" value=""> -->
 			<input type="hidden" id="tzoffset" name="tzoffset" value="">
 			<input type="hidden" id="tzname" name="tzname" value="">
 			<input type="hidden" id="challenge" name="challenge" value="<?php echo $challenge; ?>" />
