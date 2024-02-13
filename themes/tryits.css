@@ -1,5 +1,10 @@
 /* Styles for content-embedded Try-It questions only. */
 
+/* WARNING: Do not change any styles starting with "mq".
+ * These are MathQuill specific and will likely lead to
+ * funky things happening that you don't anticipate.
+ */
+
 /* General settings - fonts, overall page background, etc */
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700);
 @import url(https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap);
@@ -589,14 +594,17 @@ span.mq-math-mode {
   font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-size: 16px;
+} 
+
+/* These styles can't be added to span.mq-math-node,
+ * because they distort the MathQuill editor beyond 
+ * the point of readability/usability. 
+ */
+input.text { 
   height: 45px;
   margin: 2px;
   padding-left: 20px;
   width: 130px;
-}
-
-span.mq-root-block {
-  margin-top: 12px;
 }
 
 input.text ~ .scoreboxicon {
