@@ -11,7 +11,7 @@ return [
 	],
 	'environments' => [
 		'default_environment' => 'development',
-		'migration_table' => 'ohm_phinxlog',
+		'default_migration_table' => 'ohm_phinxlog',
 		'production' => [
 			'adapter' => 'mysql',
 			'host' => $ohmApiSettings['db']['host'],
