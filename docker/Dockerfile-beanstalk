@@ -21,8 +21,8 @@ RUN curl -O https://nodejs.org/download/release/${NODE_VERSION}/node-${NODE_VERS
 ENV PATH ${PATH}:$NODE_PATH/node-${NODE_VERSION}-linux-x64/bin
 
 # Install composer
-RUN curl -o /usr/local/bin/composer https://getcomposer.org/download/2.6.6/composer.phar
-RUN echo "72600201c73c7c4b218f1c0511b36d8537963e36aafa244757f52309f885b314 /usr/local/bin/composer" | sha256sum -c
+RUN curl -o /usr/local/bin/composer https://getcomposer.org/download/2.7.1/composer.phar
+RUN echo "1ffd0be3f27e237b1ae47f9e8f29f96ac7f50a0bd9eef4f88cdbe94dd04bfff0 /usr/local/bin/composer" | sha256sum -c
 RUN chmod 755 /usr/local/bin/composer
 
 ENV INSTALL_PATH /build
