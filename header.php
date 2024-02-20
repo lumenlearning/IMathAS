@@ -281,7 +281,7 @@ if (isset($_GET['iframe_resize_id'])) { // add Try-It styles to Try-Its
 if (isset($_GET['iframe_resize_id']) && !isset($_GET['source'])) {
   echo '<link rel="stylesheet" href="/themes/waymakertryits.css" type="text/css"/>';
 }
-// add a styles adjustment to Try-Its w/ OHM iFrame only
+// add a styles adjustment to Lumen One/TNH Try-Its only
 if (isset($_GET['iframe_resize_id']) && isset($_GET['source'])) {
 	echo '<link rel="stylesheet" href="/themes/lumenonetryits.css" type="text/css"/>';
   }
