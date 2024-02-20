@@ -100,6 +100,11 @@ if (isset($_GET['iframe_resize_id']) ) {
 if (isset($_GET['iframe_resize_id']) && !isset($_GET['source'])){
   echo '<link rel="stylesheet" href="/themes/waymakertryits.css" type="text/css"/>';
 }
+
+// add a styles adjustment to Try-Its w/ OHM iFrame only
+if (isset($_GET['iframe_resize_id']) && isset($_GET['source'])){
+	echo '<link rel="stylesheet" href="/themes/lumenonetryits.css" type="text/css"/>';
+  }
 // ####### End OHM-specific changes ##################################################################
 // ####### End OHM-specific changes ##################################################################    
 if (isset($CFG['GEN']['favicon'])) {
