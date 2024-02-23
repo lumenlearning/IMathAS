@@ -291,7 +291,8 @@ class AssessStandalone {
         'html' => $qout, 
         'jsparams' => $jsparams, 
         'errors'=>$question->getErrors(),
-        'soln'=>$question->getSolutionContentDetailed()
+        'soln'=>$question->getSolutionContentDetailed(),
+        'solnopts'=> $this->qdata[$qsid]['solutionopts']
     );
   }
 
