@@ -7,6 +7,7 @@
     <videocued-nav
       :cue="cue"
       :toshow="toshow"
+      :showfollowup="showfolloup"
       @jumpto="jumpTo"
     >
       <videocued-result-nav
@@ -15,6 +16,7 @@
         :qn = "qn"
         :cue = "cue"
         @jumpto="jumpTo"
+        @addfollowup="addShowFollowup"
       />
     </videocued-nav>
     <div
@@ -120,7 +122,8 @@ export default {
       ytplayer: null,
       timer: null,
       cue: 0,
-      toshow: 'v'
+      toshow: 'v',
+      showfolloup: []
     };
   },
   computed: {
@@ -316,6 +319,9 @@ export default {
       }
       this.cue = newCueNum;
       this.toshow = newToshow;
+    },
+    addShowFollowup (val) {
+      this.showfolloup.push(val);
     }
   },
   mounted () {

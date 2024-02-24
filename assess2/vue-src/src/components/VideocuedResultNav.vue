@@ -61,6 +61,9 @@ export default {
         : 'nextseg';
     },
     hasNextVid () {
+      if (store.assessInfo.videocues[this.cue].hasOwnProperty('followuptitle')) {
+        this.$emit('addfollowup', this.cue);
+      }
       return (this.nextVidType === 'followup' ||
         store.assessInfo.videocues.hasOwnProperty(this.cue + 1)
       );
