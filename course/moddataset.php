@@ -658,7 +658,7 @@
 				$stm = $DBH->prepare("SELECT qrightsdef FROM imas_users WHERE id=:id");
                 $stm->execute(array(':id'=>$userid));
                 $qrightsdef = $stm->fetchColumn(0);
-				$line['userights'] = 0;
+				$line['userights'] = $CFG['GEN']['newQuestionUseRights'] ?? 0;
 
 			} else {
 				if ($isadmin) {
@@ -727,7 +727,7 @@
 			$stm = $DBH->prepare("SELECT qrightsdef FROM imas_users WHERE id=:id");
             $stm->execute(array(':id'=>$userid));
             $qrightsdef = $stm->fetchColumn(0);
-			$line['userights'] = 0;
+			$line['userights'] = $CFG['GEN']['newQuestionUseRights'] ?? 0;
             $line['author'] = '';
 			$line['license'] = isset($CFG['GEN']['deflicense'])?$CFG['GEN']['deflicense']:1;
             $line['otherattribution'] = '';

@@ -171,6 +171,9 @@ $CFG['CPS']['itemicons'] = array (
 
 $CFG['GEN']['sendquestionproblemsthroughcourse'] = 1;
 
+// Default userights for new questions
+$CFG['GEN']['newQuestionUseRights'] = getenv('NEW_QUESTION_DEFAULT_USE_RIGHTS') ?: 4;
+
 $CFG['GEN']['guesttempaccts'] = array(518);
 
 $CFG['GEN']['hidedefindexmenu'] = true;
