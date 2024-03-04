@@ -98,7 +98,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
 
     $searchand = [];
     $searchvals = [];
-    $stopwords = ['about','from','that','this','what','when','where','will','with'];
+    $stopwords = ['about','are','com','for','from','how','that','the','this','was','what','when','where','will','with','und','www'];
 
     if ($searchtype != 'all' && !is_array($libs)) {
         $libs = explode(',', $libs);
@@ -174,7 +174,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             }
         }
     }
-    
+
     if (!empty($search['avgtime'])) {
         $avgtimeparts = explode(',', $search['avgtime']);
         if (!empty($avgtimeparts[0])) {
