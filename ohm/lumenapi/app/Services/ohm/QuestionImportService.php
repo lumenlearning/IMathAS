@@ -98,7 +98,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * @return int The imas_questionset ID for the created question.
      * @throws InvalidQuestionType Thrown on unknown question types.
      */
-    public function createSingleQuestion(array $mgaQuestion, array $user): int
+    private function createSingleQuestion(array $mgaQuestion, array $user): int
     {
         $questionType = $mgaQuestion['type'];
         if ('multiple_choice' == $questionType) {
@@ -120,7 +120,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * @param array $mgaQuestionData The question data.
      * @return array The question type, description, text, and control.
      */
-    public function buildMultipleChoiceQuestion(array $mgaQuestionData): array
+    private function buildMultipleChoiceQuestion(array $mgaQuestionData): array
     {
         $questionDescription = $this->replaceSmartQuotes($mgaQuestionData['description']);
 
@@ -176,7 +176,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * @param array $questionData The question data.
      * @return string The feedback text and macro snippet.
      */
-    public function buildMultipleChoicePerAnswerFeedback(array $questionData): string
+    private function buildMultipleChoicePerAnswerFeedback(array $questionData): string
     {
         if (!$this->hasPerAnswerFeedback($questionData)) {
             return '';

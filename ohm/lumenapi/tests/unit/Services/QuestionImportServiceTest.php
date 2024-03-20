@@ -140,6 +140,10 @@ class QuestionImportServiceTest extends TestCase
 
     public function testCreateSingleQuestion(): void
     {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $createSingleQuestion = $class->getMethod('createSingleQuestion');
+        $createSingleQuestion->setAccessible(true); // Required for PHP 7.4.
+
         $this->questionSetRepository
             ->shouldReceive('create')
             ->andReturn(42);
@@ -147,16 +151,23 @@ class QuestionImportServiceTest extends TestCase
             ->shouldReceive('create')
             ->andReturn(21);
 
-        $questionsetId = $this->questionImportService->createSingleQuestion(
-            self::MGA_QUESTION_WITH_FEEDBACK, self::USER);
+        $questionsetId = $createSingleQuestion->invokeArgs($this->questionImportService, [
+            self::MGA_QUESTION_WITH_FEEDBACK, self::USER
+        ]);
 
         $this->assertEquals(42, $questionsetId);
     }
 
     public function testCreateSingleQuestion_UnknownType(): void
     {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $createSingleQuestion = $class->getMethod('createSingleQuestion');
+        $createSingleQuestion->setAccessible(true); // Required for PHP 7.4.
+
         $this->expectException(RuntimeException::class);
-        $this->questionImportService->createSingleQuestion(['type' => 'meow'], []);
+        $createSingleQuestion->invokeArgs($this->questionImportService, [
+            ['type' => 'meow'], []
+        ]);
     }
 
     /*
@@ -167,13 +178,15 @@ class QuestionImportServiceTest extends TestCase
     {
         $class = new ReflectionClass(QuestionImportService::class);
         $replaceSmartQuotes = $class->getMethod('replaceSmartQuotes');
-        $replaceSmartQuotes->setAccessible(true);
+        $replaceSmartQuotes->setAccessible(true); // Required for PHP 7.4.
         $encodeForQuestionCode = $class->getMethod('encodeForQuestionCode');
-        $encodeForQuestionCode->setAccessible(true);
+        $encodeForQuestionCode->setAccessible(true); // Required for PHP 7.4.
+        $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
+        $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4
 
         // Method under test.
-        $question = $this->questionImportService
-            ->buildMultipleChoiceQuestion(self::MGA_QUESTION_WITH_FEEDBACK);
+        $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
+            [self::MGA_QUESTION_WITH_FEEDBACK]);
 
         /*
          * Assertions
@@ -214,8 +227,12 @@ class QuestionImportServiceTest extends TestCase
 
     public function testBuildMultipleChoiceQuestion_NoFeedback(): void
     {
-        $question = $this->questionImportService
-            ->buildMultipleChoiceQuestion(self::MGA_QUESTION_NO_FEEDBACK);
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
+        $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4.
+
+        $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
+            [self::MGA_QUESTION_NO_FEEDBACK]);
 
         /*
          * More complete testing of returned question data is done in another test.
@@ -232,8 +249,13 @@ class QuestionImportServiceTest extends TestCase
 
     public function testBuildMultipleChoicePerAnswerFeedback(): void
     {
-        $feedbackCode = $this->questionImportService->buildMultipleChoicePerAnswerFeedback(
-            self::MGA_QUESTION_WITH_FEEDBACK);
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoicePerAnswerFeedback = $class->getMethod('buildMultipleChoicePerAnswerFeedback');
+        $buildMultipleChoicePerAnswerFeedback->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
+            [self::MGA_QUESTION_WITH_FEEDBACK]);
+
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[0\] = \'.*\';/', $feedbackCode);
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[1\] = \'.*\';/', $feedbackCode);
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[2\] = \'.*\';/', $feedbackCode);
@@ -245,8 +267,13 @@ class QuestionImportServiceTest extends TestCase
 
     public function testGenerateMultipleChoicePerAnswerFeedback_NoFeedback(): void
     {
-        $questionCode = $this->questionImportService->buildMultipleChoicePerAnswerFeedback(
-            self::MGA_QUESTION_NO_FEEDBACK);
-        $this->assertEquals('', $questionCode);
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoicePerAnswerFeedback = $class->getMethod('buildMultipleChoicePerAnswerFeedback');
+        $buildMultipleChoicePerAnswerFeedback->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
+            [self::MGA_QUESTION_NO_FEEDBACK]);
+
+        $this->assertEquals('', $feedbackCode);
     }
 }
