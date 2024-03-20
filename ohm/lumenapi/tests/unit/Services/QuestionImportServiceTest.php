@@ -172,7 +172,7 @@ class QuestionImportServiceTest extends TestCase
      * buildMultipleChoiceQuestion
      */
 
-    public function testBuildMultipleChoiceQuestion_WithFeedback(): void
+    public function testBuildMultipleChoiceQuestion_WithPerAnswerFeedback(): void
     {
         $class = new ReflectionClass(QuestionImportService::class);
         $replaceSmartQuotes = $class->getMethod('replaceSmartQuotes');
@@ -218,7 +218,7 @@ class QuestionImportServiceTest extends TestCase
         }
 
         // Full feedback code is tested in a different test.
-        // We only assert presence of the macro usage here.
+        // We only assert presence of the correct feedback macro here.
         $expectedFeedbackMacroUsage = preg_quote('$feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer);');
         $this->assertMatchesRegularExpression('/' . $expectedFeedbackMacroUsage . '/s', $question['control']);
     }
@@ -233,12 +233,16 @@ class QuestionImportServiceTest extends TestCase
             [self::MGA_QUESTION_NO_FEEDBACK]);
 
         /*
-         * More complete testing of returned question data is done in another test.
-         * We only ensure a feedback macro is not present in question code here.
+         * If no feedback is present, the generated question code should use
+         * a "basic feedback" macro with default feedback text.
          */
 
+        // Full feedback code is tested in a different test.
+        // We only assert presence of the correct feedback macro here.
         $this->assertEquals('choices', $question['qtype']);
-        $this->assertDoesNotMatchRegularExpression('/ohm_getfeedbacktxt/', $question['control']);
+        $expectedFeedbackMacroUsage = preg_quote('$feedback = ohm_getfeedbackbasic('
+            . '$stuanswers[$thisq], "Correct!", "Incorrect.", $answer);');
+        $this->assertMatchesRegularExpression('/' . $expectedFeedbackMacroUsage . '/s', $question['control']);
     }
 
     /*
