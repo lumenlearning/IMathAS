@@ -167,7 +167,9 @@ class QuestionImportServiceTest extends TestCase
     {
         $class = new ReflectionClass(QuestionImportService::class);
         $replaceSmartQuotes = $class->getMethod('replaceSmartQuotes');
+        $replaceSmartQuotes->setAccessible(true);
         $encodeForQuestionCode = $class->getMethod('encodeForQuestionCode');
+        $encodeForQuestionCode->setAccessible(true);
 
         // Method under test.
         $question = $this->questionImportService
