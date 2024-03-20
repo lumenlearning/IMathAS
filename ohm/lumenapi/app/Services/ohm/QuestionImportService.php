@@ -55,7 +55,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * @param int $ownerId The OHM user ID to use for the owner of all questions.
      * @return array An array of source question IDs mapped to created OHM question IDs.
      * @throws RecordNotFoundException Thrown if the specified User ID is not found.
-     * @see QuestionImportService::createSingleQuestion() for question input format.
+     * @see QuestionImportServiceTest constants for $mgaQuestionArray examples.
      */
     public function createMultipleQuestions(array $mgaQuestionArray, int $ownerId): array
     {
@@ -116,6 +116,14 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * Notes:
      * - This only generates a question's description, text, and control.
      * - It does not persist anything to a DB.
+     *
+     * Example return data:
+     * [
+     *     'qtype' => 'choices',
+     *     'description' => 'Question description goes here.',
+     *     'qtext' => 'When is a good time for pizza?',
+     *     'control' => 'Question $code and $feedback goes here'
+     * ]
      *
      * @param array $mgaQuestionData The question data.
      * @return array The question type, description, text, and control.
@@ -201,11 +209,19 @@ class QuestionImportService extends BaseService implements QuestionImportService
     }
 
     /**
-     * Insert a new question into imas_questionset.
+     * Insert a new question into imas_questionset as a question without
+     * an assigned library.
      *
-     * @param array $questionData
+     * @param array $questionData The question's type, description, text, and control.
+     *                            Example array:
+     *                             [
+     *                                 'qtype' => 'choices',
+     *                                 'description' => 'Question description goes here.',
+     *                                 'qtext' => 'When is a good time for pizza?',
+     *                                 'control' => 'Question $code and $feedback goes here'
+     *                             ]
      * @param array $user A row from imas_users representing the question author.
-     * @return int
+     * @return int The inserted question's ID.
      * @throws Exception Thrown on errors while inserting rows into the DB.
      */
     private function insertNewQuestion(array $questionData, array $user): int
@@ -311,26 +327,28 @@ class QuestionImportService extends BaseService implements QuestionImportService
     }
 
     /**
-     * Determine if question data has per_answer feedback.
+     * Determine if MGA question data has per_answer feedback.
      *
-     * @param array $questionData The question data as a JSON array.
+     * @param array $mgaQuestionData The MGA question data as a JSON array.
      * @return bool True if question has per_answer feedback. False if not.
+     * @see QuestionImportServiceTest constants for $mgaQuestionData examples.
      */
-    private function hasPerAnswerFeedback(array $questionData): bool
+    private function hasPerAnswerFeedback(array $mgaQuestionData): bool
     {
-        return !empty($questionData['feedback'])
-            && 'per_answer' == $questionData['feedback']['type'];
+        return !empty($mgaQuestionData['feedback'])
+            && 'per_answer' == $mgaQuestionData['feedback']['type'];
     }
 
     /**
-     * Determine if a question has ANY type of feedback.
+     * Determine if MGA question data has ANY type of feedback.
      *
-     * @param array $questionData The question data as a JSON array.
+     * @param array $mgaQuestionData The MGA question data as a JSON array.
      * @return bool True if feedback exists. False if not.
+     * @see QuestionImportServiceTest constants for $mgaQuestionData examples.
      */
-    private function hasFeedback(array $questionData): bool
+    private function hasFeedback(array $mgaQuestionData): bool
     {
-        return !empty($questionData['feedback']);
+        return !empty($mgaQuestionData['feedback']);
     }
 
     /**
