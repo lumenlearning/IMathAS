@@ -41,6 +41,10 @@ $router->group(
             'uses' => 'QuestionController@scoreAllQuestions'
         ]);
 
+        $router->post('/questions/mga_imports', [
+            'uses' => 'QuestionImportController@importMgaQuestions'
+        ]);
+
         $router->get('/enrollments', [
             'uses' => 'EnrollmentController@getAllEnrollments'
         ]);
