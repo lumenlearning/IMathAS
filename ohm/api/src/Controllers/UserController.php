@@ -2,9 +2,8 @@
 
 namespace OHM\Api\Controllers;
 
-use Slim\Container;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 use OHM\Models\User;
 
@@ -14,9 +13,9 @@ class UserController extends BaseApiController
 	 * @param Request $request
 	 * @param Response $response
 	 * @param array $args
-	 * @return null
+     * @return Response
 	 */
-	public function findAll($request, $response, $args)
+    public function findAll(Request $request, Response $response, $args): Response
 	{
 		list($pageNum, $pageSize) = $this->getPaginationArgs($request);
 
@@ -24,6 +23,9 @@ class UserController extends BaseApiController
 //		 conditional sql goes here
 		$users = $users->get();
 
-		return $response->withJson($users);
+        $payload = json_encode($users);
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
 	}
 }

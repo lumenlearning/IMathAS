@@ -31,7 +31,7 @@ function parseMathQuiet($str, $vars = '', $allowedfuncs = array(), $fvlist = '',
       echo ". Error: ".$t->getMessage();
     }
     return false;
-  }
+  } 
   return $parser;
 }
 

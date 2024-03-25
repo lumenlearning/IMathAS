@@ -16,7 +16,7 @@ if ($res===false) {
 }
 
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 echo '<p>Add user EULA acceptance tracking columns.</p>';
 
 return true;

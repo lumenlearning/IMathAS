@@ -90,7 +90,7 @@ final class BannerTest extends TestCase
         $pdoStatement = $this->createMock(\PDOStatement::class);
         $pdoStatement->method('execute')->willReturn(true);
         $this->dbh->method('prepare')->willReturn($pdoStatement);
-        $this->dbh->method('lastInsertId')->willReturn(43);
+        $this->dbh->method('lastInsertId')->willReturn('43');
 
         // A light check for a DB write.
         $pdoStatement->expects($this->once())->method('execute');

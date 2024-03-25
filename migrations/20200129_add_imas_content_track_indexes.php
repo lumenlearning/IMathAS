@@ -40,7 +40,7 @@ if ($res === false) {
     return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Adding indexes to table: imas_content_track (type, viewtime)</p>";
 return true;

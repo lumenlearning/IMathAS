@@ -58,6 +58,7 @@ class GetQuestionDisplayTest extends TestCase
 
         // OHM1 macros return a string of feedback with HTML, which is
         // not usable by the Question API.
+        $this->assertIsArray($responseData['errors']);
         $this->assertContains(
             'Warning: Feedback may be available but is suppressed due to the usage of OHMv1 macros!',
             $responseData['errors']

@@ -16,7 +16,7 @@ if ($res===false) {
 }
 
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 echo '<p>Add assessment opt-out tracking columns.</p>';
 
 return true;

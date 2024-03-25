@@ -34,8 +34,8 @@ if (php_sapi_name() == "cli") {
     $_SERVER['HTTP_HOST'] = explode('//',$argv[1])[1];
 }
 
-require(__DIR__ . "/../init_without_validate.php");
-require(__DIR__ . "/../includes/rollingcurl.php");
+require_once __DIR__ . "/../init_without_validate.php";
+require_once __DIR__ . "/../includes/rollingcurl.php";
 require_once(__DIR__ . '/../includes/ltioutcomes.php');
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
@@ -91,7 +91,7 @@ $scriptStartTime = time();
 
 //if called via AWS SNS, we need to return an OK quickly so it won't retry
 if (isset($_SERVER['HTTP_X_AMZ_SNS_MESSAGE_TYPE'])) {
-	require(__DIR__ . "/../includes/AWSSNSutil.php");
+    require_once __DIR__ . "/../includes/AWSSNSutil.php";
 	respondOK();
 }
 
@@ -110,7 +110,7 @@ $updater1p3 = new LTI_Grade_Update($DBH);
 $updateStart = time();
 $batchsize = isset($CFG['LTI']['queuebatch'])?$CFG['LTI']['queuebatch']:10;
 $RCX = new RollingCurlX($batchsize);
-$RCX->setTimeout(5000); //5 second timeout on each request
+$RCX->setTimeout(8000); //8 second timeout on each request
 $RCX->setStopAddingTime(45); //stop adding new request after 45 seconds
 $RCX->setCallback('LTIqueueCallback'); //callback after response
 $RCX->setPostdataCallback('LTIqueuePostdataCallback'); //pre-send callback
@@ -150,6 +150,7 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	if (substr($row['sourcedid'],0,6)=='LTI1.3') {
 		// LTI 1.3 update
 		list($ltiver,$ltiuserid,$score_url,$platformid) = explode(':|:', $row['sourcedid']);
+		if (!is_numeric($platformid)) { continue; }
 		if ($updater1p3->have_token($platformid)) {
 			if ($updater1p3->token_valid($platformid)) {
 				debuglog('queing request with token for '.$row['hash']);
@@ -425,7 +426,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 			// was a token request
 			if ($response === false) {
 				// record failure. in round 2 token will be read as not valid
-				$updater1p3->token_request_failure($user_data['platformid'], $request_info['response_text']);
+				$updater1p3->token_request_failure($user_data['platformid'], $request_info['response_text'], $request_info['error'] . ' code ' . $request_info['http_code']);
 				debuglog('token request failure t1 '.$user_data['platformid']);
                 return;
 			}
@@ -435,7 +436,7 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
 				debuglog('got token for '.$user_data['platformid']);
 			} else {
                 // record failure. in round 2 token will be read as not valid
-				$updater1p3->token_request_failure($user_data['platformid'], $response . $request_info['response_text']);
+				$updater1p3->token_request_failure($user_data['platformid'], $response . $request_info['response_text'], $request_info['error'] . ' code ' . $request_info['http_code']);
 				debuglog('token request failure t2 '.$response);
 			}
 			return; // doesn't effect ltiqueue, so return now

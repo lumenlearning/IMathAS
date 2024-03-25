@@ -80,7 +80,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'correct',
                 'feedback' => 'Correct!',
                 'failsafe_data' => [
-                    incorrect_feedback => 'Nope!'
+                    'incorrect_feedback' => 'Nope!'
                 ]
             ]
         ];
@@ -96,7 +96,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'incorrect',
                 'feedback' => 'Nope!',
                 'failsafe_data' => [
-                    correct_feedback => 'Correct!'
+                    'correct_feedback' => 'Correct!'
                 ]
             ]
         ];
@@ -123,7 +123,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'correct',
                     'feedback' => 'Correct!',
                     'failsafe_data' => [
-                        incorrect_feedback => 'Nope!'
+                        'incorrect_feedback' => 'Nope!'
                     ]
                 ]
             ];
@@ -147,7 +147,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'incorrect',
                     'feedback' => 'Nope!',
                     'failsafe_data' => [
-                        correct_feedback => 'Correct!'
+                        'correct_feedback' => 'Correct!'
                     ]
                 ]
             ];
@@ -168,7 +168,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'correct',
                 'feedback' => 'Correct!',
                 'failsafe_data' => [
-                    incorrect_feedback => 'Nope!'
+                    'incorrect_feedback' => 'Nope!'
                 ]
             ]
         ];
@@ -184,7 +184,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'incorrect',
                 'feedback' => 'Nope!',
                 'failsafe_data' => [
-                    correct_feedback => 'Correct!'
+                    'correct_feedback' => 'Correct!'
                 ]
             ]
         ];
@@ -200,7 +200,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'incorrect',
                 'feedback' => 'Nope!',
                 'failsafe_data' => [
-                    correct_feedback => 'Correct!'
+                    'correct_feedback' => 'Correct!'
                 ]
             ]
         ];
@@ -227,7 +227,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'correct',
                     'feedback' => 'Correct!',
                     'failsafe_data' => [
-                        incorrect_feedback => 'Nope!'
+                        'incorrect_feedback' => 'Nope!'
                     ]
                 ]
             ];
@@ -251,7 +251,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'incorrect',
                     'feedback' => 'Nope!',
                     'failsafe_data' => [
-                        correct_feedback => 'Correct!'
+                        'correct_feedback' => 'Correct!'
                     ]
                 ]
             ];
@@ -275,7 +275,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'incorrect',
                     'feedback' => 'Nope!',
                     'failsafe_data' => [
-                        correct_feedback => 'Correct!'
+                        'correct_feedback' => 'Correct!'
                     ]
                 ]
             ];
@@ -296,7 +296,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'correct',
                 'feedback' => 'Correct!',
                 'failsafe_data' => [
-                    incorrect_feedback => 'Nope!'
+                    'incorrect_feedback' => 'Nope!'
                 ]
             ]
         ];
@@ -312,7 +312,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'incorrect',
                 'feedback' => 'Nope!',
                 'failsafe_data' => [
-                    correct_feedback => 'Correct!'
+                    'correct_feedback' => 'Correct!'
                 ]
             ]
         ];
@@ -328,7 +328,7 @@ final class GetFeedbackBasicTest extends TestCase
                 'correctness' => 'incorrect',
                 'feedback' => 'Nope!',
                 'failsafe_data' => [
-                    correct_feedback => 'Correct!'
+                    'correct_feedback' => 'Correct!'
                 ]
             ]
         ];
@@ -355,7 +355,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'correct',
                     'feedback' => 'Correct!',
                     'failsafe_data' => [
-                        incorrect_feedback => 'Nope!'
+                        'incorrect_feedback' => 'Nope!'
                     ]
                 ]
             ];
@@ -379,7 +379,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'incorrect',
                     'feedback' => 'Nope!',
                     'failsafe_data' => [
-                        correct_feedback => 'Correct!'
+                        'correct_feedback' => 'Correct!'
                     ]
                 ]
             ];
@@ -403,7 +403,7 @@ final class GetFeedbackBasicTest extends TestCase
                     'correctness' => 'incorrect',
                     'feedback' => 'Nope!',
                     'failsafe_data' => [
-                        correct_feedback => 'Correct!'
+                        'correct_feedback' => 'Correct!'
                     ]
                 ]
             ];

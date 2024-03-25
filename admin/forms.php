@@ -1,11 +1,11 @@
 <?php
 //IMathAS:  Admin forms
 //(c) 2006 David Lippman
-require("../init.php");
+require_once "../init.php";
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/forms'])) {
-	require($CFG['hooks']['admin/forms']);
+	require_once $CFG['hooks']['admin/forms'];
 }
 
 $placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/jquery.validate.min.js?v=122917"></script>';
@@ -16,8 +16,8 @@ if (function_exists('getHeaderCode')) {
 	$placeinhead .= getHeaderCode();
 }
 
-require("../header.php");
-require("../includes/htmlutil.php");
+require_once "../header.php";
+require_once "../includes/htmlutil.php";
 
 
 
@@ -135,7 +135,7 @@ switch($_GET['action']) {
 				break;
 			}
 		}
-
+		
 		echo "<p>Are you sure you want to delete this user, <b>";
 		printf("<span class='pii-full-name'>%s, %s</span> (<span class='pii-username'>%s</span>)",
             Sanitize::encodeStringForDisplay($line['LastName']), Sanitize::encodeStringForDisplay($line['FirstName']), Sanitize::encodeStringForDisplay($line['SID']));
@@ -434,7 +434,7 @@ switch($_GET['action']) {
 
 		echo "<div class=submit><input type=submit value=Save></div></form>\n";
 		if ($_GET['action'] == "newadmin") {
-			require_once("../includes/newusercommon.php");
+			require_once "../includes/newusercommon.php";
 			showNewUserValidation("userform", ['group'], ['group' => 'true, min: -1']);
 		} else if ($myrights==100) {
 			echo '<p>&nbsp;</p><p>&nbsp;</p>';
@@ -650,7 +650,7 @@ switch($_GET['action']) {
 					$stm->execute(array(':id'=>$ctc));
 					if ($stm->rowCount()==0) {
 						echo '<p>Invalid course. <a href="addcourse.php">Try again</a></p>';
-						require("../footer.php");
+						require_once "../footer.php";
 						exit;
 					}
 					$ctcinfo = $stm->fetch(PDO::FETCH_ASSOC);
@@ -660,7 +660,7 @@ switch($_GET['action']) {
 						if ($ctcinfo['enrollkey'] != '' && $ctcinfo['enrollkey'] != $_POST['ekey']) {
 							//did not provide valid enrollment key
 							echo '<p>',_('Incorrect enrollment key provided'),'. <a href="addcourse.php">'._('Try again').'</a></p>';
-							require("../footer.php");
+							require_once "../footer.php";
 							exit;
 						}
 					}
@@ -1143,7 +1143,11 @@ switch($_GET['action']) {
 
 			echo '<input type="checkbox" name="toolset-forum" value="2" ';
 			if (($toolset&2)==0) { echo 'checked="checked"';}
-			echo '> ',_('Forum List');
+			echo '> ',_('Forum List'),'<br/>';
+
+            echo '<input type="checkbox" name="toolset-gb" value="4" ';
+			if (($toolset&4)==0) { echo 'checked="checked"';}
+			echo '> ',_('Gradebook');
 
 			echo '</span><br class=form />';
 		}
@@ -1763,19 +1767,19 @@ switch($_GET['action']) {
 			if ($from!='home' && $myrights>=75) {
 				$query .= ",iut.LastName AS teacherfirst,iut.FirstName AS teacherlast";
 			}
-			$query .= " FROM imas_users AS iu JOIN ";
-			$query .= "imas_students AS i_s ON iu.id=i_s.userid JOIN imas_courses AS ic ON ic.id=i_s.courseid ";
+			$query .= " FROM imas_users AS iu LEFT JOIN ";
+			$query .= "imas_students AS i_s ON iu.id=i_s.userid LEFT JOIN imas_courses AS ic ON ic.id=i_s.courseid ";
 			$myrights = 75;
 			if ($from=='home' || $myrights<75) {
 				$query .= "JOIN imas_teachers AS i_t ON ic.id=i_t.courseid ";
 				$query .= "WHERE i_t.userid=? AND ";
 				$qarr = array($userid);
 			} else {
-				$query .= "JOIN imas_teachers AS i_t ON ic.id=i_t.courseid ";
-				$query .= "JOIN imas_users AS iut ON i_t.userid=iut.id ";
+				$query .= "LEFT JOIN imas_teachers AS i_t ON ic.id=i_t.courseid ";
+				$query .= "LEFT JOIN imas_users AS iut ON i_t.userid=iut.id ";
 				if ($myrights<100) {
-					$query .= "WHERE iut.groupid=? AND ";
-					$qarr = array($groupid);
+					$query .= "WHERE (iut.groupid=? OR iu.groupid=?) AND ";
+					$qarr = array($groupid,$groupid);
 				} else {
 					$query .= "WHERE ";
 					$qarr = array();
@@ -1800,6 +1804,7 @@ switch($_GET['action']) {
 				echo '<table class="gb"><thead><th>Student</th><th>Username</th><th>Course</th>';
 				if ($from!='home' && $myrights>=75) {
 					echo '<th>Instructor</th>';
+                    echo '<th>Edit User</th>';
 				}
 				echo '</thead><tbody>';
 				$i = 0;
@@ -1812,6 +1817,8 @@ switch($_GET['action']) {
 					echo '<td>'.Sanitize::encodeStringForDisplay($row['name']).'</td>';
 					if ($from!='home' && $myrights>=75) {
 						echo '<td>'.Sanitize::encodeStringForDisplay($row['teacherlast'].', '.$row['teacherfirst']).'</td>';
+                        echo '<td><a href="forms.php?from='.Sanitize::encodeUrlParam($from).'&action=chgrights&id='.Sanitize::onlyInt($row['id']).'">';
+                        echo _('Edit').'</a></td>';
 					}
 					echo '</td></tr>';
 				}
@@ -1822,5 +1829,5 @@ switch($_GET['action']) {
 		break;
 }
 
-require("../footer.php");
+require_once "../footer.php";
 ?>

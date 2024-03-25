@@ -19,7 +19,7 @@ if ($res === false) {
     return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Added index on typeid columns to table: imas_lti_placements</p>";
 

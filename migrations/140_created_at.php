@@ -51,7 +51,7 @@ if (false === $result) {
 	return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Added <b>created_at</b> columns.</p>";
 

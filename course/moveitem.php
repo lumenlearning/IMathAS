@@ -2,7 +2,7 @@
 //IMathAS: Move item dialog
 //(c) 2017 David Lippman
 
-require("../init.php");
+require_once "../init.php";
 
 $cid = Sanitize::courseId($_GET['cid']);
 if (!isset($teacherid)) {
@@ -181,8 +181,6 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 
 if ($itemtomove[0] != 'B') {
 	$itemtomovename = $iteminfo[$itemtomove][1];
-} else {
-	$itemtomovename = $itemtomovename;
 }
 
 $flexwidth = true;
@@ -195,7 +193,7 @@ $placeinhead .= '<script type="text/javascript">
   var block = "'.$curblock.'";
   </script>';
 $placeinhead .= '<style type="text/css"> select { max-width: 100%;} </style>';
-require("../header.php");
+require_once "../header.php";
 
 ?>
 <div id="headerforms" class="pagetitle">
@@ -217,5 +215,5 @@ require("../header.php");
 
 <p class="noticetext" id="error"></p>
 <?php
-require("../footer.php");
+require_once "../footer.php";
 ?>
