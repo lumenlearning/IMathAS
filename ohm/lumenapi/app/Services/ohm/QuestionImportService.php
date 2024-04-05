@@ -280,8 +280,8 @@ class QuestionImportService extends BaseService implements QuestionImportService
             DB::rollBack();
             Log::error(
                 sprintf(
-                    'Failed to insert new question for MGA question GUID %s. Error: %s, Trace: %s',
-                    $questionData['source_id'], $e->getMessage(), $e->getTraceAsString()
+                    'Failed to insert new question. Error: %s, Trace: %s',
+                    $e->getMessage(), $e->getTraceAsString()
                 )
             );
             throw $e;
