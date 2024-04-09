@@ -108,8 +108,12 @@ function ohm_getfeedbackbasic($stuanswers,
         $studentAnswer = implode(',', $studentAnswer);
         // The correct answer is written by humans.
         // Remove spaces and ensure the answer keys are sorted.
-        $correctAnswer = preg_replace('/\s*/', '', $correctAnswer);
-        $correctAnswer = explode(',', $correctAnswer);
+        if (is_array($correctAnswer)) {
+            $correctAnswer = array_map('trim', $correctAnswer);
+        } else {
+            $correctAnswer = preg_replace('/\s*/', '', $correctAnswer);
+            $correctAnswer = explode(',', $correctAnswer);
+        }
         sort($correctAnswer);
         $correctAnswer = implode(',', $correctAnswer);
     } else {
