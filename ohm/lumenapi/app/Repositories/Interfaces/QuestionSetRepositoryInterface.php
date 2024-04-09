@@ -10,4 +10,6 @@ interface QuestionSetRepositoryInterface
     public function getFieldsById($questionSetId);
 
     public function getAllByQuestionId($questionIds, $placeholders);
+
+    public function create(array $questionSetData): int;
 }
