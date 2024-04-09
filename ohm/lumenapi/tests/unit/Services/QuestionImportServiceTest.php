@@ -251,11 +251,12 @@ class QuestionImportServiceTest extends TestCase
         $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
         $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4.
 
-        $questionWithLongFeedback = self::MGA_QUESTION_NO_FEEDBACK;
-        $questionWithLongFeedback['description'] = str_repeat($questionWithLongFeedback['description'], 10);
+        $questionWithLongDescription = self::MGA_QUESTION_NO_FEEDBACK;
+        $questionWithLongDescription['description'] =
+            str_repeat($questionWithLongDescription['description'], 10);
 
         $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
-            [$questionWithLongFeedback]);
+            [$questionWithLongDescription]);
 
         $this->assertLessThan(255, $question['description']);
     }
