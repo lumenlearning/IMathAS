@@ -131,6 +131,8 @@ class QuestionImportService extends BaseService implements QuestionImportService
     private function buildMultipleChoiceQuestion(array $mgaQuestionData): array
     {
         $questionDescription = $this->replaceSmartQuotes($mgaQuestionData['description']);
+        // imas_questionset.description is currently VARCHAR(254)
+        $questionDescription = substr($questionDescription, 0, 200);
         $questionDescription .= ' -- MGA_GUID:' . $mgaQuestionData['source_id'];
 
         $questionText = $this->replaceSmartQuotes($mgaQuestionData['text']);

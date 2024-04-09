@@ -245,6 +245,22 @@ class QuestionImportServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/' . $expectedFeedbackMacroUsage . '/s', $question['control']);
     }
 
+    public function testBuildMultipleChoiceQuestion_LongDescription(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
+        $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4.
+
+        $questionWithLongDescription = self::MGA_QUESTION_NO_FEEDBACK;
+        $questionWithLongDescription['description'] =
+            str_repeat($questionWithLongDescription['description'], 10);
+
+        $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
+            [$questionWithLongDescription]);
+
+        $this->assertLessThan(255, $question['description']);
+    }
+
     /*
      * generateMultipleChoicePerAnswerFeedback
      */
