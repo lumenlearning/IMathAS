@@ -1,82 +1,53 @@
 <?php
   require '../init_without_validate.php';
 
-  /**
-   * Define constants
-   */
-  define("ZDAPIKEY", $GLOBALS['CFG']['GEN']['zdapikey']);
-  define("ZDURL", $GLOBALS['CFG']['GEN']['zdurl']);
-  define("ZDUSER", $GLOBALS['CFG']['GEN']['zduser']);
+use OHM\tickets\hubspot\HubSpotTicketService;
+use OHM\tickets\NewTicketDto;
+use OHM\tickets\zendesk\ZendeskTicketService;
 
-  /**
-   * Submit data via cURL.
-   *
-   * @param String $url The end of the ZenDesk URL
-   * @param JSON $json JSON encoded data to be submitted to the URL
-   *
-   * @return Array
-   */
-  function curlWrap($url, $json) {
-    // Initialize curl session
-    $ch = curl_init();
-
-    // Set options for curl transfer
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 10 );
-    curl_setopt($ch, CURLOPT_URL, ZDURL . $url);
-    curl_setopt($ch, CURLOPT_USERPWD, ZDUSER . "/token:" . ZDAPIKEY);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
-    curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-
-    // Perform curl session and close
-    $output = curl_exec($ch);
-    curl_close($ch);
-
-    // JSON decode the output and return
-    $decoded = json_decode($output);
-    return $decoded;
-  }
-
-  /**
+/**
    * Loop over $_POST data, find the ones with 'z_' at the beginning, and
    * strip the html and php tags.
-   *
-   * @var Array $arr
    */
+  $formData = [];
   foreach($_POST as $key => $value){
     if(preg_match('/^z_/i',$key)){
-      $arr[strip_tags($key)] = strip_tags($value);
+      $formData[strip_tags($key)] = strip_tags($value);
     }
   }
 
-  /**
-   * Assemble JSON encode.
-   *
-   * @var JSON encoded Array $create
-   */
+$ticketBody = $formData['z_description'] . "\n \n" . 'Course ID: '
+    . $formData['z_cid'];
 
-   $create = json_encode([
-      "ticket" => [
-          "subject" => $arr['z_subject'],
-          "comment" => [
-              'body' => $arr['z_description'] . "\n \n" . 'Course ID: ' . $arr['z_cid']
-          ],
-          "requester" => [
-              "name" => $arr['z_name'],
-              "email" => $arr['z_email'],
-          ]
-      ]
-  ]);
+$newTicketDto = new NewTicketDto();
+$newTicketDto
+    ->setRequesterName($formData['z_name'])
+    ->setRequesterEmail($formData['z_email'])
+    ->setRequesterUserAgent($_SERVER['HTTP_USER_AGENT'])
+    ->setSubject($formData['z_subject'])
+    ->setBody($ticketBody);
 
-  $return = curlWrap("/tickets.json", $create);
+$supportTicketService = $GLOBALS['CFG']['GEN']['SUPPORT_TICKET_SERVICE'];
+$supportTicketService = strtolower($supportTicketService);
 
-  if (array_key_exists('error', $return)) {
+// This conditional may be removed after migration to HubSpot is
+// completed. See OHM-1233.
+if ('hubspot' == $supportTicketService) {
+    $supportTicket = new HubSpotTicketService();
+} else {
+    $supportTicket = new ZendeskTicketService();
+}
+$createTicketResult = $supportTicket->create($newTicketDto);
+
+if ($createTicketResult->isCreated()) {
+    if ($createTicketResult->getTicketId()) {
+        echo json_encode(['ticket_id' => $createTicketResult->getTicketId()]);
+    }
+} else {
     // Returning a status 500 beacuse there's no reliable way to determine
     // if we failed due to client input or an API issue. (Zendesk down, etc)
     http_response_code(500);
-    echo json_encode($return);
-  }
+
+    $errors = $createTicketResult->getErrors();
+    echo json_encode($errors);
+}

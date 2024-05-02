@@ -190,9 +190,27 @@ $CFG['GEN']['skipbrowsercheck'] = true;
 
 $CFG['GEN']['meanstogetcode'] = 'requesting an instructor account on MyOpenMath.com';
 
+// Current supported values: "zendesk", "hubspot"
+$CFG['GEN']['SUPPORT_TICKET_SERVICE'] = getenv('SUPPORT_TICKET_SERVICE')
+    ?: 'zendesk';
+
+// Zendesk (support tickets)
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY');
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL');
 $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER');
+
+// HubSpot (support tickets)
+$CFG['GEN']['HUBSPOT_API_DEBUG'] = 'true' == getenv('HUBSPOT_API_DEBUG');
+$CFG['GEN']['HUBSPOT_API_DOMAIN'] = getenv('HUBSPOT_API_DOMAIN');
+$CFG['GEN']['HUBSPOT_ACCESS_TOKEN'] = getenv('HUBSPOT_ACCESS_TOKEN');
+// This is the "hs_pipeline_stage" ID for new tickets.
+// View an existing ticket here: https://api.hubapi.com/crm/v3/objects/tickets/{{ticketId}}
+//   to get a valid "hs_pipeline_stage" for this config variable.
+$CFG['GEN']['HUBSPOT_PIPELINE_STAGE_ID'] = getenv('HUBSPOT_PIPELINE_STAGE_ID');
+
+// Yellow "Help" button page
+$CFG['GEN']['FACULTY_USER_GUIDE_URL'] = getenv('FACULTY_USER_GUIDE_URL')
+    ?: 'https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447/';
 
 $questionErrorMsgToUserid = getenv('QUESTION_ERROR_MSG_USERID') ?
     getenv('QUESTION_ERROR_MSG_USERID') : 718166;
