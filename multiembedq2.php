@@ -212,7 +212,7 @@ if (isset($_POST['toscoreqn'])) {
     $qn = intval($_POST['regen']);
     $qsid = $QS['id'][$qn];
 
-    // clear values
+    // clear values 
     $seed = rand(0, 9999) + 10000;
     $state['seeds'][$qn] = $seed;
     unset($state['stuanswers'][$qn+1]);
@@ -222,7 +222,7 @@ if (isset($_POST['toscoreqn'])) {
     $state['partattemptn'][$qn] = array();
     $state['rawscores'][$qn] = array();
     $a2->setState($state);
-
+    
     // load question data
     $stm = $DBH->prepare("SELECT * FROM imas_questionset WHERE id=:id");
     $stm->execute(array(':id' => $qsid));
@@ -263,7 +263,6 @@ if (isset($_GET['frame_id'])) {
 } else {
   $frameid = "ohm" . $qsid;
 }
-
 if (isset($_GET['theme'])) {
     $theme = preg_replace('/\W/', '', $_GET['theme']);
     $coursetheme = $theme . '.css';
@@ -282,7 +281,7 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
 } else {
-    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=20240107" type="text/javascript"></script>';
+    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=20240505" type="text/javascript"></script>';
     // ####### Begin OHM-specific changes ##################################################################
     // ####### Begin OHM-specific changes ##################################################################
     $placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
@@ -330,7 +329,7 @@ $placeinhead .= '<script type="text/javascript">
         MathJax.Hub.Queue(function () {
             sendresizemsg();
         });
-    }
+    } 
   } else {
       $(function() {
           sendresizemsg();
