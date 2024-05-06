@@ -80,6 +80,9 @@ $CFG['GEN']['HUBSPOT_ACCESS_TOKEN'] = 'token_goes_here';
 // As of April 24, 2024, in our sandbox account, this ID is 161552755.
 $CFG['GEN']['HUBSPOT_PIPELINE_STAGE_ID'] = '161552755';
 
+// Create a support ticket for every question bug reported.
+$CFG['GEN']['ENABLE_QUESTION_BUG_TICKETS'] = 'true' == getenv('ENABLE_QUESTION_BUG_TICKETS');
+
 // Yellow "Help" button page
 $CFG['GEN']['FACULTY_USER_GUIDE_URL'] = getenv('FACULTY_USER_GUIDE_URL') ?? 'https://localhost/help.html';
 

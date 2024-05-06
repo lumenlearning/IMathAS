@@ -1,9 +1,8 @@
 <?php
   require '../init_without_validate.php';
 
-use OHM\tickets\hubspot\HubSpotTicketService;
 use OHM\tickets\NewTicketDto;
-use OHM\tickets\zendesk\ZendeskTicketService;
+use ohm\tickets\SupportTicketServiceFactory;
 
 /**
    * Loop over $_POST data, find the ones with 'z_' at the beginning, and
@@ -27,17 +26,8 @@ $newTicketDto
     ->setSubject($formData['z_subject'])
     ->setBody($ticketBody);
 
-$supportTicketService = $GLOBALS['CFG']['GEN']['SUPPORT_TICKET_SERVICE'];
-$supportTicketService = strtolower($supportTicketService);
-
-// This conditional may be removed after migration to HubSpot is
-// completed. See OHM-1233.
-if ('hubspot' == $supportTicketService) {
-    $supportTicket = new HubSpotTicketService();
-} else {
-    $supportTicket = new ZendeskTicketService();
-}
-$createTicketResult = $supportTicket->create($newTicketDto);
+$supportTicketService = SupportTicketServiceFactory::getSupportTicketService();
+$createTicketResult = $supportTicketService->create($newTicketDto);
 
 if ($createTicketResult->isCreated()) {
     if ($createTicketResult->getTicketId()) {

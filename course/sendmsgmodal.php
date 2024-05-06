@@ -102,6 +102,25 @@ if (isset($_POST['message'])) {
 		$stm->execute(array(Sanitize::onlyInt($_POST['markbroken'])));
 		$success .= '<script>$(function(){window.parent.$("#brokenmsgbad").show();});</script>';
 	}
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+    // ####### Begin OHM-specific changes ##################################################################
+    if (
+        isset($_POST['iserrreport'])
+        && $GLOBALS['CFG']['GEN']['ENABLE_QUESTION_BUG_TICKETS']
+    ) {
+        $courseId = $cid ?? null;
+        $questionBugTicketService = new OHM\tickets\QuestionBugTicketService($DBH);
+        $questionBugTicketService->createTicket($userid, $_SERVER['HTTP_USER_AGENT'],
+            $subject, $message, $courseId);
+    }
+    // ####### End OHM-specific changes ####################################################################
+    // ####### End OHM-specific changes ####################################################################
+    // ####### End OHM-specific changes ####################################################################
+    // ####### End OHM-specific changes ####################################################################
+    // ####### End OHM-specific changes ####################################################################
 	require("../header.php");
 	if ($error=='') {
 		echo $success;
