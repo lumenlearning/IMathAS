@@ -2,7 +2,7 @@
   require '../init_without_validate.php';
 
 use OHM\tickets\NewTicketDto;
-use ohm\tickets\SupportTicketServiceFactory;
+use OHM\tickets\SupportTicketServiceFactory;
 
 /**
    * Loop over $_POST data, find the ones with 'z_' at the beginning, and
