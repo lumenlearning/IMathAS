@@ -266,7 +266,7 @@ class AssessStandalone {
 
     $answeights = $question->getAnswerPartWeights();
 
-    if (!empty($options['includeans'])) {
+    if (!empty($this->state['includeans'])) {
       $jsparams['ans'] = $question->getCorrectAnswersForParts();
     }
 
@@ -296,7 +296,7 @@ class AssessStandalone {
         'errors'=>$question->getErrors()
     );
 
-    if (!empty($options['includeans'])) {
+    if (!empty($this->state['includeans'])) {
         $outarr['soln'] = $question->getSolutionContentDetailed();
         $outarr['solnopts'] = $this->qdata[$qsid]['solutionopts'];
     }
