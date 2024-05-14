@@ -89,6 +89,11 @@ if (!(isset($teacherid))) {
             );
             $extracredit = !empty($_POST['ec']) ? 1 : 0;
             $showcalculator = $_POST['showcalculator']??'default';
+
+            if ($beentaken) {
+                // prevent adding copies if beentaken
+                $_POST['copies'] = 0;
+            }
         }
         if (isset($_GET['id'])) { //already have id - updating
             $stm = $DBH->prepare("SELECT * FROM imas_questions WHERE id=?");
