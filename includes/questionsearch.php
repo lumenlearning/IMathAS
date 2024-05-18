@@ -23,7 +23,7 @@ function parseSearchString($str)
     #
     # Added "ohmuniqueid" to the preg_match_all pattern.
     #
-    preg_match_all('/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore|isrand)(:|=)("[^"]+?"|\w+)/', $str, $matches, PREG_SET_ORDER);
+    preg_match_all('/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|public|res|order|lastmod|created|avgscore|isrand|isbroken|wronglib)(:|=)("[^"]+?"|\w+)/', $str, $matches, PREG_SET_ORDER);
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
     #### End OHM-specific changes ############################################################
@@ -41,7 +41,7 @@ function parseSearchString($str)
         #
         # Added "ohmuniqueid" to the preg_match_all pattern.
         #
-        $str = preg_replace('/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|res|order|lastmod|avgscore|isrand)(:|=)("[^"]+?"|\w+)/', '', $str);
+        $str = preg_replace('/(author|type|id|ohmuniqueid|regex|used|avgtime|mine|unused|private|public|res|order|lastmod|created|avgscore|isrand|isbroken|wronglib)(:|=)("[^"]+?"|\w+)/', '', $str);
         #### End OHM-specific changes ############################################################
         #### End OHM-specific changes ############################################################
         #### End OHM-specific changes ############################################################
@@ -52,6 +52,10 @@ function parseSearchString($str)
     $out['terms'] = preg_split('/\s+/', trim($str));
     foreach ($out['terms'] as $k => $v) {
         if ($v=='') { 
+            unset($out['terms'][$k]);
+        }
+        if ($v == 'isbroken') {
+            $out['isbroken'] = 1;
             unset($out['terms'][$k]);
         }
         if (ctype_digit($v) && !isset($out['id'])) {
@@ -76,7 +80,13 @@ function parseSearchString($str)
  *    mine:     1 to limit to mine only
  *    unused:   1 to exclude existing
  *    private:  0 to exclude private questions
+ *    public:   0 to exclude public questions
  *    isrand:   1 to exclude non-rand
+ *    isbroken: 1 to limit to broken questions
+ *    wronglib: 1 to limit to questions marked as in wrong library
+ *    res:      resources
+ *    lastmod:  lastmod date range: "lower,upper"
+ *    created:  created date range: "lower,upper"
  *    terms:    array of keywords
  * @param int  $userid   userid of searcher
  * @param string $searchtype  'all' to search all libs, 'libs' to search libs, 'assess' to search assessments
@@ -210,6 +220,17 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             $searchvals[] = strtotime($lastmodparts[1]);
         }
     }
+    if (!empty($search['created'])) {
+        $createdparts = explode(',', $search['created']);
+        if (!empty($createdparts[0])) {
+            $searchand[] = 'iq.uniqueid > ?';
+            $searchvals[] = strtotime($createdparts[0]) . '000000';
+        }
+        if (!empty($createdparts[1])) {
+            $searchand[] = 'iq.uniqueid < ?';
+            $searchvals[] = strtotime($createdparts[1]) . '999999';
+        }
+    }
     if (!empty($search['mine'])) {
         $searchand[] = 'iq.ownerid=?';
         $searchvals[] = $userid;
@@ -230,7 +251,13 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         }
     }
     if (isset($search['isrand'])) {
-        $searchand[] = 'isrand=' . ($search['isrand'] == '0' ? 0 : 1);
+        $searchand[] = 'iq.isrand=' . ($search['isrand'] == '0' ? 0 : 1);
+    }
+    if (isset($search['isbroken'])) {
+        $searchand[] = 'iq.broken=' . ($search['isbroken'] == '0' ? 0 : 1);
+    }
+    if (isset($search['wronglib'])) {
+        $searchand[] = 'ili.junkflag=' . ($search['wronglib'] == '0' ? 0 : 1);
     }
     #### Begin OHM-specific changes ############################################################
     #### Begin OHM-specific changes ############################################################
@@ -310,6 +337,9 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             if (isset($search['private']) && $search['private'] == 0) {
                 $rightsand[] = 'iq.userights>0';
             }
+            if (isset($search['public']) && $search['public'] == 0) {
+                $rightsand[] = 'iq.userights=0';
+            }
         } else if (!empty($options['isgroupadmin'])) {
             $groupid = $options['isgroupadmin'];
             if (isset($search['private']) && $search['private'] == 0) {
@@ -317,6 +347,9 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             } else if ($searchtype != 'assess') {
                 $rightsand[] = '(imas_users.groupid=? OR iq.userights>0)';
                 $searchvals[] = $groupid;
+            }
+            if (isset($search['public']) && $search['public'] == 0) {
+                $rightsand[] = 'iq.userights=0';
             }
             if (isset($search['id'])) {
                 $rightsand[] = '(ili.libid > 0 OR imas_users.groupid=? OR iq.id=?)';
@@ -332,6 +365,9 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
             } else if ($searchtype != 'assess') {
                 $rightsand[] = '(iq.ownerid=? OR iq.userights>0)';
                 $searchvals[] = $userid;
+            }
+            if (isset($search['public']) && $search['public'] == 0) {
+                $rightsand[] = 'iq.userights=0';
             }
             if (isset($search['id'])) {
                 $rightsand[] = '(ili.libid > 0 OR iq.ownerid=? OR iq.id=?)';
@@ -349,7 +385,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         $rightsquery = '';
     }
 
-    if (empty($wholewords) && $libquery === '' && isset($search['terms'])) {
+    if (empty($wholewords) && $libquery === '' && !empty($search['terms'])) {
         return _('Cannot search all libraries without at least one 3+ letter word in the search terms');
     }
     if ($searchquery === '' && $libquery === '') {
@@ -369,7 +405,7 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
     if ($searchtype == 'assess') {
         $query .= ',iaq.id AS qid ';
     }
-    if (!empty($search['order']) && $search['order']=='newest') {
+    if ((!empty($search['order']) && $search['order']=='newest') || !empty($options['includelastmod'])) {
         $query .= ',iq.lastmoddate ';
     }
     $query .= 'FROM imas_questionset AS iq JOIN imas_library_items AS ili ON
@@ -443,6 +479,9 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         if (!empty($options['getowner'])) {
             $row['ownername'] = Sanitize::encodeStringForDisplay($row['LastName'].', '.$row['FirstName']);
         }
+        if (!empty($options['includeowner'])) {
+            $row['ownershort'] = Sanitize::encodeStringForDisplay($row['LastName'].','.substr($row['FirstName'],0,1));
+        }
         unset($row['LastName']);
         unset($row['FirstName']);
         $row['extrefval'] = 0;
@@ -470,6 +509,13 @@ function searchQuestions($search, $userid, $searchtype, $libs = array(), $option
         $row['meantime'] = round($row['meantime']/60,1);
         $row['meanscore'] = round($row['meanscore']);
         $row['mine'] = ($row['ownerid'] == $userid) ? 1 : 0;
+        $row['canedit'] = ($row['ownerid'] == $userid ||
+            !empty($options['isadmin']) ||
+            (!empty($options['isgroupadmin']) && $options['isgroupadmin'] == $row['groupid'])
+        ) ? 1 : 0;
+        if ($options['includelastmod']) {
+            $row['lastmod'] = tzdate("m/d/y", $row['lastmoddate']);
+        }
         $res[] = $row;
         $qsids[] = $row['id'];
     }
