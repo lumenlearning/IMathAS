@@ -33,7 +33,7 @@ class CurlRequest implements HttpRequest
 	{
 		$result = curl_exec($this->handle);
 
-		if (null == $result) {
+		if (!$result) {
 			error_log(get_class() . " - For URL: " . $this->url);
 			error_log(get_class() . " - cURL error: " . curl_error($this->handle));
 		}

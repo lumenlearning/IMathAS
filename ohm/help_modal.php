@@ -35,7 +35,7 @@ $helpCourseId = $_GET['cid'] ? Sanitize::onlyInt($_GET['cid']) : '';
         The OHM Faculty User Guide provides practical how-to information about using OHM and integrating OHM into your Learning Management System.
       </p>
       <div id="guides-button-container">
-        <a target="_blank" href="https://lumenlearning.zendesk.com/hc/en-us/categories/115000706447/">
+        <a target="_blank" href="<?php echo $GLOBALS['CFG']['GEN']['FACULTY_USER_GUIDE_URL']; ?>">
           <button id="guides-button" class="modal-buttons">
             User Guides <img class="new-tab-icon" src="<?php echo $imasroot; ?>/ohm/img/new-tab-icon.png" alt="new tab icon">
           </button>
