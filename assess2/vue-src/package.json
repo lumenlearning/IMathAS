@@ -16,7 +16,7 @@
     "json5": "^1.0.2",
     "uglify-js": "^3.17.4",
     "vue": "^3.2.37",
-    "vue-draggable-resizable": "2.1.0",
+    "vue-draggable-resizable": "3.0.0",
     "vue-i18n": "^9.8.0",
     "vue-router": "^4.2.5"
   },
