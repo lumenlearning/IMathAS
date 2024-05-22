@@ -279,6 +279,10 @@ function displayQuestionList(results) {
             '<th>'+_('Last Mod')+'</th>')
         + (curcid == 'admin' ? '<th>'+_('Owner')+'</th>' : '')
         + '</tr></thead>';
+    var sortinit = [false,'S',false,'S','N','S','N', curaid > 0 ? 'N' : 'D'];
+    if (curcid == 'admin') {
+        sortinit.push('S');
+    }
     var tbody = '<tbody>';
     var i,q,row,features,descrclass,descricon;
     var lastlib = -1;
@@ -431,7 +435,7 @@ function displayQuestionList(results) {
     document.getElementById("myTable").innerHTML = thead + tbody;
     rendermathnode(document.getElementById("myTable"));
 
-    initSortTable('myTable',[false,'S',false,'S','N','S','N','N']);
+    initSortTable('myTable', sortinit);
     if (window.top == window.self && document.getElementById("addbar")) {
          $("#selq input[type=checkbox]").on("change", function () {
              $("#addbar.footerbar").toggleClass("sr-only", $("#selq input[type=checkbox]:checked").length == 0);
