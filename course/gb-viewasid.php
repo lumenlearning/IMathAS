@@ -7,7 +7,7 @@
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['course/gb-viewasid'])) {
-	require_once $CFG['hooks']['course/gb-viewasid'];
+	require $CFG['hooks']['course/gb-viewasid'];
 }
 
 

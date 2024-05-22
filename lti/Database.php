@@ -1,7 +1,7 @@
 <?php
 
 if (isset($GLOBALS['CFG']['hooks']['lti'])) {
-    require_once $CFG['hooks']['lti'];
+    require $CFG['hooks']['lti'];
 }
 /**
  * Implements IMSGlobal\LTI\Database interface

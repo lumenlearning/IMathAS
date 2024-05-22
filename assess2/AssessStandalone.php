@@ -407,7 +407,7 @@ class AssessStandalone {
     ];
 
     if (isset($GLOBALS['CFG']['hooks']['assess2/assess_standalone'])) {
-        require_once $GLOBALS['CFG']['hooks']['assess2/assess_standalone'];
+        require $GLOBALS['CFG']['hooks']['assess2/assess_standalone'];
         $returnData = onScoreQuestionReturn($returnData, $scoreResult);
     }
 

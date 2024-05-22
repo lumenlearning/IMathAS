@@ -7,7 +7,7 @@
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['actions'])) {
-	require_once $CFG['hooks']['actions'];
+	require $CFG['hooks']['actions'];
 }
 
 require_once "includes/sanitize.php";
@@ -40,7 +40,7 @@ require_once "includes/sanitize.php";
 
 		// This happens too early in IMathAS for OHM.
 		if (isset($CFG['hooks']['actions'])) {
-			require_once($CFG['hooks']['actions']);
+			require($CFG['hooks']['actions']);
 		}
 
         // Commenting out the check below, since not implemented on OHM enrollment pages
