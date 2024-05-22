@@ -11,7 +11,7 @@ if (!isset($_SESSION['ltirole']) || $_SESSION['ltirole']!='instructor') {
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['ltihome'])) {
-	require $CFG['hooks']['ltihome'];
+	require_once $CFG['hooks']['ltihome'];
 }
 
 $hasplacement = false;

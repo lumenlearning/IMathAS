@@ -7,7 +7,7 @@ require_once "../includes/TeacherAuditLog.php";
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['admin/actions'])) {
-	require $CFG['hooks']['admin/actions'];
+	require_once $CFG['hooks']['admin/actions'];
 }
 
 if (!isset($_POST['action'])) { exit; }

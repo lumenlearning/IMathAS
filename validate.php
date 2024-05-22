@@ -8,7 +8,7 @@ $curdir = rtrim(dirname(__FILE__), '/\\');
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['validate'])) {
-    require $CFG['hooks']['validate'];
+    require_once $CFG['hooks']['validate'];
 }
 
 session_start();

@@ -31,7 +31,7 @@ require_once __DIR__ . "/i18n/i18n.php";
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['init'])) {
-	require $CFG['hooks']['init'];
+	require_once $CFG['hooks']['init'];
 }
 
 // setup session stuff

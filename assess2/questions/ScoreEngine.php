@@ -264,7 +264,7 @@ class ScoreEngine
         }
 
         if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
-            require $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'];
+            require_once $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'];
             if (function_exists('onBeforeScoreQuestion')) {
                 onBeforeScoreQuestion($scoreQuestionParams,
                     $varsForScorepart, $additionalVarsForScoring);
@@ -726,7 +726,7 @@ class ScoreEngine
         ];
 
         if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
-            require $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'];
+            require_once $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'];
             if (function_exists('onScorePartMultiPart')) {
                 $returnData = onScorePartMultiPart($returnData, $scorePartResult);
             }
@@ -799,7 +799,7 @@ class ScoreEngine
         );
 
         if (isset($GLOBALS['CFG']['hooks']['assess2/questions/score_engine'])) {
-            require $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'];
+            require_once $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'];
             if (function_exists('onScorePartNonMultiPart')) {
                 $returnData = onScorePartNonMultiPart($returnData, $scorePartResult);
             }

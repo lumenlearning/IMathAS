@@ -17,7 +17,7 @@ if (isset($_SESSION['emulateuseroriginaluser']) && isset($_GET['unemulateuser'])
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['util/utils'])) {
-	require $CFG['hooks']['util/utils'];
+	require_once $CFG['hooks']['util/utils'];
 }
 
 if ($myrights >= 75 && isset($_GET['emulateuser'])) {

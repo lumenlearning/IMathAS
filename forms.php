@@ -18,7 +18,7 @@ if ($_GET['action']!="newuser" && $_GET['action']!="resetpw" && $_GET['action']!
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['forms'])) {
-	require $CFG['hooks']['forms'];
+	require_once $CFG['hooks']['forms'];
 }
 
 require_once "includes/htmlutil.php";

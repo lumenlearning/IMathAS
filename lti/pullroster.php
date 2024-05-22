@@ -22,10 +22,10 @@ require_once __DIR__ . '/helpers.php';
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($GLOBALS['CFG']['hooks']['lti'])) {
-  require $CFG['hooks']['lti'];
+  require_once $CFG['hooks']['lti'];
 }
 if (isset($CFG['hooks']['ltihome'])) {
-	require $CFG['hooks']['ltihome'];
+	require_once $CFG['hooks']['ltihome'];
 }
 
 $db = new Imathas_LTI_Database($DBH);
