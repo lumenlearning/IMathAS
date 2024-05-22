@@ -62,7 +62,7 @@ $eulaService = new \OHM\Eula\EulaService($GLOBALS['DBH']);
 // #### End OHM-specific code #######################################################
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['bltilaunch'])) {
-	require_once $CFG['hooks']['bltilaunch'];
+	require $CFG['hooks']['bltilaunch'];
 }
 
 $curdir = rtrim(dirname(__FILE__), '/\\');

@@ -7,7 +7,7 @@
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['actions'])) {
-	require_once $CFG['hooks']['actions'];
+	require $CFG['hooks']['actions'];
 }
 
 require_once "includes/sanitize.php";

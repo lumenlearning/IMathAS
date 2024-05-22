@@ -116,7 +116,7 @@ echo _('Click the Seed to test that particular version of the question. Click th
 echo _('Once you have fixed the issue or determined it does not need fixing, clear the log entry. ');
 echo '</p>';
 if (isset($CFG['hooks']['util/questionerrors'])) {
-	require_once $CFG['hooks']['util/questionerrors'];
+	require $CFG['hooks']['util/questionerrors'];
 }
 
 if ($isadmin) {
