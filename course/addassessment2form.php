@@ -884,6 +884,10 @@ createApp({
 					'value': 'after_due',
 					'text': '<?php echo _('After the due date');?>'
 				},
+                {
+                    'value': 'after_lp',
+                    'text': '<?php echo _('After Latepass period');?>'
+                },
 				{
 					'value': 'immediately',
 					'text': '<?php echo _('Immediately - they can always view it');?>'
@@ -927,6 +931,10 @@ createApp({
 					'value': 'after_due',
 					'text': '<?php echo _('After the due date');?>'
 				},
+                {
+                    'value': 'after_lp',
+                    'text': '<?php echo _('After Latepass period');?>'
+                },
 				{
 					'value': 'never',
 					'text': '<?php echo _('Never');?>'
@@ -971,15 +979,21 @@ createApp({
  				return [];
  			} else {
  				var out = [
- 					{
- 						'value': 'after_due',
- 						'text': '<?php echo _('After the due date');?>'
+                    {
+ 						'value': 'after_lp',
+ 						'text': '<?php echo _('After Latepass period');?>'
  					},
  					{
  						'value': 'never',
  						'text': '<?php echo _('Never');?>'
  					}
  				];
+                if (this.viewingb !== 'after_lp' && this.scoresingb !== 'after_lp') {
+                    out.unshift({
+ 						'value': 'after_due',
+ 						'text': '<?php echo _('After the due date');?>'
+ 					});
+                }
                  if ((this.viewingb === 'after_take' || this.viewingb === 'immediately') && 
                     this.subtype == 'by_assessment'
                  ) {
