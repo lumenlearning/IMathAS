@@ -32,7 +32,7 @@ jobs:
       # This is required to role chain from the OIDC role to other cross-account roles
       # https://github.com/aws-actions/configure-aws-credentials/issues/279
       - name: OIDC Auth
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
@@ -40,7 +40,7 @@ jobs:
           role-duration-seconds: 900
 
       - name: Assume role in CI Account
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ecr-public-auth]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout project
     
     - uses: ./.github/actions/private-ecr-login
@@ -67,7 +67,7 @@ jobs:
       id: login-ecr
     
     - name: Login to Public ECR
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: public.ecr.aws/o9c0t3w1
         username: AWS
@@ -94,7 +94,7 @@ jobs:
         echo "beanstalk_env=${{ fromJSON(steps.read_env_json.outputs.env_json).beanstalk.beanstalk_environment }}" >> $GITHUB_OUTPUT
 
     - name: OIDC Auth to AWS
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-west-2
         role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
@@ -102,7 +102,7 @@ jobs:
         role-duration-seconds: 900
 
     - name: Assume role in target account
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}

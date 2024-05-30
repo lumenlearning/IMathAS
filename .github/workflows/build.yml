@@ -45,7 +45,7 @@ jobs:
       OHM_API_JWT_SECRET: development_jwt_secret
       LOG_CHANNEL: stderr
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout project
 
     - id: read_tree_hash
@@ -77,10 +77,10 @@ jobs:
 
     - name: Set up Docker Buildx
       if: steps.prebuilt_check.outputs.image_exists != 0
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Create Ohm Bulid Environment
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       if: steps.prebuilt_check.outputs.image_exists != 0
       with:
         context: .
@@ -121,7 +121,7 @@ jobs:
           ohm:local ./deploy-scripts/run-tests.sh
 
     - name: Docker build and push
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       if: steps.prebuilt_check.outputs.image_exists != 0
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
