@@ -25,7 +25,7 @@ if (isset($GLOBALS['CFG']['hooks']['lti'])) {
   require_once $CFG['hooks']['lti'];
 }
 if (isset($CFG['hooks']['ltihome'])) {
-	require_once $CFG['hooks']['ltihome'];
+	require $CFG['hooks']['ltihome'];
 }
 
 $db = new Imathas_LTI_Database($DBH);

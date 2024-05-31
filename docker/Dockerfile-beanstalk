@@ -42,7 +42,7 @@ COPY ./ ./
 RUN zip -r beanstalk.zip . -x deploy-scripts/**
 
 # This is the final image which gets pushed into ECR, containing only the zip and deployment dependencies
-FROM alpine:3 as deployer
+FROM alpine:3.19 as deployer
 
 RUN apk add --no-cache \
         aws-cli \
