@@ -31,9 +31,11 @@
         :min-width="calctype === 'graphing' ? 500 : 400"
         :min-height="400"
       >
+        <!-- FIXME: Hiding this widget until resizing is fixed.
         <div slot="br">
           <icon-drag></icon-drag>
         </div>
+        -->
         <div class="calc-header">
           <span v-if="!calcIsPoppedOut">
             <icon-calc :calc-type="calctype"></icon-calc> Calculator
