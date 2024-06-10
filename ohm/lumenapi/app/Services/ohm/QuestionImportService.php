@@ -193,9 +193,11 @@ class QuestionImportService extends BaseService implements QuestionImportService
             return '';
         }
 
-        $macroCode = '';
-
         $allFeedback = $questionData['feedback']['feedbacks'];
+        $correctAnswerIndex = $questionData['correct_answer'];
+        $allFeedback = $this->replaceEmptyFeedback($allFeedback, $correctAnswerIndex);
+
+        $macroCode = '';
         for ($idx = 0; $idx < count($allFeedback); $idx++) {
             $rawFeedback = $allFeedback[$idx];
             $feedbackNoSmarts = $this->replaceSmartQuotes($rawFeedback);
@@ -209,6 +211,28 @@ class QuestionImportService extends BaseService implements QuestionImportService
             . '$stuanswers[$thisq], $feedbacktxt, $answer);' . "\n";
 
         return $macroCode;
+    }
+
+    /**
+     * Replace null or empty feedback strings with "Correct." or
+     * "Incorrect.".
+     *
+     * @param array $feedbacks An array of feedback strings.
+     * @param int $correctAnswerIndex The correct answer index, 0-indexed.
+     * @return array The array of feedback strings with nulls replaced.
+     */
+    private function replaceEmptyFeedback(array $feedbacks, int $correctAnswerIndex): array
+    {
+        $processedFeedback = [];
+        foreach ($feedbacks as $idx => $singleFeedback) {
+            if (empty($singleFeedback)) {
+                $processedFeedback[$idx] = $idx == $correctAnswerIndex
+                    ? 'Correct.' : 'Incorrect.';
+            } else {
+                $processedFeedback[$idx] = $singleFeedback;
+            }
+        }
+        return $processedFeedback;
     }
 
     /**

@@ -258,11 +258,11 @@ class QuestionImportServiceTest extends TestCase
         $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
             [$questionWithLongDescription]);
 
-        $this->assertLessThan(255, $question['description']);
+        $this->assertLessThan(255, strlen($question['description']));
     }
 
     /*
-     * generateMultipleChoicePerAnswerFeedback
+     * buildMultipleChoicePerAnswerFeedback
      */
 
     public function testBuildMultipleChoicePerAnswerFeedback(): void
@@ -283,7 +283,47 @@ class QuestionImportServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/' . $expected . '/', $feedbackCode);
     }
 
-    public function testGenerateMultipleChoicePerAnswerFeedback_NoFeedback(): void
+    public function testBuildMultipleChoicePerAnswerFeedback_withNullCorrect(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoicePerAnswerFeedback = $class->getMethod('buildMultipleChoicePerAnswerFeedback');
+        $buildMultipleChoicePerAnswerFeedback->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbacks = self::MGA_QUESTION_WITH_FEEDBACK;
+        $feedbacks['feedback']['feedbacks'][1] = null; // Set the correct answer feedback to null.
+        $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
+            [$feedbacks]);
+
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[0\] = \'.*\';/', $feedbackCode);
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[1\] = \'Correct.\';/', $feedbackCode);
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[2\] = \'.*\';/', $feedbackCode);
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[3\] = \'.*\';/', $feedbackCode);
+
+        $expected = preg_quote('$feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer);');
+        $this->assertMatchesRegularExpression('/' . $expected . '/', $feedbackCode);
+    }
+
+    public function testBuildMultipleChoicePerAnswerFeedback_withNullIncorrect(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoicePerAnswerFeedback = $class->getMethod('buildMultipleChoicePerAnswerFeedback');
+        $buildMultipleChoicePerAnswerFeedback->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbacks = self::MGA_QUESTION_WITH_FEEDBACK;
+        $feedbacks['feedback']['feedbacks'][2] = null; // Set the incorrect answer feedback to null.
+        $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
+            [$feedbacks]);
+
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[0\] = \'.*\';/', $feedbackCode);
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[1\] = \'.*\';/', $feedbackCode);
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[2\] = \'Incorrect.\';/', $feedbackCode);
+        $this->assertMatchesRegularExpression('/\$feedbacktxt\[3\] = \'.*\';/', $feedbackCode);
+
+        $expected = preg_quote('$feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer);');
+        $this->assertMatchesRegularExpression('/' . $expected . '/', $feedbackCode);
+    }
+
+    public function testBuildMultipleChoicePerAnswerFeedback_NoFeedback(): void
     {
         $class = new ReflectionClass(QuestionImportService::class);
         $buildMultipleChoicePerAnswerFeedback = $class->getMethod('buildMultipleChoicePerAnswerFeedback');
@@ -293,5 +333,52 @@ class QuestionImportServiceTest extends TestCase
             [self::MGA_QUESTION_NO_FEEDBACK]);
 
         $this->assertEquals('', $feedbackCode);
+    }
+
+    /*
+     * replaceEmptyFeedback
+     */
+
+    public function testReplaceEmptyFeedback_NoNulls(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $replaceFeedbackNulls = $class->getMethod('replaceEmptyFeedback');
+        $replaceFeedbackNulls->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbacks = ['one', 'two', 'three', 'four'];
+        $processedFeedbacks = $replaceFeedbackNulls->invokeArgs($this->questionImportService,
+            [$feedbacks, 0]);
+
+        $this->assertEquals($feedbacks, $processedFeedbacks);
+    }
+
+    public function testReplaceEmptyFeedback_WithNullCorrect(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $replaceFeedbackNulls = $class->getMethod('replaceEmptyFeedback');
+        $replaceFeedbackNulls->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbacks = ['one', 'two', '', 'four'];
+        $processedFeedbacks = $replaceFeedbackNulls->invokeArgs($this->questionImportService,
+            [$feedbacks, 2]);
+
+        $expectedFeedbacks = ['one', 'two', 'Correct.', 'four'];
+
+        $this->assertEquals($expectedFeedbacks, $processedFeedbacks);
+    }
+
+    public function testReplaceEmptyFeedback_WithNullIncorrect(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $replaceFeedbackNulls = $class->getMethod('replaceEmptyFeedback');
+        $replaceFeedbackNulls->setAccessible(true); // Required for PHP 7.4.
+
+        $feedbacks = ['one', 'two', '', 'four'];
+        $processedFeedbacks = $replaceFeedbackNulls->invokeArgs($this->questionImportService,
+            [$feedbacks, 1]);
+
+        $expectedFeedbacks = ['one', 'two', 'Incorrect.', 'four'];
+
+        $this->assertEquals($expectedFeedbacks, $processedFeedbacks);
     }
 }
