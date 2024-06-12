@@ -2,24 +2,34 @@
   <div
     class="calculator"
     :id="'qa-' + calctype + '-' + qn"
-    aria-label="Use calculator">
+    aria-label="Use calculator"
+  >
     <button
       type="button"
       @click="openCalc"
       v-show="!showCalculator || calcIsPoppedOut"
-      :disabled="calcIsPoppedOut">
-        <icon-calc :calc-type="calctype"></icon-calc>
-        Calculator
+      :disabled="calcIsPoppedOut"
+    >
+      <icon-calc :calc-type="calctype"></icon-calc>
+      Calculator
     </button>
-    <div :class="{'calc-fixed-container': calcIsPoppedOut, 'graphing': calctype === 'graphing'}">
+    <div
+      :class="{
+        'calc-fixed-container': calcIsPoppedOut,
+        graphing: calctype === 'graphing',
+      }"
+    >
       <vue-draggable-resizeable
         v-show="showCalculator"
         class-name-active="calculator-active"
         ref="calcResize"
         @resizing="getCalcDimensions"
-        :class="{'reset-heightwidth': !calcIsPoppedOut, 'calc-popout': calcIsPoppedOut}"
+        :class="{
+          'reset-heightwidth': !calcIsPoppedOut,
+          'calc-popout': calcIsPoppedOut,
+        }"
         :drag-cancel="'.drag-cancel'"
-        :style="{position: calcPosition}"
+        :style="{ position: calcPosition }"
         :draggable="calcIsPoppedOut"
         :resizable="calcIsPoppedOut"
         :handles="['br']"
@@ -31,44 +41,41 @@
         :min-width="calctype === 'graphing' ? 500 : 400"
         :min-height="400"
       >
-        <!-- FIXME: Hiding this widget until resizing is fixed.
-        <div slot="br">
-          <icon-drag></icon-drag>
-        </div>
-        -->
         <div class="calc-header">
           <span v-if="!calcIsPoppedOut">
             <icon-calc :calc-type="calctype"></icon-calc> Calculator
           </span>
-          <span v-else> Question {{qn + 1}} Calculator</span>
+          <span v-else> Question {{ qn + 1 }} Calculator</span>
           <div>
             <button
-                type="button"
-                :aria-label="!calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'"
-                class="button popout"
-                @click="toggleCalcPopOut">
-
-                <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
-                <icon-pop-in v-else></icon-pop-in>
-              </button>
-              <button
-                type="button"
-                aria-label="Close calculator"
-                class="button"
-                @click="closeCalc"
-              >
-                <icon-close></icon-close>
-              </button>
-            </div>
+              type="button"
+              :aria-label="
+                !calcIsPoppedOut ? 'Pop out calculator' : 'Pop in calculator'
+              "
+              class="button popout"
+              @click="toggleCalcPopOut"
+            >
+              <icon-pop-out v-if="!calcIsPoppedOut"></icon-pop-out>
+              <icon-pop-in v-else></icon-pop-in>
+            </button>
+            <button
+              type="button"
+              aria-label="Close calculator"
+              class="button"
+              @click="closeCalc"
+            >
+              <icon-close></icon-close>
+            </button>
+          </div>
         </div>
         <div class="calc-body">
           <figure
             class="drag-cancel"
             :id="'calc' + qn"
             ref="figure"
-            :class="{ 'graphing' : calctype === 'graphing', }"
-            :style="{'height': (calcHeight - 84) + 'px'}">
-          </figure>
+            :class="{ graphing: calctype === 'graphing' }"
+            :style="{ height: calcHeight - 84 + 'px' }"
+          ></figure>
         </div>
       </vue-draggable-resizeable>
     </div>
@@ -76,24 +83,26 @@
 </template>
 
 <script>
-import { store } from '../../basicstore';
-import IconCalc from '../icons/Calculators.vue';
-import IconClose from '../icons/Close.vue';
-import IconPopOut from '../icons/PopOut.vue';
-import IconPopIn from '../icons/PopIn.vue';
-import IconDrag from '../icons/DragHandle.vue';
-import VueDraggableResizeable from 'vue-draggable-resizable';
+import { getCurrentInstance, h, render } from "vue";
+import { store } from "../../basicstore";
+import IconCalc from "../icons/Calculators.vue";
+import IconClose from "../icons/Close.vue";
+import IconPopOut from "../icons/PopOut.vue";
+import IconPopIn from "../icons/PopIn.vue";
+import IconDrag from "../icons/DragHandle.vue";
+import VueDraggableResizeable from "vue-draggable-resizable";
+import "vue-draggable-resizable/style.css";
 
 export default {
-  name: 'DesmosCalculator',
-  props: ['qn', 'calctype'],
+  name: "DesmosCalculator",
+  props: ["qn", "calctype"],
   components: {
     IconCalc,
     IconClose,
     IconPopOut,
     IconPopIn,
     IconDrag,
-    VueDraggableResizeable
+    VueDraggableResizeable,
   },
   data: function () {
     return {
@@ -101,47 +110,68 @@ export default {
       calcIsPoppedOut: false,
       calcHeight: 500,
       calcObj: null,
-      hadFirstOpen: false
+      hadFirstOpen: false,
     };
   },
   computed: {
-    calcPosition () {
-      return this.calcIsPoppedOut ? 'absolute' : 'initial';
-    }
+    calcPosition() {
+      return this.calcIsPoppedOut ? "absolute" : "initial";
+    },
+  },
+  updated() {
+    /**
+     * @note
+     * On each component update check if we have the element
+     * with class ".handle-bar" displayed and replace it with
+     * the IconDrag svg component.
+     */
+    this.replaceHandleBrWithIconDrag();
   },
   methods: {
-    openCalc () {
+    openCalc() {
       if (!this.hadFirstOpen) {
         this.initCalc();
         if (!store.assessInfo.can_view_all) {
-          window.recclick('desmoscalc', store.aid, this.qn, this.calctype);
+          window.recclick("desmoscalc", store.aid, this.qn, this.calctype);
         }
       }
       this.hadFirstOpen = true;
       this.showCalculator = true;
     },
-    closeCalc () {
+    closeCalc() {
       this.showCalculator = false;
       this.calcIsPoppedOut = false;
     },
-    toggleCalcPopOut () {
+    toggleCalcPopOut() {
       this.calcIsPoppedOut = !this.calcIsPoppedOut;
     },
-    getCalcDimensions (left, top, width, height) {
+    getCalcDimensions(left, top, width, height) {
       this.calcHeight = height;
     },
-    initCalc () {
-      if (this.calctype === 'basic') {
+    replaceHandleBrWithIconDrag() {
+      const handleBr = this.$el.querySelector(".handle-br");
+      if (handleBr) {
+        // Create and mount IconDrag component
+        const iconDragInstance = h(IconDrag);
+
+        // Use render function to mount the component
+        iconDragInstance.appContext = getCurrentInstance().appContext;
+        render(iconDragInstance, handleBr);
+      }
+    },
+    initCalc() {
+      if (this.calctype === "basic") {
         this.calcObj = window.Desmos.FourFunctionCalculator(this.$refs.figure);
-      } else if (this.calctype === 'scientific') {
+      } else if (this.calctype === "scientific") {
         this.calcObj = window.Desmos.ScientificCalculator(this.$refs.figure);
-        this.calcObj.updateSettings({degreeMode: true});
-      } if (this.calctype === 'graphing') {
+        this.calcObj.updateSettings({ degreeMode: true });
+      }
+      if (this.calctype === "graphing") {
         this.calcObj = window.Desmos.GraphingCalculator(this.$refs.figure);
       }
-    }
+    },
   },
-  beforeDestroy () {
+  beforeDestroy() {
     if (this.calcObj) {
       this.calcObj.destroy();
     }
@@ -158,8 +188,8 @@ export default {
           this.hadFirstOpen = false;
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style>
@@ -176,7 +206,7 @@ export default {
   background: linear-gradient(180deg, white 0%, #f9fafb 100%);
   border: 1px solid #c5cfd6;
   border-radius: 3px;
-  box-shadow: 0 1px 0 0 rgba(33,43,54,0.05);
+  box-shadow: 0 1px 0 0 rgba(33, 43, 54, 0.05);
   color: #212b36;
   font-size: 0.9rem;
   line-height: 1;
@@ -202,7 +232,7 @@ export default {
 }
 .calc-header {
   background-color: #f2f2f2;
-  border: 1px solid #C4CDD5;
+  border: 1px solid #c4cdd5;
   border-bottom: none;
   border-radius: 3px 3px 0 0;
   display: flex;
@@ -239,7 +269,8 @@ export default {
 .calc-popout {
   background: #fff;
   border-radius: 4px;
-  box-shadow: 0 31px 41px 0 rgba(33,43,54,0.2), 0 2px 16px 0 rgba(33,43,54,0.08)
+  box-shadow: 0 31px 41px 0 rgba(33, 43, 54, 0.2),
+    0 2px 16px 0 rgba(33, 43, 54, 0.08);
 }
 
 .calc-popout .calc-header span {
@@ -250,7 +281,7 @@ export default {
 .calc-popout .calc-header {
   background-color: #1e74d1;
   border: none;
-  color:#fff;
+  color: #fff;
 }
 
 .calc-popout .calc-header .button {
@@ -267,7 +298,7 @@ export default {
 }
 
 .calc-popout .calc-header .button:hover {
-  background: #0059BA;
+  background: #0059ba;
 }
 
 .calc-popout .calc-header svg {
@@ -290,14 +321,16 @@ export default {
 }
 
 .handle {
+  background: none;
+  border: none;
   box-sizing: border-box;
   cursor: se-resize;
   position: absolute;
 }
 
 .handle-br {
-  bottom: 5px;
-  right: 5px;
+  bottom: 10px;
+  right: 10px;
 }
 
 .handle svg {
@@ -311,7 +344,7 @@ export default {
   width: initial !important;
 }
 
-@media (max-width: 768px){
+@media (max-width: 768px) {
   .calculator {
     width: 100%;
   }
