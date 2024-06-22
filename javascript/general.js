@@ -1683,7 +1683,8 @@ function setActiveTab(el) {
   var backdrop = '.dropdown-backdrop'
   var toggle   = '[data-toggle="dropdown"]'
   var Dropdown = function (element) {
-    $(element).on('click.bs.dropdown', this.toggle)
+    $(element).on('click.bs.dropdown', this.toggle);
+    $(element).next('.dropdown-menu').children("li").attr("role","menuitem");
   }
 
     Dropdown.VERSION = '3.4.1'
@@ -1744,6 +1745,8 @@ function setActiveTab(el) {
       $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
 
       if (e.isDefaultPrevented()) return
+
+      $this.next('.dropdown-menu').children("li").attr("role","menuitem");
 
       $this
         .trigger('focus')
