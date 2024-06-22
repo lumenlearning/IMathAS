@@ -110,7 +110,7 @@ switch($_GET['action']) {
         $stm = $DBH->prepare("SELECT FirstName,LastName,SID,rights,groupid FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$line = $stm->fetch(PDO::FETCH_ASSOC);
-
+		
         if ($myrights==100) {
 			$stm = $DBH->prepare("SELECT iu.id,iu.FirstName,iu.LastName,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id WHERE (iu.rights=100 OR iu.groupid=?) AND iu.rights>12 AND iu.rights<>76 AND iu.rights<>77 AND iu.id<>? ORDER BY iu.LastName,iu.FirstName");
             $stm->execute(array($line['groupid'], $_GET['id']));
@@ -149,7 +149,7 @@ switch($_GET['action']) {
 		echo '<form method="POST" action="actions.php?from='.Sanitize::encodeUrlParam($from).'&id='.Sanitize::encodeUrlParam($_GET['id']).'">';
         if ($line['rights']>10) {
             echo '<p>'._('Any questions or libraries owned by this user need to be transfered to another user.').'</p>';
-            require_once '../includes/userlookupform.php';
+            require_once '../includes/userlookupform.php'; 
             generateUserLookupForm(_('Transfer question and library ownership to:'), 'transferto', $otherusers);
         }
 		echo '<p><button type=submit name="action" value="deladmin">'._('Delete').'</button>';
@@ -162,6 +162,7 @@ switch($_GET['action']) {
     echo "<form method=post id=userform class=limitaftervalidate action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
 		if ($_GET['action']=="chgrights") { echo "&id=".Sanitize::encodeUrlParam($_GET['id']); }
 		echo "\">\n";
+        echo '<div id="errorlive" aria-live="polite" class="sr-only"></div>';
 		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']).'" />';
 		if ($_GET['action'] == "newadmin") {
 			echo '<div class="pagetitle"><h1>'._('New User').'</h1></div>';
