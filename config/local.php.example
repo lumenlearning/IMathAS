@@ -18,17 +18,22 @@ unset($AWSkey);
 // Static assets
 $CFG['static_server'] = 'http://localhost/';
 
+// Livepoll / pandoc server
+$CFG['GEN']['pandocserver'] = getenv('PANDOC_BASE_URL') ?: 'http://localhost:8081';
+$CFG['GEN']['livepollserver'] = getenv('LIVEPOLL_SERVER_HOSTNAME') ?: 'host.docker.internal';
+$CFG['GEN']['livepollpassword'] = getenv('LIVEPOLL_SERVER_PASSWORD') ?: 'testing';
+
 // AWS S3 bucket
 //$AWSbucket = null;
 //$AWSkey = 'api_key_goes_here';
 //$AWSsecret = 'api_secret_goes_here';
 
 //database access settings
-$dbserver = getenv('DB_SERVER') ?? 'db';
-$dbname = getenv('DB_NAME') ?? 'ohm';
-$dbusername = getenv('DB_USERNAME') ?? 'ohm';
-$dbpassword = getenv('DB_PASSWORD') ?? 'ohm';
-$dbcharset = 'latin1'; // Production uses "latin1"
+$dbserver = getenv('DB_SERVER') ?: 'db';
+$dbname = getenv('DB_NAME') ?: 'ohm';
+$dbusername = getenv('DB_USERNAME') ?: 'ohm';
+$dbpassword = getenv('DB_PASSWORD') ?: 'ohm';
+$dbcharset = getenv('DB_CHARSET') ?: 'latin1'; // Production uses "latin1"
 
 // Database - read replica (env vars used in /ohm/includes/ReadReplicaDb.php)
 putenv('REPLICA_DB_SERVER=' . $dbserver);
