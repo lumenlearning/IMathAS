@@ -1,6 +1,7 @@
 {
     "require": {
         "php": ">=8.1",
+        "ext-curl": "*",
         "ext-pdo": "*",
         "ext-json": "*",
         "php-di/php-di": "7.0.6",

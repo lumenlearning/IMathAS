@@ -214,6 +214,12 @@ If deleted on both ends, delete from DB
                     ':courseid' => $cidP
                 ]);
             }
+
+            if ($GLOBALS['CFG']['GEN']['ENABLE_QUESTION_BUG_TICKETS']) {
+                $questionBugTicketService = new OHM\tickets\QuestionBugTicketService($DBH);
+                $questionBugTicketService->createTicket($userid, $_SERVER['HTTP_USER_AGENT'],
+                    $subjectPost, $messagePost, $cidP);
+            }
             // ####### End OHM-specific changes ####################################################################
             // ####### End OHM-specific changes ####################################################################
             // ####### End OHM-specific changes ####################################################################

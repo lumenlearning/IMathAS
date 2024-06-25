@@ -62,10 +62,29 @@ $GLOBALS['student_pay_api']['debug'] = true;
 // Enable FullStory
 putenv('FULLSTORY_ENABLED=false');
 
+// Current supported values: "zendesk", "hubspot"
+$CFG['GEN']['SUPPORT_TICKET_SERVICE'] = getenv('SUPPORT_TICKET_SERVICE') ?: 'hubspot';
+
 //zendesk stuff
 $CFG['GEN']['zdapikey'] = getenv('ZENDESK_API_KEY') ?? 'api_key_goes_here';
 $CFG['GEN']['zdurl'] = getenv('ZENDESK_API_URL') ?? 'api_url_goes_here';
 $CFG['GEN']['zduser'] = getenv('ZENDESK_API_USER') ?? 'ohmsupport@lumenlearning.com';
+
+// HubSpot
+$CFG['GEN']['HUBSPOT_API_DEBUG'] = 'true' == getenv('HUBSPOT_API_DEBUG');
+$CFG['GEN']['HUBSPOT_API_DOMAIN'] = 'api.hubapi.com';
+$CFG['GEN']['HUBSPOT_ACCESS_TOKEN'] = 'token_goes_here';
+// This is the "hs_pipeline_stage" ID for new tickets.
+// View an existing ticket here: https://api.hubapi.com/crm/v3/objects/tickets/{{ticketId}}
+//   to get a valid "hs_pipeline_stage" for this config variable.
+// As of April 24, 2024, in our sandbox account, this ID is 161552755.
+$CFG['GEN']['HUBSPOT_PIPELINE_STAGE_ID'] = '161552755';
+
+// Create a support ticket for every question bug reported.
+$CFG['GEN']['ENABLE_QUESTION_BUG_TICKETS'] = 'true' == getenv('ENABLE_QUESTION_BUG_TICKETS');
+
+// Yellow "Help" button page
+$CFG['GEN']['FACULTY_USER_GUIDE_URL'] = getenv('FACULTY_USER_GUIDE_URL') ?? 'https://localhost/help.html';
 
 /*
  * Handle CORS stuff in local development.
