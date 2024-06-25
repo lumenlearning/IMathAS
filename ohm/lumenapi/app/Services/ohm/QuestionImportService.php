@@ -169,7 +169,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
         }
 
         $mgaSourceId = $mgaQuestionData['source_id'];
-        if ($this->$debugLogging) {
+        if ($this->debugLogging) {
             Log::debug(sprintf('(MGA source ID: %s) Generated question control: %s',
                 $mgaSourceId, $questionControl));
             Log::debug(sprintf('(MGA source ID: %s) Generated question text: %s',
