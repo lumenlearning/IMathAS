@@ -19,6 +19,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
     private UserRepositoryInterface $userRepository;
 
     private $defaultUseRights;
+    private $debugLogging;
 
     public function __construct(
         QuestionSetRepositoryInterface $questionSetRepository,
@@ -30,6 +31,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
         $this->libraryItemRepository = $libraryItemRepository;
         $this->userRepository = $userRepository;
         $this->defaultUseRights = getenv('NEW_QUESTION_DEFAULT_USE_RIGHTS') ?: 4;
+        $this->debugLogging = 'true' == getenv('APP_DEBUG');
     }
 
     /**
@@ -167,10 +169,12 @@ class QuestionImportService extends BaseService implements QuestionImportService
         }
 
         $mgaSourceId = $mgaQuestionData['source_id'];
-        Log::debug(sprintf('(MGA source ID: %s) Generated question control: %s',
-            $mgaSourceId, $questionControl));
-        Log::debug(sprintf('(MGA source ID: %s) Generated question text: %s',
-            $mgaSourceId, $questionText));
+        if ($this->$debugLogging) {
+            Log::debug(sprintf('(MGA source ID: %s) Generated question control: %s',
+                $mgaSourceId, $questionControl));
+            Log::debug(sprintf('(MGA source ID: %s) Generated question text: %s',
+                $mgaSourceId, $questionText));
+        }
 
         return [
             'qtype' => 'choices',
@@ -298,8 +302,10 @@ class QuestionImportService extends BaseService implements QuestionImportService
             ];
             $libraryItemId = $this->libraryItemRepository->create($libraryItem);
 
-            Log::debug(sprintf('Inserted question ID: %d, Library item id: %d',
-                $questionSetId, $libraryItemId));
+            if ($this->debugLogging) {
+                Log::debug(sprintf('Inserted question ID: %d, Library item id: %d',
+                    $questionSetId, $libraryItemId));
+            }
 
             DB::commit();
         } catch (Exception $e) {
