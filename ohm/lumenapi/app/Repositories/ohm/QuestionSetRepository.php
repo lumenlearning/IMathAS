@@ -37,4 +37,9 @@ class QuestionSetRepository extends BaseRepository implements QuestionSetReposit
 
         return $this->toAssoc($result);
     }
+
+    public function create(array $questionSetData): int
+    {
+        return app('db')->table('imas_questionset')->insertGetId($questionSetData);
+    }
 }
