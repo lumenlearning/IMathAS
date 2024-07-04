@@ -3,8 +3,8 @@
 //(c) 2006 David Lippman
 
 /*** master php includes *******/
-require("../init.php");
-require_once("../includes/TeacherAuditLog.php");
+require_once "../init.php";
+require_once "../includes/TeacherAuditLog.php";
 
 /*** pre-html data manipulation, including function code *******/
 
@@ -86,7 +86,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		];
 
 		for ($i=0; $i<$cnt; $i++) {
-			require_once("../includes/parsedatetime.php");
+			require_once "../includes/parsedatetime.php";
 
 			$data = explode(',',$_POST['data'.$i]);
 
@@ -172,6 +172,12 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			$type = $data[6]; // $_POST['type'.$i];
 			$id = $data[7]; // $_POST['id'.$i];
 			$avail = intval($data[8]);
+			if ($avail == 2) {
+				$enddate =  2000000000;
+				if ($type != 'Link' && $type != 'InlineText') {
+					$startdate = 0;
+				}
+			}
 
 			$new = [
 				'id' => $id,
@@ -363,7 +369,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 
 if ($overwriteBody==1) {
-	require("../header.php");
+	require_once "../header.php";
 	echo $body;
 } else {
 
@@ -417,7 +423,7 @@ if ($overwriteBody==1) {
 		$placeinhead .= '<script type="text/javascript">var includeforums = true;</script>';
 	}
 
-	require("../header.php");
+	require_once "../header.php";
 
 	echo "<div class=breadcrumb>$breadcrumbbase <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 	echo "&gt; Mass Change Dates</div>\n";
@@ -968,6 +974,6 @@ if ($overwriteBody==1) {
 	//echo "<script>var acnt = $cnt;</script>";
 }
 
-require("../footer.php");
+require_once "../footer.php";
 
 ?>

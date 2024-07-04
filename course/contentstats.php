@@ -2,7 +2,7 @@
 //IMathAS: Content view statistics for an item
 //(c) 2013 David Lippman for Lumen Learning
 
-require("../init.php");
+require_once "../init.php";
 
 
 $overwritebody = false;
@@ -124,7 +124,7 @@ function sendMsg(tolist) {
 	GB_show("Send Message", "masssend.php?embed=true&nolimit=true&cid="+cid+"&to="+tolist, 760,"auto");
 }
 </script>';
-require("../header.php");
+require_once "../header.php";
 
 if ($overwritebody) {
 	echo $body;
@@ -246,6 +246,6 @@ if ($overwritebody) {
 		echo '</tbody></table>';
 	}
 }
-require("../footer.php");
+require_once "../footer.php";
 
 ?>

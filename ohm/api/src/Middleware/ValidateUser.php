@@ -3,8 +3,9 @@
 namespace OHM\Api\Middleware;
 
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Psr\Http\Message\ResponseInterface as Response;
 
 use OHM\Models\Session;
 
@@ -19,36 +20,36 @@ use OHM\Models\Session;
  */
 class ValidateUser
 {
-	protected $container;
+	protected ContainerInterface $container;
 
 	/**
 	 * ValidateUser constructor.
 	 * @param ContainerInterface $container
 	 */
-	public function __construct($container)
+	public function __construct(ContainerInterface $container)
 	{
 		$this->container = $container;
 	}
 
 	/**
-	 * @param  ServerRequestInterface $request PSR7 request
-	 * @param  ResponseInterface $response PSR7 response
-	 * @param  callable $next Next middleware
+	 * @param  Request $request PSR-7 request
+	 * @param  RequestHandler $handler PSR-15 request handler
 	 *
-	 * @return ResponseInterface
+	 * @return Response
 	 */
-	public function __invoke($request, $response, $next)
+	public function __invoke(Request $request, RequestHandler $handler): Response
 	{
 		$jwt = $request->getAttribute('jwt');
 
-		if (!$this->isValidOhmSession($request) && empty($jwt)) {
-			return $response->withStatus(401)
-				->withJson(['errors' => ['Please login or provide a valid API token.']]);
-		}
+        $response = $handler->handle($request);
 
-//		$response->getBody()->write('BEFORE');
-		$response = $next($request, $response);
-//		$response->getBody()->write('AFTER');
+		if (!$this->isValidOhmSession($request) && empty($jwt)) {
+            $payload = json_encode(['errors' => ['Please login or provide a valid API token.']]);
+            $response->getBody()->write($payload);
+
+			return $response
+                ->withHeader('Content-Type', 'application/json');
+		}
 
 		return $response;
 	}
@@ -56,10 +57,10 @@ class ValidateUser
 	/**
 	 * Determine if this request is associated with a valid OHM user session.
 	 *
-	 * @param ServerRequestInterface $request
+	 * @param Request $request
 	 * @return bool
 	 */
-	private function isValidOhmSession($request)
+	private function isValidOhmSession(Request $request): bool
 	{
 		$sessionId = session_id();
 		$session = Session::where('sessionid', $sessionId)->first();

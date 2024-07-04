@@ -1,6 +1,6 @@
 # This sets up an environment for building and running tests including PHP, Composer, Node, and the Mysql client
 # The actual build and test commands are run outside this image build
-FROM php:7.4-cli AS builder
+FROM php:8.1-cli AS builder
 
 RUN apt-get update && apt-get install -y libzip-dev zip gnupg
 
@@ -15,14 +15,14 @@ RUN docker-php-ext-configure zip && docker-php-ext-install zip pdo pdo_mysql
 # Install node
 ENV NODE_PATH /node
 WORKDIR $NODE_PATH
-ARG NODE_VERSION=v16.16.0
+ARG NODE_VERSION=v20.11.0
 RUN curl -O https://nodejs.org/download/release/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.gz && \
     tar xzf node-${NODE_VERSION}-linux-x64.tar.gz
 ENV PATH ${PATH}:$NODE_PATH/node-${NODE_VERSION}-linux-x64/bin
 
 # Install composer
-RUN curl -o /usr/local/bin/composer https://getcomposer.org/download/2.3.5/composer.phar
-RUN echo "3b3b5a899c06a46aec280727bdf50aad14334f6bc40436ea76b07b650870d8f4 /usr/local/bin/composer" | sha256sum -c
+RUN curl -o /usr/local/bin/composer https://getcomposer.org/download/2.7.1/composer.phar
+RUN echo "1ffd0be3f27e237b1ae47f9e8f29f96ac7f50a0bd9eef4f88cdbe94dd04bfff0 /usr/local/bin/composer" | sha256sum -c
 RUN chmod 755 /usr/local/bin/composer
 
 ENV INSTALL_PATH /build
@@ -42,7 +42,7 @@ COPY ./ ./
 RUN zip -r beanstalk.zip . -x deploy-scripts/**
 
 # This is the final image which gets pushed into ECR, containing only the zip and deployment dependencies
-FROM alpine:3 as deployer
+FROM alpine:3.19 as deployer
 
 RUN apk add --no-cache \
         aws-cli \

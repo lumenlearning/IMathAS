@@ -466,7 +466,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=201,
      *            summary="Single part - multiple choice",
      *            value={
      *                "questionSetId": 3618,
@@ -493,7 +493,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=202,
      *            summary="Single part - multiple answer",
      *            value={
      *                "questionSetId": 3618,
@@ -524,7 +524,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=203,
      *            summary="Single part - matching",
      *            value={
      *                "questionSetId": 3618,
@@ -551,7 +551,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=204,
      *            summary="Single part - string",
      *            value={
      *                "questionSetId": 3618,
@@ -578,7 +578,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=205,
      *            summary="Single part - draw",
      *            value={
      *                "questionSetId": 3618,
@@ -614,7 +614,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=206,
      *            summary="Single part - essay",
      *            value={
      *                "questionSetId": 3618,
@@ -641,7 +641,7 @@ class QuestionController extends ApiBaseController
      *            }
      *          ),
      *          @OA\Examples(
-     *            example=200,
+     *            example=207,
      *            summary="Multi-part question",
      *            value={
      *                "questionSetId": 3618,

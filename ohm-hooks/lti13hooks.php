@@ -23,6 +23,21 @@ function lti_get_types_as_num(): array {
 
 /**
  * Determine if the hooks can handle a launch of this URI
+ *
+ * MOM hooks now look for the same function under two different names
+ * with no obvious change in functionality. This function just calls
+ * the previous function and acts as a pass-through.
+ *
+ * @param string  $targetlink  The target_link_uri for the launch
+ * @return bool true if hooks can handle this launch uri
+ */
+function lti_can_ext_handle_launch(string $targetlink): bool
+{
+    return lti_can_handle_launch($targetlink);
+}
+
+/**
+ * Determine if the hooks can handle a launch of this URI
  * 
  * @param string  $targetlink  The target_link_uri for the launch
  * @return bool true if hooks can handle this launch uri

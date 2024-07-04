@@ -32,6 +32,8 @@ config/local.php
 /tests/_support/_generated
 /tests/_output/
 /c3.php
+.phpunit.cache/
+.phpunit.result.cache
 *.php~
 *.js~
 mathjax-b

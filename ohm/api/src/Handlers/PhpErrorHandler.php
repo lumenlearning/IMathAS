@@ -2,9 +2,9 @@
 
 namespace OHM\Api\Handlers;
 
-use Slim\Container;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use DI\Container;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 use Ramsey\Uuid\Uuid;
 
@@ -47,8 +47,9 @@ class PhpErrorHandler extends \Slim\Handlers\Error
 			),
 			'error_guid' => $errorGuid,
 		);
-
+        $payload = json_encode($content);
+        $response->getBody()->write($payload);
 		return $response->withStatus(500)
-			->withJson($content);
+            ->withHeader('Content-Type', 'application/json');
 	}
 }

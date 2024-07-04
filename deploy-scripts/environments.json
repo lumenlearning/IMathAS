@@ -5,7 +5,7 @@
             "account": 631711495858,
             "beanstalk": {
                 "application": "ohm",
-                "beanstalk_environment": "ohm-dev-exemplar-php",
+                "beanstalk_environment": "ohm-dev-exemplar-php81",
                 "bucket": "elasticbeanstalk-us-west-2-631711495858"
             }
         },
@@ -14,7 +14,7 @@
             "account": 631711495858,
             "beanstalk": {
                 "application": "ohm",
-                "beanstalk_environment": "ohm-staging-exemplar-php",
+                "beanstalk_environment": "ohm-staging-exemplar-php81",
                 "bucket": "elasticbeanstalk-us-west-2-631711495858"
             }
         },
@@ -23,7 +23,7 @@
             "account": 725843923591,
             "beanstalk": {
                 "application": "ohm",
-                "beanstalk_environment": "ohm-dev",
+                "beanstalk_environment": "ohm-dev-81",
                 "bucket": "elasticbeanstalk-us-west-2-725843923591"
             }
         },
@@ -32,7 +32,7 @@
             "account": 725843923591,
             "beanstalk": {
                 "application": "ohm",
-                "beanstalk_environment": "ohm-stg",
+                "beanstalk_environment": "ohm-stg-81",
                 "bucket": "elasticbeanstalk-us-west-2-725843923591"
             }
         },
@@ -41,7 +41,7 @@
             "account": 523740042085,
             "beanstalk": {
                 "application": "Ohm",
-                "beanstalk_environment": "ohm-prod-74",
+                "beanstalk_environment": "ohm-prod-81",
                 "bucket": "elasticbeanstalk-us-west-2-523740042085"
             }
         },
@@ -50,7 +50,7 @@
             "account": 701384285930,
             "beanstalk": {
                 "application": "ohm",
-                "beanstalk_environment": "ohm-prod-exemplar-php",
+                "beanstalk_environment": "ohm-prod-exemplar-php81",
                 "bucket": "elasticbeanstalk-us-west-2-701384285930"
             }
         }

@@ -159,7 +159,7 @@ function _removeOhm1Feedback(array $responseData): array
 function _getCorrectAnswersFromScoreResult(array $scoreResult, bool $isMultiPart): array
 {
     if (!$isMultiPart) {
-        $correctAnswer = !empty($scoreResult['extra']['answer']) ?
+        $correctAnswer = !is_null($scoreResult['extra']['answer']) ?
             $scoreResult['extra']['answer'] : $scoreResult['extra']['answers'];
         return [$correctAnswer];
     }
@@ -169,7 +169,7 @@ function _getCorrectAnswersFromScoreResult(array $scoreResult, bool $isMultiPart
     // each containing correct answers.
     $correctAnswers = [];
     foreach (['answer', 'answers'] as $answerVar) {
-        if (!empty($scoreResult['extra'][$answerVar])) {
+        if (!is_null($scoreResult['extra'][$answerVar])) {
             foreach ($scoreResult['extra'][$answerVar] as $partNumber => $answer) {
                 $correctAnswers[$partNumber] = $answer;
             }

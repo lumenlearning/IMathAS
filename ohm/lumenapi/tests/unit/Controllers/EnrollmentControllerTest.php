@@ -76,7 +76,7 @@ class EnrollmentControllerTest extends TestCase
             ->shouldReceive('getAll')
             ->andReturn(self::ENROLLMENT_COLLECTION);
 
-        $request = Request::create('/api/dev/v1/enrollments', 'GET');
+        $request = Request::create('/api/v1/enrollments', 'GET');
         $jsonResponse = $this->enrollmentController->getAllEnrollments($request);
         $jsonData = $jsonResponse->getData();
 
@@ -100,7 +100,7 @@ class EnrollmentControllerTest extends TestCase
             ->with(1, 2, [])
             ->andReturn(self::ENROLLMENT_COLLECTION);
 
-        $request = Request::create('/api/dev/v1/enrollments', 'GET', [
+        $request = Request::create('/api/v1/enrollments', 'GET', [
             'page' => '1', // pages are zero-indexed
             'per_page' => 2,
         ]);
@@ -126,7 +126,7 @@ class EnrollmentControllerTest extends TestCase
             ->shouldReceive('getAll')
             ->andReturn([]);
 
-        $request = Request::create('/api/dev/v1/enrollments', 'GET');
+        $request = Request::create('/api/v1/enrollments', 'GET');
         $jsonResponse = $this->enrollmentController->getAllEnrollments($request);
         $jsonData = $jsonResponse->getData();
 
@@ -146,7 +146,7 @@ class EnrollmentControllerTest extends TestCase
             ->with(42)
             ->andReturn(self::ENROLLMENT_COLLECTION);
 
-        $request = Request::create('/api/dev/v1/enrollments/42', 'GET');
+        $request = Request::create('/api/v1/enrollments/42', 'GET');
         $jsonResponse = $this->enrollmentController->getEnrollmentById($request, 42);
         $jsonData = $jsonResponse->getData();
 
@@ -169,7 +169,7 @@ class EnrollmentControllerTest extends TestCase
             ->with(42)
             ->andReturn(null);
 
-        $request = Request::create('/api/dev/v1/enrollments/42', 'GET');
+        $request = Request::create('/api/v1/enrollments/42', 'GET');
         $jsonResponse = $this->enrollmentController->getEnrollmentById($request, 42);
 
         $this->assertEquals(404, $jsonResponse->getStatusCode());
@@ -186,7 +186,7 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $request = Request::create('/api/dev/v1/enrollments/42', 'PUT', [
+        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'has_valid_access_code' => true,
             'is_opted_out_of_assessments' => false,
         ]);
@@ -212,14 +212,16 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $request = Request::create('/api/dev/v1/enrollments/42', 'PUT', [
+        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'is_opted_out_of_assessments' => false,
         ]);
         $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
+
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
-        $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+        $this->assertEquals('The has valid access code field is required.',
+            $jsonData->errors->has_valid_access_code[0]);
     }
 
     public function testUpdateEnrollmentById_missingOptedOutAssessments(): void
@@ -229,14 +231,16 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andReturn(self::ENROLLMENT_SINGLE);
 
-        $request = Request::create('/api/dev/v1/enrollments/42', 'PUT', [
+        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'has_valid_access_code' => true,
         ]);
         $jsonResponse = $this->enrollmentController->updateEnrollmentById($request, 42);
+
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
-        $this->assertEquals('The given data was invalid.', $jsonData->errors[0]);
+        $this->assertEquals('The is opted out of assessments field is required.',
+            $jsonData->errors->is_opted_out_of_assessments[0]);
     }
 
     public function testUpdateEnrollmentById_NotFound(): void
@@ -246,7 +250,7 @@ class EnrollmentControllerTest extends TestCase
             ->withAnyArgs()
             ->andThrow(RelationNotFoundException::class);
 
-        $request = Request::create('/api/dev/v1/enrollments/42', 'PUT', [
+        $request = Request::create('/api/v1/enrollments/42', 'PUT', [
             'has_valid_access_code' => true,
             'is_opted_out_of_assessments' => false,
         ]);

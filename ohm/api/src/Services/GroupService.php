@@ -2,10 +2,10 @@
 
 namespace OHM\Api\Services;
 
+use DI\Container;
 use Illuminate\Database\Capsule\Manager as DB;
 use Monolog\Logger;
 use OHM\Models\Group;
-use Slim\Container;
 
 class GroupService
 {

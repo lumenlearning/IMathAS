@@ -1,26 +1,27 @@
 {
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.1",
         "ext-curl": "*",
         "ext-pdo": "*",
         "ext-json": "*",
-        "slim/slim": "3.9.2",
-        "slim/php-view": "2.2.0",
-        "monolog/monolog": "1.23.0",
-        "illuminate/database": "5.4.36",
-        "ramsey/uuid": "3.7.3",
-        "tuupola/slim-jwt-auth": "^2.4.0"
+        "php-di/php-di": "7.0.6",
+        "slim/slim": "^4.12.0",
+        "slim/psr7": "^1.6.1",
+        "slim/php-view": "^3.2.0",
+        "monolog/monolog": "^3.5.0",
+        "illuminate/database": "^10.43.0",
+        "ramsey/uuid": "^4.7.5",
+        "tuupola/slim-jwt-auth": "^3.8.0"
     },
     "require-dev": {
-        "robmorgan/phinx": "^0.12.10",
-        "phpunit/phpunit": "^9.1",
-        "codeception/codeception": "^4.1",
-        "codeception/c3": "^2.4",
-        "flow/jsonpath": "0.4.0",
-        "fzaninotto/faker": "^1.7",
-        "squizlabs/php_codesniffer": "3.4.2",
-        "codeception/module-asserts": "^1.2",
-        "codeception/module-webdriver": "^1.0"
+        "robmorgan/phinx": "^0.16.0",
+        "phpunit/phpunit": "^10.5",
+        "codeception/codeception": "^5.1",
+        "codeception/c3": "^2.9",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-webdriver": "^4.0",
+        "softcreatr/jsonpath": "0.8.3",
+        "fakerphp/faker": "^1.23.1"
     },
     "autoload": {
         "psr-4": {

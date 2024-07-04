@@ -1,48 +1,61 @@
 <?php
 // DIC configuration
 
-$container = $app->getContainer();
+use DI\Container;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Processor\UidProcessor;
+use OHM\Api\Handlers\ErrorHandler;
+use OHM\Api\Handlers\PhpErrorHandler;
+use OHM\Api\Services\GroupService;
+use OHM\Api\Services\ModelAuditService;
+use Slim\Views\PhpRenderer;
+
+/* @var Container $container */
 
 // view renderer
-$container['renderer'] = function ($c) {
-    $settings = $c->get('settings')['renderer'];
-    return new Slim\Views\PhpRenderer($settings['template_path']);
-};
+$container->set('renderer', function () use ($settings) {
+    $templatePath = $settings['renderer']['template_path'];
+    return new PhpRenderer($templatePath);
+});
 
 // monolog
-$container['logger'] = function ($c) {
-    $settings = $c->get('settings')['logger'];
-    $logger = new Monolog\Logger($settings['name']);
-    $logger->pushProcessor(new Monolog\Processor\UidProcessor());
-    $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
+$container->set('logger', function () use ($settings) {
+    $loggerName = $settings['logger']['name'];
+    $loggerPath = $settings['logger']['path'];
+    $loggerLevel = $settings['logger']['level'];
+
+    $logger = new Logger($loggerName);
+    $logger->pushProcessor(new UidProcessor());
+    $logger->pushHandler(new StreamHandler($loggerPath, $loggerLevel));
     return $logger;
-};
+});
 
 // Service factory for the ORM
 $capsule = new \Illuminate\Database\Capsule\Manager;
-$capsule->addConnection($container['settings']['db']);
+$capsule->addConnection($settings['db']);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
-$container['db'] = function ($container) use ($capsule) {
+$container->set('db', function (Container $container) use ($capsule) {
 	return $capsule;
-};
+});
 
 // PHP exception handler
-$container['errorLogger'] = function ($c) {
-	return new \OHM\Api\Handlers\ErrorHandler($c);
-};
+$container->set('errorLogger', function (Container $container) {
+    return new ErrorHandler($container);
+});
 
 // PHP 7 exception handler
-$container['phpErrorLogger'] = function ($c) {
-	return new \OHM\Api\Handlers\PhpErrorHandler($c);
-};
+$container->set('phpErrorLogger', function (Container $container) {
+    return new PhpErrorHandler($container);
+});
 
 // Factory for ModelAuditService.
-$container['modelAuditService'] = function ($c) {
-    return new \OHM\Api\Services\ModelAuditService($c);
-};
+$container->set('modelAuditService', function (Container $container) {
+    return new ModelAuditService($container);
+});
 
 // Factory for GroupService.
-$container['groupService'] = function ($c) {
-    return new \OHM\Api\Services\GroupService($c);
-};
+$container->set('groupService', function (Container $container) {
+    return new GroupService($container);
+});

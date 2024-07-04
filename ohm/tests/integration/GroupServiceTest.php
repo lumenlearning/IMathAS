@@ -15,7 +15,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * @covers GroupService
  */
-final class GroupServiceTest extends SlimPhp3TestCase
+final class GroupServiceTest extends SlimPhp4TestCase
 {
     private FakerGenerator $faker;
     private GroupService $groupService;

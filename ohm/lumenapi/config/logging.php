@@ -17,7 +17,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'daily'),
+    'default' => getenv('LOG_CHANNEL') ?? 'daily',
 
     /*
     |--------------------------------------------------------------------------
