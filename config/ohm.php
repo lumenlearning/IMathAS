@@ -12,6 +12,9 @@ $loginpage = 'ohm/loginpage.php';
 
 $installname = "Lumen OHM";
 
+//some sql syntax is different depending on mysql server version
+$CFG['MySQL_ver'] = '8.0';
+
 //static assets
 $CFG['static_server'] = getenv('STATIC_ASSETS_BASE_URL') ?? 'https://ohm.lumenlearning.com/';
 
@@ -284,6 +287,8 @@ $CFG['showcalculator'] = [
 ];
 
 $CFG['LTI']['autoreg'] = true;
+
+$CFG['logquestionerrors'] = true;
 
 // Debug logging
 $GLOBALS['ENABLE_SCORE_DEBUG'] = 'true' == getenv('ENABLE_SCORE_DEBUG');

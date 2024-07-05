@@ -166,11 +166,11 @@ class QuestionImportService extends BaseService implements QuestionImportService
             $questionControl .= "\n" . $feedbackMacro;
         }
 
-        $mgaSourceId = $mgaQuestionData['source_id'];
-        Log::debug(sprintf('(MGA source ID: %s) Generated question control: %s',
-            $mgaSourceId, $questionControl));
-        Log::debug(sprintf('(MGA source ID: %s) Generated question text: %s',
-            $mgaSourceId, $questionText));
+//        $mgaSourceId = $mgaQuestionData['source_id'];
+//        Log::debug(sprintf('(MGA source ID: %s) Generated question control: %s',
+//            $mgaSourceId, $questionControl));
+//        Log::debug(sprintf('(MGA source ID: %s) Generated question text: %s',
+//            $mgaSourceId, $questionText));
 
         return [
             'qtype' => 'choices',
@@ -298,8 +298,8 @@ class QuestionImportService extends BaseService implements QuestionImportService
             ];
             $libraryItemId = $this->libraryItemRepository->create($libraryItem);
 
-            Log::debug(sprintf('Inserted question ID: %d, Library item id: %d',
-                $questionSetId, $libraryItemId));
+//            Log::debug(sprintf('Inserted question ID: %d, Library item id: %d',
+//                $questionSetId, $libraryItemId));
 
             DB::commit();
         } catch (Exception $e) {

@@ -14,7 +14,7 @@ class LtiCredentialSeeder extends AbstractSeed
 	 * More information on writing seeders is available here:
 	 * http://docs.phinx.org/en/latest/seeding.html
 	 */
-	public function run()
+	public function run(): void
 	{
 		// https://github.com/fzaninotto/Faker
 		$faker = FakerFactory::create();
@@ -64,6 +64,6 @@ class LtiCredentialSeeder extends AbstractSeed
 			'created_at' => $faker->numberBetween(time() - 86400 * 365 * 5, time()),
 		];
 
-		$this->insert('imas_users', $data);
+		$this->table('imas_users')->insert($data)->save();
 	}
 }

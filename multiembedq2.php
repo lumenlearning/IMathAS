@@ -5,10 +5,10 @@
 // (c) 2020 David Lippman
 
 $init_skip_csrfp = true;
-require "./init_without_validate.php";
+require_once "./init_without_validate.php";
 
 require_once './assess2/AssessStandalone.php';
-require("includes/JWT.php");
+require_once "includes/JWT.php";
 
 $assessver = 2;
 $courseUIver = 2;
@@ -259,7 +259,7 @@ for ($qn=0; $qn < $numq; $qn++) {
 }
 
 if (isset($_GET['frame_id'])) {
-   $frameid = preg_replace('/[^\w:.-]/', '', $_GET['frame_id']);
+    $frameid = preg_replace('/[^\w:.-]/', '', $_GET['frame_id']);
 } else {
   $frameid = "ohm" . $qsid;
 }
@@ -283,9 +283,9 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
 } else {
-    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=20230803" type="text/javascript"></script>';
+    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=20240107" type="text/javascript"></script>';
     // ####### Begin OHM-specific changes ##################################################################
-    // ####### Begin OHM-specific changes ##################################################################    
+    // ####### Begin OHM-specific changes ##################################################################
     $placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
     // ####### Begin OHM-specific changes ##################################################################
     // ####### Begin OHM-specific changes ##################################################################
@@ -361,7 +361,7 @@ if ($_SESSION['mathdisp']==1 || $_SESSION['mathdisp']==3) {
 
 $flexwidth = true; //tells header to use non _fw stylesheet
 $nologo = true;
-require "./header.php";
+require_once "./header.php";
 
 echo '<div><ul id="errorslist" style="display:none" class="small"></ul></div>';
 for ($qn=0; $qn < $numq; $qn++) {
@@ -375,7 +375,7 @@ for ($qn=0; $qn < $numq; $qn++) {
     if (!$state['jssubmit']) {
         echo '<p>';
         // ####### Begin OHM-specific changes ##################################################################
-        // ####### Begin OHM-specific changes ##################################################################        
+        // ####### Begin OHM-specific changes ##################################################################
         // ####### Begin OHM-specific changes ##################################################################
         // Adds $qsid param to submitq to send postMessage to Valkyrie for FullStory Try-It recording
         // Conditionally adds submitbtn class to style button differently for Try-Its (not sent if not a Try-It)
@@ -409,7 +409,7 @@ for ($qn=0; $qn < $numq; $qn++) {
         // ####### End OHM-specific changes ####################################################################
         // ####### End OHM-specific changes ####################################################################
         // ####### End OHM-specific changes ####################################################################
-        
+
         echo '</p>';
     }
     echo '</div>';
@@ -437,4 +437,4 @@ $placeinfooter = '<div id="ehdd" class="ehdd" style="display:none;">
   <span onclick="showeh(curehdd);" style="cursor:pointer;">'._('[more..]').'</span>
 </div>
 <div id="eh" class="eh"></div>';
-require "./footer.php";
+require_once "./footer.php";

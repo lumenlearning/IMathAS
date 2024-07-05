@@ -32,6 +32,7 @@ class DesmosSteps
         foreach ($steps as $step) {
             $stepOrder[$step['id']] = $step;
         }
+        $stepOrder ??= [];
         return $stepOrder;
     }
 

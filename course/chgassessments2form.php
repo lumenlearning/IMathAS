@@ -192,7 +192,7 @@ $vueData = array(
 	 		<a href="#" onclick="groupToggleAll(0);return false;"><?php echo _('Collapse All'); ?></a>
 		</div>
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/collapse.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/collapse.gif" alt="Collapse" />
 			<?php echo _('Core Options'); ?>
 		</div>
 		<div class="blockitems">
@@ -366,7 +366,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Additional Display Options'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -457,7 +457,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Time Limit and Access Control'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -557,7 +557,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Help and Hints'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -671,7 +671,7 @@ $vueData = array(
 		</div>
 
 		<div class="block grouptoggle">
-			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" />
+			<img class="mida" src="<?php echo $staticroot;?>/img/expand.gif" alt="Expand" />
 			<?php echo _('Grading and Feedback'); ?>
 		</div>
 		<div class="blockitems hidden">
@@ -760,11 +760,10 @@ $vueData = array(
 	</fieldset>
 </div>
 <script type="text/javascript">
-
-var app = new Vue({
-	el: '#app',
-  data: <?php echo json_encode($vueData, JSON_INVALID_UTF8_IGNORE); ?>,
-	computed: {
+const { createApp } = Vue;
+createApp({
+  data: function() { return <?php echo json_encode($vueData, JSON_INVALID_UTF8_IGNORE); ?>;},
+  computed: {
 		coreSet: function() {
 			let tot = (this.subtype === 'DNC' ? 0 : 1) +
 				(this.defregens === '' ? 0 : 1) +
@@ -1061,5 +1060,5 @@ var app = new Vue({
     	// call init method
         this.initCalTagRadio();
 	}
-});
+}).mount('#app');
 </script>

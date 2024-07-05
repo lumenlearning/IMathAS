@@ -66,7 +66,7 @@ class DbFixtures
  
  $feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         'qcontrol' => '',
-        'qtext' => '<p>What is your favorite sport?</p>\r\n<p>$answerbox</p>\r\n<p>$feedback</p>\r\n',
+        'qtext' => '<p>What is your favorite sport?</p>\r\n<p>$answerbox</p>\r\n',
         'answer' => '',
         'solution' => '',
         'extref' => '',
@@ -133,10 +133,10 @@ $pizzafeedbacks = array(
 $answer[3] = "42"
 
 $feedback = mergearrays(
-  ohm_getfeedbacktxt($stuanswer[$thisq], $colorfeedbacks, $answer[0], 0),
-  ohm_getfeedbacktxt($stuanswer[$thisq], $numbersfeedbacks, $answer[1], 1),
-  ohm_getfeedbacktxt($stuanswer[$thisq], $pizzafeedbacks, $answer[2], 2),
-  ohm_getfeedbackbasic($stuanswer[$thisq], "Correct!", "Not correct.", $answer[3], 3)
+  ohm_getfeedbacktxt($thisq, $colorfeedbacks, $answer[0], 0),
+  ohm_getfeedbacktxt($thisq, $numbersfeedbacks, $answer[1], 1),
+  ohm_getfeedbacktxt($thisq, $pizzafeedbacks, $answer[2], 2),
+  ohm_getfeedbackbasic($thisq, "Correct!", "Not correct.", $answer[3], 3)
 )',
         'qcontrol' => '',
         'qtext' => 'Choose the best color:

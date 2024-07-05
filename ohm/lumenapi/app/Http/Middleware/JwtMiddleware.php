@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Log;
 
 class JwtMiddleware
@@ -37,7 +38,8 @@ class JwtMiddleware
         }
 
         try {
-            $credentials = JWT::decode($jwt, env('QUESTION_API_JWT_SECRET'), ['HS256']);
+            $key = new Key(env('QUESTION_API_JWT_SECRET'), 'HS256');
+            $credentials = JWT::decode($jwt, $key);
         } catch (ExpiredException $e) {
             Log::error($e);
             return response()->json([

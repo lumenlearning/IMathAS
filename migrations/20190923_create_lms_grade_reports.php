@@ -32,7 +32,7 @@ if ($res === false) {
 	return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Created table: ohm_lms_grade_reports</p>";
 

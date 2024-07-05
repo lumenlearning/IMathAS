@@ -18,7 +18,7 @@ if ($res === false) {
     return false;
 }
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 
 echo "<p style='color: green;'>✓ Added showcalculator columns to table: imas_questions</p>";
 

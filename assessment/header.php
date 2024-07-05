@@ -19,7 +19,7 @@ if (!isset($myrights)) {
 //load filter
 $curdir = rtrim(dirname(__FILE__), '/\\');
 $loadgraphfilter = true;
-require("$curdir/../filter/filter.php");
+require_once "$curdir/../filter/filter.php";
 ?>
 <script type="text/javascript">
 var isImathasAssessment = true;
@@ -90,8 +90,8 @@ if (!empty($isdiag)) {
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"$staticroot/assessment/print.css\" media=\"print\"/>\n";
 }
 // ####### Begin OHM-specific changes ##################################################################
-// ####### Begin OHM-specific changes ##################################################################    
-if (isset($_GET['iframe_resize_id']) ) { 
+// ####### Begin OHM-specific changes ##################################################################
+if (isset($_GET['iframe_resize_id']) ) {
   // add Try-It styles to Try-Its but not standalone OHM questions
   echo '<link rel="stylesheet" href="/themes/tryits.css" type="text/css"/>';
 }
@@ -106,7 +106,7 @@ if (isset($_GET['iframe_resize_id']) && isset($_GET['source'])){
 	echo '<link rel="stylesheet" href="/themes/lumenonetryits.css" type="text/css"/>';
   }
 // ####### End OHM-specific changes ##################################################################
-// ####### End OHM-specific changes ##################################################################    
+// ####### End OHM-specific changes ##################################################################
 if (isset($CFG['GEN']['favicon'])) {
 	echo '<link rel="shortcut icon" href="'.$CFG['GEN']['favicon'].'" />';
 } else {
@@ -133,7 +133,7 @@ echo '<script>var isOhmExemplar = ' . $isOhmExemplarValue . ';</script>';
 #### End OHM-specific changes ###########################################################
 #### End OHM-specific changes ###########################################################
 
-echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=112420" type="text/javascript"></script>';
+echo '<script src="' . $imasroot . '/javascript/assessment_min.js?v=110223" type="text/javascript"></script>';
 
 
 //assessment_min.js bundles: general.js, mathjs.js, AMhelpers.js, confirmsubmit.js, drawing.js, and eqntips.js
@@ -298,7 +298,7 @@ if (isset($placeinhead)) {
 	echo $placeinhead;
 }
 if (isset($CFG['GEN']['headerscriptinclude'])) {
-	require("$curdir/../{$CFG['GEN']['headerscriptinclude']}");
+	require_once "$curdir/../{$CFG['GEN']['headerscriptinclude']}";
 }
 if (isset($CFG['GEN']['translatewidgetID'])) {
 	echo '<meta name="google-translate-customization" content="'.$CFG['GEN']['translatewidgetID'].'"></meta>';
@@ -329,7 +329,7 @@ if (!isset($flexwidth) && !isset($hideAllHeaderNav)) {
 }
 
 if (isset($CFG['GEN']['headerinclude']) && !isset($flexwidth) && !isset($hideAllHeaderNav)) {
-	require("$curdir/../{$CFG['GEN']['headerinclude']}");
+	require_once "$curdir/../{$CFG['GEN']['headerinclude']}";
 }
 
 if (isset($cid) && !isset($flexwidth) && !isset($hideAllHeaderNav) && !$isdiag && (!isset($_SESSION['intreereader']) || $_SESSION['intreereader']==false)) {

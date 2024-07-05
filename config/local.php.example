@@ -99,7 +99,7 @@ $allowedCorsOrigins = [
     'https://localhost', // Apache serving OHM.
     'http://localhost:8080' // vue-cli-service serving assessment player frontend.
 ];
-$httpOrigin = $_SERVER['HTTP_ORIGIN'];
+$httpOrigin = $_SERVER['HTTP_ORIGIN'] ?? null;
 if (!empty($httpOrigin) && in_array($httpOrigin, $allowedCorsOrigins)) {
     header("Access-Control-Allow-Origin: $httpOrigin", true);
     header('Access-Control-Allow-Credentials: true', true);

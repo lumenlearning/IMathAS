@@ -60,9 +60,9 @@ cd "${REPODIR}/ohm/lumenapi"
 echo "Building assess2."
 cd "${REPODIR}/assess2/vue-src"
 npm ci
-# This is run twice due to linter errors when building the first time.
+# Ignore all linter errors when building for production.
 # Remove the following line when the linter is no longer an issue.
-npm run build || true
+echo '*' > .eslintignore
 npm run build
 
 echo "Fixing bad timestamps for zip file."

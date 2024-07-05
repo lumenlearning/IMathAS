@@ -1,7 +1,6 @@
 <?php
 
 $ohmApiSettings = require_once(__DIR__ . '/ohm/api/src/configs/settings.php');
-$ohmApiSettings = $ohmApiSettings['settings'];
 
 print_r($ohmApiSettings['db']);
 
@@ -11,7 +10,7 @@ return [
 		'seeds' => __DIR__ . '/ohm/db/seeds',
 	],
 	'environments' => [
-		'default_database' => 'development',
+		'default_environment' => 'development',
 		'default_migration_table' => 'ohm_phinxlog',
 		'production' => [
 			'adapter' => 'mysql',

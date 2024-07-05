@@ -2,9 +2,9 @@
 
 namespace OHM\Api\Services;
 
+use DI\Container;
 use Illuminate\Database\Eloquent\Model;
 use Monolog\Logger;
-use Slim\Container;
 
 /**
  * This provides a simple method to log changes to Models.

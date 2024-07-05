@@ -12,7 +12,7 @@ require_once(__DIR__ . '/ohm/includes/setup_error_handlers.php');
 #### End OHM-specific changes ############################################################
 #### End OHM-specific changes ############################################################
 #### End OHM-specific changes ############################################################
-require_once(__DIR__ . "/includes/sanitize.php");
+require_once __DIR__ . "/includes/sanitize.php";
 
 if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https'))  {
     $urlmode = 'https://';
@@ -25,13 +25,13 @@ if (!file_exists(__DIR__ . "/config.php")) {
 	header('Location: ' . Sanitize::url($urlmode . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/install.php?r=" . Sanitize::randomQueryStringParam()));
 }
 
-require_once(__DIR__ . "/config.php");
+require_once __DIR__ . "/config.php";
 
-require_once(__DIR__ . "/i18n/i18n.php");
+require_once __DIR__ . "/i18n/i18n.php";
 
 //Look to see if a hook file is defined, and include if it is
 if (isset($CFG['hooks']['init'])) {
-	require_once($CFG['hooks']['init']);
+	require_once $CFG['hooks']['init'];
 }
 
 // setup session stuff
@@ -61,7 +61,17 @@ function disallowsSameSiteNone () {
 }
 }
 if (isset($sessionpath)) { session_save_path($sessionpath);}
-ini_set('session.gc_maxlifetime',432000);
+ini_set('session.gc_maxlifetime', $CFG['GEN']['sessionmaxlife'] ?? 432000);
+if (isset($CFG['GEN']['gc_divisor'])) {
+    ini_set('session.gc_divisor', $CFG['GEN']['gc_divisor']);
+}
+if (isset($CFG['MySQL_ver']) && $CFG['MySQL_ver'] >= 8) {
+    define('MYSQL_LEFT_WRDBND', '\\b');
+    define('MYSQL_RIGHT_WRDBND', '\\b');
+} else {
+    define('MYSQL_LEFT_WRDBND', '[[:<:]]');
+    define('MYSQL_RIGHT_WRDBND', '[[:>:]]');
+}
 
 $hostdomain = explode(':', Sanitize::domainNameWithPort($_SERVER['HTTP_HOST']));
 $hostparts = explode('.', $hostdomain[0]);
@@ -119,7 +129,7 @@ if (!isset($use_local_sessions)) {
   	ini_set('session.save_handler', 'redis');
   	ini_set('session.save_path', $redispath);
 	} else if (!empty($CFG['dynamodb'])) {
-  	require_once(__DIR__ . "/includes/dynamodb/DynamoDbSessionHandler.php");
+  	require_once __DIR__ . "/includes/dynamodb/DynamoDbSessionHandler.php";
   	(new Idealstack\DynamoDbSessionsDependencyFree\DynamoDbSessionHandler([
   		'region' => $CFG['dynamodb']['region'],
   		'table_name' => $CFG['dynamodb']['table'],
@@ -130,7 +140,7 @@ if (!isset($use_local_sessions)) {
   		'base64' => false
   	]))->register();
   } else {
-	require_once(__DIR__ . "/includes/session.php");
+	require_once __DIR__ . "/includes/session.php";
 	session_set_save_handler(new SessionDBHandler(), true);
   }
 }
@@ -139,10 +149,10 @@ $staticroot = $imasroot;
 
 // Load validate.php?
 if (!isset($init_skip_validate) || (isset($init_skip_validate) && false == $init_skip_validate)) {
-	require_once(__DIR__ . "/validate.php");
+	require_once __DIR__ . "/validate.php";
 	// OWASP CSRF Protector
 	if (!empty($CFG['use_csrfp']) && (!isset($init_skip_csrfp) || (isset($init_skip_csrfp) && false == $init_skip_csrfp))) {
-		require_once(__DIR__ . "/csrfp/simplecsrfp.php");
+		require_once __DIR__ . "/csrfp/simplecsrfp.php";
 		csrfProtector::init();
 	}
 } else if (!empty($init_session_start)) {

@@ -17,14 +17,14 @@ runs:
   using: "composite"
   steps:
     - name: assume oidc role
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-west-2
         role-to-assume: arn:aws:iam::${{ inputs.aws_user_account }}:role/ci-oidc-role
         role-session-name: github-actions-oidc
         role-duration-seconds: 900
     - name: assume target role
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -36,4 +36,4 @@ runs:
     
     - name: Login to Private ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2

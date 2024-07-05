@@ -2,11 +2,11 @@
 //IMathAS: Student sorting report functions
 //(c) 2018 David Lippman
 
-require_once("../includes/parsedatetime.php");
+require_once "../includes/parsedatetime.php";
 
 function getGBcats($cid) {
 	global $DBH;
-	
+
 	$stm = $DBH->prepare("SELECT id,name FROM imas_gbcats WHERE courseid=?");
 	$stm->execute(array($cid));
 	$out = array();
@@ -17,7 +17,7 @@ function getGBcats($cid) {
 }
 function getCourseRuleSets($cid) {
 	global $DBH;
-	
+
 	$stm = $DBH->prepare("SELECT jsondata FROM imas_courses WHERE id=?");
 	$stm->execute(array($cid));
 	$jsondata = json_decode($stm->fetchColumn(0), true);
@@ -29,7 +29,7 @@ function getCourseRuleSets($cid) {
 }
 function setCourseRuleSets($cid, $rulesets) {
 	global $DBH;
-	
+
 	$stm = $DBH->prepare("SELECT jsondata FROM imas_courses WHERE id=?");
 	$stm->execute(array($cid));
 	$jsondata = json_decode($stm->fetchColumn(0), true);
@@ -37,28 +37,29 @@ function setCourseRuleSets($cid, $rulesets) {
 		$jsondata = array();
 	}
 	$jsondata['groupingRuleSets'] = $rulesets;
-	
+
 	$stm = $DBH->prepare("UPDATE imas_courses SET jsondata=? where id=?");
-	$stm->execute(array(json_encode($jsondata), $cid));
+	$stm->execute(array(json_encode($jsondata, JSON_INVALID_UTF8_IGNORE), $cid));
 }
 function runRuleSet($ruleset) {
-	global $cid;
-	
-	$GLOBALS['isteacher'] = true;
-	$GLOBALS['canviewall'] = true;
-	$GLOBALS['includeduedate'] = true;
-	$GLOBALS['includelastchange'] = true;
-	$GLOBALS['includecategoryID'] = true;
-	$GLOBALS['hidelocked'] = true;
-	$GLOBALS['alwaysshowIP'] = true;
-	$GLOBALS['secfilter'] = -1;
+	global $cid, $userid, $DBH;
+    global $isteacher,$canviewall,$includeduedate,$includelastchange,$iuncludecategoryID,$hidelocked,$alwaysshowIP,$secfilter;
 
-	require_once("gbtable2.php");
-	
+	$isteacher = true;
+	$canviewall = true;
+	$includeduedate = true;
+	$includelastchange = true;
+	$includecategoryID = true;
+	$hidelocked = true;
+	$alwaysshowIP = true;
+	$secfilter = -1;
+
+	require_once "gbtable2.php";
+
 	$gb = gbtable();
-	
+
 	$stugrouped = array_fill(0,count($gb)-1,-1);
-	
+
 	$now = time();
 	$endoftoday = strtotime("midnight tomorrow -1second", $now);
 	$todayday = tzdate('w', $now);
@@ -89,11 +90,11 @@ function runRuleSet($ruleset) {
 			$rule['sdate'] = strtotime("-1week +1sec", $rule['edate']);
 		} else if ($rule['timeframe']=='due') {
 			$rule['sdate'] = $now;
-			$rule['edate'] = strtotime("midnight +".$rule['innextDays']."days", $now);	
+			$rule['edate'] = strtotime("midnight +".$rule['innextDays']."days", $now);
 		}
 		$ruleset[$grpnum] = $rule;
-	}	
-	
+	}
+
 	foreach ($ruleset as $grpnum=>$rule) {  //for each rule
 		$groupsout[$grpnum] = array();
 		for ($i=1;$i<count($gb)-1;$i++) { //foreach student
@@ -133,11 +134,11 @@ function runRuleSet($ruleset) {
 					} else if ($rule['tocnt']==2 && !isset($gb[$i][1][$k][0])) { //attempted
 						continue;
 					} else if ($rule['tocnt']==3 && !isset($gb[$i][1][$k][0]) && $gbitem[3]>0) { //past due or attempted
-						//not attempted and due date in future 
+						//not attempted and due date in future
 						continue;
 					}
 				}
-				
+
 				switch($rule['ruleType']) {
 					case 'score':
 						$tot += 1*(isset($gb[$i][1][$k][0])?$gb[$i][1][$k][0]:0);
@@ -145,7 +146,7 @@ function runRuleSet($ruleset) {
 						break;
 					case 'scores':
 						$pct = 100*(isset($gb[$i][1][$k][0])?$gb[$i][1][$k][0]:0)/($gbitem[2]);
-						
+
 						if (($rule['abovebelow']==0 && $pct>=$rule['scorebreak']) ||
 						    ($rule['abovebelow']==1 && $pct<$rule['scorebreak'])) {
 							$hits++;
@@ -154,7 +155,7 @@ function runRuleSet($ruleset) {
 						}
 						break;
 					case 'comp':
-						if (isset($gb[$i][1][$k][3]) && ($gb[$i][1][$k][3]%10)==0) { 
+						if (isset($gb[$i][1][$k][3]) && ($gb[$i][1][$k][3]%10)==0) {
 							//score is not marked as IP or NC
 							$hits++;
 						} else {
@@ -173,7 +174,7 @@ function runRuleSet($ruleset) {
 							$hits++;
 						}
 						break;
-					case 'close': 
+					case 'close':
 						if (isset($gb[$i][1][$k][9]) && $gb[$i][1][$k][9]!=-1) {
 							$started = $gb[$i][1][$k][9]-$gb[$i][1][$k][7]*60;
 							//is duedate - startdate < latehrs
@@ -228,7 +229,11 @@ function runRuleSet($ruleset) {
 					}
 					break;
 				case 'score':
-					$percent = 100*$tot/$poss;
+                    if ($poss > 0) {
+					    $percent = 100*$tot/$poss;
+                    } else {
+                        $percent = 0;
+                    }
 					if (($rule['abovebelow']==0 && $percent>=$rule['scorebreak']) ||
 					    ($rule['abovebelow']==1 && $percent<$rule['scorebreak'])) {
 						$stugrouped[$i] = $grpnum;
@@ -239,7 +244,7 @@ function runRuleSet($ruleset) {
 			}
 		} //next student
 	} //next rule
-	
+
 	//define leftovers group
 	$grpnum++;
 	$groupsout[$grpnum] = array();

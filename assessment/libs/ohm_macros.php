@@ -91,7 +91,12 @@ function ohm_getfeedbackbasic($stuanswers,
     }
 
     $questionIndex = _getFeedbackIndex($partNumber);
-    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
+
+    if (!is_null($partNumber) && is_array($stuanswers)) {
+        $studentAnswer = $stuanswers[$partNumber];
+    } else {
+        $studentAnswer = $stuanswers;
+    }
 
     if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];
@@ -103,8 +108,12 @@ function ohm_getfeedbackbasic($stuanswers,
         $studentAnswer = implode(',', $studentAnswer);
         // The correct answer is written by humans.
         // Remove spaces and ensure the answer keys are sorted.
-        $correctAnswer = preg_replace('/\s*/', '', $correctAnswer);
-        $correctAnswer = explode(',', $correctAnswer);
+        if (is_array($correctAnswer)) {
+            $correctAnswer = array_map('trim', $correctAnswer);
+        } else {
+            $correctAnswer = preg_replace('/\s*/', '', $correctAnswer);
+            $correctAnswer = explode(',', $correctAnswer);
+        }
         sort($correctAnswer);
         $correctAnswer = implode(',', $correctAnswer);
     } else {
@@ -734,7 +743,12 @@ function ohm_getfeedbacktxtmultans($stuanswers, // can't specify a type here :(
     }
 
     $questionIndex = _getFeedbackIndex($partNumber);
-    $studentAnswer = is_null($partNumber) ? $stuanswers : $stuanswers[$partNumber];
+
+    if (!is_null($partNumber) && is_array($stuanswers)) {
+        $studentAnswer = $stuanswers[$partNumber];
+    } else {
+        $studentAnswer = $stuanswers;
+    }
 
     if (is_null($studentAnswer) || '' === $studentAnswer) {
         return [];

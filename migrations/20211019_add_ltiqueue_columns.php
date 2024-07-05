@@ -18,7 +18,7 @@ if ($res===false) {
 }
 
 
-$DBH->commit();
+if ($DBH->inTransaction()) { $DBH->commit(); }
 echo '<p>Add userid and assessmentid columnns to imas_ltiqueue.</p>';
 
 return true;

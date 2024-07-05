@@ -2,9 +2,9 @@
 
 namespace OHM\Api\Controllers;
 
-use Slim\Container;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class BaseApiController
 {
@@ -13,13 +13,13 @@ class BaseApiController
 
 	/**
 	 * BaseApiController constructor.
-	 * @param Container $container
+     * @param ContainerInterface $container
 	 */
-	public function __construct($container)
+    public function __construct(ContainerInterface $container)
 	{
-		$apiSettings = $container->get('settings')->get('api');
-		$this->defaultPageSize = $apiSettings['defaultPageSize'];
-		$this->maxPageSize = $apiSettings['maxPageSize'];
+        $settings = $container->get('settings');
+        $this->defaultPageSize = $settings['api']['defaultPageSize'];
+        $this->maxPageSize = $settings['api']['maxPageSize'];
 	}
 
 	/**
@@ -28,14 +28,16 @@ class BaseApiController
 	 * @param Request $request
 	 * @return array Page number, page size
 	 */
-	protected function getPaginationArgs($request)
+    protected function getPaginationArgs(Request $request): array
 	{
-		$pageNum = $request->getQueryParam('page', 0);
+        $queryParams = $request->getQueryParams();
+
+        $pageNum = $queryParams['page'] ?? 0;
 		if ($pageNum < 0) {
 			$pageNum = 0;
 		}
 
-		$pageSize = $request->getQueryParam('per_page', $this->defaultPageSize);
+        $pageSize = $queryParams['per_page'] ?? $this->defaultPageSize;
 		if ($this->maxPageSize < $pageSize) {
 			$pageSize = $this->maxPageSize;
 		}

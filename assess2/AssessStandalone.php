@@ -17,13 +17,13 @@ Ideally handle both
 
 */
 
-require_once(__DIR__ . '/AssessUtils.php');
-require_once(__DIR__ . '/../filter/filter.php');
-require_once(__DIR__ . '/questions/QuestionGenerator.php');
-require_once(__DIR__ . '/questions/models/QuestionParams.php');
-require_once(__DIR__ . '/questions/models/ShowAnswer.php');
-require_once(__DIR__ . '/questions/ScoreEngine.php');
-require_once(__DIR__ . '/questions/models/ScoreQuestionParams.php');
+require_once __DIR__ . '/AssessUtils.php';
+require_once __DIR__ . '/../filter/filter.php';
+require_once __DIR__ . '/questions/QuestionGenerator.php';
+require_once __DIR__ . '/questions/models/QuestionParams.php';
+require_once __DIR__ . '/questions/models/ShowAnswer.php';
+require_once __DIR__ . '/questions/ScoreEngine.php';
+require_once __DIR__ . '/questions/models/ScoreQuestionParams.php';
 
 use IMathAS\assess2\questions\models\Question;
 use IMathAS\assess2\questions\QuestionGenerator;
@@ -44,7 +44,7 @@ class AssessStandalone {
    * Construct object
    * @param object $DBH PDO Database Handler
    */
-  function __construct($DBH) {
+  public function __construct($DBH) {
     $this->DBH = $DBH;
     $this->now = time();
   }
@@ -61,7 +61,7 @@ class AssessStandalone {
    *  $arr['rawscores'] = array of qn=>pn=>rawscores
    *  $arr['wrongfmt'] = array of qn=>pn=>wrongfmt
    */
-  function setState($arr) {
+  public function setState($arr) {
       foreach (['stuanswers','stuanswersval','scorenonzero','scoreiscorrect','partattemptn','rawscore'] as $f) {
           if (!isset($arr[$f])) {
               $arr[$f] = [];
@@ -86,14 +86,14 @@ class AssessStandalone {
    * getState()
    * gets the state an associative array (see setState)
    */
-  function getState() {
+  public function getState() {
     return $this->state;
   }
 
   /* setQuestionData($qsid, $data)
   * Sets question data
   */
-  function setQuestionData($qsid, $data) {
+  public function setQuestionData($qsid, $data) {
     $this->qdata[$qsid] = $data;
   }
 
@@ -109,7 +109,7 @@ class AssessStandalone {
      * @return array|null An associative array of the question's data.
      *                    Null if the question's data is unknown.
      */
-    function getQuestionData(int $questionSetId): ?array {
+    public function getQuestionData(int $questionSetId): ?array {
         return empty($this->qdata[$questionSetId]) ? null : $this->qdata[$questionSetId];
     }
     #### End OHM-specific changes ############################################################
@@ -125,7 +125,7 @@ class AssessStandalone {
      *
      * @return Question|null The Question object
      */
-  function getQuestion(): ?Question {
+  public function getQuestion(): ?Question {
       return $this->question;
   }
 
@@ -133,7 +133,7 @@ class AssessStandalone {
    * loadQuestionData()
    * loads the questions from state
    */
-  function loadQuestionData() {
+  public function loadQuestionData() {
     $ph = Sanitize::generateQueryPlaceholders($this->state['qsid']);
     $stm = $this->DBH->prepare("SELECT * FROM imas_questionset WHERE id IN ($ph)");
     $stm->execute(array_values($this->state['qsid']));
@@ -142,7 +142,7 @@ class AssessStandalone {
     }
   }
 
-  function getOpVal($options, $key, $default=null) {
+  public function getOpVal($options, $key, $default=null) {
       if (isset($options[$key])) {
           return $options[$key];
       } else if (isset($this->state[$key])) {
@@ -157,7 +157,7 @@ class AssessStandalone {
    * displays the question $qn, using details from state
    * Values in $options can override the state values
    */
-  function displayQuestion($qn, $options=[]) {
+  public function displayQuestion($qn, $options=[]) {
     $qsid = $this->state['qsid'][$qn];
     $attemptn = empty($this->state['partattemptn'][$qn]) ? 0 : max($this->state['partattemptn'][$qn]);
     $maxtries = $this->getOpVal($options, 'maxtries', 0);
@@ -300,7 +300,7 @@ class AssessStandalone {
    * scores the question $qn, using details from state
    * $parts_to_score: array of pn=>bool for whether to score the part
    */
-  function scoreQuestion($qn, $parts_to_score = true) {
+  public function scoreQuestion($qn, $parts_to_score = true) {
     $qsid = $this->state['qsid'][$qn];
 
     $attemptn = empty($this->state['partattemptn'][$qn]) ? 0 : max($this->state['partattemptn'][$qn]);
@@ -407,7 +407,7 @@ class AssessStandalone {
     ];
 
     if (isset($GLOBALS['CFG']['hooks']['assess2/assess_standalone'])) {
-        require_once($GLOBALS['CFG']['hooks']['assess2/assess_standalone']);
+        require_once $GLOBALS['CFG']['hooks']['assess2/assess_standalone'];
         $returnData = onScoreQuestionReturn($returnData, $scoreResult);
     }
 

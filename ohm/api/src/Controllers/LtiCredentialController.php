@@ -2,10 +2,10 @@
 
 namespace OHM\Api\Controllers;
 
+use DI\Container;
 use OHM\Models\Group;
-use Slim\Container;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 use OHM\Models\LtiCredential;
 
@@ -31,13 +31,15 @@ class LtiCredentialController extends BaseApiController
 	 * @param Request $request
 	 * @param Response $response
 	 * @param array $args
-	 * @return null
+     * @return Response
 	 */
-	public function findAll($request, $response, $args)
+    public function findAll(Request $request, Response $response, array $args): Response
 	{
 		list($pageNum, $pageSize) = $this->getPaginationArgs($request);
 		$groupId = $this->getGroupId($args['groupId']);
-		$domainFilter = $request->getParam('domain_filter');
+
+        $queryParams = $request->getQueryParams();
+		$domainFilter = $queryParams['domain_filter'] ?? '';
 
 		$creds = LtiCredential::take($pageSize)->where('groupid', $groupId)
 			->skip($pageSize * $pageNum);
@@ -45,7 +47,11 @@ class LtiCredentialController extends BaseApiController
 		$creds = $creds->get();
 
 		$publicCreds = array_map([$this, 'mapOhmSchema2Public'], $creds->all());
-		return $response->withJson($publicCreds);
+
+        $payload = json_encode($publicCreds);
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
 	}
 
 	/**
@@ -54,9 +60,9 @@ class LtiCredentialController extends BaseApiController
 	 * @param Request $request
 	 * @param Response $response
 	 * @param array $args
-	 * @return null
+     * @return Response
 	 */
-	public function find($request, $response, $args)
+    public function find(Request $request, Response $response, array $args): Response
 	{
 		$cred = LtiCredential::find($args['id']);
 
@@ -65,7 +71,11 @@ class LtiCredentialController extends BaseApiController
 		}
 
 		$publicCred = $this->mapOhmSchema2Public($cred);
-		return $response->withJson($publicCred);
+
+        $payload = json_encode($publicCred);
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
 	}
 
 	/**
@@ -76,7 +86,7 @@ class LtiCredentialController extends BaseApiController
 	 * @param array $args
 	 * @return Response
 	 */
-	public function create($request, $response, $args)
+    public function create(Request $request, Response $response, array $args): Response
 	{
 		$groupId = $this->getGroupId($args['groupId']);
 		$rawCredData = $request->getParsedBody();
@@ -85,14 +95,20 @@ class LtiCredentialController extends BaseApiController
 		$newCredData['groupid'] = $groupId;
 
 		if ($this->containsNulls($newCredData)) {
-			return $response->withStatus(400)
-				->withJson(['errors' => ['Null values are not permitted.']]);
+            $payload = json_encode(['errors' => ['Null values are not permitted.']]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withStatus(400)
+                ->withHeader('Content-Type', 'application/json');
 		}
 
 		$existingCred = LtiCredential::where('SID', $newCredData['SID'])->first();
 		if (!is_null($existingCred)) {
-			return $response->withStatus(409)
-				->withJson(['errors' => ['The specified LTI key already exists.']]);
+            $payload = json_encode(['errors' => ['The specified LTI key already exists.']]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withStatus(409)
+                ->withHeader('Content-Type', 'application/json');
 		}
 
 		$logCredData = $newCredData;
@@ -103,7 +119,12 @@ class LtiCredentialController extends BaseApiController
 		$savedCred = LtiCredential::create($newCredData);
 
 		$publicCred = $this->mapOhmSchema2Public($savedCred);
-		return $response->withStatus(201)->withJson($publicCred);
+
+        $payload = json_encode($publicCred);
+        $response->getBody()->write($payload);
+        return $response
+            ->withStatus(201)
+            ->withHeader('Content-Type', 'application/json');
 	}
 
 	/**
@@ -114,7 +135,7 @@ class LtiCredentialController extends BaseApiController
 	 * @param array $args
 	 * @return Response
 	 */
-	public function delete($request, $response, $args)
+    public function delete(Request $request, Response $response, array $args): Response
 	{
 		$cred = LtiCredential::find($args['id']);
 		if (is_null($cred)) {
@@ -140,7 +161,7 @@ class LtiCredentialController extends BaseApiController
 	 * @param array $args
 	 * @return Response
 	 */
-	public function update($request, $response, $args)
+    public function update(Request $request, Response $response, array $args): Response
 	{
 		$cred = LtiCredential::find($args['id']);
 		if (is_null($cred)) {
@@ -151,15 +172,23 @@ class LtiCredentialController extends BaseApiController
 		$updatedData = $this->mapPublic2ohmSchema($rawCredData, false);
 
 		if ($this->containsNulls($updatedData)) {
-			return $response->withStatus(400)
-				->withJson(['errors' => ['Null values are not permitted.']]);
+            $payload = json_encode(['errors' => ['Null values are not permitted.']]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withStatus(400)
+                ->withHeader('Content-Type', 'application/json');
 		}
 
 		$cred->fill($updatedData);
 		$cred->save();
 
 		$publicCred = $this->mapOhmSchema2Public($cred);
-		return $response->withStatus(200)->withJson($publicCred);
+
+        $payload = json_encode($publicCred);
+        $response->getBody()->write($payload);
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json');
 	}
 
 	/**
