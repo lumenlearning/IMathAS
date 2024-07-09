@@ -18,6 +18,11 @@ $CFG['MySQL_ver'] = '8.0';
 //static assets
 $CFG['static_server'] = getenv('STATIC_ASSETS_BASE_URL') ?? 'https://ohm.lumenlearning.com/';
 
+// Livepoll / pandoc server
+$CFG['GEN']['pandocserver'] = getenv('PANDOC_BASE_URL');
+$CFG['GEN']['livepollserver'] = getenv('LIVEPOLL_SERVER_HOSTNAME');
+$CFG['GEN']['livepollpassword'] = getenv('LIVEPOLL_SERVER_PASSWORD');
+
 //aws config
 $AWSbucket = "development" == $configEnvironment ? null : $_ENV['S3_MAIN_BUCKET_NAME'];
 
