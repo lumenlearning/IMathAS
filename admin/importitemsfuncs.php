@@ -240,13 +240,24 @@ public function importdata($data, $cid, $checked, $options) {
 
 	$DBH->commit();
 
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    // #### Begin OHM-specific code #####################################################
+    $desmosImported = empty($this->typemap['DesmosItem']) ? 0 : count($this->typemap['DesmosItem']);
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
+    // #### End OHM-specific code #####################################################
 	return array(
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
         // #### Begin OHM-specific code #####################################################
-        'Desmos Imported'=>count($this->typemap['DesmosItem']),
+        'Desmos Imported'=>$desmosImported,
         // #### End OHM-specific code #####################################################
         // #### End OHM-specific code #####################################################
         // #### End OHM-specific code #####################################################
