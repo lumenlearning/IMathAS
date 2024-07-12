@@ -13,7 +13,7 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
 
 session_start();
 
@@ -21,11 +21,11 @@ session_start();
 $container = new Container();
 
 // Add settings to container.
-$settings = require __DIR__ . '/src/configs/settings.php';
+$settings = require __DIR__ . '/../src/configs/settings.php';
 $container->set('settings', $settings);
 
 // Set up dependencies
-require __DIR__ . '/src/configs/dependencies.php';
+require __DIR__ . '/../src/configs/dependencies.php';
 
 /**
  * Instantiate App
@@ -38,10 +38,10 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 // Register middleware
-require __DIR__ . '/src/configs/middleware.php';
+require __DIR__ . '/../src/configs/middleware.php';
 
 // Add route callbacks
-require_once __DIR__ . '/src/configs/routes.php';
+require_once __DIR__ . '/../src/configs/routes.php';
 
 /**
  * Set the base path so that the router can match the URL from the browser with the path set

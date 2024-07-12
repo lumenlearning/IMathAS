@@ -68,7 +68,7 @@ class StudentPaymentDb
 		$stm->execute(array(':studentid' => $this->studentUserId));
 		$result = $stm->fetchColumn(0);
 
-		if (null == $result || 1 > $result) {
+		if (is_null($result) || 1 > $result) {
 			throw new StudentPaymentException(sprintf("Unable to get group ID for user ID %d.",
 				$this->studentUserId));
 		}
@@ -88,7 +88,7 @@ class StudentPaymentDb
 		$stm->execute(array(':studentid' => $this->studentUserId, ':courseid' => $this->courseId));
 		$result = $stm->fetchColumn(0);
 
-		if (null == $result) {
+		if (is_null($result)) {
 			throw new StudentPaymentException(sprintf(
 				"Unable to get student enrollment ID for course ID %d for student ID %d.", $this->courseId,
 				$this->studentUserId));
@@ -236,7 +236,7 @@ class StudentPaymentDb
 
 		$studentPayRequired = $result['student_pay_enabled'];
 
-		if (null == $studentPayRequired) {
+		if (is_null($studentPayRequired)) {
 			throw new StudentPaymentException(sprintf(
 				"Unable to determine if group ID %d (%s) may require student payment for course ID %d.",
 				$groupIdForPayments, $result['name'], $this->courseId));
