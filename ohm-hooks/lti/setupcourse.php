@@ -11,6 +11,10 @@
  */
 function onCopyCourse($courseId, $userId, $myrights, $groupid): void
 {
+    /*
+     * Course payment setting.
+     */
+
     require_once(__DIR__ . "/../../ohm/includes/StudentPaymentDb.php");
 
     global $DBH;
@@ -22,4 +26,14 @@ function onCopyCourse($courseId, $userId, $myrights, $groupid): void
     if ($groupRequiresStudentPayment) {
         $studentPaymentDb->setCourseRequiresStudentPayment(true);
     }
+
+    /*
+     * Set creation date.
+     */
+
+    $stm = $DBH->prepare("UPDATE imas_courses SET created_at = :created_at WHERE id = :id");
+    $stm->execute([
+        ':created_at' => time(),
+        ':id' => $courseId,
+    ]);
 }
