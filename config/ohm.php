@@ -266,6 +266,7 @@ $CFG['hooks']['banner'] = 'ohm-hooks/banner.php';
 $CFG['hooks']['use_replica_db'] = 'ohm-hooks/use_replica_db.php';
 $CFG['hooks']['util/utils'] = '../ohm-hooks/util/utils.php';
 $CFG['hooks']['lti'] = __DIR__ . '/../ohm-hooks/lti13hooks.php';
+$CFG['hooks']['lti/setupcourse'] = __DIR__ . '/../ohm-hooks/lti/setupcourse.php';
 
 // The following hooks are defined here AND in the Question API. (ohm/lumenapi/config/)
 $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] = __DIR__ . '/../ohm-hooks/assess2/questions/score_engine.php';
