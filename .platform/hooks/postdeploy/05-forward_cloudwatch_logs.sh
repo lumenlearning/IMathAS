@@ -8,4 +8,4 @@ set -euox pipefail
   -a fetch-config \
   -m ec2 \
   -s \
-  -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/ohm-config.json
