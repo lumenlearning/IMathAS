@@ -1,0 +1,36 @@
+code {
+    background-color: #e1e1e1;
+    border-radius: 5px;
+    padding: 1px 0.2em 1px 0.2em;
+    color: #000;
+}
+
+.danger {
+    color: #ff3737;
+}
+
+.primaryCodeExample {
+    color: #005200;
+}
+
+.secondaryCodeExample {
+    color: #515b00;
+}
+
+.singlePartExampleHeader {
+    text-decoration: underline;
+}
+.singlePartExampleHeader:before {
+    display: inline-block;
+    text-decoration: none;
+    content: "1️⃣";
+}
+
+.multiPartExampleHeader {
+    text-decoration: underline;
+}
+.multiPartExampleHeader:before {
+    display: inline-block;
+    text-decoration: none;
+    content: "🔢";
+}
