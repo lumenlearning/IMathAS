@@ -1,9 +1,7 @@
 <?php
 require __DIR__ . '/../init.php';
 
-if ('development' == $GLOBALS['configEnvironment']
-    || 11 == $GLOBALS['groupid'] && in_array(['production', 'staging'], $GLOBALS['configEnvironment'])
-) {
+if (100 == $GLOBALS['myrights']) {
     // Access is granted.
 } else {
     echo '<p>Insufficient permissions.</p>';

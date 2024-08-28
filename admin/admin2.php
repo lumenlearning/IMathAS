@@ -413,9 +413,7 @@ if ($overwriteBody==1) {
         ### Begin OHM-specific changes ############################################################
         ### Begin OHM-specific changes ############################################################
         ### Begin OHM-specific changes ############################################################
-        if ('development' == $GLOBALS['configEnvironment']
-            || 11 == $GLOBALS['groupid'] && in_array(['production', 'staging'], $GLOBALS['configEnvironment'])
-        ) {
+        if (100 == $GLOBALS['myrights']) {
             echo '<div class="cpmid">';
             echo '<p>Lumen-specific links:</p>';
             echo '<a href="../ohm/macro_help.php">Lumen One Macro Help</a> <br/>';
