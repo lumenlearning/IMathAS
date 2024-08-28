@@ -2,7 +2,7 @@
 require __DIR__ . '/../init.php';
 
 if ('development' == $GLOBALS['configEnvironment']
-    || 11 == $GLOBALS['groupid'] && 'production' == $GLOBALS['configEnvironment']
+    || 11 == $GLOBALS['groupid'] && in_array(['production', 'staging'], $GLOBALS['configEnvironment'])
 ) {
     // Access is granted.
 } else {
