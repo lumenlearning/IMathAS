@@ -55,7 +55,7 @@ function resyncGrades(): void
 
     $studentIds = getStudentIdsInCourse($cid);
 
-    error_log(sprintf('User is requested a course grade resync. %s',
+    error_log(sprintf('User requested a course grade resync. %s',
         json_encode([
             'userId' => $GLOBALS['userid'],
             'username' => $GLOBALS['username'],
@@ -95,7 +95,7 @@ function resyncGrades(): void
         if (empty($us['sourcedid'])) {
             $logInfo['failReason'] = 'Assessment record does not have a sourcedid.'
                 . ' Did the LMS provide a sourcedid? Are sourcedids enabled from the LMS (course and LMS-wide)?';
-            $message = 'Failed to queued LMS grade. ' . json_encode($logInfo);
+            $message = 'Failed to queue LMS grade. ' . json_encode($logInfo);
             error_log($message);
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
@@ -114,7 +114,7 @@ function resyncGrades(): void
         } else {
             $logInfo['failReason'] = 'LTI::addToLTIQueue did not insert a new row into imas_ltiqueue.'
                 . ' Possible hash collision? The new hash would\'ve been: ' . $logInfo['ltiqueue_hash'];
-            $message = 'Failed to queued LMS grade. ' . json_encode($logInfo);
+            $message = 'Failed to queue LMS grade. ' . json_encode($logInfo);
             error_log($message);
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
