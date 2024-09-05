@@ -66,6 +66,9 @@ function resyncGrades(): void
 
     printf('<h2>%s</h2>', $course['name']);
 
+    $adminDetailedLog = [];
+    $adminDetailedLogMaxCount = 200;
+
     $totalQueued = 0;
     $totalNotQueued = 0;
     $errorLogIds = array();
@@ -86,22 +89,39 @@ function resyncGrades(): void
         $score = Assessments::getScoreForDisplay($us['scores']);
         $logInfo = createLogInfo($cid, $us, $assessmentName, $grade, $score);
 
+        // Generate the hash using the same method as LTI::addToLTIQueue() for easier debugging.
+        $logInfo['ltiqueue_hash'] = empty($us['sourcedid']) ? null : md5($us['sourcedid']);
+
         if (empty($us['sourcedid'])) {
             $logInfo['failReason'] = 'Assessment record does not have a sourcedid.'
                 . ' Did the LMS provide a sourcedid? Are sourcedids enabled from the LMS (course and LMS-wide)?';
-            error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
+            $message = 'Failed to queued LMS grade. ' . json_encode($logInfo);
+            error_log($message);
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
-        }
-        elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true, $us['uid'], $us['aid'])) {
-            error_log('Queued LMS grade. ' . json_encode($logInfo));
+
+            if (isAdminUser() && $adminDetailedLogMaxCount > count($adminDetailedLog)) {
+                $adminDetailedLog[] = $message;
+            }
+        } elseif (LTI::addToLTIQueue($us['sourcedid'], $grade, true, $us['uid'], $us['aid'])) {
+            $message = 'Queued LMS grade. ' . json_encode($logInfo);
+            error_log($message);
             $totalQueued++;
+
+            if (isAdminUser() && $adminDetailedLogMaxCount > count($adminDetailedLog)) {
+                $adminDetailedLog[] = $message;
+            }
         } else {
             $logInfo['failReason'] = 'LTI::addToLTIQueue did not insert a new row into imas_ltiqueue.'
-                . ' Possible hash collision?';
-            error_log('Failed to queued LMS grade. ' . json_encode($logInfo));
+                . ' Possible hash collision? The new hash would\'ve been: ' . $logInfo['ltiqueue_hash'];
+            $message = 'Failed to queued LMS grade. ' . json_encode($logInfo);
+            error_log($message);
             $errorLogIds[] = $logInfo['debugId'];
             $totalNotQueued++;
+
+            if (isAdminUser() && $adminDetailedLogMaxCount > count($adminDetailedLog)) {
+                $adminDetailedLog[] = $message;
+            }
         }
     }
 
@@ -112,6 +132,35 @@ function resyncGrades(): void
     if (0 < $totalNotQueued) {
         dumpErrors($totalNotQueued, $errorLogIds);
     }
+
+    /*
+     * Admin-only functionality below this line.
+     */
+
+    if (!isAdminUser() || empty($adminDetailedLog)) {
+        return;
+    }
+?>
+    <hr/>
+    <h1 style="font-size: 1.5em; color: #ff4444;">Everything below this line is
+        shown to admin users only.</h1>
+    <h2>Notes</h2>
+    <ul>
+        <li>You may search the LTI logfile for <code>ltiqueue_hash</code> values
+            noted below for possible grade passback errors.</li>
+        <li>If a <code>sourcedid</code> is not present, there will also be no
+            <code>ltiqueue_hash</code>.</li>
+    </ul>
+    <h2>Detailed Requeue Log (max <?php echo $adminDetailedLogMaxCount ?> entries)</h2>
+    <p>Search for the word "fail", case insensitively.</p>
+    <p>These are also logged using PHP's <code>error_log()</code> with no max
+        logging count.</p>
+<?php
+    echo '<ol>';
+    foreach ($adminDetailedLog as $logItem) {
+        echo '<li>' . $logItem . '</li>';
+    }
+    echo '</ol>';
 }
 
 /**
@@ -207,3 +256,10 @@ function displayError(string $message): void
     error_log('ERROR: ' . $message);
 }
 
+function isAdminUser(): bool
+{
+    if (!isset($GLOBALS['myrights'])) {
+        return false;
+    }
+    return 100 == $GLOBALS['myrights'];
+}
