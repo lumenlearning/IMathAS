@@ -1092,8 +1092,8 @@ $now = time();
                             $stm = $DBH->prepare($query);
                             $stm->execute(array(
                                 ':userid' => $userid,
-                                ':cregex' => '[[:<:]]' . $aidsourcecid . '[[:>:]]',
-                                ':aregex' => '[[:<:]]' . $_SESSION['place_item_id'] . '[[:>:]]'));
+                                ':cregex' => MYSQL_LEFT_WRDBND . $aidsourcecid . MYSQL_RIGHT_WRDBND,
+                                ':aregex' => MYSQL_LEFT_WRDBND . $_SESSION['place_item_id'] . MYSQL_RIGHT_WRDBND));
                             $othercourses = array();
                             while ($row = $stm->fetch(PDO::FETCH_NUM)) {
                                 $othercourses[$row[0]] = $row[1];
@@ -1111,8 +1111,8 @@ $now = time();
                             $stm = $DBH->prepare($query);
                             $stm->execute(array(
                                 ':userid' => $userid,
-                                ':cregex' => '[[:<:]]' . $aidsourcecid . '[[:>:]]',
-                                ':aregex' => '[[:<:]]' . $_SESSION['place_aid'] . '[[:>:]]'));
+                                ':cregex' => MYSQL_LEFT_WRDBND . $aidsourcecid . MYSQL_RIGHT_WRDBND,
+                                ':aregex' => MYSQL_LEFT_WRDBND . $_SESSION['place_aid'] . MYSQL_RIGHT_WRDBND));
                             $othercourses = array();
                             while ($row = $stm->fetch(PDO::FETCH_NUM)) {
                                 $othercourses[$row[0]] = $row[1];
@@ -1513,7 +1513,7 @@ $now = time();
 			$aidtolookfor = intval($_SESSION['place_aid']);
 			//aid is in original source course.  Let's see if we already copied it.
 			if ($copiedfromcid == $aidsourcecid) {
-				$anregex = '^([0-9]+:)?'.$aidtolookfor.'[[:>:]]';
+				$anregex = '^([0-9]+:)?'.$aidtolookfor.MYSQL_RIGHT_WRDBND;
 				$stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:destcid");
 				$stm->execute(array(':ancestors'=>$anregex, ':destcid'=>$destcid));
 				if ($stm->rowCount()>0) {
@@ -1535,7 +1535,7 @@ $now = time();
 					$foundsubaid = true;
 					for ($i=$ciddepth;$i>=0;$i--) {  //starts one course back from aidsourcecid because of the unshift
 						$stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:cid");
-						$stm->execute(array(':ancestors'=>'^([0-9]+:)?'.$aidtolookfor.'[[:>:]]', ':cid'=>$ancestors[$i]));
+						$stm->execute(array(':ancestors'=>'^([0-9]+:)?'.$aidtolookfor.MYSQL_RIGHT_WRDBND, ':cid'=>$ancestors[$i]));
 						if ($stm->rowCount()>0) {
 							$aidtolookfor = $stm->fetchColumn(0);
 						} else {
@@ -1553,7 +1553,7 @@ $now = time();
 				}
 			}
 			if (!$foundaid) { //look for the assessment id anywhere in the ancestors list
-				$anregex = '[[:<:]]'.intval($_SESSION['place_aid']).'[[:>:]]';
+				$anregex = MYSQL_LEFT_WRDBND.intval($_SESSION['place_aid']).MYSQL_RIGHT_WRDBND;
 				$stm = $DBH->prepare("SELECT id,name,ancestors FROM imas_assessments WHERE ancestors REGEXP :ancestors AND courseid=:destcid");
 				$stm->execute(array(':ancestors'=>$anregex, ':destcid'=>$destcid));
 				$res = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -3224,7 +3224,7 @@ $now = time();
 			} else {
 				//aid is in source course.  Let's see if we already copied it.
 				$stm = $DBH->prepare("SELECT id FROM imas_assessments WHERE ancestors REGEXP :ancregex AND courseid=:destcid");
-				$stm->execute(array(':ancregex'=>'^([0-9]+:)?'.intval($_SESSION['place_aid'][1]).'[[:>:]]', ':destcid'=>$destcid));
+				$stm->execute(array(':ancregex'=>'^([0-9]+:)?'.intval($_SESSION['place_aid'][1]).MYSQL_RIGHT_WRDBND, ':destcid'=>$destcid));
 				if ($stm->rowCount()>0) {
 					$aid = $stm->fetchColumn(0);
 				} else {
