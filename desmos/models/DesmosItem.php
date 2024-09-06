@@ -151,9 +151,9 @@ class DesmosItem extends CourseItem
     {
         $query = "SELECT id,title,itemid_chain as ancestors FROM desmos_items WHERE itemid_chain REGEXP :typeid AND courseid=:courseid";
         if ($where == 'all') {
-            $typeid = '[[:<:]]' . $typeid . '[[:>:]]';
+            $typeid = MYSQL_LEFT_WRDBND . $typeid . MYSQL_RIGHT_WRDBND;
         } else {
-            $typeid = '^([0-9]+:)?' . $typeid . '[[:>:]]';
+            $typeid = '^([0-9]+:)?' . $typeid . MYSQL_RIGHT_WRDBND;
         }
         $stm = $GLOBALS['DBH']->prepare($query);
         $stm->bindValue(":courseid", $courseid);
