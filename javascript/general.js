@@ -1374,6 +1374,7 @@ function setupToggler(base) {
 						targ.show();
 					}
 				}
+                sendLTIresizemsg();
 			}
 		});
 	});
@@ -1392,6 +1393,7 @@ function setupToggler2(base) {
 					$(this).attr("aria-expanded", true);
 					targ.show();
 				}
+                sendLTIresizemsg();
 				return false;
 			}
 		});
@@ -1451,6 +1453,7 @@ jQuery(document).ready(function($) {
 						$(this).next(".blockitems").slideDown();
 					}
 				}
+                sendLTIresizemsg();
 			});
 	});
 	$(".grouptoggle img").attr("alt", "expand/collapse");
