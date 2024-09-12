@@ -189,7 +189,7 @@ function matrixdisplaytable() {
             $headers[$cloop] = "";
         }
     }
-    
+
     //tablestyle
     if(isset($args[5])) {
         $tablestyle = $args[5];
@@ -201,7 +201,7 @@ function matrixdisplaytable() {
         if (!is_array($rownames)) {
             $rownames = explode(',',$rownames);
         }
-    } else { 
+    } else {
         $rownames = array();
         for ($rloop=0; $rloop<$rows; $rloop++) {
             $rownames[$rloop] = "";
@@ -240,7 +240,7 @@ function matrixdisplaytable() {
     $lastrow = $rows-1;
     $lastcol = $cols-1;
 
-    $Tableau = "<table cellspacing='0' style='border:none;border-spacing: 0;border-collapse: collapse;text-align:right;border-spacing: 0px 0px;$tablestyle'>\r\n";
+    $Tableau = "<table class='matrix_table' cellspacing='0' style='border:none;border-spacing: 0;border-collapse: collapse;text-align:right;border-spacing: 0px 0px;$tablestyle'>\r\n";
 
     if($caption!="") {
         $Tableau .= "<caption>$caption</caption>\r\n";
