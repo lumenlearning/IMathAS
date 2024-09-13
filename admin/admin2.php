@@ -408,6 +408,23 @@ if ($overwriteBody==1) {
 
       echo '<div class=clear></div></div>';
 
+        ### Begin OHM-specific changes ############################################################
+        ### Begin OHM-specific changes ############################################################
+        ### Begin OHM-specific changes ############################################################
+        ### Begin OHM-specific changes ############################################################
+        ### Begin OHM-specific changes ############################################################
+        if (100 == $GLOBALS['myrights']) {
+            echo '<div class="cpmid">';
+            echo '<p>Lumen-specific links:</p>';
+            echo '<a href="../ohm/macro_help.php">Lumen One Macro Help</a> <br/>';
+            echo '</div>';
+        }
+        ### End OHM-specific changes ############################################################
+        ### End OHM-specific changes ############################################################
+        ### End OHM-specific changes ############################################################
+        ### End OHM-specific changes ############################################################
+        ### End OHM-specific changes ############################################################
+
       //search forms
       echo '<form method="get" action="admin2.php">';
       echo '<p>';
