@@ -55,16 +55,18 @@ class GetQuestionsWithAnswerTest extends TestCase
             ->andReturn(QuestionServiceFixtures::QUESTIONS_WITH_ANSWERS);
 
         $request = Request::create('/api/v1/questions', 'POST',
-            json_decode('[
-                {
-                    "questionSetId": 5485,
-                    "seed": 4321
-                },
-                {
-                    "questionSetId": 3261,
-                    "seed": 1234
-                }
-            ]', true)
+            json_decode('{
+                "questions": [
+                    {
+                        "questionSetId": 5485,
+                        "seed": 4321
+                    },
+                    {
+                        "questionSetId": 3261,
+                        "seed": 1234
+                    }
+                ]
+            }', true)
         );
 
         $response = $this->questionController->getQuestionsWithAnswers($request);
