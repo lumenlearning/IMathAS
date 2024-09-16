@@ -102,6 +102,7 @@ $app->register(App\Providers\Repositories\QuestionSetRepositoryServiceProvider::
 $app->register(App\Providers\Repositories\UserRepositoryServiceProvider::class);
 $app->register(App\Providers\Services\EnrollmentServiceProvider::class);
 $app->register(App\Providers\Services\QuestionImportServiceProvider::class);
+$app->register(App\Providers\Services\QuestionServiceProvider::class);
 $app->register(\SwaggerLume\ServiceProvider::class);
 
 /*

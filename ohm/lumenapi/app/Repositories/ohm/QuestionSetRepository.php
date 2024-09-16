@@ -30,8 +30,15 @@ class QuestionSetRepository extends BaseRepository implements QuestionSetReposit
         return $this->toAssoc($result[0]);
     }
 
-    public function getAllByQuestionId($questionIds, $placeholders)
+    public function getAllByQuestionId(array $questionIds): array
     {
+        if (empty($questionIds)) {
+            return [];
+        }
+
+        $placeholdersAsArray = array_map(fn($ids): string => '?', $questionIds);
+        $placeholders = implode(',', $placeholdersAsArray);
+
         $result = app('db')->select(
             "SELECT * FROM imas_questionset WHERE id IN ($placeholders);", $questionIds);
 

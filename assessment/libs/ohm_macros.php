@@ -93,6 +93,7 @@ function ohm_getfeedbackbasic($stuanswers,
     $questionIndex = _getFeedbackIndex($partNumber);
 
     if (!is_null($partNumber) && is_array($stuanswers)) {
+        if ([] == $stuanswers) { return []; } // The question is being eval'd for display only.
         $studentAnswer = $stuanswers[$partNumber];
     } else {
         $studentAnswer = $stuanswers;
@@ -493,7 +494,11 @@ function ohm_getfeedbacktxtnumfunc($studentAnswer,
     }
 
     $questionIndex = _getFeedbackIndex($partNumber);
-    $studentAnswer = is_null($partNumber) ? $studentAnswer : $studentAnswer[$partNumber];
+
+    if (!is_null($partNumber) && is_array($studentAnswer)) {
+        if ([] == $studentAnswer) { return []; } // The question is being eval'd for display only.
+        $studentAnswer = $studentAnswer[$partNumber];
+    }
 
     if ($studentAnswer === null || trim($studentAnswer) === '') {
         return [];

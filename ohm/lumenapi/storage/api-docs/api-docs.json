@@ -11,7 +11,7 @@
                     "Auth"
                 ],
                 "summary": "Retrieves bearer token for all api requests",
-                "operationId": "App\\Http\\Controllers\\AuthController::GetToken",
+                "operationId": "3003da6a8ab7ba92905e0db6e209ed53",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -85,9 +85,8 @@
                                 "schema": {
                                     "$ref": "#/components/schemas/enrollment_collection"
                                 },
-                                "examples": [
-                                    {
-                                        "example": 200,
+                                "examples": {
+                                    "200": {
                                         "summary": "",
                                         "value": [
                                             {
@@ -112,7 +111,7 @@
                                             }
                                         ]
                                     }
-                                ]
+                                }
                             }
                         }
                     },
@@ -156,9 +155,8 @@
                                 "schema": {
                                     "$ref": "#/components/schemas/enrollment"
                                 },
-                                "examples": [
-                                    {
-                                        "example": 200,
+                                "examples": {
+                                    "200": {
                                         "summary": "",
                                         "value": {
                                             "id": 2,
@@ -171,7 +169,7 @@
                                             "created_at": null
                                         }
                                     }
-                                ]
+                                }
                             }
                         }
                     },
@@ -236,9 +234,8 @@
                                 "schema": {
                                     "$ref": "#/components/schemas/enrollment"
                                 },
-                                "examples": [
-                                    {
-                                        "example": 200,
+                                "examples": {
+                                    "200": {
                                         "summary": "",
                                         "value": {
                                             "id": 2,
@@ -251,7 +248,7 @@
                                             "created_at": null
                                         }
                                     }
-                                ]
+                                }
                             }
                         }
                     },
@@ -273,7 +270,7 @@
                     "Question Display"
                 ],
                 "summary": "Retrieves question HTML for given question set id and seed.",
-                "operationId": "App\\Http\\Controllers\\QuestionController::getQuestion",
+                "operationId": "9d336c6b591dd432c1d810ff434023cf",
                 "parameters": [
                     {
                         "name": "Authorization",
@@ -371,9 +368,8 @@
                                     },
                                     "type": "object"
                                 },
-                                "examples": [
-                                    {
-                                        "example": 200,
+                                "examples": {
+                                    "200": {
                                         "summary": "",
                                         "value": {
                                             "questionSetId": 123,
@@ -397,7 +393,7 @@
                                             "errors": []
                                         }
                                     }
-                                ]
+                                }
                             }
                         }
                     },
@@ -419,7 +415,70 @@
                     "Question Display"
                 ],
                 "summary": "Retrieves question HTML a given list of question set ids and seeds.",
-                "operationId": "App\\Http\\Controllers\\QuestionController::getAllQuestions",
+                "operationId": "1b118a36c5d99d64a992969bd6e1dce7",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/questions/answers": {
+            "post": {
+                "tags": [
+                    "Question Display"
+                ],
+                "summary": "Retrieves questions and their correct answers, given a list of question set ids and seeds.",
+                "operationId": "8e5ebb87d3c1f1a709948ec05dab90f7",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "questions": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "questionSetId": {
+                                                    "type": "int"
+                                                },
+                                                "seed": {
+                                                    "type": "int"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "questions": [
+                                        {
+                                            "questionSetId": 16208,
+                                            "seed": 1234
+                                        },
+                                        {
+                                            "questionSetId": 7361,
+                                            "seed": 642
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -445,7 +504,7 @@
                     "Question Scoring"
                 ],
                 "summary": "Scores student reponse to a given question.",
-                "operationId": "App\\Http\\Controllers\\QuestionController::scoreQuestion",
+                "operationId": "b2bf3a574ee48dad4c456b9f9d7852bd",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -589,9 +648,8 @@
                                     },
                                     "type": "object"
                                 },
-                                "examples": [
-                                    {
-                                        "example": 200,
+                                "examples": {
+                                    "200": {
                                         "summary": "Single part - number",
                                         "value": {
                                             "questionSetId": 3618,
@@ -617,8 +675,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "201": {
                                         "summary": "Single part - multiple choice",
                                         "value": {
                                             "questionSetId": 3618,
@@ -644,8 +701,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "202": {
                                         "summary": "Single part - multiple answer",
                                         "value": {
                                             "questionSetId": 3618,
@@ -675,8 +731,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "203": {
                                         "summary": "Single part - matching",
                                         "value": {
                                             "questionSetId": 3618,
@@ -709,8 +764,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "204": {
                                         "summary": "Single part - string",
                                         "value": {
                                             "questionSetId": 3618,
@@ -736,8 +790,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "205": {
                                         "summary": "Single part - draw",
                                         "value": {
                                             "questionSetId": 3618,
@@ -772,8 +825,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "206": {
                                         "summary": "Single part - essay",
                                         "value": {
                                             "questionSetId": 3618,
@@ -799,8 +851,7 @@
                                             ]
                                         }
                                     },
-                                    {
-                                        "example": 200,
+                                    "207": {
                                         "summary": "Multi-part question",
                                         "value": {
                                             "questionSetId": 3618,
@@ -857,7 +908,7 @@
                                             ]
                                         }
                                     }
-                                ]
+                                }
                             }
                         }
                     },
@@ -879,7 +930,7 @@
                     "Question Scoring"
                 ],
                 "summary": "Scores student reponse to a given list of questions.",
-                "operationId": "App\\Http\\Controllers\\QuestionController::scoreAllQuestions",
+                "operationId": "788b5419eb25cda8788fc233849090c7",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -905,7 +956,7 @@
                     "Question MGA import"
                 ],
                 "summary": "Create questions from MGA question data.",
-                "operationId": "App\\Http\\Controllers\\QuestionImportController::importMgaQuestions",
+                "operationId": "009aa787e75bfbc133f06a2e7950a021",
                 "parameters": [
                     {
                         "name": "Authorization",
@@ -996,9 +1047,8 @@
                                     },
                                     "type": "object"
                                 },
-                                "examples": [
-                                    {
-                                        "example": 201,
+                                "examples": {
+                                    "201": {
                                         "summary": "",
                                         "value": {
                                             "question_mapping": [
@@ -1017,7 +1067,7 @@
                                             ]
                                         }
                                     }
-                                ]
+                                }
                             }
                         }
                     },
