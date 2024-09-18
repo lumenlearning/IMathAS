@@ -2,6 +2,16 @@
 require_once __DIR__.'/OAuth.php';
 require_once __DIR__.'/updateptsposs.php';
 require_once __DIR__.'/../lti/LTI_Grade_Update.php';
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+use OHM\Includes\LtiQueueLogger;
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
 
 /**
  * Add a grade update to the LTI queue. This only can send updates, not deletes
@@ -20,6 +30,32 @@ function addToLTIQueue($sourcedid, $key, $grade, $sendnow=false, $isstu=true) {
 
 	$LTIdelay = 60*(isset($CFG['LTI']['queuedelay'])?$CFG['LTI']['queuedelay']:5);
 	$keyseturl = $GLOBALS['basesiteurl'] . '/lti/jwks.php';
+	#### Begin OHM-specific changes ############################################################
+	#### Begin OHM-specific changes ############################################################
+	#### Begin OHM-specific changes ############################################################
+	#### Begin OHM-specific changes ############################################################
+	#### Begin OHM-specific changes ############################################################
+
+	$aidAndUid = LtiQueueLogger::getUserIdAndAssessmentIdFromHash($key);
+	$debugAssessmentid = $aidAndUid['assessment_id'];
+	$debugUserid = $aidAndUid['user_id'];
+
+	$debugData = [
+		'hash' => $key,
+		'userid' => $debugUserid,
+		'assessmentid' => $debugAssessmentid,
+		'grade' => $grade,
+		'sendon' => (time() + ($sendnow ? 0 : $LTIdelay)), // copied from code below.
+		'student_initiated_grade_change' => $isstu,
+		'sourcedid' => $sourcedid,
+	];
+	LtiQueueLogger::debug_log('Adding to imas_ltiqueue: ' . json_encode($debugData));
+
+	#### End OHM-specific changes ############################################################
+	#### End OHM-specific changes ############################################################
+	#### End OHM-specific changes ############################################################
+	#### End OHM-specific changes ############################################################
+	#### End OHM-specific changes ############################################################
 
 	$query = 'INSERT INTO imas_ltiqueue (hash, sourcedid, grade, failures, sendon, isstu, addedon, keyseturl) ';
 	$query .= 'VALUES (:hash, :sourcedid, :grade, 0, :sendon, :isstu, :addedon, :keyseturl) ON DUPLICATE KEY UPDATE ';
