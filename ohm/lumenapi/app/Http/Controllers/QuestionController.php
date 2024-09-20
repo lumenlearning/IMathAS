@@ -363,7 +363,10 @@ class QuestionController extends ApiBaseController
             try {
                 $validator->validate();
             } catch (ValidationException $e) {
-                return response()->json($validator->errors());
+                $response = $this->BadRequest([
+                    $validator->errors()
+                ]);
+                return $response;
             }
 
             $requestPayload = $request->all();
