@@ -69,7 +69,7 @@
 	</script>
 
 <?php
-    $helpModalQueryString = $_REQUEST['cid'] ? '?cid=' . intval($_REQUEST['cid']) : '';
+    $helpModalQueryString = empty($_REQUEST['cid']) ? '' : '?cid=' . intval($_REQUEST['cid']);
     $helpModalUrl = sprintf('%s/ohm/help_modal.php%s', $imasroot, $helpModalQueryString);
 ?>
 
