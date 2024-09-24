@@ -1,11 +1,13 @@
 <?php
 
-namespace Tests\Unit\Controllers\QuestionController;
+namespace Tests\unit\Controllers\QuestionController;
 
 use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 use App\Repositories\ohm\AssessmentRepository;
 use App\Repositories\ohm\QuestionSetRepository;
+use App\Services\Interfaces\QuestionServiceInterface;
+use App\Services\ohm\QuestionService;
 use Illuminate\Http\Request;
 use Mockery;
 use PDO;
@@ -19,8 +21,9 @@ require_once(__DIR__ . '/../../../../../../i18n/i18n.php');
 class GetQuestionTest extends TestCase
 {
     private QuestionController $questionController;
-    private AssessmentRepositoryInterface  $assessmentRepository;
+    private AssessmentRepositoryInterface $assessmentRepository;
     private QuestionSetRepositoryInterface $questionSetRepository;
+    private QuestionServiceInterface $questionService;
 
     private PDO $pdo;
 
@@ -34,8 +37,9 @@ class GetQuestionTest extends TestCase
 
         $this->assessmentRepository = Mockery::mock(AssessmentRepository::class);
         $this->questionSetRepository = Mockery::mock(QuestionSetRepository::class);
+        $this->questionService = Mockery::mock(QuestionService::class);
         $this->questionController = new QuestionController($this->assessmentRepository,
-            $this->questionSetRepository);
+            $this->questionSetRepository, $this->questionService);
 
         $this->pdo = Mockery::mock(PDO::class);
         $this->questionController->setPdo($this->pdo);
@@ -205,5 +209,56 @@ class GetQuestionTest extends TestCase
         $this->assertEquals('number', $responseData['questionType']);
         $this->assertEquals(1234, $responseData['seed']);
         $this->assertEquals([], $responseData['errors']);
+    }
+
+    /*
+     * getQuestionsWithAnswers
+     */
+
+    public function testGetQuestionsWithAnswers(): void
+    {
+        $this->questionService
+            ->shouldReceive('getQuestionsWithAnswers')
+            ->andReturn(['arrayOfQuestionsHere']);
+
+        $request = Request::create('/api/v1/questions/answers', 'POST',
+            json_decode('{
+                                  "questions": [
+                                    {
+                                      "questionSetId": 424242,
+                                      "seed": 1234
+                                    }
+                                  ]
+                              }', true)
+        );
+
+        $response = $this->questionController->getQuestionsWithAnswers($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        // The controller returns data from QuestionService unmodified.
+        // That return data is tested in QuestionServiceTest.
+        $this->assertEquals(['arrayOfQuestionsHere'], $responseData);
+    }
+
+    public function getQuestionsWithAnswers_BadRequestPayload(): void
+    {
+        $request = Request::create('/api/v1/questions/answers', 'POST',
+            json_decode('{
+                                  "questionssssss": [
+                                    {
+                                      "questionSetId": 424242,
+                                      "seed": 1234
+                                    }
+                                  ]
+                              }', true)
+        );
+
+        $response = $this->questionController->getQuestionsWithAnswers($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertCount(1, $responseData['errors']);
+        $this->assertEquals('The questions field is required.', $responseData['errors'][0]['questions']);
     }
 }

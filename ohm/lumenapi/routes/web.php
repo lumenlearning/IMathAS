@@ -33,6 +33,10 @@ $router->group(
             'uses' => 'QuestionController@getAllQuestions'
         ]);
 
+        $router->post('/questions/answers', [
+            'uses' => 'QuestionController@getQuestionsWithAnswers'
+        ]);
+
         $router->post('/question/score', [
             'uses' => 'QuestionController@scoreQuestion'
         ]);

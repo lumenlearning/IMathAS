@@ -1,11 +1,13 @@
 <?php
 
-namespace Tests\Unit\Controllers\QuestionController;
+namespace Tests\unit\Controllers\QuestionController;
 
 use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
 use App\Repositories\ohm\AssessmentRepository;
 use App\Repositories\ohm\QuestionSetRepository;
+use App\Services\Interfaces\QuestionServiceInterface;
+use App\Services\ohm\QuestionService;
 use Mockery;
 use PDO;
 use ReflectionClass;
@@ -21,6 +23,7 @@ class ReIndexingTest extends TestCase
     private QuestionController $questionController;
     private AssessmentRepositoryInterface  $assessmentRepository;
     private QuestionSetRepositoryInterface $questionSetRepository;
+    private QuestionServiceInterface $questionService;
 
     private PDO $pdo;
 
@@ -34,8 +37,9 @@ class ReIndexingTest extends TestCase
 
         $this->assessmentRepository = Mockery::mock(AssessmentRepository::class);
         $this->questionSetRepository = Mockery::mock(QuestionSetRepository::class);
+        $this->questionService = Mockery::mock(QuestionService::class);
         $this->questionController = new QuestionController($this->assessmentRepository,
-            $this->questionSetRepository);
+            $this->questionSetRepository, $this->questionService);
 
         $this->pdo = Mockery::mock(PDO::class);
         $this->questionController->setPdo($this->pdo);
