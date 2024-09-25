@@ -16,7 +16,7 @@ class LtiQueueLogger
     {
         $lti_response_log_file = getenv('LTI_RESPONSE_LOG_FILE');
 
-        $timeStr = strftime('%Y-%b-%d %H:%M:%S %Z', time());
+        $timeStr = date('Y-M-d H:i:s e', time());
         $message = sprintf('[%s] %s' . "\n", $timeStr, $logText);
 
         if (empty($lti_response_log_file)) {

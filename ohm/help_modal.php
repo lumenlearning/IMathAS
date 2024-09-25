@@ -7,7 +7,7 @@ $results = $stm->fetch(PDO::FETCH_ASSOC);
 
 $helpUserFullName = Sanitize::simpleStringWithSpaces($results['FirstName'] . ' ' . $results['LastName']);
 $helpUserEmail = Sanitize::emailAddress($results['email']);
-$helpCourseId = $_GET['cid'] ? Sanitize::onlyInt($_GET['cid']) : '';
+$helpCourseId = empty($_GET['cid']) ? '' : Sanitize::onlyInt($_GET['cid']);
 ?>
 
 <div class="modal-inner">
