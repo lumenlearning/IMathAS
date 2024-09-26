@@ -139,6 +139,10 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
     #### Begin OHM-specific changes ############################################################
     #### Begin OHM-specific changes ############################################################
     if (!$ohmLtiQueueValidator->is_valid_sourcedid($row['hash'], $row['sourcedid'])) {
+        $rowDetails = LtiQueueLogger::generateLtiqueueRowDetails($row);
+        debuglog('Invalid sourcedid, setting row to permanently failed: '
+            . json_encode($rowDetails));
+
         $ohmLtiQueueValidator->set_ltiqueue_row_invalid($row['hash']);
         continue;
     }
@@ -150,6 +154,22 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	if (substr($row['sourcedid'],0,6)=='LTI1.3') {
 		// LTI 1.3 update
 		list($ltiver,$ltiuserid,$score_url,$platformid) = explode(':|:', $row['sourcedid']);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        if (!is_numeric($platformid)) {
+            $rowDetails = LtiQueueLogger::generateLtiqueueRowDetails($row);
+            debuglog('Invalid platform ID (is not numeric), skipping row: '
+                . json_encode($rowDetails)
+            );
+        }
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 		if (!is_numeric($platformid)) { continue; }
 		if ($updater1p3->have_token($platformid)) {
 			if ($updater1p3->token_valid($platformid)) {
@@ -508,7 +528,21 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
-            LtiQueueLogger::debug_log($logdata);
+
+            $failureDetails = [
+                'user_data' => $user_data,
+                'response' => $response,
+                // This contains all request and response information as provided by curl.
+                'curl_request_and_response_info' => $request_info,
+            ];
+
+            $message = sprintf(
+                'Grade passback failure for (hash) %s: %s',
+                $user_data['hash'],
+                json_encode($failureDetails)
+            );
+            debuglog($message);
+
             #### End OHM-specific changes ############################################################
             #### End OHM-specific changes ############################################################
             #### End OHM-specific changes ############################################################
@@ -527,7 +561,24 @@ function LTIqueueCallback($response, $url, $request_info, $user_data, $time) {
             LTIDeleteQueue();
         }
 		$cntsuccess++;
-		error_log(sprintf(
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #
+        # OHM-specific changes:
+        # - Changed error_log() to debuglog(), so this will go into the LTI debug log along with
+        #   other related grade passback logging for easier support troubleshooting.
+
+//		error_log(sprintf(
+        debuglog(sprintf(
+
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 			"LTI grade return success for sourcedid=%s -- DELETE FROM imas_ltiqueue WHERE hash=%s AND sendon=%s",
 			$user_data['sourcedid'], $user_data['hash'], $user_data['sendon']
 		));

@@ -43,11 +43,17 @@ function onScoreQuestionResult(array $scoreResult,
  * Include the correct answers in scoring results after they've been randomized.
  *
  * @param array $returnData The original array to be returned by scorePartNonMultiPart().
- * @param ScorePartResult $scorePartResult An instance of ScorePartResult.
+ * @param ?ScorePartResult $scorePartResult An instance of ScorePartResult.
  * @return array The scoring result data with correct answers included.
  */
-function onScorePartMultiPart(array $returnData, ScorePartResult $scorePartResult): array
+function onScorePartMultiPart(array $returnData, ?ScorePartResult $scorePartResult): array
 {
+    // As part of work in OHM-1266, $scorePartResult was found to be NULL here if
+    // question code evals ended prematurely due to invalid or broken question code.
+    if (is_null($scorePartResult)) {
+        return $returnData;
+    }
+
     $returnData['extra'] = $scorePartResult->getExtraData();
     return $returnData;
 }

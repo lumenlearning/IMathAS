@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Repositories\Interfaces\AssessmentRepositoryInterface;
 use App\Repositories\Interfaces\QuestionSetRepositoryInterface;
+use App\Services\Interfaces\QuestionServiceInterface;
 
 use Illuminate\Support\Facades\Validator;
 use App\Dtos\QuestionBaseDto;
@@ -33,6 +34,8 @@ class QuestionController extends ApiBaseController
      */
     private $questionSetRepository;
 
+    private QuestionServiceInterface $questionService;
+
     /**
      * @var PDO DBH
      */
@@ -52,13 +55,16 @@ class QuestionController extends ApiBaseController
      * Controller constructor.
      * @param AssessmentRepositoryInterface $assessmentRepository
      * @param QuestionSetRepositoryInterface $questionSetRepository
+     * @param QuestionServiceInterface $questionService
      */
     public function __construct(AssessmentRepositoryInterface $assessmentRepository,
-                                QuestionSetRepositoryInterface $questionSetRepository)
+                                QuestionSetRepositoryInterface $questionSetRepository,
+                                QuestionServiceInterface $questionService)
     {
         parent::__construct();
         $this->assessmentRepository = $assessmentRepository;
         $this->questionSetRepository = $questionSetRepository;
+        $this->questionService = $questionService;
 
         // AssessStandalone requires PDO connection. This uses Lumen's existing connection to provide PDO.
         $this->DBH = app('db')->getPdo();
@@ -280,6 +286,95 @@ class QuestionController extends ApiBaseController
             }
 
             return response()->json($questions);
+        } catch (exception $e) {
+            Log::error($e);
+            return $this->BadRequest([$e->getMessage()]);
+        }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/questions/answers",
+     *     summary="Retrieves questions and their correct answers, given a list of question set ids and seeds.",
+     *     tags={"Question Display"},
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="questions",
+     *                     type="array",
+     *                     @OA\Items(
+     *                        type="object",
+     *                        @OA\Property(
+     *                            property="questionSetId",
+     *                            type="int"
+     *                        ),
+     *                        @OA\Property(
+     *                            property="seed",
+     *                            type="int"
+     *                        ),
+     *                     )
+     *                 ),
+     *                 example={
+     *                   "questions": {
+     *                     {
+     *                       "questionSetId": 16208,
+     *                       "seed": 1234,
+     *                     },
+     *                     {
+     *                       "questionSetId": 7361,
+     *                       "seed": 642,
+     *                     }
+     *                   }
+     *                 }
+     *             ),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="OK",
+     *         @OA\MediaType(
+     *           mediaType="application/json"
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Unprocessable Entity"
+     *     ),
+     *     @OA\Response(
+     *         response="500",
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
+    public function getQuestionsWithAnswers(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'questions' => 'required|array',
+                'questions.*.questionSetId' => 'required|int',
+                'questions.*.seed' => 'required|int',
+            ]);
+            try {
+                $validator->validate();
+            } catch (ValidationException $e) {
+                $response = $this->BadRequest([
+                    $validator->errors()
+                ]);
+                return $response;
+            }
+
+            $requestPayload = $request->all();
+            $requestedQuestions = $requestPayload['questions'];
+
+            $questionsWithAnswers = $this->questionService->getQuestionsWithAnswers($requestedQuestions);
+
+            return response()->json($questionsWithAnswers);
         } catch (exception $e) {
             Log::error($e);
             return $this->BadRequest([$e->getMessage()]);

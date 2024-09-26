@@ -1,6 +1,7 @@
 <?php
 
 use IMSGlobal\LTI\Database;
+use IMSGlobal\LTI\LTI_Deep_Link_Resource;
 use IMSGlobal\LTI\LTI_Localcourse;
 use IMSGlobal\LTI\LTI_Message_Launch;
 use IMSGlobal\LTI\LTI_Placement;
@@ -109,8 +110,8 @@ function lti_get_othercourses(array $targetinfo, int $userid): array {
         $stm = $DBH->prepare($query);
         $stm->execute(array(
             ':userid' => $userid,
-            ':cregex' => '[[:<:]]' . $target['refcid'] . '[[:>:]]',
-            ':dregex' => '[[:<:]]' . $target['refid'] . '[[:>:]]'));
+            ':cregex' => MYSQL_LEFT_WRDBND . $target['refcid'] . MYSQL_RIGHT_WRDBND,
+            ':dregex' => MYSQL_LEFT_WRDBND . $target['refid'] . MYSQL_RIGHT_WRDBND));
         while ($row = $stm->fetch(PDO::FETCH_NUM)) {
             $othercourses[$row[0]] = $row[1];
         }
@@ -256,7 +257,7 @@ function find_desmos_by_immediate_ancestor(int $idtolookfor, int $destcid)
 {
     global $DBH;
 
-    $anregex = '^([0-9]+:)?' . $idtolookfor . '[[:>:]]';
+    $anregex = '^([0-9]+:)?' . $idtolookfor . MYSQL_RIGHT_WRDBND;
     $stm = $DBH->prepare("SELECT id FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:destcid");
     $stm->execute(array(':ancestors' => $anregex, ':destcid' => $destcid));
     return $stm->fetchColumn(0);
@@ -278,7 +279,7 @@ function find_desmos_by_ancestor_walkback(int $sourceaid, int $aidsourcecid,
         $aidtolookfor = $sourceaid;
         for ($i = $ciddepth; $i >= 0; $i--) { //starts one course back from aidsourcecid because of the unshift
             $stm = $DBH->prepare("SELECT id FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:cid");
-            $stm->execute(array(':ancestors' => '^([0-9]+:)?' . $aidtolookfor . '[[:>:]]', ':cid' => $ancestors[$i]));
+            $stm->execute(array(':ancestors' => '^([0-9]+:)?' . $aidtolookfor . MYSQL_RIGHT_WRDBND, ':cid' => $ancestors[$i]));
             if ($stm->rowCount() > 0) {
                 $aidtolookfor = $stm->fetchColumn(0);
             } else {
@@ -293,7 +294,7 @@ function find_desmos_by_ancestor_walkback(int $sourceaid, int $aidsourcecid,
         // ok, still didn't work, so item wasn't copied through the whole
         // history.  So let's see if we have a copy in our course with the item
         // anywhere in the ancestry.
-        $anregex = '[[:<:]]' . $sourceaid . '[[:>:]]';
+        $anregex = MYSQL_LEFT_WRDBND . $sourceaid . MYSQL_RIGHT_WRDBND;
         $stm = $DBH->prepare("SELECT id,title,itemid_chain FROM desmos_items WHERE itemid_chain REGEXP :ancestors AND courseid=:destcid");
         $stm->execute(array(':ancestors' => $anregex, ':destcid' => $destcid));
         $res = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -411,7 +412,7 @@ function lti_deeplink_options(LTI_Localcourse $localcourse) {
         $stm = $DBH->prepare('SELECT title,courseid FROM desmos_items WHERE id=?');
         $stm->execute([$typeid]);
         $row = $stm->fetch(PDO::FETCH_ASSOC);
-        $resource = LTI\LTI_Deep_Link_Resource::new()
+        $resource = LTI_Deep_Link_Resource::new()
             ->set_url($basesiteurl . '/lti/launch.php?custom_item_type=DesmosItem&custom_item_id='.intval($typeid).'&refcid='.$row['courseid'])
             ->set_title($row['title']);
         return $resource;

@@ -18,6 +18,16 @@ use IMathAS\assess2\questions\models\QuestionParams;
 use IMathAS\assess2\questions\models\ShowAnswer;
 use IMathAS\assess2\questions\ScoreEngine;
 use IMathAS\assess2\questions\models\ScoreQuestionParams;
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+use OHM\Includes\LtiQueueLogger;
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
 
 /**
  * Primary class for working with assessment records
@@ -646,6 +656,25 @@ class AssessRecord
 
       // also update the sourcedid for any queued sends
       $hash = $this->curAid . '-' . $this->curUid;
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+      #### Begin OHM-specific changes ############################################################
+
+      $debugData = [
+          'hash' => $hash,
+          'userid' => $this->curUid,
+          'assessmentid' => $this->curAid,
+          'sourcedid' => $sourcedid,
+      ];
+      LtiQueueLogger::debug_log('Updating sourcedid in imas_ltiqueue: ' . json_encode($debugData));
+
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
+      #### End OHM-specific changes ############################################################
       $stm = $this->DBH->prepare("UPDATE imas_ltiqueue SET sourcedid=? WHERE hash=?");
       $stm->execute(array($sourcedid, $hash));
     }
