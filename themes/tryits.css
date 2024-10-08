@@ -594,13 +594,13 @@ span.mq-math-mode {
   font-family: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-size: 16px;
-} 
+}
 
 /* These styles can't be added to span.mq-math-node,
  * because they distort the MathQuill editor beyond 
  * the point of readability/usability. 
  */
-input.text { 
+input.text {
   height: 45px;
   margin: 2px;
   padding-left: 20px;
@@ -703,14 +703,14 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 
 /* START: Styles for inside tables */
 /* adds rounded corners to table */
-.question table {
+.question table:not(.matrix_table) {
   border: 2px solid var(--middle-gray) !important;
   border-collapse: separate !important;
   border-radius: 10px !important;
   border-spacing: 0 !important;
   margin-top: 10px;
 }
-.question table td {
+.question table:not(.matrix_table) td {
   border: 1px solid var(--middle-gray) !important;
 }
 
@@ -731,7 +731,7 @@ so no styles for a .feedbackwrap.partiallycorrect are included here. */
 }
 
 /* fixes border widths of rows and columns  */
-.question table tbody tr td {
+.question table:not(.matrix_table) tbody tr td {
   border-left-width: 1px !important;
   border-right: none !important;
   padding: 10px 15px;
