@@ -268,8 +268,8 @@ function modify_form(string $action, ?int $bannerId): void
         $studentContent = '';
         $startImmediately = false;
         $neverEnding = false;
-        $startDateTime = strftime('%m/%d/%Y 12:00 AM', time());
-        $endDateTime = strftime('%m/%d/%Y 12:00 AM', time() + (86400 * 8));
+        $startDateTime = date('m/d/Y 12:00 AM', time());
+        $endDateTime = date('m/d/Y 12:00 AM', time() + (86400 * 8));
     }
 
     include(__DIR__ . '/views/banner/edit_banner.php');

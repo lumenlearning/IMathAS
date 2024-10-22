@@ -10,7 +10,7 @@
 function onLogin()
 {
     // If post data contains ekey and courseid, then check for user enrollment.
-    if ($_POST['enrollandlogin']) {
+    if (!empty($_POST['enrollandlogin'])) {
         $queryString = Sanitize::fullQueryString(
             sprintf('action=enroll&cid=%d&ekey=%s&enrollandlogin=1',
                 $_POST['cid'], $_POST['ekey'])
