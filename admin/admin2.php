@@ -415,9 +415,19 @@ if ($overwriteBody==1) {
         ### Begin OHM-specific changes ############################################################
         if (100 == $GLOBALS['myrights']) {
             echo '<div class="cpmid">';
+
+            echo '<span class="column">';
             echo '<p>Lumen-specific links:</p>';
             echo '<a href="../ohm/macro_help.php">Lumen One Macro Help</a> <br/>';
-            echo '</div>';
+            echo '</span>';
+
+            echo '<span class="column">';
+            echo '<p>For Lumen dev use:</p>';
+            echo '<a href="../ohm/admin/transfer_scores.php">Transfer Assessment Scores</a> <br/>';
+            echo '<a href="../ohm/admin/add_ltiuser_to_new_org.php">Add ltiuser to new org</a> <br/>';
+            echo '</span>';
+
+            echo '<div class=clear></div></div>';
         }
         ### End OHM-specific changes ############################################################
         ### End OHM-specific changes ############################################################
