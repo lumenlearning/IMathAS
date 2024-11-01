@@ -2,6 +2,7 @@
 
 namespace App\Services\ohm;
 
+use App\Exceptions\InvalidQuestionImportType;
 use App\Exceptions\InvalidQuestionType;
 use App\Exceptions\RecordNotFoundException;
 use App\Repositories\Interfaces\LibraryItemRepositoryInterface;
@@ -12,6 +13,17 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * This is primarily used by the MGA question import script in the "align" repo.
+ * See: https://github.com/lumenlearning/align/blob/main/ohm_questions/ohm_question_importer.rb
+ *
+ * In places where $questionImportMode is used, currently two values are valid:
+ *
+ * - "quiz" - For Lumen One assessments. OHM-specific macros beginning with
+ *            "ohm_" will be used.
+ * - "practice" - For embedded practice or OHM 1 questions. Normal feedback
+ *                macros will be used.
+ */
 class QuestionImportService extends BaseService implements QuestionImportServiceInterface
 {
     private QuestionSetRepositoryInterface $questionSetRepository;
@@ -33,7 +45,41 @@ class QuestionImportService extends BaseService implements QuestionImportService
     }
 
     /**
-     * Create multiple questions
+     * Create multiple questions from MGA question data.
+     *
+     * Example of MGA question data:
+     *
+     * [
+     *     {
+     *         "source_id": "219d3809-6a1b-44d6-a75a-45b856a923a9",
+     *         "source_type": "mga_file",
+     *         "type": "multiple_choice",
+     *         "is_summative": false,
+     *         "description": "In the fall of 2019, how many students attended college?",
+     *         "text": "In the fall of 2019, how many students attended college?",
+     *         "choices": [
+     *             "20.1 million.",
+     *             "16.6 million.",
+     *             "12.3 million.",
+     *             "9.8 million."
+     *         ],
+     *         "correct_answer": 1,
+     *         "feedback": {
+     *             "type": "per_answer",
+     *             "feedbacks": [
+     *                 "Incorrect. There were fewer students enrolled in fall 2019.",
+     *                 "Correct! There were 16.6 million students enrolled in college in the fall of 2019, a 5% decrease from 2009.",
+     *                 "Incorrect. There were many more students enrolled in 2019.",
+     *                 "Incorrect. There were many more students enrolled in 2019."
+     *             ]
+     *         },
+     *         "outcome": {
+     *             "guid": "05a8773b-7c6d-4cf5-8f7c-ae4cb91e7b6e",
+     *             "number": "1.1.1",
+     *             "title": "Categories of Students"
+     *         }
+     *     }
+     * ]
      *
      * Example return data:
      * [
@@ -51,14 +97,24 @@ class QuestionImportService extends BaseService implements QuestionImportService
      *     }
      * ]
      *
+     * @param string $questionImportMode One of: quiz, practice
      * @param array $mgaQuestionArray An array of questions from an MGA file.
      * @param int $ownerId The OHM user ID to use for the owner of all questions.
      * @return array An array of source question IDs mapped to created OHM question IDs.
      * @throws RecordNotFoundException Thrown if the specified User ID is not found.
      * @see QuestionImportServiceTest constants for $mgaQuestionArray examples.
      */
-    public function createMultipleQuestions(array $mgaQuestionArray, int $ownerId): array
+    public function createMultipleQuestions(
+        string $questionImportMode,
+        array  $mgaQuestionArray,
+        int    $ownerId
+    ): array
     {
+        if (!in_array($questionImportMode, ['quiz', 'practice'])) {
+            throw new InvalidQuestionImportType('Invalid question import mode "'
+                . $questionImportMode . '". Must be one of: quiz, practice');
+        }
+
         $user = $this->userRepository->findById($ownerId);
         if (!$user) {
             throw new RecordNotFoundException('User not found for user ID: ' . $ownerId);
@@ -67,7 +123,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
         $questionIds = [];
         foreach ($mgaQuestionArray as $mgaQuestion) {
             try {
-                $qid = $this->createSingleQuestion($mgaQuestion, $user);
+                $qid = $this->createSingleQuestion($questionImportMode, $mgaQuestion, $user);
                 $questionIds[] = [
                     'source_id' => $mgaQuestion['source_id'],
                     'status' => 'created',
@@ -93,16 +149,20 @@ class QuestionImportService extends BaseService implements QuestionImportService
     /**
      * Create a single question and insert it into the imas_questionset table.
      *
+     * @param string $questionImportMode One of: quiz, practice
      * @param array $mgaQuestion The question data.
      * @param array $user A row from imas_users representing the question author.
      * @return int The imas_questionset ID for the created question.
      * @throws InvalidQuestionType Thrown on unknown question types.
      */
-    private function createSingleQuestion(array $mgaQuestion, array $user): int
+    private function createSingleQuestion(string $questionImportMode,
+                                          array  $mgaQuestion,
+                                          array  $user
+    ): int
     {
         $questionType = $mgaQuestion['type'];
         if ('multiple_choice' == $questionType) {
-            $question = $this->buildMultipleChoiceQuestion($mgaQuestion);
+            $question = $this->buildMultipleChoiceQuestion($questionImportMode, $mgaQuestion);
         } else {
             throw new InvalidQuestionType('Unknown question type: ' . $questionType);
         }
@@ -125,21 +185,38 @@ class QuestionImportService extends BaseService implements QuestionImportService
      *     'control' => 'Question $code and $feedback goes here'
      * ]
      *
+     * @param string $questionImportMode One of: quiz, practice
      * @param array $mgaQuestionData The question data.
      * @return array The question type, description, text, and control.
      */
-    private function buildMultipleChoiceQuestion(array $mgaQuestionData): array
+    private function buildMultipleChoiceQuestion(string $questionImportMode, array $mgaQuestionData): array
     {
         $questionDescription = $this->replaceSmartQuotes($mgaQuestionData['description']);
         // imas_questionset.description is currently VARCHAR(254)
         $questionDescription = substr($questionDescription, 0, 200);
         $questionDescription .= ' -- MGA_GUID:' . $mgaQuestionData['source_id'];
 
+        /*
+         * Question text.
+         */
+
         $questionText = $this->replaceSmartQuotes($mgaQuestionData['text']);
         $questionText .= "\n\n" . '$answerbox' . "\n";
 
+        if ('practice' == $questionImportMode) {
+            $questionText .= '$feedback' . "\n";
+        }
+
+        /*
+         * Question control.
+         */
+
+        $questionControl = '';
+
         // Load the OHM 2 macro library.
-        $questionControl = 'loadlibrary("ohm_macros");' . "\n\n";
+        if ('quiz' == $questionImportMode) {
+            $questionControl .= 'loadlibrary("ohm_macros");' . "\n\n";
+        }
 
         // Add question choices.
         for ($idx = 0; $idx < count($mgaQuestionData['choices']); $idx++) {
@@ -154,14 +231,21 @@ class QuestionImportService extends BaseService implements QuestionImportService
         // Define the correct answer.
         $questionControl .= '$answer = ' . $mgaQuestionData['correct_answer'] . ";\n";
 
+        /*
+         * Feedback macros.
+         */
+
+        $macroPrefix = 'quiz' == $questionImportMode ? 'ohm_' : '';
+
         // Feedback macros.
         if ($this->hasPerAnswerFeedback($mgaQuestionData)) {
             // Add a per-answer feedback macro if feedback is present.
-            $feedbackMacro = $this->buildMultipleChoicePerAnswerFeedback($mgaQuestionData);
+            $feedbackMacro = $this->buildMultipleChoicePerAnswerFeedback(
+                $questionImportMode, $mgaQuestionData);
             $questionControl .= "\n" . $feedbackMacro;
         } else if (!$this->hasFeedback($mgaQuestionData)) {
             // Add a basic feedback macro if no feedback is present.
-            $feedbackMacro = '$feedback = ohm_getfeedbackbasic('
+            $feedbackMacro = '$feedback = ' . $macroPrefix . 'getfeedbackbasic('
                 . '$stuanswers[$thisq], "Correct!", "Incorrect.", $answer);' . "\n";
             $questionControl .= "\n" . $feedbackMacro;
         }
@@ -184,14 +268,18 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * Build a question code snippet that uses the OHM 2 macro
      * "ohm_getfeedbacktxt" with the provided question feedback.
      *
+     * @param string $questionImportMode One of: quiz, practice
      * @param array $questionData The question data.
      * @return string The feedback text and macro snippet.
      */
-    private function buildMultipleChoicePerAnswerFeedback(array $questionData): string
+    private function buildMultipleChoicePerAnswerFeedback(
+        string $questionImportMode, array $questionData): string
     {
         if (!$this->hasPerAnswerFeedback($questionData)) {
             return '';
         }
+
+        $macroPrefix = 'quiz' == $questionImportMode ? 'ohm_' : '';
 
         $allFeedback = $questionData['feedback']['feedbacks'];
         $correctAnswerIndex = $questionData['correct_answer'];
@@ -207,7 +295,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
         }
         $macroCode .= "\n";
 
-        $macroCode .= '$feedback = ohm_getfeedbacktxt('
+        $macroCode .= '$feedback = ' . $macroPrefix . 'getfeedbacktxt('
             . '$stuanswers[$thisq], $feedbacktxt, $answer);' . "\n";
 
         return $macroCode;

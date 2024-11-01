@@ -5,6 +5,7 @@ namespace Tests\Unit\Controllers;
 use App\Http\Controllers\QuestionImportController;
 use App\Services\ohm\QuestionImportService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Mockery;
 use Tests\TestCase;
 
@@ -101,6 +102,7 @@ class QuestionImportControllerTest extends TestCase
 
         $requestBody = [
             'owner_id' => 42,
+            'question_import_mode' => 'quiz',
             'questions' => self::MGA_QUESTIONS,
         ];
 
@@ -121,5 +123,42 @@ class QuestionImportControllerTest extends TestCase
         $this->assertEquals('created', $questionMapping[1]->status);
         $this->assertEquals(5440, $questionMapping[1]->questionset_id);
         $this->assertEquals([], $questionMapping[1]->errors);
+    }
+
+    public function testImportMgaQuestions_MissingImportMode(): void
+    {
+        Log::shouldReceive('error')->once(); // Needed for testing in GitHub Actions.
+
+        $requestBody = [
+            'owner_id' => 42,
+            'questions' => self::MGA_QUESTIONS,
+        ];
+
+        $request = Request::create('/api/dev/v1/questions/mga_imports', 'POST', $requestBody);
+        $jsonResponse = $this->questionImportController->importMgaQuestions($request);
+        $jsonData = $jsonResponse->getData();
+
+        $this->assertEquals(400, $jsonResponse->getStatusCode());
+
+        $this->assertEquals('The question import mode field is required.', $jsonData->errors[0]);
+    }
+
+    public function testImportMgaQuestions_InvalidImportMode(): void
+    {
+        Log::shouldReceive('error')->once(); // Needed for testing in GitHub Actions.
+
+        $requestBody = [
+            'owner_id' => 42,
+            'questions' => self::MGA_QUESTIONS,
+            'question_import_mode' => 'meow',
+        ];
+
+        $request = Request::create('/api/dev/v1/questions/mga_imports', 'POST', $requestBody);
+        $jsonResponse = $this->questionImportController->importMgaQuestions($request);
+        $jsonData = $jsonResponse->getData();
+
+        $this->assertEquals(400, $jsonResponse->getStatusCode());
+
+        $this->assertEquals('The selected question import mode is invalid.', $jsonData->errors[0]);
     }
 }

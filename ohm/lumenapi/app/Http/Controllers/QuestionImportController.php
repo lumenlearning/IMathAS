@@ -148,6 +148,7 @@ class QuestionImportController extends ApiBaseController
         try {
             $this->validate($request, [
                 'owner_id' => 'required|int',
+                'question_import_mode' => 'required|string|in:quiz,practice',
                 'questions' => 'required|array',
                 'questions.*.source_id' => 'required|string',
                 'questions.*.type' => 'required|string',
@@ -159,11 +160,12 @@ class QuestionImportController extends ApiBaseController
                 'questions.*.feedback' => 'sometimes|nullable|array',
             ]);
 
+            $questionImportMode = $request['question_import_mode'];
             $mgaQuestionData = $request['questions'];
             $ownerId = $request['owner_id'];
 
             $questionIdMapping = $this->questionImportService
-                ->createMultipleQuestions($mgaQuestionData, $ownerId);
+                ->createMultipleQuestions($questionImportMode, $mgaQuestionData, $ownerId);
 
             $responseData = ["question_mappings" => $questionIdMapping];
             return response()->json($responseData, JsonResponse::HTTP_CREATED);

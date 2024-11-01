@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Controllers;
 
+use App\Exceptions\InvalidQuestionImportType;
 use App\Repositories\ohm\LibraryItemRepository;
 use App\Repositories\ohm\QuestionSetRepository;
 use App\Repositories\ohm\UserRepository;
@@ -107,7 +108,7 @@ class QuestionImportServiceTest extends TestCase
             ->andReturn(21, 22);
 
         $questionIds = $this->questionImportService->createMultipleQuestions(
-            self::MGA_QUESTIONS, self::USER['id']);
+            'quiz', self::MGA_QUESTIONS, self::USER['id']);
 
         $this->assertEquals(self::MGA_QUESTIONS[0]['source_id'], $questionIds[0]['source_id']);
         $this->assertEquals('created', $questionIds[0]['status']);
@@ -120,6 +121,14 @@ class QuestionImportServiceTest extends TestCase
         $this->assertEquals([], $questionIds[1]['errors']);
     }
 
+    public function testCreateMultipleQuestions_InvalidImportMode(): void
+    {
+        $this->expectException(InvalidQuestionImportType::class);
+
+        $this->questionImportService->createMultipleQuestions(
+            'meow', [], 42);
+    }
+
     public function testCreateMultipleQuestions_UserIdNotFound(): void
     {
         $this->expectException(RuntimeException::class);
@@ -129,7 +138,7 @@ class QuestionImportServiceTest extends TestCase
             ->andReturn(null);
 
         $this->questionImportService->createMultipleQuestions(
-            self::MGA_QUESTIONS, self::USER['id']);
+            'practice', self::MGA_QUESTIONS, self::USER['id']);
     }
 
     /*
@@ -150,7 +159,7 @@ class QuestionImportServiceTest extends TestCase
             ->andReturn(21);
 
         $questionsetId = $createSingleQuestion->invokeArgs($this->questionImportService, [
-            self::MGA_QUESTION_WITH_FEEDBACK, self::USER
+            'quiz', self::MGA_QUESTION_WITH_FEEDBACK, self::USER
         ]);
 
         $this->assertEquals(42, $questionsetId);
@@ -164,7 +173,7 @@ class QuestionImportServiceTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         $createSingleQuestion->invokeArgs($this->questionImportService, [
-            ['type' => 'meow'], []
+            'quiz', ['type' => 'meow'], []
         ]);
     }
 
@@ -184,7 +193,7 @@ class QuestionImportServiceTest extends TestCase
 
         // Method under test.
         $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
-            [self::MGA_QUESTION_WITH_FEEDBACK]);
+            ['quiz', self::MGA_QUESTION_WITH_FEEDBACK]);
 
         /*
          * Assertions
@@ -223,6 +232,58 @@ class QuestionImportServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/' . $expectedFeedbackMacroUsage . '/s', $question['control']);
     }
 
+    public function testBuildMultipleChoiceQuestion_WithPerAnswerFeedback_QuizTypeImport(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
+        $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4
+
+        // Method under test.
+        $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
+            ['quiz', self::MGA_QUESTION_WITH_FEEDBACK]);
+
+        /*
+         * Assertions specific to "quiz" import mode.
+         *
+         * Assertions common to testBuildMultipleChoiceQuestion_WithPerAnswerFeedback() are skipped here.
+         */
+
+        // Question text should NOT have feedback for "quiz" type import.
+        $this->assertStringNotContainsString('$feedback', $question['qtext']);
+
+        // Question code should load OHM-specific macro library for "quiz" type import.
+        $this->assertStringContainsString('loadlibrary("ohm_macros");', $question['control']);
+
+        // OHM-specific feedback macros should be used in "quiz" type import.
+        $this->assertStringContainsString('ohm_getfeedbacktxt', $question['control']);
+    }
+
+    public function testBuildMultipleChoiceQuestion_WithPerAnswerFeedback_PracticeTypeImport(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
+        $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4
+
+        // Method under test.
+        $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
+            ['practice', self::MGA_QUESTION_WITH_FEEDBACK]);
+
+        /*
+         * Assertions specific to "practice" import mode.
+         *
+         * Assertions common to testBuildMultipleChoiceQuestion_WithPerAnswerFeedback() are skipped here.
+         */
+
+        // Question text should have feedback for "quiz" type import.
+        $this->assertStringContainsString('$feedback', $question['qtext']);
+
+        // Question code should NOT load OHM-specific macro library for "practice" type import.
+        $this->assertStringNotContainsString('loadlibrary("ohm_macros");', $question['control']);
+
+        // OHM-specific feedback macros should NOT be used in "quiz" type import.
+        $this->assertStringContainsString('getfeedbacktxt', $question['control']);
+    }
+
     public function testBuildMultipleChoiceQuestion_NoFeedback(): void
     {
         $class = new ReflectionClass(QuestionImportService::class);
@@ -230,7 +291,7 @@ class QuestionImportServiceTest extends TestCase
         $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4.
 
         $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
-            [self::MGA_QUESTION_NO_FEEDBACK]);
+            ['quiz', self::MGA_QUESTION_NO_FEEDBACK]);
 
         /*
          * If no feedback is present, the generated question code should use
@@ -256,7 +317,7 @@ class QuestionImportServiceTest extends TestCase
             str_repeat($questionWithLongDescription['description'], 10);
 
         $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
-            [$questionWithLongDescription]);
+            ['quiz', $questionWithLongDescription]);
 
         $this->assertLessThan(255, strlen($question['description']));
     }
@@ -272,7 +333,7 @@ class QuestionImportServiceTest extends TestCase
         $buildMultipleChoicePerAnswerFeedback->setAccessible(true); // Required for PHP 7.4.
 
         $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
-            [self::MGA_QUESTION_WITH_FEEDBACK]);
+            ['quiz', self::MGA_QUESTION_WITH_FEEDBACK]);
 
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[0\] = \'.*\';/', $feedbackCode);
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[1\] = \'.*\';/', $feedbackCode);
@@ -292,7 +353,7 @@ class QuestionImportServiceTest extends TestCase
         $feedbacks = self::MGA_QUESTION_WITH_FEEDBACK;
         $feedbacks['feedback']['feedbacks'][1] = null; // Set the correct answer feedback to null.
         $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
-            [$feedbacks]);
+            ['quiz', $feedbacks]);
 
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[0\] = \'.*\';/', $feedbackCode);
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[1\] = \'Correct.\';/', $feedbackCode);
@@ -312,7 +373,7 @@ class QuestionImportServiceTest extends TestCase
         $feedbacks = self::MGA_QUESTION_WITH_FEEDBACK;
         $feedbacks['feedback']['feedbacks'][2] = null; // Set the incorrect answer feedback to null.
         $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
-            [$feedbacks]);
+            ['quiz', $feedbacks]);
 
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[0\] = \'.*\';/', $feedbackCode);
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[1\] = \'.*\';/', $feedbackCode);
@@ -330,7 +391,7 @@ class QuestionImportServiceTest extends TestCase
         $buildMultipleChoicePerAnswerFeedback->setAccessible(true); // Required for PHP 7.4.
 
         $feedbackCode = $buildMultipleChoicePerAnswerFeedback->invokeArgs($this->questionImportService,
-            [self::MGA_QUESTION_NO_FEEDBACK]);
+            ['quiz', self::MGA_QUESTION_NO_FEEDBACK]);
 
         $this->assertEquals('', $feedbackCode);
     }
