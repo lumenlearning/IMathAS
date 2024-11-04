@@ -212,7 +212,7 @@ if (isset($_POST['toscoreqn'])) {
     $qn = intval($_POST['regen']);
     $qsid = $QS['id'][$qn];
 
-    // clear values 
+    // clear values
     $seed = rand(0, 9999) + 10000;
     $state['seeds'][$qn] = $seed;
     unset($state['stuanswers'][$qn+1]);
@@ -222,7 +222,7 @@ if (isset($_POST['toscoreqn'])) {
     $state['partattemptn'][$qn] = array();
     $state['rawscores'][$qn] = array();
     $a2->setState($state);
-    
+
     // load question data
     $stm = $DBH->prepare("SELECT * FROM imas_questionset WHERE id=:id");
     $stm->execute(array(':id' => $qsid));
@@ -271,7 +271,6 @@ if (isset($_GET['theme'])) {
 
 $lastupdate = '20200422';
 $placeinhead = '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/index.css?v=' . $lastupdate . '" />';
-$placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/chunk-common.css?v=' . $lastupdate . '" />';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/print.css?v=' . $lastupdate . '" media="print">';
 $placeinhead .= '<script src="' . $staticroot . '/mathquill/mathquill.min.js?v=022720" type="text/javascript"></script>';
 if (!empty($CFG['assess2-use-vue-dev'])) {
@@ -331,7 +330,7 @@ $placeinhead .= '<script type="text/javascript">
         MathJax.Hub.Queue(function () {
             sendresizemsg();
         });
-    } 
+    }
   } else {
       $(function() {
           sendresizemsg();
