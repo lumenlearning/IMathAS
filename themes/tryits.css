@@ -3,6 +3,7 @@
 /* WARNING: Do not change any styles starting with "mq".
  * These are MathQuill specific and will likely lead to
  * funky things happening that you don't anticipate.
+ * https://ohm.localhost/multiembedq2.php?id=2&theme=lumen&iframe_resize_id=ohm2&source=tnh
  */
 
 /* General settings - fonts, overall page background, etc */
@@ -10,7 +11,7 @@
 @import url(https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap);
 
 /* Please check by hex value to see if your desired color
-* is here and add it if it's not. BEWARE: Color names may 
+* is here and add it if it's not. BEWARE: Color names may
 * not match between mocks and Valkyrie's HarmonyColors.ts,
 * from which these names are taken.
 */
@@ -138,13 +139,6 @@ ol ol {
   margin-bottom: 0;
 }
 
-div.mainbody {
-  height: auto;
-}
-.headerwrapper,
-.footerwrapper {
-  /*background-color: none;*/
-}
 .headerwrapper a:link,
 .headerwrapper a:visited,
 .headerwrapper p {
@@ -447,7 +441,7 @@ div.question {
   line-height: 1.4;
 }
 
-/* Suppresses the numerical score (out of 1) that appears 
+/* Suppresses the numerical score (out of 1) that appears
 * at the top of multiembedq2 after a user hits Submit. */
 #results0 {
   display: none;
@@ -597,8 +591,8 @@ span.mq-math-mode {
 }
 
 /* These styles can't be added to span.mq-math-node,
- * because they distort the MathQuill editor beyond 
- * the point of readability/usability. 
+ * because they distort the MathQuill editor beyond
+ * the point of readability/usability.
  */
 input.text {
   height: 45px;
@@ -847,7 +841,7 @@ div.question > .btn[value="Submit"]:active,
 }
 /* END: Submit button styles */
 
-/* 
+/*
 * START: Styles for key-logo Show Answer buttons
 * (seen in multiembedq2 but not multiembedq)
 */
@@ -876,9 +870,9 @@ div.question > .btn[value="Submit"]:active,
 }
 
 .keywrap > span > br:nth-child(1) {
-  /* answers are sometimes (but not often) coded 
-  * with starting line-breaks to try to do the 
-  * same thing as our margin-top above; 
+  /* answers are sometimes (but not often) coded
+  * with starting line-breaks to try to do the
+  * same thing as our margin-top above;
   * we'll hide these because we don't need them */
   display: none;
 }
@@ -890,10 +884,10 @@ div.question > .btn[value="Submit"]:active,
 
 /* END: Styles for key-logo Show Answer buttons */
 
-/* 
-* START: Styles for Hint link-style buttons 
-* (also Show Answer for multiembedq but NOT multiembedq2 
-* as they have different markup) 
+/*
+* START: Styles for Hint link-style buttons
+* (also Show Answer for multiembedq but NOT multiembedq2
+* as they have different markup)
 */
 input[type="button"].sabtn,
 p > button:only-child {
@@ -907,9 +901,9 @@ p > button:only-child {
   text-decoration-line: underline;
 }
 
-/* 
-* Show Answer buttons need a bit of spacing from their answers 
-* (and from one another) if stacked vertically. Hint buttons are 
+/*
+* Show Answer buttons need a bit of spacing from their answers
+* (and from one another) if stacked vertically. Hint buttons are
 * already in a <p> tag so they don't need it.
 */
 input[type="button"].sabtn {
@@ -1882,4 +1876,22 @@ div.itemhdr div.title {
   #viewbuttoncont {
     display: none;
   }
+}
+
+.questionpane {
+  margin: 0 0 15px;
+}
+.questionwrap > p:last-child {
+  padding: 0;
+}
+.footerwrapper {
+  display: none;
+}
+.questionpane > .question {
+  padding: 0;
+  width: auto;
+}
+.questionpane > .question > .question > :first-child {
+  margin-top: 0;
+  padding-top: 0;
 }
