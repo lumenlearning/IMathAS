@@ -418,14 +418,14 @@ if (isset($_GET['form'])) {
 	echo '<a href="listwronglibs.php">List WrongLibFlags</a><br/>';
 	echo '<a href="updatewronglibs.php">Update WrongLibFlags</a><br/>';
 	echo '<a href="blocksearch.php">Search Block titles</a><br/>';
+	echo '<a href="itemsearch.php">Search inline/linked items</a><br/>';
+	echo '<a href="utils.php?form=setupfcm">Set up FCM for push notifications</a><br/>';
 	######### Begin OHM-specific code #########################################
 	######### Begin OHM-specific code #########################################
 	######### Begin OHM-specific code #########################################
 	######### Begin OHM-specific code #########################################
 	######### Begin OHM-specific code #########################################
 	echo '<a href="desmos-usage-report.php">Desmos usage report</a><br/>';
-	echo '<a href="itemsearch.php">Search inline/linked items</a><br/>';
-    echo '<a href="utils.php?form=setupfcm">Set up FCM for push notifications</a><br/>';
 	echo '<a href="ohm_api_consumers.php">Manage API consumers</a><br/>';
 	echo '<a href="../admin/requeue-lti.php">View and ReQueue LTI Grade Passback</a><br/>';
 	echo '<a href="../ohm/banners.php">Notifications</a><br/>';
