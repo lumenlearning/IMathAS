@@ -332,7 +332,6 @@
 		$points = $defpoints;
 	}
 */
-	$lastupdate = '030222';
 	function formatTry($try,$cnt,$pn,$tn) {
 		if (is_array($try) && $try[0] === 'draw') {
 			$id = $cnt.'-'.$pn.'-'.$tn;
@@ -360,13 +359,12 @@
 
 	$useeditor='review';
 	$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/rubric_min.js?v=022223"></script>';
-	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/gb-scoretools.js?v=110823"></script>';
-	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/index.css?v='.$lastupdate.'" />';
-	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/gbviewassess.css?v='.$lastupdate.'" />';
-	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/chunk-common.css?v='.$lastupdate.'" />';
-	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/print.css?v='.$lastupdate.'" media="print">';
+	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/gb-scoretools.js?v=060724"></script>';
+	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/index.css?v='.$lastvueupdate.'" />';
+	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/vue/css/gbviewassess.css?v='.$lastvueupdate.'" />';
+	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/assess2/print.css?v='.$lastvueupdate.'" media="print">';
     if (!empty($CFG['assess2-use-vue-dev'])) {
-        $placeinhead .= '<script src="'.$staticroot.'/mathquill/mathquill.js?v=022720" type="text/javascript"></script>';
+        $placeinhead .= '<script src="'.$staticroot.'/mathquill/mathquill.js?v=112124" type="text/javascript"></script>';
         $placeinhead .= '<script src="'.$staticroot.'/javascript/drawing.js?v=041920" type="text/javascript"></script>';
         $placeinhead .= '<script src="'.$staticroot.'/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
         $placeinhead .= '<script src="'.$staticroot.'/javascript/eqntips.js?v=041920" type="text/javascript"></script>';
@@ -375,8 +373,8 @@
         $placeinhead .= '<script src="'.$staticroot.'/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
         $placeinhead .= '<script src="'.$staticroot.'/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
     } else {
-        $placeinhead .= '<script src="'.$staticroot.'/mathquill/mathquill.min.js?v=100220" type="text/javascript"></script>';
-        $placeinhead .= '<script src="'.$staticroot.'/javascript/assess2_min.js?v=20240107" type="text/javascript"></script>';
+        $placeinhead .= '<script src="'.$staticroot.'/mathquill/mathquill.min.js?v=112124" type="text/javascript"></script>';
+        $placeinhead .= '<script src="'.$staticroot.'/javascript/assess2_min.js?v='.$lastvueupdate.'" type="text/javascript"></script>';
     }
     
 	$placeinhead .= '<link rel="stylesheet" type="text/css" href="'.$staticroot.'/mathquill/mathquill-basic.css?v=021823">
@@ -409,6 +407,17 @@
 	$(function() {
 		$(".viewworkwrap img").on("click", rotateimg);
 	})
+    var scoretool_page = "aq";
+
+    function updatefiltercookie() {
+        let vals = [];
+        $("#filtersdiv input[type=checkbox]").each(function(i,el) {
+            if (el.checked) {
+                vals.push(el.id);
+            }
+        });
+        document.cookie = "gaqf'.$aid.'=" + vals.join(",");
+    }
 	';
 	$placeinhead .= '</script>';
 	if ($_SESSION['useed']!=0) {
@@ -417,6 +426,7 @@
 	$placeinhead .= '<style type="text/css"> 
         .fixedbottomright {position: fixed; right: 10px; bottom: 10px; z-index:10;}
         .hoverbox { background-color: #fff; z-index: 9; box-shadow: 0px -3px 5px 0px rgb(0 0 0 / 75%);}
+        #filtersdiv label { margin-right: 5px; user-select:none;}
 		</style>';
 	require_once "../includes/rubric.php";
 	$_SESSION['coursetheme'] = $coursetheme;
@@ -494,11 +504,18 @@
         echo '<p>';
 		//echo ' <button type="button" id="preprint" onclick="preprint()">'._('Prepare for Printing (Slow)').'</button>';
     }
-    echo ' <button type="button" id="showanstoggle" onclick="showallans()">'._('Show All Answers').'</button>';
-    echo ' <button type="button" onclick="showallwork()">'._('Show All Work').'</button>';
-    echo ' <button type="button" onclick="previewallfiles()">'._('Preview All Files').'</button>';
-    echo ' <button type="button" onclick="sidebysidegrading()">'._('Side-by-Side').'</button>';
-    echo ' <button type="button" onclick="toggleScrollingScoreboxes()">'._('Floating Scoreboxes').'</button>';
+    /*
+    echo ' <button type="button" id="showanstoggle" onclick="showallans(this)">'._('Show All Answers').'</button>';
+    echo ' <button type="button" onclick="showallwork(this)">'._('Show All Work').'</button>';
+    echo ' <button type="button" onclick="previewallfiles(this)">'._('Preview All Files').'</button>';
+    echo ' <button type="button" onclick="sidebysidegrading(this)">'._('Side-by-Side').'</button>';
+    echo ' <button type="button" onclick="toggleScrollingScoreboxes(this)">'._('Floating Scoreboxes').'</button>';
+    */
+    echo ' <label><input type="checkbox" onchange="toggleshowallans(this.checked)" id="op-showans"/>'._('Show All Answers').'</label>';
+    echo ' <label><input type="checkbox" onchange="toggleshowallwork(this.checked)" id="op-showwork"/>'._('Show All Work').'</label>';
+    echo ' <label><input type="checkbox" onchange="togglepreviewallfiles(this.checked)" id="op-prevwork"/>'._('Preview All Files').'</label>';
+    echo ' <label><input type="checkbox" onchange="sidebysidegrading(this.checked)" id="op-sbs"/>'._('Side-by-Side').'</label>';
+    echo ' <label><input type="checkbox" onchange="toggleScrollingScoreboxState(this.checked)" id="op-floatsb"/>'._('Floating Scoreboxes').'</label>';
 	echo ' <button type="button" id="clrfeedback" onclick="clearfeedback()">'._('Clear all feedback').'</button>';
 	if ($deffbtext != '') {
 		echo ' <button type="button" id="clrfeedback" onclick="cleardeffeedback()">'._('Clear default feedback').'</button>';
@@ -523,7 +540,7 @@
 		echo '</div>';
 	}
 	echo "<form id=\"mainform\" method=post action=\"gradeallq2.php?stu=" . Sanitize::generateQueryStringFromMap($qsmap) . "&page=" . Sanitize::encodeUrlParam($page) . "&update=true\">\n";
-	if ($isgroup>0) {
+	if ($isgroup>0 && $page == -1) {
 		echo '<p><input type="checkbox" name="onepergroup" value="1" onclick="hidegroupdup(this)" /> Grade one per group</p>';
 	}
 
@@ -551,13 +568,15 @@
 			$stulist[] = $row[0].', '.$row[1];
 		}
 
-		echo '<p>Jump to <select id="stusel" onchange="jumptostu()">';
+		echo '<p>'._('Jump to').' <select id="stusel" onchange="jumptostu()" aria-label="Jump to student">';
 		foreach ($stulist as $i=>$st) {
 			echo '<option value="'.$i.'" ';
 			if ($i==$page) {echo 'selected="selected"';}
 			echo '>'.Sanitize::encodeStringForDisplay($st).'</option>';
 		}
-		echo '</select></p>';
+		echo '</select> ';
+        echo sprintf('Grading %d of %d', $page+1, count($stulist));
+        echo '</p>';
 	}
 
 	$qarr = array(':courseid'=>$cid, ':assessmentid'=>$aid);
@@ -888,12 +907,27 @@
 		echo '<input type=hidden name=islaststu value=1 />';
 	}
 	echo "</form>";
-	echo '<p>&nbsp;</p>';
+	echo '<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>';
 	$placeinfooter = '<div id="ehdd" class="ehdd">
     <span id="ehddtext"></span>
     <span onclick="showeh(curehdd);" style="cursor:pointer;">[more..]</span>
   	</div>
 		<div id="eh" class="eh"></div>';
 	$useeqnhelper = 0;
+    echo '<script type="text/javascript">
+    $(function() {
+        let filtercookie = readCookie("gaqf'.$aid.'");
+        if (filtercookie !== null && filtercookie.length > 0) {
+            $("#filtersdiv").show();
+            filtercookie = filtercookie.split(",");
+            for (let i=0; i<filtercookie.length; i++) {
+                if (filtercookie[i].length > 0) {
+                    $("#"+filtercookie[i]).prop("checked",true).trigger("change");
+                }
+            }
+        }
+        $("#filtersdiv input[type=checkbox]").on("change", updatefiltercookie);
+    });
+    </script>'; // must be run at the end, after answerboxes have been inited
 	require_once "../footer.php";
 ?>

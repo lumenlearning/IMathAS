@@ -205,10 +205,11 @@ if (isset($CFG['hooks']['course/gb-viewasid'])) {
 		}
 	}
 	if (isset($_REQUEST['clearreviewview']) && $isteacher) {
-		$stm = $DBH->prepare("DELETE FROM imas_content_track WHERE typeid=:typeid AND userid=:userid AND (type='gbviewasid' OR type='assessreview')");
+		$stm = $DBH->prepare("DELETE FROM imas_content_track WHERE typeid=:typeid AND courseid=:courseid AND userid=:userid AND (type='gbviewasid' OR type='assessreview')");
 		$stm->execute(array(
 			':typeid' => Sanitize::onlyInt($_REQUEST['aid']),
-			':userid' => $get_uid
+			':userid' => $get_uid,
+            ':courseid' => $cid
 		));
 		header('Location: ' . $GLOBALS['basesiteurl'] ."/course/gb-viewasid.php?stu=$stu&asid=$asid&from=$from&cid=$cid&uid=$get_uid");
 
@@ -543,7 +544,7 @@ if (isset($CFG['hooks']['course/gb-viewasid'])) {
 		if ($isteacher || $istutor) {
 			$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/rubric.js?v=011823"></script>';
 			require_once "../includes/rubric.php";
-			$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/gb-scoretools.js?v=112120"></script>';
+			$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/gb-scoretools.js?v=060724"></script>';
 			if ($_SESSION['useed']!=0) {
 				$placeinhead .= '<script type="text/javascript"> initeditor("divs","fbbox",null,true);</script>';
 			}

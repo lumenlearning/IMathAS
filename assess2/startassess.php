@@ -55,7 +55,10 @@ if ($isstudent) {
 }
 
 // reject if not available
-if ($assess_info->getSetting('available') === 'practice' && !empty($_POST['practice'])) {
+if ($assess_info->getSetting('noprint') === 1 && !empty($_POST['in_print']) && !$canViewAll) {
+  echo '{"error": "not_ready"}';
+  exit;
+} else if ($assess_info->getSetting('available') === 'practice' && !empty($_POST['practice'])) {
   $in_practice = true;
 } else if ($assess_info->getSetting('available') === 'yes' && !empty($_POST['practice'])) {
   echo '{"error": "not_practice"}';
@@ -86,18 +89,22 @@ $assess_record->loadRecord($uid);
 if ($canViewAll) {
     $assess_record->setIncludeErrors(true); //only show errors to teachers/tutors
 }
-
 // check password, if needed
-if (!$in_practice && !$canViewAll &&
-  (!isset($_SESSION['assess2-'.$aid]) || 
-    (!is_array($_SESSION['assess2-'.$aid]) && $_SESSION['assess2-'.$aid] != $in_practice) || // backward compat needed for a while
-    (is_array($_SESSION['assess2-'.$aid]) && ($_SESSION['assess2-'.$aid][0] != $in_practice || !$assess_info->checkPassword($_SESSION['assess2-'.$aid][1])))
-  ) &&
-  !$assess_info->checkPassword($_POST['password'])
+$doCheckPassword = true;
+if ($in_practice || $canViewAll) {
+    $doCheckPassword = false;
+} else if ($assess_info->getSetting('noprint') === 0 && // if print version is allowed
+    !empty($_POST['in_print']) && // is print version
+    isset($_SESSION['assess2-'.$aid]) && // have session store of PW
+    $_SESSION['assess2-'.$aid][0] == $in_practice && // practice setting matches stored PW
+    $assess_info->checkPassword($_SESSION['assess2-'.$aid][1]) // stored PW matches
 ) {
+    $doCheckPassword = false;
+}
+if ($doCheckPassword && !$assess_info->checkPassword($_POST['password'])) {
   echo '{"error": "invalid_password"}';
   exit;
-}
+} 
 
 if (!$in_practice && $assess_info->getSetting('timelimit') > 0 && 
     $assess_info->getSetting('timeext') > 0
@@ -383,6 +390,11 @@ $assess_record->saveRecordIfNeeded();
 // store assessment start in session data, so we know if they've gotten past
 // password at some point
 $_SESSION['assess2-'.$aid] = [$in_practice, $assess_info->getSetting('password')];
+
+if ($in_practice) {
+    $assessInfoOut['showwork_after'] = 0;
+    $assessInfoOut['showwork_cutoff'] = 0;
+}
 
 //prep date display
 prepDateDisp($assessInfoOut);

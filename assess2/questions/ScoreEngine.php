@@ -139,9 +139,10 @@ class ScoreEngine
         $thisq = $scoreQuestionParams->getQuestionNumber() + 1;
         $currentseed = $scoreQuestionParams->getQuestionSeed();
         try {
-          eval(interpret('control', $quesData['qtype'], $quesData['control']));
+          $db_qsetid = $scoreQuestionParams->getDbQuestionSetId();
+          eval(interpret('control', $quesData['qtype'], $quesData['control'], 1, [$db_qsetid]));
           $this->randWrapper->srand($scoreQuestionParams->getQuestionSeed() + 1);
-          eval(interpret('answer', $quesData['qtype'], $quesData['answer']));
+          eval(interpret('answer', $quesData['qtype'], $quesData['answer'], 1, [$db_qsetid]));
         } catch (\Throwable $t) {
             $this->addError(
                 _('Caught error while evaluating the code in this question: ')
@@ -243,7 +244,7 @@ class ScoreEngine
                 continue;
             }
 
-            if ('answerformat' == $optionKey && is_scalar($answerformat)) {
+            if ('answerformat' == $optionKey) {
                 $answerformat = str_replace(' ', '', $answerformat);
             }
 
@@ -628,6 +629,7 @@ class ScoreEngine
                     return evalbasic($v);
                 }
             }, $answeights);
+            ksort($answeights);
             if (array_sum($answeights)==0) {
                 $answeights = array_fill_keys(array_keys($anstypes), 1); 
             }

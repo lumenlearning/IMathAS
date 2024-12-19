@@ -11,7 +11,7 @@ array_push($allowedmacros,"nCr","nPr","mean","stdev","variance","absmeandev","pe
  "mosaicplot","checklineagainstdata","chi2teststat","checkdrawnlineagainstdata",
  "csvdownloadlink","modes","forceonemode","dotplot","gamma_cdf","gamma_inv","beta_cdf","beta_inv",
  "anova1way_f","anova1way","anova2way","anova_table","anova2way_f","student_t",
- "stats_randg","stats_randF","stats_randchi2","stats_randt","stats_randpoisson");
+ "stats_randg","stats_randF","stats_randchi2","stats_randt","stats_randpoisson","cluster_bargraph","stem_plot");
 
 //nCr(n,r)
 //The Choose function
@@ -1547,20 +1547,12 @@ function checklineagainstdata($xarr,$yarr,$line,$var="x",$alpha=.05) {
 //alpha: for confidence bound.  defaults to .05
 //grid:  If you've modified the grid, include it here
 //return array(answer, showanswer) to be used to set $answer and $showanswer
-function checkdrawnlineagainstdata($xarr,$yarr,$line, $gradedots=false,$alpha=.05, $gridi="-5,5,-5,5,1,1,300,300") {
+function checkdrawnlineagainstdata($xarr,$yarr,$line, $gradedots=false,$alpha=.05, $gridi="-5,5,-5,5,1,1,300,300",$snaptogrid=null) {
 	if (!is_array($xarr)) { $xarr = explode(',',$xarr);}
 	if (!is_array($yarr)) { $yarr = explode(',',$yarr);}
-	$gridi = explode(',',$gridi);
-	$grid=array(-5,5,-5,5,1,1,300,300);
-	foreach ($gridi as $i=>$v) {
-		$grid[$i] = $v;
-	}
-  if (strpos($grid[0],'0:')!==false) {
-		$grid[0] = substr($grid[0],2);
-	}
-  if (strpos($grid[2],'0:')!==false) {
-		$grid[2] = substr($grid[2],2);
-	}
+
+    list($xmin,$xmax,$ymin,$ymax,$w,$h) = parsedrawgrid($gridi,$snaptogrid);
+    $grid = explode(',', $gridi);
 
 	if (count($xarr)!=count($yarr)) {
 		echo "Error: linreg requires xarray length = yarray length";
@@ -1574,7 +1566,8 @@ function checkdrawnlineagainstdata($xarr,$yarr,$line, $gradedots=false,$alpha=.0
 	$answers = array();
 	$showanswer = null;
 	list($r,$m,$b) = linreg($xarr,$yarr);
-    $lines = gettwopointlinedata($line,$grid[0],$grid[1],$grid[2],$grid[3],$grid[6],$grid[7]);
+    $lines = gettwopointlinedata($line,$xmin,$xmax,$ymin,$ymax,$w,$h);
+
 	if (isset($lines[0])) {
 		if ($lines[0][0]==$lines[0][2]) {
 			$stum = 100000;
@@ -1591,7 +1584,7 @@ function checkdrawnlineagainstdata($xarr,$yarr,$line, $gradedots=false,$alpha=.0
 		}
 		$eqns = arraystodoteqns($xarr,$yarr);
 		$eqns[] = "$m*x+$b,blue";
-		$showanswer = showplot($eqns,$grid[0],$grid[1],$grid[2],$grid[3],$grid[4],$grid[5],$grid[6],$grid[7]);
+		$showanswer = showplot($eqns,$xmin,$xmax,$ymin,$ymax,$grid[4],$grid[5],$w,$h);
 	} else {
 		if ($gradedots) {
 			$answers = arraystodots($xarr,$yarr);
@@ -1608,30 +1601,36 @@ function checkdrawnlineagainstdata($xarr,$yarr,$line, $gradedots=false,$alpha=.0
 //Computes the probability of x successes out of N trials
 //where each trial has probability p of success
 function binomialpdf($N,$p,$x) {
-	if (!is_nicenumber($p) || !is_nicenumber($N) || $p<0 || $p>1 || $x < 0) {
-		echo 'invalid inputs to invtcdf';
+	if (!is_nicenumber($p) || !is_nicenumber($N) || $p<0 || $p>1 || $x < 0 || $x > $N) {
+		echo 'invalid inputs to binomialpdf';
 		return 0;
 	}
-    return (nCr($N,$x)*pow($p,$x)*pow(1-$p,$N-$x));
-    /*  based on R, but doesn't seem to work right for x=1,n=30,p=.1
-    if ($N > 15) {
+    if ($N > 15 && $N != $x && $x > 0 && $x < $N) {
+        // from https://www.r-project.org/doc/reports/CLoader-dbinom-2002.pdf
         $lc = stirlerr($N) - stirlerr($x) - stirlerr($N-$x) - bd0($x,$N*$p) - bd0($N-$x,$N*(1-$p));
         $lf = log(2*M_PI) + log($x) + log(1 - $x/$N);
         $alt = exp($lc - 0.5*$lf);
-        echo (nCr($N,$x)*pow($p,$x)*pow(1-$p,$N-$x));;
         return $alt;
     }
-	*/
+    return (nCr($N,$x)*pow($p,$x)*pow(1-$p,$N-$x));
 }
 
 function stirlerr($n) {
-    // from R. Only has the part for n>15
+    // from R
     $S0  = 0.083333333333333333333;
     $S1 =0.00277777777777777777778;
     $S2 =0.00079365079365079365079365;
     $S3 =0.000595238095238095238095238;
     $S4 =0.0008417508417508417508417508;
     $nn = $n*$n;
+    if ($n < 16) {
+        $sfe = [0, 0.081061466795327258219670264,0.041340695955409294093822081, 0.0276779256849983391487892927,
+                0.020790672103765093111522771, 0.0166446911898211921631948653,0.013876128823070747998745727, 
+                0.0118967099458917700950557241,0.010411265261972096497478567, 0.0092554621827127329177286366,
+                0.008330563433362871256469318, 0.0075736754879518407949720242, 0.006942840107209529865664152, 
+                0.0064089941880042070684396310, 0.005951370112758847735624416, 0.0055547335519628013710386899];
+        return $sfe[$n];
+    }
     if ($n > 500) {
         return ($S0 - $S1/$nn)/$n;
     } else if ($n > 80) {
@@ -1675,7 +1674,7 @@ function binomialcdf($N,$p,$x) {
     $z = $p;
     $a = $x+1;
     $b = $N-$x;
-    $out = round(1 - beta_cdf($z, $a, $b), 10);
+    $out = 1 - beta_cdf($z, $a, $b);
 
 	return $out;
 }
@@ -2529,8 +2528,18 @@ function dotplot($a,$label,$dotspace=1,$labelspace=null,$width=300,$height=150) 
     $maxx = round($a[count($a)-1]/$dotspace)*$dotspace;
     $endlabel = ceil($maxx/$labelspace-1e-12)*$labelspace;
     for ($x=$startlabel; $x <=$endlabel; $x+=$labelspace) {
-        $outst .= "line([$x,$tm],[$x,$tx]); text([$x,0],\"$x\",\"below\");";
+        if ($dotspace >= $labelspace) {
+            $outst .= "line([$x,$tm],[$x,$tx]);";
+        }
+        $outst .= "text([$x,0],\"$x\",\"below\");";
     }  
+    if ($dotspace < $labelspace) {
+        $startdot = min(floor($start/$dotspace+1e-12),floor($start/$labelspace+1e-12)*$labelspace/$dotspace)*$dotspace;
+        $enddot = max(ceil($maxx/$dotspace-1e-12)*$dotspace, $endlabel);
+        for ($x=$startdot; $x<=$enddot; $x+=$dotspace) {
+            $outst .= "line([$x,$tm],[$x,$tx]);";
+        }
+    }
 	
 	//initializes SVG frame and canvas.
 	$initst = "setBorder(20,40,20,10);initPicture($startlabel,$endlabel,0,$maxfreq);";
@@ -3075,4 +3084,412 @@ function stats_randpoisson($l,$n) {
     }
     return $out;
 }
+
+// cluster_bargraph(var1labels, var2labels,freqarray,label,[width,height,options])
+// var1labels : array of labels for the categories for variable 1 which appear on the horizontal axis 
+// var2labels: array of labels for the categories for variable 2 which appears in the legend.
+/*
+   freqarray: array of arrays holding the frequencies/heights for each bar. Note: freqarray should have the form [[1,3,5],[5,3,5],[1,3,2],[3,6,4]] or
+ 	 array(array(1,3,5),array(5,3,5),array(1,3,2),array(3,6,4)), which corresponds to variable 1 having 3 categories (3 clusters) and variable 2 having 
+	 4 categories (4 bars for each cluster).
+*/
+// label: general label for bars
+// width,height (optional): width and height for graph
+// options (optional): array of options:
+//  options['valuelabels'] = array of value labels, to be placed above each bar
+//  options['showgrid'] = false to hide the horizontal grid lines
+//  options['vertlabel'] = label for vertical axis. Defaults to none
+//  options['gap'] = gap (0 &le; gap &lt; 1) between bars
+//  options['toplabel'] = label for top of chart
+//  options['colors'] = array of colors for each bar in the clusters
+//  options['stroke'] = line color of the bars; default is black
+//  options['var1name'] = a string for the variable 1 name for alternative text 
+//  options['var2name'] = a string for the variable 2 name for alternative text 
+
+function cluster_bargraph($var1,$var2,$freq,$label,$width=450,$height=300,$options=array()) {
+	
+	if (!is_array($var1) || !is_array($var2)|| !is_array($freq)) {echo "barlabels and freqarray must be arrays"; return 0;}
+	if (count($var2) != count($freq)) { echo "var2labels and freqarray must have same length"; return 0;}
+	$n = array();
+	foreach($freq as $a){
+		if(!is_array($a)){
+			echo "freqarray is not an array of arrays";
+			return 0;
+		} else{
+			$n[] = count($a);
+		}
+	}
+	if (count(array_unique($n))>1){ echo "arrays within freqarray have to have the same length"; return 0;}
+	if (count($var1) != $n[0]) {echo "each array in freqarray must have same length as var1labels"; return 0;}
+
+	if(isset($options['colors'])){
+		$colors = $options['colors'];
+		if(count($colors) < count($var2)){
+			"You need to specify more colors. Color array should be same length as var2labels";
+			return 0;
+		}
+	} else{
+		// a blue scale for first 5 bars, then a green scale for the next five bars. if exceeds 10 bars, user needs to supply the colors
+		if(count($var2)>10){
+			echo "User needs to provide the colors for each bar";
+			return 0;
+		} else{
+			$colors = array("#8BC1F7","#519DE9","#06C","#004B95","#002F5D","#BDE2B9","#7CC674","#4CB140","#38812F","#23511E");
+		}
+		
+	}
+	if (isset($options['valuelabels'])) {
+		$valuelabels = $options['valuelabels'];
+		$idx = 0;
+		if(count($options['valuelabels']) != (count($var1)*count($var2))){
+			echo "Valuelabels array should have a label for each bar"; return 0;
+		}		
+	} else {
+		$valuelabels = false;
+	}
+	if (isset($options['vertlabel'])) {
+		$vertlabel = $options['vertlabel'];
+		$usevertlabel = true;
+	} else {
+		$vertlabel = 'Bar Height';
+		$usevertlabel = false;
+	}
+	if (isset($options['gap'])) {
+		$gap = $options['gap'];
+	} else {
+		$gap = 0;
+	}
+
+	if (isset($options['fill'])) {
+		$fill = $options['fill'];
+	} else {
+		$fill = 'blue';
+	}
+
+	if (isset($options['stroke'])) {
+		$stroke = $options['stroke'];
+	} else {
+		$stroke = 'black';
+	}
+	if(isset($options['var1name'])){
+		$var1name = $options['var1name'];
+	} else {
+		$var1name = "Variable 1";
+	}
+	if(isset($options['var2name'])){
+		$var2name = $options['var2name'];
+	} else {
+		$var2name = "Variable 2";
+	}
+
+	$alt = "Cluster bar graph for $label comparing variables $var1name and  $var2name. <table class=stats><thead><tr><th>$var1name / $var2name</th>";
+	for($curr = 0; $curr < count($var2); $curr++){
+		$alt .= "<th>{$var2[$curr]}</th>";
+	}
+	
+	$alt .= "</tr></thead>\n<tbody>\n";
+
+	$st = '';
+    $start = 0;
+	$x = $start+1;
+	$maxfreq = 0;
+	$midarr = array($x);
+	
+	for ($curr=0; $curr<count($var1); $curr++) {
+		
+		for($curr2=0; $curr2<count($var2); $curr2++){
+			if ($curr2==0){
+				$alt .= "<tr><td>{$var1[$curr]}</td>";
+			}
+			
+		 	$alt .= "<td>{$freq[$curr2][$curr]}</td>";
+			$st .= "fill='$colors[$curr2]';rect([$x,0],";
+			$x += 2;
+			$st .= "[$x,{$freq[$curr2][$curr]}]);";
+			$midarr[] = $x;
+			$y = $x-1;
+			
+			if ($valuelabels!==false) {
+				if (is_array($valuelabels)) {
+					$st .= "text([$y,{$freq[$curr2][$curr]}],\"{$valuelabels[$idx]}\",\"above\");";
+					$idx++;
+				} else {
+					$st .= "text([$x,{$freq[$curr2][$curr]},\"{$freq[$curr2][$curr]}\",\"above\");";
+				}
+			}
+			if ($freq[$curr2][$curr]>$maxfreq) { $maxfreq = $freq[$curr2][$curr];}		
+			
+		}
+		$alt .= "</tr>";
+		$mid = mean($midarr);
+		$st .= "text([$mid,0],\"{$var1[$curr]}\",\"below\");";	
+		$x += 1 + 2*$gap;
+		$midarr = array();
+		$midarr[0] = $x;
+	
+	}
+	$x -= 2*$gap;
+	$alt .= "</tbody></table>\n";
+	
+	if ($_SESSION['graphdisp']==0) {
+		return $alt;
+	}
+	$x++;
+
+	$strarr = array();
+	for($i=0; $i<count($var2); $i++){
+		$strarr[] = strlen($var2[$i]);
+	}
+	
+	//$x++;
+	
+	$power = floor(log10($maxfreq))-1;
+	$base = $maxfreq/pow(10,$power);
+
+	if ($base>75) {$step = 20*pow(10,$power);} else if ($base>40) { $step = 10*pow(10,$power);} else if ($base>20) {$step = 5*pow(10,$power);} else if ($base>9) {$step = 2*pow(10,$power);} else {$step = pow(10,$power);}
+
+	$legendmax = max($strarr);
+
+	if($legendmax < 10){$x2 = $x+2.25+0.7*$legendmax;} else if($legendmax < 20){$x2 = $x+2.25+0.8*$legendmax;} else if($legendmax <30){$x2 = $x+2.25+0.8*$legendmax;} else { $x2 = $x+2.25+$legendmax;}
+	$h1 = $maxfreq - $step*(count($var2)+0.25); 
+	$h2 = $maxfreq - 0.5*$step;
+	$legendstr ="stroke='black';fill='white';rect([$x,$h1],[$x2,$h2]);";
+	$x3 = $x +0.5;
+	$x4 = $x +1.4;
+	$h3 = $h2 - 0.7*$step;
+	$h4 = $h2 - 0.3*$step;
+	$x5 = $x+1.3;
+	$h5 = $h2 - 0.5*$step;
+
+	for($i=0;$i< count($var2); $i++){
+		$legendstr .= "stroke='{$stroke}';fill='{$colors[$i]}';rect([$x3,$h3],[$x4,$h4]);text([$x5,$h5],'{$var2[$i]}','right');";
+		$h3 -= 0.75*$step;
+		$h4 -= 0.75*$step; 
+		$h5 -= 0.75*$step;
+	}
+
+	$topborder = ($valuelabels===false?10:25) + (isset($options['toplabel'])?20:0);
+	$leftborder = min(60, 9*max(strlen($maxfreq),strlen($maxfreq-$step))+10) + ($usevertlabel?30:0);
+	$bottomborder = 25+($label===''?0:20);	
+	$xmax =$x2+1;
+	
+
+	$outst = "setBorder($leftborder,$bottomborder,0,$topborder);  initPicture(".$start.",$xmax,0,$maxfreq);";
+
+	if (isset($options['showgrid']) && $options['showgrid']==false) {
+		$gdy = 0;		
+	} else {
+		$gdy = $step;
+	} 
+
+	$outst .= "axes(1000,$step,1,1000,$gdy); fill=\"$fill\"; stroke=\"$stroke\";";
+	if ($label!=='') {
+		$outst .= "textabs([". ($width/2+15)  .",0],\"$label\",\"above\");";
+	}
+	if ($usevertlabel) {
+		$outst .= "textabs([0,". ($height/2+20) . "],\"$vertlabel\",\"right\",90);";
+	}
+	if (isset($options['toplabel'])) {
+		$outst .= "textabs([". ($width/2+15)  .",$height],\"{$options['toplabel']}\",\"below\");";
+	}
+
+	$outst .= $st.$legendstr;
+
+	
+	return showasciisvg($outst,$width,$height);
+	
+}
+
+/* stem_plot(data,[options])
+   data : array of data.
+   options (optional): array of options:
+	options['key'] = false will remove key. For example, by default there is a key such as Key: 3|4 means 34 and will be removed if false.
+	 If $options['customkey'] is set, then options['key'] will be ignored.
+	options['customkey'] = string for a custom key.
+    options['space'] = false will remove the space between each leaf digit. By default the spacing looks like 3| 1 2 2 3 4 5, setting to false will yield 3|122345.
+    options['stemlabel'] = string for a custom label for Stem.
+    options['leaflabel'] = string for a custom label for Leaf.
+	options['split'] = true will make a split stem-and-leaf display. For example, a stem such as 3|2345789 will be split to two stems 3|234 and 3|5789.
+    The starting point for the code below was based on a Lua and Julia algorithm found on Rosetta Code.
+	Stem-and-leaf plot. (2024, July 22). Rosetta Code. Retrieved 00:26, July 31, 2024 from https://rosettacode.org/wiki/Stem-and-leaf_plot?oldid=367140.
+*/
+function stem_plot($data,$options=array()) {
+	
+	if (!is_array($data)) {
+		echo 'stem_plot expects an array of numerical data';
+		return 0;
+    } else {
+		
+		$data = array_map(function($v){return round($v,0);}, $data) ;
+	}
+	
+	if (isset($options['split'])){
+		$split = $options['split'];
+	} else {
+		$split = false;
+	}
+	
+	if(isset($options['space']) && $options['space']==false){
+		$spc = "";
+	} else {
+		$spc = " ";
+	}
+
+	if(isset($options['customkey'])) {
+		$key = "<caption style='caption-side:bottom; text-align: center;'>{$options['customkey']}</caption>";
+	} elseif(isset($options['key']) && $options['key']==false){
+		$key = "";
+	} else {
+		$keyval = randfrom($data);
+		if($keyval < 0){
+			if(intdiv($keyval,10) == 0){
+				$keytmp = "Key: -0|".(abs($keyval%10))." = ".$keyval;	
+			} else {
+				$keytmp = "Key: ".(intdiv($keyval,10))."|".(abs($keyval%10))." = ".$keyval;	
+			}
+		} else {
+			$keytmp = "Key: ".(intdiv($keyval,10))."|".(abs($keyval%10))." = ".$keyval;	
+		}
+		$key = "<caption style='caption-side:bottom; text-align: center;'>$keytmp</caption>";
+	}
+
+	if(isset($options["stemlabel"])){
+		$stemlabel = $options["stemlabel"];
+	} else {
+		$stemlabel = "Stem";
+	}
+
+	if(isset($options["leaflabel"])){
+		$leaflabel = $options['leaflabel'];
+	} else {
+		$leaflabel = "Leaf";
+	}
+
+	sort($data, SORT_NUMERIC);
+
+	$display = "<table style='align: center; border:0;'>$key";
+	$display .= "<thead><tr><th></th><th style='border-bottom: 1px solid;'>$stemlabel</th><th style='border-bottom: 1px solid; text-align: left;'>$leaflabel</th></tr></thead><tbody>";
+
+	$data_neg = array();
+	$data_pos = array();
+
+	for($i = 0; $i < count($data); $i++){
+		if($data[$i] < 0){
+			$data_neg[] = $data[$i];
+		} else {
+			$data_pos[] = $data[$i];
+		}
+	}
+	
+	if(count($data_neg) > 0){
+		$size = count($data_neg);
+		$min = $data_neg[0];
+		$max =  max($data_neg);
+		$start = intdiv($min,10); 
+		$finish = intdiv($max,10)+1;
+		$chk = 0;
+	
+		for($stem=$start; $stem < $finish; $stem++){
+			$leaf = "";
+
+			if($split == false){
+				if($stem == 0){
+					$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>-0</td>";
+				} else {
+					$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>$stem</td>";
+				}
+			
+				while($chk != $size && intdiv($data_neg[$chk],10) == $stem){
+					$tmp = abs($data_neg[$chk]%10);
+					$leaf .= $spc."$tmp";
+					$chk++;
+				}
+
+			} else {
+
+				if($stem == 0){
+					$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>-0</td>";
+				} else {
+					$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>$stem</td>";
+				}
+
+				while($chk != $size && intdiv($data_neg[$chk],10) == $stem){
+					$tmp = abs($data_neg[$chk]%10);
+					if($tmp < 5){
+						break;
+					}
+					$leaf .= $spc."$tmp";					
+					$chk++;
+				}
+
+				$display .= "<td>$leaf</td></tr>";
+				$leaf = "";
+
+				if($stem == 0){
+					$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>-0</td>";
+				} else {
+					$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>$stem</td>";
+				}
+
+				while($chk != $size && intdiv($data_neg[$chk],10) == $stem){
+					$tmp = abs($data_neg[$chk]%10);
+					$leaf .= $spc."$tmp";					
+					$chk++;
+				}
+			}
+			$display .= "<td>$leaf</td></tr>";
+		}
+	}
+	
+	if(count($data_pos)>0){
+		$min = $data_pos[0];
+		$max =  max($data_pos);
+		$size = count($data_pos);
+		$start = intdiv($min,10); 
+		$finish = intdiv($max,10)+1;
+		$chk = 0;
+
+		if($split == false){
+			for($stem=$start; $stem < $finish; $stem++){
+				$leaf = "";		
+				$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>$stem</td>";
+			
+				while($chk != $size && intdiv($data_pos[$chk],10) == $stem){
+					$tmp = abs($data_pos[$chk]%10);
+					$leaf .= $spc."$tmp";
+					$chk++;
+				}
+				$display .= "<td>$leaf</td></tr>";
+			}
+		} else {
+			for($stem=$start; $stem < $finish; $stem++){
+				$leaf = "";		
+				$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>$stem</td>";
+			
+				while($chk != $size && intdiv($data_pos[$chk],10) == $stem){
+					$tmp = abs($data_pos[$chk]%10);
+					if($tmp > 4){
+						break;
+					}
+					$leaf .= $spc."$tmp";
+					$chk++;
+				}
+				$display .= "<td>$leaf</td></tr>";
+				$display .= "<tr><td></td><td style='text-align: right; border-right: 1px solid;'>$stem</td>";
+				$leaf = "";
+
+				while($chk != $size && intdiv($data_pos[$chk],10) == $stem){
+					$tmp = abs($data_pos[$chk]%10);
+					$leaf .= $spc."$tmp";
+					$chk++;
+				}
+				$display .= "<td>$leaf</td></tr>";
+			}
+		}
+		
+	}
+	$display .= "<tr><td></td><td></td><td></td></tr></tbody></table>";
+	return $display;
+}
+
 ?>

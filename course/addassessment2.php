@@ -109,6 +109,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 array('grades' => $grades)
             );
         }
+        // clear any locks
+        $stm = $DBH->prepare("UPDATE imas_students SET lockaid=0 WHERE courseid=? and lockaid=?");
+        $stm->execute([$cid, $assessmentId]);
 
         $stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
         $stm->execute(array(':assessmentid' => $assessmentId));
@@ -193,7 +196,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 									'reqscore','reqscoretype','reqscoreaid','showcalculator','showhints',
 									'msgtoinstr','eqnhelper','posttoforum','extrefs','showtips',
 									'cntingb','minscore','deffeedbacktext','tutoredit','exceptionpenalty',
-									'defoutcome','isgroup','groupsetid','groupmax','showwork');
+									'defoutcome','isgroup','groupsetid','groupmax','showwork','workcutoff');
 			$fieldlist = implode(',', $fields);
 			$stm = $DBH->prepare("SELECT $fieldlist FROM imas_assessments WHERE id=:id AND courseid=:cid");
 			$stm->execute(array(':id'=>intval($_POST['copyfrom']), ':cid'=>$cid));
@@ -283,34 +286,50 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 			if (isset($_POST['samever'])) { $toset['shuffle'] += 4;}
 			$toset['istutorial'] = empty($_POST['istutorial']) ? 0 : 1;
 			$toset['noprint'] = empty($_POST['noprint']) ? 0 : 1;
+            if (!empty($_POST['lockforassess']) && $_POST['subtype'] == 'by_assessment') {
+                $toset['noprint'] += 2;
+            } 
 			$toset['showcat'] = empty($_POST['showcat']) ? 0 : 1;
-			$toset['showwork'] = Sanitize::onlyInt($_POST['showwork']) + Sanitize::onlyInt($_POST['showworktype']);
+			$toset['showwork'] = Sanitize::onlyInt($_POST['showwork']);
+            if (isset($_POST['showworktype'])) {
+                $toset['showwork'] += Sanitize::onlyInt($_POST['showworktype']);
+            }
+            if (!empty($_POST['doworkcutoff'])) {
+                $toset['workcutoff'] = Sanitize::onlyInt($_POST['workcutoffval']);
+                if ($_POST['workcutofftype'] == 'hr') {
+                    $toset['workcutoff'] *= 60;
+                } else if ($_POST['workcutofftype'] == 'day') {
+                    $toset['workcutoff'] *= 60*24;
+                } 
+            } else {
+                $toset['workcutoff'] = 0;
+            }
 
 			// time limit and access control
 			$toset['allowlate'] = Sanitize::onlyInt($_POST['allowlate']);
-	    if (isset($_POST['latepassafterdue']) && $toset['allowlate']>0) {
-	      $toset['allowlate'] += 10;
-	    }
+            if (isset($_POST['latepassafterdue']) && $toset['allowlate']>0) {
+            $toset['allowlate'] += 10;
+            }
 
-	    if (isset($_POST['dolpcutoff']) && trim($_POST['lpdate']) != '' && trim($_POST['lptime']) != '') {
-	    	$toset['LPcutoff'] = parsedatetime($_POST['lpdate'],$_POST['lptime'],0);
-	    	if (tzdate("m/d/Y",$GLOBALS['courseenddate']) == tzdate("m/d/Y", $toset['LPcutoff']) ||
-					$toset['LPcutoff'] < $toset['enddate']
-				) {
-	    		$toset['LPcutoff'] = 0; //don't really set if it matches course end date or is before
-	    	}
-	    } else {
-	    	$toset['LPcutoff'] = 0;
-	    }
+            if (isset($_POST['dolpcutoff']) && trim($_POST['lpdate']) != '' && trim($_POST['lptime']) != '') {
+                $toset['LPcutoff'] = parsedatetime($_POST['lpdate'],$_POST['lptime'],0);
+                if (tzdate("m/d/Y",$GLOBALS['courseenddate']) == tzdate("m/d/Y", $toset['LPcutoff']) ||
+                        $toset['LPcutoff'] < $toset['enddate']
+                    ) {
+                    $toset['LPcutoff'] = 0; //don't really set if it matches course end date or is before
+                }
+            } else {
+                $toset['LPcutoff'] = 0;
+            }
 
 			$toset['timelimit'] = -1*round(Sanitize::onlyFloat($_POST['timelimit'])*60);
 			$toset['overtime_grace'] = 0;
 			$toset['overtime_penalty'] = 0;
-	    if (isset($_POST['allowovertime']) && $_POST['overtimegrace'] > 0) {
-	        $toset['timelimit'] = -1*$toset['timelimit'];
-					$toset['overtime_grace'] = round(Sanitize::onlyFloat($_POST['overtimegrace'])*60);
-					$toset['overtime_penalty'] = Sanitize::onlyInt($_POST['overtimepenalty']);
-	    }
+            if (isset($_POST['allowovertime']) && $_POST['overtimegrace'] > 0) {
+                $toset['timelimit'] = -1*$toset['timelimit'];
+                $toset['overtime_grace'] = round(Sanitize::onlyFloat($_POST['overtimegrace'])*60);
+                $toset['overtime_penalty'] = Sanitize::onlyInt($_POST['overtimepenalty']);
+            }
 
 			$toset['password'] = trim(Sanitize::stripHtmlTags($_POST['assmpassword']));
 
@@ -535,6 +554,12 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
             // update "show work after" status flags
             AssessHelpers::updateShowWorkStatus($assessmentId, $toset['showwork'], $toset['submitby']);
+
+            if (($toset['noprint']&2) === 0) {
+                // no lock: clear any existing locks
+                $stm = $DBH->prepare("UPDATE imas_students SET lockaid=0 WHERE courseid=? AND lockaid=?");
+                $stm->execute([$cid, $assessmentId]);
+            }
             
 			$DBH->commit();
 			$rqp = Sanitize::randomQueryStringParam();
@@ -657,6 +682,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 					$line['shuffle'] = isset($CFG['AMS']['shuffle'])?$CFG['AMS']['shuffle']:0;
 					$line['noprint'] = isset($CFG['AMS']['noprint'])?$CFG['AMS']['noprint']:0;
 					$line['showwork'] = isset($CFG['AMS']['showwork'])?$CFG['AMS']['showwork']:0;
+                    $line['workcutoff'] = isset($CFG['AMS']['workcutoff'])?$CFG['AMS']['workcutoff']:0;
           $line['istutorial'] = 0;
 					$line['allowlate'] = isset($CFG['AMS']['allowlate'])?$CFG['AMS']['allowlate']:11;
           $line['LPcutoff'] = 0;
@@ -902,12 +928,11 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
  /******* begin html output ********/
 $placeinhead = "<script type=\"text/javascript\" src=\"$staticroot/javascript/DatePicker.js?v=080818\"></script>";
-// $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/vue"></script>';
-//if (!empty($CFG['GEN']['uselocaljs'])) {
-//	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/vue2-6-14.min.js"></script>';
-//} else {
-    $placeinhead .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.13/vue.global.prod.min.js" integrity="sha512-dJsT2VK9KxehzZYzxzUELznI6velu2pAOwpkL5jj4TQQhTNGXZUMup7aLqgqNwVPSUF/Ntcdfla3BEcfC7zwCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
-//}
+if (!empty($CFG['GEN']['uselocaljs'])) {
+	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/vue3-4-31.min.js"></script>';
+} else {
+    $placeinhead .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.31/vue.global.prod.min.js" integrity="sha512-Dg9zup8nHc50WBBvFpkEyU0H8QRVZTkiJa/U1a5Pdwf9XdbJj+hZjshorMtLKIg642bh/kb0+EvznGUwq9lQqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
+}
 
  require_once "../header.php";
 

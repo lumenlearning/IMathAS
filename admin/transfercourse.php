@@ -64,31 +64,11 @@ if (!empty($_POST['newowner'])) {
 	exit;
 }
 
-//process AJAX post-backs
-if (isset($_POST['loadgroup'])) {
-	$stm = $DBH->prepare("SELECT id,LastName,FirstName,rights FROM imas_users WHERE id<>? AND groupid=? AND rights>11 ORDER BY LastName,FirstName");
-	$stm->execute(array($courseownerid, $coursegroupid));
-	$out = array();
-	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-		if ($row['rights']==76 || $row['rights']==77) {continue;}
-		$out[] = array("id"=>$row['id'], "name"=>$row['LastName'].', '.$row['FirstName']);
-	}
-	echo json_encode($out, JSON_HEX_TAG);
-	exit;
-} else if (isset($_POST['search'])) {
-	require_once "../includes/userutils.php";
-	$search = (string) trim($_POST['search']);
-	$possible_teachers = searchForUser($search, true, true);
-	$out = array();
-	foreach ($possible_teachers as $row) {
-		if ($row['id']==$courseownerid) { continue; }
-		$out[] = array("id"=>$row['id'], "name"=>$row['LastName'].', '.$row['FirstName'].' ('.$row['name'].')');
-	}
-	echo json_encode($out, JSON_HEX_TAG);
-	exit;
+if (!empty($CFG['GEN']['uselocaljs'])) {
+	$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/vue3-4-31.min.js"></script>';
+} else {
+    $placeinhead = '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.31/vue.global.prod.min.js" integrity="sha512-Dg9zup8nHc50WBBvFpkEyU0H8QRVZTkiJa/U1a5Pdwf9XdbJj+hZjshorMtLKIg642bh/kb0+EvznGUwq9lQqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
 }
-
-$placeinhead = '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.13/vue.global.prod.min.js" integrity="sha512-dJsT2VK9KxehzZYzxzUELznI6velu2pAOwpkL5jj4TQQhTNGXZUMup7aLqgqNwVPSUF/Ntcdfla3BEcfC7zwCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
 $placeinhead .= '<style type="text/css">
  [v-cloak] { display: none;}
  .fade-enter-active {
@@ -169,8 +149,8 @@ createApp({
 			$.ajax({
 				dataType: "json",
 				type: "POST",
-				url: window.location.href,
-				data: {loadgroup: 1},
+				url: "<?php echo $basesiteurl;?>/util/userlookup.php",
+				data: {loadgroup: 1, cid: <?php echo $cid;?>},
 			}).done(function(msg) {
 				self.searchResults = msg;
 			}).always(function() {
@@ -186,8 +166,8 @@ createApp({
 				$.ajax({
 					dataType: "json",
 					type: "POST",
-					url: window.location.href,
-					data: {search: this.toLookup},
+					url: "<?php echo $basesiteurl;?>/util/userlookup.php",
+					data: {search: this.toLookup, cid: <?php echo $cid;?>},
 				}).done(function(msg) {
 					self.searchResults = msg;
 				}).always(function() {

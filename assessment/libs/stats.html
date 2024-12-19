@@ -28,7 +28,9 @@ A library of Stats functions.  Version 1.30, Nov 20, 2021
 <li><a href="#countif">countif</a></li>
 <li><a href="#histogram">histogram</a></li>
 <li><a href="#fdhistogram">fdhistogram</a></li>
+<li><a href="#stem_plot">stem_plot</a></li>
 <li><a href="#fdbargraph">fdbargraph</a></li>
+<li><a href="#cluster_bargraph">cluster_bargraph</a></li>
 <li><a href="#piechart">piechart</a></li>
 <li><a href="#normrand">normrand</a></li>
 <li><a href="#expdistrand">expdistrand</a></li>
@@ -66,6 +68,7 @@ A library of Stats functions.  Version 1.30, Nov 20, 2021
 <li><a href="#anova2way_f">Two-way ANOVA: F ratios/P values </a></li>
 <li><a href="#anova_table">ANOVA Table</a></li>
 <li><a href="#student_t">Two-sample student t-test</a></li>
+
 </ul>
 <h3><a name="nCr">nCr</a></h3>
 nCr(n,r)
@@ -197,6 +200,23 @@ fdhistogram(freqarray,label,start,cw,[labelstart,upper,width,height,showgrid,fil
 <p>To fill in only some optional parameters, the 5th argument can instead be an associate array 
  of values to fill in, like ['width'=>500, 'fill'=>'blue'].  When used this way, 'vertlabel' can 
  be used to change the vertical axis label.</p>
+ <h3><a name="stem_plot"></a><strong>stem_plot</strong>(data, [options])</h3>
+ <p>The function stem_plot() produces a basic stem-and-leaf display. </p>
+ <p><em>Parameters:</em></p>
+ <ul>
+     <li><strong>data</strong>: array of data.</li>
+     <li><strong>options</strong>(optional): array of options:</li>
+     <ul>
+         <li>options['key'] = false will remove key. For example, by default there is a key such as Key: 3|4 means 34 and will be removed if false. If $options['customkey'] is set, then options['key'] will be ignored.</li>
+         <li>options['customkey'] = string for a custom key.</li>
+         <li>options['space'] = false will remove the space between each leaf digit. By default the spacing looks like 3| 1 2 2 3 4 5, setting to false will yield 3|122345.</li>
+         <li>options['stemlabel'] = string for a custom label for Stem.</li>
+         <li>options['leaflabel'] = string for a custom label for Leaf.</li>
+         <li>options['split'] = true will make a split stem-and-leaf display. For example, a stem such as 3|2345789 will be split to two stems 3|234 and 3|5789.</li>
+     </ul>
+ </ul>
+ <p>&nbsp;<em>Returns:</em></p>
+ <p>Stem-and-leaf display</p>
 <BR><h3><a name="fdbargraph">fdbargraph</a></h3>
 fdbargraph(barlabels,freqarray,label,[width,height,options])
 <BR>barlabels: array of labels for the bars
@@ -211,6 +231,34 @@ fdbargraph(barlabels,freqarray,label,[width,height,options])
 <BR>&nbsp;&nbsp;options['toplabel'] = label for top of chart
 <BR>&nbsp;&nbsp;options['fill'] = fill color of the bars; default is blue
 <BR>&nbsp;&nbsp;options['stroke'] = line color of the bars; default is black
+
+<h3><a name="cluster_bargraph"></a><strong>cluster_bargraph</strong>(var1labels, var2labels,freqarray,label,[width,height,options])</h3>
+<p>The function cluster_bargraph() graphs a cluster bar graph also known as group bar chart or mult-series bar chart. </p>
+<p><em>Parameters:</em></p>
+<ul>
+    <li><strong>var1labels</strong>: array of labels for the categories for variable 1 which appear on the horizontal axis </li>
+    <li><strong>var2labels</strong>: array of labels for the categories for variable 2 which appears in the legend.</li>
+    <li><strong>freqarray</strong>: array of arrays holding the frequencies/heights for each bar. Note: freqarray should have the form [[1,3,5],[5,3,5],[1,3,2],[3,6,4]] or 
+    array(array(1,3,5),array(5,3,5),array(1,3,2),array(3,6,4)), which corresponds to variable 1 having 3 categories (3 clusters) and variable 2 having 4 categories (4 bars for each cluster).</li>
+    <li><strong>label</strong>: general label for bars</li>
+    <li><strong>width</strong>,<strong>height</strong>(optional): width and height for graph</li>
+    <li><strong>options</strong>(optional): array of options:</li>
+    <ul>
+        <li>options['valuelabels'] = array of value labels, to be placed above each bar</li>
+        <li>options['showgrid'] = false to hide the horizontal grid lines</li>
+        <li>options['vertlabel'] = label for vertical axis. Defaults to none</li>
+        <li>options['gap'] = gap (0 &le; gap &lt; 1) between bars</li>
+        <li>options['toplabel'] = label for top of chart</li>
+        <li>options['colors'] = array of colors for each bar in the clusters</li>
+        <li>options['stroke'] = line color of the bars; default is black</li>
+        <li>options['var1name'] = a string for the variable 1 name for alternative text </li>
+        <li>options['var2name'] = a string for the variable 2 name for alternative text </li>
+    </ul>
+</ul>
+<p>&nbsp;<em>Returns:</em></p>
+<p>Cluster bargraph</p>
+<p>&nbsp;</p>
+     
 <BR><h3><a name="piechart">piechart</a></h3>
 piechart(percents, labels, {width, height})
 <BR>create a piechart
@@ -308,14 +356,15 @@ checklineagainstdata(xarray, yarray, student answer, [variable, alpha])
 <BR>alpha: for confidence bound.  defaults to .05
 <BR>return array(answer, showanswer) to be used to set $answer and $showanswer
 <BR><h3><a name="checkdrawnlineagainstdata">checkdrawnlineagainstdata</a></h3>
-checkdrawnlineagainstdata(xarray, yarray, student answer, [grade dots, alpha, grid])
+checkdrawnlineagainstdata(xarray, yarray, student answer, [grade dots, alpha, grid, snaptogrid])
 <BR>intended for checking a student answer for drawing a line fit to data.  Determines
 <BR>if the student answer is within the confidence bounds for the regression equation.
 <BR>xarray, yarray:  list/array of data values
 <BR>student answer from draw:  the $stuanswers[$thisq]
 <BR>grade dots: default false.  If true, will grade that dots of xarray,yarray were plotted
 <BR>alpha: for confidence bound.  defaults to .05
-<BR>grid:  If you've modified the grid, include it here
+<BR>grid:  If you've modified the grid, include it here 
+<BR>snaptogrid: If you're using snaptogrid, include it here
 <BR>return array(answer, showanswer) to be used to set $answer and $showanswer
 <BR><h3><a name="binomialpdf">binomialpdf</a></h3>
 binomialpdf(N,p,x)
@@ -473,3 +522,5 @@ dotplot(array,label,[dotspacing,labelspacing,width,height])
   <p>&nbsp;<em>Returns:</em></p>
   <p>t statistic, corresponding P-value (area to the right of t-value -  one-tail), and degree of freedom for two sample student t-test as an array in the form [t, P-value, df].</p>
   <p>&nbsp;</p> 
+
+  

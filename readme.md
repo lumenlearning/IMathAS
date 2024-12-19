@@ -17,6 +17,7 @@ requires PHP 7.4+, and MySQL 5.6+.  PHP has the following recommended or require
 - pdo_mysql (required)
 - gettext (required)
 - gd with freetype (recommended) for image creation
+- zip (recommended) necessary for course export packages
 - curl (recommended) necessary for LTI grade passback
 - openssl (recommended) necessary for LTI 1.3 services
 
@@ -69,6 +70,7 @@ These are all added to the `config.php` by the install script.
 make sure you also edit your config.php and make sure the PDO connection includes a charset.  If it doesn't already, you'll want to add <code>;charset=latin1</code> to 
 the connection string (after the host= and dbname= portions) to ensure the encoding remains
 the same as the 5.x default after upgrade.  If on a new install, it's better to use <code>;charset=utf8mb4</code>.
+- `$CFG['YouTubeAPIKey']`: If the caption detection on videos attached to questions stops working, set this to your YouTube Data API v3 key, obtained from Google Cloud Platform, to use a more reliable method.
 
 ### System Defaults
 
@@ -158,6 +160,7 @@ course list from the course browser options, so you must also have `$CFG['course
 
 ### LTI
 
+- If you're going to be using LTI 1.3, make sure you go to Admin Page, LTI 1.3 Platforms, Manage Private Keys and add a new key.  This should only need to be done once, unless you choose to rotate your keys.
 - `$CFG['LTI']['noCourseLevel']`: set to true to hide course level LTI key and secret from users. Use this if you want to require use of global LTI key/secrets.
 - `$CFG['LTI']['noGlobalMsg']`: When the `noCourseLevel` option above is set, use this option to define a message that will be displayed on the export page when no global LTI is set for the group.
 - `$CFG['LTI']['showURLinSettings']`: Set to true to show the LTI launch URL on the course settings page.  Normally omitted to avoid confusion (since it's not needed in most LMSs).
@@ -200,6 +203,17 @@ If you wish to enable users to request browser push notifications (does not work
 - `$CFG['FCM']['serverApiKey']`: Your server key, from the Firebase project console.
 - `$CFG['FCM']['icon']`: an absolute web path to an icon to show on notifications.
 
+As of June 2024, the original method for interfacing with FCM will be eliminated, so to 
+continue using push notifications, you will need to:
+
+- In your config.php, add `$CFG['FCM']['project_id']`: your Project ID, from the Firebase project console.
+- Go to the Firebase console, click on your project, go to Project Settings, click on Service Accounts,
+  and click Generate new private key. This will download a .json file to your computer.
+- In the Project Settings, click on Cloud Messaging, and ensure Firebase Cloud Messaging API (V1) is
+  enabled (you may need to go to the Google Cloud Console to enable it)
+- In your IMathAS install, while logged in as an admin, go to Admin Page, click Utilities, then click
+  Set up FCM for push notifications.  Here, paste the contents of the .json file you downloaded, and Save.
+
 ### Internationalization
 
 The student side of the system is pretty well set up for i18n, but the instructor side is  not yet.  Currently the only translation pack available is `de` (German).  See `/i18n/translating.md` for more information about generating translations.  To enable a translation:
@@ -238,6 +252,10 @@ Options:
 - `$CFG['cleanup']['msgfrom']`:  the userid to send notification message from (def: 0)
 - `$CFG['cleanup']['keepsent']`:   set =0 to keep a copy of sent notifications in sent list
 - `$CFG['cleanup']['allowoptout']`:   (default: true) set to false to prevent teachers opting out
+- `$CFG['cleanup']['deloldaudit']`:  a number of days after which to delete 
+    teacher audit log data.  (def: 0 (don't use))
+- `$CFG['cleanup']['deloldltiqueue']`:  a number of days after which to delete 
+    LTI failure timesouts.  (def: 180)
 - `$CFG['cleanup']['groups']`: You can specify different old/delay values for different groups by defining
 `$CFG['cleanup']['groups'] = array(groupid => array('old'=>days, 'delay'=>days));`
 - `$CFG['cleanup']['oldstu']`: a number of days of inactivity in a student account after which the account is 

@@ -29,7 +29,7 @@ if (empty($_SESSION['tzoffset']) && !empty($CFG['static_server'])) {
     echo '<script src="'.$CFG['static_server'].'/javascript/staticcheck.js"></script>';
 }
 ?>
-<link rel="stylesheet" href="<?php echo $staticroot . "/imascore.css?ver=020123";?>" type="text/css" />
+<link rel="stylesheet" href="<?php echo $staticroot . "/imascore.css?ver=110324";?>" type="text/css" />
 <?php
 $isfw = false;
 if (isset($coursetheme)) {
@@ -77,7 +77,7 @@ div.breadcrumb { display:none;}
 var imasroot = '<?php echo $imasroot; ?>'; var cid = <?php echo (isset($cid) && is_numeric($cid))?$cid:0; ?>;
 var staticroot = '<?php echo $staticroot; ?>';
 </script>
-<script type="text/javascript" src="<?php echo $staticroot;?>/javascript/general.js?v=011024"></script>
+<script type="text/javascript" src="<?php echo $staticroot;?>/javascript/general.js?v=110324"></script>
 <?php
 //$_SESSION['mathdisp'] = 3;
 //
@@ -120,7 +120,7 @@ if (!isset($_SESSION['mathdisp'])) {
             AM.newsymbol({input: "ominus", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "rightleftharpoons", tag:"mo", output:"\u21CC", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "hbar", tag:"mi", output:"\u210F", ttype:AM.TOKEN.CONST});
-            ["arccot","arccsc","arccot"].forEach(function(v) {
+            ["arcsec","arccsc","arccot"].forEach(function(v) {
                 AM.newsymbol({input:v, tag:"mi", output:v, ttype:AM.TOKEN.UNARY, func:true});
             });
         });
@@ -176,7 +176,7 @@ if (!isset($_SESSION['mathdisp'])) {
             AM.newsymbol({input: "ominus", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "rightleftharpoons", tag:"mo", output:"\u21CC", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "hbar", tag:"mi", output:"\u210F", ttype:AM.TOKEN.CONST});
-            ["arccot","arccsc","arccot"].forEach(function(v) {
+            ["arcsec","arccsc","arccot"].forEach(function(v) {
                 AM.newsymbol({input:v, tag:"mi", output:v, ttype:AM.TOKEN.UNARY, func:true});
             });
             MathJax.startup.defaultReady();
@@ -192,7 +192,7 @@ if (!isset($_SESSION['mathdisp'])) {
 					callback = function () {};
 				}
                 MathJax.typesetClear([node]);
-                MathJax.typesetPromise([node]).then(callback);
+                MathJax.typesetPromise([node]).then(sendLTIresizemsg).then(callback);
 			} else {
 				setTimeout(function() {rendermathnode(node, callback);}, 100);
 			}
@@ -244,7 +244,7 @@ if (isset($_SESSION['graphdisp']) && $_SESSION['graphdisp']==1) {
 
 
 if (isset($useeditor) && $_SESSION['useed']==1) {
-    echo '<script type="text/javascript" src="'.$staticroot.'/tinymce4/tinymce_bundled.min.js?v=121323"></script>';
+    echo '<script type="text/javascript" src="'.$staticroot.'/tinymce4/tinymce_bundled.min.js?v=021324"></script>';
     //echo '<script type="text/javascript" src="'.$imasroot.'/tinymce4/tinymce.js?v=062821"></script>';
 
 	echo "\n";

@@ -154,10 +154,25 @@
 			$vidid = getvideoid($_POST['helpurl']);
 			if ($vidid=='') {
 				$captioned = 0;
-			} else {
+			} else if (isset($CFG['YouTubeAPIKey'])) {
+                $captioned = 0;
+                $ctx = stream_context_create(array('http'=>array('timeout' => 1)));
+                $resp = @file_get_contents('https://youtube.googleapis.com/youtube/v3/captions?part=snippet&videoId='.$vidid.'&key='.$CFG['YouTubeAPIKey'], false, $ctx);
+                $capdata = json_decode($resp, true);
+                if ($capdata !== null && isset($capdata['items'])) {
+                    foreach ($capdata['items'] as $cap) {
+                        if ($cap['snippet']['trackKind'] == 'standard') {
+                            $captioned = 1;
+                            break;
+                        }
+                    }
+                }
+            } else {
 				$ctx = stream_context_create(array('http'=>
 				    array(
-					'timeout' => 1
+					'timeout' => 1,
+                    'header' => "Accept-language: en\r\n" . 
+                                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 				    )
 				));
 				$t = @file_get_contents('https://www.youtube.com/watch?v='.$vidid, false, $ctx);
@@ -191,12 +206,13 @@
 		$_POST['qtext'] = preg_replace('/<(\/?\w[^<>]*?)>/',"&&&L$1&&&G",$_POST['qtext']);
 		$_POST['qtext'] = str_replace(array("<",">"),array("&lt;","&gt;"),$_POST['qtext']);
 		$_POST['qtext'] = str_replace(array("&&&L","&&&G"),array("<",">"),$_POST['qtext']);
+        $_POST['solution'] = str_replace(array('<!--','-->'),array('&&&L!--','--&&&G'),$_POST['solution']);
 		$_POST['solution'] = preg_replace('/<([^<>]+?)>/',"&&&L$1&&&G",$_POST['solution']);
 		$_POST['solution'] = str_replace(array("<",">"),array("&lt;","&gt;"),$_POST['solution']);
 		$_POST['solution'] = str_replace(array("&&&L","&&&G"),array("<",">"),$_POST['solution']);
 		$_POST['description'] = str_replace(array("<",">"),array("&lt;","&gt;"),$_POST['description']);
 
-        $isrand = preg_match('/(shuffle|getprimes?|rand[a-zA-Z]*)\s*\(/',$_POST['control']) ? 1 : 0;
+        $isrand = preg_match('/((shuffle|getprimes?|rand[a-zA-Z]*)\s*\(|randweights)/',$_POST['control']) ? 1 : 0;
         if (!$isrand) { // check any included code
             preg_match_all('/includecodefrom\(\s*(\d+)\s*\)/',$_POST['control'],$matches,PREG_PATTERN_ORDER);
             if (!empty($matches[1])) {
@@ -863,7 +879,7 @@
 	*/
 	$useeditor = "noinit";
 	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/codemirror/codemirror-compressed.js?v=091522"></script>';
-	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/codemirror/imathas.js?v=022723"></script>';
+	$placeinhead .= '<script type="text/javascript" src="'.$staticroot.'/javascript/codemirror/imathas.js?v=062424"></script>';
 	$placeinhead .= '<link rel="stylesheet" href="'.$staticroot.'/javascript/codemirror/codemirror_min.css?v=091522">';
 
 	//$placeinhead .= '<script src="//sagecell.sagemath.org/embedded_sagecell.js"></script>'.PHP_EOL;
@@ -1009,6 +1025,28 @@
 	   		document.getElementById(id).rows -= 2;
 	   	}
 	   }
+        $(function() {
+          $("#qtypedd a[data-sn]").on("click", function(e) {
+            $("#qtypedd dd-active").removeClass("dd-active");
+            selectqtype(this.getAttribute("data-sn"));
+            $("#qtype").val(this.getAttribute("data-sn"));
+          });
+        });
+        function selectqtype(sn) {
+            // close all second-levels
+            $(".dropdown-submenu").removeClass("open");
+            $("#qtypedd a").removeClass("dd-active").attr("aria-expanded",false);
+            var selel = $("#qtypedd a[data-sn=" + sn + "]");
+            console.log("#qtypedd a[data-sn=" + sn + "]");
+            selel.addClass("dd-active"); 
+            selel.closest(".dropdown-submenu").addClass("open").children("a").addClass("dd-active").attr("aria-expanded",true);
+            var longname = selel.text();
+            if (selel.attr("data-ln")) {
+                longname = selel.attr("data-ln");
+            }
+            $("#qtypedd > button.dropdown-toggle").html(longname + " <span class=\'arrow-down\'></span>");
+        }
+        $(function() { selectqtype($("#qtype").val()); });
 	   </script>';
 	$placeinhead .= "<script src=\"$staticroot/javascript/solver.js?ver=110621\" type=\"text/javascript\"></script>\n";
 	$placeinhead .= '<style type="text/css">.CodeMirror {font-size: medium;border: 1px solid #ccc;}
@@ -1018,6 +1056,7 @@
 		.CodeMirror-selectedtext {color: #ffffff !important;background-color: #3366AA;}
 		.CodeMirror-focused .CodeMirror-selected {background: #3366AA;}
 		.CodeMirror-selected {background: #666666;}
+        .dd-active {background-color: #eef;}
 		</style>';
 	$placeinhead .= "<link href=\"$staticroot/course/solver.css?ver=230616\" rel=\"stylesheet\">";
 	$placeinhead .= "<style>.quickSaveButton {display:none;}</style>";
@@ -1208,32 +1247,78 @@ if ($olnames !== '') {
 }
 ?>
 </p>
-<p>
-<?php echo _('Question type:'); ?> <select name=qtype <?php if (!$canedit) echo "disabled=\"disabled\"";?>>
-	<option value="number" <?php if ($line['qtype']=="number") {echo "SELECTED";} ?>>Number</option>
-	<option value="calculated" <?php if ($line['qtype']=="calculated") {echo "SELECTED";} ?>>Calculated Number</option>
-	<option value="choices" <?php if ($line['qtype']=="choices") {echo "SELECTED";} ?>>Multiple-Choice</option>
-	<option value="multans" <?php if ($line['qtype']=="multans") {echo "SELECTED";} ?>>Multiple-Answer</option>
-	<option value="matching" <?php if ($line['qtype']=="matching") {echo "SELECTED";} ?>>Matching</option>
-	<option value="numfunc" <?php if ($line['qtype']=="numfunc") {echo "SELECTED";} ?>>Function</option>
-	<option value="string" <?php if ($line['qtype']=="string") {echo "SELECTED";} ?>>String</option>
-	<option value="essay" <?php if ($line['qtype']=="essay") {echo "SELECTED";} ?>>Essay</option>
-	<option value="draw" <?php if ($line['qtype']=="draw") {echo "SELECTED";} ?>>Drawing</option>
-	<option value="ntuple" <?php if ($line['qtype']=="ntuple") {echo "SELECTED";} ?>>N-Tuple</option>
-	<option value="calcntuple" <?php if ($line['qtype']=="calcntuple") {echo "SELECTED";} ?>>Calculated N-Tuple</option>
-	<option value="matrix" <?php if ($line['qtype']=="matrix") {echo "SELECTED";} ?>>Numerical Matrix</option>
-	<option value="calcmatrix" <?php if ($line['qtype']=="calcmatrix") {echo "SELECTED";} ?>>Calculated Matrix</option>
-	<option value="interval" <?php if ($line['qtype']=="interval") {echo "SELECTED";} ?>>Interval</option>
-	<option value="calcinterval" <?php if ($line['qtype']=="calcinterval") {echo "SELECTED";} ?>>Calculated Interval</option>
-	<option value="complex" <?php if ($line['qtype']=="complex") {echo "SELECTED";} ?>>Complex</option>
-	<option value="calccomplex" <?php if ($line['qtype']=="calccomplex") {echo "SELECTED";} ?>>Calculated Complex</option>
-	<option value="chemeqn" <?php if ($line['qtype']=="chemeqn") {echo "SELECTED";} ?>>Chemical Equation</option>
-	<option value="file" <?php if ($line['qtype']=="file") {echo "SELECTED";} ?>>File Upload</option>
-	<option value="multipart" <?php if ($line['qtype']=="multipart") {echo "SELECTED";} ?>>Multipart</option>
-	<option value="conditional" <?php if ($line['qtype']=="conditional") {echo "SELECTED";} ?>>Conditional</option>
-
-</select>
-</p>
+<div class="pdiv">
+<?php echo _('Question type:'); ?> 
+<div style="display:inline-block" class="dropdown" id="qtypedd">
+    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Select Type</button>
+    <ul class="dropdown-menu">
+      <li class="dropdown-submenu">
+        <a href="#">Number</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="number" data-ln="Number">Numeric</a></li>
+          <li><a href="#" data-sn="calculated" data-ln="Calculated Number">Calculated</a></li>
+          <li><a href="#" data-sn="complex" data-ln="Complex Number">Complex</a></li>
+          <li><a href="#" data-sn="calccomplex" data-ln="Calculated Complex Number">Calculated Complex</a></li>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a href="#">Selecting from Options</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="choices">Multiple-choice</a></li>
+          <li><a href="#" data-sn="multans">Multiple-answer</a></li>
+          <li><a href="#" data-sn="matching">Matching</a></li>
+        </ul>
+      </li>
+      <li><a href="#" data-sn="numfunc">Algebraic Expression (Function)</a></li>
+      <li class="dropdown-submenu">
+        <a href="#">Text Entry / Upload</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="string">String</a></li>
+          <li><a href="#" data-sn="essay">Essay</a></li>
+          <li><a href="#" data-sn="file">File Upload</a></li>
+         </ul>
+      </li>
+      <li><a href="#" data-sn="draw">Drawing</a></li>
+      <li class="dropdown-submenu">
+        <a href="#">N-Tuple</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="ntuple" data-ln="N-Tuple">Numeric</a></li>
+          <li><a href="#" data-sn="calcntuple" data-ln="Calculated N-Tuple">Calculated</a></li>
+          <li><a href="#" data-sn="complexntuple" data-ln="Complex N-Tuple">Complex</a></li>
+          <li><a href="#" data-sn="calccomplexntuple" data-ln="Calculated Complex N-Tuple">Calculated Complex</a></li>
+          <li><a href="#" data-sn="algntuple" data-ln="Algebraic N-Tuple">Algebraic</a></li>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a href="#">Matrix</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="matrix" data-ln="Matrix">Numeric</a></li>
+          <li><a href="#" data-sn="calcmatrix" data-ln="Calculated Matrix">Calculated</a></li>
+          <li><a href="#" data-sn="complexmatrix" data-ln="Complex Matrix">Complex</a></li>
+          <li><a href="#" data-sn="calccomplexmatrix" data-ln="Calculated Complex Matrix">Calculated Complex</a></li>
+          <li><a href="#" data-sn="algmatrix" data-ln="Algebraic Matrix">Algebraic</a></li>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a href="#">Interval</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="interval" data-ln="Interval">Numeric</a></li>
+          <li><a href="#" data-sn="calcinterval" data-ln="Calculated Interval">Calculated</a></li>
+        </ul>
+      </li>
+      <li class="dropdown-submenu">
+        <a href="#">Chemical</a>
+        <ul class="dropdown-menu">
+          <li><a href="#" data-sn="chemeqn" data-ln="Chemical Equation">Equation</a></li>
+          <li><a href="#" data-sn="molecule" data-ln="Chemical Molecule">Molecule</a></li>
+        </ul>
+      </li>
+      <li><a href="#" data-sn="multipart">Multipart</a></li>
+      <li><a href="#" data-sn="conditional">Conditional</a></li>
+    </ul>
+</div>
+<input type=hidden name=qtype id=qtype value="<?php echo Sanitize::encodeStringForDisplay($line['qtype']);?>" />
+</div>
 <p>
 <a href="#" onclick="window.open('<?php echo $imasroot;?>/help.php?section=writingquestions','Help','width='+(.35*screen.width)+',height='+(.7*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width*.6));return false;"><?php echo _('Writing Questions Help'); ?></a> |
 <a href="#" onclick="window.open('<?php echo $imasroot;?>/assessment/libs/libhelp.php','Help','width='+(.35*screen.width)+',height='+(.7*screen.height)+',scrollbars=1,resizable=1,status=1,top=20,left='+(screen.width*.6));return false;"><?php echo _('Macro Library Help'); ?></a>

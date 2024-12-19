@@ -45,22 +45,46 @@ function hideNA() {
 	}
 	$(".notanswered").toggle();
 }
-function showallans() {
-	$("span[id^='ans']").toggleClass("hidden", false).show();
+function showallans(el) {
+    if (el) { el.disabled = true; }
+	$("span[id^='ans']").show();
     $(".sabtn").replaceWith("<span>Answer: </span>");
-    $("div[id^=dsbox]").toggleClass("hidden", false).attr("aria-hidden", false)
-        .attr("aria-expanded", true);
-    $("button[aria-controls^=ans],input[aria-controls^=dsbox]").attr('aria-expanded', true);
+    toggleshowallans(true);
+}
+function toggleshowallans(state, base) {
+    if (typeof base === 'undefined') { base = 'body'; }
+    $(base).find("span[id^='ans']").toggleClass("hidden", !state);
+    $(base).find("div[id^=dsbox]").toggleClass("hidden", !state).attr("aria-hidden", !state)
+        .attr("aria-expanded", state);
+    $(base).find("button[aria-controls^=ans],input[aria-controls^=dsbox]").attr('aria-expanded', state);
 }
 function previewall() {
 	$('input[value="Preview"]').trigger('click').remove();
 }
-function previewallfiles() {
+function previewallfiles(el) {
+    if (el) { el.disabled = true; }
 	$("span.clickable").trigger("click");
-	$(".question span[id^=fileembedbtn], .sidepreview span[id^=fileembedbtn], .viewworkwrap span[id^=fileembedbtn]").trigger("click");
+	togglepreviewallfiles(true);
 }
-function showallwork() {
-	$(".viewworkwrap > button").trigger("click");
+function togglepreviewallfiles(state, base) {
+    if (typeof base === 'undefined') { base = 'body'; }
+    $(base).find(".question span[id^=fileembedbtn], .sidepreview span[id^=fileembedbtn], .viewworkwrap span[id^=fileembedbtn]").each(function(i,el) {
+        togglefileembed(el.id,state);
+    });
+    if ($(base).hasClass("viewworkwrap")) {
+        $(base).find("span[id^=fileembedbtn]").each(function(i,el) {
+            togglefileembed(el.id,state);
+        });
+    }
+}
+function showallwork(el) {
+    if (el) { el.disabled = true; }
+    toggleshowallwork(true);
+}
+function toggleshowallwork(state) {
+    $(".viewworkwrap > button").each(function(i,el) {
+        toggleWork(el,state);
+    });
 }
 function allvisfullcred() {
     if (confirm(_('Are you SURE you want to give all students full credit?'))) {
@@ -87,12 +111,12 @@ function updatefilters() {
     }
     $(".bigquestionwrap .headerpane,.scoredetails .person").toggle(!document.getElementById('filter-names').checked);
 }
-function toggleWork(el) {
+function toggleWork(el, state) {
 	var next = $(el).next();
-	if (next.is(':hidden')) {
+	if (next.is(':hidden') && state !== false) {
 		el.innerText = _('Hide Work');
         next.show();
-	} else {
+	} else if (state !== true) {
 		el.innerText = _('Show Work');
 		next.hide();
 	}
@@ -278,44 +302,108 @@ function initAnswerboxHighlights() {
 };
 
 var sidebysideenabled = false;
-function sidebysidegrading() {
-    if (sidebysideenabled) { return; }
-    sidebysideenabled = true;
-	$("body").removeClass("fw1000").removeClass("fw1920");
-	$(".scrollpane").wrap('<div class="sidebyside">');
-	$(".sidebyside").append('<div class="sidepreview">');
-	$(".sidebyside").css('display','flex').css('flex-wrap','nowrap');
-	$(".sidepreview").css('border-left','1px solid #ccc').css('padding','10px');
-	$(".scrollpane,.sidepreview").css('width','50%');
-	// will have to adjust fileembedbtn to open in sidepreview
-	$(".question div.introtext").each(function(i,el) {
-		$(el).find(".keywrap.inwrap").insertAfter($(el));
-		var tgt = $(el).closest(".sidebyside").find('.sidepreview');
-		$(el).after('<div class="subdued">('+(i+1)+')</div>');
-		tgt.append('<div class="subdued">('+(i+1)+') </div>').append(el);
-	});
-	$(".lastfilesub").each(function(i,el) {
-		var tgt = $(el).closest(".sidebyside").find('.sidepreview');
-		$(el).after('<span class="subdued">('+(i+1)+')</span>');
-		tgt.append('<span class="subdued">('+(i+1)+') </span>').append(el);
-	});
-	$(".viewworkwrap").each(function(i,el) {
-		$(el).css('margin','0');
-		$(el).closest(".sidebyside").find('.sidepreview').append(el);
-	});
+function sidebysidegrading(state) {
+    if (typeof state === 'undefined') {
+        sidebysideenabled = !sidebysideenabled;
+    } else {
+        if (state == sidebysideenabled) { return; }
+        sidebysideenabled = state;
+    }
+    if (sidebysideenabled) {
+        if ($("body").hasClass("fw1000")) { $("body").data("origfw", "fw1000");}
+        if ($("body").hasClass("fw1920")) { $("body").data("origfw", "fw1920");}
+        $("body").removeClass("fw1000").removeClass("fw1920");
+    } else {
+        if ($("body").data("origfw")) { $("body").addClass($("body").data("origfw")); }
+    }
+	if (sidebysideenabled && $(".sidebyside").length == 0) {
+        $(".scrollpane").wrap('<div class="sidebyside">');
+        $(".sidebyside").append('<div class="sidepreview">');
+        $(".sidebyside").css('display','flex').css('flex-wrap','nowrap');
+    }
+    if (sidebysideenabled) {
+        $(".sidepreview").css('border-left','1px solid #ccc').css('padding','10px');
+	    $(".scrollpane,.sidepreview").css('width','50%');
+    } else {
+        $(".sidepreview").css('border-left','').css('padding','0px');
+	    $(".scrollpane").css('width','100%');
+        $(".sidepreview").css('width','0%');
+    }
+    sidebysidemoveels(sidebysideenabled);
+    if (sidebysideenabled) {
+        $(".scrollpane .viewworkwrap").each(function(i,el) {
+            $(el).css('margin','0');
+            $(el).closest(".sidebyside").find('.sidepreview').append(el);
+        });
+    } else {
+        $(".sidepreview .viewworkwrap").each(function(i,el) {
+            $(el).css('margin','');
+            $(el).closest(".sidebyside").find('.scrollpane').append(el);
+        });
+    }
+}
+
+function sidebysidemoveels(state,base) {
+    if (typeof base === 'undefined') { base = 'body'; }
+    if (state) {
+        $(base).find(".question div.introtext").each(function(i,el) {
+            $(el).find(".keywrap.inwrap").insertAfter($(el));
+            var tgt = $(el).closest(".sidebyside").find('.sidepreview');
+            if (tgt.find(".sidepreviewtarget").length > 0) {
+                tgt = tgt.find(".sidepreviewtarget");
+            }
+            $(el).after('<div class="subdued" id="it_s'+i+'">('+(i+1)+')</div>');
+            tgt.append('<div class="subdued" id="it_d'+i+'">('+(i+1)+') </div>').append(el);
+        });
+        $(base).find(".question .lastfilesub").each(function(i,el) {
+            var tgt = $(el).closest(".sidebyside").find('.sidepreview');
+            if (tgt.find(".sidepreviewtarget").length > 0) {
+                tgt = tgt.find(".sidepreviewtarget");
+            }
+            $(el).after('<span class="subdued" id="lf_s'+i+'">('+(i+1)+')</span>');
+            tgt.append('<span class="subdued" id="lf_d'+i+'">('+(i+1)+') </span>').append(el);
+        });
+    } else {
+        $(base).find("div[id^=it_s").each(function(i,el) {
+            let n = el.id.substr(4);
+            let srcnum = $('#it_d'+n);
+            let tomove = srcnum.next();
+            el.replaceWith(tomove[0]);
+            srcnum.remove();
+        });
+        $(base).find("span[id^=lf_s").each(function(i,el) {
+            let n = el.id.substr(4);
+            let srcnum = $('#lf_d'+n);
+            let tomove = srcnum.next();
+            el.replaceWith(tomove[0]);
+            srcnum.remove();
+        });
+    }
 }
 
 var scrollingscoreboxes = false;
-function toggleScrollingScoreboxes() {
+function toggleScrollingScoreboxes(el) {
     if (scrollingscoreboxes) {
+        if (el) {el.innerText = _('Floating Scoreboxes')}
+    } else {
+        if (el) {el.innerText = _('Fixed Scoreboxes')}
+    }
+    scrollingscoreboxes = !scrollingscoreboxes;
+    toggleScrollingScoreboxState(scrollingscoreboxes);
+}
+
+var scrollingscoreboxesstate = false;
+function toggleScrollingScoreboxState(state) {
+    if (state == scrollingscoreboxesstate) { return; }
+    scrollingscoreboxesstate = state;
+    if (!state) {
         $(window).off('scroll.scoreboxes');
         $(".scoredetails").removeClass("hoverbox").css("position","static").css("width","auto").css("margin-left",0);
-        $(".biquestionwrap .scrollpane").css("margin-bottom","0");
+        $(".bigquestionwrap .scrollpane").css("margin-bottom","0");
     } else {
         $(window).on('scroll.scoreboxes', updatescoreboxscroll);
         updatescoreboxscroll();
     }
-    scrollingscoreboxes = !scrollingscoreboxes;
 }
 
 function updatescoreboxscroll() {
@@ -325,17 +413,17 @@ function updatescoreboxscroll() {
     var objtop, scoredet, objbot;
     for (var i=0; i<wraps.length; i++) {
         if (wraps[i].style.display == "none") { continue; }
-        var rect = wraps[i].childNodes[1].getBoundingClientRect();
+        var rect = wraps[i].querySelector(".scrollpane").getBoundingClientRect();
         objtop = rect.top + scroll; 
         scoredet = wraps[i].childNodes[2];
-        objbot = objtop + wraps[i].childNodes[1].offsetHeight + scoredet.offsetHeight ;
+        objbot = objtop + wraps[i].querySelector(".scrollpane").offsetHeight + scoredet.offsetHeight ;
         if (viewbot > objtop + scoredet.offsetHeight + 20 && 
             viewbot < objbot && 
             scoredet.offsetHeight < .5*document.documentElement.clientHeight 
         ) {
             if (scoredet.style.position == "static") { 
                 scoredet.style.width = $(scoredet).width() + "px";
-                wraps[i].childNodes[1].style.marginBottom = scoredet.offsetHeight + "px";
+                wraps[i].querySelector(".scrollpane").style.marginBottom = scoredet.offsetHeight + "px";
                 scoredet.style.position = "fixed";
                 scoredet.style.bottom = 0;
                 scoredet.style.marginLeft = '5px';
@@ -345,7 +433,7 @@ function updatescoreboxscroll() {
             scoredet.style.position = "static";
             scoredet.style.width = 'auto';
             scoredet.style.marginLeft = '0';
-            wraps[i].childNodes[1].style.marginBottom = 0;
+            wraps[i].querySelector(".scrollpane").style.marginBottom = 0;
             scoredet.classList.remove("hoverbox");
         }
     };

@@ -6,7 +6,6 @@ require_once __DIR__ . '/CalculatedAnswerBox.php';
 require_once __DIR__ . '/CalculatedComplexAnswerBox.php';
 require_once __DIR__ . '/CalculatedIntervalAnswerBox.php';
 require_once __DIR__ . '/CalculatedMatrixAnswerBox.php';
-require_once __DIR__ . '/CalculatedNTupleAnswerBox.php';
 require_once __DIR__ . '/ChoicesAnswerBox.php';
 require_once __DIR__ . '/ComplexAnswerBox.php';
 require_once __DIR__ . '/DrawingAnswerBox.php';
@@ -18,9 +17,12 @@ require_once __DIR__ . '/MatchingAnswerBox.php';
 require_once __DIR__ . '/MatrixAnswerBox.php';
 require_once __DIR__ . '/MultipleAnswerAnswerBox.php';
 require_once __DIR__ . '/NTupleAnswerBox.php';
+require_once __DIR__ . '/ComplexNTupleAnswerBox.php';
+require_once __DIR__ . '/AlgebraicNTupleAnswerBox.php';
 require_once __DIR__ . '/NumberAnswerBox.php';
 require_once __DIR__ . '/StringAnswerBox.php';
 require_once __DIR__ . '/ChemEquationAnswerBox.php';
+require_once(__DIR__ . '/MoleculeAnswerBox.php');
 
 use OutOfBoundsException;
 
@@ -42,6 +44,9 @@ use Sanitize;
  * - Drawing: "draw"
  * - N-tuple: "ntuple"
  * - Calculated N-tuple: "calcntuple"
+ * - Complex N-tuple: "complexntuple"
+ * - Calculated Complex N-tuple: "calccomplexntuple"
+ * - Algebraic N-tuple: "algntuple"
  * - Matrix: "matrix"
  * - Calculated Matrix: "calcmatrix"
  * - Complex: "complex"
@@ -51,6 +56,7 @@ use Sanitize;
  * - Essay: "essay"
  * - File Upload: "file"
  * - String: "string"
+ * - Molecule: "molecule"
  */
 class AnswerBoxFactory
 {
@@ -79,10 +85,9 @@ class AnswerBoxFactory
                 return new CalculatedIntervalAnswerBox($answerBoxParams);
                 break;
             case 'calcmatrix':
+            case 'calccomplexmatrix':
+            case 'algmatrix':
                 return new CalculatedMatrixAnswerBox($answerBoxParams);
-                break;
-            case 'calcntuple':
-                return new CalculatedNTupleAnswerBox($answerBoxParams);
                 break;
             case 'choices':
                 return new ChoicesAnswerBox($answerBoxParams);
@@ -108,6 +113,7 @@ class AnswerBoxFactory
             case 'matching':
                 return new MatchingAnswerBox($answerBoxParams);
                 break;
+            case 'complexmatrix':
             case 'matrix':
                 return new MatrixAnswerBox($answerBoxParams);
                 break;
@@ -115,7 +121,15 @@ class AnswerBoxFactory
                 return new MultipleAnswerAnswerBox($answerBoxParams);
                 break;
             case 'ntuple':
+            case 'calcntuple':
                 return new NTupleAnswerBox($answerBoxParams);
+                break;
+            case 'complexntuple':
+            case 'calccomplexntuple':
+                return new ComplexNTupleAnswerBox($answerBoxParams);
+                break;
+            case 'algntuple':
+                return new AlgebraicNTupleAnswerBox($answerBoxParams);
                 break;
             case 'number':
                 return new NumberAnswerBox($answerBoxParams);
@@ -125,6 +139,9 @@ class AnswerBoxFactory
                 break;
             case 'chemeqn':
                 return new ChemEquationAnswerBox($answerBoxParams);
+                break;
+            case 'molecule':
+                return new MoleculeAnswerBox($answerBoxParams);
                 break;
             default:
                 // This will be caught by our custom exception handler to be
