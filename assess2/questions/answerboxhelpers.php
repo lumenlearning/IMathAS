@@ -146,173 +146,241 @@ function checkreqtimes($tocheck,$rtimes) {
 	return 1;
 }
 
+// takes numeric [real,imag] array and outputs string
+function complexarr2str($num) {
+    $out = '';
+    if (abs($num[0])>0 || abs($num[1])==0) {
+        $out .= $num[0];
+        if ($num[1]>0) {
+            $out .= '+';
+        }
+    }
+    if (abs($num[1])>0) {
+        $out .= $num[1] . 'i';
+    }
+    return $out;
+}
 //parses complex numbers.  Can handle anything, but only with
 //one i in it.
 function parsecomplex($v) {
-	$v = str_replace(' ','',$v);
-	$v = str_replace(array('sin','pi'),array('s$n','p$'),$v);
-	$v = preg_replace('/\((\d+\*?i|i)\)\/(\d+)/','$1/$2',$v);
-	$len = strlen($v);
-	//preg_match_all('/(\bi|i\b)/',$v,$matches,PREG_OFFSET_CAPTURE);
-	//if (count($matches[0])>1) {
-	if (substr_count($v,'i')>1) {
-		return _('error - more than 1 i in expression');
-	} else {
-		//$p = $matches[0][0][1];
-		$p = strpos($v,'i');
-		if ($p===false) {
-			$real = $v;
-			$imag = 0;
-		} else {
-			//look left
-			$nd = 0;
-			for ($L=$p-1;$L>0;$L--) {
-				$c = $v[$L];
-				if ($c==')') {
-					$nd++;
-				} else if ($c=='(') {
-					$nd--;
-				} else if (($c=='+' || $c=='-') && $nd==0) {
-					break;
-				}
-			}
-			if ($L<0) {$L=0;}
-			if ($nd != 0) {
-				return _('error - invalid form');
-			}
-			//look right
-			$nd = 0;
+	$v = str_replace(' ', '', $v);
+    $v = str_replace(array('sin', 'pi'), array('s$n', 'p$'), $v);
+    $v = preg_replace('/\((\d+\*?i|i)\)\/(\d+)/', '$1/$2', $v);
+    $len = strlen($v);
+    //preg_match_all('/(\bi|i\b)/',$v,$matches,PREG_OFFSET_CAPTURE);
+    //if (count($matches[0])>1) {
+    if (substr_count($v, 'i') > 1) {
+        return _('error - more than 1 i in expression');
+    } else {
+        //$p = $matches[0][0][1];
+        $p = strpos($v, 'i');
+        if ($p === false) {
+            $real = $v;
+            $imag = 0;
+        } else {
+            //look left
+            $nd = 0;
+            for ($L = $p - 1; $L > 0; $L--) {
+                $c = $v[$L];
+                if ($c == ')') {
+                    $nd++;
+                } else if ($c == '(') {
+                    $nd--;
+                } else if (($c == '+' || $c == '-') && $nd == 0) {
+                    break;
+                }
+            }
+            if ($L < 0) {$L = 0;}
+            if ($nd != 0) {
+                return _('error - invalid form');
+            }
+            //look right
+            $nd = 0;
 
-			for ($R=$p+1;$R<$len;$R++) {
-				$c = $v[$R];
-				if ($c=='(') {
-					$nd++;
-				} else if ($c==')') {
-					$nd--;
-				} else if (($c=='+' || $c=='-') && $nd==0) {
-					break;
-				}
-			}
-			if ($nd != 0) {
-				return _('error - invalid form');
-			}
-			//which is bigger?
-			if ($p-$L>0 && $R-$p>0 && ($R==$len || $L==0)) {
-				//return _('error - invalid form');
-				if ($R==$len) {// real + AiB
-					$real = substr($v,0,$L);
-					$imag = substr($v,$L,$p-$L);
-					$imag .= '*'.substr($v,$p+1+($v[$p+1]=='*'?1:0),$R-$p-1);
-				} else if ($L==0) { //AiB + real
-					$real = substr($v,$R);
-					$imag = substr($v,0,$p);
-					$imag .= '*'.substr($v,$p+1+($v[$p+1]=='*'?1:0),$R-$p-1);
-				} else {
-					return _('error - invalid form');
-				}
-				$imag = str_replace('-*','-1*',$imag);
-				$imag = str_replace('+*','+1*',$imag);
-			} else if ($p-$L>1) {
-				$imag = substr($v,$L,$p-$L);
-				$real = substr($v,0,$L) . substr($v,$p+1);
-			} else if ($R-$p>1) {
-				if ($p>0) {
-					if ($v[$p-1]!='+' && $v[$p-1]!='-') {
-						return _('error - invalid form');
-					}
-					$imag = $v[$p-1].substr($v,$p+1+($v[$p+1]=='*'?1:0),$R-$p-1);
-					$real = substr($v,0,$p-1) . substr($v,$R);
-				} else {
-					$imag = substr($v,$p+1,$R-$p-1);
-					$real = substr($v,0,$p) . substr($v,$R);
-				}
-			} else { //i or +i or -i or 3i  (one digit)
-				if ($v[$L]=='+') {
-					$imag = 1;
-				} else if ($v[$L]=='-') {
-					$imag = -1;
-				} else if ($p==0) {
-					$imag = 1;
-				} else {
-					$imag = $v[$L];
-				}
-				$real = ($p>0?substr($v,0,$L):'') . substr($v,$p+1);
-			}
-			if ($real=='') {
-				$real = 0;
-			}
-			if ($imag[0]=='/') {
-				$imag = '1'.$imag;
-			} else if (($imag[0]=='+' || $imag[0]=='-') && $imag[1]=='/') {
-				$imag = $imag[0].'1'.substr($imag,1);
-			}
-			$imag = str_replace('*/','/',$imag);
-			if (substr($imag,-1)=='*') {
-				$imag = substr($imag,0,-1);
-			}
-		}
-		$real = str_replace(array('s$n','p$'),array('sin','pi'),$real);
-		$imag = str_replace(array('s$n','p$'),array('sin','pi'),$imag);
-		return array($real,$imag);
+            for ($R = $p + 1; $R < $len; $R++) {
+                $c = $v[$R];
+                if ($c == '(') {
+                    $nd++;
+                } else if ($c == ')') {
+                    $nd--;
+                } else if (($c == '+' || $c == '-') && $nd == 0) {
+                    break;
+                }
+            }
+            if ($nd != 0) {
+                return _('error - invalid form');
+            }
+            //which is bigger?
+            if ($p - $L > 0 && $R - $p > 0 && ($R == $len || $L == 0)) {
+                //return _('error - invalid form');
+                if ($R == $len) { // real + AiB
+                    $real = substr($v, 0, $L);
+                    $imag = substr($v, $L, $p - $L);
+                    $imag .= '*' . substr($v, $p + 1 + (($v[$p + 1] ?? '') == '*' ? 1 : 0), $R - $p - 1);
+                } else if ($L == 0) { //AiB + real
+                    $real = substr($v, $R);
+                    $imag = substr($v, 0, $p);
+                    $imag .= '*' . substr($v, $p + 1 + (($v[$p + 1] ?? '') == '*' ? 1 : 0), $R - $p - 1);
+                } else {
+                    return _('error - invalid form');
+                }
+                $imag = str_replace('-*', '-1*', $imag);
+                $imag = str_replace('+*', '+1*', $imag);
+            } else if ($p - $L > 1) {
+                $imag = substr($v, $L, $p - $L);
+                $real = substr($v, 0, $L) . substr($v, $p + 1);
+            } else if ($R - $p > 1) {
+                if ($p > 0) {
+                    if ($v[$p - 1] != '+' && $v[$p - 1] != '-') {
+                        return _('error - invalid form');
+                    }
+                    $imag = $v[$p - 1] . substr($v, $p + 1 + ($v[$p + 1] == '*' ? 1 : 0), $R - $p - 1);
+                    $real = substr($v, 0, $p - 1) . substr($v, $R);
+                } else {
+                    $imag = substr($v, $p + 1, $R - $p - 1);
+                    $real = substr($v, 0, $p) . substr($v, $R);
+                }
+            } else { //i or +i or -i or 3i  (one digit)
+                if ($v[$L] == '+') {
+                    $imag = '1';
+                } else if ($v[$L] == '-') {
+                    $imag = '-1';
+                } else if ($p == 0) {
+                    $imag = '1';
+                } else {
+                    $imag = $v[$L];
+                }
+                $real = ($p > 0 ? substr($v, 0, $L) : '') . substr($v, $p + 1);
+            }
+            if ($real == '') {
+                $real = 0;
+            }
+            if ($imag[0] == '/') {
+                $imag = '1' . $imag;
+            } else if (($imag[0] == '+' || $imag[0] == '-') && $imag[1] == '/') {
+                $imag = $imag[0] . '1' . substr($imag, 1);
+            }
+            $imag = str_replace('*/', '/', $imag);
+            if (substr($imag, -1) == '*') {
+                $imag = substr($imag, 0, -1);
+            }
+        }
+        $real = str_replace(array('s$n', 'p$'), array('sin', 'pi'), $real);
+        $imag = str_replace(array('s$n', 'p$'), array('sin', 'pi'), $imag);
+        $imag = ltrim($imag, '+');
+        $imag = rtrim($imag, '*');
+        return array($real, $imag);
 	}
+}
+
+function parsesloppycomplex($v) {
+    $func = makeMathFunction($v, 'i', [], '', true);
+    if ($func === false) {
+        return false;
+    }
+    $a = $func(['i' => 0]);
+    $apb = $func(['i' => 4]);
+    $amb = $func(['i' => -4]); // catch i's inside sqrt, log
+    if (isNaN($a) || isNaN($apb) || isNaN($amb)) {
+        return false;
+    }
+    return array($a, ($apb - $a) / 4);
+}
+
+function parseGeneralComplex($v) {
+    $ev = evalMathParser($v, true);
+    if ($ev === false || !is_array($ev)) {
+        return false;
+    }
+    return $ev;
 }
 
 /*
  * Parses a list of string ntuples
  * do_or: for each element in list, create an array of "or" alternatives
- * eval: true to eval non-numeric values
+ * do_eval: true to eval non-numeric values
+ * isComplex: true to treat entries as complex numbers, populating cvals along with vals
+ * ansformats: array of answerformats, used for complex numbers when evaling
  */
-function parseNtuple($str, $do_or = false, $do_eval = true) {
-	if ($str == 'DNE' || $str == 'oo' || $str == '-oo') {
-		return $str;
-	}
-	$ntuples = [];
-	$NCdepth = 0;
-	$lastcut = 0;
-	$inor = false;
-	$str = makepretty($str);
-	$matchbracket = array(
-		'(' => ')',
-		'[' => ']',
-		'<' => '>',
-		'{' => '}'
-	);
-	$closebracket = '';
-	for ($i=0; $i<strlen($str); $i++) {
-		$dec = false;
-		if ($str[$i]=='(' || $str[$i]=='[' || $str[$i]=='<' || $str[$i]=='{') {
-			if ($NCdepth==0) {
-				$lastcut = $i;
-				$closebracket = $matchbracket[$str[$i]];
-			}
-			$NCdepth++;
-		} else if ($str[$i]==$closebracket) {
-			$NCdepth--;
-			if ($NCdepth==0) {
-				$thisTuple = array(
-					'lb' => $str[$lastcut],
-					'rb' => $str[$i],
-					'vals' => explode(',', substr($str,$lastcut+1,$i-$lastcut-1))
-				);
-				if ($do_eval) {
-					for ($j=0; $j < count($thisTuple['vals']); $j++) {
-						if ($thisTuple['vals'][$j] != 'oo' && $thisTuple['vals'][$j] != '-oo') {
-							$thisTuple['vals'][$j] = evalMathParser($thisTuple['vals'][$j]);
-						}
-					}
-				}
-				if ($do_or && $inor) {
-					$ntuples[count($ntuples)-1][] = $thisTuple;
-				} else if ($do_or) {
-					$ntuples[] = array($thisTuple);
-				} else {
-					$ntuples[] = $thisTuple;
-				}
-				$inor = ($do_or && substr($str, $i+1, 2)==='or');
-			}
-		}
-	}
-	return $ntuples;
+function parseNtuple($str, $do_or = false, $do_eval = true, $isComplex = false, $ansformats = []) {
+    if ($str == 'DNE' || $str == 'oo' || $str == '-oo') {
+        return $str;
+    }
+    $ntuples = [];
+    $NCdepth = 0;
+    $lastcut = 0;
+    $lastend = 0;
+    $inor = false;
+    $str = makepretty($str);
+    $matchbracket = array(
+        '(' => ')',
+        '[' => ']',
+        '<' => '>',
+        '{' => '}'
+    );
+    $closebracket = '';
+    $openbracket = '';
+    for ($i=0; $i<strlen($str); $i++) {
+        $dec = false;
+        if ($str[$i]=='(' || $str[$i]=='[' || $str[$i]=='<' || $str[$i]=='{') {
+            if ($NCdepth==0) {
+                if ($lastend > 0) {
+                    $between = trim(substr($str, $lastend+1, $i-$lastend-1));
+                    $inor = ($do_or && $between === 'or');
+                    if ($between !== 'or' && $between !== ',' && $between !== '') {
+                        // invalid
+                        return $ntuples;
+                    }
+                }
+                $lastcut = $i;
+                $closebracket = $matchbracket[$str[$i]];
+                $openbracket = $str[$i];
+            }
+            if ($openbracket == '' || $str[$i] == $openbracket) {
+                $NCdepth++;
+            }
+        } else if ($str[$i]==$closebracket) {
+            $NCdepth--;
+            if ($NCdepth==0) {
+                $thisTuple = array(
+                    'lb' => $str[$lastcut],
+                    'rb' => $str[$i],
+                    'vals' => explode(',', substr($str,$lastcut+1,$i-$lastcut-1))
+                );
+                $thisTuple['vals'] = array_map("trim", $thisTuple['vals']);
+                $lastend = $i;
+                if ($do_eval) {
+                    for ($j=0; $j < count($thisTuple['vals']); $j++) {
+                        if ($thisTuple['vals'][$j] != 'oo' && $thisTuple['vals'][$j] != '-oo') {
+                            if ($isComplex) {
+                                if (in_array('generalcomplex', $ansformats)) {
+                                    $thisTuple['cvals'][$j] = parseGeneralComplex($thisTuple['vals'][$j]);
+                                } else {
+                                    $thisTuple['cvals'][$j] = parsesloppycomplex($thisTuple['vals'][$j]);
+                                }
+                                $thisTuple['vals'][$j] = complexarr2str($thisTuple['cvals'][$j]); 
+                            } else {
+                                $thisTuple['vals'][$j] = evalMathParser($thisTuple['vals'][$j]);
+                            }
+                        }
+                    }
+                } else if ($isComplex) {
+                    $thisTuple['cvals'] = array_map("parsecomplex", $thisTuple['vals']);
+                }
+                if ($do_or && $inor) {
+                        $ntuples[count($ntuples)-1][] = $thisTuple;
+                } else if ($do_or) {
+                        $ntuples[] = array($thisTuple);
+                } else {
+                        $ntuples[] = $thisTuple;
+                }
+                //$inor = ($do_or && substr($str, $i+1, 2)==='or');
+                $openbracket = '';
+                $closebracket = '';
+            }
+        }
+    }
+    return $ntuples;
 }
 
 function ntupleToString($ntuples) {
@@ -489,6 +557,12 @@ function checkanswerformat($tocheck,$ansformats) {
 			return false;
 		}
 	}
+	if (in_array("integer", $ansformats)) {
+		$totest = str_replace(' ','',$tocheck);
+		if (!is_numeric($totest) || preg_match('/\..*[1-9]/',$totest)) {
+			return false;
+		}
+	}
 	if (in_array("scinotordec",$ansformats)) {
 		$totest = str_replace(' ','',$tocheck);
 		if (!is_numeric($totest) && !preg_match('/^\-?[1-9](\.\d*)?(\*|xx|x|X|×|✕)10\^(\(?\-?\d+\)?)$/',$totest)) {
@@ -553,7 +627,15 @@ function formathint($eword,$ansformats,$reqdecimals,$calledfrom, $islist=false,$
 	} else {
 		$listtype = "list";
 	}
-	if (in_array('fraction',$ansformats)) {
+    if ($calledfrom === 'calccomplexmatrix') {
+        if (in_array('allowjcomplex', $ansformats)) {
+            $tip .= sprintf(_('Enter %s as a complex number, like 3-4j. '), $eword);
+        } else {
+            $tip .= sprintf(_('Enter %s as a complex number, like 3-4i. '), $eword);
+        }
+        $eword = _('each value');
+    }
+    if (in_array('fraction',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a fraction (like 3/5 or 10/4) or as an integer (like 4 or -2)'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of fractions or integers'), $listtype):_('Enter a fraction or integer');
 	} else if (in_array('reducedfraction',$ansformats)) {
@@ -590,13 +672,19 @@ function formathint($eword,$ansformats,$reqdecimals,$calledfrom, $islist=false,$
 	} else if (in_array('decimal',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as an integer or decimal value (like 5 or 3.72)'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of integer or decimal values'), $listtype):_('Enter an integer or decimal value');
+	} else if (in_array('integer',$ansformats)) {
+		$tip .= sprintf(_('Enter %s as an integer value (like 5 or -2)'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of integer values'), $listtype):_('Enter an integer value');
 	} else if (in_array('scinotordec',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as a decimal or in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of numbers using decimals or scientific notation'), $listtype):_('Enter a number using decimals or scientific notation');
 	} else if (in_array('scinot',$ansformats)) {
 		$tip .= sprintf(_('Enter %s as in scientific notation.  Example: 3*10^2 = 3 &middot; 10<sup>2</sup>'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of numbers using scientific notation'), $listtype):_('Enter a number using scientific notation');
-	} else if (!in_array('generalcomplex',$ansformats)) {
+	} else if (in_array('generalcomplex',$ansformats)) {
+		$tip .= sprintf(_('Enter %s as a complex number (like 2+3i) or as a calculation (like e^(3i))'), $eword);
+		$shorttip = $islist?sprintf(_('Enter a %s of mathematical expressions'), $listtype):_('Enter a mathematical expression');
+    } else {
 		$tip .= sprintf(_('Enter %s as a number (like 5, -3, 2.2172) or as a calculation (like 5/3, 2^3, 5+4)'), $eword);
 		$shorttip = $islist?sprintf(_('Enter a %s of mathematical expressions'), $listtype):_('Enter a mathematical expression');
 	}
@@ -628,6 +716,13 @@ function formathint($eword,$ansformats,$reqdecimals,$calledfrom, $islist=false,$
     if (in_array('allowdegrees',$ansformats)) {
 		$tip .= "<br/>" . _('Degrees are allowed');
 	}
+    if ($calledfrom === 'calccomplexmatrix') {
+        if (in_array('generalcomplex', $ansformats)) {
+            $shorttip = _('Enter a complex expression');
+        } else {
+            $shorttip = _('Enter a complex number');
+        }
+    }
 	if ($doshort) {
 		return array($tip,$shorttip);
 	} else {
@@ -716,14 +811,17 @@ function setupnosolninf($qn, $answerbox, $answer, $ansformats, $la, $ansprompt, 
 	//$out .= '<span class="floatright">'.getcolormark($colorbox).'</span>';
 	$out .= '</div>';
 
+    $answertype = 0;
 	if (preg_match('/^inf/',$answer) || $answer==='oo' || $answer===$infsoln) {
-		$answer = '"'.$infsoln.'"';
+		$answer = $infsoln;
+        $answertype = 2;
 	}
 	if (preg_match('/^no\s*solution/',$answer) || $answer==='DNE' || $answer===$nosoln) {
-		$answer = '"'.$nosoln.'"';
+		$answer = $nosoln;
+        $answertype = 1;
 	}
 
-	return array($out,$answer);
+	return array($out,$answer,$answertype);
 }
 
 function scorenosolninf($qn, $givenans, $answer, $ansprompt, $format="number") {
@@ -747,7 +845,7 @@ function scorenosolninf($qn, $givenans, $answer, $ansprompt, $format="number") {
 		$answer = 'DNE';
 	}
 	$qs = $_POST["qs$qn"] ?? '';
-	if ($qs=='DNE') {
+	if (strtoupper($qs)=='DNE') {
 		$givenans = "DNE";
 	} else if ($qs=='inf') {
 		$givenans = "oo";
@@ -780,6 +878,34 @@ function normalizemathunicode($str) {
     $str = str_replace(['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'], ['^0','^1','^2','^3','^4','^5','^6','^7','^8','^9'], $str);
     $str = str_replace(array('₀','₁','₂','₃'), array('_0','_1','_2','_3'), $str);
     $str = str_replace(array('√','∛','°'),array('sqrt','root(3)','degree'), $str);
+    $greekLetters = array(
+        'Α' => 'Alpha',   'α' => 'alpha',
+        'Β' => 'Beta',    'β' => 'beta',
+        'Γ' => 'Gamma',   'γ' => 'gamma',
+        'Δ' => 'Delta',   'δ' => 'delta',
+        'Ε' => 'Epsilon', 'ε' => 'epsilon',
+        'Ζ' => 'Zeta',    'ζ' => 'zeta',
+        'Η' => 'Eta',     'η' => 'eta',
+        'Θ' => 'Theta',   'θ' => 'theta',
+        'Ι' => 'Iota',    'ι' => 'iota',
+        'Κ' => 'Kappa',   'κ' => 'kappa',
+        'Λ' => 'Lambda',  'λ' => 'lambda',
+        'Μ' => 'Mu',      'μ' => 'mu',
+        'Ν' => 'Nu',      'ν' => 'nu',
+        'Ξ' => 'Xi',      'ξ' => 'xi',
+        'Ο' => 'Omicron', 'ο' => 'omicron',
+        'Π' => 'Pi',      'π' => 'pi',
+        'Ρ' => 'Rho',     'ρ' => 'rho',
+        'Σ' => 'Sigma',   'σ' => 'sigma',
+        'Τ' => 'Tau',     'τ' => 'tau',
+        'Υ' => 'Upsilon', 'υ' => 'upsilon',
+        'Φ' => 'Phi',     'φ' => 'phi',
+        'Χ' => 'Chi',     'χ' => 'chi',
+        'Ψ' => 'Psi',     'ψ' => 'psi',
+        'Ω' => 'Omega',   'ω' => 'omega'
+    );
+    $str = str_replace(array_keys($greekLetters), array_values($greekLetters), $str);
+
     $str = preg_replace('/\b(OO|infty)\b/i','oo', $str);
     $str = str_replace('&ZeroWidthSpace;', '', $str);
     if (strtoupper(trim($str))==='DNE') {
@@ -849,4 +975,34 @@ function getOptionVal($options, $key, $multi, $partnum, $hasarrayval=0) {
 
 function rewritePlusMinus($str) {
     return preg_replace('/(.*?)\+\-(.*?)(,|$)/','$1+$2,$1-$2$3',$str);
+}
+
+function numfuncPrepShowanswer($string, $variables) {
+    $greekletters = array('alpha', 'beta', 'chi', 'delta', 'epsilon', 'gamma', 'varphi', 'phi', 'psi', 'sigma', 'rho', 'theta', 'lambda', 'mu', 'nu', 'omega');
+
+    for ($i = 0; $i < count($variables); $i++) {
+        if (strlen($variables[$i]) > 1) {
+            $isgreek = false;
+            $varlower = strtolower($variables[$i]);
+            $isgreek = in_array($varlower, $greekletters);
+            
+            if (!$isgreek && preg_match('/^(\w+)_(\w+|\(.*?\))$/', $variables[$i], $matches)) {
+                $chg = false;
+                if (strlen($matches[1]) > 1 && !in_array(strtolower($matches[1]), $greekletters)) {
+                    $matches[1] = '"' . $matches[1] . '"';
+                    $chg = true;
+                }
+                if (strlen($matches[2]) > 1 && $matches[2][0] != '(' && !in_array(strtolower($matches[2]), $greekletters)) {
+                    $matches[2] = '"' . $matches[2] . '"';
+                    $chg = true;
+                }
+                if ($chg) {
+                    $string = str_replace($matches[0], $matches[1] . '_' . $matches[2], $string);
+                }
+            } else if (!$isgreek) {
+                $string = str_replace($variables[$i], '"' . $variables[$i] . '"', $string);
+            }
+        }
+    }
+    return $string;
 }

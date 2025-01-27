@@ -193,6 +193,7 @@ function outcometable() {
 	$startdate = array();
 	$enddate = array();
 	$LPcutoff = array();
+    $LPenddate = [];
 	$allowlate = array();
 	$timelimits = array();
 	$avail = array();
@@ -241,6 +242,18 @@ function outcometable() {
 			// $sa = scoresingb setting
 			$assessmenttype[$kcnt] = $line['viewingb'];
 			$sa[$kcnt] = $line['scoresingb'];
+            if ($line['scoresingb'] == 'after_lp') {
+                $adjusted_allowlate = ($line['allowlate'] % 10) - 1; // ignore "allow use after"
+                if ($adjusted_allowlate == 0) { // this is now "unlimited"
+                    $LPenddate[$kcnt] = 2000000000;
+                } else {
+                    $LPenddate[$kcnt] = strtotime("+".($GLOBALS['latepasshrs']*$adjusted_allowlate)." hours", $line['enddate']);
+                }
+                $LPenddate[$kcnt] = min($LPenddate[$kcnt], $GLOBALS['courseenddate']);
+                if ($line['LPcutoff'] > 0) {
+                    $LPenddate[$kcnt] = min($LPenddate[$kcnt], $line['LPcutoff']);
+                }
+            }
 		} else {
 			$deffeedback = explode('-',$line['deffeedback']);
 			$assessmenttype[$kcnt] = $deffeedback[0];
@@ -762,7 +775,7 @@ function outcometable() {
 
 		$gb[$row][1][$col][3] = $l['userid'];; //in place of assessment session id
 
-		$scoreddata = json_decode(gzdecode($l['scoreddata']), true);
+		$scoreddata = json_decode(Sanitize::gzexpand($l['scoreddata']), true);
 		$assessver = $scoreddata['assess_versions'][$scoreddata['scored_version']];
 		$pts = array();
 		$ptsposs = array();
@@ -821,6 +834,7 @@ function outcometable() {
 		if (!$canviewall && (
 			($sa[$i]=="never") ||
 		 	($sa[$i]=='after_due' && $now < $thised) ||
+            ($sa[$i]=='after_lp' && $now < max($thised,$LPenddate[$i])) ||
 			($sa[$i]=='after_take' && !$hasSubmittedTake)
 		)) {
 			$gb[$row][1][$col][0] = 'N/A'; //score is not available

@@ -191,7 +191,7 @@ class AssessRecord
         echo '{"error": "encoding_error"}';
         exit;
       }
-      $qarr[':scoreddata'] = gzencode($encoded);
+      $qarr[':scoreddata'] = gzcompress($encoded);
     }
     if ($this->is_practice && !empty($this->data)) {
       $fields[] = 'practicedata';
@@ -200,7 +200,7 @@ class AssessRecord
         echo '{"error": "encoding_error"}';
         exit;
       }
-      $qarr[':practicedata'] = gzencode($encoded);
+      $qarr[':practicedata'] = gzcompress($encoded);
     }
 
     if ($this->hasRecord) {
@@ -340,7 +340,7 @@ class AssessRecord
     $waspractice = $this->is_practice;
     if ($this->is_practice) {
       $this->buildAssessData($recordStart);
-      $practicetosave = (!empty($this->data)) ? gzencode(json_encode($this->data)) : '';
+      $practicetosave = (!empty($this->data)) ? gzcompress(json_encode($this->data)) : '';
       $this->assessRecord['practicedata'] = $practicetosave;
       $this->setInPractice(false);
     } else {
@@ -349,7 +349,7 @@ class AssessRecord
 
     //generate scored data
     $this->buildAssessData($recordStart && !$waspractice);
-    $scoredtosave = (!empty($this->data)) ? gzencode(json_encode($this->data)) : '';
+    $scoredtosave = (!empty($this->data)) ? gzcompress(json_encode($this->data)) : '';
     $this->assessRecord['scoreddata'] = $scoredtosave;
 
     // switch back to practice if started that way
@@ -579,6 +579,22 @@ class AssessRecord
   }
 
   /**
+   * Get show work cutoff timestamp
+   * @return int
+   */
+  public function getShowWorkAfterCutoff() {
+    if (empty($this->assessRecord) || ($this->assessRecord['status'] & 128) != 128) {
+      return 0;
+    }
+    $workcutoff = $this->assess_info->getSetting('workcutoff');
+    if ($workcutoff == 0) {
+        return 0;
+    } else {
+        return $this->assessRecord['lastchange'] + $workcutoff*60;
+    }
+  }
+
+  /**
    * Get final score and assessment scored_version
    * @return array with 'score' and 'scored_version'
    */
@@ -778,6 +794,11 @@ class AssessRecord
       } else if ($active && $submitby == 'by_assessment') {
         // for by-assess, clear "accept work after" status on start
         $this->assessRecord['status'] = $this->assessRecord['status'] & ~128;
+        // set lock
+        if ($this->assess_info->getSetting('lock_for_assess') && !$this->teacherPreview) {
+            $stm = $this->DBH->prepare("UPDATE imas_students SET lockaid=? WHERE userid=? AND courseid=?");
+            $stm->execute([$this->curAid, $this->curUid, $this->assess_info->getCourseId()]);
+        }
       } else if (!$active && $submitby == 'by_assessment') {
         // for by-assess, set "accept work after" status on end
         if ($accept_work_after && $this->data['assess_versions'][$lastver]['starttime'] > 0) {
@@ -785,6 +806,11 @@ class AssessRecord
         } else {
           $this->assessRecord['status'] = $this->assessRecord['status'] & ~128;
         }
+        // clear lock
+        if ($this->assess_info->getSetting('lock_for_assess') && !$this->teacherPreview) {
+            $stm = $this->DBH->prepare("UPDATE imas_students SET lockaid=0 WHERE userid=? AND courseid=?");
+            $stm->execute([$this->curUid, $this->assess_info->getCourseId()]);
+        } 
       }
 
       if ($setattempt) {
@@ -1455,7 +1481,7 @@ class AssessRecord
    * @param  boolean $include_scores Whether to include scores (def: false)
    * @param  boolean $include_parts  True to include part scores and details, false for just total score (def false)
    * @param  boolean|int $generate_html Whether to generate question HTML (def: false) 2 to also grab correct ans
-   * @param int|string  $ver               Which version to grab data for, or 'last' for most recent
+   * @param int|string  $ver               Which version to grab data for, or 'last' for most recent, or 'scored' for scored
    * @param string   $try       Which try to show: 'last' (def) or 'scored'
    * @param boolean $record_answeights  True to record answeights into record (needed in GB loads in case not scored) def: false
    * @return array  The question object
@@ -1513,6 +1539,7 @@ class AssessRecord
 
     // set tries
     $parts = array();
+    $subsby = [];
     $score = -1;
     $raw = -1;
     $try = 0;
@@ -1566,6 +1593,15 @@ class AssessRecord
           // if any parts are unattempted, mark question as such
           $status = 'unattempted';
         }
+        /* not ready yet
+        if ($parttry > 0 && !empty($this->data['submissionby'])) {
+            $thissub = $this->data['submissions'][$curq['tries'][$pn][$parttry-1]['sub']];
+            $thissubby = $this->data['submissionby'][$thissub];
+            if (!in_array($thissubby, $subsby)) {
+                $subsby[] = $thissubby;
+            }
+        }
+        */
         if ($parttry > 0 && $curq['tries'][$pn][$parttry-1]['sub'] > $lastsub) {
             $lastsub = $curq['tries'][$pn][$parttry-1]['sub'];
         }
@@ -1627,6 +1663,10 @@ class AssessRecord
           && time() > $this->assess_info->getSetting('enddate')
           && !$this->assess_info->getSetting('can_use_latepass')
         ) ||
+        ($ansInGb == 'after_lp'
+          && !$this->is_practice
+          && time() > $this->assess_info->getSetting('latepass_enddate')
+        ) ||
         $this->teacherInGb;
       $out['info'] = $generate_html;
       $out += $this->getQuestionHtml($qn, $ver, false, $force_scores, $force_answers, $tryToShow, $generate_html === 2);
@@ -1643,6 +1683,11 @@ class AssessRecord
       if ($this->teacherInGb && $lastsub > -1) {
           $out['lastchange'] = tzdate("n/j/y, g:i a", 
             $this->data['submissions'][$lastsub] + $this->assessRecord['starttime']);
+          /* not ready yet
+          if (!empty($subsby)) {
+            $out['subsby'] = $subsby;
+          }
+          */
       }
     } else {
       $out['html'] = null;
@@ -1730,15 +1775,16 @@ class AssessRecord
    * @param  boolean $include_scores Whether to include scores (def: false)
    * @param  boolean $include_parts  True to include part scores and details, false for just total score (def false)
    * @param  boolean|int $generate_html Whether to generate question HTML (def: false)  2 to grab correct ans
-   * @param int  $ver               Which version to grab data for, or 'last' for most recent, or 'scored'
+   * @param  int|string  $ver               Which version to grab data for, or 'last' for most recent, or 'scored'
+   * @param  string  $tryToShow         Which try to show, 'last' (def) or 'scored'
    * @return array  The question object
    */
-  public function getAllQuestionObjects($include_scores = false, $include_parts = false, $generate_html = false, $ver = 'last') {
+  public function getAllQuestionObjects($include_scores = false, $include_parts = false, $generate_html = false, $ver = 'last', $tryToShow = 'last') {
     $out = array();
     // get data structure for current version
     $assessver = $this->getAssessVer($ver);
     for ($qn = 0; $qn < count($assessver['questions']); $qn++) {
-      $out[$qn] = $this->getQuestionObject($qn, $include_scores, $include_parts, $generate_html, $ver);
+      $out[$qn] = $this->getQuestionObject($qn, $include_scores, $include_parts, $generate_html, $ver, $tryToShow);
     }
     return $out;
   }
@@ -1746,7 +1792,7 @@ class AssessRecord
   /**
    * get question part score details
    * @param  int  $qn             The question number
-   * @param  string  $ver         The attempt to use, or 'last' for most recent
+   * @param  string  $ver         The attempt to use, or 'last' for most recent, or 'scored' for scored
    * @param  string  $try         'last' for last try, or 'all' to pick best try per-part
    * @param  array   $overrides   By-part score overrides
    * @return array (question Score, question Rawscore, parts details)
@@ -1766,11 +1812,14 @@ class AssessRecord
     if ($this->is_practice) {
       $assessver = $this->data['assess_versions'][0];
       $regen = 0;
-    } else if ($by_question || !is_numeric($ver)) {
+    } else if ($by_question || $ver === 'last') {
       $assessver = $this->data['assess_versions'][count($this->data['assess_versions']) - 1];
       if (!$by_question) {
         $regen = count($this->data['assess_versions']) - 1;
       } 
+    } else if (!$by_question && $ver === 'scored') {
+      $regen = $this->data['scored_version'];
+      $assessver = $this->data['assess_versions'][$regen];
     } else {
       $assessver = $this->data['assess_versions'][$ver];
       $regen = $ver;
@@ -1961,7 +2010,13 @@ class AssessRecord
       $autosave = $this->getAutoSaves($qn);
     }
 
-    $numParts = isset($qver['answeights']) ? count($qver['answeights']) : count($qver['tries']);
+    if (isset($qver['answeights'])) {
+        $numParts = count($qver['answeights']);
+    } else if (count($qver['tries']) > 0) {
+        $numParts = max(array_keys($qver['tries'])) + 1;
+    } else {
+        $numParts = 0;
+    }
     // separate numpartautosave, since in conditional, answeights tells us 1 part, and we want to
     // continue to use that for qcolor and such
     $numPartsAutosave = $numParts;
@@ -1999,24 +2054,18 @@ class AssessRecord
         if (is_string($autosave['stuans'][$pn]) && strpos($autosave['stuans'][$pn], '@FILE') !== false) {
           // it's  a file autosave.  As a bit of a hack we'll make an array
           // with both the last submitted answer and the autosave
-          if (is_array($stuanswers[$qn+1]) || $numParts > 1 || isset($autosave['post']['qn'.(($qn+1)*1000 + $pn)])) {
+          if (is_array($stuanswers[$qn+1]) || $numPartsAutosave > 1 || isset($autosave['post']['qn'.(($qn+1)*1000 + $pn)])) {
             $autosaves[$qn+1][$pn] = array($stuanswers[$qn+1][$pn] ?? '', $autosave['stuans'][$pn]);
           } else {
-            $autosaves[$qn+1] = array($stuanswers[$qn+1] ?? '', $autosave['stuans'][$pn]);
+            $autosaves[$qn+1][$pn] = array($stuanswers[$qn+1] ?? '', $autosave['stuans'][$pn]);
           }
         } else {
-          if (is_array($stuanswers[$qn+1]) || $numParts > 1 || isset($autosave['post']['qn'.(($qn+1)*1000 + $pn)])) {
-            if (isset($autosaves[$qn+1]) && !is_array($autosaves[$qn+1])) { // isn't array yet for some reason; make it one
-                $autosaves[$qn+1] = array($autosaves[$qn+1]);
-            }
-            $autosaves[$qn+1][$pn] = $autosave['stuans'][$pn];
-          } else {
-            $autosaves[$qn+1] = $autosave['stuans'][$pn];
-          }
+          $autosaves[$qn+1][$pn] = $autosave['stuans'][$pn];
         }
         $usedAutosave[] = $pn;
       }
     }
+
     for ($pn = 0; $pn < $numParts; $pn++) {
       // figure out try #
       $partattemptn[$pn] = isset($qver['tries'][$pn]) ? count($qver['tries'][$pn]) : 0;
@@ -2064,6 +2113,8 @@ class AssessRecord
           $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'] == 1
         ) {
           // don't block showans
+        } else if (isset($qver['answeights']) && $qver['answeights'][$pn] == 0) {
+          // don't want answeight 0 to block general showans
         } else {
           $showans = false;
         }
@@ -2076,7 +2127,7 @@ class AssessRecord
         } else {
           $qcolors[$pn] = $qver['tries'][$pn][$partattemptn[$pn] - 1]['raw'];
         }
-      }
+      } 
       if ($tryToShow === 'scored' && isset($qver['scored_try'][$pn])) {
         $correctAnswerWrongFormat[$pn] = 
           !empty($qver['tries'][$pn][$qver['scored_try'][$pn]]['wrongfmt']);
@@ -2100,6 +2151,7 @@ class AssessRecord
     if ($numParts == 0 && $this->teacherInGb) {
         $seqPartDone = true;
     }
+
     $attemptn = (count($partattemptn) == 0) ? 0 : max($partattemptn);
     $questionParams = new QuestionParams();
     $questionParams
@@ -2205,6 +2257,10 @@ class AssessRecord
 
     $this->parsedata();
     $this->data['submissions'][] = $seconds;
+    if ($this->assessRecord['agroupid'] > 0) {
+        // record who made submission
+        $this->data['submissionby'][$seconds] = $this->curUid;
+    }
     return count($this->data['submissions']) - 1;
   }
 
@@ -3112,7 +3168,8 @@ class AssessRecord
 
     if (!$this->teacherInGb && (
       $scoresInGb == 'never' ||
-      ($scoresInGb =='after_due' && time() < $this->assess_info->getSetting('enddate')))
+      ($scoresInGb =='after_due' && time() < $this->assess_info->getSetting('enddate')) ||
+      ($scoresInGb =='after_lp' && time() < $this->assess_info->getSetting('latepass_enddate')))
     ) {
       // don't show overall score;
       $out['gbscore'] = "N/A";
@@ -3156,7 +3213,8 @@ class AssessRecord
     $scoresInGb = $this->assess_info->getSetting('scoresingb');
     if (!$this->teacherInGb && (
       $scoresInGb == 'never' ||
-      ($scoresInGb =='after_due' && time() < $this->assess_info->getSetting('enddate')))
+      ($scoresInGb =='after_due' && time() < $this->assess_info->getSetting('enddate')) ||
+      ($scoresInGb =='after_lp' && time() < $this->assess_info->getSetting('latepass_enddate')))
     ) {
       $scored_aver = 0;
     }
@@ -3199,7 +3257,8 @@ class AssessRecord
     if ($this->teacherInGb ||
       $scoresInGb == 'immediately' ||
       ($scoresInGb == 'after_take' && $aver['status'] == 1) ||
-      ($scoresInGb == 'after_due' && time() > $this->assess_info->getSetting('enddate'))
+      ($scoresInGb == 'after_due' && time() > $this->assess_info->getSetting('enddate')) ||
+      ($scoresInGb == 'after_lp' && time() > $this->assess_info->getSetting('latepass_enddate'))
     ) {
       $out['score'] = $aver['score'];
       $showScores = true;
@@ -3318,7 +3377,8 @@ class AssessRecord
     if ($this->teacherInGb ||
       $scoresInGb == 'immediately' ||
       ($scoresInGb == 'after_take' && $this->data['assess_versions'][$aver]['status'] == 1) ||
-      ($scoresInGb == 'after_due' && time() > $this->assess_info->getSetting('enddate'))
+      ($scoresInGb == 'after_due' && time() > $this->assess_info->getSetting('enddate')) ||
+      ($scoresInGb == 'after_lp' && time() > $this->assess_info->getSetting('latepass_enddate'))
     ) {
       $showScores = true;
     } else {
@@ -3333,6 +3393,7 @@ class AssessRecord
     $GLOBALS['drawinitdata'] = array();
     $GLOBALS['capturechoices'] = true;
     $GLOBALS['capturedrawinit'] = true;
+
     $out = $this->getQuestionObject($qn, $showScores, true, $generate_html, $by_question ? $qver : $aver, $showScores ? 'scored' : 'last', true);
     $out['showscores'] = $scoresInGb;
     $this->dispqn = null;
@@ -3595,13 +3656,28 @@ class AssessRecord
   public function setGbFeedbacks($feedback) {
     $by_question = ($this->assess_info->getSetting('submitby') == 'by_question');
 
+    $hasfeedback = false;
     $this->parseData();
     foreach ($feedback as $key=>$fb) {
       $pts = explode('-', $key);
       if ($pts[1] === 'g') {
         // assessment-level feedback
         $av = intval($pts[0]);
-        $this->data['assess_versions'][$av]['feedback'] = Sanitize::incomingHtml($fb);
+        if ($av >= count($this->data['assess_versions'])) {
+            //is feedback for practice version
+            // need to do some hacky stuff to switch to practice version then back
+            $this->saveRecord();
+            $this->is_practice = true;
+            $this->data = null;
+            $this->parseData();
+            $this->data['assess_versions'][0]['feedback'] = Sanitize::incomingHtml($fb);
+            $this->saveRecord();
+            $this->data = null;
+            $this->is_practice = false;
+            $this->parseData();
+        } else {
+            $this->data['assess_versions'][$av]['feedback'] = Sanitize::incomingHtml($fb);
+        }
       } else if ($pts[0] === 'scored') {
         $qn = intval($pts[1]);
         if ($by_question) {
@@ -3619,9 +3695,32 @@ class AssessRecord
         $qdata = &$this->data['assess_versions'][$av]['questions'][$qn]['question_versions'][$qv];
         $qdata['feedback'] = Sanitize::incomingHtml($fb);
       }
+      $hasfeedback |= !empty($fb);
     }
-    if (!empty($feedback)) {
+    if ($hasfeedback) {
       $this->assessRecord['status'] |= 8; // indicate we have feedback
+    } else {
+      $hasFB = false;
+      // need to check if there is feedback on other questions than the one recorded
+      foreach ($this->data['assess_versions'] as $aver) {
+        if (!empty($aver['feedback'])) {
+            $hasFB = true;
+            break;
+        }
+        foreach ($aver['questions'] as $question) {
+          foreach ($question['question_versions'] as $qver) {
+            if (!empty($qver['feedback'])) {
+                $hasFB = true;
+                break 3;
+            }
+          }
+        }
+      }
+      if ($hasFB) {
+        $this->assessRecord['status'] |= 8; // indicate we have feedback
+      } else {
+        $this->assessRecord['status'] &= ~8; // indicate we have do not have feedback
+      }
     }
   }
 
@@ -3946,23 +4045,27 @@ class AssessRecord
     if ($retry_penalty > 0) {
       $triesOver = $try + 1 - $retry_penalty_after;
       if ($triesOver > 1e-10) {
-        $base *= (1 - $triesOver * $retry_penalty/100);
-        $penalties[] = array('type'=>'retry', 'pct'=>$triesOver * $retry_penalty);
+        $totalPenalty = min(100, $triesOver * $retry_penalty);
+        $base *= (1 - $totalPenalty/100);
+        $penalties[] = array('type'=>'retry', 'pct'=>$totalPenalty);
       }
     }
     if ($regen_penalty > 0) {
       $regensOver = $regen + 1 - $regen_penalty_after;
       if ($regensOver > 1e-10) {
-        $base *= (1 - $regensOver * $regen_penalty/100);
-        $penalties[] = array('type'=>'regen', 'pct'=>$regensOver * $regen_penalty);
+        $totalPenalty = min(100, $regensOver * $regen_penalty);
+        $base *= (1 - $totalPenalty/100);
+        $penalties[] = array('type'=>'regen', 'pct'=>$totalPenalty);
       }
     }
     if ($exceptionpenalty > 0 && $subtime > $duedate+10) {
       $base *= (1 - $exceptionpenalty / 100);
+      if ($base < 0) { $base = 0; }
       $penalties[] = array('type'=>'late', 'pct'=>$exceptionpenalty);
     }
     if ($timelimitEnd > 0 && $overtimePenalty > 0 && $subtime > $timelimitEnd+10) {
       $base *= (1 - $overtimePenalty / 100);
+      if ($base < 0) { $base = 0; }
       $penalties[] = array('type'=>'overtime', 'pct'=>$overtimePenalty);
     }
     $base = round($base, 5); // cut off weird computer arithmetic issues
@@ -4110,10 +4213,11 @@ class AssessRecord
    * Clears any Latepass blocks (review or gb) for current student
    */
   public function clearLPblocks() {
+    $cid = $this->assess_info->getCourseId();
     $query = "UPDATE imas_content_track SET type=IF(type = 'assessreview', 'assessreviewub', 'gbviewsafe')
-        WHERE typeid=:typeid AND userid=:userid AND (type='gbviewasid' OR type='gbviewassess' OR type='assessreview')";
+        WHERE typeid=:typeid AND courseid=:courseid AND userid=:userid AND (type='gbviewasid' OR type='gbviewassess' OR type='assessreview')";
     $stm = $this->DBH->prepare($query);
-    $stm->execute([':typeid' => $this->curAid, ':userid' => $this->curUid]);
+    $stm->execute([':typeid' => $this->curAid, ':courseid' => $cid, ':userid' => $this->curUid]);
   }
 
   /**
@@ -4127,10 +4231,14 @@ class AssessRecord
     $by_question = ($this->assess_info->getSetting('submitby') == 'by_question');
     // always saving work for last version
     $assessver = &$this->data['assess_versions'][count($this->data['assess_versions']) - 1];
+    $workafterCutoff = $this->getShowWorkAfterCutoff();
+    $acceptWorkAfter = ($workafterCutoff == 0 || $this->now < $workafterCutoff + 30);
     foreach ($work as $qn=>$val) {
       $question_versions = &$assessver['questions'][$qn]['question_versions'];
       $curq = &$question_versions[count($question_versions) - 1];
-      if ($during || ($this->assess_info->getQuestionSetting($curq['qid'], 'showwork') & 2) == 2) {
+      if ($during || 
+        (($this->assess_info->getQuestionSetting($curq['qid'], 'showwork') & 2) == 2 && $acceptWorkAfter)
+      ) {
         $newwork = Sanitize::incomingHtml($val);
         if (!isset($curq['work']) || $curq['work'] != $newwork) {
             $curq['work'] = $newwork;
@@ -4284,11 +4392,11 @@ class AssessRecord
     if (empty($this->data)) {
       if ($this->is_practice) {
         if ($this->assessRecord['practicedata'] != '') {
-          $this->data = json_decode(gzdecode($this->assessRecord['practicedata']), true);
+          $this->data = json_decode(Sanitize::gzexpand($this->assessRecord['practicedata']), true);
         }
       } else {
         if ($this->assessRecord['scoreddata'] != '') {
-          $this->data = json_decode(gzdecode($this->assessRecord['scoreddata']), true);
+          $this->data = json_decode(Sanitize::gzexpand($this->assessRecord['scoreddata']), true);
         }
       }
       if (empty($this->data)) {

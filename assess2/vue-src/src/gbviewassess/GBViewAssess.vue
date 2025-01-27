@@ -124,6 +124,9 @@
         <span v-if="showViewAsStu">|</span>
         <a :href="viewAsStuUrl + '#/print'">
           {{ $t('gradebook.print') }}
+        </a> |
+        <a :href="activityLogUrl" target="_blank">
+          {{ $t('gradebook.activitylog') }}
         </a>
       </div>
 
@@ -188,7 +191,7 @@
           <button @click = "showFilters = !showFilters">
             {{ $t('gradebook.filters') }}
           </button>
-          <div v-if = "showFilters" class="tabpanel">
+          <div v-if = "showFilters" class="tabpanel" @change="storeFilters">
             <p>{{ $t('gradebook.hide') }}:</p>
             <ul style="list-style-type: none; margin:0; padding-left: 15px;">
               <li>
@@ -240,31 +243,41 @@
                 </label>
               </li>
             </ul>
-            <p>
-              <button
-                type="button"
-                @click = "showAllAns"
-              >
-                {{ $t('gradebook.show_all_ans') }}
-              </button>
-              <button
-                type="button"
-                @click = "showAllWork = !showAllWork"
-              >
-                {{ $t('gradebook.show_all_work') }}
-              </button>
-              <button
-                type="button"
-                @click = "previewFiles"
-              >
-                {{ $t('gradebook.preview_files') }}
-              </button>
-              <button
-                type="button"
-                @click="toggleFloatingScoreboxes"
-              >
-                {{ $t('gradebook.floating_scoreboxes') }}
-              </button>
+            <p id="showopts">
+              <label>
+                <input
+                  type="checkbox"
+                  v-model="op_showans"
+                  @change = "showAllAns"
+                />{{ $t('gradebook.show_all_ans') }}
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  v-model="showAllWork"
+                />{{ $t('gradebook.show_all_work') }}
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  v-model="op_previewFiles"
+                  @change = "previewFiles"
+                />{{ $t('gradebook.preview_files') }}
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  v-model="op_floatingSB"
+                  @change = "toggleFloatingScoreboxes"
+                />{{ $t('gradebook.floating_scoreboxes') }}
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  v-model="sidebysideon"
+                  @change = "sidebysideAction"
+                />{{ $t('gradebook.sidebyside') }}
+              </label>
             </p>
           </div>
         </div>
@@ -299,7 +312,7 @@
               :lastq = "lastQ"
               :textlist = "textList"
             />
-            <div class = "bigquestionwrap">
+            <div class = "bigquestionwrap" v-show="showQuestion[qn]">
               <div class="headerpane">
                 <strong>
                   {{ $tc('question_n', qn+1) }}.
@@ -324,18 +337,34 @@
                 </span>
 
               </div>
-              <div class="scrollpane">
-                <gb-question
-                  :class = "{'inactive':!showQuestion[qn]}"
-                  :qdata = "qdata[curQver[qn]]"
-                  :qn = "qn"
-                  :disabled = "!canEdit"
-                />
-                <gb-showwork
-                  :work = "qdata[curQver[qn]].work"
-                  :worktime = "qdata[curQver[qn]].worktime"
-                  :showall = "showAllWork"
-                />
+              <div class="sidebyside" :class="{sidebysideon:sidebysideon}">
+                <div class="scrollpane">
+                  <gb-question
+                    :class = "{'inactive':!showQuestion[qn]}"
+                    :qdata = "qdata[curQver[qn]]"
+                    :qn = "qn"
+                    :disabled = "!canEdit"
+                    @qloaded = "questionLoaded"
+                  />
+                  <gb-showwork
+                    v-if="!sidebysideon"
+                    :work = "qdata[curQver[qn]].work"
+                    :worktime = "qdata[curQver[qn]].worktime"
+                    :showall = "showAllWork"
+                    :previewfiles = "op_previewFiles"
+                  />
+                </div>
+                <div class="sidepreview">
+                  <div class="sidepreviewtarget">
+                  </div>
+                  <gb-showwork
+                    v-if="sidebysideon"
+                    :work = "qdata[curQver[qn]].work"
+                    :worktime = "qdata[curQver[qn]].worktime"
+                    :showall = "showAllWork"
+                    :previewfiles = "op_previewFiles"
+                  />
+                </div>
               </div>
               <gb-score-details
                 :showfull = "showQuestion[qn]"
@@ -465,7 +494,7 @@ export default {
   data: function () {
     return {
       showOverride: false,
-      assessOverride: '',
+      assessOverride: false,
       hide100: false,
       hidePerfect: false,
       hideNonzero: false,
@@ -477,7 +506,11 @@ export default {
       showEndmsg: false,
       showExcused: false,
       showAllWork: false,
-      hidetexts: true
+      hidetexts: true,
+      op_previewFiles: false,
+      op_floatingSB: false,
+      op_showans: false,
+      sidebysideon: false
     };
   },
   computed: {
@@ -595,6 +628,9 @@ export default {
     },
     viewAsStuUrl () {
       return 'index.php?cid=' + store.cid + '&aid=' + store.aid + '&uid=' + store.uid;
+    },
+    activityLogUrl () {
+      return '../course/viewactionlog.php?cid=' + store.cid + '&uid=' + store.uid;
     },
     showQuestion () {
       const out = {};
@@ -773,14 +809,6 @@ export default {
       url += '&from=gb';
       window.location = url;
     },
-    showAllAns () {
-      window.$('span[id^=ans]').toggleClass('hidden', false).show();
-      window.$('.sabtn').replaceWith('<span>Answer: </span>');
-      window.$('.keybtn').attr('aria-expanded', 'true');
-      window.$('div[id^=dsbox]').toggleClass('hidden', false).attr('aria-hidden', false)
-        .attr('aria-expanded', true);
-      window.$('input[aria-controls^=dsbox]').attr('aria-expanded', true);
-    },
     beforeUnload (evt) {
       if (Object.keys(store.scoreOverrides).length > 0 ||
         Object.keys(store.feedbacks).length > 0
@@ -796,16 +824,46 @@ export default {
     closeConfirm () {
       store.confirmObj = null;
     },
+    showAllAns () {
+      window.toggleshowallans(this.op_showans);
+    },
     previewFiles () {
-      window.previewallfiles();
+      window.togglepreviewallfiles(this.op_previewFiles);
     },
     toggleFloatingScoreboxes () {
-      window.toggleScrollingScoreboxes();
+      window.toggleScrollingScoreboxState(this.op_floatingSB);
+    },
+    sidebysideAction () {
+      window.sidebysidemoveels(this.sidebysideon);
     },
     loadTexts () {
       if (!store.assessInfo.hasOwnProperty('intro')) {
         actions.loadGbTexts();
       }
+    },
+    storeFilters () {
+      const tocheck = ['hide100', 'hidePerfect', 'hideNonzero', 'hideZero', 'hideUnanswered',
+        'hideFeedback', 'hideNowork', 'showEndmsg', 'showExcused', 'showAllWork',
+        'hidetexts', 'op_previewFiles', 'op_floatingSB', 'op_showans', 'sidebysideon'];
+      const out = [];
+      for (const v of tocheck) {
+        if ((v === 'hidetexts' && this[v] === false) || (v !== 'hidetexts' && this[v] === true)) {
+          out.push(v);
+        }
+      }
+      window.document.cookie = 'gvaf' + store.aid + '=' + out.join(',');
+    },
+    questionLoaded (base) {
+      if (this.op_previewFiles) {
+        window.togglepreviewallfiles(true, base);
+      }
+      if (this.op_showans) {
+        window.toggleshowallans(true, base);
+      }
+      if (this.sidebysideon) {
+        window.sidebysidemoveels(true, base);
+      }
+      this.$nextTick(window.sendLTIresizemsg);
     }
   },
   created () {
@@ -815,6 +873,7 @@ export default {
     } else {
       store.APIbase = process.env.BASE_URL;
     }
+
     // if no assessinfo, or if cid/aid has changed, load data
     const querycid = window.location.search.replace(/^.*cid=(\d+).*$/, '$1');
     const queryaid = window.location.search.replace(/^.*aid=(\d+).*$/, '$1');
@@ -831,7 +890,31 @@ export default {
       store.uid = queryuid;
       store.stu = querystu;
       store.queryString = '?cid=' + store.cid + '&aid=' + store.aid + '&uid=' + store.uid;
-      actions.loadGbAssessData();
+
+      const filtercookie = window.readCookie('gvaf' + store.aid);
+      if (filtercookie !== null && filtercookie.length > 0) {
+        this.showFilters = true;
+        const cookieparts = filtercookie.split(',');
+        for (const v of cookieparts) {
+          if (v === 'hidetexts') {
+            this[v] = false;
+          } else {
+            this[v] = true;
+          }
+        }
+      }
+
+      actions.loadGbAssessData(this.hidetexts === false);
+    }
+  },
+  mounted () {
+    const filtercookie = window.readCookie('gvaf' + store.aid);
+    if (filtercookie !== null && filtercookie.length > 0) {
+      const cookieparts = filtercookie.split(',');
+      if (cookieparts.indexOf('op_floatingSB') !== -1) {
+        window.toggleScrollingScoreboxState(true);
+      }
+      this.$nextTick(window.sendLTIresizemsg);
     }
   },
   updated () {
@@ -865,5 +948,29 @@ export default {
 }
 .hoverbox {
   background-color: #fff; z-index: 9; box-shadow: 0px -3px 5px 0px rgb(0 0 0 / 75%);
+}
+#showopts label {
+  margin-right: 8px;
+  user-select: none;
+}
+.sidebyside {
+  display:flex;
+  flex-wrap:nowrap;
+}
+.scrollpane {
+  width: 100%;
+}
+.sidepreview {
+  width: 0%;
+}
+.sidebysideon .sidepreview {
+  border-left: 1px solid #ccc;
+  padding: 10px;
+}
+.sidebysideon > div {
+  width: 50%;
+}
+.sidepreview .viewworkwrap {
+  margin: 15px 0;
 }
 </style>

@@ -247,6 +247,9 @@ class AssessStandalone {
     if (!empty($options['printformat'])) {
         $questionParams->setPrintFormat(true);
     }
+    if (!empty($options['showteachernotes'])) {
+        $questionParams->setTeacherInGb(true);
+    }
 
     $questionGenerator = new QuestionGenerator($this->DBH,
         $GLOBALS['RND'], $questionParams);
@@ -287,12 +290,18 @@ class AssessStandalone {
       $jsparams['disabled'] = $disabled;
     }
 
-    return array(
+    $outarr = array(
         'html' => $qout, 
         'jsparams' => $jsparams, 
-        'errors'=>$question->getErrors(),
-        'soln'=>$question->getSolutionContentDetailed()
+        'errors'=>$question->getErrors()
     );
+
+    if (!empty($options['includeans'])) {
+        $outarr['soln'] = $question->getSolutionContentDetailed();
+        $outarr['solnopts'] = $this->qdata[$qsid]['solutionopts'];
+    }
+
+    return $outarr;
   }
 
   /*

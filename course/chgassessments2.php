@@ -117,7 +117,21 @@ if (!(isset($teacherid))) {
 
 			if ($_POST['showwork'] !== 'DNC') {
 				$sets[] = "showwork=:showwork";
-				$qarr[':showwork'] = Sanitize::onlyInt($_POST['showwork']) + Sanitize::onlyInt($_POST['showworktype']);
+				$qarr[':showwork'] = Sanitize::onlyInt($_POST['showwork']);
+                if (isset($_POST['showworktype'])) {
+                    $qarr[':showwork'] += Sanitize::onlyInt($_POST['showworktype']);
+                }
+                $sets[] = "workcutoff=:workcutoff";
+                if (!empty($_POST['doworkcutoff'])) {
+                    $qarr[':workcutoff'] = Sanitize::onlyInt($_POST['workcutoffval']);
+                    if ($_POST['workcutofftype'] == 'hr') {
+                        $qarr[':workcutoff'] *= 60;
+                    } else if ($_POST['workcutofftype'] == 'day') {
+                        $qarr[':workcutoff'] *= 60*24;
+                    } 
+                } else {
+                    $qarr[':workcutoff'] = 0;
+                }
 			}
 
 			if ($_POST['displaymethod'] !== 'DNC') {
@@ -252,8 +266,12 @@ if (!(isset($teacherid))) {
 			}
 
 			if ($_POST['noprint'] !== 'DNC') {
-				$sets[] = "noprint=:noprint";
-				$qarr[':noprint'] = Sanitize::onlyInt($_POST['noprint']);
+                if (!empty($_POST['noprint'])) {
+                    $sets[] = "noprint=(noprint | 1)";
+                } else {
+                    $sets[] = "noprint=(noprint & ~1)";
+                }
+                $metadata['noprint'] = $_POST['noprint'];
 			}
 
 			if ($_POST['istutorial'] !== 'DNC') {
@@ -465,6 +483,21 @@ if (!(isset($teacherid))) {
 				unset($metadata[':cid']);
 			}
 		}
+        if ($_POST['lockforassess'] !== 'DNC') {
+            // handle separately since must be limited to by_assess
+            if (intval($_POST['lockforassess']) == 2) {
+                $stm = $DBH->prepare("UPDATE imas_assessments SET noprint=(noprint | 2) WHERE id IN ($checkedlist) AND courseid=:cid AND submitby='by_assessment'");
+            } else {
+                $stm = $DBH->prepare("UPDATE imas_assessments SET noprint=(noprint & ~2) WHERE id IN ($checkedlist) AND courseid=:cid");
+            }
+            $stm->execute([':cid'=>$cid]);
+            $metadata['lockforassess'] = $_POST['lockforassess'];
+            if (intval($_POST['lockforassess']) == 0) {
+                // no lock: clear any existing locks
+                $stm = $DBH->prepare("UPDATE imas_students SET lockaid=0 WHERE courseid=? AND lockaid in ($checkedlist)");
+                $stm->execute([$cid]);
+            }
+        }
 		if ($_POST['intro'] !== 'DNC') {
 			$stm = $DBH->prepare("SELECT intro FROM imas_assessments WHERE id=:id");
 			$stm->execute(array(':id'=>Sanitize::onlyInt($_POST['intro'])));
@@ -670,8 +703,11 @@ if (!(isset($teacherid))) {
 }
 
 /******* begin html output ********/
-$placeinhead = '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.13/vue.global.prod.min.js" integrity="sha512-dJsT2VK9KxehzZYzxzUELznI6velu2pAOwpkL5jj4TQQhTNGXZUMup7aLqgqNwVPSUF/Ntcdfla3BEcfC7zwCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
-
+if (!empty($CFG['GEN']['uselocaljs'])) {
+	$placeinhead = '<script type="text/javascript" src="'.$staticroot.'/javascript/vue3-4-31.min.js"></script>';
+} else {
+    $placeinhead = '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.31/vue.global.prod.min.js" integrity="sha512-Dg9zup8nHc50WBBvFpkEyU0H8QRVZTkiJa/U1a5Pdwf9XdbJj+hZjshorMtLKIg642bh/kb0+EvznGUwq9lQqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
+}
  require_once "../header.php";
 
 if ($overwriteBody==1) {

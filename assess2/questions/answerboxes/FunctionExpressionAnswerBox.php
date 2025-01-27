@@ -107,61 +107,12 @@ class FunctionExpressionAnswerBox implements AnswerBox
         }
 
         if (empty($variables)) {$variables = "x";}
-        $variables = array_values(array_filter(array_map('trim', explode(",", $variables)), 'strlen'));
-        if (in_array('generalcomplex', $ansformats) && !in_array('i', $variables)) {
-            array_unshift($variables, 'i');
-        }
-        $ofunc = array();
-        for ($i = 0; $i < count($variables); $i++) {
-            $variables[$i] = trim($variables[$i]);
-            if (strpos($variables[$i], '()') !== false) {
-                $ofunc[] = substr($variables[$i], 0, strpos($variables[$i], '('));
-                $variables[$i] = substr($variables[$i], 0, strpos($variables[$i], '('));
-            }
+        $addvars = [];
+        if (in_array('generalcomplex', $ansformats)) {
+            $addvars[] = 'i';
         }
 
-        if (!empty($domain)) {
-            $fromto = array_map('trim', explode(",", $domain));
-            for ($i=0; $i < count($fromto); $i++) {
-                if ($fromto[$i] === 'integers') { continue; }
-                else if (!is_numeric($fromto[$i])) {
-                    $fromto[$i] = evalbasic($fromto[$i]);
-                }
-            }
-        } else { 
-            $fromto[0] = -10;
-            $fromto[1] = 10;
-        }
-        if (count($fromto) == 1) {$fromto[0] = -10;
-            $fromto[1] = 10;}
-        $domaingroups = array();
-        $i = 0;
-        while ($i < count($fromto)) {
-            if (isset($fromto[$i + 2]) && $fromto[$i + 2] == 'integers') {
-                $domaingroups[] = array(intval($fromto[$i]), intval($fromto[$i + 1]), true);
-                $i += 3;
-            } else if (isset($fromto[$i + 1])) {
-                $domaingroups[] = array(floatval($fromto[$i]), floatval($fromto[$i + 1]), false);
-                $i += 2;
-            } else {
-                break;
-            }
-        }
-
-        uasort($variables, 'lensort');
-        $newdomain = array();
-        $restrictvartoint = array();
-        foreach ($variables as $i => $v) {
-            if (isset($domaingroups[$i])) {
-                $touse = $i;
-            } else {
-                $touse = 0;
-            }
-            $newdomain[] = $domaingroups[$touse];
-        }
-
-        $variables = array_values($variables);
-        usort($ofunc, 'lensort');
+        list($variables, $ofunc, $newdomain, $restrictvartoint) = numfuncParseVarsDomain($variables, $domain, $addvars);
 
         $classes = ['text'];
         if ($colorbox != '') {
@@ -203,47 +154,25 @@ class FunctionExpressionAnswerBox implements AnswerBox
         }
         $preview .= "<span id=p$qn></span>\n";
 
+        $nosolntype = 0;
         if (in_array('nosoln', $ansformats) || in_array('nosolninf', $ansformats)) {
-            list($out, $answer) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
+            list($out, $answer, $nosolntype) = setupnosolninf($qn, $out, $answer, $ansformats, $la, $ansprompt, $colorbox);
         }
-        if ($answer !== '' && !is_array($answer) && !$isConditional) {
-            if ($GLOBALS['myrights'] > 10 && strpos($answer, '|') !== false) {
-                echo 'Warning: use abs(x) not |x| in $answer';
-            }
-            $sa = $answer;
-            if (in_array('allowplusminus', $ansformats)) {
-                $sa = str_replace('+-','pm',$sa);
-            }
-            $sa = makeprettydisp($sa);
-            $greekletters = array('alpha', 'beta', 'chi', 'delta', 'epsilon', 'gamma', 'varphi', 'phi', 'psi', 'sigma', 'rho', 'theta', 'lambda', 'mu', 'nu', 'omega');
 
-            for ($i = 0; $i < count($variables); $i++) {
-                if (strlen($variables[$i]) > 1) {
-                    $isgreek = false;
-                    $varlower = strtolower($variables[$i]);
-                    for ($j = 0; $j < count($greekletters); $j++) {
-                        if ($varlower == $greekletters[$j]) {
-                            $isgreek = true;
-                            break;
-                        }
-                    }
-                    if (!$isgreek && preg_match('/^(\w+)_(\w+|\(.*?\))$/', $variables[$i], $matches)) {
-                        $chg = false;
-                        if (strlen($matches[1]) > 1) {
-                            $matches[1] = '"' . $matches[1] . '"';
-                            $chg = true;
-                        }
-                        if (strlen($matches[2]) > 1 && $matches[2][0] != '(') {
-                            $matches[2] = '"' . $matches[2] . '"';
-                            $chg = true;
-                        }
-                        if ($chg) {
-                            $sa = str_replace($matches[0], $matches[1] . '_' . $matches[2], $sa);
-                        }
-                    } else if (!$isgreek) {
-                        $sa = str_replace($variables[$i], '"' . $variables[$i] . '"', $sa);
-                    }
+        if ($answer !== '' && !is_array($answer) && !$isConditional) {
+            if ($nosolntype > 0) {
+                $sa = $answer;
+            } else {
+                if ($GLOBALS['myrights'] > 10 && strpos($answer, '|') !== false) {
+                    echo 'Warning: use abs(x) not |x| in $answer';
                 }
+                $sa = $answer;
+                if (in_array('allowplusminus', $ansformats)) {
+                    $sa = str_replace('+-','pm',$sa);
+                }
+                $sa = makeprettydisp($sa);
+                
+                $sa = numfuncPrepShowanswer($sa, $variables);
             }
         }
 

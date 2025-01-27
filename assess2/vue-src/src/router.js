@@ -143,7 +143,8 @@ const router = createRouter({
         if (!store.assessInfo.in_practice &&
           (!store.assessInfo.has_active_attempt ||
             store.assessInfo.submitby === 'by_question'
-          )
+          ) &&
+          !store.showwork_expired
         ) {
           next();
         } else {
@@ -178,7 +179,12 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition;
     } else {
-      return { x: 0, y: 0 };
+      // return { x: 0, y: 0 };
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve({ left: 0, top: 0 });
+        }, 50);
+      });
     }
   }
 });
@@ -212,6 +218,8 @@ router.beforeEach((to, from, next) => {
       store.queryString += '&uid=' + store.uid;
     }
     actions.loadAssessData(() => next());
+  } else if (store.inPrintView && to.name !== '/print') {
+    next({ path: '/print', replace: true });
   } else {
     next();
   }

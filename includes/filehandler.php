@@ -23,6 +23,7 @@ function getfilehandlertype($filetype) {
 }
 
 function storecontenttofile($content,$key,$sec="private") {
+	$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 	if (getfilehandlertype('filehandlertype') == 's3') {
 		if ($sec=="public" || $sec=="public-read") {
 			$sec = "public-read";
@@ -37,7 +38,6 @@ function storecontenttofile($content,$key,$sec="private") {
 		}
 	} else {
 		$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/filestore/';
-		$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 		$dir = $base.dirname($key);
 		$fn = basename($key);
 		if (!is_dir($dir)) {
@@ -124,7 +124,10 @@ function rehostfile($url, $keydir, $sec="public", $prependToFilename="") {
 	$parseurl = parse_url($url);
 	$fn =  Sanitize::sanitizeFilenameAndCheckBlacklist($prependToFilename.basename($parseurl['path']));
 	if (getfilehandlertype('filehandlertypecfiles') == 's3') {
-		copy($url, $tmpdir.'/'.$fn);
+		$copyres = copy($url, $tmpdir.'/'.$fn);
+        if ($copyres === false) {
+            return false;
+        }
 		if ($sec=="public" || $sec=="public-read") {
 			$sec = "public-read";
 		} else {
@@ -152,12 +155,16 @@ function rehostfile($url, $keydir, $sec="public", $prependToFilename="") {
 		if (!is_dir($dir)) {
 			mkdir_recursive($dir);
 		}
-		copy($url, $dir.'/'.$fn);
+		$copyres = copy($url, $dir.'/'.$fn);
+        if ($copyres === false) {
+            return false;
+        }
 		return $fn;
 	}
 }
 
 function storeuploadedfile($id,$key,$sec="private") {
+	$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 	if (getfilehandlertype('filehandlertype') == 's3') {
 		if ($sec=="public" || $sec=="public-read") {
 			$sec = "public-read";
@@ -180,7 +187,6 @@ function storeuploadedfile($id,$key,$sec="private") {
 		if (is_uploaded_file($_FILES[$id]['tmp_name'])) {
 			downsizeimage($_FILES[$id]);
 			$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/filestore/';
-			$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 			$dir = $base.dirname($key);
 			$fn = basename($key);
 			if (!is_dir($dir)) {
@@ -199,6 +205,7 @@ function storeuploadedfile($id,$key,$sec="private") {
 
 function storeimportfile($id) {
 	$key = uniqid();
+	$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 	if (getfilehandlertype('filehandlertypecfiles') == 's3') {
 		$sec = "private";
 		if (is_uploaded_file($_FILES[$id]['tmp_name'])) {
@@ -215,7 +222,6 @@ function storeimportfile($id) {
 	} else {
 		if (is_uploaded_file($_FILES[$id]['tmp_name'])) {
 			$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/admin/import/';
-			$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 			if (move_uploaded_file($_FILES[$id]['tmp_name'], $base.$key)) {
 				return $key;
 			} else {
@@ -301,6 +307,7 @@ function downsizeimage($fileinfo) {
 }
 
 function storeuploadedcoursefile($id,$key,$sec="public-read") {
+	$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 	if (getfilehandlertype('filehandlertypecfiles') == 's3') {
 		if ($sec=="public" || $sec=="public-read") {
 			$sec = "public-read";
@@ -327,7 +334,6 @@ function storeuploadedcoursefile($id,$key,$sec="public-read") {
 	} else {
 		if (is_uploaded_file($_FILES[$id]['tmp_name'])) {
 			$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/course/files/';
-			$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 			$dir = $base.dirname($key);
 			$fn = basename($key);
 			$keydir = dirname($key);
@@ -350,6 +356,7 @@ function storeuploadedcoursefile($id,$key,$sec="public-read") {
 	}
 }
 function storeuploadedqimage($id,$key,$sec="public-read") {
+	$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 	if (getfilehandlertype('filehandlertypecfiles') == 's3') {
 		if ($sec=="public" || $sec=="public-read") {
 			$sec = "public-read";
@@ -376,7 +383,6 @@ function storeuploadedqimage($id,$key,$sec="public-read") {
 	} else {
 		if (is_uploaded_file($_FILES[$id]['tmp_name'])) {
 			$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/assessment/qimages/';
-			$key = Sanitize::sanitizeFilePathAndCheckBlacklist($key);
 			$dir = $base.dirname($key);
 			$fn = basename($key);
 			if (!is_dir($dir)) {
@@ -523,8 +529,8 @@ function deleteAssess2FilesOnUnenroll($tounenroll, $aids, $groupassess) {
 	$tomaybedel = [];
 	$tolookupaid = [];
 	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-		$scoreddata = gzdecode($row['scoreddata']);
-		$practicedata = $row['practicedata']==''?'':gzdecode($row['practicedata']);
+		$scoreddata = Sanitize::gzexpand($row['scoreddata']);
+		$practicedata = $row['practicedata']==''?'':Sanitize::gzexpand($row['practicedata']);
 		preg_match_all('/@FILE:(.+?)@/', $scoreddata.$practicedata, $matches);
 		foreach ($matches[1] as $file) {
 			// if it's a group asssess, we'll look to see if anyone else is using
@@ -552,8 +558,8 @@ function deleteAssess2FilesOnUnenroll($tounenroll, $aids, $groupassess) {
 		$query .= "WHERE assessmentid IN ($aidlist2) AND userid NOT IN ($userlist)";
 		$stm = $DBH->query($query);
 		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-			$scoreddata = gzdecode($row['scoreddata']);
-			$practicedata = gzdecode($row['practicedata']);
+			$scoreddata = Sanitize::gzexpand($row['scoreddata']);
+			$practicedata = Sanitize::gzexpand($row['practicedata']);
 			preg_match_all('/@FILE:(.+?)@/', $scoreddata.$practicedata, $exmatch);
 			//remove from tolookup list all files found in other sessions
 			$tomaybedel = array_diff($tomaybedel, $exmatch[1]);
@@ -858,8 +864,8 @@ function deletecoursefiles($files) {
 }
 
 function deleteqimage($file) {
-	$safeFilename = Sanitize::sanitizeFilenameAndCheckBlacklist($file);
 	if (getfilehandlertype('filehandlertypecfiles') == 's3') {
+		$safeFilename = preg_replace('/[^\w\.]/','', $file);
 		$s3 = new S3($GLOBALS['AWSkey'],$GLOBALS['AWSsecret']);
 		$s3object = "qimages/$safeFilename";
 		if($s3->deleteObject($GLOBALS['AWSbucket'],$s3object)) {
@@ -868,6 +874,7 @@ function deleteqimage($file) {
 			return false;
 		}
 	} else {
+		$safeFilename = Sanitize::sanitizeFilenameAndCheckBlacklist($file);
 		$base = rtrim(dirname(dirname(__FILE__)), '/\\').'/assessment/qimages';
 		if (@unlink($base."/$safeFilename")) {
 			return true;

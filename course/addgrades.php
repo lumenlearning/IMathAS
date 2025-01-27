@@ -214,7 +214,7 @@
                     $attper = 0;
                     $att = 0;
                     if ($row[2] !== '') {
-                        $data = json_decode(gzdecode($row[2]), true);
+                        $data = json_decode(Sanitize::gzexpand($row[2]), true);
                         if ($data !== false) {
                             $av = $data['assess_versions'][$data['scored_version']];
                             $qcnt = 0;
@@ -528,14 +528,14 @@
 		}
 
 		$outcomes = array();
-		function flattenarr($ar) {
+		function flattenarr($ar, $deftype = 0) {
 			global $outcomes;
 			foreach ($ar as $v) {
 				if (is_array($v)) { //outcome group
 					$outcomes[] = array($v['name'], 1);
-					flattenarr($v['outcomes']);
+					flattenarr($v['outcomes'], 2);
 				} else {
-					$outcomes[] = array($v, 0);
+					$outcomes[] = array($v, $deftype);
 				}
 			}
 		}
@@ -620,7 +620,7 @@ at <input type=text size=10 name=stime value="<?php echo Sanitize::encodeStringF
 				printf('<option value="%d">%s</option>', Sanitize::encodeStringForDisplay($row[0]),
                     Sanitize::encodeStringForDisplay($row[1]));
 			}
-			echo '<select><br/>';
+			echo '</select><br/>';
 			echo 'Grade type:<br/> <input type="radio" name="assesssnaptype" value="0" checked="checked">Current score ';
 			echo '<br/><input type="radio" name="assesssnaptype" value="1">Participation: give full credit if &ge; ';
 			echo '<input type="text" name="assesssnapatt" value="100" size="3">% of problems attempted and &ge; ';

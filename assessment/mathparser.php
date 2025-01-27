@@ -115,6 +115,7 @@ class MathParser
   private $variableValues = [];
   private $origstr = '';
   private $docomplex = false;
+  private $allowEscinot = true;
 
   /**
    * Construct the parser
@@ -139,11 +140,13 @@ class MathParser
     }
     usort($this->variables, function ($a,$b) { return strlen($b) - strlen($a);});
 
+    $this->allowEscinot = !in_array('E', $this->variables);
+
     //define functions
     if (count($allowedfuncs) > 0) {
       $this->functions = $allowedfuncs;
     } else {
-      $this->functions = explode(',', 'funcvar,arcsinh,arccosh,arctanh,arcsech,arccsch,arccoth,arcsin,arccos,arctan,arcsec,arccsc,arccot,root,sqrt,sign,sinh,cosh,tanh,sech,csch,coth,abs,sin,cos,tan,sec,csc,cot,exp,log,ln');
+      $this->functions = explode(',', 'funcvar,arcsinh,arccosh,arctanh,arcsech,arccsch,arccoth,arcsin,arccos,arctan,arcsec,arccsc,arccot,root,sqrt,sign,sinh,cosh,tanh,sech,csch,coth,abs,sin,cos,tan,sec,csc,cot,exp,log,div,ln');
     }
 
     //build regex's for matching symbols
@@ -220,7 +223,7 @@ class MathParser
           if ($this->docomplex) {
             if (!is_array($a)) { $a = [$a,0]; }
             if (!is_array($b)) { $b = [$b,0]; }
-            if ($b[1] === 0) {
+            if ($b[1] == 0) {
               $m = safepow($a[0]*$a[0]+$a[1]*$a[1], $b[0]/2);
               $t = atan2($a[1],$a[0]);
               return [$m*cos($t*$b[0]), $m*sin($t*$b[0])];
@@ -232,6 +235,23 @@ class MathParser
               return [$m*cos($in), $m*sin($in)];
             }
           } else {
+            if ($a == 0 && $b == 0) {
+                throw new MathParserException("0^0 is undefined");
+            } else if (!is_numeric($a) || !is_numeric($b)) {
+                throw new MathParserException("cannot evaluate powers with nonnumeric values");
+            } else if ($a < 0 && floor($b) != $b) {
+                // some code replication here, but allows us to throw proper exception for invalid inputs
+                for ($j=3; $j<50; $j+=2) {
+                    if (abs(round($j*$b)-($j*$b))<.000001) {
+                        if (round($j*$b)%2==0) {
+                            return exp($b*log(abs($a)));
+                        } else {
+                            return -1*exp($b*log(abs($a)));
+                        }
+                    }
+                }
+                throw new MathParserException("invalid power for negative base");
+            }
             return safepow($a,$b);
           }
         }],
@@ -354,7 +374,10 @@ class MathParser
    */
   public function evaluateQuiet($variableValues = array()) {
     try {
-      return $this->evaluate($variableValues);
+      ob_start(); // buffer any echos so we can ditch them to keep this quiet 
+      $out = $this->evaluate($variableValues);
+      ob_end_clean(); // ditch buffer contents 
+      return $out;
     } catch (Throwable $t) {
       return sqrt(-1);
     } 
@@ -414,13 +437,18 @@ class MathParser
         continue;
       } else if (ctype_digit($c) || $c==='.') {
         // if it's a number/decimal value
-        preg_match('/^(\d*\.?\d*(E\+?-?\d+)?)/', substr($str,$n), $matches);
+        if ($this->allowEscinot) {
+            preg_match('/^(\d*\.?\d*(E[\+\-]?\d+(?!\.))?)/', substr($str,$n), $matches);
+        } else {
+            preg_match('/^(\d*\.?\d*)/', substr($str,$n), $matches);
+
+        }
         if ($matches[1] === '.') { // special case for lone period
             continue;
         }
         $tokens[] = [
           'type'=>'number',
-          'symbol'=> $matches[1]
+          'symbol'=> (float) $matches[1]
         ];
         $lastTokenType = 'number';
         $n += strlen($matches[1]) - 1;
@@ -466,6 +494,12 @@ class MathParser
               'symbol'=>$nextSymbol
             ];
             $lastTokenType = 'variable';
+          } else if ($nextSymbol === 'div') {
+            $tokens[] = [
+                'type'=>'operator',
+                'symbol'=>'/'
+            ];
+            $lastTokenType = 'operator';
           } else {
             // found a function.  We'll handle a couple special cases here too
             if ($nextSymbol === 'log') {
@@ -911,7 +945,7 @@ class MathParser
             }
             break;
           case 'nthroot':
-            if ($indexval%2===0 && $insideval<0) {
+            if ($indexval%2==0 && $insideval<0) {
               throw new MathParserException("no even root of negative");
             }
             break;
@@ -970,7 +1004,7 @@ class MathParser
    * @return boolean
    */
   private function isMultiple($a,$b) {
-    if ($b===0) {
+    if ($b==0) {
       return false;
     }
     $v = abs($a)/abs($b);
@@ -1038,7 +1072,9 @@ class MathParser
     //echo $this->toOutputString($this->normalizeNode($this->AST));
     //print_r($this->AST);
     //print_r($this->normalizeNode($this->AST));
-    return $this->toOutputString($this->normalizeNode($this->AST));
+    $normed = $this->normalizeNode($this->AST);
+    $this->walkRemoveOne($normed);
+    return $this->toOutputString($normed);
   }
 
   /**
@@ -1341,16 +1377,16 @@ class MathParser
 
   private function walkRemoveOne(&$node) {
     if ($node['symbol'] === '*') {
-      if ($node['right']['symbol'] === '1') {
+      if ($node['right']['symbol'] === 1.0) {
         $node = $node['left'];
         $this->walkRemoveOne($node);
         return;
-      } else if ($node['left']['symbol'] === '1') {
+      } else if ($node['left']['symbol'] === 1.0) {
         $node = $node['right'];
         $this->walkRemoveOne($node);
         return;
       } else if ($node['left']['symbol'] === '~' &&
-        $node['left']['left']['symbol'] === '1'
+        $node['left']['left']['symbol'] === 1.0
       ) {
         if ($node['right']['symbol'] === '~') { // both neg; remove both negs
           $node = $node['right']['left'];
@@ -1359,7 +1395,7 @@ class MathParser
           $node = $node['left'];
         }
       } else if ($node['right']['symbol'] === '~' &&
-        $node['right']['left']['symbol'] === '1'
+        $node['right']['left']['symbol'] === 1.0
       ) {
         if ($node['left']['symbol'] === '~') { // both neg; remove both negs
           $node = $node['left']['left'];
@@ -1407,15 +1443,15 @@ function factorial($x) {
 	for ($i=$x-1;$i>0;$i--) {
 		$x *= $i;
 	}
-	return ($x<0?false:($x===0?1:$x));
+	return ($x<0?false:($x==0?1:$x));
 }
 
 function nthroot($x,$n) {
-	if ($x===0) {
+	if ($x==0) {
       return 0;
-    } else if ($n%2===0 && $x<0) { //if even root and negative base
+    } else if ($n%2==0 && $x<0) { //if even root and negative base
       throw new MathParserException("Can't take even root of negative value");
-	} else if ($n===0) {
+	} else if ($n==0) {
       throw new MathParserException("Can't take 0th root");
     } else if ($x<0) { //odd root of negative base - negative result
 		return -1*exp(1/$n*log(abs($x)));
@@ -1430,27 +1466,30 @@ function funcvar ($input, $v) {
 
 // a safer power function that can handle (-8)^(1/3)
 function safepow($base,$power) {
-	if ($base===0) {
-    if($power===0) {
-      throw new MathParserException("0^0 is undefined");
+	if ($base==0) {
+    if($power==0) {
+      echo "0^0 is undefined";
+      return NAN;
     } else {
       return 0;
     }
   }
   if (!is_numeric($base) || !is_numeric($power)) {
-    throw new MathParserException("cannot evaluate powers with nonnumeric values");
+    echo "cannot evaluate powers with nonnumeric values";
+    return NAN;
   }
 	if ($base<0 && floor($power)!=$power) {
 		for ($j=3; $j<50; $j+=2) {
 			if (abs(round($j*$power)-($j*$power))<.000001) {
-				if (round($j*$power)%2===0) {
+				if (round($j*$power)%2==0) {
 					return exp($power*log(abs($base)));
 				} else {
 					return -1*exp($power*log(abs($base)));
 				}
 			}
 		}
-		throw new MathParserException("invalid power for negative base");
+		echo "invalid power for negative base";
+        return NAN;
 	}
 	if (floor($base)==$base && floor($power)==$power && $power>0) { //whole # exponents
 		$result = pow(abs($base),$power);
@@ -1466,103 +1505,129 @@ function safepow($base,$power) {
 function sec($x) {
   $val = cos($x);
   if (abs($val)<1e-16) {
-    throw new MathParserException("Invalid input for sec");
+    echo "Invalid input for sec";
+    return NAN;
   }
 	return (1/$val);
 }
 function csc($x) {
   $val = sin($x);
   if (abs($val)<1e-16) {
-    throw new MathParserException("Invalid input for csc");
+    echo "Invalid input for csc";
+    return NAN;
   }
 	return (1/$val);
 }
 function cot($x) {
   $val = tan($x);
   if (abs($val)<1e-16) {
-    throw new MathParserException("Invalid input for cot");
+    echo "Invalid input for cot";
+    return NAN;
   }
 	return (1/$val);
 }
 function sech($x) {
   $val = cosh($x);
   if (abs($val)<1e-16) {
-    throw new MathParserException("Invalid input for sech");
+    echo "Invalid input for sech";
+    return NAN;
   }
 	return (1/$val);
 }
 function csch($x) {
   $val = sinh($x);
   if (abs($val)<1e-16) {
-    throw new MathParserException("Invalid input for csch");
+    echo "Invalid input for csch";
+    return NAN;
   }
 	return (1/$val);
 }
 function coth($x) {
   $val = tanh($x);
   if (abs($val)<1e-16) {
-    throw new MathParserException("Invalid input for coth");
+    echo "Invalid input for coth";
+    return NAN;
   }
 	return (1/$val);
 }
 function asec($x) {
   if (abs($x)<1e-16) {
-    throw new MathParserException("Invalid input for arcsec");
+    echo "Invalid input for arcsec";
+    return NAN;
   }
   $inv = round(1/$x, 12);
   if ($inv < -1 || $inv > 1) {
-    throw new MathParserException("Invalid input for arcsec");
+    echo "Invalid input for arcsec";
+    return NAN;
   }
   return acos($inv);
 }
 function acsc($x) {
   if (abs($x)<1e-16) {
-    throw new MathParserException("Invalid input for arccsc");
+    echo "Invalid input for arccsc";
+    return NAN;
   }
   $inv = round(1/$x, 12);
   if ($inv < -1 || $inv > 1) {
-    throw new MathParserException("Invalid input for arccsc");
+    echo "Invalid input for arccsc";
+    return NAN;
   }
   return asin($inv);
 }
 function acot($x) {
     if (abs($x)<1e-16) {
-        throw new MathParserException("Invalid input for arccot");
+        echo "Invalid input for arccot";
+        return NAN;
     }
     return atan(1/$x);
 }
 function asech($x) {
     if (abs($x)<1e-16) {
-        throw new MathParserException("Invalid input for arcsech");
+        echo "Invalid input for arcsech";
+        return NAN;
     }
     $inv = round(1/$x, 12);
     if ($inv < 1) {
-        throw new MathParserException("Invalid input for arcsech");
+        echo "Invalid input for arcsech";
+        return NAN;
     }
     return acosh($inv);
 }
 function acsch($x) {
     if (abs($x)<1e-16) {
-        throw new MathParserException("Invalid input for arccsch");
+        echo "Invalid input for arccsch";
+        return NAN;
     }
     $inv = round(1/$x, 12);
     return asinh($inv);
 }
 function acoth($x) {
     if (abs($x)<1e-16) {
-        throw new MathParserException("Invalid input for arccoth");
+        echo "Invalid input for arccoth";
+        return NAN;
     }
     $inv = round(1/$x, 12);
     if ($inv < -1 || $inv > 1) {
-        throw new MathParserException("Invalid input for arccoth");
+        echo "Invalid input for arccoth";
+        return NAN;
     }
     return atanh($inv);
 }
 function safeasin($x) {
-  return asin(round($x,12));  
+  $inp = round($x, 12);
+  if ($inp < -1 || $inp > 1) {
+    echo "Invalid input for arcsin";
+    return NAN;
+  }
+  return asin($inp);  
 }
 function safeacos($x) {
-  return acos(round($x,12));  
+  $inp = round($x, 12);
+  if ($inp < -1 || $inp > 1) {
+    echo "Invalid input for arccos";
+    return NAN;
+  }
+  return acos($inp);  
 }
 function sign($a,$str=false) {
 	if ($str==="onlyneg") {
@@ -1573,8 +1638,8 @@ function sign($a,$str=false) {
 		return ($a<0)?-1:1;
 	}
 }
-function sgn($a) {
-	return ($a===0)?0:(($a<0)?-1:1);
+function sgn($a, $loose=false) {
+	return ($a == 0 || ($loose && abs($a)<1e-8))?0:(($a<0)?-1:1);
 }
 
 
@@ -1586,7 +1651,7 @@ function cplx_mult($a,$b) {
 }
 function cplx_div($n,$d) {
   $ds = $d[0]*$d[0] + $d[1]*$d[1];
-  if ($ds === 0) {
+  if ($ds == 0) {
     throw new MathParserException("Cannot divide by zero in complex division");
   }
   return [($n[0]*$d[0] + $n[1]*$d[1])/$ds, ($n[1]*$d[0]-$n[0]*$d[1])/$ds];
@@ -1622,6 +1687,44 @@ function cplx_csc($z) {
 }
 function cplx_cot($z) {
   return cplx_div(cplx_cos($z), cplx_sin($z));
+}
+function cplx_sinh($z) {
+  return [sinh($z[0])*cos($z[1]), cosh($z[0])*sin($z[1])];
+}
+function cplx_cosh($z) {
+  return [cosh($z[0])*cos($z[1]), sinh($z[0])*sin($z[1])];
+}
+function cplx_tanh($z) {
+  return cplx_div(cplx_sinh($z), cplx_cosh($z));
+}
+function cplx_sech($z) {
+  return cplx_div([1,0], cplx_cosh($z));
+}
+function cplx_csch($z) {
+  return cplx_div([1,0], cplx_sinh($z));
+}
+function cplx_coth($z) {
+  return cplx_div(cplx_cosh($z), cplx_sinh($z));
+}
+function cplx_asinh($z) {
+  $r = cplx_sqrt([$z[0]*$z[0] - $z[1]*$z[1] + 1,2*$z[0]*$z[1]]);
+  return cplx_log([$z[0] + $r[0], $z[1] + $r[1]]);
+}
+function cplx_acosh($z) {
+    $r = cplx_sqrt([$z[0]*$z[0] - $z[1]*$z[1] - 1,2*$z[0]*$z[1]]);
+    return cplx_log([$z[0] + $r[0], $z[1] + $r[1]]);
+}
+function cplx_atanh($z) {
+    return cplx_mult([.5,1], cplx_log(cplx_div([1+$z[0],$z[1]], [1-$z[0],-1*$z[1]])));
+}
+function cplx_asech($z) {
+    return cplx_acosh(cplx_div([1,0],$z));
+}
+function cplx_acsch($z) {
+    return cplx_asinh(cplx_div([1,0],$z));
+}
+function cplx_acoth($z) {
+    return cplx_mult([.5,1], cplx_log(cplx_div([$z[0]+1,$z[1]], [$z[0]-1,$z[1]])));
 }
 function cplx_asin($z) {
   // -i*  ln(iz + sqrt(1-z^2))  

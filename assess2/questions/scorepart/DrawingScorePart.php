@@ -47,6 +47,8 @@ class DrawingScorePart implements ScorePart
             } else {
                 $reltolerance = 1;
             }
+        } else if ($reltolerance == 0) {
+            $reltolerance = 1e-12; // give some wiggle room for arithmetic errors
         }
 
         if ($multi) { $qn = ($qn+1)*1000+$partnum; }
@@ -185,6 +187,22 @@ class DrawingScorePart implements ScorePart
                 foreach ($line as $j=>$pt) {
                     $line[$j] = explode(',',$pt);
                 }
+                if ($scoremethod == 'ignoreextradots') {
+                    $lastslope = null;
+                    $toelim = [];
+                    for ($j=1;$j<count($line);$j++) {
+                        $thisslope = [$line[$j][0] - $line[$j-1][0], $line[$j][1] - $line[$j-1][1]];
+                        if ($lastslope !== null && ($lastslope[1]*$thisslope[0] == $lastslope[0]*$thisslope[1])) {
+                            // same slope; eliminate middle point
+                            $toelim[] = $j-1;
+                        }
+                        $lastslope = $thisslope;
+                    }
+                    foreach ($toelim as $j) {
+                        unset($line[$j]);
+                    }
+                    $line = array_values($line);
+                }
                 if ($isclosed && ($line[0][0]-$line[count($line)-1][0])*($line[0][0]-$line[count($line)-1][0]) + ($line[0][1]-$line[count($line)-1][1])*($line[0][1]-$line[count($line)-1][1]) <=25*max(1,$reltolerance)) {
                     array_pop($line);
                     $stuclosed = true;
@@ -194,8 +212,12 @@ class DrawingScorePart implements ScorePart
             $matchstu = array();
             for ($i=0; $i<count($ansdots); $i++) {
                 for ($j=0;$j<count($line);$j++) {
+                    if (in_array($j, $matchstu)) { continue; }
                     if (($ansdots[$i][0]-$line[$j][0])*($ansdots[$i][0]-$line[$j][0]) + ($ansdots[$i][1]-$line[$j][1])*($ansdots[$i][1]-$line[$j][1]) <=25*max(1,$reltolerance)) {
                         $matchstu[$i] = $j;
+                        if (isset($matchstu[$i-1]) && abs($matchstu[$i] - $matchstu[$i-1])==1) {
+                            break; // match has adjancy; don't look for another match
+                        }
                     }
                 }
             }
@@ -333,7 +355,7 @@ class DrawingScorePart implements ScorePart
                     }
                 } else if ($function[0]=='circle') {  // form "circle,x_center,y_center,radius"
                     //$anscircs[$key] = array(($function[1] - $settings[0])*$pixelsperx + $imgborder,$settings[7] - ($function[2]-$settings[2])*$pixelspery - $imgborder,$function[3]*$pixelsperx);
-                    $ansellipses[$key] = array(($function[1] - $settings[0])*$pixelsperx + $imgborder,$settings[7] - ($function[2]-$settings[2])*$pixelspery - $imgborder,$function[3]*$pixelsperx,$function[3]*$pixelsperx);
+                    $ansellipses[$key] = array(($function[1] - $settings[0])*$pixelsperx + $imgborder,$settings[7] - ($function[2]-$settings[2])*$pixelspery - $imgborder,$function[3]*$pixelsperx,$function[3]*$pixelspery);
                 } else if ($function[0]=='ellipse') {  //form ellipse,x_center,y_center,x_radius,y_radius
                     $ansellipses[$key] = array(($function[1] - $settings[0])*$pixelsperx + $imgborder,$settings[7] - ($function[2]-$settings[2])*$pixelspery - $imgborder,abs($function[3]*$pixelsperx),abs($function[4]*$pixelspery));
                 } else if ($function[0]=='verthyperbola') {  //form verthyperbola,x_center,y_center,horiz "radius",vert "radius"
@@ -803,9 +825,13 @@ class DrawingScorePart implements ScorePart
                         }
                     } else if ($pts[0]==7) {
                         //circle
-                        $rad = sqrt(($pts[3]-$pts[1])*($pts[3]-$pts[1]) + ($pts[4]-$pts[2])*($pts[4]-$pts[2]));
-                        //$circs[] = array($pts[1],$pts[2],$rad);
-                        $ellipses[] = array($pts[1],$pts[2],$rad,$rad);
+                        //$rad = sqrt(($pts[3]-$pts[1])*($pts[3]-$pts[1]) + ($pts[4]-$pts[2])*($pts[4]-$pts[2]));
+                        //$ellipses[] = array($pts[1],$pts[2],$rad,$rad);
+
+                        $dx = abs($pts[3]-$pts[1])/$pixelsperx;
+                        $dy = abs($pts[4]-$pts[2])/$pixelspery;
+                        $rad = sqrt($dx*$dx + $dy*$dy);
+                        $ellipses[] = array($pts[1],$pts[2],$rad*$pixelsperx,$rad*$pixelspery);
                     } else if ($pts[0]==7.2) {
                         //ellipse
                         $ellipses[] = array($pts[1],$pts[2],abs($pts[3]-$pts[1]),abs($pts[4]-$pts[2]));

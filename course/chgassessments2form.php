@@ -41,8 +41,12 @@ $vueData = array(
 	'showcat' => 'DNC',
 	'samever' => 'DNC',
 	'noprint' => 'DNC',
+    'lockforassess' => 'DNC',
     'showwork' => 'DNC',
     'showworktype' => 0,
+    'doworkcutoff' => 0,
+    'workcutofftype' => 'hr',
+    'workcutoffval' => 1,
 	'allowlate' => 'DNC',
 	'timelimit' => '',
 	'allowovertime' => false,
@@ -403,6 +407,21 @@ $vueData = array(
 						<option value="2"><?php echo _('After assessment');?></option>
 						<option value="3"><?php echo _('During or after assessment');?></option>
                     </select>
+                    <span v-if="showwork != 'DNC' && showwork > 1">
+                        <br>
+                        <input type="checkbox" v-model="doworkcutoff" name="doworkcutoff" id="doworkcutoff" value="1"> 
+                        <label for="doworkcutoff"><?php echo _('Add work cutoff') . '. ';  ?></label>
+                        <span v-if="doworkcutoff">
+                            <label for="workcutoffval"><?php echo _('Work must be added within:') . ' '; ?></label>
+                            <input name="workcutoffval" id="workcutoffval" v-model="workcutoffval" style="width:5.5ch" 
+                                type="number" min="0" :max="workcutofftype=='day'?45:1000"/>
+                            <select name="workcutofftype" id="workcutofftype" v-model="workcutofftype" aria-label="<?php echo _('units for work added within time');?>">
+                                <option value="min"><?php echo _('minutes');?></option>
+                                <option value="hr"><?php echo _('hours');?></option>
+                                <option value="day"><?php echo _('days');?></option>
+                            </select>
+                        </span>
+                    </span>
                     <span v-show="showwork != 'DNC'">
                         <br>
                         <label for="showworktype"><?php echo _('Work entry type');?>:</label>
@@ -414,6 +433,19 @@ $vueData = array(
 				</span><br class=form />
 			</div>
 
+            <div :class="{highlight:lockforassess != 'DNC'}">
+				<label class=form for="lockforassess"><?php echo _('Lock student out of the rest of the course until submitted'); ?></label>
+				<span class=formright>
+					<select name="lockforassess" id="lockforassess" v-model="lockforassess">
+						<option value="DNC"><?php echo _('Do not change'); ?></option>
+						<option value="0"><?php echo _('No'); ?></option>
+						<option value="2"><?php echo _('Yes'); ?></option>
+					</select>
+                    <span class=small>
+                        <?php echo _('Only applies to Quiz-style assessments'); ?>
+                    </span>
+				</span><br class=form />
+			</div>
 			<div :class="{highlight:noprint != 'DNC'}">
 				<label class=form for="noprint"><?php echo _('Make hard to print'); ?></label>
 				<span class=formright>
@@ -906,6 +938,10 @@ createApp({
 					'value': 'after_due',
 					'text': '<?php echo _('After the due date'); ?>'
 				},
+                {
+                    'value': 'after_lp',
+                    'text': '<?php echo _('After Latepass period');?>'
+                },
 				{
 					'value': 'immediately',
 					'text': '<?php echo _('Immediately - they can always view it'); ?>'
@@ -952,6 +988,10 @@ createApp({
 					'value': 'after_due',
 					'text': '<?php echo _('After the due date'); ?>'
 				},
+                {
+                    'value': 'after_lp',
+                    'text': '<?php echo _('After Latepass period');?>'
+                },
 				{
 					'value': 'never',
 					'text': '<?php echo _('Never'); ?>'
@@ -1000,15 +1040,21 @@ createApp({
  				return [];
  			} else {
  				var out = [
- 					{
- 						'value': 'after_due',
- 						'text': '<?php echo _('After the due date'); ?>'
+                    {
+ 						'value': 'after_lp',
+ 						'text': '<?php echo _('After Latepass period');?>'
  					},
  					{
  						'value': 'never',
  						'text': '<?php echo _('Never'); ?>'
  					}
                 ];
+                if (this.viewingb !== 'after_lp' && this.scoresingb !== 'after_lp') {
+                    out.unshift({
+ 						'value': 'after_due',
+ 						'text': '<?php echo _('After the due date');?>'
+ 					});
+                }
                 if ((this.viewingb === 'after_take' || this.viewingb === 'immediately') && 
                     this.subtype == 'by_assessment'
                 ) {

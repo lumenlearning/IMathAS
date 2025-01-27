@@ -187,6 +187,9 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
           array('grades'=>$grades)
         );
       }
+            // clear any locks
+            $stm = $DBH->prepare("UPDATE imas_students SET lockaid=0 WHERE courseid=? and lockaid=?");
+            $stm->execute([$cid, $aid]);
 			$stm = $DBH->prepare("DELETE FROM imas_livepoll_status WHERE assessmentid=:assessmentid");
 			$stm->execute(array(':assessmentid'=>$aid));
 			$stm = $DBH->prepare("UPDATE imas_questions SET withdrawn=0 WHERE assessmentid=:assessmentid");
@@ -384,8 +387,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var addqaddr = '$address';
         var assessver = '$aver';
 		</script>";
-    $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort2.js?v=011224\"></script>";
-    $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/qsearch.js?v=011224\"></script>";
+    $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort2.js?v=050824\"></script>";
+    $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/qsearch.js?v=052224\"></script>";
     $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/junkflag.js\"></script>";
     $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/DatePicker.js?v=080818\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\">var JunkFlagsaveurl = '". $GLOBALS['basesiteurl'] . "/course/savelibassignflag.php';</script>";

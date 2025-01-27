@@ -292,7 +292,7 @@ function loadExcusals($cid, $userid) {
 }
 
 function loadExceptions($cid, $userid) {
-	global $DBH;
+	global $DBH, $courseenddate;
 
 	$exceptions = array();
 	$query = "SELECT items.id,ex.startdate,ex.enddate,ex.islatepass,ex.waivereqscore,ex.itemtype FROM ";
@@ -304,6 +304,9 @@ function loadExceptions($cid, $userid) {
 	$stm = $DBH->prepare($query);
 	$stm->execute(array(':userid'=>$userid, ':courseid'=>$cid, ':userid2'=>$userid, ':courseid2'=>$cid));
 	while ($line = $stm->fetch(PDO::FETCH_ASSOC)) {
+        if ($line['enddate'] > $courseenddate && $line['islatepass'] > 0) {
+            $line['enddate'] = $courseenddate;
+        }
 		$exceptions[$line['id']] = array($line['startdate'],$line['enddate'],$line['islatepass'],$line['waivereqscore'],$line['itemtype']);
 	}
 	return $exceptions;

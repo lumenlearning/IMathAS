@@ -4,6 +4,7 @@
         "ext-curl": "*",
         "ext-pdo": "*",
         "ext-json": "*",
+        "ext-zlib": "*",
         "php-di/php-di": "7.0.6",
         "slim/slim": "^4.12.0",
         "slim/psr7": "^1.6.1",
