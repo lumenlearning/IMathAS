@@ -107,23 +107,25 @@ switch($_GET['action']) {
 		break;
 	case "deladmin":
 		if ($myrights < 75) { echo _("You don't have the authority for this action"); break;}
-        $stm = $DBH->prepare("SELECT FirstName,LastName,SID,rights FROM imas_users WHERE id=:id");
+        $stm = $DBH->prepare("SELECT FirstName,LastName,SID,rights,groupid FROM imas_users WHERE id=:id");
 		$stm->execute(array(':id'=>$_GET['id']));
 		$line = $stm->fetch(PDO::FETCH_ASSOC);
-		if ($myrights==100) {
-			$stm = $DBH->prepare("SELECT iu.id,iu.FirstName,iu.LastName,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id WHERE (iu.rights=100 OR iu.groupid=?) AND iu.rights>12 AND iu.rights<>76 AND iu.rights<>77 ORDER BY iu.LastName,iu.FirstName");
-            $stm->execute(array($groupid));
+		
+        if ($myrights==100) {
+			$stm = $DBH->prepare("SELECT iu.id,iu.FirstName,iu.LastName,ig.name FROM imas_users AS iu LEFT JOIN imas_groups AS ig ON iu.groupid=ig.id WHERE (iu.rights=100 OR iu.groupid=?) AND iu.rights>12 AND iu.rights<>76 AND iu.rights<>77 AND iu.id<>? ORDER BY iu.LastName,iu.FirstName");
+            $stm->execute(array($line['groupid'], $_GET['id']));
 		} else {
-			$stm = $DBH->prepare("SELECT id,FirstName,LastName FROM imas_users WHERE groupid=? AND rights>12 AND rights<>76 AND rights<>77 ORDER BY LastName,FirstName");
-			$stm->execute(array($groupid));
+			$stm = $DBH->prepare("SELECT id,FirstName,LastName FROM imas_users WHERE groupid=? AND rights>12 AND rights<>76 AND rights<>77 AND id<>? ORDER BY LastName,FirstName");
+			$stm->execute(array($line['groupid'], $_GET['id']));
 		}
-		$otherusers = array();
+		$otherusers = '<select name=transferto>';
 		while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 			if ($row['name'] === null) {
 				$row['name'] = _('Default');
 			}
-			$otherusers[$row['id']] = $row['LastName'].', '.$row['FirstName'].(isset($row['name'])?' ('.$row['name'].')':'');
+			$otherusers .= '<option value="'.$row['id'].'">'. Sanitize::encodeStringForDisplay($row['LastName'].', '.$row['FirstName'].(isset($row['name'])?' ('.$row['name'].')':'')).'</option>';
 		}
+        $otherusers .= '</select>';
 
         $allInstrEnroll = array_unique(array_merge($CFG['GEN']['enrollonnewinstructor'] ?? [], $CFG['GEN']['enrolloninstructorapproval'] ?? [])); 
 		$stm = $DBH->prepare("SELECT courseid FROM imas_students WHERE userid=? and lastaccess>?");
@@ -146,9 +148,9 @@ switch($_GET['action']) {
 		}
 		echo '<form method="POST" action="actions.php?from='.Sanitize::encodeUrlParam($from).'&id='.Sanitize::encodeUrlParam($_GET['id']).'">';
         if ($line['rights']>10) {
-            echo '<p>Any questions or libraries owned by this user need to be transfered to another user. <br/>Select user to transfer them to: ';
-            writeHtmlSelect('transferto',array_keys($otherusers),array_values($otherusers), $userid);
-            echo '</p>';
+            echo '<p>'._('Any questions or libraries owned by this user need to be transfered to another user.').'</p>';
+            require_once '../includes/userlookupform.php'; 
+            generateUserLookupForm(_('Transfer question and library ownership to:'), 'transferto', $otherusers);
         }
 		echo '<p><button type=submit name="action" value="deladmin">'._('Delete').'</button>';
 		echo "<input type=button value=\"",_("Nevermind"),"\" class=\"secondarybtn\" onclick=\"window.location='".Sanitize::encodeStringForJavascript($backloc)."'\"></p>\n";
@@ -160,6 +162,7 @@ switch($_GET['action']) {
     echo "<form method=post id=userform class=limitaftervalidate action=\"actions.php?from=".Sanitize::encodeUrlParam($from);
 		if ($_GET['action']=="chgrights") { echo "&id=".Sanitize::encodeUrlParam($_GET['id']); }
 		echo "\">\n";
+        echo '<div id="errorlive" aria-live="polite" class="sr-only"></div>';
 		echo '<input type=hidden name=action value="'.Sanitize::encodeStringForDisplay($_GET['action']).'" />';
 		if ($_GET['action'] == "newadmin") {
 			echo '<div class="pagetitle"><h1>'._('New User').'</h1></div>';
@@ -425,7 +428,16 @@ switch($_GET['action']) {
 			echo '<span id="newgroup" style="display:none"><br/>New group name: ';
 			echo ' <input name=newgroupname size=20 onblur="checkgroupisnew()"/></span>';
 			echo "</span><br class=form />\n";
-		}
+		} else if ($myrights == 75 && $oldgroup == $groupid) {
+			$stm = $DBH->prepare("SELECT name FROM imas_groups WHERE id=?");
+			$stm->execute(array($oldgroup));
+			$groupname = $stm->fetchColumn(0);
+			echo "<span class=form>Group: </span>";
+			echo "<span class=formright>";
+			echo '<b>'.Sanitize::encodeStringForDisplay($groupname).'</b> ';
+			echo '<label><input name=removefromgroup type=checkbox value=1> '._('Remove from group') .'</label>';
+			echo "</span><br class=form />\n";
+		} 
 		if ($myrights >= 75 || ($myspecialrights&32)==32) {
 			echo '<span class=form>'._('Add a course').'</span>';
 			echo '<span class=formright><label><input type=checkbox name=addnewcourse value=1> ';
@@ -673,6 +685,7 @@ switch($_GET['action']) {
 					$theme = $ctcinfo['theme'];
 					$msgset = $ctcinfo['msgset'];
 					$courselevel = $ctcinfo['level'];
+                    $deftime = $ctcinfo['deftime'];
 				}
 			} else {
 				$ctc = 0;

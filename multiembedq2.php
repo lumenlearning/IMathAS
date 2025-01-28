@@ -158,7 +158,7 @@ if (!empty($_POST['regen'])) {
     $seed = rand(0, 9999) + 10000;
     $state['seeds'][$qntoregen] = $seed;
     unset($state['stuanswers'][$qntoregen+1]);
-    unset($state['stuanswersval'][$qntoregenn+1]);
+    unset($state['stuanswersval'][$qntoregen+1]);
     $state['scorenonzero'][$qntoregen+1] = -1;
     $state['scoreiscorrect'][$qntoregen+1] = -1;
     $state['partattemptn'][$qntoregen] = array();
@@ -212,7 +212,7 @@ if (isset($_POST['toscoreqn'])) {
     $qn = intval($_POST['regen']);
     $qsid = $QS['id'][$qn];
 
-    // clear values
+    // clear values 
     $seed = rand(0, 9999) + 10000;
     $state['seeds'][$qn] = $seed;
     unset($state['stuanswers'][$qn+1]);
@@ -222,7 +222,7 @@ if (isset($_POST['toscoreqn'])) {
     $state['partattemptn'][$qn] = array();
     $state['rawscores'][$qn] = array();
     $a2->setState($state);
-
+    
     // load question data
     $stm = $DBH->prepare("SELECT * FROM imas_questionset WHERE id=:id");
     $stm->execute(array(':id' => $qsid));
@@ -263,16 +263,14 @@ if (isset($_GET['frame_id'])) {
 } else {
   $frameid = "ohm" . $qsid;
 }
-
 if (isset($_GET['theme'])) {
     $theme = preg_replace('/\W/', '', $_GET['theme']);
     $coursetheme = $theme . '.css';
 }
 
-$lastupdate = '20200422';
-$placeinhead = '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/index.css?v=' . $lastupdate . '" />';
-$placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/print.css?v=' . $lastupdate . '" media="print">';
-$placeinhead .= '<script src="' . $staticroot . '/mathquill/mathquill.min.js?v=022720" type="text/javascript"></script>';
+$placeinhead = '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/vue/css/index.css?v=' . $lastvueupdate . '" />';
+$placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/assess2/print.css?v=' . $lastvueupdate . '" media="print">';
+$placeinhead .= '<script src="' . $staticroot . '/mathquill/mathquill.min.js?v=112124" type="text/javascript"></script>';
 if (!empty($CFG['assess2-use-vue-dev'])) {
     $placeinhead .= '<script src="' . $staticroot . '/javascript/drawing.js?v=041920" type="text/javascript"></script>';
     $placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
@@ -282,7 +280,7 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqeditor.js?v=041920" type="text/javascript"></script>';
     $placeinhead .= '<script src="' . $staticroot . '/mathquill/mqedlayout.js?v=041920" type="text/javascript"></script>';
 } else {
-    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v=20240107" type="text/javascript"></script>';
+    $placeinhead .= '<script src="' . $staticroot . '/javascript/assess2_min.js?v='.$lastvueupdate.'" type="text/javascript"></script>';
     // ####### Begin OHM-specific changes ##################################################################
     // ####### Begin OHM-specific changes ##################################################################
     $placeinhead .= '<script src="' . $staticroot . '/javascript/AMhelpers2.js?v=052120" type="text/javascript"></script>';
@@ -290,7 +288,7 @@ if (!empty($CFG['assess2-use-vue-dev'])) {
     // ####### Begin OHM-specific changes ##################################################################
   }
 
-$placeinhead .= '<script src="' . $staticroot . '/javascript/assess2supp.js?v=041522" type="text/javascript"></script>';
+$placeinhead .= '<script src="' . $staticroot . '/javascript/assess2supp.js?v=092224" type="text/javascript"></script>';
 $placeinhead .= '<link rel="stylesheet" type="text/css" href="' . $staticroot . '/mathquill/mathquill-basic.css?v=021823">
   <link rel="stylesheet" type="text/css" href="' . $staticroot . '/mathquill/mqeditor.css">';
 
@@ -330,12 +328,22 @@ $placeinhead .= '<script type="text/javascript">
         MathJax.Hub.Queue(function () {
             sendresizemsg();
         });
-    }
+    } 
   } else {
       $(function() {
           sendresizemsg();
       });
   }
+  rendermathnode = (function(old) {
+      return function(el,callback) {
+        old(el, function() {
+            if (typeof callback == "function") {
+                callback();
+            }
+            sendresizemsg();
+        });
+      }
+    })(rendermathnode);
   </script>
   <style>
   body { margin: 0;}

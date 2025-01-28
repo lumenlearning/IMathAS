@@ -376,10 +376,12 @@ class FunctionExpressionScorePart implements ScorePart
                                 $stunan++;
                             } else {
                                 $diffs[] = $givenansvals[$i] - $realans;
+                                /*
                                 $realanss[] = $realans;
                                 $ysqr = $realans*$realans;
                                 $ysqrtot += 1/($ysqr+.0001);
                                 $reldifftot += ($givenansvals[$i] - $realans)/($ysqr+.0001);
+                                */
                             }
                         } else if ($isComplex) { // compare complex points
                             if (!is_array($givenansvals[$i])) {
@@ -448,7 +450,8 @@ class FunctionExpressionScorePart implements ScorePart
                             $correct = false;
                         }
                     } else if (!$isComplex && in_array('toconst',$ansformats) && count($diffs)>0) {
-                        if ($abstolerance !== '') {
+                       /* old method. Messy, confusing tolerances
+                       if ($abstolerance !== '') {
                             //if abs, use mean diff - will minimize error in abs diffs
                             $meandiff = array_sum($diffs)/count($diffs);
                         } else {
@@ -466,6 +469,21 @@ class FunctionExpressionScorePart implements ScorePart
                                 if ((abs($diffs[$i]-$meandiff)/(abs($realanss[$i])+0.0001) > $reltolerance+1E-12)) {$correct = false; break;}
                             }
                         }
+                        */
+                        $meandiff = array_sum($diffs)/count($diffs);
+                        // do same comparison as for regular funcs, but subtracting meandiff
+                        foreach ($realanstmp as $i=>$realans) {
+                            if (isNaN($realans)) {
+                                continue;
+                            }
+                            if (isNaN($givenansvals[$i])) {
+                                continue;
+                            } else if ($abstolerance !== '') {
+                                if (abs($givenansvals[$i]-$meandiff-$realans) > $abstolerance+1E-12) { $correct = false; break;}
+                            } else {
+                                if ((abs($givenansvals[$i]-$meandiff-$realans)/(abs($realans)+.0001) > $reltolerance+1E-12)) {$correct = false; break;}
+                            }
+                        }
                     }
      
                     if ($correct == true) {
@@ -481,7 +499,7 @@ class FunctionExpressionScorePart implements ScorePart
                                 continue;
                             }
                         }
-                        $correctscores[] = $partialpts[$ansidx];
+                        $correctscores[] = $partialpts[$ansidx] ?? 1;
                         $givenansused[$gaidx] = 1;
                         continue 3; // skip to next answer list entry
                     }

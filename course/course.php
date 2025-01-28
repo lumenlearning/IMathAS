@@ -27,12 +27,18 @@ if (isset($CFG['hooks']['banner'])) {
 
 /*** pre-html data manipulation, including function code *******/
 function buildBlockLeftNav($items, $parent, &$blocklist) {
+    global $studentinfo;
 	$now = time();
 	foreach ($items as $k=>$item) {
 		if (is_array($item)) {
 			if (!empty($item['innav'])) {
 				if (($item['avail']==2 || ($item['avail']==1 && $item['startdate']<$now && $item['enddate']>$now)) ||
 				    ($item['SH'][0]=='S' && $item['avail']>0)) {
+                    if (!empty($studentinfo) && isset($item['grouplimit']) && count($item['grouplimit']) > 0) {
+                        if (!in_array(strtolower('s-' . $studentinfo['section']), array_map('strtolower', $item['grouplimit']))) {
+                            continue;
+                        }
+                    }
 					$blocklist[] = array($item['name'], $parent.'-'.($k+1), $item['SH'][1]);
 				}
 			}
@@ -541,11 +547,12 @@ if ($overwriteBody==1) {
 		echo '<a href="showcalendar.php?cid=' . $cid . '">' . _('Calendar') . '</a><br/>';
 		echo '<a href="coursemap.php?cid=' . $cid . '">' . _('Course Map') . '</a><br/>';
 		echo '<a href="#" class="togglecontrol" aria-controls="navtoolmore">' . _('More...') . '</a>';
-	  echo '<span id="navtoolmore" style="display:none">';
+	  	echo '<span id="navtoolmore" style="display:none">';
 		echo '<br/>&nbsp;<a href="coursereports.php?cid=' . $cid . '">' . _('Reports') . '</a><br/>';
 		echo '&nbsp;<a href="managestugrps.php?cid=' . $cid . '">' . _('Groups') . '</a><br/>';
 		echo '&nbsp;<a href="addoutcomes.php?cid=' . $cid . '">' . _('Outcomes') . '</a><br/>';
-		echo '&nbsp;<a href="addrubric.php?cid=' . $cid . '">' . _('Rubrics') . '</a>';
+		echo '&nbsp;<a href="addrubric.php?cid=' . $cid . '">' . _('Rubrics') . '</a><br/>';
+		echo '&nbsp;<a href="mergeassess2.php?cid=' . $cid . '">' . _('Merge Assessments') . '</a><br/>';
 		echo '</span>';
 		echo '</p>';
 	}
@@ -631,7 +638,7 @@ if ($overwriteBody==1) {
         }
 	?>
 
-
+			
 	<?php
 		if (count($stuLeftNavBlocks)>0) {
 			echo '<p class=leftnavp><b>'._('Quick Links').'</b>';

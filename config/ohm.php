@@ -60,7 +60,7 @@ $allowcourseimport = false;
 $GLOBALS['health_check']['auth_code'] = getenv('HEALTH_CHECK_AUTH_CODE');
 
 // Lumen student payment authorization API
-$GLOBALS['student_pay_api']['enabled'] = "true" == strtolower(getenv('STUPAY_ENABLED')) ? true : false;
+$GLOBALS['student_pay_api']['enabled'] = "true" == strtolower(getenv('STUPAY_ENABLED'));
 $GLOBALS['student_pay_api']['base_url'] = getenv('STUPAY_API_BASE_URL');
 $GLOBALS['student_pay_api']['timeout'] = getenv('STUPAY_API_TIMEOUT_SECS');
 $GLOBALS['student_pay_api']['jwt_secret'] = getenv('STUPAY_API_JWT_SECRET');
@@ -71,7 +71,7 @@ $GLOBALS['student_pay_api']['access_code_max_length'] = 10;
 $GLOBALS['student_pay_api']['trial_min_reminder_time_secs'] = 60 * 60 * 24; // 24 hour
 $GLOBALS['student_pay_api']['direct_pay_component_url'] = getenv('DIRECT_PAY_COMPONENT_URL');
 $GLOBALS['student_pay_api']['stripe_api_key'] = getenv('STRIPE_API_KEY');
-$GLOBALS['student_pay_api']['debug'] = true;
+$GLOBALS['student_pay_api']['debug'] = 'true' == getenv('STUPAY_DEBUG_ENABLED');
 
 //userid for instructor on student self-enroll courses
 $CFG['GEN']['selfenrolluser'] = 13;
@@ -289,9 +289,14 @@ $CFG['showcalculator'] = [
 
 $CFG['LTI']['autoreg'] = true;
 
-$CFG['logquestionerrors'] = true;
+$CFG['logquestionerrors'] = 'true' == getenv('QUESTION_ERROR_DEBUG_ENABLED');
 
 // Debug logging
 $GLOBALS['ENABLE_SCORE_DEBUG'] = 'true' == getenv('ENABLE_SCORE_DEBUG');
 $GLOBALS['ENABLE_LTI_DEBUG'] = 'true' == getenv('ENABLE_LTI_DEBUG');
 
+// Display HTML errors
+$CFG['OHM']['display_errors'] = 'true' == getenv('DISPLAY_ERRORS');
+if ($CFG['OHM']['display_errors']) {
+    enableDisplayErrors();
+}

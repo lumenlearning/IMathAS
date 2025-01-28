@@ -80,7 +80,7 @@ row[0][1][0][12] = allowlate (in general)
 row[1][1][0][13] = timelimit if requested through $includetimelimit
 row[0][1][0][14] = LP cutoff
 row[0][1][0][15] = assess UI version (online only)
-row[0][1][0][16] = accepts work after assess
+row[0][1][0][16] = accepts work after assess (and is within cutoff)
 row[0][1][0][17] = section limit, if any 
 
 row[0][2] category totals
@@ -303,7 +303,7 @@ function gbtable() {
 	$now = time();
 	$query = "SELECT id,name,ptsposs,defpoints,deffeedback,timelimit,minscore,startdate,enddate,LPcutoff,itemorder,gbcategory,cntingb,avail,groupsetid,allowlate,date_by_lti,ver,viewingb,scoresingb,deffeedbacktext";
 	if ($limuser>0) {
-		$query .= ',reqscoreaid,reqscore,reqscoretype';
+		$query .= ',reqscoreaid,reqscore,reqscoretype,workcutoff';
 	}
 	if (isset($includeendmsg) && $includeendmsg) {
 		$query .= ',endmsg';
@@ -342,6 +342,8 @@ function gbtable() {
 	$startdate = array();
 	$enddate = array();
 	$LPcutoff = array();
+    $workcutoff = array();
+    $LPenddate = array();
 	$tutoredit = array();
 	$isgroup = array();
 	$avail = array();
@@ -385,6 +387,7 @@ function gbtable() {
 		$enddate[$kcnt] = $line['enddate'];
 		$startdate[$kcnt] = $line['startdate'];
 		$LPcutoff[$kcnt] = $line['LPcutoff'];
+        $workcutoff[$kcnt] = ($line['workcutoff'] ?? 0)*60; // convert to seconds
 		if ($now<$line['startdate'] || $line['date_by_lti']==1) {
 			$avail[$kcnt] = 2;
 		} else if ($now < $line['enddate']) {
@@ -409,6 +412,19 @@ function gbtable() {
 			$reqscores[$kcnt] = array('aid'=>$line['reqscoreaid'], 'score'=>abs($line['reqscore']), 'calctype'=>($line['reqscoretype']&2));
 		}
 		$defFb[$kcnt] = $line['deffeedbacktext'];
+
+        if ($line['viewingb'] == 'after_lp' || $line['scoresingb'] == 'after_lp') {
+            $adjusted_allowlate = ($line['allowlate'] % 10) - 1; // ignore "allow use after"
+            if ($adjusted_allowlate == 0) { // this is now "unlimited"
+                $LPenddate[$kcnt] = 2000000000;
+            } else {
+                $LPenddate[$kcnt] = strtotime("+".($GLOBALS['latepasshrs']*$adjusted_allowlate)." hours", $line['enddate']);
+            }
+            $LPenddate[$kcnt] = min($LPenddate[$kcnt], $GLOBALS['courseenddate']);
+            if ($line['LPcutoff'] > 0) {
+                $LPenddate[$kcnt] = min($LPenddate[$kcnt], $line['LPcutoff']);
+            }
+        }
 
 		$k = 0;
 
@@ -1017,7 +1033,7 @@ function gbtable() {
 			if (!isset($assesscol[$r['typeid']])) {
 				continue; //assessment is hidden
 			}
-			if ($r['exceptionenddate'] > $courseenddate && $now > $courseenddate) { //for grading purposes, cutoff exceptions at courseenddate
+			if ($r['exceptionenddate'] > $courseenddate && ($now > $courseenddate || $r['islatepass'] > 0)) { //for grading purposes, cutoff exceptions at courseenddate
 				$r['exceptionenddate'] = $courseenddate;
 			}
 			$exceptions[$r['typeid']][$r['userid']] = array($r['exceptionstartdate'],$r['exceptionenddate'],$r['islatepass'],$r['timeext']);
@@ -1398,7 +1414,8 @@ function gbtable() {
 		if ($canviewall ||
 			$assessmenttype[$i] == 'immediately' || //viewingb
 			($assessmenttype[$i] == 'after_take' && $hasSubmittedTake && !$hastimeext) ||
-			($assessmenttype[$i] == 'after_due' && $now > $thised)
+			($assessmenttype[$i] == 'after_due' && $now > $thised) ||
+            ($assessmenttype[$i] == 'after_lp' && $now > max($thised,$LPenddate[$i]))
 		) {
 			$gb[$row][1][$col][2] = 1; //show link
 		} else {
@@ -1410,6 +1427,7 @@ function gbtable() {
 		if (!$canviewall && (
 			($sa[$i]=="never") ||
 		 	($sa[$i]=='after_due' && $now < $thised) ||
+            ($sa[$i]=='after_lp' && $now < max($thised,$LPenddate[$i])) ||
 			($sa[$i]=='after_take' && !$hasSubmittedTake && ($l['status']&1) == 1) // does not have a submitted attempt, but does have an unsubmitted attempt
 		)) {
 			$gb[$row][1][$col][0] = 'N/A'; //score is not available
@@ -1511,7 +1529,9 @@ function gbtable() {
 			}
 		}
 
-		if (($l['status']&128)>0) { // accepting showwork after assess
+		if (($l['status']&128)>0 && 
+          ($workcutoff[$i] == 0 || $now < $l['lastchange'] + $workcutoff[$i])
+        ) { // accepting showwork after assess and within cutoff
 			$gb[$row][1][$col][16] = 1;
 		} else {
             $gb[$row][1][$col][16] = 0;
@@ -1749,6 +1769,7 @@ function gbtable() {
 		$cattotattempted[$ln] = $cattotcur[$ln];  //copy current to attempted - we will fill in zeros for past due stuff
 		$cattotattemptedec[$ln] = $cattotcurec[$ln];
 		foreach($assessidx as $aid=>$i) {
+            if (!isset($assesscol[$aid])) { continue; }
 			$col = $assesscol[$aid];
 			if (!empty($gb[$ln][1][$col][14]) && $cntingb[$i] == 1) {
 				unset($cattotpast[$ln][$category[$i]][$col]);
@@ -1789,6 +1810,7 @@ function gbtable() {
 			}
 		}
 		foreach($gradeidx as $aid=>$i) {
+            if (!isset($gradecol[$aid])) { continue; }
 			$col = $gradecol[$aid];
 			if (!empty($gb[$ln][1][$col][14]) && $cntingb[$i] == 1){
 				unset($cattotpast[$ln][$category[$i]][$col]);
@@ -1818,6 +1840,7 @@ function gbtable() {
 			}
 		}
 		foreach($exttoolidx as $aid=>$i) {
+            if (!isset($exttoolcol[$aid])) { continue; }
 			$col = $exttoolcol[$aid];
 			if (!empty($gb[$ln][1][$col][14]) && $cntingb[$i] == 1) {
 				unset($cattotpast[$ln][$category[$i]][$col]);
@@ -1847,6 +1870,7 @@ function gbtable() {
 			}
 		}
 		foreach($discussidx as $aid=>$i) {
+            if (!isset($discusscol[$aid])) { continue; }
 			$col = $discusscol[$aid];
 			if (!empty($gb[$ln][1][$col][14]) && $cntingb[$i] == 1) {
 				unset($cattotpast[$ln][$category[$i]][$col]);
@@ -2050,6 +2074,7 @@ function gbtable() {
 
 		//remove excused and non-attempted
 		foreach($assessidx as $aid=>$i) {
+            if (!isset($assesscol[$aid])) { continue; }
             $col = $assesscol[$aid];
             if (!empty($sectionlimit[$col]) && 
                 (empty($stusection[$gb[$ln][4][0]]) || $stusection[$gb[$ln][4][0]] != $sectionlimit[$col])
@@ -2113,6 +2138,7 @@ function gbtable() {
 		}
 
 		foreach($gradeidx as $aid=>$i) {
+            if (!isset($gradecol[$aid])) { continue; }
 			$col = $gradecol[$aid];
 			if (!empty($gb[$ln][1][$col][14]) && $gb[0][1][$col][4]==1) {
 				for ($j=0;$j<4;$j++) {
@@ -2121,6 +2147,7 @@ function gbtable() {
 			}
 		}
 		foreach($exttoolidx as $aid=>$i) {
+            if (!isset($exttoolcol[$aid])) { continue; }
 			$col = $exttoolcol[$aid];
 			//remove excused
 			if (!empty($gb[$ln][1][$col][14]) && $gb[0][1][$col][4]==1) {
@@ -2138,6 +2165,7 @@ function gbtable() {
 			}
 		}
 		foreach($discussidx as $aid=>$i) {
+            if (!isset($discusscol[$aid])) { continue; }
             $col = $discusscol[$aid];
             if (!empty($sectionlimit[$col]) && 
                 (empty($stusection[$gb[$ln][4][0]]) || $stusection[$gb[$ln][4][0]] != $sectionlimit[$col])
@@ -2546,7 +2574,7 @@ function gbpercentile($a,$p) {
 }
 
 function buildFeedback2($scoreddata) {
-	$scoreddata = json_decode(gzdecode($scoreddata), true);
+	$scoreddata = json_decode(Sanitize::gzexpand($scoreddata), true);
 	$out = '';
 
 	foreach ($scoreddata['assess_versions'] as $av => $aver) {

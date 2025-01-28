@@ -7,6 +7,7 @@
     <videocued-nav
       :cue="cue"
       :toshow="toshow"
+      :showfollowup="showfolloup"
       @jumpto="jumpTo"
     >
       <videocued-result-nav
@@ -14,7 +15,9 @@
         v-if = "qn != -1"
         :qn = "qn"
         :cue = "cue"
+        :playing = "playing"
         @jumpto="jumpTo"
+        @addfollowup="addShowFollowup"
       />
     </videocued-nav>
     <div
@@ -120,7 +123,9 @@ export default {
       ytplayer: null,
       timer: null,
       cue: 0,
-      toshow: 'v'
+      toshow: 'v',
+      showfolloup: [],
+      playing: false
     };
   },
   computed: {
@@ -270,11 +275,22 @@ export default {
           this.jumpTo(this.cue, 'q');
         }
       }
+      this.playing = (event.data === window.YT.PlayerState.PLAYING ||
+          event.data === window.YT.PlayerState.BUFFERING);
     },
     handlePlayerError (event) {
       store.errorMsg = event.data;
     },
     jumpTo (newCueNum, newToshow, failed = 0) {
+      if (newToshow === 'rv') {
+        // call is from Start Video button in VideocuedResultNav
+        // resume video if paused, otherwise treat as normal seek
+        if (this.ytplayer && this.ytplayer.getPlayerState() === 2) {
+          this.ytplayer.playVideo();
+          return;
+        }
+        newToshow = 'v';
+      }
       if (newCueNum === -1 || newToshow === 'q') {
         // if showing a question, pause the video
         this.exitFullscreen();
@@ -316,6 +332,9 @@ export default {
       }
       this.cue = newCueNum;
       this.toshow = newToshow;
+    },
+    addShowFollowup (val) {
+      this.showfolloup.push(val);
     }
   },
   mounted () {

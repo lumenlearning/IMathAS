@@ -170,7 +170,7 @@
 	}
 
 	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-	    $scoredData = json_decode(gzdecode($row['scoreddata']), true);
+	    $scoredData = json_decode(Sanitize::gzexpand($row['scoreddata']), true);
 
 	    $scoredAssessmentIndex = $scoredData['scored_version'];
 	    $scoredAssessment = $scoredData['assess_versions'][$scoredAssessmentIndex];
@@ -438,6 +438,8 @@
 				$avg2 = "NA";
 				$avgatt = "NA";
 				$avgreg = "NA";
+                $avgtot = "NA";
+                $avgtota = "NA";
 				$pc = 0; $pc2 = 0; $pi = "NA";
 			}
 

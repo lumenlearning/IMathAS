@@ -73,7 +73,7 @@ $include_from_assess_info = array(
   'can_use_latepass', 'allowed_attempts', 'retake_penalty', 'exceptionpenalty',
   'timelimit_multiplier', 'latepasses_avail', 'latepass_extendto', 'keepscore',
   'noprint', 'overtime_penalty', 'overtime_grace', 'reqscorename', 'reqscorevalue', 
-  'attemptext', 'showworktype'
+  'attemptext', 'showworktype', 'latepass_enddate', 'latepass_after'
 );
 $assessInfoOut = $assess_info->extractSettings($include_from_assess_info);
 
@@ -148,6 +148,13 @@ if ($assessInfoOut['has_active_attempt'] && $assessInfoOut['timelimit'] > 0) {
 // if not available, see if there is an unsubmitted scored attempt
 if ($assessInfoOut['available'] !== 'yes') {
   $assessInfoOut['has_unsubmitted_scored'] = $assess_record->hasUnsubmittedScored();
+  if ($assessInfoOut['has_unsubmitted_scored'] && 
+    $assessInfoOut['available'] === 'practice' &&
+    $assessInfoOut['submitby'] === 'by_assessment'
+  ) {
+    // disable practice while unsubmitted scored attempt exists
+    $assessInfoOut['available'] = 'pastdue';
+  }
 }
 
 //get prev attempt info
@@ -162,7 +169,8 @@ if (!$assessInfoOut['has_active_attempt']) {
   }
 }
 
-$assessInfoOut['showwork_after'] = $assess_record->getShowWorkAfter();
+// get showwork_after, showwork_cutoff (min), showwork_cutoff_in (timestamp)
+getShowWorkAfter($assessInfoOut, $assess_record, $assess_info);
 
 // adjust output if time limit is expired in by_question mode
 if ($assessInfoOut['has_active_attempt'] && $assessInfoOut['timelimit'] > 0 &&
@@ -224,6 +232,8 @@ if (!$canViewAll) {
         $assessInfoOut['excused'] = 1;
     }
 }
+
+$assessInfoOut['can_viewingb'] = $assess_info->reshowQuestionsInGb() ? 1 : 0;
 
 // set session expiration time
 $assessInfoOut['session_life'] = $CFG['GEN']['sessionmaxlife'] ?? 432000;

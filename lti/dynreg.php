@@ -19,6 +19,10 @@ function regerror($err) {
 
 // Read configuration endpoint from query string
 $configurl = $_GET['openid_configuration'];
+if (substr($configurl,0,4) !== 'http') {
+    echo "Invalid openid_configuration URL";
+    exit;
+}
 $token = $_GET['registration_token'];
 
 // Call config endpoint to get config data
@@ -77,7 +81,9 @@ $post = [
         "custom_parameters" => [
             "context_history" => '$Context.id.history',
             'link_end_avail_time' => '$ResourceLink.available.endDateTime',
+            'link_user_end_avail_time' => '$ResourceLink.available.user.endDateTime',
             'link_end_sub_time' => '$ResourceLink.submission.endDateTime',
+            'link_user_end_sub_time' => '$ResourceLink.submission.user.endDateTime',
             'link_history' => '$ResourceLink.id.history'
         ],
         "claims" => ["iss", "sub", "name", "given_name", "family_name"],

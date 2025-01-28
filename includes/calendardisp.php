@@ -1,4 +1,6 @@
 <?php
+
+// Function to show calendar, used by showcalendar and courseshowitems
 $cid = Sanitize::courseId($_GET['cid']);
 
 
@@ -16,7 +18,7 @@ require_once "filehandler.php";
 function showcalendar($refpage) {
 global $DBH;
 global $imasroot,$cid,$userid,$teacherid,$latepasses,$urlmode, $latepasshrs, $myrights;
-global $tzoffset, $tzname, $editingon, $exceptionfuncs, $courseUIver, $excused;
+global $tzoffset, $tzname, $editingon, $exceptionfuncs, $courseUIver, $excused, $courseenddate;
 
 $now= time();
 
@@ -115,6 +117,9 @@ if (!isset($teacherid)) {
 	$stm = $DBH->prepare("SELECT assessmentid,startdate,enddate,islatepass,waivereqscore,itemtype FROM imas_exceptions WHERE userid=:userid");
 	$stm->execute(array(':userid'=>$userid));
 	while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+		if ($row[2] > $courseenddate && $row[3] > 0) {
+			$row[2] = $courseenddate;
+		}
 		if ($row[5]=='A') {
 			$exceptions[$row[0]] = array($row[1],$row[2],$row[3],$row[4]);
 		} else if ($row[5]=='F' || $row[5]=='P' || $row[5]=='R') {
@@ -575,7 +580,9 @@ while ($row = $stm->fetch(PDO::FETCH_NUM)) {
 if ($editingon) {
     $query = "SELECT id,name,postby,replyby,startdate,enddate,caltag,allowlate FROM imas_forums WHERE (enddate>$exlowertime OR avail=2) AND avail>0 AND courseid=:courseid ORDER BY name";
 } else {
-    $query = "SELECT id,name,postby,replyby,startdate,enddate,caltag,allowlate FROM imas_forums WHERE (enddate>$exlowertime OR avail=2) AND ((postby>$exlowertime AND postby<$uppertime) OR (replyby>$exlowertime AND replyby<$uppertime)) AND avail>0 AND courseid=:courseid ORDER BY name";
+    $query = "SELECT id,name,postby,replyby,startdate,enddate,caltag,allowlate FROM imas_forums WHERE avail>0 AND courseid=:courseid ORDER BY name";
+	// removed to allow for exceptions:
+	// (enddate>$exlowertime OR avail=2) AND ((postby>$exlowertime AND postby<$uppertime) OR (replyby>$exlowertime AND replyby<$uppertime)) AND 
 }
 $stm = $DBH->prepare($query); //times were calcualated in flow - safe
 $stm->execute(array(':courseid'=>$cid));
@@ -597,7 +604,8 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 	$posttag = htmlentities($posttag, ENT_COMPAT | ENT_HTML401, "UTF-8", false);
 	$replytag = htmlentities($replytag, ENT_COMPAT | ENT_HTML401, "UTF-8", false);
 	$row['name'] = htmlentities($row['name'], ENT_COMPAT | ENT_HTML401, "UTF-8", false);
-	if ($row['postby']!=2000000000) { //($row['postby']>$now || isset($teacherid))
+	if (($editingon && $row['postby']!=2000000000) ||
+		($row['postby']>$exlowertime && $row['postby']<$uppertime)) { //($row['postby']>$now || isset($teacherid))
 
 		list($moday,$time) = explode('~',tzdate('Y-n-j~g:i a',$row['postby']));
 		$colors = makecolor2($row['startdate'],$row['postby'],$now);
@@ -622,7 +630,8 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
 		}
 		$byid['FP'.$row['id']] = array($moday,$posttag,$colors,$json,$row['name'],$status);
 	}
-	if ($row['replyby']!=2000000000) { //($row['replyby']>$now || isset($teacherid))
+	if (($editingon && $row['replyby']!=2000000000) ||
+		($row['replyby']>$exlowertime && $row['replyby']<$uppertime)) { //($row['replyby']>$now || isset($teacherid))
 		list($moday,$time) = explode('~',tzdate('Y-n-j~g:i a',$row['replyby']));
 		$colors = makecolor2($row['startdate'],$row['replyby'],$now);
 		if ($editingon) {$colors='';}

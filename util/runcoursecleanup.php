@@ -20,13 +20,13 @@ $CFG['cleanup']['keepsent']
    set =0 to keep a copy of sent notifications in sent list
 $CFG['cleanup']['allowoptout']:
    (default: true) set to false to prevent teachers opting out
-$CFG['cleanup']['deloldstus']:
-   (default: true) delete old student accounts that are no longer enrolled in
-   any courses and lastaccess is more than
-   $CFG['cleanup']['old']+$CFG['cleanup']['delay'] days ago.
 $CFG['cleanup']['clearoldpw']:
    a number of days since lastaccess that a users's password should be cleared
    forcing a reset.  Set =0 to not use. (def: 365)
+$CFG['cleanup']['deloldaudit']:  a number of days after which to delete 
+    teacher audit log data.  (def: 0 (don't use))
+$CFG['cleanup']['deloldltiqueue']:  a number of days after which to delete 
+    LTI failure timesouts.  (def: 180)
 
 You can specify different old/delay values for different groups by defining
 $CFG['cleanup']['groups'] = array(groupid => array('old'=>days, 'delay'=>days));
@@ -65,6 +65,8 @@ $delay = 24*60*60*(isset($CFG['cleanup']['delay'])?$CFG['cleanup']['delay']:120)
 $msgfrom = isset($CFG['cleanup']['msgfrom'])?$CFG['cleanup']['msgfrom']:0;
 $keepsent = isset($CFG['cleanup']['keepsent'])?$CFG['cleanup']['keepsent']:1;
 $clearpw = 24*60*60*(isset($CFG['cleanup']['clearoldpw'])?$CFG['cleanup']['clearoldpw']:365);
+$delaudit = 24*60*60*($CFG['cleanup']['deloldaudit'] ?? 0);
+$delltiqueue = 24*60*60*($CFG['cleanup']['deloldltiqueue'] ?? 180);
 
 //run notifications 10 in a batch
 
@@ -186,6 +188,11 @@ if (!$skip) {
 		unenrollstu($cidtoclean, $stus, true, false, true, 2);
         $stm = $DBH->prepare("DELETE FROM imas_tutors WHERE courseid=?");
 	    $stm->execute(array($cidtoclean));
+        // delete any lingering assessment records (likely belonging to teacher)
+        $stm = $DBH->prepare("DELETE ias FROM imas_assessment_sessions AS ias JOIN imas_assessments AS ia ON ias.assessmentid=ia.id WHERE ia.courseid=?");
+	    $stm->execute(array($cidtoclean));
+        $stm = $DBH->prepare("DELETE iar FROM imas_assessment_records AS iar JOIN imas_assessments AS ia ON iar.assessmentid=ia.id WHERE ia.courseid=?");
+	    $stm->execute(array($cidtoclean));
 		$DBH->commit();
 	}
 } else {
@@ -193,18 +200,6 @@ if (!$skip) {
 	$stm = $DBH->prepare("UPDATE imas_courses SET cleanupdate=0 WHERE id=?");
 	$stm->execute(array($cidtoclean));
 }
-
-//delete old students
-/* this appears to be broken :(
-if (!isset($CFG['cleanup']['deloldstus']) || $CFG['cleanup']['deloldstus']==true) {
-	$query = 'DELETE imas_users FROM imas_users ';
-	$query .= 'LEFT JOIN imas_students ON imas_users.id=imas_students.userid ';
-	$query .= 'WHERE imas_users.rights<11 AND imas_students.id IS NULL AND ';
-	$query .= 'imas_users.lastaccess<?';
-	$stm = $DBH->prepare($query);
-	$stm->execute(array($now-$old-$delay));
-}
-*/
 
 //clear out any old pw
 if ($clearpw>0) {
@@ -217,4 +212,20 @@ if ($clearpw>0) {
 	$stm = $DBH->prepare($query);
 	$stm->execute(array($now - $clearpw));
 	*/
+}
+
+if ($delaudit > 0) {
+    $query = "DELETE FROM imas_audit_log WHERE time<?";
+	$stm = $DBH->prepare($query);
+	$stm->execute(array($now - $delaudit));
+}
+
+if ($delltiqueue > 0) {
+    $query = "DELETE FROM imas_ltiqueue WHERE failures>6 AND sendon < ?";
+    $stm = $DBH->prepare($query);
+	$stm->execute(array($now - $delltiqueue));
+
+    $query = "DELETE FROM imas_log WHERE time < ? AND log LIKE 'LTI update giving up%'";
+    $stm = $DBH->prepare($query);
+	$stm->execute(array($now - $delltiqueue));
 }

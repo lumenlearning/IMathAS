@@ -795,14 +795,14 @@ function togglevideoembed() {
 	if (els.length>0) {
 		if (els.css('display')=='none') {
 			els.show();
-			els.parent('.fluid-width-video-wrapper').show();
+			els.closest('.video-wrapper-wrapper').show();
 			jQuery(this).text(' [-]')
 				.attr('title',_("Hide video"))
 				.attr('aria-label',_("Hide embedded video"));
 		} else {
 			els.hide();
 			els.get(0).contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}','*');
-			els.parent('.fluid-width-video-wrapper').hide();
+			els.closest('.video-wrapper-wrapper').hide();
 			jQuery(this).text(' [+]');
 			jQuery(this).attr('title',_("Watch video here"));
 			jQuery(this).attr('aria-label',_("Embed video") + ' ' + jQuery(this).prev().text());
@@ -822,7 +822,7 @@ function togglevideoembed() {
         if ($this.closest('.itemhdr').length == 0) {
             viframe.insertAfter($this);
             $this.parent().fitVids();
-            jQuery('<br/>').insertAfter($this);
+            //jQuery('<br/>').insertAfter($this);
         } else {
             var par = $this.closest('.itemhdr').next();
             par.prepend(viframe);
@@ -832,7 +832,7 @@ function togglevideoembed() {
 		$this.text(' [-]')
 			.attr('title',_("Hide video"))
 			.attr('aria-label',_("Hide embedded video"));
-		if ($this.prev().attr("data-base")) {
+		if ($this.prev().attr("data-base") && $this.prev().attr("data-def") !== 'open') {
 			var inf = $this.prev().attr('data-base').split('-');
 			recclick(inf[0], inf[1], href, $this.prev().text());
 		}
@@ -899,6 +899,9 @@ function setupvideoembeds(i,el) {
 		"class": "videoembedbtn"
 	}).insertAfter(el);
 	jQuery(el).addClass("prepped");
+    if (el.getAttribute("data-def") === 'open') {
+        jQuery(el).next().trigger("click");
+    }
 	videoembedcounter++;
 }
 
@@ -914,7 +917,7 @@ function setuppreviewembeds(i,el) {
 			title: _("Preview file"),
 			"aria-label": _("Preview file"),
 			id: 'fileembedbtn'+fileembedcounter,
-			click: togglefileembed,
+			click: function() {togglefileembed(this.id);},
 			keydown: function (e) {if (e.which == 13) { $(this).click();}},
 			tabindex: 0,
 			"class": "videoembedbtn"
@@ -935,23 +938,27 @@ function supportsPdf() {
 	return false;
 }
 
-function togglefileembed() {
-	var id = this.id.substr(12);
+function togglefileembed(id, newstate) {
 	var els = jQuery('#fileiframe'+id);
+    var toggleel = jQuery('#'+id);
 	if (els.length>0) {
 		if (els.css('display')=='none') {
+            if (newstate === false) {return;} // keep closed
 			els.show();
-			jQuery(this).text(' [-]');
-			jQuery(this).attr('title',_("Hide preview"));
-			jQuery(this).attr('aria-label',_("Hide file preview"));
+			toggleel.text(' [-]');
+			toggleel.attr('title',_("Hide preview"));
+			toggleel.attr('aria-label',_("Hide file preview"));
 		} else {
+            if (newstate === true) {return;} // keep open
 			els.hide();
-			jQuery(this).text(' [+]');
-			jQuery(this).attr('title',_("Preview file"));
-			jQuery(this).attr('aria-label',_("Preview file"));
+			toggleel.text(' [+]');
+			toggleel.attr('title',_("Preview file"));
+			toggleel.attr('aria-label',_("Preview file"));
 		}
-	} else {
-		var href = jQuery(this).prev().attr('href');
+	} else if (newstate === false) {
+      return; // want closed; already is  
+    } else {
+		var href = toggleel.prev().attr('href');
 		if (href.match(/\.(doc|docx|pdf|xls|xlsx|ppt|pptx)($|\?)/i)) {
 			var src;
 			if (href.match(/\.pdf/) && supportsPdf()) {
@@ -968,12 +975,12 @@ function togglefileembed() {
 				src: src,
 				frameborder: 0,
 				allowfullscreen: 1
-			}).insertAfter(jQuery(this));
+			}).insertAfter(toggleel);
 		} else if (href.match(/\.(heic)($|\?)/i)) {
 			jQuery('<div>', {
 				id: 'fileiframe' + id,
 				text: 'Converting HEIC file (this may take a while)...'
-			}).insertAfter(jQuery(this));
+			}).insertAfter(toggleel);
 			if (!window.heic2any) {
 				jQuery.getScript(staticroot+'/javascript/heic2any.min.js')
 				 .done(function() { convertheic(href, 'fileiframe' + id); });
@@ -985,14 +992,14 @@ function togglefileembed() {
 					id: 'fileiframe'+id,
 					src: href
 				}).css('display','block').on('click', rotateimg)
-		  ).insertAfter(jQuery(this));
+		  ).insertAfter(toggleel);
 		}
-		jQuery('<br/>').insertAfter(jQuery(this));
-		jQuery(this).text(' [-]');
-		jQuery(this).attr('title',_("Hide preview"));
-		if (jQuery(this).prev().attr("data-base")) {
-			var inf = jQuery(this).prev().attr('data-base').split('-');
-			recclick(inf[0], inf[1], href, jQuery(this).prev().text());
+		jQuery('<br/>').insertAfter(toggleel);
+		toggleel.text(' [-]');
+		toggleel.attr('title',_("Hide preview"));
+		if (toggleel.prev().attr("data-base")) {
+			var inf = toggleel.prev().attr('data-base').split('-');
+			recclick(inf[0], inf[1], href, toggleel.prev().text());
 		}
 	}
 }
@@ -1207,9 +1214,25 @@ function initlinkmarkup(base) {
     setupToggler(base);
 	setupToggler2(base);
     setupPopuplinks(base);
+    //setupToggleResize(base);
 	$(base).fitVids();
     resizeResponsiveIframes(base, true);
 }
+
+/* seems to be crashing browser for some reason
+function setupToggleResize(base) {
+    $(base).find("details").on("toggle", function() {
+        $(this).find("iframe").each(function(i,el) {
+            console.log(el);
+            sendResizeToIframe(el);
+        })
+        
+    })
+}
+function sendResizeToIframe(el) {
+    el.contentWindow.postMessage('requestResize','*');
+}
+*/
 
 function setIframeSpinner(base) {
     jQuery(base).find('iframe').each(function(i,el) {
@@ -1351,6 +1374,7 @@ function setupToggler(base) {
 						targ.show();
 					}
 				}
+                sendLTIresizemsg();
 			}
 		});
 	});
@@ -1369,6 +1393,7 @@ function setupToggler2(base) {
 					$(this).attr("aria-expanded", true);
 					targ.show();
 				}
+                sendLTIresizemsg();
 				return false;
 			}
 		});
@@ -1428,6 +1453,7 @@ jQuery(document).ready(function($) {
 						$(this).next(".blockitems").slideDown();
 					}
 				}
+                sendLTIresizemsg();
 			});
 	});
 	$(".grouptoggle img").attr("alt", "expand/collapse");
@@ -1574,14 +1600,12 @@ function initSageCell(base) {
 		var $this = jQuery(this);
 		if ($this.is("pre")) {
 			ta = this;
-            code = jQuery(ta).html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'')
-                    .replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+            code = jQuery(ta).html();
 		} else {
 			ta = $this.find("textarea");
 			if (ta.length==0 || jQuery(ta[0]).val()=="") {
 				if ($this.find("pre").length>0) {
-                    code = $this.find("pre").html().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'').replace(/\n\n/g,"\n")
-                            .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+                    code = $this.find("pre").html();
 					if (ta.length==0) {
 						ta = $this.find("pre")[0];
 					} else {
@@ -1591,12 +1615,13 @@ function initSageCell(base) {
 					return false;
 				}
 			} else {
-				code = jQuery(ta[0]).val().replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'').replace(/\n\n/g,"\n")
-                    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+				code = jQuery(ta[0]).val();
 				ta = ta[0];
 			}
 			inp = $this.find("input[id^=qn]");
 		}
+        code = code.replace(/<br\s*\/?>/g,"\n").replace(/<\/?[a-zA-Z][^>]*>/g,'').replace(/\n\n/g,"\n")
+                    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&amp;/g,'&');
 		if (m = code.match(/^\s+/)) {
 			var chop = m[0].length;
 			var re = new RegExp('\\n\\s{'+chop+'}',"g");
@@ -1664,7 +1689,8 @@ function setActiveTab(el) {
   var backdrop = '.dropdown-backdrop'
   var toggle   = '[data-toggle="dropdown"]'
   var Dropdown = function (element) {
-    $(element).on('click.bs.dropdown', this.toggle)
+    $(element).on('click.bs.dropdown', this.toggle);
+    $(element).next('.dropdown-menu').children("li").attr("role","menuitem");
   }
 
     Dropdown.VERSION = '3.4.1'
@@ -1726,6 +1752,8 @@ function setActiveTab(el) {
 
       if (e.isDefaultPrevented()) return
 
+      $this.next('.dropdown-menu').children("li").attr("role","menuitem");
+
       $this
         .trigger('focus')
         .attr('aria-expanded', 'true')
@@ -1739,7 +1767,7 @@ function setActiveTab(el) {
   }
 
   Dropdown.prototype.keydown = function (e) {
-    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
+    if (!/(38|40|27|32|39|37)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
 
     var $this = $(this)
 
@@ -1756,11 +1784,16 @@ function setActiveTab(el) {
       return $this.trigger('click')
     }
 
-    var desc = ' li:not(.disabled):visible a'
-      var $items = $this.next('.dropdown-menu' + desc);
-      if (!$items.length) {
-        $items = $parent.find('.dropdown-menu' + desc);
-      }
+    var $submenu = $(e.target).closest('.dropdown-submenu');
+    if (isActive && e.which == 37 && $submenu.length) {
+      $submenu.removeClass("open").children('a').attr("aria-expanded",false);;
+      $submenu.children("a").first().focus();
+    }
+
+    var $items = $this.next('.dropdown-menu li:not(.disabled):visible a');
+    if (!$items.length) {
+      $items = $parent.children('.dropdown-menu').children('li:not(.disabled):visible').children('a');
+    }
 
     if (!$items.length) return
 
@@ -1771,6 +1804,17 @@ function setActiveTab(el) {
     if (!~index)                                    index = 0
 
     $items.eq(index).trigger('focus')
+  }
+  Dropdown.prototype.submenu = function(e) {
+    if (e.type == 'keydown' && !/(13|39)/.test(e.which)) { return; }
+    $('.dropdown-submenu').removeClass('open').children('a').attr("aria-expanded",false);
+    $(this).closest('.dropdown-submenu').addClass("open").children('a').attr("aria-expanded",true);;
+    if (e.type == 'keydown') {
+      $(this).next(".dropdown-menu").find('a').first().focus();
+    }
+    
+    e.stopPropagation();
+    e.preventDefault();
   }
 
 
@@ -1811,7 +1855,7 @@ function setActiveTab(el) {
     .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
     .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
     .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
-
+    .on('click.bs.dropdown keydown.bs.dropdown', '.dropdown-submenu > a', Dropdown.prototype.submenu)
 }(jQuery);
 
 // from https://gist.github.com/dragermrb/6d4b7fda5f183524d0ebe4b0a7d8635c#file-jquery-image-upload-resizer-js

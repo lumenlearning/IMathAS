@@ -45,7 +45,8 @@ switch($_GET['action']) {
 		}
 		echo '<div id="headerforms" class="pagetitle"><h1>',_('New Student Signup'),'</h1></div>';
 		echo "<form id=\"newuserform\" class=limitaftervalidate method=post action=\"actions.php?action=newuser$gb\">\n";
-		echo "<span class=form><label for=\"SID\">$longloginprompt:</label></span> <input class=\"form pii-username\" type=\"text\" size=12 id=SID name=SID><BR class=\"form\">\n";
+		echo '<div id="errorlive" aria-live="polite" class="sr-only"></div>';
+        echo "<span class=form><label for=\"SID\">$longloginprompt:</label></span> <input class=\"form pii-username\" type=\"text\" size=12 id=SID name=SID><BR class=\"form\">\n";
 		echo "<span class=\"form\"><label for=\"pw1\">",_('Choose a password:'),"</label></span><input class=\"form\" type=\"password\" size=20 id=pw1 name=pw1><BR class=\"form\">\n";
 		echo "<span class=\"form\"><label for=\"pw2\">",_('Confirm password:'),"</label></span> <input class=\"form\" type=\"password\" size=20 id=pw2 name=pw2><BR class=\"form\">\n";
 		echo "<span class=\"form\"><label for=\"firstname\">",_('Enter First Name:'),"</label></span> <input class=\"form pii-first-name\" type=\"text\" size=20 id=firstname name=firstname autocomplete=\"given-name\"><BR class=\"form\">\n";
@@ -159,6 +160,7 @@ switch($_GET['action']) {
 		} else {
 			echo "<form id=\"pageform\" class=limitaftervalidate method=post action=\"actions.php?action=chgpwd$gb\">\n";
 		}
+        echo '<div id="errorlive" aria-live="polite" class="sr-only"></div>';
 		echo "<span class=form><label for=\"oldpw\">",_('Enter old password'),":</label></span> <input class=form type=password id=oldpw name=oldpw size=40 /> <BR class=form>\n";
         if ($mfa !== '') {
             echo "<span class=form><label for=\"mfa\">",_('Enter 2-factor Authentication code'),":</label></span> <input class=form type=text id=mfa name=mfa size=10 /> <BR class=form>\n";
@@ -188,11 +190,21 @@ switch($_GET['action']) {
             }
         }
         echo '<script type="text/javascript">
-            function togglechgpw(val) { 
-                document.getElementById("pwinfo").style.display=val?"":"none"; 
+            function togglechgpw(el) {
+                document.getElementById("pwinfo").style.display=el.checked?"":"none"; 
+                el.setAttribute("aria-expanded", el.checked);
+                if (checked) {
+                    $("#pwinfo").focus();
+                }
             } 
-            function togglechgmfa(val) { 
-                $("#mfainfo").toggle(val>0);
+            function togglechgmfa(el) { 
+                if (document.getElementById("mfainfo")) {
+                    $("#mfainfo").toggle(el.value>0);
+                    el.setAttribute("aria-expanded", el.value>0);
+                    if (el.value > 0) {
+                        $("#mfainfo").focus();
+                    }
+                }
             }
             var oldemail = "'.Sanitize::encodeStringForJavascript($line['email']).'";
             $(function () {
@@ -200,6 +212,11 @@ switch($_GET['action']) {
                     var needchk = $("#dochgpw").prop("checked") ||
                         $("#email").val() != oldemail ||
                         ($("#dochgmfa").val() < '.$mfatype.');
+                    if (needchk && !$("#seccheck").is(":visible")) {
+                      $("#infolive").html("'._('The changes you are making require additional security verification. Re-enter your password later in the form.').'");
+                    } else if (!needchk) {
+                      $("#infolive").html("");
+                    }
                     $("#seccheck").toggle(needchk);
                     $("#oldpw,#oldmfa").prop("required", needchk);
                 });
@@ -221,6 +238,8 @@ switch($_GET['action']) {
 
 		echo "<form id=\"pageform\" class=limitaftervalidate enctype=\"multipart/form-data\" method=post action=\"actions.php?action=chguserinfo$gb\">\n";
 		echo '<fieldset id="userinfoprofile"><legend>',_('Profile Settings'),'</legend>';
+        echo '<div id="errorlive" aria-live="polite" class="sr-only"></div>';
+        echo '<div id="infolive" aria-live="polite" class="sr-only"></div>';
 		echo "<span class=form><label for=\"firstname\">",_('Enter First Name'),":</label></span> <input class=\"form pii-first-name\" type=text size=20 id=firstname name=firstname autocomplete=\"given-name\" value=\"".Sanitize::encodeStringForDisplay($line['FirstName'])."\" /><br class=\"form\" />\n";
 		echo "<span class=form><label for=\"lastname\">",_('Enter Last Name'),":</label></span> <input class=\"form pii-first-name\" type=text size=20 id=lastname name=lastname autocomplete=\"family-name\" value=\"".Sanitize::encodeStringForDisplay($line['LastName'])."\"><BR class=form>\n";
 		if ($myrights>10 && $groupid>0) {
@@ -229,13 +248,18 @@ switch($_GET['action']) {
 			$r = $stm->fetch(PDO::FETCH_NUM);
 			echo '<span class="form">'._('Group').':</span><span class="formright">'.Sanitize::encodeStringForDisplay($r[0]).'</span><br class="form"/>';
 		}
-		echo '<span class="form"><label for="dochgpw">',_('Change Password?'),'</label></span> <span class="formright"><input type="checkbox" name="dochgpw" id="dochgpw" onclick="togglechgpw(this.checked)" /></span><br class="form" />';
-		echo '<div style="display:none" id="pwinfo">';
+		echo '<span class="form"><label for="dochgpw">',_('Change Password?'),'</label></span> ';
+        echo '<span class="formright"><input type="checkbox" name="dochgpw" id="dochgpw" onclick="togglechgpw(this)" aria-controls="pwinfo" aria-expanded="false"/></span><br class="form" />';
+		echo '<div style="display:none" id="pwinfo" tabindex="-1">';
 		echo "<span class=form><label for=\"pw1\">",_('Enter new password:'),"</label></span>  <input class=form type=password id=pw1 name=pw1 size=40> <BR class=form>\n";
 		echo "<span class=form><label for=\"pw2\">",_('Verify new password:'),"</label></span>  <input class=form type=password id=pw2 name=pw2 size=40> <BR class=form>\n";
         echo '</div>';
         echo '<span class=form><label for="dochgmfa">'._('2-factor Authentication').'</label></span>';
-        echo '<span class="formright"><select name="dochgmfa" id="dochgmfa" onchange="togglechgmfa(this.value)" /> ';
+        echo '<span class="formright"><select name="dochgmfa" id="dochgmfa" onchange="togglechgmfa(this)" ';
+        if ($line['mfa']=='') {
+            echo 'aria-controls="mfainfo" aria-expanded=false ';
+        }
+        echo '/> ';
         echo '<option value=0 '.($mfatype == 0 ? 'selected':'').'>'._('Disable').'</option>';
         if ($line['rights'] > 74) {
             echo '<option value=1 '.($mfatype == 1 ? 'selected':'').'>'._('Enable for admin actions').'</option>';
@@ -250,7 +274,7 @@ switch($_GET['action']) {
             $MFA = new GoogleAuthenticator();
             $mfasecret = $MFA->createSecret();
             $mfaurl = $MFA->getOtpauthUrl($installname.':'.$line['SID'], $mfasecret, $installname);
-            echo '<div style="display:none" id="mfainfo">';
+            echo '<div style="display:none" id="mfainfo" tabindex="-1">';
             echo '<script type="text/javascript" src="javascript/jquery.qrcode.min.js"></script>';
             echo '<script type="text/javascript">$(function(){$("#mfaqrcode").qrcode({width:128,height:128,text:"'.Sanitize::encodeStringForJavascript($mfaurl).'"})});</script>';
             echo '<input type=hidden name=mfasecret value="'.Sanitize::encodeStringForDisplay($mfasecret).'" />';
@@ -498,7 +522,8 @@ switch($_GET['action']) {
 		}
 		echo '<div id="headerforms" class="pagetitle"><h1>',_('Reset Password'),'</h1></div>';
 		echo "<form id=\"pageform\" class=limitaftervalidate method=post action=\"actions.php?action=resetpw$gb\">\n";
-		if (isset($_GET['code'])) {
+		echo '<div id="errorlive" aria-live="polite" class="sr-only"></div>';
+        if (isset($_GET['code'])) {
             require_once './includes/passwordreset.php';
             // verify reset code
             $linkdata = verify_pwreset_link($_GET['code']);

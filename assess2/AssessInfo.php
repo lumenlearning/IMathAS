@@ -115,10 +115,13 @@ class AssessInfo
    */
   public function setException($uid, $exception, $isstu, $latepasses=0, $latepasshrs=24, $courseenddate=2000000000) {
 
+    if ($courseenddate == 2000000000) {
+        $courseenddate = $GLOBALS['courseenddate'] ?? 2000000000;
+    }
     // resets, in case we're using setException multiple times
     $resetkeys = ['exceptionpenalty','original_enddate','extended_with',
         'timeext','attemptext', 'startdate', 'enddate', 'enddate_in',
-        'latepasses_avail', 'latepass_extendto'];
+        'latepasses_avail', 'latepass_extendto', 'latepass_enddate'];
     if (empty($this->resetdata)) { // set reset data on first run
         foreach ($resetkeys as $key) {
             $this->resetdata[$key] = isset($this->assessData[$key]) ? $this->assessData[$key] : null;
@@ -131,6 +134,11 @@ class AssessInfo
                 $this->assessData[$key] = $this->resetdata[$key];
             }
         }
+    }
+
+    // if latepass exception, and enddate is past course enddate, move back
+    if ($exception !== false && $exception[1] > $courseenddate && $exception[2] > 0) {
+        $exception[1] = $courseenddate;
     }
 
     $this->exception = $exception;
@@ -187,6 +195,8 @@ class AssessInfo
       $this->assessData['startdate'] = intval($this->exception[0]);
       $this->assessData['enddate'] = intval($this->exception[1]);
       $this->assessData['enddate_in'] = $this->assessData['enddate'] - time() - 5;
+
+      $this->assessData['latepass_enddate'] = max($this->assessData['latepass_enddate'], $this->assessData['enddate']);
       $this->setAvailable();
     }
 
@@ -200,6 +210,7 @@ class AssessInfo
       }
 
       $this->assessData['can_use_latepass'] = $LPneeded;
+      $this->assessData['latepass_after'] = ($this->assessData['allowlate']>10);
       $this->assessData['latepasses_avail'] = $latepasses;
 
       $LPcutoff = $this->assessData['LPcutoff'];
@@ -642,7 +653,9 @@ class AssessInfo
     //return ($showscores == 'at_end' || $showscores == 'during');
     $viewingb = $this->assessData['viewingb'];
     return ($viewingb == 'immediately' || $viewingb == 'after_take' ||
-      ($viewingb == 'after_due' && time() > $this->assessData['enddate']));
+      ($viewingb == 'after_due' && time() > $this->assessData['enddate']) ||
+      ($viewingb == 'after_lp' && time() > $this->assessData['latepass_enddate'])
+    );
   }
 
   /**
@@ -654,7 +667,8 @@ class AssessInfo
     $viewingb = $this->assessData['viewingb'];
     return ($showscores == 'at_end' || $showscores == 'during' ||
       $viewingb == 'immediately' || $viewingb == 'after_take' ||
-      ($viewingb == 'after_due' && time() > $this->assessData['enddate']));
+      ($viewingb == 'after_due' && time() > $this->assessData['enddate']) ||
+      ($viewingb == 'after_lp' && time() > $this->assessData['latepass_enddate']));
   }
 
 
@@ -1222,6 +1236,10 @@ class AssessInfo
     }
     $settings['timelimit_multiplier'] = 1;
 
+    //unpack noprint
+    $settings['lock_for_assess'] = ($settings['noprint'] & 2);
+    $settings['noprint'] = ($settings['noprint'] & 1);
+
     //unpack intro
     $introjson = json_decode($settings['intro'], true);
     $pagebreaks = [];
@@ -1276,9 +1294,13 @@ class AssessInfo
     }
 
     //handle IP-form passwords
+    $userIP = $_SERVER['HTTP_X_FORWARDED_FOR']
+        ?? $_SERVER['REMOTE_ADDR']
+        ?? $_SERVER['HTTP_CLIENT_IP']
+        ?? '';
     if ($settings['password'] != '' &&
       preg_match('/^\d{1,3}\.(\*|\d{1,3})\.(\*|\d{1,3})\.[\d\*\-]+/', $settings['password']) &&
-      AssessUtils::isIPinRange($_SERVER['REMOTE_ADDR'], $settings['password'])
+      AssessUtils::isIPinRange($userIP, $settings['password'])
     ) {
       $settings['password'] = '';
     }
@@ -1295,6 +1317,24 @@ class AssessInfo
     if ($settings['reqscore'] < 0) {
         $settings['reqscoretype'] |= 1;
         $settings['reqscore'] = abs($settings['reqscore']);
+    }
+
+    // get latest date latepass can extend to
+    $allowlate = $settings['allowlate'];
+    if ($settings['allowlate'] == 0) {
+        $lp_enddate = $settings['enddate'];
+    } else {
+        $allowlate = ($settings['allowlate'] % 10) - 1; // ignore "allow use after"
+        if ($allowlate == 0) { // this is now "unlimited"
+            $lp_enddate = 2000000000;
+        } else {
+            $lp_enddate = strtotime("+".($GLOBALS['latepasshrs']*$allowlate)." hours", $settings['enddate']);
+        }
+    }
+    
+    $settings['latepass_enddate'] = min($lp_enddate, $GLOBALS['courseenddate']);
+    if ($settings['LPcutoff'] > 0) {
+        $settings['latepass_enddate'] = min($settings['latepass_enddate'], $settings['LPcutoff']);
     }
 
     //unpack itemorder

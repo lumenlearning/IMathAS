@@ -31,7 +31,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 // validate inputs
 check_for_required('GET', array('aid', 'cid'));
-check_for_required('POST', array('lastloaded'));
+if (empty($_POST['endattempt'])) { // skip check for endattempt, as may be no questions changed
+    check_for_required('POST', array('lastloaded'));
+}
 $cid = Sanitize::onlyInt($_GET['cid']);
 $aid = Sanitize::onlyInt($_GET['aid']);
 if ($isActualTeacher && isset($_GET['uid'])) {
@@ -417,6 +419,9 @@ $assess_record->saveRecord();
 if (($assessInfoOut['submitby'] == 'by_question' && !$in_practice) || $end_attempt) {
     $assess_record->updateLTIscore($end_attempt, true);
 }
+
+// get showwork_after, showwork_cutoff (min), showwork_cutoff_in (timestamp)
+getShowWorkAfter($assessInfoOut, $assess_record, $assess_info);
 
 //prep date display
 prepDateDisp($assessInfoOut);

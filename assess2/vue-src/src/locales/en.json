@@ -64,6 +64,7 @@
     "latepass_used": "You used one LatePass. | You used {n} LatePasses.",
     "extension": "You were granted an extension.",
     "penalty": "A penalty of {p}% will be applied.",
+    "penalty_after": "A penalty of {p}% will be applied after {date}.",
     "take": "You can take this assessment one time. | You can take this assessment {n} times.",
     "take_more": "You can take this assessment one more time. | You can take this assessment {n} more times.",
     "attempt_inprogress": "You have an assessment attempt in progress.",
@@ -136,7 +137,7 @@
     "score": "Score: {pts}/{poss}",
     "practicescore": "Practice score: {pts}/{poss}",
     "possible": "1 point possible | {n} points possible",
-    "answered": "{n}/{tot} answered",
+    "answered": "Answered: {n}/{tot}",
     "assess_submit": "Submit and End",
     "done": "Done",
     "resources_header": "Resources",
@@ -173,6 +174,8 @@
     "not_practice": "The assessment is no longer in practice mode. Go back and open the assessment again.",
     "timelimit_expired": "Timelimit has expired",
     "timesup_submitting": "Timelimit has expired. Submitting now.",
+    "workafter_expired": "Time for adding work after has expired",
+    "workafter_submitting": "Time for adding work after has expired. Saving now.",
     "out_of_regens": "No more Get a Similar Question remain",
     "need_group": "Cannot start the assessment until you have been added to a group",
     "out_of_attempts": "You have used all your assessment attempts",
@@ -216,6 +219,8 @@
     "viewwork_immediately": "You can view your work and scores in the gradebook.",
     "viewwork_after_due": "You can view your work and scores in the gradebook after the due date.",
     "viewwork_work_scores_after": "You can view your work in the gradebook, and scores after the due date.",
+    "viewwork_work_after_lp": "You can view your work in the gradebook after the LatePass period.",
+    "viewwork_after_lp": "You can view your work and scores in the gradebook after the LatePass period.",
     "viewwork_never": "",
     "score": "Score",
     "recordedscore": "Recorded Score",
@@ -301,6 +306,7 @@
     "show_qs": "Show Questions"
   },
   "videocued": {
+    "start": "Play video",
     "continue": "Continue video to {title}",
     "skipto": "Jump video to {title}"
   },
@@ -452,6 +458,7 @@
     "avail_never": "Grade is currently hidden by the teacher.",
     "avail_after_take": "Will show after you submit an assessment attempt.",
     "avail_after_due": "Will show after the due date.",
+    "avail_after_lp": "Will show after the LatePass period.",
     "latepass_blocked_practice": "Use of a LatePass is currently blocked because the student viewed the assessment in practice mode.",
     "latepass_blocked_gb": "Use of a LatePass is currently blocked because the student viewed the assessment answers in the gradebook.",
     "latepass_blocked_lpcutoff": "Use of a LatePass is currently blocked because it is past the LatePass cutoff date.",
@@ -473,13 +480,16 @@
     "preview_files": "Preview All Files",
     "introtexts": "Intro and between-question text",
     "floating_scoreboxes": "Floating Scoreboxes",
-    "no_edit": "You are in the gradebook. You cannot edit answers or submit questions from here."
+    "sidebyside": "Side-by-Side",
+    "no_edit": "You are in the gradebook. You cannot edit answers or submit questions from here.",
+    "activitylog": "Activity Log"
   },
   "work": {
     "add": "Add Work",
     "hide": "Hide work entry",
     "noquestions": "No questions require work",
     "save": "Save Work",
+    "duein": "Work must be submitted by {date}",
     "save_continue": "Save Work and Continue",
     "add_prev": "You can still show or attach work for the previous attempt",
     "remove": "Are you sure you want to remove this file?"

@@ -157,6 +157,9 @@ if ($localuserid === false) {
 }
 
 // We have a local userid, so log them in.
+if (isset($_SESSION['userid']) && $_SESSION['userid'] != $localuserid) {
+    $_SESSION = [];
+}
 $_SESSION['lti_user_id'] = $ltiuserid;
 $_SESSION['userid'] = $localuserid;
 $_SESSION['ltiver'] = '1.3';
@@ -164,14 +167,20 @@ $_SESSION['tzoffset'] = $_POST['tzoffset'];
 $_SESSION['time'] = time();
 $_SESSION['started'] = time();
 $tzname = '';
+
+// don't need cache anymore for students
+if ($role !== 'Instructor') {
+    unset($_SESSION['lticache'][$launch->get_launch_id()]);
+}
+require_once __DIR__."/../includes/userprefs.php";
+generateuserprefs($localuserid);
 if (!empty($_POST['tzname'])) {
     $_SESSION['tzname'] = $_POST['tzname'];
  	if (date_default_timezone_set($_SESSION['tzname'])) {
         $tzname = $_SESSION['tzname'];
     }
 }
-require_once __DIR__."/../includes/userprefs.php";
-generateuserprefs($localuserid);
+
 // log lastaccess
 $db->set_user_lastaccess($localuserid);
 
