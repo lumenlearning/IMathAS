@@ -12,7 +12,7 @@
 		 $querys = '';
 	 }
 	 $loginFormAction = $GLOBALS['basesiteurl'] . substr($_SERVER['SCRIPT_NAME'],strlen($imasroot)) . $querys;
-	 
+
 	 if (!empty($_SESSION['challenge'])) {
 		 $challenge = $_SESSION['challenge'];
 	 } else {
@@ -66,18 +66,17 @@
 			<button id="enroll-button">Enroll In a New Course</button></div>
 		</form>
 		<div class="supplement-text">
-	<a target="_blank" href="https://www.lumenlearning.com/what/ohm/">What is Lumen OHM?</a></br>
-	<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br/>
-	<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a></br>
-	<a href="<?php echo $imasroot; ?>/ohm/newinstructor.php?">Request an instructor account</a>
-</div>
+			<a target="_blank" href="https://www.lumenlearning.com/">What is Lumen OHM?</a><br>
+			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=resetpw">Forgot Password</a><br>
+			<a href="<?php echo $imasroot; ?>/ohm/forms.php?action=lookupusername">Forgot Username</a><br>
+			<a target="_blank" href="https://info.lumenlearning.com/try-lumen-course?_ga=2.236146305.1085373514.1738788156-439925635.1735915993">Request an instructor account</a><br>
+		</div>
 	</div>
-
 	<footer class="footer">
 		<p><?php echo $installname;?> is powered by <a href="http://www.imathas.com">IMathAS</a> &copy; 2006-2017 David Lippman |
 		<a href="<?php echo $CFG['GET']['privacyPolicyPage']; ?>">Privacy Policy</a></p>
 	</footer>
 </div>
-<?php 
+<?php
 	require(__DIR__ . "/../footer.php");
 ?>
