@@ -419,6 +419,7 @@ if ($overwriteBody==1) {
             echo '<span class="column">';
             echo '<p>Lumen-specific links:</p>';
             echo '<a href="../ohm/macro_help.php">Lumen One Macro Help</a> <br/>';
+            echo '<a href="../ohm/admin/add_course_qids_to_lib.php">Add course questions to a library</a> <br/>';
             echo '</span>';
 
             echo '<span class="column">';
