@@ -260,6 +260,8 @@ if (!(isset($teacherid)) && $myrights<20) {
 				echo "\nSTART QUESTION\n";
 				echo "QID\n";
 				echo Sanitize::forRawExport(rtrim($qassoc[$line['id']])) . "\n";
+                echo "\nSOURCEQID\n";
+                echo Sanitize::forRawExport(rtrim($line['id'])) . "\n";
 				echo "\nUQID\n";
 				echo Sanitize::forRawExport(rtrim($line['uniqueid'])) . "\n";
 				echo "\nLASTMOD\n";
