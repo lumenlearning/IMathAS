@@ -25,8 +25,8 @@ class QuestionImportController extends ApiBaseController
     /**
      * @OA\Post(
      *     path="/questions/mga_imports",
-     *     summary="Create questions from MGA question data.",
-     *     tags={"Question MGA import"},
+     *     summary="Create questions question data.",
+     *     tags={"Question import"},
      *     @OA\Parameter(
      *       name="Authorization",
      *       in="header",
@@ -103,7 +103,7 @@ class QuestionImportController extends ApiBaseController
      *             @OA\Property(
      *               property="question_mappings",
      *               type="array",
-     *               description="Mappings of MGA file GUIDs to newly created OHM question IDs.",
+     *               description="Mappings of source GUIDs to newly created OHM question IDs.",
      *               @OA\Items(ref="#/components/schemas/ohm_question_id_mapping")
      *             )
      *           ),
@@ -143,7 +143,7 @@ class QuestionImportController extends ApiBaseController
      *     )
      * )
      */
-    public function importMgaQuestions(Request $request): JsonResponse
+    public function importQuestions(Request $request): JsonResponse
     {
         try {
             $this->validate($request, [
@@ -151,6 +151,7 @@ class QuestionImportController extends ApiBaseController
                 'question_import_mode' => 'required|string|in:quiz,practice',
                 'questions' => 'required|array',
                 'questions.*.source_id' => 'required|string',
+                'questions.*.source_type' => 'required|string|in:mga_file,form_input',
                 'questions.*.type' => 'required|string',
                 'questions.*.description' => 'required|string',
                 'questions.*.text' => 'required|string',
@@ -161,11 +162,11 @@ class QuestionImportController extends ApiBaseController
             ]);
 
             $questionImportMode = $request['question_import_mode'];
-            $mgaQuestionData = $request['questions'];
+            $questionData = $request['questions'];
             $ownerId = $request['owner_id'];
 
             $questionIdMapping = $this->questionImportService
-                ->createMultipleQuestions($questionImportMode, $mgaQuestionData, $ownerId);
+                ->createMultipleQuestions($questionImportMode, $questionData, $ownerId);
 
             $responseData = ["question_mappings" => $questionIdMapping];
             return response()->json($responseData, JsonResponse::HTTP_CREATED);
@@ -185,7 +186,7 @@ class QuestionImportController extends ApiBaseController
      *   @OA\Property(
      *     property="source_id",
      *     type="string",
-     *     description="The question's MGA file GUID."
+     *     description="The source's question GUID."
      *   ),
      *   @OA\Property(
      *     property="type",
@@ -244,7 +245,7 @@ class QuestionImportController extends ApiBaseController
      *   @OA\Property(
      *     property="source_id",
      *     type="string",
-     *     description="The question's MGA file GUID."
+     *     description="The source's question GUID."
      *   ),
      *   @OA\Property(
      *     property="status",
