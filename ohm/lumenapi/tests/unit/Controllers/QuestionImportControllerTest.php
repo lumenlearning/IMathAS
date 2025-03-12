@@ -216,6 +216,6 @@ class QuestionImportControllerTest extends TestCase
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
 
-        $this->assertEquals('The selected questions source type is invalid.', $jsonData->errors[0]);
+        $this->assertEquals('The selected questions.0.source_type is invalid.', $jsonData->errors[0]);
     }
 }
