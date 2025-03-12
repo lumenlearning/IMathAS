@@ -14,8 +14,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * This is primarily used by the MGA question import script in the "align" repo.
+ * This is used by the MGA question import script in the "align" repo. (source_type = 'mga_file')
  * See: https://github.com/lumenlearning/align/blob/main/ohm_questions/ohm_question_importer.rb
+ *
+ * This is also accessed by the Skeletor system (in Lumen One) for assessment authoring via form submission (source_type = 'form_input')
+ * See:https://github.com/lumenlearning/skeletor/blob/main/app/services/ohm/question_authoring_service.rb
  *
  * In places where $questionImportMode is used, currently two values are valid:
  *
@@ -45,9 +48,9 @@ class QuestionImportService extends BaseService implements QuestionImportService
     }
 
     /**
-     * Create multiple questions from MGA question data.
+     * Create multiple questions from question data.
      *
-     * Example of MGA question data:
+     * Example of question data:
      *
      * [
      *     {
@@ -98,15 +101,15 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * ]
      *
      * @param string $questionImportMode One of: quiz, practice
-     * @param array $mgaQuestionArray An array of questions from an MGA file.
+     * @param array $questionArray An array of questions
      * @param int $ownerId The OHM user ID to use for the owner of all questions.
      * @return array An array of source question IDs mapped to created OHM question IDs.
      * @throws RecordNotFoundException Thrown if the specified User ID is not found.
-     * @see QuestionImportServiceTest constants for $mgaQuestionArray examples.
+     * @see QuestionImportServiceTest constants for $questionArray examples.
      */
     public function createMultipleQuestions(
         string $questionImportMode,
-        array  $mgaQuestionArray,
+        array  $questionArray,
         int    $ownerId
     ): array
     {
@@ -121,18 +124,18 @@ class QuestionImportService extends BaseService implements QuestionImportService
         }
 
         $questionIds = [];
-        foreach ($mgaQuestionArray as $mgaQuestion) {
+        foreach ($questionArray as $question) {
             try {
-                $qid = $this->createSingleQuestion($questionImportMode, $mgaQuestion, $user);
+                $qid = $this->createSingleQuestion($questionImportMode, $question, $user);
                 $questionIds[] = [
-                    'source_id' => $mgaQuestion['source_id'],
+                    'source_id' => $question['source_id'],
                     'status' => 'created',
                     'questionset_id' => $qid,
                     'errors' => [],
                 ];
             } catch (Exception $e) {
                 $questionIds[] = [
-                    'source_id' => $mgaQuestion['source_id'],
+                    'source_id' => $question['source_id'],
                     'status' => 'error',
                     'questionset_id' => null,
                     'errors' => [
@@ -150,19 +153,19 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * Create a single question and insert it into the imas_questionset table.
      *
      * @param string $questionImportMode One of: quiz, practice
-     * @param array $mgaQuestion The question data.
+     * @param array $question The question data.
      * @param array $user A row from imas_users representing the question author.
      * @return int The imas_questionset ID for the created question.
      * @throws InvalidQuestionType Thrown on unknown question types.
      */
     private function createSingleQuestion(string $questionImportMode,
-                                          array  $mgaQuestion,
+                                          array  $question,
                                           array  $user
     ): int
     {
-        $questionType = $mgaQuestion['type'];
+        $questionType = $question['type'];
         if ('multiple_choice' == $questionType) {
-            $question = $this->buildMultipleChoiceQuestion($questionImportMode, $mgaQuestion);
+            $question = $this->buildMultipleChoiceQuestion($questionImportMode, $question);
         } else {
             throw new InvalidQuestionType('Unknown question type: ' . $questionType);
         }
@@ -186,21 +189,33 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * ]
      *
      * @param string $questionImportMode One of: quiz, practice
-     * @param array $mgaQuestionData The question data.
+     * @param array $questionData The question data.
      * @return array The question type, description, text, and control.
      */
-    private function buildMultipleChoiceQuestion(string $questionImportMode, array $mgaQuestionData): array
+    private function buildMultipleChoiceQuestion(string $questionImportMode, array $questionData): array
     {
-        $questionDescription = $this->replaceSmartQuotes($mgaQuestionData['description']);
+        $questionDescription = $this->replaceSmartQuotes($questionData['description']);
         // imas_questionset.description is currently VARCHAR(254)
         $questionDescription = substr($questionDescription, 0, 200);
-        $questionDescription .= ' -- MGA_GUID:' . $mgaQuestionData['source_id'];
+        
+        // Allows distinction between source type in the question description
+        // Helpful to embed the source_id for connecting the questions in OHM back to their source
+        if ('mga_file' == $questionData['source_type']) {
+            $questionDescription .= ' -- MGA_GUID:' . $questionData['source_id'];
+        }
+        else if ('form_input' == $questionData['source_type']) {
+            $questionDescription .= ' -- FORM_SUBMISSION_GUID:' . $questionData['source_id'];
+        }
+        else {
+            $questionDescription .= ' -- SOURCE_ID:' . $questionData['source_id'];
+        }
+        
 
         /*
          * Question text.
          */
 
-        $questionText = $this->replaceSmartQuotes($mgaQuestionData['text']);
+        $questionText = $this->replaceSmartQuotes($questionData['text']);
         $questionText .= "\n\n" . '$answerbox' . "\n";
 
         if ('practice' == $questionImportMode) {
@@ -219,8 +234,8 @@ class QuestionImportService extends BaseService implements QuestionImportService
         }
 
         // Add question choices.
-        for ($idx = 0; $idx < count($mgaQuestionData['choices']); $idx++) {
-            $rawChoice = $mgaQuestionData['choices'][$idx];
+        for ($idx = 0; $idx < count($questionData['choices']); $idx++) {
+            $rawChoice = $questionData['choices'][$idx];
             $choiceWithoutSmarts = $this->replaceSmartQuotes($rawChoice);
             $safeChoice = $this->encodeForQuestionCode($choiceWithoutSmarts);
             $questionControl .= sprintf('$questions[%d] = \'%s\';%s',
@@ -229,7 +244,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
         $questionControl .= "\n";
 
         // Define the correct answer.
-        $questionControl .= '$answer = ' . $mgaQuestionData['correct_answer'] . ";\n";
+        $questionControl .= '$answer = ' . $questionData['correct_answer'] . ";\n";
 
         /*
          * Feedback macros.
@@ -238,23 +253,23 @@ class QuestionImportService extends BaseService implements QuestionImportService
         $macroPrefix = 'quiz' == $questionImportMode ? 'ohm_' : '';
 
         // Feedback macros.
-        if ($this->hasPerAnswerFeedback($mgaQuestionData)) {
+        if ($this->hasPerAnswerFeedback($questionData)) {
             // Add a per-answer feedback macro if feedback is present.
             $feedbackMacro = $this->buildMultipleChoicePerAnswerFeedback(
-                $questionImportMode, $mgaQuestionData);
+                $questionImportMode, $questionData);
             $questionControl .= "\n" . $feedbackMacro;
-        } else if (!$this->hasFeedback($mgaQuestionData)) {
+        } else if (!$this->hasFeedback($questionData)) {
             // Add a basic feedback macro if no feedback is present.
             $feedbackMacro = '$feedback = ' . $macroPrefix . 'getfeedbackbasic('
                 . '$stuanswers[$thisq], "Correct!", "Incorrect.", $answer);' . "\n";
             $questionControl .= "\n" . $feedbackMacro;
         }
 
-//        $mgaSourceId = $mgaQuestionData['source_id'];
-//        Log::debug(sprintf('(MGA source ID: %s) Generated question control: %s',
-//            $mgaSourceId, $questionControl));
-//        Log::debug(sprintf('(MGA source ID: %s) Generated question text: %s',
-//            $mgaSourceId, $questionText));
+//        $sourceId = $questionData['source_id'];
+//        Log::debug(sprintf('(source ID: %s) Generated question control: %s',
+//            $sourceId, $questionControl));
+//        Log::debug(sprintf('(source ID: %s) Generated question text: %s',
+//            $sourceId, $questionText));
 
         return [
             'qtype' => 'choices',
@@ -442,28 +457,28 @@ class QuestionImportService extends BaseService implements QuestionImportService
     }
 
     /**
-     * Determine if MGA question data has per_answer feedback.
+     * Determine if question data has per_answer feedback.
      *
-     * @param array $mgaQuestionData The MGA question data as a JSON array.
+     * @param array $questionData The question data as a JSON array.
      * @return bool True if question has per_answer feedback. False if not.
-     * @see QuestionImportServiceTest constants for $mgaQuestionData examples.
+     * @see QuestionImportServiceTest constants for $questionData examples.
      */
-    private function hasPerAnswerFeedback(array $mgaQuestionData): bool
+    private function hasPerAnswerFeedback(array $questionData): bool
     {
-        return !empty($mgaQuestionData['feedback'])
-            && 'per_answer' == $mgaQuestionData['feedback']['type'];
+        return !empty($questionData['feedback'])
+            && 'per_answer' == $questionData['feedback']['type'];
     }
 
     /**
-     * Determine if MGA question data has ANY type of feedback.
+     * Determine if question data has ANY type of feedback.
      *
-     * @param array $mgaQuestionData The MGA question data as a JSON array.
+     * @param array $questionData The question data as a JSON array.
      * @return bool True if feedback exists. False if not.
-     * @see QuestionImportServiceTest constants for $mgaQuestionData examples.
+     * @see QuestionImportServiceTest constants for $questionData examples.
      */
-    private function hasFeedback(array $mgaQuestionData): bool
+    private function hasFeedback(array $questionData): bool
     {
-        return !empty($mgaQuestionData['feedback']);
+        return !empty($questionData['feedback']);
     }
 
     /**
