@@ -1,4 +1,5 @@
 <?php
+    namespace OHM\Includes;
     class Ohm2MacroBackport {
         // regex pattern for matching and determining whether a given code string contains an Ohm2 macro
         const OHM2_MACRO_REGEX = '/ohm_getfeedback(\w+)\(([^)]*)\)/';
@@ -63,6 +64,7 @@
             $lines = explode("\n", $questionText);
             // Create a new array for the output to avoid modifying the input array while iterating
             $outputLines = [];
+            $foundAnswerbox = false;
         
             // Process each line one at a time to avoid issues with multi-line regexes
             foreach ($lines as $index => $line) {
@@ -71,8 +73,14 @@
 
                 // if the line contains $answerbox add the corresponding $feedback on the following line (either plain or with an index)
                 if (preg_match('/\$(answerbox)(?:\[(.*?)\])?/', $line, $matches)) {
+                    $foundAnswerbox = true;
                     $outputLines[] = (isset($matches[2]) ? "<p>\$feedback[" . $matches[2] . "]</p>" : "<p>\$feedback</p>");
                 }
+            }
+
+            // if no answer box is found, add feedback at the very end
+            if (!$foundAnswerbox) {
+                $outputLines[] = "<p>\$feedback</p>";
             }
         
             // Reconstruct the string with the updated lines

@@ -1,9 +1,10 @@
 <?php
 
-require_once __DIR__ . '/../../includes/Ohm2MacroBackport.php';
+namespace OHM\Tests\Unit\includes;
 
 use PHPUnit\Framework\TestCase;
 
+use OHM\Includes\Ohm2MacroBackport;
 /**
  * @covers backportFeedback
  */
@@ -458,6 +459,26 @@ final class Ohm2MacroBackportTest extends TestCase
 					<p>\$feedback[0]</p>
 					\$answerbox[1]
 					<p>\$feedback[1]</p>
+					PHP;			
+		$result = Ohm2MacroBackport::backportFeedbackQuestionText($input);
+
+		$result_no_whitespace = preg_replace('/\s+/', '', $result);
+		$expected_no_whitespace = preg_replace('/\s+/', '', $expected);
+
+		$this->assertEquals($expected_no_whitespace, $result_no_whitespace);
+	}
+
+	/*
+	 * Add feedback to end if no answerbox found
+	 */
+	public function test_backportFeedbackQuestionText_answerbox_missing()
+	{
+		$input = <<<PHP
+					<p>Put the answer here</p>
+					PHP;
+		$expected = <<<PHP
+					<p>Put the answer here</p>
+					<p>\$feedback</p>
 					PHP;			
 		$result = Ohm2MacroBackport::backportFeedbackQuestionText($input);
 

@@ -18,7 +18,7 @@ require_once "../includes/filehandler.php";
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
 #### Begin OHM-specific changes ############################################################
-require_once "../includes/Ohm2MacroBackport.php";
+use OHM\Includes\Ohm2MacroBackport;
 #### End OHM-specific changes ##############################################################
 #### End OHM-specific changes ##############################################################
 #### End OHM-specific changes ##############################################################

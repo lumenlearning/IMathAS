@@ -138,8 +138,8 @@ class LibImportMappingCsv
             // Write the CSV header.
             $qidMappingCsvHeader = array_merge(
                 [
-                    'ohm1_qid',
                     'ohm2_qid',
+                    'ohm1_qid',
                     'question_type',
                 ],
                 self::TRANSLATED_OHM_MACRO_NAMES,
