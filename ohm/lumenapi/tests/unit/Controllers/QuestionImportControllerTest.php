@@ -55,9 +55,24 @@ class QuestionImportControllerTest extends TestCase
         ]
     ];
 
-    const MGA_QUESTIONS = [
+    const FORM_QUESTION_NO_FEEDBACK = [
+        "source_id" => "9d779655-019a-472a-a28f-1ef06bb35aad",
+        "source_type" => "form_input",
+        "type" => "multiple_choice",
+        "description" => "What is 1 + 2?",
+        "text" => "What is 1 + 2?",
+        "choices" => [
+            "1",
+            "2",
+            "3"
+        ],
+        "correct_answer" => 2,
+    ];
+
+    const QUESTIONS = [
         self::MGA_QUESTION_NO_FEEDBACK,
-        self::MGA_QUESTION_WITH_FEEDBACK
+        self::MGA_QUESTION_WITH_FEEDBACK,
+        self::FORM_QUESTION_NO_FEEDBACK
     ];
 
     private QuestionImportController $questionImportController;
@@ -76,10 +91,10 @@ class QuestionImportControllerTest extends TestCase
     }
 
     /*
-     * importMgaQuestions
+     * importQuestions
      */
 
-    public function testImportMgaQuestions(): void
+    public function testImportQuestions(): void
     {
         $this->questionImportService
             ->shouldReceive('createMultipleQuestions')
@@ -96,6 +111,12 @@ class QuestionImportControllerTest extends TestCase
                         "status" => "created",
                         "questionset_id" => 5440,
                         "errors" => []
+                    ],
+                    [
+                        "source_id" => "9d779655-019a-472a-a28f-1ef06bb35aad",
+                        "status" => "created",
+                        "questionset_id" => 5441,
+                        "errors" => []
                     ]
                 ]
             );
@@ -103,11 +124,11 @@ class QuestionImportControllerTest extends TestCase
         $requestBody = [
             'owner_id' => 42,
             'question_import_mode' => 'quiz',
-            'questions' => self::MGA_QUESTIONS,
+            'questions' => self::QUESTIONS,
         ];
 
         $request = Request::create('/api/dev/v1/questions/mga_imports', 'POST', $requestBody);
-        $jsonResponse = $this->questionImportController->importMgaQuestions($request);
+        $jsonResponse = $this->questionImportController->importQuestions($request);
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(201, $jsonResponse->getStatusCode());
@@ -123,19 +144,24 @@ class QuestionImportControllerTest extends TestCase
         $this->assertEquals('created', $questionMapping[1]->status);
         $this->assertEquals(5440, $questionMapping[1]->questionset_id);
         $this->assertEquals([], $questionMapping[1]->errors);
+        // Third created question.
+        $this->assertEquals('9d779655-019a-472a-a28f-1ef06bb35aad', $questionMapping[2]->source_id);
+        $this->assertEquals('created', $questionMapping[2]->status);
+        $this->assertEquals(5441, $questionMapping[2]->questionset_id);
+        $this->assertEquals([], $questionMapping[2]->errors);
     }
 
-    public function testImportMgaQuestions_MissingImportMode(): void
+    public function testImportQuestions_MissingImportMode(): void
     {
         Log::shouldReceive('error')->once(); // Needed for testing in GitHub Actions.
 
         $requestBody = [
             'owner_id' => 42,
-            'questions' => self::MGA_QUESTIONS,
+            'questions' => self::QUESTIONS,
         ];
 
         $request = Request::create('/api/dev/v1/questions/mga_imports', 'POST', $requestBody);
-        $jsonResponse = $this->questionImportController->importMgaQuestions($request);
+        $jsonResponse = $this->questionImportController->importQuestions($request);
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
@@ -143,22 +169,53 @@ class QuestionImportControllerTest extends TestCase
         $this->assertEquals('The question import mode field is required.', $jsonData->errors[0]);
     }
 
-    public function testImportMgaQuestions_InvalidImportMode(): void
+    public function testImportQuestions_InvalidImportMode(): void
     {
         Log::shouldReceive('error')->once(); // Needed for testing in GitHub Actions.
 
         $requestBody = [
             'owner_id' => 42,
-            'questions' => self::MGA_QUESTIONS,
+            'questions' => self::QUESTIONS,
             'question_import_mode' => 'meow',
         ];
 
         $request = Request::create('/api/dev/v1/questions/mga_imports', 'POST', $requestBody);
-        $jsonResponse = $this->questionImportController->importMgaQuestions($request);
+        $jsonResponse = $this->questionImportController->importQuestions($request);
         $jsonData = $jsonResponse->getData();
 
         $this->assertEquals(400, $jsonResponse->getStatusCode());
 
         $this->assertEquals('The selected question import mode is invalid.', $jsonData->errors[0]);
+    }
+
+    public function testImportQuestions_InvalidSourceType(): void
+    {
+        Log::shouldReceive('error')->once(); // Needed for testing in GitHub Actions.
+
+        $requestBody = [
+            'owner_id' => 42,
+            'questions' => [[
+                "source_id" => "9d779655-019a-472a-a28f-1ef06bb35aad",
+                "source_type" => "MEOW_MEOW_MEOW_MEOW",
+                "type" => "multiple_choice",
+                "description" => "What is 1 + 2?",
+                "text" => "What is 1 + 2?",
+                "choices" => [
+                    "1",
+                    "2",
+                    "3"
+                ],
+                "correct_answer" => 2,
+            ]],
+            'question_import_mode' => 'quiz',
+        ];
+
+        $request = Request::create('/api/dev/v1/questions/mga_imports', 'POST', $requestBody);
+        $jsonResponse = $this->questionImportController->importQuestions($request);
+        $jsonData = $jsonResponse->getData();
+
+        $this->assertEquals(400, $jsonResponse->getStatusCode());
+
+        $this->assertEquals('The selected questions.0.source_type is invalid.', $jsonData->errors[0]);
     }
 }

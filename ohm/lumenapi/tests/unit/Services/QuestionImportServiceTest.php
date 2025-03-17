@@ -56,9 +56,24 @@ class QuestionImportServiceTest extends TestCase
         ]
     ];
 
-    const MGA_QUESTIONS = [
+    const FORM_QUESTION_NO_FEEDBACK = [
+        "source_id" => "9d779655-019a-472a-a28f-1ef06bb35aad",
+        "source_type" => "form_input",
+        "type" => "multiple_choice",
+        "description" => "What is 1 + 2?",
+        "text" => "What is 1 + 2?",
+        "choices" => [
+            "1",
+            "2",
+            "3"
+        ],
+        "correct_answer" => 2,
+    ];
+
+    const QUESTIONS = [
         self::MGA_QUESTION_NO_FEEDBACK,
-        self::MGA_QUESTION_WITH_FEEDBACK
+        self::MGA_QUESTION_WITH_FEEDBACK,
+        self::FORM_QUESTION_NO_FEEDBACK
     ];
 
     const USER = [
@@ -102,23 +117,28 @@ class QuestionImportServiceTest extends TestCase
             ->andReturn(self::USER);
         $this->questionSetRepository
             ->shouldReceive('create')
-            ->andReturn(42, 43);
+            ->andReturn(42, 43, 44);
         $this->libraryItemRepository
             ->shouldReceive('create')
-            ->andReturn(21, 22);
+            ->andReturn(21, 22, 23);
 
         $questionIds = $this->questionImportService->createMultipleQuestions(
-            'quiz', self::MGA_QUESTIONS, self::USER['id']);
+            'quiz', self::QUESTIONS, self::USER['id']);
 
-        $this->assertEquals(self::MGA_QUESTIONS[0]['source_id'], $questionIds[0]['source_id']);
+        $this->assertEquals(self::QUESTIONS[0]['source_id'], $questionIds[0]['source_id']);
         $this->assertEquals('created', $questionIds[0]['status']);
         $this->assertEquals(42, $questionIds[0]['questionset_id']);
         $this->assertEquals([], $questionIds[0]['errors']);
 
-        $this->assertEquals(self::MGA_QUESTIONS[1]['source_id'], $questionIds[1]['source_id']);
+        $this->assertEquals(self::QUESTIONS[1]['source_id'], $questionIds[1]['source_id']);
         $this->assertEquals('created', $questionIds[1]['status']);
         $this->assertEquals(43, $questionIds[1]['questionset_id']);
         $this->assertEquals([], $questionIds[1]['errors']);
+
+        $this->assertEquals(self::QUESTIONS[2]['source_id'], $questionIds[2]['source_id']);
+        $this->assertEquals('created', $questionIds[2]['status']);
+        $this->assertEquals(44, $questionIds[2]['questionset_id']);
+        $this->assertEquals([], $questionIds[2]['errors']);
     }
 
     public function testCreateMultipleQuestions_InvalidImportMode(): void
@@ -138,14 +158,14 @@ class QuestionImportServiceTest extends TestCase
             ->andReturn(null);
 
         $this->questionImportService->createMultipleQuestions(
-            'practice', self::MGA_QUESTIONS, self::USER['id']);
+            'practice', self::QUESTIONS, self::USER['id']);
     }
 
     /*
      * createSingleQuestion
      */
 
-    public function testCreateSingleQuestion(): void
+    public function testCreateSingleMgaQuestion(): void
     {
         $class = new ReflectionClass(QuestionImportService::class);
         $createSingleQuestion = $class->getMethod('createSingleQuestion');
@@ -163,6 +183,26 @@ class QuestionImportServiceTest extends TestCase
         ]);
 
         $this->assertEquals(42, $questionsetId);
+    }
+
+    public function testCreateSingleFormQuestion(): void
+    {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $createSingleQuestion = $class->getMethod('createSingleQuestion');
+        $createSingleQuestion->setAccessible(true); // Required for PHP 7.4.
+
+        $this->questionSetRepository
+            ->shouldReceive('create')
+            ->andReturn(44);
+        $this->libraryItemRepository
+            ->shouldReceive('create')
+            ->andReturn(23);
+
+        $questionsetId = $createSingleQuestion->invokeArgs($this->questionImportService, [
+            'quiz', self::FORM_QUESTION_NO_FEEDBACK, self::USER
+        ]);
+
+        $this->assertEquals(44, $questionsetId);
     }
 
     public function testCreateSingleQuestion_UnknownType(): void
