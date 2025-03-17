@@ -25,7 +25,7 @@ class QuestionImportController extends ApiBaseController
     /**
      * @OA\Post(
      *     path="/questions/mga_imports",
-     *     summary="Create questions question data.",
+     *     summary="Create questions from import data, via form or MGA file.",
      *     tags={"Question import"},
      *     @OA\Parameter(
      *       name="Authorization",
