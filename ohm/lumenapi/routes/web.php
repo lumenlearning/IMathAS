@@ -46,7 +46,7 @@ $router->group(
         ]);
 
         $router->post('/questions/mga_imports', [
-            'uses' => 'QuestionImportController@importMgaQuestions'
+            'uses' => 'QuestionImportController@importQuestions'
         ]);
 
         $router->get('/enrollments', [

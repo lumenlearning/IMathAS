@@ -6,7 +6,6 @@ The project currently runs from a sub-folder of the existing ohm application and
 
 From within ./ohm/lumenapi
 ```bash
- composer update 
  composer install
 ```
 
