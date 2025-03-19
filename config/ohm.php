@@ -279,8 +279,6 @@ $GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator'] = __DIR__ 
 
 $CFG['GEN']['footerscriptinclude'] = 'ohm-hooks/footer.php';
 
-$GLOBALS['CFG']['libimport']['qsetids_max_length'] = 32768;
-
 $CFG['desmos_calculator'] = 'https://desmos.lumenlearning.com/calculator/v1.4-all/calculator.js';
 
 $CFG['showcalculator'] = [
