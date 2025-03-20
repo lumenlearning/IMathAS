@@ -16,6 +16,8 @@ class ChoicesAnswerBox implements AnswerBox
     private $correctAnswerForPart;
     private $previewLocation;
 
+    private $variables;
+
     public function __construct(AnswerBoxParams $answerBoxParams)
     {
         $this->answerBoxParams = $answerBoxParams;
@@ -43,6 +45,9 @@ class ChoicesAnswerBox implements AnswerBox
         $params = [];
 
         $optionkeys = ['displayformat', 'answer', 'noshuffle', 'readerlabel', 'ansprompt'];
+        $variablekeys = array_merge(['questions', 'randkeys'], $optionkeys);
+        $variables = [];
+
         foreach ($optionkeys as $optionkey) {
             ${$optionkey} = getOptionVal($options, $optionkey, $multi, $partnum);
         }
@@ -200,12 +205,17 @@ class ChoicesAnswerBox implements AnswerBox
             $sa = implode(' or ', $sapt); //$questions[$answer];
         }
 
+        foreach ($variablekeys as $variablekey) {
+            $variables[$variablekey] = ${$variablekey};
+        }
+
         // Done!
         $this->answerBox = $out;
         $this->jsParams = $params;
         $this->entryTip = $tip;
         $this->correctAnswerForPart = (string) $sa;
         $this->previewLocation = $preview;
+        $this->variables = $variables;
     }
 
     public function getAnswerBox(): string
@@ -231,5 +241,10 @@ class ChoicesAnswerBox implements AnswerBox
     public function getPreviewLocation(): string
     {
         return $this->previewLocation;
+    }
+
+    public function getVariables(): array
+    {
+        return $this->variables;
     }
 }

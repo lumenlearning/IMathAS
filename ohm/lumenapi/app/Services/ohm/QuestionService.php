@@ -103,6 +103,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'questionType' => $questionType,
                 'seed' => $seed,
                 'html' => $question->getQuestionContent(),
+                'json' => $question->getJsonRepresentation(),
                 'jsParams' => $jsParamsSorted,
                 'correctAnswers' => $correctAnswers,
                 'showAnswerText' => $question->getCorrectAnswersForParts(),

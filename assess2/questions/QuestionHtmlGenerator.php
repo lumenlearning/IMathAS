@@ -380,6 +380,7 @@ class QuestionHtmlGenerator
         // $answerbox must not be renamed, it is expected in eval'd code.
         $answerbox = $previewloc = null;
         $entryTips = $displayedAnswersForParts = $jsParams = [];
+        $answerBoxGenerators = [];
 
         if ($quesData['qtype'] == "multipart" || $quesData['qtype'] == 'conditional') {
             // $anstypes is question writer defined.
@@ -529,6 +530,7 @@ class QuestionHtmlGenerator
                 try {
                   $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
                   $answerBoxGenerator->generate();
+                  $answerBoxGenerators[$atIdx] = $answerBoxGenerator;
                 } catch (\Throwable $t) {
                   $this->addError(
                        _('Caught error while generating this question: ')
@@ -619,6 +621,7 @@ class QuestionHtmlGenerator
 
             $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
             $answerBoxGenerator->generate();
+            $answerBoxGenerators[0] = $answerBoxGenerator;
 
             $answerbox = $answerBoxGenerator->getAnswerBox();
             $entryTips[0] = $answerBoxGenerator->getEntryTip();
@@ -693,9 +696,12 @@ class QuestionHtmlGenerator
          * Question content (raw HTML) is stored in: $evaledqtext
          */
         $GLOBALS['qgenbreak1'] = __LINE__;
+        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'answerbox', $toevalqtxt);
+
         try {
           $prep = \genVarInit($qtextvars);
           eval($prep . "\$evaledqtext = \"$toevalqtxt\";"); // This creates $evaledqtext.
+          eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";");
 
         /*
          * Eval the solution code.
@@ -939,6 +945,18 @@ class QuestionHtmlGenerator
         $externalReferences = $this->getExternalReferences();
 
         /*
+         * Piece together relevant data for JSON representation.
+         * This is only supported for choices type questions currently
+         */
+        $questionJson = [];
+        if ($quesData['qtype'] == 'choices') {
+            $questionJson['text'] = $evaledqtextwithoutanswerbox;
+            $questionJson['type'] = $quesData['qtype'];
+            $questionJson['questions'] = $answerBoxGenerators[0]->getVariables();
+        }
+
+
+        /*
 		 * All done!
 		 */
 
@@ -954,7 +972,8 @@ class QuestionHtmlGenerator
             $evaledsoln,
             $detailedSolutionContent,
             $displayedAnswersForParts,
-            $externalReferences
+            $externalReferences,
+            $questionJson
         );
 
         $question->setQuestionLastMod($quesData['lastmoddate']);
