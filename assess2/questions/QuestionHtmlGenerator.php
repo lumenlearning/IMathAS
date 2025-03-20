@@ -696,7 +696,7 @@ class QuestionHtmlGenerator
          * Question content (raw HTML) is stored in: $evaledqtext
          */
         $GLOBALS['qgenbreak1'] = __LINE__;
-        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'answerbox', $toevalqtxt);
+        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'question_data', $toevalqtxt);
 
         try {
           $prep = \genVarInit($qtextvars);
@@ -950,9 +950,14 @@ class QuestionHtmlGenerator
          */
         $questionJson = [];
         if ($quesData['qtype'] == 'choices') {
+            $questionsJson = [];
+            foreach ($answerBoxGenerators as $answerBoxGenerator) {
+                $questionsJson[] = $answerBoxGenerator->getVariables();
+            }
+
             $questionJson['text'] = $evaledqtextwithoutanswerbox;
             $questionJson['type'] = $quesData['qtype'];
-            $questionJson['questions'] = $answerBoxGenerators[0]->getVariables();
+            $questionJson['question_data'] = $questionsJson;
         }
 
 
