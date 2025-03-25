@@ -696,7 +696,7 @@ class QuestionHtmlGenerator
          * Question content (raw HTML) is stored in: $evaledqtext
          */
         $GLOBALS['qgenbreak1'] = __LINE__;
-        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'question_data', $toevalqtxt);
+        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'PLACEHOLDER_parts', $toevalqtxt);
 
         try {
           $prep = \genVarInit($qtextvars);
@@ -945,23 +945,6 @@ class QuestionHtmlGenerator
         $externalReferences = $this->getExternalReferences();
 
         /*
-         * Piece together relevant data for JSON representation.
-         * This is only supported for choices type questions currently
-         */
-        $questionJson = [];
-        if ($quesData['qtype'] == 'choices') {
-            $questionsJson = [];
-            foreach ($answerBoxGenerators as $answerBoxGenerator) {
-                $questionsJson[] = $answerBoxGenerator->getVariables();
-            }
-
-            $questionJson['text'] = $evaledqtextwithoutanswerbox;
-            $questionJson['type'] = $quesData['qtype'];
-            $questionJson['question_data'] = $questionsJson;
-        }
-
-
-        /*
 		 * All done!
 		 */
 
@@ -977,8 +960,7 @@ class QuestionHtmlGenerator
             $evaledsoln,
             $detailedSolutionContent,
             $displayedAnswersForParts,
-            $externalReferences,
-            $questionJson
+            $externalReferences
         );
 
         $question->setQuestionLastMod($quesData['lastmoddate']);

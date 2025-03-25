@@ -25,12 +25,40 @@ $onBeforeAnswerBoxGenerator = function () use (
 if (!isset($feedback)) $feedback = null;
 $onGetQuestion = function () use (
     &$question, // [Question] The question object to be returned by getQuestion().
-    &$feedback // [?array] The feedback for the question.
+    &$feedback, // [?array] The feedback for the question.
+    &$quesData, // [?array] The question data from the generator
+    &$evaledqtextwithoutanswerbox, // [String] The HTML without embedded asnwer boxes
+    &$answerBoxGenerators // [?array] The AnswerBox generator(s)
 )
 {
-    $question->setExtraData([
-        'lumenlearning' => [
-            'feedback' => (isset($feedback)) ? $feedback : null
-        ]
-    ]);
+    $extraData = [];
+    $extraData['lumenlearning'] = [
+        'feedback' => (isset($feedback)) ? $feedback : null
+    ];
+
+    /*
+        * Piece together relevant data for JSON representation.
+        * This is only supported for choices type questions currently
+    */
+
+    if ($quesData['qtype'] == 'choices') {
+        $json = [];
+        $partsJson = [];
+
+        foreach ($answerBoxGenerators as $answerBoxGenerator) {
+            $partsJson[] = $answerBoxGenerator->getVariables();
+        }
+
+        $json['text'] = $evaledqtextwithoutanswerbox;
+        $json['type'] = $quesData['qtype'];
+        $json['feedback'] = $feedback;
+
+        // contains each part of the question
+        // (single element for non-multipart questions)
+        $json['parts'] = $partsJson;
+
+        $extraData['json'] = $json;
+    }
+
+    $question->setExtraData($extraData);
 };

@@ -206,7 +206,7 @@ class ChoicesAnswerBox implements AnswerBox
         }
 
         foreach ($variablekeys as $variablekey) {
-            $variables[$variablekey] = ${$variablekey};
+            $variables[$variablekey == 'questions' ? 'choices' : $variablekey] = ${$variablekey};
         }
 
         // Done!

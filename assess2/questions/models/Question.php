@@ -25,8 +25,6 @@ class Question
     private $extraData;
     private $questionLastMod = 0;
 
-    private $jsonRepresentation;
-
     private $errors = array();
 
     /**
@@ -47,8 +45,7 @@ class Question
         string $solutionContent,
         string $solutionContentDetailed,
         array $correctAnswersForParts,
-        array $externalReferences,
-        array $jsonRepresentation = []
+        array $externalReferences
     )
     {
         $this->questionContent = $questionContent;
@@ -58,7 +55,6 @@ class Question
         $this->solutionContentDetailed = $solutionContentDetailed;
         $this->correctAnswersForParts = $correctAnswersForParts;
         $this->externalReferences = $externalReferences;
-        $this->jsonRepresentation = $jsonRepresentation;
     }
 
     /**
@@ -229,15 +225,5 @@ class Question
     public function setQuestionLastMod($time): void
     {
         $this->questionLastMod = intval($time);
-    }
-
-    public function getJsonRepresentation(): array
-    {
-        return $this->jsonRepresentation;
-    }
-
-    public function setJsonRepresentation(array $json): void
-    {
-        $this->jsonRepresentation = $json;
     }
 }

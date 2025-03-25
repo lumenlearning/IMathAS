@@ -96,6 +96,9 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $jsParamsSorted = $question->getJsParams();
             ksort($jsParamsSorted, SORT_NATURAL);
 
+            // Get Question json, if exists
+            $json = isset($question->getExtraData()['json']) ? $question->getExtraData()['json'] : null;
+
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
                 'questionSetId' => $id,
@@ -103,7 +106,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'questionType' => $questionType,
                 'seed' => $seed,
                 'html' => $question->getQuestionContent(),
-                'json' => $question->getJsonRepresentation(),
+                'json' => $json,
                 'jsParams' => $jsParamsSorted,
                 'correctAnswers' => $correctAnswers,
                 'showAnswerText' => $question->getCorrectAnswersForParts(),
