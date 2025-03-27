@@ -208,4 +208,44 @@ class GetQuestionsWithAnswerTest extends TestCase
         $this->assertEquals(['11'],
             $responseData[1]['answerDataByQnIdentifier']['qn0']['showAnswerText']);
     }
+
+    public function testGetQuestionsWithAnswers_isAlgorithmic(): void
+    {
+        $this->questionService
+            ->shouldReceive('getQuestionsWithAnswers')
+            ->withAnyArgs()
+            ->andReturn(QuestionServiceFixtures::QUESTIONS_WITH_ANSWERS);
+
+        $request = Request::create('/api/v1/questions', 'POST',
+            json_decode('{
+                "questions": [
+                    {
+                        "questionSetId": 5485,
+                        "seed": 4321
+                    },
+                    {
+                        "questionSetId": 3261,
+                        "seed": 1234
+                    }
+                ]
+            }', true)
+        );
+
+        $response = $this->questionController->getQuestionsWithAnswers($request);
+        $responseData = $response->getData(true);
+
+        /*
+         * Assertions -- first question (multi-part)
+         */
+
+        $this->assertEquals(5485, $responseData[0]['questionSetId']);
+        $this->assertFalse($responseData[0]['isAlgorithmic']);
+
+        /*
+         * Assertions -- second question (single part)
+         */
+
+        $this->assertEquals(3261, $responseData[1]['questionSetId']);
+        $this->assertTrue($responseData[1]['isAlgorithmic']);
+    }
 }

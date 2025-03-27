@@ -184,6 +184,70 @@ class GetScoreTest extends TestCase
             $scoreResponse['feedback']['qn0']['feedback']);
     }
 
+    public function testGetScore_isAlgorithmic_True(): void
+    {
+        $inputState = json_decode('[{
+            "post": [
+                {
+                    "name": "qn0",
+                    "value": "10"
+                }
+            ],
+            "questionSetId": 42,
+            "seed": 3469,
+            "studentAnswers": ["10"],
+            "studentAnswerValues": ["10"],
+            "partAttemptNumber": [0]
+        }]', true);
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(42, $scoreResponse['questionSetId']);
+        $this->assertTrue($scoreResponse['isAlgorithmic']);
+    }
+
+    public function testGetScore_isAlgorithmic_False(): void
+    {
+        $inputState = json_decode('[{
+            "post": [
+                {
+                    "name": "qn0",
+                    "value": 0
+                }
+            ],
+            "questionSetId": 3607,
+            "seed": 3469,
+            "studentAnswers": ["0"],
+            "studentAnswerValues": ["0"],
+            "partAttemptNumber": [0]
+        }]', true);
+
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn(DbFixtures::imas_QuestionSet_dbRow_choices);
+
+        // Set the method to public.
+        $class = new ReflectionClass(QuestionController::class);
+        $method = $class->getMethod('getScore');
+        $method->setAccessible(true);
+
+        $scoreResponse = $method->invokeArgs($this->questionController, $inputState);
+
+        $this->assertEquals(3607, $scoreResponse['questionSetId']);
+        $this->assertFalse($scoreResponse['isAlgorithmic']);
+    }
+
     /**
      * @group noshuffle_all
      */
