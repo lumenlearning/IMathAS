@@ -211,6 +211,52 @@ class GetQuestionTest extends TestCase
         $this->assertEquals([], $responseData['errors']);
     }
 
+    public function testGetQuestion_isAlgorithmic_True(): void
+    {
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn(DbFixtures::imas_QuestionSet_dbRow_number);
+
+        $request = Request::create('/api/v1/question', 'POST',
+            json_decode('{
+                                  "questionSetId": 42,
+                                  "seed": 4120
+                              }', true)
+        );
+
+        $response = $this->questionController->getQuestion($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(42, $responseData['questionSetId']);
+        $this->assertEquals([], $responseData['errors']);
+
+        $this->assertTrue($responseData['isAlgorithmic']);
+    }
+
+    public function testGetQuestion_isAlgorithmic_False(): void
+    {
+        // Setup mocks.
+        $this->questionSetRepository
+            ->shouldReceive('getById')
+            ->andReturn(DbFixtures::imas_QuestionSet_dbRow_choices);
+
+        $request = Request::create('/api/v1/question', 'POST',
+            json_decode('{
+                                  "questionSetId": 3607,
+                                  "seed": 4120
+                              }', true)
+        );
+
+        $response = $this->questionController->getQuestion($request);
+        $responseData = $response->getData(true);
+
+        $this->assertEquals(3607, $responseData['questionSetId']);
+        $this->assertEquals([], $responseData['errors']);
+
+        $this->assertFalse($responseData['isAlgorithmic']);
+    }
+
     /*
      * getQuestionsWithAnswers
      */
