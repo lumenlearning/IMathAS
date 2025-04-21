@@ -88,7 +88,7 @@ final class QuestionHtmlGeneratorTest extends TestCase
     public function testOnGetQuestion_leveragesEvalWithVarInitInstanceMethod(): void
     {
         $text = $this->question->getExtraData()['lumenlearning']['json']['text'];
-        // count will be the number of replacements made
+        // count will be the number of occurences found
         preg_replace('/evalWithVarInit/', '', $text, -1, $count);
 
         // I.e. this is testing that the text value passed through the evalWithVarInit method of $this
