@@ -691,27 +691,18 @@ class QuestionHtmlGenerator
          * eval'd question code.
          *
          * Question content (raw HTML) is stored in: $evaledqtext
-         */
+        */
         $GLOBALS['qgenbreak1'] = __LINE__;
-        try {
-          $prep = \genVarInit($qtextvars);
-          eval($prep . "\$evaledqtext = \"$toevalqtxt\";"); // This creates $evaledqtext.
+        $evaledqtext = $this->evalWithVarInit($toevalqtxt, $qtextvars);
 
         /*
          * Eval the solution code.
          *
          * Solution content (raw HTML) is stored in: $evaledsoln
-         */
-         $GLOBALS['qgenbreak2'] = __LINE__;
-         $prep = \genVarInit($solnvars);
-         eval($prep . "\$evaledsoln = \"$toevalsoln\";"); // This creates $evaledsoln.
-       } catch (\Throwable $t) {
-          $this->addError(
-              _('Caught error while evaluating the text in this question: ')
-              . $t->getMessage());
-          $evaledqtext = '';
-          $evaledsoln = '';
-        }
+        */
+        $GLOBALS['qgenbreak2'] = __LINE__;
+        $evaledsoln = $this->evalWithVarInit($toevalsoln, $solnvars);
+
         $detailedSolutionContent = $this->getDetailedSolutionContent($evaledsoln);
 
         /*
@@ -1474,5 +1465,18 @@ class QuestionHtmlGenerator
         return preg_replace_callback('/`(.*?)`/s', function($m) {
             return '`' . str_replace(['degrees','degree'],'^@', $m[1]).'`';
         }, $str);
+    }
+
+    private function evalWithVarInit($toevalcode, $vars) : String {
+        try {
+            $prep = \genVarInit($vars);
+            eval($prep . "\$evaledcode = \"$toevalcode\";");
+        } catch (\Throwable $t) {
+            $this->addError(
+                _('Caught error while evaluating the text in this question: ')
+                . $t->getMessage());
+            $evaledcode = '';
+        }
+        return $evaledcode;
     }
 }
