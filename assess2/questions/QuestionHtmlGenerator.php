@@ -691,27 +691,27 @@ class QuestionHtmlGenerator
          * eval'd question code.
          *
          * Question content (raw HTML) is stored in: $evaledqtext
-        */
+         */
+        $GLOBALS['qgenbreak1'] = __LINE__;
         try {
-            $prep = \genVarInit($qtextvars);
-            eval($prep . "\$evaledqtext = \"$toevalqtxt\";"); // This creates $evaledqtext.
+          $prep = \genVarInit($qtextvars);
+          eval($prep . "\$evaledqtext = \"$toevalqtxt\";"); // This creates $evaledqtext.
 
-            /*
-             * Eval the solution code.
-             *
-             * Solution content (raw HTML) is stored in: $evaledsoln
-             */
-            $GLOBALS['qgenbreak2'] = __LINE__;
-            $prep = \genVarInit($solnvars);
-            eval($prep . "\$evaledsoln = \"$toevalsoln\";"); // This creates $evaledsoln.
+         /*
+          * Eval the solution code.
+          *
+          * Solution content (raw HTML) is stored in: $evaledsoln
+          */
+          $GLOBALS['qgenbreak2'] = __LINE__;
+          $prep = \genVarInit($solnvars);
+          eval($prep . "\$evaledsoln = \"$toevalsoln\";"); // This creates $evaledsoln.
         } catch (\Throwable $t) {
-            $this->addError(
-                _('Caught error while evaluating the text in this question: ')
-                . $t->getMessage());
-            $evaledqtext = '';
-            $evaledsoln = '';
+          $this->addError(
+              _('Caught error while evaluating the text in this question: ')
+              . $t->getMessage());
+          $evaledqtext = '';
+          $evaledsoln = '';
         }
-
         $detailedSolutionContent = $this->getDetailedSolutionContent($evaledsoln);
 
         // #### Begin OHM-specific code #####################################################
@@ -722,7 +722,7 @@ class QuestionHtmlGenerator
 
         /*
          *  Store evaluated Question Text without $answerbox
-         *  The following "normal" logic on the evaluated Question Text is excluded from the below code:
+         *  The following "normal" logic on the evaluated Question Text is not executed on $evaledqtextwithoutanswerbox:
          *    - handling [AB] and [SAB] syntax for answerbox(es) and solution answer box(es)
          *    - handling of sequential parts (for conditional and multipart only)
          *    - adding an answerbox when no answerbox was included in the $toevalqtext
