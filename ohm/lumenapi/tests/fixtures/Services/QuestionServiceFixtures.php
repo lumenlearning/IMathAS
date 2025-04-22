@@ -156,6 +156,7 @@ class QuestionServiceFixtures
                         7 => 'A,B,C,D,E,F',
                     ),
                 'uniqueid' => '1712613994709310',
+                'isAlgorithmic' => false,
                 'feedback' =>
                     array(
                         'qn1001-0' =>
@@ -278,6 +279,7 @@ class QuestionServiceFixtures
                         0 => '11',
                     ),
                 'uniqueid' => '1712618134706342',
+                'isAlgorithmic' => true,
                 'feedback' => NULL,
                 'errors' =>
                     array(),

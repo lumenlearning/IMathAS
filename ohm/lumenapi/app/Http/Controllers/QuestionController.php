@@ -957,6 +957,7 @@ class QuestionController extends ApiBaseController
         // Get the question's unique ID.
         $questionDbData = $assessStandalone->getQuestionData($scoreDto->getQuestionSetId());
         $score['uniqueid'] = $questionDbData['uniqueid'];
+        $score['isAlgorithmic'] = 1 == $questionDbData['isrand'];
 
         // Get question feedback.
         $questionFeedback = $score['feedback'] ?? null;
@@ -986,6 +987,7 @@ class QuestionController extends ApiBaseController
         // Get the question's unique ID.
         $questionDbData = $assessStandalone->getQuestionData($questionDto->getQuestionSetId());
         $questionDisplayData['uniqueid'] = $questionDbData['uniqueid'];
+        $questionDisplayData['isAlgorithmic'] = 1 == $questionDbData['isrand'];
 
         // Get question feedback.
         $question = $assessStandalone->getQuestion();

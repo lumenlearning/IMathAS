@@ -38,6 +38,8 @@ class DbFixtures
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '1111',
+        'external_id' => NULL,
+        'isrand' => '1',
     ];
 
     const imas_QuestionSet_dbRow_choices = [
@@ -87,6 +89,8 @@ class DbFixtures
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
+        'external_id' => NULL,
+        'isrand' => '0',
     ];
 
     const imas_QuestionSet_dbRow_multipart_choices = [
@@ -171,6 +175,8 @@ $answerbox[3]
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
+        'external_id' => NULL,
+        'isrand' => '0',
     ];
 
     const imas_QuestionSet_dbRow_multipart_multans = [
@@ -240,6 +246,8 @@ $answerbox[1]
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
+        'external_id' => NULL,
+        'isrand' => '0',
     ];
 
     const imas_QuestionSet_dbRow_with_ohm1_macro = [
@@ -290,6 +298,8 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
+        'external_id' => NULL,
+        'isrand' => '0',
     ];
 
     const imas_QuestionSet_dbRow_multans_basicfeedback = [
@@ -354,5 +364,7 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         'meanscoren' => '0',
         'meanscore' => '0',
         'varscore' => '0',
+        'external_id' => NULL,
+        'isrand' => '0',
     ];
 }

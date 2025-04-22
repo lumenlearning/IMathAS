@@ -84,6 +84,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $questionType = $questionSetRow['qtype'];
             $uniqueId = $questionSetRow['uniqueid'];
             $ohmUniqueId = base_convert($uniqueId, 10, 32);
+            $isAlgorithmic = 1 == $questionSetRow['isrand'];
 
             // Get question and correct answers. This evals the question code twice.
             $questionAndAnswers = $this->getQuestionAndAnswers($id, $seed, $questionSetRow);
@@ -106,6 +107,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'correctAnswers' => $correctAnswers,
                 'showAnswerText' => $question->getCorrectAnswersForParts(),
                 'uniqueid' => $uniqueId,
+                'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
                 'errors' => $question->getErrors(),
             ];
