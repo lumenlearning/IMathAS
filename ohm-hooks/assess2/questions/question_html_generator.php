@@ -39,5 +39,4 @@ $onGetQuestion = function () use (
             ]
         ]
     ]);
-    echo print_r($question->getExtraData());
 };
