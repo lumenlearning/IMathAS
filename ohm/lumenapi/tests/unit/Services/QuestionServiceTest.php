@@ -229,6 +229,7 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals(5485, $questionsWithAnswers[0]['questionSetId']);
         $this->assertEquals(1234, $questionsWithAnswers[0]['seed']);
         $this->assertFalse($questionsWithAnswers[0]['isAlgorithmic']);
+        $this->assertEmpty($questionsWithAnswers[0]['json']); # empty when not available on questions
         $this->assertNotEmpty($questionsWithAnswers[0]['html']);
         $this->assertEquals([
             300,
@@ -270,6 +271,7 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals(3261, $questionsWithAnswers[1]['questionSetId']);
         $this->assertEquals(4321, $questionsWithAnswers[1]['seed']);
         $this->assertFalse($questionsWithAnswers[1]['isAlgorithmic']);
+        $this->assertEmpty($questionsWithAnswers[1]['json']); # empty when not available on questions
         $this->assertNotEmpty($questionsWithAnswers[1]['html']);
 
         // Answers by qn identifier.
@@ -278,4 +280,61 @@ class QuestionServiceTest extends TestCase
             $questionsWithAnswers[1]['answerDataByQnIdentifier']['qn0']['correctAnswer']);
     }
 
+    /*
+     * cleanQuestionJson
+     */
+
+    public function testCleanQuestionJson_retainsGoodData() {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+
+        $inputjson = [
+            # Key/Value pair
+            'text' => 'abc123',
+            # 'Hash' Value
+            'associative_array' => ['key' => 'value'],
+            # Array Value
+            'indexed_array' => ['a', 'b', 'c'],
+            'nested_arrays' => [
+                # Array of 'Hashes' with Array values
+                ['key' => ['value', 'value']],
+                ['key' => ['value', 'value']]
+            ]
+        ];
+
+        // Call the method under test.
+        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, $inputjson);
+
+        # PHP Unit gracefully compares arrays with nested data
+        $this->assertEquals($inputjson, $outputjson);
+    }
+
+    public function testCleanQuestionJson_cleansScriptTags() {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+
+        $expectedtextvalue = 'abc123';
+        $inputjson = [
+            # Key/Value pair
+            'text' => "$expectedtextvalue<script>a bunch of top secret script stuff</script>",
+            # 'Hash' Value
+            'associative_array' => ['key' => 'value'],
+            # Array Value
+            'indexed_array' => ['a', 'b', 'c'],
+            'nested_arrays' => [
+                # Array of 'Hashes' with Array values
+                ['key' => ['value', '<script>a bunch of top secret script stuff</script>value']],
+                ['key' => ['value', 'value']]
+            ]
+        ];
+
+        // Call the method under test.
+        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, $inputjson);
+
+        # Ensure that script tags are removed from all values in the array
+        $this->assertEquals($expectedtextvalue, $outputjson['text']);
+        $this->assertEquals('value', $outputjson['nested_arrays'][0]['key'][1]);
+    }
 }

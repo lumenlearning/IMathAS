@@ -96,6 +96,9 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $jsParamsSorted = $question->getJsParams();
             ksort($jsParamsSorted, SORT_NATURAL);
 
+            $lumenlearningdata = $question->getExtraData() !== null && is_array($question->getExtraData()) ? $question->getExtraData()['lumenlearning'] : [];
+            $json = $lumenlearningdata['json'] ?? [];
+
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
                 'questionSetId' => $id,
@@ -109,6 +112,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'uniqueid' => $uniqueId,
                 'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
+                'json' => $this->cleanQuestionJson($json),
                 'errors' => $question->getErrors(),
             ];
 
@@ -388,5 +392,26 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             'question' => $assessStandalone->getQuestion(),
         ];
         return $returnData;
+    }
+
+    private function cleanQuestionJson($json) : array {
+        $strippedjson = [];
+        if (!isset($json) || $json == null || !is_array($json)) return $strippedjson;
+
+        foreach ($json as $key => $value) {
+            $newvalue = null;
+            if (is_array($value)) {
+                // nested array
+                $newvalue = $this->cleanQuestionJson($value);
+            } else {
+                list($newvalue, $scripts) = AssessStandalone::parseScripts($value);
+                // TODO LO-1232: is there more to do?
+            }
+            // indexed array
+            if (is_int($key)) { $strippedjson[] = $newvalue ; }
+            // associative array
+            else { $strippedjson[$key] = $newvalue; }
+        }
+        return $strippedjson;
     }
 }
