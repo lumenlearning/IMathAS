@@ -394,7 +394,12 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         return $returnData;
     }
 
-    private function cleanQuestionJson($json) : array {
+    /*
+     * Intended to be used to clean the question json (array type)
+     * Current cleaning functions:
+     *  - strips <script></script> HTML tags from string values
+     */
+    private function cleanQuestionJson(array $json) : array {
         $strippedjson = [];
         if (!isset($json) || $json == null || !is_array($json)) return $strippedjson;
 
