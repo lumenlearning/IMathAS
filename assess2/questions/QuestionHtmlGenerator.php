@@ -737,7 +737,7 @@ class QuestionHtmlGenerator
         try {
             $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxt);
             $prep = \genVarInit($qtextvars);
-            eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledsoln.
+            eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
         } catch(\Throwable $t) {
             $this->addError(
                 _('Caught error while evaluating the text in this question: ')
