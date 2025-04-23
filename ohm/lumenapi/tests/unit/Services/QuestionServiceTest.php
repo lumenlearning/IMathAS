@@ -295,7 +295,7 @@ class QuestionServiceTest extends TestCase
             # 'Hash' Value
             'associative_array' => ['key' => 'value'],
             # Array Value
-            'indexed_array' => ['a', 'b', 'c'],
+            'indexed_array' => [1, 2, 3],
             'nested_arrays' => [
                 # Array of 'Hashes' with Array values
                 ['key' => ['value', 'value']],
@@ -322,11 +322,14 @@ class QuestionServiceTest extends TestCase
             # 'Hash' Value
             'associative_array' => ['key' => 'value'],
             # Array Value
-            'indexed_array' => ['a', 'b', 'c'],
+            'indexed_array' => [1, 2, 3],
             'nested_arrays' => [
                 # Array of 'Hashes' with Array values
                 ['key' => ['value', '<script>a bunch of top secret script stuff</script>value']],
                 ['key' => ['value', 'value']]
+            ],
+            'scripts' => [
+                '<script>I will survive!</script>'
             ]
         ];
 
@@ -336,5 +339,7 @@ class QuestionServiceTest extends TestCase
         # Ensure that script tags are removed from all values in the array
         $this->assertEquals($expectedtextvalue, $outputjson['text']);
         $this->assertEquals('value', $outputjson['nested_arrays'][0]['key'][1]);
+        # Ensure that script tags are not removed if the key is scripts
+        $this->assertEquals($inputjson['scripts'], $outputjson['scripts']);
     }
 }

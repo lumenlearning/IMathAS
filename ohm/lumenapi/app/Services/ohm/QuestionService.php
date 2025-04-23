@@ -400,12 +400,16 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
         foreach ($json as $key => $value) {
             $newvalue = null;
-            if (is_array($value)) {
+            if ($key == 'scripts') {
+                $newvalue = $value; # preserve scripts value
+            } else if (is_array($value)) {
                 // nested array
                 $newvalue = $this->cleanQuestionJson($value);
-            } else {
+            } else if (is_string($value)) {
+                # Remove any embedded scripts for strings
                 list($newvalue, $scripts) = AssessStandalone::parseScripts($value);
-                // TODO LO-1232: is there more to do?
+            } else {
+                $newvalue = $value;
             }
             // indexed array
             if (is_int($key)) { $strippedjson[] = $newvalue ; }
