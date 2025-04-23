@@ -401,7 +401,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      */
     private function cleanQuestionJson(array $json) : array {
         $strippedjson = [];
-        if (!isset($json) || $json == null || !is_array($json)) return $strippedjson;
+        if (!isset($json)) return $strippedjson;
 
         foreach ($json as $key => $value) {
             $newvalue = null;
