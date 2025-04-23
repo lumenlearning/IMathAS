@@ -96,8 +96,9 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $jsParamsSorted = $question->getJsParams();
             ksort($jsParamsSorted, SORT_NATURAL);
 
-            $lumenlearningdata = $question->getExtraData() !== null && is_array($question->getExtraData()) ? $question->getExtraData()['lumenlearning'] : [];
-            $json = $lumenlearningdata['json'] ?? [];
+            $hasExtraData = $question->getExtraData() !== null && is_array($question->getExtraData());
+            $lumenlearningData = $hasExtraData && $question->getExtraData()['lumenlearning'] != null ? $question->getExtraData()['lumenlearning'] : [];
+            $json = $lumenlearningData['json'] ?? [];
 
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
@@ -400,27 +401,27 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      *  - strips <script></script> HTML tags from string values
      */
     private function cleanQuestionJson(array $json) : array {
-        $strippedjson = [];
-        if (!isset($json)) return $strippedjson;
+        $strippedJson = [];
+        if (!isset($json)) return $strippedJson;
 
         foreach ($json as $key => $value) {
-            $newvalue = null;
+            $newValue = null;
             if ($key == 'scripts') {
-                $newvalue = $value; # preserve scripts value
+                $newValue = $value; # preserve scripts value
             } else if (is_array($value)) {
                 // nested array
-                $newvalue = $this->cleanQuestionJson($value);
+                $newValue = $this->cleanQuestionJson($value);
             } else if (is_string($value)) {
                 # Remove any embedded scripts for strings
-                list($newvalue, $scripts) = AssessStandalone::parseScripts($value);
+                list($newValue, $scripts) = AssessStandalone::parseScripts($value);
             } else {
-                $newvalue = $value;
+                $newValue = $value;
             }
             // indexed array
-            if (is_int($key)) { $strippedjson[] = $newvalue ; }
+            if (is_int($key)) { $strippedJson[] = $newValue ; }
             // associative array
-            else { $strippedjson[$key] = $newvalue; }
+            else { $strippedJson[$key] = $newValue; }
         }
-        return $strippedjson;
+        return $strippedJson;
     }
 }
