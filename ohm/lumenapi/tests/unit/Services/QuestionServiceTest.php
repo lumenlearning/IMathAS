@@ -304,7 +304,7 @@ class QuestionServiceTest extends TestCase
         ];
 
         // Call the method under test.
-        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, $inputjson);
+        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, [$inputjson]);
 
         # PHP Unit gracefully compares arrays with nested data
         $this->assertEquals($inputjson, $outputjson);
@@ -334,7 +334,7 @@ class QuestionServiceTest extends TestCase
         ];
 
         // Call the method under test.
-        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, $inputjson);
+        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, [$inputjson]);
 
         # Ensure that script tags are removed from all values in the array
         $this->assertEquals($expectedtextvalue, $outputjson['text']);
