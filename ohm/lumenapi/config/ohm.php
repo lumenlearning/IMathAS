@@ -16,6 +16,10 @@ if (getenv('NOSHUFFLE_ANSWERS')) {
     $GLOBALS['CFG']['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
 }
 
+// Questions API (QAPI) Config does not affect regular OHM functionality
+$GLOBALS['CFG']['QAPI']['editableQtypes'] = getenv('QAPI_EDITABLE_QTYPES') ?: ['choices'];
+$GLOBALS['CFG']['QAPI']['editableQtextHtmlTags'] = getenv('QAPI_EDITABLE_QTEXT_HTML_TAGS') ?: ['p'];
+
 // Define OHM hooks.
 $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] =
     __DIR__ . '/../../../ohm-hooks/assess2/questions/score_engine.php';

@@ -96,6 +96,8 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $jsParamsSorted = $question->getJsParams();
             ksort($jsParamsSorted, SORT_NATURAL);
 
+            $editableValidations = $this->validateIsEditable($question, $questionSetRow);
+
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
                 'questionSetId' => $id,
@@ -110,6 +112,8 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
                 'errors' => $question->getErrors(),
+                'editableValidations' => $editableValidations,
+                'isEditable' => count($editableValidations) == 0
             ];
 
             // Get OHM 2 feedback macro text, if any exists.
@@ -388,5 +392,128 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             'question' => $assessStandalone->getQuestion(),
         ];
         return $returnData;
+    }
+
+    /**
+     * Validate against question data to determine editability
+     *
+     * @param Question $question A Question obect.
+     * @param array $questionSetRow Associative array of imas_questionset row data
+     *
+     * @return array Validation messages explaining why a question cannot be edited (empty for editable questions).
+     */
+    private function validateIsEditable($question, $questionSetRow): array {
+        $extraData = $question->getExtraData();
+        $lumenlearningData = isset($extraData) ? $extraData['lumenlearning'] : [];
+        $qjson = isset($lumenlearningData) ? $lumenlearningData['json'] : [];
+
+        // TODO LO-1234: confirm that the key 'components' is still correct
+        $qsettings = isset($qjson) ? $qjson['components'] : [[]];
+        $qtext = isset($qjson) ? $qjson['text'] : '';
+
+        return array_merge(
+            $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $qsettings),
+            $this->validateQuestionSetRow($questionSetRow),
+            $this->validateQuestionText($qtext)
+        );
+    }
+
+
+    /**
+     * Validate against question text HTML to determine editability
+     *
+     * @param array $htmlTags The set of HTML tags found in the question text
+     *
+     * @return array Validation messages explaining why a question cannot be edited.
+     */
+    private function validateQuestionText($qtext): array {
+        $validationErrors = [];
+
+        foreach (QuestionService::detectHtmlTags($qtext) as $htmlTag) {
+            if (!in_array($htmlTag, $GLOBALS['CFG']['QAPI']['editableQtextHtmlTags'])) {
+                $validationErrors[] = "Cannot edit a question with a <$htmlTag/> HTML tag in the question text";
+            }
+        }
+
+        $answerbox = 'ANSWERBOX_PLACEHOLDER';
+        $indexOfAnswerbox = strpos($qtext, $answerbox);
+
+        // if in the question text and not at the end of the question text
+        if ($indexOfAnswerbox != -1 && $indexOfAnswerbox != strlen($qtext) - strlen($answerbox)) {
+            $validationErrors[] = "Cannot edit a question in which the answer box is not at the end of the question text";
+        }
+
+        return $validationErrors;
+    }
+
+    /**
+     * Validate against imas_questionset data to determine editability
+     *
+     * @param array $questionSetRow Associative array of imas_questionset row data
+     *
+     * @return array Validation messages explaining why a question cannot be edited.
+     */
+    private function validateQuestionSetRow($questionSetRow): array {
+        $validationErrors = [];
+
+        if (1 == $questionSetRow['isrand']) {
+            $validationErrors[] = "Cannot edit an algorithmic question";
+        }
+
+        return $validationErrors;
+    }
+
+    /**
+     * Validate against question type data to determine editability
+     *
+     * @param string $qtype Question type
+     * @param array<array> $questionSettings array of question settings from the evaluated question control
+     *
+     * @return array Validation messages explaining why a question cannot be edited.
+     */
+    private function validateQuestionTypeAndSettings($qtype, $questionSettings): array {
+        $validationErrors = [];
+
+        // validate that the question type is generally supported
+        if (!in_array($qtype, $GLOBALS['CFG']['QAPI']['editableQtypes'])) {
+            $validationErrors[] = "Cannot edit a $qtype type question";
+        } else {
+            // validations specific to a question type & its settings
+            switch ($qtype) {
+                case 'choices':
+                    if (
+                        $questionSettings[0]["displayformat"] == "select" &&
+                        !in_array('dropdown', $GLOBALS['CFG']['QAPI']['editableQtypes'])
+                    ) {
+                        // a dropdown occurs when the 'displayformat' setting of a choices question is 'select'
+                        // (i.e. dropdowns are a subtype of choices type questions)
+                        $validationErrors[] = "Cannot edit a dropdown type question";
+                    }
+                default:
+                    break;
+            }
+        }
+
+        return $validationErrors;
+    }
+
+    /**
+     * Detects HTML tags in a given string and returns a unique set of tags found
+     *
+     * @param string $input The string to check for HTML tags
+     * @return array An array containing unique HTML tags found
+     */
+    public static function detectHtmlTags($input): array {
+        // Pattern matches opening tags, closing tags, and self-closing tags
+        $pattern = '/<\/?([a-z][a-z0-9]*)\b[^>]*>/i';
+        $matches = [];
+
+        // Find all matches
+        if (preg_match_all($pattern, $input, $matches)) {
+            // Return unique tags by using array_unique
+            return array_values(array_unique($matches[1]));
+        }
+
+        return [];
     }
 }
