@@ -483,7 +483,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                     $displayformat = $questionSettings[0]['displayformat'] ?? '';
                     if (
                         $displayformat == 'select' &&
-                        !in_array('dropdown', $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])
+                        !in_array('dropdown', $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'])
                     ) {
                         // a dropdown occurs when the 'displayformat' setting of a choices question is 'select'
                         // (i.e. dropdowns are a subtype of choices type questions)

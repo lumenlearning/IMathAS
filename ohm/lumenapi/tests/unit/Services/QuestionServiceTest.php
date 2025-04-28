@@ -286,7 +286,7 @@ class QuestionServiceTest extends TestCase
      * validateIsEditable
      */
     public function testValidateIsEditable_aggregatesValidationsFromHelperMethods(): void {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = [];
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         // fill with garbage values
