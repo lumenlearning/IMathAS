@@ -56,11 +56,11 @@ final class QuestionHtmlGeneratorTest extends TestCase
         $this->assertEquals($this->feedback, $this->question->getExtraData()['lumenlearning']['feedback']);
     }
 
-    public function testOnGetQuestion_setsJsonTextOnQuestion(): void
+    public function testOnGetQuestion_setsQuestionComponentsTextOnQuestion(): void
     {
-        $this->assertArrayHasKey('text', $this->question->getExtraData()['lumenlearning']['json']);
-        $this->assertIsString($this->question->getExtraData()['lumenlearning']['json']['text']);
-        $this->assertNotEmpty($this->question->getExtraData()['lumenlearning']['json']['text']);
-        $this->assertEquals($this->evaledqtextwithoutanswerbox, $this->question->getExtraData()['lumenlearning']['json']['text']);
+        $this->assertArrayHasKey('text', $this->question->getExtraData()['lumenlearning']['questionComponents']);
+        $this->assertIsString($this->question->getExtraData()['lumenlearning']['questionComponents']['text']);
+        $this->assertNotEmpty($this->question->getExtraData()['lumenlearning']['questionComponents']['text']);
+        $this->assertEquals($this->evaledqtextwithoutanswerbox, $this->question->getExtraData()['lumenlearning']['questionComponents']['text']);
     }
 }
