@@ -98,7 +98,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
             $hasExtraData = $question->getExtraData() !== null && is_array($question->getExtraData());
             $lumenlearningData = $hasExtraData && $question->getExtraData()['lumenlearning'] != null ? $question->getExtraData()['lumenlearning'] : [];
-            $json = $lumenlearningData['json'] ?? [];
+            $json = $lumenlearningData['questionComponents'] ?? [];
 
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
