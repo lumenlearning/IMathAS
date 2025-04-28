@@ -439,7 +439,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         $indexOfAnswerbox = strpos($qtext, $answerbox);
 
         // if in the question text and not at the end of the question text
-        if ($indexOfAnswerbox === false || $indexOfAnswerbox != strlen($qtext) - strlen($answerbox)) {
+        if ($indexOfAnswerbox !== false && $indexOfAnswerbox != strlen($qtext) - strlen($answerbox)) {
             $validationErrors[] = "Cannot edit a question in which the answer box is not at the end of the question text";
         }
 
