@@ -404,12 +404,11 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      */
     private function validateIsEditable($question, $questionSetRow): array {
         $extraData = $question->getExtraData();
-        $lumenlearningData = isset($extraData) ? $extraData['lumenlearning'] : [];
-        $qjson = isset($lumenlearningData) ? $lumenlearningData['json'] : [];
+        $questionComponents = $extraData['lumenlearning']['questionComponents'] ?? [];
 
         // TODO LO-1234: confirm that the key 'components' is still correct
-        $qsettings = isset($qjson) ? $qjson['components'] : [[]];
-        $qtext = isset($qjson) ? $qjson['text'] : '';
+        $qsettings = $questionComponents['components'] ?? [[]];
+        $qtext = $questionComponents['text'] ?? '';
 
         return array_merge(
             $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $qsettings),
@@ -481,8 +480,9 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             // validations specific to a question type & its settings
             switch ($qtype) {
                 case 'choices':
+                    $displayformat = $questionSettings[0]['displayformat'] ?? '';
                     if (
-                        $questionSettings[0]["displayformat"] == "select" &&
+                        $displayformat == 'select' &&
                         !in_array('dropdown', $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])
                     ) {
                         // a dropdown occurs when the 'displayformat' setting of a choices question is 'select'

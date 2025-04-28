@@ -301,7 +301,7 @@ class QuestionServiceTest extends TestCase
         );
         $question->setExtraData([
             'lumenlearning' => [
-                'json' => [
+                'questionComponents' => [
                     'text' => '<p>What is the answer?</p>ANSWERBOX_PLACEHOLDER',
                     'components' => [[
                         'displayformat' => 'select'
