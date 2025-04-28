@@ -400,7 +400,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
-        $questionSettings = [];
+        $questionSettings = [[]];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -415,7 +415,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = [];
 
         $qtype = 'choices';
-        $questionSettings = [];
+        $questionSettings = [[]];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -432,7 +432,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
-        $questionSettings = ['displayformat' => 'select'];
+        $questionSettings = [['displayformat' => 'select']];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -449,7 +449,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices', 'dropdown'];
 
         $qtype = 'choices';
-        $questionSettings = ['displayformat' => 'select'];
+        $questionSettings = [['displayformat' => 'select']];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
