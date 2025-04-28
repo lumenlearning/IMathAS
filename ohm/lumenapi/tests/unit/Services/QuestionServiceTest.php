@@ -286,8 +286,8 @@ class QuestionServiceTest extends TestCase
      * validateIsEditable
      */
     public function testValidateIsEditable_aggregatesValidationsFromHelperMethods(): void {
-        $GLOBALS['CFG']['QAPI']['editableQtextHtmlTags'] = ['p'];
-        $GLOBALS['CFG']['QAPI']['editableQtypes'] = ['choices'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         // fill with garbage values
         $question = new Question(
@@ -349,7 +349,7 @@ class QuestionServiceTest extends TestCase
 
     public function testValidateQuestionText_allowsEditableTagsAndAnswerbox(): void
     {
-        $GLOBALS['CFG']['QAPI']['editableQtextHtmlTags'] = ['p'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p'];
         $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>ANSWERBOX_PLACEHOLDER';
 
         // Get the method under test.
@@ -363,7 +363,7 @@ class QuestionServiceTest extends TestCase
 
     public function testValidateQuestionText_disallowsNotEditableTags(): void
     {
-        $GLOBALS['CFG']['QAPI']['editableQtextHtmlTags'] = [];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = [];
         $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>';
 
         // Get the method under test.
@@ -397,7 +397,7 @@ class QuestionServiceTest extends TestCase
      */
     public function testValidateQuestionTypeAndSettings_allowsEditableQtypes(): void
     {
-        $GLOBALS['CFG']['QAPI']['editableQtypes'] = ['choices'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
         $questionSettings = [];
@@ -412,7 +412,7 @@ class QuestionServiceTest extends TestCase
     }
 
     public function testValidateQuestionTypeAndSettings_disallowsNonEditableQtypes(): void {
-        $GLOBALS['CFG']['QAPI']['editableQtypes'] = [];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = [];
 
         $qtype = 'choices';
         $questionSettings = [];
@@ -429,7 +429,7 @@ class QuestionServiceTest extends TestCase
     }
 
     public function testValidateQuestionTypeAndSettings_disallowsDropdownStyleChoicesQtypes(): void {
-        $GLOBALS['CFG']['QAPI']['editableQtypes'] = ['choices'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
         $questionSettings = ['displayformat' => 'select'];
@@ -446,7 +446,7 @@ class QuestionServiceTest extends TestCase
     }
 
     public function testValidateQuestionTypeAndSettings_allowsDropdownStyleChoicesQtypesWhenEditable(): void {
-        $GLOBALS['CFG']['QAPI']['editableQtypes'] = ['choices', 'dropdown'];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices', 'dropdown'];
 
         $qtype = 'choices';
         $questionSettings = ['displayformat' => 'select'];

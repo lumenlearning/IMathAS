@@ -430,7 +430,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         $validationErrors = [];
 
         foreach (QuestionService::detectHtmlTags($qtext) as $htmlTag) {
-            if (!in_array($htmlTag, $GLOBALS['CFG']['QAPI']['editableQtextHtmlTags'])) {
+            if (!in_array($htmlTag, $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])) {
                 $validationErrors[] = "Cannot edit a question with a <$htmlTag/> HTML tag in the question text";
             }
         }
@@ -475,7 +475,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         $validationErrors = [];
 
         // validate that the question type is generally supported
-        if (!in_array($qtype, $GLOBALS['CFG']['QAPI']['editableQtypes'])) {
+        if (!in_array($qtype, $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'])) {
             $validationErrors[] = "Cannot edit a $qtype type question";
         } else {
             // validations specific to a question type & its settings
@@ -483,7 +483,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 case 'choices':
                     if (
                         $questionSettings[0]["displayformat"] == "select" &&
-                        !in_array('dropdown', $GLOBALS['CFG']['QAPI']['editableQtypes'])
+                        !in_array('dropdown', $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])
                     ) {
                         // a dropdown occurs when the 'displayformat' setting of a choices question is 'select'
                         // (i.e. dropdowns are a subtype of choices type questions)
