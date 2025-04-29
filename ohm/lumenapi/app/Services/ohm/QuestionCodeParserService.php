@@ -2,6 +2,8 @@
 
 namespace App\Services\ohm;
 
+use App\Services\Interfaces\QuestionCodeParserServiceInterface;
+
 use PhpParser\Error;
 use PhpParser\NodeFinder;
 use PhpParser\ParserFactory;
@@ -12,7 +14,7 @@ use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\New_;
 use PhpParser\PrettyPrinter\Standard as PrettyPrinter;
 
-class QuestionCodeParserService extends BaseService
+class QuestionCodeParserService extends BaseService implements QuestionCodeParserServiceInterface
 {
     private $parser;
 
