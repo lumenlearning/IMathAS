@@ -24,13 +24,19 @@ $onBeforeAnswerBoxGenerator = function () use (
  */
 if (!isset($feedback)) $feedback = null;
 $onGetQuestion = function () use (
+    // $this, // bound by default to any anonymous function in PHP, so long as the function is created within the class context
     &$question, // [Question] The question object to be returned by getQuestion().
-    &$feedback // [?array] The feedback for the question.
+    &$feedback, // [?array] The feedback for the question.
+    &$evaledqtextwithoutanswerbox // [string]
 )
 {
     $question->setExtraData([
         'lumenlearning' => [
-            'feedback' => (isset($feedback)) ? $feedback : null
+            'feedback' => (isset($feedback)) ? $feedback : null,
+            'questionComponents' => [
+                # TODO LO-1234: Complete me with more data!
+                'text' => $evaledqtextwithoutanswerbox
+            ]
         ]
     ]);
 };
