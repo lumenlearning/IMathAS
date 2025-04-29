@@ -231,6 +231,7 @@ class QuestionServiceTest extends TestCase
         $this->assertFalse($questionsWithAnswers[0]['isAlgorithmic']);
         $this->assertFalse($questionsWithAnswers[0]['isEditable']);
         $this->assertNotEmpty($questionsWithAnswers[0]['editableValidations']);
+        $this->assertNotEmpty($questionsWithAnswers[0]['json']);
         $this->assertNotEmpty($questionsWithAnswers[0]['html']);
         $this->assertEquals([
             300,
@@ -274,6 +275,7 @@ class QuestionServiceTest extends TestCase
         $this->assertFalse($questionsWithAnswers[1]['isAlgorithmic']);
         $this->assertFalse($questionsWithAnswers[1]['isEditable']);
         $this->assertNotEmpty($questionsWithAnswers[1]['editableValidations']);
+        $this->assertNotEmpty($questionsWithAnswers[1]['json']);
         $this->assertNotEmpty($questionsWithAnswers[1]['html']);
 
         // Answers by qn identifier.
@@ -491,4 +493,65 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals('Cannot edit an algorithmic question', $validationErrors[0]);
     }
 
+    /*
+     * cleanQuestionJson
+     */
+    public function testCleanQuestionJson_retainsGoodData() {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+
+        $inputjson = [
+            # Key/Value pair
+            'text' => 'abc123',
+            # 'Hash' Value
+            'associative_array' => ['key' => 'value'],
+            # Array Value
+            'indexed_array' => [1, 2, 3],
+            'nested_arrays' => [
+                # Array of 'Hashes' with Array values
+                ['key' => ['value', 'value']],
+                ['key' => ['value', 'value']]
+            ]
+        ];
+
+        // Call the method under test.
+        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, [$inputjson]);
+
+        # PHP Unit gracefully compares arrays with nested data
+        $this->assertEquals($inputjson, $outputjson);
+    }
+
+    public function testCleanQuestionJson_cleansScriptTags() {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+
+        $expectedtextvalue = 'abc123';
+        $inputjson = [
+            # Key/Value pair
+            'text' => "$expectedtextvalue<script>a bunch of top secret script stuff</script>",
+            # 'Hash' Value
+            'associative_array' => ['key' => 'value'],
+            # Array Value
+            'indexed_array' => [1, 2, 3],
+            'nested_arrays' => [
+                # Array of 'Hashes' with Array values
+                ['key' => ['value', '<script>a bunch of top secret script stuff</script>value']],
+                ['key' => ['value', 'value']]
+            ],
+            'scripts' => [
+                '<script>I will survive!</script>'
+            ]
+        ];
+
+        // Call the method under test.
+        $outputjson = $cleanQuestionJson->invokeArgs($this->questionService, [$inputjson]);
+
+        # Ensure that script tags are removed from all values in the array
+        $this->assertEquals($expectedtextvalue, $outputjson['text']);
+        $this->assertEquals('value', $outputjson['nested_arrays'][0]['key'][1]);
+        # Ensure that script tags are not removed if the key is scripts
+        $this->assertEquals($inputjson['scripts'], $outputjson['scripts']);
+    }
 }

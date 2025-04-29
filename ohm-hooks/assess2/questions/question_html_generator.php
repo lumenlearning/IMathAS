@@ -33,7 +33,7 @@ $onGetQuestion = function () use (
     $question->setExtraData([
         'lumenlearning' => [
             'feedback' => (isset($feedback)) ? $feedback : null,
-            'json' => [
+            'questionComponents' => [
                 # TODO LO-1234: Complete me with more data!
                 'text' => $evaledqtextwithoutanswerbox
             ]
