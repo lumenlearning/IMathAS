@@ -229,7 +229,7 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals(5485, $questionsWithAnswers[0]['questionSetId']);
         $this->assertEquals(1234, $questionsWithAnswers[0]['seed']);
         $this->assertFalse($questionsWithAnswers[0]['isAlgorithmic']);
-        $this->assertEmpty($questionsWithAnswers[0]['questionComponents']); # empty when not available on questions
+        $this->assertNotEmpty($questionsWithAnswers[0]['json']);
         $this->assertNotEmpty($questionsWithAnswers[0]['html']);
         $this->assertEquals([
             300,
@@ -271,7 +271,7 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals(3261, $questionsWithAnswers[1]['questionSetId']);
         $this->assertEquals(4321, $questionsWithAnswers[1]['seed']);
         $this->assertFalse($questionsWithAnswers[1]['isAlgorithmic']);
-        $this->assertEmpty($questionsWithAnswers[1]['questionComponents']); # empty when not available on questions
+        $this->assertNotEmpty($questionsWithAnswers[1]['json']);
         $this->assertNotEmpty($questionsWithAnswers[1]['html']);
 
         // Answers by qn identifier.
