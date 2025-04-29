@@ -714,6 +714,43 @@ class QuestionHtmlGenerator
         }
         $detailedSolutionContent = $this->getDetailedSolutionContent($evaledsoln);
 
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+
+        /*
+         *  Store evaluated Question Text without $answerbox
+         *  The following "normal" logic on the evaluated Question Text is not executed on $evaledqtextwithoutanswerbox:
+         *    - handling [AB] and [SAB] syntax for answerbox(es) and solution answer box(es)
+         *    - handling of sequential parts (for conditional and multipart only)
+         *    - adding an answerbox when no answerbox was included in the $toevalqtext
+         *    - adding show answer & show solution buttons
+         *    - adding help text and hints
+         *    - coloring for conditional question type answerboxes
+         *    - Wrapping all that in a div:
+         *         - $evaledqtext = "<div class=\"question\" role=region aria-label=\"" . _('Question') . "\">\n" . filter($evaledqtext);
+         *         - <aforementioned handling/adding of things>
+         *         - $evaledqtext .= "\n</div>\n";
+        */
+        try {
+            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxt);
+            $prep = \genVarInit($qtextvars);
+            eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
+        } catch(\Throwable $t) {
+            $this->addError(
+                _('Caught error while evaluating the text in this question: ')
+                . $t->getMessage());
+            $evaledqtextwithoutanswerbox = '';
+        }
+
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+
         /*
          * Possibly adjust the showanswer if it doesn't look right
          */
