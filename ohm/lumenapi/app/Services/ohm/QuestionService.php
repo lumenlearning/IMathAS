@@ -96,6 +96,10 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $jsParamsSorted = $question->getJsParams();
             ksort($jsParamsSorted, SORT_NATURAL);
 
+            $hasExtraData = $question->getExtraData() !== null && is_array($question->getExtraData());
+            $lumenlearningData = $hasExtraData && $question->getExtraData()['lumenlearning'] != null ? $question->getExtraData()['lumenlearning'] : [];
+            $json = $lumenlearningData['questionComponents'] ?? [];
+
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
                 'questionSetId' => $id,
@@ -109,6 +113,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'uniqueid' => $uniqueId,
                 'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
+                'json' => $this->cleanQuestionJson($json),
                 'errors' => $question->getErrors(),
             ];
 
@@ -388,5 +393,35 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             'question' => $assessStandalone->getQuestion(),
         ];
         return $returnData;
+    }
+
+    /*
+     * Intended to be used to clean the question json (array type)
+     * Current cleaning functions:
+     *  - strips <script></script> HTML tags from string values
+     */
+    private function cleanQuestionJson(array $json) : array {
+        $strippedJson = [];
+        if (!isset($json)) return $strippedJson;
+
+        foreach ($json as $key => $value) {
+            $newValue = null;
+            if ($key == 'scripts') {
+                $newValue = $value; # preserve scripts value
+            } else if (is_array($value)) {
+                // nested array
+                $newValue = $this->cleanQuestionJson($value);
+            } else if (is_string($value)) {
+                # Remove any embedded scripts for strings
+                list($newValue, $scripts) = AssessStandalone::parseScripts($value);
+            } else {
+                $newValue = $value;
+            }
+            // indexed array
+            if (is_int($key)) { $strippedJson[] = $newValue ; }
+            // associative array
+            else { $strippedJson[$key] = $newValue; }
+        }
+        return $strippedJson;
     }
 }
