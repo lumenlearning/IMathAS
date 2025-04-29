@@ -554,4 +554,60 @@ class QuestionServiceTest extends TestCase
         # Ensure that script tags are not removed if the key is scripts
         $this->assertEquals($inputjson['scripts'], $outputjson['scripts']);
     }
+
+    /*
+     * validateQuestionCode
+     */
+    public function testValidateQuestionCode_disallowsIncludecodefrom(): void {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionCode = $class->getMethod('validateQuestionCode');
+
+        $code = <<<EOD
+        includecodefrom(1021)
+        \$questions = array("Formulate an investigative question, or questions", 
+                           "Design a study and determine the population",
+                           "Select a sample from the population",
+                           "Collect data", 
+                           "Perform a data analysis", 
+                           "Interpret results and make an inference about the population")
+        \$answers = array("1","2","3","4","5","6")
+        \$displayformat = "select"
+        \$noshuffle = "answers"
+        
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",$thisq)
+        EOD;
+
+        // Call the method under test.
+        $validationErrors = $validateQuestionCode->invokeArgs($this->questionService, [$code]);
+
+        $this->assertNotEmpty($validationErrors);
+        $this->assertCount(1, $validationErrors);
+        $this->assertEquals('Cannot edit a question that uses the `includecodefrom` function', $validationErrors[0]);
+    }
+
+    public function testValidateQuestionCode_allowsOtherFunctions(): void {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionCode = $class->getMethod('validateQuestionCode');
+
+        $code = <<<EOD
+        \$questions = array("Formulate an investigative question, or questions", 
+                           "Design a study and determine the population",
+                           "Select a sample from the population",
+                           "Collect data", 
+                           "Perform a data analysis", 
+                           "Interpret results and make an inference about the population")
+        \$answers = array("1","2","3","4","5","6")
+        \$displayformat = "select"
+        \$noshuffle = "answers"
+        
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",$thisq)
+        EOD;
+
+        // Call the method under test.
+        $validationErrors = $validateQuestionCode->invokeArgs($this->questionService, [$code]);
+
+        $this->assertEmpty($validationErrors);
+    }
 }
