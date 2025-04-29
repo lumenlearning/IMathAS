@@ -417,13 +417,15 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $questionComponents['components'] ?? [[]]),
             $this->validateQuestionSetRow($questionSetRow),
             $this->validateQuestionText($questionComponents['text'] ?? ''),
-            $this->validateFunctionCallsInCode($lumenlearningData['functionCallsInCode'] ?? [])
+            $this->validateQuestionCode($questionSetRow['control'])
         ));
     }
 
-    private function validateFunctionCallsInCode($functionCalls): array {
+    private function validateQuestionCode($code): array {
         $validationErrors = [];
+        $questionCodeParser = new QuestionCodeParserService($code);
 
+        $functionCalls = $questionCodeParser->detectFunctionCalls();
         foreach ($functionCalls as $functionCall) {
             if (str_contains($functionCall['name'], 'includecodefrom')) {
                 $validationErrors[] = 'Cannot edit a question that uses the `includecodefrom` function';
