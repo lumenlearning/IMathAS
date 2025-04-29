@@ -409,17 +409,28 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      */
     private function validateIsEditable($question, $questionSetRow): array {
         $extraData = $question->getExtraData();
-        $questionComponents = $extraData['lumenlearning']['questionComponents'] ?? [];
+        $lumenlearningData = $extraData['lumenlearning'] ?? [];
+        $questionComponents = $lumenlearningData['questionComponents'] ?? [];
 
-        // TODO LO-1234: confirm that the key 'components' is still correct
-        $qsettings = $questionComponents['components'] ?? [[]];
-        $qtext = $questionComponents['text'] ?? '';
-
-        return array_merge(
-            $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $qsettings),
+        return array_unique(array_merge(
+            // TODO LO-1234: confirm that the key 'components' is still correct
+            $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $questionComponents['components'] ?? [[]]),
             $this->validateQuestionSetRow($questionSetRow),
-            $this->validateQuestionText($qtext)
-        );
+            $this->validateQuestionText($questionComponents['text'] ?? ''),
+            $this->validateFunctionCallsInCode($lumenlearningData['functionCallsInCode'] ?? [])
+        ));
+    }
+
+    private function validateFunctionCallsInCode($functionCalls): array {
+        $validationErrors = [];
+
+        foreach ($functionCalls as $functionCall) {
+            if (str_contains($functionCall['name'], 'includecodefrom')) {
+                $validationErrors[] = 'Cannot edit a question that uses the `includecodefrom` function';
+            }
+        }
+
+        return $validationErrors;
     }
 
 
