@@ -575,7 +575,7 @@ class QuestionServiceTest extends TestCase
         \$displayformat = "select"
         \$noshuffle = "answers"
         
-        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",$thisq)
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",\$thisq)
         EOD;
 
         // Call the method under test.
@@ -602,7 +602,7 @@ class QuestionServiceTest extends TestCase
         \$displayformat = "select"
         \$noshuffle = "answers"
         
-        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",$thisq)
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",\$thisq)
         EOD;
 
         // Call the method under test.
