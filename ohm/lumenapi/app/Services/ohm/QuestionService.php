@@ -417,7 +417,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $questionComponents['components'] ?? [[]]),
             $this->validateQuestionSetRow($questionSetRow),
             $this->validateQuestionText($questionComponents['text'] ?? ''),
-            $this->validateQuestionCode($questionSetRow['control'])
+            $this->validateQuestionCode($questionSetRow['control'] ?? '')
         ));
     }
 
