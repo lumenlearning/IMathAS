@@ -5,26 +5,21 @@ namespace App\Services\Interfaces;
 interface QuestionCodeParserServiceInterface
 {
     /**
-     * Detects all function calls in a PHP code string using PHP-Parser
+     * Detects all function calls in a question code string using Regex
      *
-     *  Example return data:
-     *  [
-     *      {
-     *          'name' => 'sum',
-     *          'type' => 'function',
-     *          'line' => 12,
-     *          'arguments' => ['1', '2', '3']
-     *      },
-     *      {
-     *          'name' => 'getName',
-     *          'type' => 'static',
-     *          'class' => NameGenerator,
-     *          'line' => 6,
-     *          'arguments' => []
-     *      }
-     *  ]
+     * Example return data:
+     *   [
+     *       {
+     *           'name' => 'sum',
+     *           'arguments' => "'1', '2', '3'"
+     *       },
+     *       {
+     *           'name' => 'getName',
+     *           'arguments' => ""
+     *       }
+     *   ]
      *
-     * @return array List of detected function calls with line numbers and arguments
+     * @return array List of detected function calls with name and arguments
      */
     public function detectFunctionCalls(): array;
 }

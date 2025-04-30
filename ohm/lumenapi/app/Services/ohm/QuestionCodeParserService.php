@@ -4,113 +4,78 @@ namespace App\Services\ohm;
 
 use App\Services\Interfaces\QuestionCodeParserServiceInterface;
 
-use PhpParser\Error;
-use PhpParser\NodeFinder;
-use PhpParser\ParserFactory;
-use PhpParser\Node;
-use PhpParser\Node\Expr\FuncCall;
-use PhpParser\Node\Expr\MethodCall;
-use PhpParser\Node\Expr\StaticCall;
-use PhpParser\Node\Expr\New_;
-use PhpParser\PrettyPrinter\Standard as PrettyPrinter;
-
 class QuestionCodeParserService extends BaseService implements QuestionCodeParserServiceInterface
 {
-    private $parser;
+    /*
+     * NOTE: will match functions enclosed in strings
+     *
+     * ([^()\s]+)           - Captures function name, ignoring parens and whitespace (name capture group)
+     * \( ... \)            - Function calls are wrapped in parens
+     * ( ... )              - Capture entire args list (arguments capture group)
+     * (?: ... )*           - Unnamed group of >= 0 args
+     * \s*,?\s*             - Leading/Trailing comma and whitespaces permitted
+     *  [^()]+              - Each argument must match at least 1 non-parens
+     *  (?:\((?2)\))?       - followed by parens (indicating a function call) or not (?)
+     */
+    public const FUNCTION_REGEX = '/
+        (
+            [^()\s]+
+        )
+        \(
+        (
+            (?:
+                \s*,?\s*
+                (?:
+                    [^()]+
+                    (?:
+                        \((?2)\)
+                    )?
+                )
+                \s*,?\s*
+            )*
+        )
+        \)
+    /x';
 
-    // Syntax Tree
-    private $ast;
+    private $code;
 
-    private $prettyPrinter;
-
-    private $nodeFinder;
-
-
-    // @param string $code The PHP code to parse
+    /**
+     * @param string $code The question code to parse (not proper PHP code)
+     *                      **code is not explicitly parsed for validity**
+     */
     public function __construct($code) {
-        // Create parser instance
-        $this->parser = (new ParserFactory)->createForHostVersion();
-
-        // Parse the code
-        $this->ast = $this->parser->parse($code);
-
-        // Create pretty printer for printing argument nodes
-        $this->prettyPrinter = new PrettyPrinter();
-
-        // Find all function calls in the AST
-        $this->nodeFinder = new NodeFinder();
+        $this->code = $code;
     }
 
     /**
-     * Detects all function calls in a PHP code string using PHP-Parser
+     * Detects all function calls in a question code string using Regex
      *
-     * @return array List of detected function calls with line numbers and arguments
+     * @return array List of detected function calls with name and arguments
      */
     public function detectFunctionCalls(): array {
-        try {
-            // Initialize result array
-            $functionCalls = [];
-
-            // Process all node types in one NodeFinder call
-            $allCalls = $this->nodeFinder->find($this->ast, function(Node $node) {
-                return $node instanceof FuncCall ||
-                    $node instanceof MethodCall ||
-                    $node instanceof StaticCall ||
-                    $node instanceof New_;
-            });
-
-            foreach ($allCalls as $call) {
-                // Extract arguments (common for all call types)
-                $args = [];
-                foreach ($call->args as $arg) {
-                    $args[] = $this->prettyPrinter->prettyPrintExpr($arg->value);
-                }
-
-                // Process based on call type
-                if ($call instanceof FuncCall && $call->name instanceof Node\Name) {
-                    $functionCalls[] = [
-                        'name' => $call->name->toString(),
-                        'type' => 'function',
-                        'line' => $call->getLine(),
-                        'arguments' => $args
-                    ];
-                }
-                else if ($call instanceof MethodCall && $call->name instanceof Node\Identifier) {
-                    $functionCalls[] = [
-                        'name' => $call->name->toString(),
-                        'type' => 'method',
-                        'line' => $call->getLine(),
-                        'object' => $this->prettyPrinter->prettyPrintExpr($call->var),
-                        'arguments' => $args
-                    ];
-                }
-                else if ($call instanceof StaticCall && $call->name instanceof Node\Identifier) {
-                    $className = $call->class instanceof Node\Name
-                        ? $call->class->toString()
-                        : $this->prettyPrinter->prettyPrintExpr($call->class);
-
-                    $functionCalls[] = [
-                        'name' => $call->name->toString(),
-                        'type' => 'static',
-                        'class' => $className,
-                        'line' => $call->getLine(),
-                        'arguments' => $args
-                    ];
-                }
-                else if ($call instanceof New_ && $call->class instanceof Node\Name) {
-                    $functionCalls[] = [
-                        'name' => $call->class->toString(),
-                        'type' => 'constructor',
-                        'line' => $call->getLine(),
-                        'arguments' => $args
-                    ];
-                }
-            }
-
-            return $functionCalls;
-        } catch (Error $e) {
-            return ['error' => 'Parse error: ' . $e->getMessage()];
-        }
+        return $this->detectFunctionCallsRecurs($this->code, []);
     }
 
+    /**
+     * Recursively detects all function calls in a question code string using Regex
+     * Recursively traverses nested function calls
+     *
+     * @param $code string
+     * @param $functionCalls array Running list of function calls detected
+     *
+     * @return array List of detected function calls with name and arguments
+     */
+    private function detectFunctionCallsRecurs($code, $functionCalls): array {
+        preg_match_all($this::FUNCTION_REGEX, $code, $matches);
+        for ($i = 0; $i < count($matches[0]); $i++) {
+            $args = $matches[2][$i];
+            $functionCalls[] = [
+                'name' => $matches[1][$i], // string type
+                'arguments' => $args // string type
+            ];
+            $functionCalls = $this->detectFunctionCallsRecurs($args, $functionCalls);
+        }
+
+        return $functionCalls;
+    }
 }
