@@ -780,11 +780,12 @@ class QuestionHtmlGenerator
          *         - $evaledqtext .= "\n</div>\n";
         */
         try {
-            // Replace $answerbox variables with placeholders.
-                $toevalqtxtwithoutanswerbox = ('multipart' == $quesData['qtype'])
-                    ? preg_replace('/\$answerbox\[(\d+)\]/', 'ANSWERBOX_PLACEHOLDER_QN_100\1', $toevalqtxt)
-                    : $toevalqtxt;
-                $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
+            // Replace $answerbox variables with placeholders in multi-part questions.
+            $toevalqtxtwithoutanswerbox = ('multipart' == $quesData['qtype'])
+                ? preg_replace('/\$answerbox\[(\d+)\]/', 'ANSWERBOX_PLACEHOLDER_QN_100\1', $toevalqtxt)
+                : $toevalqtxt;
+            // Replace $answerbox variables with placeholders in single part questions.
+            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
 
             $prep = \genVarInit($qtextvars);
             eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
