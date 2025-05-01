@@ -99,7 +99,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             // Get question components. (question code variables collected in AnswerBox generators)
             // If AnswerBoxOhmExtensions is not implemented by the question type's AnswerBox generator,
             // then null will be returned.
-            $questionComponents = $question->getExtraData()['lumenlearning']['question_components'] ?? [];
+            $questionComponents = $question->getExtraData()['lumenlearning']['questionComponents'] ?? [];
 
             // Build the question answer(s) and/or error(s) array.
             $answerData = [

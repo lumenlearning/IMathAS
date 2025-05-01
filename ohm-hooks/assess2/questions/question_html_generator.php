@@ -64,7 +64,7 @@ $onGetQuestion = function () use (
     // Multi-part questions will be indexed as such: "qn1000", "qn1001", etc.
     $questionComponents['componentsByQnIdentifier'] = $allAnswerBoxVariables;
 
-    $extraData['lumenlearning']['question_components'] = $questionComponents;
+    $extraData['lumenlearning']['questionComponents'] = $questionComponents;
 
     $question->setExtraData($extraData);
 };
