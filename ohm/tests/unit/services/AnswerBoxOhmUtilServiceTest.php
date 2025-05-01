@@ -2,6 +2,8 @@
 
 namespace OHM\tests\unit\services;
 
+require_once __DIR__ . '/../../../../assess2/questions/answerboxes/AnswerBoxParams.php';
+
 use IMathAS\assess2\questions\answerboxes\AnswerBoxParams;
 use OHM\Services\AnswerBoxOhmUtilService;
 use PHPUnit\Framework\TestCase;
