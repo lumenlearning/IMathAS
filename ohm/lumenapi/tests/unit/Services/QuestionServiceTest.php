@@ -366,10 +366,10 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
      * cleanQuestionJson
      */
 
-    public function testCleanQuestionJson_retainsGoodData() {
+    public function testCleanQuestionComponents_retainsGoodData() {
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
-        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+        $cleanQuestionJson = $class->getMethod('cleanQuestionComponents');
 
         $inputjson = [
             # Key/Value pair
@@ -392,10 +392,10 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertEquals($inputjson, $outputjson);
     }
 
-    public function testCleanQuestionJson_cleansScriptTags() {
+    public function testCleanQuestionComponents_cleansScriptTags() {
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
-        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+        $cleanQuestionJson = $class->getMethod('cleanQuestionComponents');
 
         $expectedtextvalue = 'abc123';
         $inputjson = [
