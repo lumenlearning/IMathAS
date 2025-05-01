@@ -6,6 +6,9 @@
  *
  * We are currently using this to override answer shuffling globally in OHM.
  */
+
+use IMathAS\assess2\questions\answerboxes\AnswerBoxOhmExtensions;
+
 $onBeforeAnswerBoxGenerator = function () use (
     &$questionWriterVars // [?array] This is the array of variables packaged up by IMathAS.
 ) {
@@ -27,7 +30,8 @@ $onGetQuestion = function () use (
     &$question, // [Question] The question object to be returned by getQuestion().
     &$feedback, // [?array] The feedback for the question.
     &$quesData, // [?array] The question data from the generator
-    &$evaledqtextwithoutanswerbox, // [String] The HTML without embedded asnwer boxes
+    &$evaledqtextwithoutanswerbox, // [String] The question text (HTML) without embedded answer boxes
+                                   // If $answerbox was present, it was replaced with "ANSWERBOX_PLACEHOLDER".
     &$answerBoxGenerators // [?array] The AnswerBox generator(s)
 )
 {
@@ -37,28 +41,29 @@ $onGetQuestion = function () use (
     ];
 
     /*
-        * Piece together relevant data for JSON representation.
-        * This is only supported for choices type questions currently
-    */
+     * The following gathers data from QuestionHtmlGenerator and all AnswerBox
+     * generator(s) to form the "questionComponentsByQuestionPart" section in
+     * question API responses in Lumen One. (OHM 2)
+     */
 
-    if ($quesData['qtype'] == 'choices') {
-        $json = [];
-        $partsJson = [];
-
-        foreach ($answerBoxGenerators as $answerBoxGenerator) {
-            $partsJson[] = $answerBoxGenerator->getVariables();
+    $allAnswerBoxVariables = [];
+    foreach ($answerBoxGenerators as $answerBoxGenerator) {
+        if ($answerBoxGenerator instanceof AnswerBoxOhmExtensions) {
+            $allAnswerBoxVariables = array_merge($allAnswerBoxVariables, $answerBoxGenerator->getQuestionOptionVariables());
         }
-
-        $json['text'] = $evaledqtextwithoutanswerbox;
-        $json['type'] = $quesData['qtype'];
-        $json['feedback'] = $feedback;
-
-        // contains each part of the question
-        // (single element for non-multipart questions)
-        $json['parts'] = $partsJson;
-
-        $extraData['json'] = $json;
     }
+
+    $questionComponents = [];
+    $questionComponents['text'] = $evaledqtextwithoutanswerbox;
+    $questionComponents['type'] = $quesData['qtype'];
+    $questionComponents['feedback'] = $feedback;
+
+    // This contains data from all AnswerBox generators, indexed by part number.
+    // Single part questions will be indexed with "qn0".
+    // Multi-part questions will be indexed as such: "qn1000", "qn1001", etc.
+    $questionComponents['componentsByQnIdentifier'] = $allAnswerBoxVariables;
+
+    $extraData['lumenlearning']['question_components'] = $questionComponents;
 
     $question->setExtraData($extraData);
 };

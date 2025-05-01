@@ -96,8 +96,10 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             $jsParamsSorted = $question->getJsParams();
             ksort($jsParamsSorted, SORT_NATURAL);
 
-            // Get Question json, if exists
-            $json = isset($question->getExtraData()['json']) ? $question->getExtraData()['json'] : null;
+            // Get question components. (question code variables collected in AnswerBox generators)
+            // If AnswerBoxOhmExtensions is not implemented by the question type's AnswerBox generator,
+            // then null will be returned.
+            $questionComponents = $question->getExtraData()['lumenlearning']['question_components'] ?? null;
 
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
@@ -106,7 +108,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'questionType' => $questionType,
                 'seed' => $seed,
                 'html' => $question->getQuestionContent(),
-                'json' => $json,
+                'questionComponents' => $questionComponents,
                 'jsParams' => $jsParamsSorted,
                 'correctAnswers' => $correctAnswers,
                 'showAnswerText' => $question->getCorrectAnswersForParts(),

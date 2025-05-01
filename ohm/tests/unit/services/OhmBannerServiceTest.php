@@ -1,6 +1,6 @@
 <?php
 
-namespace OHM\Tests;
+namespace OHM\tests\unit\services;
 
 use DateTime;
 use OHM\Models\Banner;

@@ -380,7 +380,21 @@ class QuestionHtmlGenerator
         // $answerbox must not be renamed, it is expected in eval'd code.
         $answerbox = $previewloc = null;
         $entryTips = $displayedAnswersForParts = $jsParams = [];
-        $answerBoxGenerators = [];
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #
+        # Used in $onGetQuestion hook for OHM 2.
+        # See: ohm-hooks/assess2/questions/question_html_generator.php
+        #
+        $answerBoxGenerators = []; // All AnswerBox generators used for this question will be collected here.
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 
         if ($quesData['qtype'] == "multipart" || $quesData['qtype'] == 'conditional') {
             // $anstypes is question writer defined.
@@ -530,7 +544,21 @@ class QuestionHtmlGenerator
                 try {
                   $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
                   $answerBoxGenerator->generate();
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #
+                  # Used in $onGetQuestion hook for OHM 2.
+                  # See: ohm-hooks/assess2/questions/question_html_generator.php
+                  #
                   $answerBoxGenerators[$atIdx] = $answerBoxGenerator;
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
                 } catch (\Throwable $t) {
                   $this->addError(
                        _('Caught error while generating this question: ')
@@ -621,7 +649,21 @@ class QuestionHtmlGenerator
 
             $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
             $answerBoxGenerator->generate();
-            $answerBoxGenerators[0] = $answerBoxGenerator;
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #
+            # Used in $onGetQuestion hook for OHM 2.
+            # See: ohm-hooks/assess2/questions/question_html_generator.php
+            #
+            $answerBoxGenerators[0] = $answerBoxGenerator; // This is a single part question, so always use index 0.
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 
             $answerbox = $answerBoxGenerator->getAnswerBox();
             $entryTips[0] = $answerBoxGenerator->getEntryTip();
@@ -696,12 +738,41 @@ class QuestionHtmlGenerator
          * Question content (raw HTML) is stored in: $evaledqtext
          */
         $GLOBALS['qgenbreak1'] = __LINE__;
-        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'PLACEHOLDER_parts', $toevalqtxt);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #
+        # For Lumen One (OHM 2), this allows frontend to easily insert their own answer boxes.
+        #
 
+        // Only do this for multi-part questions.
+        $toevalqtxtwithoutanswerbox = ('multipart' == $quesData['qtype'])
+            ? preg_replace('/\$answerbox\[(\d+)\]/', 'ANSWERBOX_PLACEHOLDER_QN_100\1', $toevalqtxt)
+            : $toevalqtxt;
+
+        // Handle single part $answerbox placeholder substitution.
+        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
         try {
           $prep = \genVarInit($qtextvars);
           eval($prep . "\$evaledqtext = \"$toevalqtxt\";"); // This creates $evaledqtext.
+          #### Begin OHM-specific changes ############################################################
+          #### Begin OHM-specific changes ############################################################
+          #### Begin OHM-specific changes ############################################################
+          #### Begin OHM-specific changes ############################################################
+          #### Begin OHM-specific changes ############################################################
           eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";");
+          #### End OHM-specific changes ############################################################
+          #### End OHM-specific changes ############################################################
+          #### End OHM-specific changes ############################################################
+          #### End OHM-specific changes ############################################################
+          #### End OHM-specific changes ############################################################
 
         /*
          * Eval the solution code.
