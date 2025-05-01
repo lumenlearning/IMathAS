@@ -27,6 +27,7 @@ $onBeforeAnswerBoxGenerator = function () use (
  */
 if (!isset($feedback)) $feedback = null;
 $onGetQuestion = function () use (
+    // $this, // bound by default to any anonymous function in PHP, so long as the function is created within the class context
     &$question, // [Question] The question object to be returned by getQuestion().
     &$feedback, // [?array] The feedback for the question.
     &$quesData, // [?array] The question data from the generator

@@ -99,7 +99,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             // Get question components. (question code variables collected in AnswerBox generators)
             // If AnswerBoxOhmExtensions is not implemented by the question type's AnswerBox generator,
             // then null will be returned.
-            $questionComponents = $question->getExtraData()['lumenlearning']['question_components'] ?? null;
+            $questionComponents = $question->getExtraData()['lumenlearning']['question_components'] ?? [];
 
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
@@ -115,6 +115,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'uniqueid' => $uniqueId,
                 'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
+                'json' => $this->cleanQuestionComponents($questionComponents),
                 'errors' => $question->getErrors(),
             ];
 
@@ -394,5 +395,35 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             'question' => $assessStandalone->getQuestion(),
         ];
         return $returnData;
+    }
+
+    /*
+     * Intended to be used to clean the question json (array type)
+     * Current cleaning functions:
+     *  - strips <script></script> HTML tags from string values
+     */
+    private function cleanQuestionComponents(array $json) : array {
+        $strippedJson = [];
+        if (!isset($json)) return $strippedJson;
+
+        foreach ($json as $key => $value) {
+            $newValue = null;
+            if ($key == 'scripts') {
+                $newValue = $value; # preserve scripts value
+            } else if (is_array($value)) {
+                // nested array
+                $newValue = $this->cleanQuestionComponents($value);
+            } else if (is_string($value)) {
+                # Remove any embedded scripts for strings
+                list($newValue, $scripts) = AssessStandalone::parseScripts($value);
+            } else {
+                $newValue = $value;
+            }
+            // indexed array
+            if (is_int($key)) { $strippedJson[] = $newValue ; }
+            // associative array
+            else { $strippedJson[$key] = $newValue; }
+        }
+        return $strippedJson;
     }
 }
