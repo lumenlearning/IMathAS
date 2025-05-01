@@ -108,14 +108,13 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'questionType' => $questionType,
                 'seed' => $seed,
                 'html' => $question->getQuestionContent(),
-                'questionComponents' => $questionComponents,
                 'jsParams' => $jsParamsSorted,
                 'correctAnswers' => $correctAnswers,
                 'showAnswerText' => $question->getCorrectAnswersForParts(),
                 'uniqueid' => $uniqueId,
                 'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
-                'json' => $this->cleanQuestionComponents($questionComponents),
+                'questionComponents' => $this->cleanQuestionComponents($questionComponents),
                 'errors' => $question->getErrors(),
             ];
 

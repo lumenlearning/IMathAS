@@ -738,41 +738,9 @@ class QuestionHtmlGenerator
          * Question content (raw HTML) is stored in: $evaledqtext
          */
         $GLOBALS['qgenbreak1'] = __LINE__;
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #### Begin OHM-specific changes ############################################################
-        #
-        # For Lumen One (OHM 2), this allows frontend to easily insert their own answer boxes.
-        #
-
-        // Only do this for multi-part questions.
-        $toevalqtxtwithoutanswerbox = ('multipart' == $quesData['qtype'])
-            ? preg_replace('/\$answerbox\[(\d+)\]/', 'ANSWERBOX_PLACEHOLDER_QN_100\1', $toevalqtxt)
-            : $toevalqtxt;
-
-        // Handle single part $answerbox placeholder substitution.
-        $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
-        #### End OHM-specific changes ############################################################
         try {
           $prep = \genVarInit($qtextvars);
           eval($prep . "\$evaledqtext = \"$toevalqtxt\";"); // This creates $evaledqtext.
-          #### Begin OHM-specific changes ############################################################
-          #### Begin OHM-specific changes ############################################################
-          #### Begin OHM-specific changes ############################################################
-          #### Begin OHM-specific changes ############################################################
-          #### Begin OHM-specific changes ############################################################
-          eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";");
-          #### End OHM-specific changes ############################################################
-          #### End OHM-specific changes ############################################################
-          #### End OHM-specific changes ############################################################
-          #### End OHM-specific changes ############################################################
-          #### End OHM-specific changes ############################################################
 
         /*
          * Eval the solution code.
@@ -812,7 +780,12 @@ class QuestionHtmlGenerator
          *         - $evaledqtext .= "\n</div>\n";
         */
         try {
-            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxt);
+            // Replace $answerbox variables with placeholders.
+                $toevalqtxtwithoutanswerbox = ('multipart' == $quesData['qtype'])
+                    ? preg_replace('/\$answerbox\[(\d+)\]/', 'ANSWERBOX_PLACEHOLDER_QN_100\1', $toevalqtxt)
+                    : $toevalqtxt;
+                $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
+
             $prep = \genVarInit($qtextvars);
             eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
         } catch(\Throwable $t) {
