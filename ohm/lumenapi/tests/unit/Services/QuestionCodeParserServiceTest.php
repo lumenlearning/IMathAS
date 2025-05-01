@@ -54,7 +54,7 @@ class QuestionCodeParserServiceTest extends TestCase
 
         $this->assertEquals('loadlibrary', $functionCalls[0]['name']);
         $this->assertEquals('"stats"', $functionCalls[0]['arguments']);
-        $this->assertEquals('ohm_getbasicfeedback', $functionCalls(count($functionCalls) - 1)['name']);
+        $this->assertEquals('ohm_getbasicfeedback', $functionCalls[count($functionCalls) - 1]['name']);
         $this->assertEquals('$stuanswers[$thisq],"Perfect!","It might be best to convert each category into percentage first before selecting the correct pie chart. Note: Percent = part/whole.",$answer', $functionCalls(count($functionCalls) - 1)['arguments']);
     }
 
