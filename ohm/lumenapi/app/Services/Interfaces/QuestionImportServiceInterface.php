@@ -7,9 +7,9 @@ use App\Exceptions\RecordNotFoundException;
 interface QuestionImportServiceInterface
 {
     /**
-     * Create multiple questions from MGA question data.
+     * Create multiple questions from question data.
      *
-     * Example of MGA question data:
+     * Example of question data:
      *
      * [
      *     {
@@ -60,15 +60,15 @@ interface QuestionImportServiceInterface
      * ]
      *
      * @param string $questionImportMode One of: quiz, practice
-     * @param array $mgaQuestionArray An array of questions from an MGA file.
+     * @param array $questionArray An array of questions
      * @param int $ownerId The OHM user ID to use for the owner of all questions.
      * @return array An array of source question IDs mapped to created OHM question IDs.
      * @throws RecordNotFoundException Thrown if the specified User ID is not found.
-     * @see QuestionImportServiceTest constants for $mgaQuestionArray examples.
+     * @see QuestionImportServiceTest constants for $questionArray examples.
      */
     public function createMultipleQuestions(
         string $questionImportMode,
-        array  $mgaQuestionArray,
+        array  $questionArray,
         int    $ownerId
     ): array;
 }
