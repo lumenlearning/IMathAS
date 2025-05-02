@@ -14,6 +14,22 @@ require_once "../init.php";
 require_once "../includes/filehandler.php";
 
 
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+
+use OHM\Includes\LibImportMappingCsv;
+
+$GLOBALS['qid_mapping_csv'] = new LibImportMappingCsv();
+
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+
 /*** pre-html data manipulation, including function code *******/
 function printlist($parent) {
 	global $parents,$names;
@@ -35,6 +51,29 @@ function printlist($parent) {
 function parseqs($file,$touse,$rights) {
 	function writeq($qd,$rights,$qn) {
 		global $DBH,$userid,$isadmin,$updateq,$newq,$isgrpadmin, $importuserid, $importgroupid, $sourceinstall;
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+
+        try {
+            if (isset($qd['sourceqid']) && !$GLOBALS['qid_mapping_csv']->isOpen()) {
+                $GLOBALS['qid_mapping_csv']->open();
+            }
+        } catch (RuntimeException $e) {
+            // This is ugly (it will appear before the OHM header), but only Lumen employees will see this.
+            echo '<p>'
+                . 'ERROR: Unable to create QID mapping CSV file!<br/>'
+                . 'Reason: ' . $e->getMessage()
+                . '</p>';
+        }
+
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 		$now = time();
 		$toundel = array();
 		$stm = $DBH->prepare("SELECT id,adddate,lastmoddate,deleted FROM imas_questionset WHERE uniqueid=:uniqueid");
@@ -65,6 +104,22 @@ function parseqs($file,$touse,$rights) {
 					':adddate'=>$now, ':lastmoddate'=>$now, ':hasimg'=>$hasimg, ':id'=>$qsetid);
 				$stm = $DBH->prepare($query);
 				$stm->execute($qarr);
+
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+
+                if ($GLOBALS['qid_mapping_csv']->isOpen()) {
+                    $GLOBALS['qid_mapping_csv']->addQidMappingRowToCsv($qd['control'], $qd['sourceqid'], $qsetid, $qd['qtype']);
+                }
+
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
 
 				if ($stm->rowCount()>0) {
 					$updateq++;
@@ -100,6 +155,22 @@ function parseqs($file,$touse,$rights) {
 			}
 			return $qsetid;
 		} else if ($exists) {
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+
+            if ($GLOBALS['qid_mapping_csv']->isOpen()) {
+                $GLOBALS['qid_mapping_csv']->addQidMappingRowToCsv($qd['control'], $qd['sourceqid'], $qsetid, $qd['qtype']);
+            }
+
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+
 			return $qsetid;
 		} else {
 			$importuid = '';
@@ -132,6 +203,23 @@ function parseqs($file,$touse,$rights) {
 				':license'=>$qd['license'], ':ancestorauthors'=>$qd['ancestorauthors'], ':otherattribution'=>$qd['otherattribution'], ':hasimg'=>$hasimg, ':importuid'=>$importuid));
 			$newq++;
 			$qsetid = $DBH->lastInsertId();
+
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+
+            if ($GLOBALS['qid_mapping_csv']->isOpen()) {
+                $GLOBALS['qid_mapping_csv']->addQidMappingRowToCsv($qd['control'], $qd['sourceqid'], $qsetid, $qd['qtype']);
+            }
+
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+
 			if (!empty($qd['qimgs'])) {
 				$qimgs = explode("\n",$qd['qimgs']);
 				foreach($qimgs as $qimg) {
@@ -200,6 +288,20 @@ function parseqs($file,$touse,$rights) {
 		} else if ($line == "QID") {
 			$part = 'qid';
 			continue;
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+        } else if ($line == "SOURCEQID") {
+            // This is the original imas_questionset.id value from the source OHM DB, before it was exported.
+            $part = 'sourceqid';
+            continue;
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 		} else if ($line == "UQID") {
 			$part = 'uqid';
 			continue;
@@ -328,7 +430,7 @@ function parselibs($file) {
 			$libitemid = rtrim(fgets($handle, 4096));
 		} else if ($line=="QSETIDS") {
 			if ($libitemid!=-1) {
-				$libitems[$libitemid] = rtrim(fgets($handle, 4096));
+				$libitems[$libitemid] = rtrim(fgets($handle, 32768));
 			}
 		} else if ($dopackd ==true) {
 			$packname .= rtrim($line);
@@ -471,6 +573,23 @@ if ($myrights < 100) {
 
 		//write questions, get qsetids
 		$qids = parseqs($uploadfile,$touse,$qrights);
+
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+
+        if ($GLOBALS['qid_mapping_csv']->isOpen()) {
+            $GLOBALS['qid_mapping_csv']->close();
+        }
+
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+
 		if (count($qids)>0) {
 			//resolve any includecodefrom links
 			$qidstocheck = implode(',', array_map('intval', $qids));
@@ -563,6 +682,25 @@ if ($myrights < 100) {
 		$page_uploadSuccessMsg .= "Updated Libraries: $updatel.<br>";
 		$page_uploadSuccessMsg .= "Updated Questions: $updateq.<br>";
 		$page_uploadSuccessMsg .= "New Library items: $newli.<br>";
+
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+
+        $csvFileExists = file_exists($GLOBALS['qid_mapping_csv']->getFilesystemPath());
+        if ($csvFileExists) {
+            $page_uploadSuccessMsg .= sprintf('<p><a href="%s">Download QID mapping CSV file</a></p>',
+                $GLOBALS['qid_mapping_csv']->getDownloadUrl());
+        }
+
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+
 			$page_uploadSuccessMsg .=  "<a href=\"" . $GLOBALS['basesiteurl'] . "/admin/admin2.php\">Return to Admin page</a>";
 
 	} elseif (!empty($_FILES['userfile']['name'])) { // STEP 2 DATA MANIPULATION

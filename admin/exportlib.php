@@ -13,6 +13,17 @@ ini_set("max_execution_time", "900");
 require_once "../init.php";
 require_once "../includes/filehandler.php";
 
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+use OHM\Includes\Ohm2MacroBackport;
+#### End OHM-specific changes ##############################################################
+#### End OHM-specific changes ##############################################################
+#### End OHM-specific changes ##############################################################
+#### End OHM-specific changes ##############################################################
+#### End OHM-specific changes ##############################################################
 
 /*** pre-html data manipulation, including function code *******/
 
@@ -77,6 +88,18 @@ if (!(isset($teacherid)) && $myrights<20) {
 		$names = Array();
 		$nonpriv = isset($_POST['nonpriv']);
 		$noncopyright = isset($_POST['noncopyright']);
+
+		#### Begin OHM-specific changes ############################################################
+		#### Begin OHM-specific changes ############################################################
+		#### Begin OHM-specific changes ############################################################
+		#### Begin OHM-specific changes ############################################################
+		#### Begin OHM-specific changes ############################################################
+		$backportFeedback = isset($_POST['backportFeedback']);
+		#### End OHM-specific changes ##############################################################
+		#### End OHM-specific changes ##############################################################
+		#### End OHM-specific changes ##############################################################
+		#### End OHM-specific changes ##############################################################
+		#### End OHM-specific changes ##############################################################
 		//$libs is systemid=>newid
 		//$parents is childnewid=>parentnewid
 
@@ -95,7 +118,23 @@ if (!(isset($teacherid)) && $myrights<20) {
 				echo "ID\n";
 				echo Sanitize::forRawExport(rtrim($libcnt)) . "\n";
 				echo "UID\n";
-				echo Sanitize::forRawExport(Sanitize::forRawExport(rtrim($row[3]))) . "\n";
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				if ($backportFeedback) {
+					$mt = microtime();
+					$uqid = substr($mt,11).substr($mt,2,6);
+					echo Sanitize::forRawExport(rtrim($uqid)) . "\n";
+				} else {
+					echo Sanitize::forRawExport(Sanitize::forRawExport(rtrim($row[3]))) . "\n";
+				}
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
 				echo "LASTMODDATE\n";
 				echo Sanitize::forRawExport(rtrim($row[4])) . "\n";
 				echo "OWNERID\n";
@@ -130,7 +169,23 @@ if (!(isset($teacherid)) && $myrights<20) {
 						echo "ID\n";
 						echo Sanitize::forRawExport(rtrim($libcnt)) . "\n";
 						echo "UID\n";
-						echo Sanitize::forRawExport(rtrim($row[2])) . "\n";
+						#### Begin OHM-specific changes ############################################################
+						#### Begin OHM-specific changes ############################################################
+						#### Begin OHM-specific changes ############################################################
+						#### Begin OHM-specific changes ############################################################
+						#### Begin OHM-specific changes ############################################################
+						if ($backportFeedback) {
+							$mt = microtime();
+							$uqid = substr($mt,11).substr($mt,2,6);
+							echo Sanitize::forRawExport(rtrim($uqid)) . "\n";
+						} else {
+							echo Sanitize::forRawExport(rtrim($row[2])) . "\n";
+						}
+						#### End OHM-specific changes ##############################################################
+						#### End OHM-specific changes ##############################################################
+						#### End OHM-specific changes ##############################################################
+						#### End OHM-specific changes ##############################################################
+						#### End OHM-specific changes ##############################################################
 						echo "LASTMODDATE\n";
 						echo Sanitize::forRawExport(rtrim($row[3])) . "\n";
 						echo "OWNERID\n";
@@ -237,8 +292,26 @@ if (!(isset($teacherid)) && $myrights<20) {
 				echo "\nSTART QUESTION\n";
 				echo "QID\n";
 				echo Sanitize::forRawExport(rtrim($qassoc[$line['id']])) . "\n";
+                echo "\nSOURCEQID\n";
+                echo Sanitize::forRawExport(rtrim($line['id'])) . "\n";
 				echo "\nUQID\n";
-				echo Sanitize::forRawExport(rtrim($line['uniqueid'])) . "\n";
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				if ($backportFeedback) {
+					$mt = microtime();
+					$uqid = substr($mt,11).substr($mt,2,6);
+					echo Sanitize::forRawExport(rtrim($uqid)) . "\n";	
+				} else {
+					echo Sanitize::forRawExport(rtrim($line['uniqueid'])) . "\n";
+				}
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
 				echo "\nLASTMOD\n";
 				echo Sanitize::forRawExport(rtrim($line['lastmoddate'])) . "\n";
 				echo "\nDESCRIPTION\n";
@@ -250,13 +323,41 @@ if (!(isset($teacherid)) && $myrights<20) {
 				echo "\nUSERIGHTS\n";
 				echo Sanitize::forRawExport(rtrim($line['userights'])) . "\n";
 				echo "\nCONTROL\n";
-				echo Sanitize::forRawExport(rtrim($line['control'])) . "\n";
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				if ($backportFeedback && Ohm2MacroBackport::containsOhm2Macro($line['control'])) {
+					echo Ohm2MacroBackport::backportFeedbackControl(Sanitize::forRawExport(rtrim($line['control']))) . "\n";	
+				} else {
+					echo Sanitize::forRawExport(rtrim($line['control'])) . "\n";
+				}
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
 				echo "\nQCONTROL\n";
 				echo Sanitize::forRawExport(rtrim($line['qcontrol'])) . "\n";
 				echo "\nQTYPE\n";
 				echo Sanitize::forRawExport(rtrim($line['qtype'])) . "\n";
 				echo "\nQTEXT\n";
-				echo Sanitize::forRawExport(rtrim($line['qtext'])) . "\n";
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				#### Begin OHM-specific changes ############################################################
+				if ($backportFeedback && Ohm2MacroBackport::containsOhm2Macro($line['control'])) {
+					echo Ohm2MacroBackport::backportFeedbackQuestionText(Sanitize::forRawExport(rtrim($line['qtext']))) . "\n";	
+				} else {
+					echo Sanitize::forRawExport(rtrim($line['qtext'])) . "\n";
+				}
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
+				#### End OHM-specific changes ##############################################################
 				echo "\nANSWER\n";
 				echo Sanitize::forRawExport(rtrim($line['answer'])) . "\n";
 				echo "\nSOLUTION\n";
@@ -321,6 +422,27 @@ if ($overwriteBody==1) {
 		<span class="formright">
 			<input type="checkbox" name="noncopyright" checked="checked" />
 		</span><br class="form" />
+		<?php
+			#### Begin OHM-specific changes ############################################################
+			#### Begin OHM-specific changes ############################################################
+			#### Begin OHM-specific changes ############################################################
+			#### Begin OHM-specific changes ############################################################
+			#### Begin OHM-specific changes ############################################################
+			$backportFeedbackForm = <<<END
+					<span class="form">Backport feedback macros to Ohm1?</span> 
+					<span class="formright"> 
+						<input type="checkbox" name="backportFeedback" /> 
+					</span><br class="form" />"
+					END;
+			if ($isadmin) {
+				echo $backportFeedbackForm;
+			}
+			#### End OHM-specific changes ##############################################################
+			#### End OHM-specific changes ##############################################################
+			#### End OHM-specific changes ##############################################################
+			#### End OHM-specific changes ##############################################################
+			#### End OHM-specific changes ##############################################################
+		?>
 		<span class=form>Package Description</span>
 		<span class=formright>
 			<textarea name="packdescription" rows=4 cols=60></textarea>
