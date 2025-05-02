@@ -64,6 +64,7 @@ $app->singleton(
 
 $app->configure('app');
 $app->configure('ohm'); // For OHM-specific config.
+$app->configure('lumenapi'); // For lumenapi-specific config.
 
 /*
 |--------------------------------------------------------------------------
