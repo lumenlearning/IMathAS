@@ -781,9 +781,14 @@ class QuestionHtmlGenerator
         */
         try {
             // Replace $answerbox variables with placeholders in multi-part questions.
-            $toevalqtxtwithoutanswerbox = ('multipart' == $quesData['qtype'])
-                ? preg_replace('/\$answerbox\[(\d+)\]/', 'ANSWERBOX_PLACEHOLDER_QN_100\1', $toevalqtxt)
-                : $toevalqtxt;
+            if ('multipart' == $quesData['qtype']) {
+                $toevalqtxtwithoutanswerbox = preg_replace_callback('/\$answerbox\[(\d+)\]/', function ($matches): string {
+                    $qn = 1000 + $matches[1];
+                    return 'ANSWERBOX_PLACEHOLDER_QN_' . $qn;
+                }, $toevalqtxt);
+            } else {
+                $toevalqtxtwithoutanswerbox = $toevalqtxt;
+            }
             // Replace $answerbox variables with placeholders in single part questions.
             $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
 
