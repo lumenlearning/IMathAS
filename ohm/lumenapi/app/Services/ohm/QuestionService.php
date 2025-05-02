@@ -412,12 +412,16 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         $lumenlearningData = $extraData['lumenlearning'] ?? [];
         $questionComponents = $lumenlearningData['questionComponents'] ?? [];
 
+        $questionTypeAndSettingsValidations = $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $questionComponents['componentsByQnIdentifier'] ?? []);
+        $questionSetRowValidations = $this->validateQuestionSetRow($questionSetRow);
+        $questionTextValidations = $this->validateQuestionText($questionComponents['text'] ?? '');
+        $questionCodeValidations = $this->validateQuestionCode($questionSetRow['control'] ?? '');
+
         return array_unique(array_merge(
-            // TODO LO-1234: confirm that the key 'components' is still correct
-            $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $questionComponents['components'] ?? [[]]),
-            $this->validateQuestionSetRow($questionSetRow),
-            $this->validateQuestionText($questionComponents['text'] ?? ''),
-            $this->validateQuestionCode($questionSetRow['control'] ?? '')
+            $questionTypeAndSettingsValidations,
+            $questionSetRowValidations,
+            $questionTextValidations,
+            $questionCodeValidations
         ));
     }
 
@@ -484,7 +488,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      * Validate against question type data to determine editability
      *
      * @param string $qtype Question type
-     * @param array<array> $questionSettings array of question settings from the evaluated question control
+     * @param array<array> $questionSettings associative array of question settings from the evaluated question control
      *
      * @return array Validation messages explaining why a question cannot be edited.
      */
@@ -498,7 +502,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             // validations specific to a question type & its settings
             switch ($qtype) {
                 case 'choices':
-                    $displayformat = $questionSettings[0]['displayformat'] ?? '';
+                    $displayformat = $questionSettings['qn0']['displayformat'] ?? '';
                     if (
                         $displayformat == 'select' &&
                         !in_array('dropdown', $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'])

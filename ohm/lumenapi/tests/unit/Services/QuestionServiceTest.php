@@ -305,9 +305,11 @@ class QuestionServiceTest extends TestCase
             'lumenlearning' => [
                 'questionComponents' => [
                     'text' => '<p>What is the answer?</p>ANSWERBOX_PLACEHOLDER',
-                    'components' => [[
-                        'displayformat' => 'select'
-                    ]]
+                    'componentsByQnIdentifier' => [
+                        'qn0' => [
+                            'displayformat' => 'select'
+                        ]
+                    ]
                 ]
             ]
         ]);
@@ -402,7 +404,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
-        $questionSettings = [[]];
+        $questionSettings = [];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -417,7 +419,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = [];
 
         $qtype = 'choices';
-        $questionSettings = [[]];
+        $questionSettings = [];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -434,7 +436,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
-        $questionSettings = [['displayformat' => 'select']];
+        $questionSettings = ['qn0' => ['displayformat' => 'select']];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -451,7 +453,7 @@ class QuestionServiceTest extends TestCase
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices', 'dropdown'];
 
         $qtype = 'choices';
-        $questionSettings = [['displayformat' => 'select']];
+        $questionSettings = ['qn0' => ['displayformat' => 'select']];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
