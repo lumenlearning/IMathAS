@@ -409,17 +409,34 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      */
     private function validateIsEditable($question, $questionSetRow): array {
         $extraData = $question->getExtraData();
-        $questionComponents = $extraData['lumenlearning']['questionComponents'] ?? [];
+        $lumenlearningData = $extraData['lumenlearning'] ?? [];
+        $questionComponents = $lumenlearningData['questionComponents'] ?? [];
 
-        // TODO LO-1234: confirm that the key 'components' is still correct
-        $qsettings = $questionComponents['components'] ?? [[]];
-        $qtext = $questionComponents['text'] ?? '';
+        $questionTypeAndSettingsValidations = $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $questionComponents['componentsByQnIdentifier'] ?? []);
+        $questionSetRowValidations = $this->validateQuestionSetRow($questionSetRow);
+        $questionTextValidations = $this->validateQuestionText($questionComponents['text'] ?? '');
+        $questionCodeValidations = $this->validateQuestionCode($questionSetRow['control'] ?? '');
 
-        return array_merge(
-            $this->validateQuestionTypeAndSettings($questionSetRow['qtype'], $qsettings),
-            $this->validateQuestionSetRow($questionSetRow),
-            $this->validateQuestionText($qtext)
-        );
+        return array_unique(array_merge(
+            $questionTypeAndSettingsValidations,
+            $questionSetRowValidations,
+            $questionTextValidations,
+            $questionCodeValidations
+        ));
+    }
+
+    private function validateQuestionCode($code): array {
+        $validationErrors = [];
+        $questionCodeParser = new QuestionCodeParserService($code);
+
+        $functionCalls = $questionCodeParser->detectFunctionCalls();
+        foreach ($functionCalls as $functionCall) {
+            if (str_contains($functionCall['name'], 'includecodefrom')) {
+                $validationErrors[] = 'Cannot edit a question that uses the `includecodefrom` function';
+            }
+        }
+
+        return $validationErrors;
     }
 
 
@@ -471,7 +488,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      * Validate against question type data to determine editability
      *
      * @param string $qtype Question type
-     * @param array<array> $questionSettings array of question settings from the evaluated question control
+     * @param array<array> $questionSettings associative array of question settings from the evaluated question control
      *
      * @return array Validation messages explaining why a question cannot be edited.
      */
@@ -485,7 +502,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
             // validations specific to a question type & its settings
             switch ($qtype) {
                 case 'choices':
-                    $displayformat = $questionSettings[0]['displayformat'] ?? '';
+                    $displayformat = $questionSettings['qn0']['displayformat'] ?? '';
                     if (
                         $displayformat == 'select' &&
                         !in_array('dropdown', $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'])
