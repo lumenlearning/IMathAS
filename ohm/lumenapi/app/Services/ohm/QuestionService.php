@@ -431,8 +431,22 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
         $functionCalls = $questionCodeParser->detectFunctionCalls();
         foreach ($functionCalls as $functionCall) {
-            if (str_contains($functionCall['name'], 'includecodefrom')) {
+            $name = $functionCall['name'];
+
+            if (str_contains($name, 'includecodefrom')) {
                 $validationErrors[] = 'Cannot edit a question that uses the `includecodefrom` function';
+            } else if (str_contains($name, 'loadlibrary')) {
+                // split the arguments by comma and strip out any quotes wrapping the values
+                $args = array_map(function($arg) {
+                    return trim(trim($arg), '\'"');
+                }, explode(",", $functionCall['arguments']));
+
+                $distinctArgs = array_unique($args);
+                $distinctArgCount = count($distinctArgs);
+
+                if ($distinctArgCount > 0 && ($distinctArgCount > 1 || !in_array('ohm_macros', $distinctArgs))) {
+                    $validationErrors[] = "Cannot edit a question that uses `loadlibrary` for a library other than \"ohm_macros\". Detected code: `$name($args)`";
+                }
             }
         }
 
