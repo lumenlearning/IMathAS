@@ -477,8 +477,14 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     private function validateQuestionSetRow($questionSetRow): array {
         $validationErrors = [];
 
-        if (1 == $questionSetRow['isrand']) {
+        $isrand = $questionSetRow['isrand'] ?? 0;
+        $hasimg = $questionSetRow['hasimg'] ?? 0;
+
+        if (1 == $isrand) {
             $validationErrors[] = "Cannot edit an algorithmic question";
+        }
+        if (1 == $hasimg) {
+            $validationErrors[] = "Cannot edit a question with images";
         }
 
         return $validationErrors;
