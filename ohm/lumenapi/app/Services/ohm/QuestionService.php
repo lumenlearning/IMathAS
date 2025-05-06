@@ -100,7 +100,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
             $hasExtraData = $question->getExtraData() !== null && is_array($question->getExtraData());
             $lumenlearningData = $hasExtraData && $question->getExtraData()['lumenlearning'] != null ? $question->getExtraData()['lumenlearning'] : [];
-            $json = $lumenlearningData['questionComponents'] ?? [];
+            $questionComponents = $lumenlearningData['questionComponents'] ?? [];
 
             // Build the question answer(s) and/or error(s) array.
             $answerData = [
@@ -115,7 +115,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 'uniqueid' => $uniqueId,
                 'isAlgorithmic' => $isAlgorithmic,
                 'feedback' => null,
-                'json' => $this->cleanQuestionJson($json),
+                'questionComponents' => $this->cleanQuestionComponents($questionComponents),
                 'errors' => $question->getErrors(),
                 'editableValidations' => $editableValidations,
                 'isEditable' => count($editableValidations) == 0
@@ -560,7 +560,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
      * Current cleaning functions:
      *  - strips <script></script> HTML tags from string values
      */
-    private function cleanQuestionJson(array $json) : array {
+    private function cleanQuestionComponents(array $json) : array {
         $strippedJson = [];
         if (!isset($json)) return $strippedJson;
 
@@ -570,7 +570,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
                 $newValue = $value; # preserve scripts value
             } else if (is_array($value)) {
                 // nested array
-                $newValue = $this->cleanQuestionJson($value);
+                $newValue = $this->cleanQuestionComponents($value);
             } else if (is_string($value)) {
                 # Remove any embedded scripts for strings
                 list($newValue, $scripts) = AssessStandalone::parseScripts($value);
