@@ -620,7 +620,7 @@ class QuestionServiceTest extends TestCase
         $validateQuestionCode = $class->getMethod('validateQuestionCode');
 
         $code = <<<EOD
-        loadlibrary('ohm_marcos')
+        loadlibrary('ohm_macros')
         loadlibrary("ohm_macros", "stats")
         \$questions = array("Formulate an investigative question, or questions", 
                            "Design a study and determine the population",
