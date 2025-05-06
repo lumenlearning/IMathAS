@@ -231,7 +231,7 @@ class QuestionServiceTest extends TestCase
         $this->assertFalse($questionsWithAnswers[0]['isAlgorithmic']);
         $this->assertFalse($questionsWithAnswers[0]['isEditable']);
         $this->assertNotEmpty($questionsWithAnswers[0]['editableValidations']);
-        $this->assertNotEmpty($questionsWithAnswers[0]['json']);
+        $this->assertNotEmpty($questionsWithAnswers[0]['questionComponents']);
         $this->assertNotEmpty($questionsWithAnswers[0]['html']);
         $this->assertEquals([
             300,
@@ -266,6 +266,88 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals('A,B,C,D,E,F',
             $questionsWithAnswers[0]['answerDataByQnIdentifier']['qn1007']['correctAnswer']);
 
+        // Question components
+        $firstQuestionVars = $questionsWithAnswers[0]['questionComponents'];
+        $this->assertEquals('multipart', $firstQuestionVars['type']);
+        $this->assertEquals('<p>What is the distance between the numbers -200 and 100?</p>
+ANSWERBOX_PLACEHOLDER_QN_1000<br/><br/>
+
+<p>What is 10 * 10?</p>
+ANSWERBOX_PLACEHOLDER_QN_1001<br/><br/>
+<p>How are you feeling today?</p>
+ANSWERBOX_PLACEHOLDER_QN_1002<br/><br/>
+<p>What is the correct order of these steps?</p>
+ANSWERBOX_PLACEHOLDER_QN_1003<br/><br/>
+<p>Select the questions with valid statistics.</p>
+ANSWERBOX_PLACEHOLDER_QN_1004<br/><br/>
+<p>What is 10 / 10?</p>
+ANSWERBOX_PLACEHOLDER_QN_1005<br/><br/>
+<p>If `10x = 90`, solve for `x`.</p>
+ANSWERBOX_PLACEHOLDER_QN_1006<br/><br/>
+<p>List all the letters from A to F as a comma-separated list.</p>
+ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
+        // Question components - Part 1, calculated
+        $firstQuestionVarsByQn1000 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1000'];
+        $this->assertEquals('calculated', $firstQuestionVarsByQn1000['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1000', $firstQuestionVarsByQn1000['answerboxPlaceholder']);
+        $this->assertEquals(300, $firstQuestionVarsByQn1000['answer']);
+        // Question components - Part 2, choices
+        $firstQuestionVarsByQn1001 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1001'];
+        $this->assertEquals('choices', $firstQuestionVarsByQn1001['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1001', $firstQuestionVarsByQn1001['answerboxPlaceholder']);
+        $this->assertEquals(0, $firstQuestionVarsByQn1001['answer']);
+        $this->assertEquals([
+            '100',
+            'Infinity',
+            '0',
+            'I was told there would be no math',
+        ], $firstQuestionVarsByQn1001['choices']);
+        $this->assertEquals([0, 1, 2, 3], $firstQuestionVarsByQn1001['shuffledChoicesIndex']);
+        $this->assertEquals('all', $firstQuestionVarsByQn1001['noshuffle']);
+        // Question components - Part 3, essay
+        $firstQuestionVarsByQn1002 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1002'];
+        $this->assertEquals('essay', $firstQuestionVarsByQn1002['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1002', $firstQuestionVarsByQn1002['answerboxPlaceholder']);
+        $this->assertEquals('', $firstQuestionVarsByQn1002['answer']);
+        // Question components - Part 4, matching
+        $firstQuestionVarsByQn1003 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1003'];
+        $this->assertEquals('matching', $firstQuestionVarsByQn1003['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1003', $firstQuestionVarsByQn1003['answerboxPlaceholder']);
+        $this->assertEquals([0,1,2], $firstQuestionVarsByQn1003['shuffledAnswerChoicesIndex']);
+        $this->assertEquals([0,1,2], $firstQuestionVarsByQn1003['shuffledQuestionChoicesIndex']);
+        $this->assertEquals('all', $firstQuestionVarsByQn1003['noshuffle']);
+        // Question components - Part 5, multans
+        $firstQuestionVarsByQn1004 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1004'];
+        $this->assertEquals('multans', $firstQuestionVarsByQn1004['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1004', $firstQuestionVarsByQn1004['answerboxPlaceholder']);
+        $this->assertEquals('0,2,4,5', $firstQuestionVarsByQn1004['answers']);
+        $this->assertEquals([0,1,2,3,4,5], $firstQuestionVarsByQn1004['shuffledChoicesIndex']);
+        $this->assertEquals([
+            "60% of product folks are under-caffeinated",
+            "Statistics is silly",
+            "10% of people do not like candy",
+            "I was told there would be no math",
+            "95% of campers are happy",
+            "4 out of 5 sloths say disco is their favorite music genre",
+        ], $firstQuestionVarsByQn1004['choices']);
+        $this->assertEquals('all', $firstQuestionVarsByQn1004['noshuffle']);
+        // Question components - Part 6, number
+        $firstQuestionVarsByQn1005 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1005'];
+        $this->assertEquals('number', $firstQuestionVarsByQn1005['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1005', $firstQuestionVarsByQn1005['answerboxPlaceholder']);
+        $this->assertEquals('1', $firstQuestionVarsByQn1005['answer']);
+        // Question components - Part 7, numfunc
+        $firstQuestionVarsByQn1006 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1006'];
+        $this->assertEquals('numfunc', $firstQuestionVarsByQn1006['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1006', $firstQuestionVarsByQn1006['answerboxPlaceholder']);
+        $this->assertEquals('9', $firstQuestionVarsByQn1006['answer']);
+        $this->assertEquals(['x'], $firstQuestionVarsByQn1006['variables']);
+        // Question components - Part 8, string
+        $firstQuestionVarsByQn1007 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1007'];
+        $this->assertEquals('string', $firstQuestionVarsByQn1007['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVarsByQn1007['answerboxPlaceholder']);
+        $this->assertEquals('A,B,C,D,E,F', $firstQuestionVarsByQn1007['answer']);
+
         /*
          * Assertions -- second question (single part)
          */
@@ -275,13 +357,22 @@ class QuestionServiceTest extends TestCase
         $this->assertFalse($questionsWithAnswers[1]['isAlgorithmic']);
         $this->assertFalse($questionsWithAnswers[1]['isEditable']);
         $this->assertNotEmpty($questionsWithAnswers[1]['editableValidations']);
-        $this->assertNotEmpty($questionsWithAnswers[1]['json']);
+        $this->assertNotEmpty($questionsWithAnswers[1]['questionComponents']);
         $this->assertNotEmpty($questionsWithAnswers[1]['html']);
 
         // Answers by qn identifier.
         $this->assertEquals([11], $questionsWithAnswers[1]['correctAnswers']);
         $this->assertEquals([11],
             $questionsWithAnswers[1]['answerDataByQnIdentifier']['qn0']['correctAnswer']);
+
+        // Question components
+        $secondQuestionVars = $questionsWithAnswers[1]['questionComponents'];
+        $this->assertEquals('number', $secondQuestionVars['type']);
+        $this->assertEquals('<p>What is 1 + 1? ANSWERBOX_PLACEHOLDER</p>', $secondQuestionVars['text']);
+        $secondQuestionVarsByQn0 = $questionsWithAnswers[1]['questionComponents']['componentsByQnIdentifier']['qn0'];
+        $this->assertEquals('number', $secondQuestionVarsByQn0['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER', $secondQuestionVarsByQn0['answerboxPlaceholder']);
+        $this->assertEquals(11, $secondQuestionVarsByQn0['answer']);
     }
 
     /*
@@ -513,10 +604,11 @@ class QuestionServiceTest extends TestCase
     /*
      * cleanQuestionJson
      */
-    public function testCleanQuestionJson_retainsGoodData() {
+
+    public function testCleanQuestionComponents_retainsGoodData() {
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
-        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+        $cleanQuestionJson = $class->getMethod('cleanQuestionComponents');
 
         $inputjson = [
             # Key/Value pair
@@ -539,10 +631,10 @@ class QuestionServiceTest extends TestCase
         $this->assertEquals($inputjson, $outputjson);
     }
 
-    public function testCleanQuestionJson_cleansScriptTags() {
+    public function testCleanQuestionComponents_cleansScriptTags() {
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
-        $cleanQuestionJson = $class->getMethod('cleanQuestionJson');
+        $cleanQuestionJson = $class->getMethod('cleanQuestionComponents');
 
         $expectedtextvalue = 'abc123';
         $inputjson = [
