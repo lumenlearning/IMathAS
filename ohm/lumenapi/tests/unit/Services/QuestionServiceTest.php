@@ -368,10 +368,10 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         // Question components
         $secondQuestionVars = $questionsWithAnswers[1]['questionComponents'];
         $this->assertEquals('number', $secondQuestionVars['type']);
-        $this->assertEquals('ANSWERBOX_PLACEHOLDER', $secondQuestionVars['answerboxPlaceholder']);
         $this->assertEquals('<p>What is 1 + 1? ANSWERBOX_PLACEHOLDER</p>', $secondQuestionVars['text']);
         $secondQuestionVarsByQn0 = $questionsWithAnswers[1]['questionComponents']['componentsByQnIdentifier']['qn0'];
         $this->assertEquals('number', $secondQuestionVarsByQn0['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER', $secondQuestionVarsByQn0['answerboxPlaceholder']);
         $this->assertEquals(11, $secondQuestionVarsByQn0['answer']);
     }
 
