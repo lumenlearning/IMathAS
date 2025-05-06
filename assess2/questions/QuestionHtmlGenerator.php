@@ -380,6 +380,21 @@ class QuestionHtmlGenerator
         // $answerbox must not be renamed, it is expected in eval'd code.
         $answerbox = $previewloc = null;
         $entryTips = $displayedAnswersForParts = $jsParams = [];
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #
+        # Used in $onGetQuestion hook for OHM 2.
+        # See: ohm-hooks/assess2/questions/question_html_generator.php
+        #
+        $answerBoxGenerators = []; // All AnswerBox generators used for this question will be collected here.
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 
         if ($quesData['qtype'] == "multipart" || $quesData['qtype'] == 'conditional') {
             // $anstypes is question writer defined.
@@ -529,6 +544,21 @@ class QuestionHtmlGenerator
                 try {
                   $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
                   $answerBoxGenerator->generate();
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #
+                  # Used in $onGetQuestion hook for OHM 2.
+                  # See: ohm-hooks/assess2/questions/question_html_generator.php
+                  #
+                  $answerBoxGenerators[$atIdx] = $answerBoxGenerator;
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
                 } catch (\Throwable $t) {
                   $this->addError(
                        _('Caught error while generating this question: ')
@@ -619,6 +649,21 @@ class QuestionHtmlGenerator
 
             $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
             $answerBoxGenerator->generate();
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #
+            # Used in $onGetQuestion hook for OHM 2.
+            # See: ohm-hooks/assess2/questions/question_html_generator.php
+            #
+            $answerBoxGenerators[0] = $answerBoxGenerator; // This is a single part question, so always use index 0.
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 
             $answerbox = $answerBoxGenerator->getAnswerBox();
             $entryTips[0] = $answerBoxGenerator->getEntryTip();
@@ -735,7 +780,18 @@ class QuestionHtmlGenerator
          *         - $evaledqtext .= "\n</div>\n";
         */
         try {
-            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxt);
+            // Replace $answerbox variables with placeholders in multi-part questions.
+            if ('multipart' == $quesData['qtype']) {
+                $toevalqtxtwithoutanswerbox = preg_replace_callback('/\$answerbox\[(\d+)\]/', function ($matches): string {
+                    $qn = 1000 + $matches[1];
+                    return 'ANSWERBOX_PLACEHOLDER_QN_' . $qn;
+                }, $toevalqtxt);
+            } else {
+                $toevalqtxtwithoutanswerbox = $toevalqtxt;
+            }
+            // Replace $answerbox variables with placeholders in single part questions.
+            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
+
             $prep = \genVarInit($qtextvars);
             eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
         } catch(\Throwable $t) {
