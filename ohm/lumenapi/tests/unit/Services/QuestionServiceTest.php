@@ -289,10 +289,12 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         // Question components - Part 1, calculated
         $firstQuestionVarsByQn1000 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1000'];
         $this->assertEquals('calculated', $firstQuestionVarsByQn1000['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1000', $firstQuestionVarsByQn1000['answerboxPlaceholder']);
         $this->assertEquals(300, $firstQuestionVarsByQn1000['answer']);
         // Question components - Part 2, choices
         $firstQuestionVarsByQn1001 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1001'];
         $this->assertEquals('choices', $firstQuestionVarsByQn1001['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1001', $firstQuestionVarsByQn1001['answerboxPlaceholder']);
         $this->assertEquals(0, $firstQuestionVarsByQn1001['answer']);
         $this->assertEquals([
             '100',
@@ -305,16 +307,19 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         // Question components - Part 3, essay
         $firstQuestionVarsByQn1002 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1002'];
         $this->assertEquals('essay', $firstQuestionVarsByQn1002['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1002', $firstQuestionVarsByQn1002['answerboxPlaceholder']);
         $this->assertEquals('', $firstQuestionVarsByQn1002['answer']);
         // Question components - Part 4, matching
         $firstQuestionVarsByQn1003 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1003'];
         $this->assertEquals('matching', $firstQuestionVarsByQn1003['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1003', $firstQuestionVarsByQn1003['answerboxPlaceholder']);
         $this->assertEquals([0,1,2], $firstQuestionVarsByQn1003['shuffledAnswerChoicesIndex']);
         $this->assertEquals([0,1,2], $firstQuestionVarsByQn1003['shuffledQuestionChoicesIndex']);
         $this->assertEquals('all', $firstQuestionVarsByQn1003['noshuffle']);
         // Question components - Part 5, multans
         $firstQuestionVarsByQn1004 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1004'];
         $this->assertEquals('multans', $firstQuestionVarsByQn1004['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1004', $firstQuestionVarsByQn1004['answerboxPlaceholder']);
         $this->assertEquals('0,2,4,5', $firstQuestionVarsByQn1004['answers']);
         $this->assertEquals([0,1,2,3,4,5], $firstQuestionVarsByQn1004['shuffledChoicesIndex']);
         $this->assertEquals([
@@ -329,15 +334,18 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         // Question components - Part 6, number
         $firstQuestionVarsByQn1005 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1005'];
         $this->assertEquals('number', $firstQuestionVarsByQn1005['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1005', $firstQuestionVarsByQn1005['answerboxPlaceholder']);
         $this->assertEquals('1', $firstQuestionVarsByQn1005['answer']);
         // Question components - Part 7, numfunc
         $firstQuestionVarsByQn1006 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1006'];
         $this->assertEquals('numfunc', $firstQuestionVarsByQn1006['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1006', $firstQuestionVarsByQn1006['answerboxPlaceholder']);
         $this->assertEquals('9', $firstQuestionVarsByQn1006['answer']);
         $this->assertEquals(['x'], $firstQuestionVarsByQn1006['variables']);
         // Question components - Part 8, string
         $firstQuestionVarsByQn1007 = $questionsWithAnswers[0]['questionComponents']['componentsByQnIdentifier']['qn1007'];
         $this->assertEquals('string', $firstQuestionVarsByQn1007['partType']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVarsByQn1007['answerboxPlaceholder']);
         $this->assertEquals('A,B,C,D,E,F', $firstQuestionVarsByQn1007['answer']);
 
         /*
@@ -360,6 +368,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         // Question components
         $secondQuestionVars = $questionsWithAnswers[1]['questionComponents'];
         $this->assertEquals('number', $secondQuestionVars['type']);
+        $this->assertEquals('ANSWERBOX_PLACEHOLDER', $secondQuestionVars['answerboxPlaceholder']);
         $this->assertEquals('<p>What is 1 + 1? ANSWERBOX_PLACEHOLDER</p>', $secondQuestionVars['text']);
         $secondQuestionVarsByQn0 = $questionsWithAnswers[1]['questionComponents']['componentsByQnIdentifier']['qn0'];
         $this->assertEquals('number', $secondQuestionVarsByQn0['partType']);

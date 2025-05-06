@@ -70,9 +70,11 @@ class AnswerBoxOhmUtilService
             $partIndex = 1000 + $answerBoxParams->getQuestionPartNumber();
             $partQn = 'qn' . $partIndex;
             $questionOptionVariables[$partQn] = $optionVariables;
+            $questionOptionVariables[$partQn]['answerboxPlaceholder'] = 'ANSWERBOX_PLACEHOLDER_QN_' . $partIndex;
         } else {
             // All single part questions will have a "qn0" hash key.
             $questionOptionVariables['qn0'] = $optionVariables;
+            $questionOptionVariables['qn0']['answerboxPlaceholder'] = 'ANSWERBOX_PLACEHOLDER';
         }
 
         return $questionOptionVariables;
