@@ -492,7 +492,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p', 'br'];
         $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>&nbsp;\n<p>ANSWERBOX_PLACEHOLDER&nbsp;
 
-</p><br></br>\n';
+</p><br></br><br/><br>\n';
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);

@@ -462,7 +462,7 @@ class QuestionService extends BaseService implements QuestionServiceInterface
         $indexOfAnswerbox = strpos($qtext, $answerbox);
 
         // allow an arbitrary amount of spacing after the answerbox and allow a single closing HTML tag, so long as the end of the question text is reached (\z)
-        $answerboxRegex = "/$answerbox(?:\s|&nbsp;|\\\\n|<br><\/br>)*(?:<\/div>|<\/p>|<\/span>)?(?:\s|&nbsp;|\\\\n|<br><\/br>)*\z/";
+        $answerboxRegex = "/$answerbox(?:\s|&nbsp;|\\\\n|<br><\/br>|<br\/>|<br>)*(?:<\/div>|<\/p>|<\/span>)?(?:\s|&nbsp;|\\\\n|<br><\/br>|<br\/>|<br>)*\z/";
         preg_match_all($answerboxRegex, $qtext, $matches);
 
         // if the answerbox is in the question text but not at the end of it
