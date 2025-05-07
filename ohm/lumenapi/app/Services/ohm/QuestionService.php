@@ -450,17 +450,23 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     private function validateQuestionText($qtext): array {
         $validationErrors = [];
 
+        // validation for use of HTML in question text
         foreach (QuestionService::detectHtmlTags($qtext) as $htmlTag) {
             if (!in_array($htmlTag, $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])) {
                 $validationErrors[] = "Cannot edit a question with a <$htmlTag/> HTML tag in the question text";
             }
         }
 
+        // validation for placement of naswerbox in question text
         $answerbox = 'ANSWERBOX_PLACEHOLDER';
         $indexOfAnswerbox = strpos($qtext, $answerbox);
 
-        // if in the question text and not at the end of the question text
-        if ($indexOfAnswerbox !== false && $indexOfAnswerbox != strlen($qtext) - strlen($answerbox)) {
+        // allow an arbitrary amount of spacing after the answerbox and allow a single closing HTML tag, so long as the end of the question text is reached (\z)
+        $answerboxRegex = "/$answerbox(?:\s|&nbsp;|\\n)*(?:<\/div>|<\/p>|<\/span>)?(?:\s|&nbsp;|\\n)*\z/";
+        preg_match_all($answerboxRegex, $qtext, $matches);
+
+        // if the answerbox is in the question text but not at the end of it
+        if ($indexOfAnswerbox !== false && count($matches[0]) == 0) {
             $validationErrors[] = "Cannot edit a question in which the answer box is not at the end of the question text";
         }
 

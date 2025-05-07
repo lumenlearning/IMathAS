@@ -487,6 +487,23 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertEquals('Cannot edit a question in which the answer box is not at the end of the question text', $validationErrors[0]);
     }
 
+    public function testValidateQuestionText_allowsAnswerboxWithTrailingTagAndSpacing(): void
+    {
+        $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>&nbsp;\n<p>ANSWERBOX_PLACEHOLDER&nbsp;
+
+</p>\n';
+
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionText = $class->getMethod('validateQuestionText');
+
+        $validationErrors = $validateQuestionText->invokeArgs($this->questionService, [$evaledqtextwithoutanswerbox]);
+
+        $this->assertNotEmpty($validationErrors);
+        $this->assertEquals(1, count($validationErrors));
+        $this->assertEquals('Cannot edit a question in which the answer box is not at the end of the question text', $validationErrors[0]);
+    }
+
     /*
      * validateQuestionTypeAndSettings
      */
