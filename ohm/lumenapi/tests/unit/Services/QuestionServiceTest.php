@@ -558,9 +558,9 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
     /*
      * validateQuestionSetRow
      */
-    public function testValidateQuestionSetRow_allowsNotRand(): void
+    public function testValidateQuestionSetRow_allowsNotRandAndNoImages(): void
     {
-        $questionSetRow = ['isrand' => 0];
+        $questionSetRow = ['isrand' => 0, 'hasimg' => 0];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -584,6 +584,21 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertNotEmpty($validationErrors);
         $this->assertEquals(1, count($validationErrors));
         $this->assertEquals('Cannot edit an algorithmic question', $validationErrors[0]);
+    }
+
+    public function testValidateQuestionSetRow_disallowsHasImg(): void
+    {
+        $questionSetRow = ['hasimg' => 1];
+
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionSetRow = $class->getMethod('validateQuestionSetRow');
+
+        $validationErrors = $validateQuestionSetRow->invokeArgs($this->questionService, [$questionSetRow]);
+
+        $this->assertNotEmpty($validationErrors);
+        $this->assertEquals(1, count($validationErrors));
+        $this->assertEquals('Cannot edit a question with images', $validationErrors[0]);
     }
 
     /*
