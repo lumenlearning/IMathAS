@@ -695,6 +695,63 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertEquals('Cannot edit a question that uses the `includecodefrom` function', $validationErrors[0]);
     }
 
+    public function testValidateQuestionCode_allowsLoadlibraryWithOhmMacros(): void {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionCode = $class->getMethod('validateQuestionCode');
+
+        $code = <<<EOD
+        loadlibrary("ohm_macros", 'ohm_macros')
+        \$questions = array("Formulate an investigative question, or questions", 
+                           "Design a study and determine the population",
+                           "Select a sample from the population",
+                           "Collect data", 
+                           "Perform a data analysis", 
+                           "Interpret results and make an inference about the population")
+        \$answers = array("1","2","3","4","5","6")
+        \$displayformat = "select"
+        \$noshuffle = "answers"
+        
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",\$thisq)
+        EOD;
+
+        // Call the method under test.
+        $validationErrors = $validateQuestionCode->invokeArgs($this->questionService, [$code]);
+
+        $this->assertEmpty($validationErrors);
+    }
+
+    public function testValidateQuestionCode_disallowsLoadlibraryWithNonOhmMacros(): void {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionCode = $class->getMethod('validateQuestionCode');
+
+        $code = <<<EOD
+        loadlibrary('ohm_macros')
+        loadlibrary("ohm_macros", "stats")
+        \$questions = array("Formulate an investigative question, or questions", 
+                           "Design a study and determine the population",
+                           "Select a sample from the population",
+                           "Collect data", 
+                           "Perform a data analysis", 
+                           "Interpret results and make an inference about the population")
+        \$answers = array("1","2","3","4","5","6")
+        \$displayformat = "select"
+        \$noshuffle = "answers"
+        
+        loadlibrary("lumenlearning_secrets")
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",\$thisq)
+        EOD;
+
+        // Call the method under test.
+        $validationErrors = $validateQuestionCode->invokeArgs($this->questionService, [$code]);
+
+        $this->assertNotEmpty($validationErrors);
+        $this->assertCount(2, $validationErrors);
+        $this->assertEquals("Cannot edit a question that uses `loadlibrary` for a library other than \"ohm_macros\". Detected code: `loadlibrary(\"ohm_macros\", \"stats\")`", $validationErrors[0]);
+        $this->assertEquals("Cannot edit a question that uses `loadlibrary` for a library other than \"ohm_macros\". Detected code: `loadlibrary(\"lumenlearning_secrets\")`", $validationErrors[1]);
+    }
+
     public function testValidateQuestionCode_allowsOtherFunctions(): void {
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
