@@ -49,8 +49,7 @@ var courseBrowserProps = {
 			"dana_stats_intro": "Dana Center Introductory Statistics",
 			"dana_quantitative_reasoning": "Dana Center Quantitative Reasoning",
 			"dana_reasoning1": "Dana Center Reasoning with Functions 1",
-			"dana_reasoning2": "Dana Center Reasoning with Functions 2",
-			"other": "Other"
+			"dana_reasoning2": "Dana Center Reasoning with Functions 2"
 		},
 		"multi": true,
 		"sortby": 1
