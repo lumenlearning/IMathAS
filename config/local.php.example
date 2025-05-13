@@ -66,6 +66,7 @@ $GLOBALS['student_pay_api']['debug'] = true;
 
 // Enable FullStory
 putenv('FULLSTORY_ENABLED=false');
+putenv('FULLSTORY_MODE=none');
 
 // Current supported values: "zendesk", "hubspot"
 $CFG['GEN']['SUPPORT_TICKET_SERVICE'] = getenv('SUPPORT_TICKET_SERVICE') ?: 'hubspot';

@@ -29,13 +29,206 @@ final class FullStoryTest extends TestCase
     /*
      * isFullStoryEnabled
      */
-    public function testIsFullStoryEnabled_Enabled(): void
+
+    public function testIsFullStoryEnabled_Enabled_NoMode(): void
     {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE');   // This unsets the environment variable.
+
         $result = FullStory::isFullStoryEnabled();
         $this->assertTrue($result);
     }
 
+    public function testIsFullStoryEnabled_Enabled_InvalidMode(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=asdf');
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Everyone(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=everyone');
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    /*
+     * isFullStoryEnabled (for educators)
+     */
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsPendingApproval(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 12;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsInstructor(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 20;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsLimitedCourseCreator(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 40;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsGroupAdmin(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 75;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsGuest(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 5;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsStudent(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 10;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Educators_UserIsTutor(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=educators');
+
+        $GLOBALS['myrights'] = 15;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    /*
+     * isFullStoryEnabled (for students)
+     */
+
+    public function testIsFullStoryEnabled_Enabled_Students_UserIsStudent(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=students');
+
+        $GLOBALS['myrights'] = 10;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Students_UserIsTutor(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=students');
+
+        $GLOBALS['myrights'] = 15;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertTrue($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Students_UserIsPendingApproval(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=students');
+
+        $GLOBALS['myrights'] = 12;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Students_UserIsInstructor(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=students');
+
+        $GLOBALS['myrights'] = 20;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Students_UserIsLimitedCourseCreator(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=students');
+
+        $GLOBALS['myrights'] = 40;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_Enabled_Students_UserIsGroupAdmin(): void
+    {
+        putenv('FULLSTORY_ENABLED=true');
+        putenv('FULLSTORY_MODE=students');
+
+        $GLOBALS['myrights'] = 75;
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    /*
+     * isFullStoryEnabled (disabled)
+     */
+
     public function testIsFullStoryEnabled_Disabled(): void
+    {
+        putenv('FULLSTORY_ENABLED=false');
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_InvalidValue(): void
+    {
+        putenv('FULLSTORY_ENABLED=asdf');
+
+        $result = FullStory::isFullStoryEnabled();
+        $this->assertFalse($result);
+    }
+
+    public function testIsFullStoryEnabled_NotSet(): void
     {
         putenv('FULLSTORY_ENABLED'); // This unsets the environment variable.
 
