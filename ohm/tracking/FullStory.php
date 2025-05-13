@@ -41,13 +41,36 @@ class FullStory
     }
 
     /**
-     * Determine if FullStory is enabled in OHM.
+     * Determine if FullStory is enabled for the current user.
      *
      * @return bool True if enabled. False if not.
      */
     public static function isFullStoryEnabled(): bool
     {
-        return 'true' == getenv('FULLSTORY_ENABLED');
+        if ('true' != getenv('FULLSTORY_ENABLED')) {
+            return false;
+        }
+
+        $fullStoryMode = getenv('FULLSTORY_MODE') ?: 'everyone';
+        switch ($fullStoryMode) {
+            case 'everyone':
+                return true;
+            case 'educators':
+                $loggedInUserRole = FullStoryIdentity::getUserRole();
+                // "pending-approval" is included because only instructors can request an account.
+                if (in_array($loggedInUserRole, ['pending-approval', 'instructor', 'limited-course-creator', 'group-admin'])) {
+                    return true;
+                }
+                break;
+            case 'students':
+                $loggedInUserRole = FullStoryIdentity::getUserRole();
+                if (in_array($loggedInUserRole, ['student', 'tutor'])) {
+                    return true;
+                }
+                break;
+        }
+
+        return false;
     }
 
     /**
