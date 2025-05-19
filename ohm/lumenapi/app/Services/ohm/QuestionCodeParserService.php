@@ -57,6 +57,29 @@ class QuestionCodeParserService extends BaseService implements QuestionCodeParse
     }
 
     /**
+     * Determines if a question is algorithmic (contains randomization)
+     * 
+     * @return bool True if the question is algorithmic, false otherwise
+     */
+    public function isAlgorithmic(): bool {
+        $functionCalls = $this->detectFunctionCalls();
+
+        foreach ($functionCalls as $call) {
+            $functionName = strtolower($call['name']);
+
+            // Check if the function is in any of the randomness-generating function lists
+            if (in_array($functionName, $this::RANDOM_NUMBER_FUNCTIONS) ||
+                in_array($functionName, $this::RANDOM_SELECT_FUNCTIONS) ||
+                in_array($functionName, $this::RANDOM_SHUFFLE_FUNCTIONS) ||
+                in_array($functionName, $this::RANDOM_STRING_FUNCTIONS)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Recursively detects all function calls in a question code string using Regex
      * Recursively traverses nested function calls
      *

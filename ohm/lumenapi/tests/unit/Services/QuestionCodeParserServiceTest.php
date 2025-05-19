@@ -27,19 +27,19 @@ class QuestionCodeParserServiceTest extends TestCase
             $medium=$datatable[$index+30]
             $small=$datatable[$index+45]
             $sum=$large+$medium+$small
-            
+
             $percent=array($small/$sum,$medium/$sum,$large/$sum)
             $wrongorder=array($medium/$sum,$small/$sum,$large/$sum)
             $wrongorder2=array($small,$large,$medium)
             $allequal=array(33.3,33.3,33.3)
-            
+
             $cats = array("Small","Medium","Large")
-            
+
             $pie1 = piechart($percent,$cats)
             $pie2 = piechart($wrongorder,$cats)
             $pie3 = piechart($allequal,$cats)
             $pie4 = piechart($wrongorder2,$cats)
-            
+
             $questions=array($pie1,$pie2,$pie3,$pie4)
             $answer = 0;
             loadlibrary("ohm_macros")
@@ -88,5 +88,78 @@ class QuestionCodeParserServiceTest extends TestCase
 
         $this->assertEquals('includecodefrom', $functionCalls[0]['name']);
         $this->assertEquals('1021', $functionCalls[0]['arguments']);
+    }
+
+    public function testIsAlgorithmic_withRandomNumberFunction_returnsTrue(): void {
+        $code = '
+            $a = rand(1, 10)
+            $b = $a + 5
+            $answer = $a + $b
+        ';
+
+        $questionCodeParserService = new QuestionCodeParserService($code);
+        $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
+
+        $this->assertTrue($isAlgorithmic);
+    }
+
+    public function testIsAlgorithmic_withRandomSelectFunction_returnsTrue(): void {
+        $code = '
+            $options = array(1, 2, 3, 4, 5)
+            $a = randfrom($options)
+            $answer = $a * 2
+        ';
+
+        $questionCodeParserService = new QuestionCodeParserService($code);
+        $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
+
+        $this->assertTrue($isAlgorithmic);
+    }
+
+    public function testIsAlgorithmic_withShuffleFunction_returnsTrue(): void {
+        $code = '
+            $options = array(1, 2, 3, 4, 5)
+            $shuffled = singleshuffle($options)
+            $answer = $shuffled[0]
+        ';
+
+        $questionCodeParserService = new QuestionCodeParserService($code);
+        $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
+
+        $this->assertTrue($isAlgorithmic);
+    }
+
+    public function testIsAlgorithmic_withRandomStringFunction_returnsTrue(): void {
+        $code = '
+            $name = randname()
+            $answer = "Hello, " . $name
+        ';
+
+        $questionCodeParserService = new QuestionCodeParserService($code);
+        $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
+
+        $this->assertTrue($isAlgorithmic);
+    }
+
+    public function testIsAlgorithmic_withNoRandomFunctions_returnsFalse(): void {
+        $code = '
+            $a = 5
+            $b = 10
+            $answer = $a + $b
+        ';
+
+        $questionCodeParserService = new QuestionCodeParserService($code);
+        $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
+
+        $this->assertFalse($isAlgorithmic);
+    }
+
+    public function testIsAlgorithmic_withNestedRandomFunction_returnsTrue(): void {
+        $code = 'array(rand(1, 5), 2)';
+
+        $questionCodeParserService = new QuestionCodeParserService($code);
+        $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
+
+        $this->assertTrue($isAlgorithmic);
     }
 }
