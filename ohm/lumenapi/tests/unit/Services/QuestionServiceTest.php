@@ -379,8 +379,8 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
      * validateIsEditable
      */
     public function testValidateIsEditable_aggregatesValidationsFromHelperMethods(): void {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = '';
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = 'choices';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = [];
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         // fill with garbage values
         $question = new Question(
@@ -444,7 +444,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
 
     public function testValidateQuestionText_allowsEditableTagsAndAnswerbox(): void
     {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = 'p';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p'];
         $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>ANSWERBOX_PLACEHOLDER';
 
         // Get the method under test.
@@ -458,7 +458,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
 
     public function testValidateQuestionText_disallowsNotEditableTags(): void
     {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = '';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = [];
         $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>';
 
         // Get the method under test.
@@ -489,7 +489,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
 
     public function testValidateQuestionText_allowsAnswerboxWithTrailingTagAndSpacing(): void
     {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = 'p,br';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p', 'br'];
         $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>&nbsp;\n<p>ANSWERBOX_PLACEHOLDER&nbsp;
 
 </p><br></br><br/><br>\n';
@@ -508,7 +508,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
      */
     public function testValidateQuestionTypeAndSettings_allowsEditableQtypes(): void
     {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = 'choices';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
         $questionSettings = [];
@@ -523,7 +523,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
     }
 
     public function testValidateQuestionTypeAndSettings_disallowsNonEditableQtypes(): void {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = '';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = [];
 
         $qtype = 'choices';
         $questionSettings = [];
@@ -540,7 +540,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
     }
 
     public function testValidateQuestionTypeAndSettings_disallowsDropdownStyleChoicesQtypes(): void {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = 'choices';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices'];
 
         $qtype = 'choices';
         $questionSettings = ['qn0' => ['displayformat' => 'select']];
@@ -557,7 +557,7 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
     }
 
     public function testValidateQuestionTypeAndSettings_allowsDropdownStyleChoicesQtypesWhenEditable(): void {
-        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = 'choices,dropdown';
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTYPES'] = ['choices', 'dropdown'];
 
         $qtype = 'choices';
         $questionSettings = ['qn0' => ['displayformat' => 'select']];
