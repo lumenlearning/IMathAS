@@ -380,6 +380,21 @@ class QuestionHtmlGenerator
         // $answerbox must not be renamed, it is expected in eval'd code.
         $answerbox = $previewloc = null;
         $entryTips = $displayedAnswersForParts = $jsParams = [];
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #
+        # Used in $onGetQuestion hook for OHM 2.
+        # See: ohm-hooks/assess2/questions/question_html_generator.php
+        #
+        $answerBoxGenerators = []; // All AnswerBox generators used for this question will be collected here.
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
 
         if ($quesData['qtype'] == "multipart" || $quesData['qtype'] == 'conditional') {
             // $anstypes is question writer defined.
@@ -529,6 +544,21 @@ class QuestionHtmlGenerator
                 try {
                   $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
                   $answerBoxGenerator->generate();
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #### Begin OHM-specific changes ############################################################
+                  #
+                  # Used in $onGetQuestion hook for OHM 2.
+                  # See: ohm-hooks/assess2/questions/question_html_generator.php
+                  #
+                  $answerBoxGenerators[$atIdx] = $answerBoxGenerator;
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
+                  #### End OHM-specific changes ############################################################
                 } catch (\Throwable $t) {
                   $this->addError(
                        _('Caught error while generating this question: ')
@@ -619,6 +649,21 @@ class QuestionHtmlGenerator
 
             $answerBoxGenerator = AnswerBoxFactory::getAnswerBoxGenerator($answerBoxParams);
             $answerBoxGenerator->generate();
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #
+            # Used in $onGetQuestion hook for OHM 2.
+            # See: ohm-hooks/assess2/questions/question_html_generator.php
+            #
+            $answerBoxGenerators[0] = $answerBoxGenerator; // This is a single part question, so always use index 0.
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 
             $answerbox = $answerBoxGenerator->getAnswerBox();
             $entryTips[0] = $answerBoxGenerator->getEntryTip();
@@ -713,6 +758,54 @@ class QuestionHtmlGenerator
           $evaledsoln = '';
         }
         $detailedSolutionContent = $this->getDetailedSolutionContent($evaledsoln);
+
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+
+        /*
+         *  Store evaluated Question Text without $answerbox
+         *  The following "normal" logic on the evaluated Question Text is not executed on $evaledqtextwithoutanswerbox:
+         *    - handling [AB] and [SAB] syntax for answerbox(es) and solution answer box(es)
+         *    - handling of sequential parts (for conditional and multipart only)
+         *    - adding an answerbox when no answerbox was included in the $toevalqtext
+         *    - adding show answer & show solution buttons
+         *    - adding help text and hints
+         *    - coloring for conditional question type answerboxes
+         *    - Wrapping all that in a div:
+         *         - $evaledqtext = "<div class=\"question\" role=region aria-label=\"" . _('Question') . "\">\n" . filter($evaledqtext);
+         *         - <aforementioned handling/adding of things>
+         *         - $evaledqtext .= "\n</div>\n";
+        */
+        try {
+            // Replace $answerbox variables with placeholders in multi-part questions.
+            if ('multipart' == $quesData['qtype']) {
+                $toevalqtxtwithoutanswerbox = preg_replace_callback('/\$answerbox\[(\d+)\]/', function ($matches): string {
+                    $qn = 1000 + $matches[1];
+                    return 'ANSWERBOX_PLACEHOLDER_QN_' . $qn;
+                }, $toevalqtxt);
+            } else {
+                $toevalqtxtwithoutanswerbox = $toevalqtxt;
+            }
+            // Replace $answerbox variables with placeholders in single part questions.
+            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
+
+            $prep = \genVarInit($qtextvars);
+            eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
+        } catch(\Throwable $t) {
+            $this->addError(
+                _('Caught error while evaluating the text in this question: ')
+                . $t->getMessage());
+            $evaledqtextwithoutanswerbox = '';
+        }
+
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
+        // #### Begin OHM-specific code #####################################################
 
         /*
          * Possibly adjust the showanswer if it doesn't look right

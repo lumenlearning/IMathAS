@@ -6,7 +6,25 @@ require_once __DIR__ . '/AnswerBox.php';
 
 use Sanitize;
 
-class StringAnswerBox implements AnswerBox
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+#### Begin OHM-specific changes ############################################################
+require_once __DIR__ . '/AnswerBoxOhmExtensions.php';
+require_once __DIR__ . '/../../../ohm/services/AnswerBoxOhmUtilService.php';
+
+use OHM\Services\AnswerBoxOhmUtilService;
+#
+# The OHM-specific changes:
+# - Added "AnswerBoxOhmExtensions" to the list of implemented interfaces.
+#
+class StringAnswerBox implements AnswerBox, AnswerBoxOhmExtensions
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
+#### End OHM-specific changes ############################################################
 {
     private $answerBoxParams;
 
@@ -16,6 +34,18 @@ class StringAnswerBox implements AnswerBox
     private $correctAnswerForPart;
     private $previewLocation;
 
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    #### Begin OHM-specific changes ############################################################
+    /* @var Array<String> */
+    private array $questionOptionVariables; // A list of option variable names. Most of these will appear in question code.
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
     public function __construct(AnswerBoxParams $answerBoxParams)
     {
         $this->answerBoxParams = $answerBoxParams;
@@ -204,6 +234,35 @@ class StringAnswerBox implements AnswerBox
         $this->entryTip = $tip;
         $this->correctAnswerForPart = (string) $sa;
         $this->previewLocation = $preview;
+        #### Start OHM-specific changes ############################################################
+        #### Start OHM-specific changes ############################################################
+        #### Start OHM-specific changes ############################################################
+        #### Start OHM-specific changes ############################################################
+        #### Start OHM-specific changes ############################################################
+
+        /*
+         * This gathers question variables, some created by question writers and some not, so we
+         * can pass them to AnswerBoxOhmUtilService in order to generate structured data for OHM's
+         * question API responses containing question components. The question API will use
+         * Question->getExtraData() to retrieve this information.
+         */
+
+        // Collect all the values we're interested in so we can pass them to AnswerBoxOhmUtilService.
+        $optionVariablesAndValues = [];
+        $optionVariablesAndValues['partType'] = 'string';
+        foreach ($optionkeys as $optionVariableName) {
+            $optionVariablesAndValues[$optionVariableName] = ${$optionVariableName};
+        }
+
+        $answerBoxOhmUtilService = new AnswerBoxOhmUtilService();
+        $this->questionOptionVariables = $answerBoxOhmUtilService
+            ->formatAndReturnQuestionVariables($optionVariablesAndValues, [], $this->answerBoxParams);
+
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
     }
 
     public function getAnswerBox(): string
@@ -230,4 +289,30 @@ class StringAnswerBox implements AnswerBox
     {
         return $this->previewLocation;
     }
+    #### Start OHM-specific changes ############################################################
+    #### Start OHM-specific changes ############################################################
+    #### Start OHM-specific changes ############################################################
+    #### Start OHM-specific changes ############################################################
+    #### Start OHM-specific changes ############################################################
+    /**
+     * Get an associative array of question option variable names that may appear in this
+     * question's code and their values.
+     *
+     * Some variables, such as "randkeys", do not appear in question code but will also be
+     * returned.
+     *
+     * The return value of this method is intended to be used by OHM's question API (using
+     * the Laravel/Lumen framework) to return all components of a question.
+     *
+     * @return mixed[] An associative array of question option variable names and their values.
+     */
+    public function getQuestionOptionVariables(): array
+    {
+        return $this->questionOptionVariables;
+    }
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
+    #### End OHM-specific changes ############################################################
 }

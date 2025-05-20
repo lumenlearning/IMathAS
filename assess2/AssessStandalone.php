@@ -256,7 +256,7 @@ class AssessStandalone {
     $question = $questionGenerator->getQuestion();
     $this->question = $question;
 
-    list($qout,$scripts) = $this->parseScripts($question->getQuestionContent());
+    list($qout,$scripts) = $this::parseScripts($question->getQuestionContent());
     $jsparams = $question->getJsParams();
 
     if (count($scripts) > 0) {
@@ -423,7 +423,7 @@ class AssessStandalone {
     return $returnData;
   }
 
-  private function parseScripts($html) {
+  public static function parseScripts($html) : array {
     $scripts = array();
     preg_match_all("|<script([^>]*)>(.*?)</script>|s", $html, $matches, PREG_SET_ORDER);
     foreach ($matches as $match) {
