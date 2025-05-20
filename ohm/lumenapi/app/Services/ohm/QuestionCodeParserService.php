@@ -19,7 +19,7 @@ class QuestionCodeParserService extends BaseService implements QuestionCodeParse
      */
     public const FUNCTION_REGEX = '/
         (
-            [^()\s]+
+            [^()\s=]+
         )
         \(
         (
