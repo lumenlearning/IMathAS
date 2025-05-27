@@ -241,6 +241,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
 
             // Escape single quotes and backslashes
             $safeChoice = addcslashes($safeChoice, "'\\");
+            // Don't escape double quotes because $safeChoice is wrapped in single quotes (\'%s\')
             $questionControl .= sprintf('$questions[%d] = \'%s\';%s',
                 $idx, $safeChoice, "\n");
         }
