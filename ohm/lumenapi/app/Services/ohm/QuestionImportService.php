@@ -239,8 +239,9 @@ class QuestionImportService extends BaseService implements QuestionImportService
             $rawChoice = $questionData['choices'][$idx];
             $safeChoice = $this->sanitizeInputText($rawChoice);
 
-            // Escape single quotes and backslashes
-            $safeChoice = addcslashes($safeChoice, "'\\");
+            // This must come after sanitizeInputText such that converted smart quotes are escaped
+            $safeChoice = addcslashes($safeChoice, "'\\"); // escape single quotes and backslashes only
+
             // Don't escape double quotes because $safeChoice is wrapped in single quotes (\'%s\')
             $questionControl .= sprintf('$questions[%d] = \'%s\';%s',
                 $idx, $safeChoice, "\n");
