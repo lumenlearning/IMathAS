@@ -217,7 +217,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
          */
 
         $questionText = $this->sanitizeInputText($questionData['text']);
-        $questionText .= "\n\n" . '$answerbox' . "\n";
+        $questionText .= "\n";
 
         if ('practice' == $questionImportMode) {
             $questionText .= '$feedback' . "\n";
@@ -238,6 +238,9 @@ class QuestionImportService extends BaseService implements QuestionImportService
         for ($idx = 0; $idx < count($questionData['choices']); $idx++) {
             $rawChoice = $questionData['choices'][$idx];
             $safeChoice = $this->sanitizeInputText($rawChoice);
+
+            // Escape single quotes and backslashes
+            $safeChoice = addcslashes($safeChoice, "'\\");
             $questionControl .= sprintf('$questions[%d] = \'%s\';%s',
                 $idx, $safeChoice, "\n");
         }
@@ -442,10 +445,6 @@ class QuestionImportService extends BaseService implements QuestionImportService
             // Replaces smart quotes (aka curly quotes) with normal (straight) quotes
             // This should be done before quotes are escaped
             fn(string $text) => Sanitize::replaceSmartQuotes($text),
-
-            // Escape single and double quotes. This escaping method is
-            // easier for question writers to edit later.
-            fn(string $text) => addslashes($text),
 
             // Escape $ characters to avoid unintentional references to
             // non-existent variables.

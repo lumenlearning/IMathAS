@@ -258,14 +258,15 @@ class QuestionImportServiceTest extends TestCase
         $encodedDescription = $sanitizeInputText->invokeArgs($this->questionImportService, [self::MGA_QUESTION_WITH_FEEDBACK['description']]);
         $this->assertStringContainsString($encodedDescription, $question['description']);
 
-        // Question text should have no "smart" chars, be encoded, and contain "$answerbox".
+        // Question text should have no "smart" chars, and be encoded
         $encodedQuestionText = $sanitizeInputText->invokeArgs($this->questionImportService, [self::MGA_QUESTION_WITH_FEEDBACK['text']]);
-        $this->assertMatchesRegularExpression('/' . preg_quote($encodedQuestionText, '/') . '.*\\$answerbox\s*/s', $question['qtext']);
+        $this->assertMatchesRegularExpression('/' . preg_quote($encodedQuestionText, '/') . '\s*/s', $question['qtext']);
 
         // Choices in question code should have no "smart" chars and be encoded.
         for ($idx = 0; $idx < count(self::MGA_QUESTION_WITH_FEEDBACK['choices']); $idx++) {
             $choice = self::MGA_QUESTION_WITH_FEEDBACK['choices'][$idx];
-            $encodedChoice = $sanitizeInputText->invokeArgs($this->questionImportService, [$choice]);
+            $encodedChoice = addcslashes($choice, "'\\");
+            $encodedChoice = $sanitizeInputText->invokeArgs($this->questionImportService, [$encodedChoice]);
 
             $varName = sprintf('$questions[%d]', $idx);
             $regexQuotedVarName = preg_quote($varName);
