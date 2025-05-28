@@ -12,6 +12,7 @@ use App\Services\Interfaces\QuestionImportServiceInterface;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Sanitize;
 
 /**
  * This is used by the MGA question import script in the "align" repo. (source_type = 'mga_file')
@@ -194,7 +195,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
      */
     private function buildMultipleChoiceQuestion(string $questionImportMode, array $questionData): array
     {
-        $questionDescription = $this->replaceSmartQuotes($questionData['description']);
+        $questionDescription = $this->sanitizeInputText($questionData['description']);
         // imas_questionset.description is currently VARCHAR(254)
         $questionDescription = substr($questionDescription, 0, 200);
         
@@ -215,8 +216,8 @@ class QuestionImportService extends BaseService implements QuestionImportService
          * Question text.
          */
 
-        $questionText = $this->replaceSmartQuotes($questionData['text']);
-        $questionText .= "\n\n" . '$answerbox' . "\n";
+        $questionText = $this->sanitizeInputText($questionData['text']);
+        $questionText .= "\n";
 
         if ('practice' == $questionImportMode) {
             $questionText .= '$feedback' . "\n";
@@ -236,8 +237,12 @@ class QuestionImportService extends BaseService implements QuestionImportService
         // Add question choices.
         for ($idx = 0; $idx < count($questionData['choices']); $idx++) {
             $rawChoice = $questionData['choices'][$idx];
-            $choiceWithoutSmarts = $this->replaceSmartQuotes($rawChoice);
-            $safeChoice = $this->encodeForQuestionCode($choiceWithoutSmarts);
+            $safeChoice = $this->sanitizeInputText($rawChoice);
+
+            // This must come after sanitizeInputText such that converted smart quotes are escaped
+            $safeChoice = addcslashes($safeChoice, "'\\"); // escape single quotes and backslashes only
+
+            // Don't escape double quotes because $safeChoice is wrapped in single quotes (\'%s\')
             $questionControl .= sprintf('$questions[%d] = \'%s\';%s',
                 $idx, $safeChoice, "\n");
         }
@@ -303,8 +308,7 @@ class QuestionImportService extends BaseService implements QuestionImportService
         $macroCode = '';
         for ($idx = 0; $idx < count($allFeedback); $idx++) {
             $rawFeedback = $allFeedback[$idx];
-            $feedbackNoSmarts = $this->replaceSmartQuotes($rawFeedback);
-            $safeFeedback = $this->encodeForQuestionCode($feedbackNoSmarts);
+            $safeFeedback = $this->sanitizeInputText($rawFeedback);
             $macroCode .= sprintf('$feedbacktxt[%d] = \'%s\';%s',
                 $idx, $safeFeedback, "\n");
         }
@@ -437,23 +441,23 @@ class QuestionImportService extends BaseService implements QuestionImportService
      * @param string $data The string to encode.
      * @return string The encoded string.
      */
-    private function encodeForQuestionCode(string $data): string
+    private function sanitizeInputText(string $data): string
     {
-        // Escape single and double quotes. This escaping method is
-        // easier for question writers to edit later.
-        $escapedData = addslashes($data);
+        $transformations = [
+            // Replaces smart quotes (aka curly quotes) with normal (straight) quotes
+            // This should be done before quotes are escaped
+            fn(string $text) => Sanitize::replaceSmartQuotes($text),
 
-        // Escape $ characters to avoid unintentional references to
-        // non-existent variables.
-        $escapedData = str_replace('$', '\$', $escapedData);
+            // Escape $ characters to avoid unintentional references to
+            // non-existent variables.
+            fn(string $text) => str_replace('$', '\$', $text),
 
-        // Convert all characters which have HTML character entity
-        // equivalents HTML entities. Example: & becomes &amp;
-        // Single and double quotes are excluded because we escaped
-        // them earlier.
-        $entitiesFlags = ENT_SUBSTITUTE | ENT_HTML401;
-        $sanitizedData = htmlentities($escapedData, $entitiesFlags, null, false);
-        return $sanitizedData;
+            // Remove HTML tags that are not supported (uses allow list)
+            // This helps protect against malicious HTML potentially input by users
+            fn(string $text) => strip_tags($text, $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])
+        ];
+
+        return array_reduce($transformations, fn($carry, $fn) => $fn($carry), $data);
     }
 
     /**
@@ -479,33 +483,5 @@ class QuestionImportService extends BaseService implements QuestionImportService
     private function hasFeedback(array $questionData): bool
     {
         return !empty($questionData['feedback']);
-    }
-
-    /**
-     * Replace "smart quotes" and related "smart" characters with their
-     * "normal" equivalents.
-     *
-     * All question descriptions, controls, and texts must be run through
-     * this method before escaping, sanitizing, and saving to the DB.
-     *
-     * This method is a direct copy of the function named "stripsmartquotes"
-     * found in course/moddataset.php.
-     *
-     * @param string $text
-     * @return string The provided text with "smart" characters removed.
-     */
-    private function replaceSmartQuotes(string $text): string
-    {
-        return str_replace(
-            [
-                "\xe2\x80\x98", "\xe2\x80\x99", "\xe2\x80\x9c", "\xe2\x80\x9d",
-                "\xe2\x80\x93", "\xe2\x80\x94", "\xe2\x80\xa6"
-            ],
-            [
-                "'", "'", '"', '"',
-                '-', '--', '...'
-            ],
-            $text
-        );
     }
 }
