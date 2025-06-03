@@ -487,6 +487,22 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertEquals('Cannot edit a question in which the answer box is not at the end of the question text', $validationErrors[0]);
     }
 
+    public function testValidateQuestionText_allowsAnswerboxWithTrailingTagAndSpacing(): void
+    {
+        $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'] = ['p', 'br'];
+        $evaledqtextwithoutanswerbox = '<p>What is the answer?</p>&nbsp;\n<p>ANSWERBOX_PLACEHOLDER&nbsp;
+
+</p><br></br><br/><br>\n';
+
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionText = $class->getMethod('validateQuestionText');
+
+        $validationErrors = $validateQuestionText->invokeArgs($this->questionService, [$evaledqtextwithoutanswerbox]);
+
+        $this->assertEmpty($validationErrors);
+    }
+
     /*
      * validateQuestionTypeAndSettings
      */
@@ -558,9 +574,9 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
     /*
      * validateQuestionSetRow
      */
-    public function testValidateQuestionSetRow_allowsNotRand(): void
+    public function testValidateQuestionSetRow_allowsNotRandAndNoImages(): void
     {
-        $questionSetRow = ['isrand' => 0];
+        $questionSetRow = ['isrand' => 0, 'hasimg' => 0];
 
         // Get the method under test.
         $class = new ReflectionClass(QuestionService::class);
@@ -584,6 +600,21 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertNotEmpty($validationErrors);
         $this->assertEquals(1, count($validationErrors));
         $this->assertEquals('Cannot edit an algorithmic question', $validationErrors[0]);
+    }
+
+    public function testValidateQuestionSetRow_disallowsHasImg(): void
+    {
+        $questionSetRow = ['hasimg' => 1];
+
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionSetRow = $class->getMethod('validateQuestionSetRow');
+
+        $validationErrors = $validateQuestionSetRow->invokeArgs($this->questionService, [$questionSetRow]);
+
+        $this->assertNotEmpty($validationErrors);
+        $this->assertEquals(1, count($validationErrors));
+        $this->assertEquals('Cannot edit a question with images', $validationErrors[0]);
     }
 
     /*
@@ -678,6 +709,63 @@ ANSWERBOX_PLACEHOLDER_QN_1007', $firstQuestionVars['text']);
         $this->assertNotEmpty($validationErrors);
         $this->assertCount(1, $validationErrors);
         $this->assertEquals('Cannot edit a question that uses the `includecodefrom` function', $validationErrors[0]);
+    }
+
+    public function testValidateQuestionCode_allowsLoadlibraryWithOhmMacros(): void {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionCode = $class->getMethod('validateQuestionCode');
+
+        $code = <<<EOD
+        loadlibrary("ohm_macros", 'ohm_macros')
+        \$questions = array("Formulate an investigative question, or questions", 
+                           "Design a study and determine the population",
+                           "Select a sample from the population",
+                           "Collect data", 
+                           "Perform a data analysis", 
+                           "Interpret results and make an inference about the population")
+        \$answers = array("1","2","3","4","5","6")
+        \$displayformat = "select"
+        \$noshuffle = "answers"
+        
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",\$thisq)
+        EOD;
+
+        // Call the method under test.
+        $validationErrors = $validateQuestionCode->invokeArgs($this->questionService, [$code]);
+
+        $this->assertEmpty($validationErrors);
+    }
+
+    public function testValidateQuestionCode_disallowsLoadlibraryWithNonOhmMacros(): void {
+        // Get the method under test.
+        $class = new ReflectionClass(QuestionService::class);
+        $validateQuestionCode = $class->getMethod('validateQuestionCode');
+
+        $code = <<<EOD
+        loadlibrary('ohm_macros')
+        loadlibrary("ohm_macros", "stats")
+        \$questions = array("Formulate an investigative question, or questions", 
+                           "Design a study and determine the population",
+                           "Select a sample from the population",
+                           "Collect data", 
+                           "Perform a data analysis", 
+                           "Interpret results and make an inference about the population")
+        \$answers = array("1","2","3","4","5","6")
+        \$displayformat = "select"
+        \$noshuffle = "answers"
+        
+        loadlibrary("lumenlearning_secrets")
+        \$feedback = getfeedbackbasic("Awesome! Knowing these steps will help you throughout this course.","You have to decide on what questions you want answered before you can start a study. Once you figure out the questions, you can begin design the study and decide on who, what and how you'll collect, analyze and draw conclusions from your data.",\$thisq)
+        EOD;
+
+        // Call the method under test.
+        $validationErrors = $validateQuestionCode->invokeArgs($this->questionService, [$code]);
+
+        $this->assertNotEmpty($validationErrors);
+        $this->assertCount(2, $validationErrors);
+        $this->assertEquals("Cannot edit a question that uses `loadlibrary` for a library other than \"ohm_macros\". Detected code: `loadlibrary(\"ohm_macros\", \"stats\")`", $validationErrors[0]);
+        $this->assertEquals("Cannot edit a question that uses `loadlibrary` for a library other than \"ohm_macros\". Detected code: `loadlibrary(\"lumenlearning_secrets\")`", $validationErrors[1]);
     }
 
     public function testValidateQuestionCode_allowsOtherFunctions(): void {

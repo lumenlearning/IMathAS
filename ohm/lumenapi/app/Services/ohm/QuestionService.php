@@ -431,8 +431,23 @@ class QuestionService extends BaseService implements QuestionServiceInterface
 
         $functionCalls = $questionCodeParser->detectFunctionCalls();
         foreach ($functionCalls as $functionCall) {
-            if (str_contains($functionCall['name'], 'includecodefrom')) {
+            $name = $functionCall['name'];
+            $args = $functionCall['arguments'];
+
+            if (str_contains($name, 'includecodefrom')) {
                 $validationErrors[] = 'Cannot edit a question that uses the `includecodefrom` function';
+            } else if (str_contains($name, 'loadlibrary')) {
+                // split the arguments by comma and strip out any quotes wrapping the values
+                $argsArray = array_map(function($arg) {
+                    return trim(trim($arg), '\'"');
+                }, explode(",", $args));
+
+                $distinctArgs = array_unique($argsArray);
+                $distinctArgCount = count($distinctArgs);
+
+                if ($distinctArgCount > 0 && ($distinctArgCount > 1 || !in_array('ohm_macros', $distinctArgs))) {
+                    $validationErrors[] = "Cannot edit a question that uses `loadlibrary` for a library other than \"ohm_macros\". Detected code: `$name($args)`";
+                }
             }
         }
 
@@ -450,17 +465,23 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     private function validateQuestionText($qtext): array {
         $validationErrors = [];
 
+        // validation for use of HTML in question text
         foreach (QuestionService::detectHtmlTags($qtext) as $htmlTag) {
             if (!in_array($htmlTag, $GLOBALS['QUESTIONS_API']['EDITABLE_QTEXT_HTML_TAGS'])) {
                 $validationErrors[] = "Cannot edit a question with a <$htmlTag/> HTML tag in the question text";
             }
         }
 
+        // validation for placement of naswerbox in question text
         $answerbox = 'ANSWERBOX_PLACEHOLDER';
         $indexOfAnswerbox = strpos($qtext, $answerbox);
 
-        // if in the question text and not at the end of the question text
-        if ($indexOfAnswerbox !== false && $indexOfAnswerbox != strlen($qtext) - strlen($answerbox)) {
+        // allow an arbitrary amount of spacing after the answerbox and allow a single closing HTML tag, so long as the end of the question text is reached (\z)
+        $answerboxRegex = "/$answerbox(?:\s|&nbsp;|\\\\n|<br><\/br>|<br\/>|<br>)*(?:<\/div>|<\/p>|<\/span>)?(?:\s|&nbsp;|\\\\n|<br><\/br>|<br\/>|<br>)*\z/";
+        preg_match_all($answerboxRegex, $qtext, $matches);
+
+        // if the answerbox is in the question text but not at the end of it
+        if ($indexOfAnswerbox !== false && count($matches[0]) == 0) {
             $validationErrors[] = "Cannot edit a question in which the answer box is not at the end of the question text";
         }
 
@@ -477,8 +498,14 @@ class QuestionService extends BaseService implements QuestionServiceInterface
     private function validateQuestionSetRow($questionSetRow): array {
         $validationErrors = [];
 
-        if (1 == $questionSetRow['isrand']) {
+        $isrand = $questionSetRow['isrand'] ?? 0;
+        $hasimg = $questionSetRow['hasimg'] ?? 0;
+
+        if (1 == $isrand) {
             $validationErrors[] = "Cannot edit an algorithmic question";
+        }
+        if (1 == $hasimg) {
+            $validationErrors[] = "Cannot edit a question with images";
         }
 
         return $validationErrors;

@@ -812,7 +812,17 @@ switch($_GET['action']) {
 					array_keys($browserprops['level']['options']),
 					array_values($browserprops['level']['options']),
 					$courselevel,
-					_('Select a level'),
+                    #### Begin OHM-specific code #####################################################################
+                    #### Begin OHM-specific code #####################################################################
+                    #### Begin OHM-specific code #####################################################################
+                    #### Begin OHM-specific code #####################################################################
+                    #### Begin OHM-specific code #####################################################################
+					_('Select the applicable level (required)'),
+                    #### End OHM-specific code #####################################################################
+                    #### End OHM-specific code #####################################################################
+                    #### End OHM-specific code #####################################################################
+                    #### End OHM-specific code #####################################################################
+                    #### End OHM-specific code #####################################################################
 					'',
 					'onchange="courselevelchg(this)"' . ($CFG['CPS']['usecourselevel'] === 'required' ? ' required':'')
 				);
