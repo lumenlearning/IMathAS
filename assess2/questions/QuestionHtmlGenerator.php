@@ -785,6 +785,8 @@ class QuestionHtmlGenerator
                 $toevalqtxtwithoutanswerbox = preg_replace_callback('/(\$)?\$answerbox\[(\d+)\]/', function ($matches): string {
                     $qn = 1000 + $matches[2];
                     $placeholder = 'ANSWERBOX_PLACEHOLDER_QN_' . $qn;
+                    // An additional $ preceding $answerbox should be preserved
+                    // but also must be escaped so the eval doesn't attempt to eval $ANSWERBOX_PLACEHOLDER
                     if ($matches[1] == '$') {
                         $placeholder = '\$' . $placeholder;
                     }
