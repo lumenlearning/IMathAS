@@ -53,8 +53,21 @@ $placeinhead .= '<style>
     .results-table th {
         background-color: #f2f2f2;
     }
+    .csv-download-btn {
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .csv-download-btn:hover {
+        background-color: #45a049;
+    }
 </style>';
-require_once("../header.php");
 
 if ($GLOBALS['myrights'] < 100) {
     echo "You're not authorized to view this page.";
@@ -62,24 +75,152 @@ if ($GLOBALS['myrights'] < 100) {
     exit;
 }
 
-// Initialize variables with sanitized inputs
-$startDate = isset($_POST['start_date']) ? Sanitize::simpleString($_POST['start_date']) : '';
-$endDate = isset($_POST['end_date']) ? Sanitize::simpleString($_POST['end_date']) : '';
-$startModDate = isset($_POST['start_mod_date']) ? Sanitize::simpleString($_POST['start_mod_date']) : '';
-$endModDate = isset($_POST['end_mod_date']) ? Sanitize::simpleString($_POST['end_mod_date']) : '';
-$notInAssessment = isset($_POST['not_in_assessment']);
+function questionsToCSVArrays($questions) {
+    $arrays = array(
+            // Column Headers
+            array('Question ID', 'User Rights', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
+    );
 
-// Process form submission
+    // Add data rows
+    foreach ($questions as $question) {
+        $row = array(
+            $question['id'],
+            $question['userights'],
+            $question['ownerid'],
+            date('Y-m-d H:i:s', $question['adddate']),
+            date('Y-m-d H:i:s', $question['lastmoddate']),
+            $question['groupid']
+        );
+        $arrays[] = $row;
+    }
+
+    return $arrays;
+}
+
+function usersToCSVArrays($users) {
+    $arrays = array(
+            // Column Headers
+            array('ID', 'Name', 'Rights', 'Group Name')
+    );
+
+    // Add data rows
+    foreach ($users as $user) {
+        $row = array(
+            $user['id'],
+            $user['FirstName'] . ' ' . $user['LastName'],
+            $user['rights'],
+            $user['groupname']
+        );
+        $arrays[] = $row;
+    }
+
+    return $arrays;
+}
+
+function groupsToCSVArrays($groups) {
+    $arrays = array(
+            // Column Headers
+            array('ID', 'Name', 'Group Type')
+    );
+
+    // Add data rows
+    foreach ($groups as $group) {
+        $row = array(
+            $group['id'],
+            $group['name'],
+            $group['grouptype'],
+        );
+        $arrays[] = $row;
+    }
+
+    return $arrays;
+}
+
+// Function to export multiple CSV files as a ZIP archive
+function exportToZip($filesData)
+{
+    // Create a temporary directory
+    $tempDir = sys_get_temp_dir() . '/csv_export_' . uniqid();
+    if (!file_exists($tempDir)) {
+        mkdir($tempDir, 0777, true);
+    }
+
+    // Create CSV files in the temporary directory
+    foreach ($filesData as $filename => $data) {
+        $filepath = $tempDir . '/' . $filename;
+        $f = fopen($filepath, 'w');
+
+        // Add UTF-8 BOM for Excel compatibility
+        fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        // Write data to the file
+        foreach ($data as $row) {
+            fputcsv($f, $row);
+        }
+
+        fclose($f);
+    }
+
+    // Create a ZIP file
+    $zipFilename = 'question_report_' . date('Y-m-d') . '.zip';
+    $zipFilepath = $tempDir . '/' . $zipFilename;
+
+    $zip = new ZipArchive();
+    if ($zip->open($zipFilepath, ZipArchive::CREATE) !== TRUE) {
+        die("Cannot create ZIP file");
+    }
+
+    // Add CSV files to the ZIP
+    foreach ($filesData as $filename => $data) {
+        $zip->addFile($tempDir . '/' . $filename, $filename);
+    }
+
+    $zip->close();
+
+    // Send the ZIP file to the browser
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
+    header('Content-Length: ' . filesize($zipFilepath));
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    readfile($zipFilepath);
+
+    // Clean up temporary files
+    foreach ($filesData as $filename => $data) {
+        unlink($tempDir . '/' . $filename);
+    }
+    unlink($zipFilepath);
+    rmdir($tempDir);
+}
+
 $showResults = false;
-$totalQuestions = 0;
-$userRightsDistribution = [];
-$uniqueUsers = [];
-$uniqueGroups = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $showResults = true;
+    // Initialize variables with sanitized inputs
+    $startDate = isset($_POST['start_date']) ? Sanitize::simpleString($_POST['start_date']) : '';
+    $endDate = isset($_POST['end_date']) ? Sanitize::simpleString($_POST['end_date']) : '';
+    $startModDate = isset($_POST['start_mod_date']) ? Sanitize::simpleString($_POST['start_mod_date']) : '';
+    $endModDate = isset($_POST['end_mod_date']) ? Sanitize::simpleString($_POST['end_mod_date']) : '';
+    $noAssessment = isset($_POST['no_assessment']);
+} else {
+    // Add date filters from session or GET parameters
+    $startDate = isset($_GET['start_date']) ? Sanitize::simpleString($_GET['start_date']) : '';
+    $endDate = isset($_GET['end_date']) ? Sanitize::simpleString($_GET['end_date']) : '';
+    $startModDate = isset($_GET['start_mod_date']) ? Sanitize::simpleString($_GET['start_mod_date']) : '';
+    $endModDate = isset($_GET['end_mod_date']) ? Sanitize::simpleString($_GET['end_mod_date']) : '';
+    $noAssessment = isset($_GET['no_assessment']);
+}
 
-    // Build the query
+if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Process form submission
+    $totalQuestions = 0;
+    $userRightsDistribution = [];
+    $uniqueUsers = [];
+    $uniqueGroups = [];
+    $questions = []; // Initialize questions array
+
+    // We need to run the same query as for the report
     $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, u.groupid 
               FROM imas_questionset AS qs 
               JOIN imas_users AS u ON qs.ownerid = u.id
@@ -87,7 +228,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $params = [];
 
-    // Add date filters
     if (!empty($startDate)) {
         $query .= " AND qs.adddate >= :start_date";
         $params[':start_date'] = strtotime($startDate);
@@ -108,8 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $params[':end_mod_date'] = strtotime($endModDate . ' 23:59:59');
     }
 
-    // Add not in assessment filter
-    if ($notInAssessment) {
+    if ($noAssessment) {
         $query .= " AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)";
     }
 
@@ -174,6 +313,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Check if CSV export is requested
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $questionsArrays = questionsToCSVArrays($questions);
+    $usersArrays = usersToCSVArrays($uniqueUserDetails);
+    $groupsArrays = groupsToCSVArrays($uniqueGroupDetails);
+
+    // Export to ZIP containing all CSV files
+    exportToZip([
+        'questions.csv' => $questionsArrays,
+        'users.csv' => $usersArrays,
+        'groups.csv' => $groupsArrays
+    ]);
+
+    exit();
+}
+
+require_once("../header.php");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $showResults = true;
+}
+
 ?>
 <div class="breadcrumb">
     <?php echo $breadcrumbbase; ?>
@@ -186,7 +346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="filter-container">
     <h2>Filter Questions</h2>
-    <form method="post" action="">
+    <form method="post" action="question-report.php">
         <div class="filter-row">
             <div class="filter-item">
                 <label class="filter-label" for="start_date">Creation Date Range:</label>
@@ -207,8 +367,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="filter-row">
             <div class="filter-item">
-                <input type="checkbox" id="not_in_assessment" name="not_in_assessment" <?php echo $notInAssessment ? 'checked' : ''; ?>>
-                <label for="not_in_assessment">Only show questions not in any assessment</label>
+                <input type="checkbox" id="no_assessment" name="no_assessment" <?php echo $noAssessment ? 'checked' : ''; ?>>
+                <label for="no_assessment">Only show questions not in any assessment</label>
             </div>
         </div>
 
@@ -224,6 +384,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="results-section">
             <div class="results-title">Summary</div>
+            <div style="margin-bottom: 10px;">
+                <a href="?export=csv<?php
+                echo !empty($startDate) ? '&start_date=' . urlencode($startDate) : '';
+                echo !empty($endDate) ? '&end_date=' . urlencode($endDate) : '';
+                echo !empty($startModDate) ? '&start_mod_date=' . urlencode($startModDate) : '';
+                echo !empty($endModDate) ? '&end_mod_date=' . urlencode($endModDate) : '';
+                echo $noAssessment ? '&no_assessment=1' : '';
+                ?>" class="csv-download-btn">Download CSV Files (ZIP)</a>
+            </div>
             <p>Total questions matching criteria: <?php echo $totalQuestions; ?></p>
             <p>Unique users: <?php echo count($uniqueUsers); ?></p>
             <p>Unique groups: <?php echo count($uniqueGroups); ?></p>
@@ -267,60 +436,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </tr>
                 </tbody>
             </table>
-        </div>
-
-        <div class="results-section">
-            <div class="results-title">Unique Groups (<?php echo count($uniqueGroupDetails); ?>)</div>
-            <?php if (!empty($uniqueGroupDetails)): ?>
-                <table class="results-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Group Type</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($uniqueGroupDetails as $group): ?>
-                        <tr>
-                            <td><?php echo $group['id']; ?></td>
-                            <td><?php echo $group['name']; ?></td>
-                            <td><?php echo $group['grouptype']; ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p>No groups found.</p>
-            <?php endif; ?>
-        </div>
-
-        <div class="results-section">
-            <div class="results-title">Unique Users (<?php echo count($uniqueUserDetails); ?>)</div>
-            <?php if (!empty($uniqueUserDetails)): ?>
-                <table class="results-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Rights</th>
-                        <th>Group</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($uniqueUserDetails as $user): ?>
-                        <tr>
-                            <td><?php echo $user['id']; ?></td>
-                            <td><?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></td>
-                            <td><?php echo $user['rights']; ?></td>
-                            <td><?php echo $user['groupname']; ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p>No users found.</p>
-            <?php endif; ?>
         </div>
     </div>
 <?php endif; ?>
