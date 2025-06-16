@@ -196,21 +196,16 @@ function exportToZip($filesData)
 
 $showResults = false;
 
+$paramSource = $_GET;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Initialize variables with sanitized inputs
-    $startDate = isset($_POST['start_date']) ? Sanitize::simpleString($_POST['start_date']) : '';
-    $endDate = isset($_POST['end_date']) ? Sanitize::simpleString($_POST['end_date']) : '';
-    $startModDate = isset($_POST['start_mod_date']) ? Sanitize::simpleString($_POST['start_mod_date']) : '';
-    $endModDate = isset($_POST['end_mod_date']) ? Sanitize::simpleString($_POST['end_mod_date']) : '';
-    $noAssessment = isset($_POST['no_assessment']);
-} else {
-    // Add date filters from session or GET parameters
-    $startDate = isset($_GET['start_date']) ? Sanitize::simpleString($_GET['start_date']) : '';
-    $endDate = isset($_GET['end_date']) ? Sanitize::simpleString($_GET['end_date']) : '';
-    $startModDate = isset($_GET['start_mod_date']) ? Sanitize::simpleString($_GET['start_mod_date']) : '';
-    $endModDate = isset($_GET['end_mod_date']) ? Sanitize::simpleString($_GET['end_mod_date']) : '';
-    $noAssessment = isset($_GET['no_assessment']);
+    $paramSource = $_POST;
 }
+
+$startDate = isset($paramSource['start_date']) ? Sanitize::simpleString($paramSource['start_date']) : '';
+$endDate = isset($paramSource['end_date']) ? Sanitize::simpleString($paramSource['end_date']) : '';
+$startModDate = isset($paramSource['start_mod_date']) ? Sanitize::simpleString($paramSource['start_mod_date']) : '';
+$endModDate = isset($paramSource['end_mod_date']) ? Sanitize::simpleString($paramSource['end_mod_date']) : '';
+$noAssessment = isset($paramSource['no_assessment']);
 
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Process form submission
