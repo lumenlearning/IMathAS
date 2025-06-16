@@ -800,7 +800,7 @@ class QuestionHtmlGenerator
                 $placeholder = 'ANSWERBOX_PLACEHOLDER';
                 // An additional $ preceding $answerbox should be preserved
                 // but also must be escaped so the eval doesn't attempt to eval $ANSWERBOX_PLACEHOLDER
-                if ($matches[1] == '$') {
+                if (count($matches) > 1 && $matches[1] == '$') {
                     $placeholder = '\$' . $placeholder;
                 }
                 return $placeholder;
