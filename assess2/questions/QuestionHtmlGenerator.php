@@ -796,7 +796,15 @@ class QuestionHtmlGenerator
                 $toevalqtxtwithoutanswerbox = $toevalqtxt;
             }
             // Replace $answerbox variables with placeholders in single part questions.
-            $toevalqtxtwithoutanswerbox = preg_replace('/\$answerbox/', 'ANSWERBOX_PLACEHOLDER', $toevalqtxtwithoutanswerbox);
+            $toevalqtxtwithoutanswerbox = preg_replace_callback('/(\$)?\$answerbox/', function ($matches): string {
+                $placeholder = 'ANSWERBOX_PLACEHOLDER';
+                // An additional $ preceding $answerbox should be preserved
+                // but also must be escaped so the eval doesn't attempt to eval $ANSWERBOX_PLACEHOLDER
+                if ($matches[1] == '$') {
+                    $placeholder = '\$' . $placeholder;
+                }
+                return $placeholder;
+            }, $toevalqtxtwithoutanswerbox);
 
             $prep = \genVarInit($qtextvars);
             eval($prep . "\$evaledqtextwithoutanswerbox = \"$toevalqtxtwithoutanswerbox\";"); // This creates $evaledqtextwithoutanswerbox.
