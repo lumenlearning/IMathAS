@@ -137,7 +137,7 @@ function groupsToCSVArrays($groups) {
 }
 
 // Function to export multiple CSV files as a ZIP archive
-function exportToZip($filesData)
+function exportCSVsToZip($filesData, $zipName = 'zip_')
 {
     // Create a temporary directory
     $tempDir = sys_get_temp_dir() . '/csv_export_' . uniqid();
@@ -162,7 +162,7 @@ function exportToZip($filesData)
     }
 
     // Create a ZIP file
-    $zipFilename = 'question_report_' . date('Y-m-d') . '.zip';
+    $zipFilename = $zipName . date('Y-m-d') . '.zip';
     $zipFilepath = $tempDir . '/' . $zipFilename;
 
     $zip = new ZipArchive();
@@ -201,21 +201,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paramSource = $_POST;
 }
 
+// get query params from the paramSource
 $startDate = isset($paramSource['start_date']) ? Sanitize::simpleString($paramSource['start_date']) : '';
 $endDate = isset($paramSource['end_date']) ? Sanitize::simpleString($paramSource['end_date']) : '';
 $startModDate = isset($paramSource['start_mod_date']) ? Sanitize::simpleString($paramSource['start_mod_date']) : '';
 $endModDate = isset($paramSource['end_mod_date']) ? Sanitize::simpleString($paramSource['end_mod_date']) : '';
 $noAssessment = isset($paramSource['no_assessment']);
 
+// if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Process form submission
     $totalQuestions = 0;
     $userRightsDistribution = [];
     $uniqueUsers = [];
     $uniqueGroups = [];
-    $questions = []; // Initialize questions array
+    $questions = [];
 
-    // We need to run the same query as for the report
     $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, u.groupid 
               FROM imas_questionset AS qs 
               JOIN imas_users AS u ON qs.ownerid = u.id
@@ -257,6 +258,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
     // Process the results
     $userRightsDistribution = [
         '0' => 0, // Private
+        '1' => 0, // Outdated, should've been replaced by 4
         '2' => 0, // Allow Use By All
         '3' => 0, // Allow use by all and modifications by group
         '4' => 0, // Allow use by all and modifications by all
@@ -264,7 +266,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
     ];
 
     foreach ($questions as $question) {
-        // Count by user rights
         if (isset($userRightsDistribution[$question['userights']])) {
             $userRightsDistribution[$question['userights']]++;
         } else {
@@ -315,11 +316,11 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $groupsArrays = groupsToCSVArrays($uniqueGroupDetails);
 
     // Export to ZIP containing all CSV files
-    exportToZip([
+    exportCSVsToZip([
         'questions.csv' => $questionsArrays,
         'users.csv' => $usersArrays,
         'groups.csv' => $groupsArrays
-    ]);
+    ], $zipName = 'question-report');
 
     exit();
 }
@@ -408,6 +409,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <td>Private (0)</td>
                     <td><?php echo $userRightsDistribution['0']; ?></td>
                     <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['0'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
+                </tr>
+                <tr>
+                    <td>Outdated (1)</td>
+                    <td><?php echo $userRightsDistribution['1']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['1'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
                 </tr>
                 <tr>
                     <td>Allow use by all (2)</td>
