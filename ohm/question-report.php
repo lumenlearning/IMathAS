@@ -210,110 +210,30 @@ $noAssessment = isset($paramSource['no_assessment']);
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Process form submission
-    $totalQuestions = 0;
-    $userRightsDistribution = [];
-    $uniqueUsers = [];
-    $uniqueGroups = [];
-    $questions = [];
+    $reportService = new OHM\Services\QuestionReportService(
+        $DBH,
+        $startModDate,
+        $endDate,
+        $startModDate,
+        $endModDate,
+        $noAssessment
+    );
 
-    $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, u.groupid 
-              FROM imas_questionset AS qs 
-              JOIN imas_users AS u ON qs.ownerid = u.id
-              WHERE qs.deleted=0";
+    $report = $reportService->generateReport();
 
-    $params = [];
-
-    if (!empty($startDate)) {
-        $query .= " AND qs.adddate >= :start_date";
-        $params[':start_date'] = strtotime($startDate);
-    }
-
-    if (!empty($endDate)) {
-        $query .= " AND qs.adddate <= :end_date";
-        $params[':end_date'] = strtotime($endDate . ' 23:59:59');
-    }
-
-    if (!empty($startModDate)) {
-        $query .= " AND qs.lastmoddate >= :start_mod_date";
-        $params[':start_mod_date'] = strtotime($startModDate);
-    }
-
-    if (!empty($endModDate)) {
-        $query .= " AND qs.lastmoddate <= :end_mod_date";
-        $params[':end_mod_date'] = strtotime($endModDate . ' 23:59:59');
-    }
-
-    if ($noAssessment) {
-        $query .= " AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)";
-    }
-
-    // Execute the query
-    $stmt = $DBH->prepare($query);
-    $stmt->execute($params);
-    $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    $questions = $report['questions'];
     $totalQuestions = count($questions);
 
-    // Process the results
-    $userRightsDistribution = [
-        '0' => 0, // Private
-        '1' => 0, // Outdated, should've been replaced by 4
-        '2' => 0, // Allow Use By All
-        '3' => 0, // Allow use by all and modifications by group
-        '4' => 0, // Allow use by all and modifications by all
-        'Unspecified' => 0
-    ];
-
-    foreach ($questions as $question) {
-        if (isset($userRightsDistribution[$question['userights']])) {
-            $userRightsDistribution[$question['userights']]++;
-        } else {
-            $userRightsDistribution['Unspecified']++;
-        }
-
-        // Track unique users
-        if (!in_array($question['ownerid'], $uniqueUsers)) {
-            $uniqueUsers[] = $question['ownerid'];
-        }
-
-        // Track unique groups
-        if (!empty($question['groupid']) && !in_array($question['groupid'], $uniqueGroups)) {
-            $uniqueGroups[] = $question['groupid'];
-        }
-    }
-
-    // Get user details
-    $uniqueUserDetails = [];
-    if (!empty($uniqueUsers)) {
-        $placeholders = str_repeat('?,', count($uniqueUsers) - 1) . '?';
-        $query = "SELECT u.id, u.FirstName, u.LastName, u.rights, u.groupid, g.name AS groupname 
-                  FROM imas_users AS u 
-                  LEFT JOIN imas_groups AS g ON u.groupid = g.id 
-                  WHERE u.id IN ($placeholders)";
-        $stmt = $DBH->prepare($query);
-        $stmt->execute($uniqueUsers);
-        $uniqueUserDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Get group details
-    $uniqueGroupDetails = [];
-    if (!empty($uniqueGroups)) {
-        $placeholders = str_repeat('?,', count($uniqueGroups) - 1) . '?';
-        $query = "SELECT id, name, grouptype 
-                  FROM imas_groups 
-                  WHERE id IN ($placeholders)";
-        $stmt = $DBH->prepare($query);
-        $stmt->execute($uniqueGroups);
-        $uniqueGroupDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    $users = $report['users'];
+    $groups = $report['groups'];
+    $userRightsDistribution = $report['userRightsDistribution'];
 }
 
 // Check if CSV export is requested
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $questionsArrays = questionsToCSVArrays($questions);
-    $usersArrays = usersToCSVArrays($uniqueUserDetails);
-    $groupsArrays = groupsToCSVArrays($uniqueGroupDetails);
+    $usersArrays = usersToCSVArrays($users);
+    $groupsArrays = groupsToCSVArrays($groups);
 
     // Export to ZIP containing all CSV files
     exportCSVsToZip([
@@ -390,8 +310,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ?>" class="csv-download-btn">Download CSV Files (ZIP)</a>
             </div>
             <p>Total questions matching criteria: <?php echo $totalQuestions; ?></p>
-            <p>Unique users: <?php echo count($uniqueUsers); ?></p>
-            <p>Unique groups: <?php echo count($uniqueGroups); ?></p>
+            <p>Unique users: <?php echo count($users); ?></p>
+            <p>Unique groups: <?php echo count($groups); ?></p>
         </div>
 
         <div class="results-section">
