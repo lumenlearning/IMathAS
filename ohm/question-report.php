@@ -148,8 +148,9 @@ $endModDate = isset($paramSource['end_mod_date']) ? Sanitize::simpleString($para
 // onlyInt will cast '' to 0, so checking against !empty is required
 $minId = isset($paramSource['min_id']) && !empty($paramSource['min_id']) ? Sanitize::onlyInt($paramSource['min_id']) : null;
 $maxId = isset($paramSource['max_id']) && !empty($paramSource['max_id']) ? Sanitize::onlyInt($paramSource['max_id']) : null;
-$minAssessmentUsage = isset($paramSource['min_assessment_usage']) && !empty($paramSource['min_assessment_usage']) ? Sanitize::onlyInt($paramSource['min_assessment_usage']) : null;
-$maxAssessmentUsage = isset($paramSource['max_assessment_usage']) && !empty($paramSource['max_assessment_usage']) ? Sanitize::onlyInt($paramSource['max_assessment_usage']) : null;
+// !empty(0) is false, so must check against explicit '0' to ensure that value is interpreted as integer 0
+$minAssessmentUsage = isset($paramSource['min_assessment_usage']) && (!empty($paramSource['min_assessment_usage']) || $paramSource['min_assessment_usage'] === '0') ? Sanitize::onlyInt($paramSource['min_assessment_usage']) : null;
+$maxAssessmentUsage = isset($paramSource['max_assessment_usage']) && (!empty($paramSource['max_assessment_usage']) || $paramSource['max_assessment_usage'] === '0') ? Sanitize::onlyInt($paramSource['max_assessment_usage']) : null;
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
