@@ -86,7 +86,7 @@ class QuestionReportService
 
         if (!empty($this->endDate)) {
             $query .= " AND qs.adddate <= :end_date";
-            $params[':end_date'] = strtotime($this->endDate . ' 23:59:59');
+            $params[':end_date'] = strtotime($this->endDate . ' 23:59:59'); // inclusive of endDate
         }
 
         if (!empty($this->startModDate)) {
@@ -96,7 +96,7 @@ class QuestionReportService
 
         if (!empty($this->endModDate)) {
             $query .= " AND qs.lastmoddate <= :end_mod_date";
-            $params[':end_mod_date'] = strtotime($this->endModDate . ' 23:59:59');
+            $params[':end_mod_date'] = strtotime($this->endModDate . ' 23:59:59'); // inclusive of endModDate
         }
 
         if ($this->noAssessment) {
