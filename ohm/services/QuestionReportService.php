@@ -219,7 +219,7 @@ class QuestionReportService
     public function questionsToCSVArrays(): array {
         $arrays = array(
             // Column Headers
-            array('Question ID', 'User Rights', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
+            array('Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
         );
 
         // Add data rows
@@ -227,6 +227,7 @@ class QuestionReportService
             $row = array(
                 $question['id'],
                 $question['userights'],
+                $question['qtype'],
                 $question['ownerid'],
                 date('Y-m-d H:i:s', $question['adddate']),
                 date('Y-m-d H:i:s', $question['lastmoddate']),

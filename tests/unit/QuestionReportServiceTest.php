@@ -648,13 +648,14 @@ final class QuestionReportServiceTest extends TestCase
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result); // Header row + 1 data row
-        $this->assertEquals(['Question ID', 'User Rights', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID'], $result[0]);
+        $this->assertEquals(['Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID'], $result[0]);
         $this->assertEquals(1, $result[1][0]); // Question ID
         $this->assertEquals('0', $result[1][1]); // User Rights
-        $this->assertEquals(100, $result[1][2]); // Owner ID
-        $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][3]); // Creation Date
-        $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][4]); // Last Modified Date
-        $this->assertEquals(5, $result[1][5]); // Group ID
+        $this->assertEquals('numeric', $result[1][2]); // Question Type
+        $this->assertEquals(100, $result[1][3]); // Owner ID
+        $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][4]); // Creation Date
+        $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][5]); // Last Modified Date
+        $this->assertEquals(5, $result[1][6]); // Group ID
     }
 
     /*
