@@ -7,15 +7,15 @@ use PDO;
 // Collect data on a set of questions
 class QuestionReportService
 {
-    private $startDate = '';
+    private $startDate;
 
-    private $endDate = '';
+    private $endDate;
 
-    private $startModDate = '';
+    private $startModDate;
 
-    private $endModDate = '';
+    private $endModDate;
 
-    private $noAssessment = '';
+    private $noAssessment;
 
     private $dbh;
 

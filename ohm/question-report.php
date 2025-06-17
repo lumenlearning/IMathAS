@@ -151,7 +151,7 @@ $noAssessment = isset($paramSource['no_assessment']);
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
     $reportService = new OHM\Services\QuestionReportService(
         $DBH,
-        $startModDate,
+        $startDate,
         $endDate,
         $startModDate,
         $endModDate,
