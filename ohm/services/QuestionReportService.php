@@ -15,11 +15,14 @@ class QuestionReportService
 
     private $endModDate;
 
-    private $noAssessment;
 
     private $minId;
 
     private $maxId;
+
+    private $minAssessmentUsage;
+
+    private $maxAssessmentUsage;
 
     private $dbh;
 
@@ -50,9 +53,10 @@ class QuestionReportService
         $endDate,
         $startModDate,
         $endModDate,
-        $noAssessment,
         $minId = 0,
-        $maxId = null
+        $maxId = null,
+        $minAssessmentUsage = null,
+        $maxAssessmentUsage = null
     )
     {
         $this->dbh = $dbh;
@@ -60,9 +64,10 @@ class QuestionReportService
         $this->endDate = $endDate;
         $this->startModDate = $startModDate;
         $this->endModDate = $endModDate;
-        $this->noAssessment = $noAssessment;
         $this->minId = $minId;
         $this->maxId = $maxId;
+        $this->minAssessmentUsage = $minAssessmentUsage;
+        $this->maxAssessmentUsage = $maxAssessmentUsage;
     }
 
     public function generateReport(): array
@@ -83,7 +88,8 @@ class QuestionReportService
 
     public function queryQuestions(): array
     {
-        $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, qs.qtype, u.groupid 
+        $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, qs.qtype, u.groupid, 
+                 (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) AS assessment_usage_count
               FROM imas_questionset AS qs 
               JOIN imas_users AS u ON qs.ownerid = u.id
               WHERE qs.deleted=0";
@@ -110,10 +116,6 @@ class QuestionReportService
             $params[':end_mod_date'] = strtotime($this->endModDate . ' 23:59:59'); // inclusive of endModDate
         }
 
-        if ($this->noAssessment) {
-            $query .= " AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)";
-        }
-
         if (!empty($this->minId)) {
             $query .= " AND qs.id >= :min_id";
             $params[':min_id'] = $this->minId;
@@ -122,6 +124,16 @@ class QuestionReportService
         if (!empty($this->maxId)) {
             $query .= " AND qs.id <= :max_id";
             $params[':max_id'] = $this->maxId;
+        }
+
+        if (!empty($this->minAssessmentUsage)) {
+            $query .= " AND (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) >= :min_assessment_usage";
+            $params[':min_assessment_usage'] = $this->minAssessmentUsage;
+        }
+
+        if (!empty($this->maxAssessmentUsage)) {
+            $query .= " AND (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) <= :max_assessment_usage";
+            $params[':max_assessment_usage'] = $this->maxAssessmentUsage;
         }
 
         // Execute the query
@@ -219,7 +231,7 @@ class QuestionReportService
     public function questionsToCSVArrays(): array {
         $arrays = array(
             // Column Headers
-            array('Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
+            array('Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID', 'Assessment Usage Count')
         );
 
         // Add data rows
@@ -231,7 +243,8 @@ class QuestionReportService
                 $question['ownerid'],
                 date('Y-m-d H:i:s', $question['adddate']),
                 date('Y-m-d H:i:s', $question['lastmoddate']),
-                $question['groupid']
+                $question['groupid'],
+                $question['assessment_usage_count']
             );
             $arrays[] = $row;
         }

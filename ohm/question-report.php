@@ -145,10 +145,11 @@ $startDate = isset($paramSource['start_date']) ? Sanitize::simpleString($paramSo
 $endDate = isset($paramSource['end_date']) ? Sanitize::simpleString($paramSource['end_date']) : '';
 $startModDate = isset($paramSource['start_mod_date']) ? Sanitize::simpleString($paramSource['start_mod_date']) : '';
 $endModDate = isset($paramSource['end_mod_date']) ? Sanitize::simpleString($paramSource['end_mod_date']) : '';
-$noAssessment = isset($paramSource['no_assessment']);
 // onlyInt will cast '' to 0, so checking against !empty is required
 $minId = isset($paramSource['min_id']) && !empty($paramSource['min_id']) ? Sanitize::onlyInt($paramSource['min_id']) : null;
 $maxId = isset($paramSource['max_id']) && !empty($paramSource['max_id']) ? Sanitize::onlyInt($paramSource['max_id']) : null;
+$minAssessmentUsage = isset($paramSource['min_assessment_usage']) && !empty($paramSource['min_assessment_usage']) ? Sanitize::onlyInt($paramSource['min_assessment_usage']) : null;
+$maxAssessmentUsage = isset($paramSource['max_assessment_usage']) && !empty($paramSource['max_assessment_usage']) ? Sanitize::onlyInt($paramSource['max_assessment_usage']) : null;
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -158,9 +159,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
         $endDate,
         $startModDate,
         $endModDate,
-        $noAssessment,
         $minId,
-        $maxId
+        $maxId,
+        $minAssessmentUsage,
+        $maxAssessmentUsage
     );
 
     $report = $reportService->generateReport();
@@ -196,57 +198,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
-<div class="breadcrumb">
-    <?php echo $breadcrumbbase; ?>
-    <a href="../admin/admin2.php">Admin</a> >
-    <a href="../util/utils.php">Utilities</a> >
-    <a href="?">Question Report</a>
-</div>
+    <div class="breadcrumb">
+        <?php echo $breadcrumbbase; ?>
+        <a href="../admin/admin2.php">Admin</a> >
+        <a href="../util/utils.php">Utilities</a> >
+        <a href="?">Question Report</a>
+    </div>
 
-<h1>Question Report</h1>
+    <h1>Question Report</h1>
 
-<div class="filter-container">
-    <h2>Filter Questions (Optional)</h2>
-    <form method="post" action="question-report.php">
-        <div class="filter-row">
-            <div class="filter-item">
-                <label class="filter-label" for="start_date">Creation Date Range:</label>
-                <input type="text" id="start_date" name="start_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startDate; ?>">
-                to
-                <input type="text" id="end_date" name="end_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endDate; ?>">
+    <div class="filter-container">
+        <h2>Filter Questions (Optional)</h2>
+        <form method="post" action="question-report.php">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label" for="start_date">Creation Date Range:</label>
+                    <input type="text" id="start_date" name="start_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startDate; ?>">
+                    to
+                    <input type="text" id="end_date" name="end_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endDate; ?>">
+                </div>
             </div>
-        </div>
 
-        <div class="filter-row">
-            <div class="filter-item">
-                <label class="filter-label" for="start_mod_date">Last Modified Date Range:</label>
-                <input type="text" id="start_mod_date" name="start_mod_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startModDate; ?>">
-                to
-                <input type="text" id="end_mod_date" name="end_mod_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endModDate; ?>">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label" for="start_mod_date">Last Modified Date Range:</label>
+                    <input type="text" id="start_mod_date" name="start_mod_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startModDate; ?>">
+                    to
+                    <input type="text" id="end_mod_date" name="end_mod_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endModDate; ?>">
+                </div>
             </div>
-        </div>
 
-        <div class="filter-row">
-            <div class="filter-item">
-                <label class="filter-label" for="min_id">Question ID Range:</label>
-                <input type="number" id="min_id" name="min_id" placeholder="Min ID" value="<?php echo $minId; ?>">
-                to
-                <input type="number" id="max_id" name="max_id" placeholder="Max ID" value="<?php echo $maxId; ?>">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label" for="min_id">Question ID Range:</label>
+                    <input type="number" id="min_id" name="min_id" placeholder="Min ID" value="<?php echo $minId; ?>">
+                    to
+                    <input type="number" id="max_id" name="max_id" placeholder="Max ID" value="<?php echo $maxId; ?>">
+                </div>
             </div>
-        </div>
 
-        <div class="filter-row">
-            <div class="filter-item">
-                <input type="checkbox" id="no_assessment" name="no_assessment" <?php echo $noAssessment ? 'checked' : ''; ?>>
-                <label for="no_assessment">Only show questions not in any assessment</label>
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label" for="min_assessment_usage">Assessment Usage Range:</label>
+                    <input type="number" id="min_assessment_usage" name="min_assessment_usage" placeholder="Min Usage" value="<?php echo $minAssessmentUsage; ?>">
+                    to
+                    <input type="number" id="max_assessment_usage" name="max_assessment_usage" placeholder="Max Usage" value="<?php echo $maxAssessmentUsage; ?>">
+                </div>
             </div>
-        </div>
 
-        <div class="filter-row">
-            <button type="submit" class="button button--primary">Generate Report</button>
-        </div>
-    </form>
-</div>
+            <div class="filter-row">
+                <button type="submit" class="button button--primary">Generate Report</button>
+            </div>
+        </form>
+    </div>
 
 <?php if ($showResults): ?>
     <div class="results-container">
@@ -260,9 +264,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo !empty($endDate) ? '&end_date=' . urlencode($endDate) : '';
                 echo !empty($startModDate) ? '&start_mod_date=' . urlencode($startModDate) : '';
                 echo !empty($endModDate) ? '&end_mod_date=' . urlencode($endModDate) : '';
-                echo $noAssessment ? '&no_assessment=1' : '';
                 echo isset($minId) ? '&min_id=' . urlencode($minId) : '';
                 echo isset($maxId) ? '&max_id=' . urlencode($maxId) : '';
+                echo isset($minAssessmentUsage) ? '&min_assessment_usage=' . urlencode($minAssessmentUsage) : '';
+                echo isset($maxAssessmentUsage) ? '&max_assessment_usage=' . urlencode($maxAssessmentUsage) : '';
                 ?>" class="csv-download-btn">Download CSV Files (ZIP)</a>
             </div>
             <p>Total questions matching criteria: <?php echo $totalQuestions; ?></p>
@@ -327,11 +332,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </thead>
                 <tbody>
                 <?php foreach ($questionTypeDistribution as $type => $count): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($type); ?></td>
-                    <td><?php echo $count; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($count / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
+                    <tr>
+                        <td><?php echo htmlspecialchars($type); ?></td>
+                        <td><?php echo $count; ?></td>
+                        <td><?php echo $totalQuestions > 0 ? round(($count / $totalQuestions) * 100, 2) : 0; ?>%</td>
+                    </tr>
                 <?php endforeach; ?>
                 </tbody>
             </table>

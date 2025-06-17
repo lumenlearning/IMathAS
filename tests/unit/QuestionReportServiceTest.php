@@ -26,8 +26,7 @@ final class QuestionReportServiceTest extends TestCase
             '2023-01-01',
             '2023-12-31',
             '2023-02-01',
-            '2023-11-30',
-            true
+            '2023-11-30'
         );
 
         $this->assertInstanceOf(QuestionReportService::class, $service);
@@ -67,8 +66,7 @@ final class QuestionReportServiceTest extends TestCase
             $startDate, // Only startDate is set
             '',
             '',
-            '',
-            false
+            ''
         );
 
         $result = $service->queryQuestions();
@@ -106,8 +104,7 @@ final class QuestionReportServiceTest extends TestCase
             '',
             $endDate, // Only endDate is set
             '',
-            '',
-            false
+            ''
         );
 
         $result = $service->queryQuestions();
@@ -145,8 +142,7 @@ final class QuestionReportServiceTest extends TestCase
             '',
             '',
             $startModDate, // Only startModDate is set
-            '',
-            false
+            ''
         );
 
         $result = $service->queryQuestions();
@@ -184,8 +180,7 @@ final class QuestionReportServiceTest extends TestCase
             '',
             '',
             '',
-            $endModDate, // Only endModDate is set
-            false
+            $endModDate // Only endModDate is set
         );
 
         $result = $service->queryQuestions();
@@ -193,43 +188,6 @@ final class QuestionReportServiceTest extends TestCase
         $this->assertCount(1, $result);
     }
 
-    // Test with noAssessment parameter
-    public function testQueryQuestionsWithNoAssessment()
-    {
-        $noAssessment = true;
-
-        // Create mock statement
-        $stmtMock = $this->createMock(PDOStatement::class);
-        $stmtMock->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(function ($params) {
-                // Verify that no parameters are set since noAssessment doesn't use a parameter
-                return empty($params);
-            }));
-        $stmtMock->expects($this->once())
-            ->method('fetchAll')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'calculated', 'groupid' => 5]]);
-
-        // Configure dbhMock to return our statement mock
-        $this->dbhMock->expects($this->once())
-            ->method('prepare')
-            ->with($this->stringContains('AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)'))
-            ->willReturn($stmtMock);
-
-        // Create service with only noAssessment
-        $service = new QuestionReportService(
-            $this->dbhMock,
-            '',
-            '',
-            '',
-            '',
-            $noAssessment // Only noAssessment is set
-        );
-
-        $result = $service->queryQuestions();
-        $this->assertIsArray($result);
-        $this->assertCount(1, $result);
-    }
 
     // Test with minId parameter
     public function testQueryWithMinId()
@@ -262,7 +220,6 @@ final class QuestionReportServiceTest extends TestCase
             '', // endDate
             '', // startModDate
             '', // endModDate
-            false, // noAssessment
             $minId // Only minId is set
         );
 
@@ -302,9 +259,91 @@ final class QuestionReportServiceTest extends TestCase
             '', // endDate
             '', // startModDate
             '', // endModDate
-            false, // noAssessment
             null, // minId
             $maxId // Only maxId is set
+        );
+
+        $result = $service->queryQuestions();
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+    }
+
+    // Test with minAssessmentUsage parameter
+    public function testQueryWithMinAssessmentUsage()
+    {
+        $minAssessmentUsage = 5;
+
+        // Create mock statement
+        $stmtMock = $this->createMock(PDOStatement::class);
+        $stmtMock->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function ($params) use ($minAssessmentUsage) {
+                // Verify that the min_assessment_usage parameter is set correctly
+                return isset($params[':min_assessment_usage']) &&
+                    $params[':min_assessment_usage'] == $minAssessmentUsage;
+            }));
+        $stmtMock->expects($this->once())
+            ->method('fetchAll')
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5, 'assessment_usage_count' => 5]]);
+
+        // Configure dbhMock to return our statement mock
+        $this->dbhMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->stringContains('AND (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) >= :min_assessment_usage'))
+            ->willReturn($stmtMock);
+
+        // Create service with only minAssessmentUsage
+        $service = new QuestionReportService(
+            $this->dbhMock,
+            '', // startDate
+            '', // endDate
+            '', // startModDate
+            '', // endModDate
+            null, // minId
+            null, // maxId
+            $minAssessmentUsage // Only minAssessmentUsage is set
+        );
+
+        $result = $service->queryQuestions();
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+    }
+
+    // Test with maxAssessmentUsage parameter
+    public function testQueryWithMaxAssessmentUsage()
+    {
+        $maxAssessmentUsage = 10;
+
+        // Create mock statement
+        $stmtMock = $this->createMock(PDOStatement::class);
+        $stmtMock->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function ($params) use ($maxAssessmentUsage) {
+                // Verify that the max_assessment_usage parameter is set correctly
+                return isset($params[':max_assessment_usage']) &&
+                    $params[':max_assessment_usage'] == $maxAssessmentUsage;
+            }));
+        $stmtMock->expects($this->once())
+            ->method('fetchAll')
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5, 'assessment_usage_count' => 8]]);
+
+        // Configure dbhMock to return our statement mock
+        $this->dbhMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->stringContains('AND (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) <= :max_assessment_usage'))
+            ->willReturn($stmtMock);
+
+        // Create service with only maxAssessmentUsage
+        $service = new QuestionReportService(
+            $this->dbhMock,
+            '', // startDate
+            '', // endDate
+            '', // startModDate
+            '', // endModDate
+            null, // minId
+            null, // maxId
+            null, // minAssessmentUsage
+            $maxAssessmentUsage // Only maxAssessmentUsage is set
         );
 
         $result = $service->queryQuestions();
@@ -357,7 +396,7 @@ final class QuestionReportServiceTest extends TestCase
     public function testAggregateQuestionData()
     {
         // Create a service with questions data
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $service = new QuestionReportService($this->dbhMock, '', '', '', '');
 
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
@@ -429,7 +468,7 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create a service with uniqueUserIds
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $service = new QuestionReportService($this->dbhMock, '', '', '', '');
 
         // Use reflection to set the uniqueUserIds property
         $reflection = new ReflectionClass($service);
@@ -639,7 +678,7 @@ final class QuestionReportServiceTest extends TestCase
 
         $currentTime = time();
         $questionsProperty->setValue($service, [
-            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => $currentTime, 'lastmoddate' => $currentTime, 'qtype' => 'numeric', 'groupid' => 5]
+            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => $currentTime, 'lastmoddate' => $currentTime, 'qtype' => 'numeric', 'groupid' => 5, 'assessment_usage_count' => 3]
         ]);
 
         // Call the method
@@ -648,7 +687,7 @@ final class QuestionReportServiceTest extends TestCase
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result); // Header row + 1 data row
-        $this->assertEquals(['Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID'], $result[0]);
+        $this->assertEquals(['Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID', 'Assessment Usage Count'], $result[0]);
         $this->assertEquals(1, $result[1][0]); // Question ID
         $this->assertEquals('0', $result[1][1]); // User Rights
         $this->assertEquals('numeric', $result[1][2]); // Question Type
@@ -656,6 +695,7 @@ final class QuestionReportServiceTest extends TestCase
         $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][4]); // Creation Date
         $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][5]); // Last Modified Date
         $this->assertEquals(5, $result[1][6]); // Group ID
+        $this->assertEquals(3, $result[1][7]); // Assessment Usage Count
     }
 
     /*
