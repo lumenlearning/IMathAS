@@ -55,7 +55,7 @@ class QuestionReportService
         $this->noAssessment = $noAssessment;
     }
 
-    public function generateReport()
+    public function generateReport(): array
     {
         $questions = $this->queryQuestions();
         $this->aggregateQuestionData();
@@ -70,7 +70,7 @@ class QuestionReportService
         ];
     }
 
-    public function queryQuestions()
+    public function queryQuestions(): array
     {
         $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, u.groupid 
               FROM imas_questionset AS qs 
@@ -110,7 +110,7 @@ class QuestionReportService
         return $this->questions;
     }
 
-    public function aggregateQuestionData()
+    public function aggregateQuestionData(): void
     {
         foreach ($this->questions as $question) {
             if (isset($this->userRightsDistribution[$question['userights']])) {
@@ -131,7 +131,7 @@ class QuestionReportService
         }
     }
 
-    public function queryUsers()
+    public function queryUsers(): array
     {
         // Get user details
         if (!empty($this->uniqueUserIds)) {
@@ -147,7 +147,7 @@ class QuestionReportService
         return $this->users;
     }
 
-    public function queryGroups()
+    public function queryGroups(): array
     {
         if (!empty($this->uniqueGroupIds)) {
             $placeholders = str_repeat('?,', count($this->uniqueGroupIds) - 1) . '?';
@@ -162,27 +162,27 @@ class QuestionReportService
     }
 
 
-    public function getQuestions()
+    public function getQuestions(): array
     {
         return $this->questions;
     }
 
-    public function getUserRightsDistribution()
+    public function getUserRightsDistribution(): array
     {
         return $this->userRightsDistribution;
     }
 
-    public function getUsers()
+    public function getUsers(): array
     {
         return $this->users;
     }
 
-    public function getGroups()
+    public function getGroups(): array
     {
         return $this->groups;
     }
 
-    public function questionsToCSVArrays() {
+    public function questionsToCSVArrays(): array {
         $arrays = array(
             // Column Headers
             array('Question ID', 'User Rights', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
@@ -204,7 +204,7 @@ class QuestionReportService
         return $arrays;
     }
 
-    public function usersToCSVArrays() {
+    public function usersToCSVArrays(): array {
         $arrays = array(
             // Column Headers
             array('ID', 'Name', 'Rights', 'Group Name')
@@ -224,7 +224,7 @@ class QuestionReportService
         return $arrays;
     }
 
-    public function groupsToCSVArrays() {
+    public function groupsToCSVArrays(): array {
         $arrays = array(
             // Column Headers
             array('ID', 'Name', 'Group Type')
