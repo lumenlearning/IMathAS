@@ -29,183 +29,193 @@ final class QuestionReportServiceTest extends TestCase
             '2023-11-30',
             true
         );
-        
+
         $this->assertInstanceOf(QuestionReportService::class, $service);
     }
 
     /*
      * queryQuestions - Testing each parameter individually
      */
-    
+
     // Test with startDate parameter
     public function testQueryQuestionsWithStartDate()
     {
+        $startDate = '2023-01-01';
+
         // Create mock statement
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($params) {
+            ->with($this->callback(function ($params) use ($startDate) {
                 // Verify that the start_date parameter is set correctly
-                return isset($params[':start_date']) && 
-                       $params[':start_date'] == strtotime('2023-01-01');
+                return isset($params[':start_date']) &&
+                    $params[':start_date'] == strtotime($startDate);
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
             ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->with($this->stringContains('AND qs.adddate >= :start_date'))
             ->willReturn($stmtMock);
-        
+
         // Create service with only startDate
         $service = new QuestionReportService(
             $this->dbhMock,
-            '2023-01-01', // Only startDate is set
+            $startDate, // Only startDate is set
             '',
             '',
             '',
             false
         );
-        
+
         $result = $service->queryQuestions();
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
     }
-    
+
     // Test with endDate parameter
     public function testQueryQuestionsWithEndDate()
     {
+        $endDate = '2023-12-31';
+
         // Create mock statement
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($params) {
+            ->with($this->callback(function ($params) use ($endDate) {
                 // Verify that the end_date parameter is set correctly
-                return isset($params[':end_date']) && 
-                       $params[':end_date'] == strtotime('2023-12-31 23:59:59');
+                return isset($params[':end_date']) &&
+                    $params[':end_date'] == strtotime($endDate . ' 23:59:59');
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
             ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->with($this->stringContains('AND qs.adddate <= :end_date'))
             ->willReturn($stmtMock);
-        
+
         // Create service with only endDate
         $service = new QuestionReportService(
             $this->dbhMock,
-            '', 
-            '2023-12-31', // Only endDate is set
+            '',
+            $endDate, // Only endDate is set
             '',
             '',
             false
         );
-        
+
         $result = $service->queryQuestions();
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
     }
-    
+
     // Test with startModDate parameter
     public function testQueryQuestionsWithStartModDate()
     {
+        $startModDate = '2023-02-01';
+
         // Create mock statement
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($params) {
+            ->with($this->callback(function ($params) use ($startModDate) {
                 // Verify that the start_mod_date parameter is set correctly
-                return isset($params[':start_mod_date']) && 
-                       $params[':start_mod_date'] == strtotime('2023-02-01');
+                return isset($params[':start_mod_date']) &&
+                    $params[':start_mod_date'] == strtotime($startModDate);
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
             ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->with($this->stringContains('AND qs.lastmoddate >= :start_mod_date'))
             ->willReturn($stmtMock);
-        
+
         // Create service with only startModDate
         $service = new QuestionReportService(
             $this->dbhMock,
             '',
             '',
-            '2023-02-01', // Only startModDate is set
+            $startModDate, // Only startModDate is set
             '',
             false
         );
-        
+
         $result = $service->queryQuestions();
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
     }
-    
+
     // Test with endModDate parameter
     public function testQueryQuestionsWithEndModDate()
     {
+        $endModDate = '2023-11-30';
+
         // Create mock statement
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($params) {
+            ->with($this->callback(function ($params) use ($endModDate) {
                 // Verify that the end_mod_date parameter is set correctly
-                return isset($params[':end_mod_date']) && 
-                       $params[':end_mod_date'] == strtotime('2023-11-30 23:59:59');
+                return isset($params[':end_mod_date']) &&
+                    $params[':end_mod_date'] == strtotime($endModDate . ' 23:59:59');
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
             ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->with($this->stringContains('AND qs.lastmoddate <= :end_mod_date'))
             ->willReturn($stmtMock);
-        
+
         // Create service with only endModDate
         $service = new QuestionReportService(
             $this->dbhMock,
             '',
             '',
             '',
-            '2023-11-30', // Only endModDate is set
+            $endModDate, // Only endModDate is set
             false
         );
-        
+
         $result = $service->queryQuestions();
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
     }
-    
+
     // Test with noAssessment parameter
     public function testQueryQuestionsWithNoAssessment()
     {
+        $noAssessment = true;
+
         // Create mock statement
         $stmtMock = $this->createMock(PDOStatement::class);
         $stmtMock->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($params) {
+            ->with($this->callback(function ($params) {
                 // Verify that no parameters are set since noAssessment doesn't use a parameter
                 return empty($params);
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
             ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->with($this->stringContains('AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)'))
             ->willReturn($stmtMock);
-        
+
         // Create service with only noAssessment
         $service = new QuestionReportService(
             $this->dbhMock,
@@ -213,9 +223,9 @@ final class QuestionReportServiceTest extends TestCase
             '',
             '',
             '',
-            true // Only noAssessment is set
+            $noAssessment // Only noAssessment is set
         );
-        
+
         $result = $service->queryQuestions();
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
@@ -231,26 +241,26 @@ final class QuestionReportServiceTest extends TestCase
             ->setConstructorArgs([$this->dbhMock, '', '', '', '', false])
             ->onlyMethods(['queryQuestions', 'aggregateQuestionData', 'queryUsers', 'queryGroups'])
             ->getMock();
-        
+
         // Set up expectations for mocked methods
         $service->expects($this->once())
             ->method('queryQuestions')
             ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
-        
+
         $service->expects($this->once())
             ->method('aggregateQuestionData');
-            
+
         $service->expects($this->once())
             ->method('queryUsers')
             ->willReturn([['id' => 100, 'FirstName' => 'John', 'LastName' => 'Doe', 'rights' => 40, 'groupid' => 5, 'groupname' => 'Test Group']]);
-            
+
         $service->expects($this->once())
             ->method('queryGroups')
             ->willReturn([['id' => 5, 'name' => 'Test Group', 'grouptype' => 'Test']]);
-        
+
         // Call the method
         $result = $service->generateReport();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertArrayHasKey('questions', $result);
@@ -266,7 +276,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service with questions data
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
         $questionsProperty = $reflection->getProperty('questions');
@@ -276,25 +286,25 @@ final class QuestionReportServiceTest extends TestCase
             ['id' => 2, 'userights' => '2', 'ownerid' => 101, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5],
             ['id' => 3, 'userights' => '4', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 6]
         ]);
-        
+
         // Call the method
         $service->aggregateQuestionData();
-        
+
         // Get the userRightsDistribution property
         $userRightsDistributionProperty = $reflection->getProperty('userRightsDistribution');
         $userRightsDistributionProperty->setAccessible(true);
         $userRightsDistribution = $userRightsDistributionProperty->getValue($service);
-        
+
         // Get the uniqueUserIds property
         $uniqueUserIdsProperty = $reflection->getProperty('uniqueUserIds');
         $uniqueUserIdsProperty->setAccessible(true);
         $uniqueUserIds = $uniqueUserIdsProperty->getValue($service);
-        
+
         // Get the uniqueGroupIds property
         $uniqueGroupIdsProperty = $reflection->getProperty('uniqueGroupIds');
         $uniqueGroupIdsProperty->setAccessible(true);
         $uniqueGroupIds = $uniqueGroupIdsProperty->getValue($service);
-        
+
         // Assert the results
         $this->assertEquals(1, $userRightsDistribution['0']);
         $this->assertEquals(1, $userRightsDistribution['2']);
@@ -323,24 +333,24 @@ final class QuestionReportServiceTest extends TestCase
                 ['id' => 100, 'FirstName' => 'John', 'LastName' => 'Doe', 'rights' => 40, 'groupid' => 5, 'groupname' => 'Test Group'],
                 ['id' => 101, 'FirstName' => 'Jane', 'LastName' => 'Smith', 'rights' => 40, 'groupid' => 6, 'groupname' => 'Another Group']
             ]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->willReturn($stmtMock);
-        
+
         // Create a service with uniqueUserIds
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the uniqueUserIds property
         $reflection = new ReflectionClass($service);
         $uniqueUserIdsProperty = $reflection->getProperty('uniqueUserIds');
         $uniqueUserIdsProperty->setAccessible(true);
         $uniqueUserIdsProperty->setValue($service, [100, 101]);
-        
+
         // Call the method
         $result = $service->queryUsers();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
@@ -364,24 +374,24 @@ final class QuestionReportServiceTest extends TestCase
                 ['id' => 5, 'name' => 'Test Group', 'grouptype' => 'Test'],
                 ['id' => 6, 'name' => 'Another Group', 'grouptype' => 'Test']
             ]);
-        
+
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
             ->method('prepare')
             ->willReturn($stmtMock);
-        
+
         // Create a service with uniqueGroupIds
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the uniqueGroupIds property
         $reflection = new ReflectionClass($service);
         $uniqueGroupIdsProperty = $reflection->getProperty('uniqueGroupIds');
         $uniqueGroupIdsProperty->setAccessible(true);
         $uniqueGroupIdsProperty->setValue($service, [5, 6]);
-        
+
         // Call the method
         $result = $service->queryGroups();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
@@ -396,7 +406,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
         $questionsProperty = $reflection->getProperty('questions');
@@ -404,10 +414,10 @@ final class QuestionReportServiceTest extends TestCase
         $questionsProperty->setValue($service, [
             ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]
         ]);
-        
+
         // Call the method
         $result = $service->getQuestions();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
@@ -421,7 +431,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the userRightsDistribution property
         $reflection = new ReflectionClass($service);
         $userRightsDistributionProperty = $reflection->getProperty('userRightsDistribution');
@@ -434,10 +444,10 @@ final class QuestionReportServiceTest extends TestCase
             '4' => 3,
             'Unspecified' => 0
         ]);
-        
+
         // Call the method
         $result = $service->getUserRightsDistribution();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertEquals(1, $result['0']);
@@ -452,7 +462,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the users property
         $reflection = new ReflectionClass($service);
         $usersProperty = $reflection->getProperty('users');
@@ -460,10 +470,10 @@ final class QuestionReportServiceTest extends TestCase
         $usersProperty->setValue($service, [
             ['id' => 100, 'FirstName' => 'John', 'LastName' => 'Doe', 'rights' => 40, 'groupid' => 5, 'groupname' => 'Test Group']
         ]);
-        
+
         // Call the method
         $result = $service->getUsers();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
@@ -477,7 +487,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the groups property
         $reflection = new ReflectionClass($service);
         $groupsProperty = $reflection->getProperty('groups');
@@ -485,10 +495,10 @@ final class QuestionReportServiceTest extends TestCase
         $groupsProperty->setValue($service, [
             ['id' => 5, 'name' => 'Test Group', 'grouptype' => 'Test']
         ]);
-        
+
         // Call the method
         $result = $service->getGroups();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
@@ -502,20 +512,20 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
         $questionsProperty = $reflection->getProperty('questions');
         $questionsProperty->setAccessible(true);
-        
+
         $currentTime = time();
         $questionsProperty->setValue($service, [
             ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => $currentTime, 'lastmoddate' => $currentTime, 'groupid' => 5]
         ]);
-        
+
         // Call the method
         $result = $service->questionsToCSVArrays();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result); // Header row + 1 data row
@@ -535,7 +545,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the users property
         $reflection = new ReflectionClass($service);
         $usersProperty = $reflection->getProperty('users');
@@ -543,10 +553,10 @@ final class QuestionReportServiceTest extends TestCase
         $usersProperty->setValue($service, [
             ['id' => 100, 'FirstName' => 'John', 'LastName' => 'Doe', 'rights' => 40, 'groupid' => 5, 'groupname' => 'Test Group']
         ]);
-        
+
         // Call the method
         $result = $service->usersToCSVArrays();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result); // Header row + 1 data row
@@ -564,7 +574,7 @@ final class QuestionReportServiceTest extends TestCase
     {
         // Create a service
         $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
-        
+
         // Use reflection to set the groups property
         $reflection = new ReflectionClass($service);
         $groupsProperty = $reflection->getProperty('groups');
@@ -572,10 +582,10 @@ final class QuestionReportServiceTest extends TestCase
         $groupsProperty->setValue($service, [
             ['id' => 5, 'name' => 'Test Group', 'grouptype' => 'Test']
         ]);
-        
+
         // Call the method
         $result = $service->groupsToCSVArrays();
-        
+
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result); // Header row + 1 data row
