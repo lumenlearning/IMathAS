@@ -181,4 +181,65 @@ class QuestionReportService
     {
         return $this->groups;
     }
+
+    public function questionsToCSVArrays() {
+        $arrays = array(
+            // Column Headers
+            array('Question ID', 'User Rights', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
+        );
+
+        // Add data rows
+        foreach ($this->questions as $question) {
+            $row = array(
+                $question['id'],
+                $question['userights'],
+                $question['ownerid'],
+                date('Y-m-d H:i:s', $question['adddate']),
+                date('Y-m-d H:i:s', $question['lastmoddate']),
+                $question['groupid']
+            );
+            $arrays[] = $row;
+        }
+
+        return $arrays;
+    }
+
+    public function usersToCSVArrays() {
+        $arrays = array(
+            // Column Headers
+            array('ID', 'Name', 'Rights', 'Group Name')
+        );
+
+        // Add data rows
+        foreach ($this->users as $user) {
+            $row = array(
+                $user['id'],
+                $user['FirstName'] . ' ' . $user['LastName'],
+                $user['rights'],
+                $user['groupname']
+            );
+            $arrays[] = $row;
+        }
+
+        return $arrays;
+    }
+
+    public function groupsToCSVArrays() {
+        $arrays = array(
+            // Column Headers
+            array('ID', 'Name', 'Group Type')
+        );
+
+        // Add data rows
+        foreach ($this->groups as $group) {
+            $row = array(
+                $group['id'],
+                $group['name'],
+                $group['grouptype'],
+            );
+            $arrays[] = $row;
+        }
+
+        return $arrays;
+    }
 }

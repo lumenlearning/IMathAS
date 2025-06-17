@@ -75,67 +75,6 @@ if ($GLOBALS['myrights'] < 100) {
     exit;
 }
 
-function questionsToCSVArrays($questions) {
-    $arrays = array(
-            // Column Headers
-            array('Question ID', 'User Rights', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID')
-    );
-
-    // Add data rows
-    foreach ($questions as $question) {
-        $row = array(
-            $question['id'],
-            $question['userights'],
-            $question['ownerid'],
-            date('Y-m-d H:i:s', $question['adddate']),
-            date('Y-m-d H:i:s', $question['lastmoddate']),
-            $question['groupid']
-        );
-        $arrays[] = $row;
-    }
-
-    return $arrays;
-}
-
-function usersToCSVArrays($users) {
-    $arrays = array(
-            // Column Headers
-            array('ID', 'Name', 'Rights', 'Group Name')
-    );
-
-    // Add data rows
-    foreach ($users as $user) {
-        $row = array(
-            $user['id'],
-            $user['FirstName'] . ' ' . $user['LastName'],
-            $user['rights'],
-            $user['groupname']
-        );
-        $arrays[] = $row;
-    }
-
-    return $arrays;
-}
-
-function groupsToCSVArrays($groups) {
-    $arrays = array(
-            // Column Headers
-            array('ID', 'Name', 'Group Type')
-    );
-
-    // Add data rows
-    foreach ($groups as $group) {
-        $row = array(
-            $group['id'],
-            $group['name'],
-            $group['grouptype'],
-        );
-        $arrays[] = $row;
-    }
-
-    return $arrays;
-}
-
 // Function to export multiple CSV files as a ZIP archive
 function exportCSVsToZip($filesData, $zipName = 'zip_')
 {
@@ -231,9 +170,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
 
 // Check if CSV export is requested
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
-    $questionsArrays = questionsToCSVArrays($questions);
-    $usersArrays = usersToCSVArrays($users);
-    $groupsArrays = groupsToCSVArrays($groups);
+    $questionsArrays = $reportService->questionsToCSVArrays();
+    $usersArrays = $reportService->usersToCSVArrays();
+    $groupsArrays = $reportService->groupsToCSVArrays();
 
     // Export to ZIP containing all CSV files
     exportCSVsToZip([
