@@ -146,8 +146,9 @@ $endDate = isset($paramSource['end_date']) ? Sanitize::simpleString($paramSource
 $startModDate = isset($paramSource['start_mod_date']) ? Sanitize::simpleString($paramSource['start_mod_date']) : '';
 $endModDate = isset($paramSource['end_mod_date']) ? Sanitize::simpleString($paramSource['end_mod_date']) : '';
 $noAssessment = isset($paramSource['no_assessment']);
-$minId = isset($paramSource['min_id']) ? Sanitize::onlyInt($paramSource['min_id']) : null;
-$maxId = isset($paramSource['max_id']) ? Sanitize::onlyInt($paramSource['max_id']) : null;
+// onlyInt will cast '' to 0, so checking against !empty is required
+$minId = isset($paramSource['min_id']) && !empty($paramSource['min_id']) ? Sanitize::onlyInt($paramSource['min_id']) : null;
+$maxId = isset($paramSource['max_id']) && !empty($paramSource['max_id']) ? Sanitize::onlyInt($paramSource['max_id']) : null;
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -170,6 +171,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
     $users = $report['users'];
     $groups = $report['groups'];
     $userRightsDistribution = $report['userRightsDistribution'];
+    $questionTypeDistribution = $report['questionTypeDistribution'];
 }
 
 // Check if CSV export is requested
@@ -309,6 +311,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <td><?php echo $userRightsDistribution['Unspecified']; ?></td>
                     <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['Unspecified'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
                 </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="results-section">
+            <div class="results-title">Distribution of Question Types</div>
+            <table class="results-table">
+                <thead>
+                <tr>
+                    <th>Question Type</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($questionTypeDistribution as $type => $count): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($type); ?></td>
+                    <td><?php echo $count; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($count / $totalQuestions) * 100, 2) : 0; ?>%</td>
+                </tr>
+                <?php endforeach; ?>
                 </tbody>
             </table>
         </div>

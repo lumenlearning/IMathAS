@@ -53,7 +53,7 @@ final class QuestionReportServiceTest extends TestCase
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5]]);
 
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
@@ -92,7 +92,7 @@ final class QuestionReportServiceTest extends TestCase
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'multipleChoice', 'groupid' => 5]]);
 
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
@@ -131,7 +131,7 @@ final class QuestionReportServiceTest extends TestCase
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'essay', 'groupid' => 5]]);
 
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
@@ -170,7 +170,7 @@ final class QuestionReportServiceTest extends TestCase
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'matching', 'groupid' => 5]]);
 
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
@@ -208,7 +208,7 @@ final class QuestionReportServiceTest extends TestCase
             }));
         $stmtMock->expects($this->once())
             ->method('fetchAll')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'calculated', 'groupid' => 5]]);
 
         // Configure dbhMock to return our statement mock
         $this->dbhMock->expects($this->once())
@@ -231,6 +231,87 @@ final class QuestionReportServiceTest extends TestCase
         $this->assertCount(1, $result);
     }
 
+    // Test with minId parameter
+    public function testQueryWithMinId()
+    {
+        $minId = 100;
+
+        // Create mock statement
+        $stmtMock = $this->createMock(PDOStatement::class);
+        $stmtMock->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function ($params) use ($minId) {
+                // Verify that the min_id parameter is set correctly
+                return isset($params[':min_id']) &&
+                    $params[':min_id'] == $minId;
+            }));
+        $stmtMock->expects($this->once())
+            ->method('fetchAll')
+            ->willReturn([['id' => 100, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5]]);
+
+        // Configure dbhMock to return our statement mock
+        $this->dbhMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->stringContains('AND qs.id >= :min_id'))
+            ->willReturn($stmtMock);
+
+        // Create service with only minId
+        $service = new QuestionReportService(
+            $this->dbhMock,
+            '', // startDate
+            '', // endDate
+            '', // startModDate
+            '', // endModDate
+            false, // noAssessment
+            $minId // Only minId is set
+        );
+
+        $result = $service->queryQuestions();
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+    }
+
+    // Test with maxId parameter
+    public function testQueryWithMaxId()
+    {
+        $maxId = 200;
+
+        // Create mock statement
+        $stmtMock = $this->createMock(PDOStatement::class);
+        $stmtMock->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function ($params) use ($maxId) {
+                // Verify that the max_id parameter is set correctly
+                return isset($params[':max_id']) &&
+                    $params[':max_id'] == $maxId;
+            }));
+        $stmtMock->expects($this->once())
+            ->method('fetchAll')
+            ->willReturn([['id' => 150, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5]]);
+
+        // Configure dbhMock to return our statement mock
+        $this->dbhMock->expects($this->once())
+            ->method('prepare')
+            ->with($this->stringContains('AND qs.id <= :max_id'))
+            ->willReturn($stmtMock);
+
+        // Create service with only maxId
+        $service = new QuestionReportService(
+            $this->dbhMock,
+            '', // startDate
+            '', // endDate
+            '', // startModDate
+            '', // endModDate
+            false, // noAssessment
+            null, // minId
+            $maxId // Only maxId is set
+        );
+
+        $result = $service->queryQuestions();
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+    }
+
     /*
      * generateReport
      */
@@ -245,7 +326,7 @@ final class QuestionReportServiceTest extends TestCase
         // Set up expectations for mocked methods
         $service->expects($this->once())
             ->method('queryQuestions')
-            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]]);
+            ->willReturn([['id' => 1, 'userights' => 2, 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5]]);
 
         $service->expects($this->once())
             ->method('aggregateQuestionData');
@@ -267,6 +348,7 @@ final class QuestionReportServiceTest extends TestCase
         $this->assertArrayHasKey('users', $result);
         $this->assertArrayHasKey('groups', $result);
         $this->assertArrayHasKey('userRightsDistribution', $result);
+        $this->assertArrayHasKey('questionTypeDistribution', $result);
     }
 
     /*
@@ -282,9 +364,9 @@ final class QuestionReportServiceTest extends TestCase
         $questionsProperty = $reflection->getProperty('questions');
         $questionsProperty->setAccessible(true);
         $questionsProperty->setValue($service, [
-            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5],
-            ['id' => 2, 'userights' => '2', 'ownerid' => 101, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5],
-            ['id' => 3, 'userights' => '4', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 6]
+            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5],
+            ['id' => 2, 'userights' => '2', 'ownerid' => 101, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'multipleChoice', 'groupid' => 5],
+            ['id' => 3, 'userights' => '4', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 6]
         ]);
 
         // Call the method
@@ -294,6 +376,11 @@ final class QuestionReportServiceTest extends TestCase
         $userRightsDistributionProperty = $reflection->getProperty('userRightsDistribution');
         $userRightsDistributionProperty->setAccessible(true);
         $userRightsDistribution = $userRightsDistributionProperty->getValue($service);
+
+        // Get the questionTypeDistribution property
+        $questionTypeDistributionProperty = $reflection->getProperty('questionTypeDistribution');
+        $questionTypeDistributionProperty->setAccessible(true);
+        $questionTypeDistribution = $questionTypeDistributionProperty->getValue($service);
 
         // Get the uniqueUserIds property
         $uniqueUserIdsProperty = $reflection->getProperty('uniqueUserIds');
@@ -309,6 +396,8 @@ final class QuestionReportServiceTest extends TestCase
         $this->assertEquals(1, $userRightsDistribution['0']);
         $this->assertEquals(1, $userRightsDistribution['2']);
         $this->assertEquals(1, $userRightsDistribution['4']);
+        $this->assertEquals(2, $questionTypeDistribution['numeric']);
+        $this->assertEquals(1, $questionTypeDistribution['multipleChoice']);
         $this->assertCount(2, $uniqueUserIds);
         $this->assertContains(100, $uniqueUserIds);
         $this->assertContains(101, $uniqueUserIds);
@@ -412,7 +501,7 @@ final class QuestionReportServiceTest extends TestCase
         $questionsProperty = $reflection->getProperty('questions');
         $questionsProperty->setAccessible(true);
         $questionsProperty->setValue($service, [
-            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'groupid' => 5]
+            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => time(), 'lastmoddate' => time(), 'qtype' => 'numeric', 'groupid' => 5]
         ]);
 
         // Call the method
@@ -481,6 +570,36 @@ final class QuestionReportServiceTest extends TestCase
     }
 
     /*
+     * getQuestionTypeDistribution
+     */
+    public function testGetQuestionTypeDistribution()
+    {
+        // Create a service
+        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+
+        // Use reflection to set the questionTypeDistribution property
+        $reflection = new ReflectionClass($service);
+        $questionTypeDistributionProperty = $reflection->getProperty('questionTypeDistribution');
+        $questionTypeDistributionProperty->setAccessible(true);
+        $questionTypeDistributionProperty->setValue($service, [
+            'numeric' => 5,
+            'multipleChoice' => 3,
+            'essay' => 2,
+            'Unspecified' => 1
+        ]);
+
+        // Call the method
+        $result = $service->getQuestionTypeDistribution();
+
+        // Assert the result
+        $this->assertIsArray($result);
+        $this->assertEquals(5, $result['numeric']);
+        $this->assertEquals(3, $result['multipleChoice']);
+        $this->assertEquals(2, $result['essay']);
+        $this->assertEquals(1, $result['Unspecified']);
+    }
+
+    /*
      * getGroups
      */
     public function testGetGroups()
@@ -520,7 +639,7 @@ final class QuestionReportServiceTest extends TestCase
 
         $currentTime = time();
         $questionsProperty->setValue($service, [
-            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => $currentTime, 'lastmoddate' => $currentTime, 'groupid' => 5]
+            ['id' => 1, 'userights' => '0', 'ownerid' => 100, 'adddate' => $currentTime, 'lastmoddate' => $currentTime, 'qtype' => 'numeric', 'groupid' => 5]
         ]);
 
         // Call the method

@@ -34,6 +34,8 @@ class QuestionReportService
         'Unspecified' => 0
     ];
 
+    private $questionTypeDistribution = [];
+
     private $uniqueUserIds = [];
 
     private $uniqueGroupIds = [];
@@ -49,8 +51,8 @@ class QuestionReportService
         $startModDate,
         $endModDate,
         $noAssessment,
-        $minId,
-        $maxId
+        $minId = 0,
+        $maxId = null
     )
     {
         $this->dbh = $dbh;
@@ -75,12 +77,13 @@ class QuestionReportService
           'users' => $users,
           'groups' => $groups,
           'userRightsDistribution' => $this->userRightsDistribution,
+          'questionTypeDistribution' => $this->questionTypeDistribution,
         ];
     }
 
     public function queryQuestions(): array
     {
-        $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, u.groupid 
+        $query = "SELECT qs.id, qs.userights, qs.ownerid, qs.adddate, qs.lastmoddate, qs.qtype, u.groupid 
               FROM imas_questionset AS qs 
               JOIN imas_users AS u ON qs.ownerid = u.id
               WHERE qs.deleted=0";
@@ -111,12 +114,12 @@ class QuestionReportService
             $query .= " AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)";
         }
 
-        if (isset($this->minId)) {
+        if (!empty($this->minId)) {
             $query .= " AND qs.id >= :min_id";
             $params[':min_id'] = $this->minId;
         }
 
-        if (isset($this->maxId)) {
+        if (!empty($this->maxId)) {
             $query .= " AND qs.id <= :max_id";
             $params[':max_id'] = $this->maxId;
         }
@@ -131,11 +134,19 @@ class QuestionReportService
     public function aggregateQuestionData(): void
     {
         foreach ($this->questions as $question) {
+            // Count user rights distribution
             if (isset($this->userRightsDistribution[$question['userights']])) {
                 $this->userRightsDistribution[$question['userights']]++;
             } else {
                 $this->userRightsDistribution['Unspecified']++;
             }
+
+            // Count question type distribution
+            $qtype = !empty($question['qtype']) ? $question['qtype'] : 'Unspecified';
+            if (!isset($this->questionTypeDistribution[$qtype])) {
+                $this->questionTypeDistribution[$qtype] = 0;
+            }
+            $this->questionTypeDistribution[$qtype]++;
 
             // Track unique users
             if (!in_array($question['ownerid'], $this->uniqueUserIds)) {
@@ -198,6 +209,11 @@ class QuestionReportService
     public function getGroups(): array
     {
         return $this->groups;
+    }
+
+    public function getQuestionTypeDistribution(): array
+    {
+        return $this->questionTypeDistribution;
     }
 
     public function questionsToCSVArrays(): array {
