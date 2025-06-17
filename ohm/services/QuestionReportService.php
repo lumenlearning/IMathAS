@@ -126,12 +126,12 @@ class QuestionReportService
             $params[':max_id'] = $this->maxId;
         }
 
-        if (!empty($this->minAssessmentUsage)) {
+        if (is_int($this->minAssessmentUsage)) {
             $query .= " AND (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) >= :min_assessment_usage";
             $params[':min_assessment_usage'] = $this->minAssessmentUsage;
         }
 
-        if (!empty($this->maxAssessmentUsage)) {
+        if (is_int($this->maxAssessmentUsage)) {
             $query .= " AND (SELECT COUNT(*) FROM imas_questions WHERE questionsetid = qs.id) <= :max_assessment_usage";
             $params[':max_assessment_usage'] = $this->maxAssessmentUsage;
         }
