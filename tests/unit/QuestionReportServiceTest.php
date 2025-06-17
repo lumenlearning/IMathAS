@@ -312,7 +312,7 @@ final class QuestionReportServiceTest extends TestCase
     // Test with maxAssessmentUsage parameter
     public function testQueryWithMaxAssessmentUsage()
     {
-        $maxAssessmentUsage = 10;
+        $maxAssessmentUsage = 0;
 
         // Create mock statement
         $stmtMock = $this->createMock(PDOStatement::class);
