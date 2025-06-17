@@ -146,6 +146,8 @@ $endDate = isset($paramSource['end_date']) ? Sanitize::simpleString($paramSource
 $startModDate = isset($paramSource['start_mod_date']) ? Sanitize::simpleString($paramSource['start_mod_date']) : '';
 $endModDate = isset($paramSource['end_mod_date']) ? Sanitize::simpleString($paramSource['end_mod_date']) : '';
 $noAssessment = isset($paramSource['no_assessment']);
+$minId = isset($paramSource['min_id']) ? Sanitize::onlyInt($paramSource['min_id']) : null;
+$maxId = isset($paramSource['max_id']) ? Sanitize::onlyInt($paramSource['max_id']) : null;
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -155,7 +157,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
         $endDate,
         $startModDate,
         $endModDate,
-        $noAssessment
+        $noAssessment,
+        $minId,
+        $maxId
     );
 
     $report = $reportService->generateReport();
@@ -200,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <h1>Question Report</h1>
 
 <div class="filter-container">
-    <h2>Filter Questions</h2>
+    <h2>Filter Questions (Optional)</h2>
     <form method="post" action="question-report.php">
         <div class="filter-row">
             <div class="filter-item">
@@ -217,6 +221,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" id="start_mod_date" name="start_mod_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startModDate; ?>">
                 to
                 <input type="text" id="end_mod_date" name="end_mod_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endModDate; ?>">
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-item">
+                <label class="filter-label" for="min_id">Question ID Range:</label>
+                <input type="number" id="min_id" name="min_id" placeholder="Min ID" value="<?php echo $minId; ?>">
+                to
+                <input type="number" id="max_id" name="max_id" placeholder="Max ID" value="<?php echo $maxId; ?>">
             </div>
         </div>
 
@@ -246,6 +259,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo !empty($startModDate) ? '&start_mod_date=' . urlencode($startModDate) : '';
                 echo !empty($endModDate) ? '&end_mod_date=' . urlencode($endModDate) : '';
                 echo $noAssessment ? '&no_assessment=1' : '';
+                echo isset($minId) ? '&min_id=' . urlencode($minId) : '';
+                echo isset($maxId) ? '&max_id=' . urlencode($maxId) : '';
                 ?>" class="csv-download-btn">Download CSV Files (ZIP)</a>
             </div>
             <p>Total questions matching criteria: <?php echo $totalQuestions; ?></p>

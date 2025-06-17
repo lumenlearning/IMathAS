@@ -17,6 +17,10 @@ class QuestionReportService
 
     private $noAssessment;
 
+    private $minId;
+
+    private $maxId;
+
     private $dbh;
 
     private $questions = [];
@@ -44,7 +48,9 @@ class QuestionReportService
         $endDate,
         $startModDate,
         $endModDate,
-        $noAssessment
+        $noAssessment,
+        $minId,
+        $maxId
     )
     {
         $this->dbh = $dbh;
@@ -53,6 +59,8 @@ class QuestionReportService
         $this->startModDate = $startModDate;
         $this->endModDate = $endModDate;
         $this->noAssessment = $noAssessment;
+        $this->minId = $minId;
+        $this->maxId = $maxId;
     }
 
     public function generateReport(): array
@@ -101,6 +109,16 @@ class QuestionReportService
 
         if ($this->noAssessment) {
             $query .= " AND qs.id NOT IN (SELECT DISTINCT questionsetid FROM imas_questions)";
+        }
+
+        if (isset($this->minId)) {
+            $query .= " AND qs.id >= :min_id";
+            $params[':min_id'] = $this->minId;
+        }
+
+        if (isset($this->maxId)) {
+            $query .= " AND qs.id <= :max_id";
+            $params[':max_id'] = $this->maxId;
         }
 
         // Execute the query
