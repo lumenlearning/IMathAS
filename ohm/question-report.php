@@ -1,5 +1,7 @@
 <?php
 
+use OHM\Includes\ReadReplicaDb;
+
 require_once(__DIR__ . '/../init.php');
 $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>';
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.2/lux-components.min.css\">";
@@ -11,63 +13,8 @@ if ($GLOBALS['myrights'] < 100) {
     exit;
 }
 
-// Function to export multiple CSV files as a ZIP archive
-function exportCSVsToZip($filesData, $zipName = 'zip_')
-{
-    // Create a temporary directory
-    $tempDir = sys_get_temp_dir() . '/csv_export_' . uniqid();
-    if (!file_exists($tempDir)) {
-        mkdir($tempDir, 0777, true);
-    }
-
-    // Create CSV files in the temporary directory
-    foreach ($filesData as $filename => $data) {
-        $filepath = $tempDir . '/' . $filename;
-        $f = fopen($filepath, 'w');
-
-        // Add UTF-8 BOM for Excel compatibility
-        fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-        // Write data to the file
-        foreach ($data as $row) {
-            fputcsv($f, $row);
-        }
-
-        fclose($f);
-    }
-
-    // Create a ZIP file
-    $zipFilename = $zipName . date('Y-m-d') . '.zip';
-    $zipFilepath = $tempDir . '/' . $zipFilename;
-
-    $zip = new ZipArchive();
-    if ($zip->open($zipFilepath, ZipArchive::CREATE) !== TRUE) {
-        die("Cannot create ZIP file");
-    }
-
-    // Add CSV files to the ZIP
-    foreach ($filesData as $filename => $data) {
-        $zip->addFile($tempDir . '/' . $filename, $filename);
-    }
-
-    $zip->close();
-
-    // Send the ZIP file to the browser
-    header('Content-Type: application/zip');
-    header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
-    header('Content-Length: ' . filesize($zipFilepath));
-    header('Pragma: no-cache');
-    header('Expires: 0');
-
-    readfile($zipFilepath);
-
-    // Clean up temporary files
-    foreach ($filesData as $filename => $data) {
-        unlink($tempDir . '/' . $filename);
-    }
-    unlink($zipFilepath);
-    rmdir($tempDir);
-}
+// Run all queries on the read replica DB.
+$GLOBALS['DBH'] = ReadReplicaDb::getPdoInstance();
 
 $showResults = false;
 
