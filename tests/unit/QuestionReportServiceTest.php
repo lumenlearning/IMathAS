@@ -390,7 +390,7 @@ final class QuestionReportServiceTest extends TestCase
         $this->assertArrayHasKey('questions', $result);
         $this->assertArrayHasKey('users', $result);
         $this->assertArrayHasKey('groups', $result);
-        $this->assertArrayHasKey('userRightsDistribution', $result);
+        $this->assertArrayHasKey('useRightsDistribution', $result);
         $this->assertArrayHasKey('questionTypeDistribution', $result);
     }
 
@@ -416,10 +416,10 @@ final class QuestionReportServiceTest extends TestCase
         // Call the method
         $service->aggregateQuestionData();
 
-        // Get the userRightsDistribution property
-        $userRightsDistributionProperty = $reflection->getProperty('userRightsDistribution');
-        $userRightsDistributionProperty->setAccessible(true);
-        $userRightsDistribution = $userRightsDistributionProperty->getValue($service);
+        // Get the useRightsDistribution property
+        $useRightsDistributionProperty = $reflection->getProperty('useRightsDistribution');
+        $useRightsDistributionProperty->setAccessible(true);
+        $useRightsDistribution = $useRightsDistributionProperty->getValue($service);
 
         // Get the questionTypeDistribution property
         $questionTypeDistributionProperty = $reflection->getProperty('questionTypeDistribution');
@@ -437,9 +437,9 @@ final class QuestionReportServiceTest extends TestCase
         $uniqueGroupIds = $uniqueGroupIdsProperty->getValue($service);
 
         // Assert the results
-        $this->assertEquals(1, $userRightsDistribution['0']);
-        $this->assertEquals(1, $userRightsDistribution['2']);
-        $this->assertEquals(1, $userRightsDistribution['4']);
+        $this->assertEquals(1, $useRightsDistribution['0']);
+        $this->assertEquals(1, $useRightsDistribution['2']);
+        $this->assertEquals(1, $useRightsDistribution['4']);
         $this->assertEquals(2, $questionTypeDistribution['numeric']);
         $this->assertEquals(1, $questionTypeDistribution['multipleChoice']);
         $this->assertCount(2, $uniqueUserIds);
@@ -561,19 +561,19 @@ final class QuestionReportServiceTest extends TestCase
     }
 
     /*
-     * getUserRightsDistribution
+     * getUseRightsDistribution
      */
-    public function testGetUserRightsDistribution()
+    public function testGetUseRightsDistribution()
     {
         // Create a service
         $paramSource = [];
         $service = new QuestionReportService($this->dbhMock, $paramSource);
 
-        // Use reflection to set the userRightsDistribution property
+        // Use reflection to set the useRightsDistribution property
         $reflection = new ReflectionClass($service);
-        $userRightsDistributionProperty = $reflection->getProperty('userRightsDistribution');
-        $userRightsDistributionProperty->setAccessible(true);
-        $userRightsDistributionProperty->setValue($service, [
+        $useRightsDistributionProperty = $reflection->getProperty('useRightsDistribution');
+        $useRightsDistributionProperty->setAccessible(true);
+        $useRightsDistributionProperty->setValue($service, [
             '0' => 1,
             '1' => 0,
             '2' => 2,
@@ -583,7 +583,7 @@ final class QuestionReportServiceTest extends TestCase
         ]);
 
         // Call the method
-        $result = $service->getUserRightsDistribution();
+        $result = $service->getUseRightsDistribution();
 
         // Assert the result
         $this->assertIsArray($result);
@@ -700,9 +700,9 @@ final class QuestionReportServiceTest extends TestCase
         // Assert the result
         $this->assertIsArray($result);
         $this->assertCount(2, $result); // Header row + 1 data row
-        $this->assertEquals(['Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID', 'Assessment Usage Count'], $result[0]);
+        $this->assertEquals(['Question ID', 'Use Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID', 'Assessment Usage Count'], $result[0]);
         $this->assertEquals(1, $result[1][0]); // Question ID
-        $this->assertEquals('0', $result[1][1]); // User Rights
+        $this->assertEquals('0', $result[1][1]); // Use Rights
         $this->assertEquals('numeric', $result[1][2]); // Question Type
         $this->assertEquals(100, $result[1][3]); // Owner ID
         $this->assertEquals(date('Y-m-d H:i:s', $currentTime), $result[1][4]); // Creation Date

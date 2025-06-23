@@ -83,11 +83,11 @@
         </div>
 
         <div class="results-section">
-            <div class="results-title">Distribution of User Rights</div>
+            <div class="results-title">Distribution of Use Rights</div>
             <table class="results-table">
                 <thead>
                 <tr>
-                    <th>User Rights</th>
+                    <th>Use Rights</th>
                     <th>Count</th>
                     <th>Percentage</th>
                 </tr>
@@ -95,43 +95,43 @@
                 <tbody>
                 <tr>
                     <td>Private (0)</td>
-                    <td><?php echo $userRightsDistribution['0']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['0'] / $totalQuestions) * 100, 2) : 0; ?>
+                    <td><?php echo $useRightsDistribution['0']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($useRightsDistribution['0'] / $totalQuestions) * 100, 2) : 0; ?>
                         %
                     </td>
                 </tr>
                 <tr>
                     <td>Outdated (1)</td>
-                    <td><?php echo $userRightsDistribution['1']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['1'] / $totalQuestions) * 100, 2) : 0; ?>
+                    <td><?php echo $useRightsDistribution['1']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($useRightsDistribution['1'] / $totalQuestions) * 100, 2) : 0; ?>
                         %
                     </td>
                 </tr>
                 <tr>
                     <td>Allow use by all (2)</td>
-                    <td><?php echo $userRightsDistribution['2']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['2'] / $totalQuestions) * 100, 2) : 0; ?>
+                    <td><?php echo $useRightsDistribution['2']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($useRightsDistribution['2'] / $totalQuestions) * 100, 2) : 0; ?>
                         %
                     </td>
                 </tr>
                 <tr>
                     <td>Allow use by all and modifications by group (3)</td>
-                    <td><?php echo $userRightsDistribution['3']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['3'] / $totalQuestions) * 100, 2) : 0; ?>
+                    <td><?php echo $useRightsDistribution['3']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($useRightsDistribution['3'] / $totalQuestions) * 100, 2) : 0; ?>
                         %
                     </td>
                 </tr>
                 <tr>
                     <td>Allow use by all and modifications by all (4)</td>
-                    <td><?php echo $userRightsDistribution['4']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['4'] / $totalQuestions) * 100, 2) : 0; ?>
+                    <td><?php echo $useRightsDistribution['4']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($useRightsDistribution['4'] / $totalQuestions) * 100, 2) : 0; ?>
                         %
                     </td>
                 </tr>
                 <tr>
                     <td>Unspecified</td>
-                    <td><?php echo $userRightsDistribution['Unspecified']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['Unspecified'] / $totalQuestions) * 100, 2) : 0; ?>
+                    <td><?php echo $useRightsDistribution['Unspecified']; ?></td>
+                    <td><?php echo $totalQuestions > 0 ? round(($useRightsDistribution['Unspecified'] / $totalQuestions) * 100, 2) : 0; ?>
                         %
                     </td>
                 </tr>

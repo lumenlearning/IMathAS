@@ -29,7 +29,7 @@ class QuestionReportService
 
     private $questions = [];
 
-    private $userRightsDistribution = [
+    private $useRightsDistribution = [
         '0' => 0, // Private
         '1' => 0, // Outdated, should've been replaced by 4
         '2' => 0, // Allow Use By All
@@ -69,7 +69,7 @@ class QuestionReportService
     function getIntegerFromParams($paramName) : int | null {
         // onlyInt will cast '' to 0, so checking against !empty is required
         // !empty(0) is false, so must check against explicit '0' to ensure that value is interpreted as integer 0
-        return isset($this->paramSource[$paramName]) && (!empty($this->paramSource[$paramName]) || $this->paramSource[$paramName] === '0') ? Sanitize::onlyInt($this->paramSource[$paramName]) : null;
+        return isset($this->paramSource[$paramName]) && (!empty($this->paramSource[$paramName]) || $this->paramSource[$paramName] === '0' || $this->paramSource[$paramName] === 0) ? Sanitize::onlyInt($this->paramSource[$paramName]) : null;
     }
 
     function initializeParams() : void {
@@ -94,7 +94,7 @@ class QuestionReportService
           'questions' => $questions,
           'users' => $users,
           'groups' => $groups,
-          'userRightsDistribution' => $this->userRightsDistribution,
+          'useRightsDistribution' => $this->useRightsDistribution,
           'questionTypeDistribution' => $this->questionTypeDistribution,
         ];
     }
@@ -159,11 +159,11 @@ class QuestionReportService
     public function aggregateQuestionData(): void
     {
         foreach ($this->questions as $question) {
-            // Count user rights distribution
-            if (isset($this->userRightsDistribution[$question['userights']])) {
-                $this->userRightsDistribution[$question['userights']]++;
+            // Count use rights distribution
+            if (isset($this->useRightsDistribution[$question['userights']])) {
+                $this->useRightsDistribution[$question['userights']]++;
             } else {
-                $this->userRightsDistribution['Unspecified']++;
+                $this->useRightsDistribution['Unspecified']++;
             }
 
             // Count question type distribution
@@ -221,9 +221,9 @@ class QuestionReportService
         return $this->questions;
     }
 
-    public function getUserRightsDistribution(): array
+    public function getUseRightsDistribution(): array
     {
-        return $this->userRightsDistribution;
+        return $this->useRightsDistribution;
     }
 
     public function getUsers(): array
@@ -284,7 +284,7 @@ class QuestionReportService
     public function questionsToCSVArrays(): array {
         $arrays = array(
             // Column Headers
-            array('Question ID', 'User Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID', 'Assessment Usage Count')
+            array('Question ID', 'Use Rights', 'Question Type', 'Owner ID', 'Creation Date', 'Last Modified Date', 'Group ID', 'Assessment Usage Count')
         );
 
         // Add data rows

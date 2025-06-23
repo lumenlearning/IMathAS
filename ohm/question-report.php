@@ -36,7 +36,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
 
     $users = $report['users'];
     $groups = $report['groups'];
-    $userRightsDistribution = $report['userRightsDistribution'];
+    $useRightsDistribution = $report['useRightsDistribution'];
     $questionTypeDistribution = $report['questionTypeDistribution'];
 }
 
