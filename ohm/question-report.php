@@ -4,70 +4,6 @@ require_once(__DIR__ . '/../init.php');
 $placeinhead .= '<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>';
 $placeinhead .= "<link title='lux' rel=\"stylesheet\" type=\"text/css\" href=\"https://lux.lumenlearning.com/use-lux/1.0.2/lux-components.min.css\">";
 $placeinhead .= '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">';
-$placeinhead .= '<style>
-    .filter-container {
-        margin-bottom: 20px;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-    }
-    .filter-row {
-        display: flex;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-        align-items: center;
-    }
-    .filter-item {
-        margin-right: 20px;
-        margin-bottom: 10px;
-    }
-    .filter-label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-    .results-container {
-        margin-top: 20px;
-    }
-    .results-section {
-        margin-bottom: 30px;
-    }
-    .results-title {
-        font-size: 1.2em;
-        font-weight: bold;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid #ddd;
-    }
-    .results-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    .results-table th, .results-table td {
-        padding: 8px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
-    .results-table th {
-        background-color: #f2f2f2;
-    }
-    .csv-download-btn {
-        margin-left: 10px;
-        padding: 5px 10px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .csv-download-btn:hover {
-        background-color: #45a049;
-    }
-</style>';
 
 if ($GLOBALS['myrights'] < 100) {
     echo "You're not authorized to view this page.";
@@ -141,25 +77,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // get string query params from the paramSource
-function getStringFromParams($paramName) : string {
+function getStringFromParams($paramSource, $paramName) : string {
     return isset($paramSource[$paramName]) ? Sanitize::simpleString($paramSource[$paramName]) : '';
 }
 
 // get integer query params from the paramSource
-function getIntegerFromParams($paramName) : int | null {
+function getIntegerFromParams($paramSource, $paramName) : int | null {
     // onlyInt will cast '' to 0, so checking against !empty is required
     // !empty(0) is false, so must check against explicit '0' to ensure that value is interpreted as integer 0
     return isset($paramSource[$paramName]) && (!empty($paramSource[$paramName]) || $paramSource[$paramName] === '0') ? Sanitize::onlyInt($paramSource[$paramName]) : null;
 }
 
-$startDate = getStringFromParams('start_date');
-$endDate = getStringFromParams('end_date');
-$startModDate = getStringFromParams('start_mod_date');
-$endModDate = getStringFromParams('end_mod_date');
-$minId = getIntegerFromParams('min_id');
-$maxId = getIntegerFromParams('max_id');
-$minAssessmentUsage = getIntegerFromParams('min_assessment_usage');
-$maxAssessmentUsage = getIntegerFromParams('max_assessment_usage');
+$startDate = getStringFromParams($paramSource, 'start_date');
+$endDate = getStringFromParams($paramSource, 'end_date');
+$startModDate = getStringFromParams($paramSource, 'start_mod_date');
+$endModDate = getStringFromParams($paramSource, 'end_mod_date');
+$minId = getIntegerFromParams($paramSource, 'min_id');
+$maxId = getIntegerFromParams($paramSource, 'max_id');
+$minAssessmentUsage = getIntegerFromParams($paramSource, 'min_assessment_usage');
+$maxAssessmentUsage = getIntegerFromParams($paramSource, 'max_assessment_usage');
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -207,161 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $showResults = true;
 }
 
-?>
-    <div class="breadcrumb">
-        <?php echo $breadcrumbbase; ?>
-        <a href="../admin/admin2.php">Admin</a> >
-        <a href="../util/utils.php">Utilities</a> >
-        <a href="?">Question Report</a>
-    </div>
+include(__DIR__ . "/views/question-report/show-question-report.php");
 
-    <h1>Question Report</h1>
-
-    <div class="filter-container">
-        <h2>Filter Questions (Optional)</h2>
-        <form method="post" action="question-report.php">
-            <div class="filter-row">
-                <div class="filter-item">
-                    <label class="filter-label" for="start_date">Creation Date Range:</label>
-                    <input type="text" id="start_date" name="start_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startDate; ?>">
-                    to
-                    <input type="text" id="end_date" name="end_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endDate; ?>">
-                </div>
-            </div>
-
-            <div class="filter-row">
-                <div class="filter-item">
-                    <label class="filter-label" for="start_mod_date">Last Modified Date Range:</label>
-                    <input type="text" id="start_mod_date" name="start_mod_date" class="js-flatpickr" placeholder="Start Date" value="<?php echo $startModDate; ?>">
-                    to
-                    <input type="text" id="end_mod_date" name="end_mod_date" class="js-flatpickr" placeholder="End Date" value="<?php echo $endModDate; ?>">
-                </div>
-            </div>
-
-            <div class="filter-row">
-                <div class="filter-item">
-                    <label class="filter-label" for="min_id">Question ID Range:</label>
-                    <input type="number" id="min_id" name="min_id" placeholder="Min ID" value="<?php echo $minId; ?>">
-                    to
-                    <input type="number" id="max_id" name="max_id" placeholder="Max ID" value="<?php echo $maxId; ?>">
-                </div>
-            </div>
-
-            <div class="filter-row">
-                <div class="filter-item">
-                    <label class="filter-label" for="min_assessment_usage">Assessment Usage Range:</label>
-                    <input type="number" id="min_assessment_usage" name="min_assessment_usage" placeholder="Min Usage" value="<?php echo $minAssessmentUsage; ?>">
-                    to
-                    <input type="number" id="max_assessment_usage" name="max_assessment_usage" placeholder="Max Usage" value="<?php echo $maxAssessmentUsage; ?>">
-                </div>
-            </div>
-
-            <div class="filter-row">
-                <button type="submit" class="button button--primary">Generate Report</button>
-            </div>
-        </form>
-    </div>
-
-<?php if ($showResults): ?>
-    <div class="results-container">
-        <h2>Report Results</h2>
-
-        <div class="results-section">
-            <div class="results-title">Summary</div>
-            <div style="margin-bottom: 10px;">
-                <a href="?export=csv<?php
-                echo !empty($startDate) ? '&start_date=' . urlencode($startDate) : '';
-                echo !empty($endDate) ? '&end_date=' . urlencode($endDate) : '';
-                echo !empty($startModDate) ? '&start_mod_date=' . urlencode($startModDate) : '';
-                echo !empty($endModDate) ? '&end_mod_date=' . urlencode($endModDate) : '';
-                echo isset($minId) ? '&min_id=' . urlencode($minId) : '';
-                echo isset($maxId) ? '&max_id=' . urlencode($maxId) : '';
-                echo isset($minAssessmentUsage) ? '&min_assessment_usage=' . urlencode($minAssessmentUsage) : '';
-                echo isset($maxAssessmentUsage) ? '&max_assessment_usage=' . urlencode($maxAssessmentUsage) : '';
-                ?>" class="csv-download-btn">Download CSV Files (ZIP)</a>
-            </div>
-            <p>Total questions matching criteria: <?php echo $totalQuestions; ?></p>
-            <p>Unique users: <?php echo count($users); ?></p>
-            <p>Unique groups: <?php echo count($groups); ?></p>
-        </div>
-
-        <div class="results-section">
-            <div class="results-title">Distribution of User Rights</div>
-            <table class="results-table">
-                <thead>
-                <tr>
-                    <th>User Rights</th>
-                    <th>Count</th>
-                    <th>Percentage</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>Private (0)</td>
-                    <td><?php echo $userRightsDistribution['0']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['0'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
-                <tr>
-                    <td>Outdated (1)</td>
-                    <td><?php echo $userRightsDistribution['1']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['1'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
-                <tr>
-                    <td>Allow use by all (2)</td>
-                    <td><?php echo $userRightsDistribution['2']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['2'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
-                <tr>
-                    <td>Allow use by all and modifications by group (3)</td>
-                    <td><?php echo $userRightsDistribution['3']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['3'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
-                <tr>
-                    <td>Allow use by all and modifications by all (4)</td>
-                    <td><?php echo $userRightsDistribution['4']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['4'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
-                <tr>
-                    <td>Unspecified</td>
-                    <td><?php echo $userRightsDistribution['Unspecified']; ?></td>
-                    <td><?php echo $totalQuestions > 0 ? round(($userRightsDistribution['Unspecified'] / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="results-section">
-            <div class="results-title">Distribution of Question Types</div>
-            <table class="results-table">
-                <thead>
-                <tr>
-                    <th>Question Type</th>
-                    <th>Count</th>
-                    <th>Percentage</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($questionTypeDistribution as $type => $count): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($type); ?></td>
-                        <td><?php echo $count; ?></td>
-                        <td><?php echo $totalQuestions > 0 ? round(($count / $totalQuestions) * 100, 2) : 0; ?>%</td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-<?php endif; ?>
-
-<script>
-    $(document).ready(function() {
-        $(".js-flatpickr").flatpickr({
-            dateFormat: "Y-m-d",
-        });
-    });
-</script>
-
-<?php
 include(__DIR__ . '/../footer.php');
 ?>
