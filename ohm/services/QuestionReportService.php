@@ -3,6 +3,8 @@
 namespace OHM\Services;
 
 use PDO;
+use Sanitize;
+use ZipArchive;
 
 // Collect data on a set of questions
 class QuestionReportService
@@ -14,7 +16,6 @@ class QuestionReportService
     private $startModDate;
 
     private $endModDate;
-
 
     private $minId;
 
@@ -47,27 +48,39 @@ class QuestionReportService
 
     private $groups = [];
 
+    private $paramSource;
+
     public function __construct(
         $dbh,
-        $startDate,
-        $endDate,
-        $startModDate,
-        $endModDate,
-        $minId = 0,
-        $maxId = null,
-        $minAssessmentUsage = null,
-        $maxAssessmentUsage = null
+        $paramSource
     )
     {
         $this->dbh = $dbh;
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-        $this->startModDate = $startModDate;
-        $this->endModDate = $endModDate;
-        $this->minId = $minId;
-        $this->maxId = $maxId;
-        $this->minAssessmentUsage = $minAssessmentUsage;
-        $this->maxAssessmentUsage = $maxAssessmentUsage;
+        $this->paramSource = $paramSource;
+        $this->initializeParams();
+    }
+
+    // get string query params from the paramSource
+    function getStringFromParams($paramName) : string {
+        return isset($this->paramSource[$paramName]) ? Sanitize::simpleString($this->paramSource[$paramName]) : '';
+    }
+
+    // get integer query params from the paramSource
+    function getIntegerFromParams($paramName) : int | null {
+        // onlyInt will cast '' to 0, so checking against !empty is required
+        // !empty(0) is false, so must check against explicit '0' to ensure that value is interpreted as integer 0
+        return isset($this->paramSource[$paramName]) && (!empty($this->paramSource[$paramName]) || $this->paramSource[$paramName] === '0') ? Sanitize::onlyInt($this->paramSource[$paramName]) : null;
+    }
+
+    function initializeParams() : void {
+        $this->startDate = $this->getStringFromParams('start_date');
+        $this->endDate = $this->getStringFromParams('end_date');
+        $this->startModDate = $this->getStringFromParams('start_mod_date');
+        $this->endModDate = $this->getStringFromParams('end_mod_date');
+        $this->minId = $this->getIntegerFromParams('min_id');
+        $this->maxId = $this->getIntegerFromParams('max_id');
+        $this->minAssessmentUsage = $this->getIntegerFromParams('min_assessment_usage');
+        $this->maxAssessmentUsage = $this->getIntegerFromParams('max_assessment_usage');
     }
 
     public function generateReport(): array
@@ -228,6 +241,46 @@ class QuestionReportService
         return $this->questionTypeDistribution;
     }
 
+    public function getStartDate(): string
+    {
+        return $this->startDate;
+    }
+
+    public function getEndDate(): string
+    {
+        return $this->endDate;
+    }
+
+    public function getStartModDate(): string
+    {
+        return $this->startModDate;
+    }
+
+    public function getEndModDate(): string
+    {
+        return $this->endModDate;
+    }
+
+    public function getMinId(): int | null
+    {
+        return $this->minId;
+    }
+
+    public function getMaxId(): int | null
+    {
+        return $this->maxId;
+    }
+
+    public function getMinAssessmentUsage(): int | null
+    {
+        return $this->minAssessmentUsage;
+    }
+
+    public function getMaxAssessmentUsage(): int | null
+    {
+        return $this->maxAssessmentUsage;
+    }
+
     public function questionsToCSVArrays(): array {
         $arrays = array(
             // Column Headers
@@ -289,5 +342,69 @@ class QuestionReportService
         }
 
         return $arrays;
+    }
+
+    // Function to export multiple CSV files as a ZIP archive
+    function exportCSVsToZip($zipName = 'zip_')
+    {
+        $filesData = [
+            'questions.csv' => $this->questionsToCSVArrays(),
+            'users.csv' => $this->usersToCSVArrays(),
+            'groups.csv' => $this->groupsToCSVArrays()
+        ];
+
+        // Create a temporary directory
+        $tempDir = sys_get_temp_dir() . '/csv_export_' . uniqid();
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        // Create CSV files in the temporary directory
+        foreach ($filesData as $filename => $data) {
+            $filepath = $tempDir . '/' . $filename;
+            $f = fopen($filepath, 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Write data to the file
+            foreach ($data as $row) {
+                fputcsv($f, $row);
+            }
+
+            fclose($f);
+        }
+
+        // Create a ZIP file
+        $zipFilename = $zipName . date('Y-m-d') . '.zip';
+        $zipFilepath = $tempDir . '/' . $zipFilename;
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipFilepath, ZipArchive::CREATE) !== TRUE) {
+            die("Cannot create ZIP file");
+        }
+
+        // Add CSV files to the ZIP
+        foreach ($filesData as $filename => $data) {
+            $zip->addFile($tempDir . '/' . $filename, $filename);
+        }
+
+        $zip->close();
+
+        // Send the ZIP file to the browser
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
+        header('Content-Length: ' . filesize($zipFilepath));
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        readfile($zipFilepath);
+
+        // Clean up temporary files
+        foreach ($filesData as $filename => $data) {
+            unlink($tempDir . '/' . $filename);
+        }
+        unlink($zipFilepath);
+        rmdir($tempDir);
     }
 }

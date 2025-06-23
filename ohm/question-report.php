@@ -17,47 +17,18 @@ if ($GLOBALS['myrights'] < 100) {
 $GLOBALS['DBH'] = ReadReplicaDb::getPdoInstance();
 
 $showResults = false;
-
 $paramSource = $_GET;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paramSource = $_POST;
 }
 
-// get string query params from the paramSource
-function getStringFromParams($paramSource, $paramName) : string {
-    return isset($paramSource[$paramName]) ? Sanitize::simpleString($paramSource[$paramName]) : '';
-}
-
-// get integer query params from the paramSource
-function getIntegerFromParams($paramSource, $paramName) : int | null {
-    // onlyInt will cast '' to 0, so checking against !empty is required
-    // !empty(0) is false, so must check against explicit '0' to ensure that value is interpreted as integer 0
-    return isset($paramSource[$paramName]) && (!empty($paramSource[$paramName]) || $paramSource[$paramName] === '0') ? Sanitize::onlyInt($paramSource[$paramName]) : null;
-}
-
-$startDate = getStringFromParams($paramSource, 'start_date');
-$endDate = getStringFromParams($paramSource, 'end_date');
-$startModDate = getStringFromParams($paramSource, 'start_mod_date');
-$endModDate = getStringFromParams($paramSource, 'end_mod_date');
-$minId = getIntegerFromParams($paramSource, 'min_id');
-$maxId = getIntegerFromParams($paramSource, 'max_id');
-$minAssessmentUsage = getIntegerFromParams($paramSource, 'min_assessment_usage');
-$maxAssessmentUsage = getIntegerFromParams($paramSource, 'max_assessment_usage');
+$reportService = new OHM\Services\QuestionReportService(
+    $DBH,
+    $paramSource
+);
 
 // if the request is a form POST or a CSV export, then the data needs to be queried
 if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $reportService = new OHM\Services\QuestionReportService(
-        $DBH,
-        $startDate,
-        $endDate,
-        $startModDate,
-        $endModDate,
-        $minId,
-        $maxId,
-        $minAssessmentUsage,
-        $maxAssessmentUsage
-    );
-
     $report = $reportService->generateReport();
 
     $questions = $report['questions'];
@@ -69,26 +40,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv' || $_SERVER['REQUEST_MET
     $questionTypeDistribution = $report['questionTypeDistribution'];
 }
 
-// Check if CSV export is requested
-if (isset($_GET['export']) && $_GET['export'] === 'csv') {
-    $questionsArrays = $reportService->questionsToCSVArrays();
-    $usersArrays = $reportService->usersToCSVArrays();
-    $groupsArrays = $reportService->groupsToCSVArrays();
-
-    // Export to ZIP containing all CSV files
-    exportCSVsToZip([
-        'questions.csv' => $questionsArrays,
-        'users.csv' => $usersArrays,
-        'groups.csv' => $groupsArrays
-    ], $zipName = 'question-report');
-
+if (isset($_GET['export']) && $_GET['export'] === 'csv') { // CSV export request
+    $reportService->exportCSVsToZip('question-report-');
     exit();
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') { // Form submission request
+    $showResults = true;
 }
 
 require_once("../header.php");
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $showResults = true;
-}
 
 include(__DIR__ . "/views/question-report/show-question-report.php");
 

@@ -21,12 +21,16 @@ final class QuestionReportServiceTest extends TestCase
      */
     public function testConstructor()
     {
+        $paramSource = [
+            'start_date' => '2023-01-01',
+            'end_date' => '2023-12-31',
+            'start_mod_date' => '2023-02-01',
+            'end_mod_date' => '2023-11-30'
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '2023-01-01',
-            '2023-12-31',
-            '2023-02-01',
-            '2023-11-30'
+            $paramSource
         );
 
         $this->assertInstanceOf(QuestionReportService::class, $service);
@@ -61,12 +65,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only startDate
+        $paramSource = [
+            'start_date' => $startDate // Only startDate is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            $startDate, // Only startDate is set
-            '',
-            '',
-            ''
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -99,12 +104,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only endDate
+        $paramSource = [
+            'end_date' => $endDate // Only endDate is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '',
-            $endDate, // Only endDate is set
-            '',
-            ''
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -137,12 +143,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only startModDate
+        $paramSource = [
+            'start_mod_date' => $startModDate // Only startModDate is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '',
-            '',
-            $startModDate, // Only startModDate is set
-            ''
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -175,12 +182,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only endModDate
+        $paramSource = [
+            'end_mod_date' => $endModDate // Only endModDate is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '',
-            '',
-            '',
-            $endModDate // Only endModDate is set
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -214,13 +222,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only minId
+        $paramSource = [
+            'min_id' => $minId // Only minId is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '', // startDate
-            '', // endDate
-            '', // startModDate
-            '', // endModDate
-            $minId // Only minId is set
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -253,14 +261,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only maxId
+        $paramSource = [
+            'max_id' => $maxId // Only maxId is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '', // startDate
-            '', // endDate
-            '', // startModDate
-            '', // endModDate
-            null, // minId
-            $maxId // Only maxId is set
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -293,15 +300,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only minAssessmentUsage
+        $paramSource = [
+            'min_assessment_usage' => $minAssessmentUsage // Only minAssessmentUsage is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '', // startDate
-            '', // endDate
-            '', // startModDate
-            '', // endModDate
-            null, // minId
-            null, // maxId
-            $minAssessmentUsage // Only minAssessmentUsage is set
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -334,16 +339,13 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create service with only maxAssessmentUsage
+        $paramSource = [
+            'max_assessment_usage' => $maxAssessmentUsage // Only maxAssessmentUsage is set
+        ];
+
         $service = new QuestionReportService(
             $this->dbhMock,
-            '', // startDate
-            '', // endDate
-            '', // startModDate
-            '', // endModDate
-            null, // minId
-            null, // maxId
-            null, // minAssessmentUsage
-            $maxAssessmentUsage // Only maxAssessmentUsage is set
+            $paramSource
         );
 
         $result = $service->queryQuestions();
@@ -357,8 +359,10 @@ final class QuestionReportServiceTest extends TestCase
     public function testGenerateReport()
     {
         // Create a service with mocked methods
+        $paramSource = [];
+
         $service = $this->getMockBuilder(QuestionReportService::class)
-            ->setConstructorArgs([$this->dbhMock, '', '', '', '', false])
+            ->setConstructorArgs([$this->dbhMock, $paramSource])
             ->onlyMethods(['queryQuestions', 'aggregateQuestionData', 'queryUsers', 'queryGroups'])
             ->getMock();
 
@@ -396,7 +400,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testAggregateQuestionData()
     {
         // Create a service with questions data
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '');
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
@@ -468,7 +473,8 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create a service with uniqueUserIds
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '');
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the uniqueUserIds property
         $reflection = new ReflectionClass($service);
@@ -509,7 +515,8 @@ final class QuestionReportServiceTest extends TestCase
             ->willReturn($stmtMock);
 
         // Create a service with uniqueGroupIds
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the uniqueGroupIds property
         $reflection = new ReflectionClass($service);
@@ -533,7 +540,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testGetQuestions()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
@@ -558,7 +566,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testGetUserRightsDistribution()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the userRightsDistribution property
         $reflection = new ReflectionClass($service);
@@ -589,7 +598,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testGetUsers()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the users property
         $reflection = new ReflectionClass($service);
@@ -614,7 +624,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testGetQuestionTypeDistribution()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the questionTypeDistribution property
         $reflection = new ReflectionClass($service);
@@ -644,7 +655,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testGetGroups()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the groups property
         $reflection = new ReflectionClass($service);
@@ -669,7 +681,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testQuestionsToCSVArrays()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the questions property
         $reflection = new ReflectionClass($service);
@@ -704,7 +717,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testUsersToCSVArrays()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the users property
         $reflection = new ReflectionClass($service);
@@ -733,7 +747,8 @@ final class QuestionReportServiceTest extends TestCase
     public function testGroupsToCSVArrays()
     {
         // Create a service
-        $service = new QuestionReportService($this->dbhMock, '', '', '', '', false);
+        $paramSource = [];
+        $service = new QuestionReportService($this->dbhMock, $paramSource);
 
         // Use reflection to set the groups property
         $reflection = new ReflectionClass($service);

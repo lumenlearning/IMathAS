@@ -15,10 +15,10 @@
             <div class="filter-item">
                 <label class="filter-label" for="start_date">Creation Date Range:</label>
                 <input type="text" id="start_date" name="start_date" class="js-flatpickr" placeholder="Start Date"
-                       value="<?php echo $startDate; ?>">
+                       value="<?php echo $reportService->getStartDate(); ?>">
                 to
                 <input type="text" id="end_date" name="end_date" class="js-flatpickr" placeholder="End Date"
-                       value="<?php echo $endDate; ?>">
+                       value="<?php echo $reportService->getEndDate(); ?>">
             </div>
         </div>
 
@@ -26,19 +26,19 @@
             <div class="filter-item">
                 <label class="filter-label" for="start_mod_date">Last Modified Date Range:</label>
                 <input type="text" id="start_mod_date" name="start_mod_date" class="js-flatpickr"
-                       placeholder="Start Date" value="<?php echo $startModDate; ?>">
+                       placeholder="Start Date" value="<?php echo $reportService->getStartModDate(); ?>">
                 to
                 <input type="text" id="end_mod_date" name="end_mod_date" class="js-flatpickr" placeholder="End Date"
-                       value="<?php echo $endModDate; ?>">
+                       value="<?php echo $reportService->getEndModDate(); ?>">
             </div>
         </div>
 
         <div class="filter-row">
             <div class="filter-item">
                 <label class="filter-label" for="min_id">Question ID Range:</label>
-                <input type="number" id="min_id" name="min_id" placeholder="Min ID" value="<?php echo $minId; ?>">
+                <input type="number" id="min_id" name="min_id" placeholder="Min ID" value="<?php echo $reportService->getMinId(); ?>">
                 to
-                <input type="number" id="max_id" name="max_id" placeholder="Max ID" value="<?php echo $maxId; ?>">
+                <input type="number" id="max_id" name="max_id" placeholder="Max ID" value="<?php echo $reportService->getMaxId(); ?>">
             </div>
         </div>
 
@@ -46,10 +46,10 @@
             <div class="filter-item">
                 <label class="filter-label" for="min_assessment_usage">Assessment Usage Range:</label>
                 <input type="number" id="min_assessment_usage" name="min_assessment_usage" placeholder="Min Usage"
-                       value="<?php echo $minAssessmentUsage; ?>">
+                       value="<?php echo $reportService->getMinAssessmentUsage(); ?>">
                 to
                 <input type="number" id="max_assessment_usage" name="max_assessment_usage" placeholder="Max Usage"
-                       value="<?php echo $maxAssessmentUsage; ?>">
+                       value="<?php echo $reportService->getMaxAssessmentUsage(); ?>">
             </div>
         </div>
 
@@ -67,14 +67,14 @@
             <div class="results-title">Summary</div>
             <div style="margin-bottom: 10px;">
                 <a href="?export=csv<?php
-                echo !empty($startDate) ? '&start_date=' . urlencode($startDate) : '';
-                echo !empty($endDate) ? '&end_date=' . urlencode($endDate) : '';
-                echo !empty($startModDate) ? '&start_mod_date=' . urlencode($startModDate) : '';
-                echo !empty($endModDate) ? '&end_mod_date=' . urlencode($endModDate) : '';
-                echo isset($minId) ? '&min_id=' . urlencode($minId) : '';
-                echo isset($maxId) ? '&max_id=' . urlencode($maxId) : '';
-                echo isset($minAssessmentUsage) ? '&min_assessment_usage=' . urlencode($minAssessmentUsage) : '';
-                echo isset($maxAssessmentUsage) ? '&max_assessment_usage=' . urlencode($maxAssessmentUsage) : '';
+                echo !empty($reportService->getStartDate()) ? '&start_date=' . urlencode($reportService->getStartDate()) : '';
+                echo !empty($reportService->getEndDate()) ? '&end_date=' . urlencode($reportService->getEndDate()) : '';
+                echo !empty($reportService->getStartModDate()) ? '&start_mod_date=' . urlencode($reportService->getStartModDate()) : '';
+                echo !empty($reportService->getEndModDate()) ? '&end_mod_date=' . urlencode($reportService->getEndModDate()) : '';
+                echo is_int($reportService->getMinId()) ? '&min_id=' . urlencode($reportService->getMinId()) : '';
+                echo is_int($reportService->getMaxId()) ? '&max_id=' . urlencode($reportService->getMaxId()) : '';
+                echo is_int($reportService->getMinAssessmentUsage()) ? '&min_assessment_usage=' . urlencode($reportService->getMinAssessmentUsage()) : '';
+                echo is_int($reportService->getMaxAssessmentUsage()) ? '&max_assessment_usage=' . urlencode($reportService->getMaxAssessmentUsage()) : '';
                 ?>" class="csv-download-btn">Download CSV Files (ZIP)</a>
             </div>
             <p>Total questions matching criteria: <?php echo $totalQuestions; ?></p>
