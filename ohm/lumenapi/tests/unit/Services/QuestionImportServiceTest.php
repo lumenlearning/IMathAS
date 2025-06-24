@@ -70,6 +70,20 @@ class QuestionImportServiceTest extends TestCase
         "correct_answer" => 2,
     ];
 
+    const MGA_QUESTION_NEEDS_SANITIZATION = [
+        "source_id" => "9d779655-019a-472a-a28f-1ef06bb35aad",
+        "source_type" => "form_input",
+        "type" => "multiple_choice",
+        "description" => "What is 1 + 2?<script>let a = 1;</script>",
+        "text" => "What is 1 + 2?<script>let a = 1;</script>",
+        "choices" => [
+            "1<button>CLICK ME!</button>",
+            "<input/>2",
+            "3<code>let a = 1</code>"
+        ],
+        "correct_answer" => 2
+    ];
+
     const QUESTIONS = [
         self::MGA_QUESTION_NO_FEEDBACK,
         self::MGA_QUESTION_WITH_FEEDBACK,
@@ -224,10 +238,8 @@ class QuestionImportServiceTest extends TestCase
     public function testBuildMultipleChoiceQuestion_WithPerAnswerFeedback(): void
     {
         $class = new ReflectionClass(QuestionImportService::class);
-        $replaceSmartQuotes = $class->getMethod('replaceSmartQuotes');
-        $replaceSmartQuotes->setAccessible(true); // Required for PHP 7.4.
-        $encodeForQuestionCode = $class->getMethod('encodeForQuestionCode');
-        $encodeForQuestionCode->setAccessible(true); // Required for PHP 7.4.
+        $sanitizeInputText = $class->getMethod('sanitizeInputText');
+        $sanitizeInputText->setAccessible(true); // Required for PHP 7.4.
         $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
         $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4
 
@@ -243,20 +255,18 @@ class QuestionImportServiceTest extends TestCase
         $this->assertEquals('choices', $question['qtype']);
 
         // Question description should have no "smart" chars and be and encoded.
-        $nosmartDescription = $replaceSmartQuotes->invokeArgs($this->questionImportService, [self::MGA_QUESTION_WITH_FEEDBACK['description']]);
-        $encodedDescription = $encodeForQuestionCode->invokeArgs($this->questionImportService, [$nosmartDescription]);
-        $this->assertMatchesRegularExpression('/' . $encodedDescription . '/', $question['description']);
+        $encodedDescription = $sanitizeInputText->invokeArgs($this->questionImportService, [self::MGA_QUESTION_WITH_FEEDBACK['description']]);
+        $this->assertStringContainsString($encodedDescription, $question['description']);
 
-        // Question text should have no "smart" chars, be encoded, and contain "$answerbox".
-        $nosmartQuestionText = $replaceSmartQuotes->invokeArgs($this->questionImportService, [self::MGA_QUESTION_WITH_FEEDBACK['text']]);
-        $encodedQuestionText = $encodeForQuestionCode->invokeArgs($this->questionImportService, [$nosmartQuestionText]);
-        $this->assertMatchesRegularExpression('/' . $encodedQuestionText . '.*\$answerbox/s', $question['qtext']);
+        // Question text should have no "smart" chars, and be encoded
+        $encodedQuestionText = $sanitizeInputText->invokeArgs($this->questionImportService, [self::MGA_QUESTION_WITH_FEEDBACK['text']]);
+        $this->assertMatchesRegularExpression('/' . preg_quote($encodedQuestionText, '/') . '\s*/s', $question['qtext']);
 
         // Choices in question code should have no "smart" chars and be encoded.
         for ($idx = 0; $idx < count(self::MGA_QUESTION_WITH_FEEDBACK['choices']); $idx++) {
             $choice = self::MGA_QUESTION_WITH_FEEDBACK['choices'][$idx];
-            $nosmartChoice = $replaceSmartQuotes->invokeArgs($this->questionImportService, [$choice]);
-            $encodedChoice = $encodeForQuestionCode->invokeArgs($this->questionImportService, [$nosmartChoice]);
+            $encodedChoice = addcslashes($choice, "'\\");
+            $encodedChoice = $sanitizeInputText->invokeArgs($this->questionImportService, [$encodedChoice]);
 
             $varName = sprintf('$questions[%d]', $idx);
             $regexQuotedVarName = preg_quote($varName);
@@ -360,6 +370,23 @@ class QuestionImportServiceTest extends TestCase
             ['quiz', $questionWithLongDescription]);
 
         $this->assertLessThan(255, strlen($question['description']));
+    }
+
+    public function testBuildMultipleChoiceQuestion_SanitizesInputsOfHtml(): void {
+        $class = new ReflectionClass(QuestionImportService::class);
+        $buildMultipleChoiceQuestion = $class->getMethod('buildMultipleChoiceQuestion');
+        $buildMultipleChoiceQuestion->setAccessible(true); // Required for PHP 7.4.
+
+        $questionWithLongDescription = self::MGA_QUESTION_NEEDS_SANITIZATION;
+
+        $question = $buildMultipleChoiceQuestion->invokeArgs($this->questionImportService,
+            ['quiz', $questionWithLongDescription]);
+
+        $this->assertStringNotContainsString('<script>', $question['description']);
+        $this->assertStringNotContainsString('<script>', $question['qtext']);
+        $this->assertStringNotContainsString('<code>', $question['control']);
+        $this->assertStringNotContainsString('<input>', $question['control']);
+        $this->assertStringNotContainsString('<button>', $question['control']);
     }
 
     /*
