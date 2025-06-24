@@ -1,0 +1,62 @@
+.filter-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.filter-item {
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+.filter-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.results-container {
+    margin-top: 20px;
+}
+.results-section {
+    margin-bottom: 30px;
+}
+.results-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.results-table th, .results-table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+.results-table th {
+    background-color: #f2f2f2;
+}
+.csv-download-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+.csv-download-btn:hover {
+    background-color: #45a049;
+}
