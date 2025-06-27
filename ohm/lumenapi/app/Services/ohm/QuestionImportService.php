@@ -309,6 +309,9 @@ class QuestionImportService extends BaseService implements QuestionImportService
         for ($idx = 0; $idx < count($allFeedback); $idx++) {
             $rawFeedback = $allFeedback[$idx];
             $safeFeedback = $this->sanitizeInputText($rawFeedback);
+            // addcslashes must be used after fancy ("smart") quotes
+            // are changed to normal quotes.
+            $safeFeedback = addcslashes($safeFeedback, "'\\");
             $macroCode .= sprintf('$feedbacktxt[%d] = \'%s\';%s',
                 $idx, $safeFeedback, "\n");
         }

@@ -407,6 +407,14 @@ class QuestionImportServiceTest extends TestCase
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[2\] = \'.*\';/', $feedbackCode);
         $this->assertMatchesRegularExpression('/\$feedbacktxt\[3\] = \'.*\';/', $feedbackCode);
 
+        // Ensure certain characters are escaped. (single quotes and backslashes)
+        $this->assertStringContainsString(
+            '$feedbacktxt[1] = \'Correct!'
+            . ' (\\\'singleQuoteTest\\\')'
+            . ' ("doubleQuoteTest")'
+            . ' (\\\$sanitizeTest)'
+            , $feedbackCode);
+
         $expected = preg_quote('$feedback = ohm_getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer);');
         $this->assertMatchesRegularExpression('/' . $expected . '/', $feedbackCode);
     }
