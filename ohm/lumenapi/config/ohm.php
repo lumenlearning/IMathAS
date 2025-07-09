@@ -11,10 +11,6 @@
 $GLOBALS['assessUIver'] = 2;
 
 // Override question answer shuffling.
-// This setting also exists in OHM's root /config/ohm.php file.
-if (getenv('NOSHUFFLE_ANSWERS')) {
-    $GLOBALS['CFG']['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
-}
 $GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'] = ['choices', 'multans'];
 
 // Define OHM hooks.
