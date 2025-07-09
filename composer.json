@@ -21,6 +21,7 @@
         "codeception/c3": "^2.9",
         "codeception/module-asserts": "^3.0",
         "codeception/module-webdriver": "^4.0",
+        "mockery/mockery": "^1.6.7",
         "softcreatr/jsonpath": "0.8.3",
         "fakerphp/faker": "^1.23.1"
     },

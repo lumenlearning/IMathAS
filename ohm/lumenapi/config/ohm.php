@@ -15,6 +15,7 @@ $GLOBALS['assessUIver'] = 2;
 if (getenv('NOSHUFFLE_ANSWERS')) {
     $GLOBALS['CFG']['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
 }
+$GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'] = ['choices', 'multans'];
 
 // Define OHM hooks.
 $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] =

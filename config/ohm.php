@@ -89,9 +89,11 @@ $CFG['GEN']['footerscriptinclude'] = "ohm/js/lumenga.js";
 $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
 // Override question answer shuffling.
+// This setting also exists in OHM's question API: ohm/lumenapi/config/ohm.php
 if (!empty(getenv('NOSHUFFLE_ANSWERS'))) {
     $CFG['GEN']['noshuffle'] = getenv('NOSHUFFLE_ANSWERS');
 }
+$GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'] = ['choices', 'multans'];
 
 //can set almost any assessment setting this way
 $CFG['AMS']['defpoints'] = 1;
