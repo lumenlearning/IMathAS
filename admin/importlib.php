@@ -105,6 +105,11 @@ function parseqs($file,$touse,$rights) {
 				$stm = $DBH->prepare($query);
 				$stm->execute($qarr);
 
+                if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                    require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                    $onQuestionSave($qsetid, $qd['control']);
+                }
+
                 #### Begin OHM-specific changes ############################################################
                 #### Begin OHM-specific changes ############################################################
                 #### Begin OHM-specific changes ############################################################
@@ -203,6 +208,11 @@ function parseqs($file,$touse,$rights) {
 				':license'=>$qd['license'], ':ancestorauthors'=>$qd['ancestorauthors'], ':otherattribution'=>$qd['otherattribution'], ':hasimg'=>$hasimg, ':importuid'=>$importuid));
 			$newq++;
 			$qsetid = $DBH->lastInsertId();
+
+            if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                $onQuestionSave($qsetid, $qd['control']);
+            }
 
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
@@ -636,6 +646,11 @@ if ($myrights < 100) {
   					}, $row[2]);
 					$stm2 = $DBH->prepare("UPDATE imas_questionset SET control=:control,qtext=:qtext WHERE id=:id");
 					$stm2->execute(array(':control'=>$control, ':qtext'=>$qtext, ':id'=>$row[0]));
+
+                    if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                        require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                        $onQuestionSave($row[0], $control);
+                    }
 				}
 			}
 

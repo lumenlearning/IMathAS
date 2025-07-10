@@ -271,6 +271,11 @@
 					':qcontrol'=>$_POST['qcontrol'], ':solution'=>$_POST['solution'], ':isrand'=>$isrand, ':qtext'=>$_POST['qtext'], ':answer'=>$_POST['answer'],
 					':lastmoddate'=>$now, ':extref'=>$extref, ':replaceby'=>$replaceby, ':solutionopts'=>$solutionopts, ':id'=>$_GET['id']));
 
+                if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                    require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                    $onQuestionSave($_GET['id'], $_POST['control']);
+                }
+
 				if ($stm->rowCount()>0) {
 					$outputmsg .= _("Question Updated.")." ";
 				} else {
@@ -360,6 +365,11 @@
 				':solution'=>$_POST['solution'], ':solutionopts'=>$solutionopts, ':isrand'=>$isrand));
 			$qsetid = $DBH->lastInsertId();
 			$_GET['id'] = $qsetid;
+
+            if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                $onQuestionSave($qsetid, $_POST['control']);
+            }
 
 			if (isset($_GET['templateid'])) {
 				$stm = $DBH->prepare("SELECT var,filename,alttext,id FROM imas_qimages WHERE qsetid=:qsetid");

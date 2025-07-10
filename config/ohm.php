@@ -271,6 +271,7 @@ $CFG['hooks']['lti/setupcourse'] = __DIR__ . '/../ohm-hooks/lti/setupcourse.php'
 // The following hooks are defined here AND in the Question API. (ohm/lumenapi/config/)
 $GLOBALS['CFG']['hooks']['assess2/questions/score_engine'] = __DIR__ . '/../ohm-hooks/assess2/questions/score_engine.php';
 $GLOBALS['CFG']['hooks']['assess2/questions/question_html_generator'] = __DIR__ . '/../ohm-hooks/assess2/questions/question_html_generator.php';
+$GLOBALS['CFG']['hooks']['admin/imas_questionset'] = __DIR__ . '/../ohm-hooks/admin/imas_questionset.php';
 
 // The following hooks are defined in the Question API. (ohm/lumenapi/config/)
 //$GLOBALS['CFG']['hooks']['assess2/assess_standalone']

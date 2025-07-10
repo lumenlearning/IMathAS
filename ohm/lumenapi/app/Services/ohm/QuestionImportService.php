@@ -412,6 +412,11 @@ class QuestionImportService extends BaseService implements QuestionImportService
 //                $questionSetId, $libraryItemId));
 
             DB::commit();
+
+            if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                $onQuestionSave($questionSetId, $imasQuestionsetData['control'], app('db')->getPdo());
+            }
         } catch (Exception $e) {
             DB::rollBack();
             Log::error(
