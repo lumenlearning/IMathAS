@@ -10,7 +10,9 @@ use App\Services\ohm\QuestionCodeParserService;
  * Called after a question is saved to the database.
  * Determines if the question is algorithmic and updates the isrand column accordingly.
  *
+ * @param integer $questionId The questions ID in the database
  * @param string $questionCode The question code
+ * @param object $db The database instance upon which to make update(s)
  */
 $onQuestionSave = function($questionId, $questionCode, $db = null)
 {
