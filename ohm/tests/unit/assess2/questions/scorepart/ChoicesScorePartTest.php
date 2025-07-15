@@ -19,6 +19,15 @@ class ChoicesScorePartTest extends TestCase
 
     function setUp(): void
     {
+        /*
+         * requires and require_onces typically go at the top of a file, but due to how some
+         * functions in MOM are defined in global scope and required/require_onced in many
+         * places, it was necessary to place the following require_onces here to avoid
+         * attempts to define functions a second time.
+         *
+         * In combination with "@group ohm" at the class level, this prevents the following
+         * files from being require'd until this test class is executed.
+         */
         require_once __DIR__ . '/../../../../../../i18n/i18n.php';
         require_once __DIR__ . '/../../../../../../assess2/questions/ScoreEngine.php';
         require_once __DIR__ . '/../../../../../../assess2/questions/answerboxhelpers.php';
