@@ -271,12 +271,24 @@
 					':qcontrol'=>$_POST['qcontrol'], ':solution'=>$_POST['solution'], ':isrand'=>$isrand, ':qtext'=>$_POST['qtext'], ':answer'=>$_POST['answer'],
 					':lastmoddate'=>$now, ':extref'=>$extref, ':replaceby'=>$replaceby, ':solutionopts'=>$solutionopts, ':id'=>$_GET['id']));
 
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+                #### Begin OHM-specific changes ############################################################
+
                 if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
                     require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
                     $onQuestionSave($_GET['id'], $_POST['control']);
                 }
 
-				if ($stm->rowCount()>0) {
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+                #### End OHM-specific changes ############################################################
+
+                if ($stm->rowCount()>0) {
 					$outputmsg .= _("Question Updated.")." ";
 				} else {
 					$outputmsg .= _("Library Assignments Updated.")." ";
@@ -366,12 +378,24 @@
 			$qsetid = $DBH->lastInsertId();
 			$_GET['id'] = $qsetid;
 
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+
             if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
                 require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
                 $onQuestionSave($qsetid, $_POST['control']);
             }
 
-			if (isset($_GET['templateid'])) {
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+
+            if (isset($_GET['templateid'])) {
 				$stm = $DBH->prepare("SELECT var,filename,alttext,id FROM imas_qimages WHERE qsetid=:qsetid");
 				$stm->execute(array(':qsetid'=>$_GET['templateid']));
 				while ($row = $stm->fetch(PDO::FETCH_NUM)) {
