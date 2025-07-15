@@ -9,6 +9,13 @@ use PHPUnit\Framework\TestCase;
 use Rand;
 
 /**
+ * Keeping this test in a group (using "@group ohm") allows for excluding these
+ * tests from the group of MOM tests, where some functions are already defined
+ * before we require_once the same file.
+ *
+ * This is also why our "require_once" statements are in the class' setUp()
+ * method and not at the top of this PHP file.
+ *
  * @group ohm
  * @covers MatchingAnswerBox
  */
