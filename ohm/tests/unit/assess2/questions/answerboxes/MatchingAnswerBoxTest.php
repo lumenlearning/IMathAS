@@ -21,6 +21,7 @@ $displayformat = "select"
 
     function setUp(): void
     {
+        require_once __DIR__ . '/../../../../../../i18n/i18n.php';
         require_once __DIR__ . '/../../../../../../includes/Rand.php';
         require_once __DIR__ . '/../../../../../../includes/sanitize.php';
         require_once __DIR__ . '/../../../../../../assess2/questions/answerboxhelpers.php';
