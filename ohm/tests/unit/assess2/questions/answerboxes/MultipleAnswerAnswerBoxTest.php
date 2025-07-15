@@ -8,12 +8,8 @@ use IMathAS\assess2\questions\QuestionHtmlGenerator;
 use PHPUnit\Framework\TestCase;
 use Rand;
 
-require_once __DIR__ . '/../../../../../../includes/Rand.php';
-require_once __DIR__ . '/../../../../../../includes/sanitize.php';
-require_once __DIR__ . '/../../../../../../assess2/questions/answerboxhelpers.php';
-require_once __DIR__ . '/../../../../../../assessment/interpret5.php';
-
 /**
+ * @group ohm
  * @covers MultipleAnswerAnswerBox
  */
 final class MultipleAnswerAnswerBoxTest extends TestCase
@@ -24,6 +20,12 @@ $answer = "0,3"
 
     function setUp(): void
     {
+        require_once __DIR__ . '/../../../../../../includes/Rand.php';
+        require_once __DIR__ . '/../../../../../../includes/sanitize.php';
+        require_once __DIR__ . '/../../../../../../assess2/questions/answerboxhelpers.php';
+        require_once __DIR__ . '/../../../../../../assess2/questions/QuestionHtmlGenerator.php';
+        require_once __DIR__ . '/../../../../../../assessment/interpret5.php';
+
         $GLOBALS['RND'] = new Rand();
     }
 

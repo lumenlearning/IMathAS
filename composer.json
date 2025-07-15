@@ -73,10 +73,14 @@
     "scripts": {
         "start": "php -S localhost:8080 -t .",
         "test": [
-            "phpunit",
+            "phpunit --group ohm",
+            "phpunit --exclude-group ohm",
             "codecept run"
         ],
-        "test-mom": "phpunit",
+        "test-mom": [
+            "phpunit --group ohm",
+            "phpunit --exclude-group ohm"
+        ],
         "test-ohm": "codecept run",
         "test-ohmv": "codecept run --steps --coverage --coverage-html",
         "coverage-ohm": "codecept run --coverage --coverage-html",

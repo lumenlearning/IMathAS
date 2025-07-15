@@ -10,18 +10,21 @@ use Rand;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\Controllers\QuestionController\DbFixtures;
 
-require_once __DIR__ . '/../../../../../../assess2/questions/ScoreEngine.php';
-require_once __DIR__ . '/../../../../../../assess2/questions/answerboxhelpers.php';
-require_once __DIR__ . '/../../../../../../assessment/interpret5.php';
-require_once __DIR__ . '/../../../../../../includes/Rand.php';
-require_once __DIR__ . '/../../../../../../ohm/lumenapi/tests/unit/Controllers/QuestionController/DbFixtures.php';
-
+/**
+ * @group ohm
+ */
 class MultipleAnswerScorePartTest extends TestCase
 {
     private PDO $pdo;
 
     function setUp(): void
     {
+        require_once __DIR__ . '/../../../../../../assess2/questions/ScoreEngine.php';
+        require_once __DIR__ . '/../../../../../../assess2/questions/answerboxhelpers.php';
+        require_once __DIR__ . '/../../../../../../assessment/interpret5.php';
+        require_once __DIR__ . '/../../../../../../includes/Rand.php';
+        require_once __DIR__ . '/../../../../../../ohm/lumenapi/tests/unit/Controllers/QuestionController/DbFixtures.php';
+
         $GLOBALS['RND'] = new Rand();
 
         $this->pdo = Mockery::mock(PDO::class);
