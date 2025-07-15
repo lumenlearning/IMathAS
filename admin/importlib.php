@@ -106,7 +106,7 @@ function parseqs($file,$touse,$rights) {
 				$stm->execute($qarr);
 
                 if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
-                    require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                    require $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
                     $onQuestionSave($qsetid, $qd['control']);
                 }
 
@@ -210,7 +210,7 @@ function parseqs($file,$touse,$rights) {
 			$qsetid = $DBH->lastInsertId();
 
             if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
-                require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                require $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
                 $onQuestionSave($qsetid, $qd['control']);
             }
 
@@ -648,7 +648,7 @@ if ($myrights < 100) {
 					$stm2->execute(array(':control'=>$control, ':qtext'=>$qtext, ':id'=>$row[0]));
 
                     if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
-                        require_once $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                        require $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
                         $onQuestionSave($row[0], $control);
                     }
 				}
