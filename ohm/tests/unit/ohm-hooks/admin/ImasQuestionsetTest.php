@@ -5,6 +5,10 @@ namespace OHM\Tests;
 use PHPUnit\Framework\TestCase;
 use App\Services\ohm\QuestionCodeParserService;
 
+require_once __DIR__ . '/../../../../../ohm/lumenapi/app/Services/Interfaces/QuestionCodeParserServiceInterface.php';
+require_once __DIR__ . '/../../../../../ohm/lumenapi/app/Services/ohm/BaseService.php';
+require_once __DIR__ . '/../../../../../ohm/lumenapi/app/Services/ohm/QuestionCodeParserService.php';
+
 /**
  * Covers OHM hook file: /ohm-hooks/admin/imas_questionset.php
  *
@@ -13,11 +17,6 @@ use App\Services\ohm\QuestionCodeParserService;
  */
 final class ImasQuestionsetTest extends TestCase
 {
-    public static function setUpBeforeClass(): void
-    {
-        require_once(__DIR__ . '/../../../../../ohm-hooks/admin/imas_questionset.php');
-    }
-
     /**
      * Test the onQuestionSave function
      *
@@ -76,6 +75,7 @@ final class ImasQuestionsetTest extends TestCase
             ->with([':isrand' => $expectedIsrand, ':id' => $questionId]);
 
         // Call the function with the DB
+        require(__DIR__ . '/../../../../../ohm-hooks/admin/imas_questionset.php');
         $onQuestionSave($questionId, $questionCode, $useGlobalDB ? null : $mockDb, $mockParser);
     }
 }
