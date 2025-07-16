@@ -14,13 +14,13 @@ use App\Services\ohm\QuestionCodeParserService;
  * @param string $questionCode The question code
  * @param object $db The database instance upon which to make update(s)
  */
-$onQuestionSave = function($questionId, $questionCode, $db = null)
+$onQuestionSave = function($questionId, $questionCode, $db = null, $parser = null)
 {
     if (!isset($db)) {
         $db = $GLOBALS['DBH'];
     }
     // Use QuestionCodeParserService to determine if the question is algorithmic
-    $parser = new QuestionCodeParserService($questionCode);
+    $parser = $parser ?? new QuestionCodeParserService($questionCode);
     $isAlgorithmic = $parser->isAlgorithmic();
 
     // Update the isrand column in the database
