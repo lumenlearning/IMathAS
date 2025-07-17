@@ -21,6 +21,7 @@
         "codeception/c3": "^2.9",
         "codeception/module-asserts": "^3.0",
         "codeception/module-webdriver": "^4.0",
+        "mockery/mockery": "^1.6.7",
         "softcreatr/jsonpath": "0.8.3",
         "fakerphp/faker": "^1.23.1"
     },
@@ -72,10 +73,14 @@
     "scripts": {
         "start": "php -S localhost:8080 -t .",
         "test": [
-            "phpunit",
+            "phpunit --group ohm",
+            "phpunit --exclude-group ohm",
             "codecept run"
         ],
-        "test-mom": "phpunit",
+        "test-mom": [
+            "phpunit --group ohm",
+            "phpunit --exclude-group ohm"
+        ],
         "test-ohm": "codecept run",
         "test-ohmv": "codecept run --steps --coverage --coverage-html",
         "coverage-ohm": "codecept run --coverage --coverage-html",
