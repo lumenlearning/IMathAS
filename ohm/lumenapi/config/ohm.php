@@ -28,3 +28,6 @@ $GLOBALS['CFG']['hooks']['assess2/questions/scorepart/multiple_answer_score_part
 
 $GLOBALS['CFG']['hooks']['assess2/questions/scorepart/choices_score_part'] =
     __DIR__ . '/../../../ohm-hooks/assess2/questions/scorepart/choices_score_part.php';
+
+$GLOBALS['CFG']['hooks']['admin/imas_questionset'] =
+    __DIR__ . '/../../../ohm-hooks/admin/imas_questionset.php';

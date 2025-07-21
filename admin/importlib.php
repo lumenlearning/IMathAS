@@ -111,6 +111,12 @@ function parseqs($file,$touse,$rights) {
                 #### Begin OHM-specific changes ############################################################
                 #### Begin OHM-specific changes ############################################################
 
+                if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                    require $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                    $onQuestionSave($qsetid, $qd['control']);
+                }
+
+
                 if ($GLOBALS['qid_mapping_csv']->isOpen()) {
                     $GLOBALS['qid_mapping_csv']->addQidMappingRowToCsv($qd['control'], $qd['sourceqid'], $qsetid, $qd['qtype']);
                 }
@@ -209,6 +215,11 @@ function parseqs($file,$touse,$rights) {
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
             #### Begin OHM-specific changes ############################################################
+
+            if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                require $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                $onQuestionSave($qsetid, $qd['control']);
+            }
 
             if ($GLOBALS['qid_mapping_csv']->isOpen()) {
                 $GLOBALS['qid_mapping_csv']->addQidMappingRowToCsv($qd['control'], $qd['sourceqid'], $qsetid, $qd['qtype']);
@@ -636,7 +647,25 @@ if ($myrights < 100) {
   					}, $row[2]);
 					$stm2 = $DBH->prepare("UPDATE imas_questionset SET control=:control,qtext=:qtext WHERE id=:id");
 					$stm2->execute(array(':control'=>$control, ':qtext'=>$qtext, ':id'=>$row[0]));
-				}
+
+
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+                    #### Begin OHM-specific changes ############################################################
+
+                    if (isset($GLOBALS['CFG']['hooks']['admin/imas_questionset'])) {
+                        require $GLOBALS['CFG']['hooks']['admin/imas_questionset'];
+                        $onQuestionSave($row[0], $control);
+                    }
+
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                    #### End OHM-specific changes ############################################################
+                }
 			}
 
 
