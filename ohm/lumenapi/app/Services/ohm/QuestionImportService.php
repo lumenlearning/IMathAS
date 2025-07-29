@@ -197,14 +197,16 @@ class QuestionImportService extends BaseService implements QuestionImportService
     {
         $questionDescription = $this->sanitizeInputText($questionData['description']);
         // imas_questionset.description is currently VARCHAR(254)
-        $questionDescription = substr($questionDescription, 0, 200);
-        
+        // 254 - 61 (see form_input type below) = 193
+        $questionDescription = substr($questionDescription, 0, 193);
+
         // Allows distinction between source type in the question description
         // Helpful to embed the source_id for connecting the questions in OHM back to their source
         if ('mga_file' == $questionData['source_type']) {
             $questionDescription .= ' -- MGA_GUID:' . $questionData['source_id'];
         }
         else if ('form_input' == $questionData['source_type']) {
+            // This is 61 chars long
             $questionDescription .= ' -- FORM_SUBMISSION_GUID:' . $questionData['source_id'];
         }
         else {
