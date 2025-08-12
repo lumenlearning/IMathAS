@@ -85,7 +85,39 @@ require_once "../header.php";
 					</svg>
 				</span>
 			</div>
+
+			<?php
+			// Load data needed for "My Courses" section
+			$stm = $DBH->prepare("SELECT jsondata FROM imas_users WHERE id=:id");
+			$stm->execute(array(':id'=>$userid));
+			$userjson = json_decode($stm->fetchColumn(0), true);
+
+			$myCourseResult = $DBH->prepare("SELECT ic.id,ic.name,ic.termsurl,ic.copyrights FROM imas_courses AS ic,imas_teachers WHERE imas_teachers.courseid=ic.id AND imas_teachers.userid=:userid AND ic.available<4 ORDER BY ic.name");
+			$myCourseResult->execute(array(':userid'=>$userid));
+			$myCourses = array();
+			$myCoursesDefaultOrder = array();
+			while ($line = $myCourseResult->fetch(PDO::FETCH_ASSOC)) {
+				$myCourses[$line['id']] = $line;
+				$myCoursesDefaultOrder[] = $line['id'];
+			}
 			
+			// Define constant and include utilities
+			define('INCLUDED_FROM_COURSECOPY', true);
+			require_once(__DIR__ . '/../includes/coursecopy_templates/utilities.php');
+			?>
+			
+			<div class="copy-course-content-mine">
+				<p><?php echo _('Select a course to copy:'); ?></p>
+				<?php include_once(__DIR__ . '/../includes/coursecopy_templates/my_courses.php'); ?>
+				
+				<?php writeEkeyField(); ?>
+				
+				<button type="submit" id="continuebutton" disabled style="display:none">
+					<?php echo _('Continue'); ?>
+				</button>
+			</div>
+		
+
 			<div class="copy-course-content-other-title collapsible-item close" onClick={copyOtherCourseToggle()}>
 				Copy someone else's course 
 				<span class="open-close-caret">
@@ -145,33 +177,6 @@ require_once "../header.php";
 			</div>
 		</div>
 	</form>
-
-	
-	<p>
-            <button id="qa-button-copyfrom-existing-course" type="button" onclick="showCopyOpts()">
-                <?php if (isset($CFG['addcourse']['copybutton'])): ?>
-                    <?php echo $CFG['addcourse']['copybutton']; ?>
-                <?php elseif (isset($CFG['coursebrowser'])): ?>
-                    <?php echo _('Copy from an existing course'); ?>
-                <?php else: ?>
-                    <?php echo _('Copy from an existing course or template'); ?>
-                <?php endif; ?>
-            </button>
-            </p>
-
-            <div id="copyoptions" style="display:none; padding-left: 20px">
-            <p><?php echo _('Select a course to copy'); ?></p>
-            <?php
-            $skipthiscourse = true;
-            $cid = 0;
-            require_once "../includes/coursecopylist.php";
-            ?>
-            </div>
-
-            <?php writeEkeyField(); ?>
-            <button type="submit" id="continuebutton" disabled style="display:none">
-            <?php echo _('Continue'); ?>
-            </button>
 </div>
 
 
