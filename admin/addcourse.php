@@ -96,14 +96,15 @@ echo '<div><h2>Advanced Options</h2>';
 
 	echo '<div><h3>Start From Scratch</h3>';
 	echo '<p>Create your own course structure and content.</p>';
-		echo '<button id="qa-button-add-blank-course" type="submit" name="copytype" value=0>';
+		echo '<a href="'.$CFG['wwwroot'].'/admin/forms.php?from=home&action=addcourse">';
 		if (isset($CFG['addcourse']['blankbutton'])) {
 		echo $CFG['addcourse']['blankbutton'];
 		} else {
 		echo _('Start with a blank course');
 		}
-		echo '</button>';
+		echo '</a>';
 	echo '</div>';
+
 echo '</div>';
 
 
