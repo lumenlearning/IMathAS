@@ -180,3 +180,8 @@ function advancedOptionsToggle() {
   $("#advanced-options-container").toggleClass("open close");
   $("#advanced-options-container-expanded").toggleClass("hide");
 }
+
+function copyOtherCourseToggle() {
+  $(".copy-course-content-other-title").toggleClass("open close");
+  $(".copy-course-content-other").toggleClass("hide");
+}

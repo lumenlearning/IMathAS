@@ -2,6 +2,10 @@
   max-width: 854px;
 }
 
+#quick-start-content-container a {
+  color: #0a65e3;
+}
+
 #template-course-container {
   background-color: #d1e4fd;
   padding: 20px;
@@ -52,11 +56,12 @@
   transition: transform 0.3s ease;
 }
 
-#advanced-options-container-expanded.hide {
+#advanced-options-container-expanded.hide,
+.copy-course-content-other.hide {
   display: none;
 }
 
-#advanced-options-container.open .open-close-caret {
+.open .open-close-caret {
   transform: rotate(180deg);
 }
 

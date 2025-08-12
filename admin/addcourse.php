@@ -86,13 +86,25 @@ require_once "../header.php";
 				</span>
 			</div>
 			
-			<div class="collapsible-item">
+			<div class="copy-course-content-other-title collapsible-item close" onClick={copyOtherCourseToggle()}>
 				Copy someone else's course 
 				<span class="open-close-caret">
 					<svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M10 0H0L4.81481 5L10 0Z" fill="black"/>
 					</svg>
 				</span>
+			</div>
+
+			<div class="copy-course-content-other hide">
+				<p>
+					<input type="text" size="7" id="cidlookup" />
+					<button type="button" onclick="lookupcid()"><?php echo _('Look up course'); ?></button>
+					<span id="cidlookupout" style="display:none;"><br/>
+					<input type=radio name=ctc value=0 id=cidlookupctc />
+					<span id="cidlookupname"></span>
+					</span>
+					<span id="cidlookuperr"></span>
+				</p>
 			</div>
 		</div>
 
@@ -133,6 +145,33 @@ require_once "../header.php";
 			</div>
 		</div>
 	</form>
+
+	
+	<p>
+            <button id="qa-button-copyfrom-existing-course" type="button" onclick="showCopyOpts()">
+                <?php if (isset($CFG['addcourse']['copybutton'])): ?>
+                    <?php echo $CFG['addcourse']['copybutton']; ?>
+                <?php elseif (isset($CFG['coursebrowser'])): ?>
+                    <?php echo _('Copy from an existing course'); ?>
+                <?php else: ?>
+                    <?php echo _('Copy from an existing course or template'); ?>
+                <?php endif; ?>
+            </button>
+            </p>
+
+            <div id="copyoptions" style="display:none; padding-left: 20px">
+            <p><?php echo _('Select a course to copy'); ?></p>
+            <?php
+            $skipthiscourse = true;
+            $cid = 0;
+            require_once "../includes/coursecopylist.php";
+            ?>
+            </div>
+
+            <?php writeEkeyField(); ?>
+            <button type="submit" id="continuebutton" disabled style="display:none">
+            <?php echo _('Continue'); ?>
+            </button>
 </div>
 
 
