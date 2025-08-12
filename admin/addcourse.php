@@ -77,7 +77,7 @@ require_once "../header.php";
 		<div id="copy-course-container" class="quick-start-wrapper">
 			<h3>Copy a Course</h3>
 			
-			<div class="collapsible-item">
+			<div class="copy-course-content-mine-title collapsible-item close" onClick={copyMyCourseToggle()}>
 				Copy MY course from a previous term 
 				<span class="open-close-caret">
 					<svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -106,7 +106,7 @@ require_once "../header.php";
 			require_once(__DIR__ . '/../includes/coursecopy_templates/utilities.php');
 			?>
 			
-			<div class="copy-course-content-mine">
+			<div class="copy-course-content-mine hide">
 				<?php include_once(__DIR__ . '/../includes/coursecopy_templates/my_courses.php'); ?>
 				
 				<?php writeEkeyField(); ?>

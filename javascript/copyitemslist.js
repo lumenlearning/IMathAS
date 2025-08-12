@@ -185,3 +185,8 @@ function copyOtherCourseToggle() {
   $(".copy-course-content-other-title").toggleClass("open close");
   $(".copy-course-content-other").toggleClass("hide");
 }
+
+function copyMyCourseToggle() {
+  $(".copy-course-content-mine-title").toggleClass("open close");
+  $(".copy-course-content-mine").toggleClass("hide");
+}
