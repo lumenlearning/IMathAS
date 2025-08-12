@@ -43,7 +43,7 @@ require_once "../header.php";
 
 	<?php if (isset($CFG['coursebrowser'])): ?>
 		<!-- Copy a template course button -->
-		<div id="template-course-container">
+		<div id="template-course-container" class="quick-start-container">
 			<h2>Start with a fully-built Lumen OHM template course you can easily customize to meet the needs of your students.</h2>
 			<p>Lumen template courses are designed with evidence-based teaching practices, scaffolded for students to build a strong foundation in mathematics.</p>
 			
@@ -55,10 +55,10 @@ require_once "../header.php";
 	<?php endif; ?>
 
 	<!-- Copy a Course -->
-	<div>
+	<div id="copy-course-container" class="quick-start-container">
 		<h3>Copy a Course</h3>
 		<div>
-			Copy MY Coruse from a previous term <span class="open-close-caret"><svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 0H0L4.81481 5L10 0Z" fill="black"/></svg></span>
+			Copy MY course from a previous term <span class="open-close-caret"><svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 0H0L4.81481 5L10 0Z" fill="black"/></svg></span>
 		</div>
 		<div>
 			Copy someone else's course <span class="open-close-caret"><svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 0H0L4.81481 5L10 0Z" fill="black"/></svg></span>
