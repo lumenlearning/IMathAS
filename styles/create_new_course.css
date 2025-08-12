@@ -6,6 +6,11 @@
   color: #0a65e3;
 }
 
+#quick-start-content-container li,
+#quick-start-content-container ul {
+  list-style: none;
+}
+
 #template-course-container {
   background-color: #d1e4fd;
   padding: 20px;

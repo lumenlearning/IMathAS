@@ -15,7 +15,7 @@ if (!defined('INCLUDED_FROM_COURSECOPY')) {
 function printCourseOrder($order, $data, &$printed) {
     foreach ($order as $item) {
         if (is_array($item)) {
-            echo '<li class="coursegroup"><span class=dd>-</span> ';
+            echo '<li class="coursegroup"> ';
             echo '<b>'.Sanitize::encodeStringForDisplay($item['name']).'</b>';
             echo '<ul class="nomark">';
             printCourseOrder($item['courses'], $data, $printed);
@@ -31,7 +31,7 @@ function printCourseOrder($order, $data, &$printed) {
  * Print a single course line
  */
 function printCourseLine($data) {
-    echo '<li><span class=dd>-</span> ';
+    echo '<li>';
     writeCourseInfo($data, -1);
     echo '</li>';
 }

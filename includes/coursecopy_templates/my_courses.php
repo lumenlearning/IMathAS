@@ -10,14 +10,8 @@ if (!defined('INCLUDED_FROM_COURSECOPY')) {
 }
 ?>
 
-<li class=lihdr><span class=dd>-</span>
-    <span class=hdr onClick="toggle('mine')">
-        <span class=btn id="bmine">+</span>
-    </span>
-    <span class=hdr onClick="toggle('mine')">
-        <span id="nmine" ><?php echo _('My Courses'); ?></span>
-    </span>
-    <ul class=hide id="mine">
+<li class=lihdr>
+    <ul id="mine">
 <?php
 //my items
 if (isset($userjson['courseListOrder']['teach'])) {

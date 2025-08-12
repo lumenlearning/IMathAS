@@ -107,7 +107,6 @@ require_once "../header.php";
 			?>
 			
 			<div class="copy-course-content-mine">
-				<p><?php echo _('Select a course to copy:'); ?></p>
 				<?php include_once(__DIR__ . '/../includes/coursecopy_templates/my_courses.php'); ?>
 				
 				<?php writeEkeyField(); ?>
