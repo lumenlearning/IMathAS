@@ -136,10 +136,6 @@ require_once "../header.php";
 					<span id="cidlookuperr"></span>
 
 					<?php writeEkeyField(); ?>
-
-					<button type="submit" id="continuebutton" disabled style="display:none">
-					<?php echo _('Continue'); ?>
-				</button>
 				</p>
 			</div>
 		</div>
@@ -183,6 +179,67 @@ require_once "../header.php";
 		</div>
 	</form>
 </div>
+
+<script>
+// Function to show the continue button in the appropriate section
+function showContinueButton(section) {
+    // Hide the button in all sections first
+    const continueButton = document.getElementById('continuebutton');
+    if (continueButton) {
+        continueButton.style.display = 'none';
+    }
+    
+    // Show the button in the specified section
+    if (section === 'mine') {
+        const mineSection = document.querySelector('.copy-course-content-mine');
+        if (mineSection && continueButton) {
+            mineSection.appendChild(continueButton);
+            continueButton.style.display = 'inline-block';
+        }
+    } else if (section === 'other') {
+        const otherSection = document.querySelector('.copy-course-content-other');
+        if (otherSection && continueButton) {
+            otherSection.appendChild(continueButton);
+            continueButton.style.display = 'inline-block';
+        }
+    }
+}
+
+// Function to hide the continue button
+function hideContinueButton() {
+    const continueButton = document.getElementById('continuebutton');
+    if (continueButton) {
+        continueButton.style.display = 'none';
+    }
+}
+
+// Add event listeners to the collapsible sections
+document.addEventListener('DOMContentLoaded', function() {
+    // When "My Courses" section is expanded, show button there
+    const mineTitle = document.querySelector('.copy-course-content-mine-title');
+    if (mineTitle) {
+        mineTitle.addEventListener('click', function() {
+            setTimeout(() => {
+                if (!document.querySelector('.copy-course-content-mine').classList.contains('hide')) {
+                    showContinueButton('mine');
+                }
+            }, 100);
+        });
+    }
+    
+    // When "Other Courses" section is expanded, show button there
+    const otherTitle = document.querySelector('.copy-course-content-other-title');
+    if (otherTitle) {
+        otherTitle.addEventListener('click', function() {
+            setTimeout(() => {
+                if (!document.querySelector('.copy-course-content-other').classList.contains('hide')) {
+                    showContinueButton('other');
+                }
+            }, 100);
+        });
+    }
+});
+</script>
 
 
 

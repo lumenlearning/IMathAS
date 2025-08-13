@@ -177,16 +177,58 @@ function showCopyOpts() {
 }
 
 function advancedOptionsToggle() {
-  $("#advanced-options-container").toggleClass("open close");
-  $("#advanced-options-container-expanded").toggleClass("hide");
+  // Check if this section is already open
+  if ($("#advanced-options-container").hasClass("open")) {
+    // If open, just close it
+    $("#advanced-options-container").removeClass("open").addClass("close");
+    $("#advanced-options-container-expanded").addClass("hide");
+  } else {
+    // If closed, close all others and open this one
+    closeAllSections();
+    $("#advanced-options-container").removeClass("close").addClass("open");
+    $("#advanced-options-container-expanded").removeClass("hide");
+  }
 }
 
 function copyOtherCourseToggle() {
-  $(".copy-course-content-other-title").toggleClass("open close");
-  $(".copy-course-content-other").toggleClass("hide");
+  // Check if this section is already open
+  if ($(".copy-course-content-other-title").hasClass("open")) {
+    // If open, just close it
+    $(".copy-course-content-other-title").removeClass("open").addClass("close");
+    $(".copy-course-content-other").addClass("hide");
+  } else {
+    // If closed, close all others and open this one
+    closeAllSections();
+    $(".copy-course-content-other-title").removeClass("close").addClass("open");
+    $(".copy-course-content-other").removeClass("hide");
+  }
 }
 
 function copyMyCourseToggle() {
-  $(".copy-course-content-mine-title").toggleClass("open close");
-  $(".copy-course-content-mine").toggleClass("hide");
+  // Check if this section is already open
+  if ($(".copy-course-content-mine-title").hasClass("open")) {
+    // If open, just close it
+    $(".copy-course-content-mine-title").removeClass("open").addClass("close");
+    $(".copy-course-content-mine").addClass("hide");
+  } else {
+    // If closed, close all others and open this one
+    closeAllSections();
+    $(".copy-course-content-mine-title").removeClass("close").addClass("open");
+    $(".copy-course-content-mine").removeClass("hide");
+  }
+}
+
+// Helper function to close all sections
+function closeAllSections() {
+  // Close advanced options
+  $("#advanced-options-container").removeClass("open").addClass("close");
+  $("#advanced-options-container-expanded").addClass("hide");
+
+  // Close other courses
+  $(".copy-course-content-other-title").removeClass("open").addClass("close");
+  $(".copy-course-content-other").addClass("hide");
+
+  // Close my courses
+  $(".copy-course-content-mine-title").removeClass("open").addClass("close");
+  $(".copy-course-content-mine").addClass("hide");
 }
