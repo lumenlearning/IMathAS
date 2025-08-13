@@ -30,7 +30,6 @@ if (empty($_SESSION['tzoffset']) && !empty($CFG['static_server'])) {
 }
 ?>
 <link rel="stylesheet" href="<?php echo $staticroot . "/imascore.css?ver=110324";?>" type="text/css" />
-<link rel="stylesheet" href="<?php echo $staticroot . "/styles/create_new_course.css";?>" type="text/css" />
 <?php
 $isfw = false;
 if (isset($coursetheme)) {

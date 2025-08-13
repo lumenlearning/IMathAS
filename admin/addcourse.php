@@ -13,6 +13,7 @@ if ($myrights < 40) {
 $placeinhead = '<script src="' . $staticroot . '/javascript/copyitemslist.js" type="text/javascript"></script>';
 $placeinhead .= '<link rel="stylesheet" href="' . $staticroot . '/course/libtree.css" type="text/css" />';
 $placeinhead .= '<script type="text/javascript" src="' . $staticroot . '/javascript/libtree.js"></script>';
+$placeinhead .= '<link rel="stylesheet" href="' . $staticroot . '/styles/addcourse.css" type="text/css" />';
 
 require_once "../header.php";
 ?>
@@ -157,9 +158,10 @@ require_once "../header.php";
 						These are courses shared by faculty members. They are not supported by Lumen 
 						and should only be used at your own risk.
 					</p>
-					<a href="<?php echo $CFG['wwwroot']; ?>/admin/forms.php?from=home&action=addcourse">
+					<a href="#" onclick="showCourseBrowser(<?php echo Sanitize::encodeStringForDisplay($dispgroup); ?>)">
 						<?php echo _('Use a community template'); ?>
 					</a>
+
 				</div>
 
 				<div class="advanced-options-content-wrapper">
