@@ -126,17 +126,8 @@ require_once "../header.php";
 			</div>
 
 			<div class="copy-course-content-other hide">
-				<p>
-					<input type="text" size="7" id="cidlookup" />
-					<button type="button" onclick="lookupcid()"><?php echo _('Look up course'); ?></button>
-					<span id="cidlookupout" style="display:none;"><br/>
-					<input type="radio" name=ctc value=0 id=cidlookupctc />
-					<span id="cidlookupname"></span>
-					</span>
-					<span id="cidlookuperr"></span>
-
-					<?php writeEkeyField(); ?>
-				</p>
+				<?php include_once(__DIR__ . '/../includes/coursecopy_templates/course_lookup.php'); ?>
+				<?php writeEkeyField(); ?>
 			</div>
 		</div>
 
