@@ -26,7 +26,7 @@ require_once "../header.php";
 	<h1><?php echo _('Quick Start'); ?></h1>
 </div>
 
-<div id="quick-start-content-container">
+<div id="add-course-container">
 	<form method="POST" action="forms.php?from=home&action=addcourse">
 		<?php
 		$dispgroup = '';
@@ -56,7 +56,7 @@ require_once "../header.php";
 
 		<?php if (isset($CFG['coursebrowser'])): ?>
 			<!-- Copy a template course button -->
-			<div id="template-course-container" class="quick-start-wrapper">
+			<div id="lumen-template-choice-container" class="choice-container">
 				<h2>
 					Start with a fully-built Lumen OHM template course you can easily customize 
 					to meet the needs of your students.
@@ -66,7 +66,7 @@ require_once "../header.php";
 					scaffolded for students to build a strong foundation in mathematics.
 				</p>
 				
-				<button id="qa-button-copy-template" type="button" 
+				<button class="choice-container__button" type="button" 
 						onclick="showCourseBrowser(<?php echo Sanitize::encodeStringForDisplay($dispgroup); ?>)">
 					<?php echo _('Use a Lumen Template'); ?>
 				</button>
@@ -75,7 +75,7 @@ require_once "../header.php";
 		<?php endif; ?>
 
 		<!-- Copy a Course -->
-		<div id="copy-course-container" class="quick-start-wrapper">
+		<div id="copy-course-choice-container" class="choice-container">
 			<h3>Copy a Course</h3>
 			
 			<div class="copy-course-content-mine-title collapsible-item close" onClick={copyMyCourseToggle()}>
@@ -110,8 +110,6 @@ require_once "../header.php";
 			<div class="copy-course-content-mine hide">
 				<?php include_once(__DIR__ . '/../includes/coursecopy_templates/my_courses.php'); ?>
 				
-				<?php writeEkeyField(); ?>
-				
 				<button type="submit" id="continuebutton" disabled style="display:none">
 					<?php echo _('Continue'); ?>
 				</button>
@@ -132,16 +130,22 @@ require_once "../header.php";
 					<input type="text" size="7" id="cidlookup" />
 					<button type="button" onclick="lookupcid()"><?php echo _('Look up course'); ?></button>
 					<span id="cidlookupout" style="display:none;"><br/>
-					<input type=radio name=ctc value=0 id=cidlookupctc />
+					<input type="radio" name=ctc value=0 id=cidlookupctc />
 					<span id="cidlookupname"></span>
 					</span>
 					<span id="cidlookuperr"></span>
+
+					<?php writeEkeyField(); ?>
+
+					<button type="submit" id="continuebutton" disabled style="display:none">
+					<?php echo _('Continue'); ?>
+				</button>
 				</p>
 			</div>
 		</div>
 
 		<!-- Advanced options -->
-		<div id="advanced-options-container" class="quick-start-wrapper close">
+		<div id="advanced-options-container" class="choice-container close">
 			<p class="advanced-options-title collapsible-item" onClick={advancedOptionsToggle()}>
 				Advanced options 
 				<span class="open-close-caret">

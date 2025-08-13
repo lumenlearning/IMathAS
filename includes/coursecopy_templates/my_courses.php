@@ -10,22 +10,21 @@ if (!defined('INCLUDED_FROM_COURSECOPY')) {
 }
 ?>
 
-<li class=lihdr>
-    <ul id="mine">
-<?php
-//my items
-if (isset($userjson['courseListOrder']['teach'])) {
-    $printed = array();
-    printCourseOrder($userjson['courseListOrder']['teach'], $myCourses, $printed);
-    $notlisted = array_diff(array_keys($myCourses), $printed);
-    foreach ($notlisted as $course) {
-        printCourseLine($myCourses[$course]);
+<ul id="mine">
+    <?php
+    //my items
+    if (isset($userjson['courseListOrder']['teach'])) {
+        $printed = array();
+        printCourseOrder($userjson['courseListOrder']['teach'], $myCourses, $printed);
+        $notlisted = array_diff(array_keys($myCourses), $printed);
+        foreach ($notlisted as $course) {
+            printCourseLine($myCourses[$course]);
+        }
+    } else {
+        foreach ($myCoursesDefaultOrder as $course) {
+            printCourseLine($myCourses[$course]);
+        }
     }
-} else {
-    foreach ($myCoursesDefaultOrder as $course) {
-        printCourseLine($myCourses[$course]);
-    }
-}
-?>
-    </ul>
-</li>
+    ?>
+</ul>
+
