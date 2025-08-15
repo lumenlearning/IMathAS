@@ -49,15 +49,21 @@ $(function () {
     }
   });
 });
-function showCourseBrowser(grpid) {
+function showCourseBrowser(grpid, filterType) {
   var grpstr = "";
-  if (grpid) {
+  if (grpid && grpid !== "null" && grpid > 0) {
     grpstr = "&forgrp=" + grpid;
   }
+
+  var filterstr = "";
+  if (filterType !== undefined && filterType !== null) {
+    filterstr = "&filtertype=" + filterType;
+  }
+
   $("#copyoptions").slideUp();
   GB_show(
     "Course Browser",
-    imasroot + "/admin/coursebrowser.php?embedded=true" + grpstr,
+    imasroot + "/admin/coursebrowser.php?embedded=true" + grpstr + filterstr,
     800,
     "auto"
   );

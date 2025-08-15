@@ -29,7 +29,7 @@ require_once "../header.php";
 <div id="add-course-container">
 	<form method="POST" action="forms.php?from=home&action=addcourse">
 		<?php
-		$dispgroup = '';
+		$dispgroup = $groupid; // Default to current user's group
 		
 		// Check if adding course for another user
 		if (($myrights >= 75 || ($myspecialrights & 32) == 32) && 
@@ -67,7 +67,7 @@ require_once "../header.php";
 				</p>
 				
 				<button class="choice-container__button" type="button" 
-						onclick="showCourseBrowser(<?php echo Sanitize::encodeStringForDisplay($dispgroup); ?>)">
+						onclick="showCourseBrowser(<?php echo $dispgroup > 0 ? Sanitize::encodeStringForDisplay($dispgroup) : 'null'; ?>, 1)">
 					<?php echo _('Use a Lumen Template'); ?>
 				</button>
 				<input type="hidden" name="coursebrowserctc" id="coursebrowserctc" />
@@ -78,7 +78,7 @@ require_once "../header.php";
 		<div id="copy-course-choice-container" class="choice-container">
 			<h3>Copy a Course</h3>
 			
-			<div class="copy-course-content-mine-title collapsible-item close" onClick={copyMyCourseToggle()}>
+			<div class="copy-course-content-mine-title collapsible-item close" onclick="copyMyCourseToggle()">
 				Copy MY course from a previous term 
 				<span class="open-close-caret">
 					<svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,7 +116,7 @@ require_once "../header.php";
 			</div>
 		
 
-			<div class="copy-course-content-other-title collapsible-item close" onClick={copyOtherCourseToggle()}>
+			<div class="copy-course-content-other-title collapsible-item close" onclick="copyOtherCourseToggle()">
 				Copy someone else's course 
 				<span class="open-close-caret">
 					<svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -133,7 +133,7 @@ require_once "../header.php";
 
 		<!-- Advanced options -->
 		<div id="advanced-options-container" class="choice-container close">
-			<p class="advanced-options-title collapsible-item" onClick={advancedOptionsToggle()}>
+			<p class="advanced-options-title collapsible-item" onclick="advancedOptionsToggle()">
 				Advanced options 
 				<span class="open-close-caret">
 					<svg width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -149,7 +149,7 @@ require_once "../header.php";
 						These are courses shared by faculty members. They are not supported by Lumen 
 						and should only be used at your own risk.
 					</p>
-					<a href="#" onclick="showCourseBrowser(<?php echo Sanitize::encodeStringForDisplay($dispgroup); ?>)">
+					<a href="#" onclick="showCourseBrowser(<?php echo $dispgroup > 0 ? Sanitize::encodeStringForDisplay($dispgroup) : 'null'; ?>, 0)">
 						<?php echo _('Use a community template'); ?>
 					</a>
 
