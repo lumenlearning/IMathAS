@@ -227,7 +227,11 @@ if (!isset($_GET['embedded'])) {
 				<div class="card-body">
 					<div class="card-header" :class="'coursetype'+course.coursetype" @click="toggleCourse(course.id)" style="cursor: pointer;">
 						<b>{{ course.name }}</b>
-						<span class="toggle-arrow" :class="{ 'expanded': expandedCourses.includes(course.id) }">▶</span>
+						<span class="open-close-caret" :class="{ 'expanded': expandedCourses.includes(course.id) }">
+							<svg width="15" height="9" viewBox="0 0 15 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M13.4121 1L7.41211 7L1.41211 0.999999" stroke="#636566" stroke-width="2" stroke-linecap="round"/>
+							</svg>
+						</span>
 					</div>
 					<div class="card-main" v-show="expandedCourses.includes(course.id)">
 						<table class="proplist">
@@ -262,29 +266,6 @@ if (!isset($_GET['embedded'])) {
 </div>
 
 </div>
-
-<style>
-.toggle-arrow {
-    float: right;
-    font-size: 14px;
-    transition: transform 0.3s ease;
-    color: #666;
-}
-
-.toggle-arrow.expanded {
-    transform: rotate(90deg);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-header b {
-    flex: 1;
-}
-</style>
 
 <script type="text/javascript">
 const { createApp } = Vue;
