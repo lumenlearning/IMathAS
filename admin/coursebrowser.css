@@ -102,23 +102,32 @@ body {
 }
 .filterwrap {
   position: absolute;
-  top: 120%;
   left: 0;
   z-index: 2;
   float: left;
   margin: 0;
-  padding: 0;
   list-style-type: none;
-  border: 1px solid #ccc;
+  border: 1px solid #d0d0d0;
   background-color: #f3f3f3;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-  padding: 5px 0;
+  box-shadow: 0 5px 20px 5px rgba(77, 95, 108, 0.08);
+  padding: 20px 12px;
   overflow-y: auto;
+  border-radius: 10px;
+  display: flex;
+  flex-flow: column;
+  gap: 20px;
+  max-height: none !important;
 }
+
 .filterwrap li {
   margin: 0;
   padding: 0;
 }
+
+.filterwrap li label {
+  cursor: pointer;
+}
+
 .filterwrap label,
 .filterwrap span {
   display: block;
@@ -132,6 +141,15 @@ body {
 }
 .filterwrap label:hover {
   background-color: #fefefe;
+}
+
+.dropdown-wrap button {
+  background-color: #f4f4f4;
+  border: 1px solid #d0d0d0;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 #courseTypeTabs {
