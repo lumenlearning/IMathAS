@@ -143,7 +143,7 @@ if (!empty($CFG['GEN']['uselocaljs'])) {
     $placeinhead .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.31/vue.global.prod.min.js" integrity="sha512-Dg9zup8nHc50WBBvFpkEyU0H8QRVZTkiJa/U1a5Pdwf9XdbJj+hZjshorMtLKIg642bh/kb0+EvznGUwq9lQqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
 }
 $placeinhead .= '<script src="'.$imasroot.'/javascript/'.$CFG['coursebrowser'].'"></script>
-<link rel="stylesheet" href="coursebrowser.css?v=072018" type="text/css" />';
+	<link rel="stylesheet" href="coursebrowser.css?v=072018" type="text/css" />';
 
 $pagetitle = _('Course Browser');
 require_once "../header.php";
@@ -242,7 +242,8 @@ createApp({
             showFilter: '',
             filterLeft: 0,
             courseTypes: courseBrowserProps.meta.courseTypes,
-            activeTab: 0,
+            		activeTab: 0,
+		filterType: null,
         }
 	},
 	methods: {
@@ -359,6 +360,10 @@ createApp({
 			return activeTypes;
 		},
 		useTabs: function () {
+			// Don't show tabs if we're filtering by a specific course type
+			if (this.filterType !== null) {
+				return false;
+			}
 			return (!!this.courseBrowserProps.meta.courseTypeTabs &&
 				this.activeCourseTypes.length>1);
 		},
@@ -367,6 +372,11 @@ createApp({
 
 			var includeCourse = true;
 			for (var i=0; i<courses.length; i++) {
+				// If filterType is set, only show courses of that type
+				if (this.filterType !== null && courses[i].coursetype != this.filterType) {
+					continue;
+				}
+				// Otherwise, use the normal tab filtering
 				if (this.useTabs && courses[i].coursetype != this.activeTab) {
 					continue;
 				}
@@ -412,6 +422,17 @@ createApp({
 	},
 	created: function() {
 		document.addEventListener('click', this.clickaway);
+		
+		// Check if we should filter by course type
+		const urlParams = new URLSearchParams(window.location.search);
+		const filterType = urlParams.get('filtertype');
+		if (filterType !== null) {
+			this.filterType = parseInt(filterType);
+			// Set active tab to the filtered type if it exists
+			if (this.courseTypes[this.filterType] !== undefined) {
+				this.activeTab = this.filterType;
+			}
+		}
 	},
 	mounted: function() {
         this.$nextTick(function() {
