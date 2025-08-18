@@ -225,15 +225,15 @@ if (!isset($_GET['embedded'])) {
 		<transition-group name="fade" tag="div" class="card-deck">
 			<div v-for="course in levelGroup" :key="course.id" class="card">
 				<div class="card-body">
-					<div class="card-header" :class="'coursetype'+course.coursetype" @click="toggleCourse(course.id)" style="cursor: pointer;">
+					<div class="card-header" :class="'coursetype'+course.coursetype" @click="toggleCourse(level + '-' + course.id)" style="cursor: pointer;">
 						<b>{{ course.name }}</b>
-						<span class="open-close-caret" :class="{ 'expanded': expandedCourses.includes(course.id) }">
+						<span class="open-close-caret" :class="{ 'expanded': expandedCourses.includes(level + '-' + course.id) }">
 							<svg width="15" height="9" viewBox="0 0 15 9" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M13.4121 1L7.41211 7L1.41211 0.999999" stroke="#636566" stroke-width="2" stroke-linecap="round"/>
 							</svg>
 						</span>
 					</div>
-					<div class="card-main" v-show="expandedCourses.includes(course.id)">
+					<div class="card-main" v-show="expandedCourses.includes(level + '-' + course.id)">
 						<table class="proplist">
 						<caption class="sr-only">Course Details</caption>
 						<tbody>
@@ -253,11 +253,13 @@ if (!isset($_GET['embedded'])) {
 						<p v-for="(propval,propname) in courseText(course)"
 						class="pre-line"
 						>{{ propval }}</p>
+
+						<div class="card-footer">
+							<button @click="previewCourse(course.id)">Preview Course</button>
+							<button @click="copyCourse(course)">Copy This Course</button>
+						</div>
 					</div>
-					<div class="card-footer">
-						<button @click="previewCourse(course.id)">Preview Course</button>
-						<button @click="copyCourse(course)">Copy This Course</button>
-					</div>
+					
 				</div>
 			</div>
 		</transition-group>
