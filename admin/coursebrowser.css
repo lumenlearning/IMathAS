@@ -42,20 +42,18 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0px 5px;
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  border-radius: 0.25rem;
+  border: 1px solid #c2bdba;
+  border-radius: 10px;
   word-wrap: break-word;
   box-sizing: border-box;
   flex: 1 1 auto;
 }
 .card-main {
-  padding: 0.7rem;
-  flex: 1 1 auto;
+  padding: 0 20px 20px 20px;
 }
 .card-header {
-  border-radius: 0.25rem 0.25rem 0 0;
-  padding: 0.5rem;
-  color: #fff;
+  padding: 20px;
+  font-size: 20px;
 }
 .course-type-marker {
   float: right;
@@ -64,21 +62,24 @@ body {
   margin-left: 1rem;
 }
 .card-footer {
-  text-align: right;
+  text-align: left;
+  margin-top: 10px;
 }
+
 .card-footer button {
-  padding: 5px 8px;
-  min-width: 30%;
-  height: auto;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+  font-weight: 600;
 }
-.card-header.coursetype0 {
-  background-color: #060;
+
+#preview-course-button {
+  background-color: #f4f4f4;
 }
-.card-header.coursetype1 {
-  background-color: #680082;
-}
-.card-header.coursetype2 {
-  background-color: #006;
+
+#add-course-button {
+  background-color: #4574c5;
+  color: #fff;
 }
 .card-body h4 {
   margin-top: 0;
@@ -180,11 +181,7 @@ body {
 }
 .pre-line {
   white-space: pre-line;
-  background-color: #f7f7f7;
-  border: 1px solid #eee;
-  border-radius: 0.25rem;
-  margin: 5px 0px;
-  padding: 5px;
+  padding: 0;
 }
 table.proplist {
   border-collapse: collapse;

@@ -188,21 +188,14 @@ if (!isset($_GET['embedded'])) {
 	</div>
 
 	<div class="course-template-filters">
-	<div id="filters">
-			Filter results:
-			<span v-for="propname in propsToFilter" class="dropdown-wrap">
+			<div id="filters">
+			<span v-for="propname in propsToFilter.filter(p => p === 'level')" class="dropdown-wrap">
 				<button @click="showFilter = (showFilter==propname)?'':propname">
-					{{ courseBrowserProps[propname].name }} {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
+					Filter Courses {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
 					<span class="arrow-down2" :class="{rotated: showFilter==propname}"></span>
 				</button>
 				<transition name="fade" @enter="adjustpos">
 					<ul v-if="showFilter == propname" class="filterwrap">
-						<li v-if="courseBrowserProps[propname].hasall">
-							<span>Show courses that contain <i>all</i> of:</span>
-						</li>
-						<li v-if="!courseBrowserProps[propname].hasall">
-							<span>Show courses that contain <i>any</i> of:</span>
-						</li>
 						<li v-for="(longname,propval) in courseBrowserProps[propname].options">
 							<span v-if="propval.match(/^group/)" class="optgrplabel"><em>{{ longname }}</em></span>
 							<label v-else><input type="checkbox" :value="propname+'.'+propval" v-model="selectedItems">
@@ -234,29 +227,13 @@ if (!isset($_GET['embedded'])) {
 						</span>
 					</div>
 					<div class="card-main" v-show="expandedCourses.includes(level + '-' + course.id)">
-						<table class="proplist">
-						<caption class="sr-only">Course Details</caption>
-						<tbody>
-						<tr v-for="(propval,propname) in courseOut(course)">
-							<th>{{ courseBrowserProps[propname].name }}</th>
-							<td v-if="!Array.isArray(propval)"> {{ propval }} </td>
-							<td v-if="Array.isArray(propval)">
-								<ul class="nomark">
-									<li v-for="subprop in propval">
-										{{ courseBrowserProps[propname].options[subprop] }}
-									</li>
-								</ul>
-							</td>
-						</tr>
-
-						</tbody></table>
 						<p v-for="(propval,propname) in courseText(course)"
 						class="pre-line"
 						>{{ propval }}</p>
 
 						<div class="card-footer">
-							<button @click="previewCourse(course.id)">Preview Course</button>
-							<button @click="copyCourse(course)">Copy This Course</button>
+							<button @click="previewCourse(course.id)" id="preview-course-button">Preview Course</button>
+							<button @click="copyCourse(course)" id="add-course-button">Add Course</button>
 						</div>
 					</div>
 					
