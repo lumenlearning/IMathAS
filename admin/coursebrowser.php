@@ -159,51 +159,36 @@ if (!isset($_GET['embedded'])) {
 ?>
 
 <div id="app" v-cloak>
-	<div <?php if (isset($_GET['embedded'])) {echo 'id="fixedfilters"';}?>>
-		<!-- Message for filtered course types -->
+	<div class="course-template-message">
 		<div v-if="filterType === 1 || (Array.isArray(filterType) && filterType.includes(1))" class="filter-message">
-			<h1>Lumen Course Templates</h1>
-			<p>Lumen template courses are designed with evidence-based teaching practices, fully scaffolded for students to build a strong foundation in mathematics.</p>
-			<p><strong>Each module contains</strong></p>
-			<ul>
-				<li>Background You'll Need review content</li>
-				<li>Lumen OHM Readiness Check</li>
-				<li>Learn It pages</li>
-				<li>Apply It pages</li>
-				<li>Fresh Take pages</li>
-				<li>Lumen OHM Self Check</li>
-				<li>Lumen OHM Quiz</li>
-				<li>Cheat Sheet</li>
-				<li>Get Stronger Problems</li>
-				<li>Instructor Guide</li>
-				<li>PowerPoint</li>
-				<li>In-class Instructor Lead Activity</li>
-			</ul>
-		</div>
+				<h1>Lumen Course Templates</h1>
+				<p>Lumen template courses are designed with evidence-based teaching practices, fully scaffolded for students to build a strong foundation in mathematics.</p>
+				<p><strong>Each module contains</strong></p>
+				<ul>
+					<li>Background You'll Need review content</li>
+					<li>Lumen OHM Readiness Check</li>
+					<li>Learn It pages</li>
+					<li>Apply It pages</li>
+					<li>Fresh Take pages</li>
+					<li>Lumen OHM Self Check</li>
+					<li>Lumen OHM Quiz</li>
+					<li>Cheat Sheet</li>
+					<li>Get Stronger Problems</li>
+					<li>Instructor Guide</li>
+					<li>PowerPoint</li>
+					<li>In-class Instructor Lead Activity</li>
+				</ul>
+			</div>
 
-		<div v-if="(filterType === 0 || (Array.isArray(filterType) && filterType.includes(0))) && !(Array.isArray(filterType) && filterType.includes(0) && filterType.includes(2))" class="filter-message">
-			<h1>Community Course Templates</h1>
-			<p>These are courses shared by faculty members. They are not supported by Lumen and should only be used at your own risk.</p>
-			<p><strong>They are not supported by Lumen and should only be used at your own risk.</strong></p>
-		</div>
+			<div v-if="Array.isArray(filterType) && filterType.includes(0) && filterType.includes(2)" class="filter-message">
+				<h1>Community Course Templates</h1>
+				<p>These are courses shared by faculty members and contributed courses. They are not supported by Lumen and should only be used at your own risk.</p>
+				<p><strong>They are not supported by Lumen and should only be used at your own risk.</strong></p>
+			</div>
+	</div>
 
-		<div v-if="Array.isArray(filterType) && filterType.includes(0) && filterType.includes(2)" class="filter-message">
-			<h1>Community Course Templates</h1>
-			<p>These are courses shared by faculty members and contributed courses. They are not supported by Lumen and should only be used at your own risk.</p>
-			<p><strong>They are not supported by Lumen and should only be used at your own risk.</strong></p>
-		</div>
-
-		<div id="courseTypeTabs" v-if="useTabs">
-			<ul>
-				<li v-for="type in activeCourseTypes"
-					@click="activeTab=type"
-					:class="{'active': activeTab==type}">
-					{{courseBrowserProps.meta.courseTypeTabs[type]}}
-				</li>
-			<ul>
-		</div>
-
-		<div id="filters">
+	<div class="course-template-filters">
+	<div id="filters">
 			Filter results:
 			<span v-for="propname in propsToFilter" class="dropdown-wrap">
 				<button @click="showFilter = (showFilter==propname)?'':propname">
@@ -228,48 +213,51 @@ if (!isset($_GET['embedded'])) {
 			</span>
 			<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
 		</div>
-
 	</div>
 
 	<div style="position: relative" id="card-deck-wrap">
-	<transition-group name="fade" tag="div" class="card-deck">
-	<div v-if="filteredCourses.length==0" key="none"><?php echo _('No matches found'); ?></div>
+	<div v-if="filteredCourses.length==0" class="no-matches"><?php echo _('No matches found'); ?></div>
+	
+	<div v-for="(levelGroup, level) in coursesByLevel" :key="level" class="level-group">
+		<div class="level-header">
+			<h2>{{ getLevelDisplayName(level) }}</h2>
+		</div>
+		<transition-group name="fade" tag="div" class="card-deck">
+			<div v-for="course in levelGroup" :key="course.id" class="card">
+				<div class="card-body">
+					<div class="card-header" :class="'coursetype'+course.coursetype">
+						<span class="course-type-marker">{{ courseTypes[course.coursetype] }}</span>
+						<b>{{ course.name }}</b>
+					</div>
+					<div class="card-main">
+						<table class="proplist">
+						<caption class="sr-only">Course Details</caption>
+						<tbody>
+						<tr v-for="(propval,propname) in courseOut(course)">
+							<th>{{ courseBrowserProps[propname].name }}</th>
+							<td v-if="!Array.isArray(propval)"> {{ propval }} </td>
+							<td v-if="Array.isArray(propval)">
+								<ul class="nomark">
+									<li v-for="subprop in propval">
+										{{ courseBrowserProps[propname].options[subprop] }}
+									</li>
+								</ul>
+							</td>
+						</tr>
 
-	<div v-for="(course,index) in filteredCourses" :key="course.id" class="card">
-	<div class="card-body">
-		<div class="card-header" :class="'coursetype'+course.coursetype">
-			<span class="course-type-marker">{{ courseTypes[course.coursetype] }}</span>
-			<b>{{ course.name }}</b>
-		</div>
-		<div class="card-main">
-			<table class="proplist">
-			<caption class="sr-only">Course Details</caption>
-			<tbody>
-			<tr v-for="(propval,propname) in courseOut(course)">
-				<th>{{ courseBrowserProps[propname].name }}</th>
-				<td v-if="!Array.isArray(propval)"> {{ propval }} </td>
-				<td v-if="Array.isArray(propval)">
-					<ul class="nomark">
-						<li v-for="subprop in propval">
-							{{ courseBrowserProps[propname].options[subprop] }}
-						</li>
-					</ul>
-				</td>
-			</tr>
-
-			</tbody></table>
-			<p v-for="(propval,propname) in courseText(course)"
-			class="pre-line"
-			>{{ propval }}</p>
-		</div>
-		<div class="card-footer">
-			<button @click="previewCourse(course.id)">Preview Course</button>
-			<button @click="copyCourse(course)">Copy This Course</button>
-		</div>
+						</tbody></table>
+						<p v-for="(propval,propname) in courseText(course)"
+						class="pre-line"
+						>{{ propval }}</p>
+					</div>
+					<div class="card-footer">
+						<button @click="previewCourse(course.id)">Preview Course</button>
+						<button @click="copyCourse(course)">Copy This Course</button>
+					</div>
+				</div>
+			</div>
+		</transition-group>
 	</div>
-	</div>
-
-	</transition-group>
 
 </div>
 
@@ -364,6 +352,12 @@ createApp({
 				tgt.style.right = "auto";
 				tgt.style.left = "0px";
 			}
+		},
+		getLevelDisplayName: function(level) {
+			if (level === 'undefined' || level === 'null' || !level) {
+				return 'Other / Unspecified Level';
+			}
+			return this.courseBrowserProps.level.options[level] || level;
 		}
 	},
 	computed: {
@@ -490,6 +484,54 @@ createApp({
 				}
 			}
 			return selectedCourses;
+		},
+		coursesByLevel: function() {
+			var grouped = {};
+			var filtered = this.filteredCourses;
+			
+			for (var i = 0; i < filtered.length; i++) {
+				var course = filtered[i];
+				var level = course.level;
+				
+				// Handle cases where level might be an array or undefined
+				if (Array.isArray(level)) {
+					// If level is an array, add the course to each level group
+					for (var j = 0; j < level.length; j++) {
+						var singleLevel = level[j];
+						if (!grouped[singleLevel]) {
+							grouped[singleLevel] = [];
+						}
+						grouped[singleLevel].push(course);
+					}
+				} else if (level) {
+					// Single level
+					if (!grouped[level]) {
+						grouped[level] = [];
+					}
+					grouped[level].push(course);
+				} else {
+					// No level specified
+					if (!grouped['undefined']) {
+						grouped['undefined'] = [];
+					}
+					grouped['undefined'].push(course);
+				}
+			}
+			
+			// Sort the levels based on the order defined in courseBrowserProps.level.options
+			var sortedGrouped = {};
+			var levelOrder = Object.keys(this.courseBrowserProps.level.options);
+			
+			// Add undefined level at the end
+			levelOrder.push('undefined');
+			
+			levelOrder.forEach(function(level) {
+				if (grouped[level]) {
+					sortedGrouped[level] = grouped[level];
+				}
+			});
+			
+			return sortedGrouped;
 		}
 	},
 	created: function() {

@@ -215,3 +215,29 @@ ul.nomark {
 [v-cloak] {
   display: none;
 }
+
+/* Level Group Styling */
+.level-group {
+  margin-bottom: 30px;
+}
+
+.level-header {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #006;
+}
+
+.level-header h2 {
+  margin: 0;
+  color: #006;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.no-matches {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+  color: #666;
+  font-style: italic;
+}
