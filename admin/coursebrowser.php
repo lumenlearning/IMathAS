@@ -225,11 +225,11 @@ if (!isset($_GET['embedded'])) {
 		<transition-group name="fade" tag="div" class="card-deck">
 			<div v-for="course in levelGroup" :key="course.id" class="card">
 				<div class="card-body">
-					<div class="card-header" :class="'coursetype'+course.coursetype">
-						<span class="course-type-marker">{{ courseTypes[course.coursetype] }}</span>
+					<div class="card-header" :class="'coursetype'+course.coursetype" @click="toggleCourse(course.id)" style="cursor: pointer;">
 						<b>{{ course.name }}</b>
+						<span class="toggle-arrow" :class="{ 'expanded': expandedCourses.includes(course.id) }">▶</span>
 					</div>
-					<div class="card-main">
+					<div class="card-main" v-show="expandedCourses.includes(course.id)">
 						<table class="proplist">
 						<caption class="sr-only">Course Details</caption>
 						<tbody>
@@ -263,6 +263,29 @@ if (!isset($_GET['embedded'])) {
 
 </div>
 
+<style>
+.toggle-arrow {
+    float: right;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    color: #666;
+}
+
+.toggle-arrow.expanded {
+    transform: rotate(90deg);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header b {
+    flex: 1;
+}
+</style>
+
 <script type="text/javascript">
 const { createApp } = Vue;
 createApp({
@@ -276,6 +299,7 @@ createApp({
             courseTypes: courseBrowserProps.meta.courseTypes,
             		activeTab: 0,
 		filterType: null,
+            expandedCourses: [],
         }
 	},
 	methods: {
@@ -355,9 +379,17 @@ createApp({
 		},
 		getLevelDisplayName: function(level) {
 			if (level === 'undefined' || level === 'null' || !level) {
-				return 'Other / Unspecified Level';
+				return 'Other';
 			}
 			return this.courseBrowserProps.level.options[level] || level;
+		},
+		toggleCourse: function(courseId) {
+			const index = this.expandedCourses.indexOf(courseId);
+			if (index > -1) {
+				this.expandedCourses.splice(index, 1);
+			} else {
+				this.expandedCourses.push(courseId);
+			}
 		}
 	},
 	computed: {

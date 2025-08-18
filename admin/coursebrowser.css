@@ -222,15 +222,12 @@ ul.nomark {
 }
 
 .level-header {
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #006;
+  margin-bottom: 10px;
 }
 
 .level-header h2 {
   margin: 0;
-  color: #006;
-  font-size: 1.5em;
+  font-size: 24px;
   font-weight: bold;
 }
 
