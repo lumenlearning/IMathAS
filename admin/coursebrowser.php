@@ -152,85 +152,129 @@ if (!isset($_GET['embedded'])) {
   $curBreadcrumb = $breadcrumbbase . _('Course Browser');
   echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
 	echo '<div id="headercoursebrowser" class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
+	echo '<div class="c" style="margin-bottom: 20px;">';
+	echo '<a href="courselist.php" class="btn">View All Courses in Database</a>';
+	echo '</div>';
 }
 ?>
+
 <div id="app" v-cloak>
-<div <?php if (isset($_GET['embedded'])) {echo 'id="fixedfilters"';}?>>
-<div id="courseTypeTabs" v-if="useTabs">
-	<ul>
-		<li v-for="type in activeCourseTypes"
-			@click="activeTab=type"
-			:class="{'active': activeTab==type}">
-			{{courseBrowserProps.meta.courseTypeTabs[type]}}
-		</li>
-	<ul>
-</div>
-<div id="filters">
-	Filter results:
-	<span v-for="propname in propsToFilter" class="dropdown-wrap">
-		<button @click="showFilter = (showFilter==propname)?'':propname">
-			{{ courseBrowserProps[propname].name }} {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
-			<span class="arrow-down2" :class="{rotated: showFilter==propname}"></span>
-		</button>
-		<transition name="fade" @enter="adjustpos">
-			<ul v-if="showFilter == propname" class="filterwrap">
-				<li v-if="courseBrowserProps[propname].hasall">
-					<span>Show courses that contain <i>all</i> of:</span>
-				</li>
-				<li v-if="!courseBrowserProps[propname].hasall">
-					<span>Show courses that contain <i>any</i> of:</span>
-				</li>
-				<li v-for="(longname,propval) in courseBrowserProps[propname].options">
-					<span v-if="propval.match(/^group/)" class="optgrplabel"><em>{{ longname }}</em></span>
-					<label v-else><input type="checkbox" :value="propname+'.'+propval" v-model="selectedItems">
-					{{ longname }}</label>
-				</li>
+	<div <?php if (isset($_GET['embedded'])) {echo 'id="fixedfilters"';}?>>
+		<!-- Message for filtered course types -->
+		<div v-if="filterType === 1 || (Array.isArray(filterType) && filterType.includes(1))" class="filter-message">
+			<h1>Lumen Course Templates</h1>
+			<p>Lumen template courses are designed with evidence-based teaching practices, fully scaffolded for students to build a strong foundation in mathematics.</p>
+			<p><strong>Each module contains</strong></p>
+			<ul>
+				<li>Background You'll Need review content</li>
+				<li>Lumen OHM Readiness Check</li>
+				<li>Learn It pages</li>
+				<li>Apply It pages</li>
+				<li>Fresh Take pages</li>
+				<li>Lumen OHM Self Check</li>
+				<li>Lumen OHM Quiz</li>
+				<li>Cheat Sheet</li>
+				<li>Get Stronger Problems</li>
+				<li>Instructor Guide</li>
+				<li>PowerPoint</li>
+				<li>In-class Instructor Lead Activity</li>
 			</ul>
-		</transition>
-	</span>
-	<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
-</div>
-</div>
-<div style="position: relative" id="card-deck-wrap">
-<transition-group name="fade" tag="div" class="card-deck">
-<div v-if="filteredCourses.length==0" key="none"><?php echo _('No matches found'); ?></div>
-<div v-for="(course,index) in filteredCourses" :key="course.id" class="card">
-  <div class="card-body">
-  	<div class="card-header" :class="'coursetype'+course.coursetype">
-  		<span class="course-type-marker">{{ courseTypes[course.coursetype] }}</span>
-  		<b>{{ course.name }}</b>
-  	</div>
-	<div class="card-main">
-		<table class="proplist">
-        <caption class="sr-only">Course Details</caption>
-        <tbody>
-		<tr v-for="(propval,propname) in courseOut(course)">
-			<th>{{ courseBrowserProps[propname].name }}</th>
-			<td v-if="!Array.isArray(propval)"> {{ propval }} </td>
-			<td v-if="Array.isArray(propval)">
-				<ul class="nomark">
-					<li v-for="subprop in propval">
-						{{ courseBrowserProps[propname].options[subprop] }}
-					</li>
-				</ul>
-			</td>
-		</tr>
+		</div>
 
-		</tbody></table>
-		<p v-for="(propval,propname) in courseText(course)"
-		   class="pre-line"
-		>{{ propval }}</p>
+		<div v-if="(filterType === 0 || (Array.isArray(filterType) && filterType.includes(0))) && !(Array.isArray(filterType) && filterType.includes(0) && filterType.includes(2))" class="filter-message">
+			<h1>Community Course Templates</h1>
+			<p>These are courses shared by faculty members. They are not supported by Lumen and should only be used at your own risk.</p>
+			<p><strong>They are not supported by Lumen and should only be used at your own risk.</strong></p>
+		</div>
+
+		<div v-if="Array.isArray(filterType) && filterType.includes(0) && filterType.includes(2)" class="filter-message">
+			<h1>Community Course Templates</h1>
+			<p>These are courses shared by faculty members and contributed courses. They are not supported by Lumen and should only be used at your own risk.</p>
+			<p><strong>They are not supported by Lumen and should only be used at your own risk.</strong></p>
+		</div>
+
+		<div id="courseTypeTabs" v-if="useTabs">
+			<ul>
+				<li v-for="type in activeCourseTypes"
+					@click="activeTab=type"
+					:class="{'active': activeTab==type}">
+					{{courseBrowserProps.meta.courseTypeTabs[type]}}
+				</li>
+			<ul>
+		</div>
+
+		<div id="filters">
+			Filter results:
+			<span v-for="propname in propsToFilter" class="dropdown-wrap">
+				<button @click="showFilter = (showFilter==propname)?'':propname">
+					{{ courseBrowserProps[propname].name }} {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
+					<span class="arrow-down2" :class="{rotated: showFilter==propname}"></span>
+				</button>
+				<transition name="fade" @enter="adjustpos">
+					<ul v-if="showFilter == propname" class="filterwrap">
+						<li v-if="courseBrowserProps[propname].hasall">
+							<span>Show courses that contain <i>all</i> of:</span>
+						</li>
+						<li v-if="!courseBrowserProps[propname].hasall">
+							<span>Show courses that contain <i>any</i> of:</span>
+						</li>
+						<li v-for="(longname,propval) in courseBrowserProps[propname].options">
+							<span v-if="propval.match(/^group/)" class="optgrplabel"><em>{{ longname }}</em></span>
+							<label v-else><input type="checkbox" :value="propname+'.'+propval" v-model="selectedItems">
+							{{ longname }}</label>
+						</li>
+					</ul>
+				</transition>
+			</span>
+			<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
+		</div>
+
 	</div>
-	<div class="card-footer">
-		<button @click="previewCourse(course.id)">Preview Course</button>
-		<button @click="copyCourse(course)">Copy This Course</button>
+
+	<div style="position: relative" id="card-deck-wrap">
+	<transition-group name="fade" tag="div" class="card-deck">
+	<div v-if="filteredCourses.length==0" key="none"><?php echo _('No matches found'); ?></div>
+
+	<div v-for="(course,index) in filteredCourses" :key="course.id" class="card">
+	<div class="card-body">
+		<div class="card-header" :class="'coursetype'+course.coursetype">
+			<span class="course-type-marker">{{ courseTypes[course.coursetype] }}</span>
+			<b>{{ course.name }}</b>
+		</div>
+		<div class="card-main">
+			<table class="proplist">
+			<caption class="sr-only">Course Details</caption>
+			<tbody>
+			<tr v-for="(propval,propname) in courseOut(course)">
+				<th>{{ courseBrowserProps[propname].name }}</th>
+				<td v-if="!Array.isArray(propval)"> {{ propval }} </td>
+				<td v-if="Array.isArray(propval)">
+					<ul class="nomark">
+						<li v-for="subprop in propval">
+							{{ courseBrowserProps[propname].options[subprop] }}
+						</li>
+					</ul>
+				</td>
+			</tr>
+
+			</tbody></table>
+			<p v-for="(propval,propname) in courseText(course)"
+			class="pre-line"
+			>{{ propval }}</p>
+		</div>
+		<div class="card-footer">
+			<button @click="previewCourse(course.id)">Preview Course</button>
+			<button @click="copyCourse(course)">Copy This Course</button>
+		</div>
 	</div>
-  </div>
-</div>
-</transition-group>
+	</div>
+
+	</transition-group>
+
 </div>
 
 </div>
+
 <script type="text/javascript">
 const { createApp } = Vue;
 createApp({
@@ -347,6 +391,19 @@ createApp({
 		activeCourseTypes: function() {
 			var activeTypes = [];
 			for (type in this.courseTypes) {
+				// If we're filtering by specific types, only include those types
+				if (this.filterType !== null) {
+					if (Array.isArray(this.filterType)) {
+						if (this.filterType.indexOf(parseInt(type)) === -1) {
+							continue;
+						}
+					} else {
+						if (parseInt(type) != this.filterType) {
+							continue;
+						}
+					}
+				}
+				
 				for (var i=0; i<courses.length; i++) {
 					if (courses[i].coursetype == type) {
 						activeTypes.push(type);
@@ -362,6 +419,11 @@ createApp({
 		useTabs: function () {
 			// Don't show tabs if we're filtering by a specific course type
 			if (this.filterType !== null) {
+				// If filtering by multiple types, we can still show tabs
+				if (Array.isArray(this.filterType) && this.filterType.length > 1) {
+					return (!!this.courseBrowserProps.meta.courseTypeTabs &&
+						this.activeCourseTypes.length>1);
+				}
 				return false;
 			}
 			return (!!this.courseBrowserProps.meta.courseTypeTabs &&
@@ -373,8 +435,18 @@ createApp({
 			var includeCourse = true;
 			for (var i=0; i<courses.length; i++) {
 				// If filterType is set, only show courses of that type
-				if (this.filterType !== null && courses[i].coursetype != this.filterType) {
-					continue;
+				if (this.filterType !== null) {
+					if (Array.isArray(this.filterType)) {
+						// Check if course type is in the array of allowed types
+						if (this.filterType.indexOf(courses[i].coursetype) === -1) {
+							continue;
+						}
+					} else {
+						// Single filter type (backward compatibility)
+						if (courses[i].coursetype != this.filterType) {
+							continue;
+						}
+					}
 				}
 				// Otherwise, use the normal tab filtering
 				if (this.useTabs && courses[i].coursetype != this.activeTab) {
@@ -427,9 +499,18 @@ createApp({
 		const urlParams = new URLSearchParams(window.location.search);
 		const filterType = urlParams.get('filtertype');
 		if (filterType !== null) {
-			this.filterType = parseInt(filterType);
-			// Set active tab to the filtered type if it exists
-			if (this.courseTypes[this.filterType] !== undefined) {
+			// Handle comma-separated filter types
+			if (filterType.includes(',')) {
+				this.filterType = filterType.split(',').map(t => parseInt(t.trim()));
+			} else {
+				this.filterType = parseInt(filterType);
+			}
+			// Set active tab to the first filtered type if it exists
+			if (Array.isArray(this.filterType) && this.filterType.length > 0) {
+				if (this.courseTypes[this.filterType[0]] !== undefined) {
+					this.activeTab = this.filterType[0];
+				}
+			} else if (this.courseTypes[this.filterType] !== undefined) {
 				this.activeTab = this.filterType;
 			}
 		}
@@ -442,5 +523,6 @@ createApp({
 
 }).mount('#app');
 </script>
+
 <?php
 require_once "../footer.php";
