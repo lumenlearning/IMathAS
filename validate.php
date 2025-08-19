@@ -621,10 +621,12 @@ if ($hasusername) {
             if ($line['lticourseid'] > 0) {
                 $studentinfo['lticourseid'] = $line['lticourseid'];
             }
+            
             if ($line['locked'] > 0) {
                 require_once __DIR__."/header.php";
-                echo "<p>", _("You have been locked out of this course by your instructor.  Please see your instructor for more information."), "</p>";
-                echo "<p><a href=\"$imasroot/index.php\">Home</a></p>";
+                echo "<p>", _("You have been locked out of this course because you have opted out of your course material or your instructor has suspended your access."), "</p>";
+                echo "<p>", _("If you opted out of your course please follow <a href='https://support.lumenlearning.com/hc/en-us/articles/10912261843351-how-to-regain-access-to-course-materials-lumen-ohm'>these instructions</a> to opt back in."), "</p>";
+                echo "<p>", _("If you are unsure you may contact <a href='https://support.lumenlearning.com/'>Lumen Learning Support</a>"), "</p>";
                 require_once __DIR__ . '/footer.php';
                 exit;
             } else {
