@@ -151,10 +151,7 @@ require_once "../header.php";
 if (!isset($_GET['embedded'])) {
   $curBreadcrumb = $breadcrumbbase . _('Course Browser');
   echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
-	echo '<div id="headercoursebrowser" class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
-	echo '<div class="c" style="margin-bottom: 20px;">';
-	echo '<a href="courselist.php" class="btn">View All Courses in Database</a>';
-	echo '</div>';
+  echo '<div id="headercoursebrowser" class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
 }
 ?>
 
