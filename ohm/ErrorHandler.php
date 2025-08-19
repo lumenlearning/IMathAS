@@ -55,8 +55,6 @@ stack trace:
         );
         error_log($loggableErrorMessage);
 
-        self::logNewRelic($errno, $errstr, $errfile, $errline, $errcontext);
-
         if (!empty($configEnvironment) && 'development' == $configEnvironment) {
             printf('<pre>%s</pre>', $loggableErrorMessage);
         }
@@ -87,40 +85,8 @@ stack trace:
         );
         error_log($loggableErrorMessage);
 
-        self::logNewRelic($throwable->getCode(), $throwable, $throwable->getFile(),
-            $throwable->getLine(), []);
-
         if (!empty($configEnvironment) && 'development' == $configEnvironment) {
             printf('<pre>%s</pre>', $loggableErrorMessage);
         }
-    }
-
-    /**
-     * Log errors to New Relic.
-     *
-     * @param string|int $errno
-     * @param Exception|string $errstr
-     * @param string $errfile
-     * @param int $errline
-     * @param mixed $errcontext
-     * @return bool True if an error was logged to New Relic. False if not.
-     */
-    private static function logNewRelic($errno, $errstr, string $errfile,
-                                        int $errline, $errcontext): bool
-    {
-        if (!extension_loaded('newrelic')) {
-            return false;
-        }
-
-        if (!empty($GLOBALS['userid'])) {
-            newrelic_add_custom_parameter('userid', $GLOBALS['userid']);
-        }
-        if (!empty($GLOBALS['myrights'])) {
-            newrelic_add_custom_parameter('userid', $GLOBALS['myrights']);
-        }
-
-        newrelic_notice_error($errno, $errstr, $errfile, $errline, $errcontext);
-
-        return true;
     }
 }
