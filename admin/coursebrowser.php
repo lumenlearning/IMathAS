@@ -188,10 +188,10 @@ if (!isset($_GET['embedded'])) {
 	</div>
 
 	<div class="course-template-filters">
-			<div id="filters">
+		<div id="filters">
 			<span v-for="propname in propsToFilter.filter(p => p === 'level')" class="dropdown-wrap">
 				<button @click="showFilter = (showFilter==propname)?'':propname">
-					Filter Courses {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
+					Filter Courses
 					<span class="arrow-down2" :class="{rotated: showFilter==propname}"></span>
 				</button>
 				<transition name="fade" @enter="adjustpos">
@@ -481,6 +481,15 @@ createApp({
 			var grouped = {};
 			var filtered = this.filteredCourses;
 			
+			// Check if we're filtering by a specific level
+			var isFilteringByLevel = false;
+			var filteredLevels = [];
+			if (this.catprops.level && this.catprops.level.length > 0) {
+				isFilteringByLevel = true;
+				filteredLevels = this.catprops.level;
+			}
+			
+			// Only group courses that pass the filter
 			for (var i = 0; i < filtered.length; i++) {
 				var course = filtered[i];
 				var level = course.level;
@@ -510,6 +519,25 @@ createApp({
 				}
 			}
 			
+			// If filtering by level, only show the filtered level groups
+			var filteredGrouped = {};
+			if (isFilteringByLevel) {
+				// Only include the specific levels that were filtered for
+				for (var i = 0; i < filteredLevels.length; i++) {
+					var level = filteredLevels[i];
+					if (grouped[level] && grouped[level].length > 0) {
+						filteredGrouped[level] = grouped[level];
+					}
+				}
+			} else {
+				// No level filter applied, show all level groups with courses
+				for (var level in grouped) {
+					if (grouped[level].length > 0) {
+						filteredGrouped[level] = grouped[level];
+					}
+				}
+			}
+			
 			// Sort the levels based on the order defined in courseBrowserProps.level.options
 			var sortedGrouped = {};
 			var levelOrder = Object.keys(this.courseBrowserProps.level.options);
@@ -517,9 +545,10 @@ createApp({
 			// Add undefined level at the end
 			levelOrder.push('undefined');
 			
+			// Only include levels that have courses after filtering
 			levelOrder.forEach(function(level) {
-				if (grouped[level]) {
-					sortedGrouped[level] = grouped[level];
+				if (filteredGrouped[level]) {
+					sortedGrouped[level] = filteredGrouped[level];
 				}
 			});
 			
