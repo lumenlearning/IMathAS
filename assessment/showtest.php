@@ -647,12 +647,6 @@
 	// #### Begin OHM-specific code #####################################################
 	// #### Begin OHM-specific code #####################################################
 
-	if (extension_loaded('newrelic')) { // Ensure PHP agent is available
-		// Record custom data about this web transaction
-		newrelic_add_custom_parameter ('showtest_aid', $line['assessmentid']);
-		newrelic_add_custom_parameter ('showtest_asid', $line['id']);
-	}
-
 	$GLOBALS['assessver'] = $line['ver'];
 	if (strpos($line['questions'],';')===false) {
 		$questions = explode(",",$line['questions']);

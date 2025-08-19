@@ -44,9 +44,6 @@ class ErrorHandler
             error_log(sprintf('Caught error in %s:%s -- %s',
                 $errfile, $errline, $errstr));
 
-            if (extension_loaded('newrelic')) {
-                newrelic_notice_error($errno, $errstr, $errfile, $errline, $errcontext);
-            }
         }
         // True = Don't execute the PHP internal error handler.
         // False = Populate $php_errormsg.
@@ -67,10 +64,6 @@ class ErrorHandler
 
         error_log(sprintf('Caught exception in %s:%d -- %s',
             $t->getFile(), $t->getLine(), $t->getMessage()));
-
-        if (extension_loaded('newrelic')) {
-            newrelic_notice_error($t);
-        }
 
         exit;
     }
