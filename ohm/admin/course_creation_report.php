@@ -32,9 +32,10 @@ echo '<div class=breadcrumb>', $curBreadcrumb, '</div>';
  */
 
 $startDate = getDateTime($_POST['startDate']);
+$includeEnrollmentCounts = filter_has_var(INPUT_POST, 'includeEnrollmentCounts');
 
 if ('generate_report' == $_POST['action']) {
-    generateReport($startDate);
+    generateReport($startDate, $includeEnrollmentCounts);
 } else {
     displayForm($startDate);
 }
@@ -82,6 +83,19 @@ function displayForm(DateTime $startDate): void
                        onClick="displayDatePicker('startDate', this); return false"
                        value="<?php echo $startDate->format('m/d/Y'); ?>"/>
             </div>
+            <br/>
+            <div>
+                <input id="includeEnrollmentCounts"
+                       name="includeEnrollmentCounts"
+                       type="checkbox"
+                       value="true"
+                />
+                <label id="includeEnrollmentCountsLabel"
+                       for="includeEnrollmentCounts"
+                       class="form-label"
+                >Include enrollment counts?<br/>Warning: This
+                    may increase report generation time by several minutes per year of data.</label>
+            </div>
             <button id="generate_report_form_submit_button"
                     name="submitbtn"
                     type="submit"
@@ -120,10 +134,13 @@ function getDateTime(?string $unsafeDateString): DateTime
  * Generate reports of courses by creation method.
  *
  * @param DateTime $startDate Get courses created after this time.
+ * @param bool $includeEnrollmentCounts Include enrollment counts for every course?
  * @return void
  */
-function generateReport(DateTime $startDate): void
+function generateReport(DateTime $startDate, bool $includeEnrollmentCounts): void
 {
+    $reportStartTime = microtime(true);
+
     $templateCourseIds = getTemplateCourseIds();
 
     printf('<p>Searched <span class="outsideDateRange">all</span> available courses for template courses. Found %d.'
@@ -140,11 +157,16 @@ function generateReport(DateTime $startDate): void
 
     echo '<h1>Beginning report generation.</h1>';
 
-    printf('<p>Generating reports for courses created since: <span id="specifiedDateRange">%s</span></p>', $startDate->format('Y-m-d @ H:i:s T'));
+    printf('<p>Generating reports for courses created since: <span id="specifiedDateRange">%s</span></p>',
+            $startDate->format('Y-m-d @ H:i:s T'));
     echo '<p>The numbers below are <span class="insideDateRange">within</span> your specified date range.</p>';
     echo '<p>(scroll down for CSV downloads)</p>';
 
-    generateReportCsvFiles($startDate, $templateCourseIds['globalTemplateCourseIds'], $templateCourseIds['nonGlobalTemplateCourseIds']);
+    generateReportCsvFiles($startDate, $includeEnrollmentCounts, $templateCourseIds['globalTemplateCourseIds'],
+            $templateCourseIds['nonGlobalTemplateCourseIds']);
+
+    $secondsElapsed = microtime(true) - $reportStartTime;
+    printf('<p>Report generation time: %.2f minutes</p>', $secondsElapsed / 60);
 }
 
 /**
@@ -156,7 +178,7 @@ function generateReport(DateTime $startDate): void
  */
 function getTemplateCourseIds(): array
 {
-    $query = 'SELECT id,istemplate FROM imas_courses WHERE istemplate > 0';
+    $query = 'SELECT id,istemplate,level FROM imas_courses WHERE istemplate > 0';
     $stm = $GLOBALS['DBH']->prepare($query);
     $stm->execute();
 
@@ -166,19 +188,21 @@ function getTemplateCourseIds(): array
     $nonGlobalTemplateCourseIds = [];
 
     while ($dbRow = $stm->fetch(PDO::FETCH_ASSOC)) {
+        $courseId = $dbRow['id'];
+
         // This follows the logic from admin/coursebrowser.php.
         if (
                 $dbRow['istemplate'] & 2 // template for user's group
                 || $dbRow['istemplate'] & 32 // template for user's super-group
         ) {
-            $nonGlobalTemplateCourseIds[] = $dbRow['id'];
+            $nonGlobalTemplateCourseIds[$courseId] = $dbRow['level'];
         } elseif ($dbRow['istemplate'] & 1) {
-            $globalTemplateCourseIds[] = $dbRow['id'];
+            $globalTemplateCourseIds[$courseId] = $dbRow['level'];
         } else {
             // Any course marked as a template where istemplate&1 is false
             // is not a global template course. This includes group templates
             // super-group templates, and contributed templates.
-            $nonGlobalTemplateCourseIds[] = $dbRow['id']; // "contributed course"
+            $nonGlobalTemplateCourseIds[$courseId] = $dbRow['level']; // "contributed course"
         }
     }
 
@@ -193,11 +217,15 @@ function getTemplateCourseIds(): array
  * Generate CSV files reporting course creation counts by creation method.
  *
  * @param DateTime $startDate Get courses created after this time.
+ * @param bool $includeEnrollmentCounts Include enrollment counts for every course.
  * @param array $globalTemplateCourseIds An array of global template course IDs.
  * @param array $nonGlobalTemplateCourseIds An array of non-global template course IDs.
  * @return void
  */
-function generateReportCsvFiles(DateTime $startDate, array $globalTemplateCourseIds, array $nonGlobalTemplateCourseIds): void
+function generateReportCsvFiles(DateTime $startDate,
+                                bool     $includeEnrollmentCounts,
+                                array    $globalTemplateCourseIds,
+                                array    $nonGlobalTemplateCourseIds): void
 {
     $startUnixtime = $startDate->getTimestamp();
 
@@ -213,12 +241,16 @@ function generateReportCsvFiles(DateTime $startDate, array $globalTemplateCourse
     $csvFileNonGlobalTemplateCopyFh = fopen(__DIR__ . '/../../filestore/' . $csvFileNonGlobalTemplateCopyFilename, 'w');
     $csvFileNonTemplateCourseCopyFh = fopen(__DIR__ . '/../../filestore/' . $csvFileNonTemplateCourseCopyFilename, 'w');
 
-    // Courses created from blank templates have no ancestry, so we don't need those columns here.
     $csvHeadersForDbColumns = ['course_id', 'course_name', 'ancestors', 'level', 'group_name'];
-    fputcsv($csvFileBlankTemplateFh, $csvHeadersForDbColumns);
 
+    // Write CSV headers for courses created from blank emplates.
+    fputcsv($csvFileBlankTemplateFh, array_merge($csvHeadersForDbColumns, ['enrollment_count']));
+
+    // Write CSV headers for courses created copied from other courses.
     $headersForCourseCopies = array_merge($csvHeadersForDbColumns, [
-            'ancestry_has_global_template_ids', 'ancestry_has_non_global_template_ids',
+            'enrollment_count',
+            'ancestry_has_global_template_ids', 'most_recent_global_template_id', 'most_recent_global_template_level',
+            'ancestry_has_non_global_template_ids', 'most_recent_non_global_template_id', 'most_recent_non_global_template_level',
             'first_ancestor_course_id', 'last_ancestor_course_id',
             'all_global_template_course_ids_in_ancestry', 'all_non_global_template_course_ids_in_ancestry']);
     fputcsv($csvFileGlobalTemplateCopyFh, $headersForCourseCopies);
@@ -250,12 +282,13 @@ WHERE c.created_at >= :startUnixtime
     $totalNonTemplateCopiesWithNoAncestors = 0;
 
     while ($dbRow = $stm->fetch(PDO::FETCH_ASSOC)) {
-        $courseId = $dbRow['course_id'];
+        $enrollmentCount = $includeEnrollmentCounts ? getEnrollmentsByCourseId($dbRow['course_id']) : '';
+
         $ancestors = $dbRow['ancestors'];
 
         // No ancestors
         if ('' == $ancestors) {
-            fputcsv($csvFileBlankTemplateFh, $dbRow);
+            fputcsv($csvFileBlankTemplateFh, array_merge($dbRow, [$enrollmentCount]));
             $totalFromBlankTemplates++;
             continue;
         }
@@ -264,17 +297,22 @@ WHERE c.created_at >= :startUnixtime
 
         // Single ancestor
         if (!$commaIdx) {
-            if (in_array($courseId, $globalTemplateCourseIds)) {
+            if (array_key_exists($ancestors, $globalTemplateCourseIds)) {
                 // Copied from a global template course.
-                fputcsv($csvFileGlobalTemplateCopyFh, array_merge($dbRow, ['YES', '', $ancestors, $ancestors, $ancestors, '']));
+                $ancestorLevel = $globalTemplateCourseIds[$ancestors];
+                fputcsv($csvFileGlobalTemplateCopyFh, array_merge($dbRow,
+                        [$enrollmentCount, 'YES', $ancestors, $ancestorLevel, '', '', '', $ancestors, $ancestors, $ancestors, '']));
                 $totalFromGlobalTemplates++;
-            } elseif (in_array($courseId, $nonGlobalTemplateCourseIds)) {
+            } elseif (array_key_exists($ancestors, $nonGlobalTemplateCourseIds)) {
                 // Copied from a non-global template course.
-                fputcsv($csvFileNonGlobalTemplateCopyFh, array_merge($dbRow, ['', 'YES', $ancestors, $ancestors, '', $ancestors]));
+                $ancestorLevel = $nonGlobalTemplateCourseIds[$ancestors];
+                fputcsv($csvFileNonGlobalTemplateCopyFh, array_merge($dbRow,
+                        [$enrollmentCount, '', '', '', 'YES', $ancestors, $ancestorLevel, $ancestors, $ancestors, '', $ancestors]));
                 $totalFromNonGlobalTemplates++;
             } else {
                 // Copied from a normal (non-template) course.
-                fputcsv($csvFileNonTemplateCourseCopyFh, array_merge($dbRow, ['', '', $ancestors, $ancestors, '', '']));
+                fputcsv($csvFileNonTemplateCourseCopyFh, array_merge($dbRow,
+                        [$enrollmentCount, '', '', '', '', '', '', $ancestors, $ancestors, '', '']));
                 $totalFromNonTemplateCourseCopies++;
                 $totalNonTemplateCopiesWithNoAncestors++;
             }
@@ -293,23 +331,46 @@ WHERE c.created_at >= :startUnixtime
         $globalTemplateAncestorsFound = [];
         $nonGlobalTemplateAncestorsFound = [];
         foreach ($ancestorList as $ancestor) {
-            if (in_array($ancestor, $globalTemplateCourseIds)) {
+            if (array_key_exists($ancestor, $globalTemplateCourseIds)) {
                 $globalTemplateAncestorsFound[] = $ancestor;
                 if (empty($hasGlobalTemplateAncestor)) $hasGlobalTemplateAncestor = 'YES';
             }
-            if (in_array($ancestor, $nonGlobalTemplateCourseIds)) {
+            if (array_key_exists($ancestor, $nonGlobalTemplateCourseIds)) {
                 $nonGlobalTemplateAncestorsFound[] = $ancestor;
                 if (empty($hasNonGlobalTemplateAncestor)) $hasNonGlobalTemplateAncestor = 'YES';
             }
         }
 
-        // Build up fields for csv line
+        /*
+         * Build up fields for csv line.
+         */
+
         $oldestAncestor = $ancestorList[array_key_last($ancestorList)];
         $mostRecentAncestor = $ancestorList[0];
+
+        // What is the most recent global template ID for this course?
+        $mostRecentGlobalTemplateAncestorIdx = array_key_first($globalTemplateAncestorsFound);
+        // If this course doesn't have a global template course ID, then default to an empty string for this CSV column.
+        $mostRecentGlobalTemplateAncestor = !is_null($mostRecentGlobalTemplateAncestorIdx) ? $globalTemplateAncestorsFound[$mostRecentGlobalTemplateAncestorIdx] : '';
+        // What is the course level for the most recent global template ID?
+        $mostRecentGlobalTemplateAncestorLevel = !empty($mostRecentGlobalTemplateAncestor) ? $globalTemplateCourseIds[$mostRecentGlobalTemplateAncestor] : '';
+
+        // What is the most recent NON-global template ID for this course?
+        $mostRecentNonGlobalTemplateAncestorIdx = array_key_first($nonGlobalTemplateAncestorsFound);
+        // If this course doesn't have a NON-global template course ID, then default to an empty string for this CSV column.
+        $mostRecentNonGlobalTemplateAncestor = !is_null($mostRecentNonGlobalTemplateAncestorIdx) ? $nonGlobalTemplateAncestorsFound[$mostRecentNonGlobalTemplateAncestorIdx] : '';
+        // What is the course level for the most recent NON-global template ID?
+        $mostRecentNonGlobalTemplateAncestorLevel = !empty($mostRecentNonGlobalTemplateAncestor) ? $nonGlobalTemplateCourseIds[$mostRecentNonGlobalTemplateAncestor] : '';
+
         $csvData = array_merge($dbRow,
                 [
+                        $enrollmentCount,
                         $hasGlobalTemplateAncestor,
+                        $mostRecentGlobalTemplateAncestor,
+                        $mostRecentGlobalTemplateAncestorLevel,
                         $hasNonGlobalTemplateAncestor,
+                        $mostRecentNonGlobalTemplateAncestor,
+                        $mostRecentNonGlobalTemplateAncestorLevel,
                         $oldestAncestor,
                         $mostRecentAncestor,
                         implode(',', $globalTemplateAncestorsFound),
@@ -317,12 +378,24 @@ WHERE c.created_at >= :startUnixtime
                 ]
         );
 
+        /*
+         * Output a CSV line for this course.
+         *
+         * The course's most recent ancestor course type (global template,
+         * non-global template, or normal course copy) determines which
+         * CSV file we write to.
+         *
+         * Courses created from a blank template (no template) had their
+         * CSV row written to a different file long before we got here. See the
+         * beginning of this while() loop. :)
+         */
+
         // Which type of course is the most recent ancestor?
-        if (in_array($mostRecentAncestor, $globalTemplateCourseIds)) {
+        if (array_key_exists($mostRecentAncestor, $globalTemplateCourseIds)) {
             // Course was copied from a global template course.
             $totalFromGlobalTemplates++;
             fputcsv($csvFileGlobalTemplateCopyFh, $csvData);
-        } elseif (in_array($mostRecentAncestor, $nonGlobalTemplateCourseIds)) {
+        } elseif (array_key_exists($mostRecentAncestor, $nonGlobalTemplateCourseIds)) {
             // Course was copied from a non-global template course.
             $totalFromNonGlobalTemplates++;
             fputcsv($csvFileNonGlobalTemplateCopyFh, $csvData);
@@ -409,4 +482,19 @@ WHERE c.created_at >= :startUnixtime
     printf('<li><a href="%s/filestore/%s">%s</a></li>',
             $GLOBALS['basesiteurl'], $csvFileNonTemplateCourseCopyFilename, $csvFileNonTemplateCourseCopyFilename);
     echo '</ul>';
+}
+
+/**
+ * Get the number of enrollments for a course.
+ *
+ * @param int $courseId The course ID to get an enrollment count for.
+ * @return int The number of enrollments for the course.
+ */
+function getEnrollmentsByCourseId(int $courseId): int
+{
+    $query = 'SELECT COUNT(*) FROM imas_students WHERE courseid = :courseId';
+    $stm = $GLOBALS['DBH']->prepare($query);
+    $stm->execute(['courseId' => $courseId]);
+
+    return $stm->fetchColumn();
 }
