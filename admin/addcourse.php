@@ -149,7 +149,7 @@ require_once "../header.php";
 						These are courses shared by faculty members. They are not supported by Lumen 
 						and should only be used at your own risk.
 					</p>
-					<a href="#" onclick="showCourseBrowser(<?php echo $dispgroup > 0 ? Sanitize::encodeStringForDisplay($dispgroup) : 'null'; ?>, 0)">
+					<a href="#" onclick="showCourseBrowser(<?php echo $dispgroup > 0 ? Sanitize::encodeStringForDisplay($dispgroup) : 'null'; ?>, [0, 2])">
 						<?php echo _('Use a community template'); ?>
 					</a>
 
