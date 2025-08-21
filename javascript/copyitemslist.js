@@ -57,7 +57,12 @@ function showCourseBrowser(grpid, filterType) {
 
   var filterstr = "";
   if (filterType !== undefined && filterType !== null) {
-    filterstr = "&filtertype=" + filterType;
+    // Handle both single values and arrays
+    if (Array.isArray(filterType)) {
+      filterstr = "&filtertype=" + filterType.join(",");
+    } else {
+      filterstr = "&filtertype=" + filterType;
+    }
   }
 
   $("#copyoptions").slideUp();
