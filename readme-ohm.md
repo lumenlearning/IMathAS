@@ -29,22 +29,26 @@ To **exclude** sensitive user information, use the `fs-exclude` CSS class.
 ## Get OHM running
 
 ### SSL CERTS
+
 This step is only needed the first time you are setting up locally.
+
 1. Install `mkcert`. You can use `brew install mkcert` (homebrew) or `port install mkcert` (macports)
-2. Create a directory to store your certificates. 
+2. Create a directory to store your certificates.
 3. In the above directory, run `mkcert -install` and `mkcert localhost 127.0.0.1 ::1`.
-4. Copy the two resulting files into the project subdirectory `/docker/ssl`. 
+4. Copy the two resulting files into the project subdirectory `/docker/ssl`.
    - Name the .key.pem file `docker/ssl/lumenlearning.key`
-    - Name the .pem file  `docker/ssl/lumenlearning.crt`
-    
+   - Name the .pem file `docker/ssl/lumenlearning.crt`
+
 ### Running OHM locally
+
 0. Ensure you have installed:
-  - Homebrew: https://brew.sh/
-  - Docker: https://www.docker.com/get-started)
-  - PHP: (run these commands in a terminal)
-    1. `brew install php@7.4`
-    2. `brew link php@7.4`
-    
+
+- Homebrew: https://brew.sh/
+- Docker: https://www.docker.com/get-started)
+- PHP: (run these commands in a terminal)
+  1. `brew install php@7.4`
+  2. `brew link php@7.4`
+
 Note: If you have issues with Macbook M1 installation, see this [confluence page](https://lumenlearning.atlassian.net/l/cp/0DPenfEX).
 
 1. Copy local.php.example to local.php:
@@ -60,11 +64,11 @@ Note: If you have issues with Macbook M1 installation, see this [confluence page
 1. Hopefully app is up and running at localhost!
 
 ### Get Vue Running
+
 For OHM1 development only.
 
-1. Execute `npm run serve` from the `assess2/vue-src` 
+1. Execute `npm run serve` from the `assess2/vue-src`
    (You might need to `nvm use stable` if this step fails)
-    
 2. See [Vue's specific README.md](assess2/vue-src/README.md) file
 
 # Reference
@@ -74,9 +78,8 @@ For OHM1 development only.
 In the `imas_users` table, each user record has one of these values in the
 `rights` column to define their role and access level within OHM.
 
-
 | Value      | Meaning          |
-|------------|------------------|
+| ---------- | ---------------- |
 | 5          | Guest            |
 | 10         | Student          |
 | 12         | Pending          |
@@ -99,10 +102,10 @@ Go to https://localhost/upgrade.php in your web browser.
 Requirements:
 
 - Composer with all dependencies installed.
-    - `$ brew install composer` or [getcomposer.org](https://getcomposer.org/)
-    - `$ composer install`
+  - `$ brew install composer` or [getcomposer.org](https://getcomposer.org/)
+  - `$ composer install`
 - A local server already running with this project root available at https://localhost
-	- `composer start` will start a local server for you.
+  - `composer start` will start a local server for you.
 - PHP must have `xdebug` enabled.
 
 Important: After all the above requirements are met, you must still follow
@@ -137,5 +140,4 @@ Tests will be available at
 
 - URLs are sometimes mangled when running a local server with `php -S`.
 - Correct namespacing in OHM-specific code. (PSR-4)
-	- Move/rename OHM-specific namespaced directories so they make more sense.
-
+  - Move/rename OHM-specific namespaced directories so they make more sense.
