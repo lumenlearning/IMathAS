@@ -110,10 +110,10 @@ function getBlockDD($blocktype, $i, $parent, $bnum, $blockid, $name)
     global $cid, $staticroot;
     $blockid = intval($blockid);
     $out = '<div class="itemhdrdd dropdown">';
-    $out .= '<a tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+    $out .= '<button tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-controls="actionsMenu1" aria-expanded="false">';
     $out .= ' <img src="' . $staticroot . '/img/gearsdd.png" alt="' . _('Options for') . ' ' . Sanitize::encodeStringForDisplay($name) . '" class="mida"/>';
-    $out .= '</a>';
-    $out .= '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
+    $out .= '</button>';
+    $out .= '<ul id="actionsMenu1" class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
     if ($blocktype == 'T') {
         $out .= " <li><a href=\"course.php?cid=$cid&folder=$parent-$bnum\">" . _('Edit Contents') . "</a></li>";
     } else if ($blocktype == 'E') {
@@ -132,10 +132,10 @@ function getAssessDD($i, $typeid, $parent, $itemid, $thisaddassess, $ver, $name)
 {
     global $cid, $staticroot;
     $out = '<div class="itemhdrdd dropdown">';
-    $out .= '<a tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+    $out .= '<button tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-controls="actionsMenu2" aria-expanded="false">';
     $out .= ' <img src="' . $staticroot . '/img/gearsdd.png" alt="' . _('Options for') . ' ' . Sanitize::encodeStringForDisplay($name) . '" class="mida"/>';
-    $out .= '</a>';
-    $out .= '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
+    $out .= '</button>';
+    $out .= '<ul id="actionsMenu2"class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
     $out .= " <li><a href=\"addquestions2.php?aid=$typeid&cid=$cid\">" . _('Questions') . "</a></li>";
     $out .= " <li><a href=\"$thisaddassess?id=$typeid&block=$parent&cid=$cid\">" . _('Settings') . "</a></li>";
     $out .= " <li><a href=\"#\" onclick=\"return moveDialog('$parent','$itemid');\">" . _('Move') . '</a></li>';
@@ -155,10 +155,10 @@ function getDrillDD($i, $typeid, $parent, $itemid, $name)
 {
     global $cid, $staticroot;
     $out = '<div class="itemhdrdd dropdown">';
-    $out .= '<a tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+    $out .= '<button tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-controls="actionsMenu3" aria-expanded="false">';
     $out .= ' <img src="' . $staticroot . '/img/gearsdd.png" alt="' . _('Options for') . ' ' . Sanitize::encodeStringForDisplay($name) . '" class="mida"/>';
-    $out .= '</a>';
-    $out .= '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
+    $out .= '</button>';
+    $out .= '<ul id="actionsMenu3" class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
     $out .= " <li><a href=\"adddrillassess.php?daid=$typeid&block=$parent&cid=$cid\">" . _('Modify') . "</a></li>";
     $out .= " <li><a href=\"#\" onclick=\"return moveDialog('$parent','$itemid');\">" . _('Move') . '</a></li>';
     $out .= " <li><a href=\"deletedrillassess.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">" . _('Delete') . "</a></li>";
@@ -173,10 +173,10 @@ function getBasicDD($i, $typeid, $parent, $itemid, $typename, $statsletter, $sho
 {
     global $cid, $staticroot;
     $out = '<div class="itemhdrdd dropdown">';
-    $out .= '<a tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+    $out .= '<button tabindex=0 class="dropdown-toggle" id="dropdownMenu' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-controls="actionsMenu4" aria-expanded="false">';
     $out .= ' <img src="' . $staticroot . '/img/gearsdd.png" alt="' . _('Options for') . ' ' . Sanitize::encodeStringForDisplay($name) . '" class="mida"/>';
-    $out .= '</a>';
-    $out .= '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
+    $out .= '</button>';
+    $out .= '<ul id="actionsMenu4"class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu' . $i . '">';
     $out .= " <li><a href=\"add$typename.php?id=$typeid&block=$parent&cid=$cid\">" . _('Modify') . "</a></li>";
     $out .= " <li><a href=\"#\" onclick=\"return moveDialog('$parent','$itemid');\">" . _('Move') . '</a></li>';
     $out .= " <li><a href=\"delete$typename.php?id=$typeid&block=$parent&cid=$cid&remove=ask\">" . _('Delete') . "</a></li>";
