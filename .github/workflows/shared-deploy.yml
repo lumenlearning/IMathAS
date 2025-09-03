@@ -19,45 +19,10 @@ on:
         required: true
 
 jobs:
-  # this job gets a password for public ECR to use in future steps
-  ecr-public-auth:
-    runs-on: ubuntu-latest
-    name: Login to Public ECR
-    timeout-minutes: 5
-    permissions:
-      id-token: write   # Used for AWS OIDC auth
-    outputs:
-      ECR_PASSWORD: ${{ steps.ecr-auth.outputs.ECR_PASSWORD }}
-    steps:
-      # This is required to role chain from the OIDC role to other cross-account roles
-      # https://github.com/aws-actions/configure-aws-credentials/issues/279
-      - name: OIDC Auth
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::265299512749:role/ci-oidc-role
-          role-session-name: github-actions
-          role-duration-seconds: 900
-
-      - name: Assume role in CI Account
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::824635284302:role/ci-role
-          role-session-name: github-actions
-          role-duration-seconds: 1200
-      
-      - name: Set Public ECR Auth
-        id: ecr-auth
-        run: echo "ECR_PASSWORD=$(aws ecr-public --region us-east-1 get-login-password)" >> $GITHUB_OUTPUT
   beanstalk-deploy:
     name: Beanstalk Deployment
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    needs: [ecr-public-auth]
     steps:
     - uses: actions/checkout@v4
       name: Checkout project
@@ -66,13 +31,6 @@ jobs:
       name: Login to Private ECR
       id: login-ecr
     
-    - name: Login to Public ECR
-      uses: docker/login-action@v3
-      with:
-        registry: public.ecr.aws/o9c0t3w1
-        username: AWS
-        password: ${{ needs.ecr-public-auth.outputs.ECR_PASSWORD }}
-
     - id: read_tree_hash
       name: Read git tree hash
       run: |
