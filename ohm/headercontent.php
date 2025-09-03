@@ -27,7 +27,7 @@
 					$usernameinheader = true;
 					echo "<span id=\"myname\" class=\"header-menu-item pii-full-name\">" .
                         Sanitize::encodeStringForDisplay($userfullname)
-                        . "<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" /></span>";
+                        . "<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" alt='' aria-hidden=\"true\" /></span>";
 					// User avatar logic
 					// if (1 == $selfhasuserimg && isset($GLOBALS['CFG']['GEN']['AWSforcoursefiles']) && $GLOBALS['CFG']['GEN']['AWSforcoursefiles'] == true) {
 					// 	$curdir = rtrim(dirname(__FILE__), '/\\');
@@ -37,13 +37,13 @@
 					// 	echo "<img id=\"avatar\" src=\"$imasroot/ohm/img/blank-avatar.png\" />";
 					// }
 					echo "<div id=\"headerrightlinks\"><a href=\"#\" onclick=\"GB_show('Account Settings','$imasroot/forms.php?action=chguserinfo&greybox=true',800,'auto')\" title=\"Account Settings\"><span class=\"header-menu-item\">User Settings</span></a>";
-					echo '<a href="#" class="header-menu-item" onclick="jQuery(\'#homemenu\').css({\'left\': jQuery(this).offset().left+\'px\', \'background-color\':\'#1E74D1\', \'color\':\'#fff\'});mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" style="vertical-align:middle"/></a> ';
+					echo '<a href="#" class="header-menu-item" onclick="jQuery(\'#homemenu\').css({\'left\': jQuery(this).offset().left+\'px\', \'background-color\':\'#1E74D1\', \'color\':\'#fff\'});mopen(\'homemenu\',0)" onmouseout="mclosetime()">My Classes <img src="'.$imasroot.'/img/smdownarrow.png" alt="" aria-hidden="true" style="vertical-align:middle"/></a> ';
 					echo '<div id="homemenu" class="ddmenu" onmouseover="mcancelclosetime()" onmouseout="mclosetime()"></div>';
 				}
 				echo "<a href=\"$imasroot/actions.php?action=logout\" class=\"header-menu-item\">Log Out</a></div>";
 				// if user has more privileges than student...
 				if ($myrights > 10) {
-					echo "<a id=\"help-modal-open\" href=\"#\"><span id=\"help-button\"><img src=\"$imasroot/ohm/img/help-icon.png\" id=\"help-icon\" /><span>Help</span></span></a>";
+					echo "<a id=\"help-modal-open\" href=\"#\"><span id=\"help-button\"><img alt='' aria-hidden=\"true\" src=\"$imasroot/ohm/img/help-icon.png\" id=\"help-icon\" /><span>Help</span></span></a>";
 				}
 			}
 		?>
