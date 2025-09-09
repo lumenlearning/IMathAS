@@ -5,9 +5,7 @@ FROM php:8.1-cli AS builder
 RUN apt-get update && apt-get install -y libzip-dev zip gnupg
 
 # Install mysql
-RUN curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql-keyring.gpg
-RUN echo 'deb [signed-by=/usr/share/keyrings/mysql-keyring.gpg] http://repo.mysql.com/apt/debian buster mysql-5.7' > /etc/apt/sources.list.d/mysql.list
-RUN apt-get update && apt-get install -y mysql-client
+RUN apt-get update && apt-get install -y mariadb-client-compat
 RUN apt-get install -y git
 
 RUN docker-php-ext-configure zip && docker-php-ext-install zip pdo pdo_mysql
