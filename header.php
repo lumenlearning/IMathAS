@@ -115,14 +115,7 @@ if (!isset($_SESSION['mathdisp'])) {
         MathJax.Ajax.config.path["Local"] = "'.$staticroot.'/javascript/mathjax";
         MathJax.Hub.config.extensions.push("[Local]/InputToDataAttrCDN.js");
         MathJax.Hub.Register.StartupHook("AsciiMath Jax Ready", function () {
-;
             var AM = MathJax.InputJax.AsciiMath.AM;
-            
-            // Modify number pattern to support comma-separated thousands
-            // Original pattern: /^[0-9]+(\.[0-9]+)?/
-            // New pattern: /^[0-9]+(?:,[0-9]{1,3})*(?:\.[0-9]*)?/
-            AM.number = /^[0-9]+(?:,[0-9]{1,3})*(?:\.[0-9]*)?/;
-            
             AM.newsymbol({input: "o-", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "ominus", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "rightleftharpoons", tag:"mo", output:"\u21CC", ttype:AM.TOKEN.CONST});
@@ -130,10 +123,47 @@ if (!isset($_SESSION['mathdisp'])) {
             ["arcsec","arccsc","arccot"].forEach(function(v) {
                 AM.newsymbol({input:v, tag:"mi", output:v, ttype:AM.TOKEN.UNARY, func:true});
             });
+
+			//format commas in numbers
+			//solution: https://groups.google.com/g/mathjax-users/c/dl8mtt-ovkM/m/OEUutu0RBAAJ?pli=1
+			function addCommas(n){
+					var parts = n.toString().split(".");
+					parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+					return parts.join(".");
+				}
+
+				function removeCommas(n) {
+					return n.replace(/,/g,"");
+				}
+
+				function recursiveAddCommas(node) {
+					if (node.isToken) {
+						if (node.type === "mn") {
+							node.data[0].data[0] = addCommas(node.data[0].data[0]);
+						}
+					}
+					else {
+						for (var i = 0, m = node.data.length; i < m; i++) {
+							recursiveAddCommas(node.data[i]);
+						}
+					}
+				}
+
+				MathJax.InputJax.AsciiMath.prefilterHooks.Add(function (data) {
+					data.math = data.math.replace(/\\d{1,3}(?:\\,\\d{3})+/g,removeCommas);
+				});
+
+				MathJax.InputJax.AsciiMath.postfilterHooks.Add(function (data) {
+					recursiveAddCommas(data.math.root);
+				});
+
+			
         });
+		
+
 		MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
 			MathJax.InputJax.TeX.Definitions.number =
-			/^[0-9]+(?:,[0-9]{1,3})*(?:\.[0-9]*)?/
+			/^[0-9]+(?:,[0-9]{1,3})*(?:\\.[0-9]*)?/
 		});
         </script>';
     if (!empty($CFG['GEN']['uselocaljs'])) {
