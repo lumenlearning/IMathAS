@@ -49,6 +49,14 @@ $csvFile = $_FILES["csv_file"];
         by uploading a CSV File.
     </p>
 
+    <p>
+        The CSV file should contain the following columns:
+    </p>
+
+    <pre>
+        groupId,courseId,studentFirstName,studentLastName,email
+    </pre>
+
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action" value="upload_csv_file"/>
         <p>
