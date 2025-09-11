@@ -116,6 +116,12 @@ if (!isset($_SESSION['mathdisp'])) {
         MathJax.Hub.config.extensions.push("[Local]/InputToDataAttrCDN.js");
         MathJax.Hub.Register.StartupHook("AsciiMath Jax Ready", function () {
             var AM = MathJax.InputJax.AsciiMath.AM;
+            
+            // Modify number pattern to support comma-separated thousands
+            // Original pattern: /^[0-9]+(\.[0-9]+)?/
+            // New pattern: /^[0-9]+(?:,[0-9]{3})*(?:\.[0-9]*)?/
+            AM.number = /^[0-9]+(?:,[0-9]{3})*(?:\.[0-9]*)?/;
+            
             AM.newsymbol({input: "o-", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "ominus", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "rightleftharpoons", tag:"mo", output:"\u21CC", ttype:AM.TOKEN.CONST});
@@ -124,6 +130,10 @@ if (!isset($_SESSION['mathdisp'])) {
                 AM.newsymbol({input:v, tag:"mi", output:v, ttype:AM.TOKEN.UNARY, func:true});
             });
         });
+		MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
+			MathJax.InputJax.TeX.Definitions.number =
+			/^(?:[0-9]+(?:,[0-9]{3})*(?:\.[0-9]*)*|\.[0-9]+)/
+		});
         </script>';
     if (!empty($CFG['GEN']['uselocaljs'])) {
         echo '<script type="text/javascript" async src="'.$staticroot.'/mathjax/MathJax.js?config=AM_CHTML-full"></script>';
@@ -171,6 +181,10 @@ if (!isset($_SESSION['mathdisp'])) {
       },
       startup: {
           ready: function() {
+           MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
+				MathJax.InputJax.TeX.Definitions.number =
+				/^(?:[0-9]+(?:\.[0-9]{3})*(?:\{,\}[0-9]*)*|\{,\}[0-9]+)/
+			});
             var AM = MathJax.InputJax.AsciiMath.AM;
             AM.newsymbol({input: "o-", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
             AM.newsymbol({input: "ominus", tag:"mo", output:"\u2296", ttype:AM.TOKEN.CONST});
