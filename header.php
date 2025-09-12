@@ -221,6 +221,40 @@ if (!isset($_SESSION['mathdisp'])) {
             ["arcsec","arccsc","arccot"].forEach(function(v) {
                 AM.newsymbol({input:v, tag:"mi", output:v, ttype:AM.TOKEN.UNARY, func:true});
             });
+
+            //format numbers with commas
+            function addCommas(n){
+                var parts = n.toString().split(".");
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                return parts.join(".");
+            }
+
+            function removeCommas(n) {
+                return n.replace(/,/g,"");
+            }
+
+            function recursiveAddCommas(node) {
+                if (node.isToken) {
+                    if (node.type === "mn") {
+                        node.data[0].data[0] = addCommas(node.data[0].data[0]);
+                    }
+                }
+                else {
+                    for (var i = 0, m = node.data.length; i < m; i++) {
+                        recursiveAddCommas(node.data[i]);
+                    }
+                }
+            }
+
+            // Add prefilter and postfilter hooks for comma formatting
+            MathJax.InputJax.AsciiMath.prefilterHooks.Add(function (data) {
+                data.math = data.math.replace(/\d{1,3}(?:,\d{3})+/g,removeCommas);
+            });
+
+            MathJax.InputJax.AsciiMath.postfilterHooks.Add(function (data) {
+                recursiveAddCommas(data.math.root);
+            });
+
             MathJax.startup.defaultReady();
           }
        }
