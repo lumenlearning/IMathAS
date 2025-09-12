@@ -5,6 +5,7 @@ namespace OHM\Includes;
 use OHM\Models\StudentPayApiResult;
 use OHM\Models\StudentPayStatus;
 use OHM\Exceptions\StudentPaymentException;
+use OHM\Services\OptOutService;
 
 /**
  * Class StudentPayment - Determine if a student has a valid activation code for a course.
@@ -27,6 +28,7 @@ class StudentPayment
 
 	private $studentPaymentApi;
 	private $studentPaymentDb;
+    private OptOutService $optOutService;
 
 	private $studentGroupId;
 	private $courseId;
@@ -48,7 +50,8 @@ class StudentPayment
                                 ?int $courseOwnerGroupId = null,
                                 ?int $courseOwnerUserId = null,
                                 StudentPaymentApi $studentPaymentApi = null,
-                                StudentPaymentDb $studentPaymentDb = null
+                                StudentPaymentDb $studentPaymentDb = null,
+                                OptOutService $optOutService = null
     )
 	{
         $this->courseId = $courseId;
@@ -59,6 +62,8 @@ class StudentPayment
             new StudentPaymentApi($studentGroupId, $courseId, $studentUserId, $courseOwnerGroupId, $courseOwnerUserId);
         $this->studentPaymentDb = $studentPaymentDb ??
             new StudentPaymentDb($studentGroupId, $courseId, $studentUserId, $courseOwnerGroupId, $courseOwnerUserId);
+        $this->optOutService = $optOutService ??
+            new OptOutService($GLOBALS['DBH']);
 	}
 
 	/**
@@ -82,6 +87,10 @@ class StudentPayment
 	public function getCourseAndStudentPaymentInfo()
 	{
 		$studentPayStatus = new StudentPayStatus();
+
+        // Determine if the student has been opted out of assessments.
+        $optOutState = $this->optOutService->isOptedOutOfAssessments($this->studentUserId, $this->courseId);
+        $studentPayStatus->setStudentIsOptedOut($optOutState);
 
 		// Are student payments enabled at the group level?
 		$groupMayRequirePayment = $this->studentPaymentDb->getGroupRequiresStudentPayment();

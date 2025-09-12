@@ -2,6 +2,7 @@
 
 namespace OHM\Tests;
 
+use OHM\Services\OptOutService;
 use PHPUnit\Framework\TestCase;
 
 use OHM\Models\StudentPayApiResult;
@@ -26,15 +27,17 @@ final class StudentPaymentTest extends TestCase
 
 	private $studentPaymentApiMock;
 	private $studentPaymentDbMock;
+    private $optOutServiceMock;
 
 
 	function setUp(): void
 	{
 		$this->studentPaymentApiMock = $this->createMock(StudentPaymentApi::class);
 		$this->studentPaymentDbMock = $this->createMock(StudentPaymentDb::class);
+        $this->optOutServiceMock = $this->createMock(OptOutService::class);
 
 		$this->studentPayment = new StudentPayment(42, 2604, 128, 42, null,
-            $this->studentPaymentApiMock, $this->studentPaymentDbMock);
+            $this->studentPaymentApiMock, $this->studentPaymentDbMock, $this->optOutServiceMock);
 	}
 
 	/*
@@ -59,15 +62,34 @@ final class StudentPaymentTest extends TestCase
 		$this->assertFalse($studentPaymentStatus->getCourseRequiresStudentPayment());
 	}
 
-	public function testGetCourseAndStudentPaymentInfo_GroupAndCourseEnabled()
+    public function testGetCourseAndStudentPaymentInfo_GroupAndCourseEnabled()
+    {
+        $this->studentPaymentDbMock->method('getGroupRequiresStudentPayment')->willReturn(true);
+        $this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+        $this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(true);
+
+        $studentPaymentStatus = $this->studentPayment->getCourseAndStudentPaymentInfo();
+
+        $this->assertTrue($studentPaymentStatus->getStudentHasValidAccessCode());
+    }
+
+	public function testGetCourseAndStudentPaymentInfo_StudentIsOptedOut()
 	{
-		$this->studentPaymentDbMock->method('getGroupRequiresStudentPayment')->willReturn(true);
-		$this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
-		$this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(true);
+        // Mock payment API return data
+        $apiResult = new StudentPayApiResult();
+        $apiResult->setCourseRequiresStudentPayment(true);
+        $apiResult->setStudentPaymentStatus('not_paid');
+
+        // Setup mocks
+        $this->studentPaymentApiMock->method('getActivationStatusFromApi')->willReturn($apiResult);
+        $this->studentPaymentDbMock->method('getGroupRequiresStudentPayment')->willReturn(true);
+        $this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+        $this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(false);
+		$this->optOutServiceMock->method('isOptedOutOfAssessments')->willReturn(true);
 
 		$studentPaymentStatus = $this->studentPayment->getCourseAndStudentPaymentInfo();
 
-		$this->assertTrue($studentPaymentStatus->getStudentHasValidAccessCode());
+		$this->assertTrue($studentPaymentStatus->getStudentIsOptedOut());
 	}
 
 	/*

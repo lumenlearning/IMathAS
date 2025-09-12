@@ -87,15 +87,21 @@ if (isStudentPayEnabled() && !isTutor($userId, $courseId) && isValidGroupIdForSt
 		$courseRequiresPayment = $studentPayStatus->getCourseRequiresStudentPayment();
 		$studentHasAccessCode = $studentPayStatus->getStudentHasValidAccessCode();
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();
+        $studentIsOptedOut = $studentPayStatus->getStudentIsOptedOut();
 
-		if (StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
+        if ($studentIsOptedOut && !$studentHasAccessCode) {
+            // This should happen even if payments are not enabled at the group level.
+            require_once(__DIR__ . "/../../ohm/assessments/direct_or_multi_pay.php");
+        }
+
+		else if (StudentPayApiResult::ACCESS_TYPE_ACTIVATION_CODE ==
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/activation.php");
 			}
 		}
 
-		if (needsLumenComponents($paymentTypeRequired) &&
+		else if (needsLumenComponents($paymentTypeRequired) &&
 			$paymentTypeRequired && $courseRequiresPayment) {
 			if (!$studentHasAccessCode) {
 				require_once(__DIR__ . "/../../ohm/assessments/direct_or_multi_pay.php");
