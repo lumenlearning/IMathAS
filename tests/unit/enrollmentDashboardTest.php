@@ -1,8 +1,5 @@
 <?php
 
-// Load DBH global
-require_once __DIR__ . '/../../config.php';
-
 /**
  * This unit test is designed to alert any breaking changes to the database schema, 
  * from the perspective of enrollment reporting.
@@ -19,7 +16,30 @@ class EnrollmentDashboardTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->DBH = $GLOBALS['DBH'];
+        // Copied directly from /config/local.php.
+        $dbserver = getenv('DB_SERVER') ?: '127.0.0.1';
+        $dbname = getenv('DB_NAME') ?: 'ohm';
+        $dbusername = getenv('DB_USERNAME') ?: 'ohm';
+        $dbpassword = getenv('DB_PASSWORD') ?: 'ohm';
+        $dbcharset = getenv('DB_CHARSET') ?: 'latin1';
+
+        // Copied directly from /config.php.
+        try {
+            $DBH = new PDO("mysql:host=$dbserver;dbname=$dbname;charset=$dbcharset", $dbusername, $dbpassword);
+            $DBH->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch(PDOException $e) {
+            die("<p>Could not connect to database: <b>" . $e->getMessage() . "</b></p></div></body></html>");
+        }
+
+        $DBH->query("set session sql_mode=''");
+
+        unset($dbserver);
+        unset($dbname);
+        unset($dbusername);
+        unset($dbpassword);
+        unset($dbcharset);
+
+        $this->DBH = $DBH;
 
         try {
             $this->DBH->beginTransaction();
