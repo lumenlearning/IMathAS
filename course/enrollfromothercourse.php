@@ -30,6 +30,21 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			}
 		}
 		if (count($todo)>0) {
+			// check students are actually in teacher's course
+			$todolist = implode(',', $todo);
+			$stm = $DBH->prepare("SELECT DISTINCT istu.userid FROM imas_students AS istu JOIN 
+				imas_teachers AS it ON istu.courseid=it.courseid WHERE
+				it.userid=? AND istu.userid IN ($todolist)");
+			$stm->execute([$userid]);
+			$todo = [];
+			while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+				$todo[] = intval($row[0]);
+			}
+			if (count($todo)==0) {
+				echo 'No valid students';
+				exit;
+			}
+			//check they're not already enrolled
 			$todolist = implode(',', $todo);
 			$dontdo = array();
 			$stm = $DBH->prepare("SELECT userid FROM imas_students WHERE courseid=:courseid AND userid IN ($todolist)");
