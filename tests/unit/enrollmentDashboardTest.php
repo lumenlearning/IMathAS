@@ -17,11 +17,11 @@ class EnrollmentDashboardTest extends TestCase
     protected function setUp(): void
     {
         // Copied directly from /config/local.php.
-        $dbserver = getenv('DB_SERVER') ?: '127.0.0.1';
-        $dbname = getenv('DB_NAME') ?: 'ohm';
-        $dbusername = getenv('DB_USERNAME') ?: 'ohm';
-        $dbpassword = getenv('DB_PASSWORD') ?: 'ohm';
-        $dbcharset = getenv('DB_CHARSET') ?: 'latin1';
+        $dbserver = '127.0.0.1';
+        $dbname = 'myopenmathdb';
+        $dbusername = 'root';
+        $dbpassword = '';
+        $dbcharset = 'latin1';
 
         // Copied directly from /config.php.
         try {
