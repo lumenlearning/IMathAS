@@ -5,6 +5,9 @@
 //(c) 2006 David Lippman
 
 /*** master php includes *******/
+
+use OHM\Services\OptOutService;
+
 require_once "../init.php";
 
 
@@ -274,6 +277,25 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			} else {
 				$msgout = '<p>Username, name, email, and password left unchanged.</p>';
 			}
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            $optOutService = new OptOutService($GLOBALS['DBH']);
+            $currentOptOutState = $optOutService->isOptedOutOfAssessments($_GET['uid'], $cid);
+
+            $newOptOutState = isset($_POST['opted_out']) ? 1 : 0;
+            if ($newOptOutState != $currentOptOutState) {
+                $optOutService->setStudentOptedOut($_GET['uid'], $cid, $newOptOutState);
+                $optOutChange = $newOptOutState ? 'OUT of' : 'IN to';
+                $msgout = sprintf('<p>Student has been opted %s assessments.</p>', $optOutChange);
+            }
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 			$code = $_POST['code'];
 			$section = $_POST['section'];
 			if (trim($_POST['section'])==='') {
@@ -343,7 +365,20 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 			//header('Location: ' . $urlmode  . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . "/listusers.php?cid=$cid");
 			exit;
 		} else {
-			$query = "SELECT imas_users.*,imas_students.code,imas_students.section,imas_students.locked,imas_students.timelimitmult,imas_students.hidefromcourselist,imas_students.latepass FROM imas_users,imas_students ";
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #### Begin OHM-specific changes ############################################################
+            #
+            # The OHM-specific change: Added imas_students.is_opted_out_assessments to the SELECT clause.
+            #
+            $query = "SELECT imas_users.*,imas_students.is_opted_out_assessments,imas_students.code,imas_students.section,imas_students.locked,imas_students.timelimitmult,imas_students.hidefromcourselist,imas_students.latepass FROM imas_users,imas_students ";
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
+            #### End OHM-specific changes ############################################################
 			$query .= "WHERE imas_users.id=imas_students.userid AND imas_users.id=:id AND imas_students.courseid=:courseid";
 			$stm = $DBH->prepare($query);
 			$stm->execute(array(':id'=>$_GET['uid'], ':courseid'=>$cid));
@@ -637,6 +672,10 @@ if ($overwriteBody==1) {
 			<span class=formright><input type="number" min="0" name="latepasses" value="<?php echo Sanitize::encodeStringForDisplay($lineStudent['latepass']); ?>"/></span><br class=form>
 			<span class=form>Lock out of course?</span>
 			<span class=formright><input type="checkbox" name="locked" value="1" <?php if ($lineStudent['locked']>0) {echo ' checked="checked" ';} ?>/></span><br class=form>
+    <?php #### Begin OHM-specific changes ############################################################ ?>
+            <span class=form>Opt out of assessments?</span>
+            <span class=formright><input type="checkbox" name="opted_out" value="1" <?php if ($lineStudent['is_opted_out_assessments']>0) {echo ' checked="checked" ';} ?>/></span><br class=form>
+    <?php #### End OHM-specific changes ############################################################ ?>
 			<span class="form">Student has course hidden from course list?</span>
 			<span class="formright"><input type="checkbox" name="hidefromcourselist" value="1" <?php if ($lineStudent['hidefromcourselist']>0) {echo ' checked="checked" ';} ?>/></span><br class=form>
 			<span class=form><label for="doresetpw">Reset password?</label></span>

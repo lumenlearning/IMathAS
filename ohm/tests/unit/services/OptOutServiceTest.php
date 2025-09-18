@@ -138,7 +138,7 @@ final class OptOutServiceTest extends TestCase
 
         // Call the method under test.
         $result = $this->invokePrivateMethod($this->optOutService,
-            'setStudentOptedOut', array(42, true));
+            'setStudentOptedOut', array(1234, 42, true));
 
         $this->assertTrue($result['optOutStateIsUpdated']);
         $this->assertEmpty($result['errors']);
@@ -158,7 +158,53 @@ final class OptOutServiceTest extends TestCase
 
         // Call the method under test.
         $result = $this->invokePrivateMethod($this->optOutService,
-            'setStudentOptedOut', array(42, true));
+            'setStudentOptedOut', array(1234, 42, true));
+
+        $this->assertFalse($result['optOutStateIsUpdated']);
+        $this->assertCount(1, $result['errors']);
+        $this->assertEquals('Enrollment record not found for user ID 1234 and course ID 42.',
+            $result['errors'][0]);
+    }
+
+    /*
+     * setStudentOptedOutByEnrollmentId
+     */
+
+    function testSetStudentOptedOutByEnrollmentId_EnrollmentFound(): void
+    {
+        // The method under test executes an UPDATE statement
+        // and checks the affected row count for success.
+        $pdoStatement = $this->createMock(PDOStatement::class);
+        $pdoStatement->expects($this->once())
+            ->method('rowCount')->willReturn(1);
+        $pdoStatement->expects($this->once())
+            ->method('execute')->willReturn(true);
+        $this->dbh->expects($this->once())
+            ->method('prepare')->willReturn($pdoStatement);
+
+        // Call the method under test.
+        $result = $this->invokePrivateMethod($this->optOutService,
+            'setStudentOptedOutByEnrollmentId', array(42, true));
+
+        $this->assertTrue($result['optOutStateIsUpdated']);
+        $this->assertEmpty($result['errors']);
+    }
+
+    function testSetStudentOptedOutByEnrollmentId_EnrollmentNotFound(): void
+    {
+        // The method under test executes an UPDATE statement
+        // and checks the affected row count for success.
+        $pdoStatement = $this->createMock(PDOStatement::class);
+        $pdoStatement->expects($this->once())
+            ->method('rowCount')->willReturn(0);
+        $pdoStatement->expects($this->once())
+            ->method('execute')->willReturn(true);
+        $this->dbh->expects($this->once())
+            ->method('prepare')->willReturn($pdoStatement);
+
+        // Call the method under test.
+        $result = $this->invokePrivateMethod($this->optOutService,
+            'setStudentOptedOutByEnrollmentId', array(42, true));
 
         $this->assertFalse($result['optOutStateIsUpdated']);
         $this->assertCount(1, $result['errors']);

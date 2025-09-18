@@ -142,7 +142,7 @@ class OptOutService
             }
 
             // Opt the student out of assessments.
-            $optOutUpdated = $this->setStudentOptedOut($currentOptOutState['enrollmentId'], true);
+            $optOutUpdated = $this->setStudentOptedOutByEnrollmentId($currentOptOutState['enrollmentId'], true);
             if ($optOutUpdated['optOutStateIsUpdated']) {
                 $enrollmentId = $currentOptOutState['enrollmentId'];
                 $newCsvRow = array_merge($csvline, [$enrollmentId]);
@@ -179,6 +179,46 @@ class OptOutService
     }
 
     /**
+     * Set a students's assessment opt out status by their user and course IDs.
+     *
+     * @param int $userId The student's user ID.
+     * @param int $courseId The student's course ID.
+     * @param bool $newOptedOutState The new opt out state.
+     * @return array An associative array with a change result, if any, or an error message.
+     *               Example: [
+     *                   "optOutStateIsUpdated": false,
+     *                   "errors": [
+     *                       "Enrollment record not found for enrollment ID: 42"
+     *                   ]
+     *               ]
+     */
+    public function setStudentOptedOut(int $userId, int $courseId, bool $newOptedOutState): array
+    {
+        $query = 'UPDATE imas_students SET is_opted_out_assessments = :optedOut
+                  WHERE userid = :userId AND courseid = :courseId';
+        $stm = $this->DBH->prepare($query);
+        $stm->execute([
+            ':userId' => $userId,
+            ':courseId' => $courseId,
+            ':optedOut' => $newOptedOutState,
+        ]);
+
+        if (1 === $stm->rowCount()) {
+            return [
+                'optOutStateIsUpdated' => true,
+                'errors' => [],
+            ];
+        } else {
+            return [
+                'optOutStateIsUpdated' => false,
+                'errors' => [
+                    sprintf('Enrollment record not found for user ID %d and course ID %d.', $userId, $courseId),
+                ],
+            ];
+        }
+    }
+
+    /**
      * Update a student's assessment opt out status.
      *
      * This will enable or disable a student's access to course assesments.
@@ -195,7 +235,7 @@ class OptOutService
      *                   ]
      *               ]
      */
-    private function setStudentOptedOut(int $enrollmentId, bool $newOptedOutState): array
+    private function setStudentOptedOutByEnrollmentId(int $enrollmentId, bool $newOptedOutState): array
     {
         $query = 'UPDATE imas_students SET is_opted_out_assessments = :optedOut WHERE id = :enrollmentId';
         $stm = $this->DBH->prepare($query);
