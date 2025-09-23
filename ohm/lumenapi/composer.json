@@ -36,9 +36,6 @@
     "prefer-stable": true,
     "scripts": {
         "swagger": "php artisan swagger-lume:generate",
-        "test": [
-            "phpunit --exclude-group noshuffle_all",
-            "NOSHUFFLE_ANSWERS=all phpunit --group noshuffle_all"
-        ]
+        "test": "phpunit"
     }
 }

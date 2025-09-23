@@ -1,0 +1,89 @@
+#add-course-container {
+  max-width: 854px;
+}
+
+#add-course-container a {
+  color: #0a65e3;
+}
+
+#add-course-container li,
+#add-course-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#lumen-template-choice-container {
+  background-color: #d1e4fd;
+  padding: 20px;
+  border-radius: 6px;
+  display: flex;
+  flex-flow: column;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.choice-container h2,
+.choice-container h3,
+.choice-container h4 {
+  margin: 0;
+}
+
+.choice-container__button {
+  background-color: #4574c5;
+  border-radius: 6px;
+  border-color: #d0d0d0;
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+  margin: 0;
+}
+
+#copy-course-choice-container {
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 6px;
+  display: flex;
+  flex-flow: column;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+#continuebutton {
+  margin-top: 10px;
+}
+
+#advanced-options-container-expanded,
+.advanced-options-content-wrapper {
+  display: flex;
+  flex-flow: column;
+  gap: 10px;
+}
+
+#advanced-options-container,
+#advanced-options-container-expanded {
+  margin-top: 20px;
+  gap: 20px;
+  transition: transform 0.3s ease;
+}
+
+.hide {
+  display: none !important;
+}
+
+.open .open-close-caret {
+  transform: rotate(180deg);
+}
+
+.collapsible-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.collapsible-item .open-close-caret {
+  display: flex;
+  transition: transform 0.3s ease;
+}

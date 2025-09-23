@@ -303,7 +303,7 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
     ];
 
     const imas_QuestionSet_dbRow_multans_basicfeedback = [
-        'id' => '3623',
+        'id' => '7321',
         'uniqueid' => '1670955967303564',
         'adddate' => '1670955967',
         'lastmoddate' => '1671133493',
@@ -315,35 +315,14 @@ $feedback = getfeedbacktxt($stuanswers[$thisq], $feedbacktxt, $answer)',
         'qtype' => 'multans',
         'control' => 'loadlibrary("ohm_macros")
 
-$a = "0 - How tall is the tallest mountain in the United States?"
-$b = "1 - Do standing heart rates tend to be higher than sitting heartrates?"
-$c = "2 - What is the sum of all the whole numbers between 0 and 10?"
-$d = "3 - What is your favorite subject in school?"
-$e = "4 - What proportion of college students live on campus?"
-$f = "5 - How many members does your household have (including pets)?"
+$questions = array("NH<sub>4</sub>OH","KOH","Al(OH)<sub>3</sub>","AgOH","All of these","None of these")
 
-$questions = array($a,$b,$c,$d,$e,$f)
-$answers = "1,4"
+$answers = "2,3"
 
-$hints[1] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
-
-$feedback = ohm_getfeedbackbasic($stuanswers[$thisq], "Excellent! You are able to distinguish the statstical investigative questions from the rest.", "A statistical investigative question would require data collection and analysis. Does the question account for variability?  Questions with a single mathematical answer are not considered statistical investigative questions.", $answers)
-
-// As of AST-275, using ohm_getfeedbackbasic or feedbacktxt in a multans
-// type question requires shuffling to be disabled.
-$noshuffle = "all"
-
-$hinttext[0] = "Remember that all statistical investigative questions anticipate variability and could lead to data collection and analysis."
-
-$hinttext_a=forminlinebutton("Hint",$hinttext[0])
+$feedback = ohm_getfeedbackbasic($stuanswers[$thisq], "Correct!", "Incorrect.", $answers)
 ',
         'qcontrol' => '',
-        'qtext' => 'Which of the following are statistical investigative questions? <em>There may be more than one correct answer.</em>
-<p>$hinttext_a
-  $answerbox
-  $feedback
-  $hintloc
-',
+        'qtext' => '<p>Consider the following compounds. Which is/are insoluble? Select all that apply. $answerbox</p>',
         'answer' => '',
         'solution' => '',
         'extref' => '',
@@ -366,5 +345,54 @@ $hinttext_a=forminlinebutton("Hint",$hinttext[0])
         'varscore' => '0',
         'external_id' => NULL,
         'isrand' => '0',
+    ];
+
+    const imas_QuestionSet_dbRow_matching_single_part = [
+        'id' => '1610',
+        'uniqueid' => '1417541752232996',
+        'adddate' => '1494366089',
+        'lastmoddate' => '1494366089',
+        'ownerid' => '1',
+        'author' => 'Kulinsky,Carla',
+        'userights' => '3',
+        'license' => '1',
+        'description' => 'Matching Vocabulary Question for radicals - Carla Kulinsky',
+        'qtype' => 'matching',
+        'control' => '$a, $b, $c = diffrands(2,9,3)
+$questions = array("Index", "Radicand", "Principal Root", "Extraneous", "Hypotenuse", "Radical")
+$answers = array(
+  "indicates root of the radical",
+  "term underneath the radical sign",
+  "positive root",
+  "answer that doesn\'t work",
+  "side opposite the right angle",
+  "expression that uses a root",
+  "conjugate",
+  "one of two sides that form a right angle"
+)',
+        'qcontrol' => '',
+        'qtext' => 'Match each of the following with the definition or description it demonstrates.',
+        'answer' => '',
+        'solution' => '',
+        'extref' => '',
+        'hasimg' => '0',
+        'deleted' => '0',
+        'avgtime' => '0',
+        'ancestors' => '',
+        'ancestorauthors' => 'Kulinsky,Carla; Johns,Bryan',
+        'otherattribution' => '',
+        'importuid' => '',
+        'replaceby' => '0',
+        'broken' => '0',
+        'solutionopts' => '0',
+        'sourceinstall' => '',
+        'meantimen' => '0',
+        'meantime' => '0',
+        'vartime' => '0',
+        'meanscoren' => '0',
+        'meanscore' => '0',
+        'varscore' => '1111',
+        'external_id' => NULL,
+        'isrand' => '1',
     ];
 }

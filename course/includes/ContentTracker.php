@@ -62,7 +62,7 @@ class ContentTracker
     ): array
     {
         return ContentTracker::countUniqueUsersByGroup($types, self::STUDENTS,
-            $startTimestamp, $endTimestamp, false, $groupId, $dbh);
+            $startTimestamp, $endTimestamp, $ltiOnly, $groupId, $dbh);
     }
 
     /**
@@ -87,7 +87,7 @@ class ContentTracker
     ): array
     {
         return ContentTracker::countUniqueUsersByGroup($types, self::TEACHERS,
-            $startTimestamp, $endTimestamp, false, $groupId, $dbh);
+            $startTimestamp, $endTimestamp, $ltiOnly, $groupId, $dbh);
     }
 
     /**
@@ -123,7 +123,9 @@ class ContentTracker
                 COUNT(DISTINCT su.id) AS user_count,
                 tg.id AS group_id
             FROM imas_users AS su
-                JOIN imas_content_track AS ct ON ct.userid = su.id
+                JOIN imas_content_track AS ct
+                    FORCE INDEX (viewtime) -- Full table scans for ct.viewtime without this!
+                    ON ct.userid = su.id
                 JOIN imas_courses AS c ON c.id = ct.courseid
                 JOIN imas_users AS tu ON tu.id = c.ownerid
                 JOIN imas_groups AS tg ON tg.id = tu.groupid
@@ -178,6 +180,7 @@ class ContentTracker
             FROM (
                 SELECT userid
                 FROM imas_content_track AS ct
+                        FORCE INDEX (viewtime) -- Full table scans for ct.viewtime without this!
                     JOIN imas_users AS u ON u.id = ct.userid
                 WHERE
                     ct.type IN ($typeList)

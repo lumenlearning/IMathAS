@@ -101,6 +101,22 @@ class MatchingAnswerBox implements AnswerBox, AnswerBoxOhmExtensions
         }
         if ($noshuffle == "questions" || $noshuffle == 'all') {
             $randqkeys = array_keys($questions);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        } else if (
+            isset($GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+            && is_array($GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+            && !in_array('matching', $GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+        ) {
+            $randqkeys = array_keys($questions);
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
         } else {
             $randqkeys = (array) $RND->array_rand($questions, count($questions));
             $RND->shuffle($randqkeys);

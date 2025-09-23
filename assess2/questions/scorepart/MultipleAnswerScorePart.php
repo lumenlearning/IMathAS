@@ -53,6 +53,22 @@ class MultipleAnswerScorePart implements ScorePart
             array_push($randqkeys,count($questions)-1);
         } else if ($noshuffle == "all" || count($questions)==1) {
             $randqkeys = array_keys($questions);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        } else if (
+            isset($GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+            && is_array($GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+            && !in_array('multans', $GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+        ) {
+            $randqkeys = array_keys($questions);
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
         } else if (strlen($noshuffle)>4 && substr($noshuffle,0,4)=="last") {
             $n = intval(substr($noshuffle,4));
             if ($n>count($questions)) {

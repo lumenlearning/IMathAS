@@ -177,9 +177,7 @@ class QuestionGenerator
      */
     private function setMetricsMetadata(): void
     {
-        if (extension_loaded('newrelic')) {
-            newrelic_add_custom_parameter('cur_qsid', $this->questionParams->getDbQuestionSetId());
-        }
+        /* Currently, there are no runtime metadata services */
     }
 
     /**

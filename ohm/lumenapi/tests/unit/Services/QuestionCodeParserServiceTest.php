@@ -142,7 +142,7 @@ class QuestionCodeParserServiceTest extends TestCase
         $this->assertTrue($isAlgorithmic);
     }
 
-    public function testIsAlgorithmic_withRandomStringFunction_returnsTrue(): void {
+    public function testIsAlgorithmic_withRandomStringFunction_returnsFalse(): void {
         $code = '
             $name = randname()
             $answer = "Hello, " . $name
@@ -151,7 +151,7 @@ class QuestionCodeParserServiceTest extends TestCase
         $questionCodeParserService = new QuestionCodeParserService($code);
         $isAlgorithmic = $questionCodeParserService->isAlgorithmic();
 
-        $this->assertTrue($isAlgorithmic);
+        $this->assertFalse($isAlgorithmic);
     }
 
     public function testIsAlgorithmic_withNoRandomFunctions_returnsFalse(): void {

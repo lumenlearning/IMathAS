@@ -70,8 +70,8 @@ class QuestionCodeParserService extends BaseService implements QuestionCodeParse
             // Check if the function is in any of the randomness-generating function lists
             if (in_array($functionName, $this::RANDOM_NUMBER_FUNCTIONS) ||
                 in_array($functionName, $this::RANDOM_SELECT_FUNCTIONS) ||
-                in_array($functionName, $this::RANDOM_SHUFFLE_FUNCTIONS) ||
-                in_array($functionName, $this::RANDOM_STRING_FUNCTIONS)) {
+                in_array($functionName, $this::RANDOM_SHUFFLE_FUNCTIONS)) {
+                // RANDOM_STRING_FUNCTIONS excluded because they don't change the intention of the question
                 return true;
             }
         }

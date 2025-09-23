@@ -96,6 +96,22 @@ class MultipleAnswerAnswerBox implements AnswerBox, AnswerBoxOhmExtensions
             array_push($randkeys, count($questions) - 1);
         } else if ($noshuffle == "all" || count($questions) == 1) {
             $randkeys = array_keys($questions);
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        #### Begin OHM-specific changes ############################################################
+        } else if (
+            isset($GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+            && is_array($GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+            && !in_array('multans', $GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'])
+        ) {
+            $randkeys = array_keys($questions);
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
+        #### End OHM-specific changes ############################################################
         } else if (strlen($noshuffle) > 4 && substr($noshuffle, 0, 4) == "last") {
             $n = intval(substr($noshuffle, 4));
             if ($n > count($questions)) {
