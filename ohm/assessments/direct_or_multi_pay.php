@@ -92,13 +92,16 @@ function displayPaymentPage()
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.min.js"></script>
     <script src="<?php echo $GLOBALS['student_pay_api']['direct_pay_component_url']; ?>"></script>
     <script>
-	<?php
-      if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY) {
-	?> directPayComponents.renderDirectPayLandingPage('paymentComponent', { <?php
-      } else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_MULTI_PAY) {
-	?> directPayComponents.renderMultiPayPage('paymentComponent', { <?php
-	  }
-	?>
+	<?php if ($GLOBALS['studentPayStatus']->getStudentIsOptedOut()) { ?>
+      directPayComponents.renderMultiPayPage('paymentComponent', {
+        'allowTrial': false,
+    <?php } else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_DIRECT_PAY) { ?>
+	  directPayComponents.renderDirectPayLandingPage('paymentComponent', {
+        'allowTrial': true,
+    <?php } else if ($GLOBALS['paymentType'] == StudentPayApiResult::ACCESS_TYPE_MULTI_PAY) { ?>
+	  directPayComponents.renderMultiPayPage('paymentComponent', {
+        'allowTrial': true,
+	<?php } ?>
         'stripeKey': '<?php echo $GLOBALS['apiKey']; ?>',
         'courseTitle': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['courseName']); ?>',
         'studentName': '<?php echo Sanitize::encodeStringForJavascript($GLOBALS['userfullname']) ?>',

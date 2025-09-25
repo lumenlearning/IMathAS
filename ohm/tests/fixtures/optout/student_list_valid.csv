@@ -1,0 +1,4 @@
+group_id,course_id,student_first_name,student_last_name,student_email
+1,66,"STuDeNT","oNe","student.one@lumenlearning.com"
+1,66,"STuDeNT","TWo",""
+1,66,"Student","NotEnrolled","slacker@example.com"

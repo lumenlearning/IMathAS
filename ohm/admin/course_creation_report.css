@@ -1,0 +1,36 @@
+input#includeEnrollmentCounts {
+    display: inline-block;
+}
+
+label#includeEnrollmentCountsLabel {
+    display: inline-block;
+    vertical-align: top;
+}
+
+div.boringInlineBorder {
+    display: inline-block;
+    border: 1px solid black;
+    border-radius: 0.5em;
+    padding-right: 2em;
+}
+
+span#specifiedDateRange {
+    background-color: #171717;
+    color: #22ff00;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+span.outsideDateRange {
+    background-color: #ff8000;
+    color: #000000;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+}
+
+span.insideDateRange {
+    background-color: #37ff00;
+    color: #000000;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+}

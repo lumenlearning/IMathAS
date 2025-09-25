@@ -90,7 +90,7 @@ $CFG['GEN']['noimathasimportfornonadmins'] = true;
 
 // Override question answer shuffling.
 // This setting also exists in OHM's question API: ohm/lumenapi/config/ohm.php
-$GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'] = ['choices', 'multans'];
+$GLOBALS['ONLY_SHUFFLE_QUESTION_TYPES'] = ['choices', 'multans', 'matching'];
 
 //can set almost any assessment setting this way
 $CFG['AMS']['defpoints'] = 1;

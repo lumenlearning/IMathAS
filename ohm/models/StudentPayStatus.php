@@ -17,6 +17,7 @@ class StudentPayStatus
 	private $studentHasValidAccessCode; // boolean
 	private $studentIsInTrial; // boolean
 	private $studentTrialTimeRemainingSeconds; // integer
+    private bool $studentIsOptedOut = false; // imas_students.is_opted_out_assessments
 	private $studentPaymentRawStatus; // string
 	private $courseDirectPayAmountInCents; // integer
 	private $schoolLogoUrl; // string
@@ -191,4 +192,21 @@ class StudentPayStatus
 		$this->userMessage = $userMessage;
 	}
 
+    /**
+     * @return bool True if the student is opted out of assessments. False if not.
+     */
+    public function getStudentIsOptedOut(): bool
+    {
+        return $this->studentIsOptedOut;
+    }
+
+    /**
+     * @param bool $studentIsOptedOut True if the student is opted out of assessments. False if not.
+     * @return StudentPayStatus $this
+     */
+    public function setStudentIsOptedOut(bool $studentIsOptedOut): StudentPayStatus
+    {
+        $this->studentIsOptedOut = $studentIsOptedOut;
+        return $this;
+    }
 }
