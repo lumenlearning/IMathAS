@@ -73,6 +73,13 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 	} else if (isset($_POST['sourcecourse'])) {
 		//know source course
 		$source = intval($_POST['sourcecourse']);
+		$stm = $DBH->prepare("SELECT id FROM imas_teachers WHERE courseid=? AND userid=?");
+		$stm->execute([$source, $userid]);
+		$check = $stm->fetchColumn(0);
+		if ($check === false) {
+			echo 'Error - invalid course';
+			exit;
+		}
 		$resultStudentList = $DBH->prepare("SELECT iu.FirstName,iu.LastName,iu.id FROM imas_users AS iu JOIN imas_students ON iu.id=imas_students.userid WHERE imas_students.courseid=:courseid ORDER BY iu.LastName,iu.FirstName");
 		$resultStudentList->execute(array(':courseid'=>$source));
 

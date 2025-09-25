@@ -42,7 +42,7 @@ $hasInclude = 0;
 $istutor = isset($tutorid);
 $isteacher = isset($teacherid);
 if (!isset($CFG['GEN']['allowinstraddstus'])) {
-	$CFG['GEN']['allowinstraddstus'] = true;
+	$CFG['GEN']['allowinstraddstus'] = false;
 }
 if (!isset($CFG['GEN']['allowinstraddtutors'])) {
 	$CFG['GEN']['allowinstraddtutors'] = true;
@@ -223,8 +223,23 @@ if (!isset($teacherid)) { // loaded by a NON-teacher
 
 		if (isset($_POST['timelimitmult'])) {
 			$msgout = '';
-			if (isset($_POST['SID'])) {
-				if (checkFormatAgainstRegex($_POST['SID'], $loginformat)) {
+			$stm = $DBH->prepare("SELECT iu.* FROM imas_users AS iu JOIN imas_students AS istu ON istu.userid=iu.id WHERE istu.courseid=? AND istu.userid=?");
+			$stm->execute([$cid, $_GET['uid']]);
+			$olddata = $stm->fetch(PDO::FETCH_ASSOC);
+			if ($olddata === false) {
+				echo 'Invalid userid';
+				exit;
+			}
+			$jsondata = json_decode($olddata['jsondata'], true);
+			if (!is_array($jsondata)) {
+				$jsondata = [];
+			}
+			$chglog = [];
+			if ($olddata['rights'] < $myrights && isset($_POST['SID']) && (
+				$_POST['SID'] != $olddata['SID'] || $_POST['firstname'] != $olddata['FirstName'] || $_POST['lastname'] != $olddata['LastName'] ||
+				$_POST['email'] != $olddata['email'] || isset($_POST['doresetpw'])
+			)) {
+				if (checkFormatAgainstRegex($_POST['SID'], $loginformat) && $_POST['SID'] != $olddata['SID']) {
 					$un = $_POST['SID'];
 					$updateusername = true;
 				} else {
