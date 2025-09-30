@@ -89,7 +89,7 @@ if (isStudentPayEnabled() && !isTutor($userId, $courseId) && isValidGroupIdForSt
 		$paymentTypeRequired = $studentPayStatus->getStudentPaymentTypeRequired();
         $studentIsOptedOut = $studentPayStatus->getStudentIsOptedOut();
 
-        if ($studentIsOptedOut && !$studentHasAccessCode) {
+        if (!$studentHasAccessCode && $studentIsOptedOut) {
             // This should happen even if payments are not enabled at the group level.
             require_once(__DIR__ . "/../../ohm/assessments/direct_or_multi_pay.php");
         }
