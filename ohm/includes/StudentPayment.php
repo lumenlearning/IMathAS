@@ -88,10 +88,6 @@ class StudentPayment
 	{
 		$studentPayStatus = new StudentPayStatus();
 
-        // Determine if the student has been opted out of assessments.
-        $optOutState = $this->optOutService->isOptedOutOfAssessments($this->studentUserId, $this->courseId);
-        $studentPayStatus->setStudentIsOptedOut($optOutState);
-
 		// Are student payments enabled at the group level?
 		$groupMayRequirePayment = $this->studentPaymentDb->getGroupRequiresStudentPayment();
 		if (!$groupMayRequirePayment) {
@@ -107,6 +103,16 @@ class StudentPayment
 
 		// Get the student's "has an activation code" status and return it.
 		$studentPayStatus = $this->getStudentPayStatusCacheFirst($studentPayStatus);
+
+        // Determine if the student has been opted out of assessments.
+        // If the student has paid or provided an access code, we opt them back in here.
+        $isOptedOut = $this->optOutService->isOptedOutOfAssessments($this->studentUserId, $this->courseId);
+        if ($isOptedOut && $studentPayStatus->getStudentHasValidAccessCode()) {
+            $this->optOutService->setStudentOptedOut($this->studentUserId, $this->courseId, false);
+            $isOptedOut = false;
+        }
+        $studentPayStatus->setStudentIsOptedOut($isOptedOut);
+
 		return $studentPayStatus;
 	}
 
@@ -258,6 +264,7 @@ class StudentPayment
 		if (StudentPayApiResult::ACTIVATION_SUCCESS == $studentPayApiResult->getStudentPaymentStatus()) {
 			$this->studentPaymentDb->setStudentHasActivationCode(true);
 			$studentPayStatus->setStudentHasValidAccessCode(true);
+            $this->optOutService->setStudentOptedOut($this->studentUserId, $this->courseId, false);
 		}
 
 		return $studentPayStatus;

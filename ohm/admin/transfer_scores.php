@@ -384,11 +384,16 @@ function generateGradeUpdateSql(int $courseId, int $sourceStudentUid, int $targe
      * Update payment status.
      */
 
-    $generatedSql[] = "\n-- Update payment status.\n";
+    $generatedSql[] = "\n-- Update payment and opt-out status.\n";
 
     $sql = sprintf('UPDATE imas_students
-        SET has_valid_access_code = %d WHERE userid = %d AND courseid = %d;',
-        $oldEnrollment['has_valid_access_code'], $targetStudentUid, $courseId);
+        SET has_valid_access_code = %d,
+            is_opted_out_assessments = %d
+        WHERE userid = %d AND courseid = %d;',
+            $oldEnrollment['has_valid_access_code'],
+            $oldEnrollment['is_opted_out_assessments'],
+            $targetStudentUid, $courseId
+    );
 
     // Strip whitespace.
     $sql = str_replace(PHP_EOL, '', $sql);
@@ -471,7 +476,7 @@ function generateGradeUpdateSql(int $courseId, int $sourceStudentUid, int $targe
  */
 function getEnrollment(int $userId, int $courseId): array
 {
-    $query = 'SELECT id, has_valid_access_code
+    $query = 'SELECT id, has_valid_access_code, is_opted_out_assessments
         FROM imas_students WHERE userid = :userId AND courseid = :courseId';
     $stm = $GLOBALS['DBH']->prepare($query);
     $stm->execute([
