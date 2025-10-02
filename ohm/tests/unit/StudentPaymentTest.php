@@ -92,6 +92,25 @@ final class StudentPaymentTest extends TestCase
 		$this->assertTrue($studentPaymentStatus->getStudentIsOptedOut());
 	}
 
+    public function testGetCourseAndStudentPaymentInfo_StudentPaid_And_IsOptedOut()
+    {
+        // Mock payment API return data
+        $apiResult = new StudentPayApiResult();
+        $apiResult->setCourseRequiresStudentPayment(true);
+        $apiResult->setStudentPaymentStatus('paid');
+
+        // Setup mocks
+        $this->studentPaymentApiMock->method('getActivationStatusFromApi')->willReturn($apiResult);
+        $this->studentPaymentDbMock->method('getGroupRequiresStudentPayment')->willReturn(true);
+        $this->studentPaymentDbMock->method('getCourseRequiresStudentPayment')->willReturn(true);
+        $this->studentPaymentDbMock->method('getStudentHasActivationCode')->willReturn(true);
+        $this->optOutServiceMock->method('isOptedOutOfAssessments')->willReturn(true);
+
+        $studentPaymentStatus = $this->studentPayment->getCourseAndStudentPaymentInfo();
+
+        $this->assertFalse($studentPaymentStatus->getStudentIsOptedOut());
+    }
+
 	/*
 	 * getCoursePayStatusFromDatabase
 	 */

@@ -142,8 +142,12 @@ if (!empty($CFG['GEN']['uselocaljs'])) {
 } else {
     $placeinhead .= '<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.31/vue.global.prod.min.js" integrity="sha512-Dg9zup8nHc50WBBvFpkEyU0H8QRVZTkiJa/U1a5Pdwf9XdbJj+hZjshorMtLKIg642bh/kb0+EvznGUwq9lQqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>';
 }
-$placeinhead .= '<script src="'.$imasroot.'/javascript/'.$CFG['coursebrowser'].'"></script>
-	<link rel="stylesheet" href="coursebrowser.css?v=072018" type="text/css" />';
+$placeinhead .= '<script src="'.$imasroot.'/javascript/'.$CFG['coursebrowser'].'"></script>';
+if (getenv('ALLOW_NEW_OHM_COURSE_CREATION') === 'true') {
+	$placeinhead .= '<link rel="stylesheet" href="coursebrowser-new.css?v=092925" type="text/css" />';
+} else {
+	$placeinhead .= '<link rel="stylesheet" href="coursebrowser.css?v=092925" type="text/css" />';
+}
 
 $pagetitle = _('Course Browser');
 require_once "../header.php";
@@ -151,11 +155,11 @@ require_once "../header.php";
 if (!isset($_GET['embedded'])) {
   $curBreadcrumb = $breadcrumbbase . _('Course Browser');
   echo '<div class=breadcrumb>'.$curBreadcrumb.'</div>';
-  echo '<div id="headercoursebrowser" class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
+	echo '<div id="headercoursebrowser" class="pagetitle"><h1>'.$pagetitle.'</h1></div>';
 }
 ?>
-
 <div id="app" v-cloak>
+<?php if (getenv('ALLOW_NEW_OHM_COURSE_CREATION') === 'true') { ?>
 	<div class="course-template-message">
 		<div v-if="filterType === 1 || (Array.isArray(filterType) && filterType.includes(1))" class="filter-message">
 				<h1>Lumen Course Templates</h1>
@@ -183,7 +187,19 @@ if (!isset($_GET['embedded'])) {
 				<p><strong>They are not supported by Lumen and should only be used at your own risk.</strong></p>
 			</div>
 	</div>
-
+<?php } else { ?>
+<div <?php if (isset($_GET['embedded'])) {echo 'id="fixedfilters"';}?>>
+<div id="courseTypeTabs" v-if="useTabs">
+	<ul>
+		<li v-for="type in activeCourseTypes"
+			@click="activeTab=type"
+			:class="{'active': activeTab==type}">
+			{{courseBrowserProps.meta.courseTypeTabs[type]}}
+		</li>
+	<ul>
+</div>
+<?php } ?>
+<?php if (getenv('ALLOW_NEW_OHM_COURSE_CREATION') === 'true') { ?>
 	<div class="course-template-filters">
 		<div id="filters">
 			<span v-for="propname in propsToFilter.filter(p => p === 'level')" class="dropdown-wrap">
@@ -204,10 +220,38 @@ if (!isset($_GET['embedded'])) {
 			<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
 		</div>
 	</div>
-
-	<div style="position: relative" id="card-deck-wrap">
+<?php } else { ?>
+<div id="filters">
+	Filter results:
+	<span v-for="propname in propsToFilter" class="dropdown-wrap">
+		<button @click="showFilter = (showFilter==propname)?'':propname">
+			{{ courseBrowserProps[propname].name }} {{ catprops[propname].length > 0 ? '('+catprops[propname].length+')': '' }}
+			<span class="arrow-down2" :class="{rotated: showFilter==propname}"></span>
+		</button>
+		<transition name="fade" @enter="adjustpos">
+			<ul v-if="showFilter == propname" class="filterwrap">
+				<li v-if="courseBrowserProps[propname].hasall">
+					<span>Show courses that contain <i>all</i> of:</span>
+				</li>
+				<li v-if="!courseBrowserProps[propname].hasall">
+					<span>Show courses that contain <i>any</i> of:</span>
+				</li>
+				<li v-for="(longname,propval) in courseBrowserProps[propname].options">
+					<span v-if="propval.match(/^group/)" class="optgrplabel"><em>{{ longname }}</em></span>
+					<label v-else><input type="checkbox" :value="propname+'.'+propval" v-model="selectedItems">
+					{{ longname }}</label>
+				</li>
+			</ul>
+		</transition>
+	</span>
+	<a href="#" @click.prevent="selectedItems = []" v-if="selectedItems.length>0">Clear Filters</a>
+</div>
+<?php } ?>
+</div>
+<div style="position: relative" id="card-deck-wrap">
+<?php if (getenv('ALLOW_NEW_OHM_COURSE_CREATION') === 'true') { ?>
 	<div v-if="filteredCourses.length==0" class="no-matches"><?php echo _('No matches found'); ?></div>
-	
+
 	<div v-for="(levelGroup, level) in coursesByLevel" :key="level" class="level-group">
 		<div class="level-header">
 			<h2>{{ getLevelDisplayName(level) }}</h2>
@@ -233,16 +277,52 @@ if (!isset($_GET['embedded'])) {
 							<button @click="copyCourse(course)" id="add-course-button">Add Course</button>
 						</div>
 					</div>
-					
+
 				</div>
 			</div>
 		</transition-group>
 	</div>
+<?php } else { ?>
+<transition-group name="fade" tag="div" class="card-deck">
+<div v-if="filteredCourses.length==0" key="none"><?php echo _('No matches found'); ?></div>
+<div v-for="(course,index) in filteredCourses" :key="course.id" class="card">
+  <div class="card-body">
+  	<div class="card-header" :class="'coursetype'+course.coursetype">
+  		<span class="course-type-marker">{{ courseTypes[course.coursetype] }}</span>
+  		<b>{{ course.name }}</b>
+  	</div>
+	<div class="card-main">
+		<table class="proplist">
+        <caption class="sr-only">Course Details</caption>
+        <tbody>
+		<tr v-for="(propval,propname) in courseOut(course)">
+			<th>{{ courseBrowserProps[propname].name }}</th>
+			<td v-if="!Array.isArray(propval)"> {{ propval }} </td>
+			<td v-if="Array.isArray(propval)">
+				<ul class="nomark">
+					<li v-for="subprop in propval">
+						{{ courseBrowserProps[propname].options[subprop] }}
+					</li>
+				</ul>
+			</td>
+		</tr>
 
+		</tbody></table>
+		<p v-for="(propval,propname) in courseText(course)"
+		   class="pre-line"
+		>{{ propval }}</p>
+	</div>
+	<div class="card-footer">
+		<button @click="previewCourse(course.id)">Preview Course</button>
+		<button @click="copyCourse(course)">Copy This Course</button>
+	</div>
+  </div>
+</div>
+</transition-group>
+<?php } ?>
 </div>
 
 </div>
-
 <script type="text/javascript">
 const { createApp } = Vue;
 createApp({
@@ -254,8 +334,8 @@ createApp({
             showFilter: '',
             filterLeft: 0,
             courseTypes: courseBrowserProps.meta.courseTypes,
-            		activeTab: 0,
-		filterType: null,
+            activeTab: 0,
+            filterType: null,
             expandedCourses: [],
         }
 	},
@@ -295,7 +375,7 @@ createApp({
         courseText: function (course) {
 			var courseout = {};
 			for (propname in course) {
-				if (this.courseBrowserProps[propname] && 
+				if (this.courseBrowserProps[propname] &&
                     this.courseBrowserProps[propname].type &&
                     this.courseBrowserProps[propname].type == 'textarea') {
 							courseout[propname] = course[propname];
@@ -386,7 +466,7 @@ createApp({
 						}
 					}
 				}
-				
+
 				for (var i=0; i<courses.length; i++) {
 					if (courses[i].coursetype == type) {
 						activeTypes.push(type);
@@ -477,7 +557,7 @@ createApp({
 		coursesByLevel: function() {
 			var grouped = {};
 			var filtered = this.filteredCourses;
-			
+
 			// Check if we're filtering by a specific level
 			var isFilteringByLevel = false;
 			var filteredLevels = [];
@@ -485,12 +565,12 @@ createApp({
 				isFilteringByLevel = true;
 				filteredLevels = this.catprops.level;
 			}
-			
+
 			// Only group courses that pass the filter
 			for (var i = 0; i < filtered.length; i++) {
 				var course = filtered[i];
 				var level = course.level;
-				
+
 				// Handle cases where level might be an array or undefined
 				if (Array.isArray(level)) {
 					// If level is an array, add the course to each level group
@@ -515,7 +595,7 @@ createApp({
 					grouped['undefined'].push(course);
 				}
 			}
-			
+
 			// If filtering by level, only show the filtered level groups
 			var filteredGrouped = {};
 			if (isFilteringByLevel) {
@@ -534,27 +614,27 @@ createApp({
 					}
 				}
 			}
-			
+
 			// Sort the levels based on the order defined in courseBrowserProps.level.options
 			var sortedGrouped = {};
 			var levelOrder = Object.keys(this.courseBrowserProps.level.options);
-			
+
 			// Add undefined level at the end
 			levelOrder.push('undefined');
-			
+
 			// Only include levels that have courses after filtering
 			levelOrder.forEach(function(level) {
 				if (filteredGrouped[level]) {
 					sortedGrouped[level] = filteredGrouped[level];
 				}
 			});
-			
+
 			return sortedGrouped;
 		}
 	},
 	created: function() {
 		document.addEventListener('click', this.clickaway);
-		
+
 		// Check if we should filter by course type
 		const urlParams = new URLSearchParams(window.location.search);
 		const filterType = urlParams.get('filtertype');
@@ -583,6 +663,5 @@ createApp({
 
 }).mount('#app');
 </script>
-
 <?php
 require_once "../footer.php";

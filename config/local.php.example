@@ -68,6 +68,9 @@ $GLOBALS['student_pay_api']['debug'] = true;
 putenv('FULLSTORY_ENABLED=false');
 putenv('FULLSTORY_MODE=none');
 
+// Enable new course catalogue changes
+putenv('ALLOW_NEW_OHM_COURSE_CREATION=false');
+
 // Current supported values: "zendesk", "hubspot"
 $CFG['GEN']['SUPPORT_TICKET_SERVICE'] = getenv('SUPPORT_TICKET_SERVICE') ?: 'hubspot';
 
