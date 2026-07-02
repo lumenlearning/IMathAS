@@ -245,7 +245,8 @@ export default {
       return (
         !this.canViewAll &&
         this.settings.can_viewingb === 1 &&
-        (this.settings.prev_attempts.length > 0 || this.settings.submitby === 'by_question')
+        (this.settings.prev_attempts.length > 0 || 
+          (this.settings.submitby === 'by_question' && this.settings.has_active_attempt === true))
       );
     },
     canViewAll () {
