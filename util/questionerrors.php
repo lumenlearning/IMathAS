@@ -146,7 +146,7 @@ if ($isadmin) {
 }
 echo '<form id=mainform method=post>';
 //echo '<p>'._('With selected:').'<button type=submit>'._('Clear error').'</button></p>';
-echo '<div class="fixedonscroll">';
+echo '<div class="stickyonscroll">';
 echo _('With selected:') . ' <button type="button" id="quicksavebtn" onclick="quicksave()">'._('Clear log').'</button> ';
 echo '<span class="noticetext" id="quicksavenotice" aria-live="polite" aria-atomic=true>&nbsp;</span>';
 echo '</div>';

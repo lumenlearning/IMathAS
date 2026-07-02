@@ -568,7 +568,7 @@ if ($overwriteBody==1) {
 ?>
     <form id="curqform" method="post" action="addquestions2.php?modqs=true&aid=<?php echo $aid ?>&cid=<?php echo $cid ?>"
       <?php if (count($jsarr)==0) echo ' style="display:none;"'; ?>
-    ><div class="fixedonscroll" data-fixedend="curqtbl">
+    ><div class="stickyonscroll">
 <?php
 		if (!$beentaken) {
 			/*
@@ -582,12 +582,15 @@ if ($overwriteBody==1) {
 ?>
 
 		<?php echo _('Check:') ?> <a href="#" onclick="return chkAllNone('curqform','checked[]',true)">All</a> <a href="#" onclick="return chkAllNone('curqform','checked[]',false)"><?php echo _('None') ?></a>
-
-		<?php echo _('With Selected:') ?> <button type="button" onclick="removeSelected()"><?php echo _('Remove'); ?></button>
-			<button type="button" onclick="groupSelected()" ><?php echo _('Group'); ?></button>
-            <button type="button" onclick="if (confirm_textseg_dirty()) { modsettings();}"><?php echo _("Change Settings"); ?></button>
-
-<?php
+		<?php
+			echo '<span class="dropdown">';
+			echo ' <a tabindex=0 class="dropdown-toggle arrow-down" id="dropdownMenuWithsel" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+			echo _('With Selected').'</a>';
+			echo '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWithsel">';
+			echo ' <li><a href="#" onclick="removeSelected();return false;">', _('Remove'), "</a></li>";
+			echo ' <li><a href="#" onclick="groupSelected();return false;">', _('Group'), "</a></li>";
+			echo ' <li><a href="#" onclick="if (confirm_textseg_dirty()) { modsettings();} return false;">',_('Change Settings'), "</a></li>";
+			echo '</ul></span>';
 		}
 ?>
 		<span id="submitnotice" class=noticetext></span>

@@ -606,7 +606,7 @@ function initeditor(edmode,edids,css,inline,setupfunction,extendsetup){
 		resize: "both",
 		width: '100%',
 		height: 150,
-		content_style: "body {background-color: " + (coursetheme.match(/_dark/) ? "#000" : "#fff") + " !important;}",
+		content_style: "body.mce-content-body {background-color: " + (coursetheme.match(/_dark/) ? "#000" : "#fff") + " !important;}",
 		table_class_list: [{title: "None", value:''},
 			{title:"Gridded", value:"gridded"},
 			{title:"Gridded Centered", value:"gridded centered"}],
@@ -1472,6 +1472,19 @@ jQuery(document).ready(function($) {
 			}
 		});
 	}
+
+	$(".stickyonscroll").each(function(i, el) {
+		var $el = $(el);
+		var parentBg = $el.parent().css('background-color');
+		// walk up if parent is transparent
+		var $ancestor = $el.parent();
+		while (parentBg === 'rgba(0, 0, 0, 0)' || parentBg === 'transparent') {
+			$ancestor = $ancestor.parent();
+			if (!$ancestor.length) break;
+			parentBg = $ancestor.css('background-color');
+		}
+		$el.css('background-color', parentBg);
+	});
 });
 
 
@@ -1841,6 +1854,12 @@ function setActiveTab(el) {
 	jQuery(el).closest(".tabwrap").find(".tabpanel").hide().attr("aria-hidden",true);
 	var tabpanelid = el.getAttribute('aria-controls');
 	jQuery(el).closest(".tabwrap").find("#"+tabpanelid).show().attr("aria-hidden",false);
+	var curtop = $("#"+tabpanelid).offset().top - jQuery(el).closest(".tablist").height();
+	if (curtop < window.scrollY) {
+		window.scrollTo({
+			top: curtop
+		});
+	}
 }
 
 function setCookie(name, value, expires) {

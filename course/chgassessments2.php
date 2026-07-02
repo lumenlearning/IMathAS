@@ -834,7 +834,7 @@ $(function() {
 	 taken will change the student's data.</p>
 
 	<form id="qform" method=post action="chgassessments2.php?cid=<?php echo $cid; ?>" onsubmit="return valform();" class="tabwrap">
-		<ul class="tablist" role="tablist" aria-label="Mass Change Steps">
+		<ul class="tablist stickyonscroll" role="tablist" aria-label="Mass Change Steps">
 			<li role=presentation class="active">
 				<a href="#" role="tab" id="chgassesstab_sel" aria-controls="chgassess_sel" aria-selected="true"
 					tabindex="0"

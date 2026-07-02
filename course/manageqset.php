@@ -930,12 +930,17 @@ if (isset($searchtype)) {
 		echo "<script type=\"text/javascript\" src=\"$staticroot/javascript/tablesorter.js?v=082913\"></script>\n";
 		echo "<form id=\"selq\" method=post action=\"manageqset.php?cid=$cid\">\n";
 		//echo "Check/Uncheck All: <input type=\"checkbox\" name=\"ca2\" value=\"1\" onClick=\"chkAll(this.form, 'nchecked[]', this.checked)\">\n";
-		echo '<div class=pdiv>Check: <a href="#" onclick="return chkAllNone(\'selq\',\'nchecked[]\',true)">All</a> <a href="#" onclick="return chkAllNone(\'selq\',\'nchecked[]\',false)">None</a> ';
+		echo '<div class="stickyonscroll">Check: <a href="#" onclick="return chkAllNone(\'selq\',\'nchecked[]\',true)">All</a> <a href="#" onclick="return chkAllNone(\'selq\',\'nchecked[]\',false)">None</a> ';
 
         echo '<span class="dropdown">';
 		echo ' <a role=button tabindex=0 class="dropdown-toggle arrow-down" id="dropdownMenuWithsel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
 		echo _('With Selected').'</a>';
 		echo '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuWithsel">';
+		if (!$isadmin && !$isgrpadmin) {
+			echo "<li><span class=small>(Delete and Transfer only apply to your questions)</span></li>";
+		} else if ($isgrpadmin) {
+			echo "<li><span class=small>(Delete and Transfer only apply to group's questions)</span></li>";
+		}
 		echo ' <li><a href="#" onclick="postWSform(\'transfer\');return false;" title="',_("Transfer question ownership"),'">', _('Transfer'), "</a></li>";
 		echo ' <li><a href="#" onclick="postWSform(\'remove\');return false;">', _('Delete'), "</a></li>";
 		echo ' <li><a href="#" onclick="postWSform(\'chglib\');return false;" title="',_("Change library assignments"),'">',_('Library Assignment'), "</a></li>";
@@ -945,11 +950,7 @@ if (isset($searchtype)) {
 
         echo " <input type=button value=\"Add New Question\" onclick=\"window.location='moddataset.php?cid=$cid'\">\n";
 
-		if (!$isadmin && !$isgrpadmin) {
-			echo "<br/>(Delete and Transfer only applies to your questions)\n";
-		} else if ($isgrpadmin) {
-			echo "<br/>(Delete and Transfer only apply to group's questions)\n";
-		}
+		
         echo '</div>';
 		echo '<table cellpadding="5" id="myTable" class="gb zebra potential-question-list" style="clear:both; position:relative;" tabindex="-1"></table>';
         echo '<p><span id="searchnums">' . _('Showing') . ' <span id="searchnumvals"></span></span>
