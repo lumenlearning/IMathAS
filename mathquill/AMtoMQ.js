@@ -135,8 +135,8 @@ var AMQsymbols = [
 {input:":)", tag:"mo", tex:"rangle", ttype:RIGHTBRACKET},
 {input:"<<", tag:"mo", tex:"langle", ttype:LEFTBRACKET},
 {input:">>", tag:"mo", tex:"rangle", ttype:RIGHTBRACKET},
-{input:"{:", tag:"mo", output:"{:", ttype:LEFTBRACKET, invisible:true},
-{input:":}", tag:"mo", output:":}", ttype:RIGHTBRACKET, invisible:true},
+{input:"{:", tag:"mo", tex:"linvis", ttype:LEFTBRACKET},
+{input:":}", tag:"mo", tex:"rinvis", ttype:RIGHTBRACKET},
 
 //miscellaneous symbols
 {input:"int",  tag:"mo", ttype:CONST},
@@ -658,7 +658,7 @@ function AMQTparseExpr(str,rightbracket) {
 		if (right==')' || right==']') {
 			var left = newFrag.charAt(6);
 			if ((left=='(' && right==')' && symbol.output != '}') || (left=='[' && right==']')) {
-				var mxout = '\\begin{bmatrix}';
+				var mxout = '\\begin{matrix}';
 				var pos = new Array(); //position of commas
 				pos.push(0);
 				var matrix = true;
@@ -719,7 +719,7 @@ function AMQTparseExpr(str,rightbracket) {
 						mxout += subarr.join('&');
 					}
 				}
-				mxout += '\\end{bmatrix}';
+				mxout += '\\end{matrix}';
 				if (matrix) { newFrag = mxout;}
 			}
 		}
@@ -814,8 +814,13 @@ function MQtoAM(tex,display) {
     tex = tex.replace(/\\varnothing/g,' \\emptyset ');
     tex = tex.replace(/\\mathbb{([RCNZQ])}/g,' $1$1 ');
 	}
-  tex = tex.replace(/\\begin{.?matrix}(.*?)\\end{.?matrix}/g, function(m, p) {
+  tex = tex.replace(/\\begin{bmatrix}(.*?)\\end{bmatrix}/g, function(m, p) {
     return '[(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')]';
+  });
+  tex = tex.replace(/\\left(\\{|\[|\(|\\linvis|\.|\\|)\\begin{matrix}(.*?)\\end{matrix}\\right(\\}|\]|\)|\\rinvis|\.|\\|)/g, function(m, lb, p, rb) {
+    lb = lb.replace(/\\/,'').replace(/(linvis|\.)/,'lbrace:');
+    rb = rb.replace(/\\/,'').replace(/(rinvis|\.)/,':rbrace'); // l/rbrace is replace with { } later
+    return lb + '(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')' + rb;
   });
 	tex = tex.replace(/\\le(?=(\b|\d))/g,' <= ');
 	tex = tex.replace(/\\ge(?=(\b|\d))/g,' >= ');

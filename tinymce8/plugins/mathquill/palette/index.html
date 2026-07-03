@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../../../mathquill/mathquill-basic.css">
 <script src="../../../../javascript/jquery.min.js"></script>
 <script src="../../../../mathquill/mathquill.min.js"></script>
-<script src="../../../../mathquill/AMtoMQ_min.js"></script>
+<script src="../../../../mathquill/AMtoMQ.js"></script>
 
 <style>
 /* ── reset / base ── */
@@ -410,9 +410,12 @@ body {
   function doInsert() {
     var latex = mqField.latex().trim();
     if (!latex) return;
+    var tidylatex = latex.replace(/\\left\\linvis/g,'\\left.')
+      .replace(/\\right\\rinvis/g,'\\right.')
+      .replace(/\\varnothing/g, '\\emptyset');
     if (window.parent && window.parent !== window) {
       window.parent.postMessage(
-        { mceAction: 'customAction', data: { type: 'mq:insert', latex: latex, asciimath: MQtoAM(latex,true) } },
+        { mceAction: 'customAction', data: { type: 'mq:insert', latex: tidylatex, asciimath: MQtoAM(latex,true) } },
         '*'
       );
     }
