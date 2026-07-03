@@ -817,10 +817,10 @@ function MQtoAM(tex,display) {
   tex = tex.replace(/\\begin{bmatrix}(.*?)\\end{bmatrix}/g, function(m, p) {
     return '[(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')]';
   });
-  tex = tex.replace(/\\left(\\{|\[|\(|\\linvis|\.|\\|)\\begin{matrix}(.*?)\\end{matrix}\\right(\\}|\]|\)|\\rinvis|\.|\\|)/g, function(m, lb, p, rb) {
-    lb = lb.replace(/\\/,'').replace(/(linvis|\.)/,'lbrace:');
-    rb = rb.replace(/\\/,'').replace(/(rinvis|\.)/,':rbrace'); // l/rbrace is replace with { } later
-    return lb + '(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')' + rb;
+  tex = tex.replace(/\\left(\\{|\[|\(|\\linvis|\.|\|)\\begin{matrix}(.*?)\\end{matrix}\\right(\\}|\]|\)|\\rinvis|\.|\|)/g, function(m, lb, p, rb) {
+    lb = lb.replace(/(\.)/,'\\linvis');
+    rb = rb.replace(/(\.)/,'\\rinvis');
+    return '\\left' + lb + '(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')' + '\\right' + rb;
   });
 	tex = tex.replace(/\\le(?=(\b|\d))/g,' <= ');
 	tex = tex.replace(/\\ge(?=(\b|\d))/g,' >= ');
@@ -879,6 +879,7 @@ function MQtoAM(tex,display) {
   tex = tex.replace(/_{(\w+)}$/g,'_($1)');
 	tex = tex.replace(/{/g,'(').replace(/}/g,')');
 	tex = tex.replace(/lbrace/g,'{').replace(/rbrace/g,'}');
+  tex = tex.replace(/linvis/g,'{:').replace(/rinvis/g,':}');
 	tex = tex.replace(/\(([\d\.]+)\)\/\(([\d\.]+)\)/g,'$1/$2 ');  //change (2)/(3) to 2/3
 	tex = tex.replace(/\/\(([\d\.]+)\)/g,'/$1 ');  //change /(3) to /3
 	tex = tex.replace(/\(([\d\.]+)\)\//g,'$1/');  //change (3)/ to 3/

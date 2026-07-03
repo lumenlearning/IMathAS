@@ -7,8 +7,8 @@
 
 <link rel="stylesheet" href="../../../../mathquill/mathquill-basic.css">
 <script src="../../../../javascript/jquery.min.js"></script>
-<script src="../../../../mathquill/mathquill.min.js"></script>
-<script src="../../../../mathquill/AMtoMQ.js"></script>
+<script src="../../../../mathquill/mathquill.min.js?v=070326c"></script>
+<script src="../../../../mathquill/AMtoMQ_min.js?v=070326c"></script>
 
 <style>
 /* ── reset / base ── */
@@ -1053,6 +1053,9 @@ body {
   function matWrite(latex, cols) {
     return function() {
       mqField.write(latex);
+      if (!latex.match(/bmatrix/)) {
+        mqField.keystroke('Left'); // get inside bracket
+      }
       for (var i = 0; i < cols; i++) { mqField.keystroke('Left'); }
       updatePreview();
     };
@@ -1080,10 +1083,15 @@ body {
     mkBtn({ html: '2×2', title: '2×2 matrix', action: matWrite('\\begin{bmatrix}&\\\\&\\end{bmatrix}', 2) }),
     mkBtn({ html: '2×3', title: '2×3 matrix', action: matWrite('\\begin{bmatrix}&&\\\\&&\\end{bmatrix}', 3) }),
     mkBtn({ html: '2×4', title: '2×4 matrix', action: matWrite('\\begin{bmatrix}&&&\\\\&&&\\end{bmatrix}', 4) }),
+
     mkBtn({ html: '3×1', title: '3×1 matrix', action: matWrite('\\begin{bmatrix}\\\\\\\\\\end{bmatrix}', 1) }),
     mkBtn({ html: '3×2', title: '3×2 matrix', action: matWrite('\\begin{bmatrix}&\\\\&\\\\&\\end{bmatrix}', 2) }),
     mkBtn({ html: '3×3', title: '3×3 matrix', action: matWrite('\\begin{bmatrix}&&\\\\&&\\\\&&\\end{bmatrix}', 3) }),
     mkBtn({ html: '3×4', title: '3×4 matrix', action: matWrite('\\begin{bmatrix}&&&\\\\&&&\\\\&&&\\end{bmatrix}', 4) }),
+
+    mkBtn({ html: '(⊞)', title: 'Parenthesis matrix', action: matWrite('\\left(\\begin{matrix}&\\\\&\\end{matrix}\\right)', 2) }),
+    mkBtn({ html: '|⊞|', title: 'Determinant matrix', action: matWrite('\\left|\\begin{matrix}&\\\\&\\end{matrix}\\right|', 2) }),
+    mkBtn({ html: '{⊞', title: 'Left brace matrix', action: matWrite('\\left\\{\\begin{matrix}&\\\\&\\end{matrix}\\right\\rinvis', 2) })
   ];
 
   var grpMatrixEdit = [
