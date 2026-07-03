@@ -623,6 +623,9 @@ class QuestionHtmlGenerator
                 $qnRef = ($this->questionParams->getDisplayQuestionNumber()+1)*1000 + $atIdx;
                 $jsParams[$qnRef] = $answerBoxGenerator->getJsParams();
                 $jsParams[$qnRef]['qtype'] = $anstype;
+                if (!empty($disablePartsWhenCorrect[$atIdx]) || (!empty($disablePartsWhenCorrect) && !is_array($disablePartsWhenCorrect))) {
+                    $jsParams[$qnRef]['disableoncorrect'] = 1;
+                }
                 $displayedAnswersForParts[$atIdx] = $answerBoxGenerator->getCorrectAnswerForPart();
                 $previewloc[$atIdx] = $answerBoxGenerator->getPreviewLocation();
 

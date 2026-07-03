@@ -120,6 +120,13 @@ function init(paramarr, enableMQ, baseel) {
     allParams[qn] = paramarr[qn];
     params = paramarr[qn];
 
+    if (params.disableoncorrect) {
+      el = document.getElementById("qn"+qn);
+      if (el.classList.contains("ansgrn")) {
+        el.setAttribute('disabled', true);
+      }
+    }
+
     if (params.helper && params.qtype.match(/^(calc|numfunc|string|interval|matrix|chemeqn|complexmatrix|alg)/)) { //want mathquill
       el = document.getElementById("qn"+qn);
       if (!el && !params.matrixsize) { continue; }

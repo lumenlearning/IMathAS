@@ -5900,6 +5900,11 @@ $answerboxsize = 3
 		$defaults will generally apply the variable for ALL parts, which may cause some unexpected behavior. 
 		Note that defaults for abstolerance or reltolerance will not be applied to Drawing question parts, since 
 		those variables have special meaning in that context.</dd>
+<dt>$disablePartsWhenCorrect</dt>
+	<dd>Indicates you want a question input disabled if it's correct, preventing changing existing 
+		answers. Set in general, or indexed for specific parts. Generally not necessary, but may be useful 
+		in certain cases where later answers depend on earlier ones.
+	</dd>
 <dt>$showanswer </dt>
 	<dd>You can either define $showanswer for individual question parts (ie, $showanswer[1]="`x^2`"), or you can set one
 	$showanswer, which will be the only answer shown for the problem (ie, $showanswer = "x=$answer[0], y=$answer[1]")</dd>
