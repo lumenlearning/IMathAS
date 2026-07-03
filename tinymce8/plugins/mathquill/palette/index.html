@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equation Editor</title>
+
+<link rel="stylesheet" href="../../../../mathquill/mathquill-basic.css">
+<script src="../../../../javascript/jquery.min.js"></script>
+<script src="../../../../mathquill/mathquill.min.js"></script>
+<script src="../../../../mathquill/AMtoMQ_min.js"></script>
+
+<style>
+/* ── reset / base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface2: #eef0f4;
+  --border: #d0d4de;
+  --accent: #4a6cf7;
+  --accent-hover: #3557e8;
+  --text: #1a1d2e;
+  --text-dim: #6b7299;
+  --btn-bg: #ffffff;
+  --btn-hover: #eef0f4;
+  --btn-active: #dde2f8;
+  --insert-bg: #4a6cf7;
+  --insert-hover: #3557e8;
+  --tab-active-bg: #eef1ff;
+  --divider: #c8ccd8;
+  --radius: 6px;
+  --font: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 16px;
+}
+
+/* ── tab row ── */
+#tab-row {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  justify-content: center;
+}
+#tab-row::-webkit-scrollbar { display: none; }
+
+.palette-tab {
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: .03em;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+  user-select: none;
+}
+.palette-tab:hover { color: var(--text); }
+.palette-tab:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+.palette-tab:focus:not(:focus-visible) { outline: none; }
+.palette-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: var(--tab-active-bg);
+}
+
+/* ── palette panels ── */
+#palette-area {
+  flex-shrink: 0;
+  background: var(--surface2);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  min-height: 165px;
+  max-height: 185px;
+  overflow-y: auto;
+}
+
+.palette-panel { display: none; }
+.palette-panel.active { display: flex; flex-direction: row; align-items: stretch; justify-content: center;}
+
+/* A group wraps its buttons into a grid inside its own column */
+.btn-group {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+  gap: 4px;
+  padding: 0;
+  align-content: start;
+}
+.btn-group:first-child { padding-left: 0; }
+.btn-group:last-child  { padding-right: 0; }
+
+/* Vertical divider — stretches to full height of the tallest group */
+.btn-divider {
+  width: 1px;
+  background: var(--divider);
+  margin: 0 6px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* Flat ungrouped grid (Greek, Symbols, Advanced, Functions) */
+.btn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Override for panels that are column-of-rows (QWERTY keyboard) */
+.palette-panel-col { flex-direction: column !important; align-items: stretch !important; }
+.palette-panel-col .qwerty-row { justify-content: center; }
+
+/* ── buttons ── */
+.mq-btn {
+  /*display: inline-flex;*/
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 34px;
+  padding: 0 6px;
+  background: var(--btn-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: background .1s, border-color .1s;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+.mq-btn:hover  { background: var(--btn-hover); border-color: var(--accent); }
+.mq-btn:active { background: var(--btn-active); border-color: var(--accent-hover); }
+.mq-btn:focus  { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 1; position: relative; }
+.mq-btn:focus:not(:focus-visible) { outline: none; }
+.mq-btn.wide   { min-width: 56px; }
+.mq-btn.shift-btn { font-size: 16px; }
+.mq-btn.shift-btn.active {
+  background: var(--accent);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+.mq-btn.nav-btn { font-size: 16px; color: var(--text-dim); }
+.mq-btn.del-btn { font-size: 16px; color: #c0392b; }
+
+/* MathQuill content inside buttons */
+.mq-btn .mq-math-mode,
+.mq-btn .mq-root-block {
+  pointer-events: none;
+  font-size: 14px;
+}
+
+/* ── always-visible nav bar (below panels, above MQ input) ── */
+#nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  /*background: var(--surface);
+  border-bottom: 1px solid var(--border);*/
+  flex: 1;
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+/* QWERTY rows */
+.qwerty-row { display: flex; gap: 4px; margin-bottom: 4px; justify-content: center; }
+
+/* ── MathQuill input area ── */
+#mq-input-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  gap: 6px;
+  min-height: 0;
+}
+#mq-label {
+  font-size: 16px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+#mq-field-wrap {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  cursor: text;
+  min-height: 56px;
+  overflow-x: auto;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
+}
+/*#mq-field-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.06), 0 0 0 2px rgba(74,108,247,.15);
+}*/
+#mq-field-wrap .mq-editable-field {
+  background: transparent !important;
+  min-width: 200px;
+  font-size: 18px;
+  width: 100%;
+}
+
+/* ── footer ── */
+#footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 10px;
+  flex-shrink: 0;
+  display: none;
+}
+#latex-preview {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  word-break: break-all;
+  max-height: 40px;
+  overflow-y: auto;
+  /*visibility: hidden;*/
+}
+#btn-clear {
+  padding: 7px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  transition: background .1s;
+}
+#btn-clear:hover { background: var(--btn-hover); color: var(--text); }
+
+/* ── MathQuill "pr" empty-box cosmetics (provided by user) ── */
+.mq-btn .mq-root-block { padding: 0; }
+
+.mq-btn .mq-empty { background-color: inherit; }
+.mq-btn .mq-sqrt-stem.mq-empty { width: 3px; }
+
+.mq-btn .mq-sup.mq-empty,
+.mq-btn .mq-sub.mq-empty,
+.mq-btn .mq-empty-box {
+  border: 1px solid #ccc;
+  height: 12px;
+  width: 8px;
+  margin-bottom: 0px !important;
+}
+.mq-btn .mq-paren { vertical-align: top; }
+.mq-btn .mq-paren + .mq-empty { height: 18px; }
+.mq-btn .mq-paren + .mq-empty::after {
+  visibility: visible;
+  display: block;
+  content: " ";
+  border: 1px solid #ccc;
+  width: 6px;
+  height: 12px;
+  margin: 2px 1px 0px 1px;
+}
+.mq-btn .mq-bracket-l, .mq-btn .mq-bracket-r { top: 2px; }
+.mq-btn .mq-bracket-l + .mq-empty::after { margin: 4px 0px 0px 0px; }
+
+.mq-btn .mq-numerator.mq-empty,
+.mq-btn .mq-denominator.mq-empty {
+  height: 14px;
+  padding: 0 0.1em;
+}
+.mq-btn .mq-numerator.mq-empty { height: 15px; }
+.mq-btn .mq-denominator.mq-empty::after,
+.mq-btn .mq-numerator.mq-empty::after {
+  visibility: visible;
+  display: inline-block;
+  content: " ";
+  border: 1px solid #ccc;
+  width: 6px;
+  height: 10px;
+}
+</style>
+</head>
+<body>
+
+<!-- ── Tab bar ── -->
+<div id="tab-row" role="tablist" aria-label="Equation palette categories">
+  <div class="palette-tab active" role="tab" tabindex="0" aria-selected="true"  aria-controls="panel-basic"     data-panel="panel-basic"     title="Basic">±</div>
+  <div class="palette-tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-keyboard"  data-panel="panel-keyboard"  title="Keyboard">⌨</div>
+  <div class="palette-tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-greek"     data-panel="panel-greek"     title="Greek">Ω</div>
+  <div class="palette-tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-functions" data-panel="panel-functions" title="Functions">ƒ</div>
+  <div class="palette-tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-symbols"   data-panel="panel-symbols"   title="Symbols">≈</div>
+  <div class="palette-tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-advanced"  data-panel="panel-advanced"  title="Advanced">∫</div>
+  <div class="palette-tab"        role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-matrix"    data-panel="panel-matrix"    title="Matrix">⊞</div>
+</div>
+
+<!-- ── Palette area ── -->
+<div id="palette-area" role="toolbar" aria-label="Math symbols" tabindex="-1">
+
+  <!-- 1. Basic math — groups with dividers, built by JS -->
+  <div id="panel-basic"     class="palette-panel active" role="tabpanel" tabindex="-1"></div>
+
+  <!-- 2. QWERTY keyboard — column of rows, so uses palette-panel-col -->
+  <div id="panel-keyboard"  class="palette-panel palette-panel-col"      role="tabpanel" tabindex="-1">
+    <div class="qwerty-row" id="qrow1"></div>
+    <div class="qwerty-row" id="qrow2"></div>
+    <div class="qwerty-row" id="qrow3"></div>
+    <div class="qwerty-row" id="qrow4"></div>
+  </div>
+
+  <!-- 3. Greek letters -->
+  <div id="panel-greek" class="palette-panel palette-panel-col" role="tabpanel" tabindex="-1">
+    <div class="qwerty-row" id="grow1"></div>
+    <div class="qwerty-row" id="grow2"></div>
+    <div class="qwerty-row" id="grow3"></div>
+    <div class="qwerty-row" id="grow4"></div>
+  </div>
+
+  <!-- 4. Functions -->
+  <div id="panel-functions" class="palette-panel"                        role="tabpanel" tabindex="-1"></div>
+
+  <!-- 5. Symbols -->
+  <div id="panel-symbols"   class="palette-panel"                        role="tabpanel" tabindex="-1"></div>
+
+  <!-- 6. Advanced -->
+  <div id="panel-advanced"  class="palette-panel"                        role="tabpanel" tabindex="-1"></div>
+
+  <!-- 7. Matrix -->
+  <div id="panel-matrix"    class="palette-panel"                        role="tabpanel" tabindex="-1"></div>
+
+</div>
+
+<!-- ── Always-visible nav bar ── -->
+
+
+<!-- ── MathQuill input ── -->
+<div id="mq-input-wrap">
+  <div style="display:flex; align-items: center;">
+    <div id="mq-label">Equation</div>
+    <div id="nav-bar" role="toolbar" aria-label="Cursor navigation" tabindex="-1">
+        <!-- populated by JS -->
+    </div>
+  </div>
+  <div id="mq-field-wrap">
+    <span id="mq-field"></span>
+  </div>
+</div>
+
+<!-- ── Footer ── -->
+<div id="footer">
+  <div id="latex-preview" title="LaTeX source"></div>
+  <button id="btn-clear">Clear</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── URL params ────────────────────────────────────────────────────────────
+  var params    = new URLSearchParams(window.location.search);
+  var endpoint  = params.get('endpoint') || '/render-latex';
+  var imgClass  = params.get('imgclass') || 'mq-equation';
+  var initAsciimath = params.get('asciimath')    || '';
+
+  // ── MathQuill ─────────────────────────────────────────────────────────────
+  var MQ      = MathQuill.getInterface(MathQuill.getInterface.MAX);
+  var mqField = MQ.MathField(document.getElementById('mq-field'), {
+    spaceBehavesLikeTab: true,
+    leftRightIntoCmdGoes: 'up',
+    supSubsRequireOperand: true,
+    charsThatBreakOutOfSupSub: '=<>',
+    restrictMismatchedBrackets: true,
+    autoOperatorNames: 'sin cos tan sec csc cot arcsin arccos arctan arcsinh arccosh arctanh sinh cosh tanh log ln exp abs det max min gcd lcm lim',
+    autoCommands: 'pi theta sqrt sum prod int alpha beta gamma delta epsilon zeta eta iota kappa lambda mu nu xi rho sigma tau upsilon phi chi psi omega ^oo',
+    handlers: { edit: function () { updatePreview(); } },
+    addCommands: {'oo': ['VanillaSymbol', '\\infty ', '&infin;'], 
+                'xor': ['VanillaSymbol', '\\oplus ', '&oplus;'], 
+                'uu': ['VanillaSymbol', '\\cup ', '&cup;'], 
+                'nn': ['VanillaSymbol', '\\cap ', '&cap;'],
+                'rightleftharpoons': ['BinaryOperator', '\\rightleftharpoons ', '&rlhar;']}
+  });
+
+  if (initAsciimath) { try { mqField.latex(AMtoMQ(initAsciimath)); } catch(e) {} }
+
+  function updatePreview() {
+    var latex = mqField.latex();
+    document.getElementById('latex-preview').textContent = latex || '(empty)';
+  }
+  updatePreview();
+  setTimeout(function () { mqField.focus(); }, 100);
+
+  // ── Insert helper — posts latex back to TinyMCE ───────────────────────────
+  function doInsert() {
+    var latex = mqField.latex().trim();
+    if (!latex) return;
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(
+        { mceAction: 'customAction', data: { type: 'mq:insert', latex: latex, asciimath: MQtoAM(latex,true) } },
+        '*'
+      );
+    }
+  }
+
+  window.addEventListener('message', function (e) {
+    if (!e.data) return;
+    if (e.data.type === 'mq:setAsciimath') {
+      try { mqField.latex(AMtoMQ(e.data.asciimath) || ''); } catch(ex) {}
+      updatePreview();
+      mqField.focus();
+    }
+    // Dialog footer "Insert Equation" button triggers this
+    if (e.data.type === 'mq:requestAsciimath') {
+      doInsert();
+    }
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    mqField.latex('');
+    updatePreview();
+    mqField.focus();
+  });
+
+  // ── Tab switching (keyboard-accessible tablist) ───────────────────────────
+  var allTabs = Array.prototype.slice.call(document.querySelectorAll('.palette-tab'));
+
+  // activateTab(tab, moveFocus)
+  //   moveFocus = true  → focus stays on the tab (arrow-key navigation)
+  //   moveFocus = false → focus moves to MQ field (click / Enter / Space)
+  function activateTab(tab, moveFocus) {
+    allTabs.forEach(function (t) {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      t.setAttribute('tabindex', '-1');
+    });
+    document.querySelectorAll('.palette-panel').forEach(function (p) {
+      p.classList.remove('active');
+    });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    tab.setAttribute('tabindex', '0');
+    var panel = document.getElementById(tab.dataset.panel);
+    if (panel) panel.classList.add('active');
+    // Reset the roving tabindex in the newly-visible panel
+    resetPaletteRovingIndex();
+    if (moveFocus) {
+      tab.focus();
+    } else {
+      mqField.focus();
+    }
+  }
+
+  allTabs.forEach(function (tab, idx) {
+    tab.addEventListener('click', function () {
+      activateTab(tab, false);  // click → focus moves to MQ field
+    });
+
+    tab.addEventListener('keydown', function (e) {
+      var key = e.key;
+      var newTab;
+      if (key === 'ArrowRight' || key === 'ArrowDown') {
+        e.preventDefault();
+        newTab = allTabs[(idx + 1) % allTabs.length];
+        activateTab(newTab, true);   // arrow → stay on tab bar
+      } else if (key === 'ArrowLeft' || key === 'ArrowUp') {
+        e.preventDefault();
+        newTab = allTabs[(idx - 1 + allTabs.length) % allTabs.length];
+        activateTab(newTab, true);   // arrow → stay on tab bar
+      } else if (key === 'Home') {
+        e.preventDefault();
+        activateTab(allTabs[0], true);
+      } else if (key === 'End') {
+        e.preventDefault();
+        activateTab(allTabs[allTabs.length - 1], true);
+      } else if (key === 'Enter' || key === ' ') {
+        e.preventDefault();
+        activateTab(tab, false);     // confirm → focus moves to MQ field
+      }
+    });
+  });
+
+  // ── Palette button roving-tabindex navigation ─────────────────────────────
+  // The #palette-area is the single Tab stop. When it receives focus we focus
+  // the first (or last-remembered) button inside the active panel.
+  // Arrow keys move the roving focus among the visible buttons.
+
+  var paletteArea = document.getElementById('palette-area');
+
+  function getPaletteButtons() {
+    // All .mq-btn elements in the currently active panel
+    var activePanel = paletteArea.querySelector('.palette-panel.active');
+    if (!activePanel) return [];
+    return Array.prototype.slice.call(activePanel.querySelectorAll('.mq-btn'));
+  }
+
+  function setPaletteTabIndex(btn) {
+    // Give focus-tabstop to btn, strip it from all others
+    getPaletteButtons().forEach(function (b) {
+      b.setAttribute('tabindex', b === btn ? '0' : '-1');
+    });
+    btn.focus();
+  }
+
+  paletteArea.addEventListener('focus', function (e) {
+    // Only act when focus lands directly on the wrapper (not when a button inside is clicked)
+    if (e.target !== paletteArea) return;
+    var btns = getPaletteButtons();
+    if (!btns.length) return;
+    // Find the button that currently holds tabindex="0", else default to first
+    var current = btns.find(function (b) { return b.getAttribute('tabindex') === '0'; }) || btns[0];
+    setPaletteTabIndex(current);
+  });
+
+  // ── Grid-aware arrow navigation for the palette ───────────────────────────
+  // For grouped panels: buttons live in .btn-group children of the panel.
+  //   Left/Right moves between groups (to the first button of the adjacent group).
+  //   Up/Down moves within a group by position index.
+  // For the QWERTY panel: buttons live in .qwerty-row children.
+  //   Left/Right moves within a row; Up/Down moves between rows at the same column.
+  // All movements wrap around.
+
+  paletteArea.addEventListener('keydown', function (e) {
+    var key = e.key;
+    if (key !== 'ArrowRight' && key !== 'ArrowLeft' &&
+        key !== 'ArrowDown'  && key !== 'ArrowUp'   &&
+        key !== 'Home'       && key !== 'End') return;
+
+    var focused = document.activeElement;
+    if (!focused || !paletteArea.contains(focused)) return;
+    e.preventDefault();
+
+    var activePanel = paletteArea.querySelector('.palette-panel.active');
+    if (!activePanel) return;
+
+    var isQwerty = activePanel.querySelector('.qwerty-row') !== null;
+    var next;
+
+    if (isQwerty) {
+      // Rows are .qwerty-row divs; buttons are direct children
+      var rows = Array.prototype.slice.call(activePanel.querySelectorAll('.qwerty-row'));
+      var rowIdx = -1, colIdx = -1;
+      rows.forEach(function (row, ri) {
+        var btns = Array.prototype.slice.call(row.querySelectorAll('.mq-btn'));
+        var ci = btns.indexOf(focused);
+        if (ci !== -1) { rowIdx = ri; colIdx = ci; }
+      });
+      if (rowIdx === -1) { next = rows[0].querySelector('.mq-btn'); }
+      else if (key === 'ArrowRight') {
+        var rowBtns = Array.prototype.slice.call(rows[rowIdx].querySelectorAll('.mq-btn'));
+        next = rowBtns[(colIdx + 1) % rowBtns.length];
+      } else if (key === 'ArrowLeft') {
+        var rowBtns = Array.prototype.slice.call(rows[rowIdx].querySelectorAll('.mq-btn'));
+        next = rowBtns[(colIdx - 1 + rowBtns.length) % rowBtns.length];
+      } else if (key === 'ArrowDown') {
+        var nextRow = rows[(rowIdx + 1) % rows.length];
+        var nextRowBtns = Array.prototype.slice.call(nextRow.querySelectorAll('.mq-btn'));
+        next = nextRowBtns[Math.min(colIdx, nextRowBtns.length - 1)];
+      } else if (key === 'ArrowUp') {
+        var prevRow = rows[(rowIdx - 1 + rows.length) % rows.length];
+        var prevRowBtns = Array.prototype.slice.call(prevRow.querySelectorAll('.mq-btn'));
+        next = prevRowBtns[Math.min(colIdx, prevRowBtns.length - 1)];
+      } else if (key === 'Home') {
+        next = rows[0].querySelector('.mq-btn');
+      } else if (key === 'End') {
+        var lastRow = rows[rows.length - 1];
+        var lastRowBtns = Array.prototype.slice.call(lastRow.querySelectorAll('.mq-btn'));
+        next = lastRowBtns[lastRowBtns.length - 1];
+      }
+    } else {
+      // Grouped panels: columns are .btn-group divs (dividers are .btn-divider, ignored)
+      var groups = Array.prototype.slice.call(activePanel.querySelectorAll('.btn-group'));
+      var grpIdx = -1, posIdx = -1;
+      groups.forEach(function (grp, gi) {
+        var btns = Array.prototype.slice.call(grp.querySelectorAll('.mq-btn'));
+        var pi = btns.indexOf(focused);
+        if (pi !== -1) { grpIdx = gi; posIdx = pi; }
+      });
+      if (grpIdx === -1) { next = groups[0] && groups[0].querySelector('.mq-btn'); }
+      else if (key === 'ArrowDown') {
+        var grpBtns = Array.prototype.slice.call(groups[grpIdx].querySelectorAll('.mq-btn'));
+        next = grpBtns[(posIdx + 1) % grpBtns.length];
+      } else if (key === 'ArrowUp') {
+        var grpBtns = Array.prototype.slice.call(groups[grpIdx].querySelectorAll('.mq-btn'));
+        next = grpBtns[(posIdx - 1 + grpBtns.length) % grpBtns.length];
+      } else if (key === 'ArrowRight') {
+        var nextGrp = groups[(grpIdx + 1) % groups.length];
+        var nextGrpBtns = Array.prototype.slice.call(nextGrp.querySelectorAll('.mq-btn'));
+        next = nextGrpBtns[Math.min(posIdx, nextGrpBtns.length - 1)];
+      } else if (key === 'ArrowLeft') {
+        var prevGrp = groups[(grpIdx - 1 + groups.length) % groups.length];
+        var prevGrpBtns = Array.prototype.slice.call(prevGrp.querySelectorAll('.mq-btn'));
+        next = prevGrpBtns[Math.min(posIdx, prevGrpBtns.length - 1)];
+      } else if (key === 'Home') {
+        next = groups[0] && groups[0].querySelector('.mq-btn');
+      } else if (key === 'End') {
+        var lastGrp = groups[groups.length - 1];
+        var lastGrpBtns = Array.prototype.slice.call(lastGrp.querySelectorAll('.mq-btn'));
+        next = lastGrpBtns[lastGrpBtns.length - 1];
+      }
+    }
+    if (next) setPaletteTabIndex(next);
+  });
+
+  // When a panel is switched, reset the roving tabindex so the first button
+  // in the new panel is the remembered stop (but don't move focus yet).
+  function resetPaletteRovingIndex() {
+    // Strip tabindex="0" from all buttons across all panels
+    paletteArea.querySelectorAll('.mq-btn').forEach(function (b) {
+      b.setAttribute('tabindex', '-1');
+    });
+    // Give tabindex="0" to the first button of the now-active panel
+    var btns = getPaletteButtons();
+    if (btns.length) btns[0].setAttribute('tabindex', '0');
+  }
+
+  // ── Button factory ────────────────────────────────────────────────────────
+  function mkBtn(opts) {
+    var btn = document.createElement('button');
+    btn.className = 'mq-btn mq-math-mode' + (opts.wide ? ' wide' : '') + (opts.extraClass ? ' ' + opts.extraClass : '');
+    btn.title = opts.title || '';
+
+    btn.innerHTML = opts.html;
+    btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      opts.action();
+      updatePreview();
+      mqField.focus();
+    });
+    return btn;
+  }
+  function writeBtn(html, latex, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || latex,
+      action: function () { mqField.write(latex); } }, opts || {}));
+  }
+  function writeBtnMove(html, latex, title, moves, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || latex,
+      action: function () { 
+        mqField.write(latex); 
+        if (Array.isArray(moves)) {
+          for (const move of moves) {
+            mqField.keystroke(move);
+          }
+        }
+      } }, opts || {}));
+  }
+  function latexBtn(html, latex, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || latex,
+      action: function () { mqField.latex(latex); } }, opts || {}));
+  }
+  function typeBtn(html, text, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || text,
+      action: function () { mqField.typedText(text); } }, opts || {}));
+  }
+  function cmdBtn(html, cmd, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || text,
+      action: function () { mqField.cmd(cmd); } }, opts || {}));
+  }
+  function keystrokeBtn(html, key, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || key,
+      action: function () { mqField.keystroke(key); } }, opts || {}));
+  }
+
+  function funcWriteBtn(html, cmdval, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || latex,
+      action: function () { 
+        var sel = mqField.selection();
+        if (sel && sel.startIndex != sel.endIndex) {
+          let latex = sel.latex.substring(sel.startIndex, sel.endIndex);
+          mqField.write(cmdval+'\\left('+latex+'\\right)');
+          mqField.keystroke('Left');
+        } else if (cmdval.match(/{}$/)) {
+          mqField.typedText(cmdval.replace(/{}$/,''));
+        } else {
+          mqField.write(cmdval);
+        }
+      } }, opts || {}));
+  }
+
+  function intervalWriteBtn(html, cmdval, title, opts) {
+    if (html == cmdval) {
+      html = '<span class="mq-non-leaf"><span class="mq-scaled mq-paren" style="transform: scale(1, 1.2);">'+cmdval.charAt(0)+'</span><span class="mq-non-leaf mq-empty"></span><span class="mq-scaled mq-paren" style="transform: scale(1, 1.2);">'+cmdval.charAt(1)+'</span></span>'
+    }
+    return mkBtn(Object.assign({ html: html, title: title || html,
+      action: function () { 
+        var sel = mqField.selection();
+        var latex = '';
+        if (sel && sel.startIndex != sel.endIndex) {
+          latex = sel.latex.substring(sel.startIndex, sel.endIndex);
+        }
+        if (typeof cmdval === 'string') {
+          var leftsym = cmdval.charAt(0);
+          var rightsym = cmdval.charAt(1);
+          mqField.write('\\left'+leftsym+latex+'\\right'+rightsym);
+        } else {
+          mqField.write(cmdval[0]+latex+cmdval[1]);
+        }
+        if (latex=='') {
+          mqField.keystroke('Left');
+        }
+      } }, opts || {}));
+  }
+
+  /**
+   * Append a list of button groups (each an array of buttons) to a panel element.
+   * Groups are separated by .btn-divider elements.
+   * panelEl: the DOM element to append into (a .palette-panel)
+   * groups: array of arrays of button elements
+   */
+  function buildGroupedPanel(panelEl, groups) {
+    groups.forEach(function (btns, i) {
+      if (i > 0) {
+        var div = document.createElement('div');
+        div.className = 'btn-divider';
+        panelEl.appendChild(div);
+      }
+      var grp = document.createElement('div');
+      grp.className = 'btn-group';
+      btns.forEach(function(b){ grp.appendChild(b); });
+      panelEl.appendChild(grp);
+    });
+  }
+
+  function appendTo(id, el) { console.log("apending to "+id); document.getElementById(id).appendChild(el); }
+
+  // ── Prerendered PR snippets  ─────────────────────────
+  var PR = {
+    frac:     '<span class="mq-fraction mq-non-leaf"><span class="mq-numerator mq-empty"></span><span class="mq-denominator mq-empty"></span><span style="display:inline-block;width:0">&#8203;</span></span>',
+    exponent: '<var>x</var><span class="mq-supsub mq-non-leaf mq-sup-only"><span class="mq-sup mq-empty"></span></span>',
+    subscript:'<var>x</var><span class="mq-supsub mq-non-leaf"><span class="mq-sub mq-empty"></span></span>',
+    sqrt:     '<span class="mq-non-leaf mq-sqrt-container"><span class="mq-scaled mq-sqrt-prefix"><svg preserveAspectRatio="none" viewBox="0 0 32 54"><path d="M0 33 L7 27 L12.5 47 L13 47 L30 0 L32 0 L13 54 L11 54 L4.5 31 L0 33"></path></svg></span><span class="mq-non-leaf mq-sqrt-stem mq-empty"></span></span>',
+    nthroot:  '<span class="mq-root-block"><span class="mq-nthroot-container mq-non-leaf"><sup class="mq-nthroot mq-non-leaf"><var>n</var></sup><span class="mq-scaled mq-sqrt-container"><span class="mq-sqrt-prefix mq-scaled"><svg preserveAspectRatio="none" viewBox="0 0 32 54"><path d="M0 33 L7 27 L12.5 47 L13 47 L30 0 L32 0 L13 54 L11 54 L4.5 31 L0 33"></path></svg></span><span class="mq-sqrt-stem mq-non-leaf mq-empty"></span></span></span></span>',
+  
+    bar:      '<span class="mq-non-leaf mq-overline"><var>x</var></span>',
+    vec:      '<span class="mq-non-leaf"><span class="mq-diacritic-above">→</span><span class="mq-diacritic-stem"><var>x</var></span></span>',
+    tildeacc:      '<span class="mq-non-leaf"><span class="mq-diacritic-above">~</span><span class="mq-diacritic-stem"><var>x</var></span></span>',
+    hat:      '<span class="mq-non-leaf"><span class="mq-hat-prefix">^</span><span class="mq-hat-stem"><var>x</var></span></span>',
+    accdot:   '<span class="mq-non-leaf"><span class="mq-dot-recurring-inner"><span class="mq-dot-recurring">˙</span><var>x</var></span></span>',
+    accddot:   '<span class="mq-non-leaf"><span class="mq-dot-recurring-inner"><span class="mq-dot-recurring">¨</span><var>x</var></span></span>',
+
+    logBase:  '<var class="mq-operator-name">log</var><span class="mq-supsub mq-non-leaf"><span class="mq-sub mq-empty"></span></span>',
+    ePow:     '<var>e</var><span class="mq-supsub mq-non-leaf mq-sup-only"><span class="mq-sup mq-empty"></span></span>',
+
+    arcsin:   '<var class="mq-operator-name">sin</var><span class="mq-supsub mq-non-leaf mq-sup-only"><span class="mq-sup">−1</span></span>',
+    arccos:   '<var class="mq-operator-name">cos</var><span class="mq-supsub mq-non-leaf mq-sup-only"><span class="mq-sup">−1</span></span>',
+    arctan:   '<var class="mq-operator-name">tan</var><span class="mq-supsub mq-non-leaf mq-sup-only"><span class="mq-sup">−1</span></span>',
+    
+    sumtb:    '<span class="mq-large-operator mq-non-leaf"><span class="mq-to"><span class="mq-empty"></span></span><big>∑</big><span class="mq-from"><span class="mq-empty"></span></span></span>',
+    liminf:   '<span class="mq-root-block"><var class="mq-operator-name">lim</var><span class="mq-supsub mq-non-leaf mq-after-operator-name"><span class="mq-sub"><var>x</var><span class="mq-binary-operator">→</span><span>∞</span></span></span></span>'
+  };
+
+  // ── 1. Basic — grouped rows ───────────────────────────────────────────────
+
+  // Row 1, Group A: Structure (fraction, exponent, subscript, sqrt, nthroot)
+  var grpStructure = [
+    typeBtn(PR.frac, '/', 'Fraction'),
+    typeBtn(PR.exponent, '^', 'Exponent'),
+    typeBtn(PR.subscript, '_', 'Subscript'),
+    writeBtn('=', '=', 'Equals'),
+    cmdBtn(PR.sqrt, 'sqrt', 'Square root'),
+    cmdBtn(PR.nthroot, 'nthroot', 'nth root')
+  ];
+
+  // Row 1, Group B: Arithmetic operators
+  var grpArith = [
+    typeBtn('+',  '+',  'Plus'),
+    writeBtn('−', '-',  'Minus'),
+    writeBtn('·', '\\cdot',  'Dot times'),
+    writeBtn('÷', '\\div',   'Divide'),
+    writeBtn('×', '\\times', 'Cross times'),
+    writeBtn('±', '\\pm',    'Plus or minus'),
+  ];
+
+  // Row 1, Group C: Grouping symbols
+  var grpGrouping = [
+    intervalWriteBtn('()', '()', 'Parentheses'),
+    intervalWriteBtn('||', '||', 'Absolute value'),
+    intervalWriteBtn('[]', '[]', 'Brackets'),
+    intervalWriteBtn('⟨ ⟩', ['\\left\\langle','\\right\\rangle'], 'Angle brackets'),
+    intervalWriteBtn('[)', '[)', 'Interval closed left'),
+    intervalWriteBtn('(]', '(]', 'Interval closed right'),
+  ];
+
+  // Row 1, Group D: Accent / decorator symbols
+  var grpAccents = [
+    cmdBtn(PR.bar, 'bar', 'Bar'),
+    cmdBtn(PR.hat, 'hat', 'Hat'),
+    cmdBtn(PR.vec, 'vec', 'Vector arrow'),
+    cmdBtn(PR.tildeacc, 'tilde', 'Tilde accent'),
+  ];
+
+
+  var grpConst = [
+    writeBtn('π', '\\pi', 'pi'),
+    writeBtn('∞', '\\infty', 'Infinity'),
+    writeBtn('∅', '\\emptyset', 'Empty set'),
+    writeBtn('!', '!',       'Factorial'),
+    writeBtn('…', '\\ldots',    'Ellipsis'),
+  ];
+
+  buildGroupedPanel(document.getElementById('panel-basic'), [
+    grpStructure,
+    grpArith,
+    grpGrouping,
+    grpAccents,
+    grpConst,
+  ]);
+
+  // ── 2. QWERTY keyboard ────────────────────────────────────────────────────
+  var shiftActive = false;
+  var letterBtns  = [];
+  var digitBtns   = [];
+  var qrows = [
+    ['q','w','e','r','t','y','u','i','o','p'],
+    ['a','s','d','f','g','h','j','k','l'],
+    ['z','x','c','v','b','n','m',',','.'],
+    ['1','2','3','4','5','6','7','8','9','0']
+  ];
+  // Standard US keyboard shift symbols for the digit/punctuation row
+  var shiftSymbol = {
+    '0':')', '1':'!', '2':'@', '3':'#', '4':'$',
+    '5':'%', '6':'^', '7':'&', '8':'*', '9':'(',
+    '.':'>',',':'<'
+  };
+  var rowIds = ['qrow1','qrow2','qrow3','qrow4'];
+
+  function applyShift(active) {
+    shiftActive = active;
+    document.querySelector('.shift-btn').classList.toggle('active', active);
+    letterBtns.forEach(function (b) {
+      b.textContent = active ? b._char.toUpperCase() : b._char;
+    });
+    digitBtns.forEach(function (b) {
+      b.textContent = active ? shiftSymbol[b._char] : b._char;
+    });
+  }
+
+  qrows.forEach(function (row, ri) {
+    var container = document.getElementById(rowIds[ri]);
+    if (ri === 2) {
+      var shiftBtn = document.createElement('button');
+      shiftBtn.className = 'mq-btn shift-btn';
+      shiftBtn.title = 'Shift (capitalize)';
+      shiftBtn.innerHTML = '⇧';
+      shiftBtn.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      shiftBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        applyShift(!shiftActive);
+        mqField.focus();
+      });
+      container.appendChild(shiftBtn);
+    }
+    row.forEach(function (ch) {
+      var btn = document.createElement('button');
+      btn.className = 'mq-btn';
+      btn.title = ch;
+      btn.textContent = ch;
+      btn._char = ch;
+      btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var c = shiftActive
+          ? (/[a-z]/.test(ch) ? ch.toUpperCase() : (shiftSymbol[ch] || ch))
+          : ch;
+        mqField.typedText(c);
+        // Auto-release shift after any shifted keypress
+        if (shiftActive) { applyShift(false); }
+        updatePreview();
+        mqField.focus();
+      });
+      if (/[a-z]/.test(ch)) letterBtns.push(btn)
+      else if (shiftSymbol[ch] !== undefined) digitBtns.push(btn);
+      container.appendChild(btn);
+    });
+  });
+
+
+  // ── 3. Greek letters — rows of 9 ─────────────────────────────────────────
+
+  var greekRows = [
+    // Row 1: α–θ (9)
+    [ writeBtn('α','\\alpha','alpha'), writeBtn('β','\\beta','beta'), writeBtn('γ','\\gamma','gamma'),
+      writeBtn('δ','\\delta','delta'), writeBtn('ϵ','\\epsilon','epsilon'),
+      writeBtn('ε','\\varepsilon','varepsilon'), writeBtn('ζ','\\zeta','zeta'),
+      writeBtn('η','\\eta','eta'), writeBtn('θ','\\theta','theta') ],
+    // Row 2: ι–χ (9)
+    [ writeBtn('ι','\\iota','iota'), writeBtn('κ','\\kappa','kappa'), writeBtn('λ','\\lambda','lambda'),
+      writeBtn('μ','\\mu','mu'), writeBtn('ν','\\nu','nu'), writeBtn('ξ','\\xi','xi'),
+      writeBtn('π','\\pi','pi'), writeBtn('ρ','\\rho','rho'), writeBtn('σ','\\sigma','sigma') ],
+    // Row 3: τ–ω (9)
+    [ writeBtn('τ','\\tau','tau'), writeBtn('υ','\\upsilon','upsilon'), writeBtn('φ','\\phi','phi'),
+      writeBtn('ϕ','\\varphi','varphi'), writeBtn('χ','\\chi','chi'), writeBtn('ψ','\\psi','psi'),
+      writeBtn('ω','\\omega','omega'),
+      writeBtn('Γ','\\Gamma','Gamma'), writeBtn('Δ','\\Delta','Delta') ],
+    // Row 4: uppercase (8)
+    [ writeBtn('Θ','\\Theta','Theta'), writeBtn('Λ','\\Lambda','Lambda'), writeBtn('Ξ','\\Xi','Xi'),
+      writeBtn('Π','\\Pi','Pi'), writeBtn('Σ','\\Sigma','Sigma'), writeBtn('Φ','\\Phi','Phi'),
+      writeBtn('Ψ','\\Psi','Psi'), writeBtn('Ω','\\Omega','Omega') ],
+  ];
+
+  ['grow1','grow2','grow3','grow4'].forEach(function (id, i) {
+    var rowEl = document.getElementById(id);
+    greekRows[i].forEach(function (btn) { rowEl.appendChild(btn); });
+  });
+
+  // ── 4. Functions — four groups ────────────────────────────────────────────
+
+  var grpLogExp = [
+    funcWriteBtn('log', '\\log', 'Logarithm'),
+    funcWriteBtn('ln', '\\ln', 'Natural log'),
+    funcWriteBtn(PR.logBase, '\\log_{}', 'Log with base'),
+    typeBtn(PR.ePow, 'e^', 'e to a power')
+  ];
+
+  var grpTrig = [
+    funcWriteBtn('sin',   '\\sin',  'Sine'),
+    funcWriteBtn('cos',  '\\cos',  'Cosine'),
+    funcWriteBtn('tan',   '\\tan',  'Tangent'),
+    funcWriteBtn('sec',   '\\sec',  'Secant'),
+    funcWriteBtn('csc',  '\\csc',  'Cosecant'),
+    funcWriteBtn('cot', '\\cot',  'Cotangent'),
+    funcWriteBtn('sinh',   '\\sinh', 'Hyperbolic sine'),
+    funcWriteBtn('cosh', '\\cosh', 'Hyperbolic cosine'),
+    funcWriteBtn('tanh','\\tanh', 'Hyperbolic tangent'),
+  ];
+
+  var grpArcTrig = [
+    funcWriteBtn(PR.arcsin,    '\\sin^{-1}', 'Arcsine'),
+    funcWriteBtn(PR.arccos,  '\\cos^{-1}', 'Arccosine'),
+    funcWriteBtn(PR.arctan, '\\tan^{-1}', 'Arctangent'),
+  ];
+
+  buildGroupedPanel(document.getElementById('panel-functions'), [
+    grpLogExp,
+    grpTrig,
+    grpArcTrig, 
+  ]);
+
+  // ── 5. Symbols — four groups ──────────────────────────────────────────────
+
+  var grpRelations = [
+    writeBtn('=',        '=',          'Equals'),
+    writeBtn('≠',      '\\ne',       'Not equal'),
+    writeBtn('≈',        '\\approx',   'Approximately equal'),
+    writeBtn('≡',        '\\equiv',    'Equivalent'),
+
+    writeBtn('<',      '\\lt',       'Less than'),
+    writeBtn('>',      '\\gt',       'Greater than'),
+    writeBtn('≤',      '\\le',       'Less than or equal'),
+    writeBtn('≥',      '\\ge',       'Greater than or equal'),
+    
+    writeBtn('∼',        '\\sim',      'Similar'),
+    writeBtn('≅',        '\\cong',     'Congruent'),
+    writeBtn('∝',        '\\propto',   'Proportional'),
+  ];
+
+    var grpLogic = [
+    writeBtn('∧',   '\\wedge',    'Logical AND'),
+    writeBtn('∨',     '\\vee',      'Logical OR'),
+    writeBtn('¬',        '\\neg',      'Negation'),
+    writeBtn('~',        '\\sim',      'Negation'),
+    
+    writeBtn('⇒', '\\implies',  'Implies'),
+    writeBtn('⇔',     '\\iff',      'If and only if'),
+    writeBtn('⇐',        '\\Leftarrow',         'Double left arrow'),
+    writeBtn('⊕',   '\\oplus',    'XOR / direct sum'),
+
+    writeBtn('∀',        '\\forall',   'For all'),
+    writeBtn('∃',        '\\exists',   'There exists'),
+  ];
+
+  var grpArrows = [
+    writeBtn('→',      '\\to',                'Right arrow'),
+    writeBtn('←',        '\\leftarrow',         'Left arrow'),
+    writeBtn('↔',   '\\leftrightarrow',    'Left-right arrow'),
+    writeBtn('⇌',   '\\rightleftharpoons', 'Harpoons (equilibrium)'),
+  ];
+
+  buildGroupedPanel(document.getElementById('panel-symbols'), [
+    grpRelations,
+    grpLogic,
+    grpArrows,
+  ]);
+
+  // ── 6. Advanced ───────────────────────────────────────────────────────────
+  var advBtns = [
+    
+    writeBtnMove('∫', '\\int_{}^{}', 'Integral', ['Left', 'Down']),
+    writeBtn('d/dx', '\\frac{d}{dx}', 'Derivative d/dx'),
+    writeBtn('′', '\'', 'Prime'),
+    cmdBtn(PR.accdot, 'dot', 'Dot'),
+
+    writeBtnMove('lim', '\\lim_{}', 'Limit', ['Left']),
+    writeBtn('→',      '\\to',                'Right arrow'),
+    writeBtn('∞', '\\infty', 'Infinity'),
+    writeBtn('∇', '\\nabla', 'Nabla / gradient'),
+
+    writeBtnMove('∑', '\\sum_{}^{}', 'Sum', ['Left', 'Down']),
+    writeBtnMove('∏', '\\prod_{}^{}', 'Product', ['Left', 'Down']),
+    writeBtn('∂', '\\partial', 'Partial derivative'),
+    writeBtn('∂/∂x', '\\frac{\\partial}{\\partial x}', 'Partial derivative with x'),
+  ];
+
+  var grpSets = [
+    writeBtn('∈',        '\\in',       'Element of'),
+    writeBtn('∉',        '\\notin',    'Not element of'),
+    writeBtn('∪',   '\\cup',      'Union'),
+    writeBtn('∩',   '\\cap',     'Intersection'),
+
+    writeBtn('⊂',        '\\subset',   'Subset'),
+    writeBtn('⊃',        '\\supset',   'Superset'),
+    writeBtn('⊆',        '\\subseteq', 'Subset or equal'),
+    writeBtn('⊇',        '\\supseteq', 'Superset or equal'),
+    
+    writeBtn('∅',        '\\emptyset', 'Empty set'),
+    writeBtn('∖',        '\\setminus', 'Set difference'),
+  ];
+
+  var grpDoubleStruck = [
+    writeBtn('ℝ','\\mathbb{R}','Real numbers'),
+    writeBtn('ℕ','\\mathbb{N}','Natural numbers'),
+    writeBtn('ℤ','\\mathbb{Z}','Integers'),
+    writeBtn('ℚ','\\mathbb{Q}','Rationals'),
+    writeBtn('ℂ','\\mathbb{C}','Complex numbers'),
+  ];
+  buildGroupedPanel(document.getElementById('panel-advanced'), [
+    advBtns,
+    grpDoubleStruck,
+    grpSets
+  ]);
+
+  // ── 7. Matrix ─────────────────────────────────────────────────────────────
+  // matrixCmd helper: write and move cursor to first cell
+  function matWrite(latex, cols) {
+    return function() {
+      mqField.write(latex);
+      for (var i = 0; i < cols; i++) { mqField.keystroke('Left'); }
+      updatePreview();
+    };
+  }
+  // matrixCmd uses MathQuill's matrixCmd API for structural edits
+  function matCmd(cmd) {
+    return function() { mqField.matrixCmd(cmd); updatePreview(); };
+  }
+
+  function matWriteBtn(html, latex, title, cols, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || latex,
+      action: function () { 
+        mqField.write(latex); 
+        for (var i = 0; i < cols; i++) { mqField.keystroke('Left'); }
+      } }, opts || {}));
+  }
+
+  function matCmdBtn(html, cmd, title, opts) {
+    return mkBtn(Object.assign({ html: html, title: title || latex,
+      action: function () { mqField.matrixCmd(cmd); } }, opts || {}));
+  }
+
+  var grpMatrixTemplates = [
+    mkBtn({ html: '2×1', title: '2×1 matrix', action: matWrite('\\begin{bmatrix}\\\\\\end{bmatrix}', 1) }),
+    mkBtn({ html: '2×2', title: '2×2 matrix', action: matWrite('\\begin{bmatrix}&\\\\&\\end{bmatrix}', 2) }),
+    mkBtn({ html: '2×3', title: '2×3 matrix', action: matWrite('\\begin{bmatrix}&&\\\\&&\\end{bmatrix}', 3) }),
+    mkBtn({ html: '2×4', title: '2×4 matrix', action: matWrite('\\begin{bmatrix}&&&\\\\&&&\\end{bmatrix}', 4) }),
+    mkBtn({ html: '3×1', title: '3×1 matrix', action: matWrite('\\begin{bmatrix}\\\\\\\\\\end{bmatrix}', 1) }),
+    mkBtn({ html: '3×2', title: '3×2 matrix', action: matWrite('\\begin{bmatrix}&\\\\&\\\\&\\end{bmatrix}', 2) }),
+    mkBtn({ html: '3×3', title: '3×3 matrix', action: matWrite('\\begin{bmatrix}&&\\\\&&\\\\&&\\end{bmatrix}', 3) }),
+    mkBtn({ html: '3×4', title: '3×4 matrix', action: matWrite('\\begin{bmatrix}&&&\\\\&&&\\\\&&&\\end{bmatrix}', 4) }),
+  ];
+
+  var grpMatrixEdit = [
+    mkBtn({ html: '+Col', title: 'Add column',    action: matCmd('addColumn') }),
+    mkBtn({ html: '−Col', title: 'Delete column', action: matCmd('deleteColumn') }),
+    mkBtn({ html: '+Row', title: 'Add row',       action: matCmd('addRow') }),
+    mkBtn({ html: '−Row', title: 'Delete row',    action: matCmd('deleteRow') }),
+  ];
+
+  buildGroupedPanel(document.getElementById('panel-matrix'), [
+    grpMatrixTemplates,
+    grpMatrixEdit,
+  ]);
+
+  // ── Always-visible nav bar ────────────────────────────────────────────────
+  var navBar = document.getElementById('nav-bar');
+  var navLabel = document.createElement('span');
+  navLabel.textContent = 'Navigate:';
+  navLabel.style.cssText = 'font-size:11px;color:var(--text-dim);margin-right:2px;white-space:nowrap;';
+  navBar.appendChild(navLabel);
+
+  var navBtns = [
+    keystrokeBtn('←', 'Left',      'Move left',  { extraClass: 'nav-btn' }),
+    keystrokeBtn('→', 'Right',     'Move right', { extraClass: 'nav-btn' }),
+    keystrokeBtn('↑', 'Up',        'Move up',    { extraClass: 'nav-btn' }),
+    keystrokeBtn('↓', 'Down',      'Move down',  { extraClass: 'nav-btn' }),
+    keystrokeBtn('⌫', 'Backspace', 'Backspace',  { extraClass: 'del-btn' }),
+  ];
+  navBtns.forEach(function (b, i) {
+    b.setAttribute('tabindex', i === 0 ? '0' : '-1');
+    navBar.appendChild(b);
+  });
+
+  function setNavTabIndex(btn) {
+    navBtns.forEach(function (b) { b.setAttribute('tabindex', b === btn ? '0' : '-1'); });
+    btn.focus();
+  }
+
+  navBar.addEventListener('keydown', function (e) {
+    var key = e.key;
+    if (key !== 'ArrowRight' && key !== 'ArrowLeft' &&
+        key !== 'Home'       && key !== 'End') return;
+    var idx = navBtns.indexOf(document.activeElement);
+    if (idx === -1) idx = 0;
+    e.preventDefault();
+    var next;
+    if      (key === 'ArrowRight') next = navBtns[(idx + 1) % navBtns.length];
+    else if (key === 'ArrowLeft')  next = navBtns[(idx - 1 + navBtns.length) % navBtns.length];
+    else if (key === 'Home')       next = navBtns[0];
+    else if (key === 'End')        next = navBtns[navBtns.length - 1];
+    setNavTabIndex(next);
+  });
+
+  // Initialise the roving tabindex now that all panel buttons exist
+  resetPaletteRovingIndex();
+
+})();
+</script>
+</body>
+</html>
