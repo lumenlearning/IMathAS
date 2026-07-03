@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../../../mathquill/mathquill-basic.css">
 <script src="../../../../javascript/jquery.min.js"></script>
 <script src="../../../../mathquill/mathquill.min.js?v=070326c"></script>
-<script src="../../../../mathquill/AMtoMQ_min.js?v=070326c"></script>
+<script src="../../../../mathquill/AMtoMQ.js?v=070326c"></script>
 
 <style>
 /* ── reset / base ── */
@@ -697,9 +697,9 @@ body {
   }
 
   function intervalWriteBtn(html, cmdval, title, opts) {
-    if (html == cmdval) {
-      html = '<span class="mq-non-leaf"><span class="mq-scaled mq-paren" style="transform: scale(1, 1.2);">'+cmdval.charAt(0)+'</span><span class="mq-non-leaf mq-empty"></span><span class="mq-scaled mq-paren" style="transform: scale(1, 1.2);">'+cmdval.charAt(1)+'</span></span>'
-    }
+    //if (html == cmdval) {
+      html = '<span class="mq-non-leaf"><span class="mq-scaled mq-paren" style="transform: scale(1, 1.2);">'+html.charAt(0)+'</span><span class="mq-non-leaf mq-empty"></span><span class="mq-scaled mq-paren" style="transform: scale(1, 1.2);">'+html.charAt(1)+'</span></span>'
+    //}
     return mkBtn(Object.assign({ html: html, title: title || html,
       action: function () { 
         var sel = mqField.selection();
@@ -795,9 +795,12 @@ body {
     intervalWriteBtn('()', '()', 'Parentheses'),
     intervalWriteBtn('||', '||', 'Absolute value'),
     intervalWriteBtn('[]', '[]', 'Brackets'),
-    intervalWriteBtn('⟨ ⟩', ['\\left\\langle','\\right\\rangle'], 'Angle brackets'),
+    intervalWriteBtn('{}', ['\\lbrace','\\rbrace'], 'Braces'),
+    
     intervalWriteBtn('[)', '[)', 'Interval closed left'),
     intervalWriteBtn('(]', '(]', 'Interval closed right'),
+    intervalWriteBtn('⟨⟩', ['\\left\\langle','\\right\\rangle'], 'Angle brackets'),
+    intervalWriteBtn('‖‖', ['\\left\\lVert','\\right\\rVert'], 'Norm'),
   ];
 
   // Row 1, Group D: Accent / decorator symbols

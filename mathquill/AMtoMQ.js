@@ -190,6 +190,7 @@ var AMQsymbols = [
 {input:"log",  tag:"mo", ttype:UNARY, func:true},
 {input:"ln",   tag:"mo",  ttype:UNARY, func:true},
 {input:"abs",   tag:"mo",  ttype:UNARY},
+{input:"norm",   tag:"mo",  ttype:UNARY},
 
 {input:"innerfield", tag:"mo", output:"MathQuillMathField", ttype:UNARY},
 
@@ -518,6 +519,8 @@ function AMQTparseSexpr(str) { //parses str and returns [node,tailstr]
 	      return ['\\sqrt{'+result[0]+'}',result[1]];
       } else if (symbol.input == "abs") {           // sqrt
 	      return ['\\left|{'+result[0]+'}\\right|',result[1]];
+      } else if (symbol.input == "norm") {           // sqrt
+	      return ['\\left\\lVert{'+result[0]+'}\\right\\rVert',result[1]];
       } else if (symbol.input == "cancel") {           // cancel
 	      return ['\\cancel{'+result[0]+'}',result[1]];
       } else if (typeof symbol.rewriteleftright != "undefined") {  // abs, floor, ceil
@@ -814,6 +817,20 @@ function MQtoAM(tex,display) {
     tex = tex.replace(/\\varnothing/g,' \\emptyset ');
     tex = tex.replace(/\\mathbb{([RCNZQ])}/g,' $1$1 ');
 	}
+  while ((i = tex.lastIndexOf('\\left\\lVert'))!=-1) { //found a left ||)
+    rb = tex.indexOf('\\right\\rVert',i+1);
+    if (rb!=-1) {  //have a right ||  - replace with norm( )
+      // if sin||x||, conver to sin(norm(x))
+      isfuncleft = false;
+      if (!display) {
+        isfuncleft = tex.substring(0,i).match(/(arcsinh|arccosh|arctanh|arcsech|arccsch|arccoth|arcsin|arccos|arctan|arcsec|arccsc|arccot|sinh|cosh|tanh|sech|csch|coth|ln|log|exp|sin|cos|tan|sec|csc|cot)(\^\d+)?$/);
+      }
+      tex = tex.substring(0,rb) + ")" + (isfuncleft?')':'') + tex.substring(rb+12);
+      tex = tex.substring(0,i) + (isfuncleft?'(':'') + "norm(" + tex.substring(i+11);
+    } else {
+      tex = tex.substring(0,i) + "||" + tex.substring(i+11);
+    }
+  }
   tex = tex.replace(/\\begin{bmatrix}(.*?)\\end{bmatrix}/g, function(m, p) {
     return '[(' + p.replace(/\\\\/g,'),(').replace(/&/g,',') + ')]';
   });
