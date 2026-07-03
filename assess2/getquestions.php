@@ -73,6 +73,11 @@ $assessInfoOut['questions'] = $assess_record->getAllQuestionObjects($showscores,
 // get showwork_after, showwork_cutoff (min), showwork_cutoff_in (timestamp)
 getShowWorkAfter($assessInfoOut, $assess_record, $assess_info);
 
+// get single work
+if ($assess_info->getSetting('singleshowwork')) {
+  $assessInfoOut['swgen'] = $assess_record->getGenShowwork();
+}
+
 //prep date display
 prepDateDisp($assessInfoOut);
 

@@ -847,6 +847,10 @@ class AssessRecord
    */
   public  function setAutoSave($time, $timeactive, $qn, $pn) {
     $err = '';
+    if ($qn === 'gen') {
+      $this->saveWork([$qn => $_POST['sw' . $qn]], true);
+      return;
+    }
     $qn = intval($qn);
     $this->parseData();
     $data = &$this->data['autosaves'];
@@ -1701,6 +1705,15 @@ class AssessRecord
 
 
     return $out;
+  }
+
+  /**
+   * Get singlebox showwork
+   * @param string $ver    version to get work for
+   */
+  public function getGenShowwork($ver = 'last') {
+    $aver = $this->getAssessVer($ver);
+    return [$aver['swgen'] ?? '', isset($aver['swgentime']) ? tzdate("n/j/y, g:i a", $aver['starttime'] + $aver['swgentime']) : ''];
   }
 
   /**
@@ -2604,6 +2617,7 @@ class AssessRecord
       $qns = range(0, count($assessver['questions']) - 1);
     }
     foreach ($qns as $qn) {
+      if ($qn === 'gen') { continue; }
       $question_versions = $assessver['questions'][$qn]['question_versions'];
       if (!$by_question || $ver === 'last') {
         $curq = $question_versions[count($question_versions) - 1];
@@ -3355,6 +3369,9 @@ class AssessRecord
         $aver['score'],
         $this->assess_info->getSetting('points_possible')
       );
+      if ($this->assess_info->getSetting('singleshowwork')) {
+        [$out['swgen'], $out['swgentime']] = $this->getGenShowwork($av);
+      }
     }
     return $out;
   }
@@ -4325,6 +4342,16 @@ class AssessRecord
     $workafterCutoff = $this->getShowWorkAfterCutoff();
     $acceptWorkAfter = ($workafterCutoff == 0 || $this->now < $workafterCutoff + 30);
     foreach ($work as $qn=>$val) {
+      if ($qn === 'gen') {
+        $newwork = Sanitize::incomingHtml($val, true, 30000);
+        if (!isset($assessver['swgen']) || $assessver['swgen'] != $newwork) {
+            $assessver['swgen'] = $newwork;
+            $assessver['swgentime'] = time() - $this->assessRecord['starttime'];
+        } else {
+            unset($work[$qn]);
+        }
+        continue;
+      }
       $question_versions = &$assessver['questions'][$qn]['question_versions'];
       $curq = &$question_versions[count($question_versions) - 1];
       if ($during || 

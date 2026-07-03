@@ -286,6 +286,11 @@ export const actions = {
       const nQuestions = store.assessInfo.questions.length;
       if (qAttempted !== nQuestions) {
         warnMsg = 'header-confirm_assess_unattempted_submit';
+      } else if ((store.assessInfo.singleshowwork & 8) &&  // single showwork, during only
+          (store.assessInfo.singleshowwork & 3)==1 &&
+          (!store.work.hasOwnProperty('gen') || store.work['gen'] == '' || store.work['gen'] == '<p></p>')
+      ) {
+        warnMsg = 'header-confirm_assess_nowork_submit';
       }
       store.confirmObj = {
         body: warnMsg,
@@ -319,11 +324,19 @@ export const actions = {
     const data = {};
     // get values again, in case event trigger didn't happen
     window.$('.swbox').each(function () {
-      const qn = parseInt(this.id.substr(2));
-      if (!store.assessInfo.questions[qn].hasOwnProperty('work') ||
-        this.value !== store.assessInfo.questions[qn].work
-      ) {
-        store.work[qn] = this.value;
+      if (this.id === 'swgen') {
+        if (!store.assessInfo.hasOwnProperty('swgen') ||
+          this.value !== store.assessInfo.swgen
+        ) {
+          store.work['gen'] = this.value;
+        }
+      } else {
+        const qn = parseInt(this.id.substr(2));
+        if (!store.assessInfo.questions[qn].hasOwnProperty('work') ||
+          this.value !== store.assessInfo.questions[qn].work
+        ) {
+          store.work[qn] = this.value;
+        }
       }
     });
     for (const qn in store.work) {
@@ -364,7 +377,11 @@ export const actions = {
         }
         // copy into questions for reload later if needed
         for (const qn in store.work) {
-          store.assessInfo.questions[parseInt(qn)].work = store.work[qn];
+          if (qn === 'gen') {
+            store.assessInfo.swgen = store.work['gen'];
+          } else {
+            store.assessInfo.questions[parseInt(qn)].work = store.work[qn];
+          }
           delete store.work[qn];
         }
 
@@ -598,6 +615,10 @@ export const actions = {
         break;
       }
     }
+    if ((store.assessInfo.singleshowwork & 8) &&  // single showwork after
+        (store.assessInfo.singleshowwork & 2)) {
+        hasShowWorkAfter = true;
+    }
 
     if (store.assessInfo.submitby === 'by_question') {
       if (hasShowWorkAfter && !store.assessInfo.in_practice) {
@@ -652,7 +673,7 @@ export const actions = {
         continue; // skip it
       }
       tosaveqn[qn] = store.autosaveQueue[qn];
-      if (store.autosaveQueue[qn].length === 1 && store.autosaveQueue[qn][0] === 0) {
+      if (qn !== 'gen' && store.autosaveQueue[qn].length === 1 && store.autosaveQueue[qn][0] === 0) {
         // one part, might be single part
         valstr = window.imathasAssess.preSubmit(qn);
         if (valstr !== false) {
@@ -678,23 +699,25 @@ export const actions = {
           data.append('qn' + subqn + '-val', valstr);
         }
       }
-      var regex = new RegExp('^(qn|tc|qs)(' + regexpts.join('\\b|') + '\\b)');
-      window.$('#questionwrap' + qn).find('input,select,textarea').each(function (i, el) {
-        if (el.name.match(regex)) {
-          if ((el.type !== 'radio' && el.type !== 'checkbox') || el.checked) {
-            if (el.type === 'file') {
-              if (el.files.length === 0) {
-                data.append(el.name, '');
+      if (qn !== 'gen') {
+        var regex = new RegExp('^(qn|tc|qs)(' + regexpts.join('\\b|') + '\\b)');
+        window.$('#questionwrap' + qn).find('input,select,textarea').each(function (i, el) {
+          if (el.name.match(regex)) {
+            if ((el.type !== 'radio' && el.type !== 'checkbox') || el.checked) {
+              if (el.type === 'file') {
+                if (el.files.length === 0) {
+                  data.append(el.name, '');
+                } else {
+                  data.append(el.name, el.files[0]);
+                }
               } else {
-                data.append(el.name, el.files[0]);
+                data.append(el.name, window.imathasAssess.preSubmitString(el.name, el.value));
               }
-            } else {
-              data.append(el.name, window.imathasAssess.preSubmitString(el.name, el.value));
             }
           }
-        }
-      });
-      lastLoaded[qn] = store.lastLoaded[qn].getTime();
+        });
+        lastLoaded[qn] = store.lastLoaded[qn].getTime();
+      }
     }
     data.append('autosave-tosaveqn', JSON.stringify(tosaveqn));
     data.append('autosave-lastloaded', JSON.stringify(lastLoaded));
@@ -707,6 +730,10 @@ export const actions = {
   },
   markAutosavesDone () {
     for (const qn in store.autosaveQueue) {
+      if (qn === 'gen') { 
+        store.assessInfo.swgen = store.work['gen'];
+        continue;
+      }
       for (const k in store.autosaveQueue[qn]) {
         if (store.assessInfo.questions[parseInt(qn)].hasOwnProperty('parts_entered')) {
           if (store.assessInfo.questions[parseInt(qn)].parts_entered.indexOf(store.autosaveQueue[qn][k]) === -1) {
@@ -992,6 +1019,7 @@ export const actions = {
     const byQuestion = (store.assessInfo.submitby === 'by_question');
     const assessRegen = store.assessInfo.prev_attempts.length;
     for (const qn in qns) {
+      if (qn === 'gen') { continue; }
       const parttries = [];
       const qdata = store.assessInfo.questions[qn];
       for (let pn = 0; pn < qdata.parts.length; pn++) {

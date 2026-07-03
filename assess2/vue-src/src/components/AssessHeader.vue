@@ -252,6 +252,10 @@ export default {
           break;
         }
       }
+      if ((store.assessInfo.singleshowwork & 8) &&  // single showwork after
+          (store.assessInfo.singleshowwork & 2)) {
+          hasShowWorkAfter = true;
+      }
       return hasShowWorkAfter;
     },
     msglink () {

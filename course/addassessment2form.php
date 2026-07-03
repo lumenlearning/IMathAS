@@ -67,6 +67,7 @@ $vueData = array(
 	'showhints' => ($line['showhints']&1) > 0,
     'showwork' => ($line['showwork']&3),
     'showworktype' => ($line['showwork']&4),
+	'showworkonebox' => ($line['showwork']&8),
     'doworkcutoff' => ($line['workcutoff'] > 0),
     'workcutofftype' => $workcutofftype,
     'workcutoffval' => $workcutoffval,
@@ -433,6 +434,14 @@ $vueData = array(
                     <select name="showworktype" id="showworktype" v-model="showworktype">
                         <option value="0"><?php echo _('Essay');?></option>
                         <option value="4"><?php echo _('File upload');?></option>
+                    </select>
+                </span>
+				<span v-if="showwork > 0">
+                    <br>
+                    <label for="showworktype"><?php echo _('Work entry format');?>:</label>
+                    <select name="showworkonebox" id="showworkonebox" v-model="showworkonebox">
+                        <option value="0"><?php echo _('Separate entry for each question');?></option>
+                        <option value="8"><?php echo _('One entry for the whole assessment');?></option>
                     </select>
                 </span>
                 <span>

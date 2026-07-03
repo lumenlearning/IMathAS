@@ -315,6 +315,18 @@
         </div>
 
         <div v-if="viewFull">
+          <div v-if="hasSingleShowwork" class="bigquestionwrap">
+            <div class="headerpane">
+              <strong>{{ $t('work-gbtitle') }}</strong>
+            </div>
+            <gb-showwork
+              :work = "aData.assess_versions[curAver].swgen"
+              :worktime = "aData.assess_versions[curAver].swgentime"
+              :showall = "showAllWork"
+              :previewfiles = "op_previewFiles"
+            />
+          </div>
+
           <inter-question-text
             v-if = "aData.hasOwnProperty('intro') && aData.intro !== ''"
             v-show = "!hidetexts"
@@ -823,6 +835,9 @@ export default {
     },
     hasExit () {
       return (window.exiturl && window.exiturl !== '');
+    },
+    hasSingleShowwork () {
+      return (this.aData.assess_versions[store.curAver].hasOwnProperty('swgen'));   // during
     }
   },
   methods: {

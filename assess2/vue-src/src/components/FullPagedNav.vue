@@ -21,7 +21,7 @@
         @click="navigate"
         @keypress.enter="navigate"
         role="link"
-        :disabled="page < (this.hasIntro ? 0 : 1)"
+        :disabled="disppage <= firstPage"
         class="secondarybtn"
         id="qprev"
         :aria-label="$t('previous')"
@@ -40,7 +40,7 @@
         @click="navigate"
         @keypress.enter="navigate"
         role="link"
-        :disabled="page>=pagesData.length-1"
+        :disabled="disppage >= lastPage"
         class="secondarybtn"
         id="qnext"
         :aria-label="$t('next')"
@@ -110,10 +110,29 @@ export default {
           numattempted: numAttempted
         };
       }
+      if (this.showSingleShowwork) {
+        const disppage = this.pagesData.length + 1;
+        out[disppage] = {
+          disppage: disppage,
+          title: this.$t('work-add'),
+          internallink: '/full/page/' + disppage,
+          numquestions: 0
+        };
+      }
       return out;
+    },
+    firstPage () {
+      return Math.min(...Object.keys(this.navOptions).map(Number));
+    },
+    lastPage () {
+      return Math.max(...Object.keys(this.navOptions).map(Number));
     },
     showNextPrev () {
       return (Object.keys(this.navOptions).length > 1);
+    },
+    showSingleShowwork () {
+      return ((store.assessInfo.singleshowwork & 8) &&  // single showwork
+              (store.assessInfo.singleshowwork & 1));   // during
     }
   }
 };

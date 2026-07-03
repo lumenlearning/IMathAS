@@ -71,7 +71,7 @@ $include_from_assess_info = array(
   'can_use_latepass', 'allowed_attempts', 'retake_penalty', 'exceptionpenalty', 'earlybonus',
   'timelimit_multiplier', 'latepasses_avail', 'latepass_extendto', 'keepscore',
   'noprint', 'overtime_penalty', 'overtime_grace', 'reqscorevalue', 
-  'attemptext', 'showworktype', 'latepass_enddate', 'latepass_after', 'latepass_reason'
+  'attemptext', 'showworktype', 'singleshowwork', 'latepass_enddate', 'latepass_after', 'latepass_reason'
 );
 $assessInfoOut = $assess_info->extractSettings($include_from_assess_info);
 

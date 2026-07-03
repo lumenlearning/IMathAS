@@ -207,7 +207,9 @@ export default {
     },
     showSubmit () {
       return (store.assessInfo.submitby === 'by_assessment' &&
-        this.qn === store.assessInfo.questions.length - 1
+        this.qn === store.assessInfo.questions.length - 1 &&
+        !((store.assessInfo.singleshowwork & 8) &&  // single showwork
+          (store.assessInfo.singleshowwork & 1))
       );
     }
   },

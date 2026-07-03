@@ -1,6 +1,6 @@
 <template>
   <span class="flex-nowrap-center">
-    <icons :name="statusIcon" class="qstatusicon" v-if="option.dispqn > 0" />
+    <icons :name="statusIcon" class="qstatusicon" v-if="showIcon" />
     <span class="qname-wrap">
       <span
         :class="{greystrike: option.withdrawn > 0}"
@@ -34,8 +34,11 @@ export default {
     Icons
   },
   computed: {
+    showIcon () {
+      return this.option.hasOwnProperty('status');
+    },
     statusIcon () {
-      if (this.option.dispqn === 0) {
+      if (!this.option.hasOwnProperty('status')) {
         return 'none';
       } else {
         return this.option.status;
@@ -44,6 +47,8 @@ export default {
     nameDisp () {
       if (this.option.dispqn === 0) {
         return this.$t('intro');
+      } else if (this.option.hasOwnProperty('title')) {
+        return this.option.title;
       } else {
         return this.$t('question_n', { n: this.option.dispqn });
       }
@@ -56,7 +61,7 @@ export default {
       }
     },
     scoreDisplay () {
-      if (this.option.dispqn === 0) {
+      if (!this.option.hasOwnProperty('points_possible')) {
         return '';
       } else if (this.option.hasOwnProperty('gbscore') && this.option.tries_max > 1) {
         return this.option.gbscore + '/' + this.$t('header-pts', {n: this.option.points_possible});

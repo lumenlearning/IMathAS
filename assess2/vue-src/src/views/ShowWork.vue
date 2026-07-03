@@ -22,10 +22,21 @@
       <p v-if="questions.length === 0">
         {{ $t('work-noquestions') }}
       </p>
+      <div v-if="showSingleShowwork">
+        <p>{{ $t('work-all') }}</p>
+        <showwork-input
+            id="swgen"
+            qn="gen"
+            :value = "genwork"
+            rows = "20"
+            @input = "(val) => workChanged('gen', val)"
+          />
+      </div>
       <div v-for="(question,curqn) in questions" :key="curqn">
         <full-question-header
           :qn = "curqn"
           :showretry="false"
+          v-if = "question.html !== null || question.showwork&2"
         />
         <question
           v-if = "question.html !== null"
@@ -33,10 +44,10 @@
           :key="'sq'+curqn"
           :active = "true"
           :disabled = "true"
-          :getwork = "2"
+          :getwork = "(question.showwork&2)==2 ? 2 : 0"
           @workchanged = "(val) => workChanged(curqn, val)"
         />
-        <div v-else>
+        <div v-else-if="question.showwork&2">
           <showwork-input
             :id="'sw' + curqn"
             :qn="curqn"
@@ -63,7 +74,7 @@ import ShowworkInput from '@/components/ShowworkInput.vue';
 import Timer from '@/components/Timer.vue';
 
 export default {
-  name: 'Summary',
+  name: 'ShowWork',
   components: {
     Question,
     FullQuestionHeader,
@@ -94,7 +105,7 @@ export default {
     questions () {
       var out = {};
       for (var qn in store.assessInfo.questions) {
-        if (store.assessInfo.questions[qn].showwork & 2) {
+        if ((store.assessInfo.questions[qn].showwork & 2) || this.showSingleShowwork) {
           out[qn] = store.assessInfo.questions[qn];
         }
       }
@@ -102,6 +113,13 @@ export default {
     },
     saveLabel () {
       return store.inAssess ? this.$t('work-save_continue') : this.$t('work-save');
+    },
+    showSingleShowwork () {
+      return ((store.assessInfo.singleshowwork & 8) &&  // single showwork
+              (store.assessInfo.singleshowwork & 2));   // after
+    },
+    genwork () {
+      return store.assessInfo.swgen ?? '';
     }
   },
   methods: {

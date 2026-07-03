@@ -65,6 +65,10 @@
           :active="curqn == qn"
           :getwork="1"
         />
+        <showwork-single 
+          showheader="true"
+          v-if="showSingleShowwork && curqn == qn && qn == lastQ" 
+        />
         <inter-question-text-list
           pos = "after"
           :qn = "curqn"
@@ -101,6 +105,7 @@ import InterQuestionTextList from '@/components/InterQuestionTextList.vue';
 import VideocuedResultNav from '@/components/VideocuedResultNav.vue';
 import Question from '@/components/question/Question.vue';
 import IntroText from '@/components/IntroText.vue';
+import ShowworkSingle from '@/components/ShowworkSingle.vue';
 import { store } from '@/basicstore';
 
 export default {
@@ -112,7 +117,8 @@ export default {
     VideocuedResultNav,
     InterQuestionTextList,
     AssessHeader,
-    IntroText
+    IntroText,
+    ShowworkSingle
   },
   data: function () {
     return {
@@ -186,6 +192,10 @@ export default {
       } else {
         return store.assessInfo.interquestion_text;
       }
+    },
+    showSingleShowwork () {
+      return ((store.assessInfo.singleshowwork & 8) &&  // single showwork
+              (store.assessInfo.singleshowwork & 1));   // during
     }
   },
   methods: {

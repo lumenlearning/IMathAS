@@ -681,7 +681,14 @@
 
         $locdata = $assess_record->getQuestionLocs($qid,$ver);
 
+		if ($submitby != 'by_assessment') {
+			$singlework = $assess_record->getGenShowwork('last'); // there's only one aver for by_question
+		}
+
         foreach ($locdata as $vernum=>$lockeys) {
+			if ($submitby == 'by_assessment') {
+				$singlework = $assess_record->getGenShowwork($vernum);
+			}
             foreach ($lockeys as $loc) {
                 $teacherreview = $line['userid'];
                 $qdata = $assess_record->getGbQuestionVersionData($loc, true, $vernum, $cnt);
@@ -768,6 +775,15 @@
                     }
                     echo  $qdata['work'].'</div></div>';
                 }
+				if (!empty($singlework[0])) {
+					echo '<div class="questionpane viewworkwrap">';
+                    echo '<button type="button" onclick="toggleWork(this)">'._('View Work').'</button>';
+                    echo '<div class="introtext" style="display:none;">';
+                    if ($singlework[1] !== '') {
+                        echo '<div class="small">' . _('Last Changed').': '.$singlework[1].'</div>';
+                    }
+                    echo  $singlework[0].'</div></div>';
+				}
                 echo '</div>';
                 echo "<div class=scoredetails>";
                 echo '<span class="person">'.Sanitize::encodeStringForDisplay($line['LastName']).', '.Sanitize::encodeStringForDisplay($line['FirstName']).': </span>';

@@ -227,6 +227,7 @@ header-work_save_avail = Save progress button available
 header-work_saving = Saving...
 header-confirm_assess_submit = After submitting, you will not be able to change your answers on this version of the assessment. Are you ready to submit?
 header-confirm_assess_unattempted_submit = There appears to be unattempted questions. After submitting, you will not be able to change your answers on this version of the assessment. Are you ready to submit?
+header-confirm_assess_nowork_submit = You have not added any work. After submitting, you will not be able to add work on this version of the assessment. Are you ready to submit?
 header-preview_all = Instructor Preview of All Questions
 
 # Resource
@@ -639,6 +640,8 @@ work-duein = Work must be submitted by {$date}
 work-save_continue = Save Work and Continue
 work-add_prev = You can still show or attach work for the previous attempt
 work-remove = Are you sure you want to remove this file?
+work-all = Add work here for all questions
+work-gbtitle = Work
 
 # Regions
 regions-questions = Questions and text

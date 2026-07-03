@@ -21,7 +21,7 @@ export default {
   },
   computed: {
     statusIcon () {
-      if (this.option.disppage === 0) {
+      if (this.option.disppage === 0 || this.option.numquestions === 0) {
         return 'none';
       } else if (this.option.numquestions === this.option.numattempted) {
         return 'attempted';

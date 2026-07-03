@@ -31,7 +31,7 @@
               @click="navigate"
               @keypress.enter="navigate"
               role="link"
-              :disabled="qn < (this.hasIntro ? 0 : 1)"
+              :disabled="qn <= firstPage"
               class="secondarybtn"
               id="qprev"
               :aria-label="$t('previous')"
@@ -51,7 +51,7 @@
               @click="navigate"
               @keypress.enter="navigate"
               role="link"
-              :disabled="qn>=ainfo.questions.length-1"
+              :disabled="qn>=lastPage"
               class="secondarybtn"
               id="qnext"
               :aria-label="$t('next')"
@@ -63,6 +63,7 @@
         </div>
     </div>
     <question-header-icons
+      v-if = "curQData !== null"
       :showscore = "showScore"
       :curQData = "curQData"
       :qn = "qn"
@@ -99,6 +100,9 @@ export default {
       return store.assessInfo;
     },
     curQData () {
+      if (!store.assessInfo.questions.hasOwnProperty(this.qn)) {
+        return null;
+      }
       return store.assessInfo.questions[this.qn];
     },
     dispqn () {
@@ -134,6 +138,15 @@ export default {
         }
         out.push(thisoption);
       }
+      if (this.showSingleShowwork) {
+        const dispqn = store.assessInfo.questions.length + 1;
+        out.push({
+          dispqn: dispqn,
+          internallink: '/skip/' + dispqn,
+          withdrawn: 0,
+          title: this.$t('work-add'),
+        });
+      }
       return out;
     },
     showScore () {
@@ -168,6 +181,16 @@ export default {
     },
     showNextPrev () {
       return (Object.keys(this.navOptions).length > 1);
+    },
+    firstPage () {
+      return Math.min(...this.navOptions.map(obj => obj.dispqn)) - 1;
+    },
+    lastPage () {
+      return Math.max(...this.navOptions.map(obj => obj.dispqn)) - 1;
+    },
+    showSingleShowwork () {
+      return ((store.assessInfo.singleshowwork & 8) &&  // single showwork
+              (store.assessInfo.singleshowwork & 1));   // during
     }
   },
   methods: {

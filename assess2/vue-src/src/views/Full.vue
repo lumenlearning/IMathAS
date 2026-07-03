@@ -64,6 +64,10 @@
         :active = "showTexts"
       />
     </div>
+    <showwork-single 
+      showheader="true"
+      v-if="showSingleShowwork" 
+    />
     <p v-if = "showSubmit">
       <button
         type = "button"
@@ -82,6 +86,7 @@ import FullQuestionHeader from '@/components/FullQuestionHeader.vue';
 import Question from '@/components/question/Question.vue';
 import InterQuestionTextList from '@/components/InterQuestionTextList.vue';
 import IntroText from '@/components/IntroText.vue';
+import ShowworkSingle from '@/components/ShowworkSingle.vue';
 import { store, actions } from '@/basicstore';
 
 export default {
@@ -96,7 +101,8 @@ export default {
     AssessHeader,
     FullQuestionHeader,
     InterQuestionTextList,
-    IntroText
+    IntroText,
+    ShowworkSingle
   },
   computed: {
     intro () {
@@ -136,6 +142,10 @@ export default {
     },
     questionsLink () {
       return '../course/addquestions2.php?aid=' + store.aid + '&cid=' + store.cid;
+    },
+    showSingleShowwork () {
+      return ((store.assessInfo.singleshowwork & 8) &&  // single showwork
+              (store.assessInfo.singleshowwork & 1));   // during
     }
   },
   methods: {

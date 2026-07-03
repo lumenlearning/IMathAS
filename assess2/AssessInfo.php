@@ -296,6 +296,7 @@ class AssessInfo
   */
   public function loadQuestionSettings($qids = 'all', $get_code = false, $get_cats = true) {
     if (is_array($qids)) {
+      if (count($qids) == 0) { return; }
       $ph = Sanitize::generateQueryPlaceholders($qids);
       $stm = $this->DBH->prepare("SELECT * FROM imas_questions WHERE id IN ($ph)");
       $stm->execute(array_values($qids));
@@ -1140,7 +1141,11 @@ class AssessInfo
     }
 
     if ($settings['showwork'] == -1) {
-      $settings['showwork'] = $defaults['showwork'];
+      if ($defaults['singleshowwork']&8) { // single; no question
+        $settings['showwork'] = 0; 
+      } else {
+        $settings['showwork'] = $defaults['showwork'];
+      }
     }
 
     if (!empty($settings['fixedseeds'])) {
@@ -1409,6 +1414,7 @@ class AssessInfo
     }
 
     $settings['showworktype'] = ($settings['showwork'] & 4);
+    $settings['singleshowwork'] = ($settings['showwork'] & 11);
     $settings['showwork'] = ($settings['showwork'] & 3);
 
     return $settings;

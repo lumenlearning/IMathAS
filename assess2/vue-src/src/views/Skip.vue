@@ -51,6 +51,10 @@
           :getwork="1"
         />
       </div>
+      <showwork-single 
+        v-if = "showSingleShowwork && qn == singleworkQn"
+        :showheader="false"
+      />
       <inter-question-text-skiplist
         pos = "after"
         :qn = "qn"
@@ -65,6 +69,7 @@ import SkipQuestionHeader from '@/components/SkipQuestionHeader.vue';
 import InterQuestionTextSkiplist from '@/components/InterQuestionTextSkiplist.vue';
 import Question from '@/components/question/Question.vue';
 import IntroText from '@/components/IntroText.vue';
+import ShowworkSingle from '@/components/ShowworkSingle.vue';
 import Icons from '@/components/widgets/Icons.vue';
 
 import { store } from '@/basicstore';
@@ -77,6 +82,7 @@ export default {
     InterQuestionTextSkiplist,
     AssessHeader,
     IntroText,
+    ShowworkSingle,
     Icons
   },
   computed: {
@@ -92,6 +98,13 @@ export default {
         qnArray[i] = i;
       }
       return qnArray;
+    },
+    singleworkQn () {
+      return store.assessInfo.questions.length;
+    },
+    showSingleShowwork () {
+      return ((store.assessInfo.singleshowwork & 8) &&  // single showwork
+              (store.assessInfo.singleshowwork & 1));   // during
     }
   },
   methods: {
