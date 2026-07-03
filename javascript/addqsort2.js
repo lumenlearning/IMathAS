@@ -1182,6 +1182,10 @@ function generateTable() {
     var pttotal = 0;
     var html = "";
     var totalcols = 10;
+    var tottime = 0;
+    var totvar = 0;
+    var totcnt = 0;
+    var totmissing = false;
 
     html += "<table cellpadding=5 class='gb questions-in-assessment'><thead><tr>";
     if (!beentaken) {
@@ -1234,10 +1238,34 @@ function generateTable() {
             //is group
             curitems = itemarray[i][2];
             curisgroup = 1;
+            var grptime = 0;
+            var grpvar = 0;
+            var grpcnt = 0;
+            for (var k=0; k<curitems.length; k++) {
+                if (curitems[k][8][3] < 5) {
+                    totmissing = true;
+                } else {
+                    grptime += curitems[k][8][0];
+                    grpvar += curitems[k][8][4];
+                    grpcnt++;
+                }
+            }
+            if (grpcnt>0) {
+                tottime += grptime * itemarray[i][0]/grpcnt;
+                totvar += grpvar * itemarray[i][0]/grpcnt;
+                totcnt += itemarray[i][0];
+            }
         } else {
             //not group
             var curitems = new Array();
             curitems[0] = itemarray[i];
+            if (itemarray[i][8][3] < 5) {
+                totmissing = true;
+            } else {
+                tottime += itemarray[i][8][0];
+                totvar += itemarray[i][8][4];
+                totcnt++;
+            }
         }
         curqitemloc = i - text_segment_count;
         //var ms = generateMoveSelect(i,itemcount);
@@ -1262,6 +1290,7 @@ function generateTable() {
                 } else {
                     curgrppoints = curitems[0][4];
                 }
+                
             }
             if (beentaken) {
                 if (curisgroup) {
@@ -1720,7 +1749,9 @@ function generateTable() {
                     html +=
                         "<br/>"+_("Avg time on first try: ") +
                         curitems[j][8][2] +
-                        _(" min")+"<br/>N=" +
+                        _(" min")+"<br/>&sigma;="+
+                        Math.round(100*Math.sqrt(curitems[j][8][4]))/100 +
+                        "<br/>N=" +
                         curitems[j][8][3] +
                         '\')" onmouseout="tipout()">';
                     
@@ -1965,6 +1996,9 @@ function generateTable() {
             ) +
             ".</p>";
     }
+    $("#avgtimemissing").toggle(totmissing);
+    $("#avgtimetotal").text(Math.round(10*tottime)/10);
+    $("#p95timetotal").text(Math.round(tottime + 1.645*Math.sqrt(totvar)));
     document.getElementById("pttotal").textContent = pttotal;
 
     return html;

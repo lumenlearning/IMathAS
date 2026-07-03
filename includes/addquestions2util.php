@@ -60,7 +60,7 @@ function getQuestionsAsJSON($cid, $aid, $data=null)
     $query = "SELECT iq.id,iq.questionsetid,iqs.description,iqs.userights,iqs.ownerid,";
     $query .= "iqs.qtype,iq.points,iq.withdrawn,iqs.extref,imas_users.groupid,iq.showhints,";
     $query .= "iq.showwork,iq.rubric,iqs.solution,iqs.solutionopts,iqs.meantime,iqs.meanscore,";
-    $query .= "iq.attempts,iq.penalty,iq.regen,iq.showans,";
+    $query .= "iqs.vartime,iq.attempts,iq.penalty,iq.regen,iq.showans,";
     $query .= "iqs.meantimen,iq.extracredit,iqs.broken,iqs.isrand FROM imas_questions AS iq ";
     $query .= "JOIN imas_questionset AS iqs ON iqs.id=iq.questionsetid JOIN imas_users ON iqs.ownerid=imas_users.id ";
     $query .= "WHERE iq.assessmentid=:aid";
@@ -136,6 +136,7 @@ function getQuestionsAsJSON($cid, $aid, $data=null)
         $timeout[1] = round($line['meanscore'], 1);
         $timeout[2] = round($line['meantime'] / 60, 1);
         $timeout[3] = intval($line['meantimen']);
+        $timeout[4] = round($line['vartime'] / 60, 2);
 
         $notdefault = '';
         if ($line['attempts'] != 9999) {

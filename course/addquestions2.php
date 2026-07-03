@@ -33,7 +33,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 
 	$cid = Sanitize::courseId($_GET['cid']);
 	$aid = Sanitize::onlyInt($_GET['aid']);
-	$stm = $DBH->prepare("SELECT courseid,ver,submitby,defpoints,name,intro,showhints,showwork,itemorder,displaymethod FROM imas_assessments WHERE id=?");
+	$stm = $DBH->prepare("SELECT courseid,ver,submitby,defpoints,name,intro,showhints,showwork,itemorder,displaymethod,defregens,defattempts FROM imas_assessments WHERE id=?");
 	$stm->execute(array($aid));
 	$row = $stm->fetch(PDO::FETCH_ASSOC);
 	if ($row === false || $row['courseid'] != $cid) {
@@ -53,6 +53,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
     $itemorder = $row['itemorder'];
 	$rawintro = $row['intro'];
     $row['showwork'] = ($row['showwork'] & 3);
+	$showtimewarning = ($row['defattempts'] > 1 || ($submitby=='by_question' && $row['defregens'] > 1));
 
 	if (isset($_GET['grp'])) { $_SESSION['groupopt'.$aid] = Sanitize::onlyInt($_GET['grp']);}
 	if (isset($_GET['selfrom'])) {
@@ -388,7 +389,7 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 		var addqaddr = '$address';
         var assessver = '$aver';
 		</script>";
-    $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort2.js?v=062626\"></script>";
+    $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/addqsort2.js?v=070326\"></script>";
     $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/tablesorter.js\"></script>";
 	$placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/qsearch.js?v=062526\"></script>";
     $placeinhead .= "<script type=\"text/javascript\" src=\"$staticroot/javascript/junkflag.js?v=021326\"></script>";
@@ -598,7 +599,16 @@ if ($overwriteBody==1) {
 		<div id="curqtbl"></div>
 
 	</form>
-	<p><?php echo _('Assessment points total:') ?> <span id="pttotal"></span></p>
+	<p><?php echo _('Assessment points total:') ?> <span id="pttotal"></span><br>
+	   <?php echo _('Estimated average time:') ?> <span id="avgtimetotal"></span> <?php echo _('min'); ?>. 
+		<span class="nowrap">P<sub>95</sub>: <span id="p95timetotal"></span> <?php echo _('min'); ?>.</span>
+		<span id="avgtimemissing" class="small" style="display:none;"><br><em><?php echo _('Not all questions have time data yet, so this estimate will be inaccurate.');?></em></span>
+		<?php if ($showtimewarning) {
+			echo '<br><span class="small">'._('Your assessment allows multiple attempts or tries on questions, so keep in mind the estimate is for a single try at each question.').'</span>';
+		}?>
+		<br/>
+		
+	</p>
 	<?php if (!empty($introconvertmsg)) {echo $introconvertmsg;}?>
 	<script>
 		var itemarray = <?php echo json_encode($jsarr, JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_INVALID_UTF8_IGNORE); ?>;
