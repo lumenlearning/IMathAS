@@ -45,6 +45,7 @@ $vueData = array(
     'lockforassess' => 'DNC',
     'showwork' => 'DNC',
     'showworktype' => 0,
+	'showworkonebox' => 0,
     'doworkcutoff' => 0,
     'workcutofftype' => 'hr',
     'workcutoffval' => 1,
@@ -423,6 +424,14 @@ $vueData = array(
                             <option value="4"><?php echo _('File upload');?></option>
                         </select>
                     </span>
+					<span v-if="showwork != 'DNC' && showwork > 0">
+						<br>
+						<label for="showworktype"><?php echo _('Work entry format');?>:</label>
+						<select name="showworkonebox" id="showworkonebox" v-model="showworkonebox">
+							<option value="0"><?php echo _('Separate entry for each question');?></option>
+							<option value="8"><?php echo _('One entry for the whole assessment');?></option>
+						</select>
+					</span>
                     <span v-if="showwork != 'DNC'">
                         <br>
                         <input type="checkbox" v-model="doworkcutoff" name="doworkcutoff" id="doworkcutoff" value="1"> 

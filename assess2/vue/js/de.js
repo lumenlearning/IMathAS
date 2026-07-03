@@ -60,6 +60,8 @@ closed-pasttime = Die Zeit für diesen test ist abgelaufen.\r
 closed-needprereq = Sie haben noch nicht die Voraussetzungen erfüllt, um an diesem Test zu arbeiten\r
 closed-prereqreq = Voraussetzung: {$str}.\r
 closed-no_attempts = Sie haben alle Versuche für diesen Test verbraucht.\r
+# checkme \r
+closed-retakewait = Für diesen Test ist eine Pause zwischen den Wiederholungsversuchen erforderlich. Sie können den Test erneut ablegen am: {$date}.\r
 closed-latepassn = \r
     { $n ->\r
         [one] Sie können einmal verspätet einreichen.\r
@@ -146,11 +148,16 @@ setlist-timelimit_wgrace_restricted_penalty = Zeitbegrenzung: {$time}, mit einer
 setlist-timelimit_ext = Ihnen wurde eine Verlängerung der Zeitbegrenzung um {$n} Minuten gewährt\r
 setlist-timelimit_ext_used = Sie haben eine Zeitverlängerung von {$n} Minuten genutzt\r
 setlist-excused = Sie können diesen Test überspringen. Dies ändert nichts an Ihrer Note.\r
-# checkme\r
+# checkme 2\r
 setlist-latepass_needed = \r
     { $n ->\r
         [one] Sie können einen LatePass einlösen, um das Fälligkeitsdatum auf {$date} zu verlängern\r
         *[other] Sie können {$n} LatePasses einlösen, um das Fälligkeitsdatum auf den {$date} zu verlängern\r
+    }\r
+setlist-retakewait = \r
+    { $n ->\r
+        [one] Sie müssen zwischen den Wiederholungsversuchen eine Stunde warten.\r
+        *[other] Sie müssen zwischen Wiederholungsversuchen {$n} Stunden warten.\r
     }\r
 \r
 # Group\r
