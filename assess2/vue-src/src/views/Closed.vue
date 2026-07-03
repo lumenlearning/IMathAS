@@ -164,6 +164,8 @@ export default {
         return this.$t('closed-needprereq') + ': ' + this.settings.reqscorevalue;
       } else if (this.settings.hasOwnProperty('pasttime')) {
         return this.$t('closed-pasttime');
+      } else if (this.settings.available === 'retakewait') {
+        return this.$t('closed-retakewait', { date: this.settings.retake_time_disp });
       } else if (this.settings.has_active_attempt === false && this.settings.can_retake === false) {
         return this.$t('closed-no_attempts');
       }
@@ -189,6 +191,7 @@ export default {
     },
     showLatePassOffer () {
       return (this.settings.available !== 'needprereq' &&
+        this.settings.available !== 'retakewait' &&
         !this.settings.hasOwnProperty('pasttime'));
     },
     latepassExtendMsg () {

@@ -55,7 +55,7 @@ if (!(isset($teacherid))) {
         $coreOK = true;
 		if ($_POST['copyopts'] != 'DNC') {
             $copyreqscore = !empty($_POST['copyreqscore']);
-			$tocopy = 'displaymethod,submitby,defregens,defregenpenalty,keepscore,defattempts,defpenalty,showscores,showans,viewingb,scoresingb,ansingb,gbcategory,caltag,shuffle,showwork,noprint,istutorial,showcat,allowlate,timelimit,password,reqscoretype,reqscorejson,showhints,msgtoinstr,posttoforum,extrefs,showtips,cntingb,minscore,deffeedbacktext,tutoredit,exceptionpenalty,earlybonus,defoutcome';
+			$tocopy = 'displaymethod,submitby,defregens,defregenpenalty,keepscore,retakewait,defattempts,defpenalty,showscores,showans,viewingb,scoresingb,ansingb,gbcategory,caltag,shuffle,showwork,noprint,istutorial,showcat,allowlate,timelimit,password,reqscoretype,reqscorejson,showhints,msgtoinstr,posttoforum,extrefs,showtips,cntingb,minscore,deffeedbacktext,tutoredit,exceptionpenalty,earlybonus,defoutcome';
 			$stm = $DBH->prepare("SELECT $tocopy FROM imas_assessments WHERE id=:id AND courseid=:courseid");
 			$stm->execute(array(':id'=>Sanitize::onlyInt($_POST['copyopts']), ':courseid'=>$cid));
 			$qarr = $stm->fetch(PDO::FETCH_ASSOC);
@@ -168,8 +168,14 @@ if (!(isset($teacherid))) {
 				} else {
 					$keepscore = Sanitize::simpleASCII($_POST['keepscore']);
 				}
+				if (intval($_POST['retakewait']) > 0) {
+					$retakewait = intval($_POST['retakewait']);
+				} else {
+					$retakewait = 0;
+				}
 			} else {
 				$keepscore = 'best';
+				$retakewait = 0;
 			}
 			if ($_POST['defattempts'] === '') {
 				$coreOK = false;
@@ -223,6 +229,8 @@ if (!(isset($teacherid))) {
 				$qarr[':submitby'] = $submitby;
 				$sets[] = "keepscore=:keepscore";
 				$qarr[':keepscore'] = $keepscore;
+				$sets[] = "retakewait=:retakewait";
+				$qarr[':retakewait'] = $retakewait;
 				$sets[] = "defregens=:defregens";
 				$qarr[':defregens'] = $defregens;
 				$sets[] = "defregenpenalty=:defregenpenalty";
@@ -309,17 +317,17 @@ if (!(isset($teacherid))) {
 					foreach ($_POST['reqscoreaid'] as $k=>$v) {
 						if (!empty($_POST['reqscore'][$k])) {
 							$reqscorearr[] = [$v, $_POST['reqscore'][$k], $_POST['reqscorecalctype'][$k]];
-						}
+				}
 					}
 					
 					if (count($reqscorearr) > 0) {
 						$sets[] = "reqscorejson=:reqscorejson";
 						if (count($reqscorearr) == 1) {
 							$qarr[':reqscorejson'] = json_encode($reqscorearr[0]);
-						} else {
+				} else {
 							$qarr[':reqscorejson'] = json_encode(['&', $reqscorearr]);
-						}
-					}
+				}
+			}
 				}
 			}
 			if ($_POST['reqscoreshowtype'] !== 'DNC') {

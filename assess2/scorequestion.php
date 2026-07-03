@@ -156,7 +156,7 @@ $assess_info->loadLTIMsgPosts($userid, $canViewAll);
 $include_from_assess_info = array(
   'available', 'startdate', 'enddate', 'original_enddate', 'submitby',
   'extended_with', 'allowed_attempts', 'showscores', 'timelimit', 'enddate_in',
-  'lti_showmsg', 'lti_msgcnt', 'lti_forumcnt'
+  'lti_showmsg', 'lti_msgcnt', 'lti_forumcnt', 'retakewait'
 );
 $assessInfoOut = $assess_info->extractSettings($include_from_assess_info);
 //get attempt info
@@ -325,6 +325,14 @@ if ($end_attempt) {
     $assessInfoOut['can_retake'] = false;
   } else {
     $assessInfoOut['can_retake'] = (count($assessInfoOut['prev_attempts']) < $assessInfoOut['allowed_attempts']);
+    if ($assessInfoOut['retakewait'] > 0) {
+      $retaketime = $assess_record->getNextRetaketime();
+      if ($retaketime > 0) {
+        $assessInfoOut['can_retake'] = false;
+        $assessInfoOut['retake_time'] = $retaketime;
+        $assessInfoOut['available'] = 'retakewait';
+      }
+    }
   }
 
   // get endmsg

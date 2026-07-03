@@ -129,7 +129,7 @@ export default {
     },
     getAttemptsObj () {
       var settings = store.assessInfo;
-      var mainstr, attemptsLeftStr, substr, alertstr;
+      var mainstr, attemptsLeftStr, substr, alertstr, alert2str;
 
       var attemptsLeft = settings.allowed_attempts - settings.prev_attempts.length;
       let altstr = '';
@@ -173,12 +173,17 @@ export default {
         alertstr = this.$t('setlist-retake_penalty', { p: penalty });
       }
 
+      if (settings.retakewait) {
+        alert2str = this.$t('setlist-retakewait', { n: settings.retakewait });
+      }
+
       return {
         icon: 'retake',
         str: mainstr,
         altstr: altstr,
         sub: substr,
-        alert: alertstr
+        alert: alertstr,
+        alert2: alert2str
       };
     },
     getTimelimitObj () {

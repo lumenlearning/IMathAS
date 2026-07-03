@@ -58,6 +58,7 @@ closed-pasttime = The timelimit has expired on this assessment.
 closed-needprereq = You have not yet met the prerequisite requirements to work on this assessment
 closed-prereqreq = Prerequisite: {$str}.
 closed-no_attempts = You have used all your attempts at this assessment.
+closed-retakewait = This assessment requires a break between retakes. You can retake the assessment at: {$date}.
 closed-latepassn = 
     { $n ->
         [one] You have one LatePass available.
@@ -145,7 +146,12 @@ setlist-latepass_needed =
         [one] You can redeem one LatePass to extend the due date to {$date}
         *[other] You can redeem {$n} LatePasses to extend the due date to {$date}
     }
-
+setlist-retakewait = 
+    { $n ->
+        [one] You must wait 1 hour between retakes
+        *[other] You must waitn {$n} hours between retakes
+    }
+    
 # Group
 group-isgroup = This is a group assessment.
 group-teacher_auto = This assessment allows students to select their own group members, up to {$n}.

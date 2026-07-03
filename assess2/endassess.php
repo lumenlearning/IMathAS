@@ -77,7 +77,8 @@ $assess_record->updateLTIscore(true, true);
 // grab any assessment info fields that may have updated:
 $include_from_assess_info = array(
   'available', 'startdate', 'enddate', 'original_enddate', 'submitby',
-  'extended_with', 'allowed_attempts', 'showscores', 'timelimit', 'points_possible'
+  'extended_with', 'allowed_attempts', 'showscores', 'timelimit', 'points_possible',
+  'retakewait'
 );
 $assessInfoOut = $assess_info->extractSettings($include_from_assess_info);
 
@@ -103,6 +104,14 @@ if ($assessInfoOut['submitby'] == 'by_question') {
   $assessInfoOut['can_retake'] = false;
 } else {
   $assessInfoOut['can_retake'] = (count($assessInfoOut['prev_attempts']) < $assessInfoOut['allowed_attempts']);
+  if ($assessInfoOut['retakewait'] > 0) {
+      $retaketime = $assess_record->getNextRetaketime();
+      if ($retaketime > 0) {
+        $assessInfoOut['can_retake'] = false;
+        $assessInfoOut['retake_time'] = $retaketime;
+        $assessInfoOut['available'] = 'retakewait';
+      }
+    }
 }
 
 // get endmsg

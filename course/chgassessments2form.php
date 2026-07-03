@@ -10,12 +10,13 @@ $vueData = array(
 	'outcomeOptions' => $outcomeOptions,
 	'subtype' => 'DNC',
 	'defregens' => '',
-	'defregenpenalty' => '',
-	'defregenpenaltyaftern' => '',
-	'keepscore' => 'DNC',
+	'defregenpenalty' => '0',
+	'defregenpenaltyaftern' => '1',
+	'keepscore' => 'best',
+	'retakewait' => '0',
 	'defattempts' => '',
-	'defattemptpenalty' => '',
-	'defattemptpenaltyaftern' => '',
+	'defattemptpenalty' => '0',
+	'defattemptpenaltyaftern' => '1',
 	'showscores' => 'DNC',
 	'showans' => 'DNC',
 	'viewingb' => 'DNC',
@@ -270,6 +271,13 @@ $vueData = array(
 								<option value="last"><?php echo _('Last'); ?></option>
 								<option value="average"><?php echo _('Average'); ?></option>
 							</select>
+							<br/>
+							<label>
+								<?php echo _('Require wait between retakes');?>: 
+								<input type=text id="retakewait" name="retakewait" v-model="retakewait" 
+									:required="changingCore" size="5" />
+								<?php echo _('hours'); ?>
+							</label>
 						</span>
 					</span>
 				</span><br class=form />
