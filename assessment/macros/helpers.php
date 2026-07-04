@@ -837,6 +837,10 @@ function stuansready($stu, $qn, $parts = null, $anstypes = null, $answerformat =
                 continue;
             }
             if ($anstypes !== null && $stu[$qn][$v] !== '') {
+                if (!isset($anstypes[$v])) {
+                    // treat single anstype as type for this part 
+                    $anstypes[$v] = count($anstypes)==1 ? ($anstypes[0] ?? '') : '';
+                }
                 $thisaf = '';
                 if ($answerformat !== null && is_array($answerformat) && !empty($answerformat[$v])) {
                     $thisaf = $answerformat[$v];
