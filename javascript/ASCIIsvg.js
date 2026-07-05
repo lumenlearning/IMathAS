@@ -840,6 +840,7 @@ function mathtextabs(p,st,pos,angle) {
   var div = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
   var span = document.createElementNS('http://www.w3.org/1999/xhtml', 'span');
   div.style.fontSize = (fontsize * .9) + 'px';
+  div.style.textAlign = 'left';
   if (fontfill!="none") { div.style.color = fontfill; }
   div.innerHTML = st;
   p[1] = height - p[1];
