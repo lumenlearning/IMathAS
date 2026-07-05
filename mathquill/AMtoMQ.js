@@ -859,7 +859,7 @@ function MQtoAM(tex,display) {
 	tex = tex.replace(/\\right/g,'');
 	tex = tex.replace(/\\langle/g,' << ');
 	tex = tex.replace(/\\rangle/g,' >> ');
-	tex = tex.replace(/\\cdot/g,' * ');
+	tex = tex.replace(/\\cdot/g,'*');
 	tex = tex.replace(/\\infty/g,' oo ').replace(/-\s+oo/g, '-oo');
 	tex = tex.replace(/\\nthroot/g,'root');
   tex = tex.replace(/\\overline/g,'bar');
