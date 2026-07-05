@@ -1183,7 +1183,7 @@ function generateTable() {
     var html = "";
     var totalcols = 10;
     var tottime = 0;
-    var totvar = 0;
+    var totstdev = 0;
     var totcnt = 0;
     var totmissing = false;
 
@@ -1239,20 +1239,20 @@ function generateTable() {
             curitems = itemarray[i][2];
             curisgroup = 1;
             var grptime = 0;
-            var grpvar = 0;
+            var grpstdev = 0;
             var grpcnt = 0;
             for (var k=0; k<curitems.length; k++) {
                 if (curitems[k][8][3] < 5) {
                     totmissing = true;
                 } else {
                     grptime += curitems[k][8][0];
-                    grpvar += curitems[k][8][4];
+                    grpstdev += curitems[k][8][4];
                     grpcnt++;
                 }
             }
             if (grpcnt>0) {
                 tottime += grptime * itemarray[i][0]/grpcnt;
-                totvar += grpvar * itemarray[i][0]/grpcnt;
+                totstdev += grpstdev * itemarray[i][0]/grpcnt;
                 totcnt += itemarray[i][0];
             }
         } else {
@@ -1263,7 +1263,7 @@ function generateTable() {
                 totmissing = true;
             } else {
                 tottime += itemarray[i][8][0];
-                totvar += itemarray[i][8][4];
+                totstdev += itemarray[i][8][4];
                 totcnt++;
             }
         }
@@ -1750,7 +1750,7 @@ function generateTable() {
                         "<br/>"+_("Avg time on first try: ") +
                         curitems[j][8][2] +
                         _(" min")+"<br/>&sigma;="+
-                        Math.round(100*Math.sqrt(curitems[j][8][4]))/100 +
+                        curitems[j][8][4] +
                         "<br/>N=" +
                         curitems[j][8][3] +
                         '\')" onmouseout="tipout()">';
@@ -1998,7 +1998,7 @@ function generateTable() {
     }
     $("#avgtimemissing").toggle(totmissing);
     $("#avgtimetotal").text(Math.round(10*tottime)/10);
-    $("#p95timetotal").text(Math.round(tottime + 1.645*Math.sqrt(totvar)));
+    $("#p95timetotal").text(Math.round(tottime + 1.645*totstdev));
     document.getElementById("pttotal").textContent = pttotal;
 
     return html;

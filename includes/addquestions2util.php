@@ -136,7 +136,7 @@ function getQuestionsAsJSON($cid, $aid, $data=null)
         $timeout[1] = round($line['meanscore'], 1);
         $timeout[2] = round($line['meantime'] / 60, 1);
         $timeout[3] = intval($line['meantimen']);
-        $timeout[4] = round($line['vartime'] / 3600, 2);
+        $timeout[4] = round(sqrt($line['vartime']) / 60, 2);
 
         $notdefault = '';
         if ($line['attempts'] != 9999) {
