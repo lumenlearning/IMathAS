@@ -3,7 +3,7 @@
 // Mike Jenck, Originally developed July 25-27, 2018
 // licensed under GPL version 2 or later
 //
-// File Version : 7.5
+// File Version : 7.7
 //
 
 global $allowedmacros;
@@ -475,6 +475,26 @@ function poly3_decimalsubtract($minuend,$subtrahend){
 	return $result;
 }
 
+// internal only
+// Converts a poly3 array to match the requested format: when $IsFraction is
+// true, each term becomes array(numerator, denominator); when false, each
+// term becomes a plain number. Terms already in the requested format are
+// left untouched, so it is safe to call unconditionally.
+function poly3_conformformat($poly, $IsFraction) {
+	if (!is_array($poly)) {
+		return $poly;
+	}
+	foreach ($poly as $i => $term) {
+		$termIsFraction = is_array($term);
+		if ($IsFraction && !$termIsFraction) {
+			$poly[$i] = array($term, 1);
+		} elseif (!$IsFraction && $termIsFraction) {
+			$poly[$i] = ($term[1] == 0) ? 0 : $term[0] / $term[1];
+		}
+	}
+	return $poly;
+}
+
 // dividepoly3(dividend, divisor [, IsFraction=TRUE])
 //
 // Does the polynomial long division and returns an array of results
@@ -501,6 +521,8 @@ function poly3_decimalsubtract($minuend,$subtrahend){
 function dividepoly3($dividend, $divisor, $IsFraction=TRUE) {
 	$dividend = poly3_trimleadingzeros($dividend);
 	$divisor = poly3_trimleadingzeros($divisor);
+	$dividend = poly3_conformformat($dividend, $IsFraction);
+	$divisor = poly3_conformformat($divisor, $IsFraction);
 	if($IsFraction){
 		return poly3_dividefractions($dividend, $divisor);
 	}
@@ -570,16 +592,16 @@ function poly3_dividedecimal($dividendstart, $divisor) {
 		$dividend = $results[$resultindex][0];
 		$dividendposition = count($dividend)-1;
 
-		if($dividend[$dividendposition] < $i) {
+		if($dividendposition < $i) {
 			// divisor power is greater then the dividend power
 			// position is suppose to be a zero
             if(!isset($results[$resultindex][0][0])){
-                $results[$resultindex][0] = 0;
+                $results[$resultindex][0][0] = 0;
                 $dividend = 0;
                 $dividendposition = 0;
             }
 		} else {
-            if($dividend[$dividendposition][0]==0) {
+            if($dividend[$dividendposition]==0) {
                 // nothing to do - skip a zero entry
             }
             else {
@@ -719,6 +741,8 @@ function longdivisionpoly3($dividend, $divisor, $variable="x", $IsFraction=1, $d
 	}
 	$dividend = poly3_trimleadingzeros($dividend);
 	$divisor = poly3_trimleadingzeros($divisor);
+	$dividend = poly3_conformformat($dividend, $IsFraction);
+	$divisor = poly3_conformformat($divisor, $IsFraction);
 
 	$TableResults = dividepoly3($dividend, $divisor, $IsFraction);  // this does the polynomial long division
 
@@ -1025,6 +1049,7 @@ function poly3_trimleadingzeros($poly) {
 	return $poly;
 }
 
+// File version : 7.7   - Added internal poly3_conformformat to convert input polys based on IsFraction input to divide functions; fix loop in decimal divide
 // File version : 7.6   - Added internal poly3_trimleadingzeros to fix errors on longdivisionpoly3
 // File version : 7.5   - Fixed warning in formpoly3fromstring for non-numeric value encountered on line 179 in file /var/app/current/assessment/libs/fraction.php
 //                        
