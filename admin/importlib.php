@@ -172,6 +172,7 @@ function parseqs($file,$touse,$rights) {
 	}
 
 	$line = '';
+	$qids = [];
 	while ((!$nogz || !feof($handle)) && ($nogz || !gzeof($handle))) {
 		if ($nogz) {
 			$line = rtrim(fgets($handle, 4096));
@@ -264,13 +265,15 @@ function parseqs($file,$touse,$rights) {
 	} else {
 		gzclose($handle);
 	}
-	foreach($qdata as $k=>$val) {
-		$qdata[$k] = rtrim($val);
-	}
-	if (in_array($qdata['qid'],$touse)) {
-		$qid = writeq($qdata,$rights,$qnum);
-		if ($qid!==false) {
-			$qids[$qdata['qid']] = $qid;
+	if (!empty($qdata)) {
+		foreach($qdata as $k=>$val) {
+			$qdata[$k] = rtrim($val);
+		}
+		if (in_array($qdata['qid'],$touse)) {
+			$qid = writeq($qdata,$rights,$qnum);
+			if ($qid!==false) {
+				$qids[$qdata['qid']] = $qid;
+			}
 		}
 	}
 	return $qids;
