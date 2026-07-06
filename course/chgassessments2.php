@@ -327,10 +327,11 @@ if (!(isset($teacherid))) {
 						$sets[] = "reqscorejson=:reqscorejson";
 						if (count($reqscorearr) == 1) {
 							$qarr[':reqscorejson'] = json_encode($reqscorearr[0]);
-				} else {
-							$qarr[':reqscorejson'] = json_encode(['&', $reqscorearr]);
-				}
-			}
+						} else {
+							$logic = ($_POST['reqscoreandor'] == 0) ? '&' : '|';
+							$qarr[':reqscorejson'] = json_encode([$logic, $reqscorearr]);
+						}
+					}
 				}
 			}
 			if ($_POST['reqscoreshowtype'] !== 'DNC') {

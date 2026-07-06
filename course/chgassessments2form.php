@@ -59,6 +59,7 @@ $vueData = array(
 	'reqscoretype' => 'DNC',
 	'reqscorechg' => 'DNC',
 	'reqscorearr' => [],
+	'reqscoreandor' => 0,
     'dochgshowhints' => false,
     'showhints' => ($defshowhints&1) > 0,
 	'showextrefs' => ($defshowhints&2) > 0,
@@ -584,6 +585,10 @@ $vueData = array(
 						<option value="1"><?php echo _('New prerequisite'); ?></option>
 					</select>
 					<span v-show="reqscorechg == 1">
+						<select id="reqscoreandor" name="reqscoreandor" v-model="reqscoreandor" aria-label="<?php echo _('prerequisite require all or one'); ?>">
+							<option value="0"><?php echo _('Require all of these');?></option>
+							<option value="1"><?php echo _('Require any one of these');?></option>
+						</select>
 						<ul class="nomark">
 							<li v-for="(ritem,index) in reqscorearr" :key="index">
 								<input type="hidden" name="reqscoreaid[]" v-model="ritem[0]"/>

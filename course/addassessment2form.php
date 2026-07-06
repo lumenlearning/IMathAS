@@ -100,6 +100,7 @@ $vueData = array(
 	'groupOptions' => $groupOptions,
 	'reqscoreshowtype' => $reqscoredisptype,
 	'reqscorearr' => $line['reqscorejson'],
+	'reqscoreandor' => $reqscoreandor,
 	'reqscoreOptions' => $otherAssessments,
 	'copyfrom' => 0,
 	'taken' => $taken,
@@ -579,6 +580,10 @@ $vueData = array(
 					<option value="1"><?php echo _('Show greyed until');?></option>
 				</select>
 				<span v-show="reqscoreshowtype > -1">
+					<select id="reqscoreandor" name="reqscoreandor" v-model="reqscoreandor" aria-label="<?php echo _('prerequisite require all or one'); ?>">
+						<option value="0"><?php echo _('All of these');?></option>
+						<option value="1"><?php echo _('Any one of these');?></option>
+					</select>
 					<ul class="nomark">
 						<li v-for="(ritem,index) in reqscorearr" :key="index">
 							<input type="hidden" name="reqscoreaid[]" v-model="ritem[0]"/>

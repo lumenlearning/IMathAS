@@ -31,7 +31,8 @@ if (isset($_POST['reqscoreshowtype'])) {
             if (count($reqscorearr) == 1) {
                 $reqscorejson = json_encode($reqscorearr[0]);
             } else if (count($reqscorearr)>1) {
-                $reqscorejson = json_encode(['&', $reqscorearr]);
+                $logic = ($_POST['reqscoreandor'][$aid] == 0) ? '&' : '|';
+                $reqscorejson = json_encode([$logic, $reqscorearr]);
             }
             $reqscoretype = ($reqscoreshowtype == 'grey' ? 1 : 0); // 1 if greyed out, 0 only after
         }
@@ -56,15 +57,17 @@ while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
     } else {
         $vueData['reqscoreshowtype'][$row['id']] = 'after'; // Show only after 
     }
+    $vueData['reqscoreandor'][$row['id']] = 0;
     if ($row['reqscorejson']=='') {
        $vueData['reqscorearr'][$row['id']] = [];
     } else {
         // normalize to an array of [aid,score,type] arrays
         $json = json_decode($row['reqscorejson'], true);
 		if (is_array($json[1])) { // has bool format ['&', [array of objects]]
-			$vueData['reqscorearr'][$row['id']] = $row['reqscorejson'] = $json[1];
+            $vueData['reqscoreandor'][$row['id']] = ($json[0] == '&') ? 0 : 1;
+			$vueData['reqscorearr'][$row['id']] = $json[1];
 		} else { // single format; make into an array
-			$vueData['reqscorearr'][$row['id']] = $row['reqscorejson'] = [$json];
+			$vueData['reqscorearr'][$row['id']] = [$json];
 		}
     }
     $vueData['assessments'][] = ['id'=>$row['id'], 'name'=>$row['name']];
@@ -132,11 +135,18 @@ echo '</tr></thead><tbody>';
 ?>
 <tr v-for="(aid,index) in order" :key="index" :class="index%2==0?'even':'odd'">
     <td :id="'n' + aid">{{ assessmentName(aid) }}</td>
-    <td><select :id="'reqscoreshowtype'+index" :name="'reqscoreshowtype['+aid+']'" v-model="reqscoreshowtype[aid]">
+    <td><select :id="'reqscoreshowtype'+index" :name="'reqscoreshowtype['+aid+']'" v-model="reqscoreshowtype[aid]" >
             <option value="none"><?php echo _('No prerequisite');?></option>
             <option value="after"><?php echo _('Show only after');?></option>
             <option value="grey"><?php echo _('Show greyed until');?></option>
         </select>
+        <span v-show="reqscoreshowtype[aid] != 'none'">
+            <br>
+            <select :id="'reqscoreandor'+index" :name="'reqscoreandor['+aid+']'" v-model="reqscoreandor[aid]" :aria-labelledby="'n' + aid + ' reqscoreshowtype'+index">
+                <option value="0"><?php echo _('All of these');?></option>
+                <option value="1"><?php echo _('Any one of these');?></option>
+            </select>
+        </span>
     </td>
     <td>
         <div v-show="reqscoreshowtype[aid] != 'none'">

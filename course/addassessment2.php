@@ -364,7 +364,8 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
 				if (count($reqscorearr) == 1) {
 					$toset['reqscorejson'] = json_encode($reqscorearr[0]);
 				} else if (count($reqscorearr)>1) {
-					$toset['reqscorejson'] = json_encode(['&', $reqscorearr]);
+					$logic = ($_POST['reqscoreandor'] == 0) ? '&' : '|';
+					$toset['reqscorejson'] = json_encode([$logic, $reqscorearr]);
 				}
 			}
 
@@ -832,12 +833,14 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
       } else {
       	$reqscoredisptype=0;
       }
+	  $reqscoreandor = 0;
 	  if ($line['reqscorejson']=='') {
 		$line['reqscorejson'] = [];
 	  } else {
 		$line['reqscorejson'] = json_decode($line['reqscorejson'], true);
 		// normalize to an array of [aid,score,type] arrays
 		if (is_array($line['reqscorejson'][1])) { // has bool format ['&', [array of objects]]
+			$reqscoreandor = ($line['reqscorejson'][0] == '&') ? 0 : 1;
 			$line['reqscorejson'] = $line['reqscorejson'][1];
 		} else { // single format; make into an array
 			$line['reqscorejson'] = [$line['reqscorejson']];
