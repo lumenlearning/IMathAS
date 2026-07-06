@@ -110,7 +110,7 @@ if (!(isset($teacherid)) && $myrights<20) {
 		//lists child libraries
 		function getchildlibs($lib) {
 			global $DBH,$libs,$libcnt,$nonpriv;
-			$query = "SELECT id,name,uniqueid,lastmoddate FROM imas_libraries WHERE parent=:parent AND deleted=0";
+			$query = "SELECT id,name,uniqueid,lastmoddate,ownerid,userights FROM imas_libraries WHERE parent=:parent AND deleted=0";
 			if ($nonpriv) {
 				$query .= " AND userights>0";
 			}
@@ -131,9 +131,9 @@ if (!(isset($teacherid)) && $myrights<20) {
 						echo "LASTMODDATE\n";
 						echo Sanitize::forRawExport(rtrim($row[3])) . "\n";
 						echo "OWNERID\n";
-						echo Sanitize::forRawExport(rtrim($row[5])) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[4])) . "\n";
 						echo "USERIGHTS\n";
-						echo Sanitize::forRawExport(rtrim($row[6])) . "\n";
+						echo Sanitize::forRawExport(rtrim($row[5])) . "\n";
 						echo "NAME\n";
 						echo Sanitize::forRawExport(rtrim($row[1])) . "\n";
 						echo "PARENT\n";

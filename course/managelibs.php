@@ -55,8 +55,7 @@ if ($myrights<20) {
 	$curBreadcrumb = "<a href=\"../index.php\">Home</a>";
 	if ($isadmin || $isgrpadmin) {
 		$curBreadcrumb .= " &gt; <a href=\"../admin/admin2.php\">Admin</a> ";
-	}
-	if ($cid!=0) {
+	} else if ($cid!=0) {
 		$curBreadcrumb .= " &gt; <a href=\"course.php?cid=$cid\">".Sanitize::encodeStringForDisplay($coursename)."</a> ";
 	}
 

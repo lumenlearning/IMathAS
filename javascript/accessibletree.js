@@ -148,16 +148,18 @@ class AccessibleTreeWidget {
         content.appendChild(expander);
         content.appendChild(selectionContainer);
         content.appendChild(label);
-        if (item.links) {
+        if (item.links || (canHaveChildren && this.options.selectionMode === 'multi')) {
             let linkbtn = '<a tabindex=0 class="dropdown-toggle arrow-down" id="tdd'+item.id+'" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
 	        linkbtn += _('Actions')+'</a>';
 	        linkbtn += '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="tdd'+item.id+'">';
-            for (let i=0;i<item.links.length;i++) {
-                linkbtn += '<li><a href="'+item.links[i].href+'"';
-                if (item.links[i].newtab) {
-                    linkbtn += ' target="_blank"';
+            if (item.links) {
+                for (let i=0;i<item.links.length;i++) {
+                    linkbtn += '<li><a href="'+item.links[i].href+'"';
+                    if (item.links[i].newtab) {
+                        linkbtn += ' target="_blank"';
+                    }
+                    linkbtn += '>'+item.links[i].label+'</a></li>';
                 }
-                linkbtn += '>'+item.links[i].label+'</a></li>';
             }
             if (canHaveChildren && this.options.selectionMode === 'multi') {
                 linkbtn += '<li><a href="#" class="tree-action-select-all" data-tree-action="select-all" data-item-id="'+item.id+'" role="menuitem">'+_('Select all children')+'</a></li>';

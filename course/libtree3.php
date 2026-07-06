@@ -88,7 +88,7 @@ else if (isset($_GET['getsubs']) && isset($_GET['cid']) && $_GET['cid']=="admin"
         $stm->execute($ids);
         while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
             if ($row['count']>0) {
-                $out[$row['id']]['childrenUrl'] = "libtree3.php?cid=$cid&getsubs=".$row['id']."&sortorder=".intval($row['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'');
+                $out[$row['id']]['childrenUrl'] = $imasroot . "/course/libtree3.php?cid=$cid&getsubs=".$row['id']."&sortorder=".intval($row['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'');
             }
         }
         if (!empty($_GET['sortorder'])) {
@@ -216,7 +216,7 @@ foreach ($libdata as $k=>$n) {
 }
 
 function genItem($data) {
-    global $isadmin, $isgrpadmin, $userid, $groupid, $cid;
+    global $isadmin, $isgrpadmin, $userid, $groupid, $cid, $imasroot;
     global $childlibs, $locked, $checked, $showmanagelibslinks, $allsrights, $selectrights, $includecounts;
 
     $item = [];
@@ -288,7 +288,7 @@ $visited = [];
 // returns an array of data for the children of the given parent ID
 function getChildren($parent) {
     global $childlibs,$libdata,$allsrights,$selectrights,$userid,$groupid,$isadmin,$isgrpadmin;
-    global $locked, $checked, $cid, $includecounts, $visited, $showmanagelibslinks;
+    global $locked, $checked, $cid, $includecounts, $visited, $showmanagelibslinks, $imasroot;
 
     $out = [];
     $children = $childlibs[$parent];
@@ -325,7 +325,7 @@ function getChildren($parent) {
             }
             
             if ($isadmin && $parent==0 && !empty($libdata[$child]['has_children'])) {
-                $item['childrenUrl'] = "libtree3.php?cid=$cid&getsubs=".$child."&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'');
+                $item['childrenUrl'] = $imasroot . "/course/libtree3.php?cid=$cid&getsubs=".$child."&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'');
                 $out[] = $item;
             } else if ($isadmin && $parent==0 && $rights<4 && 
                 $libdata[$child]['ownerid']!=$userid && 
@@ -334,7 +334,7 @@ function getChildren($parent) {
             ) {
                 // shouldn't be hitting this code block anymore, but keeping for backreference
                 if (!empty($childlibs[$child])) {
-                    $item['childrenUrl'] = "libtree3.php?cid=$cid&getsubs=".$child."&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'');
+                    $item['childrenUrl'] = $imasroot . "/course/libtree3.php?cid=$cid&getsubs=".$child."&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'');
                 }
                 if ($rights==0) {
                     $toplevelprivate[] = $item;
@@ -355,7 +355,7 @@ function getChildren($parent) {
             'label'=>_('Root Level Private Libraries'),
             'userights'=>0,
             'notselectable'=>true,
-            'childrenUrl' => "libtree3.php?cid=$cid&type=privateroot&getsubs=0&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'')
+            'childrenUrl' => $imasroot . "/course/libtree3.php?cid=$cid&type=privateroot&getsubs=0&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'')
         ];
     }
     if ($isadmin && $parent==0) {
@@ -364,7 +364,7 @@ function getChildren($parent) {
             'label'=>_('Root Level Group Libraries'),
             'userights'=>2,
             'notselectable'=>true,
-            'childrenUrl' => "libtree3.php?cid=$cid&type=grouproot&getsubs=0&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'')
+            'childrenUrl' => $imasroot . "/course/libtree3.php?cid=$cid&type=grouproot&getsubs=0&sortorder=".intval($libdata[$child]['sortorder']).($includecounts? '&counts=true':'').($showmanagelibslinks?'&links=1':'')
         ];
     }
     return $out;
