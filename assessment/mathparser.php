@@ -823,9 +823,11 @@ class MathParser
     }
 
     //see if was function application
+    $wasFunction = false;
     if (count($this->operatorStack) > 0) {
       $previous = end($this->operatorStack);
       if ($previous['type'] === 'function') {
+        $wasFunction = true;
         $node = array_pop($this->operatorStack); //this is the function node
         $operand = array_pop($this->operandStack);
         if ($node['symbol'] === 'log_') {
@@ -878,6 +880,17 @@ class MathParser
           }
         }
         $this->operandStack[] = $node;
+      }
+    }
+
+    if (!$wasFunction) {
+      // a plain grouping paren (not a function call): tag the resulting
+      // expression as explicitly parenthesized in the original input, so
+      // pretty-printing can choose to preserve that grouping visually
+      // (e.g. (5*pi)/3 keeping its numerator grouped as (5pi)/3)
+      $top = count($this->operandStack) - 1;
+      if ($top >= 0 && $this->operandStack[$top]['type'] === 'operator') {
+        $this->operandStack[$top]['info'] = 'wasparens';
       }
     }
   }
@@ -1222,7 +1235,12 @@ class MathParser
         // covers x*1 -> x and x/1 -> x
         $result = $left;
       } else {
-        $result = ['type'=>'operator', 'symbol'=>$symbol, 'left'=>$left, 'right'=>$right];
+        // update in place (rather than building a fresh array) so any
+        // extra keys on the node, like an 'info' tag marking an explicitly
+        // parenthesized numerator, survive simplification
+        $node['left'] = $left;
+        $node['right'] = $right;
+        $result = $node;
       }
       return $neg ? $this->prettyNegateNode($result) : $result;
     }
@@ -1702,7 +1720,10 @@ class MathParser
       array_unshift($numFactors, ['type'=>'number', 'symbol'=>$constFrac['n']]);
     }
     $numNode = $this->prettyChainMultiply($numFactors);
-    return ['type'=>'operator', 'symbol'=>'/', 'left'=>$numNode, 'right'=>$this->prettyChainMultiply($denFactors)];
+    // tagged so the renderer keeps the numerator visually grouped as "one
+    // fraction" here specifically, without forcing parens on every
+    // product-over-something division (see prettyRenderNode's '/' case)
+    return ['type'=>'operator', 'symbol'=>'/', 'left'=>$numNode, 'right'=>$this->prettyChainMultiply($denFactors), 'info'=>'mergedcoef'];
   }
 
   /**
@@ -1767,9 +1788,10 @@ class MathParser
    * with implicit multiplication enabled, based on the boundary
    * characters between the two rendered pieces:
    *  - two numbers never get merged (2*3 stays 2*3, not 23)
-   *  - two "word-like" pieces (variable/function names) get a space
-   *    between them so they don't read as one longer identifier
-   *    (x*y -> x y, x*sin(x) -> x sin(x))
+   *  - a trailing "word-like" piece (variable/function name) followed by
+   *    another letter or a digit gets a space so they don't read as one
+   *    longer identifier (x*y -> x y, x*sin(x) -> x sin(x),
+   *    (x/y)*3 -> x/y 3, not x/y3)
    *  - everything else (e.g. a number or variable next to a
    *    parenthesized group) is simply juxtaposed (4x, x(x+1), 4(x+1),
    *    (x+1)(x-1))
@@ -1785,7 +1807,7 @@ class MathParser
     if ($firstChar === '-' || ($isNumBoundary($lastChar) && $isNumBoundary($firstChar))) {
       return '*';
     }
-    if ($isLetterBoundary($lastChar) && $isLetterBoundary($firstChar)) {
+    if ($isLetterBoundary($lastChar) && ($isLetterBoundary($firstChar) || $isNumBoundary($firstChar))) {
       return ' ';
     }
     return '';
@@ -1884,11 +1906,24 @@ class MathParser
       $left = $node['left'];
       $right = $node['right'];
       $leftStr = $this->prettyRenderNode($left);
-      // parens aren't mathematically required around a product used as a
-      // division's numerator (a*b/c == (a*b)/c), but they read more
-      // clearly as "one fraction" rather than "a times a fraction"
+      // parens aren't mathematically required around a product/quotient
+      // used as a division's numerator (a*b/c == (a*b)/c, and a/b/c ==
+      // (a/b)/c), since left-to-right evaluation reconstructs the same
+      // value either way.  Normally we leave them off (15*x/3 shouldn't
+      // become (15*x)/3, and 1/3*x/5 shouldn't become (1/3*x)/5), unless
+      // something specifically calls for keeping that numerator visually
+      // grouped as "one fraction" for a human reader: either the level-3
+      // combiner merged a numeric coefficient into it alongside a
+      // variable stuck in the denominator (tagged 'mergedcoef' by
+      // prettyRebuildProduct), or the original input explicitly
+      // parenthesized it (tagged 'wasparens' by handleSubExpression, e.g.
+      // (5*pi)/3 keeping its numerator grouped as (5pi)/3, and
+      // (2/3)/x keeping its numerator grouped as (2/3)/x rather than the
+      // ambiguous-looking 2/3/x)
       $leftNeedsParens = ($this->prettyPrecedence($left) < 2) ||
-        ($symbol === '/' && $left['symbol'] === '*');
+        ($symbol === '/' && ($left['symbol'] === '*' || $left['symbol'] === '/') &&
+          ((isset($node['info']) && $node['info'] === 'mergedcoef') ||
+           (isset($left['info']) && $left['info'] === 'wasparens')));
       if ($leftNeedsParens) {
         $leftStr = '(' . $leftStr . ')';
       }

@@ -249,7 +249,7 @@ $prettytests = [
   ['(6)(2^x+1)','6(2^x+1)','x'],
   ['(x^2)(6)','x^2*6','x'],   
   ['3(xy)','3x y','x,y'],
-  ['(xy)3','x y3','x,y'],
+  ['(xy)3','x y 3','x,y'],
 	['2(x)(x+3)', '2x(x+3)','x'],
 	['1-(x)', '1-x','x'],
 	['1-(x+3)', '1-(x+3)','x'],
@@ -258,7 +258,7 @@ $prettytests = [
   ['2x+5+3y+4x-1', '6x+4+3y', 'x,y', 1],
   ['3x+2+x+1/2', '4x+2+1/2', 'x', 1],
   ['1/2x+1/4x+1+1/2^2', '3/4x+5/4','x',2],
-  ['2x*5x', '2x5x','x',2],
+  ['2x*5x', '2x 5x','x',2],
   ['2x*5x', '10x^2','x',3],
   ['x*x*(x+3)', 'x^2(x+3)','x',3],
   ['x/x^2+2*3/2', '1/x+3','x',3],
@@ -275,7 +275,10 @@ $prettytests = [
   ["sin^2(x)-sin^-1(x)+arcsin(x)", "sin^2(x)-sin^-1(x)+arcsin(x)", "x", 0],
   ["log_3(x)-root(3)(x)+log(x)", "log_3(x)-root(3)(x)+log(x)", "x", 0],
   ["(log_2(x))^3", "(log_2(x))^3", "x", 0],
-  ["(sin(x))^3+sin^3(x)", "(sin(x))^3+sin^3(x)", "x", 0]
+  ["(sin(x))^3+sin^3(x)", "(sin(x))^3+sin^3(x)", "x", 0],
+  ["15x/3+(5pi)/3+2/3*x/5", "15x/3+(5pi)/3+2/3x/5","x", 0],
+  ["(x/y)3", "x/y 3", "x,y", 0],
+  ["(2/3)/5+(1/2)/(3/5)", "(2/3)/5+(1/2)/(3/5)", "x", 0]
 /* these are makexxpretty tests that are 
    stuff the parser can't handle, since it 
    was only intended for algebraic expressions,
