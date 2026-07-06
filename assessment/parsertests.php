@@ -278,7 +278,8 @@ $prettytests = [
   ["(sin(x))^3+sin^3(x)", "(sin(x))^3+sin^3(x)", "x", 0],
   ["15x/3+(5pi)/3+2/3*x/5", "15x/3+(5pi)/3+2/3x/5","x", 0],
   ["(x/y)3", "x/y 3", "x,y", 0],
-  ["(2/3)/5+(1/2)/(3/5)", "(2/3)/5+(1/2)/(3/5)", "x", 0]
+  ["(2/3)/5+(1/2)/(3/5)", "(2/3)/5+(1/2)/(3/5)", "x", 0],
+  ["(x-3)(x)(x+4)", "x(x-3)(x+4)", "x", 0]
 /* these are makexxpretty tests that are 
    stuff the parser can't handle, since it 
    was only intended for algebraic expressions,

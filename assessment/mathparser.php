@@ -1814,6 +1814,46 @@ class MathParser
   }
 
   /**
+   * Flattens a maximal chain of '*' nodes into an ordered list of factors.
+   * Does not cross into '/' (or anything else) - those are treated as a
+   * single opaque factor, left in place rather than reordered.
+   * @param  array $node
+   * @param  array $factors  (by reference) collected factor nodes, in order
+   * @return void
+   */
+  private function prettyFlattenMulChain($node, &$factors) {
+    if ($node['symbol'] === '*') {
+      $this->prettyFlattenMulChain($node['left'], $factors);
+      $this->prettyFlattenMulChain($node['right'], $factors);
+    } else {
+      $factors[] = $node;
+    }
+  }
+
+  /**
+   * Renders a non-empty, already-ordered list of factors as a '*' chain,
+   * parenthesizing each factor that needs it individually.
+   * @param  array $factors
+   * @return string
+   */
+  private function prettyRenderFactorChain($factors) {
+    $out = '';
+    foreach ($factors as $i => $f) {
+      $str = $this->prettyRenderNode($f);
+      if ($this->prettyPrecedence($f) < 2) {
+        $str = '(' . $str . ')';
+      }
+      if ($i === 0) {
+        $out = $str;
+      } else {
+        $joiner = $this->prettyImplicitMult ? $this->prettyImplicitJoiner($out, $str) : '*';
+        $out .= $joiner . $str;
+      }
+    }
+    return $out;
+  }
+
+  /**
    * The display name (everything before the final "(input)") for a
    * function node, reconstructing the special-cased syntax the parser
    * accepts on the way in:
@@ -1902,7 +1942,27 @@ class MathParser
       return $leftStr . $dispSymbol . $rightStr;
     }
 
-    if ($symbol === '*' || $symbol === '/') {
+    if ($symbol === '*') {
+      // flatten the whole chain of factors (not crossing into '/') and
+      // stable-partition it so factors that don't need parens display
+      // first, ahead of the ones that do.  Otherwise a bare factor can
+      // get stranded in the middle of a chain of parenthesized ones:
+      // (x+3)(x)(x-4) reads as x(x+3)(x-4) instead
+      $factors = [];
+      $this->prettyFlattenMulChain($node, $factors);
+      $simple = [];
+      $complex = [];
+      foreach ($factors as $f) {
+        if ($this->prettyPrecedence($f) < 2) {
+          $complex[] = $f;
+        } else {
+          $simple[] = $f;
+        }
+      }
+      return $this->prettyRenderFactorChain(array_merge($simple, $complex));
+    }
+
+    if ($symbol === '/') {
       $left = $node['left'];
       $right = $node['right'];
       $leftStr = $this->prettyRenderNode($left);
@@ -1921,7 +1981,7 @@ class MathParser
       // (2/3)/x keeping its numerator grouped as (2/3)/x rather than the
       // ambiguous-looking 2/3/x)
       $leftNeedsParens = ($this->prettyPrecedence($left) < 2) ||
-        ($symbol === '/' && ($left['symbol'] === '*' || $left['symbol'] === '/') &&
+        (($left['symbol'] === '*' || $left['symbol'] === '/') &&
           ((isset($node['info']) && $node['info'] === 'mergedcoef') ||
            (isset($left['info']) && $left['info'] === 'wasparens')));
       if ($leftNeedsParens) {
@@ -1929,15 +1989,11 @@ class MathParser
       }
       $rightStr = $this->prettyRenderNode($right);
       $rightPrec = $this->prettyPrecedence($right);
-      $rightNeedsParens = ($symbol === '/') ? ($rightPrec <= 2) : ($rightPrec < 2);
+      $rightNeedsParens = ($rightPrec <= 2);
       if ($rightNeedsParens) {
         $rightStr = '(' . $rightStr . ')';
       }
-      $joiner = $symbol;
-      if ($symbol === '*' && $this->prettyImplicitMult) {
-        $joiner = $this->prettyImplicitJoiner($leftStr, $rightStr);
-      }
-      return $leftStr . $joiner . $rightStr;
+      return $leftStr . '/' . $rightStr;
     }
 
     if ($symbol === '^') {
