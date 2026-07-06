@@ -289,6 +289,7 @@ function parselibs($file) {
 		exit;
 	}
 	$line = '';
+	$libitems = [];
 	while (((!$nogz || !feof($handle)) && ($nogz || !gzeof($handle))) && $line!="START QUESTION") {
 		if ($nogz) {
 			$line = rtrim(fgets($handle, 4096));
@@ -464,7 +465,7 @@ if ($myrights < 100) {
 				$libs[$libid] = $DBH->lastInsertId();
 				$newl++;
 			}
-			if (isset($libs[$libid])) {
+			if (isset($libs[$libid]) && !empty($libitems[$libid])) {
 				if ($touse=='') {$touse = $libitems[$libid];} else if (isset($libitems[$libid])) {$touse .= ','.$libitems[$libid];}
 			}
 		}
@@ -536,16 +537,18 @@ if ($myrights < 100) {
 					}
 				}
 
-				$qidlist = explode(',',$libitems[$libid]);
-				foreach ($qidlist as $qid) {
-					if (isset($qids[$qid]) && (array_search($qids[$qid],$deletedli)!==false)) {
-						$stm = $DBH->prepare("UPDATE imas_library_items SET ownerid=:ownerid,lastmoddate=:now,deleted=0 WHERE libid=:libid AND qsetid=:qsetid");
-						$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>Sanitize::onlyInt($qids[$qid]), ':ownerid'=>$userid, ':now'=>$now));
-						$newli += count($deletedli);
-					} else if (isset($qids[$qid]) && (array_search($qids[$qid],$existingli)===false)) {
-						$stm = $DBH->prepare("INSERT INTO imas_library_items (libid,qsetid,ownerid,lastmoddate) VALUES (:libid, :qsetid, :ownerid, :now)");
-						$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>Sanitize::onlyInt($qids[$qid]), ':ownerid'=>$userid, ':now'=>$now));
-						$newli++;
+				if (!empty($libitems[$libid])) {
+					$qidlist = explode(',',$libitems[$libid]);
+					foreach ($qidlist as $qid) {
+						if (isset($qids[$qid]) && (array_search($qids[$qid],$deletedli)!==false)) {
+							$stm = $DBH->prepare("UPDATE imas_library_items SET ownerid=:ownerid,lastmoddate=:now,deleted=0 WHERE libid=:libid AND qsetid=:qsetid");
+							$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>Sanitize::onlyInt($qids[$qid]), ':ownerid'=>$userid, ':now'=>$now));
+							$newli += count($deletedli);
+						} else if (isset($qids[$qid]) && (array_search($qids[$qid],$existingli)===false)) {
+							$stm = $DBH->prepare("INSERT INTO imas_library_items (libid,qsetid,ownerid,lastmoddate) VALUES (:libid, :qsetid, :ownerid, :now)");
+							$stm->execute(array(':libid'=>$libs[$libid], ':qsetid'=>Sanitize::onlyInt($qids[$qid]), ':ownerid'=>$userid, ':now'=>$now));
+							$newli++;
+						}
 					}
 				}
 				unset($existingli);
