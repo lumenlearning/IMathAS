@@ -207,6 +207,7 @@ function outcometable() {
 	$qoutcome = array();
 	$itemoutcome = array();
 	$assessmenttype = array();
+	$sectionlimit = [];
 	$sa = array();
 	while ($line=$stm->fetch(PDO::FETCH_ASSOC)) {
 		if (substr($line['deffeedback'],0,8)=='Practice') { continue;}
@@ -236,6 +237,9 @@ function outcometable() {
 		$category[$kcnt] = $line['gbcategory'];
 		$name[$kcnt] = $line['name'];
 		$cntingb[$kcnt] = $line['cntingb']; //1: count, 2: extra credit
+		if (!empty($itemsection['Assessment'.$line['id']])) {
+			$sectionlimit[$kcnt] = $itemsection['Assessment'.$line['id']];
+		}
 		$assessoutcomes[$kcnt] = array();
 
 		if ($line['ver'] > 1) {
@@ -384,6 +388,9 @@ function outcometable() {
 		$possible[$kcnt] = $line['points'];
 		$name[$kcnt] = $line['name'];
 		$cntingb[$kcnt] = $line['cntingb'];
+		if (!empty($itemsection['Forum'.$line['id']])) {
+			$sectionlimit[$kcnt] = $itemsection['Forum'.$line['id']];
+		}
 		$itemoutcome[$kcnt] = explode(',',$line['outcomes']);
 		$kcnt++;
 	}
@@ -547,6 +554,34 @@ function outcometable() {
 		$pos++;
 	}
 
+	//pull excusals
+	$excused = array();
+	$query = "SELECT userid,type,typeid FROM imas_excused WHERE courseid=?";
+	if ($limuser>0) {
+		$query .= " AND userid=?";
+		$stm2 = $DBH->prepare($query);
+		$stm2->execute(array($cid, $limuser));
+	} else {
+		$stm2 = $DBH->prepare($query);
+		$stm2->execute(array($cid));
+	}
+	while ($r = $stm2->fetch(PDO::FETCH_ASSOC)) {
+        $refcol = -1;
+		if ($r['type']=='A') {
+            if (!isset($assesscol[$r['typeid']])) { continue; }
+            $refcol = $assesscol[$r['typeid']];
+			$excused[$refcol][$r['userid']] = 1;
+		} else if ($r['type']=='O') {
+            if (!isset($gradecol[$r['typeid']])) { continue; }
+            $refcol = $gradecol[$r['typeid']];
+			$excused[$refcol][$r['userid']] = 1;
+		} else if ($r['type']=='F') {
+            if (!isset($discusscol[$r['typeid']])) { continue; }
+            $refcol = $discusscol[$r['typeid']];
+			$excused[$refcol][$r['userid']] = 1;
+		}
+	}
+
 	//Pull student data
 	$ln = 1;
 	$query = "SELECT imas_users.id,imas_users.SID,imas_users.FirstName,imas_users.LastName,imas_users.SID,imas_users.email,imas_students.section,imas_students.code,imas_students.locked,imas_students.timelimitmult,imas_students.lastaccess,imas_users.hasuserimg ";
@@ -585,6 +620,7 @@ function outcometable() {
 	$stm->execute($qarr);
 	$alt = 0;
     $sturow = array();
+	$stusection = array();
     $timelimitmult = [];
 	while ($line=$stm->fetch(PDO::FETCH_ASSOC)) {
 		unset($asid); unset($pts); unset($IP); unset($timeused);
@@ -603,6 +639,11 @@ function outcometable() {
 
 
         $sturow[$line['id']] = $ln;
+		if ($line['section'] !== null) {
+            $stusection[$line['id']] = strtolower($line['section'] ?? '');
+        } else {
+			$stusection[$line['id']] = '';
+		}
         $timelimitmult[$line['id']] = $line['timelimitmult'];
 		$ln++;
 	}
@@ -731,6 +772,19 @@ function outcometable() {
 		if ($now < $thised) { //still active
 			$gb[$row][1][$col][2] += 10;
 		}
+
+		if (!empty($sectionlimit[$i]) && 
+            !in_array($stusection[$l['userid']], $sectionlimit[$i])
+        ) {
+			// assess is not in this stu's section, so we won't count it, 
+            $countthisone = false;
+            $gb[$row][1][$col][0] = [];
+		}
+		if (!empty($excused[$col][$l['userid']])) {
+			// excused
+			$countthisone = false;
+		}
+
 		if ($countthisone) {
 			foreach ($pts as $oc=>$pv) {
 				if ($cntingb[$i] == 1) {
@@ -866,6 +920,19 @@ function outcometable() {
 		if ($now < $thised) { //still active
 			$gb[$row][1][$col][2] += 10;
 		}
+
+		if (!empty($sectionlimit[$i]) && 
+            !in_array($stusection[$l['userid']], $sectionlimit[$i])
+        ) {
+			// assess is not in this stu's section, so we won't count it, 
+            $countthisone = false;
+            $gb[$row][1][$col][0] = [];
+		}
+		if (!empty($excused[$col][$l['userid']])) {
+			// excused
+			$countthisone = false;
+		}
+
 		if ($countthisone) {
 			foreach ($pts as $oc=>$pv) {
 				if ($cntingb[$i] == 1) {
@@ -965,13 +1032,23 @@ function outcometable() {
 						}
                         $gb[$row][1][$col][1][$oc] = $possible[$i];
 					}
-					if ($gb[0][1][$col][2]<1) { //past
-						$cattotpast[$row][$category[$i]][$oc][$col] = $gb[$row][1][$col][0][$oc];
-						$catposspast[$row][$category[$i]][$oc][$col] = $possible[$i];
-					}
-					if ($gb[0][1][$col][3]<2) { //past or cur
-						$cattotcur[$row][$category[$i]][$oc][$col] = $gb[$row][1][$col][0][$oc];
-						$catposscur[$row][$category[$i]][$oc][$col] = $possible[$i];
+					if (!empty($sectionlimit[$i]) && 
+               			!in_array($stusection[$l['userid']], $sectionlimit[$i])
+					) {
+						// is not in this stu's section, so we won't count it, 
+		
+					} else if (!empty($excused[$col][$l['userid']])) {
+						// excused
+						$countthisone = false;
+					} else {
+						if ($gb[0][1][$col][2]<1) { //past
+							$cattotpast[$row][$category[$i]][$oc][$col] = $gb[$row][1][$col][0][$oc];
+							$catposspast[$row][$category[$i]][$oc][$col] = $possible[$i];
+						}
+						if ($gb[0][1][$col][3]<2) { //past or cur
+							$cattotcur[$row][$category[$i]][$oc][$col] = $gb[$row][1][$col][0][$oc];
+							$catposscur[$row][$category[$i]][$oc][$col] = $possible[$i];
+						}
 					}
 				}
 			}
@@ -985,12 +1062,20 @@ function outcometable() {
 		foreach($gb[0][1] as $col=>$inf) {
 			if ($gb[0][1][$col][2]>0 || (isset($gb[$ln][1][$col][1]) && count($gb[$ln][1][$col][1])>0)) {continue;} //skip if current, or if already set
 			if ($inf[4]==0 && count($possible[$assessidx[$inf[5]]])==0) {continue;} //assess has no outcomes
-
+			
+			if (!empty($excused[$col][$gb[$ln][0][1]])) {
+				continue; // don't zero out excused
+			}
 			$gb[$ln][1][$col] = array();
 			$gb[$ln][1][$col][0] = array();
 			$gb[$ln][1][$col][1] = array();
 			if ($inf[4]==0) { //online item
 				$i = $assessidx[$inf[5]];
+				if (!empty($sectionlimit[$i]) && 
+					!in_array($stusection[$gb[$ln][0][1]], $sectionlimit[$i])
+				) {
+					continue; // don't zero out section limited
+				}
 				foreach ($possible[$i] as $oc=>$p) {
 					$gb[$ln][1][$col][0][$oc] = 0;
 					$gb[$ln][1][$col][1][$oc] = $p;
@@ -1006,6 +1091,11 @@ function outcometable() {
 					$i = $gradeidx[$inf[5]];
 				} else if ($inf[4]==2) {
 					$i = $discussidx[$inf[5]];
+				}
+				if (!empty($sectionlimit[$i]) && 
+					!in_array($stusection[$gb[$ln][0][1]], $sectionlimit[$i])
+				) {
+					continue; // don't zero out section limited
 				}
 				foreach ($itemoutcome[$i] as $oc) {
 					$gb[$ln][1][$col][0][$oc] = 0;
