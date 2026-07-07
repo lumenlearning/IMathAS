@@ -117,11 +117,15 @@
 
     } 
 
+	function removeGrpNames($order) {
+		return preg_replace('/(\d+\|\d+)\|.*?~/', '$1~', $order);
+	}
+
 	if (!isset($_POST['order']) || !isset($_POST['text_order']) || !isset($_POST['lastitemhash'])) {
 		echo "error: missing required values";
 		exit;
     }
-    if ($beentaken && $rawitemorder != $_REQUEST['order']) {
+    if ($beentaken && removeGrpNames($rawitemorder) != removeGrpNames($_REQUEST['order'])) {
         echo 'error: '._('Students have started the assessment, and you cannot change questions or order after students have started; reload the page');
         exit;
     }
