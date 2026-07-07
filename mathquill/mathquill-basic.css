@@ -27,8 +27,10 @@
 }
 @font-face {
   font-family: Symbola;
-  src: url(fonts/Symbola-basic.eot);
+  /*src: url(fonts/Symbola-basic.eot);
   src: local('Symbola Regular'), local('Symbola'), url(fonts/Symbola-basic.woff2) format('woff2'), url(fonts/Symbola-basic.woff) format('woff'), url(fonts/Symbola-basic.ttf) format('truetype');
+  */
+  src: local('Symbola Regular'), local('Symbola'), url(fonts/Symbola-subset.woff2) format('woff2'), url(fonts/Symbola-subset.woff) format('woff'), url(fonts/Symbola-subset.ttf) format('truetype');
 }
 .mq-editable-field {
   display: -moz-inline-box;
@@ -110,40 +112,27 @@
   margin-left: 0.009em;
   margin-right: 0.009em;
 }
-.mq-root-block .mq-group-start,
-.mq-math-mode .mq-root-block .mq-group-start {
+.mq-root-block.mq-show-grouping .mq-group-start,
+.mq-math-mode .mq-root-block.mq-show-grouping .mq-group-start {
   margin-left: 0.11em;
   margin-right: -0.01em;
 }
-.mq-root-block .mq-group-other,
-.mq-math-mode .mq-root-block .mq-group-other {
+.mq-root-block.mq-show-grouping .mq-group-other,
+.mq-math-mode .mq-root-block.mq-show-grouping .mq-group-other {
   margin-left: -0.01em;
   margin-right: -0.01em;
 }
-.mq-root-block .mq-group-leading-1,
-.mq-math-mode .mq-root-block .mq-group-leading-1,
-.mq-root-block .mq-group-leading-2,
-.mq-math-mode .mq-root-block .mq-group-leading-2 {
+.mq-root-block.mq-show-grouping .mq-group-leading-1,
+.mq-math-mode .mq-root-block.mq-show-grouping .mq-group-leading-1,
+.mq-root-block.mq-show-grouping .mq-group-leading-2,
+.mq-math-mode .mq-root-block.mq-show-grouping .mq-group-leading-2 {
   margin-left: 0;
   margin-right: -0.01em;
 }
-.mq-root-block .mq-group-leading-3,
-.mq-math-mode .mq-root-block .mq-group-leading-3 {
+.mq-root-block.mq-show-grouping .mq-group-leading-3,
+.mq-math-mode .mq-root-block.mq-show-grouping .mq-group-leading-3 {
   margin-left: 0.036em;
   margin-right: -0.01em;
-}
-.mq-root-block.mq-suppress-grouping .mq-group-start,
-.mq-math-mode .mq-root-block.mq-suppress-grouping .mq-group-start,
-.mq-root-block.mq-suppress-grouping .mq-group-other,
-.mq-math-mode .mq-root-block.mq-suppress-grouping .mq-group-other,
-.mq-root-block.mq-suppress-grouping .mq-group-leading-1,
-.mq-math-mode .mq-root-block.mq-suppress-grouping .mq-group-leading-1,
-.mq-root-block.mq-suppress-grouping .mq-group-leading-2,
-.mq-math-mode .mq-root-block.mq-suppress-grouping .mq-group-leading-2,
-.mq-root-block.mq-suppress-grouping .mq-group-leading-3,
-.mq-math-mode .mq-root-block.mq-suppress-grouping .mq-group-leading-3 {
-  margin-left: 0.009em;
-  margin-right: 0.009em;
 }
 .mq-root-block .mq-ellipsis-start,
 .mq-math-mode .mq-root-block .mq-ellipsis-start {
