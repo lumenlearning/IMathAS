@@ -15,6 +15,10 @@
         :active = "page === -1 && hasIntro"
         :html = "intro"
       />
+      <feedback 
+        :active = "page === -1"
+        qn = "general"
+      />
       <div
         v-for = "(pageData,pagenum) in allPages"
         :key = "pagenum"
@@ -48,6 +52,10 @@
             />
             <div>
               <full-question-header :qn = "curqn" />
+              <feedback 
+                :active = "pagenum === page"
+                :qn = "curqn"
+              />
               <question
                 :qn="curqn"
                 :active = "pagenum === page"
@@ -98,6 +106,7 @@ import FullQuestionHeader from '@/components/FullQuestionHeader.vue';
 import Question from '@/components/question/Question.vue';
 import InterQuestionTextList from '@/components/InterQuestionTextList.vue';
 import IntroText from '@/components/IntroText.vue';
+import Feedback from '@/components/Feedback.vue';
 import ShowworkSingle from '@/components/ShowworkSingle.vue';
 import { store, actions } from '@/basicstore';
 
@@ -110,6 +119,7 @@ export default {
     FullQuestionHeader,
     InterQuestionTextList,
     IntroText,
+    Feedback,
     ShowworkSingle
   },
   computed: {

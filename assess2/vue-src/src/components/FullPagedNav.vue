@@ -80,7 +80,10 @@ export default {
       return store.assessInfo.interquestion_pages;
     },
     hasIntro () {
-      return (store.assessInfo.intro !== '' || store.assessInfo.resources.length > 0);
+      return (store.assessInfo.intro !== '' || 
+        store.assessInfo.resources.length > 0 ||
+        !!store.assessInfo?.feedback
+      );
     },
     navOptions () {
       var out = [];

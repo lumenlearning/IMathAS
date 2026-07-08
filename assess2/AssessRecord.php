@@ -1531,6 +1531,7 @@ class AssessRecord
     if ($include_scores) {
       $out['gbscore'] = $aver['questions'][$qn]['score'];
       $out['gbrawscore'] = $aver['questions'][$qn]['rawscore'];
+      $out['feedback'] = $curq['feedback'] ?? '';
     }
 
     // set tries
@@ -1828,6 +1829,16 @@ class AssessRecord
       $out[$qn] = $this->getQuestionObject($qn, $include_scores, $include_parts, $generate_html, $ver, $tryToShow);
     }
     return $out;
+  }
+
+  /**
+   * Get the assessment-level feedback
+   * @param  int|string  $ver               Which version to grab data for, or 'last' for most recent, or 'scored'
+   * @return string   feedback
+   */
+  public function getGenFeedback($ver = 'last') {
+    $assessver = $this->getAssessVer($ver);
+    return ($assessver['feedback'] ?? '');
   }
 
   /**

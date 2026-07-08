@@ -1,5 +1,5 @@
 <template>
-  <div v-show="active" class="questionpane introtext">
+  <div v-show="active && html !== ''" class="questionpane introtext">
     <div v-if="html !== ''" v-html="html" ref="introtext"/>
     <resource-pane :showicon="true" style="display:inline-block"/>
   </div>

@@ -34,6 +34,10 @@
         :active = "showTexts"
         :html = "intro"
       />
+      <feedback 
+        :active = "showTexts"
+        qn = "general"
+      />
 
       <div
         v-for="curqn in questionArray" :key="curqn"
@@ -48,6 +52,10 @@
           :active = "showTexts"
         />
         <full-question-header :qn = "curqn" />
+        <feedback 
+          :active = "showTexts"
+          :qn = "curqn"
+        />
         <question
           :qn="curqn"
           active="true"
@@ -86,6 +94,7 @@ import FullQuestionHeader from '@/components/FullQuestionHeader.vue';
 import Question from '@/components/question/Question.vue';
 import InterQuestionTextList from '@/components/InterQuestionTextList.vue';
 import IntroText from '@/components/IntroText.vue';
+import Feedback from '@/components/Feedback.vue';
 import ShowworkSingle from '@/components/ShowworkSingle.vue';
 import { store, actions } from '@/basicstore';
 
@@ -102,6 +111,7 @@ export default {
     FullQuestionHeader,
     InterQuestionTextList,
     IntroText,
+    Feedback,
     ShowworkSingle
   },
   computed: {

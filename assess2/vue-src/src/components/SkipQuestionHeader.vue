@@ -109,7 +109,10 @@ export default {
       return parseInt(this.qn) + 1;
     },
     hasIntro () {
-      return (store.assessInfo.intro !== '' || store.assessInfo.resources.length > 0);
+      return (store.assessInfo.intro !== '' || 
+        store.assessInfo.resources.length > 0 ||
+        !!store.assessInfo?.feedback
+      );
     },
     navOptions () {
       var out = [];

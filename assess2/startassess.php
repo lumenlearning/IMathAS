@@ -395,6 +395,11 @@ $showscores = $assess_info->showScoresDuring();
 $generate_html = ($assess_info->getSetting('displaymethod') == 'full' || !empty($_POST['in_print']));
 $assessInfoOut['questions'] = $assess_record->getAllQuestionObjects($showscores, $generate_html, $generate_html);
 
+// get gen feedback if showing scores
+if ($showscores) {
+  $assessInfoOut['feedback'] = $assess_record->getGenFeedback();
+}
+
 // get single work
 if ($assess_info->getSetting('singleshowwork')) {
   [$assessInfoOut['swgen'], $assessInfoOut['swgentime']] = $assess_record->getGenShowwork();

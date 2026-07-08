@@ -16,6 +16,10 @@
         :html = "intro"
         key = "-1"
       />
+      <feedback 
+        :active = "qn == -1"
+        qn = "general"
+      />
       <router-link
           v-if = "qn == -1"
           :to="'/skip/1'"
@@ -45,6 +49,10 @@
         <h2 class="sr-only">
           {{ $t('question_n', { n: curqn + 1 }) }}
         </h2>
+        <feedback
+          :active = "curqn == qn"
+          :qn = "curqn"
+        />
         <question
           :qn="curqn"
           :active="curqn == qn"
@@ -69,6 +77,7 @@ import SkipQuestionHeader from '@/components/SkipQuestionHeader.vue';
 import InterQuestionTextSkiplist from '@/components/InterQuestionTextSkiplist.vue';
 import Question from '@/components/question/Question.vue';
 import IntroText from '@/components/IntroText.vue';
+import Feedback from '@/components/Feedback.vue';
 import ShowworkSingle from '@/components/ShowworkSingle.vue';
 import Icons from '@/components/widgets/Icons.vue';
 
@@ -82,6 +91,7 @@ export default {
     InterQuestionTextSkiplist,
     AssessHeader,
     IntroText,
+    Feedback,
     ShowworkSingle,
     Icons
   },
