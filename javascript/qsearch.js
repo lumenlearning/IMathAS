@@ -207,7 +207,7 @@ function doQuestionSearch(offset) {
     $("#searcherror").hide();
     var search = document.getElementById("search").value;
     if (cursearchtype == 'all' && search.trim()=='') {
-        $("#searcherror").html(_('You must provide a search term when searching All Libraries')).show();
+        $("#searcherror").text(_('You must provide a search term when searching All Libraries')).show();
         $("#search").focus();
         return;
     }
@@ -268,7 +268,7 @@ var a11ygoodicon = '<span class="a11ygoodicon" title="' + _('Positive accessibil
 var wrongLibState = {};
 function displayQuestionList(results) {
     if (typeof results === 'string') {  // error message
-        $("#searcherror").html(results).show();
+        $("#searcherror").text(results).show();
         $("#search").focus();
         return;
     }
@@ -278,26 +278,26 @@ function displayQuestionList(results) {
     } else if (qsearchaddr.match(/did=/)) {
         searchcontext = 'adddrill';
     }
-    var searchtype = 'libs';
     var colcnt = 9;
-    var thead = '<thead><tr>'
-        + '<th><span class="sr-only">'+_('Select')+'</span></th>'
-        + '<th>'+_('Description')+'</th>'
-        + '<th>'+_('Actions')+'</th>'
-        + '<th>'+_('Info')+'</th>'
-        + '<th>'+_('ID')+'</th>'
-        + '<th>'+_('Type')+'</th>'
-        + '<th>'+_('Times Used')+'</th>'
-        + (searchcontext == 'manageq' ? '<th>'+_('Last Mod')+'</th>' :
-            '<th>'+_('Avg Time')+'</th>')
-        + (curcid == 'admin' ? '<th>'+_('Owner')+'</th>' : '')
-        + '</tr></thead>';
+    var $theadRow = $('<tr>').append(
+        $('<th>').append($('<span class="sr-only">').text(_('Select'))),
+        $('<th>').text(_('Description')),
+        $('<th>').text(_('Actions')),
+        $('<th>').text(_('Info')),
+        $('<th>').text(_('ID')),
+        $('<th>').text(_('Type')),
+        $('<th>').text(_('Times Used')),
+        $('<th>').text(searchcontext == 'manageq' ? _('Last Mod') : _('Avg Time'))
+    );
+    if (curcid == 'admin') {
+        $theadRow.append($('<th>').text(_('Owner')));
+    }
+    var $thead = $('<thead>').append($theadRow);
     var sortinit = [false,'S',false,'S','N','S','N', searchcontext == 'manageq' ? 'D' : 'N'];
     if (curcid == 'admin') {
         sortinit.push('S');
     }
-    var tbody = '<tbody>';
-    var i,q,row,features,descrclass,descricon;
+    var $tbody = $('<tbody>');
     var lastlib = -1;
     var existingq = [];
     wrongLibState = {};
@@ -306,72 +306,71 @@ function displayQuestionList(results) {
     }
     for (var i in results['qs']) {
         // show lib/assess titles
-        q = results['qs'][i];
+        var q = results['qs'][i];
         wrongLibState[i] = [q['junkflag'], q['libitemid']];
         if (results.type=='libs' && q['libid'] != lastlib) {
-            tbody += '<tr><td colspan="'+colcnt+'"><b>' + results.names[q['libid']] + '</b></td></tr>';
+            $tbody.append($('<tr>').append($('<td>').attr('colspan', colcnt).append($('<b>').append(results.names[q['libid']]))));
             lastlib = q['libid'];
         } else if (results.type=='assess' && q['grp'] != lastlib) {
-            tbody += '<tr><td colspan="'+colcnt+'"><b>' + results.names[q['grp']] + '</b></td></tr>';
+            $tbody.append($('<tr>').append($('<td>').attr('colspan', colcnt).append($('<b>').append(results.names[q['grp']]))));
             lastlib = q['grp'];
         }
-        // build feature icons
-        features = '';
+        // build feature icons (static, trusted markup - only translated strings are interpolated)
+        var $features = $('<td class="nowrap">');
         if ((q['extrefval']&1)==1) {
-            features += '<div class="inlinediv"';
             var altbase = (q['extrefval']&3)==3 ? _("Captioned video") : _("Video");
-            features += 'title="'+altbase+'">';
-            features +=
-                '<img width="16" src="' +
-                staticroot +
-                '/img/video2' + ((q['extrefval']&3)==3 ?'cc':'') + '.svg" alt="' +
-                altbase +
-                '"/>' +
-                '</div>';
+            $features.append(
+                $('<div class="inlinediv">').attr('title', altbase).append(
+                    $('<img width="16">').attr({
+                        src: staticroot + '/img/video2' + ((q['extrefval']&3)==3 ? 'cc' : '') + '.svg',
+                        alt: altbase
+                    })
+                )
+            );
         }
         if ((q['extrefval'] & 4) == 4) {
-            features +=
-                '<img width="16" src="' +
-                staticroot +
-                '/img/page.svg" alt="'+_('Help Resource')+'" ' +
-                'title="'+_('Help Resource')+'" />';
+            $features.append($('<img width="16">').attr({
+                src: staticroot + '/img/page.svg',
+                alt: _('Help Resource'),
+                title: _('Help Resource')
+            }));
         }
         if ((q['extrefval'] & 8) == 8) {
-            features +=
-                '<img width="16" src="' +
-                staticroot +
-                '/img/written.svg" alt="'+_('Written example')+'" ' +  
-                'title="'+_('Written example')+'" />';
+            $features.append($('<img width="16">').attr({
+                src: staticroot + '/img/written.svg',
+                alt: _('Written example'),
+                title: _('Written example')
+            }));
         }
         if (q['mine'] == 1) {
-            features += '<span title="' + _('My Question') + '">' + 
-                '<svg role=img viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><title>' + _('My Question') + '</title><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>' +
-                '</span>';
+            $features.append($('<span>').attr('title', _('My Question')).html(
+                '<svg role=img viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><title>' + _('My Question') + '</title><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
+            ));
         }
         if (q['userights'] == 0) {
-            features += '<span title="' + _('Private') + '">' + 
-                '<svg role=img viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><title>' + _('Private') + '</title><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
-                '</span>';
+            $features.append($('<span>').attr('title', _('Private')).html(
+                '<svg role=img viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><title>' + _('Private') + '</title><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>'
+            ));
         }
         if (q['isrand'] == 0) {
-            features += '<span title="' + _('Not Randomized') + '">' + 
-                '<svg role=img viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><title>' + _('Not Randomized') + '</title><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><line stroke="#f00" x1="5" y1="1" x2="19" y2="23"></line></svg>' +
-                '</span>';
+            $features.append($('<span>').attr('title', _('Not Randomized')).html(
+                '<svg role=img viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><title>' + _('Not Randomized') + '</title><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path><line stroke="#f00" x1="5" y1="1" x2="19" y2="23"></line></svg>'
+            ));
         }
-        descrclass = '';
-        descricon = '';
+        var descrclass = '';
+        var $descricon = null;
         if (q['broken'] == 1) {
-            descrclass = ' class="qbroken"';
-            descricon = '<span title="' + _('Marked as broken') + '">' + 
-                '<svg viewBox="0 0 24 24" width="16" height="16" stroke="#f66" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19.7 1.3 19.6 9 16.2 6.3 13.8 11.3 10.5 8.3 7 11.7 3.6 9.2l0-7.9z" class="a"></path><path d="m19.7 22.9 0-7.8-2-1.4-3.1 4-3.3-3-3.8 3.8-4-3.9v8.4z" class="a"></path></svg>' + 
-                '</span> ';
+            descrclass = 'qbroken';
+            $descricon = $('<span>').attr('title', _('Marked as broken')).html(
+                '<svg viewBox="0 0 24 24" width="16" height="16" stroke="#f66" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19.7 1.3 19.6 9 16.2 6.3 13.8 11.3 10.5 8.3 7 11.7 3.6 9.2l0-7.9z" class="a"></path><path d="m19.7 22.9 0-7.8-2-1.4-3.1 4-3.3-3-3.8 3.8-4-3.9v8.4z" class="a"></path></svg>'
+            );
         } else if (q['junkflag'] == 1 && results.type=='libs') {
-            descrclass = ' class="qwronglib"';
-            descricon = wronglibicon;
+            descrclass = 'qwronglib';
+            $descricon = $(wronglibicon);
         } else if (existingq.indexOf(parseInt(q['id'])) !== -1) {
-            descrclass = ' class="qinassess"';
+            descrclass = 'qinassess';
         } else if (q['userights'] == 0) {
-            descrclass = ' class="qisprivate"';
+            descrclass = 'qisprivate';
         }
         // build action dropdown
 
@@ -386,61 +385,95 @@ function displayQuestionList(results) {
             "&cid=" + curcid +
             (curaid > 0 ? ('&from=addq2&frompot=1') : "");
 
-        var actions2 = '<button role="button" class="dropdown-toggle arrow-down secondary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' + 
-            '<span class="sr-only">More</span></button><ul role="menu" class="dropdown-menu dropdown-menu-right">';
-        if (curaid > 0) { 
-            actions2 += '<li><a href="' + addqaddr + '">' + _('Add') + '</a></li>';
+        var $actionsMenu = $('<ul role="menu" class="dropdown-menu dropdown-menu-right">');
+        if (curaid > 0) {
+            $actionsMenu.append($('<li>').append($('<a>').attr('href', addqaddr).text(_('Add'))));
         }
-        actions2 += '<li><a href="' + editqaddr + '&viewonly=1">' + _('View Code') + '</a></li>';
+        $actionsMenu.append($('<li>').append($('<a>').attr('href', editqaddr + '&viewonly=1').text(_('View Code'))));
         if (q['canedit']==1) {
-            actions2 += '<li><a href="' + editqaddr + '">' + _('Edit Code') + '</a></li>';
-        } 
-        actions2 += '<li><a href="' + editqaddr + '&template=true">' + _('Template (Copy)') + '</a></li>';
+            $actionsMenu.append($('<li>').append($('<a>').attr('href', editqaddr).text(_('Edit Code'))));
+        }
+        $actionsMenu.append($('<li>').append($('<a>').attr('href', editqaddr + '&template=true').text(_('Template (Copy)'))));
         if (results.type=='libs') {
-            actions2 += '<li><a href="#" onclick="toggleWrongLibFlag('+i+'); return false;" class="wronglibtoggle">' + 
-                ((q['junkflag'] == 1) ? _('Un-mark as in wrong library') : _('Mark as in wrong library')) +
-                '</a></li>';
+            var $wronglibA = $('<a href="#" class="wronglibtoggle">')
+                .text((q['junkflag'] == 1) ? _('Un-mark as in wrong library') : _('Mark as in wrong library'))
+                .on('click', (function(rowid) {
+                    return function(e) {
+                        e.preventDefault();
+                        toggleWrongLibFlag(rowid);
+                    };
+                })(i));
+            $actionsMenu.append($('<li>').append($wronglibA));
         }
         if (q['canedit']==1) {
-            actions2 += '<li class=divider></li>';
-            actions2 += '<li><a href="manageqset.php?cid=' + curcid + 
-                '&transfer=' + q['id'] + '">' + 
-                _('Transfer') + '</a></li>';
-            actions2 += '<li><a href="manageqset.php?cid=' + curcid + 
-                '&remove=' + q['id'] + '">' + 
-                _('Delete') + '</a></li>';
+            $actionsMenu.append($('<li class="divider">'));
+            $actionsMenu.append($('<li>').append($('<a>').attr('href', 'manageqset.php?cid=' + curcid + '&transfer=' + q['id']).text(_('Transfer'))));
+            $actionsMenu.append($('<li>').append($('<a>').attr('href', 'manageqset.php?cid=' + curcid + '&remove=' + q['id']).text(_('Delete'))));
         }
-        actions2 += '</ul>';
+
+        var $previewBtn = $('<button type="button" class="secondary">')
+            .text(_('Preview'))
+            .on('click', (function(rowid, qid) {
+                return function() {
+                    previewq('selq', 'qo'+rowid, qid, true, false);
+                };
+            })(i, q['id']));
+
+        var $dropdownToggle = $('<button role="button" class="dropdown-toggle arrow-down secondary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">')
+            .append($('<span class="sr-only">').text('More'));
+
+        var $actionsTd = $('<td>').append(
+            $('<div class="dropdown splitbtn nowrap">').append($previewBtn, $dropdownToggle, $actionsMenu)
+        );
+
+        var $checkboxTd = $('<td>').append(
+            $('<input type="checkbox" name="nchecked[]">').attr({id: 'qo'+i, value: q['id']})
+        );
+
+        var $descrTd = $('<td>');
+        if (descrclass) {
+            $descrTd.addClass(descrclass);
+        }
+        var $label = $('<label>').attr({'for': 'qo'+i, id: 'qd'+i});
+        if ($descricon) {
+            $label.append($descricon);
+        }
+        $label.append(q['description']);
+        $descrTd.append($label);
 
         // build row
-        tbody += '<tr>'
-            + '<td><input type=checkbox name="nchecked[]" id="qo'+i+'" value="'+q['id']+'"></td>'
-            + '<td' + descrclass + '><label for="qo'+i+'" id="qd'+i+'">' + descricon + q['description'] + '</label></td>'
-            + '<td><div class="dropdown splitbtn nowrap"><button type="button" class="secondary" onclick="previewq(\'selq\',\'qo'+i+'\','+q['id']+',true,false)">'
-            + _('Preview') + '</button>'
-            + actions2
-            + '</div></td>'
-            + '<td class="nowrap">' + features + '</td>'
-            + '<td>' + q['id'] + '</td>'
-            + '<td>' + q['qtype'] + '</td>'
-            + '<td class="c">' + q['times'] + '</td>';
+        var $row = $('<tr>').append(
+            $checkboxTd,
+            $descrTd,
+            $actionsTd,
+            $features,
+            $('<td>').text(q['id']),
+            $('<td>').text(q['qtype']),
+            $('<td class="c">').text(q['times'])
+        );
 
         if (searchcontext == 'manageq') {
-            tbody += '<td>' + q['lastmod'] + '</td>';
+            $row.append($('<td>').text(q['lastmod']));
         } else {
-            tbody += '<td class="c">' + (q['meantimen'] > 3 ? 
-                ('<span onmouseenter="tipshow(this,\''+_('Avg score on first try: ')+q['meanscore']+'%'
-                + '<br/>'+_('Avg time on first try: ') + q['meantime'] + _(' min') + 
-                '<br/>N='+q['meantimen']+'\')" onmouseleave="tipout()">' + q['meantime'] + '</span>') :
-                '') + '</td>';
+            var $avgTd = $('<td class="c">');
+            if (q['meantimen'] > 3) {
+                var tipHtml = _('Avg score on first try: ') + q['meanscore'] + '%'
+                    + '<br/>' + _('Avg time on first try: ') + q['meantime'] + _(' min')
+                    + '<br/>N=' + q['meantimen'];
+                $avgTd.append(
+                    $('<span>').attr('data-tip', tipHtml).text(q['meantime'])
+                        .on('mouseenter', function() { tipshow(this); })
+                        .on('mouseleave', function() { tipout(); })
+                );
+            }
+            $row.append($avgTd);
         }
         if (curcid == 'admin') {
-            tbody += '<td>' + q['ownershort'] + '</td>';
+            $row.append($('<td>').append(q['ownershort']));
         }
-        tbody += '</tr>';
+        $tbody.append($row);
     }
-    tbody += '</tbody>';
-    document.getElementById("myTable").innerHTML = thead + tbody;
+    $("#myTable").empty().append($thead, $tbody);
     rendermathnode(document.getElementById("myTable"));
 
     initSortTable('myTable', sortinit);

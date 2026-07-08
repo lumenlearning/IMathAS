@@ -278,7 +278,7 @@ if (FormData){ // Only allow quicksave if FormData object exists
 				// Change form action url and testing address
 				if (formAction.indexOf("moddataset.php") > -1) {
 					quickSaveQuestion.url = formAction;
-					quickSaveQuestion.testAddr = basetestaddr + res.id
+					quickSaveQuestion.testAddr = basetestaddr + parseInt(res.id)
 				} else {
 					quickSaveQuestion.errorFunc();
 				}
@@ -309,11 +309,24 @@ if (FormData){ // Only allow quicksave if FormData object exists
 					for (id in images.vars){
 						imgCount++;
 						$("#imgList").append(
-							"<li><label>Variable: <input type='text' name='imgvar-" + id + "' value='$" + images.vars[id] + "' size='10' /></label>" +
-							" <a href='" + res.imgUrlBase + images.files[id] + "' target='_blank'>View</a>" +
-							" <label>Description: <textarea rows=1 cols=30 name='imgalt-" + id + "'>" + images.alttext[id] + "</textarea></label>" +
-							" <label><input type='checkbox' name='delimg-" + id + "'/> Delete?</label>" +
-							"</li>"
+							$("<li>").append(
+								$("<label>").append(
+									document.createTextNode("Variable: "),
+									$("<input>").attr({type: "text", name: "imgvar-"+id, size: "10"}).val("$"+images.vars[id])
+								),
+								document.createTextNode(" "),
+								$("<a>").attr({href: res.imgUrlBase + images.files[id], target: "_blank"}).text("View"),
+								document.createTextNode(" "),
+								$("<label>").append(
+									document.createTextNode("Description: "),
+									$("<textarea>").attr({rows: 1, cols: 30, name: "imgalt-"+id}).val(images.alttext[id])
+								),
+								document.createTextNode(" "),
+								$("<label>").append(
+									$("<input>").attr({type: "checkbox", name: "delimg-"+id}),
+									document.createTextNode(" Delete?")
+								)
+							)
 						);
 					}
 				} else { // No uploads/deletes: still count number of images
@@ -327,10 +340,19 @@ if (FormData){ // Only allow quicksave if FormData object exists
 				if (res.extref.length>0) {
 					$("#helpbtnlist").html('');
 					for (var i=0;i<res.extref.length;i++) {
-						$("#helpbtnlist").append("<li>Type: "+res.extref[i][0] +
-                            ", URL: <a href='"+res.extref[i][1]+"'>"+res.extref[i][1]+"</a>. " +
-                            ((res.extref[i][2]) ? (_("Description")+": "+res.extref[i][2]+". "):"") +
-							"<label><input type=\"checkbox\" name=\"delhelp-"+i+"\"/>" + _("Delete?") + "</label></li>");
+						var ref = res.extref[i];
+						var $li = $("<li>").append(document.createTextNode("Type: "+ref[0]+", URL: "));
+						$("<a>").attr("href", ref[1]).text(ref[1]).appendTo($li);
+						$li.append(document.createTextNode(". "));
+						if (ref[2]) {
+							$li.append(document.createTextNode(_("Description")+": "+ref[2]+". "));
+						}
+						var $label = $("<label>").append(
+							$("<input>").attr({type: "checkbox", name: "delhelp-"+i}),
+							document.createTextNode(_("Delete?"))
+						);
+						$li.append($label);
+						$("#helpbtnlist").append($li);
 					}
 					$("#helpbtnwrap").removeClass("hidden");
 				} else {

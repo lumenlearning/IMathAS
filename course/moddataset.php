@@ -131,7 +131,13 @@
 				}
             }
             $helpdescr = str_replace(['!!','~~'],'',Sanitize::stripHtmlTags($_POST['helpdescr']));
-			$newextref[] = $_POST['helptype'].'!!'.trim($_POST['helpurl']).'!!'.$captioned.'!!'.$helpdescr;
+			$newextref[] = Sanitize::simpleString($_POST['helptype'])
+				. '!!'
+				. Sanitize::url(trim($_POST['helpurl']))
+				. '!!'
+				. $captioned
+				. '!!'
+				. $helpdescr;
 		}
 		$extref = implode('~~',$newextref);
 		if (isset($_POST['doreplaceby'])) {
@@ -281,8 +287,8 @@
 							$stm2->execute(array(':id'=>$_GET['id']));
 						}
 					} else if ($row[2]!=$_POST['imgvar-'.$row[0]] || $row[3]!=$_POST['imgalt-'.$row[0]]) {
-						$newvar = $_POST['imgvar-'.$row[0]];
-						$newalt = $_POST['imgalt-'.$row[0]];
+						$newvar = preg_replace('/[^\w\[\]]/','', $_POST['imgvar-'.$row[0]]);
+						$newalt = Sanitize::stripHtmlTags($_POST['imgalt-'.$row[0]]);
 						$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','laarr','shanspt','GLOBALS','laparts','anstype','kidx','iidx','tips','optionsPack','partla','partnum','score','disallowedvar','allowedmacros','wherecount','countcnt','myrights','myspecialrights');
 						if (in_array($newvar,$disallowedvar)) {
 							$errmsg .= "<p>".Sanitize::encodeStringForDisplay($newvar)." is not an allowed variable name</p>";
@@ -350,8 +356,8 @@
 					if (!isset($_POST['delimg-'.$row[3]])) {
 						$_POST['imgvar-'.$row[3]] = preg_replace('/[^\w\[\]]/','', $_POST['imgvar-'.$row[3]]);
 						if ($row[0]!=$_POST['imgvar-'.$row[3]] || $row[2]!=$_POST['imgalt-'.$row[3]]) {
-							$newvar = $_POST['imgvar-'.$row[3]];
-							$newalt = $_POST['imgalt-'.$row[3]];
+							$newvar = $_POST['imgvar-'.$row[3]]; // sanitized above
+							$newalt = Sanitize::stripHtmlTags($_POST['imgalt-'.$row[3]]);
 							$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','laarr','shanspt','GLOBALS','laparts','anstype','kidx','iidx','tips','optionsPack','partla','partnum','score','disallowedvar','allowedmacros','wherecount','countcnt','myrights','myspecialrights');
 							if (!in_array($newvar,$disallowedvar)) {
 								$row[0] = $newvar;
@@ -380,7 +386,7 @@
 			//upload image files if attached
 			if (!empty($_FILES['imgfile']['name'])) {
 				$disallowedvar = array('link','qidx','qnidx','seed','qdata','toevalqtxt','la','GLOBALS','laparts','anstype','kidx','iidx','tips','options','partla','partnum','score');
-				$_POST['newimgvar'] = preg_replace('/[^\w\[\]]/','', $_POST['newimgvar']);
+				$newvar = preg_replace('/[^\w\[\]]/','', $_POST['newimgvar']);
 				if (!is_uploaded_file($_FILES['imgfile']['tmp_name'])) {
 					switch($_FILES['imgfile']['error']){
 					case 1:
@@ -394,9 +400,9 @@
 					  $errmsg .= _("There was a problem with your upload.");
 					  break;
 						}
-				} else if (trim($_POST['newimgvar'])=='') {
+				} else if (trim($newvar)=='') {
 					$errmsg .= "<p>"._("Need to specify variable for image to be referenced by")."</p>";
-				} else if (in_array($_POST['newimgvar'],$disallowedvar)) {
+				} else if (in_array($newvar,$disallowedvar)) {
 					$errmsg .= "<p>".sprintf(_("%s is not an allowed variable name"),Sanitize::encodeStringForDisplay($newvar))."</p>";
 				} else {
 					$uploaddir = rtrim(dirname(__FILE__), '/\\') .'/../assessment/qimages/';
@@ -422,8 +428,9 @@
 						if (($filename=storeuploadedqimage('imgfile',$filename))!==false) {
 						//if (move_uploaded_file($_FILES['imgfile']['tmp_name'], $uploadfile)) {
 							//echo "<p>File is valid, and was successfully uploaded</p>\n";
+							$newalt = Sanitize::stripHtmlTags($_POST['newimgalt']);
 							$stm = $DBH->prepare("INSERT INTO imas_qimages (var,qsetid,filename,alttext) VALUES (:var, :qsetid, :filename, :alttext)");
-							$stm->execute(array(':var'=>$_POST['newimgvar'], ':qsetid'=>$qsetid, ':filename'=>$filename, ':alttext'=>$_POST['newimgalt']));
+							$stm->execute(array(':var'=>$newvar, ':qsetid'=>$qsetid, ':filename'=>$filename, ':alttext'=>$newalt));
 							$stm = $DBH->prepare("UPDATE imas_questionset SET hasimg=1 WHERE id=:id");
 							$stm->execute(array(':id'=>$qsetid));
 						} else {
@@ -809,20 +816,20 @@
 	$errors = $a11yscan->geterrors();
 	$a11yerr = '';
 	foreach ($errors[1] as $err) {
-		$a11yerr .= $err[0].'. ';
+		$a11yerr .= Sanitize::encodeStringForDisplay($err[0]).'. ';
 	}
 	if (count($extref)>0) {
 		for ($i=0;$i<count($extref);$i++) {
 			$extrefpt = explode('!!',$extref[$i]);
 			if ($extrefpt[0]=='video' && count($extrefpt)>2 && $extrefpt[2]==0) {
-				$a11yerr .= sprintf(_('Uncaptioned video (%s). '), $extrefpt[1]);
+				$a11yerr .= sprintf(_('Uncaptioned video (%s). '), Sanitize::encodeStringForDisplay($extrefpt[1]));
 			}
 		}
 	}
 	if (!empty($images['alttext'])) {
 		foreach ($images['alttext'] as $imn=>$alt) {
 			if (empty($alt)) {
-				$a11yerr .= sprintf(_('Blank alt text on image variable %s'), $images['vars'][$imn]);
+				$a11yerr .= sprintf(_('Blank alt text on image variable %s'), Sanitize::encodeStringForDisplay($images['vars'][$imn]));
 			}
 		}
 	}
@@ -852,11 +859,11 @@
 		$extrefqs = array();
 		for ($i=0;$i<count($extref);$i++) {
 			$extrefpt = explode('!!',$extref[$i]);
-			$type = ucfirst($extrefpt[0]);
+			$type = ucfirst(Sanitize::simpleString($extrefpt[0]));
 			if ($extrefpt[0]=='video' && count($extrefpt)>2 && $extrefpt[2]==1) {
 				$type .= ' (cc)';
 			}
-            $extrefqs[$i] = array($type,$extrefpt[1]);
+            $extrefqs[$i] = array($type,Sanitize::encodeUrlForHref($extrefpt[1]));
             if (!empty($extrefpt[3])) {
                 $extrefqs[$i][2] = Sanitize::encodeStringForDisplay($extrefpt[3]);
             }

@@ -1162,7 +1162,12 @@ function convertheic(href, divid) {
 	})
   .then(function(conversionResult) {
     var url = URL.createObjectURL(conversionResult);
-    document.getElementById(divid).innerHTML = '<img src="' + url + '" onclick="rotateimg(this)">';
+    var container = document.getElementById(divid);
+    container.textContent = '';
+    var img = document.createElement('img');
+    img.src = url;
+    img.addEventListener('click', function() { rotateimg(img); });
+    container.appendChild(img);
   })
   .catch(function(e) {
     console.log(e);
@@ -1176,7 +1181,12 @@ function convertheic2(href, divid) {
 	})
   .then(function(conversionResult) {
     var url = URL.createObjectURL(conversionResult);
-    document.getElementById(divid).innerHTML = '<img src="' + url + '" onclick="rotateimg(this)">';
+    var container = document.getElementById(divid);
+    container.textContent = '';
+    var img = document.createElement('img');
+    img.src = url;
+    img.addEventListener('click', function() { rotateimg(img); });
+    container.appendChild(img);
   })
   .catch(function(e) {
     console.log(e);

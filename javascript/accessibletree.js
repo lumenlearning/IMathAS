@@ -149,26 +149,62 @@ class AccessibleTreeWidget {
         content.appendChild(selectionContainer);
         content.appendChild(label);
         if (item.links || (canHaveChildren && this.options.selectionMode === 'multi')) {
-            let linkbtn = '<a tabindex=0 class="dropdown-toggle arrow-down" id="tdd'+item.id+'" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-	        linkbtn += _('Actions')+'</a>';
-	        linkbtn += '<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="tdd'+item.id+'">';
+            let linkspan = document.createElement("span");
+            linkspan.className = "dropdown";
+
+            let toggle = document.createElement("a");
+            toggle.tabIndex = 0;
+            toggle.className = "dropdown-toggle arrow-down";
+            toggle.id = "tdd" + item.id;
+            toggle.setAttribute("role", "button");
+            toggle.setAttribute("data-toggle", "dropdown");
+            toggle.setAttribute("aria-haspopup", "true");
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.textContent = _('Actions');
+            linkspan.appendChild(toggle);
+
+            let menu = document.createElement("ul");
+            menu.className = "dropdown-menu dropdown-menu-right";
+            menu.setAttribute("role", "menu");
+            menu.setAttribute("aria-labelledby", "tdd" + item.id);
+
             if (item.links) {
                 for (let i=0;i<item.links.length;i++) {
-                    linkbtn += '<li><a href="'+item.links[i].href+'"';
+                    let li = document.createElement("li");
+                    let a = document.createElement("a");
+                    a.href = item.links[i].href;
                     if (item.links[i].newtab) {
-                        linkbtn += ' target="_blank"';
+                        a.target = "_blank";
                     }
-                    linkbtn += '>'+item.links[i].label+'</a></li>';
+                    a.textContent = item.links[i].label;
+                    li.appendChild(a);
+                    menu.appendChild(li);
                 }
             }
             if (canHaveChildren && this.options.selectionMode === 'multi') {
-                linkbtn += '<li><a href="#" class="tree-action-select-all" data-tree-action="select-all" data-item-id="'+item.id+'" role="menuitem">'+_('Select all children')+'</a></li>';
-                linkbtn += '<li><a href="#" class="tree-action-unselect-all" data-tree-action="unselect-all" data-item-id="'+item.id+'" role="menuitem">'+_('Un-Select all children')+'</a></li>';
+                let selAllLi = document.createElement("li");
+                let selAllA = document.createElement("a");
+                selAllA.href = "#";
+                selAllA.className = "tree-action-select-all";
+                selAllA.setAttribute("data-tree-action", "select-all");
+                selAllA.setAttribute("data-item-id", item.id);
+                selAllA.setAttribute("role", "menuitem");
+                selAllA.textContent = _('Select all children');
+                selAllLi.appendChild(selAllA);
+                menu.appendChild(selAllLi);
+
+                let unselAllLi = document.createElement("li");
+                let unselAllA = document.createElement("a");
+                unselAllA.href = "#";
+                unselAllA.className = "tree-action-unselect-all";
+                unselAllA.setAttribute("data-tree-action", "unselect-all");
+                unselAllA.setAttribute("data-item-id", item.id);
+                unselAllA.setAttribute("role", "menuitem");
+                unselAllA.textContent = _('Un-Select all children');
+                unselAllLi.appendChild(unselAllA);
+                menu.appendChild(unselAllLi);
             }
-            linkbtn += '</ul></span>';
-            let linkspan = document.createElement("span");
-            linkspan.className = "dropdown";
-            linkspan.innerHTML = linkbtn;
+            linkspan.appendChild(menu);
             content.appendChild(linkspan);
         }
         li.appendChild(content);
