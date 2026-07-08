@@ -416,13 +416,16 @@ body {
     if (window.parent && window.parent !== window) {
       window.parent.postMessage(
         { mceAction: 'customAction', data: { type: 'mq:insert', latex: tidylatex, asciimath: MQtoAM(latex,true) } },
-        '*'
+        window.location.origin
       );
     }
   }
 
   window.addEventListener('message', function (e) {
     if (!e.data) return;
+    if (e.origin !== window.location.origin) {
+      return; // reject anything not from the expected origin
+    }
     if (e.data.type === 'mq:setAsciimath') {
       try { mqField.latex(AMtoMQ(e.data.asciimath) || ''); } catch(ex) {}
       updatePreview();
