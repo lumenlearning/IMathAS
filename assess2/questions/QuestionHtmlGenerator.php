@@ -476,6 +476,10 @@ class QuestionHtmlGenerator
         			if (!is_array($answeights)) {
         				$answeights = explode(",",$answeights);
                     }
+                    if (count(array_filter(array_keys($answeights), 'is_int')) != count($answeights)) {
+                        echo 'Error: All keys of $answeights should be numbers';
+                        $answeights = array_fill_keys(array_keys($anstypes), 1);
+                    }
                     if (count(array_filter($answeights, 'is_array')) > 0) {
                         echo 'Error: All elements of $answeights should be numbers, not arrays';
                         $answeights = array_fill_keys(array_keys($anstypes), 1);
