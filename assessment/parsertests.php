@@ -290,6 +290,23 @@ $prettytests = [
   ["(3+sqrt(4))/(2-sqrt(1))","5", "x", 3],
   ["root(3)(-8)","-2","x",3],
   ["sqrt(-8)","sqrt(-8)","x",3],
+  ["sqrt(8)/2","sqrt(2)","x",3],
+  ["(6pi)/8","(3pi)/4","x",3],
+  ["(6x)/8","(3x)/4","x",3],
+  ["(12x)/6","2x","x",3],
+  ["6x/8","3/4x","x",3],
+  ["(3x^3)/(4x)","3/4x^2", "x", 3],
+  ["(3x)/(4x^3)","3/(4x^2)", "x", 3],
+  ["(6x+4)/(2x+10)","(3x+2)/(x+5)","x",3],
+  ["(6x+4)/(2x)","(3x+2)/x","x",3],
+  ["(6x+4)/(2)","3x+2","x",3],
+  ["(-3)^2","9","x",3],
+  ["(3x-4)/(-2x)","(-3x+4)/(2x)","x",3],
+  ["(-x+4)/(-x-5)","(x-4)/(x+5)","x",3],
+  ["(-x+4)/(-x+5)","(-x+4)/(-x+5)","x",3],
+  ["(3x+2)/(-1)","-3x-2","x",3],
+  ["(3x+2)/(1)","3x+2","x",3],
+
 /* these are makexxpretty tests that are 
    stuff the parser can't handle, since it 
    was only intended for algebraic expressions,
@@ -322,7 +339,7 @@ foreach ($prettytests as $test) {
       // and the simplification level from test[3] 
       $out = $p->toPrettyString(null, true, $simplevel);
       if ($test[1] != $out) {
-        echo "pretty Test failed on {$test[0]}: {$test[1]} vs $out<br>";
+        echo "pretty L$simplevel Test failed on {$test[0]}: expected {$test[1]}, got $out.<br>";
       }
     } catch (Throwable $t) {
       echo "Pretty Test crashed on {$test[0]}<br>";
