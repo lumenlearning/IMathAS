@@ -24,7 +24,7 @@
 	if (!isset($_GET['page']) || $_GET['page']=='') {
 		$page = 1;
 	} else {
-		$page = Sanitize::onlyInt($_GET['page']);
+		$page = max(1,Sanitize::onlyInt($_GET['page']));
 	}
 	if (isset($_GET['filterstu'])) {
 		$filterstu = Sanitize::onlyInt($_GET['filterstu']);

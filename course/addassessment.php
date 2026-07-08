@@ -714,13 +714,16 @@ if (!(isset($teacherid))) { // loaded by a NON-teacher
                 $skippenalty = 0;
             }
 			$reqscoredisptype=-1;
+			$line['reqscoreaid'] = 0;
+			$line['reqscore'] = 0;
+			$line['reqscorecalctype'] = 0;
 			if ($line['reqscorejson']!=='') {
 				$reqscoredisptype = $line['reqscoretype'];
 				$json = json_decode($line['reqscorejson'], true);
 				$line['reqscoreaid'] = $json[0];
 				$line['reqscore'] = $json[1];
 				$line['reqscorecalctype'] = ($json[2]>0)?1:0;
-			}
+			} 
             
             if ($taken) {
                 $page_isTakenMsg = "<p>This assessment has already been taken.  Modifying some settings will mess up those assessment attempts, and those inputs ";
