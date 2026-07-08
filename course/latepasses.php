@@ -15,8 +15,8 @@
 
 	if (isset($_POST['hours'])) {
 		if (isset($_POST['latepass'])) {
+			$stm = $DBH->prepare("UPDATE imas_students SET latepass=:latepass WHERE userid=:userid AND courseid=:courseid");
 			foreach ($_POST['latepass'] as $uid=>$lp) {
-				$stm = $DBH->prepare("UPDATE imas_students SET latepass=:latepass WHERE userid=:userid AND courseid=:courseid");
 				$stm->execute(array(':latepass'=>$lp, ':userid'=>$uid, ':courseid'=>$cid));
 			}
 		}
@@ -24,6 +24,48 @@
 		$stm->execute(array(':latepasshrs'=>max(1,intval($_POST['hours'])), ':id'=>$cid));
 		header('Location: ' . $GLOBALS['basesiteurl'] . "/course/listusers.php?cid=$cid" . "&r=" . Sanitize::randomQueryStringParam());
 		exit;
+	}
+
+	$sections = [];
+	$query = "SELECT imas_users.id,imas_users.LastName,imas_users.FirstName,imas_students.section,imas_students.latepass ";
+	$query .= "FROM imas_users,imas_students WHERE ";
+	$query .= "imas_users.id=imas_students.userid AND imas_students.courseid=:courseid ";
+	$query .= "ORDER BY imas_users.LastName,imas_users.FirstName";
+	$stm = $DBH->prepare($query);
+	$stm->execute([':courseid'=>$cid]);
+	$sturows = [];
+	$hasemptysec = false;
+	while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
+		$sturows[] = $row;
+		if (is_null($row['section'])) {
+			$hasemptysec = true;
+		} else {
+			$sections[] =  $row['section'];
+		}
+	}
+
+	$sections = array_unique($sections);
+	sort($sections);
+	
+	$hassections = (count($sections)>1 || (count($sections)>0 && $hasemptysec));
+
+	if ($hassections) {
+		$stm = $DBH->prepare("SELECT usersort FROM imas_gbscheme WHERE courseid=:courseid");
+		$stm->execute(array(':courseid'=>$cid));
+		if ($stm->fetchColumn(0)==0) {
+			$sortorder = "sec";
+			usort($sturows, function ($a,$b) {
+				if ($a['section'] !== $b['section']) {
+					return $a['section'] <=> $b['section'];
+				}
+				if ($a['LastName'] !== $b['LastName']) {
+					return strcasecmp($a['LastName'], $b['LastName']);
+				}
+				return strcasecmp($a['FirstName'], $b['FirstName']);
+			});
+		} else {
+			$sortorder = "name";
+		}
 	}
 
     require_once "../header.php";
@@ -47,13 +89,12 @@ function onenter(e,field) {
 		var key = e.which;
 	}
 	if (key==13) {
-		var i;
-                for (i = 0; i < field.form.elements.length; i++)
-                   if (field == field.form.elements[i])
-                       break;
-              i = (i + 1) % field.form.elements.length;
-              field.form.elements[i].focus();
-              return false;
+		var curtr = $(e.target).closest("tr");
+		var to = curtr.next("tr:visible").find("input");
+		if (to.length) {
+			to[0].focus();
+		}
+        return false;
 	} else {
 		return true;
 	}
@@ -66,21 +107,18 @@ function onarrow(e,field) {
 	}
 
 	if (key==40 || key==38) {
-		var i;
-                for (i = 0; i < field.form.elements.length; i++)
-                   if (field == field.form.elements[i])
-                       break;
-
-	      if (key==38) {
-		      i = i-1;
-		      if (i<0) { i=0;}
-	      } else {
-		      i = (i + 1) % field.form.elements.length;
-	      }
-	      if (field.form.elements[i].type=='text') {
-		      field.form.elements[i].focus();
-	      }
-              return false;
+		e.preventDefault();
+		var curtr = $(e.target).closest("tr");
+		var to;
+		if (key == 38) {
+			to = curtr.prev("tr:visible").find("input");
+		} else {
+			to = curtr.next("tr:visible").find("input");
+		}
+		if (to.length) {
+			to[0].focus();
+		}
+		return false;
 	} else {
 		return true;
 	}
@@ -93,45 +131,27 @@ function doonblur(value) {
 }
 
 function sendtoall(type) {
-	  var form=document.getElementById("mainform");
-	  for (var e = 0; e<form.elements.length; e++) {
-	      var el = form.elements[e];
-	      if (el.type=="text" && el.id!="toall" && el.id!="hours") {
-		      if (type==0) {
-			       el.value = parseInt(el.value) + parseInt(document.getElementById("toall").value);
-		      } else if (type==1) {
-			      el.value = document.getElementById("toall").value;
-		      }
-	      }
-	   }
+	var tosend = parseInt(document.getElementById("toall").value);
+	$("input[name^=latepass]:visible").each(function(i,el) {
+		if (type == 0) {
+			el.value = parseInt(el.value) + tosend;
+		} else {
+			el.value = tosend;
+		}
+	});
+}
+function updatesec(el) {
+	var sel = el.value;
+	if (sel == 'all') {
+		$("tbody tr").show();
+	} else {
+		$("tbody tr").hide();
+		$("tr."+sel).show();
+	}
 }
 </script>
 <?php
-		$query = "SELECT COUNT(imas_users.id) FROM imas_users,imas_students WHERE imas_users.id=imas_students.userid ";
-		$query .= "AND imas_students.courseid=:courseid AND imas_students.section IS NOT NULL";
-		$stm = $DBH->prepare($query);
-		$stm->execute(array(':courseid'=>$cid));
-		if ($stm->fetchColumn(0)>0) {
-			$hassection = true;
-		} else {
-			$hassection = false;
-		}
 
-		if ($hassection) {
-			$stm = $DBH->prepare("SELECT usersort FROM imas_gbscheme WHERE courseid=:courseid");
-			$stm->execute(array(':courseid'=>$cid));
-			if ($stm->fetchColumn(0)==0) {
-				$sortorder = "sec";
-			} else {
-				$sortorder = "name";
-			}
-		} else {
-			$sortorder = "name";
-		}
-
-		if ($hassection) {
-			echo "<script type=\"text/javascript\" src=\"$staticroot/javascript/tablesorter.js\"></script>\n";
-		}
 		$stm = $DBH->prepare("SELECT latepasshrs FROM imas_courses WHERE id=:id");
 		$stm->execute(array(':id'=>$cid));
 		$hours = $stm->fetchColumn(0);
@@ -142,39 +162,38 @@ function sendtoall(type) {
 		echo "<p><label>Late Passes extend the due date by <input type=text size=3 name=\"hours\" id=\"hours\" value=\"" . Sanitize::encodeStringForDisplay($hours) . "\"/> hours</label></p>";
 		echo "<p><label>To all students: <input type=\"text\" size=\"3\" value=\"1\" id=\"toall\"/> latepasses</label> ";
 		echo '<button type=button onClick="sendtoall(0);">Add</button> <button type=button onclick="sendtoall(1)">Replace</button><p>';
-		echo "<table id=myTable><thead><tr><th>Name</th>";
-		if ($hassection) {
-			echo '<th>Section</th>';
+		echo "<table id=myTable class=gb><thead><tr><th>Name</th>";
+		if ($hassections) {
+			echo '<th>Section<br><select onchange="updatesec(this)">';
+			echo '<option value="all">'._('All').'</option>';
+			if ($hasemptysec) {
+				echo '<option value="s-N">'._('None').'</option>';
+			}
+			foreach ($sections as $i=>$sn) {
+				echo '<option value="s-'.intval($i).'">'.Sanitize::encodeStringForDisplay($sn).'</option>';
+			}
+			echo '</select></th>';
 		}
 		echo "<th>LatePasses Remaining</th></tr></thead><tbody>";
-		$query = "SELECT imas_users.id,imas_users.LastName,imas_users.FirstName,imas_students.section,imas_students.latepass ";
-		$query .= "FROM imas_users,imas_students WHERE ";
-		$query .= "imas_users.id=imas_students.userid AND imas_students.courseid=:courseid";
-
-		if ($hassection && $sortorder=="sec") {
-			 $query .= " ORDER BY imas_students.section,imas_users.LastName,imas_users.FirstName";
-		} else {
-			 $query .= " ORDER BY imas_users.LastName,imas_users.FirstName";
-		}
-		$stm = $DBH->prepare($query);
-		$stm->execute(array(':courseid'=>$cid));
-		$i = 0;
-		while ($row = $stm->fetch(PDO::FETCH_NUM)) {
+		foreach ($sturows as $i=>$row) {
 			$i++;
-			echo "<tr><td><span class='pii-full-name' id='n$i'>" . Sanitize::encodeStringForDisplay($row[1]) . ", " . Sanitize::encodeStringForDisplay($row[2]) . "</span></td>";
-			if ($hassection) {
-				echo "<td>" . Sanitize::encodeStringForDisplay($row[3]) . "</td>";
+			if (is_null($row['section'])) {
+				$secid = 'N';
+			} else {
+				$secid = intval(array_search($row['section'], $sections));
+			}
+			echo "<tr class='s-".$secid."'>";
+			echo "<td><span class='pii-full-name' id='n$i'>" . Sanitize::encodeStringForDisplay($row['LastName']) . ", " . Sanitize::encodeStringForDisplay($row['FirstName']) . "</span></td>";
+			if ($hassections) {
+				echo "<td>" . Sanitize::encodeStringForDisplay($row['section']) . "</td>";
 			}
 
-			echo "<td><input type=text size=3 name=\"latepass[" . Sanitize::encodeStringForDisplay($row[0]) . "]\" value=\"" . Sanitize::encodeStringForDisplay($row[4]) . "\"";
-			echo " onkeypress=\"return onenter(event,this)\" onkeyup=\"onarrow(event,this)\" onblur=\"this.value = doonblur(this.value);\" aria-labelledby='n$i'/></td>";
+			echo "<td><input type=text size=3 name=\"latepass[" . Sanitize::encodeStringForDisplay($row['id']) . "]\" value=\"" . Sanitize::encodeStringForDisplay($row['latepass']) . "\"";
+			echo " onkeypress=\"return onenter(event,this)\" onkeydown=\"onarrow(event,this)\" onblur=\"this.value = doonblur(this.value);\" aria-labelledby='n$i'/></td>";
 			echo "</tr>";
 		}
 
 		echo "</tbody></table>";
-		if ($hassection) {
-			echo "<script> initSortTable('myTable',Array('S','S',false),false);</script>";
-		}
 
 		echo '<div class="submit"><input type="submit" value="'._('Save Changes').'"></div>';
 
